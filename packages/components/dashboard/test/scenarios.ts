@@ -65,12 +65,18 @@ const markup: Record<string, string> = {
       <c2-dash-card id="one" card-id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
       <c2-dash-card id="two" card-id="two" col="2" row="1"><div class="pane">Two</div></c2-dash-card>
     </c2-dashboard>`,
+  // Named whole-panel sizes, declared as a JSON attribute and chosen per card; `two` names a size the grid lacks.
+  sizes: `<c2-dashboard id="subject" columns="2" rows="2" storage-key="${STORAGE_KEY}" sizes='{"small":{"colSpan":1},"wide":{"colSpan":2},"tall":{"rowSpan":2}}'>
+      <c2-dash-card id="one" card-id="one" col="1" row="1" size="small"><div class="pane">One</div></c2-dash-card>
+      <c2-dash-card id="two" card-id="two" col="1" row="2" size="huge"><div class="pane">Two</div></c2-dash-card>
+    </c2-dashboard>`,
 }
 
 markup['storage-restored'] = markup.storage
+markup['sizes-restored'] = markup.sizes
 markup.motion = markup.layout
 
-if (scenario !== 'storage-restored') {
+if (scenario !== 'storage-restored' && scenario !== 'sizes-restored') {
   localStorage.removeItem(STORAGE_KEY)
   localStorage.removeItem(`${STORAGE_KEY}@(max-width: 600px)`)
 }
@@ -106,6 +112,7 @@ let changes = 0
 subject.addEventListener('layout-change', (event: CustomEvent<DashboardLayoutChangeDetail>) => {
   changes += 1
   output.textContent = `${changes} ${event.detail.columns.join('|')} ${event.detail.rows.join('|')}`
+  output.dataset.detail = JSON.stringify(event.detail)
 })
 
 for (const card of main.querySelectorAll('c2-dash-card')) {

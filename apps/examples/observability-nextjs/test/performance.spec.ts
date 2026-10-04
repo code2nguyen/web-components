@@ -3,11 +3,13 @@ import { expect, test } from '@playwright/test'
 test('dense collections and charts keep bounded DOM and update without remounting', async ({ page }) => {
   await page.goto('./traces/?pageSize=100')
   const table = page.locator('c2-table')
+  // The page is cut by the app and its c2-pagination; the table receives one page of rows and does not paginate itself.
+  await expect(page.locator('c2-pagination')).toHaveJSProperty('pageSize', 100)
+  await expect.poll(() => table.evaluate((node) => (node as HTMLElement & { rowCount: number }).rowCount)).toBeGreaterThan(0)
   const tableState = await table.evaluate((node) => {
-    const element = node as HTMLElement & { pageSize: number; rowCount: number; totalRows: number }
-    return { pageSize: element.pageSize, rowCount: element.rowCount, totalRows: element.totalRows }
+    const element = node as HTMLElement & { rowCount: number; totalRows: number }
+    return { rowCount: element.rowCount, totalRows: element.totalRows }
   })
-  expect(tableState.pageSize).toBe(100)
   expect(tableState.rowCount).toBeLessThanOrEqual(100)
   expect(tableState.totalRows).toBeGreaterThanOrEqual(tableState.rowCount)
   expect(await table.getByRole('row').count()).toBeLessThanOrEqual(101)

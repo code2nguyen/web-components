@@ -52,3 +52,12 @@ test('public parts style title, header, body and copy button regions', async ({ 
   await expect(host.locator('.c2-code-viewer-body')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
   await expect(host.locator('.c2-code-viewer-copy')).toHaveCSS('background-color', 'rgb(10, 11, 12)')
 })
+
+test('the css-variables theme colours tokens and the frame from the --c2-code-viewer__theme--* variables', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-code-viewer theme="css-variables" language="javascript" code="const a = 1;" style="--c2-code-viewer__theme--token-keyword: rgb(1, 2, 3); --c2-code-viewer__theme--background: rgb(250, 240, 230)"></c2-code-viewer>',
+  )
+  await expect(page.locator('pre.shiki:not(.plain)')).toBeVisible()
+  await expect(page.locator('pre code span', { hasText: /^const$/ })).toHaveCSS('color', 'rgb(1, 2, 3)')
+  await expect(page.locator('c2-code-viewer .c2-code-viewer')).toHaveCSS('background-color', 'rgb(250, 240, 230)')
+})

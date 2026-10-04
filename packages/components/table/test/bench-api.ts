@@ -44,12 +44,25 @@ export interface TableScenarioApi {
   setTotal(total: number): void
 }
 
+/** Features a benchmarked table turns on, so their cost is measured against the plain table. */
+export interface TableBenchMountOptions {
+  /**
+   * Marks the score column `cell-slot` and fills it the way a framework would: on every `range-change` the light-DOM
+   * children are rebuilt for the reported rows only (`cell:{line}:score`), so the work stays bounded by the window.
+   */
+  cellSlot?: boolean
+  /** Sets a `rowPart` callback that tags every third row, as a status tint would. */
+  rowPart?: boolean
+  /** Sets `wrap`, which turns windowing off — every row renders. */
+  wrap?: boolean
+}
+
 export interface TableBenchApi {
   /**
    * Creates a table, gives it `count` rows and waits for the first paint. Returns the milliseconds that took —
    * building the row array happens before the clock starts, so the number is the table's own cost.
    */
-  mount(count: number): Promise<number>
+  mount(count: number, options?: TableBenchMountOptions): Promise<number>
   /** Replaces one field of one row, the realtime-update case. Returns the milliseconds it took. */
   patch(index: number): Promise<number>
   /** Applies `ticks` single-row patches back to back, as a feed would. Returns the total milliseconds. */

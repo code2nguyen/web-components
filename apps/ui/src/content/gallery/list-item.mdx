@@ -92,9 +92,9 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     --c2-list-item--border-bottom-right-radius: 0px;
     --c2-list-item--padding-left: 12px;
     --c2-list-item--border-left: 3px solid transparent;
-    --c2-list-item__selected--border-left: 3px solid #2563eb;
+    --c2-list-item__selected--border-left: 3px solid var(--c2-theme--color-primary, #2563eb);
     --c2-list-item__selected--background: transparent;
-    --c2-list-item__selected--color: #2563eb;
+    --c2-list-item__selected--color: var(--c2-theme--color-primary, #2563eb);
     --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
@@ -233,8 +233,11 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
   .shortcuts kbd {
     font-family: inherit;
     font-size: 11px;
-    color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     white-space: nowrap;
+  }
+  .shortcuts c2-list-item[selected] kbd {
+    color: inherit;
   }
 </style>
 <div class="shortcuts">
@@ -261,7 +264,6 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
   }
   .two-line c2-list-item[selected] small {
     color: inherit;
-    opacity: 0.8;
   }
 </style>
 <div class="two-line">
@@ -286,18 +288,21 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     border-radius: 999px;
     font-size: 10px;
     font-weight: 600;
-    color: var(--c2-theme--color-on-primary, #ffffff);
+    color: var(--c2-theme--color-on-fill, #ffffff);
   }
   .avatars .avatar--violet {
     background: #7c3aed;
   }
   .avatars .avatar--cyan {
-    background: #0891b2;
+    background: #0e7490;
   }
   .avatars small {
     display: block;
     font-size: 12px;
     color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .avatars c2-list-item[selected] small {
+    color: inherit;
   }
 </style>
 <div class="avatars">

@@ -79,6 +79,35 @@ test('lays the steps out in one column per dependency depth and styles edges fro
   await accessible(page)
 })
 
+test('each edge and status colour variable reaches the line, the arrowhead and the marker of its state', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  await host(page).evaluate((element: Flow) => {
+    element.style.setProperty('--c2-flow__edge--color', 'rgb(1, 2, 3)')
+    element.style.setProperty('--c2-flow__edge__done--color', 'rgb(10, 20, 30)')
+    element.style.setProperty('--c2-flow__edge__active--color', 'rgb(40, 50, 60)')
+    element.style.setProperty('--c2-flow__success--color', 'rgb(70, 80, 90)')
+    element.style.setProperty('--c2-flow__pending--color', 'rgb(100, 110, 120)')
+  })
+  await expect(page.locator('c2-flow .edge--done').first()).toHaveCSS('stroke', 'rgb(10, 20, 30)')
+  await expect(page.locator('c2-flow .arrow.mark--done').first()).toHaveCSS('background-color', 'rgb(10, 20, 30)')
+  await expect(page.locator('c2-flow .edge--active')).toHaveCSS('stroke', 'rgb(40, 50, 60)')
+  await expect(page.locator('c2-flow .arrow.mark--active')).toHaveCSS('background-color', 'rgb(40, 50, 60)')
+  // build → deploy: neither step has run.
+  await expect(page.locator('c2-flow .edge:not(.edge--done):not(.edge--active)').last()).toHaveCSS('stroke', 'rgb(1, 2, 3)')
+  await expect(node(page, 'checkout').locator('.status')).toHaveCSS('color', 'rgb(70, 80, 90)')
+  await expect(node(page, 'deploy').locator('.status')).toHaveCSS('color', 'rgb(100, 110, 120)')
+})
+
+test('the auto layout reads --c2-flow__rank--gap and --c2-flow__node--gap', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  const base = await layout(page)
+  await renderScenario(flow({ attributes: 'style="--c2-flow__rank--gap: 172px; --c2-flow__node--gap: 70px"' }))
+  const wide = await layout(page)
+  expect(wide.install.x - wide.checkout.x).toBe(base.install.x - base.checkout.x + 100)
+  // lint and test share a rank, one node gap apart.
+  expect(Math.abs(wide.test.y - wide.lint.y)).toBe(Math.abs(base.test.y - base.lint.y) + 50)
+})
+
 test('direction="TB" stacks the ranks from top to bottom', async ({ page, renderScenario }) => {
   await renderScenario(flow({ attributes: 'direction="TB"' }))
   const positions = await layout(page)
@@ -409,4 +438,179 @@ test('Ctrl/⌘ + plus, minus and 0 zoom and fit while focus is in the flow; the 
   await page.keyboard.press(`${mod}+0`)
   await expect.poll(scale).toBeCloseTo(fitted, 3)
   await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
+})
+
+/** Per edge, in `edges` order: the stroke of its line and the box and colour of its arrowhead, in page pixels. */
+const arrows = (page: Page) =>
+  host(page).evaluate((element) => {
+    const root = element.shadowRoot!
+    const paths = [...root.querySelectorAll<SVGPathElement>('path.edge:not(.edge--draft)')]
+    return [...root.querySelectorAll<HTMLElement>('.arrow')].map((arrow, index) => {
+      const box = arrow.getBoundingClientRect()
+      return {
+        stroke: paths[index] ? getComputedStyle(paths[index]).stroke : null,
+        color: getComputedStyle(arrow).backgroundColor,
+        display: getComputedStyle(arrow).display,
+        opacity: Number(getComputedStyle(arrow).opacity),
+        box: { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height },
+      }
+    })
+  })
+
+/** The point halfway along each edge line, in page pixels. */
+const midpoints = (page: Page) =>
+  host(page).evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll<SVGPathElement>('path.edge')].map((path) => {
+      const point = path.getPointAtLength(path.getTotalLength() / 2).matrixTransform(path.getScreenCTM()!)
+      return { x: point.x, y: point.y }
+    }),
+  )
+
+test.describe('arrowheads', () => {
+  test('every edge ends in an arrowhead at its target, in the colour of the edge', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    const marks = await arrows(page)
+    expect(marks).toHaveLength(EDGES.length)
+    for (const [index, edge] of EDGES.entries()) {
+      const target = (await node(page, edge.target).boundingBox())!
+      const { box, color, stroke } = marks[index]
+      // The tip stops at the target's incoming handle, centred on its incoming side.
+      expect(box.right).toBeLessThan(target.x)
+      expect(box.right).toBeGreaterThan(target.x - 8)
+      expect(Math.abs((box.top + box.bottom) / 2 - (target.y + target.height / 2))).toBeLessThan(1)
+      expect(box.width).toBeGreaterThan(2)
+      expect(color).toBe(stroke)
+    }
+    // Idle, done and active edges each have their own colour.
+    expect(new Set(marks.map((mark) => mark.color)).size).toBe(3)
+  })
+
+  test('arrowheads follow failed and dotted edges, the highlight, and point down in a top-to-bottom step flow', async ({ page, renderScenario }) => {
+    const nodes = NODES.map((step) =>
+      step.id === 'test' ? { ...step, status: 'error' as const } : step.id === 'build' ? { ...step, status: 'skipped' as const } : step,
+    )
+    await renderScenario(flow({ nodes, attributes: 'direction="TB" edge-type="step" open-delay="0"' }))
+    const marks = await arrows(page)
+    for (const mark of marks) expect(mark.color).toBe(mark.stroke)
+    // test → build has failed: the error colour, shared by line and arrow.
+    expect(marks[4].color).toBe('rgb(220, 38, 38)')
+    for (const [index, edge] of EDGES.entries()) {
+      const target = (await node(page, edge.target).boundingBox())!
+      const { box } = marks[index]
+      expect(box.bottom).toBeLessThan(target.y)
+      expect(box.bottom).toBeGreaterThan(target.y - 8)
+      expect(Math.abs((box.left + box.right) / 2 - (target.x + target.width / 2))).toBeLessThan(1)
+    }
+
+    // Hovering a node dims the other edges' arrowheads with their lines.
+    await node(page, 'deploy').hover()
+    await expect.poll(async () => (await arrows(page)).map((mark) => mark.opacity)).toEqual([0.35, 0.35, 0.35, 0.35, 0.35, 1])
+  })
+
+  test('--c2-flow__arrow--display: none turns the arrowheads off and --c2-flow__arrow--size sizes them', async ({ page, renderScenario }) => {
+    await renderScenario(flow({ attributes: 'style="--c2-flow__arrow--size: 12px"' }))
+    const zoom = await page.locator('c2-flow .viewport').evaluate((element) => Number(/scale\(([\d.]+)\)/.exec((element as HTMLElement).style.transform)?.[1]))
+    for (const mark of await arrows(page)) expect(mark.box.width).toBeCloseTo(12 * zoom, 1)
+
+    await host(page).evaluate((element) => element.style.setProperty('--c2-flow__arrow--display', 'none'))
+    await expect(page.locator('c2-flow .arrow').first()).toBeHidden()
+    for (const mark of await arrows(page)) expect(mark.display).toBe('none')
+    await expect(page.locator('c2-flow .edge')).toHaveCount(EDGES.length)
+  })
+})
+
+test.describe('edge labels', () => {
+  const DECISION: FlowNode[] = [
+    { id: 'missed', label: 'Missed the last train' },
+    { id: 'bus', label: 'Book the night bus' },
+    { id: 'walk', label: 'Walk home' },
+  ]
+  const BRANCHES: FlowEdge[] = [
+    { source: 'missed', target: 'bus', label: 'yes' },
+    { source: 'missed', target: 'walk', label: 'no' },
+  ]
+
+  async function expectLabelsAtMidpoints(page: Page) {
+    const points = await midpoints(page)
+    const labels = page.locator('c2-flow .edge-label')
+    await expect(labels).toHaveText(['yes', 'no'])
+    for (const [index, point] of points.entries()) {
+      const { x, y } = await center(labels.nth(index))
+      expect(Math.abs(x - point.x)).toBeLessThan(1.5)
+      expect(Math.abs(y - point.y)).toBeLessThan(1.5)
+    }
+  }
+
+  test('a label sits halfway along its edge, scales with the canvas and is read with the relations', async ({ page, renderScenario }) => {
+    await renderScenario(flow({ nodes: DECISION, edges: BRANCHES }))
+    await expectLabelsAtMidpoints(page)
+    const before = (await page.locator('c2-flow .edge-label').first().boundingBox())!
+
+    await expect(node(page, 'missed')).toHaveAccessibleDescription('Before Book the night bus, yes; Walk home, no.')
+    await expect(node(page, 'bus')).toHaveAccessibleDescription('After Missed the last train, yes.')
+    await accessible(page)
+
+    await host(page).evaluate(async (element: Flow) => {
+      element.zoomOut()
+      await element.updateComplete
+    })
+    await expectLabelsAtMidpoints(page)
+    const after = (await page.locator('c2-flow .edge-label').first().boundingBox())!
+    expect(after.height / before.height).toBeCloseTo(1 / 1.2, 1)
+  })
+
+  test('labels sit at the midpoint of step edges and back edges too, and an unlabelled edge has none', async ({ page, renderScenario }) => {
+    const edges: FlowEdge[] = [...BRANCHES, { source: 'walk', target: 'missed', label: 'retry' }, { source: 'bus', target: 'walk' }]
+    await renderScenario(flow({ nodes: DECISION, edges, attributes: 'edge-type="step" direction="TB"' }))
+    const points = await midpoints(page)
+    const labels = page.locator('c2-flow .edge-label')
+    await expect(labels).toHaveText(['yes', 'no', 'retry'])
+    for (const index of [0, 1, 2]) {
+      const { x, y } = await center(labels.nth(index))
+      expect(Math.abs(x - points[index].x)).toBeLessThan(1.5)
+      expect(Math.abs(y - points[index].y)).toBeLessThan(1.5)
+    }
+  })
+
+  test('labels let a pan through in a read-only flow', async ({ page, renderScenario }) => {
+    await renderScenario(flow({ nodes: DECISION, edges: BRANCHES }))
+    await expect(page.locator('c2-flow .edge-label').first()).toHaveCSS('pointer-events', 'none')
+  })
+})
+
+test.describe('status marker', () => {
+  test('--c2-flow__marker--display: none hides the marker and the label starts at the padding', async ({ page, renderScenario }) => {
+    await renderScenario(flow({ attributes: 'open-delay="0"' }))
+    const marker = node(page, 'lint').locator('.body > .status')
+    const label = node(page, 'lint').locator('.label')
+    await expect(marker).toBeVisible()
+    const shown = (await label.boundingBox())!
+
+    await host(page).evaluate(async (element: Flow) => {
+      element.style.setProperty('--c2-flow__marker--display', 'none')
+      await element.updateComplete
+    })
+    await expect(marker).toBeHidden()
+    // Measured in canvas pixels, relative to the node: the label starts at the padding and keeps its line.
+    const offset = await node(page, 'lint').evaluate((element: HTMLElement) => {
+      const zoom = element.getBoundingClientRect().width / element.offsetWidth
+      const box = element.getBoundingClientRect()
+      const text = element.querySelector('.label')!.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      return {
+        left: (text.left - box.left) / zoom,
+        expected: Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.paddingLeft),
+        top: (text.top - box.top) / zoom,
+        expectedTop: Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.paddingTop),
+      }
+    })
+    expect(offset.left).toBeCloseTo(offset.expected, 0)
+    expect(offset.top).toBeCloseTo(offset.expectedTop, 0)
+    const hidden = (await label.boundingBox())!
+    expect(hidden.x).toBeLessThan(shown.x)
+    expect(Math.abs(hidden.y - shown.y)).toBeLessThan(0.5)
+    // The hover card keeps its own marker.
+    await node(page, 'lint').hover()
+    await expect(page.locator('c2-flow .card .status')).toBeVisible()
+  })
 })

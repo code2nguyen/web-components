@@ -86,6 +86,53 @@ test.describe('table benchmark', () => {
     )
   })
 
+  // The features below are measured against the plain cases above: `cell-slot` filled for the window only through
+  // `range-change`, a `rowPart` callback, and `wrap`, which renders every row on purpose.
+  test(`mounts ${HUGE.toLocaleString('en-US')} rows with a cell-slot column filled from range-change`, async ({ page, bench }) => {
+    await bench()
+    results['mount.cellslot.huge'] = median(await repeat(page, (count) => window.tableBench.mount(count, { cellSlot: true }), HUGE))
+  })
+
+  test('scrolls a cell-slot column, re-rendering its window children', async ({ page, bench }) => {
+    await bench()
+    await page.evaluate((count) => window.tableBench.mount(count, { cellSlot: true }), HUGE)
+    results['scroll.cellslot.huge'] = median(
+      await repeat(
+        page,
+        async () => {
+          await window.tableBench.scrollToRatio(Math.random() * 0.4)
+          return window.tableBench.scrollToRatio(0.6 + Math.random() * 0.4)
+        },
+        HUGE,
+      ),
+    )
+  })
+
+  test(`mounts ${HUGE.toLocaleString('en-US')} rows with a rowPart callback`, async ({ page, bench }) => {
+    await bench()
+    results['mount.rowpart.huge'] = median(await repeat(page, (count) => window.tableBench.mount(count, { rowPart: true }), HUGE))
+  })
+
+  test('scrolls with a rowPart callback', async ({ page, bench }) => {
+    await bench()
+    await page.evaluate((count) => window.tableBench.mount(count, { rowPart: true }), HUGE)
+    results['scroll.rowpart.huge'] = median(
+      await repeat(
+        page,
+        async () => {
+          await window.tableBench.scrollToRatio(Math.random() * 0.4)
+          return window.tableBench.scrollToRatio(0.6 + Math.random() * 0.4)
+        },
+        HUGE,
+      ),
+    )
+  })
+
+  test(`mounts ${SMALL.toLocaleString('en-US')} wrapped rows (windowing off)`, async ({ page, bench }) => {
+    await bench()
+    results['mount.wrap.small'] = median(await repeat(page, (count) => window.tableBench.mount(count, { wrap: true }), SMALL))
+  })
+
   // This case reports rather than measures, so it takes no fixtures — and Playwright requires the first parameter to
   // be an object pattern, which is the one thing no-empty-pattern forbids.
   // eslint-disable-next-line no-empty-pattern

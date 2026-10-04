@@ -121,3 +121,27 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(added).toHaveHostAria('role', 'listitem')
   expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])
 })
+
+// The timeline tells each entry whether it is last and which layout it is in while the page upgrades, which is
+// before React (or any framework) hydrates. Attributes written then would differ from the server markup, so the
+// entries expose both as custom states and their hosts keep only what the author wrote.
+test('last and split are custom states, never attributes on the entry', async ({ page, scenario }) => {
+  await scenario('split')
+  const items = page.locator('c2-timeline-item')
+  await expect
+    .poll(() => items.evaluateAll((els) => els.map((el) => [el.matches(':state(last)'), el.matches(':state(split)')])))
+    .toEqual([
+      [false, true],
+      [false, true],
+      [true, true],
+    ])
+  const unauthored = () =>
+    items.evaluateAll((els) => els.flatMap((el) => el.getAttributeNames().filter((name) => !['label', 'timestamp', 'datetime', 'tone'].includes(name))))
+  expect(await unauthored()).toEqual([])
+  await expect(items.last()).toHaveCSS('grid-template-rows', /0px$/)
+
+  await page.locator('c2-timeline').evaluate((el) => el.setAttribute('layout', 'stacked'))
+  await expect.poll(() => items.evaluateAll((els) => els.some((el) => el.matches(':state(split)')))).toBe(false)
+  await expect(items.first()).toHaveCSS('grid-template-areas', /"rail label"/)
+  expect(await unauthored()).toEqual([])
+})

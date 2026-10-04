@@ -38,7 +38,7 @@ export default function ServicesPage() {
           ))}
         </div>
       </section>
-      <Suspense fallback={<c2-skeleton aria-label="Loading service filters" />}>
+      <Suspense fallback={<c2-skeleton label="Loading service filters" />}>
         <ServiceInventory />
       </Suspense>
     </div>

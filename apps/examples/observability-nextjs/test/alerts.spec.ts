@@ -1,10 +1,7 @@
 import { expect, test } from '@playwright/test'
+import { failOnConsoleErrors } from './console-guard'
 
-test.beforeEach(({ page }) => {
-  page.on('console', (message) => {
-    if (message.type() === 'error') throw new Error(`Browser console error: ${message.text()}`)
-  })
-})
+test.beforeEach(({ page }) => failOnConsoleErrors(page))
 
 test('incident detail exposes ownership, annotations, services, duration, and lifecycle', async ({ page }) => {
   await page.goto('./alerts/?view=incidents')
@@ -43,8 +40,9 @@ test('validates, previews, saves, reloads, edits, and cancels a synthetic alert 
   await expect(page.getByText('Checkout latency from Next.js', { exact: true })).toBeVisible()
   await page.goto('./alerts/')
 
-  await page.getByRole('button', { name: 'Edit' }).last().click()
-  await expect(page).toHaveURL(/\/alerts\/rules\/new\/?\?edit=local-rule-01/)
+  // Locally saved rules join the list after the persisted store hydrates: wait for this rule's own Edit action.
+  await page.locator('article').filter({ hasText: 'Actions for Checkout latency from Next.js' }).getByRole('button', { name: 'Edit' }).click()
+  await expect(page).toHaveURL(/\/alerts\/rules\/new\/?\?(?:[^#]*&)?edit=local-rule-01(?:&|$)/)
   await page.getByRole('textbox', { name: 'Rule name' }).fill('Unsaved renamed rule')
   await page.getByRole('button', { name: 'Cancel' }).click()
   await expect(page.getByText('Checkout latency from Next.js', { exact: true })).toBeVisible()
@@ -55,19 +53,21 @@ test('simulated delivery and confirmed reset never ask for a real destination', 
   await page.goto('./alerts/')
   await expect(page.getByText(/Delivery is simulated locally/).first()).toBeVisible()
   await page.getByRole('button', { name: 'Simulate selected delivery' }).click()
-  await expect(page.getByText(/No address, endpoint, or credential was used/i)).toBeVisible()
+  // The feedback is announced through the app's visually hidden live region and shown in a toast: assert the toast.
+  await expect(page.locator('c2-toast').filter({ hasText: /No address, endpoint, or credential was used/i })).toBeVisible()
 
   await page.getByRole('button', { name: 'Reset demo data' }).click()
   await expect(page.getByText('Reset demo alert data?')).toBeVisible()
   await page.getByRole('button', { name: 'Reset alerts' }).click()
-  await expect(page.getByText(/Theme and dashboard layout were preserved/i)).toBeVisible()
+  await expect(page.locator('c2-toast').filter({ hasText: /Theme and dashboard layout were preserved/i })).toBeVisible()
 })
 
 test('alert and incident actions restore the scoped filtered list', async ({ page }) => {
   await page.goto('./alerts/?env=production&range=24h&severity=critical')
   await page.getByRole('button', { name: 'Edit' }).first().click()
   await page.getByRole('button', { name: 'Cancel' }).click()
-  await expect(page).toHaveURL(/alerts\/\?env=production&range=24h&severity=critical/)
+  // A client navigation can drop the exported route's trailing slash before the query (Next.js 16.3, see console-guard.ts).
+  await expect(page).toHaveURL(/alerts\/?\?env=production&range=24h&severity=critical/)
 
   await page.goto('./alerts/?env=production&range=24h&view=incidents')
   await page
@@ -75,5 +75,5 @@ test('alert and incident actions restore the scoped filtered list', async ({ pag
     .first()
     .click()
   await page.getByRole('link', { name: 'Return to incidents' }).click()
-  await expect(page).toHaveURL(/alerts\/\?env=production&range=24h&view=incidents/)
+  await expect(page).toHaveURL(/alerts\/?\?env=production&range=24h&view=incidents/)
 })

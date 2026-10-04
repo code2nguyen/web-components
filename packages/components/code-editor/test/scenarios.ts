@@ -20,6 +20,8 @@ const markup: Record<string, string> = {
   themed: `<c2-code-editor id="subject" class="themed" language="javascript" line-numbers label="Source"></c2-code-editor>`,
   json: `<c2-code-editor id="subject" language="json" label="Source"></c2-code-editor>`,
   'no-language': `<c2-code-editor id="subject" label="Source"></c2-code-editor>`,
+  // Value and language arrive while the engine is still loading, as they do from async storage.
+  late: `<c2-code-editor id="subject" label="Source"></c2-code-editor>`,
   // Same element; the spec aborts the engine request so the textarea fallback is exercised.
   fallback: `<c2-code-editor id="subject" language="javascript" label="Source"></c2-code-editor>`,
   form: `<form id="host">
@@ -46,7 +48,7 @@ const submitted = document.querySelector('#submitted')!
 
 // `form` starts from a default value so reset has something to restore.
 if (scenario === 'form') subject.setAttribute('value', 'const initial = 1')
-else if (scenario !== 'placeholder' && scenario !== 'no-language') subject.value = SAMPLE
+else if (scenario !== 'placeholder' && scenario !== 'no-language' && scenario !== 'late') subject.value = SAMPLE
 if (scenario === 'json') subject.value = '{ "name": "c2n", "count": 2 }'
 
 let inputs = 0
@@ -68,6 +70,12 @@ form?.addEventListener('submit', (event) => {
 })
 
 await subject.updateComplete
+if (scenario === 'late') {
+  // firstUpdated has started the dynamic import; it has not resolved yet.
+  subject.value = '{ "loaded": "late" }'
+  subject.language = 'json'
+  subject.lineNumbers = true
+}
 // Every scenario waits for the engine, so a spec never races the dynamic import.
 const engine = await subject.ready
 main.dataset.engine = engine

@@ -73,7 +73,7 @@ interface MasonryLayoutSnapshot {
 }
 ```
 
-`rows` and each column count must be a positive integer; each range's maximum is its column count. An invalid supplied snapshot is rejected atomically with `layout-error`, leaving the previous valid arrangement. Newly added tile IDs append in authored order; removed IDs disappear from the next emitted snapshot. An authored span change updates that tile and repacks without a user-change event. Invalid authored numbers use defaults and report `invalid-span`.
+`rows` and each column count must be a positive integer; each range's maximum is its column count. An invalid supplied snapshot is rejected atomically with `layout-error`, leaving the previous valid arrangement. A newly added tile ID is placed before the next tile authored after it (so a tile prepended in the DOM comes first), or appended when none follows; removed IDs disappear from the next emitted snapshot. An authored span change updates that tile and repacks without a user-change event. Invalid authored numbers use defaults and report `invalid-span`.
 
 ## Public API
 

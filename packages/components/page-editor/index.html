@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-page-editor</title>
+    <script type="module" src="/src/page-editor.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 24px;
+        background: #f4f4f2;
+        color: #18181b;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      h2.section {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #52525b;
+      }
+      .sheet {
+        background: #ffffff;
+        border: 1px solid #e4e3df;
+        border-radius: 12px;
+        padding: 32px 40px 32px 16px;
+      }
+      .dark {
+        color-scheme: dark;
+        background: #191919;
+        border-color: #2c2c2b;
+        --c2-page-editor__content--color: #e8e7e3;
+        --c2-page-editor__placeholder--color: #7c7c78;
+        --c2-page-editor__code-block--background: #232322;
+        --c2-page-editor__code-block--color: #e8e7e3;
+        --c2-page-editor__code-header--color: #a3a29d;
+        --c2-page-editor__popover--background: #252525;
+        --c2-page-editor__popover--color: #e8e7e3;
+        --c2-page-editor__popover--border: 1px solid #383837;
+        --c2-page-editor__menu-item__active--background: #333332;
+        --c2-page-editor__menu-label--color: #a3a29d;
+        --c2-page-editor__hint--color: #a3a29d;
+        --c2-page-editor__link--color: #7cc0ea;
+        --c2-page-editor__divider--border-top: 1px solid #383837;
+      }
+      .comment {
+        max-width: 480px;
+        --c2-page-editor__content--min-height: 72px;
+        --c2-page-editor__content--padding: 10px 12px 10px 36px;
+        --c2-page-editor__content--font-size: 14px;
+        border: 1px solid #d4d4d8;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h2 class="section">A page in progress</h2>
+        <div class="sheet">
+          <c2-page-editor
+            label="Q3 launch plan"
+            placeholder="Start writing…"
+            value='# Q3 launch plan
+
+This page collects everything we need before the **October release**. Anything marked &lt;span data-color="red"&gt;blocked&lt;/span&gt; needs an owner by Friday, and anything in &lt;mark data-color="yellow"&gt;yellow&lt;/mark&gt; is still an estimate.
+
+## Goals
+
+- Ship the new `c2-table` with **virtual scrolling**
+- Cut the bundle size by &lt;mark data-color="yellow"&gt;about 20%&lt;/mark&gt;
+- Publish the [migration guide](https://example.com/guide) on the docs site
+
+## Checklist
+
+- [x] Freeze the public API
+- [ ] Update the docs site &lt;span data-color="red"&gt;(blocked on design)&lt;/span&gt;
+- [ ] Record the demo video
+
+&gt; Easy to use is the most important thing. If people have to learn it, we did it wrong.
+
+## Snippet
+
+```typescript
+import &apos;@c2n/table&apos;
+const table = document.querySelector(&apos;c2-table&apos;)
+table.rows = await loadOrders({ limit: 500 }) // virtualised
+```'
+          ></c2-page-editor>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section">Empty, with a placeholder</h2>
+        <div class="sheet">
+          <c2-page-editor label="New page" placeholder="Write something, or type '/' for blocks…"></c2-page-editor>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section">Comment box: text and lists only</h2>
+        <c2-page-editor class="comment" label="Comment" blocks="paragraph bullet ordered" placeholder="Leave a comment…"></c2-page-editor>
+      </section>
+
+      <section>
+        <h2 class="section">Dark</h2>
+        <div class="sheet dark">
+          <c2-page-editor
+            label="Dark page"
+            value='## Release notes
+
+Anything marked &lt;span data-color="red"&gt;blocked&lt;/span&gt; needs an owner, &lt;mark data-color="yellow"&gt;yellow&lt;/mark&gt; is an estimate.
+
+- [x] Freeze the public API
+- [ ] Update the docs site
+
+```ts
+const table = document.querySelector(&apos;c2-table&apos;)
+```'
+          ></c2-page-editor>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section">Read-only</h2>
+        <div class="sheet">
+          <c2-page-editor
+            label="Published note"
+            readonly
+            value="## Published&#10;&#10;This page is **read-only**: select, copy and follow [links](https://example.com)."
+          ></c2-page-editor>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

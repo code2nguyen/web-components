@@ -7,12 +7,18 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './progress.scss?inline'
 
+export type ProgressVariant = 'linear' | 'circular'
+
 /**
- * Linear progress bar. Without a `value` the indicator slides across the track indefinitely; with one it fills the
- * track from the start edge and animates between values. Text in the default slot labels the bar and doubles as its
- * accessible name, and `show-value` adds the percentage on the opposite side — override that text with the `value`
+ * Progress indicator, drawn as a bar (`linear`, the default) or a ring (`circular`). Without a `value` the
+ * indicator slides across the track indefinitely; with one it fills the track from the start edge and animates
+ * between values. Text in the default slot labels the bar and doubles as its accessible name, and `show-value` adds the percentage on the opposite side — override that text with the `value`
  * slot to count something other than percent. Track and indicator are two plain boxes, so height, radius, colours
  * and speed are all variables. Use `c2-spinner` when the wait has no natural width to fill.
+ *
+ * The `circular` variant draws the same track and indicator as a ring `--c2-progress--size` across and
+ * `--c2-progress--height` thick, starting at the top and filling clockwise. `show-value` (or the `value` slot) prints
+ * the value in the middle of the ring and the label sits underneath; without a value the arc spins.
  *
  * @tag c2-progress
  *
@@ -22,10 +28,12 @@ import styles from './progress.scss?inline'
  * @csspart header - Row containing the label and displayed value.
  * @csspart label - Container for the default label slot.
  * @csspart value - Text region containing the custom `value` slot or displayed-percentage fallback.
- * @csspart track - The full progress track.
- * @csspart indicator - The filled portion of the progress track.
+ * @csspart track - The full progress track (the ring's box in the `circular` variant).
+ * @csspart indicator - The filled portion of the progress track (the arc in the `circular` variant).
+ * @csspart unit - The `%` sign of the percentage in the middle of a `circular` ring.
  *
- * @cssproperty {pixel} [--c2-progress--height=8px] - Thickness of the track and the indicator.
+ * @cssproperty {pixel} [--c2-progress--height=8px] - Thickness of the track and the indicator (the ring's stroke in `circular`).
+ * @cssproperty {pixel} [--c2-progress--size=64px] - Diameter of the `circular` ring.
  * @cssproperty {pixel} [--c2-progress--width=100%] - Width of the bar; the host is a block by default.
  * @cssproperty {border-radius} [--c2-progress--border-radius=999px] - Rounding of both the track and the indicator.
  * @cssproperty {color} [--c2-progress__track--background-color=#e4e4e7] - Colour of the unfilled track.
@@ -38,6 +46,8 @@ import styles from './progress.scss?inline'
  * @cssproperty {color} [--c2-progress__value--color=#18181b]
  * @cssproperty {font-size} [--c2-progress__value--font-size=14px]
  * @cssproperty {font-weight} [--c2-progress__value--font-weight=500]
+ * @cssproperty {font-size} [--c2-progress__ring-value--font-size=16px] - Size of the value in the middle of a `circular` ring.
+ * @cssproperty {string} [--c2-progress__indicator--stroke-linecap=round] - Ends of the `circular` arc: `round` or `butt`.
  */
 @customElement('c2-progress')
 export class Progress extends LitElement {
@@ -45,6 +55,9 @@ export class Progress extends LitElement {
 
   /** Progress between `0` and `max`. Leave unset for an indeterminate bar. */
   @property({ type: Number }) value: number | undefined = undefined
+
+  /** `linear` draws a bar, `circular` a ring with the value in its middle. */
+  @property({ reflect: true }) variant: ProgressVariant = 'linear'
 
   /** Value that fills the whole track. */
   @property({ type: Number }) max = 100
@@ -81,6 +94,7 @@ export class Progress extends LitElement {
     const percent = determinate ? Math.round(fraction * 100) : 0
     const hasLabel = this.slotPresence.has()
     const showValue = this.showValue || this.slotPresence.has('value')
+    if (this.variant === 'circular') return this.renderCircular(value, fraction, percent, hasLabel, showValue)
     return html`
       <div class=${classMap({ 'c2-progress': true, 'is-determinate': determinate })}>
         <div class="c2-progress-header" part="header" ?hidden=${!hasLabel && !showValue}>
@@ -103,6 +117,37 @@ export class Progress extends LitElement {
         >
           <div class="c2-progress-indicator" part="indicator" style=${determinate ? styleMap({ width: `${fraction * 100}%` }) : nothing}></div>
         </div>
+      </div>
+    `
+  }
+
+  private renderCircular(value: number | undefined, fraction: number | undefined, percent: number, hasLabel: boolean, showValue: boolean) {
+    const determinate = fraction !== undefined
+    return html`
+      <div class=${classMap({ 'c2-progress': true, 'is-circular': true, 'is-determinate': determinate, 'is-empty': fraction === 0 })}>
+        <div
+          class="c2-progress-track"
+          part="track"
+          role="progressbar"
+          aria-label=${hasLabel ? nothing : ifDefined(this.label || 'Loading')}
+          aria-labelledby=${hasLabel ? 'label' : nothing}
+          aria-valuemin=${determinate ? '0' : nothing}
+          aria-valuemax=${determinate ? String(this.effectiveMax) : nothing}
+          aria-valuenow=${value !== undefined ? String(value) : nothing}
+        >
+          <svg class="c2-progress-ring" aria-hidden="true" focusable="false">
+            <circle class="c2-progress-ring-track"></circle>
+            <circle class="c2-progress-indicator" part="indicator" style=${determinate ? styleMap({ '--_fraction': String(fraction) }) : nothing}></circle>
+          </svg>
+          <span class="c2-progress-value" part="value" ?hidden=${!showValue}>
+            <slot name="value" @slotchange=${this.slotPresence.handleSlotChange}
+              >${determinate ? html`${percent}<span class="c2-progress-unit" part="unit">%</span>` : nothing}</slot
+            >
+          </span>
+        </div>
+        <span id="label" class="c2-progress-label" part="label" ?hidden=${!hasLabel}>
+          <slot @slotchange=${this.slotPresence.handleSlotChange}></slot>
+        </span>
       </div>
     `
   }

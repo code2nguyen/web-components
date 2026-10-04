@@ -1,27 +1,33 @@
 import { expect, test } from '@playwright/test'
+import { failOnConsoleErrors } from './console-guard'
 
 const alertKey = 'c2n-observability:v1:alerts'
 
-test.beforeEach(({ page }) => {
-  page.on('console', (message) => {
-    if (message.type() === 'error' && !/Failed to load resource.*404 \(Not Found\)/i.test(message.text())) {
-      throw new Error(`Browser console error: ${message.text()}`)
-    }
-  })
-})
+test.beforeEach(({ page }) => failOnConsoleErrors(page))
 
 test('malformed and unknown-version alert storage recover to baseline', async ({ page }) => {
   await page.goto('./alerts/')
   await page.evaluate((key) => localStorage.setItem(key, '{malformed'), alertKey)
   await page.reload()
-  await expect(page.getByText(/guardrail for/i).first()).toBeVisible()
+  // The no-JavaScript baseline list stays in the document, hidden, once the workspace hydrates: assert the rendered rules.
+  await expect(
+    page
+      .getByText(/guardrail for/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible()
 
   await page.evaluate(
     (key) => localStorage.setItem(key, JSON.stringify({ schemaVersion: 99, updatedAt: new Date().toISOString(), data: { rulesById: {} } })),
     alertKey,
   )
   await page.reload()
-  await expect(page.getByText(/guardrail for/i).first()).toBeVisible()
+  await expect(
+    page
+      .getByText(/guardrail for/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible()
 })
 
 test('stale destination recovery keeps a valid persisted neighbor', async ({ page }) => {
@@ -71,7 +77,8 @@ test('unavailable storage and quota failure keep a usable session draft', async 
   await page.getByRole('checkbox', { name: /Monitor edge-gateway/i }).check()
   await page.getByRole('checkbox', { name: /Primary on-call.*synthetic/i }).check()
   await page.getByRole('button', { name: 'Save alert rule' }).click()
-  await expect(page.getByText(/available for this session/i)).toBeVisible()
+  // The message is both announced through the app's live region (visually hidden) and shown in a toast: assert the toast.
+  await expect(page.locator('c2-toast').filter({ hasText: /available for this session/i })).toBeVisible()
 })
 
 test('unknown rule and incident identifiers have helpful recovery', async ({ page }) => {

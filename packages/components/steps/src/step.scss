@@ -106,11 +106,11 @@ $_duration: css.cssVar(transition-duration);
 
 // Written by the list on a step that arrived after it was already on screen, and taken off again by the step
 // itself when the animation ends. The clipping only lasts as long as the growing does.
-:host([entering]) {
+:host(:state(entering)) {
   animation: c2-step-enter css.cssVar(enter-duration) animation.$standard-easing;
 }
 
-:host([entering]) .c2-step__frame {
+:host(:state(entering)) .c2-step__frame {
   overflow: hidden;
 }
 
@@ -189,7 +189,7 @@ $_duration: css.cssVar(transition-duration);
 }
 
 // A list with no group anywhere has no nesting either, so it has nothing to draw.
-:host(:not([grouped])) .c2-step__row::before {
+:host(:not(:state(grouped))) .c2-step__row::before {
   display: none;
 }
 
@@ -256,11 +256,11 @@ button.c2-step__row {
 }
 
 // The last row of the whole list has no hairline under it; a parent's hairline is carried by its last descendant.
-:host([last]) .c2-step__row:not(:has(~ .c2-step__children:not([hidden]))) {
+:host(:state(last)) .c2-step__row:not(:has(~ .c2-step__children:not([hidden]))) {
   border-bottom: none;
 }
 
-:host([last][has-children]:not([collapsed])) > .c2-step__frame > .c2-step__details > summary.c2-step__row {
+:host(:state(last):state(has-children):not(:state(collapsed))) > .c2-step__frame > .c2-step__details > summary.c2-step__row {
   border-bottom: css.cssVar(row--border-bottom);
 }
 
@@ -295,7 +295,7 @@ button.c2-step__row {
   }
 }
 
-:host([has-children]:not([collapsed])) .c2-step__toggle {
+:host(:state(has-children):not(:state(collapsed))) .c2-step__toggle {
   transform: rotate(90deg);
 }
 
@@ -354,13 +354,13 @@ button.c2-step__row {
   border-radius: css.cssVar(rail--width);
 }
 
-:host([last]:not([has-children])) .c2-step__rail,
-:host([last][has-children][collapsed]) .c2-step__rail {
+:host(:state(last):not(:state(has-children))) .c2-step__rail,
+:host(:state(last):state(has-children):state(collapsed)) .c2-step__rail {
   visibility: hidden;
 }
 
 // `marker="none"` drops the whole column, rail included.
-:host([marker='none']) .c2-step__gutter {
+:host(:state(marker-none)) .c2-step__gutter {
   display: none;
 }
 
@@ -468,7 +468,7 @@ button.c2-step__row {
  * round box the size of a checkmark spills out over its own border. In number mode the marker keeps its height and
  * grows sideways instead: a single digit is still the circle, a path is a pill.
  */
-:host([marker='number']) .c2-step__marker {
+:host(:state(marker-number)) .c2-step__marker {
   width: auto;
   min-width: css.cssVar(marker--size);
   padding-inline: css.cssVar(marker--padding-inline);
@@ -476,16 +476,16 @@ button.c2-step__row {
   border: css.cssVar(marker--border);
 }
 
-:host([marker='number']) .c2-step__row.is-success .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-error .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-warning .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-success .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-error .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-warning .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-current .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   border-color: currentColor;
 }
 
-:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-current .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   // With a number inside, the filled core would swallow it.
   box-shadow: none;
 }
@@ -506,10 +506,10 @@ button.c2-step__row {
  * the first pass and taken off again when the beat ends, so a trace drawn complete sits still and only a step that
  * actually finishes in front of you moves. A step that is still growing into place has enough going on already.
  */
-:host([settling]:not([entering])) .c2-step__row.is-success .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-error .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-warning .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-skipped .c2-step__marker {
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-success .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-error .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-warning .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-skipped .c2-step__marker {
   animation: c2-step-settle $_duration animation.$standard-easing;
 }
 
@@ -533,7 +533,7 @@ button.c2-step__row {
   animation: c2-step-spin 900ms linear infinite;
 }
 
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   animation: none;
   border-top-color: currentColor;
 }
@@ -549,8 +549,8 @@ button.c2-step__row {
     animation: none;
     border-top-color: currentColor;
   }
-  :host([entering]),
-  :host([settling]) .c2-step__row .c2-step__marker {
+  :host(:state(entering)),
+  :host(:state(settling)) .c2-step__row .c2-step__marker {
     animation: none;
   }
   .c2-step__row,
@@ -625,7 +625,7 @@ button.c2-step__row {
 
 // The last step's rail would lead nowhere; it keeps its cell so every step is the same width, but stops at the end
 // of the row, or the list would scroll by the length of a rail nobody can see.
-:host([last]) .is-horizontal .c2-step__rail {
+:host(:state(last)) .is-horizontal .c2-step__rail {
   visibility: hidden;
   margin-inline-end: 0;
 }

@@ -25,6 +25,9 @@ declare module 'vue' {
         'aria-label'?: unknown
         onMonthChange?: (event: EventOf<MonthPlanner, 'month-change'>) => void
         onEventClick?: (event: EventOf<MonthPlanner, 'event-click'>) => void
+        onDayClick?: (event: EventOf<MonthPlanner, 'day-click'>) => void
+        onEventChange?: (event: EventOf<MonthPlanner, 'event-change'>) => void
+        onRangeSelect?: (event: EventOf<MonthPlanner, 'range-select'>) => void
       }
     >
   }

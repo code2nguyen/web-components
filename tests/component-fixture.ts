@@ -74,6 +74,27 @@ export const expect = baseExpect.extend({
         `${this.utils.matcherHint('toHaveHostAria', locator.toString(), attribute, { isNot: this.isNot })}\n\nExpected: ${this.isNot ? 'not ' : ''}${this.utils.printExpected(expected)}\nReceived: ${this.utils.printReceived(actual)}`,
     }
   },
+
+  /**
+   * Retrying assertion that the host matches `:state(<name>)`. Components expose their own state as ElementInternals
+   * custom states rather than host attributes, which `toHaveAttribute` cannot see.
+   */
+  async toHaveState(locator: Locator, name: string, options?: { timeout?: number }) {
+    const poll = baseExpect.poll(() => locator.evaluate((element, state) => element.matches(`:state(${state})`), name), {
+      timeout: options?.timeout ?? this.timeout,
+    })
+    // `.not` polls for the state to go away rather than waiting out the timeout for it to appear.
+    const matched = await (this.isNot ? poll.not : poll).toBe(true).then(
+      () => true,
+      () => false,
+    )
+    return {
+      pass: this.isNot ? !matched : matched,
+      name: 'toHaveState',
+      message: () =>
+        `${this.utils.matcherHint('toHaveState', locator.toString(), name, { isNot: this.isNot })}\n\nExpected the host ${this.isNot ? 'not ' : ''}to match :state(${name})`,
+    }
+  },
 })
 
 export async function props(locator: Locator, values: Record<string, unknown>) {

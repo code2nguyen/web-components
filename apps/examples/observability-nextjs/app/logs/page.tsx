@@ -35,8 +35,8 @@ export default function LogsPage() {
       </section>
       <Suspense
         fallback={
-          <div className="skeleton-grid" aria-label="Loading log search">
-            <c2-skeleton />
+          <div className="skeleton-grid" aria-busy="true">
+            <c2-skeleton label="Loading log search" />
             <c2-skeleton />
             <c2-skeleton />
           </div>

@@ -1,0 +1,83 @@
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { property } from '@c2n/core/lit-helper.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { classMap } from 'lit/directives/class-map.js'
+import styles from './separator.scss?inline'
+
+export type SeparatorOrientation = 'horizontal' | 'vertical'
+
+/**
+ * Thin rule that divides content, horizontally or vertically, with an optional label in the middle ("or", a section
+ * name). It is `role="separator"` for assistive technology unless marked `decorative`. Thickness, colour and line
+ * style are variables, so dashed or dotted dividers, inset list dividers and accent rules are all one variable away.
+ *
+ * @tag c2-separator
+ *
+ * @slot - Optional label drawn between two line segments.
+ *
+ * @csspart separator - The outer separator layout container.
+ * @csspart line - Each line segment on either side of the optional label.
+ * @csspart label - Container for the optional default slot.
+ *
+ * @cssproperty {pixel} [--c2-separator--thickness=1px]
+ * @cssproperty {color} [--c2-separator--color=#e4e4e7]
+ * @cssproperty {border-style} [--c2-separator--style=solid] - `dashed` or `dotted` for a broken line.
+ * @cssproperty {pixel} [--c2-separator--spacing=0px] - Margin on both sides across the line (above and below a horizontal rule).
+ * @cssproperty {pixel} [--c2-separator--inset-start=0px] - Margin before the line along its axis, e.g. to align with list text.
+ * @cssproperty {pixel} [--c2-separator--inset-end=0px] - Margin after the line along its axis.
+ * @cssproperty {flex} [--c2-separator__line-start--flex=1] - Growth of the segment before the label; `0 0 16px` pins the label near the start.
+ * @cssproperty {flex} [--c2-separator__line-end--flex=1] - Growth of the segment after the label.
+ *
+ * @cssproperty {pixel} [--c2-separator__label--gap=12px] - Space between the label and the lines.
+ * @cssproperty {color} [--c2-separator__label--color=#71717a]
+ * @cssproperty {font-size} [--c2-separator__label--font-size=12px]
+ * @cssproperty {font-weight} [--c2-separator__label--font-weight=500]
+ * @cssproperty {line-height} [--c2-separator__label--line-height=1.4]
+ * @cssproperty {pixel} --c2-separator__label--letter-spacing
+ * @cssproperty {text-transform} [--c2-separator__label--text-transform=none]
+ */
+@customElement('c2-separator')
+export class Separator extends LitElement {
+  static override styles = unsafeCSS(styles)
+
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
+  /** Direction of the line. A vertical separator stretches to its flex row; give it a height elsewhere. */
+  @property({ reflect: true }) orientation: SeparatorOrientation = 'horizontal'
+
+  /** Purely visual: removes the `separator` role so screen readers skip it. */
+  @property({ type: Boolean, reflect: true }) decorative = false
+
+  private readonly slotPresence = new SlotPresenceController(this, [''])
+
+  /** `slotchange` does not fire for server-rendered slots, so read the label once after the first render. */
+  override updated(changed: PropertyValues<this>) {
+    if (changed.has('decorative') || changed.has('orientation')) {
+      this.internals.role = this.decorative ? 'none' : 'separator'
+      this.internals.ariaOrientation = this.decorative ? null : this.orientation
+    }
+  }
+
+  private handleSlotChange(event: Event) {
+    this.slotPresence.handleSlotChange(event)
+  }
+
+  override render() {
+    return html`
+      <div class=${classMap({ 'c2-separator': true, 'has-label': this.slotPresence.has() })} part="separator">
+        <span class="c2-separator-line c2-separator-line--start" part="line"></span>
+        <span class="c2-separator-label" part="label"><slot @slotchange=${this.handleSlotChange}></slot></span>
+        <span class="c2-separator-line c2-separator-line--end" part="line"></span>
+      </div>
+    `
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'c2-separator': Separator
+  }
+}

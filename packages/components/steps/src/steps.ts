@@ -8,7 +8,7 @@ import type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, Step
 import { rollupStatus } from './step-icons.js'
 import styles from './steps.scss?inline'
 
-import { STEP_SELECT_EVENT, type StepSelectRequestDetail } from './step.js'
+import { STEP_SELECT_EVENT, STEP_STATUS_EVENT, type StepSelectRequestDetail } from './step.js'
 
 export type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
 export type { StepToggleEventDetail, StepEventMap } from './step.js'
@@ -46,7 +46,7 @@ type ManagedStep = HTMLElement & {
   marker: StepsMarker
   grouped: boolean
   hasChildren: boolean
-  toggleAttribute(name: string, force?: boolean): boolean
+  entering: boolean
   collapsed: boolean
   status: StepStatus
 }
@@ -185,9 +185,9 @@ export class Steps extends LitElement {
   /**
    * The status this element last wrote to each step, which is how it knows whether a step is still its to write.
    *
-   * `status` reflects, and a server-rendered step arrives with the default already stamped on it, so the presence
-   * of the attribute proves nothing about who put it there. A step is ours while it still holds what we last gave
-   * it — the moment a run sets something else on it, it is the run's, for good.
+   * `status` can arrive as an attribute or a property, from the markup, the server or a run, so its value alone
+   * proves nothing about who put it there. A step is ours while it still holds what we last gave it — the moment a
+   * run sets something else on it, it is the run's, for good.
    */
   private readonly written = new WeakMap<Element, StepStatus>()
 
@@ -199,22 +199,23 @@ export class Steps extends LitElement {
   private readonly known = new WeakSet<Element>()
   private hasSynced = false
 
-  /**
-   * A run ticks a step over by setting `status` on it, which is nothing this element renders and so nothing Lit
-   * would notice. Watching the attribute is what lets a parent roll the change up and a group open on it.
-   */
+  /** Watches for steps arriving and leaving, which is nothing this element renders and so nothing Lit would notice. */
   private observer?: MutationObserver
+
+  private syncQueued = false
 
   override connectedCallback() {
     super.connectedCallback()
     this.internals.role = 'list'
     this.addEventListener(STEP_SELECT_EVENT, this.handleSelectRequest)
+    this.addEventListener(STEP_STATUS_EVENT, this.handleStatusChange)
     this.observer ??= new MutationObserver(() => this.syncSteps())
-    this.observer.observe(this, { subtree: true, childList: true, attributes: true, attributeFilter: ['status'] })
+    this.observer.observe(this, { subtree: true, childList: true })
   }
 
   override disconnectedCallback() {
     this.removeEventListener(STEP_SELECT_EVENT, this.handleSelectRequest)
+    this.removeEventListener(STEP_STATUS_EVENT, this.handleStatusChange)
     this.observer?.disconnect()
     super.disconnectedCallback()
   }
@@ -262,6 +263,21 @@ export class Steps extends LitElement {
   /** What a step is called in `selected`: its `value`, or its dotted path. */
   private static keyOf(step: ManagedStep): string {
     return step.value || step.path
+  }
+
+  /**
+   * A run ticks a step over by setting `status` on it, which is nothing this element renders and so nothing Lit
+   * would notice; the step says so, and the list rolls the change up. One pass covers every step that changed in the
+   * same task, so a trace rendered at once is not walked once per row.
+   */
+  private readonly handleStatusChange = (event: Event) => {
+    event.stopPropagation()
+    if (this.syncQueued) return
+    this.syncQueued = true
+    queueMicrotask(() => {
+      this.syncQueued = false
+      if (this.isConnected) this.syncSteps()
+    })
   }
 
   /** A row asks to be selected; only this list decides, and the request goes no further than here. */
@@ -326,7 +342,7 @@ export class Steps extends LitElement {
 
     const walk = (steps: HTMLElement[], level: number, parentPath: string): StepStatus[] => {
       return steps.map((step, index) => {
-        const element = step as ManagedStep & { hasAttribute(name: string): boolean }
+        const element = step as ManagedStep
         element.level = level
         element.position = index + 1
         // `3.1` reads as the first child of the third step; a bare `1` there would be a lie.
@@ -340,7 +356,7 @@ export class Steps extends LitElement {
         if (!this.known.has(element)) {
           this.known.add(element)
           // The step takes it off again when the animation ends.
-          if (this.hasSynced) element.toggleAttribute('entering', true)
+          if (this.hasSynced) element.entering = true
         }
 
         const children = Steps.collectSteps(element)

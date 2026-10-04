@@ -21,6 +21,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-table': DefineComponent<
       C2Props<Table> & {
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
         'row-key'?: unknown
         'checkbox-selection'?: unknown
         sort?: unknown
@@ -42,9 +44,11 @@ declare module 'vue' {
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
         onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<Table, 'row-activate'>) => void
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
         onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
         onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
@@ -73,4 +77,5 @@ declare module '@vue/runtime-dom' {
   }
 }
 
-export {}
+// The package's own Vue composables (src/vue.ts).
+export * from './types/src/vue.js'

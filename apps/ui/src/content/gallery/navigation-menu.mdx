@@ -103,7 +103,7 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
 ```html tag=MdxCodeBlock,label=Dark header
 <style>
   .dark {
-    --c2-navigation-menu--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-navigation-menu--background: var(--c2-theme--color-dark-surface, #18181b);
     --c2-navigation-menu--padding-top: 6px;
     --c2-navigation-menu--padding-right: 10px;
     --c2-navigation-menu--padding-bottom: 6px;
@@ -112,22 +112,22 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
     --c2-navigation-menu--border-top-right-radius: 10px;
     --c2-navigation-menu--border-bottom-left-radius: 10px;
     --c2-navigation-menu--border-bottom-right-radius: 10px;
-    --c2-navigation-menu-item--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-navigation-menu-item__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-navigation-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-item__expanded--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-navigation-menu-item__expanded--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-item__current--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-navigation-menu-item--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-navigation-menu-item__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-navigation-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-item__expanded--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-navigation-menu-item__expanded--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-item__current--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-navigation-menu-item__indicator--color: #a78bfa;
-    --c2-navigation-menu-item__panel--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-navigation-menu-item__panel--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-item__panel--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-item__panel--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-item__panel--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__panel--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-navigation-menu-item__panel--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-item__panel--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-item__panel--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-item__panel--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-navigation-menu-item__panel--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --c2-navigation-menu-link--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-navigation-menu-link__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-navigation-menu-link__description--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-navigation-menu-link--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-navigation-menu-link__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-navigation-menu-link__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
   .dark .stack {
     display: grid;

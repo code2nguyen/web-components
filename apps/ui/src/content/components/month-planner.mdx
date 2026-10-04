@@ -6,9 +6,15 @@ category: 'Planning'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { MonthPlanner } from '@c2n/month-planner'
 import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+<ExampleModules />
 
 `c2-month-planner` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
 day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
@@ -32,6 +38,37 @@ npm install @c2n/month-planner
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/month-planner
+<style>
+  .planner-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .planner-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+  .planner-add {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 6px;
+    --c2-button__container--font-size: 13px;
+    --c2-feather-icon--size: 16px;
+  }
+  .planner-icon-action {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
+</style>
 <div data-label="Vacation plan">
   <c2-month-planner
     month="2026-09"
@@ -46,8 +83,21 @@ npm install @c2n/month-planner
     locale="en-US"
     events='[{"id":"ana","title":"Ana: vacation","start":"2026-09-07","end":"2026-09-11","color":"#0f766e"},{"id":"leo","title":"Leo: parental leave","start":"2026-09-14","end":"2026-09-25","color":"#be185d"}]'
   >
-    <c2-button slot="actions">Add event</c2-button>
+    <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+    <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
   </c2-month-planner>
+</div>
+<div data-label="Editable">
+  <div class="planner-demo">
+    <c2-month-planner
+      editable
+      data-planner-demo="editable"
+      month="2026-09"
+      locale="en-US"
+      events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+    ></c2-month-planner>
+    <output class="planner-result">Click a day, drag across days, or drag a bar.</output>
+  </div>
 </div>
 ```
 
@@ -65,8 +115,8 @@ instead of overflowing. The planner leaves what they do to you.
 
 ```html tag=CodeBlock
 <c2-month-planner heading="Team holidays">
-  <c2-button slot="actions">Add event</c2-button>
-  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+  <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+  <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
 </c2-month-planner>
 ```
 
@@ -87,6 +137,36 @@ const planner = document.querySelector('c2-month-planner')!
 planner.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]
 planner.addEventListener('event-click', (event) => console.log(event.detail.event.id))
 planner.addEventListener('month-change', (event) => console.log(event.detail.month))
+```
+
+## Editing
+
+Set `editable` to plan on the grid itself. The planner reports what the user did and leaves the change to you: it
+never rewrites `events`, so apply each change (and save it) in the handler, and the grid redraws from the new list.
+
+- A click on a day's empty area, or Enter or Space on a focused day, fires `day-click` with `detail.date`
+  (`YYYY-MM-DD`). Arrow keys move between days. Days of the neighbouring months shown in the grid count too.
+- Pressing on one day and releasing on another highlights the days between
+  (`--c2-month-planner__day__range--background`) and fires `range-select` with `detail.start` and `detail.end`, in
+  order and inclusive. Escape cancels.
+- Dragging an event bar to another day moves it, keeping its length; dragging its start or end edge
+  (`--c2-month-planner__handle--width`) changes that date. The bar follows the pointer while it is dragged, Escape
+  puts it back, and a press that does not move stays an `event-click`. On drop, `event-change` carries the entry in
+  `detail.event` and its new dates in `detail.changes` (`{ start, end }`, `end` set even for a one-day entry).
+- On a focused bar, Alt+Arrow Left/Right moves it by a day, Alt+Arrow Up/Down by a week, and Alt+Shift+Arrow
+  Left/Right changes its end; each fires `event-change`, and focus stays on the bar once the new `events` arrive.
+
+A compact planner fires `day-click` on a tap as well. None of these events bubble: listen on the planner.
+
+```ts tag=CodeBlock
+const planner = document.querySelector('c2-month-planner')!
+planner.editable = true
+planner.addEventListener('day-click', (event) => openNewEventForm({ start: event.detail.date }))
+planner.addEventListener('range-select', (event) => openNewEventForm(event.detail))
+planner.addEventListener('event-change', (event) => {
+  const { event: entry, changes } = event.detail
+  planner.events = planner.events.map((item) => (item === entry ? { ...item, ...changes } : item))
+})
 ```
 
 ## Narrow screens

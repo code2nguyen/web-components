@@ -53,26 +53,26 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
     height: 320px;
     width: min(100%, 420px);
     border-radius: 18px;
-    background: var(--c2-theme--color-on-surface, #18181b);
-    color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     overflow: hidden;
   }
   .night-list {
     flex: 1;
     --c2-chat-message-list__content--padding: 20px;
     --c2-chat-message-list__content--gap: 20px;
-    --c2-chat-message-list__jump-button--background: #27272a;
-    --c2-chat-message-list__jump-button--color: #f4f4f5;
-    --c2-chat-message-list__jump-button--border: 1px solid #3f3f46;
-    --c2-chat-message-list__jump-button__hover--background: #3f3f46;
+    --c2-chat-message-list__jump-button--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-chat-message-list__jump-button--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-message-list__jump-button--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-chat-message-list__jump-button__hover--background: var(--c2-theme--color-dark-outline, #3f3f46);
     --c2-chat-message-list__badge--background: #a78bfa;
-    --c2-chat-message-list__badge--color: #18181b;
+    --c2-chat-message-list__badge--color: var(--c2-theme--color-dark-surface, #18181b);
     --c2-chat-message-list__scrollbar__thumb--color: rgba(167, 139, 250, 0.35);
     --c2-chat-message-list__scrollbar__thumb__hover--color: rgba(167, 139, 250, 0.6);
   }
   .night-list c2-chat-message {
-    --c2-chat-message__message--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-chat-message__header__title--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-chat-message__message--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-message__header__title--color: var(--c2-theme--color-on-dark-surface, #fafafa);
   }
   .night-list .night-outgoing {
     --c2-chat-message__message--background: #312e81;
@@ -87,9 +87,9 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
   }
   .night-input {
     margin: 14px;
-    --c2-chat-input__container--background: #1c1c21;
-    --c2-chat-input__container--color: #f4f4f5;
-    --c2-chat-input__container--border: 1px solid #3f3f46;
+    --c2-chat-input__container--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 2%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-input__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-input__container--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
     --c2-chat-input__send-button--background: #7c3aed;
   }
 </style>

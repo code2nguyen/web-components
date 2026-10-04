@@ -21,6 +21,7 @@ export interface Tab {
  * A single tab inside `<c2-tabs>`. Its `for` attribute names the `id` of the panel it controls.
  * The parent owns selection: it sets `selected` and the roving `tabindex`; this element exposes
  * them as `role="tab"`, `aria-selected`, `aria-controls` and `aria-disabled` through `ElementInternals`, so no host attribute is written.
+ * The selected tab matches `c2-tab:state(selected)`.
  *
  * @tag c2-tab
  *
@@ -41,8 +42,11 @@ export class Tab extends LitElement {
   /** Prevents activation and removes this tab from keyboard navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
-  /** Set by the parent `<c2-tabs>`; do not set by hand. */
-  @property({ type: Boolean, reflect: true }) selected = false
+  /**
+   * Set by the parent `<c2-tabs>`; do not set by hand. Not reflected: the strip selects a tab while the page upgrades,
+   * before a framework hydrates, so it is exposed as the custom state `c2-tab:state(selected)` instead.
+   */
+  @property({ type: Boolean }) selected = false
 
   @consume({ context: selectedTabContext, subscribe: true })
   private selectedTab: string = ''
@@ -62,14 +66,15 @@ export class Tab extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    // A custom element constructor must not set attributes: `document.createElement('c2-tab')` enforces that and
-    // throws `NotSupportedError`. Parser-created tabs never hit the check, so this only shows up when a framework
-    // builds the element imperatively — Angular's renderer does, and the whole tab strip dies with it.
-    if (!isServer) this.setAttribute('slot', 'tab')
+    // No `slot` attribute: `<c2-tabs>` assigns its tabs to the strip itself (manual slot assignment), so a tab never
+    // writes on its own host. (Nor may a constructor: `document.createElement('c2-tab')` throws `NotSupportedError`
+    // when one sets an attribute, which is how Angular's renderer builds the element.)
     if (!this.hasAttribute('tabindex')) this.tabIndex = -1
   }
 
   override updated(_changed: PropertyValues<this>) {
+    if (this.selected) this.internals.states.add('selected')
+    else this.internals.states.delete('selected')
     this.internals.ariaSelected = String(this.selected)
     this.internals.ariaDisabled = this.disabled ? 'true' : null
     // Resolved on every update: the panel may be added after the tab, and `<c2-tabs>` re-requests an update then.

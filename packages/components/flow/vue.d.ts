@@ -22,6 +22,7 @@ declare module 'vue' {
       C2Props<Flow> & {
         'edge-type'?: unknown
         'storage-key'?: unknown
+        'actions-placement'?: unknown
         'no-card'?: unknown
         'no-context-menu'?: unknown
         'open-delay'?: unknown
@@ -29,6 +30,12 @@ declare module 'vue' {
         onLayoutChange?: (event: EventOf<Flow, 'layout-change'>) => void
         onSelectionChange?: (event: EventOf<Flow, 'selection-change'>) => void
         onNodeClick?: (event: EventOf<Flow, 'node-click'>) => void
+        onNodeAdd?: (event: EventOf<Flow, 'node-add'>) => void
+        onEdgeAdd?: (event: EventOf<Flow, 'edge-add'>) => void
+        onNodeDelete?: (event: EventOf<Flow, 'node-delete'>) => void
+        onEdgeDelete?: (event: EventOf<Flow, 'edge-delete'>) => void
+        onEdgeEdit?: (event: EventOf<Flow, 'edge-edit'>) => void
+        onNodeEdit?: (event: EventOf<Flow, 'node-edit'>) => void
         onFlowMenuSelect?: (event: EventOf<Flow, 'flow-menu-select'>) => void
       }
     >

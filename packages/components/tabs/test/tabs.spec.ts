@@ -75,9 +75,9 @@ test('tabs built with createElement, the way a framework renderer builds them, b
     await (tabs as Element & { updateComplete?: Promise<boolean> }).updateComplete
   })
 
-  // The slot is what puts a tab in the tab strip; the constructor used to set it.
-  await expect(page.locator('c2-tab[for="one"]')).toHaveAttribute('slot', 'tab')
-  await expect(page.locator('c2-tab[for="two"]')).toHaveAttribute('slot', 'tab')
+  // The strip assigns its tabs to the header slot itself; nothing writes `slot` on them.
+  await expect(page.locator('c2-tab[for="one"]')).not.toHaveAttribute('slot')
+  await expect(page.locator('c2-tab[for="two"]')).toBeVisible()
 
   const first = page.locator('c2-tab', { hasText: 'First' })
   await expect(first).toHaveHostAria('aria-selected', 'true')
@@ -135,4 +135,76 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(first).toHaveHostAria('aria-selected', 'false')
   expect(await hostSemantics()).toEqual([])
   expect(await hostAria(third, 'role')).toBe('tab')
+})
+
+// A tab is selected and the panels are slotted while the page upgrades, before React (or any framework) hydrates.
+// Writing `slot` on the children or reflecting `selected` would make the hydrated markup differ from the server's,
+// so the strip assigns its slots by hand and the selected tab is a custom state.
+test('upgrading and switching tabs write no slot or selected attribute on the children', async ({ page, renderScenario }) => {
+  await renderScenario(
+    markup
+      .replace('<div id="one">', '<div id="one" role="tabpanel" aria-labelledby="tab-one">')
+      .replace('<c2-tab for="one">', '<c2-tab for="one" id="tab-one">'),
+  )
+  const unauthored = () =>
+    page.locator('c2-tabs').evaluate((tabs) =>
+      [...tabs.children].flatMap((el) =>
+        el
+          .getAttributeNames()
+          .filter((name) => !['for', 'disabled', 'id', 'tabindex'].includes(name) && !(el.id === 'one' && ['role', 'aria-labelledby'].includes(name)))
+          .map((name) => `${el.localName}#${el.id || el.getAttribute('for')}[${name}]`),
+      ),
+    )
+  const first = page.locator('c2-tab[for="one"]')
+  const third = page.locator('c2-tab[for="three"]')
+
+  await expect(first).toHaveHostAria('aria-selected', 'true')
+  await expect(page.getByText('First content', { exact: true })).toBeVisible()
+  await expect(page.getByText('Third content', { exact: true })).toBeHidden()
+  expect(await first.evaluate((el) => el.matches(':state(selected)'))).toBe(true)
+  await expect(first).toHaveCSS('color', 'rgb(2, 101, 220)')
+  expect(await unauthored()).toEqual([])
+
+  await third.click()
+  await expect(page.getByText('Third content', { exact: true })).toBeVisible()
+  await expect(page.getByText('First content', { exact: true })).toBeHidden()
+  expect(await third.evaluate((el) => el.matches(':state(selected)'))).toBe(true)
+  expect(await first.evaluate((el) => el.matches(':state(selected)'))).toBe(false)
+  await expect(third).toHaveCSS('color', 'rgb(2, 101, 220)')
+  // The panel the strip had to label itself is the only one that gained attributes.
+  expect(await unauthored()).toEqual(['div#three[role]', 'div#three[aria-labelledby]'])
+})
+
+test('tabs and panels added later are assigned to the strip', async ({ page, renderScenario }) => {
+  await renderScenario(markup)
+  await page.locator('c2-tabs').evaluate((tabs) => {
+    const tab = document.createElement('c2-tab')
+    tab.setAttribute('for', 'four')
+    tab.textContent = 'Fourth'
+    const panel = document.createElement('div')
+    panel.id = 'four'
+    panel.textContent = 'Fourth content'
+    tabs.append(tab, panel)
+  })
+  await page.locator('c2-tab', { hasText: 'Fourth' }).click()
+  await expect(page.getByText('Fourth content', { exact: true })).toBeVisible()
+  await expect(page.locator('c2-tab[for="four"]')).not.toHaveAttribute('slot')
+})
+
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the strip then falls back to writing `slot`, as it always did.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="host"></div>')
+  await page
+    .locator('#host')
+    .evaluate((host) =>
+      host.setHTMLUnsafe(
+        '<c2-tabs><template shadowrootmode="open"></template><c2-tab for="one">First</c2-tab><c2-tab for="two">Second</c2-tab><div id="one">First content</div><div id="two">Second content</div></c2-tabs>',
+      ),
+    )
+  await expect(page.locator('c2-tab[for="one"]')).toHaveAttribute('slot', 'tab')
+  await expect(page.getByText('First content', { exact: true })).toBeVisible()
+  await page.locator('c2-tab', { hasText: 'Second' }).click()
+  await expect(page.getByText('Second content', { exact: true })).toBeVisible()
+  await expect(page.getByText('First content', { exact: true })).toBeHidden()
 })

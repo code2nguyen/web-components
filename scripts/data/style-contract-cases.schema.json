@@ -21,6 +21,8 @@
           "settledWhen": { "type": "string", "minLength": 1 },
           "modules": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
           "hoverTarget": { "type": "string", "minLength": 1 },
+          "focusTarget": { "type": "string", "minLength": 1 },
+          "pressTarget": { "type": "string", "minLength": 1 },
           "stateSetup": {
             "type": "array",
             "items": {
@@ -68,7 +70,7 @@
           "target": { "type": "string", "minLength": 1 },
           "assertion": { "enum": ["computed-style", "geometry", "pseudo-style", "slotted-style", "delegated-style", "programmatic-output"] },
           "declaration": { "type": "string", "minLength": 1 },
-          "pseudo": { "enum": ["::before", "::after"] },
+          "pseudo": { "enum": ["::before", "::after", "::placeholder"] },
           "valueSyntax": { "type": "string", "minLength": 1 },
           "syntaxRationale": { "type": "string", "minLength": 1 },
           "outputProbe": { "enum": ["canvas-bitmap", "svg-bitmap", "image-bitmap", "text-content"] },

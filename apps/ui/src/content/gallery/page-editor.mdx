@@ -1,0 +1,91 @@
+---
+title: 'Page Editor gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { PageEditor } from '@c2n/page-editor'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .doc-page { width: 420px; max-width: 100%; }
+</style>
+<c2-page-editor class="doc-page" label="Meeting notes" placeholder="Start writing…" value="## Thursday sync
+
+We agreed to ship **behind a flag** and to <mark data-color=&quot;yellow&quot;>revisit pricing</mark>.
+
+- [x] Draft the announcement
+- [ ] Book the demo room"></c2-page-editor>
+```
+
+```html tag=MdxCodeBlock,label=Writing page
+<style>
+  .writing-page {
+    width: 460px;
+    max-width: 100%;
+    padding: 24px 8px;
+    border-radius: 12px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, transparent);
+    --c2-page-editor__content--font-family: Georgia, 'Times New Roman', serif;
+    --c2-page-editor__content--font-size: 17px;
+    --c2-page-editor__content--line-height: 1.75;
+    --c2-page-editor__heading--font-weight: 700;
+    --c2-page-editor__heading1--font-size: 32px;
+    --c2-page-editor__block--margin-top: 10px;
+  }
+</style>
+<c2-page-editor class="writing-page" label="Essay" value="# On small tools
+
+The best editors disappear. You write, and the *structure* arrives on its own.
+
+> Make the common case fast and the rare case possible."></c2-page-editor>
+```
+
+```html tag=MdxCodeBlock,label=Comment box
+<style>
+  .comment-box {
+    width: 380px;
+    max-width: 100%;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    --c2-page-editor__content--min-height: 72px;
+    --c2-page-editor__content--font-size: 14px;
+    --c2-page-editor__content--padding: 10px 12px 10px 36px;
+  }
+</style>
+<c2-page-editor class="comment-box" label="Comment" blocks="paragraph bullet ordered" placeholder="Leave a comment…"></c2-page-editor>
+```
+
+```html tag=MdxCodeBlock,label=Engineering notes
+<style>
+  .eng-notes {
+    width: 440px;
+    max-width: 100%;
+    --c2-page-editor__code-block--background: #0f172a;
+    --c2-page-editor__code-block--color: #e2e8f0;
+    --c2-page-editor__code-header--color: #94a3b8;
+    --c2-page-editor__syntax-keyword--color: #c4b5fd;
+    --c2-page-editor__syntax-string--color: #86efac;
+    --c2-page-editor__syntax-function--color: #7dd3fc;
+    --c2-page-editor__syntax-constant--color: #fdba74;
+    --c2-page-editor__syntax-comment--color: #64748b;
+    --c2-page-editor__inline-code--color: #2563eb;
+  }
+</style>
+<c2-page-editor class="eng-notes" label="Retry helper" value="### Retry with backoff
+
+Wrap a flaky call in `retry()`; it waits longer after each failure:
+
+&#96;&#96;&#96;ts
+import { retry } from './retry'
+
+const orders = await retry(() => fetchOrders(), 5)
+console.log(orders.length) // 42
+&#96;&#96;&#96;"></c2-page-editor>
+```
+
+</GalleryGrid>

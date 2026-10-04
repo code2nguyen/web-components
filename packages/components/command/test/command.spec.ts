@@ -139,6 +139,50 @@ test('rows added later are filtered and can be highlighted', async ({ page, rend
   await expect.poll(() => activeValue(page)).toBe('reports')
 })
 
+const longPalette = (style: string) =>
+  `<c2-command style="${style}">${Array.from({ length: 40 }, (_, i) => `<c2-command-item value="row-${i}">Row ${i}</c2-command-item>`).join('')}<span slot="footer">Footer hint</span></c2-command>`
+
+const geometry = (page: Page) =>
+  page.locator('c2-command').evaluate((host) => {
+    const list = host.shadowRoot!.querySelector('.list') as HTMLElement
+    const footer = host.shadowRoot!.querySelector('.footer') as HTMLElement
+    const hostBox = host.getBoundingClientRect()
+    return {
+      host: hostBox.height,
+      // Content height: the list is content-box, so its max-height excludes the padding.
+      list: list.clientHeight - parseFloat(getComputedStyle(list).paddingTop) - parseFloat(getComputedStyle(list).paddingBottom),
+      listScrolls: list.scrollHeight > list.clientHeight,
+      footerInside: footer.getBoundingClientRect().bottom <= hostBox.bottom + 0.5,
+    }
+  })
+
+test('the list keeps its own 320px cap when the palette is not capped', async ({ page, renderScenario }) => {
+  await renderScenario(longPalette(''))
+  const box = await geometry(page)
+  expect(box.list).toBe(320)
+  expect(box.listScrolls).toBe(true)
+  expect(box.footerInside).toBe(true)
+})
+
+test('--c2-command--max-height caps the palette and only the list scrolls', async ({ page, renderScenario }) => {
+  await renderScenario(longPalette('--c2-command--max-height: 240px'))
+  const box = await geometry(page)
+  expect(box.host).toBeLessThanOrEqual(240)
+  expect(box.list).toBeLessThan(240)
+  expect(box.listScrolls).toBe(true)
+  expect(box.footerInside).toBe(true)
+  await expect(page.getByText('Footer hint')).toBeInViewport()
+})
+
+test('with the list cap lifted, the list fills the height the palette cap leaves', async ({ page, renderScenario }) => {
+  await renderScenario(longPalette('--c2-command--max-height: 520px; --c2-command__list--max-height: none'))
+  const box = await geometry(page)
+  expect(box.host).toBe(520)
+  expect(box.list).toBeGreaterThan(320)
+  expect(box.listScrolls).toBe(true)
+  expect(box.footerInside).toBe(true)
+})
+
 test('has no accessibility violations, full and filtered', async ({ page, renderScenario }) => {
   await renderScenario(palette.replace('</c2-command>', '<span slot="footer">↑↓ to navigate</span></c2-command>'))
   await accessible(page)

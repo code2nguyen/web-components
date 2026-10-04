@@ -48,6 +48,21 @@ export const tokens: TokenDef[] = [
   token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(0, 0, 0, 0.6)'),
   token('color-inverse-surface', 'color', '#18181b', 'High-contrast surface, e.g. tooltips.', '#f4f4f5'),
   token('color-on-inverse-surface', 'color', '#fafafa', 'Text drawn on the inverse surface.', '#18181b'),
+  // A dark block that stays dark in both themes (a terminal, a dark sidebar, an outgoing chat bubble): unlike the
+  // inverse surface it does not flip, so it carries no dark value; a brand recolours it once for both themes.
+  token('color-dark-surface', 'color', '#18181b', 'Surface of a block that is dark in both themes: terminals, dark sidebars, dark bubbles.'),
+  token('color-dark-surface-container', 'color', '#27272a', 'Raised surface inside a dark block: a hovered or selected row, a header strip.'),
+  token('color-on-dark-surface', 'color', '#fafafa', 'Text and icons on the dark surface.'),
+  token('color-on-dark-surface-variant', 'color', '#a1a1aa', 'Secondary text on the dark surface: metadata, timestamps, muted labels.'),
+  token('color-dark-outline', 'color', '#3f3f46', 'Borders and dividers inside a dark block.'),
+  // Text on a saturated fill that is not the primary: a danger or success button, a coloured event, a brand badge.
+  // `color-on-primary` cannot stand in, since it pairs with the primary and turns dark where the primary lightens.
+  token(
+    'color-on-fill',
+    'color',
+    '#ffffff',
+    'Text and icons on a saturated colour fill other than the primary: status buttons, coloured events, brand badges.',
+  ),
   // Typography
   token('font-family', 'font', null, 'Font family of every component. Unset by default so components inherit the page font.'),
   token('font-size-sm', 'font', '12px', 'Small text: supporting text, tooltips, descriptions, timestamps.'),
@@ -68,6 +83,13 @@ export const tokens: TokenDef[] = [
   token('disabled-opacity', 'disabled', '0.38', 'Opacity of disabled components.'),
   token('motion-scale', 'motion', '1', 'Multiplier applied to every transition and animation duration (0 disables motion).'),
   // Elevation
+  token(
+    'shadow-sm',
+    'shadow',
+    '0 1px 3px rgba(0, 0, 0, 0.18)',
+    "Shadow of small raised controls, such as an avatar's remove button.",
+    '0 1px 3px rgba(0, 0, 0, 0.5)',
+  ),
   token('shadow-md', 'shadow', '0 8px 24px rgba(24, 24, 27, 0.08)', 'Shadow of popovers, menus and tooltips.', '0 8px 24px rgba(0, 0, 0, 0.45)'),
   token('shadow-lg', 'shadow', '0 24px 60px rgba(0, 0, 0, 0.25)', 'Shadow of dialogs and drawers.', '0 24px 60px rgba(0, 0, 0, 0.6)'),
   // Data visualisation. The categorical palette is a set: recolour it as a whole, never one slot at a time.

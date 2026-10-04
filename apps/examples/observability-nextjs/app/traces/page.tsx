@@ -35,8 +35,8 @@ export default function TracesPage() {
       </section>
       <Suspense
         fallback={
-          <div className="skeleton-grid" aria-label="Loading trace search">
-            <c2-skeleton />
+          <div className="skeleton-grid" aria-busy="true">
+            <c2-skeleton label="Loading trace search" />
             <c2-skeleton />
             <c2-skeleton />
           </div>

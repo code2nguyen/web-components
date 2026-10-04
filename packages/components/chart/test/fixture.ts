@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test'
+import { expect } from '../../../../tests/component-fixture'
 import { test as base } from '../../../../tests/fixture'
 
 // Pulls in the `window.chartScenario` declaration the scenario page installs.
@@ -16,4 +16,4 @@ export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>(
     })
   },
 })
-export { expect } from '@playwright/test'
+export { expect } from '../../../../tests/component-fixture'

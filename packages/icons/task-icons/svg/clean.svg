@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <path class="tone" d="M8 9h6l1.5 3v8a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-8z"/>
+  <path d="M9 9V6h4v3M9 6H7.5V4H14l1.5 2H13"/>
+  <circle class="solid" cx="19" cy="4" r="0.9"/>
+  <circle class="solid" cx="20.5" cy="7" r="0.9"/>
+  <circle class="solid" cx="18" cy="7.5" r="0.9"/>
+</svg>

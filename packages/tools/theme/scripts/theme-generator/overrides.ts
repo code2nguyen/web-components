@@ -61,6 +61,20 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
   },
+  // The editable planner's ghost blocks: the hour under the pointer and where a dragged event lands.
+  '--c2-week-planner__slot__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-week-planner__preview--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-week-planner__preview--border': {
+    token: 'color-primary',
+    value: '2px dashed var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
+  '--c2-week-planner__event__dragging--opacity': { exclude: 'drag feedback, not a disabled state' },
   '--c2-month-planner__day__today--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
@@ -97,6 +111,8 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
   '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
+  // The done mark is a semantic success green; #16a34a keeps 3:1 against both the light and the dark surface.
+  '--c2-working-indicator__done--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -203,6 +219,12 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
+  // falling-direction colour so a brand recolours the pair together with the charts.
+  '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
+  '--c2-comparison-bar__end-value--color': { token: 'chart-negative' },
+  // The neutral middle share (draws, abstentions) reads as a strong outline grey in either theme.
+  '--c2-comparison-bar__middle-segment--background-color': { token: 'color-outline-strong' },
   // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
   // rather than reading as white text, which is how the colour rule would otherwise classify it.
   '--c2-chart__surface--color': { token: 'color-surface' },
@@ -228,7 +250,11 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
-  '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
+  // The success green has no token, but a fixed green fails on a dark surface; pulled towards the ink it reads on both.
+  '--c2-attachment__status__complete--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, rgb(0, 122, 77) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },
   // Marks drawn on the accent background of a selected checkbox.
   '--c2-checkbox__checkmark--color': onPrimary,
@@ -288,12 +314,26 @@ export const overrides: Record<string, Override> = {
   },
   '--c2-copy-button__container__copied--color': { exclude: 'status colour' },
   // Badge status tones are semantic colours with no theme token; the neutral/primary/danger pairs map on their own.
+  // The primary text sits on the primary container, where the bare accent falls short of 4.5:1; pulling it a quarter
+  // towards the ink deepens it in a light theme and lifts it in a dark one.
+  '--c2-badge__primary--color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__success--background': { exclude: 'status colour' },
   '--c2-badge__success--color': { exclude: 'status colour' },
   '--c2-badge__warning--background': { exclude: 'status colour' },
   '--c2-badge__warning--color': { exclude: 'status colour' },
   '--c2-badge__info--background': { exclude: 'status colour' },
-  '--c2-badge__danger--background': { exclude: 'status colour (the text maps to color-error)' },
+  // The danger pair is themed together: a fixed pink under an error text that lightens in a dark theme read 2.3:1.
+  '--c2-badge__danger--background': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 14%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-badge__danger--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__info--color': { exclude: 'status colour' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
@@ -302,13 +342,22 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar__editor__focus--outline-offset': { exclude: 'avatar editor focus geometry' },
   '--c2-avatar__editor-icon--size': { exclude: 'avatar editor icon size' },
   '--c2-avatar__remove--size': { exclude: 'avatar remove action geometry' },
+  // The accordion's frame and dividers are the same grey as c2-details' borders (rgb(213, 213, 213)), written as hex,
+  // so they take the same outline token.
+  '--c2-accordion--border-color': { token: 'color-outline' },
   '--c2-avatar__remove--box-shadow': { token: 'shadow-sm' },
   // Avatar-group width, overlap and item measurements are responsive composition controls. The overflow badge uses
   // the inverse surface pair so it remains legible in both light and dark themes.
   '--c2-avatar-group--max-width': { exclude: 'responsive avatar-group width' },
   '--c2-avatar-group--overlap': { exclude: 'avatar stacking geometry' },
-  '--c2-avatar-group__avatar--box-shadow': { exclude: 'overlap separation ring' },
+  // The ring cuts each avatar out of the one under it, so it is drawn in the surface colour, like the badge's border.
+  '--c2-avatar-group__avatar--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
+  // A selected questionnaire indicator is filled with the inverse surface; its dot and tick take the matching ink.
+  '--c2-questionnaire__control__selected--color': { token: 'color-on-inverse-surface' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
   // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
@@ -360,12 +409,38 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline-variant',
     value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
   },
-  // The pressed trigger sits one step darker than the hover surface; the ramp has no token for that step.
-  '--c2-theme-select__trigger__active--background': { exclude: 'pressed tint one step below color-surface-container' },
-  // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
-  // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
-  // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
-  '--c2-code-editor--color': { exclude: 'code foreground; the syntax palette is themed as a unit' },
+  // The pressed trigger sits one step past the hover surface; the ramp has no token for that step, so it is the hover
+  // surface tinted towards the ink, like the copy button's pressed state.
+  '--c2-theme-select__trigger__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  // Code editor: the foreground and the syntax palette are themed as one unit. Its surface follows the theme, so a
+  // fixed light palette went unreadable on a dark one: the body text takes the ink, and each token hue is pulled
+  // towards it, darker on a light surface and lighter on a dark one, at the strength that keeps every token at 4.5:1
+  // on both the surface and the low container.
+  '--c2-code-editor--color': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-variable': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-punctuation': { token: 'color-on-surface' },
+  ...Object.fromEntries(
+    (
+      [
+        ['keyword', '#cf222e', 77],
+        ['invalid', '#cf222e', 77],
+        ['string', '#0969da', 83],
+        ['link', '#0969da', 83],
+        ['comment', '#636c76', 85],
+        ['constant', '#0550ae', 69],
+        ['property', '#0550ae', 69],
+        ['function', '#6f42c1', 75],
+        ['type', '#953800', 70],
+        ['tag', '#116329', 72],
+      ] as const
+    ).map(([name, hue, strength]) => [
+      `--c2-code-editor__theme--token-${name}`,
+      { token: 'color-on-surface', value: `color-mix(in srgb, ${hue} ${strength}%, var(--c2-theme--color-on-surface, #18181b))` },
+    ]),
+  ),
   '--c2-code-editor--font-size': { exclude: 'code font size, off the 12/14 text scale' },
   // The editor's three accent tints are alpha blends the colour ramp has no entries for, but they should still
   // follow the app's accent — `color-mix` expresses that without a token per opacity step.
@@ -403,6 +478,35 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Reorder list swipe actions are semantic colours, like the todo list's: they stay put in every theme.
+  '--c2-reorder-list__swipe-action__danger--background-color': { token: 'color-error' },
+  '--c2-reorder-list__swipe-action__warning--background-color': { exclude: 'semantic warning action' },
+  '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
+  '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
+  '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
+  // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
+  // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
+  // swipe actions are semantic colours that stay put.
+  '--c2-todo-list__container--box-shadow': { token: 'shadow-md' },
+  '--c2-todo-list__on-accent--color': { token: 'color-on-primary' },
+  '--c2-todo-list__add--border-color': { token: 'color-outline' },
+  '--c2-todo-list__row__divider--color': { token: 'color-surface-container' },
+  '--c2-todo-list__mark--color': { token: 'color-outline-strong' },
+  '--c2-todo-list__dropped--color': { token: 'color-error' },
+  '--c2-todo-list__pen-blue--color': { token: 'chart-series-1' },
+  '--c2-todo-list__pen-red--color': { token: 'color-error' },
+  '--c2-todo-list__pen-green--color': { token: 'chart-series-3' },
+  '--c2-todo-list__pen-violet--color': { token: 'chart-series-6' },
+  '--c2-todo-list__pen-graphite--color': { token: 'color-on-surface-variant' },
+  '--c2-todo-list__toast--background-color': { token: 'color-inverse-surface' },
+  '--c2-todo-list__toast--color': { token: 'color-on-inverse-surface' },
+  '--c2-todo-list__highlight-yellow--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-green--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-blue--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-pink--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-orange--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-violet--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__heading--font-size': { exclude: 'list heading, one step above body text' },
   // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
   '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
   '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },
@@ -422,4 +526,134 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__edge--color': { token: 'color-outline' },
   '--c2-flow__success--color': { exclude: 'success status colour' },
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
+  // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
+  // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
+  // dimmed rules, brighter inks) under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
+  '--c2-notepad__sheet--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 90%, #f3ead0)',
+  },
+  '--c2-notepad__writing--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, #2f4fb0)',
+  },
+  '--c2-notepad__rule--color': { token: 'color-surface', value: 'color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__margin--color': { token: 'color-surface', value: 'color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__ink-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #3b5bdb 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-red--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #e03131 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #2f9e44 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-black--color': { token: 'color-on-surface' },
+  '--c2-notepad__placeholder--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__header--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__perforation--color': { token: 'color-outline-strong' },
+  '--c2-notepad__selection--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
+  // The washi tape is a little of its kraft hue on the surface: cream on light paper, dark kraft under a dark theme.
+  '--c2-notepad__toolbar--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, #c9b98f 30%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-notepad__toolbar--color': { token: 'color-on-surface' },
+  '--c2-notepad__toolbar__button__active--background': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 14%, transparent)',
+  },
+  // Paper colours are a pastel of their hue on the surface, so they darken with it and keep the theme ink readable.
+  '--c2-notepad__paper-yellow--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-green--background': { token: 'color-surface', value: 'color-mix(in srgb, #bddcb2 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-blue--background': { token: 'color-surface', value: 'color-mix(in srgb, #b8ceee 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-pink--background': { token: 'color-surface', value: 'color-mix(in srgb, #f4b8c3 35%, var(--c2-theme--color-surface, #ffffff))' },
+  // Each paper's ink is the theme text colour with a touch of the paper's hue, so it follows light and dark mode.
+  '--c2-notepad__paper-yellow--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #966800)' },
+  '--c2-notepad__paper-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #39cc57)' },
+  '--c2-notepad__paper-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #3390ff)' },
+  '--c2-notepad__paper-pink--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #ff4786)' },
+  // Night paper is a dark sheet with light ink in either mode.
+  '--c2-notepad__paper-night--background': { exclude: 'night paper is dark in both modes' },
+  '--c2-notepad__paper-night--color': { exclude: 'night paper is dark in both modes' },
+  '--c2-notepad__glue--background': { exclude: 'binding material colour' },
+  // Each pad's own sheet colour is mixed into the surface like the pastel papers, so a legal pad or a sticky note
+  // darkens with a dark theme instead of glowing on it.
+  '--c2-notepad__pad-legal--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-sticky--background': { token: 'color-surface', value: 'color-mix(in srgb, #ffd23f 40%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-index-card--background': { token: 'color-surface', value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 94%, #9ec1e8)' },
+  '--c2-notepad__headline--color': { exclude: 'transparent unless a pad draws it' },
+  '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
+  '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
+  '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },
+  '--c2-notepad__sheet__focus--box-shadow': { exclude: 'paper elevation over the desk' },
+  // Page editor: the floating toolbar and menus are popovers, and the caret's code block and selection follow the accent.
+  '--c2-page-editor__popover--box-shadow': { token: 'shadow-md' },
+  '--c2-page-editor__selection--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
+  '--c2-page-editor__code-block__focus--box-shadow': {
+    token: 'color-primary',
+    value: '0 0 0 2px color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 25%, transparent)',
+  },
+  '--c2-page-editor__quote--border-left': { exclude: 'follows the text colour' },
+  '--c2-page-editor__code--font-family': { exclude: 'monospace code face' },
+  '--c2-page-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
+  '--c2-page-editor__color-gray--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-brown--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-orange--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-yellow--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-green--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-blue--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-purple--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__color-red--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__inline-code--color': { exclude: 'named hue, mixed with the text colour inside the component' },
+  '--c2-page-editor__background-gray--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-brown--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-orange--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-yellow--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-green--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-blue--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-purple--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__background-red--background': { exclude: 'translucent named tint, reads on any surface' },
+  '--c2-page-editor__syntax-keyword--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-string--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-function--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-constant--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-comment--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-parameter--color': { exclude: 'syntax colours are not themed' },
+  '--c2-page-editor__syntax-link--color': { exclude: 'syntax colours are not themed' },
+  // Neutral literals off the ramp the classifier knows, which stayed light on a dark surface.
+  '--c2-color-select__popover--background-color': { token: 'color-surface' },
+  '--c2-color-slider--border-top': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-right': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-bottom': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  // The frosted header keeps its translucency over whatever the surface is.
+  '--c2-header__blurred--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 82%, transparent)',
+  },
+  '--c2-table__summary--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 -1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-table__group-row__echo--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-time-input__picker-separator--color': { token: 'color-outline' },
+  '--c2-qr-code__placeholder--border': {
+    token: 'color-outline',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  // The resize grip sits on the event bar's own colour, not on the surface.
+  '--c2-month-planner__handle--color': { token: 'color-on-fill' },
 }

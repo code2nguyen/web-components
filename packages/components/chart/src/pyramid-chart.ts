@@ -94,6 +94,7 @@ interface RenderApi {
  * @cssproperty {length} [--c2-chart__level--min-width=0%] - Width of the apex, as a length or a percentage of the plot box. Above 0 the pyramid has a flat top.
  * @cssproperty {length} [--c2-chart__level--max-width=100%] - Width of the base, as a length or a percentage of the plot box.
  * @cssproperty {string} [--c2-chart__level--align=center] - Where the pyramid sits across its axis: `start`, `center` or `end`. A `start` pyramid is a right triangle.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-pyramid-chart')
 export class PyramidChart extends EchartsChartBase {

@@ -22,7 +22,7 @@ test('a horizontal list lays its top-level steps out side by side, and draws no 
   const group = page.locator('c2-step[label="Build"]')
   await expect(group.locator('details')).toHaveCount(0)
   await expect(page.locator('c2-step[label="compile"]')).toBeHidden()
-  await expect(group).toHaveAttribute('status', 'error')
+  await expect(group).toHaveJSProperty('status', 'error')
 })
 
 test('a horizontal list draws a rail between its markers by default, and none after the last', async ({ page, scenario }) => {
