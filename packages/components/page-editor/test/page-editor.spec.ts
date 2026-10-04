@@ -2,7 +2,8 @@ import { test, expect, watch, accessible } from '../../../../tests/component-fix
 import type { Page } from '@playwright/test'
 
 test.beforeEach(({ page }) => {
-  page.on('console', (m) => m.text().startsWith('[probe') && console.log(m.text()))
+  page.on('console', (m) => /^\[probe:(pe-throw|cv-strict-throw)/.test(m.text()) && console.log(m.text().slice(0, 1500)))
+  page.on('pageerror', (e) => console.log('[pageerror]', String(e.stack ?? e).slice(0, 1500)))
 })
 
 const page$ = (page: Page) => page.getByRole('textbox', { name: 'Notes' })

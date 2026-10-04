@@ -58,7 +58,7 @@ const pending = new Map<string, Promise<void>>()
  * (the `u` flag) on an older one.
  */
 function getCore(): Promise<HighlighterCore> {
-  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true, target: regexTarget() }), langs: [], themes: [] }))
+  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: false, target: regexTarget() }), langs: [], themes: [] }))
 }
 
 function regexTarget(): 'ES2024' | 'ES2018' {

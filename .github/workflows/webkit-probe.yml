@@ -16,4 +16,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps webkit
-      - run: npx playwright test packages/components/code-viewer/test/code-viewer.spec.ts packages/components/page-editor/test/page-editor.spec.ts --project=webkit --reporter=list -g "css-variables theme colours|code tokens take their colour" --retries=0
+      - run: npx playwright test packages/components/code-viewer/test/code-viewer.spec.ts packages/components/page-editor/test/page-editor.spec.ts --project=webkit --reporter=list -g "css-variables theme colours|code tokens take their colour" --retries=0 --repeat-each=15 --workers=4
