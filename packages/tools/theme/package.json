@@ -55,6 +55,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/working-indicator:build",
         "../../components/page-editor:build",
         "../../components/notepad:build",
         "../../components/todo-list:build",

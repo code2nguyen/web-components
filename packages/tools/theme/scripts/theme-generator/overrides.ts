@@ -111,6 +111,8 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
   '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
+  // The done mark is a semantic success green; #16a34a keeps 3:1 against both the light and the dark surface.
+  '--c2-working-indicator__done--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },

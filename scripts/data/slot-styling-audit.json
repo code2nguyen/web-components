@@ -2592,6 +2592,41 @@
       "decision": "part",
       "parts": ["heading"],
       "reason": "The semantic heading region owns the heading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The label part owns the default slot's text colour, size and animation; slotted content inherits them."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "done-icon",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the done mark's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "error-icon",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the error mark's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "indicator",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the custom indicator's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "meta",
+      "decision": "part",
+      "parts": ["meta"],
+      "reason": "The meta container owns the supporting text's colour and size."
     }
   ]
 }

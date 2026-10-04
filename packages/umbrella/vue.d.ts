@@ -98,5 +98,6 @@ import '@c2n/tree/vue'
 import '@c2n/upload/vue'
 import '@c2n/virtual-list/vue'
 import '@c2n/week-planner/vue'
+import '@c2n/working-indicator/vue'
 
 export {}

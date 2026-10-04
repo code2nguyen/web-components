@@ -98,5 +98,6 @@ import '@c2n/tree/react'
 import '@c2n/upload/react'
 import '@c2n/virtual-list/react'
 import '@c2n/week-planner/react'
+import '@c2n/working-indicator/react'
 
 export {}

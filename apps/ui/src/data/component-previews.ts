@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">
+  <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))"></c2-working-indicator>
+  <c2-working-indicator indicator="dots" effect="wave" label="Generating"></c2-working-indicator>
+  <c2-working-indicator state="done" done-label="Done in 14s"></c2-working-indicator>
+</div>`,
   'page-editor': `<c2-page-editor label="Notes" style="width:260px;--c2-page-editor__content--min-height:0;--c2-page-editor__content--font-size:13px;--c2-page-editor__content--padding:4px 8px 4px 24px;--c2-page-editor__heading2--font-size:17px;--c2-page-editor__block--margin-top:2px" value="## Launch plan&#10;&#10;Ship **Friday**, <span data-color=&quot;red&quot;>no slips</span>.&#10;&#10;- [x] Freeze the API&#10;- [ ] Write the docs"></c2-page-editor>`,
   notepad: `<c2-notepad label="Groceries" style="width:240px;--c2-notepad__sheet--min-height:150px;--c2-notepad__writing--font-size:16px;--c2-notepad__rule--spacing:24px;--c2-notepad__margin--inset:36px" value="- [x] Oat milk&#10;- [ ] **Sourdough**&#10;remember the ==blue== bag"></c2-notepad>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,

@@ -94,6 +94,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/working-indicator:build",
         "./packages/components/page-editor:build",
         "./packages/components/notepad:build",
         "./packages/components/todo-list:build",

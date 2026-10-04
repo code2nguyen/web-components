@@ -1494,6 +1494,31 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Slow', css: { '--c2-spinner--animation-duration': '2.5s' } },
     ],
   },
+  'c2-working-indicator': {
+    html: `<c2-working-indicator label="Scheming" elapsed></c2-working-indicator>`,
+    presets: [
+      {
+        name: 'Agent',
+        description: 'Warm accent glyph with a soft shimmer, like a coding agent at work.',
+        css: {
+          '--c2-working-indicator__indicator--color': '#d97757',
+          '--c2-working-indicator__label--color': '#d97757',
+          '--c2-working-indicator__label--highlight-color': 'color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))',
+        },
+      },
+      {
+        name: 'Typing dots',
+        attributes: { indicator: 'dots', effect: 'pulse', ellipsis: 'none' },
+        css: { '--c2-working-indicator--font-weight': '400' },
+      },
+      {
+        name: 'Wave',
+        attributes: { indicator: 'orbit', effect: 'wave', ellipsis: 'bounce' },
+        css: { '--c2-working-indicator__label--highlight-color': '#7c3aed', '--c2-working-indicator__indicator--color': '#7c3aed' },
+      },
+      { name: 'Slow', css: { '--c2-working-indicator__label--animation-duration': '3.5s', '--c2-working-indicator__indicator--animation-duration': '2.4s' } },
+    ],
+  },
   'c2-code-editor': {
     html: `<c2-code-editor language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) => \`hello \${name}\`"></c2-code-editor>`,
     presets: [
