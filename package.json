@@ -104,6 +104,7 @@
         "./packages/components/flow:build",
         "./packages/components/week-planner:build",
         "./packages/components/month-planner:build",
+        "./packages/components/google-map:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",
         "./packages/components/marker:build",

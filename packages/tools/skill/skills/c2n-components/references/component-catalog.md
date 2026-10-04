@@ -42,6 +42,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Flow** — `c2-flow` · `@c2n/flow` — A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
 - **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
+- **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.

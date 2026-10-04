@@ -6,6 +6,13 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CssCustomProperty } from 'custom-elements-manifest/schema'
 
+declare global {
+  interface ImportMetaEnv {
+    /** Browser key for the Google Maps examples; see `src/data/google-maps-config.ts`. */
+    readonly PUBLIC_GOOGLE_MAPS_API_KEY?: string
+  }
+}
+
 declare namespace astroHTML.JSX {
   interface IntrinsicAttributes {
     [attr: string]: string | boolean | any[]

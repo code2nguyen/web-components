@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-google-map</title>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 960px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .rounded {
+        --c2-google-map__container--border-radius: 14px;
+        --c2-google-map-route__line--color: #7c3aed;
+      }
+    </style>
+    <script type="module">
+      import { configureGoogleMaps } from '/src/google-map.ts'
+      // Run with VITE_GOOGLE_MAPS_API_KEY=… npm run dev -w packages/components/google-map
+      configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY })
+      const route = document.querySelector('c2-google-map-route')
+      route.addEventListener('route-change', (event) => {
+        document.querySelector('output').textContent = `${event.detail.distanceText} · ${event.detail.durationText}`
+      })
+    </script>
+  </head>
+
+  <body>
+    <h2>Markers</h2>
+    <c2-google-map id="city" center="10.7769,106.7009" zoom="14">
+      <c2-google-map-marker position="10.7725,106.6980" label="Ben Thanh Market" glyph="1"></c2-google-map-marker>
+      <c2-google-map-marker position="10.7769,106.7031" label="Saigon Opera House" glyph="2" draggable></c2-google-map-marker>
+    </c2-google-map>
+
+    <h2>Route A → B <output></output></h2>
+    <c2-google-map class="rounded">
+      <c2-google-map-route origin="Ben Thanh Market, Ho Chi Minh City" destination="Landmark 81, Ho Chi Minh City"></c2-google-map-route>
+    </c2-google-map>
+
+    <h2>Street View linked to the first map (drag its pegman)</h2>
+    <c2-google-street-view for="city"></c2-google-street-view>
+  </body>
+</html>

@@ -9,6 +9,7 @@ import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
+import googleMap from '@c2n/google-map/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import command from '@c2n/command/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
@@ -111,6 +112,7 @@ export const componentManifests = (function () {
     flow,
     weekPlanner,
     monthPlanner,
+    googleMap,
     hoverCard,
     command,
     marker,
