@@ -11,10 +11,10 @@ import { Overlay } from '@c2n/overlay'
 
 `c2-overlay` is a positioning shell around the browser Popover API. It lives in the top layer, opens and light-dismisses natively (Escape, click outside, `popover="manual"` to opt out), and floating-ui keeps it next to its anchor: the element whose `popovertarget` is the overlay's `id`, or whatever the `anchor` attribute (an id) or property (an element) points at. The preferred `placement` flips and shifts to stay on screen; the one in use is reflected as `current-placement`, and `--c2-overlay--available-height` / `--available-width` tell the content how much room it has. The overlay is at least as wide as its anchor unless `free-width` is set, and exactly as wide with `fit-anchor`. The slotted content brings its own surface. `c2-select` and `c2-color-select` are built on it.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/overlay
+```typescript tag=CodeBlock
+import '@c2n/components/overlay'
 ```
 
 ## Usage

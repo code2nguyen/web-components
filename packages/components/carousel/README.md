@@ -4,12 +4,12 @@ Carousel built with Lit: a swipeable slideshow of its children, with previous/ne
 optional autoplay.
 
 ```bash
-npm install @c2n/carousel
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/carousel'
+  import '@c2n/components/carousel'
 </script>
 
 <c2-carousel label="Featured" loop>

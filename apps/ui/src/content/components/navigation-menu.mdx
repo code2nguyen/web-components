@@ -24,10 +24,10 @@ The bar is always one row — it never wraps. `mode="mobile"` is the other layou
 
 Keyboard: every item is a tab stop. On a trigger, ArrowLeft / ArrowRight and Home / End walk the bar — and while a panel is open, moving along keeps browsing panels — ArrowDown, Enter or Space opens the panel and moves focus to its first link, and Escape closes it and returns focus to the trigger. Tab from an open trigger walks straight into the panel.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/navigation-menu
+```typescript tag=CodeBlock
+import '@c2n/components/navigation-menu'
 ```
 
 `c2-navigation-menu-item` and `c2-navigation-menu-link` ship in the same package and are registered with it.
@@ -326,7 +326,7 @@ Make the bar the island and hand it its items as **plain HTML**. Written as tags
 
 ```astro tag=CodeBlock
 ---
-import { NavigationMenu } from '@c2n/navigation-menu'
+import { NavigationMenu } from '@c2n/components/navigation-menu'
 
 const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 const links = [

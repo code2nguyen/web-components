@@ -15,13 +15,15 @@ Search is part of the component rather than something you bolt on: `searchable` 
 
 Give the host a height (or `--c2-virtual-list--max-height`); the rows scroll inside it. Windowing needs a uniform row height, which comes from `--c2-virtual-list__item--height` — a list with two-line rows has to raise it. Tab moves into the list, the arrow keys, Home, End, PageUp and PageDown walk the rows, Enter or Space selects, ⌘/Ctrl-click toggles and shift-click selects a range.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/virtual-list
+```typescript tag=CodeBlock
+import '@c2n/components/virtual-list'
 ```
 
-`@c2n/list-item`, `@c2n/text-field` and `@c2n/spinner` are dependencies of the package and are registered for you.
+The entry also registers `c2-list-item`, `c2-text-field` and `c2-spinner`, which it renders internally.
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 

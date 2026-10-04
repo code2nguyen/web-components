@@ -20,11 +20,13 @@ import { FeatherHelpCircleIcon as FeatherHelpCircle } from '@c2n/feather-icons/i
 
 The field has no intrinsic width: set a `width` on the host or place it in a grid. Its height follows `--c2-text-field--min-height`, padding and font size, so a compact or large field is a handful of variables on a class (see the Sizes row and the Compact / Large gallery cards). For a caption, pair it with `c2-label` and point the label's `for` at the field's `id`.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/text-field
+```typescript tag=CodeBlock
+import '@c2n/components/text-field'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`. The `c2-mat-icon` examples also need a Material icon font, which `c2-mat-icon` does not load: `npm install @fontsource/material-icons`, then `import '@fontsource/material-icons'`.
 
 ## Usage
 

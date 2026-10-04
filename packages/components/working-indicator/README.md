@@ -3,12 +3,12 @@
 Working indicator built with Lit: a live "work in progress" line, like an agent's "✻ Scheming… 12s".
 
 ```bash
-npm install @c2n/working-indicator
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/working-indicator'
+  import '@c2n/components/working-indicator'
 </script>
 
 <c2-working-indicator></c2-working-indicator>

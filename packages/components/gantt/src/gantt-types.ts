@@ -4,7 +4,7 @@ export type GanttScale = 'day' | 'week' | 'month'
 /** `split` keeps the task list beside the timeline, `compact` drops it and puts each label above its bar. */
 export type GanttLayout = 'auto' | 'split' | 'compact'
 
-/** A semantic tone, or a slot of the categorical palette shared with `@c2n/chart` (`1` to `8`). */
+/** A semantic tone, or a slot of the categorical palette shared with the charts (`1` to `8`). */
 export type GanttTone = 'primary' | 'success' | 'warning' | 'danger' | 'neutral' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 /**

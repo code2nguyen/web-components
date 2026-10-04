@@ -18,10 +18,10 @@ time in `route-change`). `c2-google-street-view` is a Street View panorama of it
 opens when it is linked with `for`. Everything else the Maps JavaScript API offers stays reachable through the
 element's `map` property, the underlying `google.maps.Map`.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/google-map
+```typescript tag=CodeBlock
+import '@c2n/components/google-map'
 ```
 
 ## API key
@@ -32,7 +32,7 @@ page uses (Maps JavaScript API, plus Routes API for `c2-google-map-route`), and 
 the whole page, before or after the maps render:
 
 ```ts tag=CodeBlock
-import { configureGoogleMaps } from '@c2n/google-map'
+import { configureGoogleMaps } from '@c2n/components/google-map'
 
 configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, language: 'en', region: 'VN' })
 ```

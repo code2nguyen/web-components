@@ -3,12 +3,12 @@
 A site-shell header that arranges brand, navigation, actions and a mobile trigger without owning navigation state.
 
 ```bash
-npm install @c2n/header
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/header'
+  import '@c2n/components/header'
 </script>
 
 <c2-header sticky blurred>

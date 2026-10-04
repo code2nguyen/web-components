@@ -1,9 +1,10 @@
 // One import registers every c2-* tag with Volar, and carries the packages' Vue composables.
 import { useRenderedRows } from '@c2n/components/vue'
-import { useRenderedRows as tableComposable } from '@c2n/table/vue'
-import type { GlobalComponents } from 'vue'
+import type { Table, TableRenderedRow } from '@c2n/components/table'
+import type { GlobalComponents, MaybeRefOrGetter, Ref } from 'vue'
 
-export const composable: typeof tableComposable = useRenderedRows
+// The composable takes the table class the table entry exports: one declaration, not a copy per entry.
+export const composable: (element: MaybeRefOrGetter<Table | null | undefined>) => Ref<TableRenderedRow[]> = useRenderedRows
 
 type Tag = keyof GlobalComponents
 export const tags: Tag[] = ['c2-button', 'c2-table', 'c2-line-chart', 'c2-chat-message']

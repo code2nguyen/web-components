@@ -3,12 +3,12 @@
 Sheet built with Lit: a dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 
 ```bash
-npm install @c2n/sheet
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/sheet'
+  import '@c2n/components/sheet'
 </script>
 
 <button onclick="document.getElementById('filters').show()">Filters</button>
@@ -26,6 +26,6 @@ npm install @c2n/sheet
 - **Events**: `open` after showing, `close` with `detail.returnValue`, and the native cancelable `cancel` on Escape.
 - **Nesting**: a sheet can hold another overlay. The page scroll lock is shared through `@c2n/core`, and each overlay only reacts to its own dialog's events, so closing an inner confirm leaves the sheet standing and the page locked.
 
-Theme it with `--c2-sheet--size`, `--c2-sheet--border-radius` (the two corners facing the page), `--c2-sheet--background`, `--c2-sheet--color`, `--c2-sheet--box-shadow`, `--c2-sheet--transition-duration` and the `__header`, `__body`, `__footer`, `__close` and `__backdrop` groups — the same names [`@c2n/modal`](../modal) uses, so a dialog and a sheet can be themed together. The full list is in `custom-elements.json` and on the docs site.
+Theme it with `--c2-sheet--size`, `--c2-sheet--border-radius` (the two corners facing the page), `--c2-sheet--background`, `--c2-sheet--color`, `--c2-sheet--box-shadow`, `--c2-sheet--transition-duration` and the `__header`, `__body`, `__footer`, `__close` and `__backdrop` groups — the same names [`@c2n/components/modal`](../modal) uses, so a dialog and a sheet can be themed together. The full list is in `custom-elements.json` and on the docs site.
 
-Use [`@c2n/modal`](../modal) when the page must stop for a decision, and [`@c2n/side-nav`](../side-nav) when the panel is navigation that is part of the layout rather than a transient overlay.
+Use [`@c2n/components/modal`](../modal) when the page must stop for a decision, and [`@c2n/components/side-nav`](../side-nav) when the panel is navigation that is part of the layout rather than a transient overlay.

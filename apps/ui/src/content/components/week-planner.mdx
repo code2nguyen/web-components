@@ -26,11 +26,13 @@ current time. Overlapping events cascade, each stepped in from the one before an
 title stays readable, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
 default) grows to fit every event.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/week-planner
+```typescript tag=CodeBlock
+import '@c2n/components/week-planner'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 
@@ -207,8 +209,8 @@ for, and you update `events`.
   block keeps focus once you have applied it.
 
 ```ts tag=CodeBlock
-import '@c2n/week-planner'
-import type { WeekPlannerEvent } from '@c2n/week-planner'
+import '@c2n/components/week-planner'
+import type { WeekPlannerEvent } from '@c2n/components/week-planner'
 
 const planner = document.querySelector('c2-week-planner')!
 planner.date = '2026-10-07'
@@ -290,7 +292,7 @@ Dutch and Vietnamese, and fall back to English otherwise. A dated week formats i
 ```
 
 ```ts tag=CodeBlock
-import '@c2n/week-planner'
+import '@c2n/components/week-planner'
 
 const planner = document.querySelector('c2-week-planner')!
 planner.events = [{ id: 'pickup', title: 'School pick-up', day: 'wed', start: '13:30', end: '17:00', weeks: 'even' }]

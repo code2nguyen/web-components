@@ -5,12 +5,12 @@ under or through it, or a box or loose circle around it. Set `animated` to draw 
 view.
 
 ```bash
-npm install @c2n/marker
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/marker'
+  import '@c2n/components/marker'
 </script>
 
 <p>

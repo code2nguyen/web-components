@@ -7,7 +7,7 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { ElementEntry } from './registry-types.ts'
 
-/** The one-install package: depends on every component package and re-exports each one as `@c2n/components/<name>`. */
+/** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
 
 export interface InstalledInfo {
@@ -35,8 +35,8 @@ export function installedPackage(name: string): InstalledInfo | null {
     // workspaces resolve `@c2n/components` too, and their packages depend on `@c2n/<name>` directly.
     const declared = declaredDependencies(root)
     const umbrella = name !== UMBRELLA && declared.has(UMBRELLA) && !declared.has(name) ? umbrellaOf(root, name) : undefined
-    // Under a strict layout (pnpm) the umbrella's dependencies are not hoisted: resolve them from the umbrella itself.
-    const pkgJsonPath = findPackageJson(root, name) ?? (umbrella && findPackageJson(dirname(umbrella.path), name))
+    // The umbrella bundles the package, so its own package.json and merged manifest stand in for the package's.
+    const pkgJsonPath = umbrella ? umbrella.path : findPackageJson(root, name)
     if (!pkgJsonPath) throw new Error(`${name} is not installed`)
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string }
     info = { version: pkg.version }
@@ -102,22 +102,22 @@ function findPackageJson(from: string, name: string): string | undefined {
   }
 }
 
-/** The installed `@c2n/components`, when it lists `name` among its dependencies. */
+/** The installed `@c2n/components`, when it bundles `name`: it has an entry `./<name>` in its exports. */
 function umbrellaOf(root: string, name: string): { path: string; version: string } | undefined {
   const path = findPackageJson(root, UMBRELLA)
   if (!path) return undefined
   try {
-    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; dependencies?: Record<string, string> }
-    return pkg.dependencies?.[name] ? { path: realpathSync(path), version: pkg.version } : undefined
+    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; exports?: Record<string, unknown> }
+    return pkg.exports?.[`./${name.slice('@c2n/'.length)}`] !== undefined ? { path: realpathSync(path), version: pkg.version } : undefined
   } catch {
     return undefined
   }
 }
 
 /**
- * The module an agent should import `modulePath` (a module of `pkg`) from. A project that installed `@c2n/components`
- * imports the umbrella's entry, which re-exports every module of the package, so a subpath such as
- * `@c2n/table/table-column.js` maps to `@c2n/components/table` too.
+ * The module an agent should import `modulePath` (a module of `pkg`) from. The registry already names
+ * `@c2n/components` paths; a workspace package's own path (`@c2n/table/table-column.js`) maps to the umbrella's entry
+ * for the package (`@c2n/components/table`), which re-exports every module of it.
  */
 export function importPath(modulePath: string, pkg: string, installed: InstalledInfo | null): string {
   return installed?.via && (modulePath === pkg || modulePath.startsWith(`${pkg}/`)) ? `${UMBRELLA}/${pkg.slice('@c2n/'.length)}` : modulePath

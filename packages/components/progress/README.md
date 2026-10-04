@@ -3,12 +3,12 @@
 Progress built with Lit: a linear bar, indeterminate by default or filling to a value, with an optional label and count.
 
 ```bash
-npm install @c2n/progress
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/progress'
+  import '@c2n/components/progress'
 </script>
 
 <c2-progress></c2-progress>
@@ -25,4 +25,4 @@ npm install @c2n/progress
 
 Theme it with `--c2-progress--height`, `--c2-progress--width`, `--c2-progress--border-radius`, `--c2-progress__track--background-color`, `--c2-progress__indicator--background-color`, `--c2-progress--gap` and the `--c2-progress__label--*` / `--c2-progress__value--*` text variables. The full list is in `custom-elements.json` and on the docs site.
 
-Reach for [`@c2n/spinner`](../spinner) when the wait has no natural width to fill.
+Reach for [`@c2n/components/spinner`](../spinner) when the wait has no natural width to fill.

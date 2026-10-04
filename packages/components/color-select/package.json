@@ -1,6 +1,7 @@
 {
   "name": "@c2n/color-select",
   "version": "0.0.24",
+  "private": true,
   "type": "module",
   "main": "dist/color-select.js",
   "exports": {
@@ -33,10 +34,6 @@
     "lit"
   ],
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -66,12 +63,12 @@
     }
   },
   "dependencies": {
-    "@c2n/color-area": "0.0.24",
-    "@c2n/color-slider": "0.0.24",
-    "@c2n/core": "0.0.24",
-    "@c2n/overlay": "0.0.24",
-    "@c2n/select": "0.0.24",
-    "@c2n/text-field": "0.0.24",
+    "@c2n/color-area": "*",
+    "@c2n/color-slider": "*",
+    "@c2n/core": "*",
+    "@c2n/overlay": "*",
+    "@c2n/select": "*",
+    "@c2n/text-field": "*",
     "@ctrl/tinycolor": "4.2.0",
     "lit": "3.3.3"
   },

@@ -1,6 +1,7 @@
 {
   "name": "@c2n/attachment",
   "version": "0.0.24",
+  "private": true,
   "type": "module",
   "main": "dist/attachment.js",
   "exports": {
@@ -38,10 +39,6 @@
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -68,8 +65,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.24",
-    "@c2n/phosphor-icons": "0.0.24",
+    "@c2n/core": "*",
+    "@c2n/phosphor-icons": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

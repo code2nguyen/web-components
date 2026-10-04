@@ -3,12 +3,12 @@
 Syntax-highlighted code blocks powered by [shiki](https://shiki.style), built with Lit.
 
 ```bash
-npm install @c2n/code-viewer
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/code-viewer'
+  import '@c2n/components/code-viewer'
 </script>
 
 <c2-code-viewer language="ts" line-numbers highlight-lines="2" copyable>

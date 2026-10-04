@@ -55,6 +55,14 @@ async function loadLanguage(language: string): Promise<boolean> {
   })
   core = await corePromise
   await core.loadLanguage(bundledLanguages[language as keyof typeof bundledLanguages])
+  // Compile the grammar's root patterns now, with no time limit. Shiki gives each line 500 ms and returns the rest of a
+  // line that overruns as one uncoloured token, which `tokenize` would then cache; the first line also pays for this
+  // compilation, which on a busy WebKit can take longer than that.
+  try {
+    core.getLanguage(language).tokenizeLine('a', null, 0)
+  } catch {
+    // The grammar still loads: `tokenize` leaves a block it cannot handle as plain text.
+  }
   return true
 }
 

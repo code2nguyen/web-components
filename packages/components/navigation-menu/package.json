@@ -1,6 +1,7 @@
 {
   "name": "@c2n/navigation-menu",
   "version": "0.0.24",
+  "private": true,
   "type": "module",
   "main": "dist/navigation-menu.js",
   "exports": {
@@ -44,10 +45,6 @@
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -74,8 +71,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.24",
-    "@c2n/overlay": "0.0.24",
+    "@c2n/core": "*",
+    "@c2n/overlay": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

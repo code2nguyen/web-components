@@ -4,10 +4,10 @@
 //
 //     import '@c2n/components/react'
 //
-// The declarations are those of each package's own '@c2n/<name>/react' entry; see any of them for the
-// rules React needs followed (register before rendering, kebab-case attribute names when server-rendering).
+// Register an element before React renders it, and pass kebab-case attribute names when server-rendering:
+// a camelCase prop that reaches the server as an attribute is never seen by the element.
 //
-// It also re-exports the hooks of @c2n/table, which import React.
+// It also re-exports the hooks of table, which import React.
 
 import '@c2n/accordion/react'
 import '@c2n/attachment/react'

@@ -16,13 +16,13 @@ Rows and columns are both readable from markup as JSON and from script as proper
 
 Give the host a height (or `--c2-table--max-height`); the header stays sticky while the rows scroll under it. Tab moves into the header, the arrow keys walk cells, Enter sorts the focused column, Space selects the focused row and shift-click selects a range.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/table
+```typescript tag=CodeBlock
+import '@c2n/components/table'
 ```
 
-`@c2n/checkbox` and `@c2n/spinner` are dependencies of the package and are registered for you.
+The entry also registers `c2-checkbox` and `c2-spinner`, which it renders internally.
 
 ## Usage
 
@@ -116,7 +116,7 @@ From script the array can carry the things an attribute cannot — `renderCell`,
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import type { TableColumnConfig } from '@c2n/table/table-types.js'
+import type { TableColumnConfig } from '@c2n/components/table'
 
 const columns: TableColumnConfig[] = [
   { field: 'name', header: 'Name', width: '2fr' },
@@ -272,8 +272,8 @@ ignores `group-by` and says so in the console. Style a group with `--c2-table__g
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import '@c2n/table'
-import '@c2n/badge'
+import '@c2n/components/table'
+import '@c2n/components/badge'
 
 const table = document.querySelector('c2-table')!
 table.rows = await fetchPeople()
@@ -327,13 +327,13 @@ only. A child whose line is outside the window is left unassigned, and a line th
 shows the column's formatted value until it arrives. After a sort, filter or page change the same line holds a
 different row, and `range-change` fires again with the new rows: re-render the children from it.
 
-The package ships that subscription as `useRenderedRows`, for React in `@c2n/table/react` and for Vue 3 in
-`@c2n/table/vue`, the same entries that carry the JSX and template types (both frameworks are optional peer
-dependencies: `@c2n/table` itself never imports them). Each one is seeded from `renderedRange`, follows the element when the table remounts, returns `[]` on the
+The package ships that subscription as `useRenderedRows`, for React in `@c2n/components/react` and for Vue 3 in
+`@c2n/components/vue`, the same entries that carry the JSX and template types (both frameworks are optional peer
+dependencies: `@c2n/components/table` itself never imports them). Each one is seeded from `renderedRange`, follows the element when the table remounts, returns `[]` on the
 server and before the element upgrades, and unsubscribes on unmount.
 
 ```tsx tag=CodeBlock
-import { useRenderedRows } from '@c2n/table/react'
+import { useRenderedRows } from '@c2n/components/react'
 
 const tableRef = useRef<Table>(null)
 const rendered = useRenderedRows(tableRef) // TableRenderedRow[]
@@ -342,13 +342,13 @@ const rendered = useRenderedRows(tableRef) // TableRenderedRow[]
 
 ```ts tag=CodeBlock
 import { useTemplateRef } from 'vue'
-import { useRenderedRows } from '@c2n/table/vue'
+import { useRenderedRows } from '@c2n/components/vue'
 
 const rendered = useRenderedRows(useTemplateRef<Table>('table')) // Ref<TableRenderedRow[]>
 // <button v-for="{ line, key, row } in rendered" :key="key" :slot="`cell:${line}:action`">Open {{ row.name }}</button>
 ```
 
-Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table`, the
+Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, the
 dependency-free core of both: it reports the rows already rendered, then every `range-change`, and returns the
 function that unsubscribes.
 
@@ -478,4 +478,4 @@ else about it (`variant`, the labels, `page-size-options`, the styling) is still
 same. The table emits one `page-change`: the pager's own event does not leave the table. Sorting starts again at page
 one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
 
-`@c2n/pagination` is deliberately **not** a dependency of `@c2n/table` — install and import it yourself.
+`@c2n/components/table` deliberately does **not** import `@c2n/components/pagination` — import it yourself.

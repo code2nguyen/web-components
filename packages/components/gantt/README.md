@@ -4,12 +4,12 @@ A read-only Gantt chart web component: tasks, groups, milestones and finish-to-s
 month scale, themed through CSS custom properties.
 
 ```bash
-npm install @c2n/gantt
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/gantt'
+  import '@c2n/components/gantt'
 </script>
 
 <c2-gantt aria-label="Docs relaunch">

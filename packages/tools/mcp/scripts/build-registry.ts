@@ -25,13 +25,12 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(packageRoot, '../../..')
 const uiRoot = join(repoRoot, 'apps/ui/src')
 const outFile = join(packageRoot, 'data/registry.json')
-/** `@c2n/components`: every component package behind one install, one entry per package (`@c2n/components/table`). */
+/** `@c2n/components`: every component package in one install, one entry per package (`@c2n/components/table`). */
 const UMBRELLA = '@c2n/components'
-const umbrellaPackages = new Set(
-  Object.keys(
-    (JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { dependencies?: Record<string, string> }).dependencies ?? {},
-  ),
+const umbrellaExports = new Set(
+  Object.keys((JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { exports?: Record<string, unknown> }).exports ?? {}),
 )
+const umbrellaPackages = new Set([...umbrellaExports].filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath)).map((subpath) => `@c2n/${subpath.slice(2)}`))
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
 const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
@@ -200,9 +199,20 @@ function usageRows(html: string): { label: string; html: string }[] {
   return rows
 }
 
-/** `@c2n/tabs` + `src/tab.ts` → `@c2n/tabs/tab.js`; `@c2n/feather-icons` + `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`. */
-function modulePathFor(pkg: PackageJson, modulePath: string): string {
+/**
+ * The module an application imports to register the element. A package `@c2n/components` bundles is reached through
+ * its entry (`@c2n/tabs` + `src/tab.ts` → `@c2n/components/tabs`, which registers the container with it), since only
+ * the umbrella is published. A package documented one page per element (`perElement`, the charts) is imported one
+ * element at a time, through the element's own entry (`@c2n/chart` + `src/line-chart.ts` →
+ * `@c2n/components/chart/line-chart`). An icon set is reached through its own subpath (`@c2n/feather-icons` +
+ * `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`).
+ */
+function modulePathFor(pkg: PackageJson, modulePath: string, perElement: boolean): string {
   const rel = modulePath.replace(/^src\//, '').replace(/\.ts$/, '')
+  if (umbrellaPackages.has(pkg.name)) {
+    const name = pkg.name.slice('@c2n/'.length)
+    return perElement && umbrellaExports.has(`./${name}/${rel}`) ? `${UMBRELLA}/${name}/${rel}` : `${UMBRELLA}/${name}`
+  }
   const exportsMap = pkg.exports ?? {}
   const mainTarget = typeof exportsMap['.'] === 'object' && exportsMap['.'] ? (exportsMap['.'] as { default?: string }).default : pkg.main
   if (mainTarget && mainTarget.replace(/^\.\//, '').replace(/\.js$/, '') === `dist/${rel}`) return pkg.name
@@ -319,7 +329,7 @@ for (const dir of packageDirs.sort()) {
       elements.push({
         tag: decl.tagName,
         className: decl.name,
-        modulePath: modulePathFor(pkg, mod.path),
+        modulePath: modulePathFor(pkg, mod.path, docs.length > 1),
         description: decl.description?.trim() ?? '',
         attributes: (decl.attributes ?? []).map((a) => ({
           name: a.name,
@@ -449,9 +459,9 @@ for (const dir of packageDirs.sort()) {
       icons,
       composition: { internal: [...internal].sort(), slotted: [...slotted].sort(), usedBy: [] },
       install: {
-        npm: `npm install ${pkg.name} @c2n/theme`,
+        npm: umbrellaPackages.has(pkg.name) ? `npm install ${UMBRELLA}` : `npm install ${pkg.name} @c2n/theme`,
         // A package whose elements are documented one page at a time is also imported one element at a time.
-        import: tagPattern || docs.length > 1 ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
+        import: tagPattern || docs.length > 1 || umbrellaPackages.has(pkg.name) ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
         importClass: `import { ${docElements[0].className} } from '${docElements[0].modulePath}'`,
         umbrella: umbrellaPackages.has(pkg.name) ? `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}` : undefined,
       },
@@ -494,7 +504,11 @@ const usedBy = new Map<string, number>()
 for (const token of Object.values(themeData.mapping)) usedBy.set(token, (usedBy.get(token) ?? 0) + 1)
 const theme: ThemeEntry = {
   package: '@c2n/theme',
-  install: { npm: 'npm install @c2n/theme', imports: ["import '@c2n/theme/theme.css'", "import '@c2n/theme/tokens.css'", "import '@c2n/theme/base.css'"] },
+  // The theme ships inside @c2n/components, which re-exports its stylesheets.
+  install: {
+    npm: 'npm install @c2n/components',
+    imports: ["import '@c2n/components/theme.css'", "import '@c2n/components/tokens.css'", "import '@c2n/components/base.css'"],
+  },
   tokens: themeData.tokens.map((t) => ({ ...t, usedBy: usedBy.get(t.name) ?? 0 })),
   mapping: themeData.mapping,
   darkMode:

@@ -15,11 +15,13 @@ import { ChartSeries } from '@c2n/chart/chart-series.js'
 
 The default example plots approximate, rounded 2023 figures after the World Bank's [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) (GDP per capita in current US$, life expectancy at birth, population in millions); check the source before reusing them. The product-portfolio example (a growth–share matrix: each business unit is a column holding its products' market growth) is illustrative.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/bubble-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

@@ -47,8 +47,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     ? `(installed ${installed.version} through \`${UMBRELLA}\` ${installed.via.version}: import it from \`${component.install.umbrella ?? UMBRELLA}\`, not \`${component.package}\`)`
     : installed
       ? `(installed ${installed.version})`
-      : `— not installed. \`${component.install.npm}\`${component.install.umbrella ? `, or \`npm install ${UMBRELLA}\` for every component (then \`import '${component.install.umbrella}'\`)` : ''}`
-  out.push(`- Package: \`${component.package}\` ${status}`)
+      : `— not installed. \`${component.install.npm}\`${component.install.umbrella ? ` (it ships in \`${UMBRELLA}\`, the one published component package)` : ''}`
+  out.push(`- Package: \`${component.install.umbrella ? UMBRELLA : component.package}\` ${status}`)
   out.push(`- Status: ${component.status} · Category: ${component.category} · Docs: ${component.docsUrl}`)
   const modulePath = importPath(primary.modulePath, component.package, installed)
   out.push(`- Register: \`import '${modulePath}'\` · Class: \`import { ${primary.className} } from '${modulePath}'\``)

@@ -6,7 +6,7 @@ const docs = (component: string): `/web-components/components/${string}` => `/we
 export const COMPONENT_USAGE = defineComponentUsage([
   {
     tag: 'c2-header',
-    packageName: '@c2n/header',
+    packageName: '@c2n/components/header',
     purpose: 'Keeps product identity and global actions in a consistent page landmark.',
     regions: ['app-shell'],
     docsPath: docs('header'),
@@ -14,7 +14,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-side-nav',
-    packageName: '@c2n/side-nav',
+    packageName: '@c2n/components/side-nav',
     purpose: 'Provides responsive collection navigation without changing document order.',
     regions: ['app-shell'],
     docsPath: docs('side-nav'),
@@ -22,7 +22,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-theme-select',
-    packageName: '@c2n/theme-select',
+    packageName: '@c2n/components/theme-select',
     purpose: 'Lets evaluators compare the complete workspace in light, dark, or system color schemes.',
     regions: ['global-scope'],
     docsPath: docs('theme-select'),
@@ -30,7 +30,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-icon-button',
-    packageName: '@c2n/icon-button',
+    packageName: '@c2n/components/icon-button',
     purpose: 'Exposes compact, named shell and data actions with native button behavior.',
     regions: ['app-shell', 'global-scope', 'tables'],
     docsPath: docs('icon-button'),
@@ -38,7 +38,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-button',
-    packageName: '@c2n/button',
+    packageName: '@c2n/components/button',
     purpose: 'Runs replay, recovery, filtering, layout, and alert-management actions.',
     regions: ['global-scope', 'data-state', 'dashboard', 'alerts'],
     docsPath: docs('button'),
@@ -46,7 +46,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-button-group',
-    packageName: '@c2n/button-group',
+    packageName: '@c2n/components/button-group',
     purpose: 'Groups time-mode, replay, view, and dashboard actions into coherent controls.',
     regions: ['global-scope', 'alerts', 'dashboard'],
     docsPath: docs('button-group'),
@@ -54,7 +54,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-link-button',
-    packageName: '@c2n/link-button',
+    packageName: '@c2n/components/link-button',
     purpose: 'Presents prominent navigation and recovery actions with link semantics.',
     regions: ['data-state', 'details'],
     docsPath: docs('link-button'),
@@ -62,7 +62,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-select',
-    packageName: '@c2n/select',
+    packageName: '@c2n/components/select',
     purpose: 'Selects environment, time, filters, sorting, page size, and alert fields.',
     regions: ['global-scope', 'services', 'traces', 'logs', 'alerts'],
     docsPath: docs('select'),
@@ -70,7 +70,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-list-item',
-    packageName: '@c2n/list-item',
+    packageName: '@c2n/components/list-item',
     purpose: 'Supplies semantic option rows to application select controls.',
     regions: ['global-scope', 'filters', 'alerts'],
     docsPath: docs('list-item'),
@@ -78,7 +78,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-text-field',
-    packageName: '@c2n/text-field',
+    packageName: '@c2n/components/text-field',
     purpose: 'Captures searchable investigation text and alert-rule names.',
     regions: ['services', 'traces', 'logs', 'alerts'],
     docsPath: docs('text-field'),
@@ -86,7 +86,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-number-input',
-    packageName: '@c2n/number-input',
+    packageName: '@c2n/components/number-input',
     purpose: 'Captures validated duration and threshold values with numeric semantics.',
     regions: ['traces', 'alerts'],
     docsPath: docs('number-input'),
@@ -94,7 +94,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-date-input',
-    packageName: '@c2n/date-input',
+    packageName: '@c2n/components/date-input',
     purpose: 'Captures explicit investigation boundaries in a keyboard-accessible date field.',
     regions: ['global-scope'],
     docsPath: docs('date-input'),
@@ -102,7 +102,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-checkbox',
-    packageName: '@c2n/checkbox',
+    packageName: '@c2n/components/checkbox',
     purpose: 'Selects synthetic destinations and multi-value criteria.',
     regions: ['alerts', 'filters'],
     docsPath: docs('checkbox'),
@@ -110,7 +110,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-switch',
-    packageName: '@c2n/switch',
+    packageName: '@c2n/components/switch',
     purpose: 'Controls whether a locally simulated alert rule is enabled.',
     regions: ['alerts'],
     docsPath: docs('switch'),
@@ -118,7 +118,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-card',
-    packageName: '@c2n/card',
+    packageName: '@c2n/components/card',
     purpose: 'Groups related evidence while retaining a meaningful light-DOM reading order.',
     regions: ['overview', 'service-detail', 'dashboard'],
     docsPath: docs('card'),
@@ -126,7 +126,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-stat',
-    packageName: '@c2n/stat',
+    packageName: '@c2n/components/stat',
     purpose: 'Communicates scoped operational indicators with values and changes.',
     regions: ['overview', 'service-detail', 'dashboard'],
     docsPath: docs('stat'),
@@ -134,7 +134,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-badge',
-    packageName: '@c2n/badge',
+    packageName: '@c2n/components/badge',
     purpose: 'Pairs every color-coded status with a visible text label.',
     regions: ['overview', 'tables', 'alerts'],
     docsPath: docs('badge'),
@@ -142,7 +142,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-table',
-    packageName: '@c2n/table',
+    packageName: '@c2n/components/table',
     purpose: 'Presents sortable, keyboard-navigable service, trace, log, and alert collections.',
     regions: ['services', 'traces', 'logs', 'alerts'],
     docsPath: docs('table'),
@@ -150,7 +150,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-table-column',
-    packageName: '@c2n/table',
+    packageName: '@c2n/components/table',
     purpose: 'Declares stable trace and log columns in server-visible light DOM.',
     regions: ['traces', 'logs'],
     docsPath: docs('table'),
@@ -158,7 +158,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-pagination',
-    packageName: '@c2n/pagination',
+    packageName: '@c2n/components/pagination',
     purpose: 'Navigates bounded telemetry result pages while preserving URL context.',
     regions: ['traces', 'logs'],
     docsPath: docs('pagination'),
@@ -166,7 +166,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-tabs',
-    packageName: '@c2n/tabs',
+    packageName: '@c2n/components/tabs',
     purpose: 'Switches alert collections without hiding the current operational scope.',
     regions: ['alerts'],
     docsPath: docs('tabs'),
@@ -174,7 +174,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-tab',
-    packageName: '@c2n/tabs',
+    packageName: '@c2n/components/tabs',
     purpose: 'Labels a keyboard reachable rules or incidents view.',
     regions: ['alerts'],
     docsPath: docs('tabs'),
@@ -182,7 +182,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-details',
-    packageName: '@c2n/details',
+    packageName: '@c2n/components/details',
     purpose: 'Progressively discloses structured telemetry, dashboard data, alert previews, and evaluation guidance.',
     regions: ['trace-detail', 'dashboard', 'alerts', 'built-with'],
     docsPath: docs('details'),
@@ -195,7 +195,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-tree',
-    packageName: '@c2n/tree',
+    packageName: '@c2n/components/tree',
     purpose: 'Makes a trace span hierarchy keyboard navigable and structurally understandable.',
     regions: ['trace-detail'],
     docsPath: docs('tree'),
@@ -203,7 +203,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-tree-item',
-    packageName: '@c2n/tree',
+    packageName: '@c2n/components/tree',
     purpose: 'Aligns each span label with consumer-owned duration evidence.',
     regions: ['trace-detail'],
     docsPath: docs('tree'),
@@ -211,7 +211,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-line-chart',
-    packageName: '@c2n/chart',
+    packageName: '@c2n/components/chart',
     purpose: 'Plots latency and traffic trends alongside textual and tabular alternatives.',
     regions: ['overview', 'service-detail', 'dashboard'],
     docsPath: docs('chart'),
@@ -219,7 +219,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-area-chart',
-    packageName: '@c2n/chart',
+    packageName: '@c2n/components/chart',
     purpose: 'Shows cumulative traffic and saturation shapes over shared replay time.',
     regions: ['dashboard'],
     docsPath: docs('chart'),
@@ -227,7 +227,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-bar-chart',
-    packageName: '@c2n/chart',
+    packageName: '@c2n/components/chart',
     purpose: 'Compares ranked contributors and error distributions.',
     regions: ['dashboard'],
     docsPath: docs('chart'),
@@ -235,7 +235,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-sparkline',
-    packageName: '@c2n/chart',
+    packageName: '@c2n/components/chart',
     purpose: 'Adds compact trend context without overwhelming dense service rows.',
     regions: ['services'],
     docsPath: docs('chart'),
@@ -243,7 +243,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-chart-series',
-    packageName: '@c2n/chart',
+    packageName: '@c2n/components/chart',
     purpose: 'Declares named, unit-aware chart series through a public composition API.',
     regions: ['overview', 'service-detail', 'dashboard'],
     docsPath: docs('chart'),
@@ -251,7 +251,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-dashboard',
-    packageName: '@c2n/dashboard',
+    packageName: '@c2n/components/dashboard',
     purpose: 'Arranges curated operational evidence into a persistent responsive dashboard.',
     regions: ['dashboard'],
     docsPath: docs('dashboard'),
@@ -259,7 +259,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-dash-card',
-    packageName: '@c2n/dashboard',
+    packageName: '@c2n/components/dashboard',
     purpose: 'Provides movable and named-size panel containers for dashboard evidence.',
     regions: ['dashboard'],
     docsPath: docs('dashboard'),
@@ -267,7 +267,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-steps',
-    packageName: '@c2n/steps',
+    packageName: '@c2n/components/steps',
     purpose: 'Communicates alert-rule creation progress and validation position.',
     regions: ['alerts'],
     docsPath: docs('steps'),
@@ -275,7 +275,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-step',
-    packageName: '@c2n/steps',
+    packageName: '@c2n/components/steps',
     purpose: 'Names one understandable phase of alert-rule configuration.',
     regions: ['alerts'],
     docsPath: docs('steps'),
@@ -283,7 +283,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-sheet',
-    packageName: '@c2n/sheet',
+    packageName: '@c2n/components/sheet',
     purpose: 'Shows structured log details and developer guidance while preserving trigger and result-list context.',
     regions: ['logs', 'built-with'],
     docsPath: docs('sheet'),
@@ -291,7 +291,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-modal',
-    packageName: '@c2n/modal',
+    packageName: '@c2n/components/modal',
     purpose: 'Confirms destructive local-demo resets with managed focus.',
     regions: ['alerts'],
     docsPath: docs('modal'),
@@ -299,7 +299,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-toast',
-    packageName: '@c2n/toast',
+    packageName: '@c2n/components/toast',
     purpose: 'Carries concise local save and simulated-delivery feedback.',
     regions: ['alerts'],
     docsPath: docs('toast'),
@@ -307,7 +307,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-status-panel',
-    packageName: '@c2n/status-panel',
+    packageName: '@c2n/components/status-panel',
     purpose: 'Distinguishes empty, error, and unknown-route outcomes with recovery actions.',
     regions: ['data-state', 'not-found'],
     docsPath: docs('status-panel'),
@@ -315,7 +315,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-skeleton',
-    packageName: '@c2n/skeleton',
+    packageName: '@c2n/components/skeleton',
     purpose: 'Keeps loading regions stable while maintaining visible page context.',
     regions: ['data-state'],
     docsPath: docs('skeleton'),
@@ -323,7 +323,7 @@ export const COMPONENT_USAGE = defineComponentUsage([
   },
   {
     tag: 'c2-progress',
-    packageName: '@c2n/progress',
+    packageName: '@c2n/components/progress',
     purpose: 'Exposes deterministic replay or threshold progress with a textual label.',
     regions: ['dashboard', 'alerts'],
     docsPath: docs('progress'),

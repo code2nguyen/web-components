@@ -1,13 +1,13 @@
 /**
- * Vue 3 composables for `c2-table`, published as `@c2n/table/vue` together with the generated template types (the
+ * Vue 3 composables for `c2-table`, published as `@c2n/components/vue` together with the generated template types (the
  * framework-types binding convention: `src/vue.ts` → `dist/vue.js`, re-exported by the package's `vue.js`). `vue` is
- * an optional peer dependency of `@c2n/table`: only an application that imports this module needs it, and the
+ * an optional peer dependency of `@c2n/components`: only an application that imports this module needs it, and the
  * component itself never loads it.
  *
  * ```vue
  * <script setup lang="ts">
  * import { useTemplateRef } from 'vue'
- * import { useRenderedRows } from '@c2n/table/vue'
+ * import { useRenderedRows } from '@c2n/components/vue'
  *
  * const table = useTemplateRef<HTMLElementTagNameMap['c2-table']>('table')
  * const rendered = useRenderedRows(table)

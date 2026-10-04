@@ -30,11 +30,13 @@ band at each end and the cursor snaps to the band instead of landing between two
 On first display the plot reveals from the zero baseline upward, so grouped bars grow together. Later data
 updates stay immediate; set `animation="none"` when even the initial entrance should be disabled.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart uplot
+```typescript tag=CodeBlock
+import '@c2n/components/chart/bar-chart'
 ```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
 
 ## Usage
 

@@ -49,7 +49,8 @@ const STATES = new Set([
   'invalid',
 ])
 
-const EXCLUDED_PACKAGES = new Set(['@c2n/design-board', '@c2n/json-form'])
+// `@c2n/components` merges the manifests of the packages it bundles, so reading it would map every variable twice.
+const EXCLUDED_PACKAGES = new Set(['@c2n/design-board', '@c2n/json-form', '@c2n/components'])
 
 const NAME_PATTERN = /^--(c2-[a-z0-9-]+?)(?:__(.+?))?--(-?[a-z-]+)$/
 

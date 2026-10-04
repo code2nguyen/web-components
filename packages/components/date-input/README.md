@@ -3,7 +3,7 @@
 A form-associated, themeable single-date input for Lit applications.
 
 ```bash
-npm install @c2n/date-input
+npm install @c2n/components
 ```
 
 ```html

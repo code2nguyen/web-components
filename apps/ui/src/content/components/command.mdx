@@ -16,10 +16,10 @@ Focus never leaves the search field. Arrow Up/Down move the highlight between th
 
 Put it inside a `c2-modal` and open it from a `c2-shortcut` binding for a ⌘K palette, or place it inline — in a page, a sidebar or a popover. When results come from a server, set `manual-filter`: the palette then shows every row as given, and your `input` listener reads `query` and replaces the rows.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/command
+```typescript tag=CodeBlock
+import '@c2n/components/command'
 ```
 
 `c2-command-item`, `c2-command-group` and `c2-command-separator` ship in the same package and are registered with it.

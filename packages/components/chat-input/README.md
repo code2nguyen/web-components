@@ -1,14 +1,14 @@
-# `@c2n/chat-input`
+# `@c2n/components/chat-input`
 
 An auto-growing Lit message composer with keyboard submission, a built-in send button, slotted toolbar actions and native form participation.
 
 ```bash
-npm install @c2n/chat-input
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/chat-input'
+  import '@c2n/components/chat-input'
 </script>
 
 <c2-chat-input aria-label="Message" placeholder="Ask anything…"></c2-chat-input>

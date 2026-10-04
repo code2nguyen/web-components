@@ -5,7 +5,7 @@ margin, so 50 000 rows cost the same DOM as twenty — and every visible row is 
 slots, selection styling and theming are the ones you already know from `c2-list`.
 
 ```bash
-npm install @c2n/virtual-list
+npm install @c2n/components
 ```
 
 ```html
@@ -22,7 +22,7 @@ npm install @c2n/virtual-list
 ```
 
 ```js
-import '@c2n/virtual-list'
+import '@c2n/components/virtual-list'
 
 const list = document.querySelector('c2-virtual-list')
 list.items = people

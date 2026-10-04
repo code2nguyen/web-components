@@ -15,11 +15,13 @@ import { MapLayer } from '@c2n/chart/map-layer.js'
 
 The figures in these examples are illustrative, not real company or market data. The outlines are real: Natural Earth's countries and the US Census Bureau's states.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/map-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

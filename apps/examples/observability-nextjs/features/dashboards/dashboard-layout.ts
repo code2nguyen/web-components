@@ -1,4 +1,4 @@
-import type { DashCardPlacement } from '@c2n/dashboard'
+import type { DashCardPlacement } from '@c2n/components/dashboard'
 import { createBrowserStore, type BrowserStore, type StorageLike } from '../../lib/storage/browser-store.ts'
 import {
   STORAGE_KEYS,

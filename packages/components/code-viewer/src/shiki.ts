@@ -62,13 +62,29 @@ export function normalizeLang(lang: string | undefined): string {
   return id in bundledLanguages ? id : 'plaintext'
 }
 
+/**
+ * Tokenizes one character with no time limit, so the grammar's regular expressions are compiled before a real line is
+ * timed. Shiki gives each line 500 ms and returns the rest of a line that overruns as one uncoloured token; the first
+ * line also pays for compiling the grammar's root patterns, which on a busy WebKit can take longer than that.
+ */
+function warmUp(core: HighlighterCore, lang: string) {
+  try {
+    core.getLanguage(lang).tokenizeLine('a', null, 0)
+  } catch {
+    // Only an optimisation: the grammar stays loaded and the real highlight reports any failure.
+  }
+}
+
 async function ensureLanguage(core: HighlighterCore, lang: string) {
   if (lang === 'plaintext' || core.getLoadedLanguages().includes(lang)) return
   const key = `lang:${lang}`
   if (!pending.has(key)) {
     pending.set(
       key,
-      core.loadLanguage(bundledLanguages[lang as BundledLanguage]).finally(() => pending.delete(key)),
+      core
+        .loadLanguage(bundledLanguages[lang as BundledLanguage])
+        .then(() => warmUp(core, lang))
+        .finally(() => pending.delete(key)),
     )
   }
   await pending.get(key)

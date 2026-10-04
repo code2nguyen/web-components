@@ -12,10 +12,10 @@ import { Button } from '@c2n/button'
 
 `c2-sheet` is a dialog that spans one edge of the screen and slides in from it — filters, details, a form beside the record it edits. It is built on the native `<dialog>` like `c2-modal`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. `side` picks the edge (`right` by default), and `--c2-sheet--size` is the width of a left/right sheet or the height of a top/bottom one while the other axis fills the screen. Open it with the `open` attribute or `show()`, close it with `close(returnValue)`, the × button, a backdrop click or Escape — `hide-close`, `no-backdrop-close` and `no-escape` turn those off. The heading goes in `title` (it labels the sheet; use `label` when there is none), the content in the default slot, the actions in `footer`; only the body scrolls, so the header and footer stay put.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/sheet
+```typescript tag=CodeBlock
+import '@c2n/components/sheet'
 ```
 
 ## Usage

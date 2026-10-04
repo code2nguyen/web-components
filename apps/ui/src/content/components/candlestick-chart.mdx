@@ -22,11 +22,13 @@ import { Button } from '@c2n/button'
 
 The examples use AAPL daily open, high, low and close observations from the public [Nasdaq historical-data service](https://www.nasdaq.com/market-activity/stocks/aapl/historical). The default field convention is `open`, `close`, `low`, `high`; rename those with the four `*-field` attributes when adapting a feed.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/candlestick-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

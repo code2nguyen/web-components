@@ -3,7 +3,7 @@
 A form-associated, themeable numeric input with consistent step controls.
 
 ```bash
-npm install @c2n/number-input
+npm install @c2n/components
 ```
 
 ```html

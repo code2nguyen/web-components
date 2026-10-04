@@ -3,12 +3,12 @@
 Switch built with Lit: an on/off toggle on a native `<input type="checkbox" role="switch">`, with label, description and optional icons inside the thumb.
 
 ```bash
-npm install @c2n/switch
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/switch'
+  import '@c2n/components/switch'
 </script>
 
 <c2-switch checked>Notifications</c2-switch>

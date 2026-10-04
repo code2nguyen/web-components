@@ -3,12 +3,12 @@
 Collapsible disclosure built on native `<details>` / `<summary>` with Lit.
 
 ```bash
-npm install @c2n/details
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/details'
+  import '@c2n/components/details'
 </script>
 
 <c2-details label="Shipping">Delivered in 3–5 business days.</c2-details>

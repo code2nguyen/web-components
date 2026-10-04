@@ -17,11 +17,13 @@ import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/sea
 
 `c2-icon-button` is a 48px circular state layer around a 24px icon. Drop any icon into the default slot: an inline `<svg>`, a `c2-feather-*` element or a `c2-mat-icon` ligature. Add `tooltip` to label it for the pointer, and theme size, shape and colours through `--c2-icon-button__*` custom properties.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/icon-button
+```typescript tag=CodeBlock
+import '@c2n/components/icon-button'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`. The `c2-mat-icon` examples also need a Material icon font, which `c2-mat-icon` does not load: `npm install @fontsource/material-icons`, then `import '@fontsource/material-icons'`.
 
 ## Usage
 

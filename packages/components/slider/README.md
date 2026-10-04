@@ -3,12 +3,12 @@
 Slider built with Lit on a native `<input type="range">`: the browser handles dragging, keyboard steps, RTL and the `slider` role; the component draws a themeable track, fill, thumb, step ticks and a value bubble.
 
 ```bash
-npm install @c2n/slider
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/slider'
+  import '@c2n/components/slider'
 </script>
 
 <c2-slider value="40" aria-label="Volume"></c2-slider>

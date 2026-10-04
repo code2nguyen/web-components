@@ -10,14 +10,14 @@ is in the tab order, and the arrow keys move it 10px a step, 1px with Shift.
 A pane has no surface of its own — put a `c2-card`, or any markup, in it.
 
 ```bash
-npm install @c2n/dashboard
+npm install @c2n/components
 ```
 
 ## Markup
 
 ```html
 <script type="module">
-  import '@c2n/dashboard'
+  import '@c2n/components/dashboard'
 </script>
 
 <c2-dashboard columns="320px 1fr" rows="1fr 1fr" storage-key="trading-desk" style="height: 480px">

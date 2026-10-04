@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Table } from '@c2n/table'
-import type { Select } from '@c2n/select'
-import type { TextField } from '@c2n/text-field'
-import type { Switch } from '@c2n/switch'
+import type { Table } from '@c2n/components/table'
+import type { Select } from '@c2n/components/select'
+import type { TextField } from '@c2n/components/text-field'
+import type { Switch } from '@c2n/components/switch'
 import { useCustomEvent } from './hooks/useCustomEvent'
-import { useRenderedRows } from '@c2n/table/react'
+import { useRenderedRows } from '@c2n/components/react'
 import { SECTORS, changePct, initialPositions, marketValue, tick, type Position } from './data/positions'
 
 // `TableRow` is `Record<string, unknown>`, so a row type handed to `rows` has to carry an index signature.

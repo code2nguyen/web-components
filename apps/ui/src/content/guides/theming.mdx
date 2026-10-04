@@ -14,11 +14,13 @@ Every `c2-*` component is styled exclusively through its own CSS custom properti
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/theme
+npm install @c2n/components
 ```
 
+`@c2n/components` brings in `@c2n/theme` and re-exports its stylesheets as `@c2n/components/theme.css`, `base.css` and `tokens.css`.
+
 ```typescript tag=CodeBlock
-import '@c2n/theme/theme.css' // tokens + base theme, once at the app root
+import '@c2n/components/theme.css' // tokens + base theme, once at the app root
 ```
 
 Then override the tokens that differ in your brand:
@@ -64,7 +66,7 @@ Because the selectors are not tied to the root element, any subtree can be inver
 If your app already has a token system, skip `tokens.css`, load only `base.css`, and bridge your tokens onto the `--c2-theme--*` names. Dark mode then follows your own switch automatically.
 
 ```css tag=CodeBlock
-@import '@c2n/theme/base.css';
+@import '@c2n/components/base.css';
 
 :root {
   --c2-theme--color-primary: var(--brand-600);

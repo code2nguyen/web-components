@@ -52,8 +52,8 @@ lookalike such as `rowkey` is forwarded to the real attribute with a warning rat
 
 ```html
 <script type="module">
-  import '@c2n/theme/theme.css'
-  import '@c2n/button'
+  import '@c2n/components/theme.css'
+  import '@c2n/components/button'
 </script>
 <c2-button>Save</c2-button>
 ```
@@ -62,12 +62,12 @@ With a bundler, put the imports in the entry module (`main.ts`). CSS imports wor
 
 ## Lit
 
-Import what you render at the top of the component module (`import '@c2n/text-field'`). Extend a component for a tag variant (`class AppField extends TextField`). Re-emit child events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Set child variables in your `static styles` on `:host` or on a class.
+Import what you render at the top of the component module (`import '@c2n/components/text-field'`). Extend a component for a tag variant (`class AppField extends TextField`). Re-emit child events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Set child variables in your `static styles` on `:host` or on a class.
 
 ## Astro
 
-- Islands (`@astrojs/lit`): `import { Button } from '@c2n/button'` in the frontmatter, `<Button client:load>` in the template. SSR'd with declarative shadow DOM, hydrated on load. Pass **kebab-case attributes** only (a prop whose name matches an element property is set as a property and forces `defer-hydration`). A `client:only` island must not contain islands: its children end up in a `<template>` and nothing hydrates; the parent module registers the children instead.
-- Plain tags + client script: `<c2-button>` in the template and `import '@c2n/button'` inside a `<script>`. Cheaper for repeated markup (no shadow-DOM copy per instance); guard the flash with `c2-button:not(:defined) { visibility: hidden }`.
+- Islands (`@astrojs/lit`): `import { Button } from '@c2n/components/button'` in the frontmatter, `<Button client:load>` in the template. SSR'd with declarative shadow DOM, hydrated on load. Pass **kebab-case attributes** only (a prop whose name matches an element property is set as a property and forces `defer-hydration`). A `client:only` island must not contain islands: its children end up in a `<template>` and nothing hydrates; the parent module registers the children instead.
+- Plain tags + client script: `<c2-button>` in the template and `import '@c2n/components/button'` inside a `<script>`. Cheaper for repeated markup (no shadow-DOM copy per instance); guard the flash with `c2-button:not(:defined) { visibility: hidden }`.
 - Many instances on one page (tree rows, list items, nav entries — more than a handful): do **not** server-render them. Declarative shadow DOM cannot share a stylesheet, so every instance inlines the component's whole stylesheet into its own `<template shadowrootmode>` (138 `c2-tree-item` rows took a page from 606 KB to 2.2 MB of HTML). Note that a plain tag is still claimed by `@astrojs/lit` once anything imports the package on the server (an island elsewhere on the page counts), so emit the markup as a string built by a small `rawElement` helper of the app's own (see [Many instances without server rendering](#many-instances-without-server-rendering)), `<Fragment set:html={html} />`, and register the element in a client `<script>`. Keep crawlable content such as links in the light DOM (slot an `<a href>` into the item rather than setting the item's `href`), since nothing inside an unrendered shadow root reaches the static HTML.
 - Children of an island that the island's package also registers (`c2-navigation-menu-item` and `c2-navigation-menu-link` inside `<NavigationMenu client:load>`) are server-rendered as well, lose unreflected properties such as `href` from the HTML and keep a `defer-hydration` nothing removes. Pass such children as a serialized string (`rawElement`), `<Fragment set:html={itemsHtml} />`, so they ship as plain tags and upgrade with the parent; check the built HTML still carries each item's `href`.
 - Scoped `<style>` does not reach elements rendered by child components; use `is:global` (or `:global()`) for variant classes.
@@ -76,7 +76,7 @@ Import what you render at the top of the component module (`import '@c2n/text-fi
 
 Custom elements work as JSX tags. React 19 passes primitive props as attributes and functions as event listeners for `on*` names; for custom events attach listeners with a `ref` (`ref.current.addEventListener('selection-change', …)`).
 
-Types: `import '@c2n/<name>/react'` — one line per package, in any `.d.ts` — declares the tags in `JSX.IntrinsicElements` with props derived from the element class, plus each kebab-case attribute name (`row-key` next to `rowKey`). With `@c2n/components`, `import '@c2n/components/react'` once types every tag. A package that ships React hooks exports them from the same entry (`import { useRenderedRows } from '@c2n/table/react'`). Do not hand-write the mapping. React 18 and older: pass attributes as strings and use refs for events and properties.
+Types: `import '@c2n/components/react'` — once, in any `.d.ts` — declares every tag in `JSX.IntrinsicElements` with props derived from the element class, plus each kebab-case attribute name (`row-key` next to `rowKey`). A component that ships React hooks exports them from the same entry (`import { useRenderedRows } from '@c2n/components/react'`). Do not hand-write the mapping. React 18 and older: pass attributes as strings and use refs for events and properties.
 
 **Server-rendered React (Next.js, React Router SSR):** write a camelCase property by its kebab-case attribute name — `min-width`, `expand-full`, `storage-key`, not `minWidth`. The server writes a custom element's props into the HTML verbatim, the parser lowercases them (`minwidth`) and hydration does not set properties, so the camelCase spelling reaches the element as an attribute it does not declare. The component forwards that lookalike to the real attribute and logs a warning, so the value is not lost, but the kebab-case name is what the types list and what needs no forwarding. Object and array props (`rows`) stringify on the server: pass `JSON.stringify(rows)`, which parses from the attribute the server writes and from the property the client sets, or assign the array in an effect through a ref.
 
@@ -88,7 +88,7 @@ Treat assigned nodes and component-owned regions separately. A slotted node rema
 
 Tell the compiler about the tags: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')` (in `@vitejs/plugin-vue`'s `template.compilerOptions`); without it every `c2-*` tag is treated as a Vue component and renders nothing. Register the elements at module scope before `mount()`: Vue chooses between a property and an attribute with `key in el`, so a binding on an element that has not upgraded yet falls back to an attribute.
 
-Types: `import '@c2n/<name>/vue'` (or `import '@c2n/components/vue'` for every tag) registers the tags with Volar, and `"extends": [..., "@c2n/framework-types/tsconfig.vue.json"]` supplies the matching `vueCompilerOptions` (`strictTemplates`, plus the `v-model` prop mapping so `v-model` binds `value`/`checked` rather than `modelValue`). Declare no local `vueCompilerOptions` next to it — a local one replaces the inherited object rather than merging.
+Types: `import '@c2n/components/vue'` registers every tag with Volar, and `"extends": [..., "@c2n/framework-types/tsconfig.vue.json"]` supplies the matching `vueCompilerOptions` (`strictTemplates`, plus the `v-model` prop mapping so `v-model` binds `value`/`checked` rather than `modelValue`). Declare no local `vueCompilerOptions` next to it — a local one replaces the inherited object rather than merging.
 
 - Events: `@selection-change`, `@submit-message` bind by their real kebab-case name — Vue calls `addEventListener` with the name as written. The handler gets a plain `Event`, so narrow it (`(event as CustomEvent<{ value: string[] }>).detail`).
 - `v-model` works on `c2-text-field` / `c2-textarea`: on a custom element Vue compiles it to the plain-text model directive, which sets `el.value` and listens for `input`, and both components expose `value` and re-emit the native `input` event.
@@ -113,9 +113,9 @@ binding on a tag that has not upgraded yet silently falls back to an attribute.
 
 ```svelte
 <script lang="ts">
-  import '@c2n/table'
-  import '@c2n/table/table-column.js'
-  import type { TableEventMap } from '@c2n/table'
+  import '@c2n/components/table'
+  import '@c2n/components/table/table-column'
+  import type { TableEventMap } from '@c2n/components/table'
 
   let { rows } = $props()
   let selected = $state<string[]>([])
@@ -155,13 +155,13 @@ from `@c2n/core/lit-helper.js` rather than adding `lit` to the application: it i
 components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
 Mark the column `cell-slot` and render light-DOM children into `slot="cell:<line>:<field>"`, where `line` is the display line (after sort, filter and grouping, page offset included). Render them only for the lines `range-change` reports: `detail.rows` is one `{ line, key, row }` per rendered data row; a child whose line is outside the window is left unassigned, and after a sort, filter or page change the same line holds another row, so re-render from the next `range-change`. The children stay in the document, so ordinary CSS reaches them; `renderCell`/the column format is the fallback.
 
-Do not hand-write that subscription: `@c2n/table` ships it as `useRenderedRows`. React: `useRenderedRows(ref)` from
-`@c2n/table/react` returns `TableRenderedRow[]`. Vue 3: `useRenderedRows(templateRefOrGetter)` from
-`@c2n/table/vue` returns `Ref<TableRenderedRow[]>`. These are the same entries that declare the JSX / template
-types, so one import gives both; through the umbrella they are `@c2n/components/react` and `@c2n/components/vue`.
+Do not hand-write that subscription: `@c2n/components/table` ships it as `useRenderedRows`. React: `useRenderedRows(ref)` from
+`@c2n/components/react` returns `TableRenderedRow[]`. Vue 3: `useRenderedRows(templateRefOrGetter)` from
+`@c2n/components/vue` returns `Ref<TableRenderedRow[]>`. These are the same entries that declare the JSX / template
+types, so one import gives both.
 Both seed from `table.renderedRange`, re-subscribe when the element changes, return `[]` on the server and before the
-element upgrades, and clean up on unmount; React and Vue are optional peers, and `@c2n/table` itself never imports
-them. Other frameworks wrap `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table`, which returns the
+element upgrades, and clean up on unmount; React and Vue are optional peers, and `@c2n/components/table` itself never imports
+them. Other frameworks wrap `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, which returns the
 unsubscribe function.
 
 ## Editor support outside TypeScript
@@ -208,7 +208,7 @@ const rows = files
 
 <Fragment set:html={rawElement('c2-tree', { 'aria-label': 'Files' }, rows)} />
 <script>
-  import '@c2n/tree'
+  import '@c2n/components/tree'
 </script>
 ```
 
@@ -237,7 +237,7 @@ export default async function FilesPage() {
 import { useEffect } from 'react'
 
 export function RegisterTree() {
-  useEffect(() => void import('@c2n/tree'), [])
+  useEffect(() => void import('@c2n/components/tree'), [])
   return null
 }
 ```

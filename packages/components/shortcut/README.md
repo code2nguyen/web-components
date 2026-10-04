@@ -1,11 +1,11 @@
 # Shortcut
 
-`@c2n/shortcut` provides `c2-shortcut`, a render-nothing element that holds every keyboard shortcut of an application
+`@c2n/components/shortcut` provides `c2-shortcut`, a render-nothing element that holds every keyboard shortcut of an application
 (or of one region) and turns each key press into an action.
 
 ```html
 <script type="module">
-  import '@c2n/shortcut'
+  import '@c2n/components/shortcut'
 
   document.querySelector('c2-shortcut').addEventListener('shortcut', (event) => {
     if (event.detail.action === 'save') save()

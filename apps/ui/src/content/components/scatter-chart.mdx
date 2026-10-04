@@ -23,11 +23,13 @@ import { Button } from '@c2n/button'
 
 The default example plots illustrative product-usage data: weekly active hours against 90-day retention, one series per plan so each segment gets its own colour. The other examples pair Apple R&D expense with annual revenue from the public [SEC Company Facts data](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json). It answers a real question a time-series chart cannot: whether larger investment years also occupy a different revenue range.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/scatter-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

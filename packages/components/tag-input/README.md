@@ -3,12 +3,12 @@
 `c2-tag-input` turns typed or pasted text into removable tags: recipients, keywords, labels.
 
 ```bash
-npm install @c2n/tag-input
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/tag-input'
+  import '@c2n/components/tag-input'
 </script>
 
 <c2-tag-input name="to" aria-label="Recipients" placeholder="Add recipients" delimiters=",; " pattern="[^\s@]+@[^\s@]+\.[^\s@]+"></c2-tag-input>

@@ -9,7 +9,7 @@
  * - `packages/adapters/angular/src/value-accessors.ts` — the `ControlValueAccessor` directives of `@c2n/angular`
  * - `dist/html-custom-data.json` — VS Code / Volar completion for plain HTML, Vue and Angular templates
  * - `dist/web-types.json`        — the JetBrains equivalent
- * - `packages/umbrella/`         — `@c2n/components`, every component package behind one install
+ * - `packages/umbrella/`         — `@c2n/components`: the bundle entries under `src/` and the package's manifest
  *
  * The two `.d.ts` files live in the package they describe: a single aggregate file would have to import from
  * every `@c2n` package, and a consumer who installed three of them would not be able to compile it.
@@ -18,7 +18,7 @@
  * to erasable TypeScript syntax only). Output is formatted with the repo's prettier config, and the per-package
  * files are committed alongside `custom-elements.json`.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { format, resolveConfig } from 'prettier'
@@ -59,4 +59,6 @@ await write(join(distDir, 'html-custom-data.json'), emitHtmlCustomData(packages,
 await write(join(distDir, 'web-types.json'), emitWebTypes(packages, version), 'json')
 
 const umbrellaDir = resolve(packageDir, '../../umbrella')
+// `src/` holds nothing but generated entries: clearing it drops the entry of a package that no longer exists.
+rmSync(join(umbrellaDir, 'src'), { recursive: true, force: true })
 for (const file of emitUmbrella(packages, umbrellaDir, scopeDir())) await write(join(umbrellaDir, file.path), file.contents, file.parser)

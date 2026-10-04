@@ -3,11 +3,11 @@
 `c2-accordion` combines directly slotted `c2-details` panels into a connected, animated disclosure surface. It owns their shared borders, dividers and outside corners, and coordinates expansion through Lit context. Opening one closes its siblings; add `multiple` to allow independent expansion. All panels may be closed.
 
 ```sh
-npm install @c2n/accordion
+npm install @c2n/components
 ```
 
 ```js
-import '@c2n/accordion'
+import '@c2n/components/accordion'
 ```
 
 The import also registers `c2-details`.

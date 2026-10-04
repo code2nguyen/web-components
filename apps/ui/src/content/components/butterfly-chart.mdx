@@ -23,11 +23,13 @@ Both sides share one scale, rounded to even steps, so equal values draw equal le
 mirrored rather than negated: every value, tick and tooltip reads as the number it is. The tooltip lists both
 sides of a row, and the legend highlights a side (or, with `legend-action="toggle"`, switches it off).
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/butterfly-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

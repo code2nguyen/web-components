@@ -2,15 +2,15 @@
 
 ## Layers
 
-1. **Tokens** `--c2-theme--<name>` (from `@c2n/theme/tokens.css`, ~35 of them). Set by the application.
-2. **Base theme** `@c2n/theme/base.css`: `--c2-<component>__<part>--<prop>: var(--c2-theme--<token>, <component default>)` on `:root`/`:host` for every mapped component variable. Generated from the component manifests.
+1. **Tokens** `--c2-theme--<name>` (from `@c2n/components/tokens.css`, ~35 of them). Set by the application.
+2. **Base theme** `@c2n/components/base.css`: `--c2-<component>__<part>--<prop>: var(--c2-theme--<token>, <component default>)` on `:root`/`:host` for every mapped component variable. Generated from the component manifests.
 3. **Component variables** `--c2-<component>__<part>[__<state>]--<property>`: the fine-grained escape hatch. Set on an element, a class or any ancestor; they always win over the base theme.
 4. **Variant components** built from 2 and 3.
 
 ## Install
 
 ```ts
-import '@c2n/theme/theme.css' // tokens + base theme, once
+import '@c2n/components/theme.css' // tokens + base theme, once
 ```
 
 ```css
@@ -25,7 +25,7 @@ import '@c2n/theme/theme.css' // tokens + base theme, once
 ## Bring your own tokens
 
 ```css
-@import '@c2n/theme/base.css';
+@import '@c2n/components/base.css';
 :root {
   --c2-theme--color-primary: var(--brand-600);
   --c2-theme--color-on-primary: var(--brand-on-600);

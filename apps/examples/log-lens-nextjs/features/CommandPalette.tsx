@@ -1,6 +1,6 @@
 'use client'
 
-import type { ShortcutBinding } from '@c2n/shortcut'
+import type { ShortcutBinding } from '@c2n/components/shortcut'
 import { useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'

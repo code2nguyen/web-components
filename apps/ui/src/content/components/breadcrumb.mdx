@@ -11,13 +11,13 @@ import { Breadcrumb } from '@c2n/breadcrumb'
 
 `c2-breadcrumb` shows where the user is in a hierarchy. Every child is one item: use `c2-link-button` with an `href` for the ancestors and either a link button or a plain element for the current page. The last item is marked as the current page automatically (`aria-current="page"`) and styled as text, and a separator is drawn between items, a chevron by default or the content of the `separator` slot. The trail always stays on one row: when it does not fit, items collapse behind an ellipsis in priority order (the current page always, then the first item, then the items closest to the current page), and `max-items` caps the visible count even when there is room. Clicking the ellipsis reveals every item. The whole trail sits in a `nav` landmark labelled "Breadcrumb" (override with `aria-label`).
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/breadcrumb
+```typescript tag=CodeBlock
+import '@c2n/components/breadcrumb'
 ```
 
-Importing `@c2n/breadcrumb` also registers `c2-link-button`.
+Importing `@c2n/components/breadcrumb` also registers `c2-link-button`.
 
 ## Usage
 

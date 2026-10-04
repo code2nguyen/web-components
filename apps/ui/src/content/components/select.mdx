@@ -16,13 +16,13 @@ The trigger has no intrinsic width: give the host a `width` (or a grid / flex ce
 
 With `name`, the select participates in `FormData`, reset, disabled fieldsets and required validation. `value` remains an array in both modes; use the scalar `selectedValue` property when working with a single-select. A multiple select submits one form entry per selected value.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/select
+```typescript tag=CodeBlock
+import '@c2n/components/select'
 ```
 
-`@c2n/list-item` is a dependency of the package and is registered for you.
+The entry also registers `c2-list-item`, which it renders internally.
 
 ## Usage
 

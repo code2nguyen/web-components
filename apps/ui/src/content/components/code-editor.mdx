@@ -20,7 +20,7 @@ settles and `engine` reads `codemirror` or `basic`.
 
 Theming is ordinary CSS. CodeMirror renders real DOM inside the shadow root, so there is no JavaScript theme to
 configure: the frame, gutter, selection, cursor and the whole syntax palette are `--c2-code-editor__*` custom
-properties, and the token names match `@c2n/code-viewer`'s `css-variables` theme so one palette drives both. A dark
+properties, and the token names match `@c2n/components/code-viewer`'s `css-variables` theme so one palette drives both. A dark
 editor is different variable values and nothing else.
 
 Grammars for `javascript`, `typescript`, `jsx`, `tsx`, `html`, `css` and `json` are built in and loaded on demand;
@@ -30,13 +30,13 @@ The editor sizes itself to its content between `--c2-code-editor--min-height` an
 height set on the element reaches the editor — the label and the supporting text keep theirs — so in a pane or a
 split view give it `height: 100%` (or let a flex parent stretch it) and set the max height to `none`.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/code-editor
+```typescript tag=CodeBlock
+import '@c2n/components/code-editor'
 ```
 
-The engine is installed alongside it — only the grammars the app actually uses:
+Its engine is a set of CodeMirror peer dependencies. Install them next to `@c2n/components`, with only the grammars the app actually uses:
 
 ```bash tag=CodeBlock
 npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/language \

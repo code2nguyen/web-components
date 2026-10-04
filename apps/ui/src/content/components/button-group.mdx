@@ -22,13 +22,15 @@ import { FeatherUnderlineIcon as FeatherUnderline } from '@c2n/feather-icons/ico
 
 `c2-button-group` attaches related `c2-button` or `c2-icon-button` elements into one control. The default `joined` appearance shares borders and outside corners. Use `appearance="segmented"` for an inset track with an animated single-selection surface; it selects the first enabled item when `value` is omitted and supports arrow, Home and End keys. Both appearances support `orientation="vertical"`; vertical selectable groups use Up/Down while horizontal groups use Left/Right. Set `selection="single"` or `selection="multiple"` explicitly for selectable joined groups.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/button-group
+```typescript tag=CodeBlock
+import '@c2n/components/button-group'
 ```
 
-Importing `@c2n/button-group` also registers `c2-button` and `c2-icon-button`.
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+Importing `@c2n/components/button-group` also registers `c2-button` and `c2-icon-button`.
 
 ## Usage
 

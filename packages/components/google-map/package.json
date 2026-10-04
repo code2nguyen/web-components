@@ -1,6 +1,7 @@
 {
   "name": "@c2n/google-map",
   "version": "0.0.19",
+  "private": true,
   "type": "module",
   "main": "dist/google-map.js",
   "exports": {
@@ -59,10 +60,6 @@
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -88,7 +85,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.19",
+    "@c2n/core": "*",
     "lit": "3.3.3",
     "@types/google.maps": "^3.66.4"
   },

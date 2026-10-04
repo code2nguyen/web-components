@@ -12,13 +12,13 @@ import { Autocomplete } from '@c2n/autocomplete'
 
 `c2-autocomplete` filters a local `suggestions` array or asks an asynchronous `dataSource` for matches. Its overlay composes an optional header, a real `c2-list` of `c2-list-item` rows, and an optional footer. Like `c2-virtual-list`, the default renderer reads only `labelField` and optional `descriptionField`. Arbitrary objects use field mappings and `renderItem`; no group, icon, meta or type fields receive special treatment. The component keeps selection and keyboard accessibility around custom content, cancels stale server requests and returns the original selected item.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/autocomplete
+```typescript tag=CodeBlock
+import '@c2n/components/autocomplete'
 ```
 
-`@c2n/overlay`, `@c2n/list` and `@c2n/list-item` are dependencies and are registered automatically.
+The entry also registers `c2-overlay`, `c2-list` and `c2-list-item`, which it renders internally.
 
 ## Usage
 

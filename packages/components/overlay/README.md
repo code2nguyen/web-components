@@ -3,12 +3,12 @@
 Anchored popup built on the browser Popover API and positioned with floating-ui, built with Lit.
 
 ```bash
-npm install @c2n/overlay
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/overlay'
+  import '@c2n/components/overlay'
 </script>
 
 <button popovertarget="menu">Open</button>

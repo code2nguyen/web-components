@@ -3,12 +3,12 @@
 A compact KPI block with slots for an icon, formatted value, label, trend and supporting description.
 
 ```bash
-npm install @c2n/stat
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/stat'
+  import '@c2n/components/stat'
 </script>
 
 <c2-stat value="$18.4M" label="Assets under management" tone="positive">

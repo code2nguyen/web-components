@@ -15,11 +15,13 @@ import { FeatherMessageSquareIcon as FeatherMessageSquare } from '@c2n/feather-i
 
 `c2-badge` labels a state in a small tinted pill. Six `tone`s carry meaning (neutral, primary, success, warning, danger, info) and each is a background/text variable pair, so a design system recolours them without touching markup. Give it a `count` to show a number clamped at `max` (`99+`), or `dot` for a presence indicator that can `pulse`. Put an element in the `anchor` slot and the badge pins itself to one of its corners chosen with `placement`, the classic notification count on an icon button. `--c2-badge--background` and `--c2-badge--color` override whichever tone is active.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/badge
+```typescript tag=CodeBlock
+import '@c2n/components/badge'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 

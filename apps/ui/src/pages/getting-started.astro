@@ -4,8 +4,8 @@ import CodeBlock from '../components/CodeBlock.astro'
 
 const base = import.meta.env.BASE_URL
 
-const installCode = `npm install @c2n/text-field`
-const importCode = `import '@c2n/text-field'
+const installCode = `npm install @c2n/components`
+const importCode = `import '@c2n/components/text-field'
 
 // then anywhere in your markup
 <c2-text-field placeholder="Your email"></c2-text-field>`
@@ -40,10 +40,10 @@ const slotCode = `<c2-text-field placeholder="Search">
         <li class="step">
           <div class="step__text">
             <span class="step__number">1</span>
-            <h3>Install the packages you need</h3>
+            <h3>Install the package</h3>
             <p>
-              Each component ships as its own package under the <code>@c2n</code> scope, so you only pay for what you use. Lit is a peer dependency shared between
-              them.
+              Every component ships in <code>@c2n/components</code>, one entry per component, so you only pay for what you import. Lit comes with it and is
+              shared by all of them.
             </p>
           </div>
           <CodeBlock code={installCode} lang="bash" />
@@ -52,7 +52,7 @@ const slotCode = `<c2-text-field placeholder="Search">
           <div class="step__text">
             <span class="step__number">2</span>
             <h3>Import once, use anywhere</h3>
-            <p>Importing a package registers its <code>c2-*</code> custom element. After that it is plain HTML.</p>
+            <p>Importing a component's entry registers its <code>c2-*</code> custom element. After that it is plain HTML.</p>
           </div>
           <CodeBlock code={importCode} lang="html" />
         </li>

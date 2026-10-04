@@ -3,12 +3,12 @@
 A vertical sequence of dated events on a connected rail — order history, activity feeds, changelogs, milestones.
 
 ```bash
-npm install @c2n/timeline
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/timeline'
+  import '@c2n/components/timeline'
 </script>
 
 <c2-timeline aria-label="Order history">

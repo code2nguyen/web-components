@@ -15,10 +15,10 @@ import { Button } from '@c2n/button'
 
 Read thousands of log entries without rendering thousands of rows. `c2-log-viewer` combines **virtual scrolling for variable-height text** with **sticky attributes** that keep a long entry's context visible. Single-line messages, wrapped output and multiline traces can share the same viewport.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/log-viewer
+```typescript tag=CodeBlock
+import '@c2n/components/log-viewer'
 ```
 
 ## Usage
@@ -135,7 +135,7 @@ The title bars and buttons above belong to the example application. The log view
 ### Connect your data
 
 ```ts tag=CodeBlock
-import '@c2n/log-viewer'
+import '@c2n/components/log-viewer'
 
 const viewer = document.querySelector('c2-log-viewer')!
 viewer.columns = ['timestamp', 'level', 'message']

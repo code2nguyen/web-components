@@ -16,7 +16,7 @@ Inspect the project's `package.json` with the available filesystem or shell tool
 
 Then look for what already exists before adding anything:
 
-- a theme: `--c2-theme--` in the CSS, or an import of `@c2n/theme`;
+- a theme: `--c2-theme--` in the CSS, or an import of `@c2n/components/theme.css` (or `base.css`, or `@c2n/theme` directly);
 - a variants directory: `src/components/ui/`, `src/ui/`, files that `extends … from '@c2n/`, or classes setting `--c2-…` variables;
 - the CSS entry point and the dark-mode switch (`data-theme`, a class, `prefers-color-scheme`).
 
@@ -43,17 +43,16 @@ Each component has a gallery of designed looks on the docs site. Start from one 
 - Fetch the chosen card with `get_examples` `label: "<slug>"`. Its CSS already uses `var(--c2-theme--…, literal)` wherever a colour belongs to the theme; a literal left over is the card's own accent, so replace it with the application's token (usually `--c2-theme--color-primary…`) rather than pasting it.
 - When the look repeats, `generate_variant` with `example: "<slug>"` turns the card into a class or Lit subclass under the app's prefix.
 
-Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/<name>/custom-elements.json` (resolved from `@c2n/components` when the project installed only the umbrella) for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
+Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/components/custom-elements.json` for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
 
 ## 3. Theme once
 
 Read `references/theming.md`.
 
-- Install the theme with the components: `npm install @c2n/theme @c2n/<component>…`.
-- Or install everything at once: `npm install @c2n/components` depends on every component package and the theme. In a project that declares it (and not the individual packages), import through it — `@c2n/components/<name>` (the package name without its scope) per component, `@c2n/components/theme.css` for the theme — because a strict installer (pnpm) does not expose `@c2n/<name>` to the app. Prefer the per-component entries to the `@c2n/components` barrel, which registers everything; `@c2n/components/react` and `/vue` type every tag. Not included: icon sets and the optional chart/code-editor engines (`uplot`, `echarts`, CodeMirror) — install those separately. The MCP server detects this and prints the matching import lines.
-- Import `@c2n/theme/theme.css` once at the application root (`main.ts`, root layout, global stylesheet). If the app already has design tokens, import `@c2n/theme/base.css` alone and bridge the app's tokens onto the `--c2-theme--*` names on `:root`.
+- Install the components with `npm install @c2n/components`: it is the one published component package and includes the theme. Import each component you use through its entry — `@c2n/components/<name>` (`@c2n/components/table`, `@c2n/components/chart` for every chart element) — and the theme with `@c2n/components/theme.css`. Prefer the per-component entries to the `@c2n/components` barrel, which registers everything; `@c2n/components/react` and `/vue` type every tag. Not included: icon sets and the optional chart/code-editor engines (`uplot`, `echarts`, CodeMirror) — install those separately. The MCP server prints the matching import lines.
+- Import `@c2n/components/theme.css` once at the application root (`main.ts`, root layout, global stylesheet). If the app already has design tokens, import `@c2n/components/base.css` alone and bridge the app's tokens onto the `--c2-theme--*` names on `:root`.
 - Override tokens on `:root` (light) and under the app's dark selector. Component variables are never set globally when a token covers the job.
-- Register elements with side-effect imports (`import '@c2n/button'`) at the entry or in the module that renders them; icons individually (`import '@c2n/feather-icons/icons/search.js'`).
+- Register elements with side-effect imports (`import '@c2n/components/button'`) at the entry or in the module that renders them; icons individually (`import '@c2n/feather-icons/icons/search.js'`).
 
 ## 4. Decide: tag, variant, or composed component
 
@@ -94,7 +93,7 @@ Read `references/frameworks.md` for details.
 
 ## 7. Verify
 
-- Every element used is registered (no empty tags, no `HTMLUnknownElement`); `@c2n/theme` imported exactly once.
+- Every element used is registered (no empty tags, no `HTMLUnknownElement`); the theme (`@c2n/components/theme.css` or `base.css`) imported exactly once.
 - Every variable, attribute, slot and event name exists in `get_component` / the manifest.
 - Every `::part()` name exists in `get_component`; no repeated inline variable styles; repeated looks became variants.
 - Variant tags contain a hyphen and do not start with `c2-`.

@@ -1,9 +1,9 @@
 'use client'
 
-import type { AreaChart } from '@c2n/chart/area-chart.js'
-import type { BarChart } from '@c2n/chart/bar-chart.js'
-import type { LineChart } from '@c2n/chart/line-chart.js'
-import type { Sparkline } from '@c2n/chart/sparkline.js'
+import type { AreaChart } from '@c2n/components/chart/area-chart'
+import type { BarChart } from '@c2n/components/chart/bar-chart'
+import type { LineChart } from '@c2n/components/chart/line-chart'
+import type { Sparkline } from '@c2n/components/chart/sparkline'
 import { useRef } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import type { DemoState } from '@/providers/DemoStateProvider'

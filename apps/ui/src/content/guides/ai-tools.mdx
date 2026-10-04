@@ -167,18 +167,18 @@ Both files point back to the MCP server and the installed manifests for exact AP
 
 ## Add c2n components to the application
 
-The AI tools provide guidance and metadata; component packages remain normal application dependencies. Install the theme and only the components the application uses:
+The AI tools provide guidance and metadata; the components remain a normal application dependency. Install `@c2n/components`, which includes the theme:
 
 ```bash tag=CodeBlock
-npm install @c2n/theme @c2n/button @c2n/text-field
+npm install @c2n/components
 ```
 
-Load the theme once near the application entry point, then import component modules before their tags render:
+Load the theme once near the application entry point, then import only the components the application uses, before their tags render:
 
 ```typescript tag=CodeBlock
-import '@c2n/theme/theme.css'
-import '@c2n/button'
-import '@c2n/text-field'
+import '@c2n/components/theme.css'
+import '@c2n/components/button'
+import '@c2n/components/text-field'
 ```
 
 Continue with [Using c2n in an application](./application-workflow) for the application architecture and [Theming](./theming) for tokens, dark mode and component-level overrides.

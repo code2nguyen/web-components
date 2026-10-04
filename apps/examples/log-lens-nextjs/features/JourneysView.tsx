@@ -1,6 +1,6 @@
 'use client'
 
-import type { TableColumnConfig } from '@c2n/table/table-types.js'
+import type { TableColumnConfig } from '@c2n/components/table'
 import { useMemo, useRef, useState } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
