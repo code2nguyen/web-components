@@ -1,7 +1,7 @@
 /**
  * The package barrel: registers every chart tag and re-exports the public API.
  *
- * Importing a single chart (`@c2n/chart/line-chart.js`) registers only that tag and pulls in only that
+ * Importing a single chart (`@c2n/components/chart/line-chart`) registers only that tag and pulls in only that
  * engine; this entry exists for an application that wants them all.
  */
 import './line-chart.js'

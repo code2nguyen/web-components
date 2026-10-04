@@ -115,9 +115,9 @@ function umbrellaOf(root: string, name: string): { path: string; version: string
 }
 
 /**
- * The module an agent should import `modulePath` (a module of `pkg`) from. A project that installed `@c2n/components`
- * imports the umbrella's entry, which re-exports every module of the package, so a subpath such as
- * `@c2n/table/table-column.js` maps to `@c2n/components/table` too.
+ * The module an agent should import `modulePath` (a module of `pkg`) from. The registry already names
+ * `@c2n/components` paths; a workspace package's own path (`@c2n/table/table-column.js`) maps to the umbrella's entry
+ * for the package (`@c2n/components/table`), which re-exports every module of it.
  */
 export function importPath(modulePath: string, pkg: string, installed: InstalledInfo | null): string {
   return installed?.via && (modulePath === pkg || modulePath.startsWith(`${pkg}/`)) ? `${UMBRELLA}/${pkg.slice('@c2n/'.length)}` : modulePath

@@ -49,7 +49,7 @@ let authFailed = false
  * element is only used when no key was configured here.
  *
  * ```js
- * import { configureGoogleMaps } from '@c2n/google-map'
+ * import { configureGoogleMaps } from '@c2n/components/google-map'
  * configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, language: 'vi', region: 'VN' })
  * ```
  */

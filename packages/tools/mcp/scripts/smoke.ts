@@ -30,6 +30,9 @@ assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_compone
 const tab = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab' } }))
 assert(tab.includes("import '@c2n/components/tabs'"), 'get_component c2-tab must resolve @c2n/components/tabs')
 
+const chart = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-line-chart' } }))
+assert(chart.includes("import '@c2n/components/chart/line-chart'"), 'get_component c2-line-chart must resolve its own entry')
+
 const icon = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-feather-arrow-right' } }))
 assert(icon.includes('@c2n/feather-icons/icons/arrow-right.js'), 'icon tag must resolve to its module')
 

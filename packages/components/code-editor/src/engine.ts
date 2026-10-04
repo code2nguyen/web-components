@@ -4,7 +4,7 @@
  * Nothing here is imported by the element file at module scope: `c2-code-editor` pulls in no engine until an
  * instance actually mounts, so importing the package costs nothing, the module is safe to evaluate during SSR, and
  * the whole of CodeMirror stays an *optional* peer dependency — the element degrades to a plain textarea when it is
- * not installed, the same contract `@c2n/chart` has with uPlot and ECharts.
+ * not installed, the same contract the charts have with uPlot and ECharts.
  *
  * Every visible colour comes from the component's CSS custom properties, not from a CodeMirror theme: the editor
  * renders real DOM inside the shadow root, so `code-editor.scss` can style `.cm-*` directly, and the syntax
@@ -87,7 +87,7 @@ export function loadCodeMirror(): Promise<Modules | undefined> {
 
 /**
  * Token classes instead of inline colours, so the palette lives in `code-editor.scss` as
- * `--c2-code-editor__theme--token-*` — the same names `@c2n/code-viewer` uses for its `css-variables` theme, so the
+ * `--c2-code-editor__theme--token-*` — the same names `c2-code-viewer` uses for its `css-variables` theme, so the
  * two components can be given one palette.
  */
 function buildHighlightStyle({ language, highlight }: Modules) {

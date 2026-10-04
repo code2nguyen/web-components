@@ -2,7 +2,7 @@
 import CodeBlock from './CodeBlock.astro'
 import SiteIconButton from './ui/SiteIconButton.astro'
 import type { CodeLanguage } from 'astro'
-import umbrella from '@c2n/components/package.json'
+import { importPathFor } from '../utils/import-path'
 
 /**
  * Docs usage frame produced by a ```html tag=UsageBlock,package=… fence (see plugin/mdx-codeblock-remark.mjs).
@@ -16,7 +16,7 @@ interface Props {
   lang: CodeLanguage
   uid: string
   style: string
-  /** npm package to show in the import line, e.g. `@c2n/button`. */
+  /** Workspace package of the component, e.g. `@c2n/button`: the import line shows its `@c2n/components` entry. */
   package?: string
   /** Fence meta passthrough, unused. */
   title?: string
@@ -26,9 +26,9 @@ interface Props {
 }
 
 const { code, lang, uid, style, package: pkg } = Astro.props
-// Only `@c2n/components` is published: a package it bundles is imported through its entry there.
-const entry = pkg?.startsWith('@c2n/') ? `./${pkg.slice('@c2n/'.length)}` : undefined
-const importPath = entry && entry in umbrella.exports ? `@c2n/components/${entry.slice(2)}` : pkg
+// Only `@c2n/components` is published: a package it bundles is imported through its entry there, and a page documenting
+// one element of a multi-element package (a chart) through that element's own entry.
+const importPath = pkg?.startsWith('@c2n/') ? importPathFor(pkg, Astro.params.componentId) : pkg
 ---
 
 <section class="usage" data-uid={uid}>

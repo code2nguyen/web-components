@@ -8,7 +8,7 @@ export const componentSchema = z.object({
   title: z.string(),
   description: z.string().default(''),
   category: z.enum(COMPONENT_CATEGORIES).default('Layout'),
-  /** npm package name, e.g. `@c2n/checkbox`. Defaults to `@c2n/<id>` when omitted. */
+  /** Workspace package name, e.g. `@c2n/checkbox` (published through `@c2n/components`). Defaults to `@c2n/<id>` when omitted. */
   package: z.string().optional(),
   /**
    * The package's primary custom element, when the package name is not itself a tag — `@c2n/chart` ships

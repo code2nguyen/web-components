@@ -46,7 +46,7 @@ import '@c2n/checkbox'
 import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
 
-// Framework-free: `useRenderedRows` in `@c2n/table/react` and `@c2n/table/vue` is built on it, and any other framework
+// Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
 export { subscribeRenderedRows, type RenderedRowsListener } from './rendered-rows.js'
 

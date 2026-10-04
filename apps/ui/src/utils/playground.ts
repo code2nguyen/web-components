@@ -7,6 +7,7 @@ import { $configCodeStore } from '../store/config-code-store.ts'
 import { componentManifests } from '../store/component-manifests.ts'
 import { getComponentManifestData, saveInitialStyle } from './manifest-utils.ts'
 import { getComponentByUid, getElemenetProperty, getInitialStyles } from './dom.ts'
+import { classModuleFor } from './import-path.ts'
 import type { ExtraComponentConfigState } from '../model/component-config-state.ts'
 import type { ComponentPreset } from '../data/component-presets.ts'
 
@@ -376,7 +377,7 @@ export function generateCode(format: CodeFormat, input: CodeInput): string {
     case 'lit': {
       const baseClass = toPascalCase(tag.replace(/^c2-/, ''))
       const className = toPascalCase(name)
-      const pkg = `@c2n/${tag.replace(/^c2-/, '')}`
+      const pkg = classModuleFor(tag)
       const attributeLines = Object.entries(changes.attributes ?? {})
         .map(([attr, value]) => `    this.setAttribute('${attr}', ${jsString(value === 'true' ? '' : value)})`)
         .join('\n')

@@ -27,11 +27,10 @@ const uiRoot = join(repoRoot, 'apps/ui/src')
 const outFile = join(packageRoot, 'data/registry.json')
 /** `@c2n/components`: every component package in one install, one entry per package (`@c2n/components/table`). */
 const UMBRELLA = '@c2n/components'
-const umbrellaPackages = new Set(
-  Object.keys((JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { exports?: Record<string, unknown> }).exports ?? {})
-    .filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath))
-    .map((subpath) => `@c2n/${subpath.slice(2)}`),
+const umbrellaExports = new Set(
+  Object.keys((JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { exports?: Record<string, unknown> }).exports ?? {}),
 )
+const umbrellaPackages = new Set([...umbrellaExports].filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath)).map((subpath) => `@c2n/${subpath.slice(2)}`))
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
 const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
@@ -202,12 +201,18 @@ function usageRows(html: string): { label: string; html: string }[] {
 
 /**
  * The module an application imports to register the element. A package `@c2n/components` bundles is reached through
- * its entry (`@c2n/tabs` + `src/tab.ts` → `@c2n/components/tabs`), since only the umbrella is published; an icon set
- * through its own subpath (`@c2n/feather-icons` + `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`).
+ * its entry (`@c2n/tabs` + `src/tab.ts` → `@c2n/components/tabs`, which registers the container with it), since only
+ * the umbrella is published. A package documented one page per element (`perElement`, the charts) is imported one
+ * element at a time, through the element's own entry (`@c2n/chart` + `src/line-chart.ts` →
+ * `@c2n/components/chart/line-chart`). An icon set is reached through its own subpath (`@c2n/feather-icons` +
+ * `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`).
  */
-function modulePathFor(pkg: PackageJson, modulePath: string): string {
-  if (umbrellaPackages.has(pkg.name)) return `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}`
+function modulePathFor(pkg: PackageJson, modulePath: string, perElement: boolean): string {
   const rel = modulePath.replace(/^src\//, '').replace(/\.ts$/, '')
+  if (umbrellaPackages.has(pkg.name)) {
+    const name = pkg.name.slice('@c2n/'.length)
+    return perElement && umbrellaExports.has(`./${name}/${rel}`) ? `${UMBRELLA}/${name}/${rel}` : `${UMBRELLA}/${name}`
+  }
   const exportsMap = pkg.exports ?? {}
   const mainTarget = typeof exportsMap['.'] === 'object' && exportsMap['.'] ? (exportsMap['.'] as { default?: string }).default : pkg.main
   if (mainTarget && mainTarget.replace(/^\.\//, '').replace(/\.js$/, '') === `dist/${rel}`) return pkg.name
@@ -324,7 +329,7 @@ for (const dir of packageDirs.sort()) {
       elements.push({
         tag: decl.tagName,
         className: decl.name,
-        modulePath: modulePathFor(pkg, mod.path),
+        modulePath: modulePathFor(pkg, mod.path, docs.length > 1),
         description: decl.description?.trim() ?? '',
         attributes: (decl.attributes ?? []).map((a) => ({
           name: a.name,

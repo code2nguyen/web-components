@@ -45,7 +45,7 @@ export interface CodeEditor {
  *
  * Colours are **not** a CodeMirror theme. The editor renders real DOM inside the shadow root, so every surface,
  * gutter and token colour is an ordinary `--c2-code-editor__*` custom property — including the syntax palette, whose
- * `--c2-code-editor__theme--token-*` names match `@c2n/code-viewer`'s `css-variables` theme so one palette can drive
+ * `--c2-code-editor__theme--token-*` names match `c2-code-viewer`'s `css-variables` theme so one palette can drive
  * both. Dark mode is therefore just different variable values, with no JavaScript involved.
  *
  * Grammars for `javascript`, `typescript`, `jsx`, `tsx`, `html`, `css` and `json` are built in and loaded on demand.

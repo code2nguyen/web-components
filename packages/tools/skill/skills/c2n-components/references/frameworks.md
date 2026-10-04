@@ -62,7 +62,7 @@ With a bundler, put the imports in the entry module (`main.ts`). CSS imports wor
 
 ## Lit
 
-Import what you render at the top of the component module (`import '@c2n/text-field'`). Extend a component for a tag variant (`class AppField extends TextField`). Re-emit child events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Set child variables in your `static styles` on `:host` or on a class.
+Import what you render at the top of the component module (`import '@c2n/components/text-field'`). Extend a component for a tag variant (`class AppField extends TextField`). Re-emit child events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Set child variables in your `static styles` on `:host` or on a class.
 
 ## Astro
 
@@ -113,9 +113,9 @@ binding on a tag that has not upgraded yet silently falls back to an attribute.
 
 ```svelte
 <script lang="ts">
-  import '@c2n/table'
-  import '@c2n/table/table-column.js'
-  import type { TableEventMap } from '@c2n/table'
+  import '@c2n/components/table'
+  import '@c2n/components/table/table-column'
+  import type { TableEventMap } from '@c2n/components/table'
 
   let { rows } = $props()
   let selected = $state<string[]>([])
@@ -155,13 +155,13 @@ from `@c2n/core/lit-helper.js` rather than adding `lit` to the application: it i
 components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
 Mark the column `cell-slot` and render light-DOM children into `slot="cell:<line>:<field>"`, where `line` is the display line (after sort, filter and grouping, page offset included). Render them only for the lines `range-change` reports: `detail.rows` is one `{ line, key, row }` per rendered data row; a child whose line is outside the window is left unassigned, and after a sort, filter or page change the same line holds another row, so re-render from the next `range-change`. The children stay in the document, so ordinary CSS reaches them; `renderCell`/the column format is the fallback.
 
-Do not hand-write that subscription: `@c2n/table` ships it as `useRenderedRows`. React: `useRenderedRows(ref)` from
+Do not hand-write that subscription: `@c2n/components/table` ships it as `useRenderedRows`. React: `useRenderedRows(ref)` from
 `@c2n/components/react` returns `TableRenderedRow[]`. Vue 3: `useRenderedRows(templateRefOrGetter)` from
 `@c2n/components/vue` returns `Ref<TableRenderedRow[]>`. These are the same entries that declare the JSX / template
-types, so one import gives both; through the umbrella they are `@c2n/components/react` and `@c2n/components/vue`.
+types, so one import gives both.
 Both seed from `table.renderedRange`, re-subscribe when the element changes, return `[]` on the server and before the
-element upgrades, and clean up on unmount; React and Vue are optional peers, and `@c2n/table` itself never imports
-them. Other frameworks wrap `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table`, which returns the
+element upgrades, and clean up on unmount; React and Vue are optional peers, and `@c2n/components/table` itself never imports
+them. Other frameworks wrap `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, which returns the
 unsubscribe function.
 
 ## Editor support outside TypeScript
@@ -208,7 +208,7 @@ const rows = files
 
 <Fragment set:html={rawElement('c2-tree', { 'aria-label': 'Files' }, rows)} />
 <script>
-  import '@c2n/tree'
+  import '@c2n/components/tree'
 </script>
 ```
 
@@ -237,7 +237,7 @@ export default async function FilesPage() {
 import { useEffect } from 'react'
 
 export function RegisterTree() {
-  useEffect(() => void import('@c2n/tree'), [])
+  useEffect(() => void import('@c2n/components/tree'), [])
   return null
 }
 ```
