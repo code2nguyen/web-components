@@ -1,6 +1,6 @@
 'use client'
 
-import type { StepNode } from '@c2n/components/steps/step-types.js'
+import type { StepNode } from '@c2n/components/steps'
 import { useMemo, useRef } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
