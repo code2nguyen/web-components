@@ -16,7 +16,7 @@ Inspect the project's `package.json` with the available filesystem or shell tool
 
 Then look for what already exists before adding anything:
 
-- a theme: `--c2-theme--` in the CSS, or an import of `@c2n/theme`;
+- a theme: `--c2-theme--` in the CSS, or an import of `@c2n/components/theme.css` (or `base.css`, or `@c2n/theme` directly);
 - a variants directory: `src/components/ui/`, `src/ui/`, files that `extends … from '@c2n/`, or classes setting `--c2-…` variables;
 - the CSS entry point and the dark-mode switch (`data-theme`, a class, `prefers-color-scheme`).
 
@@ -93,7 +93,7 @@ Read `references/frameworks.md` for details.
 
 ## 7. Verify
 
-- Every element used is registered (no empty tags, no `HTMLUnknownElement`); `@c2n/theme` imported exactly once.
+- Every element used is registered (no empty tags, no `HTMLUnknownElement`); the theme (`@c2n/components/theme.css` or `base.css`) imported exactly once.
 - Every variable, attribute, slot and event name exists in `get_component` / the manifest.
 - Every `::part()` name exists in `get_component`; no repeated inline variable styles; repeated looks became variants.
 - Variant tags contain a hyphen and do not start with `c2-`.

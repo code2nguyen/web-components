@@ -6,17 +6,30 @@ import { exports as umbrellaExports } from '@c2n/components/package.json'
 const UMBRELLA = '@c2n/components'
 const exported = new Set(Object.keys(umbrellaExports))
 
-/** Icon sets stay separate packages, outside `@c2n/components`; each icon is a module of its own. */
-const ICON_SETS: [prefix: string, module: (name: string) => string][] = [
-  ['c2-feather-', (name) => `@c2n/feather-icons/icons/${name}.js`],
-  ['c2-phosphor-', (name) => `@c2n/phosphor-icons/icons/${name}.js`],
-  ['c2-symbol-', (name) => `@c2n/symbols/symbols/${name}.js`],
-  ['c2-task-icon-', (name) => `@c2n/task-icons/icons/${name}.js`],
+const pascal = (value: string) => value.replace(/(^|-)([a-z0-9])/g, (_, _dash: string, char: string) => char.toUpperCase())
+
+/**
+ * Icon sets stay separate packages, outside `@c2n/components`; each icon is a module of its own, and its class follows
+ * the set's generator (`c2-feather-bar-chart-2` → `FeatherBarChart2Icon`, `c2-symbol-share` → `ShareSymbol`).
+ */
+const ICON_SETS: { prefix: string; module: (name: string) => string; className: (name: string) => string }[] = [
+  { prefix: 'c2-feather-', module: (name) => `@c2n/feather-icons/icons/${name}.js`, className: (name) => `Feather${pascal(name)}Icon` },
+  { prefix: 'c2-phosphor-', module: (name) => `@c2n/phosphor-icons/icons/${name}.js`, className: (name) => `Phosphor${pascal(name)}Icon` },
+  { prefix: 'c2-symbol-', module: (name) => `@c2n/symbols/symbols/${name}.js`, className: (name) => `${pascal(name)}Symbol` },
+  { prefix: 'c2-task-icon-', module: (name) => `@c2n/task-icons/icons/${name}.js`, className: (name) => `${pascal(name)}TaskIcon` },
 ]
 
+const iconSetOf = (tag: string) => ICON_SETS.find((set) => tag.startsWith(set.prefix))
+
 function iconModule(tag: string): string | undefined {
-  const set = ICON_SETS.find(([prefix]) => tag.startsWith(prefix))
-  return set?.[1](tag.slice(set[0].length))
+  const set = iconSetOf(tag)
+  return set?.module(tag.slice(set.prefix.length))
+}
+
+/** The class `tag` is defined by: `c2-tab` → `Tab`, `c2-feather-home` → `FeatherHomeIcon`. */
+export function classNameFor(tag: string): string {
+  const set = iconSetOf(tag)
+  return set ? set.className(tag.slice(set.prefix.length)) : pascal(tag.replace(/^c2-/, ''))
 }
 
 /**

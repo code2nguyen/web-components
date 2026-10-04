@@ -14,8 +14,10 @@ Every `c2-*` component is styled exclusively through its own CSS custom properti
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/theme
+npm install @c2n/components
 ```
+
+`@c2n/components` brings in `@c2n/theme` and re-exports its stylesheets as `@c2n/components/theme.css`, `base.css` and `tokens.css`.
 
 ```typescript tag=CodeBlock
 import '@c2n/components/theme.css' // tokens + base theme, once at the app root
