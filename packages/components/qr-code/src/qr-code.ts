@@ -39,6 +39,7 @@ export interface QrCode {
  * @cssproperty {color} [--c2-qr-code__background--color=#ffffff]
  * @cssproperty {border-radius} [--c2-qr-code__container--border-radius=8px]
  * @cssproperty {color} [--c2-qr-code__placeholder--color=#71717a]
+ * @cssproperty {border} [--c2-qr-code__placeholder--border=1px dashed #bcbcc6] - Frame drawn while there is no value to encode.
  * @cssproperty {font-size} [--c2-qr-code__placeholder--font-size=12px]
  * @cssproperty {length} [--c2-qr-code__center--size=20%]
  * @cssproperty {color} [--c2-qr-code__center--background-color=#ffffff]

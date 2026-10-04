@@ -27,7 +27,8 @@ export interface ListItem {
  * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by
  * `--c2-list-item__icon--size` — anything else in them, a shortcut hint or a badge, keeps its own size.
  * With `href` the row is a link. In a multiple-selection list, adjacent selected rows lose the corner radius between
- * them (the list marks them `joined-before` / `joined-after`) so a run of selected rows reads as one block.
+ * them (the list sets `joinedBefore` / `joinedAfter`, exposed as `:state(joined-before)` / `:state(joined-after)`) so a run of
+ * selected rows reads as one block.
  *
  * Accessibility: standalone rows are `role="button"` with `aria-pressed`; rows in a list are `role="option"` with
  * `aria-selected` and a roving `tabindex` managed by the list. Set your own `role` to override.
@@ -136,6 +137,15 @@ export class ListItem extends LitElement {
   @property({ attribute: false }) data?: unknown
 
   /**
+   * Private: set by the parent `c2-list` (or written as an attribute by `c2-virtual-list`) when the row above is
+   * selected too, so the facing corners square off. Exposed as `:state(joined-before)`; never reflected.
+   */
+  @property({ type: Boolean, attribute: 'joined-before' }) joinedBefore = false
+
+  /** Private: the `joinedBefore` counterpart for the row below. Exposed as `:state(joined-after)`; never reflected. */
+  @property({ type: Boolean, attribute: 'joined-after' }) joinedAfter = false
+
+  /**
    * Private property, it will use context value to setup selected state of component.
    */
   @property({ attribute: false }) applyContext = false
@@ -213,6 +223,10 @@ export class ListItem extends LitElement {
   }
 
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
+    // Custom states rather than host attributes: the list joins rows while the page upgrades, before a framework
+    // hydrates, and an attribute the server never rendered is a hydration mismatch.
+    if (changedProperties.has('joinedBefore')) this.toggleState('joined-before', this.joinedBefore)
+    if (changedProperties.has('joinedAfter')) this.toggleState('joined-after', this.joinedAfter)
     if (changedProperties.has('applyContext')) {
       if (this.applyContext) {
         this.contextConsumer.applyContext()
@@ -234,6 +248,11 @@ export class ListItem extends LitElement {
       )
     }
     this.syncAria()
+  }
+
+  private toggleState(name: string, on: boolean) {
+    if (on) this.internals.states.add(name)
+    else this.internals.states.delete(name)
   }
 
   private syncAria() {

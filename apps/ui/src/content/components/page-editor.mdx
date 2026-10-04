@@ -1,0 +1,127 @@
+---
+title: 'Page Editor'
+description: 'A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { PageEditor } from '@c2n/page-editor'
+
+`c2-page-editor` is a form control for writing long text with structure, without learning an editor. It has the blocks people reach for (headings, bulleted, numbered and to-do lists, quotes, code blocks and dividers), the usual inline formats and links, and eight named text and background colours. It has nothing else: no tables, images or columns. Every format can be reached three ways, so people use whichever they already know:
+
+- **Markdown as you type**: `# ` gives a heading, `- ` a bullet, `[] ` a to-do, ` ``` ` a code block, `**bold**` bold. If the editor guessed wrong, Backspace straight after puts the characters back.
+- **The `/` menu**: type `/` at the start of a line or after a space, then a few letters (`/code`, `/red`, `/h2`). The `+` button on an empty line opens the same menu.
+- **The toolbar** over selected text: turn into another block, bold, italic, underline, strike, code, link and colour.
+
+The value is GitHub-flavoured Markdown, so it can be stored, searched and rendered anywhere.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/page-editor
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/page-editor
+<style>
+  .page { width: 560px; max-width: 100%; }
+  .comment {
+    width: 420px;
+    max-width: 100%;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    --c2-page-editor__content--min-height: 72px;
+    --c2-page-editor__content--font-size: 14px;
+    --c2-page-editor__content--padding: 10px 12px 10px 36px;
+  }
+</style>
+<div data-label="Default">
+  <c2-page-editor class="page" label="Release notes" placeholder="Start writing…" value="## Release notes
+
+The **new table** ships on <span data-color=&quot;red&quot;>Friday</span>; see `c2-table`.
+
+- [x] Freeze the API
+- [ ] Update the docs
+
+&#96;&#96;&#96;ts
+const table = document.querySelector('c2-table')
+&#96;&#96;&#96;"></c2-page-editor>
+</div>
+<div data-label="Empty">
+  <c2-page-editor class="page" label="New page" placeholder="Write something, or type '/' for blocks…"></c2-page-editor>
+</div>
+<div data-label="Comment box">
+  <c2-page-editor class="comment" label="Comment" blocks="paragraph bullet ordered" placeholder="Leave a comment…"></c2-page-editor>
+</div>
+<div data-label="Read-only">
+  <c2-page-editor class="page" label="Published note" readonly value="This page is **read-only**: select, copy and follow [links](https://example.com)."></c2-page-editor>
+</div>
+```
+
+## Writing
+
+| Block or format  | Type at the start of a line              | Shortcut                    |
+| ---------------- | ---------------------------------------- | --------------------------- |
+| Heading 1–3      | `# `, `## `, `### `                      | <kbd>Ctrl/⌘ Alt 1</kbd>–`3` |
+| Text             |                                          | <kbd>Ctrl/⌘ Alt 0</kbd>     |
+| Bulleted list    | `- ` or `* `                             | <kbd>Ctrl/⌘ Shift 8</kbd>   |
+| Numbered list    | `1. `                                    | <kbd>Ctrl/⌘ Shift 7</kbd>   |
+| To-do            | `[] ` or `[x] `                          | <kbd>Ctrl/⌘ Shift 9</kbd>   |
+| Quote            | `> `                                     |                             |
+| Code block       | ` ``` ` or ` ```ts ` then Space or Enter |                             |
+| Divider          | `---`                                    |                             |
+| Bold             | `**bold**`                               | <kbd>Ctrl/⌘ B</kbd>         |
+| Italic           | `*italic*`                               | <kbd>Ctrl/⌘ I</kbd>         |
+| Underline        |                                          | <kbd>Ctrl/⌘ U</kbd>         |
+| Strikethrough    | `~~strike~~`                             | <kbd>Ctrl/⌘ Shift S</kbd>   |
+| Inline code      | `` `code` ``                             | <kbd>Ctrl/⌘ E</kbd>         |
+| Link             | paste a URL over text                    | <kbd>Ctrl/⌘ K</kbd>         |
+| Last colour      |                                          | <kbd>Ctrl/⌘ Shift H</kbd>   |
+| Clear formatting |                                          | <kbd>Ctrl/⌘ \\</kbd>        |
+| Move to toolbar  |                                          | <kbd>Alt F10</kbd>          |
+
+A few rules keep long writing smooth. Enter on an empty list item steps out one level, then out of the list. Enter at the end of a heading starts a paragraph. Backspace at the start of a heading, list item or quote makes it a paragraph before it joins the line above. Tab and Shift Tab nest list items (three levels) and indent code; elsewhere Tab moves focus as usual. Shift Enter breaks the line inside a block. In a code block, Enter keeps the indentation, and Enter three times at the end (or <kbd>Ctrl/⌘ Enter</kbd>) leaves the block. <kbd>Ctrl/⌘ Enter</kbd> on a to-do ticks it.
+
+Pasted rich text (from a web page, Google Docs or Word) keeps its headings, lists, quotes, code, links and emphasis; its own colours and fonts are dropped. Pasted plain text is read as Markdown. On touch screens a format bar sits on top of the keyboard while the page has focus.
+
+## Code blocks
+
+Each code block has a language picker with search, a wrap toggle and a copy button, and shows line numbers. Syntax colours come from [shiki](https://shiki.style), loaded the first time a block names a language and only for that language, so a page without code loads none of it. Every token colour is a CSS variable (`--c2-page-editor__syntax-keyword--color` and so on), mixed with the code's text colour so it reads in light and dark themes.
+
+## Colours
+
+The eight colours (gray, brown, orange, yellow, green, blue, purple, red) are names, not values. In the value they are written as `<span data-color="red">` and `<mark data-color="yellow">`; on screen each name is a CSS variable. Text colours are mixed with the page's text colour and backgrounds are translucent, so the same page reads on a light or a dark surface, and a theme can change what "red" means everywhere at once. A pasted colour that is not one of the eight is dropped.
+
+## The value
+
+```md tag=CodeBlock
+# Launch plan
+
+Ship the **new table** before <span data-color="red">Friday</span>, see `c2-table`.
+
+- Faster sorting
+  - Stable order
+1. First
+- [x] Freeze the API
+
+> Easy to use matters most.
+
+---
+
+Read the [guide](https://example.com/guide).
+```
+
+Formats Markdown has no syntax for are inline HTML, which Markdown renderers pass through: `<u>`, `<span data-color>`, `<mark data-color>`, and `<br>` for a line break or an empty line. `text` gives the page as plain text, and `toHTML()` as HTML with real nested lists. `markdownToHTML(value)` renders a stored value without an editor on the page.
+
+```ts tag=CodeBlock
+import '@c2n/page-editor'
+
+const editor = document.querySelector('c2-page-editor')!
+editor.addEventListener('input', () => save(editor.value))
+editor.value = '# Notes\n\n- [ ] Call the bank'
+```
+
+`input` fires on every edit, after `value` is updated, and `change` when the editor loses focus with a changed value; writing the emitted value back, as `v-model` does, keeps the caret where it is. `c2-page-editor` is form-associated: it submits `value` under `name`, supports `required`, resets with its form and follows a disabled fieldset. `blocks="paragraph bullet ordered"` limits the blocks the menus, shortcuts and pasted content can use. `setBlock()`, `toggleMark()`, `setColor()`, `setBackground()`, `setLink()` and `clearFormatting()` drive it from your own controls, and `format-change` reports the block and formats at the selection.

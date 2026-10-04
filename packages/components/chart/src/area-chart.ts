@@ -27,9 +27,14 @@ export interface AreaChart {
  * @tag c2-area-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of the fill under each line, unless `fill-opacity` is set.
  */
 @customElement('c2-area-chart')
 export class AreaChart extends LineChart {
+  // A click inside a fill picks that area, not whichever line happens to be nearest.
+  protected override readonly hitMode = 'band' as const
+
   /** Opacity of the fill under each line. Falls back to `--c2-chart__area--opacity`. */
   @property({ type: Number, attribute: 'fill-opacity' }) fillOpacity?: number
 
@@ -38,6 +43,15 @@ export class AreaChart extends LineChart {
     const color = this.colorOf(series, index, context.theme)
     const opacity = this.fillOpacity ?? this.areaOpacity(context)
     return { ...base, fill: withAlpha(color, opacity) }
+  }
+
+  /** The highlighted area's fill deepens as well as its line, so the whole band comes forward. */
+  protected override highlightStyle(style: UplotSeriesStyle, index: number, context: ChartBuildContext): UplotSeriesStyle {
+    const base = super.highlightStyle(style, index, context)
+    if (index !== context.highlighted) return base
+    const series = context.series[index]
+    const opacity = this.fillOpacity ?? this.areaOpacity(context)
+    return series ? { ...base, fill: withAlpha(this.colorOf(series, index, context.theme), Math.min(1, opacity * 2.4)) } : base
   }
 
   /** Reads `--c2-chart__area--opacity` off the host, falling back to uPlot-friendly 0.15. */

@@ -14,6 +14,7 @@
     media--background-color: #f4f4f5,
     media--color: #71717a,
     media-icon--size: 32px,
+    illustration--size: 128px,
     media__info--background-color: #edf1fe,
     media__info--color: rgb(2, 101, 220),
     media__success--background-color: #ecfdf3,
@@ -152,6 +153,20 @@
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+:host([media='illustration']) .media {
+  width: css.cssVar(illustration--size);
+  height: css.cssVar(illustration--size);
+  overflow: visible;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+:host([media='illustration']) .media svg,
+:host([media='illustration']) ::slotted([slot='media']) {
+  width: css.cssVar(illustration--size);
+  height: css.cssVar(illustration--size);
 }
 
 .title {

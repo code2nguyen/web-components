@@ -1,14 +1,33 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import type { StepStatus, StepsMarker } from './step-types.js'
+import type { StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
 import { STATUS_ICONS, STATUS_LABELS } from './step-icons.js'
 import styles from './step.scss?inline'
 
-export type { StepStatus, StepsMarker } from './step-types.js'
+export type { StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
+
+/**
+ * Parent/child protocol: a selectable row asks its `c2-steps` to select it. Not public API — the list answers with
+ * `selection-change`, which is the event to listen for.
+ */
+export const STEP_SELECT_EVENT = 'c2-step-select'
+
+/**
+ * Parent/child protocol: a step's `status` changed, whether a run set the property or the attribute. Bubbles to the
+ * parent `c2-steps`, which rolls the change up. Not public API.
+ */
+export const STEP_STATUS_EVENT = 'c2-step-status'
+
+/** Detail of the {@link STEP_SELECT_EVENT} protocol event. */
+export interface StepSelectRequestDetail {
+  /** The step's `value`, or its dotted path when it has none. */
+  value: string
+}
 
 /** Detail of {@link StepEventMap.step-toggle}. */
 export interface StepToggleEventDetail {
@@ -52,8 +71,21 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * lands under its parent's label. `--c2-step__text--flex-direction: column` still stacks the detail under the
  * label, which a wizard's descriptions want — that is two lines on purpose, and each of them is still one line.
  *
- * The step never sets its own depth, position or marker mode: the parent `c2-steps` writes them on every pass, so
- * a step used on its own renders as a single root-level row.
+ * **In an `interactive` list a row is a button.** Pressing it selects the step — the list keeps one selected step and
+ * says so with `selection-change` — so a view can show what belongs to it: the log of the step that ran, the result
+ * of the step that produced one. A group's row stays its disclosure; `disabled` keeps a step from being selected.
+ *
+ * The step never sets its own depth, position, marker mode, orientation or selection: the parent `c2-steps` writes
+ * them on every pass, so a step used on its own renders as a single root-level row.
+ *
+ * **States.** The step never writes an attribute on its own host — not even the `status` the list rolls up or the
+ * `collapsed` a reader toggles, neither of which reflects — so server-rendered markup matches the hydrated element.
+ * Page CSS reads the step through custom states instead: its status (`c2-step:state(running)`, `:state(success)`,
+ * `:state(error)`, `:state(warning)`, `:state(current)`, `:state(skipped)`, `:state(pending)`), `:state(collapsed)`,
+ * `:state(has-children)` for a group, `:state(last)` for the last step of its group, `:state(grouped)` when the list
+ * holds any group, the marker mode as `:state(marker-icon)`, `:state(marker-number)` or `:state(marker-none)`, and
+ * the two animations: `:state(entering)` while a step that arrived in a running trace grows into place, and
+ * `:state(settling)` while its marker gives the beat of a changed status.
  *
  * @tag c2-step
  *
@@ -67,7 +99,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @event {CustomEvent<StepToggleEventDetail>} step-toggle - A group was folded away or brought back. Bubbles.
  *
  * @csspart frame - The box around the whole step, which is what grows when a new step arrives.
- * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`.
+ * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`, and a selectable row in an `interactive` list is a `<button>`.
  * @csspart toggle - Disclosure region containing the assigned `toggle` slot for a group.
  * @csspart marker - Round marker region containing the `marker` slot or status fallback at the start of the row.
  * @csspart rail - The connector between this marker and the next.
@@ -84,7 +116,15 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {color} --c2-step__row--background
  * @cssproperty {color} --c2-step__row__hover--background - Set it to make the rows respond to the pointer.
  * @cssproperty {border} [--c2-step__row--border-bottom=1px solid #e4e4e7] - The hairline under each row.
- * @cssproperty {border} [--c2-step__row--outline=2px solid rgb(2, 101, 220)] - Focus ring of a group's row, which is a button.
+ * @cssproperty {border} [--c2-step__row--outline=2px solid rgb(2, 101, 220)] - Focus ring of a row that is a button: a group's, and every selectable one.
+ * @cssproperty {color} --c2-step__row__selected--background - Background of the selected row in an `interactive` list. None by default: the label colour alone marks the selection.
+ * @cssproperty {box-shadow} --c2-step__row__selected--box-shadow - An indicator for the selected row — `inset 0 -2px 0 currentColor` underlines it.
+ * @cssproperty {opacity} [--c2-step__row__disabled--opacity=0.38] - A `disabled` step in an `interactive` list.
+ * @cssproperty {border} [--c2-step__row__horizontal--border-bottom=none] - The hairline under each step of a horizontal list, which has none by default.
+ * @cssproperty {pixel} [--c2-step__row__horizontal--min-width=96px] - The narrowest a step of a horizontal list gets before the list scrolls.
+ * @cssproperty {grid-template-areas} [--c2-step__row__horizontal--grid-template-areas="marker rail rail" "text text text" "trailing trailing trailing"] - Where the text sits around the marker in a horizontal list. The cells are `marker`, `rail`, `text` and `trailing`, over three columns sized `auto auto 1fr`; the rail always takes the last one and runs on to the next step. Text over the marker: `"text text text" "trailing trailing trailing" "marker rail rail"`, with `--c2-step__row__horizontal--align-content: end`. Beside it: `"marker text rail" ". trailing ."`. Before it: `"text marker rail" "trailing . ."`.
+ * @cssproperty {align-content} [--c2-step__row__horizontal--align-content=start] - Which end of a horizontal step its rows pack to when a neighbour is taller. `end` with the text over the marker keeps every marker on one line.
+ * @cssproperty {pixel} [--c2-step__row__horizontal--row-gap=8px] - Space between the marker's line and the text above or below it in a horizontal list.
  *
  * @cssproperty {pixel} [--c2-step__toggle--size=14px] - Width of the `toggle` slot's column, when it is filled.
  * @cssproperty {pixel} [--c2-step__toggle--gap=4px] - Space between that column and the marker.
@@ -105,11 +145,14 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {pixel} [--c2-step__rail--width=0px] - Width of the connector. `0px` is the trace look; `2px` gives a stepper its rail.
  * @cssproperty {color} [--c2-step__rail--color=#e4e4e7]
  * @cssproperty {pixel} [--c2-step__rail--gap=4px] - Space between the marker and the rail.
+ * @cssproperty {pixel} [--c2-step__rail__horizontal--width=2px] - Thickness of the connector in a horizontal list, which always links one step to the next: it runs from this step's marker (or its label, when the label comes after the marker) through the gap to where the next step starts, one `--c2-step__rail--gap` short of it at each end.
  *
  * @cssproperty {color} [--c2-step__label--color=#18181b]
  * @cssproperty {font-size} [--c2-step__label--font-size=13px]
  * @cssproperty {font-weight} [--c2-step__label--font-weight=500]
  * @cssproperty {font-family} [--c2-step__label--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
+ * @cssproperty {color} [--c2-step__label__selected--color=rgb(2, 101, 220)] - Label colour of the selected row: what marks the selection by default.
+ * @cssproperty {font-weight} --c2-step__label__selected--font-weight - Label weight of the selected row. Falls back to the label weight.
  * @cssproperty {color} [--c2-step__detail--color=#71717a]
  * @cssproperty {font-size} --c2-step__detail--font-size - Falls back to the label size.
  * @cssproperty {font-weight} [--c2-step__detail--font-weight=400]
@@ -139,8 +182,12 @@ export class Step extends LitElement {
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
 
-  /** State of the step. Drives the marker glyph and the accent colour, and reopens a folded group. */
-  @property({ reflect: true }) status: StepStatus = 'pending'
+  /**
+   * State of the step. Drives the marker glyph and the accent colour, and reopens a folded group. Not reflected: the
+   * parent list writes a rolled-up status onto a group that authored none, and a reflected one would be an attribute
+   * the server never rendered. Read it as `:state(<status>)`.
+   */
+  @property() status: StepStatus = 'pending'
 
   /** Primary text, when the `label` slot is empty. */
   @property() label = ''
@@ -152,10 +199,20 @@ export class Step extends LitElement {
   @property() trailing = ''
 
   /**
-   * Whether this group is folded away. A group is expanded by default — every step in the list is a row you can
-   * see — and only the reader, the markup or a reopening status ever changes that.
+   * What the parent `c2-steps` calls this step in `selected` and `selection-change`. Without one, the step is
+   * called by its dotted path — `2` for the second top-level step.
    */
-  @property({ type: Boolean, reflect: true }) collapsed = false
+  @property() value = ''
+
+  /** In an `interactive` list, keeps the step from being selected. Its row stays visible, and its status still shows. */
+  @property({ type: Boolean, reflect: true }) disabled = false
+
+  /**
+   * Whether this group is folded away. A group is expanded by default — every step in the list is a row you can
+   * see — and only the reader, the markup or a reopening status ever changes that. Not reflected; read it as
+   * `:state(collapsed)`.
+   */
+  @property({ type: Boolean }) collapsed = false
 
   /** Depth of nesting. Written by the parent `c2-steps`; setting it by hand only changes the indent. */
   @property({ attribute: false }) level = 0
@@ -172,6 +229,15 @@ export class Step extends LitElement {
   /** Marker mode, written by the parent `c2-steps`. */
   @property({ attribute: false }) marker: StepsMarker = 'icon'
 
+  /** Layout of the list, written by the parent `c2-steps`. A horizontal step is one column and draws no sub-steps. */
+  @property({ attribute: false }) orientation: StepsOrientation = 'vertical'
+
+  /** Whether the row is a button that selects the step. Written by the parent from its `interactive`. */
+  @property({ attribute: false }) interactive = false
+
+  /** Whether this is the list's selected step. Written by the parent from its `selected`; set that instead. */
+  @property({ attribute: false }) selected = false
+
   /**
    * Whether the list holds any group at all, written by the parent. A list of plain rows drops the chevron column
    * rather than leaving every row inset by an empty one.
@@ -184,16 +250,26 @@ export class Step extends LitElement {
    */
   @property({ attribute: false }) hasChildren = false
 
+  /**
+   * Whether the step is playing its arrival animation. Written by the parent `c2-steps` on a step that arrived after
+   * the list was already on screen; the step clears it when the animation ends.
+   */
+  @property({ attribute: false }) entering = false
+
   private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle'])
 
   override connectedCallback() {
+    // A server-rendered step arrives with its shadow root already attached. The server cannot see the light DOM, so
+    // it drew the step as a leaf; the first client render must match that, and the sub-steps are picked up after.
+    const serverRendered = this.shadowRoot !== null && !this.hasUpdated
     super.connectedCallback()
     this.internals.role = 'listitem'
     // The arrival animation runs on the host, the settling one on the marker inside the shadow root — and an
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
     this.renderRoot.addEventListener('animationend', this.handleAnimationEnd)
-    this.syncHasChildren()
+    if (serverRendered) void this.updateComplete.then(() => this.syncHasChildren())
+    else this.syncHasChildren()
   }
 
   override disconnectedCallback() {
@@ -209,29 +285,54 @@ export class Step extends LitElement {
    */
   private readonly handleAnimationEnd = (event: Event) => {
     const name = (event as AnimationEvent).animationName
-    if (name.includes('step-enter') && event.target === this) this.removeAttribute('entering')
-    if (name.includes('step-settle')) this.removeAttribute('settling')
+    if (name.includes('step-enter') && event.target === this) this.entering = false
+    if (name.includes('step-settle')) this.setState('settling', false)
+  }
+
+  /**
+   * Every piece of state page CSS may want lives in a custom state, never on the host's attributes: an attribute the
+   * step (or its list) writes on itself is one the server never rendered, which a hydrating framework reports.
+   */
+  private setState(name: string, on: boolean) {
+    if (on) this.internals.states.add(name)
+    else this.internals.states.delete(name)
   }
 
   protected override willUpdate(changed: PropertyValues) {
     // Only a real change reopens a stage. The old value is `undefined` on the first pass, where `status` is merely
     // the one the step was born with — the author's, not the run's, so a `collapsed` stage stays folded.
-    if (!changed.has('status') || changed.get('status') === undefined) return
-    if (STATUS_REOPENS.has(this.status)) this.collapsed = false
+    if (changed.has('status') && changed.get('status') !== undefined && STATUS_REOPENS.has(this.status)) this.collapsed = false
+    this.syncStates(changed)
   }
 
   protected override updated(changed: PropertyValues) {
     // The beat is for a status that *changed*. On the first pass `status` is merely the one the step was born
     // with, and a trace drawn complete should sit still rather than pop one marker per row.
-    if (changed.has('status') && changed.get('status') !== undefined) this.toggleAttribute('settling', true)
-    if (changed.has('level')) this.style.setProperty('--level', String(this.level))
-    if (changed.has('last')) this.toggleAttribute('last', this.last)
-    if (changed.has('marker')) this.setAttribute('marker', this.marker)
-    if (changed.has('grouped')) this.toggleAttribute('grouped', this.grouped)
-    if (changed.has('hasChildren')) this.toggleAttribute('has-children', this.hasChildren)
+    if (changed.has('status') && changed.get('status') !== undefined) this.setState('settling', true)
+    // The parent rolls a run's status up; telling it is what used to be the reflected attribute's job.
+    if (changed.has('status')) this.dispatchEvent(new CustomEvent(STEP_STATUS_EVENT, { bubbles: true }))
     if (changed.has('collapsed') && changed.get('collapsed') !== undefined && this.hasChildren) {
       this.dispatchEvent(new CustomEvent<StepToggleEventDetail>('step-toggle', { detail: { collapsed: this.collapsed, path: this.path }, bubbles: true }))
     }
+  }
+
+  /** States are set before render so the first paint already carries them. */
+  private syncStates(changed: PropertyValues) {
+    if (changed.has('status')) {
+      const previous = changed.get('status') as StepStatus | undefined
+      if (previous) this.setState(previous, false)
+      if (this.status) this.setState(this.status, true)
+    }
+    if (changed.has('collapsed')) this.setState('collapsed', this.collapsed)
+    if (changed.has('last')) this.setState('last', this.last)
+    if (changed.has('marker')) {
+      const previous = changed.get('marker') as StepsMarker | undefined
+      if (previous) this.setState(`marker-${previous}`, false)
+      this.setState(`marker-${this.marker}`, true)
+    }
+    if (changed.has('grouped')) this.setState('grouped', this.grouped)
+    if (changed.has('hasChildren')) this.setState('has-children', this.hasChildren)
+    if (changed.has('entering')) this.setState('entering', this.entering)
   }
 
   /** These three collapse when empty, so their rows have to know whether the slot was filled. */
@@ -247,6 +348,19 @@ export class Step extends LitElement {
 
   private handleToggle(event: Event) {
     this.collapsed = !(event.target as HTMLDetailsElement).open
+  }
+
+  /** The list owns the selection; the row only asks for it. */
+  private handleSelect() {
+    if (this.disabled) return
+    this.dispatchEvent(
+      new CustomEvent<StepSelectRequestDetail>(STEP_SELECT_EVENT, { detail: { value: this.value || this.path }, bubbles: true, composed: true }),
+    )
+  }
+
+  /** A horizontal step is one column, so a group there is a plain step: its sub-steps roll up but are not drawn. */
+  private get isDisclosure() {
+    return this.hasChildren && this.orientation !== 'horizontal'
   }
 
   private renderMarker() {
@@ -291,23 +405,40 @@ export class Step extends LitElement {
     `
   }
 
+  /** A leaf's row: a button in an `interactive` list, which is what makes it focusable and pressable. */
+  private renderLeafRow(rowClass: ReturnType<typeof classMap>): TemplateResult {
+    if (!this.interactive) return html`<div class=${rowClass} part="row">${this.renderRowContent()}</div>`
+    return html`<button
+      type="button"
+      class=${rowClass}
+      part="row"
+      ?disabled=${this.disabled}
+      aria-current=${this.selected ? 'true' : 'false'}
+      @click=${this.handleSelect}
+    >
+      ${this.renderRowContent()}
+    </button>`
+  }
+
   override render() {
-    const rowClass = classMap({ 'c2-step__row': true, [`is-${this.status}`]: true })
+    const rowClass = classMap({ 'c2-step__row': true, [`is-${this.status}`]: true, 'is-selected': this.interactive && this.selected })
+    const frameClass = classMap({ 'c2-step__frame': true, 'is-horizontal': this.orientation === 'horizontal' })
+    // The depth drives the indent. It is set inside the shadow root, never as an inline style on the host.
+    const frameStyle = styleMap({ '--level': String(this.level) })
     // A leaf is a row; a group is a disclosure, which `<details>` gives correct keyboard and expanded-state
     // semantics for free. The slot lives in both branches, or a leaf could never find out it has children.
     // One frame around both, so a step arriving in a running trace has a single box to grow from.
     return html`
-      <div class="c2-step__frame" part="frame">
+      <div class=${frameClass} part="frame" style=${frameStyle}>
         ${
-          this.hasChildren
+          this.isDisclosure
             ? html`
                 <details class="c2-step__details" ?open=${!this.collapsed} @toggle=${this.handleToggle}>
                   <summary class=${rowClass} part="row">${this.renderRowContent()}</summary>
                   ${this.renderChildren()}
                 </details>
               `
-            : html`<div class=${rowClass} part="row">${this.renderRowContent()}</div>
-                ${this.renderChildren()}`
+            : html`${this.renderLeafRow(rowClass)} ${this.renderChildren()}`
         }
       </div>
     `

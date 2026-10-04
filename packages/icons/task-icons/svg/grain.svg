@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <path d="M12 21.5V6.5"/>
+  <ellipse class="tone" cx="12" cy="4.8" rx="1.5" ry="2.5"/>
+  <ellipse class="tone" cx="9.6" cy="9.4" rx="1.5" ry="2.8" transform="rotate(-40 9.6 9.4)"/>
+  <ellipse class="tone" cx="14.4" cy="9.4" rx="1.5" ry="2.8" transform="rotate(40 14.4 9.4)"/>
+  <ellipse class="tone" cx="9.6" cy="14" rx="1.5" ry="2.8" transform="rotate(-40 9.6 14)"/>
+  <ellipse class="tone" cx="14.4" cy="14" rx="1.5" ry="2.8" transform="rotate(40 14.4 14)"/>
+</svg>

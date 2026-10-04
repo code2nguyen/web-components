@@ -1,10 +1,10 @@
 # @c2n/chart
 
-Line, area, bar, sparkline, pie, gauge, scatter and candlestick charts as custom elements, from one package.
+Line, area, bar, sparkline, pie, gauge, scatter, candlestick and overlap (Venn) charts as custom elements, from one package.
 
 ```bash
 npm install @c2n/chart uplot     # line, area, bar, sparkline
-npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick
+npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick, overlap
 ```
 
 ```html
@@ -35,6 +35,7 @@ import '@c2n/chart' // all of them
 | `c2-gauge-chart`       | ECharts | A bounded current value or target               |
 | `c2-scatter-chart`     | ECharts | Relationships, clusters and outliers            |
 | `c2-candlestick-chart` | ECharts | Open-high-low-close financial sessions          |
+| `c2-overlap-chart`     | ECharts | How two or three sets overlap (Venn diagram)    |
 | `c2-chart-series`      | —       | A series definition; renders nothing            |
 | `c2-chart-legend`      | —       | A linked legend placed anywhere in the layout   |
 | `c2-chart-tooltip`     | —       | A linked floating or inline tooltip             |
@@ -111,5 +112,7 @@ messages) is ordinary DOM and does expose parts.
 `chart-ready`, `chart-error`, `point-click`, `point-hover`, `range-change`, `series-toggle`, `legend-change`
 and `tooltip-change`. The
 semantic ones do not bubble: several components fire similarly named events, so a listener belongs on the
-element itself. The host also carries `data-chart-ready` once the first frame is drawn, which is the
-signal to wait on in a test.
+element itself. The host also matches the custom state `:state(ready)` once the first frame is drawn
+(`c2-line-chart:state(ready)`), which is the signal to wait on in a test; `:state(engine-uplot)` or
+`:state(engine-echarts)` names the engine. Earlier releases wrote `data-chart-ready` and `data-chart-engine`
+attributes on the host instead, which a server-rendered page never had.

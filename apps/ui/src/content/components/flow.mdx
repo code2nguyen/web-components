@@ -1,0 +1,231 @@
+---
+title: 'Flow'
+description: 'A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { Flow } from '@c2n/flow'
+
+<ExampleModules />
+
+`c2-flow` draws a directed graph such as a CI pipeline, a data job or a training run. Give it `nodes` and `edges` (as properties, or as JSON attributes); every node carries a status, and each edge takes its look from the statuses at both ends: an edge into a running step animates, one out of a failed step turns red and one touching a skipped step is dotted. Every edge ends in an arrowhead at its target, in the edge's own colour, so the direction of a dependency reads at a glance. An edge with a `label` shows it halfway along, in a small pill: the "yes" and "no" on the branches of a decision.
+
+The flow lays itself out: one column per dependency depth (`direction="LR"`) or one row (`"TB"`), with siblings ordered to avoid crossings. Cycles are allowed and their closing edge loops round the outside. Drag a node to arrange the graph yourself; with a `storage-key` the arrangement and the chosen direction are saved in `localStorage` and restored on the next visit, and when the graph has changed in between, the saved layout is merged: kept steps stay put, new ones are placed next to their neighbours.
+
+Right-click the canvas or a node (or long-press it, or press Shift+F10) for the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout. With focus in the flow, Ctrl/⌘ + `+`, Ctrl/⌘ + `-` and Ctrl/⌘ + `0` zoom and fit, and Ctrl/⌘ + scroll zooms around the pointer. Hover or focus a node for a card with its status and details.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/flow
+```
+
+`@c2n/context-menu` and `@c2n/menu` are dependencies of the package and are registered for you.
+
+## Usage
+
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the last one is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag a node's handle to connect it, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
+
+```html tag=UsageBlock,package=@c2n/flow
+<style>
+  .demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .demo c2-flow {
+    --c2-flow--height: 380px;
+  }
+  .demo .short {
+    --c2-flow--height: 300px;
+  }
+  .demo .diagram {
+    --c2-flow__marker--display: none;
+  }
+  .flow-action {
+    --c2-icon-button__state-layer--size: 28px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
+  .result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="CI pipeline">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="events" aria-label="CI pipeline" storage-key="c2n-docs:flow:ci" nodes='[{"id":"checkout","label":"Checkout","status":"success","meta":"4s","description":"actions/checkout"},{"id":"install","label":"Install deps","status":"success","meta":"48s","description":"npm ci","details":{"Runner":"ubuntu-24.04","Cache":"hit (412 MB)"}},{"id":"lint","label":"Lint","status":"success","meta":"21s","description":"eslint"},{"id":"types","label":"Type-check","status":"success","meta":"34s","description":"tsc"},{"id":"unit","label":"Unit tests","status":"warning","meta":"1m 52s","description":"playwright","details":{"Tests":"1318 passed, 2 flaky"}},{"id":"build","label":"Build packages","status":"success","meta":"2m 10s","description":"wireit"},{"id":"e2e-chromium","label":"E2E Chromium","status":"success","meta":"3m 02s"},{"id":"e2e-firefox","label":"E2E Firefox","status":"running","meta":"2m 41s","details":{"Progress":"812 of 1320 tests"}},{"id":"e2e-webkit","label":"E2E WebKit","status":"error","meta":"1m 18s","details":{"Failed":"select.spec.ts, closes on outside click"}},{"id":"staging","label":"Deploy staging","status":"pending"},{"id":"approval","label":"Approval","status":"pending","description":"manual gate"},{"id":"prod","label":"Deploy production","status":"pending"}]' edges='[{"source":"checkout","target":"install"},{"source":"install","target":"lint"},{"source":"install","target":"types"},{"source":"install","target":"unit"},{"source":"lint","target":"build"},{"source":"types","target":"build"},{"source":"unit","target":"build"},{"source":"build","target":"e2e-chromium"},{"source":"build","target":"e2e-firefox"},{"source":"build","target":"e2e-webkit"},{"source":"e2e-chromium","target":"staging"},{"source":"e2e-firefox","target":"staging"},{"source":"e2e-webkit","target":"staging"},{"source":"staging","target":"approval"},{"source":"approval","target":"prod"}]'></c2-flow>
+    <output class="result"></output>
+  </div>
+</div>
+<div data-label="Top to bottom, step edges">
+  <div class="demo">
+    <c2-flow client:only="lit" aria-label="Warehouse load" direction="TB" edge-type="step" storage-key="c2n-docs:flow:etl" nodes='[{"id":"orders","label":"Extract orders","status":"success","description":"postgres"},{"id":"customers","label":"Extract customers","status":"success","description":"crm api"},{"id":"validate","label":"Validate","status":"warning","description":"14 rows quarantined"},{"id":"transform","label":"Transform","status":"success","description":"dbt"},{"id":"load","label":"Load warehouse","status":"error","description":"No active warehouse"},{"id":"report","label":"Quality report","status":"skipped"},{"id":"dash","label":"Refresh dashboards","status":"skipped"}]' edges='[{"source":"orders","target":"validate"},{"source":"customers","target":"validate"},{"source":"validate","target":"transform"},{"source":"transform","target":"load"},{"source":"load","target":"report"},{"source":"load","target":"dash"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="A cycle">
+  <div class="demo">
+    <c2-flow client:only="lit" class="short" aria-label="Batch with retries" nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]' edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="Custom nodes">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="custom" class="short" aria-label="Model training" nodes='[{"id":"data","label":"Load features","status":"success","data":{"kind":"dataset","progress":100,"metric":"1.2M rows"}},{"id":"split","label":"Train / test split","status":"success","data":{"kind":"transform","progress":100,"metric":"80 / 20"}},{"id":"xgb","label":"XGBoost","status":"running","data":{"kind":"train","progress":64,"metric":"AUC 0.871"}},{"id":"lgbm","label":"LightGBM","status":"success","data":{"kind":"train","progress":100,"metric":"AUC 0.864"}},{"id":"eval","label":"Evaluate","status":"pending","data":{"kind":"evaluate","progress":0,"metric":"best of 2"}}]' edges='[{"source":"data","target":"split"},{"source":"split","target":"xgb"},{"source":"split","target":"lgbm"},{"source":"xgb","target":"eval"},{"source":"lgbm","target":"eval"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="A decision">
+  <div class="demo">
+    <c2-flow client:only="lit" class="short diagram" aria-label="Getting home" nodes='[{"id":"missed","label":"Missed the last train?"},{"id":"bus","label":"Book the night bus"},{"id":"walk","label":"Walk to the station"},{"id":"home","label":"Home"}]' edges='[{"source":"missed","target":"bus","label":"yes"},{"source":"missed","target":"walk","label":"no"},{"source":"bus","target":"home"},{"source":"walk","target":"home"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="Editable">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="editable" editable actions-placement="left" class="short" aria-label="Flow note" nodes='[{"id":"idea","label":"Idea"},{"id":"outline","label":"Outline"},{"id":"draft","label":"First draft"}]' edges='[{"source":"idea","target":"outline","label":"worth it"},{"source":"outline","target":"draft"}]'>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="add" tooltip="Add node" aria-label="Add node"><c2-feather-plus></c2-feather-plus></c2-icon-button>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="layout" tooltip="Auto layout" aria-label="Auto layout"><c2-feather-layout></c2-feather-layout></c2-icon-button>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="fit" tooltip="Fit view" aria-label="Fit view"><c2-feather-maximize></c2-feather-maximize></c2-icon-button>
+    </c2-flow>
+    <output class="result"></output>
+  </div>
+</div>
+```
+
+## Editing
+
+With `editable` the user draws the diagram. The flow stays controlled, like a form field with a `value`: it never changes `nodes` or `edges` itself, it fires an event and your application applies the change (and can refuse it, or save it first). None of the events bubble.
+
+| Gesture                                                          | Keyboard                                                                      | Event                                   |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------- |
+| Double-click empty canvas, or **Add node** in the canvas menu    | `N` (in the middle of the view), or Enter on the canvas of an empty flow      | `node-add` `{ position }`               |
+| Drag a node's handle and release on empty canvas                 | `N` on the selected node                                                      | `node-add` `{ position, source }`       |
+| Drag a node's handle onto another node                           | `C`, then the arrow keys or Tab to choose, Enter to connect, Escape to cancel | `edge-add` `{ source, target }`         |
+| Double-click a node, or **Rename** in its menu                   | F2, or Enter on the selected node; Enter commits, Escape cancels              | `node-edit` `{ id, label }`             |
+| Double-click an edge or its label, or **Edit label** in its menu | F2 or Enter on the selected edge; Enter commits, Escape cancels               | `edge-edit` `{ source, target, label }` |
+| **Delete** in a node's menu                                      | Delete or Backspace on the focused node                                       | `node-delete` `{ id }`                  |
+| Click an edge, then Delete; or **Delete** in its menu            | `E` on a node selects its edges in turn, then Delete                          | `edge-delete` `{ source, target }`      |
+
+`edge-add` never names a self-loop or an edge that already exists. `position` is in canvas pixels, the top-left corner of the new node: give it to the node as its `position` and the flow puts it there. While the flow is editable, a change to the graph never moves the nodes that are already on the canvas: their positions are pinned as a custom layout, saved under `storage-key` and reported by `layout-change` with the reason `edit`.
+
+An edge's label is edited in the same inline field, opened halfway along the edge. `edge-edit` carries the trimmed new label, and an empty `label` when the user cleared it: remove the edge's `label` then. `editEdgeLabel(source, target)` opens the field from script, for example on a branch you have just added.
+
+The inline editor replaces the label of a node drawn by the flow. A node drawn by `renderNode` or a `node:<id>` slot gets the editor over its whole body and the same `node-edit` event, but must render `node.label` itself for the new name to show.
+
+```ts tag=CodeBlock
+import type { FlowEdge } from '@c2n/flow'
+
+const flow = document.querySelector('c2-flow')!
+let next = 1
+
+flow.addEventListener('node-add', async ({ detail }) => {
+  const id = `note-${next++}`
+  flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]
+  if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id }]
+  await flow.updateComplete
+  flow.editLabel(id) // let the user name it straight away
+})
+flow.addEventListener('node-edit', ({ detail }) => {
+  flow.nodes = flow.nodes.map((node) => (node.id === detail.id ? { ...node, label: detail.label } : node))
+})
+flow.addEventListener('node-delete', ({ detail }) => {
+  flow.nodes = flow.nodes.filter((node) => node.id !== detail.id)
+  flow.edges = flow.edges.filter((edge) => edge.source !== detail.id && edge.target !== detail.id)
+})
+flow.addEventListener('edge-add', ({ detail }) => {
+  flow.edges = [...flow.edges, detail]
+})
+flow.addEventListener('edge-delete', ({ detail }) => {
+  flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+})
+flow.addEventListener('edge-edit', ({ detail }) => {
+  flow.edges = flow.edges.map((edge) => {
+    if (edge.source !== detail.source || edge.target !== detail.target) return edge
+    const next: FlowEdge = { ...edge, label: detail.label }
+    if (!detail.label) delete next.label
+    return next
+  })
+})
+```
+
+## Actions on the canvas
+
+Buttons slotted into `actions` form a toolbar over the canvas: the place for the commands a diagram editor keeps at hand, such as add node, auto layout or fit view. It sits at the top by default; `actions-placement="right"`, `"bottom"` or `"left"` moves it to that edge, where the buttons stack in a column. It is a `toolbar` for assistive technology, and the arrow keys (along its orientation), Home and End move between its buttons. Clicks on it never pan the canvas or open the context menu.
+
+Wire the buttons to the flow's methods: `addNode()` asks for a node exactly as `N` does (after the selected node, or in a free spot in the middle of the view) through the usual `node-add` event, `resetLayout()` animates back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` move the view. The panel is styled by `--c2-flow__actions--background-color`, `--border`, `--border-radius`, `--box-shadow`, `--padding` and `--gap`; `--c2-flow__actions--align` (`flex-start`, `center`, `flex-end`) slides it along its edge and `--c2-flow__actions--offset` sets its distance from the edge.
+
+```html tag=CodeBlock
+<c2-flow editable actions-placement="left">
+  <c2-icon-button slot="actions" data-action="add" tooltip="Add node" aria-label="Add node"><c2-feather-plus></c2-feather-plus></c2-icon-button>
+  <c2-icon-button slot="actions" data-action="layout" tooltip="Auto layout" aria-label="Auto layout"><c2-feather-layout></c2-feather-layout></c2-icon-button>
+  <c2-icon-button slot="actions" data-action="fit" tooltip="Fit view" aria-label="Fit view"><c2-feather-maximize></c2-feather-maximize></c2-icon-button>
+</c2-flow>
+<script type="module">
+  const flow = document.querySelector('c2-flow')
+  const run = { add: () => flow.addNode(), layout: () => flow.resetLayout(), fit: () => flow.fitView() }
+  flow.addEventListener('click', (event) => run[event.target.closest('[data-action]')?.dataset.action]?.())
+</script>
+```
+
+## Arrowheads, labels and the status marker
+
+All three are styled through CSS variables. The arrowhead takes the colour of its edge in every state (idle, done, active, failed, selected and the edge being drawn); `--c2-flow__arrow--size` sizes it and `--c2-flow__arrow--display: none` turns it off. An edge label is drawn in a pill with its own background, so it stays readable over the line and the dot grid: `--c2-flow__edge-label--background-color`, `--c2-flow__edge-label--color`, `--c2-flow__edge-label--font-size`, `--c2-flow__edge-label--padding`, `--c2-flow__edge-label--border` and `--c2-flow__edge-label--border-radius`. Labels scale with the canvas, like the text of the nodes, and screen readers hear them with the relations of both nodes ("Before Book the night bus, yes; Walk to the station, no.").
+
+The marker at the start of each default node body shows the step's status, which is what a pipeline needs and noise in a plain diagram. `--c2-flow__marker--display: none` hides it, and the label then starts flush with the node's padding; the hover card keeps its marker.
+
+```css tag=CodeBlock
+c2-flow.diagram {
+  --c2-flow__marker--display: none;
+  --c2-flow__arrow--size: 10px;
+  --c2-flow__edge-label--color: #18181b;
+}
+```
+
+## Custom nodes and cards
+
+`renderNode` returns the body of every node and `renderCard` the content of its hover card, as a Lit template, a DOM node or a string. Handles, dragging, edges and positioning stay with the flow. A framework that renders its own markup can use the `node:<id>` and `card:<id>` slots instead.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import '@c2n/flow'
+
+const flow = document.querySelector('c2-flow')!
+flow.renderNode = ({ node, status }) => html`
+  <strong>${node.label}</strong>
+  <progress max="100" value=${node.data.progress}></progress>
+  <small>${status} · ${node.data.metric}</small>
+`
+flow.addEventListener('node-click', ({ detail }) => openDetails(detail.node))
+```
+
+## Context menu
+
+`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas), the edge in an `editable` flow, and the built-in rows (in an editable flow, **Add node** on the canvas, **Rename** and **Delete** on a node, and **Edit label** and **Delete** on an edge). The view controls (zoom, fit, layout) belong to the canvas: a node has no built-in rows, so right-clicking one opens a menu only when you return rows for it. Return your own rows next to `defaultItems` to extend the canvas menu; they fire `flow-menu-select` with the node. A row with `value="flow:details"` selects the node and fires `node-click`. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
+
+```ts tag=CodeBlock
+flow.renderContextMenu = ({ node }) =>
+  node
+    ? html`<h6>${node.label}</h6>
+        <c2-menu-item value="flow:details">Show details</c2-menu-item>
+        ${node.status === 'error' ? html`<c2-menu-item value="retry">Retry</c2-menu-item>` : nothing}`
+    : undefined
+
+flow.addEventListener('flow-menu-select', ({ detail }) => {
+  if (detail.value === 'retry') retry(detail.node!.id)
+})
+```
+
+## Layout
+
+The saved layout is a plain object of positions keyed by node id. `getLayout()` returns the current one and `setLayout()` applies one (merged like a restored layout), so it can live on a server instead of in `localStorage`; `layout-change` fires whenever the user changes it. `resetLayout()` goes back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` drive the view from your own controls.
+
+A node can also carry its own `position`. The flow places it there instead of where the auto layout would, unless the user has already moved it (a saved or dragged position wins over the one the node first arrived with); changing the value later moves the node. Nodes without one still follow the auto layout, placed next to their neighbours.

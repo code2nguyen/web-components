@@ -92,3 +92,41 @@ test('the bar fills a flex or grid container instead of collapsing to its conten
   await props(page.locator('c2-progress'), { style: '--c2-progress--width: 180px' })
   await expect(page.locator('[part="track"]')).toHaveCSS('width', '180px')
 })
+
+test('the circular variant draws a ring with the value in its middle and the label underneath', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-progress variant="circular" value="67" show-value>Readiness</c2-progress>')
+  const progress = page.getByRole('progressbar', { name: 'Readiness' })
+  await expect(progress).toHaveAttribute('aria-valuenow', '67')
+  await expect(page.locator('[part="value"]')).toHaveText('67%')
+  const ring = await page.locator('[part="track"]').boundingBox()
+  const value = await page.locator('[part="value"]').boundingBox()
+  const label = await page.locator('[part="label"]').boundingBox()
+  if (!ring || !value || !label) throw new Error('Expected a visible ring, value and label')
+  expect(Math.round(ring.width)).toBe(64)
+  expect(Math.round(ring.height)).toBe(64)
+  // The value is centred inside the ring and the label sits below it.
+  expect(Math.abs(value.x + value.width / 2 - (ring.x + ring.width / 2))).toBeLessThan(1.5)
+  expect(Math.abs(value.y + value.height / 2 - (ring.y + ring.height / 2))).toBeLessThan(1.5)
+  expect(label.y).toBeGreaterThanOrEqual(ring.y + ring.height)
+  await accessible(page)
+})
+
+test('the circular arc covers the fraction of the ring given by the value', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-progress variant="circular" label="Upload" value="25"></c2-progress>')
+  const coverage = () =>
+    page.locator('[part="indicator"]').evaluate((circle: SVGCircleElement) => {
+      const [dash] = getComputedStyle(circle).strokeDasharray.split(/[ ,]+/).map(parseFloat)
+      return Math.round((dash / circle.getTotalLength()) * 100)
+    })
+  await expect.poll(coverage).toBe(25)
+  await props(page.locator('c2-progress'), { value: 80 })
+  await expect.poll(coverage).toBe(80)
+})
+
+test('an indeterminate circular ring spins without a value', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-progress variant="circular" show-value>Loading data</c2-progress>')
+  await expect(page.getByRole('progressbar', { name: 'Loading data' })).not.toHaveAttribute('aria-valuenow')
+  await expect(page.locator('[part="value"]')).toHaveText('')
+  const animation = await page.locator('[part="indicator"]').evaluate((circle) => getComputedStyle(circle).animationName)
+  expect(animation).toBe('c2-progress-spin')
+})

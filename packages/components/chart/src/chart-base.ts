@@ -1,4 +1,4 @@
-import { LitElement, html, isServer, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, isServer, nothing, render, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -54,10 +54,23 @@ const VIEW_ONLY_KEYS: ReadonlySet<string> = new Set([
 export interface ChartLegendItem {
   label: string
   color: string
+  /** Whether the entry's series (or slice, or set) is drawn at all. */
   visible: boolean
+  /** What `highlighted` names this entry by: the series field, a pie's slice label, an overlap chart's set key. */
+  key: string
+  /** The entry's pressed state under the chart's `legend-action`: shown in `toggle` mode, highlighted in `highlight` mode. */
+  pressed: boolean
+  /** Whether the entry is drawn faded: hidden in `toggle` mode, another entry highlighted in `highlight` mode. */
+  dimmed: boolean
+  /** Runs the chart's `legend-action` for this entry: hides or shows it, or highlights it or clears the highlight. */
   toggle: () => void
   series: ChartSeriesConfig
   index: number
+  /**
+   * Called with `true` while the entry is hovered or focused and `false` when it is left, for a chart that can
+   * emphasise the entry's mark (the overlap chart lights up the set's circle). Absent on most charts.
+   */
+  highlight?: (active: boolean) => void
 }
 
 /** Detail emitted whenever the component-owned legend model changes. */
@@ -85,6 +98,13 @@ export interface ChartEventMap {
   'legend-change': CustomEvent<ChartLegendChangeEventDetail>
   'range-change': CustomEvent<ChartRangeEventDetail>
   'series-toggle': CustomEvent<ChartSeriesToggleEventDetail>
+  'series-highlight': CustomEvent<ChartSeriesHighlightEventDetail>
+}
+
+/** Detail of `series-highlight`. */
+export interface ChartSeriesHighlightEventDetail {
+  /** Key of the highlighted series, slice or set, or `null` when the highlight was cleared. */
+  key: string | null
 }
 
 export interface ChartBase {
@@ -107,6 +127,15 @@ export interface ChartBase {
  * default) rather than by its content. Give the host a height — through the variable, a CSS rule, or a
  * flex parent — or the plot area collapses.
  *
+ * **States.** The host never carries an attribute the author did not write. Once the engine has drawn, it matches the
+ * custom states `:state(ready)` and `:state(engine-uplot)` or `:state(engine-echarts)` (`c2-line-chart:state(ready)` in
+ * page CSS or a test selector); both clear again when the chart is disconnected.
+ *
+ * **Mark variables.** The variables documented here apply to every chart. Those that style one kind of mark —
+ * `--c2-chart__line--width`, `--c2-chart__point--radius`, `--c2-chart__area--opacity`,
+ * `--c2-chart__bar--border-radius`, `--c2-chart__grid--width` and `--c2-chart__series__dimmed--opacity` — are
+ * documented on the chart types that draw that mark, and only there.
+ *
  * @slot default - The series definitions: `c2-chart-series` elements. They render nothing themselves.
  * @slot legend - Replaces the built-in legend. The built-in one is still what `legend` positions.
  * @slot tooltip - Replaces the built-in tooltip body. The hovered point is available through the `renderTooltip` property when a function is easier than markup.
@@ -117,14 +146,15 @@ export interface ChartBase {
  *
  * @slotcomponent c2-chart-series
  *
- * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also gains `data-chart-ready`, which is what a test should wait on.
+ * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also matches `:state(ready)` from then on, which is what a test should wait on.
  * @event {CustomEvent<{ error: unknown }>} chart-error - Fired when the engine fails to load or to draw. `detail.error` is the underlying failure.
- * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked. Does not bubble: several components fire point events, so a listener belongs on the element itself.
+ * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked; the chart then highlights the clicked series (a second click on it clears the highlight). Cancelable: `preventDefault()` keeps the highlight as it is. Does not bubble: several components fire point events, so a listener belongs on the element itself.
  * @event {CustomEvent<ChartPointEventDetail | null>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
  * @event {CustomEvent<ChartTooltipContext | null>} tooltip-change - Fired with the complete tooltip model as the pointer moves, and with `null` when it leaves. Used by `c2-chart-tooltip`.
  * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
  * @event {CustomEvent<ChartRangeEventDetail>} range-change - Fired after the user zooms or brushes. `detail.min` and `detail.max` are the new x bounds. Does not bubble.
- * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a legend entry is toggled. Does not bubble.
+ * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a series is hidden or shown, from the legend with `legend-action="toggle"` or through `setSeriesVisible`. Does not bubble.
+ * @event {CustomEvent<ChartSeriesHighlightEventDetail>} series-highlight - Fired when the reader highlights a series, from the legend or by clicking it in the plot, or clears the highlight. `detail.key` names it, or is `null`. Does not bubble.
  *
  * @csspart frame - The outer flex column holding the legend and the plot area.
  * @csspart plot-area - The positioned box the engine draws into.
@@ -163,28 +193,22 @@ export interface ChartBase {
  * @cssproperty {color} [--c2-chart__series-7--color=#0891b2] - Colour of the seventh series.
  * @cssproperty {color} [--c2-chart__series-8--color=#52525b] - Colour of the eighth series. Series beyond the eighth reuse the palette from the start.
  *
- * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of a line series.
- * @cssproperty {pixel} [--c2-chart__point--radius=2.5px] - Radius of a data point marker.
- * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of the fill under an area series.
- * @cssproperty {number} [--c2-chart__bar--border-radius=0] - Roundedness of a bar's value end, from 0 (square) to 0.5 (fully rounded).
- *
  * @cssproperty {color} [--c2-chart__axis--color=#71717a] - Colour of the axis lines and tick labels.
  * @cssproperty {font-size} [--c2-chart__axis--font-size=12px] - Font size of the tick labels.
  * @cssproperty {color} [--c2-chart__grid--color=#e4e4e7] - Colour of the grid lines.
- * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
  * @cssproperty {color} [--c2-chart__crosshair--color=#a1a1aa] - Colour of the cursor crosshair.
  * @cssproperty {pixel} [--c2-chart__crosshair--width=1px] - Width of the cursor crosshair.
  *
  * @cssproperty {color} [--c2-chart__surface--color=#ffffff] - Surface colour handed to the engine, for marker borders and label backdrops.
  * @cssproperty {color} [--c2-chart__muted--color=#71717a] - Secondary text colour.
- * @cssproperty {color} [--c2-chart__positive--color=#16a34a] - Colour for a rising value, used by the candlestick and gauge charts.
- * @cssproperty {color} [--c2-chart__negative--color=#dc2626] - Colour for a falling value, used by the candlestick and gauge charts.
+ * @cssproperty {color} [--c2-chart__positive--color=#16a34a] - Colour for a rising value, used by the candlestick chart and as the sparkline's positive tone.
+ * @cssproperty {color} [--c2-chart__negative--color=#dc2626] - Colour for a falling value, used by the candlestick chart and as the sparkline's negative tone.
  *
  * @cssproperty {pixel} [--c2-chart__legend--gap=12px] - Gap between legend entries.
  * @cssproperty {padding} [--c2-chart__legend--padding=8px 0 0] - Padding around the legend.
  * @cssproperty {color} [--c2-chart__legend--color=#71717a] - Legend text colour.
  * @cssproperty {font-size} [--c2-chart__legend--font-size=12px] - Legend font size.
- * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of a legend entry whose series is hidden.
+ * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of the legend entries that are not highlighted while one is, or, with `legend-action="toggle"`, of an entry whose series is hidden.
  * @cssproperty {pixel} [--c2-chart__legend-marker--size=10px] - Size of the legend colour swatch.
  * @cssproperty {border-radius} [--c2-chart__legend-marker--border-radius=999px] - Corner radius of the legend colour swatch.
  *
@@ -201,6 +225,10 @@ export interface ChartBase {
  */
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
+
+  // State is exposed as custom states, never as host attributes: an attribute written on the host after the engine
+  // loads is one the server never rendered, which a hydrating framework reports as a mismatch.
+  protected readonly internals = this.attachInternals()
 
   @query('.plot') protected plotElement!: HTMLElement | null
   @query('.tooltip') private tooltipElement!: HTMLElement | null
@@ -241,6 +269,19 @@ export abstract class ChartBase extends LitElement {
    * unreadable without one, and a single-series chart simply renders a one-entry legend.
    */
   @property({ type: String }) legend: 'none' | 'top' | 'bottom' | 'start' | 'end' = 'bottom'
+
+  /**
+   * What clicking a legend entry does. `highlight` (the default) emphasises the series and dims the others, and a
+   * second click clears the highlight, just as a click on the series in the plot does; `toggle` hides or shows the
+   * series instead. A linked `c2-chart-legend` follows the same mode.
+   */
+  @property({ type: String, attribute: 'legend-action' }) legendAction: 'toggle' | 'highlight' = 'highlight'
+
+  /**
+   * Key of the series drawn emphasised, the others dimmed: the series `field`, or a pie's slice label, or an overlap
+   * chart's set key. Set by a legend click in `highlight` mode, and settable from the application in either mode.
+   */
+  @property({ type: String }) highlighted: string | null = null
 
   /** Whether the tooltip follows the whole x position or only the hovered datum. */
   @property({ type: String }) tooltip: 'none' | 'item' | 'axis' = 'axis'
@@ -329,9 +370,52 @@ export abstract class ChartBase extends LitElement {
     for (const index of this.hiddenSeries) adapter.setSeriesVisibility(index, false)
   }
 
+  /**
+   * A problem with the input this chart type cannot draw, shown in the error state like `error` but owned by
+   * the chart rather than the author. Empty when the input is drawable.
+   */
+  protected validationError(): string {
+    return ''
+  }
+
+  /**
+   * Whether the chart has something to draw before it has data: a map draws its geometry, and a region picker may
+   * never be given rows at all. Such a chart skips the empty state and creates its engine without a frame row.
+   */
+  protected get rendersWithoutData(): boolean {
+    return false
+  }
+
+  /**
+   * Whether everything the engine needs besides data has arrived. A map waits for its geometry to load; until then
+   * the chart neither creates its engine nor shows the empty state.
+   */
+  protected get readyToDraw(): boolean {
+    return true
+  }
+
+  /**
+   * Whether a change must replace the engine options rather than merge them. Merging keeps keys a new option object
+   * leaves out, which is wrong when a change removes them (a map's projection or extent box). A changed series list
+   * always replaces.
+   */
+  protected replacesOptions(_changed: PropertyValues): boolean {
+    return false
+  }
+
   /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
   protected get legendDependsOnData(): boolean {
     return false
+  }
+
+  /**
+   * Whether a change reshapes the frame, so the rows must be read again. `x-field`, `label-field` and `x-type`
+   * always do, and so does the series list: definitions that arrive after `data` would otherwise leave the frame
+   * holding the columns inferred from the first row. A chart with more row fields (the bubble chart's size) adds
+   * its own. The builder's signature cache makes a change that reads the same fields free.
+   */
+  protected reshapesFrame(changed: PropertyValues): boolean {
+    return changed.has('series') || changed.has('seriesElements')
   }
 
   // ------------------------------------------------------------ lifecycle ---
@@ -387,8 +471,8 @@ export abstract class ChartBase extends LitElement {
     // uPlot registers its own listeners and ECharts leaks without `dispose`, so the instance goes too.
     this.adapter?.destroy()
     this.adapter = undefined
-    this.removeAttribute('data-chart-engine')
-    this.removeAttribute('data-chart-ready')
+    this.internals.states.delete(`engine-${this.engineName}`)
+    this.internals.states.delete('ready')
   }
 
   /**
@@ -404,9 +488,18 @@ export abstract class ChartBase extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues): void {
+    // Read the declared series before the first frame is built, so a hydrated chart does not start from inferred ones.
+    if (!this.hasUpdated && !isServer) this.#collectSeries(true)
     // The fields that shape the frame count as data: a chart switched to another x or label field at runtime must
     // re-read its rows, which the builder's signature cache would otherwise hand back unchanged.
-    if (changed.has('data') || changed.has('revision') || changed.has('xField') || changed.has('labelField') || changed.has('xType')) {
+    if (
+      changed.has('data') ||
+      changed.has('revision') ||
+      changed.has('xField') ||
+      changed.has('labelField') ||
+      changed.has('xType') ||
+      this.reshapesFrame(changed)
+    ) {
       this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
       this.#dataDirty = true
     }
@@ -420,7 +513,7 @@ export abstract class ChartBase extends LitElement {
       }
     }
     // A shrinking series set cannot be merged into ECharts: the removed series would stay on screen.
-    if (changed.has('series') || changed.has('seriesElements')) this.#optionsMode = 'replace'
+    if (changed.has('series') || changed.has('seriesElements') || this.replacesOptions(changed)) this.#optionsMode = 'replace'
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -433,6 +526,7 @@ export abstract class ChartBase extends LitElement {
       this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: null }))
     }
     this.#syncTooltipPopover()
+    this.#renderLegendEntries()
     if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
   }
 
@@ -478,6 +572,29 @@ export abstract class ChartBase extends LitElement {
         detail: { seriesIndex: index, series, visible, hidden: [...next] },
       }),
     )
+  }
+
+  /** Highlights a series, slice or set by key, or clears the highlight with `null`, and fires `series-highlight`. */
+  highlight(key: string | null): void {
+    if (this.highlighted === key) return
+    this.highlighted = key
+    this.dispatchEvent(new CustomEvent<ChartSeriesHighlightEventDetail>('series-highlight', { detail: { key } }))
+  }
+
+  /**
+   * The `key`, `pressed`, `dimmed` and `toggle` of one legend entry under the current `legend-action`. Every chart's
+   * `legendItems` goes through this, so a linked `c2-chart-legend` follows the mode without knowing it.
+   */
+  protected legendEntryState(
+    key: string,
+    visible: boolean,
+    setVisible: (visible: boolean) => void,
+  ): Pick<ChartLegendItem, 'key' | 'pressed' | 'dimmed' | 'toggle'> {
+    if (this.legendAction === 'highlight') {
+      const active = this.highlighted === key
+      return { key, pressed: active, dimmed: this.highlighted !== null && !active, toggle: () => this.highlight(active ? null : key) }
+    }
+    return { key, pressed: visible, dimmed: !visible, toggle: () => setVisible(!visible) }
   }
 
   /** Current entries for a linked `c2-chart-legend`. */
@@ -583,6 +700,7 @@ export abstract class ChartBase extends LitElement {
       series: this.resolvedSeries,
       hidden: this.hiddenSeries,
       labels: this.frame?.labels,
+      highlighted: this.highlighted === null ? -1 : this.resolvedSeries.findIndex((series) => series.field === this.highlighted),
       width: this.#measured.width || this.plotElement?.clientWidth || 0,
       height: this.#measured.height || this.plotElement?.clientHeight || 0,
     }
@@ -590,8 +708,8 @@ export abstract class ChartBase extends LitElement {
 
   /** True once there is something to draw and somewhere to draw it. */
   #canRender(): boolean {
-    if (!this.#visible || this.engineFailed || this.error || this.loading) return false
-    if (!this.plotElement || !this.frame || this.frame.length === 0) return false
+    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading || !this.readyToDraw) return false
+    if (!this.plotElement || !this.frame || (this.frame.length === 0 && !this.rendersWithoutData)) return false
     const { width, height } = this.buildContext()
     return width > 0 && height > 0
   }
@@ -628,16 +746,17 @@ export abstract class ChartBase extends LitElement {
       }
       const context = this.buildContext()
       await adapter.create(this.plotElement, this.buildOptions(context), this.projectData(this.frame, context), {
-        hover: (detail) => this.#handleHover(detail),
-        click: (detail) => this.#handleClick(detail),
+        hover: (detail) => this.handleEngineHover(detail),
+        click: (detail) => this.handleEngineClick(detail),
         rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
+        viewChange: (detail) => this.handleEngineViewChange(detail),
       })
       this.adapter = adapter
       this.#optionsDirty = false
       this.#dataDirty = false
       this.restoreVisibility(adapter)
-      this.setAttribute('data-chart-engine', this.engineName)
-      this.setAttribute('data-chart-ready', 'true')
+      this.internals.states.add(`engine-${this.engineName}`)
+      this.internals.states.add('ready')
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {
       this.engineFailed = true
@@ -654,7 +773,11 @@ export abstract class ChartBase extends LitElement {
     if (this.#appended > 0 && this.adapter.appendData) this.adapter.appendData(projected, this.#appended)
     else this.adapter.setData(projected)
     this.#appended = 0
-    if (this.legendDependsOnData) this.notifyLegendChange()
+    if (this.legendDependsOnData) {
+      // The data path skips Lit's update, so a legend drawn from the data (pie slices) is refreshed here.
+      this.#renderLegendEntries()
+      this.notifyLegendChange()
+    }
   }
 
   #handleResize(entries: ResizeObserverEntry[]): void {
@@ -673,18 +796,23 @@ export abstract class ChartBase extends LitElement {
     this.themeRevision += 1
   }
 
+  #handleSlotChange = (): void => this.#collectSeries(true)
+
   #handleSeriesChange = (event: Event): void => {
     // The children's change event is internal plumbing; it must not escape the chart.
     event.stopPropagation()
     this.#collectSeries()
   }
 
-  #collectSeries(): void {
+  #collectSeries(onlyIfChanged = false): void {
+    // Before the first render there is no slot yet, and after hydrating server-rendered markup its `slotchange`
+    // has already fired, before Lit bound the listener. The default slot's assignment is the host's
+    // unslotted element children, so read those directly until the slot can answer.
     const slot = this.renderRoot?.querySelector<HTMLSlotElement>('slot.definitions')
-    if (!slot) return
+    const assigned = slot ? slot.assignedElements({ flatten: true }) : Array.from(this.children).filter((element) => !element.hasAttribute('slot'))
 
     const found: ChartSeries[] = []
-    for (const element of slot.assignedElements({ flatten: true })) {
+    for (const element of assigned) {
       // Matched by tag rather than `instanceof`, and searched at any depth: in the docs site every element
       // of an example is its own Astro island, so a definition arrives wrapped in one or more hosts.
       if (element.localName === SERIES_TAG) found.push(element as ChartSeries)
@@ -697,6 +825,9 @@ export abstract class ChartBase extends LitElement {
       for (const element of found) customElements.upgrade(element)
     }
 
+    // The same definitions again (the first `slotchange` after the early read) must not schedule an update. A
+    // definition's own change event always does, since the elements are the same but their config is not.
+    if (onlyIfChanged && found.length === this.seriesElements.length && found.every((element, index) => element === this.seriesElements[index])) return
     this.seriesElements = found
   }
 
@@ -727,7 +858,11 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #handleHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+  /** The engine reports a zoom or pan of the view. Only the map chart has one. */
+  protected handleEngineViewChange(_detail: { zoom: number }): void {}
+
+  /** The engine reports a hovered datum, or `null` when the pointer leaves. A chart with its own events extends this. */
+  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void {
     if (!detail || !this.frame) {
       this.#tooltipContext = null
       this.#setHover(null)
@@ -735,12 +870,12 @@ export abstract class ChartBase extends LitElement {
       this.dispatchEvent(new CustomEvent<ChartPointEventDetail | null>('point-hover', { detail: null }))
       return
     }
-    const context = this.#tooltipContextAt(detail)
+    const context = this.tooltipContextAt(detail)
     const tooltipContext = this.tooltip === 'none' ? null : context
     this.#tooltipContext = tooltipContext
     this.#setHover(this.hasLinkedTooltip ? null : tooltipContext)
     this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: tooltipContext }))
-    const point = this.#pointAt(detail.index, detail.seriesIndex)
+    const point = this.pointAt(detail.index, detail.seriesIndex)
     if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-hover', { detail: point }))
   }
 
@@ -811,7 +946,8 @@ export abstract class ChartBase extends LitElement {
     tooltip.style.top = `${top}px`
   }
 
-  #tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
+  /** The tooltip model for a hovered datum. A chart whose data is not a frame of series columns overrides it. */
+  protected tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
     const frame = this.frame as ChartFrame
     const theme = this.themeController.theme
     const series = this.resolvedSeries
@@ -843,7 +979,8 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #pointAt(index: number, seriesIndex: number): ChartPointEventDetail | undefined {
+  /** The `point-hover`/`point-click` detail for a datum, or `undefined` to fire neither. */
+  protected pointAt(index: number, seriesIndex: number): ChartPointEventDetail | undefined {
     const frame = this.frame
     const series = this.resolvedSeries[seriesIndex]
     if (!frame || !series) return undefined
@@ -857,9 +994,27 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #handleClick(detail: { index: number; seriesIndex: number }): void {
-    const point = this.#pointAt(detail.index, detail.seriesIndex)
-    if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-click', { detail: point }))
+  /**
+   * The engine reports a clicked datum: `point-click` fires, and unless a listener cancels it the clicked series is
+   * highlighted, or the highlight cleared when it already was. A chart with its own events extends this.
+   */
+  protected handleEngineClick(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void {
+    const point = this.pointAt(detail.index, detail.seriesIndex)
+    if (!point) return
+    const event = new CustomEvent<ChartPointEventDetail>('point-click', { detail: point, cancelable: true })
+    this.dispatchEvent(event)
+    if (event.defaultPrevented) return
+    const key = this.highlightKeyAt(detail)
+    if (key !== undefined) this.highlight(this.highlighted === key ? null : key)
+  }
+
+  /**
+   * What a click on this datum highlights: its series field. A chart with a single series has nothing to set apart,
+   * so it returns `undefined`; a pie overrides this to name the slice.
+   */
+  protected highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
+    const series = this.resolvedSeries
+    return series.length > 1 ? series[detail.seriesIndex]?.field : undefined
   }
 
   /** Formats an x value for the tooltip. Time charts get a date, everything else a number. */
@@ -903,7 +1058,7 @@ export abstract class ChartBase extends LitElement {
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
             <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
-            <div class="actions" part="actions"><slot name="actions"></slot></div>
+            <div class="actions" part="actions">${this.renderActionsExtras()}<slot name="actions"></slot></div>
           </div>
           ${this.renderState()}
         </div>
@@ -911,7 +1066,7 @@ export abstract class ChartBase extends LitElement {
       </div>
       <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}<span class="axis-font-probe"></span></div>
       <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
-      <slot class="definitions" @slotchange=${this.#collectSeries}></slot>
+      <slot class="definitions" @slotchange=${this.#handleSlotChange}></slot>
     `
   }
 
@@ -921,7 +1076,7 @@ export abstract class ChartBase extends LitElement {
     return html`<slot name="tooltip">${context ? (this.renderTooltip?.(context) ?? this.defaultTooltip(context)) : nothing}</slot>`
   }
 
-  private defaultTooltip(context: ChartTooltipContext): TemplateResult {
+  protected defaultTooltip(context: ChartTooltipContext): TemplateResult {
     return html`
       <div class="tooltip-title">${context.formattedX}</div>
       ${context.entries.map(
@@ -937,9 +1092,10 @@ export abstract class ChartBase extends LitElement {
   }
 
   private renderState(): TemplateResult | typeof nothing {
-    if (this.error) return html`<div class="state" part="state"><slot name="error">${this.error}</slot></div>`
+    const error = this.error || this.validationError()
+    if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
-    if (!this.frame || this.frame.length === 0) {
+    if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
       return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
     }
     return nothing
@@ -955,31 +1111,66 @@ export abstract class ChartBase extends LitElement {
       label: item.label ?? item.field,
       color: this.colorOf(item, index),
       visible: !this.hiddenSeries.has(index),
-      toggle: () => this.setSeriesVisible(index, this.hiddenSeries.has(index)),
+      ...this.legendEntryState(item.field, !this.hiddenSeries.has(index), (visible) => this.setSeriesVisible(index, visible)),
       series: item,
       index,
     }))
   }
 
+  /**
+   * The legend box and its slot. The generated entries are not part of this template: they are rendered into the
+   * slot, as its fallback content, after every update (`#renderLegendEntries`). A server cannot see the chart's
+   * `c2-chart-series` children, so entries it rendered would name inferred series, and hydration keeps
+   * server-rendered values without patching them, so the page would show them for good.
+   */
   private renderLegend(): TemplateResult {
     return html`
       <div class="legend legend--${this.legend}" part="legend">
-        <slot name="legend">
-          ${this.legendItems().map(
-            (item) => html`
-              <button class="legend-item" part="legend-item" type="button" aria-pressed=${item.visible ? 'true' : 'false'} @click=${item.toggle}>
-                ${
-                  this.renderLegendItem?.(item.series, item.index) ??
-                  html`
-                    <span class="legend-marker" part="legend-marker" style="background:${item.color}"></span>
-                    <span class="legend-label">${item.label}</span>
-                  `
-                }
-              </button>
-            `,
-          )}
-        </slot>
+        <slot name="legend"></slot>
+        ${this.renderLegendExtras()}
       </div>
     `
+  }
+
+  /** Controls drawn before the `actions` slot, such as the map chart's zoom buttons. */
+  protected renderActionsExtras(): unknown {
+    return nothing
+  }
+
+  /** Content drawn after the series entries in the built-in legend, such as the bubble chart's size key. */
+  protected renderLegendExtras(): unknown {
+    return nothing
+  }
+
+  #renderLegendEntries(): void {
+    const slot = this.renderRoot?.querySelector<HTMLSlotElement>('.legend > slot[name="legend"]')
+    if (!slot) return
+    render(
+      this.legendItems().map(
+        (item) => html`
+          <button
+            class="legend-item ${item.dimmed ? 'legend-item--dimmed' : ''}"
+            part="legend-item"
+            type="button"
+            aria-pressed=${item.pressed ? 'true' : 'false'}
+            @click=${item.toggle}
+            @pointerenter=${() => item.highlight?.(true)}
+            @pointerleave=${() => item.highlight?.(false)}
+            @focus=${() => item.highlight?.(true)}
+            @blur=${() => item.highlight?.(false)}
+          >
+            ${
+              this.renderLegendItem?.(item.series, item.index) ??
+              html`
+                <span class="legend-marker" part="legend-marker" style="background:${item.color}"></span>
+                <span class="legend-label">${item.label}</span>
+              `
+            }
+          </button>
+        `,
+      ),
+      slot,
+      { host: this },
+    )
   }
 }

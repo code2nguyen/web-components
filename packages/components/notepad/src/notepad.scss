@@ -1,0 +1,1071 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-notepad,
+  $theme: (
+    sheet--background: #fdfcf7,
+    sheet--border-radius: 3px,
+    sheet--box-shadow: (
+      0 1px 2px rgba(24, 24, 27, 0.12),
+      0 10px 24px rgba(24, 24, 27, 0.1),
+    ),
+    sheet__focus--box-shadow: (
+      0 1px 2px rgba(24, 24, 27, 0.14),
+      0 16px 32px rgba(24, 24, 27, 0.16),
+    ),
+    sheet--min-height: 224px,
+    sheet--max-height: none,
+    texture--opacity: 0.5,
+    rule--spacing: 28px,
+    rule--color: #c3d3ea,
+    grid--color: transparent,
+    dot--color: transparent,
+    margin--inset: 56px,
+    margin--color: #eba6a6,
+    margin--gap: 0px,
+    headline--color: transparent,
+    writing--color: #1e2a4a,
+    // One unquoted string, so the family names keep their quotes when the list is interpolated into the fallback.
+    writing--font-family: string.unquote("'C2 Notepad Hand', 'Patrick Hand', 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive"),
+    writing--font-size: 18px,
+    placeholder--color: #8a909b,
+    selection--background: rgba(255, 214, 64, 0.45),
+    header--color: #7a8494,
+    header--font-size: 12px,
+    spiral--display: block,
+    glue--display: none,
+    glue--background: #3f444b,
+    sheet--rotate: 0deg,
+    top--padding-top: 20px,
+    controls--opacity: 1,
+    ink-blue--color: #2848b8,
+    ink-black--color: #18181b,
+    ink-red--color: #b8232b,
+    ink-green--color: #22743a,
+    highlight-yellow--background: rgba(255, 214, 64, 0.55),
+    highlight-green--background: rgba(110, 220, 120, 0.4),
+    highlight-pink--background: rgba(255, 120, 170, 0.38),
+    task__checked--opacity: 0.55,
+    toolbar--background: #efe6cc,
+    toolbar--color: #2c2a26,
+    toolbar__button__active--background: rgba(60, 50, 30, 0.14),
+    perforation--color: #b9bfc8,
+    paper-yellow--background: #fcf0bf,
+    paper-yellow--color: #2b2410,
+    paper-green--background: #e8f3e4,
+    paper-green--color: #1d3324,
+    paper-blue--background: #e6eef9,
+    paper-blue--color: #1c2a4a,
+    paper-pink--background: #fbe6ea,
+    paper-pink--color: #3d1f2b,
+    paper-night--background: #232a33,
+    paper-night--color: #e9e4d4,
+    pad-legal--background: #fbf1a6,
+    pad-sticky--background: #ffe680,
+    pad-index-card--background: #ffffff,
+    error--color: #dc2626,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    disabled--opacity: 0.38,
+    tear--duration: 700ms,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+  color-scheme: inherit;
+}
+:host([hidden]) {
+  display: none;
+}
+
+// ---- pad: a preset of the paper's own variables -------------------------------------------------------------------
+// Each pad sets documented variables on the host, so a value set on the element (or a class on it) still wins. Colours
+// go through a variable per pad, which the theme maps for dark mode; the shapes are plain values.
+
+:host {
+  --_pad-paper: #{css.cssVar(sheet--background)};
+}
+:host([pad='legal']) {
+  --_pad-paper: #{css.cssVar(pad-legal--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__glue--display: block;
+  --c2-notepad__top--padding-top: 10px;
+  --c2-notepad__rule--spacing: 30px;
+  --c2-notepad__margin--inset: 60px;
+  --c2-notepad__margin--gap: 4px;
+  --c2-notepad__sheet--border-radius: 0 0 3px 3px;
+}
+:host([pad='sticky']) {
+  --_pad-paper: #{css.cssVar(pad-sticky--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__top--padding-top: 8px;
+  --c2-notepad__margin--inset: 4px;
+  --c2-notepad__rule--spacing: 30px;
+  --c2-notepad__writing--font-size: 20px;
+  --c2-notepad__texture--opacity: 0.3;
+  --c2-notepad__sheet--border-radius: 0 0 2px 18px;
+  // Lifted at the bottom: the note is stuck on by its top edge only.
+  --c2-notepad__sheet--box-shadow: 0 1px 1px rgba(24, 24, 27, 0.08), 0 14px 14px -10px rgba(24, 24, 27, 0.3);
+  --c2-notepad__sheet__focus--box-shadow: 0 1px 1px rgba(24, 24, 27, 0.1), 0 18px 18px -10px rgba(24, 24, 27, 0.34);
+}
+:host([pad='index-card']) {
+  --_pad-paper: #{css.cssVar(pad-index-card--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__top--padding-top: 10px;
+  --c2-notepad__margin--inset: 4px;
+  --c2-notepad__rule--spacing: 26px;
+  --c2-notepad__writing--font-size: 17px;
+  --c2-notepad__texture--opacity: 0.2;
+  --c2-notepad__sheet--border-radius: 2px;
+  --c2-notepad__sheet--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.14), 0 4px 10px rgba(24, 24, 27, 0.08);
+  --c2-notepad__headline--color: #{css.cssVar(margin--color)};
+}
+// The index card's red headline replaces the margin, and a sticky note has none.
+:host([pad='sticky']) .sheet,
+:host([pad='index-card']) .sheet {
+  --_margin-c: transparent;
+}
+// Stuck on by hand: a sticky note leans by an angle the element picks each time it becomes one (`--_tilt`, set on the
+// pad inside the shadow root). A rotation set through the variable, 0deg included, replaces it.
+:host([pad='sticky']) .sheet {
+  rotate: var(--c2-notepad__sheet--rotate, var(--_tilt, 0deg));
+}
+
+// ---- paper: the writer's choice of ruling (`paper`) and colour (`paper-color`) -------------------------------------
+// The attributes only choose which layers are drawn and which colour variable the sheet takes; every colour is still
+// one of the documented variables.
+
+:host {
+  --_paper: var(--_pad-paper);
+  --_ink: #{css.cssVar(writing--color)};
+  // The ruling, read by the sheet's layers and the writing inside it. The pad presets set the documented variables
+  // these read; the `pad`, `paper`, `paper-color` and `error` rules override the colours on `.sheet`.
+  --_rule: #{css.cssVar(rule--spacing)};
+  --_size: #{css.cssVar(writing--font-size)};
+  --_inset: #{css.cssVar(margin--inset)};
+  --_gap: #{css.cssVar(margin--gap)};
+  // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
+  --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
+  --_rule-c: #{css.cssVar(rule--color)};
+  --_grid-c: #{css.cssVar(grid--color)};
+  --_dot-c: #{css.cssVar(dot--color)};
+  --_margin-c: #{css.cssVar(margin--color)};
+}
+:host([paper-color='yellow']) {
+  --_paper: #{css.cssVar(paper-yellow--background)};
+  --_ink: #{css.cssVar(paper-yellow--color)};
+}
+:host([paper-color='green']) {
+  --_paper: #{css.cssVar(paper-green--background)};
+  --_ink: #{css.cssVar(paper-green--color)};
+}
+:host([paper-color='blue']) {
+  --_paper: #{css.cssVar(paper-blue--background)};
+  --_ink: #{css.cssVar(paper-blue--color)};
+}
+:host([paper-color='pink']) {
+  --_paper: #{css.cssVar(paper-pink--background)};
+  --_ink: #{css.cssVar(paper-pink--color)};
+}
+:host([paper-color='night']) {
+  --_paper: #{css.cssVar(paper-night--background)};
+  --_ink: #{css.cssVar(paper-night--color)};
+}
+// On night paper the inks would be dark on dark: each mark takes its night variant, lifted towards white (the default
+// black ink becomes the paper's ink).
+:host([paper-color='night']) .writing span[data-ink] {
+  --_mark-ink: var(--_mark-night);
+}
+// Night paper is dark: the rules and the margin are dimmed into it rather than drawn at full strength.
+:host([paper-color='night']) .sheet {
+  --_rule-c: color-mix(in srgb, #{css.cssVar(rule--color)} 35%, var(--_paper));
+  --_margin-c: color-mix(in srgb, #{css.cssVar(margin--color)} 45%, var(--_paper));
+}
+:host([paper='grid']) .sheet {
+  --_grid-c: var(--_rule-c);
+}
+:host([paper='dot']) .sheet {
+  --_rule-c: transparent;
+  --_margin-c: transparent;
+  --_dot-c: color-mix(in srgb, #{css.cssVar(rule--color)} 50%, var(--_ink));
+}
+:host([paper='blank']) .sheet {
+  --_rule-c: transparent;
+  --_margin-c: transparent;
+}
+
+.pad {
+  position: relative;
+  // Lets the stack and the spiral draw outside the sheet without being clipped by the host.
+  padding-block-start: 12px;
+}
+:host([tearable]) .pad {
+  padding-block-end: 8px;
+}
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--_paper);
+  rotate: css.cssVar(sheet--rotate);
+  border-radius: css.cssVar(sheet--border-radius);
+  box-shadow: css.cssVar(sheet--box-shadow);
+  transition: box-shadow 160ms ease;
+
+  // Paper grain. Decorative, multiplied into whatever paper colour is set.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: css.cssVar(texture--opacity);
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+.pad:focus-within .sheet {
+  box-shadow: css.cssVar(sheet__focus--box-shadow);
+}
+
+// ---- bindings ---------------------------------------------------------------------------------------------------
+
+.spiral {
+  display: css.cssVar(spiral--display);
+  position: absolute;
+  inset: 0 14px auto;
+  height: 26px;
+  z-index: 3;
+  pointer-events: none;
+  background-image: linear-gradient(90deg, transparent 8px, #6d737b 8px, #e9ecef 11px, #8b929a 13px, #50565d 16px, transparent 16px);
+  background-size: 24px 100%;
+  background-repeat: space no-repeat;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.25));
+}
+// Punched holes under the coils, on the same spacing so each coil goes through one.
+.holes {
+  display: css.cssVar(spiral--display);
+  position: absolute;
+  inset: 0 14px auto;
+  height: 26px;
+  z-index: 2;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 12px 10px, rgba(24, 24, 27, 0.32) 0 4px, transparent 4.5px);
+  background-size: 24px 100%;
+  background-repeat: space no-repeat;
+}
+.glue {
+  display: css.cssVar(glue--display);
+  position: relative;
+  z-index: 2;
+  height: 18px;
+  margin-block-end: -3px;
+  border-radius: css.cssVar(sheet--border-radius) css.cssVar(sheet--border-radius) 0 0;
+  background: css.cssVar(glue--background);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+
+// Sheets under the top one, for a pad that can be torn.
+.stack {
+  display: none;
+  position: absolute;
+  inset: 12px 0 0;
+  pointer-events: none;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: css.cssVar(sheet--border-radius);
+    background: var(--_paper);
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.12);
+  }
+  &::before {
+    transform: translate(3px, 5px) rotate(0.7deg);
+  }
+  &::after {
+    transform: translate(-2px, 3px) rotate(-0.5deg);
+  }
+}
+:host([tearable]) .stack {
+  display: block;
+}
+
+// ---- header, perforation, margin ----------------------------------------------------------------------------------
+
+.top {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  min-height: 28px;
+  // Clear of the spiral coils and the punched holes, which cover the top 18px of the sheet.
+  padding-block-start: css.cssVar(top--padding-top);
+  // The headline of an index card, across the whole sheet under the header row.
+  background: linear-gradient(to top, #{css.cssVar(headline--color)} 0 1.5px, transparent 1.5px);
+  padding-inline: calc(var(--_inset) + 12px) 16px;
+}
+.header {
+  flex: 1;
+  min-width: 0;
+  padding-block: 2px;
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  line-height: 1.4;
+  &[hidden] {
+    display: none;
+  }
+}
+:host([tearable]) .top {
+  // The perforation runs 17-19px down the sheet: a pad with a small top padding (a sticky note) still keeps its
+  // controls below it.
+  padding-block-start: max(#{css.cssVar(top--padding-top)}, 22px);
+}
+.perforation {
+  position: absolute;
+  inset: 17px 0 auto;
+  height: 0;
+  border-top: 2px dotted css.cssVar(perforation--color);
+  pointer-events: none;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  // The "Paper" and "Tear off" buttons and the slotted icon buttons carry their own padding: a small gap keeps the
+  // space between two controls the same as the space between two icons.
+  gap: 4px;
+  margin-block-end: 2px;
+  margin-inline-start: auto;
+  opacity: css.cssVar(controls--opacity);
+  transition: opacity 150ms ease;
+}
+:host(:hover) .controls,
+:host(:focus-within) .controls,
+.controls.open {
+  opacity: 1;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  &[hidden] {
+    display: none;
+  }
+  // The 24px icon buttons overhang the 18px row of the "Paper" and "Tear off" labels by 3px each way rather than
+  // making it taller, which would lift the labels onto the perforation of a tearable pad.
+  margin-block: -3px;
+  // Icon buttons share the row of the small "Paper" and "Tear off" labels. A variable set on the button itself wins.
+  ::slotted(c2-icon-button) {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+  }
+}
+.tear,
+.paper-button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: css.cssVar(header--color);
+  font:
+    600 10px/1.4 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  &:hover,
+  &[aria-expanded='true'] {
+    background: rgba(24, 24, 27, 0.06);
+  }
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+}
+.margin {
+  position: absolute;
+  inset: 26px auto 0 0;
+  z-index: 1;
+  width: var(--_inset);
+  pointer-events: none;
+  ::slotted(*) {
+    pointer-events: auto;
+  }
+}
+
+// ---- writing surface (the ProseMirror root) ------------------------------------------------------------------------
+
+.writing {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  box-sizing: border-box;
+  min-height: calc(#{css.cssVar(sheet--min-height)} - 26px);
+  max-height: css.cssVar(sheet--max-height);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0 16px var(--_rule) calc(var(--_inset) + 12px);
+  outline: none;
+  color: var(--_ink);
+  caret-color: currentColor;
+  font-family: css.cssVar(writing--font-family);
+  font-size: var(--_size);
+  line-height: var(--_rule);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(
+      to right,
+      transparent calc(var(--_inset) - 1px),
+      var(--_margin-c) calc(var(--_inset) - 1px),
+      var(--_margin-c) var(--_inset),
+      transparent var(--_inset)
+    ),
+    linear-gradient(
+      to right,
+      transparent calc(var(--_inset) - var(--_gap) - 1px),
+      var(--_margin-c) calc(var(--_inset) - var(--_gap) - 1px),
+      var(--_margin-c) calc(var(--_inset) - var(--_gap)),
+      transparent calc(var(--_inset) - var(--_gap))
+    ),
+    radial-gradient(circle at 1px 1px, var(--_dot-c) 1.3px, transparent 1.6px), linear-gradient(to right, var(--_grid-c) 1px, transparent 1px),
+    linear-gradient(
+      to bottom,
+      transparent calc(var(--_baseline) - 1px),
+      var(--_rule-c) calc(var(--_baseline) - 1px),
+      var(--_rule-c) var(--_baseline),
+      transparent var(--_baseline)
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    var(--_rule) var(--_rule),
+    var(--_rule) var(--_rule),
+    100% var(--_rule);
+  background-position:
+    0 0,
+    0 0,
+    calc(var(--_inset) - 1px) calc(var(--_baseline) - 1px),
+    calc(var(--_inset) - 1px) 0,
+    0 0;
+  // The rules scroll with the writing.
+  background-attachment: local;
+
+  // Selected text keeps its ink. `color: inherit` would not: a highlight pseudo-element inherits from the parent's
+  // highlight, so a page that styles ::selection would recolour every ink inside the notepad.
+  &::selection,
+  *::selection {
+    background: css.cssVar(selection--background);
+    color: var(--_ink);
+  }
+  span[data-ink]::selection,
+  span[data-ink] ::selection {
+    color: var(--_mark-ink, var(--_ink));
+  }
+  &:focus-visible {
+    outline: none;
+  }
+
+  p,
+  .task {
+    margin: 0;
+    min-height: var(--_rule);
+  }
+  strong {
+    font-weight: 700;
+    // Handwriting faces rarely ship a bold: press harder with the pen instead of letting the browser smear it.
+    -webkit-text-stroke: 0.035em currentColor;
+    font-synthesis: none;
+  }
+  em {
+    font-style: italic;
+  }
+  u {
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+    text-decoration-skip-ink: none;
+  }
+  s {
+    text-decoration-thickness: 1.5px;
+  }
+  // Each mark names its colour by position (`--_ink-<n>`, set by the component from its list); a position the
+  // list does not have falls back to the page's ink.
+  span[data-ink] {
+    --_mark-ink: var(--_mark-day);
+    color: var(--_mark-ink, var(--_ink));
+  }
+  mark {
+    color: inherit;
+    padding-inline: 1px;
+    border-radius: 2px;
+    // A marker stroke: it sits on the lower part of the letters rather than filling the whole line box.
+    background: linear-gradient(transparent 22%, var(--_highlight) 22% 88%, transparent 88%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .placeholder::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    pointer-events: none;
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+// ---- checklist ----------------------------------------------------------------------------------------------------
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: var(--_rule);
+  cursor: pointer;
+  user-select: none;
+  svg {
+    width: 18px;
+    height: 18px;
+    overflow: visible;
+    // Seat the box on the rule like a written character.
+    translate: 0 calc(var(--_baseline) - var(--_rule) / 2 - 8px);
+  }
+  .tick {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    transition: stroke-dashoffset 260ms ease-out;
+  }
+}
+.task-text {
+  flex: 1;
+  min-width: 0;
+}
+.task[data-checked='true'] {
+  .tick {
+    stroke-dashoffset: 0;
+  }
+  .task-text {
+    opacity: css.cssVar(task__checked--opacity);
+    text-decoration-line: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+}
+
+// ---- states ---------------------------------------------------------------------------------------------------------
+
+// The lifted sheet and the caret show focus. The ring is for keyboard focus only: a contenteditable matches
+// :focus-visible on a click too, and a ring drawn round the page on every click turns it back into an input box.
+.pad:not(.pointer-focus) .sheet:has(.writing:focus-visible) {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 4px;
+}
+:host([error]) .sheet {
+  --_margin-c: #{css.cssVar(error--color)};
+}
+.error-note {
+  position: absolute;
+  inset: auto 16px 4px auto;
+  z-index: 3;
+  max-width: calc(100% - var(--_inset) - 32px);
+  color: css.cssVar(error--color);
+  font-family: css.cssVar(writing--font-family);
+  font-size: calc(var(--_size) * 0.85);
+  line-height: 1.2;
+  rotate: -2deg;
+  text-align: end;
+}
+:host([disabled]) .pad,
+.pad.form-disabled {
+  opacity: css.cssVar(disabled--opacity);
+  filter: grayscale(0.4);
+  .writing {
+    cursor: default;
+  }
+}
+
+// ---- tear-off -------------------------------------------------------------------------------------------------------
+
+.torn {
+  position: absolute;
+  z-index: 4;
+  margin: 0;
+  pointer-events: none;
+  transform-origin: 85% 0;
+  animation: tear css.cssVar(tear--duration) cubic-bezier(0.55, 0, 0.75, 0.3) forwards;
+  // A ragged top edge where the page came off the perforation.
+  clip-path: polygon(
+    0 2px,
+    4% 0,
+    8% 3px,
+    12% 1px,
+    17% 4px,
+    22% 0,
+    27% 3px,
+    33% 1px,
+    38% 4px,
+    44% 0,
+    50% 3px,
+    55% 1px,
+    61% 4px,
+    67% 0,
+    72% 3px,
+    78% 1px,
+    84% 4px,
+    90% 0,
+    95% 3px,
+    100% 1px,
+    100% 100%,
+    0 100%
+  );
+}
+
+@keyframes tear {
+  20% {
+    transform: rotate(-3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-32px, 60%) rotate(-18deg);
+    opacity: 0;
+  }
+}
+
+@mixin tape {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, #{css.cssVar(toolbar--background)} 93%, #ffffff) 9px 12px),
+    #{css.cssVar(toolbar--background)};
+  clip-path: polygon(
+    0 8%,
+    3px 0,
+    6px 12%,
+    9px 2%,
+    100% 0,
+    calc(100% - 3px) 10%,
+    100% 22%,
+    calc(100% - 4px) 40%,
+    100% 58%,
+    calc(100% - 3px) 78%,
+    100% 100%,
+    7px 100%,
+    3px 90%,
+    0 100%,
+    4px 70%,
+    0 52%,
+    3px 32%
+  );
+}
+
+// ---- selection toolbar: a strip of washi tape --------------------------------------------------------------------------
+
+.toolbar {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100vw - 16px);
+  padding: 5px 14px;
+  border: 0;
+  overflow: visible;
+  background: none;
+  color: css.cssVar(toolbar--color);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  rotate: -0.6deg;
+  font-family: css.cssVar(writing--font-family);
+  &:popover-open {
+    display: flex;
+  }
+  // The tape is drawn behind the buttons, so its torn edges do not clip the colour flyouts.
+  &::before,
+  .scrap::before {
+    @include tape;
+  }
+  button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    min-width: 30px;
+    height: 30px;
+    padding-inline: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1;
+    color: inherit;
+    &:hover,
+    &[aria-pressed='true'],
+    &[aria-expanded='true'] {
+      background: css.cssVar(toolbar__button__active--background);
+    }
+    &[aria-pressed='true'] {
+      box-shadow: inset 0 -2px 0 currentColor;
+    }
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: -2px;
+    }
+    &[hidden] {
+      display: none;
+    }
+  }
+  .sep {
+    width: 1px;
+    height: 18px;
+    margin-inline: 4px;
+    background: currentColor;
+    opacity: 0.2;
+  }
+  .ink {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--_swatch);
+    box-shadow:
+      0 0 0 2px css.cssVar(toolbar--background),
+      0 0 0 3px rgba(0, 0, 0, 0.2);
+  }
+  .ink.default {
+    --_swatch: var(--_ink);
+  }
+  .hi {
+    width: 18px;
+    height: 11px;
+    border-radius: 2px;
+    background: var(--_swatch);
+    transform: skewX(-18deg);
+  }
+  // No highlighter: an empty marker tip with a stroke through it.
+  .hi.none {
+    background: linear-gradient(to top right, transparent calc(50% - 1px), currentColor calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    // A border rather than an inset shadow, so the selection ring can still be drawn round it.
+    box-sizing: border-box;
+    border: 1.5px solid color-mix(in srgb, currentColor 55%, transparent);
+  }
+}
+
+// ---- colour groups: one button each, the colours in a flyout under it -------------------------------------------------
+
+.group {
+  position: relative;
+  &[hidden] {
+    display: none;
+  }
+}
+.toolbar .trigger {
+  grid-auto-flow: column;
+  gap: 3px;
+  padding-inline: 6px 5px;
+  .caret {
+    width: 8px;
+    height: 6px;
+    opacity: 0.6;
+  }
+}
+// Colour swatches in the flyouts: no button square, the swatch's own ring shows the state.
+.toolbar .flyout button {
+  &:hover,
+  &[aria-pressed='true'] {
+    background: none;
+    box-shadow: none;
+  }
+  &:hover > span {
+    box-shadow:
+      0 0 0 2px #{css.cssVar(toolbar--background)},
+      0 0 0 3.5px color-mix(in srgb, currentColor 45%, transparent);
+  }
+  &[aria-pressed='true'] > span {
+    box-shadow:
+      0 0 0 2px #{css.cssVar(toolbar--background)},
+      0 0 0 3.5px currentColor;
+  }
+}
+.flyout {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 1;
+  display: none;
+  // Transparent bridge, so the pointer can travel from the button to the swatches without the flyout closing.
+  padding-block-start: 6px;
+  translate: -50% 0;
+}
+.group:hover:not(.picked) .flyout,
+.group.open .flyout {
+  display: block;
+}
+.scrap {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 4px 10px;
+  rotate: 1.4deg;
+}
+
+.paper-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 10px 16px 12px;
+  border: 0;
+  overflow: visible;
+  background: none;
+  color: css.cssVar(toolbar--color);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22));
+  rotate: 0.6deg;
+  &::before {
+    @include tape;
+  }
+  // A column of content-sized rows, the card sized to them. As a grid with `auto` tracks, WebKit (iOS Safari) gave the
+  // card a height far past its content and spread it between the rows.
+  width: max-content;
+  height: max-content;
+  &:popover-open {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .label {
+    font:
+      600 10px/1.4 ui-monospace,
+      'SFMono-Regular',
+      Menlo,
+      monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .row {
+    display: flex;
+    gap: 6px;
+  }
+  button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    padding: 3px;
+    border-radius: 6px;
+    cursor: pointer;
+    // The choice itself shows the state: a ring round the selected one, a fainter ring under the pointer.
+    &:hover > span:first-child {
+      box-shadow:
+        0 0 0 2px #{css.cssVar(toolbar--background)},
+        0 0 0 3.5px color-mix(in srgb, currentColor 45%, transparent);
+    }
+    &[aria-checked='true'] > span:first-child {
+      box-shadow:
+        0 0 0 2px #{css.cssVar(toolbar--background)},
+        0 0 0 3.5px currentColor;
+    }
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 1px;
+    }
+  }
+  // A miniature of each paper, drawn on the current paper colour.
+  .thumb {
+    width: 34px;
+    height: 26px;
+    border-radius: 2px;
+    background-color: var(--_paper);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+  }
+  .thumb.lined {
+    background-image:
+      linear-gradient(to right, transparent 7px, #{css.cssVar(margin--color)} 7px 8px, transparent 8px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+  }
+  .thumb.grid {
+    background-image:
+      linear-gradient(to right, #{css.cssVar(rule--color)} 1px, transparent 1px), linear-gradient(to bottom, #{css.cssVar(rule--color)} 1px, transparent 1px);
+    background-size: 5px 5px;
+  }
+  .thumb.dot {
+    background-image: radial-gradient(circle at 2.5px 2.5px, color-mix(in srgb, #{css.cssVar(rule--color)} 50%, var(--_ink)) 0.8px, transparent 1px);
+    background-size: 5px 5px;
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    align-items: start;
+  }
+  // Each pad as a miniature of itself, on its own colour, with its name under it.
+  .pads button {
+    gap: 8px;
+    padding-block-end: 2px;
+  }
+  .name {
+    white-space: nowrap;
+    font-size: 10px;
+    line-height: 1.2;
+    opacity: 0.8;
+  }
+  .pad-thumb {
+    position: relative;
+    width: 44px;
+    height: 32px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+    background-color: #{css.cssVar(sheet--background)};
+    background-image:
+      linear-gradient(to right, transparent 9px, #{css.cssVar(margin--color)} 9px 10px, transparent 10px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 6px;
+    background-repeat: no-repeat, repeat-y;
+  }
+  // Spiral coils along the top of the notebook.
+  .pad-thumb.notebook::before {
+    content: '';
+    position: absolute;
+    inset: -2px 3px auto;
+    height: 5px;
+    background: radial-gradient(circle, #6d737b 0 1.4px, transparent 1.8px) 0 0 / 6px 5px space no-repeat;
+  }
+  .pad-thumb.legal {
+    background-color: #{css.cssVar(pad-legal--background)};
+    background-image:
+      linear-gradient(#{css.cssVar(glue--background)} 0 5px, transparent 5px),
+      linear-gradient(
+        to right,
+        transparent 8px,
+        #{css.cssVar(margin--color)} 8px 9px,
+        transparent 9px 10px,
+        #{css.cssVar(margin--color)} 10px 11px,
+        transparent 11px
+      ),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 0,
+      0 6px;
+    background-repeat: no-repeat, no-repeat, repeat-y;
+  }
+  .pad-thumb.sticky {
+    width: 32px;
+    rotate: -4deg;
+    border-radius: 0 0 1px 8px;
+    background-color: #{css.cssVar(pad-sticky--background)};
+    background-image: none;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.12),
+      0 4px 4px -2px rgba(0, 0, 0, 0.3);
+  }
+  .pad-thumb.index-card {
+    background-color: #{css.cssVar(pad-index-card--background)};
+    background-image:
+      linear-gradient(transparent 7px, #{css.cssVar(margin--color)} 7px 8px, transparent 8px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 9px;
+    background-repeat: no-repeat, repeat-y;
+  }
+  // A scrap of each paper with a word in its ink.
+  .swatch {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 30px;
+    border-radius: 2px;
+    background: var(--_swatch);
+    color: var(--_swatch-ink);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+    font-family: css.cssVar(writing--font-family);
+    font-size: 16px;
+    line-height: 1;
+  }
+  // The arrow points at the Paper button, as on a tooltip.
+  &::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: var(--_arrow-x, 50%);
+    width: 16px;
+    height: 9px;
+    translate: -50% 0;
+    background: css.cssVar(toolbar--background);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  &[data-side='top']::after {
+    top: auto;
+    bottom: -8px;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+}
+
+@media (forced-colors: active) {
+  .sheet::before,
+  .spiral,
+  .holes,
+  .stack {
+    display: none;
+  }
+  .writing {
+    background-image: none;
+  }
+  .toolbar::before,
+  .scrap::before,
+  .paper-menu::before {
+    clip-path: none;
+    border: 1px solid CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .box .tick {
+    transition: none;
+  }
+}

@@ -34,7 +34,7 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     --c2-code-viewer__header--background: rgba(255, 255, 255, 0.06);
     --c2-code-viewer__header--border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    --c2-code-viewer__header--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-code-viewer__header--color: #a1a1aa;
   }
 </style>
 <c2-code-viewer style="width: 240px" class="terminal" variant="terminal" language="bash" theme="vitesse-dark" code="npm install\nnpm run ui">
@@ -50,10 +50,10 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--border-bottom-left-radius: 8px;
     --c2-code-viewer--border-bottom-right-radius: 8px;
     --c2-code-viewer__line-numbers--gap: 20px;
-    --c2-code-viewer__line-numbers--color: #94a3b8;
+    --c2-code-viewer__line-numbers--color: #64748b;
   }
 </style>
-<c2-code-viewer style="width: 240px" class="numbered" language="ts" theme="github-light" line-numbers code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+<c2-code-viewer style="width: 240px" class="numbered" language="ts" theme="github-light-high-contrast" line-numbers code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
 ```
 
 ```html tag=MdxCodeBlock,label=Highlighted lines
@@ -63,7 +63,7 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer__line__highlighted--border-left: 3px solid #f59e0b;
   }
 </style>
-<c2-code-viewer style="width: 240px" class="highlighted" language="ts" theme="github-light" line-numbers highlight-lines="2" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+<c2-code-viewer style="width: 240px" class="highlighted" language="ts" theme="github-light-high-contrast" line-numbers highlight-lines="2" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark pair
@@ -109,14 +109,16 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--border-bottom-left-radius: 8px;
     --c2-code-viewer--border-bottom-right-radius: 8px;
     --c2-code-viewer__theme--background: #fdf6e3;
-    --c2-code-viewer__theme--foreground: #657b83;
-    --c2-code-viewer__theme--token-keyword: #859900;
-    --c2-code-viewer__theme--token-function: #268bd2;
-    --c2-code-viewer__theme--token-string: #2aa198;
-    --c2-code-viewer__theme--token-string-expression: #2aa198;
-    --c2-code-viewer__theme--token-constant: #cb4b16;
-    --c2-code-viewer__theme--token-comment: #93a1a1;
-    --c2-code-viewer__theme--token-punctuation: #586e75;
+    --c2-code-viewer__theme--foreground: #4a5c62;
+    --c2-code-viewer__theme--token-keyword: #5f6e00;
+    --c2-code-viewer__theme--token-function: #1a6aa3;
+    --c2-code-viewer__theme--token-string: #177069;
+    --c2-code-viewer__theme--token-string-expression: #177069;
+    --c2-code-viewer__theme--token-constant: #a83c0f;
+    --c2-code-viewer__theme--token-comment: #617070;
+    --c2-code-viewer__theme--token-parameter: #4a5c62;
+    --c2-code-viewer__theme--token-punctuation: #4a5c62;
+    --c2-code-viewer__theme--token-link: #1a6aa3;
   }
 </style>
 <c2-code-viewer style="width: 240px" class="solarized" language="ts" theme="css-variables" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
@@ -136,9 +138,20 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--border-bottom-left-radius: 6px;
     --c2-code-viewer--border-bottom-right-radius: 6px;
     --c2-code-viewer--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-code-viewer__theme--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-code-viewer__theme--foreground: var(--c2-theme--color-on-surface, #24292e);
+    --c2-code-viewer__theme--token-keyword: color-mix(in srgb, #d73a49 86%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-constant: color-mix(in srgb, #005cc5 75%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-string: color-mix(in srgb, #0969da 83%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-string-expression: color-mix(in srgb, #22863a 88%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-comment: color-mix(in srgb, #6a737d 88%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-parameter: color-mix(in srgb, #e36209 78%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-function: color-mix(in srgb, #6f42c1 75%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-code-viewer__theme--token-punctuation: var(--c2-theme--color-on-surface, #24292e);
+    --c2-code-viewer__theme--token-link: color-mix(in srgb, #0969da 83%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
-<c2-code-viewer style="width: 240px" class="compact" language="ts" theme="github-light" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+<c2-code-viewer style="width: 240px" class="compact" language="ts" theme="css-variables" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
 ```
 
 ```html tag=MdxCodeBlock,label=Scrolling

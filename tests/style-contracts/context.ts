@@ -7,6 +7,10 @@ export type ReviewedContext = {
   settledWhen: string
   modules?: string[]
   hoverTarget?: string
+  /** Focused programmatically before the baseline, so `:focus-visible` and focus-driven classes apply (no pointer focus). */
+  focusTarget?: string
+  /** Hovered and held under a pressed primary button for the whole case, so `:active` applies. */
+  pressTarget?: string
   stateSetup?: { target: string; attribute: string; value: string }[]
   dimensions?: { target: string; width?: string; height?: string }[]
 }
@@ -43,4 +47,15 @@ export async function prepareReviewedContext(page: Page, context: ReviewedContex
       if (updateComplete) await updateComplete
     })
   if (context.hoverTarget) await page.locator(context.hoverTarget).first().hover()
+  if (context.focusTarget) {
+    const target = page.locator(context.focusTarget).first()
+    await target.focus()
+    await expect.poll(() => target.evaluate((element) => element.matches(':focus')), `${context.id}: focus target did not take focus`).toBe(true)
+  }
+  if (context.pressTarget) {
+    const target = page.locator(context.pressTarget).first()
+    await target.hover()
+    await page.mouse.down()
+    await expect.poll(() => target.evaluate((element) => element.matches(':active')), `${context.id}: press target is not active`).toBe(true)
+  }
 }

@@ -95,9 +95,10 @@ const palette = rawElement('c2-modal', { class: 'search-palette', label: 'Search
     --c2-modal__backdrop--backdrop-filter: blur(2px);
 
     &__command {
-      /* Fit the modal's content box (its max-height minus the 1px border) so the palette's list is the only
-         scroller: the host is a flex column whose list shrinks, and the modal body never overflows. */
-      max-height: calc(min(70vh, 560px) - 2px);
+      /* Fit the modal's content box (its max-height minus the 1px border): the list takes what the field and the
+         footer leave and is the only scroller, so the modal body never overflows. */
+      --c2-command--max-height: calc(min(70vh, 560px) - 2px);
+      --c2-command__list--max-height: none;
       --c2-command--background: transparent;
       --c2-command--color: var(--site-color-on-surface);
       --c2-command--border-top: none;
@@ -116,7 +117,6 @@ const palette = rawElement('c2-modal', { class: 'search-palette', label: 'Search
       --c2-command__placeholder--color: var(--site-color-on-surface-muted);
       --c2-command__icon--size: 18px;
       --c2-command__icon--color: var(--site-color-on-surface-muted);
-      --c2-command__list--max-height: none;
       --c2-command__list--padding-top: 8px;
       --c2-command__list--padding-right: 8px;
       --c2-command__list--padding-bottom: 8px;

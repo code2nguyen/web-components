@@ -45,6 +45,9 @@ export interface Menu {
  * The surface is as wide as its rows, never narrower than `--c2-menu--min-width` and, when the menu owns its trigger,
  * never narrower than that trigger either. `fit-anchor` pins it to exactly the trigger's width instead.
  *
+ * The host never writes its own attributes: while something is slotted into `trigger` it matches
+ * `c2-menu:state(has-trigger)` (and takes space in the flow as an inline box); without one it is `display: contents`.
+ *
  * @tag c2-menu
  *
  * @slot default - The rows: `c2-menu-item` elements, plus `<hr>` separators and `<h1>`–`<h6>` group headings.
@@ -135,6 +138,19 @@ export class Menu extends LitElement {
 
   @state() private anchorElement: HTMLElement | null = null
 
+  // Custom states live on ElementInternals so the component never writes its own host.
+  private readonly internals = this.attachInternals()
+
+  /**
+   * The placement handed to the overlay. A submenu opens beside its row, not under it, unless the author chose a
+   * placement. Resolved at render rather than written to `placement`, which reflects: assigning it on connect put a
+   * `placement` attribute on a host the server rendered without one.
+   */
+  private get effectivePlacement(): Menu['placement'] {
+    if (this.getAttribute('slot') === 'submenu' && !this.hasAttribute('placement') && this.placement === 'bottom-start') return 'right-start'
+    return this.placement
+  }
+
   /** Whether something is slotted into `trigger`; a menu opened from one is never narrower than it. */
   @state() private hasTrigger = false
 
@@ -174,8 +190,6 @@ export class Menu extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    // A submenu opens beside its row, not under it.
-    if (!isServer && this.getAttribute('slot') === 'submenu' && !this.hasAttribute('placement')) this.placement = 'right-start'
     if (!isServer && this.renderRoot.hasChildNodes()) {
       void this.updateComplete.then(() => {
         this.syncAnchor()
@@ -225,7 +239,10 @@ export class Menu extends LitElement {
     const resolved = this.resolveAnchor()
     if (resolved !== this.anchorElement) this.anchorElement = resolved
     this.hasTrigger = !!this.triggerElement
-    this.toggleAttribute('has-trigger', this.hasTrigger)
+    // A custom state, not a host attribute: this runs while the page upgrades, before a framework hydrates, and an
+    // attribute the server never rendered is a hydration mismatch. The stylesheet reads it as `:host(:state(has-trigger))`.
+    if (this.hasTrigger) this.internals.states.add('has-trigger')
+    else this.internals.states.delete('has-trigger')
     void this.syncTriggerAria()
   }
 
@@ -505,7 +522,7 @@ export class Menu extends LitElement {
         id="overlay"
         class="overlay"
         .anchor=${this.anchorElement ?? undefined}
-        .placement=${this.placement}
+        .placement=${this.effectivePlacement}
         .offset=${this.offset}
         .crossOffset=${this.crossOffset}
         .open=${this.open}

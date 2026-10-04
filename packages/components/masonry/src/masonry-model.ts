@@ -141,12 +141,28 @@ export function cloneSnapshot(snapshot: MasonryLayoutSnapshot): MasonryLayoutSna
   return { version: 1, items: snapshot.items.map((item) => ({ id: item.id, rows: item.rows, columns: { ...item.columns } })) }
 }
 
-/** Preserve saved order, append newly-authored tiles, and discard removed tiles. */
+/**
+ * Preserve saved order and discard removed tiles. A newly-authored tile goes before the nearest tile authored after it
+ * that is already placed, so a tile inserted first in the DOM is placed first; with no such tile it is appended.
+ */
 export function reconcileSnapshot(authored: MasonryLayoutSnapshot, saved?: MasonryLayoutSnapshot): MasonryLayoutSnapshot {
   if (!saved) return cloneSnapshot(authored)
   const current = new Map(authored.items.map((item) => [item.id, item]))
   const ordered = saved.items.filter((item) => current.has(item.id)).map((item) => ({ id: item.id, rows: item.rows, columns: { ...item.columns } }))
   const retained = new Set(ordered.map((item) => item.id))
-  for (const item of authored.items) if (!retained.has(item.id)) ordered.push({ id: item.id, rows: item.rows, columns: { ...item.columns } })
+  authored.items.forEach((item, index) => {
+    if (retained.has(item.id)) return
+    const added = { id: item.id, rows: item.rows, columns: { ...item.columns } }
+    let at = ordered.length
+    for (const next of authored.items.slice(index + 1)) {
+      const position = ordered.findIndex((placed) => placed.id === next.id)
+      if (position !== -1) {
+        at = position
+        break
+      }
+    }
+    ordered.splice(at, 0, added)
+    retained.add(item.id)
+  })
   return { version: 1, items: ordered }
 }

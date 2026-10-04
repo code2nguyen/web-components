@@ -31,7 +31,7 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 <style>
   .soft {
     --c2-button__container--background-color: rgba(37, 99, 235, 0.1);
-    --c2-button__container--color: #1d4ed8;
+    --c2-button__container--color: color-mix(in srgb, #1d4ed8 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.16);
     --c2-button__container__active--background-color: rgba(37, 99, 235, 0.24);
   }
@@ -57,7 +57,7 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 <style>
   .ghost {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #2563eb;
+    --c2-button__container--color: color-mix(in srgb, #2563eb 75%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.08);
     --c2-button__container__active--background-color: rgba(37, 99, 235, 0.16);
     --c2-button__container--font-weight: 600;
@@ -70,11 +70,11 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 <style>
   .link {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #2563eb;
+    --c2-button__container--color: color-mix(in srgb, #2563eb 75%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button__container--padding-left: 4px;
     --c2-button__container--padding-right: 4px;
     --c2-button__container__hover--background-color: transparent;
-    --c2-button__container__hover--color: #1e40af;
+    --c2-button__container__hover--color: color-mix(in srgb, #1e40af 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button__container__active--background-color: transparent;
   }
 </style>
@@ -110,6 +110,7 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 <style>
   .danger {
     --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__hover--background-color: #b91c1c;
     --c2-button__container__active--background-color: #991b1b;
     --c2-button__container__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
@@ -126,9 +127,10 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 ```html tag=MdxCodeBlock,label=Success
 <style>
   .success {
-    --c2-button__container--background-color: #16a34a;
-    --c2-button__container__hover--background-color: #15803d;
-    --c2-button__container__active--background-color: #166534;
+    --c2-button__container--background-color: #15803d;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
+    --c2-button__container__hover--background-color: #166534;
+    --c2-button__container__active--background-color: #14532d;
     --c2-button__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
   }
 </style>
@@ -401,7 +403,7 @@ Place icon-only buttons in a positioned wrapper to create a floating action butt
     --c2-button__container--width: 56px;
     --c2-button__container--height: 56px;
     --c2-button__container--background-color: #2563eb;
-    --c2-button__container--color: #ffffff;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container--border: 1px solid #2563eb;
     --c2-button__container__hover--background-color: #1d4ed8;
     --c2-button__container__active--background-color: #1e40af;
@@ -475,6 +477,7 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
 <style>
   .feather-danger {
     --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__hover--background-color: #b91c1c;
     --c2-button__container__active--background-color: #991b1b;
     --c2-button__container__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
@@ -511,7 +514,7 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
 <style>
   .material-soft {
     --c2-button__container--background-color: rgba(37, 99, 235, 0.1);
-    --c2-button__container--color: #1d4ed8;
+    --c2-button__container--color: color-mix(in srgb, #1d4ed8 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.16);
     --c2-button__container__active--background-color: rgba(37, 99, 235, 0.24);
     --c2-button__icon--size: 20px;

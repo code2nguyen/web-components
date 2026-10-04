@@ -1,0 +1,223 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    region--background-color: #f4f4f5,
+    region--border-color: #ffffff,
+    region--border-width: 0.5px,
+    region__hover--border-color: #18181b,
+    region__hover--border-width: 1px,
+    region__selected--background-color: #dbeafe,
+    region__selected--border-color: #0265dc,
+    region__selected--border-width: 2px,
+    scale-start--color: #dce8fb,
+    scale-end--color: #0a3b8c,
+    scale-negative--color: #c2410c,
+    scale-mid--color: #e4e4e7,
+    scale-legend--width: 160px,
+    marker--opacity: 0.5,
+    marker__hover--opacity: 0.85,
+    marker--border-width: 1px,
+    marker--min-size: 6px,
+    marker--max-size: 40px,
+    flow--width: 1.5px,
+    flow--max-width: 6px,
+    flow--opacity: 0.7,
+    zoom-control--size: 28px,
+    zoom-control--background-color: #ffffff,
+    zoom-control__hover--background-color: #f4f4f5,
+    zoom-control--color: #18181b,
+    zoom-control--border: 1px solid #e4e4e7,
+    zoom-control--border-radius: 6px,
+  )
+);
+
+.zoom-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zoom-control {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(zoom-control--size);
+  height: css.cssVar(zoom-control--size);
+  padding: 0;
+  border: css.cssVar(zoom-control--border);
+  border-radius: css.cssVar(zoom-control--border-radius);
+  background: css.cssVar(zoom-control--background-color);
+  color: css.cssVar(zoom-control--color);
+  cursor: pointer;
+}
+
+.zoom-control:hover {
+  background: css.cssVar(zoom-control__hover--background-color);
+}
+
+.zoom-control:focus-visible {
+  outline: 2px solid css.cssVar(region__selected--border-color);
+  outline-offset: 1px;
+}
+
+.zoom-control svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// The colour key sits after the layer entries in the built-in legend, pushed to its far end.
+.scale-legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-inline-start: auto;
+}
+
+.scale-ramp {
+  display: inline-grid;
+  gap: 3px;
+  width: css.cssVar(scale-legend--width);
+}
+
+.scale-gradient {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.scale-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.scale-steps {
+  display: inline-flex;
+  gap: 2px;
+  // At least the key's width, and wider when there are more classes than fit with their break values readable.
+  min-width: css.cssVar(scale-legend--width);
+  // Room for the break values written under the boundaries between classes.
+  padding-block-end: 16px;
+}
+
+.scale-step {
+  position: relative;
+  flex: 1 0 36px;
+  height: 8px;
+}
+
+.scale-step:first-child {
+  border-start-start-radius: 4px;
+  border-end-start-radius: 4px;
+}
+
+.scale-step:last-child {
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
+}
+
+.scale-break {
+  position: absolute;
+  inset-inline-start: calc(100% + 1px);
+  top: 11px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.scale-classes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.scale-class,
+.scale-no-data {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scale-class i,
+.scale-no-data i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.scale-no-data i {
+  box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35);
+}
+
+// Read by a screen reader only: the canvas carries no text of its own.
+.data-table {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * Theme probes, read by the map's style lookup. Computed values resolve `var()` chains and relative lengths into what
+ * the engine accepts; `display: none` keeps them free. A border needs a style, or its computed width is 0.
+ */
+.map-probes,
+.map-probe {
+  display: none;
+}
+
+.map-probe--region {
+  color: css.cssVar(region--background-color);
+  border-top: css.cssVar(region--border-width) solid css.cssVar(region--border-color);
+}
+
+.map-probe--hover {
+  border-top: css.cssVar(region__hover--border-width) solid css.cssVar(region__hover--border-color);
+}
+
+.map-probe--selected {
+  color: css.cssVar(region__selected--background-color);
+  border-top: css.cssVar(region__selected--border-width) solid css.cssVar(region__selected--border-color);
+}
+
+.map-probe--scale-start {
+  color: css.cssVar(scale-start--color);
+}
+
+.map-probe--scale-end {
+  color: css.cssVar(scale-end--color);
+}
+
+.map-probe--scale-negative {
+  color: css.cssVar(scale-negative--color);
+}
+
+.map-probe--scale-mid {
+  color: css.cssVar(scale-mid--color);
+}
+
+.map-probe--marker {
+  opacity: css.cssVar(marker--opacity);
+  width: css.cssVar(marker--min-size);
+  height: css.cssVar(marker--max-size);
+  border-top: css.cssVar(marker--border-width) solid;
+}
+
+.map-probe--marker-hover {
+  opacity: css.cssVar(marker__hover--opacity);
+}
+
+.map-probe--flow {
+  opacity: css.cssVar(flow--opacity);
+  width: css.cssVar(flow--max-width);
+  border-top: css.cssVar(flow--width) solid;
+}

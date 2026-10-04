@@ -113,6 +113,55 @@ const markup: Record<string, string> = {
       <svg slot="marker" data-testid="custom-marker" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16" stroke="currentColor" /></svg>
     </c2-step>
   </c2-steps>`,
+  // Side by side; `build` is a group, which a horizontal list rolls up but does not draw.
+  horizontal: `<c2-steps id="subject" orientation="horizontal" style="width:600px" aria-label="Release">
+    <c2-step status="success" label="Checkout" detail="main"></c2-step>
+    <c2-step label="Build">
+      <c2-step status="success" label="compile"></c2-step>
+      <c2-step status="error" label="bundle"></c2-step>
+    </c2-step>
+    <c2-step status="pending" label="Publish"></c2-step>
+  </c2-steps>`,
+  // Every placement of the text around the marker, one list each; the rail must link every step whatever it is.
+  placements: `
+    <c2-steps id="subject" class="below" orientation="horizontal" style="width:640px;--c2-steps--gap:16px" aria-label="Below">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="above" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'text text text' 'trailing trailing trailing' 'marker rail rail';--c2-step__row__horizontal--align-content:end" aria-label="Above">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="end" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'marker text rail' '. trailing .'" aria-label="Beside">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="start" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'text marker rail' 'trailing . .'" aria-label="Before">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>`,
+  // The task view: the process step shows the log, the result step shows the result once there is one.
+  interactive: `<c2-steps id="subject" orientation="horizontal" interactive selected="process" aria-label="Task">
+    <c2-step value="process" status="running" label="Process" detail="Running"></c2-step>
+    <c2-step value="result" status="pending" label="Result" disabled></c2-step>
+  </c2-steps>`,
+  // Vertical and interactive: a group stays a disclosure, its leaves become buttons; no `value`, so paths name them.
+  'interactive-vertical': `<c2-steps id="subject" interactive aria-label="Pipeline">
+    <c2-step label="build" id="build">
+      <c2-step status="success" label="install" id="install"></c2-step>
+      <c2-step status="success" label="compile" id="compile"></c2-step>
+    </c2-step>
+    <c2-step status="pending" label="ship" id="ship"></c2-step>
+  </c2-steps>`,
+  'data-interactive': `<c2-steps id="subject" orientation="horizontal" interactive selected="process" aria-label="Task from data"></c2-steps>`,
   data: `<c2-steps id="subject" aria-label="Run trace from data"></c2-steps>`,
   'data-wizard': `<c2-steps id="subject" marker="number" current="1" aria-label="Checkout from data"></c2-steps>`,
   renderers: `<c2-steps id="subject" aria-label="Rendered"></c2-steps>`,
@@ -147,6 +196,13 @@ if (scenario === 'data' || scenario === 'renderers' || scenario === 'render-item
 
 if (scenario === 'data-wizard') {
   subject.steps = [{ label: 'Account' }, { label: 'Plan' }, { label: 'Payment' }, { label: 'Confirm' }]
+}
+
+if (scenario === 'data-interactive') {
+  subject.steps = [
+    { id: 'process', label: 'Process', status: 'running' },
+    { id: 'result', label: 'Result', disabled: true },
+  ]
 }
 
 if (scenario === 'renderers') {

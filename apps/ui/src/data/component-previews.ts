@@ -4,8 +4,26 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  kanban: `<c2-kanban editable aria-label="Sprint board" style="--c2-kanban--gap:6px;--c2-kanban-column--width:116px;--c2-kanban-column--padding:5px;--c2-kanban-column--gap:5px;--c2-kanban-column__cards--gap:5px;--c2-kanban-column__card--padding:6px 8px;--c2-kanban-column__card--font-size:11px;--c2-kanban-column__label--font-size:12px;--c2-kanban-column__count--font-size:11px;--c2-kanban-column__empty--padding:8px 4px;--c2-kanban-column__empty--font-size:12px" items='[{"id":"1","column":"todo","title":"Search empty state"},{"id":"2","column":"todo","title":"Date input focus"},{"id":"3","column":"doing","title":"Tree drag handles"}]'><c2-kanban-column column-id="todo" label="To do"></c2-kanban-column><c2-kanban-column column-id="doing" label="Doing" limit="1"></c2-kanban-column></c2-kanban>`,
+  gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
+  <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
+  <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
+  <c2-gantt-task task-id="c" start="2026-10-15" milestone dependencies="b">Ship</c2-gantt-task>
+</c2-gantt>`,
+  'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">
+  <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))"></c2-working-indicator>
+  <c2-working-indicator indicator="dots" effect="wave" label="Generating"></c2-working-indicator>
+  <c2-working-indicator state="done" done-label="Done in 14s"></c2-working-indicator>
+</div>`,
+  'page-editor': `<c2-page-editor label="Notes" style="width:260px;--c2-page-editor__content--min-height:0;--c2-page-editor__content--font-size:13px;--c2-page-editor__content--padding:4px 8px 4px 24px;--c2-page-editor__heading2--font-size:17px;--c2-page-editor__block--margin-top:2px" value="## Launch plan&#10;&#10;Ship **Friday**, <span data-color=&quot;red&quot;>no slips</span>.&#10;&#10;- [x] Freeze the API&#10;- [ ] Write the docs"></c2-page-editor>`,
+  notepad: `<c2-notepad label="Groceries" style="width:240px;--c2-notepad__sheet--min-height:150px;--c2-notepad__writing--font-size:16px;--c2-notepad__rule--spacing:24px;--c2-notepad__margin--inset:36px" value="- [x] Oat milk&#10;- [ ] **Sourdough**&#10;remember the ==blue== bag"></c2-notepad>`,
+  'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
+  'comparison-bar': `<c2-comparison-bar start-value="22.43" end-value="77.57" start-label="Bid" end-label="Ask" show-value style="width:240px"></c2-comparison-bar>`,
+  flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
+  'week-planner': `<c2-week-planner locale="en-US" start-hour="8" end-hour="14" style="width:720px;max-width:none;zoom:0.34;--c2-week-planner--padding:16px;--c2-week-planner__hour--height:36px;--c2-week-planner__hour-label--font-size:16px;--c2-week-planner__day-header--font-size:18px;--c2-week-planner__event--font-size:16px" events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Kids","day":"wed","start":"11:00","end":"14:00","color":"#0f766e"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Football","day":"sat","start":"09:00","end":"12:00","color":"#0f766e"}]'></c2-week-planner>`,
+  'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
+  'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:var(--c2-theme--color-on-surface-variant, #71717a)">Wrote the first published algorithm.</div></c2-hover-card>`,
   'google-map': `<c2-google-map center="10.7769,106.7009" zoom="13" disable-default-ui style="width:260px;--c2-google-map__container--height:150px"><c2-google-map-marker position="10.7769,106.7009" label="Saigon Opera House"></c2-google-map-marker></c2-google-map>`,
-  'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">
     <c2-command-item value="calendar">Calendar</c2-command-item>
@@ -17,7 +35,7 @@ export const componentPreviews: Record<string, string> = {
 </c2-command>`,
   marker: `<p style="max-width:240px;margin:0;font-size:15px;line-height:1.8;text-align:center">Deploys are <c2-marker>fully automated</c2-marker>, <c2-marker variant="underline">reviewed</c2-marker> and <c2-marker variant="circle">reversible</c2-marker>.</p>`,
   'context-menu': `<c2-context-menu>
-  <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed #a1a1aa;border-radius:8px;color:#71717a;font-size:13px">Right-click me</div>
+  <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed var(--c2-theme--color-outline, #a1a1aa);border-radius:8px;color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:13px">Right-click me</div>
   <c2-menu slot="menu" aria-label="Canvas">
     <c2-menu-item value="zoom-in">Zoom in</c2-menu-item>
     <c2-menu-item value="zoom-out">Zoom out</c2-menu-item>
@@ -42,14 +60,14 @@ export const componentPreviews: Record<string, string> = {
 </c2-carousel>`,
   'tag-input': `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width:260px"></c2-tag-input>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
-  'split-panel': `<c2-split-panel position="35" style="width:260px;height:130px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:12px">
+  'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
-  <div slot="end" style="padding:8px;color:#71717a">Message</div>
+  <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
 </c2-split-panel>`,
   banner: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
   'log-viewer': `<c2-log-viewer data-log-viewer-demo="preview" wrap aria-label="Store server log" style="height:180px;width:300px"></c2-log-viewer>`,
-  masonry: `<c2-masonry style="width:260px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:#f4f4f5;--c2-masonry--border-radius:8px;--c2-masonry-item--background:#fff;--c2-masonry-item--border:1px solid #e4e4e7;--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
+  masonry: `<c2-masonry style="width:260px;color:var(--c2-theme--color-on-surface, #18181b);font-size:12px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:var(--c2-theme--color-surface-container, #f4f4f5);--c2-masonry--border-radius:8px;--c2-masonry-item--background:var(--c2-theme--color-surface, #ffffff);--c2-masonry-item--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
@@ -71,7 +89,7 @@ export const componentPreviews: Record<string, string> = {
 
 // editable, highlighted
 greet('world')"></c2-code-editor>`,
-  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid #bcbcc6;--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:#f4f4f5"></c2-theme-select></div>`,
+  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
     <c2-tree-item value="app" label="app.ts"></c2-tree-item>
@@ -79,7 +97,7 @@ greet('world')"></c2-code-editor>`,
   </c2-tree-item>
   <c2-tree-item value="readme" label="README.md"></c2-tree-item>
 </c2-tree>`,
-  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid #e4e4e7;border-radius:12px;background:#fff"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:#71717a;font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam></c2-border-beam></div>`,
+  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:12px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b)"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam style="--c2-border-beam__beam--width:2px;--c2-border-beam__beam--size:140px;--c2-border-beam__beam--color-from:#3b82f6;--c2-border-beam__beam--color-to:#a5b4fc;--c2-border-beam__beam--opacity:1;--c2-border-beam__beam--filter:drop-shadow(0 0 6px rgba(59, 130, 246, 0.75));--c2-border-beam__beam--duration:4s"></c2-border-beam></div>`,
   'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>
@@ -91,7 +109,7 @@ greet('world')"></c2-code-editor>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
   cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
-  questionnaire: `<c2-questionnaire questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
+  questionnaire: `<c2-questionnaire style="zoom:0.5;width:448px" questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
   'otp-input': `<c2-otp-input value="4827" group="3" aria-label="Verification code" style="--c2-otp-input__cell--width:32px;--c2-otp-input__cell--height:38px;--c2-otp-input__cell--font-size:16px;--c2-otp-input--gap:6px"></c2-otp-input>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
@@ -100,16 +118,21 @@ greet('world')"></c2-code-editor>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+  'overlap-chart': `<c2-overlap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__region-label--font-size:11px;--c2-chart__set-label--font-size:11px" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web"></c2-chart-series><c2-chart-series field="mobile" label="Mobile"></c2-chart-series><c2-chart-series field="api" label="API"></c2-chart-series></c2-overlap-chart>`,
   'gauge-chart': `<c2-gauge-chart style="width:280px;height:132px;--c2-chart--padding:4px" aria-label="Services mix: 26.2%" min="0" max="40" precision="1" value-suffix="%" pointer="none" marks="none" split-number="1" legend="none" label-field="metric" data='[{"metric":"","value":26.23}]'><c2-chart-series field="value" label="Services mix"></c2-chart-series></c2-gauge-chart>`,
   'radar-chart': `<c2-radar-chart style="width:280px;height:132px;--c2-chart--padding:4px" label-field="metric" max="100" points="none" data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'><c2-chart-series field="current" label="Current"></c2-chart-series><c2-chart-series field="target" label="Target"></c2-chart-series></c2-radar-chart>`,
+  'butterfly-chart': `<c2-butterfly-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__gutter--width:44px" aria-label="Population by age band, men against women" label-field="age" legend="none" data='[{"age":"60+","men":1960,"women":2610},{"age":"40–59","men":2480,"women":2530},{"age":"20–39","men":2950,"women":2880},{"age":"0–19","men":2410,"women":2295}]'><c2-chart-series field="men" label="Men"></c2-chart-series><c2-chart-series field="women" label="Women"></c2-chart-series></c2-butterfly-chart>`,
+  'pyramid-chart': `<c2-pyramid-chart style="width:280px;height:132px;--c2-chart--padding:4px" label-field="plan" legend="none" data='[{"plan":"Enterprise","accounts":42},{"plan":"Business","accounts":318},{"plan":"Team","accounts":1260},{"plan":"Starter","accounts":4870}]'><c2-chart-series field="accounts" label="Accounts"></c2-chart-series></c2-pyramid-chart>`,
   'scatter-chart': `<c2-scatter-chart style="width:280px;height:132px;--c2-chart--padding:8px" aria-label="Weekly active hours against 90-day retention by plan" x-field="hours" legend="none" symbol-size="7" data='[{"hours":2.5,"starter":33.2},{"hours":4.2,"starter":32.6},{"hours":4.9,"starter":35.9},{"hours":5.7,"starter":34.9},{"hours":7.4,"starter":42.8},{"hours":7.9,"starter":32.1},{"hours":9.1,"starter":44.6},{"hours":10.3,"growth":45.9},{"hours":11.0,"starter":28.8},{"hours":11.5,"growth":51.9},{"hours":12.5,"starter":51.1},{"hours":13.3,"starter":43.9},{"hours":13.7,"growth":62.3},{"hours":13.9,"starter":30.7},{"hours":15.3,"growth":58.7},{"hours":15.4,"starter":33.1},{"hours":16.7,"growth":60.2},{"hours":18.2,"growth":52.2},{"hours":20.5,"growth":70.6},{"hours":21.8,"growth":64.8},{"hours":22.5,"growth":54.1},{"hours":23.4,"scale":81.1},{"hours":23.5,"scale":67.5},{"hours":23.9,"growth":51.4},{"hours":26.1,"growth":60.7},{"hours":26.4,"scale":74.9},{"hours":27.8,"growth":61.5},{"hours":28.0,"scale":74.4},{"hours":28.1,"scale":79.4},{"hours":30.7,"scale":73.3},{"hours":31.1,"scale":75.0},{"hours":33.9,"scale":85.9},{"hours":34.2,"scale":75.1},{"hours":35.7,"scale":72.0},{"hours":38.2,"scale":76.2},{"hours":39.3,"scale":82.7}]'><c2-chart-series field="starter" label="Starter"></c2-chart-series><c2-chart-series field="growth" label="Growth"></c2-chart-series><c2-chart-series field="scale" label="Scale"></c2-chart-series></c2-scatter-chart>`,
+  'bubble-chart': `<c2-bubble-chart style="width:280px;height:132px;--c2-chart--padding:8px;--c2-chart__bubble--max-size:34px" aria-label="Life expectancy against GDP per capita, sized by population" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" legend="none" bubble-labels="none" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>`,
+  'map-chart': `<c2-map-chart style="width:280px;height:132px;--c2-chart--padding:8px" aria-label="Revenue by country" legend="none" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>`,
   'candlestick-chart': `<c2-candlestick-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="date" legend="none" data='[{"date":"M","open":248.3,"close":256.1,"low":248.1,"high":256.6},{"date":"T","open":255.9,"close":254.4,"low":253.6,"high":257.3},{"date":"W","open":255.2,"close":252.3,"low":251,"high":255.7},{"date":"T","open":253.2,"close":256.9,"low":252.4,"high":257.2},{"date":"F","open":254.1,"close":255.5,"low":253.1,"high":257.6}]'></c2-candlestick-chart>`,
   sparkline: `<div class="preview-row"><c2-sparkline style="--c2-chart--width:120px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline><c2-sparkline style="--c2-chart--width:120px" data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline></div>`,
   autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
-  header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px">
+  header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px;--c2-header--gap:16px">
   <strong slot="brand">Northstar</strong>
   <span style="font-size:12px">Markets</span>
-  <button slot="actions" type="button">Sign in</button>
+  <c2-button slot="actions" style="--c2-button__container--height:30px;--c2-button__container--padding-left:12px;--c2-button__container--padding-right:12px;--c2-button__container--font-size:13px;--c2-button__container--background-color:var(--c2-theme--color-surface-container, #f4f4f5);--c2-button__container--color:var(--c2-theme--color-on-surface, #18181b);--c2-button__container--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-button__container__hover--background-color:var(--c2-theme--color-surface-container-low, #fafafa);--c2-button__container__active--background-color:var(--c2-theme--color-surface-container, #f4f4f5)">Sign in</c2-button>
 </c2-header>`,
   stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
   <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
@@ -121,7 +144,7 @@ greet('world')"></c2-code-editor>`,
   <c2-details label="Shipping" expanded>Ships in 3–5 days.</c2-details>
   <c2-details label="Returns">Free within 30 days.</c2-details>
 </c2-accordion>`,
-  avatar: `<c2-avatar-group aria-label="Project contributors" style="--c2-avatar-group--max-width:150px">
+  avatar: `<c2-avatar-group aria-label="Project contributors" style="width:170px;--c2-avatar-group--max-width:170px;--c2-avatar-group--overlap:6px">
   <c2-avatar name="Nguyen Thai Vinh" status="online"></c2-avatar>
   <c2-avatar auto-color name="Elisa Jasmin" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
@@ -152,7 +175,7 @@ greet('world')"></c2-code-editor>`,
 </div>`,
   card: `<c2-card style="width:220px">
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>
-  <div style="font-size:12px;line-height:1.5;color:#71717a">Supporting text that describes what this card is about.</div>
+  <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #71717a)">Supporting text that describes what this card is about.</div>
 </c2-card>`,
   'chat-input': `<c2-chat-input style="width:240px" aria-label="Message" placeholder="Ask anything…" value="Can you summarize this?"></c2-chat-input>`,
   'chat-message': `<c2-chat-message style="width:240px;--c2-chat-message__message--max-width:190px">
@@ -178,10 +201,10 @@ greet('world')"></c2-code-editor>`,
   'color-slider': `<c2-color-slider value="200" style="width:220px"></c2-color-slider>`,
   'copy-button': `<div class="preview-row">
   <c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
-  <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid #bcbcc6; --c2-copy-button__container__hover--background-color: #f4f4f5">Copy</c2-copy-button>
+  <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6); --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5)">Copy</c2-copy-button>
 </div>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
-  <div style="font-size:12px;line-height:1.5;color:#52525b">Delivered in 3–5 business days. Free over $50.</div>
+  <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
@@ -194,6 +217,12 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-camera></c2-phosphor-camera>
   <c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
+</div>`,
+  'task-icons': `<div class="preview-row" style="gap:18px;--c2-task-icon--size:28px;color:#0265dc">
+  <c2-task-icon-mail></c2-task-icon-mail>
+  <c2-task-icon-run style="color:#ea580c"></c2-task-icon-run>
+  <c2-task-icon-cook style="color:#0f766e"></c2-task-icon-cook>
+  <c2-task-icon-meditate style="color:#7c3aed"></c2-task-icon-meditate>
 </div>`,
   symbols: `<div class="preview-row" style="gap:10px;--c2-symbol--size:84px">
   <c2-symbol-celebration></c2-symbol-celebration>
@@ -250,7 +279,7 @@ greet('world')"></c2-code-editor>`,
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>
     <span slot="title">Invite your team</span>
-    <div style="font-size:13px;color:#71717a">Share the link with your teammates.</div>
+    <div style="font-size:13px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Share the link with your teammates.</div>
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
@@ -271,19 +300,22 @@ greet('world')"></c2-code-editor>`,
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
 </div>`,
-  progress: `<div style="display:grid;gap:12px;width:220px">
-  <c2-progress value="72" show-value>Uploading files</c2-progress>
-  <c2-progress style="--c2-progress--height:4px"></c2-progress>
+  progress: `<div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;width:240px">
+  <div style="display:grid;gap:12px">
+    <c2-progress value="72" show-value>Uploading</c2-progress>
+    <c2-progress style="--c2-progress--height:4px"></c2-progress>
+  </div>
+  <c2-progress variant="circular" value="67" show-value label="Readiness" style="--c2-progress--size:56px;--c2-progress--height:6px"></c2-progress>
 </div>`,
   radio: `<c2-radio-group value="pro" style="width:200px">
   <c2-radio value="free" label="Free"></c2-radio>
   <c2-radio value="pro" label="Pro"></c2-radio>
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
-  seperator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:#71717a">
-  <c2-seperator></c2-seperator>
-  <c2-seperator>or</c2-seperator>
-  <c2-seperator style="--c2-seperator--style: dashed"></c2-seperator>
+  separator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">
+  <c2-separator></c2-separator>
+  <c2-separator>or</c2-separator>
+  <c2-separator style="--c2-separator--style: dashed"></c2-separator>
 </div>`,
   select: `<c2-select value="FR" placeholder="Select a country" style="width:190px">
   <c2-list-item value="US">United States</c2-list-item>
@@ -295,7 +327,7 @@ greet('world')"></c2-code-editor>`,
   <c2-button onclick="this.nextElementSibling.show()">Open sheet</c2-button>
   <c2-sheet>
     <span slot="title">Filters</span>
-    <div style="font-size:13px;color:#71717a">A panel pinned to the edge of the screen.</div>
+    <div style="font-size:13px;color:var(--c2-theme--color-on-surface-variant, #71717a)">A panel pinned to the edge of the screen.</div>
     <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Apply</c2-button>
   </c2-sheet>
 </div>`,

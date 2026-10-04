@@ -6,7 +6,7 @@ test('hard reload keeps the server-rendered pie gallery visible through hydratio
 
   const charts = page.locator('c2-pie-chart')
   await expect(charts).toHaveCount(7)
-  await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.hasAttribute('data-chart-ready')))).toBe(true)
+  await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.matches(':state(ready)')))).toBe(true)
   await expect
     .poll(() =>
       charts.evaluateAll((elements) =>
@@ -25,7 +25,7 @@ test('scatter chart collects its declarative series before the hydrated chart se
   await page.reload()
 
   const chart = page.locator('#scatter-investment')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect.poll(() => chart.evaluate((element) => element.matches(':state(ready)'))).toBe(true)
   await expect
     .poll(() => chart.evaluate((element) => (element as HTMLElement & { getLegendItems(): { label: string }[] }).getLegendItems().map((item) => item.label)))
     .toEqual(['Revenue'])
@@ -33,6 +33,20 @@ test('scatter chart collects its declarative series before the hydrated chart se
   const legend = page.locator('c2-chart-legend[for="scatter-investment"]')
   await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelectorAll('.item').length ?? 0)).toBe(1)
   await expect(legend.locator('.item')).toContainText('Revenue')
+})
+
+test('server-rendered charts keep their declared series', async ({ page }) => {
+  await page.goto('./components/overlap-chart/gallery/')
+  await page.reload()
+
+  const chart = page.locator('c2-overlap-chart').first()
+  await expect.poll(() => chart.evaluate((element) => element.matches(':state(ready)'))).toBe(true)
+  // The server cannot see the chart's children, so the definitions have to be read on the client. Inferred from the data
+  // alone, the sets would be named by their keys (`web`); the declared labels prove the children were read.
+  await expect
+    .poll(() => chart.evaluate((element) => (element as HTMLElement & { getLegendItems(): { label: string }[] }).getLegendItems().map((item) => item.label)))
+    .toEqual(['Web', 'Mobile', 'API'])
+  await expect(chart.locator('table.overlap-a11y tbody tr').first()).toContainText('Web only')
 })
 
 test('card conditional regions survive hydration and reconcile later mutations', async ({ page }) => {

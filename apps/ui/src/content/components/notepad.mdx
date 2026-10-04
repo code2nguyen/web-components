@@ -1,0 +1,242 @@
+---
+title: 'Notepad'
+description: 'A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.'
+category: 'Planning'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { Notepad } from '@c2n/notepad'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
+import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
+
+`c2-notepad` is a form control for notes that reads as a sheet of paper rather than an input box. The writing sits on the ruled lines, a margin runs down the left, a spiral binds the top and the page has a light grain. Select some text and a strip of washi tape appears above it with bold, italic, underline and strikethrough, plus one button for the four inks and one for the three highlighters. Write `[ ] ` at the start of a line for a checklist item. Set `tearable` to add a perforated edge with a "Tear off" button.
+
+The value is plain, line-based Markdown, so it reads well when you store it, search it or show it somewhere else. The handwriting face, Patrick Hand, is bundled. It is compact and easy to read, and it covers Latin and Vietnamese.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/notepad
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/notepad
+<style>
+  .note { width: 360px; max-width: 100%; }
+  .small { width: 240px; max-width: 100%; }
+</style>
+<div data-label="Default">
+  <c2-notepad class="note" paper-picker label="Meeting notes" placeholder="Write something…" value="Thursday sync
+Ship the notepad **behind a flag**
+Ask about the <span data-ink=&quot;red&quot;>night paper</span>"><span slot="header">Notes · Oct 1</span></c2-notepad>
+</div>
+<div data-label="Checklist">
+  <c2-notepad class="note" label="Groceries" value="- [x] Oat milk
+- [ ] Sourdough
+- [ ] Lemons ×3
+remember the ==blue== bag"></c2-notepad>
+</div>
+<div data-label="Pads">
+  <c2-notepad class="small" pad="legal" label="Deposition prep" value="1. Timeline of the March emails
+2. Who signed the ~~first~~ second draft?"></c2-notepad>
+  <c2-notepad class="small" pad="sticky" label="Reminder" value="Dentist Tue 9:30
+bring the **insurance card**!"></c2-notepad>
+  <c2-notepad class="small" pad="index-card" label="Recipe" value="2 cans San Marzano, 5 garlic
+olive oil, basil, slow 40 min"><span slot="header">Nonna's tomato sauce</span></c2-notepad>
+</div>
+<div data-label="Tear-off pad">
+  <c2-notepad class="note" label="To call" tearable value="Plumber: Thu after 4
+Landlord about the heating"></c2-notepad>
+</div>
+<div data-label="States">
+  <c2-notepad class="note" label="Signed copy" readonly value="Signed copy, read-only"></c2-notepad>
+  <c2-notepad class="note" label="Archived page" disabled value="Archived page"></c2-notepad>
+  <c2-notepad class="note" label="Summary" required error error-text="Write a summary first"></c2-notepad>
+</div>
+```
+
+## Formatting
+
+The toolbar opens when a selection settles in the page and closes on Escape, when the selection collapses, or when focus leaves the notepad. Its buttons show the formatting of the selected text, and clicking one keeps the selection so you can apply several formats in a row. The ink button shows the current ink: hover it, or tap it on a touch screen, to pick another ink or go back to the default. The highlighter button works the same way. The same formats are on the keyboard:
+
+| Format                  | Shortcut                  | While typing       |
+| ----------------------- | ------------------------- | ------------------ |
+| Bold                    | <kbd>Ctrl/⌘ B</kbd>       | `**bold**`         |
+| Italic                  | <kbd>Ctrl/⌘ I</kbd>       | `*italic*`         |
+| Underline               | <kbd>Ctrl/⌘ U</kbd>       |                    |
+| Strikethrough           | <kbd>Ctrl/⌘ Shift X</kbd> | `~~strike~~`       |
+| First highlighter       | <kbd>Ctrl/⌘ Shift H</kbd> | `==highlight==`    |
+| Clear formatting        | <kbd>Ctrl/⌘ \\</kbd>      |                    |
+| Checklist item          | <kbd>Ctrl/⌘ Shift L</kbd> | `[ ] ` or `- [ ] ` |
+| Tick or untick the item | <kbd>Ctrl/⌘ Enter</kbd>   |                    |
+| Move to the toolbar     | <kbd>Alt F10</kbd>        |                    |
+
+In the toolbar, the arrow keys move between buttons and Escape goes back to the page. On the ink or highlighter button, ArrowDown or Enter opens its colours, the arrow keys move between them, and Escape closes them. `toolbar="none"` keeps the shortcuts and hides the strip. `marks="bold italic"` limits what can be applied, through the toolbar, the shortcuts and pasted content. Buttons slotted into `toolbar` are added at the end of the strip.
+
+Nothing changes the line height, so no format can push text off the ruled lines. That is why there are no headings or font sizes.
+
+## Your own colours
+
+A page stores an ink or a highlighter by its **position** in a list, never as a colour: `<span data-ink="3">` is the third ink. By default the lists are the four inks (blue, black, red, green) and three highlighters (yellow, green, pink), drawn from the `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Set `inks` and `highlights` to give the toolbar your own, as a list of colours. Each entry is `{ value, name }`: `value` is any CSS colour, `var()` included, and `name` is what the writer sees on the swatch's tooltip and hears from a screen reader. The name is optional, and so is the object: a bare `'#4f46e5'` is called `Ink 2` by its position.
+
+```ts tag=CodeBlock
+const light = [
+  { name: 'Ink', value: '#1f2937' },
+  { name: 'Brand', value: '#4f46e5' },
+  { name: 'Alert', value: '#b91c1c' },
+]
+const dark = [
+  { name: 'Ink', value: '#e5e7eb' },
+  { name: 'Brand', value: '#a5b4fc' },
+  { name: 'Alert', value: '#fca5a5' },
+]
+notepad.inks = light
+notepad.highlights = [{ name: 'Marker', value: 'rgba(250, 204, 21, 0.5)' }]
+
+// The page keeps its positions, so switching theme recolours every mark in place.
+themeToggle.addEventListener('change', () => (notepad.inks = isDark() ? dark : light))
+```
+
+The first note below gives its own three inks and two highlighters: select some text to see them in the toolbar. The second gets the same page with a different list of the same length, so every mark is recoloured in place.
+
+```html tag=UsageBlock,package=@c2n/notepad
+<style>
+  .colour-note { width: 300px; max-width: 100%; }
+</style>
+<div data-label="Own inks and highlighters">
+  <c2-notepad
+    class="colour-note"
+    label="Brand notes"
+    inks='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+    highlights='[{"name":"Marker","value":"rgba(250, 204, 21, 0.5)"},{"name":"Mint","value":"rgba(52, 211, 153, 0.35)"}]'
+    value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+  ></c2-notepad>
+</div>
+<div data-label="Same page, another list">
+  <c2-notepad
+    class="colour-note"
+    label="Brand notes, warm"
+    inks='[{"name":"Ink","value":"#3f2a1d"},{"name":"Brand","value":"#c2410c"},{"name":"Alert","value":"#9f1239"}]'
+    highlights='[{"name":"Marker","value":"rgba(251, 146, 60, 0.4)"},{"name":"Mint","value":"rgba(163, 230, 53, 0.4)"}]'
+    value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+  ></c2-notepad>
+</div>
+```
+
+Keep the same length and order across themes: position 2 should mean the same thing in both. A list whose colours are `var(--app-token)` follows the theme with no reassigning at all. A position the current list does not have is drawn in the page's own ink. The defaults were checked for contrast; a list you give replaces them and is used exactly as given, so choosing colours that read on each other, on every paper colour and in every theme, is up to you. Pages written with the default colours' names (`data-ink="red"`) still open, as their position. `DEFAULT_INKS` and `DEFAULT_HIGHLIGHTS` are exported to start from.
+
+Call `formatSelection(mark, color?)` (`color` is the 1-based position, e.g. `formatSelection('ink', 3)`) and `clearFormatting()` to drive the formatting from your own controls. Listen for `format-change` to keep them in sync with the selection.
+
+## The value
+
+`value` is a small Markdown dialect with one line of the page per line of text:
+
+```md tag=CodeBlock
+Thursday sync
+- [ ] Ship the notepad **behind a flag**
+- [x] Ask about the night paper
+*italic*, ~~strike~~, ==yellow highlight==, <u>underline</u>
+<span data-ink="3">third ink</span> and <mark data-color="3">third highlighter</mark>
+```
+
+Formats Markdown has no syntax for are written as inline HTML, which every Markdown renderer passes through. Anything else is kept as text. `text` gives the same page as plain text, without formatting or checklist markers. Pasted plain text is read as this dialect, and copied text is written in it.
+
+```ts tag=CodeBlock
+import '@c2n/notepad'
+
+const notepad = document.querySelector('c2-notepad')!
+notepad.addEventListener('input', () => save(notepad.value))
+notepad.addEventListener('check-change', (event) => console.log(event.detail.line, event.detail.checked))
+notepad.value = '- [ ] Call the bank'
+```
+
+`input` fires on every edit, after `value` is updated. `change` fires when the notepad loses focus with a changed value. Writing the emitted value straight back, as `v-model` does, keeps the caret where it is. `c2-notepad` is form-associated: it submits `value` under `name`, supports `required` and `maxlength` (which counts plain-text characters), resets with its form, and follows a disabled fieldset.
+
+## Tearing off a page
+
+With `tearable`, the sheet gets a perforated top edge, a "Tear off" button and a stack of sheets underneath. `tearOff()` does the same from script. It fires a cancelable `page-tear` with the page's value and number, plays the tear, clears the page and adds one to `page`. Cancel the event to keep the page. Ctrl/⌘ Z brings a torn page back.
+
+```ts tag=CodeBlock
+notepad.addEventListener('page-tear', (event) => archive.push(event.detail.value))
+```
+
+## Choosing the paper
+
+Set `paper-picker` to add a "Paper" button at the top of the sheet. It behaves like a hover card: point at it and a small card opens under it, with an arrow pointing at the button. Click or tap the button to keep the card open; from the keyboard, Enter opens it with the focus on the current choice. The card has three groups:
+
+- **Pad**: notebook (spiral binding, red margin), legal pad (canary paper, glued top, double margin, wide rules), sticky note (no binding, curled corner, larger writing, and a random tilt) and index card (white card, red headline, tight rules).
+- **Lines**: lined, grid, dot grid and blank.
+- **Paper**: six colours, each of which sets the sheet and its ink together. The first is the pad's own colour (white, canary, lemon, card or cream); the others are yellow, green, blue, pink and night, a dark sheet with light ink.
+
+The three groups combine, so an index card can have a grid or a sticky note can be pink. The arrow keys move between choices and pick as they go (up and down move a whole row), and Escape closes the card.
+
+The choice is held in three reflected properties, `pad`, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with all three, so the app can remember each writer's choice:
+
+```ts tag=CodeBlock
+notepad.addEventListener('paper-change', (event) => savePreference(event.detail.pad, event.detail.paper, event.detail.paperColor))
+```
+
+A pad is only a preset of the paper's CSS variables: binding, corners, shadow, line spacing, margin and the size of the writing. A variable you set on the element, or on a class on it, still wins over the preset, so you can tune a pad without leaving it. A sticky note leans as if stuck on by hand, at a random angle between 1° and 4° either way, picked again each time the pad is switched to a sticky note; set `--c2-notepad__sheet--rotate` to choose the angle, or `0deg` to keep it straight. Each pad's colour has its own variable (`--c2-notepad__pad-legal--background`, `--c2-notepad__pad-sticky--background`, `--c2-notepad__pad-index-card--background`); the notebook uses `--c2-notepad__sheet--background`. Under `@c2n/theme` these darken with the surface in dark mode.
+
+The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and `--c2-notepad__paper-yellow--color` (and the same pair for each colour) decide what each choice looks like. Under `@c2n/theme` the pastel papers darken with the surface in dark mode and their inks lighten.
+
+## Actions on the note
+
+Buttons slotted into `actions` sit in the row of the "Paper" and "Tear off" buttons, on their left: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). A `c2-icon-button` there is shrunk to a 24px button with a 14px icon to match that row; set its own `--c2-icon-button__state-layer--size` and `--c2-icon-button__icon--width`/`--height` to change that. The buttons keep their own events.
+
+On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
+
+Hover the notes of the second row, or tab into one, to see its controls.
+
+```html tag=UsageBlock,package=@c2n/notepad
+<style>
+  .note-with-actions { width: 320px; max-width: 100%; }
+  .board-note {
+    width: 240px;
+    max-width: 100%;
+    --c2-notepad__controls--opacity: 0;
+  }
+  .note-action {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button--border-radius: 4px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
+</style>
+<div data-label="Actions">
+  <c2-notepad class="note-with-actions" paper-picker label="Groceries" value="- [ ] Oat milk
+- [ ] Sourdough">
+    <c2-icon-button class="note-action" slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+<div data-label="Controls on hover">
+  <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+  <c2-notepad class="board-note" pad="sticky" paper-picker tearable label="To call" value="Plumber: Thu after 4">
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+```
+
+## Paper and binding
+
+The paper is styled through CSS variables only. Graph paper sets `--c2-notepad__grid--color`. A dot grid sets `--c2-notepad__dot--color` and makes the rules transparent. A blank page makes the rules and the margin transparent. `--c2-notepad__rule--spacing` is also the line height: the default 28px is college ruling. `--c2-notepad__spiral--display` and `--c2-notepad__glue--display` switch between a spiral and the glued top of a legal pad, `--c2-notepad__margin--gap` adds a second margin line, `--c2-notepad__headline--color` draws the red headline of an index card, and `--c2-notepad__sheet--rotate` tilts the sheet. Under `@c2n/theme` the paper, rules, margin and inks are mixed from the surface tokens, so a dark theme gives night paper. The Gallery tab has a legal pad, a dot-grid journal, an engineering pad, a sticky note and an index card.
+
+## The handwriting face
+
+The default `--c2-notepad__writing--font-family` starts with `'C2 Notepad Hand'`. That is [Patrick Hand](https://fonts.google.com/specimen/Patrick+Hand) by Patrick Wagesreiter, under the SIL Open Font License 1.1 (the license ships in the package's `fonts/` directory). The face is subset to Latin and Vietnamese and kept in a separate 57 kB chunk, which the notepad registers through `document.fonts` only when its writing surface uses it. Set the variable to another family, or to `inherit`, and the face is never downloaded.

@@ -24,6 +24,8 @@ export interface GaugeChart {
  * @tag c2-gauge-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-gauge-chart')
 export class GaugeChart extends EchartsChartBase {

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "0.0.19",
+  "version": "0.0.24",
   "description": "Every c2n web component in one install: the whole library, one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -141,6 +141,10 @@
       "types": "./lib/command.d.ts",
       "default": "./lib/command.js"
     },
+    "./comparison-bar": {
+      "types": "./lib/comparison-bar.d.ts",
+      "default": "./lib/comparison-bar.js"
+    },
     "./context-menu": {
       "types": "./lib/context-menu.d.ts",
       "default": "./lib/context-menu.js"
@@ -165,6 +169,14 @@
       "types": "./lib/details.d.ts",
       "default": "./lib/details.js"
     },
+    "./flow": {
+      "types": "./lib/flow.d.ts",
+      "default": "./lib/flow.js"
+    },
+    "./gantt": {
+      "types": "./lib/gantt.d.ts",
+      "default": "./lib/gantt.js"
+    },
     "./google-map": {
       "types": "./lib/google-map.d.ts",
       "default": "./lib/google-map.js"
@@ -180,6 +192,10 @@
     "./icon-button": {
       "types": "./lib/icon-button.d.ts",
       "default": "./lib/icon-button.js"
+    },
+    "./kanban": {
+      "types": "./lib/kanban.d.ts",
+      "default": "./lib/kanban.js"
     },
     "./kbd": {
       "types": "./lib/kbd.d.ts",
@@ -225,9 +241,17 @@
       "types": "./lib/modal.d.ts",
       "default": "./lib/modal.js"
     },
+    "./month-planner": {
+      "types": "./lib/month-planner.d.ts",
+      "default": "./lib/month-planner.js"
+    },
     "./navigation-menu": {
       "types": "./lib/navigation-menu.d.ts",
       "default": "./lib/navigation-menu.js"
+    },
+    "./notepad": {
+      "types": "./lib/notepad.d.ts",
+      "default": "./lib/notepad.js"
     },
     "./number-input": {
       "types": "./lib/number-input.d.ts",
@@ -240,6 +264,10 @@
     "./overlay": {
       "types": "./lib/overlay.d.ts",
       "default": "./lib/overlay.js"
+    },
+    "./page-editor": {
+      "types": "./lib/page-editor.d.ts",
+      "default": "./lib/page-editor.js"
     },
     "./pagination": {
       "types": "./lib/pagination.d.ts",
@@ -273,9 +301,9 @@
       "types": "./lib/select.d.ts",
       "default": "./lib/select.js"
     },
-    "./seperator": {
-      "types": "./lib/seperator.d.ts",
-      "default": "./lib/seperator.js"
+    "./separator": {
+      "types": "./lib/separator.d.ts",
+      "default": "./lib/separator.js"
     },
     "./sheet": {
       "types": "./lib/sheet.d.ts",
@@ -357,6 +385,10 @@
       "types": "./lib/toast.d.ts",
       "default": "./lib/toast.js"
     },
+    "./todo-list": {
+      "types": "./lib/todo-list.d.ts",
+      "default": "./lib/todo-list.js"
+    },
     "./tooltip": {
       "types": "./lib/tooltip.d.ts",
       "default": "./lib/tooltip.js"
@@ -372,6 +404,14 @@
     "./virtual-list": {
       "types": "./lib/virtual-list.d.ts",
       "default": "./lib/virtual-list.js"
+    },
+    "./week-planner": {
+      "types": "./lib/week-planner.d.ts",
+      "default": "./lib/week-planner.js"
+    },
+    "./working-indicator": {
+      "types": "./lib/working-indicator.d.ts",
+      "default": "./lib/working-indicator.js"
     },
     "./react": {
       "types": "./react.d.ts",
@@ -399,90 +439,100 @@
     "tokens.css"
   ],
   "dependencies": {
-    "@c2n/accordion": "0.0.19",
-    "@c2n/attachment": "0.0.19",
-    "@c2n/autocomplete": "0.0.19",
-    "@c2n/avatar": "0.0.19",
-    "@c2n/badge": "0.0.19",
-    "@c2n/banner": "0.0.19",
-    "@c2n/border-beam": "0.0.19",
-    "@c2n/breadcrumb": "0.0.19",
-    "@c2n/button": "0.0.19",
-    "@c2n/button-group": "0.0.19",
-    "@c2n/card": "0.0.19",
-    "@c2n/carousel": "0.0.19",
-    "@c2n/cascader": "0.0.19",
-    "@c2n/chart": "0.0.19",
-    "@c2n/chat-input": "0.0.19",
-    "@c2n/chat-message": "0.0.19",
-    "@c2n/chat-message-list": "0.0.19",
-    "@c2n/chatbot": "0.0.19",
-    "@c2n/checkbox": "0.0.19",
-    "@c2n/code-editor": "0.0.19",
-    "@c2n/code-viewer": "0.0.19",
-    "@c2n/color-area": "0.0.19",
-    "@c2n/color-select": "0.0.19",
-    "@c2n/color-slider": "0.0.19",
-    "@c2n/command": "0.0.19",
-    "@c2n/context-menu": "0.0.19",
-    "@c2n/copy-button": "0.0.19",
-    "@c2n/dashboard": "0.0.19",
-    "@c2n/date-input": "0.0.19",
-    "@c2n/date-selector": "0.0.19",
-    "@c2n/details": "0.0.19",
+    "@c2n/accordion": "0.0.24",
+    "@c2n/attachment": "0.0.24",
+    "@c2n/autocomplete": "0.0.24",
+    "@c2n/avatar": "0.0.24",
+    "@c2n/badge": "0.0.24",
+    "@c2n/banner": "0.0.24",
+    "@c2n/border-beam": "0.0.24",
+    "@c2n/breadcrumb": "0.0.24",
+    "@c2n/button": "0.0.24",
+    "@c2n/button-group": "0.0.24",
+    "@c2n/card": "0.0.24",
+    "@c2n/carousel": "0.0.24",
+    "@c2n/cascader": "0.0.24",
+    "@c2n/chart": "0.0.24",
+    "@c2n/chat-input": "0.0.24",
+    "@c2n/chat-message": "0.0.24",
+    "@c2n/chat-message-list": "0.0.24",
+    "@c2n/chatbot": "0.0.24",
+    "@c2n/checkbox": "0.0.24",
+    "@c2n/code-editor": "0.0.24",
+    "@c2n/code-viewer": "0.0.24",
+    "@c2n/color-area": "0.0.24",
+    "@c2n/color-select": "0.0.24",
+    "@c2n/color-slider": "0.0.24",
+    "@c2n/command": "0.0.24",
+    "@c2n/comparison-bar": "0.0.24",
+    "@c2n/context-menu": "0.0.24",
+    "@c2n/copy-button": "0.0.24",
+    "@c2n/dashboard": "0.0.24",
+    "@c2n/date-input": "0.0.24",
+    "@c2n/date-selector": "0.0.24",
+    "@c2n/details": "0.0.24",
+    "@c2n/flow": "0.0.24",
+    "@c2n/gantt": "0.0.24",
     "@c2n/google-map": "0.0.19",
-    "@c2n/header": "0.0.19",
-    "@c2n/hover-card": "0.0.19",
-    "@c2n/icon-button": "0.0.19",
-    "@c2n/kbd": "0.0.19",
-    "@c2n/label": "0.0.19",
-    "@c2n/link-button": "0.0.19",
-    "@c2n/list": "0.0.19",
-    "@c2n/list-item": "0.0.19",
-    "@c2n/log-viewer": "0.0.19",
-    "@c2n/marker": "0.0.19",
-    "@c2n/masonry": "0.0.19",
-    "@c2n/mat-icon": "0.0.19",
-    "@c2n/menu": "0.0.19",
-    "@c2n/modal": "0.0.19",
-    "@c2n/navigation-menu": "0.0.19",
-    "@c2n/number-input": "0.0.19",
-    "@c2n/otp-input": "0.0.19",
-    "@c2n/overlay": "0.0.19",
-    "@c2n/pagination": "0.0.19",
-    "@c2n/progress": "0.0.19",
-    "@c2n/qr-code": "0.0.19",
-    "@c2n/questionnaire": "0.0.19",
-    "@c2n/radio": "0.0.19",
-    "@c2n/rate": "0.0.19",
-    "@c2n/reorder-list": "0.0.19",
-    "@c2n/select": "0.0.19",
-    "@c2n/seperator": "0.0.19",
-    "@c2n/sheet": "0.0.19",
-    "@c2n/shortcut": "0.0.19",
-    "@c2n/side-nav": "0.0.19",
-    "@c2n/skeleton": "0.0.19",
-    "@c2n/slider": "0.0.19",
-    "@c2n/spinner": "0.0.19",
-    "@c2n/split-panel": "0.0.19",
-    "@c2n/stat": "0.0.19",
-    "@c2n/status-panel": "0.0.19",
-    "@c2n/steps": "0.0.19",
-    "@c2n/switch": "0.0.19",
-    "@c2n/table": "0.0.19",
-    "@c2n/tabs": "0.0.19",
-    "@c2n/tag-input": "0.0.19",
-    "@c2n/text-field": "0.0.19",
-    "@c2n/textarea": "0.0.19",
-    "@c2n/theme": "0.0.19",
-    "@c2n/theme-select": "0.0.19",
-    "@c2n/time-input": "0.0.19",
-    "@c2n/timeline": "0.0.19",
-    "@c2n/toast": "0.0.19",
-    "@c2n/tooltip": "0.0.19",
-    "@c2n/tree": "0.0.19",
-    "@c2n/upload": "0.0.19",
-    "@c2n/virtual-list": "0.0.19"
+    "@c2n/header": "0.0.24",
+    "@c2n/hover-card": "0.0.24",
+    "@c2n/icon-button": "0.0.24",
+    "@c2n/kanban": "0.0.24",
+    "@c2n/kbd": "0.0.24",
+    "@c2n/label": "0.0.24",
+    "@c2n/link-button": "0.0.24",
+    "@c2n/list": "0.0.24",
+    "@c2n/list-item": "0.0.24",
+    "@c2n/log-viewer": "0.0.24",
+    "@c2n/marker": "0.0.24",
+    "@c2n/masonry": "0.0.24",
+    "@c2n/mat-icon": "0.0.24",
+    "@c2n/menu": "0.0.24",
+    "@c2n/modal": "0.0.24",
+    "@c2n/month-planner": "0.0.24",
+    "@c2n/navigation-menu": "0.0.24",
+    "@c2n/notepad": "0.0.24",
+    "@c2n/number-input": "0.0.24",
+    "@c2n/otp-input": "0.0.24",
+    "@c2n/overlay": "0.0.24",
+    "@c2n/page-editor": "0.0.24",
+    "@c2n/pagination": "0.0.24",
+    "@c2n/progress": "0.0.24",
+    "@c2n/qr-code": "0.0.24",
+    "@c2n/questionnaire": "0.0.24",
+    "@c2n/radio": "0.0.24",
+    "@c2n/rate": "0.0.24",
+    "@c2n/reorder-list": "0.0.24",
+    "@c2n/select": "0.0.24",
+    "@c2n/separator": "0.0.24",
+    "@c2n/sheet": "0.0.24",
+    "@c2n/shortcut": "0.0.24",
+    "@c2n/side-nav": "0.0.24",
+    "@c2n/skeleton": "0.0.24",
+    "@c2n/slider": "0.0.24",
+    "@c2n/spinner": "0.0.24",
+    "@c2n/split-panel": "0.0.24",
+    "@c2n/stat": "0.0.24",
+    "@c2n/status-panel": "0.0.24",
+    "@c2n/steps": "0.0.24",
+    "@c2n/switch": "0.0.24",
+    "@c2n/table": "0.0.24",
+    "@c2n/tabs": "0.0.24",
+    "@c2n/tag-input": "0.0.24",
+    "@c2n/text-field": "0.0.24",
+    "@c2n/textarea": "0.0.24",
+    "@c2n/theme": "0.0.24",
+    "@c2n/theme-select": "0.0.24",
+    "@c2n/time-input": "0.0.24",
+    "@c2n/timeline": "0.0.24",
+    "@c2n/toast": "0.0.24",
+    "@c2n/todo-list": "0.0.24",
+    "@c2n/tooltip": "0.0.24",
+    "@c2n/tree": "0.0.24",
+    "@c2n/upload": "0.0.24",
+    "@c2n/virtual-list": "0.0.24",
+    "@c2n/week-planner": "0.0.24",
+    "@c2n/working-indicator": "0.0.24"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.0.0",
@@ -497,7 +547,9 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
-    "uplot": "^1.6.31"
+    "react": ">=18.0.0",
+    "uplot": "^1.6.31",
+    "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "@codemirror/autocomplete": {
@@ -536,7 +588,13 @@
     "echarts": {
       "optional": true
     },
+    "react": {
+      "optional": true
+    },
     "uplot": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   }

@@ -12,7 +12,20 @@ import type { AlignedData, Options } from 'uplot'
 import { loadUplot } from './uplot-loader.js'
 import type { ChartAdapter, ChartAdapterEvents } from '../chart-adapter.js'
 
-export async function createUplotAdapter(): Promise<ChartAdapter<Options, AlignedData>> {
+/**
+ * How the cursor picks a series. `nearest` takes the line closest to the pointer; `band` (area charts) takes the fill
+ * the pointer is inside, which is the line just above it, and falls back to the nearest when it is above every line.
+ */
+export type UplotHitMode = 'nearest' | 'band'
+
+/**
+ * A chart's own hit test: the series (0-based) under the cursor at row `index`, or `undefined` to keep the
+ * {@link UplotHitMode} result. Bars use it, because which bar the pointer is on is a question of the bar's
+ * rectangle — its slot in a group, its segment in a stack, a horizontal layout — not of the nearest value.
+ */
+export type UplotPick = (self: uPlot, index: number) => number | undefined
+
+export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest', pick?: UplotPick): Promise<ChartAdapter<Options, AlignedData>> {
   const UPlot = await loadUplot()
 
   let instance: uPlot | undefined
@@ -21,6 +34,10 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
   let data: AlignedData = [[]] as unknown as AlignedData
   /** Set while we are rebuilding, so the scale hook does not report our own restore as a user zoom. */
   let restoring = false
+  /** The datum under the cursor, as last reported to `hover`: what a click on the plot lands on. */
+  let hovered: { index: number; seriesIndex: number } | null = null
+  /** Where the press started, so the release of a drag-to-zoom is not also reported as a click. */
+  let pressedAt: { x: number; y: number } | null = null
 
   /** Adds our hooks to whatever the element built, without the element knowing uPlot's hook shape. */
   const withHooks = (options: Options): Options => ({
@@ -31,25 +48,39 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
         (self: uPlot) => {
           const index = self.cursor.idx
           if (index === null || index === undefined) {
+            hovered = null
             events?.hover(null)
             return
           }
           let nearestSeriesIndex = 0
           let nearestDistance = Number.POSITIVE_INFINITY
+          let bandSeriesIndex = -1
+          let bandDistance = Number.POSITIVE_INFINITY
+          // `cursor.top` is in CSS pixels from the top of the plot, so the points must be too: `valToPos(…, true)`
+          // would give canvas pixels, scaled by the device pixel ratio, and pick the wrong series on any HiDPI screen.
           const cursorY = self.cursor.top ?? 0
           for (let engineIndex = 1; engineIndex < self.series.length; engineIndex += 1) {
             const series = self.series[engineIndex]
             const value = data[engineIndex]?.[index]
             if (!series?.show || value === null || value === undefined || !Number.isFinite(value)) continue
-            const pointY = self.valToPos(value, series.scale ?? 'y', true)
+            const pointY = self.valToPos(value, series.scale ?? 'y', false)
             const distance = Math.abs(pointY - cursorY)
             if (distance < nearestDistance) {
               nearestDistance = distance
               nearestSeriesIndex = engineIndex - 1
             }
+            // Inside a fill means below its line (screen y grows downwards); the closest such line is the band.
+            if (pointY <= cursorY && cursorY - pointY < bandDistance) {
+              bandDistance = cursorY - pointY
+              bandSeriesIndex = engineIndex - 1
+            }
           }
+          if (hitMode === 'band' && bandSeriesIndex >= 0) nearestSeriesIndex = bandSeriesIndex
+          const picked = pick?.(self, index)
+          if (picked !== undefined && picked >= 0) nearestSeriesIndex = picked
           const pointer = self.cursor.event
           const bounds = container?.getBoundingClientRect()
+          hovered = { index, seriesIndex: nearestSeriesIndex }
           events?.hover({
             index,
             seriesIndex: nearestSeriesIndex,
@@ -76,9 +107,25 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
     },
   })
 
+  /**
+   * uPlot has no click hook, so the overlay's own pointer events stand in for one. A click reports the datum the
+   * cursor is on, the one `hover` last reported; a press that moved more than a few pixels was a drag, not a click.
+   */
+  const handlePress = (event: PointerEvent) => {
+    pressedAt = { x: event.clientX, y: event.clientY }
+  }
+  const handleClick = (event: MouseEvent) => {
+    const start = pressedAt
+    pressedAt = null
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4) return
+    if (hovered) events?.click(hovered)
+  }
+
   const build = (options: Options, next: AlignedData) => {
     if (!container) return
     instance = new UPlot(withHooks(options), next, container)
+    instance.over.addEventListener('pointerdown', handlePress)
+    instance.over.addEventListener('click', handleClick)
   }
 
   return {
@@ -113,6 +160,11 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
     setSeriesVisibility(index, visible) {
       // Series 0 is the x values, so a caller's series index is offset by one.
       instance?.setSeries(index + 1, { show: visible })
+    },
+
+    redraw() {
+      // `true` rebuilds every series' paths: a stacked series' segments depend on which of the others are shown.
+      instance?.redraw(true)
     },
 
     resize(width, height) {

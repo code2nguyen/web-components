@@ -3,7 +3,7 @@
  *
  * Charts load their engine through a dynamic `import()`, so `updateComplete` resolves long before
  * anything is drawn. Every scenario therefore waits for each chart's `chart-ready` before flagging the
- * page, and the specs additionally assert `data-chart-ready` on the element itself.
+ * page, and the specs additionally assert `:state(ready)` on the element itself.
  *
  * The page also counts engine calls, which is what lets the perf spec assert the init/update split
  * without measuring wall-clock time.
@@ -15,8 +15,13 @@ import '../src/sparkline'
 import '../src/pie-chart'
 import '../src/gauge-chart'
 import '../src/radar-chart'
+import '../src/pyramid-chart'
+import '../src/butterfly-chart'
 import '../src/scatter-chart'
+import '../src/bubble-chart'
 import '../src/candlestick-chart'
+import '../src/overlap-chart'
+import * as overlapLayout from '../src/overlap-layout'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -80,7 +85,7 @@ function whenDrawn(elements: Element[]): Promise<unknown> {
     elements.map(
       (element) =>
         new Promise<void>((resolve) => {
-          if (element.hasAttribute('data-chart-ready')) return resolve()
+          if (element.matches(':state(ready)')) return resolve()
           element.addEventListener('chart-ready', () => resolve(), { once: true })
           // An empty, loading or error chart never draws; it is still a finished scenario.
           element.addEventListener('chart-error', () => resolve(), { once: true })
@@ -149,6 +154,27 @@ function build(): void {
           <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
         </c2-bar-chart>`
       break
+    case 'stacked-bars':
+    case 'percent-bars':
+    case 'horizontal-bars':
+    case 'horizontal-grouped-bars':
+    case 'labelled-bars':
+    case 'labelled-stacked-bars': {
+      const attributes = {
+        'stacked-bars': 'stack="normal"',
+        'percent-bars': 'stack="percent"',
+        'horizontal-bars': 'stack="normal" orientation="horizontal"',
+        'horizontal-grouped-bars': 'orientation="horizontal"',
+        'labelled-bars': 'value-labels',
+        'labelled-stacked-bars': 'stack="normal" value-labels',
+      }[scenario]
+      main.innerHTML = `
+        <c2-bar-chart id="chart" label-field="quarter" x-type="category" legend="none" animation="none" ${attributes}>
+          <c2-chart-series field="small" label="Small" color="#0000ff"></c2-chart-series>
+          <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
+        </c2-bar-chart>`
+      break
+    }
     case 'dual-axis':
       // Two quantities three orders of magnitude apart: on one scale the small one is a flat line.
       main.innerHTML = `
@@ -179,6 +205,19 @@ function build(): void {
           <c2-chart-series field="target" label="Target"></c2-chart-series>
         </c2-radar-chart>`
       break
+    case 'butterfly':
+      main.innerHTML = `
+        <c2-butterfly-chart id="chart" label-field="age">
+          <c2-chart-series field="men" label="Men"></c2-chart-series>
+          <c2-chart-series field="women" label="Women"></c2-chart-series>
+        </c2-butterfly-chart>`
+      break
+    case 'pyramid':
+      main.innerHTML = `
+        <c2-pyramid-chart id="chart" label-field="plan">
+          <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+        </c2-pyramid-chart>`
+      break
     case 'scatter':
       main.innerHTML = `
         <c2-scatter-chart id="chart" x-field="risk" symbol-size="14">
@@ -187,6 +226,26 @@ function build(): void {
       break
     case 'candlestick':
       main.innerHTML = `<c2-candlestick-chart id="chart" label-field="date"></c2-candlestick-chart>`
+      break
+    case 'overlap':
+    case 'overlap-uniform':
+    case 'overlap-selectable':
+    case 'overlap-select-set':
+      main.innerHTML = `
+        <c2-overlap-chart id="chart" set-labels="around" ${scenario === 'overlap-uniform' ? 'layout="uniform" labels="percent"' : ''} ${scenario === 'overlap-selectable' ? 'selectable' : ''} ${scenario === 'overlap-select-set' ? 'selectable selection="set"' : ''}>
+          <c2-chart-series field="web" label="Web app"></c2-chart-series>
+          <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+          <c2-chart-series field="api" label="Public API"></c2-chart-series>
+        </c2-overlap-chart>`
+      break
+    case 'overlap-too-many':
+      main.innerHTML = `
+        <c2-overlap-chart id="chart">
+          <c2-chart-series field="a"></c2-chart-series>
+          <c2-chart-series field="b"></c2-chart-series>
+          <c2-chart-series field="c"></c2-chart-series>
+          <c2-chart-series field="d"></c2-chart-series>
+        </c2-overlap-chart>`
       break
     case 'family':
       main.innerHTML = `
@@ -197,6 +256,7 @@ function build(): void {
         <c2-pie-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-pie-chart>
         <c2-gauge-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-gauge-chart>
         <c2-radar-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-radar-chart>
+        <c2-pyramid-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-pyramid-chart>
         <c2-scatter-chart x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-scatter-chart>
         <c2-candlestick-chart label-field="t"></c2-candlestick-chart>`
       break
@@ -259,7 +319,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -276,8 +336,32 @@ function build(): void {
       { channel: 'Search', revenue: 3100 },
       { channel: 'Social', revenue: 1800 },
     ]
+  } else if (scenario.startsWith('overlap')) {
+    chart.data = [
+      { sets: ['web'], size: 18420 },
+      { sets: ['mobile'], size: 12960 },
+      { sets: ['api'], size: 4310 },
+      { sets: ['web', 'mobile'], size: 6880 },
+      { sets: ['web', 'api'], size: 2150 },
+      { sets: ['mobile', 'api'], size: 1020 },
+      { sets: ['web', 'mobile', 'api'], size: 740 },
+    ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
+  } else if (scenario === 'butterfly') {
+    chart.data = [
+      { age: '60+', men: 1960, women: 2610 },
+      { age: '40–59', men: 2480, women: 2530 },
+      { age: '20–39', men: 2950, women: 2880 },
+      { age: '0–19', men: 2410, women: 2295 },
+    ]
+  } else if (scenario === 'pyramid') {
+    chart.data = [
+      { plan: 'Starter', accounts: 4870 },
+      { plan: 'Enterprise', accounts: 42 },
+      { plan: 'Team', accounts: 1260 },
+      { plan: 'Business', accounts: 318 },
+    ]
   } else if (scenario === 'radar') {
     chart.data = [
       { metric: 'Quality', current: 82, target: 90 },
@@ -309,7 +393,7 @@ function build(): void {
   } else if (scenario === 'intraday') {
     const base = Date.UTC(2024, 0, 1, 9)
     chart.data = Array.from({ length: 6 }, (_, index) => ({ at: base + index * 900_000, v: 10 + index }))
-  } else if (scenario === 'grouped-bars') {
+  } else if (scenario === 'grouped-bars' || scenario.endsWith('-bars')) {
     chart.data = [
       { quarter: 'Q1', small: 20, large: 80 },
       { quarter: 'Q2', small: 25, large: 90 },
@@ -331,7 +415,7 @@ function build(): void {
     chart.data = series(1, 100)
   } else if (scenario === 'family') {
     for (const element of main.querySelectorAll<ChartBase>(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart',
     )) {
       element.data = series(1, 4)
     }
@@ -367,6 +451,7 @@ function build(): void {
     },
     hover: (detail) => adapterEvents?.hover(detail),
     element: () => chart,
+    overlapLayout,
   }
 }
 
@@ -374,7 +459,9 @@ build()
 
 void whenDrawn(
   Array.from(
-    main.querySelectorAll('c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart'),
+    main.querySelectorAll(
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+    ),
   ),
 ).then(() => {
   main.dataset.ready = 'true'

@@ -12,7 +12,7 @@ a table of rows. Every step is a row and every row is on screen: a sub-step is i
 its parent's label, which is all the nesting needs. `--c2-step__guide--width: 1px` adds file-tree rules on top of
 that, and the `toggle` slot adds a chevron — both off by default.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-steps aria-label="Pipeline">
@@ -167,23 +167,24 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Dark panel
 <style>
   .dark-steps {
-    --c2-steps--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-steps--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 95%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 5%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__marker--size: 13px;
-    --c2-step__marker--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-step__label--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-step__marker--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-step__label--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__label--font-weight: 400;
-    --c2-step__detail--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-step__trailing--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-step__guide--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__detail--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-step__trailing--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-step__guide--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__guide--width: 1px;
     --c2-step__success--color: #4ade80;
     --c2-step__error--color: #f87171;
     --c2-step__running--color: #60a5fa;
+    --c2-step__skipped--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
 </style>
 <c2-steps class="dark-steps" aria-label="Run trace">
@@ -193,6 +194,69 @@ that, and the `toggle` slot adds a chevron — both off by default.
     <c2-step status="error" label="append" trailing="1 ms"></c2-step>
   </c2-step>
   <c2-step status="skipped" label="notify" detail="[5].notify"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Horizontal stepper
+<style>
+  .horizontal-stepper {
+    --c2-step__marker--size: 24px;
+    --c2-step__marker--font-size: 12px;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__detail--font-size: 12px;
+    --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-steps class="horizontal-stepper" orientation="horizontal" marker="number" current="2" aria-label="Checkout">
+  <c2-step label="Account" detail="Signed in"></c2-step>
+  <c2-step label="Plan" detail="Team"></c2-step>
+  <c2-step label="Payment" detail="Card"></c2-step>
+  <c2-step label="Confirm"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Task view
+<style>
+  .task-view {
+    --c2-steps--gap: 4px;
+    --c2-step__row--border-radius: 6px;
+    --c2-step__row--padding-block: 10px;
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__label__selected--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-step__marker--size: 18px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__detail--font-size: 12px;
+    --c2-step__trailing--font-size: 12px;
+  }
+</style>
+<c2-steps class="task-view" orientation="horizontal" interactive selected="result" aria-label="Task">
+  <c2-step value="process" status="success" label="Process" detail="8 log lines" trailing="3.6 s"></c2-step>
+  <c2-step value="result" status="success" label="Result" detail="1 284 rows"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Labels beside
+<style>
+  .labels-beside {
+    --c2-step__row__horizontal--grid-template-areas: 'marker text rail' '. trailing .';
+    --c2-step__rail--gap: 10px;
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-step__marker--size: 20px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-steps class="labels-beside" orientation="horizontal" current="1" aria-label="Onboarding">
+  <c2-step label="Profile"></c2-step>
+  <c2-step label="Team"></c2-step>
+  <c2-step label="Billing"></c2-step>
 </c2-steps>
 ```
 

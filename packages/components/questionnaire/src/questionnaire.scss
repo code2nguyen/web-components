@@ -22,9 +22,16 @@
     option__error--border: 1px solid #dc2626,
     option__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     control--size: 16px,
+    control--border: 1px solid #d4d4d8,
+    control--background-color: #ffffff,
     control__selected--background-color: #18181b,
+    control__selected--color: #ffffff,
     option-description--color: #71717a,
     shortcut--color: #71717a,
+    shortcut--border: 1px solid #e4e4e7,
+    shortcut--background-color: #ffffff,
+    other--border: 1px solid #e4e4e7,
+    other--background-color: #ffffff,
     error--color: #dc2626,
     action--border-radius: 8px,
     primary-action--background-color: #18181b,
@@ -131,9 +138,9 @@ h2 {
   width: css.cssVar(control--size);
   height: css.cssVar(control--size);
   margin-top: 1px;
-  border: 1px solid #d4d4d8;
+  border: css.cssVar(control--border);
   border-radius: 999px;
-  background: #ffffff;
+  background: css.cssVar(control--background-color);
 }
 
 .option input[type='checkbox'] + .control {
@@ -150,7 +157,7 @@ h2 {
   position: absolute;
   inset: 4px;
   border-radius: 50%;
-  background: #ffffff;
+  background: css.cssVar(control__selected--color);
 }
 
 .option input[type='checkbox']:checked + .control::after {
@@ -160,7 +167,7 @@ h2 {
   top: 1px;
   width: 5px;
   height: 9px;
-  border: solid #ffffff;
+  border: solid css.cssVar(control__selected--color);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -187,10 +194,10 @@ kbd {
   min-width: 18px;
   box-sizing: border-box;
   padding: 1px 5px;
-  border: 1px solid #e4e4e7;
+  border: css.cssVar(shortcut--border);
   border-radius: 8px;
   color: css.cssVar(shortcut--color);
-  background: #ffffff;
+  background: css.cssVar(shortcut--background-color);
   font: inherit;
   font-size: 10px;
   line-height: 16px;
@@ -203,10 +210,10 @@ kbd {
   height: 32px;
   margin-top: 8px;
   padding: 0 10px;
-  border: 1px solid #e4e4e7;
+  border: css.cssVar(other--border);
   border-radius: 10px;
   color: inherit;
-  background: #ffffff;
+  background: css.cssVar(other--background-color);
   font: inherit;
   font-size: 14px;
 

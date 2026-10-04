@@ -1,16 +1,16 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { isServer } from 'lit-html/is-server.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import type { DashCardPlacement, DashboardCard } from './dashboard-host'
+import type { DashCardPlacement, DashboardCard, DashboardPanelSize } from './dashboard-host'
 import styles from './dashboard.scss?inline'
 
 // Registers `c2-dash-card`, so an app that imports the grid gets the panes too (same pattern as tabs → tab).
 import './dash-card'
 
-export type { DashCardPlacement } from './dashboard-host'
+export type { DashCardPlacement, DashboardPanelSize } from './dashboard-host'
 
 /** Track sizes the grid is laid out with. Both are CSS track lists, one entry per track. */
 export interface DashboardLayoutChangeDetail {
@@ -22,6 +22,8 @@ export interface DashboardLayoutChangeDetail {
   order: string[]
   /** Active responsive media query, or `null` for the authored layout. */
   breakpoint: string | null
+  /** Named size in force per card ID, for every card whose size the grid knows: `{ cpu: 'wide' }`. */
+  sizes: Record<string, string>
 }
 
 /** Events fired by {@link Dashboard}, keyed for `addEventListener`. */
@@ -49,12 +51,41 @@ export interface DashboardResponsiveLayout {
   layout?: Record<string, DashCardPlacement>
 }
 
+/**
+ * What is kept under the storage key. Only `version: 1` is read back (a payload without `version` predates it and
+ * is read too; any other version is discarded), and every field is validated: a malformed one is dropped, the rest
+ * still applies.
+ */
 export interface DashboardStoredLayout {
   version?: 1
   columns?: string[]
   rows?: string[]
   order?: string[]
   breakpoint?: string | null
+  /** Named sizes the user chose through `setPanelSize()`, by card ID. Absent from layouts stored before it existed. */
+  sizes?: Record<string, string>
+}
+
+const LAYOUT_VERSION = 1
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+}
+
+/** Keeps the well-formed fields of a stored payload; `null` for a payload of another version or no object at all. */
+function normalizeStored(value: unknown): DashboardStoredLayout | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const input = value as Record<string, unknown>
+  if (input.version !== undefined && input.version !== LAYOUT_VERSION) return null
+  const layout: DashboardStoredLayout = { version: LAYOUT_VERSION }
+  if (isStringArray(input.columns)) layout.columns = input.columns
+  if (isStringArray(input.rows)) layout.rows = input.rows
+  if (isStringArray(input.order)) layout.order = input.order
+  if (typeof input.breakpoint === 'string' || input.breakpoint === null) layout.breakpoint = input.breakpoint
+  if (input.sizes && typeof input.sizes === 'object' && !Array.isArray(input.sizes)) {
+    layout.sizes = Object.fromEntries(Object.entries(input.sizes).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
+  }
+  return layout
 }
 
 const FRACTION = /^([\d.]*)fr$/
@@ -94,7 +125,13 @@ function toTracks(input: number | string | string[]): string[] {
  * `layouts` makes the grid responsive without a remount: each entry names a media query and the tracks and card
  * placements to use while it matches, the first match wins, and every entry keeps its own stored sizes under
  * `<storage-key>@<media>`. Stored payloads are versioned and include stable card order; `serializeLayout` and
- * `deserializeLayout` can preserve application metadata such as named sizes without coupling it to the component.
+ * `deserializeLayout` can add application metadata or migrate an older payload of the application's own.
+ *
+ * Named whole-panel sizes: `sizes` declares them (`{ "small": { "colSpan": 1 }, "wide": { "colSpan": 2 } }`), a
+ * card picks one with its `size` attribute, and `setPanelSize(cardId, name)` changes it at runtime. A runtime choice
+ * is stored with the layout and reported in `layout-change`; on restore a choice naming an unknown size or a card
+ * that is no longer there is ignored, so that card falls back to its authored `size`, and `reset()` forgets every
+ * choice along with the tracks.
  *
  * Placement is the application's: the grid never re-places cards on its own. A pane removed or hidden at runtime
  * leaves its cells empty and its neighbours where they were, and a pane added at runtime lands exactly where its
@@ -109,9 +146,9 @@ function toTracks(input: number | string | string[]): string[] {
  * @slot - The `c2-dash-card` panes. Anything else becomes an ordinary grid item, placed by your own CSS.
  * @slotcomponent c2-dash-card
  *
- * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The tracks or stable card order changed: a
- * gesture ended, `setPanelOrder()`/`reset()` was called, or another entry of `layouts` took over. Includes the active
- * breakpoint. Does not bubble: listen on the element.
+ * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The tracks, the stable card order or a named
+ * panel size changed: a gesture ended, `setPanelOrder()`/`setPanelSize()`/`reset()` was called, or another entry of
+ * `layouts` took over. Includes the active breakpoint and the named sizes. Does not bubble: listen on the element.
  *
  * @cssproperty {pixel} [--c2-dashboard--gap=8px] - Gutter between the cards. The whole gutter drags: each card's
  * handle is centred on its edge and as thick as the gap (never under `--c2-dash-card__handle--size`).
@@ -154,6 +191,13 @@ export class Dashboard extends LitElement {
    */
   @property({ attribute: false }) layouts: DashboardResponsiveLayout[] | undefined = undefined
 
+  /**
+   * Named whole-panel sizes, each a column and/or row span: `{ small: { colSpan: 1 }, wide: { colSpan: 2 } }`. A
+   * card chooses one with `size`; spans past the grid's last track are clamped like any other. Settable as a JSON
+   * attribute.
+   */
+  @property({ converter: jsonPropertyConverter }) sizes: Record<string, DashboardPanelSize> | undefined = undefined
+
   /** Optional storage encoder. Use it to add application metadata such as named panel sizes. */
   @property({ attribute: false }) serializeLayout: ((layout: DashboardStoredLayout) => unknown) | undefined = undefined
 
@@ -170,6 +214,9 @@ export class Dashboard extends LitElement {
   private readonly handleMediaChange = () => {
     this.activeLayout = this.resolveActiveLayout()
   }
+
+  /** Named sizes chosen at runtime, by card ID; they win over the cards' authored `size`. */
+  private sizeChoices = new Map<string, string>()
 
   /** Used track sizes, valid until the next write to the tracks. */
   private pixelCache = new Map<'column' | 'row', number[]>()
@@ -190,6 +237,17 @@ export class Dashboard extends LitElement {
 
   get rowCount(): number {
     return this.rowTracks.length
+  }
+
+  /** Named size in force per card ID, for every card whose size is one of `sizes`. */
+  get panelSizes(): Record<string, string> {
+    const result: Record<string, string> = {}
+    for (const card of this.childCards) {
+      const id = this.idOf(card)
+      const name = this.sizeNameOf(card)
+      if (id && name) result[id] = name
+    }
+    return result
   }
 
   /** The entry of `layouts` in force, or `undefined` while the authored grid is. */
@@ -226,7 +284,14 @@ export class Dashboard extends LitElement {
     // The cards are light-DOM children, so the grid lives on the host itself.
     this.style.setProperty('--_columns', this.columnTracks.join(' '))
     this.style.setProperty('--_rows', this.rowTracks.join(' '))
-    if (changed.has('columnTracks') || changed.has('rowTracks') || changed.has('layout') || changed.has('layouts') || changed.has('activeLayout')) {
+    if (
+      changed.has('columnTracks') ||
+      changed.has('rowTracks') ||
+      changed.has('layout') ||
+      changed.has('layouts') ||
+      changed.has('activeLayout') ||
+      changed.has('sizes')
+    ) {
       for (const card of this.cards) card.hostChanged()
     }
     // Crossing a breakpoint is a layout change the app did not make itself, so it is reported like a drag.
@@ -245,6 +310,8 @@ export class Dashboard extends LitElement {
     }
     this.columnTracks = toTracks(this.activeResponsiveLayout?.columns ?? this.columns)
     this.rowTracks = toTracks(this.activeResponsiveLayout?.rows ?? this.rows)
+    this.sizeChoices.clear()
+    this.refreshCards()
     this.emitLayoutChange()
   }
 
@@ -290,6 +357,27 @@ export class Dashboard extends LitElement {
     this.applyPanelOrder(order)
     this.persist()
     this.emitLayoutChange()
+  }
+
+  /**
+   * Gives the card with this `card-id` one of the named `sizes`, or its authored `size` back with `null`; persists
+   * it and reports one layout change. Returns `false`, changing nothing, for an unknown card or size name.
+   */
+  setPanelSize(cardId: string, size: string | null): boolean {
+    if (!this.childCards.some((card) => this.idOf(card) === cardId)) return false
+    if (size === null) this.sizeChoices.delete(cardId)
+    else if (this.knowsSize(size)) this.sizeChoices.set(cardId, size)
+    else return false
+    this.refreshCards()
+    this.persist()
+    this.emitLayoutChange()
+    return true
+  }
+
+  /** Spans of the named size in force for `card`; read by the card when it places itself. */
+  panelSizeOf(card: DashboardCard): DashboardPanelSize | undefined {
+    const name = this.sizeNameOf(card)
+    return name ? this.sizes![name] : undefined
   }
 
   /**
@@ -342,6 +430,7 @@ export class Dashboard extends LitElement {
           rows: [...this.rowTracks],
           order: this.panelOrder,
           breakpoint: this.activeResponsiveLayout?.media ?? null,
+          sizes: this.panelSizes,
         },
         bubbles: false,
         composed: true,
@@ -438,6 +527,9 @@ export class Dashboard extends LitElement {
     this.columnTracks = stored?.columns?.length === columns.length ? [...stored.columns] : columns
     this.rowTracks = stored?.rows?.length === rows.length ? [...stored.rows] : rows
     if (stored?.order?.length) queueMicrotask(() => this.applyPanelOrder(stored.order!))
+    // Each stored layout carries its own choices; unknown names and card IDs are ignored when they are resolved.
+    this.sizeChoices = new Map(Object.entries(stored?.sizes ?? {}))
+    if (this.hasUpdated) this.refreshCards()
   }
 
   private readStored(): DashboardStoredLayout | null {
@@ -447,8 +539,7 @@ export class Dashboard extends LitElement {
       const raw = localStorage.getItem(key)
       if (!raw) return null
       const parsed: unknown = JSON.parse(raw)
-      if (this.deserializeLayout) return this.deserializeLayout(parsed)
-      return parsed && typeof parsed === 'object' ? (parsed as DashboardStoredLayout) : null
+      return normalizeStored(this.deserializeLayout ? this.deserializeLayout(parsed) : parsed)
     } catch {
       return null
     }
@@ -464,6 +555,7 @@ export class Dashboard extends LitElement {
         rows: [...this.rowTracks],
         order: this.panelOrder,
         breakpoint: this.activeResponsiveLayout?.media ?? null,
+        sizes: this.storedSizeChoices(),
       }
       localStorage.setItem(key, JSON.stringify(this.serializeLayout ? this.serializeLayout(layout) : layout))
     } catch {
@@ -475,16 +567,44 @@ export class Dashboard extends LitElement {
     return html`<slot></slot>`
   }
 
+  private get childCards(): DashboardCard[] {
+    return [...this.children].filter((child): child is DashboardCard => child instanceof HTMLElement && child.tagName.toLowerCase() === 'c2-dash-card')
+  }
+
+  private idOf(card: DashboardCard): string {
+    return card.cardId ?? card.getAttribute('card-id') ?? ''
+  }
+
+  private knowsSize(name: string | undefined): name is string {
+    return name !== undefined && this.sizes !== undefined && Object.prototype.hasOwnProperty.call(this.sizes, name)
+  }
+
+  /** The runtime choice when it names a known size, else the card's authored one when that does, else none. */
+  private sizeNameOf(card: DashboardCard): string | undefined {
+    const id = this.idOf(card)
+    const chosen = id ? this.sizeChoices.get(id) : undefined
+    if (this.knowsSize(chosen)) return chosen
+    const authored = card.size ?? card.getAttribute('size') ?? undefined
+    return this.knowsSize(authored) ? authored : undefined
+  }
+
+  /** Runtime choices of cards that are still here, naming sizes that still exist. */
+  private storedSizeChoices(): Record<string, string> {
+    const ids = new Set(this.panelOrder)
+    return Object.fromEntries([...this.sizeChoices].filter(([id, name]) => ids.has(id) && this.knowsSize(name)))
+  }
+
+  private refreshCards() {
+    for (const card of this.cards) card.hostChanged()
+  }
+
   private get panelOrder(): string[] {
-    return [...this.children]
-      .filter((child): child is DashboardCard => child instanceof HTMLElement && child.tagName.toLowerCase() === 'c2-dash-card')
-      .map((card) => card.cardId ?? card.getAttribute('card-id') ?? '')
-      .filter(Boolean)
+    return this.childCards.map((card) => this.idOf(card)).filter(Boolean)
   }
 
   private applyPanelOrder(order: readonly string[]) {
-    const cards = [...this.children].filter((child): child is DashboardCard => child instanceof HTMLElement && child.tagName.toLowerCase() === 'c2-dash-card')
-    const byId = new Map(cards.map((card) => [card.cardId ?? card.getAttribute('card-id') ?? '', card]))
+    const cards = this.childCards
+    const byId = new Map(cards.map((card) => [this.idOf(card), card]))
     const ordered = order.map((id) => byId.get(id)).filter((card): card is DashboardCard => Boolean(card))
     for (const card of cards) if (!ordered.includes(card)) ordered.push(card)
     if (ordered.every((card, index) => card === cards[index])) return

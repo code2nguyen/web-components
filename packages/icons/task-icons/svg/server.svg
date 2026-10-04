@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <rect class="tone" x="3" y="3.5" width="18" height="7" rx="2"/>
+  <rect class="tone" x="3" y="13.5" width="18" height="7" rx="2"/>
+  <circle class="solid" cx="7" cy="7" r="1"/>
+  <circle class="solid" cx="7" cy="17" r="1"/>
+  <path d="M11 7h6M11 17h6"/>
+</svg>

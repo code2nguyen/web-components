@@ -1,0 +1,41 @@
+---
+/**
+ * Wires the selection readout under the overlap chart's "Click a circle" usage row: every `[data-overlap-selection]`
+ * row shows what its chart's `selection-change` reports.
+ */
+---
+
+<script>
+  interface SetDetail {
+    label: string
+    total: number
+    only: number
+    share: number
+  }
+  type OverlapDemoChart = HTMLElement & { setDetail(key: string): SetDetail | undefined; regionName(region: { sets: string[] }): string }
+
+  const format = new Intl.NumberFormat('en-US')
+  const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 })
+
+  function wire(row: HTMLElement): void {
+    const chart = row.querySelector<OverlapDemoChart>('c2-overlap-chart')
+    const status = row.querySelector<HTMLElement>('[data-overlap-status]')
+    if (!chart || !status || row.dataset.overlapWired) return
+    row.dataset.overlapWired = 'true'
+    chart.addEventListener('selection-change', (event) => {
+      const { selected, selectedSet } = (event as CustomEvent<{ selected: string[]; selectedSet: string | null }>).detail
+      const set = selectedSet ? chart.setDetail(selectedSet) : undefined
+      if (set) {
+        status.textContent = `Selected: ${set.label} · ${format.format(set.total)} members, ${percent.format(set.share)} of all · ${format.format(set.only)} in no other set`
+      } else if (selected.length > 0) {
+        status.textContent = `Selected region: ${chart.regionName({ sets: selected })}`
+      } else {
+        status.textContent = status.dataset.overlapStatusIdle ?? ''
+      }
+    })
+  }
+
+  const run = () => document.querySelectorAll<HTMLElement>('[data-overlap-selection]').forEach(wire)
+  run()
+  document.addEventListener('astro:page-load', run)
+</script>

@@ -1,3 +1,4 @@
+@use 'sass:string';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-step,
@@ -13,7 +14,16 @@
     row__hover--background: null,
     row--border-bottom: 1px solid #e4e4e7,
     row--outline: 2px solid rgb(2, 101, 220),
-
+    row__selected--background: null,
+    row__selected--box-shadow: null,
+    row__disabled--opacity: 0.38,
+    row__horizontal--border-bottom: none,
+    row__horizontal--min-width: 96px,
+    row__horizontal--row-gap: 8px,
+    row__horizontal--align-content: start,
+    // Quoted rows of a `grid-template-areas`: the cells are `marker`, `rail`, `text` and `trailing`, over three
+    // columns sized `auto auto 1fr`. The rail always takes the last column.
+    row__horizontal--grid-template-areas: string.unquote('"marker rail rail" "text text text" "trailing trailing trailing"'),
     toggle--size: 14px,
     toggle--gap: 4px,
     toggle--color: #a1a1aa,
@@ -33,6 +43,7 @@
     rail--width: 0px,
     rail--color: #e4e4e7,
     rail--gap: 4px,
+    rail__horizontal--width: 2px,
 
     label--color: #18181b,
     label--font-size: 13px,
@@ -44,6 +55,8 @@
       Consolas,
       monospace,
     ),
+    label__selected--color: rgb(2, 101, 220),
+    label__selected--font-weight: null,
     detail--color: #71717a,
     detail--font-size: null,
     detail--font-weight: 400,
@@ -93,11 +106,11 @@ $_duration: css.cssVar(transition-duration);
 
 // Written by the list on a step that arrived after it was already on screen, and taken off again by the step
 // itself when the animation ends. The clipping only lasts as long as the growing does.
-:host([entering]) {
+:host(:state(entering)) {
   animation: c2-step-enter css.cssVar(enter-duration) animation.$standard-easing;
 }
 
-:host([entering]) .c2-step__frame {
+:host(:state(entering)) .c2-step__frame {
   overflow: hidden;
 }
 
@@ -159,16 +172,24 @@ $_duration: css.cssVar(transition-duration);
   inset-inline-start: calc(#{css.cssVar(row--padding-inline)} + #{css.cssVar(toggle--size)} / 2);
   inline-size: calc(#{css.cssVar(row--indent)} * var(--level, 0));
   pointer-events: none;
-  background-image: repeating-linear-gradient(to right, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+  background-image: repeating-linear-gradient(
+    to right,
+    #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)},
+    transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)}
+  );
 }
 
 // Gradients ignore `direction`, so the guide stack has to be mirrored explicitly.
 .c2-step__row:dir(rtl)::before {
-  background-image: repeating-linear-gradient(to left, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+  background-image: repeating-linear-gradient(
+    to left,
+    #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)},
+    transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)}
+  );
 }
 
 // A list with no group anywhere has no nesting either, so it has nothing to draw.
-:host(:not([grouped])) .c2-step__row::before {
+:host(:not(:state(grouped))) .c2-step__row::before {
   display: none;
 }
 
@@ -189,12 +210,57 @@ summary.c2-step__row {
   }
 }
 
+/**
+ * A selectable row in an `interactive` list is a `<button>`: the same row, with the button's own box taken away so
+ * it looks exactly like the row it replaces. The hairline stays, which is why only the other three sides are reset.
+ */
+button.c2-step__row {
+  width: 100%;
+  margin: 0;
+  border-top: none;
+  border-inline: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+
+  &:focus-visible {
+    outline: css.cssVar(row--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(row__disabled--opacity);
+
+    &:hover {
+      background: css.cssVar(row--background);
+    }
+  }
+}
+
+.c2-step__row.is-selected {
+  // Nothing but the label's colour by default: the row keeps the look of every other row, hover included.
+  background: css.cssVar(row__selected--background, row--background);
+  box-shadow: css.cssVar(row__selected--box-shadow);
+
+  &:hover {
+    background: css.cssVar(row__selected--background, row__hover--background, row--background);
+  }
+
+  .c2-step__label {
+    color: css.cssVar(label__selected--color);
+    font-weight: css.cssVar(label__selected--font-weight, label--font-weight);
+  }
+}
+
 // The last row of the whole list has no hairline under it; a parent's hairline is carried by its last descendant.
-:host([last]) .c2-step__row:not(:has(~ .c2-step__children:not([hidden]))) {
+:host(:state(last)) .c2-step__row:not(:has(~ .c2-step__children:not([hidden]))) {
   border-bottom: none;
 }
 
-:host([last][has-children]:not([collapsed])) > .c2-step__frame > .c2-step__details > summary.c2-step__row {
+:host(:state(last):state(has-children):not(:state(collapsed))) > .c2-step__frame > .c2-step__details > summary.c2-step__row {
   border-bottom: css.cssVar(row--border-bottom);
 }
 
@@ -229,7 +295,7 @@ summary.c2-step__row {
   }
 }
 
-:host([has-children]:not([collapsed])) .c2-step__toggle {
+:host(:state(has-children):not(:state(collapsed))) .c2-step__toggle {
   transform: rotate(90deg);
 }
 
@@ -288,13 +354,13 @@ summary.c2-step__row {
   border-radius: css.cssVar(rail--width);
 }
 
-:host([last]:not([has-children])) .c2-step__rail,
-:host([last][has-children][collapsed]) .c2-step__rail {
+:host(:state(last):not(:state(has-children))) .c2-step__rail,
+:host(:state(last):state(has-children):state(collapsed)) .c2-step__rail {
   visibility: hidden;
 }
 
 // `marker="none"` drops the whole column, rail included.
-:host([marker='none']) .c2-step__gutter {
+:host(:state(marker-none)) .c2-step__gutter {
   display: none;
 }
 
@@ -402,7 +468,7 @@ summary.c2-step__row {
  * round box the size of a checkmark spills out over its own border. In number mode the marker keeps its height and
  * grows sideways instead: a single digit is still the circle, a path is a pill.
  */
-:host([marker='number']) .c2-step__marker {
+:host(:state(marker-number)) .c2-step__marker {
   width: auto;
   min-width: css.cssVar(marker--size);
   padding-inline: css.cssVar(marker--padding-inline);
@@ -410,16 +476,16 @@ summary.c2-step__row {
   border: css.cssVar(marker--border);
 }
 
-:host([marker='number']) .c2-step__row.is-success .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-error .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-warning .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-success .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-error .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-warning .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-current .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   border-color: currentColor;
 }
 
-:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-current .c2-step__marker,
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   // With a number inside, the filled core would swallow it.
   box-shadow: none;
 }
@@ -440,10 +506,10 @@ summary.c2-step__row {
  * the first pass and taken off again when the beat ends, so a trace drawn complete sits still and only a step that
  * actually finishes in front of you moves. A step that is still growing into place has enough going on already.
  */
-:host([settling]:not([entering])) .c2-step__row.is-success .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-error .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-warning .c2-step__marker,
-:host([settling]:not([entering])) .c2-step__row.is-skipped .c2-step__marker {
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-success .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-error .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-warning .c2-step__marker,
+:host(:state(settling):not(:state(entering))) .c2-step__row.is-skipped .c2-step__marker {
   animation: c2-step-settle $_duration animation.$standard-easing;
 }
 
@@ -467,7 +533,7 @@ summary.c2-step__row {
   animation: c2-step-spin 900ms linear infinite;
 }
 
-:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+:host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   animation: none;
   border-top-color: currentColor;
 }
@@ -483,8 +549,8 @@ summary.c2-step__row {
     animation: none;
     border-top-color: currentColor;
   }
-  :host([entering]),
-  :host([settling]) .c2-step__row .c2-step__marker {
+  :host(:state(entering)),
+  :host(:state(settling)) .c2-step__row .c2-step__marker {
     animation: none;
   }
   .c2-step__row,
@@ -493,4 +559,98 @@ summary.c2-step__row {
   .c2-step__toggle {
     transition: none;
   }
+}
+
+/**
+ * Horizontal: the step is a column, laid out on a grid whose areas say where the text goes around the marker —
+ * under it by default, over it, or beside it on either side (`--c2-step__row__horizontal--grid-template-areas`).
+ * The tracks are fixed at `auto auto 1fr`, and the rail always takes the last one, so whatever the placement the rail
+ * starts right after this step's marker (or its label, when the label sits after it) and runs on through the gap to
+ * the next step, ending where that one starts: the steps are always linked.
+ *
+ * Sub-steps are not drawn — the step still takes their status — so there is no disclosure, no indent and no guide.
+ */
+.c2-step__frame.is-horizontal {
+  display: flex;
+  flex-direction: column;
+  min-width: css.cssVar(row__horizontal--min-width);
+}
+
+.is-horizontal .c2-step__row {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-areas: css.cssVar(row__horizontal--grid-template-areas);
+  align-content: css.cssVar(row__horizontal--align-content);
+  // Everything hangs from one line — the marker's centre — so the rails line up from step to step whatever the
+  // text under, over or beside each marker is.
+  align-items: start;
+  --_line: max(#{css.cssVar(label--font-size)} * 1.5, #{css.cssVar(marker--size)});
+  column-gap: css.cssVar(rail--gap);
+  row-gap: css.cssVar(row__horizontal--row-gap);
+  padding-inline-start: css.cssVar(row--padding-inline);
+  border-bottom: css.cssVar(row__horizontal--border-bottom);
+
+  &::before {
+    display: none;
+  }
+}
+
+// The marker and the rail are cells of the row's grid, not a column of their own.
+.is-horizontal .c2-step__gutter {
+  display: contents;
+}
+
+.is-horizontal .c2-step__marker {
+  grid-area: marker;
+  margin-top: calc((var(--_line) - #{css.cssVar(marker--size)}) / 2);
+}
+
+/**
+ * The rail fills its cell, then carries on past the end of the row — through the row's own padding, the list's gap
+ * and the next row's padding — to stop one rail gap short of the next step. Above the rows, so a selected or hovered
+ * neighbour's background does not cut it.
+ */
+.is-horizontal .c2-step__rail {
+  grid-area: rail;
+  position: relative;
+  z-index: 1;
+  width: auto;
+  height: css.cssVar(rail__horizontal--width);
+  min-width: 0;
+  margin-top: calc((var(--_line) - #{css.cssVar(rail__horizontal--width)}) / 2);
+  margin-inline-end: calc(#{css.cssVar(rail--gap)} - 2 * #{css.cssVar(row--padding-inline)} - var(--c2-steps--gap, 0px));
+  border-radius: css.cssVar(rail__horizontal--width);
+}
+
+// The last step's rail would lead nowhere; it keeps its cell so every step is the same width, but stops at the end
+// of the row, or the list would scroll by the length of a rail nobody can see.
+:host(:state(last)) .is-horizontal .c2-step__rail {
+  visibility: hidden;
+  margin-inline-end: 0;
+}
+
+// A column is narrow, so the detail goes under the label whatever `text--flex-direction` says.
+.is-horizontal .c2-step__text {
+  grid-area: text;
+  // Beside the marker, the label's first line is the one centred on it.
+  margin-top: calc((var(--_line) - #{css.cssVar(label--font-size)} * 1.5) / 2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: css.cssVar(detail--row-gap);
+}
+
+.is-horizontal .c2-step__trailing {
+  grid-area: trailing;
+  justify-self: start;
+}
+
+.is-horizontal .c2-step__label,
+.is-horizontal .c2-step__detail {
+  max-width: 100%;
+}
+
+.is-horizontal .c2-step__toggle,
+.is-horizontal .c2-step__children {
+  display: none;
 }

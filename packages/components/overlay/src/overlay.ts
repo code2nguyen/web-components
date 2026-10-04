@@ -19,6 +19,8 @@ export interface Overlay {
   removeEventListener: TypedRemoveEventListener<Overlay, OverlayEventMap>
 }
 
+const POSITIONING_VARIABLES = ['--c2-overlay--offset-y', '--c2-overlay--offset-x', '--c2-overlay--viewport-padding']
+
 /**
  * Anchored popup built on the browser Popover API: the element sits in the top layer, opens and light-dismisses
  * natively (Escape, click outside) and is positioned next to its anchor with floating-ui. The anchor is found in
@@ -75,6 +77,8 @@ export class Overlay extends LitElement {
   @property() anchor: string | HTMLElement | undefined = undefined
 
   private cleanupPosition: (() => void) | null = null
+  private positioningStyleObserver: MutationObserver | null = null
+  private positioningStyleValues = ''
 
   constructor() {
     super()
@@ -131,11 +135,27 @@ export class Overlay extends LitElement {
     const anchor = this.anchorElement
     if (!anchor) return
     this.cleanupPosition = autoUpdate(anchor, this, () => this.updatePosition(anchor))
+    // Floating UI observes layout, but an edit to a positioning variable (an inline style, a class) need not resize
+    // either element. Positioning writes the host's own style too, so only a change in the variables repositions.
+    const positioningValues = () => {
+      const style = getComputedStyle(this)
+      return POSITIONING_VARIABLES.map((name) => style.getPropertyValue(name)).join('|')
+    }
+    this.positioningStyleValues = positioningValues()
+    this.positioningStyleObserver = new MutationObserver(() => {
+      const next = positioningValues()
+      if (next === this.positioningStyleValues) return
+      this.positioningStyleValues = next
+      void this.updatePosition(anchor)
+    })
+    this.positioningStyleObserver.observe(this, { attributes: true, attributeFilter: ['style', 'class'] })
   }
 
   private stopPositioning() {
     this.cleanupPosition?.()
     this.cleanupPosition = null
+    this.positioningStyleObserver?.disconnect()
+    this.positioningStyleObserver = null
   }
 
   private async updatePosition(anchor: HTMLElement) {

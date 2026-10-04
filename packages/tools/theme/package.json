@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "0.0.19",
+  "version": "0.0.24",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -45,7 +45,8 @@
     "dev": "vite",
     "build": "wireit",
     "type-check": "wireit",
-    "generate": "node scripts/theme-generator/index.ts"
+    "generate": "node scripts/theme-generator/index.ts",
+    "test": "node --test scripts/theme-generator/*.test.ts"
   },
   "wireit": {
     "type-check": {
@@ -54,6 +55,16 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/kanban:build",
+        "../../components/gantt:build",
+        "../../components/working-indicator:build",
+        "../../components/page-editor:build",
+        "../../components/notepad:build",
+        "../../components/todo-list:build",
+        "../../components/comparison-bar:build",
+        "../../components/flow:build",
+        "../../components/week-planner:build",
+        "../../components/month-planner:build",
         "../../components/google-map:build",
         "../../components/hover-card:build",
         "../../components/command:build",
@@ -104,7 +115,7 @@
         "../../components/switch:build",
         "../../components/spinner:build",
         "../../components/slider:build",
-        "../../components/seperator:build",
+        "../../components/separator:build",
         "../../components/breadcrumb:build",
         "../../components/badge:build",
         "../../components/toast:build",
@@ -139,6 +150,7 @@
         "../../icons/feather-icons:build",
         "../../icons/phosphor-icons:build",
         "../../icons/symbols:build",
+        "../../icons/task-icons:build",
         "../../../open-packages/chatbot:build"
       ],
       "command": "tsc -p tsconfig.lib.json && node scripts/theme-generator/index.ts"

@@ -1,0 +1,1733 @@
+{
+  "repository": "https://github.com/code2nguyen/web-components",
+  "releases": [
+    {
+      "version": "0.0.24",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Add color-on-fill for text on a saturated fill",
+              "hash": "d015383"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Add dark-block colour roles that stay dark in both themes",
+              "hash": "b6295ad"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["week-planner"],
+              "text": "Hydrate with the server's clock",
+              "hash": "388ec4f"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Regenerate the React and Vue declarations for actions-placement",
+              "hash": "534f4ca"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Gallery text on coloured fills takes color-on-fill",
+              "hash": "95c76f0"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Dark gallery cards take their colours from the dark-block tokens",
+              "hash": "b37d26e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.23",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Add an actions toolbar over the canvas, placeable on any edge",
+              "hash": "bbf0111"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Arrowheads, edge labels and a variable to hide the status marker",
+              "hash": "da4bb53"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Theme the code editor's syntax palette, the danger badge and the attachment status",
+              "hash": "7057036"
+            },
+            {
+              "scopes": ["otp-input"],
+              "text": "Shrink inside flex and grid parents too",
+              "hash": "fece866"
+            },
+            {
+              "scopes": ["avatar"],
+              "text": "Auto-color backgrounds keep white initials readable",
+              "hash": "4c5ac36"
+            },
+            {
+              "scopes": ["code-editor"],
+              "text": "Let --c2-code-editor__active-line--background win over CodeMirror",
+              "hash": "0bcf2c3"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Hydrate a server-rendered step as the leaf the server drew",
+              "hash": "facba45"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Deepen the primary badge's text so it reads on its container",
+              "hash": "8bdd18a"
+            },
+            {
+              "scopes": ["otp-input"],
+              "text": "Shrink the cells instead of overflowing a narrow column",
+              "hash": "7f7e8c5"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map the remaining neutral component colours to theme tokens",
+              "hash": "bf0f962"
+            },
+            {
+              "scopes": ["qr-code"],
+              "text": "Expose the placeholder border as --c2-qr-code__placeholder--border",
+              "hash": "d690092"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map the accordion's frame colour to the outline token",
+              "hash": "53bd233"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Theme select's pressed trigger and its landing preview follow the theme",
+              "hash": "4f5b8e7"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "Expose the indicator, shortcut and other-field colours so the theme reaches them",
+              "hash": "5765b41"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Draw the avatar group's separation ring in the surface colour",
+              "hash": "64f5f3a"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Record the actions slot in the slot styling audit",
+              "hash": "7b1e849"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Tighten the controls row and keep it below the perforation",
+              "hash": "4ad238c"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Put the actions slot left of the Paper and Tear off buttons, on their row",
+              "hash": "90973f8"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Every gallery card passes the audit in both themes",
+              "hash": "f3c68e2"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Primary text reads on the site's primary container",
+              "hash": "1898b70"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Gallery cards pass the contrast audit in both themes",
+              "hash": "ff9ca10"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Readable muted text and the dark chart palette on the docs site",
+              "hash": "673f88c"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the copy button and details previews",
+              "hash": "982c74f"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Fit the questionnaire preview in its card",
+              "hash": "12148ec"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Give the avatar preview room and theme its rings",
+              "hash": "3bfb28d"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the split panel preview's divider visible",
+              "hash": "893ee45"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the masonry preview and the neutral greys of the other landing previews",
+              "hash": "e713cb8"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the border beam preview card and make its beam easier to see",
+              "hash": "68e8c8d"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.22",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Actions slot, and controls that can show only on the note in use",
+              "hash": "87c3390"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Editable mode — add, connect, rename and delete nodes",
+              "hash": "80190a0"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Dated weeks, click to add and drag to reschedule",
+              "hash": "72879d3"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Click a day to add, drag to reschedule",
+              "hash": "24d8d2a"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Add the actions slot to the slot styling audit",
+              "hash": "1a383a2"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "On a touch screen, hidden controls show once the page is tapped",
+              "hash": "4ebb9e8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.21",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["todo-list"],
+              "text": "Take custom backgrounds and palettes, stored by position",
+              "hash": "76eefa9"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Take custom ink and highlighter lists, stored by position",
+              "hash": "5011b91"
+            },
+            {
+              "scopes": ["separator"],
+              "text": "Rename @c2n/seperator to @c2n/separator",
+              "hash": "37674f3"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["page-editor"],
+              "text": "Add c2-page-editor, a Notion-style editor for long text",
+              "hash": "f1d3857"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Name list colours `{ value, name }`, with an optional name",
+              "hash": "bfd8efd"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Draw the ring and hero progress as a circular c2-progress",
+              "hash": "7056c63"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["masonry"],
+              "text": "Place a newly added tile before its authored successor",
+              "hash": "04883b3"
+            },
+            {
+              "scopes": ["code-editor"],
+              "text": "Apply value and options set while the engine loads",
+              "hash": "aa3745d"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Keep the drag preview under the pointer inside a containing ancestor",
+              "hash": "ba20843"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Size the paper menu to its content on iOS Safari",
+              "hash": "164b69d"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.20",
+      "date": "2026-10-02",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Add pad presets (notebook, legal pad, sticky note, index card) to the paper picker",
+              "hash": "037de7d"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Edit tasks, list icons, four distinct palettes, and c2-tabs/c2-progress",
+              "hash": "8ec21c7"
+            },
+            {
+              "scopes": ["progress"],
+              "text": "Add circular variant",
+              "hash": "6994887"
+            },
+            {
+              "scopes": ["comparison-bar"],
+              "text": "Segments touch by default",
+              "hash": "e6318aa"
+            },
+            {
+              "scopes": ["comparison-bar"],
+              "text": "Support an optional third (middle) value",
+              "hash": "95cde3e"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Paper colours pair a sheet with its ink, in a hover card",
+              "hash": "a986953"
+            },
+            {
+              "scopes": ["comparison-bar"],
+              "text": "Add c2-comparison-bar two-segment ratio bar",
+              "hash": "8283c07"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Add a paper picker, and a dark washi-tape toolbar under the theme",
+              "hash": "ce5a4df"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Group the inks and highlighters into one toolbar button each",
+              "hash": "d5d2e46"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-map-chart, a choropleth and point map on vector outlines",
+              "hash": "e84cd3d"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Add c2-notepad, a paper notepad with a selection toolbar, checklists and tear-off pages",
+              "hash": "1b21b03"
+            },
+            {
+              "scopes": ["butterfly-chart"],
+              "text": "Add c2-butterfly-chart, two series back to back",
+              "hash": "05302b3"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Add toolbar mode, roving focus and form association",
+              "hash": "2566aeb"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add horizontal, stacked and value-labelled bar charts",
+              "hash": "cf1724a"
+            },
+            {
+              "scopes": ["status-panel"],
+              "text": "Add media=\"illustration\" and media=\"none\"",
+              "hash": "cf20366"
+            },
+            {
+              "scopes": [],
+              "text": "Add a custom 404 page to the docs site",
+              "hash": "c49430f"
+            },
+            {
+              "scopes": ["changelog"],
+              "text": "Show the 10 latest releases and preview new components",
+              "hash": "74e4a5e"
+            },
+            {
+              "scopes": ["changelog"],
+              "text": "Generate the changelog from git history and show it on the docs site",
+              "hash": "c63e5de"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Horizontal rail always links the steps; text placement around the marker",
+              "hash": "22b8f4d"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Horizontal orientation and selectable steps",
+              "hash": "33295e2"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Add colour palettes to c2-todo-list",
+              "hash": "ef3c458"
+            },
+            {
+              "scopes": ["reorder-list", "todo-list"],
+              "text": "Add opt-in swipe actions to c2-reorder-list and use them in c2-todo-list",
+              "hash": "2b27d11"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Add c2-flow: pipeline flow diagram component",
+              "hash": "f544fd6"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Add c2-todo-list and the @c2n/task-icons set",
+              "hash": "71659a1"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Add c2-week-planner: typical-week schedule with odd/even weeks",
+              "hash": "d5ee5ae"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Round the pyramid's corners",
+              "hash": "0fa6d3f"
+            },
+            {
+              "scopes": ["bubble-chart"],
+              "text": "Hide the size key unless size-legend is set",
+              "hash": "e628cb4"
+            },
+            {
+              "scopes": ["calendar"],
+              "text": "Add c2-calendar: inline single-date month calendar",
+              "hash": "4d7fd0a"
+            },
+            {
+              "scopes": ["overlap-chart"],
+              "text": "Name the sets in one legend by default; set-labels=\"around\" opts in",
+              "hash": "98419b2"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-pyramid-chart",
+              "hash": "e1fcb73"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Highlight is the default legend action; overlap chart polish",
+              "hash": "8f46cce"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Clicking a series in the plot highlights it, on every chart",
+              "hash": "0365dc5"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Legend-action=\"highlight\" on every chart; slots verified for all",
+              "hash": "0f142f9"
+            },
+            {
+              "scopes": ["overlap-chart"],
+              "text": "Selection=\"set\" selects the whole circle under the pointer",
+              "hash": "8583e3e"
+            },
+            {
+              "scopes": ["overlap-chart"],
+              "text": "Configurable look for the other circles while one set is highlighted",
+              "hash": "78ad3fb"
+            },
+            {
+              "scopes": ["overlap-chart"],
+              "text": "Highlight and select a whole set; region/set on tooltip context",
+              "hash": "d57a2c8"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-bubble-chart, a scatter plot sized by a third measure",
+              "hash": "896e7bb"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-overlap-chart, a Venn diagram of two or three sets",
+              "hash": "d0c8c0e"
+            },
+            {
+              "scopes": ["marker"],
+              "text": "Add c2-marker inline text marker",
+              "hash": "54507ee"
+            },
+            {
+              "scopes": ["command"],
+              "text": "Add c2-command searchable command list",
+              "hash": "f8c4de6"
+            },
+            {
+              "scopes": ["hover-card"],
+              "text": "Add c2-hover-card component",
+              "hash": "5f65330"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Group rows by one or more fields",
+              "hash": "d2959b0"
+            },
+            {
+              "scopes": ["context-menu"],
+              "text": "Add c2-context-menu: right-click / long-press menus, static or per clicked spot",
+              "hash": "69cfc0c"
+            },
+            {
+              "scopes": ["otp-input"],
+              "text": "Add c2-otp-input one-time-code field",
+              "hash": "1275cd7"
+            },
+            {
+              "scopes": ["slider"],
+              "text": "Add range mode with two thumbs",
+              "hash": "819fa5d"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Read the caret through composed ranges, so a fast key acts at the real caret in WebKit",
+              "hash": "837b0cb"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Keep the toolbar and the paper card on their anchor while the page scrolls",
+              "hash": "9f13221"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Hydrate server-rendered items, and style the drop slot and drag preview",
+              "hash": "305934f"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Mark the selected colour with a ring, not a highlighted square",
+              "hash": "2908af9"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Keep the ink colour of selected text",
+              "hash": "8414048"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Sync the caret before key handling, clear the binding, ring only on keyboard focus",
+              "hash": "8e651fb"
+            },
+            {
+              "scopes": ["status-panel"],
+              "text": "Show slotted title and description after SSR hydration",
+              "hash": "8982b18"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Zero-based bar value axis, one tick per band, readable inside labels",
+              "hash": "6b093e7"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "A selected step only recolours its label; steps gallery two cards per row",
+              "hash": "66b343c"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Keep every bubble inside the axes; meaningful one-column-per-series example",
+              "hash": "8ce849e"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Equal-height horizontal steps; build the docs task demo in the browser",
+              "hash": "bcd20c2"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Keep pyramid labels readable and clear of each other",
+              "hash": "56355b6"
+            },
+            {
+              "scopes": ["bubble-chart"],
+              "text": "Draw bubble labels in the chart text colour so they read in dark mode",
+              "hash": "f776921"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Honour declared series after hydration; tidy overlap labels",
+              "hash": "486e180"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Keep gallery screenshot names independent of card order",
+              "hash": "2350ffa"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Mark the keyboard-focused row by its highlight only; widen the context-menu usage examples",
+              "hash": "0188407"
+            },
+            {
+              "scopes": ["navigation-menu"],
+              "text": "Close the open panel when its trigger is clicked again",
+              "hash": "208ec16"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Record the group:{groupKey} slot in the slot styling audit",
+              "hash": "1060ae5"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Theme scatter grid lines and fit its axes to the data",
+              "hash": "f5d39df"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Keep the icon on the message row in a narrow banner",
+              "hash": "2331b07"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map chat message body text to the on-surface token",
+              "hash": "39e8d33"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Keep the selected fill on a hovered day",
+              "hash": "c8fa95e"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Planners: heading and actions parts, slot styling audit entries",
+              "hash": "5dacbb5"
+            },
+            {
+              "scopes": [],
+              "text": "Month planner: heading and actions header slots",
+              "hash": "4c2868f"
+            },
+            {
+              "scopes": [],
+              "text": "Week planner: heading and actions header slots",
+              "hash": "3ed6611"
+            },
+            {
+              "scopes": [],
+              "text": "Responsive planners: day strip, compact month, heading, Planning category",
+              "hash": "4cbdd72"
+            },
+            {
+              "scopes": ["calendar", "month-planner"],
+              "text": "Rename c2-calendar to c2-month-planner",
+              "hash": "2826c3f"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Give c2-todo-list a paper feel, notes, archive, swipe, reorder and task colours",
+              "hash": "3a0bc9e"
+            },
+            {
+              "scopes": [],
+              "text": "Start the week on the locale's first day",
+              "hash": "b0ca38b"
+            },
+            {
+              "scopes": [],
+              "text": "Translate the calendar and week planner; week number badge on the switch",
+              "hash": "7364743"
+            },
+            {
+              "scopes": [],
+              "text": "Keep white text on custom-coloured events in dark mode",
+              "hash": "a2a9ac1"
+            },
+            {
+              "scopes": [],
+              "text": "Today tints inside the grid lines; week planner's odd/even is opt-in",
+              "hash": "f72d579"
+            },
+            {
+              "scopes": [],
+              "text": "Record @c2n/calendar in the umbrella package's lockfile entry",
+              "hash": "ba5bb8b"
+            },
+            {
+              "scopes": ["stat"],
+              "text": "Dim the c2-stat placeholder through --c2-stat__placeholder--opacity",
+              "hash": "bb73aed"
+            },
+            {
+              "scopes": ["stat"],
+              "text": "Show -- in c2-stat while value is null or undefined",
+              "hash": "e6c7d91"
+            },
+            {
+              "scopes": ["calendar"],
+              "text": "Rework c2-calendar into a month planner",
+              "hash": "ddeb8d0"
+            },
+            {
+              "scopes": [],
+              "text": "Tint shared zones of a highlighted circle in the other set's colour",
+              "hash": "fbe0c3a"
+            },
+            {
+              "scopes": [],
+              "text": "Bring highlighted series forward and fix area chart band picking",
+              "hash": "d194af6"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Render the button-group toolbar example as plain children",
+              "hash": "02c107d"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep table rows in the studio and add a Data tab to the inspector",
+              "hash": "373c81d"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the space before the full changelog link",
+              "hash": "a9cdb64"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Neutral theme-aware Sign in button in the header preview",
+              "hash": "965d04e"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Show sidebar counts only in the components section",
+              "hash": "f9eae50"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the header preview's Sign in on one line",
+              "hash": "a2ef052"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Put the drawer close button on the overview row",
+              "hash": "f2937f8"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the search palette to one scrollbar",
+              "hash": "212470c"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Build the ⌘K search palette on c2-command",
+              "hash": "0f9e889"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the neutral colours in docs examples for dark mode",
+              "hash": "4164e9a"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Tighten menu separators and add icons to the menu examples",
+              "hash": "fdd2bb3"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Fit the accordion landing preview inside its canvas",
+              "hash": "40f377a"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Declutter the gauge chart landing preview",
+              "hash": "c3020ac"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the steps preview and usage panel for dark mode",
+              "hash": "c1c507f"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Add reorder-list preview to the landing gallery",
+              "hash": "8ce0b0e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.19",
+      "date": "2026-09-29",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["mcp", "skill"],
+              "text": "Know about @c2n/components",
+              "hash": "8bc883e"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Gallery looks for agents: index, search, themed CSS, screenshots",
+              "hash": "660a575"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Add @c2n/components, every component in one install",
+              "hash": "8eaeeb6"
+            },
+            {
+              "scopes": ["skill"],
+              "text": "GitHub Copilot support, proxy-safe MCP startup, dashboard composition",
+              "hash": "db7e699"
+            },
+            {
+              "scopes": ["table"],
+              "text": "String row keys, getRowKey and row-based selection helpers",
+              "hash": "ed68c34"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Sticky summary row keyed by column id",
+              "hash": "9b608ea"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["gallery", "chart"],
+              "text": "Readable gallery cards in dark mode, category x ticks",
+              "hash": "b95a708"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Keep reflected defaults off the host",
+              "hash": "284e7bd"
+            },
+            {
+              "scopes": ["framework-types"],
+              "text": "Make every generated vue.d.ts compile",
+              "hash": "b664fb4"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Apply the selected row colour to its cells",
+              "hash": "c84b829"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Clicking the selected row again clears the selection",
+              "hash": "c1cbe45"
+            },
+            {
+              "scopes": ["masonry"],
+              "text": "Stop writing tabindex on connect, which broke SSR hydration",
+              "hash": "1f99f81"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Gallery audit, automatic checks on every card in both themes",
+              "hash": "b700c08"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the release version badge visible on mobile",
+              "hash": "996e419"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.18",
+      "date": "2026-09-29",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["chat-message-list"],
+              "text": "Theme the log's scrollbar",
+              "hash": "6fb2e4b"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Mouse drag, click-to-peek and edge-zone hover controls",
+              "hash": "0ace2b8"
+            },
+            {
+              "scopes": ["split-panel"],
+              "text": "Hide the divider until hovered, recolour it on focus",
+              "hash": "b833880"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Add position (sticky top / fixed bottom) and polish defaults",
+              "hash": "7b7815b"
+            },
+            {
+              "scopes": ["time-input"],
+              "text": "Replace native picker with a compact themeable picker",
+              "hash": "2737319"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Add c2-carousel component",
+              "hash": "1aebf68"
+            },
+            {
+              "scopes": ["timeline"],
+              "text": "Add c2-timeline and c2-timeline-item",
+              "hash": "28a99fa"
+            },
+            {
+              "scopes": ["split-panel"],
+              "text": "Add c2-split-panel component",
+              "hash": "3af43c5"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Add c2-banner component",
+              "hash": "26fdea3"
+            },
+            {
+              "scopes": ["tag-input"],
+              "text": "Add c2-tag-input for entering lists such as email recipients",
+              "hash": "ced1869"
+            },
+            {
+              "scopes": ["time-input"],
+              "text": "Add c2-time-input component",
+              "hash": "84d3a66"
+            },
+            {
+              "scopes": ["shortcut"],
+              "text": "Add c2-shortcut and the core shortcut helper",
+              "hash": "feffb80"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Disable month navigation past min/max, add relative range examples",
+              "hash": "f3863bb"
+            },
+            {
+              "scopes": ["chat-message-list"],
+              "text": "Add c2-chat-message-list conversation log",
+              "hash": "a67bc1f"
+            },
+            {
+              "scopes": ["symbols"],
+              "text": "Expand the set to 157 illustrations",
+              "hash": "9caa65a"
+            },
+            {
+              "scopes": ["symbols"],
+              "text": "Add @c2n/symbols spot illustrations",
+              "hash": "593fac7"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["shortcut"],
+              "text": "Accept composed keys only and click inner controls",
+              "hash": "0f9ad88"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Ignore a stale scrollend while a programmatic scroll is in flight",
+              "hash": "d9bac17"
+            },
+            {
+              "scopes": ["timeline"],
+              "text": "Show slotted content after hydration, add release notes gallery card",
+              "hash": "2dbd7f8"
+            },
+            {
+              "scopes": ["icon-button"],
+              "text": "Center the button in its host when the host is stretched or sized",
+              "hash": "b6e9645"
+            },
+            {
+              "scopes": ["side-nav"],
+              "text": "No focus ring on the first drawer link after a tap",
+              "hash": "1977453"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Calendar icon focuses the input and tolerates showPicker() throwing",
+              "hash": "c9a3f5c"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "No range strip behind a lone start date",
+              "hash": "3b65fc3"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Keep selected row background under the pointer, show row hover, resize columns by default",
+              "hash": "a42568c"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Reveal copy button per tapped entry on touch devices",
+              "hash": "1d54b2d"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Tidy autocomplete example header/footer on narrow screens",
+              "hash": "d0e8dff"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Keep Astro's island bootstrap out of named slots",
+              "hash": "1fbe4fd"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep long usage-row labels from overlapping examples on mobile",
+              "hash": "18f709e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.17",
+      "date": "2026-09-28",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add virtual log viewer with sticky columns and log highlighting",
+              "hash": "647f60b"
+            },
+            {
+              "scopes": [],
+              "text": "Add persistent masonry component",
+              "hash": "3989120"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Stabilize virtual log keyboard scrolling in CI",
+              "hash": "9854ce5"
+            },
+            {
+              "scopes": [],
+              "text": "Complete log viewer styling and wrapped token contracts",
+              "hash": "468f0ac"
+            },
+            {
+              "scopes": [],
+              "text": "Fix tabs accessibility and chart font sizing",
+              "hash": "fe083e5"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Make switch thumb follow track height",
+              "hash": "faea792"
+            },
+            {
+              "scopes": [],
+              "text": "Allow table scroll to chain to the page",
+              "hash": "b3c5cd7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.16",
+      "date": "2026-09-24",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add diagnostic CSS styling contract audit",
+              "hash": "e674886"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["nextjs"],
+              "text": "Track JSX custom element declarations",
+              "hash": "3605230"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.15",
+      "date": "2026-09-23",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add Next.js observability example and c2n improvements",
+              "hash": "6077abb"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["button"],
+              "text": "Rerender after form-disabled state changes",
+              "hash": "fd97e6d"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Restore mobile site navigation",
+              "hash": "05a6ebf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.14",
+      "date": "2026-09-21",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["reorder-list"],
+              "text": "Make reordering reliable and accessible",
+              "hash": "4be70ff"
+            },
+            {
+              "scopes": [],
+              "text": "Complete slot styling contracts",
+              "hash": "678a94c"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["core"],
+              "text": "Read a \"false\" boolean attribute as false, and parse JSON assigned to a property",
+              "hash": "9cdf0cb"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Render API descriptions as safe markdown",
+              "hash": "1301984"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.13",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Ship custom-elements.json in every published package",
+              "hash": "822f232"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "llms-full.txt from the skill, richer llms.txt, footer links",
+              "hash": "c81f3fa"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.12",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Responsive layouts, enter/leave motion, and SSR-safe attributes",
+              "hash": "e729283"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.11",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Add @c2n/dashboard, a grid of resizable panes",
+              "hash": "498233e"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Sync the new package with v0.0.10",
+              "hash": "e5d01a4"
+            },
+            {
+              "scopes": ["theme-select"],
+              "text": "Keep the menu open while the pointer crosses into it",
+              "hash": "94e8ba4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.10",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["steps"],
+              "text": "Add @c2n/steps, plus border-beam, code-editor, theme-select and avatar-group",
+              "hash": "7a897e3"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Sync the new packages with v0.0.9, and declare composed children",
+              "hash": "182c364"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.9",
+      "date": "2026-09-17",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["tree"],
+              "text": "Add @c2n/tree and rebuild the docs sidebar on it",
+              "hash": "a093add"
+            },
+            {
+              "scopes": [],
+              "text": "Expand component library and examples",
+              "hash": "38fc60e"
+            },
+            {
+              "scopes": [],
+              "text": "Improve chart examples and add radar charts",
+              "hash": "06e2b60"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Make questionnaire options directly interactive",
+              "hash": "4750d9c"
+            },
+            {
+              "scopes": [],
+              "text": "Keep chart hover active during entry animation",
+              "hash": "ba1bb76"
+            },
+            {
+              "scopes": [],
+              "text": "Resolve chart theme before first paint",
+              "hash": "2ad952a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.8",
+      "date": "2026-09-15",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add date and number inputs",
+              "hash": "36e70a2"
+            },
+            {
+              "scopes": [],
+              "text": "Add date selector component",
+              "hash": "cb5aca9"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Preserve number input width in WebKit",
+              "hash": "de560e4"
+            },
+            {
+              "scopes": [],
+              "text": "Correct date selector test semantics",
+              "hash": "f17a244"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.7",
+      "date": "2026-09-15",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Framework integration for React, Vue and Angular",
+              "hash": "3502f6d"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Refine docs shell interactions",
+              "hash": "790bfa0"
+            },
+            {
+              "scopes": [],
+              "text": "Expand chart and realtime table demos",
+              "hash": "453ef10"
+            },
+            {
+              "scopes": [],
+              "text": "Improve chat components",
+              "hash": "a0a3bfb"
+            },
+            {
+              "scopes": [],
+              "text": "Add autocomplete component",
+              "hash": "a72d74c"
+            },
+            {
+              "scopes": [],
+              "text": "Improve data platform navigation",
+              "hash": "31d76bc"
+            },
+            {
+              "scopes": [],
+              "text": "Expand components and native form support",
+              "hash": "a6b4ed3"
+            },
+            {
+              "scopes": [],
+              "text": "Improve component docs and agent tooling",
+              "hash": "f50b2ac"
+            },
+            {
+              "scopes": [],
+              "text": "Add attachment components and improve galleries",
+              "hash": "1d4843a"
+            },
+            {
+              "scopes": ["virtual-list"],
+              "text": "Add the virtualized list with built-in search",
+              "hash": "977a0b3"
+            },
+            {
+              "scopes": ["pagination"],
+              "text": "Add the pagination component and wire it into the table",
+              "hash": "336cfe2"
+            },
+            {
+              "scopes": ["sheet"],
+              "text": "Add the edge-anchored sheet component",
+              "hash": "a67a13a"
+            },
+            {
+              "scopes": ["skeleton"],
+              "text": "Add the skeleton placeholder component",
+              "hash": "7123837"
+            },
+            {
+              "scopes": ["progress"],
+              "text": "Add the linear progress component",
+              "hash": "0120a74"
+            },
+            {
+              "scopes": ["kbd"],
+              "text": "Add the kbd component",
+              "hash": "a8c11d9"
+            },
+            {
+              "scopes": [],
+              "text": "Add virtualized table component",
+              "hash": "fa0df0b"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Publish regenerated framework metadata",
+              "hash": "f1b9394"
+            },
+            {
+              "scopes": [],
+              "text": "Resume releases from historical tags",
+              "hash": "01a7970"
+            },
+            {
+              "scopes": [],
+              "text": "Resolve release before version lifecycle",
+              "hash": "6059c47"
+            },
+            {
+              "scopes": [],
+              "text": "Make npm releases resumable",
+              "hash": "c95b86f"
+            },
+            {
+              "scopes": [],
+              "text": "Keep framework types on workspace version",
+              "hash": "9a10c49"
+            },
+            {
+              "scopes": ["tabs"],
+              "text": "Move c2-tab's slot attribute out of the constructor",
+              "hash": "c0711ce"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Stop squashing non-icon content in the icon slots",
+              "hash": "b8e5d71"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Split the chart docs, rebuild the sidebar, and dogfood c2n in the docs site",
+              "hash": "e3636e2"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add data-platform-html example app and component polish",
+              "hash": "f670d12"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add example apps section with a Vue 3 inbox",
+              "hash": "a5dc4d6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.6",
+      "date": "2026-09-10",
+      "sections": [
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Keep the sidebar scroll offset across navigations",
+              "hash": "124f2e0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.5",
+      "date": "2026-09-10",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["copy-button"],
+              "text": "New @c2n/copy-button component",
+              "hash": "9aa425f"
+            },
+            {
+              "scopes": [],
+              "text": "Docs app restructure, design tokens, MCP server, skill plugin and studio inspector redesign",
+              "hash": "1ce7584"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["copy-button"],
+              "text": "Stop the abandoned button flipping back to the copy icon",
+              "hash": "2081bdb"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.4",
+      "date": "2022-11-04",
+      "sections": []
+    },
+    {
+      "version": "0.0.3",
+      "date": "2022-11-03",
+      "sections": []
+    },
+    {
+      "version": "0.0.2",
+      "date": "2022-09-22",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["checkbox"],
+              "text": "Checked state does not reactive on vuejs binding",
+              "hash": "a8cfa44"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.1",
+      "date": "2022-09-22",
+      "sections": []
+    }
+  ]
+}

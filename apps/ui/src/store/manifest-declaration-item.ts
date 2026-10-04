@@ -14,6 +14,8 @@ export interface AttributeDeclarationItem {
   default?: string
   value?: string
   description?: string
+  /** JSON data (`rows`, `items`, `nodes`…), edited in the inspector's Data tab rather than as a prop. */
+  data?: boolean
 }
 
 export interface EventDeclarationItem {

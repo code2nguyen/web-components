@@ -39,11 +39,7 @@ The symbol names, catalog (title, category, description), tag helper and `Symbol
 ### In a status panel
 
 ```html
-<c2-status-panel
-  heading="No results"
-  description="Try a different keyword or clear the filters."
-  style="--c2-status-panel__media--size: 128px; --c2-status-panel__media-icon--size: 128px; --c2-status-panel__media--background-color: transparent"
->
+<c2-status-panel media="illustration" heading="No results" description="Try a different keyword or clear the filters.">
   <c2-symbol-no-results slot="media"></c2-symbol-no-results>
 </c2-status-panel>
 ```

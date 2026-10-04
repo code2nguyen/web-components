@@ -75,13 +75,13 @@ Each example gets a full gallery row so the complete brand, navigation and actio
 <style>
   .trading-header {
     width: 100%;
-    --c2-header--background: var(--c2-theme--color-on-surface, #18181b);
-    --c2-header--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-header--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-header--border-bottom: 1px solid rgba(34, 211, 238, 0.22);
     --c2-header--box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
   }
   .trading-brand {
-    --c2-link-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-link-button__container--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-link-button__container--font-weight: 750;
     --c2-link-button__container__hover--color: #67e8f9;
     --c2-link-button__container__hover--text-decoration: none;
@@ -96,7 +96,7 @@ Each example gets a full gallery row so the complete brand, navigation and actio
   }
   .desk-link {
     --c2-link-button__container--color: #94a3b8;
-    --c2-link-button__container__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
   }
   .desk-search {
     --c2-icon-button--background-color: #111827;
@@ -133,13 +133,13 @@ Each example gets a full gallery row so the complete brand, navigation and actio
 <style>
   .glass-header {
     width: 100%;
-    --c2-header--background: rgba(255, 255, 255, 0.72);
-    --c2-header__blurred--background: rgba(255, 255, 255, 0.72);
+    --c2-header--background: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 72%, transparent);
+    --c2-header__blurred--background: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 72%, transparent);
     --c2-header--border-bottom: 1px solid rgba(124, 58, 237, 0.16);
     --c2-header--box-shadow: 0 18px 45px rgba(76, 29, 149, 0.1);
   }
   .docs-brand {
-    --c2-link-button__container--color: #4c1d95;
+    --c2-link-button__container--color: color-mix(in srgb, #7c3aed 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-link-button__container--font-weight: 750;
     --c2-link-button__container__hover--text-decoration: none;
   }
@@ -150,6 +150,7 @@ Each example gets a full gallery row so the complete brand, navigation and actio
   }
   .start-action {
     --c2-button__container--background-color: #7c3aed;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__hover--background-color: #6d28d9;
     --c2-button__container--height: 36px;
   }

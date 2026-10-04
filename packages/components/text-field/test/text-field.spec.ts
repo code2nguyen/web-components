@@ -93,3 +93,47 @@ test('participates in FormData, native validation, reset and disabled fieldsets'
   await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = true))
   await expect(page.getByRole('textbox')).toBeDisabled()
 })
+
+test('state changes never write a class on the host; they show inside and as custom states', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-text-field aria-label="Message" class="author"></c2-text-field><button>Elsewhere</button>')
+  const host = page.locator('c2-text-field')
+  const box = host.locator('.c2-text-field')
+  const input = page.getByRole('textbox', { name: 'Message' })
+  const states = () => host.evaluate((el) => ['focus-within', 'error', 'read-only', 'disabled'].filter((name) => el.matches(`:state(${name})`)))
+  const hostClass = () => host.evaluate((el) => el.getAttribute('class'))
+
+  await expect(box).toHaveCSS('border-top-color', 'rgb(188, 188, 198)')
+  await input.focus()
+  await input.pressSequentially('Hello')
+  await expect(box).toHaveCSS('border-top-color', 'rgb(71, 110, 249)')
+  expect(await states()).toEqual(['focus-within'])
+  expect(await hostClass()).toBe('author')
+
+  await props(host, { error: true })
+  await page.getByRole('button', { name: 'Elsewhere' }).focus()
+  await expect(box).toHaveCSS('border-top-color', 'rgb(220, 38, 38)')
+  await expect.poll(states).toEqual(['error'])
+  expect(await hostClass()).toBe('author')
+
+  await props(host, { error: false, readOnly: true })
+  await expect(box).toHaveCSS('border-top-color', 'rgb(228, 228, 231)')
+  await expect.poll(states).toEqual(['read-only'])
+
+  await props(host, { readOnly: false, disabled: true })
+  await expect(box).toHaveCSS('opacity', '0.38')
+  await expect.poll(states).toEqual(['disabled'])
+  expect(await hostClass()).toBe('author')
+
+  await props(host, { disabled: false })
+  await expect.poll(states).toEqual([])
+  expect(await hostClass()).toBe('author')
+})
+
+test('a bare host stays without a class attribute through every state', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-text-field aria-label="Message"></c2-text-field>')
+  const host = page.locator('c2-text-field')
+  await page.getByRole('textbox').focus()
+  await page.getByRole('textbox').pressSequentially('x')
+  await props(host, { error: true, readOnly: true, disabled: true })
+  await expect(host).not.toHaveAttribute('class')
+})

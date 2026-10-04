@@ -263,6 +263,30 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-overlap-chart': {
+    html: `<c2-overlap-chart style="width:420px;height:300px" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web app"></c2-chart-series><c2-chart-series field="mobile" label="Mobile app"></c2-chart-series><c2-chart-series field="api" label="Public API"></c2-chart-series></c2-overlap-chart>`,
+    presets: [
+      { name: 'Equal circles', description: 'Same-sized circles, so every region has room for its label.', attributes: { layout: 'uniform' } },
+      { name: 'Shares', description: 'Each region as a share of all members, without a legend.', attributes: { labels: 'percent', legend: 'none' } },
+      {
+        name: 'Focus view',
+        description: 'One set highlighted, the others hatched in grey.',
+        attributes: { highlighted: 'api' },
+        css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
+      },
+      {
+        name: 'Soft fills',
+        description: 'Stronger tinted fills with no outlines, in a violet, pink and cyan palette.',
+        css: {
+          '--c2-chart__series-1--color': '#7c3aed',
+          '--c2-chart__series-2--color': '#db2777',
+          '--c2-chart__series-3--color': '#0891b2',
+          '--c2-chart__set--fill-opacity': '0.24',
+          '--c2-chart__set--stroke-width': '0',
+        },
+      },
+    ],
+  },
   'c2-autocomplete': {
     html: `<c2-autocomplete style="width:240px" aria-label="Search" placeholder="Search…" item-key="value" label-field="label" description-field="description" suggestions='[{"value":"ada","label":"Ada Lovelace","description":"Platform engineering"},{"value":"api","label":"Autocomplete API notes","description":"Updated yesterday"}]'></c2-autocomplete>`,
     presets: [
@@ -377,6 +401,62 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-button__container__hover--background-color': 'rgba(37, 99, 235, 0.08)',
           '--c2-button__container__active--background-color': 'rgba(37, 99, 235, 0.16)',
           '--c2-button__container--font-weight': '600',
+        },
+      },
+    ],
+  },
+  'c2-notepad': {
+    html: `<c2-notepad label="Notes" style="width:320px" value="Thursday sync&#10;Ship it **behind a flag**&#10;- [ ] Ask about night paper"></c2-notepad>`,
+    presets: [
+      {
+        name: 'Legal pad',
+        description: 'Canary paper, wide blue rules, a red margin and a glued top instead of the spiral.',
+        css: {
+          '--c2-notepad__sheet--background': '#fbf1a6',
+          '--c2-notepad__rule--color': '#8fb2d6',
+          '--c2-notepad__rule--spacing': '30px',
+          '--c2-notepad__margin--color': '#e07a6e',
+          '--c2-notepad__writing--color': '#1b2433',
+          '--c2-notepad__spiral--display': 'none',
+          '--c2-notepad__glue--display': 'block',
+        },
+      },
+      {
+        name: 'Dot grid',
+        description: 'Warm stock with a 5 mm dot grid and no rules or margin.',
+        css: {
+          '--c2-notepad__sheet--background': '#f7f4ec',
+          '--c2-notepad__rule--color': 'transparent',
+          '--c2-notepad__dot--color': '#b5b0a3',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+          '--c2-notepad__spiral--display': 'none',
+        },
+      },
+      {
+        name: 'Graph paper',
+        description: 'Green engineering grid with a tighter 24px ruling.',
+        css: {
+          '--c2-notepad__sheet--background': '#f0f5ee',
+          '--c2-notepad__rule--color': '#b7d3bd',
+          '--c2-notepad__grid--color': '#b7d3bd',
+          '--c2-notepad__rule--spacing': '24px',
+          '--c2-notepad__writing--font-size': '16px',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+        },
+      },
+      {
+        name: 'Night paper',
+        description: 'Dark slate paper with light ink and brighter inks for dark interfaces.',
+        css: {
+          '--c2-notepad__sheet--background': '#232a33',
+          '--c2-notepad__rule--color': '#3b4654',
+          '--c2-notepad__margin--color': '#6a4651',
+          '--c2-notepad__writing--color': '#e9e4d4',
+          '--c2-notepad__ink-blue--color': '#9fb6ff',
+          '--c2-notepad__ink-red--color': '#ff8f8f',
+          '--c2-notepad__texture--opacity': '0',
         },
       },
     ],
@@ -498,12 +578,13 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     html: `<c2-kbd>⌘ + K</c2-kbd>`,
     presets: [
       {
-        name: 'Flat',
-        description: 'No shadow, hairline border — an inline tag rather than a key',
+        name: 'Raised',
+        description: 'A keycap with a bottom edge, darker fill and border',
         css: {
-          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--background-color': '#f4f4f5',
+          '--c2-kbd--color': '#52525b',
           '--c2-kbd--border': '1px solid #d4d4d8',
-          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--box-shadow': '0 1px 0 #a1a1aa',
         },
       },
       {
@@ -1258,7 +1339,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         css: {
           '--c2-avatar--size': '44px',
           '--c2-avatar--background': '#2563eb',
-          '--c2-avatar--box-shadow': '0 0 0 2px #ffffff, 0 0 0 4px #2563eb',
+          '--c2-avatar--box-shadow': '0 0 0 2px var(--c2-theme--color-surface, #ffffff), 0 0 0 4px #2563eb',
         },
       },
     ],
@@ -1344,24 +1425,24 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
-  'c2-seperator': {
-    html: `<c2-seperator style="width: 240px">or</c2-seperator>`,
+  'c2-separator': {
+    html: `<c2-separator style="width: 240px">or</c2-separator>`,
     presets: [
-      { name: 'Dashed', css: { '--c2-seperator--style': 'dashed', '--c2-seperator--color': '#d4d4d8' } },
-      { name: 'Accent', css: { '--c2-seperator--thickness': '3px', '--c2-seperator--color': '#0265dc' } },
+      { name: 'Dashed', css: { '--c2-separator--style': 'dashed', '--c2-separator--color': '#d4d4d8' } },
+      { name: 'Accent', css: { '--c2-separator--thickness': '3px', '--c2-separator--color': '#0265dc' } },
       {
         name: 'Section heading',
         css: {
-          '--c2-seperator__line-start--flex': '0 0 0px',
-          '--c2-seperator__label--gap': '0px',
-          '--c2-seperator__label--color': '#18181b',
-          '--c2-seperator__label--font-weight': '600',
-          '--c2-seperator__label--font-size': '11px',
-          '--c2-seperator__label--text-transform': 'uppercase',
-          '--c2-seperator__label--letter-spacing': '0.06em',
+          '--c2-separator__line-start--flex': '0 0 0px',
+          '--c2-separator__label--gap': '0px',
+          '--c2-separator__label--color': '#18181b',
+          '--c2-separator__label--font-weight': '600',
+          '--c2-separator__label--font-size': '11px',
+          '--c2-separator__label--text-transform': 'uppercase',
+          '--c2-separator__label--letter-spacing': '0.06em',
         },
       },
-      { name: 'Leading label', css: { '--c2-seperator__line-start--flex': '0 0 24px', '--c2-seperator__label--font-size': '13px' } },
+      { name: 'Leading label', css: { '--c2-separator__line-start--flex': '0 0 24px', '--c2-separator__label--font-size': '13px' } },
     ],
   },
   'c2-skeleton': {
@@ -1411,6 +1492,31 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'No track', css: { '--c2-spinner__track--color': 'transparent' } },
       { name: 'Success', css: { '--c2-spinner--color': '#16a34a', '--c2-spinner__track--color': '#dcfce7' } },
       { name: 'Slow', css: { '--c2-spinner--animation-duration': '2.5s' } },
+    ],
+  },
+  'c2-working-indicator': {
+    html: `<c2-working-indicator label="Scheming" elapsed></c2-working-indicator>`,
+    presets: [
+      {
+        name: 'Agent',
+        description: 'Warm accent glyph with a soft shimmer, like a coding agent at work.',
+        css: {
+          '--c2-working-indicator__indicator--color': '#d97757',
+          '--c2-working-indicator__label--color': '#d97757',
+          '--c2-working-indicator__label--highlight-color': 'color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))',
+        },
+      },
+      {
+        name: 'Typing dots',
+        attributes: { indicator: 'dots', effect: 'pulse', ellipsis: 'none' },
+        css: { '--c2-working-indicator--font-weight': '400' },
+      },
+      {
+        name: 'Wave',
+        attributes: { indicator: 'orbit', effect: 'wave', ellipsis: 'bounce' },
+        css: { '--c2-working-indicator__label--highlight-color': '#7c3aed', '--c2-working-indicator__indicator--color': '#7c3aed' },
+      },
+      { name: 'Slow', css: { '--c2-working-indicator__label--animation-duration': '3.5s', '--c2-working-indicator__indicator--animation-duration': '2.4s' } },
     ],
   },
   'c2-code-editor': {

@@ -17,16 +17,23 @@ export interface ChartBuildContext {
   hidden: ReadonlySet<number>
   /** Category labels, when the chart is categorical. */
   labels?: string[]
+  /** Index of the series the reader highlighted from the legend, or `-1`. The others are drawn dimmed. */
+  highlighted: number
   width: number
   height: number
 }
 
 /** Engine callbacks, normalised so the element never sees a uPlot hook or an ECharts action. */
 export interface ChartAdapterEvents {
-  /** A point is hovered, or `null` when the pointer leaves the plot. */
-  hover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void
-  click(detail: { index: number; seriesIndex: number }): void
+  /**
+   * A point is hovered, or `null` when the pointer leaves the plot. `name` and `component` are set by an engine whose
+   * marks are not series data: a map region reports its region name and `component: 'geo'`.
+   */
+  hover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void
+  click(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void
   rangeChange(detail: { min: number; max: number }): void
+  /** The reader zoomed or panned a map. `zoom` is the engine's current zoom factor, `1` at the initial fit. */
+  viewChange?(detail: { zoom: number }): void
 }
 
 /**
@@ -60,7 +67,19 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
    */
   setDatumVisibility?(name: string, visible: boolean): void
 
+  /**
+   * Repaints from the current options and data, recomputing every mark. Optional: for a chart whose marks depend on
+   * which series are shown (a stacked bar chart), which a visibility toggle alone would leave stale.
+   */
+  redraw?(): void
+
   resize(width: number, height: number): void
+
+  /** Runs an engine action, such as ECharts' `geoRoam` for a map's zoom buttons. Only ECharts implements it. */
+  dispatchAction?(payload: Record<string, unknown>): void
+
+  /** Converts a value in a coordinate system (a map's `[lon, lat]`) to a pixel inside the plot. */
+  convertToPixel?(finder: Record<string, unknown>, value: number[]): [number, number] | null
 
   destroy(): void
 }

@@ -137,9 +137,13 @@
 }
 
 .c2-carousel-control {
-  // How shown a control is, 0 to 1. The state rules below set it; opacity follows it, and so does a short slide in from
-  // the control's own edge, so the reveal reads as the button arriving rather than blinking on.
-  --_shown: 1;
+  // How shown a control is, 0 to 1; opacity follows it, and so does a short slide in from the control's own edge, so
+  // the reveal reads as the button arriving rather than blinking on. Fully shown unless a state rule below raises one
+  // of the two flags: `--_at-rest` (pointer and focus outside) takes `control--opacity`, `--_opposite` (pointer away
+  // from this control's edge) takes `control__opposite--opacity`. They never both apply.
+  --_at-rest: 0;
+  --_opposite: 0;
+  --_shown: calc(1 + var(--_at-rest) * (#{css.cssVar(control--opacity)} - 1) + var(--_opposite) * (#{css.cssVar(control__opposite--opacity)} - 1));
   --_edge: -1;
 
   display: css.cssVar(control--display);
@@ -176,14 +180,14 @@
 // that cannot hover always shows them, since nothing would ever reveal them there.
 @media (hover: hover) {
   :host(:not(:hover):not(:focus-within)) .c2-carousel-control {
-    --_shown: #{css.cssVar(control--opacity)};
+    --_at-rest: 1;
   }
 
   // While hovering, a control whose edge zone the pointer is not in takes its own opacity; a focused one stays shown.
   :host(:hover) .pointer-start .c2-carousel-next:not(:focus-visible),
   :host(:hover) .pointer-end .c2-carousel-previous:not(:focus-visible),
   :host(:hover) .pointer-middle .c2-carousel-control:not(:focus-visible) {
-    --_shown: #{css.cssVar(control__opposite--opacity)};
+    --_opposite: 1;
   }
 }
 

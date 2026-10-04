@@ -2,7 +2,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import type { AlignedData, Axis, Options, Series } from 'uplot'
 import { ChartBase } from './chart-base.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
-import { createUplotAdapter } from './engines/uplot-adapter.js'
+import { createUplotAdapter, type UplotHitMode } from './engines/uplot-adapter.js'
 import type { ChartFrame, ChartSeriesConfig } from './chart-types.js'
 
 const DAY = 86_400_000
@@ -21,7 +21,9 @@ export type UplotSeriesStyle = Omit<Series, 'label' | 'show'>
  *
  * Defines no tag and is never registered.
  *
- * @cssproperty {color} [--c2-chart__axis-line--color=#e4e4e7] - Colour of the axis rules uPlot draws at the plot edges.
+ * @cssproperty {color} [--c2-chart__axis-line--color=#e4e4e7] - Colour of the tick marks uPlot draws along each axis at the plot edges.
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 export abstract class UplotChartBase extends ChartBase {
   protected override readonly engineName = 'uplot' as const
@@ -56,8 +58,11 @@ export abstract class UplotChartBase extends ChartBase {
     return options
   }
 
+  /** How the cursor picks a series: the nearest line, or (area charts) the fill it is inside. */
+  protected readonly hitMode: UplotHitMode = 'nearest'
+
   protected override createAdapter(): Promise<ChartAdapter> {
-    return createUplotAdapter() as unknown as Promise<ChartAdapter>
+    return createUplotAdapter(this.hitMode) as unknown as Promise<ChartAdapter>
   }
 
   protected override projectData(frame: ChartFrame): unknown {
@@ -75,17 +80,24 @@ export abstract class UplotChartBase extends ChartBase {
     // `scale` and `side` are spread in only for the right-hand axis: uPlot fills its per-index defaults with
     // `assign`, which copies an explicit `undefined` straight over them — the x axis would lose its side and
     // stop being drawn at the bottom.
+    // The tick marks along each axis are the rules uPlot draws at the plot edges; their colour has its own variable,
+    // resolved through a scratch probe because the shared probe block carries only the variables every chart reads.
+    const axisLineColor = this.themeController.resolveColor('var(--c2-chart__axis-line--color, #e4e4e7)', theme.gridColor)
     const axis = (show: boolean, isX: boolean, scale?: string): Axis => ({
       ...(scale ? { scale, side: 1 as const } : {}),
       show,
       stroke: theme.axisColor,
       font: `${theme.axisFontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`,
-      ticks: { show, stroke: theme.gridColor, width: 1 },
+      ticks: { show, stroke: axisLineColor, width: 1 },
       // Only the left axis contributes grid lines; a second set from the right one would not line up with it.
       grid:
         scale === RIGHT_SCALE
           ? { show: false }
-          : { show: isX ? this.grid === 'x' || this.grid === 'both' : this.grid === 'y' || this.grid === 'both', stroke: theme.gridColor, width: 1 },
+          : {
+              show: isX ? this.grid === 'x' || this.grid === 'both' : this.grid === 'y' || this.grid === 'both',
+              stroke: theme.gridColor,
+              width: theme.gridWidth,
+            },
       values: isX
         ? (_self: unknown, splits: number[]) => splits.map((value) => this.formatAxisX(value))
         : (_self: unknown, splits: number[]) => splits.map((value) => this.formatValue(value)),
@@ -109,16 +121,31 @@ export abstract class UplotChartBase extends ChartBase {
       axes: [axis(showX, true), axis(showY, false), ...(hasRight ? [axis(showY, false, RIGHT_SCALE)] : [])],
       series: [
         {},
-        ...series.map((item, index) => ({
-          label: item.label ?? item.field,
-          show: !context.hidden.has(index),
-          scale: item.axis === 'right' ? RIGHT_SCALE : undefined,
-          ...this.seriesStyle(item, index, context),
-        })),
+        ...series.map((item, index) => {
+          const style = this.seriesStyle(item, index, context)
+          return {
+            label: item.label ?? item.field,
+            show: !context.hidden.has(index),
+            // Spread in only for the right-hand axis, as for the axes above: an explicit `undefined` is copied over uPlot's
+            // default, and a series left without the `y` scale key cannot be mapped to a pixel, so the cursor could
+            // never tell which series it is nearest (it always reported the first).
+            ...(item.axis === 'right' ? { scale: RIGHT_SCALE } : {}),
+            ...style,
+            // A highlighted series comes forward with a heavier line, and the others fade back.
+            ...this.highlightStyle(style, index, context),
+          }
+        }),
       ],
     }
 
     return this.decorateOptions(options, context)
+  }
+
+  /** The highlight on top of a series' own style: a heavier stroke for the highlighted one, fading for the rest. */
+  protected highlightStyle(style: UplotSeriesStyle, index: number, context: ChartBuildContext): UplotSeriesStyle {
+    if (context.highlighted < 0) return {}
+    if (index !== context.highlighted) return { alpha: context.theme.dimmedOpacity }
+    return style.stroke ? { width: (style.width ?? context.theme.lineWidth) + 1 } : {}
   }
 
   /** A fixed y range when either bound is set, otherwise uPlot's own auto-ranging. */

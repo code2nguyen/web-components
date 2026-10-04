@@ -49,10 +49,14 @@ ${declarations(dark, '    ')}
 `
 }
 
-export function renderBaseCss(classified: ClassifiedVar[]): string {
+/**
+ * `covered` lists the longhand variables left out because they fall through to a shorthand variable that is mapped
+ * to the same value (see `shorthands.ts`); writing them would make the shorthand unreachable.
+ */
+export function renderBaseCss(classified: ClassifiedVar[], covered: ReadonlyMap<string, string> = new Map()): string {
   const byPackage = new Map<string, [string, string][]>()
   for (const { cssVar, result } of classified) {
-    if (result.kind !== 'mapped') continue
+    if (result.kind !== 'mapped' || covered.has(cssVar.name)) continue
     const list = byPackage.get(cssVar.pkg) ?? []
     list.push([cssVar.name, result.value])
     byPackage.set(cssVar.pkg, list)
@@ -102,7 +106,14 @@ export interface PackageReport {
 export function buildReport(
   classified: ClassifiedVar[],
   unparsed: string[],
-): { packages: Record<string, PackageReport>; totals: Omit<PackageReport, 'unmappedVars' | 'excludedVars'>; unparsed: string[] } {
+  covered: ReadonlyMap<string, string> = new Map(),
+): {
+  packages: Record<string, PackageReport>
+  totals: Omit<PackageReport, 'unmappedVars' | 'excludedVars'>
+  unparsed: string[]
+  /** Mapped longhand variables left out of base.css because they fall through to their shorthand variable. */
+  coveredByShorthand: Record<string, string>
+} {
   const packages: Record<string, PackageReport> = {}
   const totals = { total: 0, mapped: 0, unmapped: 0, excluded: 0, noDefault: 0 }
   for (const { cssVar, result } of classified) {
@@ -132,7 +143,7 @@ export function buildReport(
       report.unmappedVars.push(entry)
     }
   }
-  return { packages, totals, unparsed }
+  return { packages, totals, unparsed, coveredByShorthand: Object.fromEntries(covered) }
 }
 
 export async function formatCss(filePath: string, css: string): Promise<string> {

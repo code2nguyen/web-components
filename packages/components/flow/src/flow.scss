@@ -1,0 +1,756 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-flow,
+  $theme: (
+    height: 480px,
+
+    actions--align: flex-start,
+    actions--offset: 12px,
+    actions--gap: 4px,
+    actions--padding: 4px,
+    actions--background-color: #ffffff,
+    actions--border: 1px solid #e4e4e7,
+    actions--border-radius: 8px,
+    actions--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06),
+    background-color: #fafafa,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    font-family: null,
+
+    dot--color: #ebebed,
+    dot--size: 1px,
+    dot--gap: 20px,
+    dot--min-gap: 14px,
+    dot--max-gap: 32px,
+
+    rank--gap: 72px,
+    node--gap: 20px,
+
+    node--width: 200px,
+    node--padding-top: 10px,
+    node--padding-right: 12px,
+    node--padding-bottom: 10px,
+    node--padding-left: 12px,
+    node--background-color: #ffffff,
+    node--color: #18181b,
+    node--border: 1px solid #bcbcc6,
+    node--border-radius: 8px,
+    node--box-shadow: '0 1px 2px rgba(24, 24, 27, 0.06)',
+    node__hover--border-color: #a1a1aa,
+    node__selected--border-color: rgb(2, 101, 220),
+    node__selected--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
+    node__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    node__dragging--box-shadow: '0 10px 28px rgba(24, 24, 27, 0.14)',
+    node__skipped--opacity: 0.6,
+
+    label--font-size: 14px,
+    label--font-weight: 500,
+    description--font-size: 12px,
+    description--color: #71717a,
+
+    handle--size: 7px,
+    handle--background-color: #ffffff,
+    handle--border-color: #a1a1aa,
+
+    edge--color: #d4d4d8,
+    edge--width: 1.5px,
+    edge__done--color: #a1a1aa,
+    edge__active--color: rgb(2, 101, 220),
+    edge__failed--color: #dc2626,
+    edge__highlighted--width: 2.5px,
+    edge--animation-duration: 600ms,
+    arrow--size: 8px,
+    arrow--display: block,
+    edge-label--background-color: #ffffff,
+    edge-label--color: #71717a,
+    edge-label--font-size: 12px,
+    edge-label--font-weight: 500,
+    edge-label--padding: 1px 8px,
+    edge-label--border: 1px solid #e4e4e7,
+    edge-label--border-radius: 999px,
+    marker--display: inline-flex,
+
+    success--color: #16a34a,
+    error--color: #dc2626,
+    warning--color: #d97706,
+    running--color: rgb(2, 101, 220),
+    current--color: rgb(2, 101, 220),
+    pending--color: #a1a1aa,
+    skipped--color: #a1a1aa,
+
+    card--width: 300px,
+    card--padding: 14px,
+    card--background-color: #ffffff,
+    card--color: #18181b,
+    card--border: 1px solid #e4e4e7,
+    card--border-radius: 8px,
+    card--box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
+    card--font-size: 14px,
+    card--offset: 8px,
+    card__term--color: #71717a,
+    card--transition-duration: 150ms,
+
+    canvas__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    connector--size: 12px,
+    connector--background-color: rgb(2, 101, 220),
+    connector--border-color: #ffffff,
+    node__connect-target--border-color: rgb(2, 101, 220),
+    node__connect-target--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
+    edge__draft--color: rgb(2, 101, 220),
+    edge__selected--color: rgb(2, 101, 220),
+    edge__selected--width: 2.5px,
+    edge-hit--width: 12px,
+    editor--background-color: #ffffff,
+    editor--color: #18181b,
+    editor--border: 1px solid #bcbcc6,
+    editor--border-radius: 4px,
+    editor__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  height: css.cssVar(height);
+  font-family: css.cssVar(font-family);
+  // The canvas menu lists every view control at once; c2-menu's default height would scroll its last rows away.
+  --c2-menu--max-height: 480px;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// ---- actions toolbar: a strip over one edge of the canvas, outside the stage so it never pans or opens the menu -----
+
+.actions {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  pointer-events: none;
+  &[hidden] {
+    display: none;
+  }
+  // The strip spans its edge; the panel inside it sits at the start, centre or end of it.
+  justify-content: css.cssVar(actions--align);
+  slot {
+    display: flex;
+    flex-direction: inherit;
+    align-items: center;
+    gap: css.cssVar(actions--gap);
+    padding: css.cssVar(actions--padding);
+    border: css.cssVar(actions--border);
+    border-radius: css.cssVar(actions--border-radius);
+    background-color: css.cssVar(actions--background-color);
+    box-shadow: css.cssVar(actions--box-shadow);
+    pointer-events: auto;
+  }
+}
+.actions--top,
+.actions--bottom {
+  flex-direction: row;
+  inset-inline: css.cssVar(actions--offset);
+}
+.actions--top {
+  top: css.cssVar(actions--offset);
+}
+.actions--bottom {
+  bottom: css.cssVar(actions--offset);
+}
+.actions--left,
+.actions--right {
+  flex-direction: column;
+  inset-block: css.cssVar(actions--offset);
+}
+.actions--left {
+  left: css.cssVar(actions--offset);
+}
+.actions--right {
+  right: css.cssVar(actions--offset);
+}
+
+.stage {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  background-image: radial-gradient(circle, css.cssVar(dot--color) css.cssVar(dot--size), transparent calc(#{css.cssVar(dot--size)} + 0.2px));
+  // The grid follows the zoom, within bounds: zoomed far out it would turn into a texture, far in into sparse specks.
+  --_dot-gap: clamp(#{css.cssVar(dot--min-gap)}, calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1)), #{css.cssVar(dot--max-gap)});
+  background-size: var(--_dot-gap) var(--_dot-gap);
+  cursor: grab;
+  // Vertical swipes keep scrolling the page; horizontal ones pan the canvas.
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.stage.is-panning {
+  cursor: grabbing;
+}
+
+.viewport {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.edges {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.edge {
+  fill: none;
+  stroke: css.cssVar(edge--color);
+  stroke-width: css.cssVar(edge--width);
+  transition:
+    stroke 200ms,
+    opacity 200ms;
+}
+
+// The colour of an edge in a state, shared by its line (`.edge--<state>`) and its arrowhead (`.mark--<state>`). Each
+// state reads its documented variable directly; the selected and draft rules further down come later and win.
+@mixin edge-color($state, $name) {
+  .edge.edge--#{$state} {
+    stroke: css.cssVar($name);
+  }
+  .arrow.mark--#{$state} {
+    background-color: css.cssVar($name);
+  }
+}
+
+@include edge-color(done, edge__done--color);
+@include edge-color(active, edge__active--color);
+@include edge-color(failed, edge__failed--color);
+
+.edge.edge--active {
+  stroke-dasharray: 6 5;
+  animation: c2-flow-dash css.cssVar(edge--animation-duration) linear infinite;
+}
+
+.edge.edge--blocked {
+  stroke-dasharray: 2 4;
+}
+
+.edge.edge--back:not(.edge--active) {
+  stroke-dasharray: 5 4;
+}
+
+.edge.is-highlighted {
+  stroke-width: css.cssVar(edge__highlighted--width);
+}
+
+.edges.has-highlight .edge:not(.is-highlighted),
+.edge-marks.has-highlight > :not(.is-highlighted) {
+  opacity: 0.35;
+}
+
+// Arrowheads and labels: HTML in the scaled viewport, above the edges and below the nodes.
+.edge-marks {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.arrow {
+  display: css.cssVar(arrow--display);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  transform-origin: 0 0;
+  // Read by the inline transform: the tip touches the incoming handle of the target rather than hiding under it.
+  --_arrow-offset: calc(-100% - #{css.cssVar(handle--size)} / 2);
+  background-color: css.cssVar(edge--color);
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 22% 50%);
+  transition:
+    background-color 200ms,
+    opacity 200ms;
+}
+
+.edge-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: css.cssVar(edge-label--padding);
+  background-color: css.cssVar(edge-label--background-color);
+  color: css.cssVar(edge-label--color);
+  border: css.cssVar(edge-label--border);
+  border-radius: css.cssVar(edge-label--border-radius);
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+  line-height: 1.35;
+  transition: opacity 200ms;
+}
+
+@keyframes c2-flow-dash {
+  to {
+    stroke-dashoffset: -11;
+  }
+}
+
+.node {
+  --_cutout: #{css.cssVar(node--background-color)};
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: css.cssVar(node--width);
+  padding-top: css.cssVar(node--padding-top);
+  padding-right: css.cssVar(node--padding-right);
+  padding-bottom: css.cssVar(node--padding-bottom);
+  padding-left: css.cssVar(node--padding-left);
+  background-color: css.cssVar(node--background-color);
+  color: css.cssVar(node--color);
+  border: css.cssVar(node--border);
+  border-radius: css.cssVar(node--border-radius);
+  box-shadow: css.cssVar(node--box-shadow);
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.stage:not(.is-locked) .node {
+  cursor: grab;
+}
+
+.node:hover {
+  border-color: css.cssVar(node__hover--border-color);
+}
+
+.node:focus-visible {
+  outline: css.cssVar(node__focus--outline);
+  outline-offset: 2px;
+}
+
+.node.is-selected {
+  border-color: css.cssVar(node__selected--border-color);
+  box-shadow: css.cssVar(node__selected--box-shadow);
+}
+
+.node.is-dragging {
+  cursor: grabbing;
+  box-shadow: css.cssVar(node__dragging--box-shadow);
+  z-index: 1;
+}
+
+.node.status--skipped .body {
+  opacity: css.cssVar(node__skipped--opacity);
+}
+
+.node.status--running {
+  border-color: color-mix(in srgb, #{css.cssVar(running--color)} 55%, transparent);
+}
+
+.node.status--error {
+  border-color: color-mix(in srgb, #{css.cssVar(error--color)} 60%, transparent);
+}
+
+.node.is-selected.status--running,
+.node.is-selected.status--error {
+  border-color: css.cssVar(node__selected--border-color);
+}
+
+.handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: css.cssVar(handle--size);
+  height: css.cssVar(handle--size);
+  border-radius: 50%;
+  background-color: css.cssVar(handle--background-color);
+  border: 1.5px solid css.cssVar(handle--border-color);
+  pointer-events: none;
+}
+
+.direction--lr .handle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.direction--lr .handle--in {
+  left: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--lr .handle--out {
+  right: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--tb .handle {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.direction--tb .handle--in {
+  top: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--tb .handle--out {
+  bottom: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+
+.body {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.label,
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.label {
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+}
+
+.description,
+.meta {
+  font-size: css.cssVar(description--font-size);
+  color: css.cssVar(description--color);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.meta {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  flex: none;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.body > .status {
+  display: css.cssVar(marker--display);
+}
+
+.status svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cutout {
+  stroke: var(--_cutout);
+}
+.cutout-fill {
+  fill: var(--_cutout);
+}
+
+// The status marker of a node and the status line of its hover card (`.card-content.status--<status>`) take the
+// status colour.
+@each $status in (success, error, warning, running, current, pending, skipped) {
+  .status.status--#{$status},
+  .status--#{$status} .card-status {
+    color: css.cssVar(#{$status}--color);
+  }
+}
+
+.spin {
+  animation: c2-flow-spin 900ms linear infinite;
+  transform-origin: 8px 8px;
+}
+
+@keyframes c2-flow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Hover card: a manual popover in the top layer, placed next to the node by floating-ui.
+.card {
+  --_cutout: #{css.cssVar(card--background-color)};
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  box-sizing: border-box;
+  width: css.cssVar(card--width);
+  max-width: calc(100vw - 16px);
+  padding: css.cssVar(card--padding);
+  background-color: css.cssVar(card--background-color);
+  color: css.cssVar(card--color);
+  border: css.cssVar(card--border);
+  border-radius: css.cssVar(card--border-radius);
+  box-shadow: css.cssVar(card--box-shadow);
+  font-size: css.cssVar(card--font-size);
+  font-family: inherit;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity css.cssVar(card--transition-duration) animation.$standard-easing,
+    transform css.cssVar(card--transition-duration) animation.$standard-easing,
+    display css.cssVar(card--transition-duration) allow-discrete,
+    overlay css.cssVar(card--transition-duration) allow-discrete;
+}
+
+.card:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .card:popover-open {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.card-content {
+  display: grid;
+  gap: 10px;
+}
+
+.card-head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.card-head .text {
+  gap: 1px;
+}
+
+.card-status {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.card-details dt {
+  color: css.cssVar(card__term--color);
+}
+
+.card-details dd {
+  margin: 0;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+// Editing (`editable`)
+
+.stage:focus-visible {
+  outline: css.cssVar(canvas__focus--outline);
+  outline-offset: -2px;
+}
+
+.edge.is-selected {
+  stroke: css.cssVar(edge__selected--color);
+}
+.arrow.is-selected {
+  background-color: css.cssVar(edge__selected--color);
+}
+
+.edge.is-selected,
+.edges.has-highlight .edge.is-selected {
+  stroke-width: css.cssVar(edge__selected--width);
+  opacity: 1;
+}
+
+.edge-marks.has-highlight > .is-selected {
+  opacity: 1;
+}
+
+.edge-label.is-selected {
+  border-color: css.cssVar(edge__selected--color);
+}
+
+@include edge-color(draft, edge__draft--color);
+
+.edge.edge--draft,
+.edges.has-highlight .edge--draft {
+  opacity: 1;
+  stroke-width: css.cssVar(edge__highlighted--width);
+  stroke-dasharray: 6 5;
+}
+
+.edge-marks.has-highlight > .mark--draft {
+  opacity: 1;
+}
+
+// In an editable flow a label is part of its edge: a click selects the edge, a double-click edits the label.
+.stage.is-editable .edge-label {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: css.cssVar(edge-hit--width);
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.stage.is-connecting,
+.stage.is-connecting .node,
+.stage.is-connecting .edge-hit {
+  cursor: crosshair;
+}
+
+.node.is-connect-target {
+  border-color: css.cssVar(node__connect-target--border-color);
+  box-shadow: css.cssVar(node__connect-target--box-shadow);
+}
+
+.connector {
+  position: absolute;
+  box-sizing: border-box;
+  width: css.cssVar(connector--size);
+  height: css.cssVar(connector--size);
+  border-radius: 50%;
+  background-color: css.cssVar(connector--background-color);
+  border: 2px solid css.cssVar(connector--border-color);
+  cursor: crosshair;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+// A larger target than the dot itself.
+.connector::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+}
+
+.node:hover .connector,
+.node:focus-visible .connector,
+.node.is-selected .connector,
+.node.is-connect-source .connector {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.stage.is-connecting .node:not(.is-connect-source) .connector {
+  opacity: 0;
+}
+
+.direction--lr .connector {
+  top: 50%;
+  right: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+  transform: translateY(-50%);
+}
+
+.direction--tb .connector {
+  left: 50%;
+  bottom: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+  transform: translateX(-50%);
+}
+
+.label-editor {
+  box-sizing: border-box;
+  width: calc(100% + 8px);
+  min-width: 0;
+  margin: -2px -4px;
+  padding: 1px 3px;
+  font: inherit;
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+  color: css.cssVar(editor--color);
+  background-color: css.cssVar(editor--background-color);
+  border: css.cssVar(editor--border);
+  border-radius: css.cssVar(editor--border-radius);
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+.label-editor:focus-visible,
+.label-editor:focus {
+  outline: css.cssVar(editor__focus--outline);
+  outline-offset: 0;
+}
+
+// The editor of an edge's label, halfway along the edge.
+.label-editor--edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 140px;
+  margin: 0;
+  padding: 1px 8px;
+  text-align: center;
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+}
+
+// Over a node drawn by the application, the editor covers the whole body.
+.label-editor--overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 css.cssVar(node--padding-left);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .edge.edge--active {
+    animation: none;
+  }
+  .card {
+    transition: none;
+  }
+}

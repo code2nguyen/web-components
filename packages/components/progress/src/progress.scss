@@ -2,6 +2,7 @@
   $prefix: c2-progress,
   $theme: (
     height: 8px,
+    size: 64px,
     width: 100%,
     border-radius: 999px,
     track--background-color: #e4e4e7,
@@ -14,6 +15,8 @@
     value--color: #18181b,
     value--font-size: 14px,
     value--font-weight: 500,
+    ring-value--font-size: 16px,
+    indicator--stroke-linecap: round,
   )
 );
 
@@ -100,13 +103,103 @@
   }
 }
 
+// Circular: the same track and indicator drawn as two concentric circle strokes. The radius is set in CSS so the ring
+// follows `size` and `height` without a viewBox (which would scale the stroke with the ring).
+:host([variant='circular']) {
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+}
+
+.is-circular {
+  align-items: center;
+  text-align: center;
+
+  .c2-progress-track {
+    display: grid;
+    place-items: center;
+    overflow: visible;
+    width: css.cssVar(size);
+    height: css.cssVar(size);
+    border-radius: 0;
+    background: none;
+  }
+
+  .c2-progress-ring {
+    // Circumference of the stroke's centre line, the unit the arc's dash is measured in.
+    --_circumference: calc(3.14159 * (#{css.cssVar(size)} - #{css.cssVar(height)}));
+    grid-area: 1 / 1;
+    // Sized directly: a percentage would resolve against the auto grid row and fall back to SVG's 300×150.
+    width: css.cssVar(size);
+    height: css.cssVar(size);
+    overflow: visible;
+    // The arc starts at 12 o'clock rather than SVG's 3 o'clock.
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    cx: 50%;
+    cy: 50%;
+    r: calc(50% - #{css.cssVar(height)} / 2);
+    fill: none;
+    stroke-width: css.cssVar(height);
+  }
+
+  .c2-progress-ring-track {
+    stroke: css.cssVar(track--background-color);
+  }
+
+  .c2-progress-indicator {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    stroke: css.cssVar(indicator--background-color);
+    stroke-linecap: css.cssVar(indicator--stroke-linecap);
+    // Indeterminate: a quarter arc spinning round the ring.
+    stroke-dasharray: calc(var(--_circumference) * 0.25) var(--_circumference);
+    transform-origin: center;
+    animation: c2-progress-spin css.cssVar(animation-duration) linear infinite;
+  }
+
+  &.is-determinate .c2-progress-indicator {
+    stroke-dasharray: calc(var(--_circumference) * var(--_fraction, 0)) var(--_circumference);
+    animation: none;
+    transition: stroke-dasharray calc(#{css.cssVar(animation-duration)} / 2) cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  // A round cap would still draw a dot at 0%.
+  &.is-empty .c2-progress-indicator {
+    visibility: hidden;
+  }
+
+  .c2-progress-value {
+    grid-area: 1 / 1;
+    font-size: css.cssVar(ring-value--font-size);
+    line-height: 1;
+  }
+
+  .c2-progress-unit {
+    margin-inline-start: 0.05em;
+    font-size: 0.6em;
+    font-weight: 400;
+  }
+}
+
+@keyframes c2-progress-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // Reduced motion: the bar still sweeps so the wait reads as ongoing, just slowly and without the easing snap.
 @media (prefers-reduced-motion: reduce) {
   .c2-progress-indicator {
     animation-duration: 3s;
     animation-timing-function: linear;
   }
-  .is-determinate .c2-progress-indicator {
+  .is-determinate .c2-progress-indicator,
+  .is-circular.is-determinate .c2-progress-indicator {
     transition: none;
   }
 }

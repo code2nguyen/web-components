@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "0.0.19",
+  "version": "0.0.24",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -55,6 +55,10 @@
     "./controllers/virtual-scroll.js": {
       "types": "./dist/controllers/virtual-scroll.d.ts",
       "default": "./dist/controllers/virtual-scroll.js"
+    },
+    "./locale-helper.js": {
+      "types": "./dist/locale-helper.d.ts",
+      "default": "./dist/locale-helper.js"
     }
   },
   "files": [
