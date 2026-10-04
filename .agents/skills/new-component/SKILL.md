@@ -100,7 +100,7 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 ## Checklist to report
 
 - `packages/components/<name>/` (or `open-packages/<name>/`) scaffolded, implemented, built, `custom-elements.json` generated
-- the package stays private (`"private": true`): it ships only inside `@c2n/components`, whose `src/<name>.js` entry and `package.json` exports `npm run build:tools` regenerates; commit them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
+- the package stays private (`"private": true`): it ships only inside `@c2n/components`; `npm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
 - `npm run build:tools` run; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed

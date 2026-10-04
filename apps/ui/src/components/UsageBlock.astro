@@ -2,7 +2,7 @@
 import CodeBlock from './CodeBlock.astro'
 import SiteIconButton from './ui/SiteIconButton.astro'
 import type { CodeLanguage } from 'astro'
-import { importPathFor } from '../utils/import-path'
+import { importsFor } from '../utils/import-path'
 
 /**
  * Docs usage frame produced by a ```html tag=UsageBlock,package=… fence (see plugin/mdx-codeblock-remark.mjs).
@@ -26,9 +26,10 @@ interface Props {
 }
 
 const { code, lang, uid, style, package: pkg } = Astro.props
-// Only `@c2n/components` is published: a package it bundles is imported through its entry there, and a page documenting
-// one element of a multi-element package (a chart) through that element's own entry.
-const importPath = pkg?.startsWith('@c2n/') ? importPathFor(pkg, Astro.params.componentId) : pkg
+// Only `@c2n/components` is published: a package it bundles is imported through its entry there, a page documenting one
+// element of a multi-element package (a chart) through that element's own entry, and every other element the markup
+// uses (a chart's legend, an icon) through its own.
+const imports = pkg?.startsWith('@c2n/') ? importsFor(code, pkg, Astro.params.componentId) : pkg ? [pkg] : []
 ---
 
 <section class="usage" data-uid={uid}>
@@ -49,7 +50,7 @@ const importPath = pkg?.startsWith('@c2n/') ? importPathFor(pkg, Astro.params.co
       pkg && (
         <div class="usage__code-section">
           <span class="usage__code-label">Import</span>
-          <CodeBlock code={`import '${importPath}'`} lang="typescript" bare />
+          <CodeBlock code={imports.map((module) => `import '${module}'`).join('\n')} lang="typescript" bare />
         </div>
       )
     }
