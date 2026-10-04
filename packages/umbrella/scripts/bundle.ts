@@ -72,7 +72,14 @@ await build({
     target: 'es2022',
     lib: { entry: Object.fromEntries(entries.map((file) => [file.slice(0, -'.js'.length), join(srcDir, file)])), formats: ['es'] },
     rollupOptions: {
-      external: (id) => external.some((dependency) => id === dependency || id.startsWith(`${dependency}/`)),
+      external: (id) => {
+        // Lit's own packages are not dependencies, so they would be inlined, and resolved with the browser
+        // condition: `isServer` from `lit-html/is-server.js` became a literal `false` and broke server rendering.
+        if (/^(?:lit-html|lit-element|@lit\/reactive-element)(?:\/|$)/.test(id)) {
+          throw new Error(`a component imports ${id}: import it from 'lit' (or 'lit/…') so the bundle keeps it external`)
+        }
+        return external.some((dependency) => id === dependency || id.startsWith(`${dependency}/`))
+      },
       output: { entryFileNames: '[name].js', chunkFileNames: 'chunks/[name]-[hash].js' },
     },
   },
