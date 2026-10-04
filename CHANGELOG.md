@@ -3,6 +3,61 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.0](https://github.com/code2nguyen/web-components/releases/tag/v1.0.0) — 2026-10-04
+
+### Breaking changes
+
+- **components:** Export element subpaths without the .js extension ([5d06804](https://github.com/code2nguyen/web-components/commit/5d06804))
+- **components:** Publish @c2n/components as the only component package ([9490c75](https://github.com/code2nguyen/web-components/commit/9490c75))
+- **steps, chart, avatar:** No host writes on first render ([ff2b634](https://github.com/code2nguyen/web-components/commit/ff2b634))
+- **text-field:** Expose state as custom states instead of host classes ([6a0de84](https://github.com/code2nguyen/web-components/commit/6a0de84))
+- **table:** Name cell slots by display line and report rendered rows ([7a4ff4d](https://github.com/code2nguyen/web-components/commit/7a4ff4d))
+
+### Features
+
+- **working-indicator:** Add c2-working-indicator ([4d3d1d8](https://github.com/code2nguyen/web-components/commit/4d3d1d8))
+- **table:** Row-activate for keyboard and pointer, grid named from the host ([4e81bc8](https://github.com/code2nguyen/web-components/commit/4e81bc8))
+- **table:** Ship useRenderedRows for React and Vue ([63ee3aa](https://github.com/code2nguyen/web-components/commit/63ee3aa))
+- **core:** Raw-html helper for many-instance markup; check app CSS variables in CI ([2f0e3e9](https://github.com/code2nguyen/web-components/commit/2f0e3e9))
+- **table:** Row parts, cell wrapping, rendered-range event and keys for cell controls ([0a88c2b](https://github.com/code2nguyen/web-components/commit/0a88c2b))
+- **command:** Cap the whole palette with --c2-command--max-height ([7b4eec9](https://github.com/code2nguyen/web-components/commit/7b4eec9))
+- **theme:** Let a component shorthand variable work under base.css ([b9ff328](https://github.com/code2nguyen/web-components/commit/b9ff328))
+- **dashboard:** Named panel sizes stored with the layout ([3ba3c1c](https://github.com/code2nguyen/web-components/commit/3ba3c1c))
+- **kanban:** Render cards from items through renderItem ([b1d1707](https://github.com/code2nguyen/web-components/commit/b1d1707))
+- **kanban:** Add c2-kanban board ([6f72719](https://github.com/code2nguyen/web-components/commit/6f72719))
+- **log-lens:** Adopt the new c2n components across every view ([99d8d9f](https://github.com/code2nguyen/web-components/commit/99d8d9f))
+- **gantt:** Add @c2n/gantt, a read-only Gantt chart ([77eaf2d](https://github.com/code2nguyen/web-components/commit/77eaf2d))
+- **google-map:** Add @c2n/google-map with map, marker, route and street view ([d4da6a8](https://github.com/code2nguyen/web-components/commit/d4da6a8))
+- Add Log Lens, an OpenTelemetry log analyzer example in Next.js ([b0edf73](https://github.com/code2nguyen/web-components/commit/b0edf73))
+
+### Fixes
+
+- **code-viewer, page-editor:** A failed grammar warm-up no longer unloads the grammar ([81b4469](https://github.com/code2nguyen/web-components/commit/81b4469))
+- **code-viewer, page-editor:** Compile a grammar before shiki times its first line ([f88ebe1](https://github.com/code2nguyen/web-components/commit/f88ebe1))
+- **code-viewer, page-editor:** Fall back to the ES2018 regex target without the v flag ([34ef6f3](https://github.com/code2nguyen/web-components/commit/34ef6f3))
+- **code-viewer, page-editor:** Pin shiki's regex target so WebKit highlights code ([5bfd084](https://github.com/code2nguyen/web-components/commit/5bfd084))
+- **components:** Element-only subpaths and accurate README imports ([f1c3ce4](https://github.com/code2nguyen/web-components/commit/f1c3ce4))
+- **components:** Per-module subpaths, docs and READMEs on @c2n/components ([f2234bd](https://github.com/code2nguyen/web-components/commit/f2234bd))
+- **gantt:** Measure on the next frame to avoid a ResizeObserver loop ([dc87f3a](https://github.com/code2nguyen/web-components/commit/dc87f3a))
+- **page-editor:** Warn when a code grammar fails to load ([2076b20](https://github.com/code2nguyen/web-components/commit/2076b20))
+- **working-indicator:** Keep the label when space runs out ([987e7d1](https://github.com/code2nguyen/web-components/commit/987e7d1))
+- **theme:** Define shadow-sm and reject overrides naming an unknown token ([96854f3](https://github.com/code2nguyen/web-components/commit/96854f3))
+- **button:** Name the inner button from the host aria-label ([414af07](https://github.com/code2nguyen/web-components/commit/414af07))
+- **overlay, hover-card:** Reposition an open popup when its offset variables change ([d83d3ef](https://github.com/code2nguyen/web-components/commit/d83d3ef))
+- **chart:** Wire grid width, axis-line colour and sparkline tones; document mark variables only where drawn ([b1af6e1](https://github.com/code2nguyen/web-components/commit/b1af6e1))
+- **reorder-list:** Kebab-case drag-start-threshold and auto-scroll-disabled ([31cbe93](https://github.com/code2nguyen/web-components/commit/31cbe93))
+- **kanban:** Keep the dragged card under the pointer ([7809686](https://github.com/code2nguyen/web-components/commit/7809686))
+- **google-map:** Fixes found against the live Maps API ([46de2cb](https://github.com/code2nguyen/web-components/commit/46de2cb))
+
+### Docs site & examples
+
+- **ui:** Radio's import, icon and font notes, and grouped tags in the studio ([864fb39](https://github.com/code2nguyen/web-components/commit/864fb39))
+- **ui:** Icon class names in the studio, and theme/install wording cubic flagged ([7a26711](https://github.com/code2nguyen/web-components/commit/7a26711))
+- **ui:** Import every element a usage card shows, and keep the studio's import map small ([1deef67](https://github.com/code2nguyen/web-components/commit/1deef67))
+- **ui:** Point llms.txt chart pages at their own chart entry ([1809a21](https://github.com/code2nguyen/web-components/commit/1809a21))
+- **examples:** Import table and step types from their component entries ([c48b97c](https://github.com/code2nguyen/web-components/commit/c48b97c))
+- **examples:** Name Log Lens pattern-table cell slots by display line ([f92ee48](https://github.com/code2nguyen/web-components/commit/f92ee48))
+
 ## [0.0.24](https://github.com/code2nguyen/web-components/releases/tag/v0.0.24) — 2026-10-03
 
 ### Features
