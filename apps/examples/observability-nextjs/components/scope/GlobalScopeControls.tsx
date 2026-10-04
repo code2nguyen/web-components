@@ -1,9 +1,9 @@
 'use client'
 
-import type { ButtonGroup } from '@c2n/button-group'
-import type { DateInput } from '@c2n/date-input'
-import type { Select } from '@c2n/select'
-import type { ThemeSelect } from '@c2n/theme-select'
+import type { ButtonGroup } from '@c2n/components/button-group'
+import type { DateInput } from '@c2n/components/date-input'
+import type { Select } from '@c2n/components/select'
+import type { ThemeSelect } from '@c2n/components/theme-select'
 import { useEffect, useRef, useState } from 'react'
 import { useReplay } from '@/providers/ReplayProvider'
 import { ENVIRONMENT_IDS, RELATIVE_RANGES, useScope, type EnvironmentId, type RelativeRange } from '@/providers/ScopeProvider'

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import type { TableEventMap } from '@c2n/table'
-import type { TabsEventMap } from '@c2n/tabs'
+import type { TableEventMap } from '@c2n/components/table'
+import type { TabsEventMap } from '@c2n/components/tabs'
 import { C2_FORM_ACCESSORS } from '@c2n/angular'
-import { toast } from '@c2n/toast'
+import { toast } from '@c2n/components/toast'
 import { ORDERS, STATUS_TONE, type Order, type OrderStatus } from './orders'
 
 type Filter = 'all' | OrderStatus

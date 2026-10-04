@@ -27,7 +27,15 @@ test('every rendered c2 tag has one complete usage record and broad category cov
   assert.equal(registered.size, new Set(COMPONENT_USAGE.map(({ tag }) => tag)).size)
   assert.ok(rendered.size >= 25, `expected at least 25 rendered c2 elements, received ${rendered.size}`)
   const packages = new Set<string | undefined>([...rendered].map((tag) => registered.get(tag)?.packageName))
-  for (const expected of ['@c2n/header', '@c2n/select', '@c2n/table', '@c2n/chart', '@c2n/dashboard', '@c2n/status-panel']) assert.ok(packages.has(expected))
+  for (const expected of [
+    '@c2n/components/header',
+    '@c2n/components/select',
+    '@c2n/components/table',
+    '@c2n/components/chart',
+    '@c2n/components/dashboard',
+    '@c2n/components/status-panel',
+  ])
+    assert.ok(packages.has(expected))
 })
 
 test('component documentation and source links are canonical and bounded', () => {

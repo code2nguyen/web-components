@@ -1,6 +1,6 @@
 'use client'
 
-import type { SideNav } from '@c2n/side-nav'
+import type { SideNav } from '@c2n/components/side-nav'
 import Link from 'next/link'
 import { useRef, useState, type ReactNode } from 'react'
 import { GlobalScopeControls } from '@/components/scope/GlobalScopeControls'

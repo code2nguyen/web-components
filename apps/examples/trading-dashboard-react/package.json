@@ -12,14 +12,7 @@
     "type-check": {
       "dependencies": [
         "../../../packages/core:build",
-        "../../../packages/components/badge:build",
-        "../../../packages/components/button:build",
-        "../../../packages/components/card:build",
-        "../../../packages/components/list-item:build",
-        "../../../packages/components/select:build",
-        "../../../packages/components/switch:build",
-        "../../../packages/components/table:build",
-        "../../../packages/components/text-field:build",
+        "../../../packages/umbrella:build",
         "../../../packages/tools/theme:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
@@ -41,14 +34,7 @@
     }
   },
   "dependencies": {
-    "@c2n/badge": "*",
-    "@c2n/button": "*",
-    "@c2n/card": "*",
-    "@c2n/list-item": "*",
-    "@c2n/select": "*",
-    "@c2n/switch": "*",
-    "@c2n/table": "*",
-    "@c2n/text-field": "*",
+    "@c2n/components": "*",
     "@c2n/theme": "*",
     "react": "19.3.0",
     "react-dom": "19.3.0"

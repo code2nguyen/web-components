@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Table } from '@c2n/table'
-import type { Select } from '@c2n/select'
-import type { TextField } from '@c2n/text-field'
-import type { Switch } from '@c2n/switch'
+import type { Table } from '@c2n/components/table'
+import type { Select } from '@c2n/components/select'
+import type { TextField } from '@c2n/components/text-field'
+import type { Switch } from '@c2n/components/switch'
 import { useCustomEvent } from './hooks/useCustomEvent'
 import { SECTORS, changePct, initialPositions, marketValue, tick, type Position } from './data/positions'
 

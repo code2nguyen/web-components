@@ -1,6 +1,6 @@
 'use client'
 
-import type { Dashboard } from '@c2n/dashboard'
+import type { Dashboard } from '@c2n/components/dashboard'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'

@@ -13,19 +13,7 @@
     "type-check": {
       "dependencies": [
         "../../../packages/core:build",
-        "../../../packages/components/avatar:build",
-        "../../../packages/components/badge:build",
-        "../../../packages/components/button:build",
-        "../../../packages/components/chat-message:build",
-        "../../../packages/components/icon-button:build",
-        "../../../packages/components/list:build",
-        "../../../packages/components/list-item:build",
-        "../../../packages/components/select:build",
-        "../../../packages/components/sheet:build",
-        "../../../packages/components/text-field:build",
-        "../../../packages/components/textarea:build",
-        "../../../packages/components/toast:build",
-        "../../../packages/components/tooltip:build",
+        "../../../packages/umbrella:build",
         "../../../packages/icons/feather-icons:build",
         "../../../packages/tools/theme:build"
       ],
@@ -48,21 +36,9 @@
     }
   },
   "dependencies": {
-    "@c2n/avatar": "*",
-    "@c2n/badge": "*",
-    "@c2n/button": "*",
-    "@c2n/chat-message": "*",
+    "@c2n/components": "*",
     "@c2n/feather-icons": "*",
-    "@c2n/icon-button": "*",
-    "@c2n/list": "*",
-    "@c2n/list-item": "*",
-    "@c2n/select": "*",
-    "@c2n/sheet": "*",
-    "@c2n/text-field": "*",
-    "@c2n/textarea": "*",
     "@c2n/theme": "*",
-    "@c2n/toast": "*",
-    "@c2n/tooltip": "*",
     "vue": "3.5.42"
   },
   "devDependencies": {

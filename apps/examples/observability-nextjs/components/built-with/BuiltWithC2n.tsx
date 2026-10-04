@@ -1,7 +1,7 @@
 'use client'
 
-import type { Select } from '@c2n/select'
-import type { Sheet } from '@c2n/sheet'
+import type { Select } from '@c2n/components/select'
+import type { Sheet } from '@c2n/components/sheet'
 import { usePathname } from 'next/navigation'
 import { useMemo, useRef, useState } from 'react'
 import { useElementProperties } from '../c2n/element-bindings'
