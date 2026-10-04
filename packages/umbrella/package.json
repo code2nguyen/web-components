@@ -189,6 +189,10 @@
       "types": "./lib/icon-button.d.ts",
       "default": "./lib/icon-button.js"
     },
+    "./kanban": {
+      "types": "./lib/kanban.d.ts",
+      "default": "./lib/kanban.js"
+    },
     "./kbd": {
       "types": "./lib/kbd.d.ts",
       "default": "./lib/kbd.js"
@@ -468,6 +472,7 @@
     "@c2n/header": "0.0.24",
     "@c2n/hover-card": "0.0.24",
     "@c2n/icon-button": "0.0.24",
+    "@c2n/kanban": "0.0.24",
     "@c2n/kbd": "0.0.24",
     "@c2n/label": "0.0.24",
     "@c2n/link-button": "0.0.24",

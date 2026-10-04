@@ -1,0 +1,130 @@
+---
+description: 'Task, support and hiring boards styled through the column and card variables.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Kanban } from '@c2n/kanban'
+
+## Presets
+
+These boards use the default card renderer, so their whole look comes from variables: `--c2-kanban-column__card--*`
+for the card box, the other `--c2-kanban-column__*` variables for the column, its header and the drop gap. Set them on
+the board to reach every column. Give the board a `renderItem` for richer card content.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-kanban
+  client:only="lit"
+  editable
+  aria-label="Tasks"
+  items='[{"id":"1","column":"todo","title":"Write the release notes"},{"id":"2","column":"todo","title":"Update the screenshots"},{"id":"3","column":"done","title":"Fix the build"}]'
+>
+  <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+  <c2-kanban-column column-id="done" label="Done"></c2-kanban-column>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Sprint board
+<style>
+  .sprint-board {
+    --c2-kanban--gap: 10px;
+    --c2-kanban-column--width: 200px;
+    --c2-kanban-column__card--font-size: 13px;
+    --c2-kanban-column__description--font-size: 11px;
+  }
+  .sprint-board .sprint-add {
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 13px;
+  }
+</style>
+<c2-kanban
+  client:only="lit"
+  class="sprint-board"
+  editable
+  aria-label="Sprint 42"
+  items='[{"id":"C2-118","column":"todo","title":"Empty state for search","description":"C2-118 · feature"},{"id":"C2-109","column":"doing","title":"Tree drag handles","description":"C2-109 · feature"},{"id":"C2-104","column":"doing","title":"Toast stacking order","description":"C2-104 · bug"}]'
+>
+  <c2-kanban-column column-id="todo" label="To do"><span slot="footer" class="sprint-add">+ Add card</span></c2-kanban-column>
+  <c2-kanban-column column-id="doing" label="In progress" limit="1"></c2-kanban-column>
+  <c2-kanban-column column-id="review" label="In review"></c2-kanban-column>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Support triage
+<style>
+  .triage-board {
+    --c2-kanban-column--width: 190px;
+    --c2-kanban-column--background-color: transparent;
+    --c2-kanban-column--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kanban-column--border-radius: 14px;
+    --c2-kanban-column__cards--gap: 6px;
+    --c2-kanban-column__card--border: none;
+    --c2-kanban-column__card--border-radius: 4px;
+    --c2-kanban-column__card--padding: 8px 10px;
+    --c2-kanban-column__card--font-size: 13px;
+    --c2-kanban-column__card--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kanban-column__card__dragging--transform: none;
+    --c2-kanban-column__placeholder--border: 2px dashed #0f766e;
+    --c2-kanban-column__placeholder--background-color: rgba(15, 118, 110, 0.08);
+    --c2-kanban-column__target--border-color: #0f766e;
+    --c2-kanban-column__target--background-color: rgba(15, 118, 110, 0.06);
+  }
+</style>
+<c2-kanban
+  client:only="lit"
+  class="triage-board"
+  editable
+  aria-label="Support inbox"
+  items='[{"id":"T-1","column":"new","title":"Checkout returns 500","description":"Acme · 4 min"},{"id":"T-2","column":"new","title":"Invoice missing VAT","description":"Globex · 1 h"},{"id":"T-3","column":"new","title":"Change billing email","description":"Initech · 3 h"},{"id":"T-4","column":"waiting","title":"Export to CSV","description":"Umbrella · 1 d"}]'
+>
+  <c2-kanban-column column-id="new" label="New" limit="2"></c2-kanban-column>
+  <c2-kanban-column column-id="waiting" label="Waiting on customer"></c2-kanban-column>
+  <c2-kanban-column column-id="solved" label="Solved"><span slot="empty">Solve a ticket to see it here</span></c2-kanban-column>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Hiring pipeline
+<style>
+  .hiring-board {
+    --c2-kanban--scroll-snap-type: x mandatory;
+    --c2-kanban-column--width: 180px;
+    --c2-kanban-column--max-height: 260px;
+    --c2-kanban-column__cards--overflow-y: auto;
+    --c2-kanban-column--background-color: #f5f3ff;
+    --c2-kanban-column__target--border-color: #7c3aed;
+    --c2-kanban-column__target--background-color: #ede9fe;
+    --c2-kanban-column__label--color: #4c1d95;
+    --c2-kanban-column__count--color: #5b21b6;
+    --c2-kanban-column__card--border: none;
+    --c2-kanban-column__card--background-color: #ffffff;
+    --c2-kanban-column__card--color: #2e1065;
+    --c2-kanban-column__card--font-size: 13px;
+    --c2-kanban-column__card--padding: 8px 10px;
+    --c2-kanban-column__card--box-shadow: 0 1px 2px rgba(76, 29, 149, 0.12);
+    --c2-kanban-column__description--color: #6d28d9;
+    --c2-kanban-column__card__focus--outline: 2px solid rgba(124, 58, 237, 0.5);
+    --c2-kanban-column__placeholder--border: 2px dashed #7c3aed;
+    --c2-kanban-column__placeholder--background-color: rgba(124, 58, 237, 0.08);
+    --c2-kanban-column__empty--background-color: #ffffff;
+    --c2-kanban-column__empty--color: #6d28d9;
+  }
+</style>
+<c2-kanban
+  client:only="lit"
+  class="hiring-board"
+  editable
+  aria-label="Frontend engineer pipeline"
+  items='[{"id":"1","column":"applied","title":"Amara Kofi","description":"Lagos · referral"},{"id":"2","column":"applied","title":"Jonas Lind","description":"Malmö"},{"id":"3","column":"applied","title":"Priya Shah","description":"Pune"},{"id":"4","column":"applied","title":"Tomás Mora","description":"Valencia"},{"id":"5","column":"applied","title":"Yuki Tanaka","description":"Osaka"},{"id":"6","column":"interview","title":"Léa Bernard","description":"Lyon · onsite Tue"}]'
+>
+  <c2-kanban-column column-id="applied" label="Applied"></c2-kanban-column>
+  <c2-kanban-column column-id="interview" label="Interview"></c2-kanban-column>
+  <c2-kanban-column column-id="offer" label="Offer"></c2-kanban-column>
+</c2-kanban>
+```
+
+</GalleryGrid>

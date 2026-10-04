@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-kanban</title>
+    <script type="module" src="/src/kanban.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+        color: #18181b;
+        display: grid;
+        gap: 32px;
+      }
+      .scrolling {
+        --c2-kanban-column--max-height: 220px;
+        --c2-kanban-column__cards--overflow-y: auto;
+      }
+      pre {
+        background: #fafafa;
+        padding: 12px;
+        min-height: 40px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Editable, default cards, footer and limit</h2>
+    <c2-kanban id="board" editable aria-label="Sprint 42">
+      <c2-kanban-column column-id="todo" label="To do">
+        <button slot="footer" type="button">+ Add card</button>
+      </c2-kanban-column>
+      <c2-kanban-column column-id="doing" label="In progress" limit="2"></c2-kanban-column>
+      <c2-kanban-column column-id="review" label="In review"></c2-kanban-column>
+      <c2-kanban-column column-id="done" label="Done"><span slot="empty">Nothing shipped yet</span></c2-kanban-column>
+    </c2-kanban>
+    <pre id="log"></pre>
+
+    <h2>renderItem, header slot, scrolling columns</h2>
+    <c2-kanban id="custom" class="scrolling" editable aria-label="Backlog">
+      <c2-kanban-column column-id="backlog" label="Backlog"><strong slot="header">Backlog · this quarter</strong></c2-kanban-column>
+      <c2-kanban-column column-id="next" label="Next"></c2-kanban-column>
+    </c2-kanban>
+
+    <script type="module">
+      import { html } from 'lit'
+
+      const board = document.getElementById('board')
+      board.items = [
+        { id: 'C2-118', column: 'todo', title: 'Empty state for search', description: 'C2-118' },
+        { id: 'C2-121', column: 'todo', title: 'Date input loses focus', description: 'C2-121' },
+        { id: 'C2-109', column: 'doing', title: 'Tree drag handles' },
+        { id: 'C2-104', column: 'doing', title: 'Toast stacking order' },
+        { id: 'C2-112', column: 'doing', title: 'Chart tooltip on focus' },
+      ]
+      board.addEventListener('card-move', (event) => {
+        const { items, item, ...detail } = event.detail
+        document.getElementById('log').textContent = JSON.stringify(detail)
+      })
+
+      const custom = document.getElementById('custom')
+      custom.items = Array.from({ length: 8 }, (_, index) => ({
+        id: String(index),
+        column: index < 6 ? 'backlog' : 'next',
+        title: `Task ${index + 1}`,
+        points: (index % 3) + 1,
+      }))
+      custom.renderItem = ({ item, index }) =>
+        html`<div style="display:flex;justify-content:space-between">
+          <span>${item.title}</span><span style="opacity:0.6">#${index + 1} · ${item.points} pt <a href="#">open</a></span>
+        </div>`
+    </script>
+  </body>
+</html>

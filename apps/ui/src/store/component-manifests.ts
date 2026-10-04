@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import kanban from '@c2n/kanban/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
@@ -100,6 +101,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    kanban,
     gantt,
     workingIndicator,
     pageEditor,

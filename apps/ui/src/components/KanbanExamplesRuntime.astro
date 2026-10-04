@@ -1,0 +1,56 @@
+---
+/** Enhances kanban examples whose property-only API (`renderItem`) cannot be expressed as an HTML attribute. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Kanban, KanbanItem } from '@c2n/kanban'
+  import '@c2n/kanban'
+  import '@c2n/avatar'
+  import '@c2n/badge'
+
+  interface Task extends KanbanItem {
+    id: string
+    title: string
+    type: 'bug' | 'feature' | 'docs'
+    owner: string
+    points: number
+  }
+
+  const tones = { bug: 'danger', feature: 'primary', docs: 'success' } as const
+
+  const initialized = new WeakSet<Kanban>()
+
+  function setupSprint(board: Kanban) {
+    board.renderItem = ({ item }) => {
+      const task = item as Task
+      return html`
+        <div style="display:grid;gap:8px">
+          <span>${task.title}</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <c2-badge tone=${tones[task.type]}>${task.type}</c2-badge>
+            <span style="font-size:12px;opacity:0.7">${task.id} · ${task.points} pt</span>
+            <c2-avatar name=${task.owner} auto-color style="--c2-avatar--size:22px;margin-left:auto" aria-hidden="true"></c2-avatar>
+          </span>
+        </div>
+      `
+    }
+    const status = board.parentElement?.querySelector<HTMLElement>('[data-kanban-status]')
+    board.addEventListener('card-move', ({ detail }) => {
+      if (status) status.textContent = `card-move: ${detail.key} ${detail.fromColumn} → ${detail.toColumn} (position ${detail.toIndex + 1})`
+    })
+  }
+
+  function setup() {
+    document.querySelectorAll<Kanban>('c2-kanban[data-kanban-example]').forEach((board) => {
+      if (initialized.has(board)) return
+      initialized.add(board)
+      if (board.dataset.kanbanExample === 'sprint') setupSprint(board)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

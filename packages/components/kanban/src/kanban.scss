@@ -1,0 +1,35 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-kanban,
+  $theme: (
+    gap: 12px,
+    padding: 4px,
+    scroll-snap-type: none,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.board {
+  display: flex;
+  align-items: stretch;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  overflow-x: auto;
+  scroll-snap-type: css.cssVar(scroll-snap-type);
+  box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  kanban: `<c2-kanban editable aria-label="Sprint board" style="--c2-kanban--gap:6px;--c2-kanban-column--width:116px;--c2-kanban-column--padding:5px;--c2-kanban-column--gap:5px;--c2-kanban-column__cards--gap:5px;--c2-kanban-column__card--padding:6px 8px;--c2-kanban-column__card--font-size:11px;--c2-kanban-column__label--font-size:12px;--c2-kanban-column__count--font-size:11px;--c2-kanban-column__empty--padding:8px 4px;--c2-kanban-column__empty--font-size:12px" items='[{"id":"1","column":"todo","title":"Search empty state"},{"id":"2","column":"todo","title":"Date input focus"},{"id":"3","column":"doing","title":"Tree drag handles"}]'><c2-kanban-column column-id="todo" label="To do"></c2-kanban-column><c2-kanban-column column-id="doing" label="Doing" limit="1"></c2-kanban-column></c2-kanban>`,
   gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
   <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
   <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
