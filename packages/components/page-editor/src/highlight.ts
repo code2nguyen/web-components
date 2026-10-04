@@ -49,24 +49,17 @@ async function loadLanguage(language: string): Promise<boolean> {
   ])
   if (!(language in bundledLanguages)) return false
   corePromise ??= createHighlighterCore({
-    // An explicit target: `auto` misreads JavaScriptCore's regex support (Safari, WebKit), and the grammars then match
-    // nothing. ES2024 (the `v` flag) where the engine has it, ES2018 (the `u` flag) on an older one.
-    engine: createJavaScriptRegexEngine({ forgiving: false, target: regexTarget() }),
+    engine: createJavaScriptRegexEngine({ forgiving: true }),
     themes: [createCssVariablesTheme({ name: THEME, variablePrefix: '--_tok-', variableDefaults: {}, fontStyle: true })],
     langs: [],
   })
   core = await corePromise
   await core.loadLanguage(bundledLanguages[language as keyof typeof bundledLanguages])
+  // Compile the grammar's root patterns now, with no time limit. Shiki gives each line 500 ms and returns the rest of a
+  // line that overruns as one uncoloured token, which `tokenize` would then cache; the first line also pays for this
+  // compilation, which on a busy WebKit can take longer than that.
+  core.getLanguage(language).tokenizeLine('a', null, 0)
   return true
-}
-
-function regexTarget(): 'ES2024' | 'ES2018' {
-  try {
-    new RegExp('', 'v')
-    return 'ES2024'
-  } catch {
-    return 'ES2018'
-  }
 }
 
 /** Loads a grammar once; resolves to whether it can be used. */
@@ -101,14 +94,6 @@ function tokenize(text: string, language: string): Span[] {
   const spans: Span[] = []
   try {
     const { tokens } = core!.codeToTokens(text, { lang: language, theme: THEME })
-    console.log('[probe:pe]', JSON.stringify({ language, line0: tokens[0]?.map((x) => [x.content, x.color]) }))
-    {
-      const ex = core!.codeToTokens(text, { lang: language, theme: THEME, includeExplanation: true })
-      console.log('[probe:pe-explain]', JSON.stringify(ex.tokens[0]?.map((x) => [x.content, (x.explanation ?? []).map((e) => [e.content, e.scopes.map((sc) => sc.scopeName).join(' > ')])])).slice(0, 2500))
-      const th = core!.getTheme(THEME) as unknown as { settings?: unknown[]; colors?: unknown; name?: string; fg?: string }
-      console.log('[probe:pe-theme]', JSON.stringify({ name: th.name, fg: th.fg, n: th.settings?.length, first: th.settings?.slice(0, 6) }).slice(0, 2500))
-      console.log('[probe:pe-loaded]', JSON.stringify({ langs: core!.getLoadedLanguages(), themes: core!.getLoadedThemes() }))
-    }
     for (const line of tokens) {
       for (const token of line) {
         if (!token.content.trim()) continue
@@ -120,8 +105,7 @@ function tokenize(text: string, language: string): Span[] {
         if (styles.length) spans.push({ from: token.offset, to: token.offset + token.content.length, style: styles.join('; ') })
       }
     }
-  } catch (e) {
-    console.log('[probe:pe-throw]', String((e as Error)?.stack ?? e).slice(0, 1500))
+  } catch {
     // A grammar that fails on this text leaves it plain.
   }
   cache.set(key, spans)
