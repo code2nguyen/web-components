@@ -41,8 +41,8 @@ import { Kbd } from '@c2n/components/kbd'
     --c2-command-item--border-top-right-radius: 10px;
     --c2-command-item--border-bottom-left-radius: 10px;
     --c2-command-item--border-bottom-right-radius: 10px;
-    --c2-command-item__active--background: #eef4fd;
-    --c2-command-item__active--color: rgb(2, 101, 220);
+    --c2-command-item__active--background: color-mix(in srgb, #0c62e2 7%, var(--c2-theme--color-surface, #ffffff));
+    --c2-command-item__active--color: color-mix(in srgb, #008eff 65%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-command class="floating" placeholder="Search or jump to…" client:only="lit"><c2-command-item value="new">New document<c2-kbd slot="shortcut">⌘N</c2-kbd></c2-command-item><c2-command-item value="open">Open recent<c2-kbd slot="shortcut">⌘O</c2-kbd></c2-command-item><c2-command-item value="share">Share<c2-kbd slot="shortcut">⌘⇧S</c2-kbd></c2-command-item><span slot="footer">↑↓ navigate · ↵ select · esc close</span></c2-command>

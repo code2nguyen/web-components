@@ -27,14 +27,14 @@ Importing `@c2n/components/radio` registers both `c2-radio-group` and `c2-radio`
     width: 280px;
     max-width: 100%;
     --c2-radio-group--align-items: stretch;
-    --c2-radio__container--border: 1px solid #d4d4d8;
+    --c2-radio__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-radio__container--padding-top: 10px;
     --c2-radio__container--padding-right: 14px;
     --c2-radio__container--padding-bottom: 10px;
     --c2-radio__container--padding-left: 8px;
-    --c2-radio__container__hover--background: #fafafa;
-    --c2-radio__container__checked--border: 1px solid #0265dc;
-    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__container__hover--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-radio__container__checked--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+    --c2-radio__container__checked--background: var(--c2-theme--color-primary-container, #edf1fe);
     --c2-radio__state-layer--size: 24px;
     --c2-radio__label--font-weight: 500;
   }
@@ -50,15 +50,15 @@ Importing `@c2n/components/radio` registers both `c2-radio-group` and `c2-radio`
     --c2-radio__container--padding-bottom: 6px;
     --c2-radio__container--padding-left: 12px;
     --c2-radio__container--border-radius: 6px;
-    --c2-radio__container__hover--background: #f4f4f5;
-    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__container__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-radio__container__checked--background: var(--c2-theme--color-primary-container, #edf1fe);
     --c2-radio__control--border: none;
     --c2-radio__control__hover--border: none;
     --c2-radio__state-layer--size: 20px;
     --c2-radio__icon--size: 16px;
-    --c2-radio__icon__checked--color: #0265dc;
+    --c2-radio__icon__checked--color: var(--c2-theme--color-primary, #0265dc);
     --c2-radio__label--font-size: 14px;
-    --c2-radio__label__checked--color: #0265dc;
+    --c2-radio__label__checked--color: var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <div data-label="Group">

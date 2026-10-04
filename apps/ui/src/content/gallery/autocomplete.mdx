@@ -121,9 +121,9 @@ These examples exercise different capabilities instead of repeating the same dat
     --c2-autocomplete--border-radius: 12px;
     --c2-autocomplete__focus--border: 1px solid #d97706;
     --c2-autocomplete__focus--outline: 3px solid rgba(245, 158, 11, 0.2);
-    --c2-autocomplete__highlight--color: #b45309;
-    --c2-autocomplete__option__active--background: #fffbeb;
-    --c2-autocomplete__header--background: #fffbeb;
+    --c2-autocomplete__highlight--color: color-mix(in srgb, #ff7300 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-autocomplete__option__active--background: color-mix(in srgb, #ffcd05 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-autocomplete__header--background: color-mix(in srgb, #ffcd05 8%, var(--c2-theme--color-surface, #ffffff));
   }
   .catalog-header {
     display: flex;
@@ -166,8 +166,8 @@ These examples exercise different capabilities instead of repeating the same dat
   .command-launcher {
     width: 100%;
     --c2-autocomplete--border-radius: 999px;
-    --c2-autocomplete__option__active--background: #eef2ff;
-    --c2-autocomplete__option__active--color: #312e81;
+    --c2-autocomplete__option__active--background: color-mix(in srgb, #0c45ff 7%, var(--c2-theme--color-surface, #ffffff));
+    --c2-autocomplete__option__active--color: color-mix(in srgb, #4a44e7 50%, var(--c2-theme--color-on-surface, #18181b));
     --c2-autocomplete__panel--box-shadow: 0 24px 70px rgba(30, 41, 59, 0.2);
   }
   .command-header {

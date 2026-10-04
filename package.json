@@ -46,7 +46,8 @@
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
     "test:style-contracts": "playwright test tests/style-contracts",
     "verify:style-contracts": "node scripts/verify-style-contracts.mjs",
-    "check:bundle-size": "npm run size -w packages/umbrella"
+    "check:bundle-size": "npm run size -w packages/umbrella",
+    "check:example-theme": "node packages/tools/mcp/scripts/theme-examples.ts --check"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

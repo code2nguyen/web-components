@@ -29,7 +29,7 @@ import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
     width: 320px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__container--border: 1px solid #bbf7d0;
+    --c2-toast__container--border: 1px solid color-mix(in srgb, #03e151 27%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-toast class="success" variant="success" heading="Payment received" message="Your receipt is ready to download."></c2-toast>
@@ -60,9 +60,9 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
   .celebration {
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__container--border: 1px solid #e9d5ff;
+    --c2-toast__container--border: 1px solid color-mix(in srgb, #7e08ff 17%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--color: color-mix(in srgb, #9333ea 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__icon--color: #9333ea;
+    --c2-toast__icon--color: color-mix(in srgb, #d542ff 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__icon--size: 26px;
   }
 </style>
@@ -91,9 +91,9 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
   .download {
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__container--border: 1px solid #bfdbfe;
+    --c2-toast__container--border: 1px solid color-mix(in srgb, #0975fb 26%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--color: color-mix(in srgb, #2563eb 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__icon--color: #2563eb;
+    --c2-toast__icon--color: color-mix(in srgb, #2c8bff 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__icon--size: 28px;
     --c2-toast__action--color: color-mix(in srgb, #2563eb 75%, var(--c2-theme--color-on-surface, #18181b));
   }
@@ -107,11 +107,11 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .offline {
     width: 340px;
-    --c2-toast__container--background: #fffbeb;
+    --c2-toast__container--background: color-mix(in srgb, #ffcd05 8%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #fde68a;
-    --c2-toast__container--color: #78350f;
-    --c2-toast__icon__warning--color: #b45309;
-    --c2-toast__action--color: #92400e;
+    --c2-toast__container--color: color-mix(in srgb, #d85203 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__icon__warning--color: color-mix(in srgb, #ff7300 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__action--color: color-mix(in srgb, #fe6302 53%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-toast class="offline" variant="warning" heading="You are offline" message="Your changes will sync when you reconnect." action-label="Try again">
@@ -123,12 +123,12 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .security {
     width: 340px;
-    --c2-toast__container--background: #f0fdfa;
+    --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #99f6e4;
-    --c2-toast__container--color: #134e4a;
-    --c2-toast__icon--color: #0f766e;
-    --c2-toast__close--color: #0f766e;
-    --c2-toast__close__hover--background: #ccfbf1;
+    --c2-toast__container--color: color-mix(in srgb, #0e8479 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__icon--color: color-mix(in srgb, #06d4c1 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__close--color: color-mix(in srgb, #06d4c1 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__close__hover--background: color-mix(in srgb, #00ebb9 20%, var(--c2-theme--color-surface, #ffffff));
   }
   .close-icon { --c2-feather-icon--size: 20px; }
 </style>
@@ -161,14 +161,14 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 <style>
   .editorial {
     width: 340px;
-    --c2-toast__container--background: #fff7ed;
-    --c2-toast__container--color: #7c2d12;
+    --c2-toast__container--background: color-mix(in srgb, #ff9b1e 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-toast__container--color: color-mix(in srgb, #e04209 50%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__container--border: 1px solid #fed7aa;
     --c2-toast__container--border-radius: 2px;
     --c2-toast__container--box-shadow: none;
     --c2-toast__container--padding: 18px 20px;
-    --c2-toast__close--color: #9a3412;
-    --c2-toast__close__hover--background: #ffedd5;
+    --c2-toast__close--color: color-mix(in srgb, #fc490b 57%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__close__hover--background: color-mix(in srgb, #ff9508 17%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-toast class="editorial" no-icon dismissible heading="A quick reminder" message="Your free trial ends in three days."></c2-toast>
@@ -195,8 +195,8 @@ These cards show static remaining-time previews. The manager animates the bar fr
 <style>
   .countdown {
     width: 340px;
-    --c2-toast__progress--color: #15803d;
-    --c2-toast__progress--background: #dcfce7;
+    --c2-toast__progress--color: color-mix(in srgb, #12e85f 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-toast__progress--background: color-mix(in srgb, #05ea54 14%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-toast class="countdown" variant="success" heading="Changes saved" message="This notification will close shortly." show-progress progress="0.65"></c2-toast>

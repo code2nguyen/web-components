@@ -57,8 +57,8 @@ headings, lists and code, styled by the page's own CSS.
     --c2-timeline-item__timestamp__split--width: 112px;
     --c2-timeline-item__marker--size: 12px;
     --c2-timeline-item__marker--border: 2px solid var(--c2-theme--color-outline, #d4d4d8);
-    --c2-timeline-item__marker__primary--border-color: #0265dc;
-    --c2-timeline-item__marker__danger--border-color: #dc2626;
+    --c2-timeline-item__marker__primary--border-color: var(--c2-theme--color-primary, #0265dc);
+    --c2-timeline-item__marker__danger--border-color: var(--c2-theme--color-error, #dc2626);
     --c2-timeline-item__connector--width: 1px;
     --c2-timeline-item__label--line-height: 28px;
     --c2-timeline-item__timestamp--font-size: 13px;
@@ -160,7 +160,7 @@ headings, lists and code, styled by the page's own CSS.
     gap: 4px;
     margin: 0 0 16px;
     padding: 16px 18px;
-    border: 1px solid #dbe4ff;
+    border: 1px solid color-mix(in srgb, #0f4bff 15%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 10px;
     background: linear-gradient(135deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)));
     font-size: 13px;
@@ -173,7 +173,7 @@ headings, lists and code, styled by the page's own CSS.
   .release-timeline .migration {
     margin: 0 0 16px;
     padding: 14px 16px;
-    border: 1px solid #fecaca;
+    border: 1px solid color-mix(in srgb, #fa0303 21%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 10px;
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     font-size: 13px;

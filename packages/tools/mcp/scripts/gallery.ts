@@ -127,17 +127,78 @@ function mixNeutral([r, g, b]: [number, number, number, number]): string {
 
 const COLOR = /#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi
 
+const INK_RGB = [24, 24, 27]
+/** The literal colours of a value; one that already reads a variable or a `color-mix()` has been themed. */
+const literalColors = (value: string) => (value.includes('var(') || value.includes('color-mix(') ? [] : [...value.matchAll(COLOR)].map((match) => match[0]))
+const hex = (channels: number[]) =>
+  `#${channels
+    .map((channel) =>
+      Math.round(Math.min(255, Math.max(0, channel)))
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`
+const lightness = ([r, g, b]: [number, number, number, number]) => (Math.max(r, g, b) + Math.min(r, g, b)) / 2 / 255
+
+/** HSL saturation: a pale blue (`#eff6ff`) is fully saturated even though its channels are only 16 apart. */
+function saturation([r, g, b]: [number, number, number, number]): number {
+  const max = Math.max(r, g, b) / 255
+  const min = Math.min(r, g, b) / 255
+  const l = (max + min) / 2
+  return max === min ? 0 : (max - min) / (l > 0.5 ? 2 - max - min : max + min)
+}
+
+/** A pale wash of a hue (`#f3e8ff`, `#eff6ff`): the selected row, the soft badge, the info panel. */
+const isTint = (color: [number, number, number, number]) =>
+  color[3] === 1 && lightness(color) >= 0.85 && Math.max(color[0], color[1], color[2]) - Math.min(color[0], color[1], color[2]) >= 4 && saturation(color) >= 0.5
+/** Accent text on a tint (`#7e22ce`, `#2f56e6`), too dark to read once the tint goes dark. */
+const isAccentText = (color: [number, number, number, number]) => color[3] === 1 && !isNeutral(color) && lightness(color) <= 0.7
+
+/**
+ * A tint as the smallest share of a vivid colour of its hue over paper: `#f3e8ff` is `#7a00ff` at 10%. The light theme
+ * renders the authored tint; in dark mode the same share sits on dark paper, a dark wash of the hue.
+ */
+function mixTint([r, g, b]: [number, number, number, number]): string {
+  const channels = [r, g, b]
+  const share = Math.max(0.01, Math.ceil((Math.max(...channels.map((channel) => 255 - channel)) / 255) * 100) / 100)
+  return `color-mix(in srgb, ${hex(channels.map((channel) => 255 - (255 - channel) / share))} ${Math.round(share * 100)}%, ${PAPER})`
+}
+
+/**
+ * Accent text as a lighter colour of its hue over ink. Dark mode renders it `(1 - share)` of the way towards light ink,
+ * so the share stays between 50% and 65%: exactly the authored colour on light paper while the hue leaves room for
+ * that, a shade deeper for a bright mid-tone (`#2f56e6`) that does not, and a light shade of the hue in dark mode.
+ */
+function mixAccentText([r, g, b]: [number, number, number, number]): string {
+  const channels = [r, g, b]
+  const needed = Math.max(...channels.map((channel, index) => (channel - INK_RGB[index]) / (255 - INK_RGB[index])))
+  const share = Math.min(0.65, Math.max(0.5, Math.ceil(needed * 100) / 100))
+  return `color-mix(in srgb, ${hex(channels.map((channel, index) => (channel - (1 - share) * INK_RGB[index]) / share))} ${Math.round(share * 100)}%, ${INK})`
+}
+
+// Syntax colours (`--c2-code-viewer__theme--token-keyword`) and a theme's `foreground` are text as well.
+const isTextProperty = (property: string) =>
+  /(^|-)color$|^fill$|^stroke$|caret|^token-|^foreground$/.test(property) && !/border|outline|background/.test(property)
+
 /**
  * Makes a card's neutral colours follow the theme. A literal equal to a colour role's light value becomes
  * `var(--c2-theme--<role>, <literal>)`, the role chosen by the property it is assigned to; any other opaque grey becomes
  * a mix of ink and paper (`mixNeutral`). Under the default light theme the card renders as authored; with an
  * application's tokens, or in dark mode, its greys, text and borders flip with everything else.
  *
- * Hues stay literal: they are the card's accents. So does a whole rule block that paints a coloured background, since
- * its text was chosen against that colour and must not flip on its own. Only the `color-*` roles take part; the chart
+ * Mid-tone hues stay literal: they are the card's accents and read on either paper. Pale tints of a hue used as a
+ * surface or border become a share of that hue over paper (`mixTint`), and deep hues used as text become a share over
+ * ink (`mixAccentText`), so a selected row drawn as purple text on a lilac wash turns into light purple on a dark purple
+ * wash instead of a lilac block in a dark page. A whole rule block that paints a strong coloured background stays
+ * literal, since its text was chosen against that colour and must not flip on its own, and so does a block designed dark
+ * (a dark background or light text). Only the `color-*` roles take part; the chart
  * palette tokens are series colours, not surfaces or text.
  */
-export function themeExampleCss(css: string, tokens: ThemeColor[]): { css: string; themed: number; literal: number } {
+export function themeExampleCss(
+  css: string,
+  tokens: ThemeColor[],
+  { neutrals = 'all' }: { neutrals?: 'all' | 'tinted-blocks' } = {},
+): { css: string; themed: number; literal: number } {
   const byValue = new Map<string, string[]>()
   for (const token of tokens) {
     if (!token.light || !token.name.startsWith('--c2-theme--color-')) continue
@@ -156,28 +217,65 @@ export function themeExampleCss(css: string, tokens: ThemeColor[]): { css: strin
   const out = css.replace(/\{([^{}]*)\}/g, (block, body: string) => {
     const accentSurface = [...body.matchAll(DECLARATION)].some(([, name, , value]) => {
       if (!/background/.test(propertyOf(name))) return false
-      return [...value.matchAll(COLOR)].some((match) => {
-        const color = parseColor(match[0])
-        return !!color && color[3] >= 0.5 && !isNeutral(color)
+      return literalColors(value).some((literal) => {
+        const color = parseColor(literal)
+        return !!color && color[3] >= 0.5 && !isNeutral(color) && !isTint(color)
       })
     })
-    if (accentSurface) {
+    // A block designed dark (a terminal, a night card) has a dark background or light text; its colours were chosen
+    // against each other, and theming its greys would turn the background light in dark mode under fixed text.
+    const darkSurface = [...body.matchAll(DECLARATION)].some(([, name, , value]) => {
+      const property = propertyOf(name)
+      return literalColors(value).some((literal) => {
+        const color = parseColor(literal)
+        if (!color || color[3] < 0.5) return false
+        if (/background/.test(property)) return lightness(color) < 0.35
+        return isTextProperty(property) && lightness(color) >= 0.85
+      })
+    })
+    // A block that paints a tint: its accent text and (with `tinted-blocks`) its greys flip with the tint. Unless it
+    // also lays a translucent light surface over a colour another block sets, which does not flip.
+    // A tint already written as `mixTint` counts too, so a second run themes what the first one left.
+    const tinted =
+      /color-mix\(in srgb, #[0-9a-f]{6} \d+%, var\(--c2-theme--color-surface/.test(body) ||
+      [...body.matchAll(COLOR)].some((match) => {
+        const color = parseColor(match[0])
+        return !!color && isTint(color)
+      })
+    const translucentLight = [...body.matchAll(DECLARATION)].some(
+      ([, name, , value]) =>
+        /background/.test(propertyOf(name)) &&
+        literalColors(value).some((literal) => {
+          const color = parseColor(literal)
+          return !!color && color[3] < 1 && lightness(color) >= 0.85
+        }),
+    )
+    if (accentSurface || darkSurface || (tinted && translucentLight)) {
       literal += (body.match(COLOR) ?? []).length
       return block
     }
+    const themeNeutrals = neutrals === 'all' || tinted
     const next = body.replace(DECLARATION, (declaration, name: string, colon: string, value: string) => {
       if (value.includes('var(') || value.includes('color-mix(')) return declaration
       const property = propertyOf(name)
       return `${name}${colon}${value.replace(COLOR, (match) => {
-        const token = pickToken(property, byValue.get(normalizeColor(match)) ?? [])
+        const token = themeNeutrals ? pickToken(property, byValue.get(normalizeColor(match)) ?? []) : undefined
         if (token) {
           themed++
           return `var(${token}, ${match})`
         }
         const color = parseColor(match)
-        if (color && color[3] === 1 && isNeutral(color)) {
+        if (color && isTint(color) && !isTextProperty(property)) {
+          themed++
+          return mixTint(color)
+        }
+        if (color && color[3] === 1 && isNeutral(color) && themeNeutrals) {
           themed++
           return mixNeutral(color)
+        }
+        if (color && tinted && isAccentText(color) && isTextProperty(property)) {
+          themed++
+          return mixAccentText(color)
         }
         literal++
         return match

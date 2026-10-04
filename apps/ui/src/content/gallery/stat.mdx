@@ -40,15 +40,15 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
     width: 290px;
     --c2-stat--padding: 20px;
     --c2-stat--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-stat--border: 1px solid #fecaca;
+    --c2-stat--border: 1px solid color-mix(in srgb, #fa0303 21%, var(--c2-theme--color-surface, #ffffff));
     --c2-stat--border-radius: 16px;
     --c2-stat--box-shadow: 0 18px 40px rgba(185, 28, 28, 0.08);
     --c2-stat__icon--size: 46px;
     --c2-stat__icon--border-radius: 13px;
     --c2-stat__value--font-size: 30px;
     --c2-stat__value--line-height: 36px;
-    --c2-badge__danger--background: #fee2e2;
-    --c2-badge__danger--color: #b91c1c;
+    --c2-badge__danger--background: color-mix(in srgb, #f70d0d 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-badge__danger--color: color-mix(in srgb, #ff1e1d 65%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-stat class="drawdown-stat" value="−3.82%" label="Portfolio drawdown" tone="negative">
@@ -101,7 +101,7 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
   .risk-stat {
     width: 290px;
     --c2-stat--padding: 20px;
-    --c2-stat--background: linear-gradient(135deg, #fffbeb, #ffffff 62%);
+    --c2-stat--background: linear-gradient(135deg, color-mix(in srgb, #ffcd05 8%, var(--c2-theme--color-surface, #ffffff)), var(--c2-theme--color-surface, #ffffff) 62%);
     --c2-stat--border: 1px solid #fde68a;
     --c2-stat--border-radius: 16px;
     --c2-stat--box-shadow: 0 18px 40px rgba(161, 98, 7, 0.1);

@@ -92,14 +92,14 @@ Every look below is a handful of `--c2-checkbox__container*` custom properties o
 ```html tag=MdxCodeBlock,label=Soft tint
 <style>
   .soft-tint {
-    --c2-checkbox__container--background-color: #f4f4f5;
+    --c2-checkbox__container--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-checkbox__container--border-top: 1px solid transparent;
     --c2-checkbox__container--border-right: 1px solid transparent;
     --c2-checkbox__container--border-bottom: 1px solid transparent;
     --c2-checkbox__container--border-left: 1px solid transparent;
-    --c2-checkbox__container__selected--background-color: #dbeafe;
-    --c2-checkbox__checkmark--color: #1d4ed8;
-    --c2-checkbox__mixedmark--color: #1d4ed8;
+    --c2-checkbox__container__selected--background-color: color-mix(in srgb, #0f73f8 15%, var(--c2-theme--color-surface, #ffffff));
+    --c2-checkbox__checkmark--color: color-mix(in srgb, #206bff 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-checkbox__mixedmark--color: color-mix(in srgb, #206bff 65%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-checkbox checked class="soft-tint"></c2-checkbox>

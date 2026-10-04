@@ -53,6 +53,9 @@ jobs:
       - name: Check the @c2n/components bundle size
         run: npm run check:bundle-size
 
+      - name: Check docs examples follow the theme in light and dark
+        run: npm run check:example-theme && npm test -w packages/tools/mcp
+
       - name: Check component documentation coverage
         run: npm run docs:check
 

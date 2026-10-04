@@ -124,8 +124,8 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
 ```html tag=MdxCodeBlock,label=Tinted rows
 <style>
   .tinted {
-    --c2-menu-item__hover--background: #eef2ff;
-    --c2-menu-item__hover--color: #3730a3;
+    --c2-menu-item__hover--background: color-mix(in srgb, #0c45ff 7%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu-item__hover--color: color-mix(in srgb, #4c40fe 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-menu-item__focus--outline: 2px solid rgba(99, 102, 241, 0.4);
     --c2-menu-item--font-weight: 500;
   }

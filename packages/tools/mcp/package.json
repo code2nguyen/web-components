@@ -48,7 +48,9 @@
     "inspect": "npx -y @modelcontextprotocol/inspector node src/cli.ts",
     "presmoke": "npm run build",
     "prepack": "npm run build",
-    "smoke": "node scripts/smoke.ts"
+    "smoke": "node scripts/smoke.ts",
+    "theme:examples": "node scripts/theme-examples.ts",
+    "test": "node --test scripts/*.test.ts"
   },
   "wireit": {
     "build:registry": {

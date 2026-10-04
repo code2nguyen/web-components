@@ -59,13 +59,13 @@ that, and the `toggle` slot adds a chevron — both off by default.
 <style>
   .failed {
     --c2-steps--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 1%, var(--c2-theme--color-surface, #ffffff));
-    --c2-steps--border: 1px solid #f3d6d6;
+    --c2-steps--border: 1px solid color-mix(in srgb, #b80e0e 17%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid #f7e6e6;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, #af0505 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__marker--size: 13px;
     --c2-step__label--font-weight: 400;
-    --c2-step__toggle--color: #c98b8b;
+    --c2-step__toggle--color: color-mix(in srgb, #ffc9c7 65%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-steps class="failed" aria-label="Failed run">
