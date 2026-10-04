@@ -3,11 +3,11 @@
 A rich-text notepad that reads as a sheet of paper: handwriting on ruled lines, a margin, a spiral binding and paper grain. Selecting text opens a formatting toolbar drawn as a strip of washi tape (bold, italic, underline, strikethrough, and one button each for the four inks and the three highlighters). `[ ] ` starts a checklist item, and a `tearable` pad can have its page torn off. Built on ProseMirror.
 
 ```sh
-npm install @c2n/notepad
+npm install @c2n/components
 ```
 
 ```js
-import '@c2n/notepad'
+import '@c2n/components/notepad'
 ```
 
 ```html

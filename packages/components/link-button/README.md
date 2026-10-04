@@ -10,7 +10,7 @@
 
 ```html
 <script type="module">
-  import '@c2n/link-button'
+  import '@c2n/components/link-button'
 </script>
 
 <c2-link-button href="/docs">Documentation</c2-link-button>

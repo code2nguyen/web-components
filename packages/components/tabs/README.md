@@ -3,12 +3,12 @@
 Accessible tab strip built with Lit. `c2-tabs` shows one content panel at a time; each `c2-tab` names the panel it controls with `for`.
 
 ```bash
-npm install @c2n/tabs
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/tabs' // registers c2-tabs and c2-tab
+  import '@c2n/components/tabs' // registers c2-tabs and c2-tab
 </script>
 
 <c2-tabs selected-tab="activity">

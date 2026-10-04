@@ -3,12 +3,12 @@
 `c2-button` is a themeable button with slots for the label text, a prefix icon, a suffix icon and a running (busy) icon.
 
 ```bash
-npm install @c2n/button
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/button'
+  import '@c2n/components/button'
 </script>
 
 <c2-button>

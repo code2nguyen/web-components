@@ -3,12 +3,12 @@
 Pagination built with Lit: page navigation for a list, a table or search results, in three layouts.
 
 ```bash
-npm install @c2n/pagination
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/pagination'
+  import '@c2n/components/pagination'
 </script>
 
 <!-- Numbered: previous/next around the page numbers -->

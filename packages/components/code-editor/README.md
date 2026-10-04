@@ -3,7 +3,7 @@
 Source-code field built with Lit on **CodeMirror 6**, which is an _optional_ peer dependency: nothing is imported until an editor mounts, and without it the element degrades to a plain `<textarea>` with the same value, events and form behaviour.
 
 ```bash
-npm install @c2n/code-editor
+npm install @c2n/components
 # the engine, installed alongside — only the grammars you need
 npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/language \
   @codemirror/autocomplete @codemirror/search @lezer/highlight @codemirror/lang-javascript
@@ -11,7 +11,7 @@ npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/
 
 ```html
 <script type="module">
-  import '@c2n/code-editor'
+  import '@c2n/components/code-editor'
 </script>
 
 <c2-code-editor label="Handler" language="javascript" line-numbers autocomplete value="export const answer = 42"></c2-code-editor>
@@ -25,7 +25,7 @@ npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/
 - **Events**: the editor's `contenteditable` fires native composed `input` / `beforeinput`, which are stopped at the component boundary so a consumer sees exactly one `input` per edit and none for an edit `readonly` rejected.
 - **Accessibility**: the editable element carries `role="textbox"` with the label as its accessible name, plus `aria-readonly` and `aria-disabled`. The default token palette meets WCAG AA on both the surface and the active-line tint.
 
-**Theming is plain CSS.** CodeMirror renders real DOM inside the shadow root, so there is no JavaScript theme: the frame, gutter, selection, cursor and the whole syntax palette are `--c2-code-editor__*` custom properties, and the token names (`--c2-code-editor__theme--token-keyword`, `…-string`, `…-comment`, …) match `@c2n/code-viewer`'s `css-variables` theme so one palette can drive the viewer and the editor. Dark mode is different variable values and nothing else:
+**Theming is plain CSS.** CodeMirror renders real DOM inside the shadow root, so there is no JavaScript theme: the frame, gutter, selection, cursor and the whole syntax palette are `--c2-code-editor__*` custom properties, and the token names (`--c2-code-editor__theme--token-keyword`, `…-string`, `…-comment`, …) match `@c2n/components/code-viewer`'s `css-variables` theme so one palette can drive the viewer and the editor. Dark mode is different variable values and nothing else:
 
 ```css
 .midnight {

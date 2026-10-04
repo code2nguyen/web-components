@@ -4,11 +4,11 @@ Google Maps as web components: a map, markers, the road route from A to B with i
 Street View.
 
 ```bash
-npm install @c2n/google-map
+npm install @c2n/components
 ```
 
 ```js
-import { configureGoogleMaps } from '@c2n/google-map'
+import { configureGoogleMaps } from '@c2n/components/google-map'
 
 configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY })
 ```

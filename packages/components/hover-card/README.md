@@ -4,12 +4,12 @@ Preview card shown when a trigger is hovered or focused — a profile behind a m
 The pointer can move into the card and it stays open, so it may hold links and buttons.
 
 ```bash
-npm install @c2n/hover-card
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/hover-card'
+  import '@c2n/components/hover-card'
 </script>
 
 <c2-hover-card>

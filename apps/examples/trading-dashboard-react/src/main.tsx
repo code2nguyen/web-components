@@ -16,6 +16,7 @@ import '@c2n/components/list-item'
 import '@c2n/components/select'
 import '@c2n/components/switch'
 import '@c2n/components/table'
+import '@c2n/components/table/table-column.js'
 import '@c2n/components/text-field'
 
 import { App } from './App'

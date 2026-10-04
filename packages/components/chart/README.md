@@ -3,8 +3,8 @@
 Line, area, bar, sparkline, pie, gauge, scatter, candlestick and overlap (Venn) charts as custom elements, from one package.
 
 ```bash
-npm install @c2n/chart uplot     # line, area, bar, sparkline
-npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick, overlap
+npm install @c2n/components uplot     # line, area, bar, sparkline
+npm install @c2n/components echarts   # pie, gauge, scatter, candlestick, overlap
 ```
 
 ```html
@@ -19,8 +19,8 @@ npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick, overlap
 ```
 
 ```js
-import '@c2n/chart/line-chart.js' // one tag
-import '@c2n/chart' // all of them
+import '@c2n/components/chart/line-chart.js' // one tag
+import '@c2n/components/chart' // all of them
 ```
 
 ## Elements

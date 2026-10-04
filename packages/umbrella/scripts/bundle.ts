@@ -58,7 +58,9 @@ rmSync(distDir, { recursive: true, force: true })
 
 // --- JavaScript ---------------------------------------------------------------------------------------------------
 
-const entries = readdirSync(srcDir).filter((file) => file.endsWith('.js'))
+// `src/<name>.js` per package, `src/<name>/<module>.js` per module of a multi-module package.
+const sourceFiles = (readdirSync(srcDir, { recursive: true }) as string[]).map((file) => file.split(sep).join('/'))
+const entries = sourceFiles.filter((file) => file.endsWith('.js'))
 await build({
   configFile: false,
   logLevel: 'warn',
@@ -150,8 +152,9 @@ for (const [name, root] of roots) {
   }
 }
 
-for (const file of readdirSync(srcDir).filter((file) => file.endsWith('.d.ts'))) {
+for (const file of sourceFiles.filter((file) => file.endsWith('.d.ts'))) {
   const target = join(distDir, file)
+  mkdirSync(dirname(target), { recursive: true })
   writeFileSync(target, rewrite(readFileSync(join(srcDir, file), 'utf8'), target))
 }
 

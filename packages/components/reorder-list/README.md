@@ -7,11 +7,11 @@ Use this component for one vertical queue. It does not support grids, moving ite
 ## Installation
 
 ```sh
-npm install @c2n/reorder-list
+npm install @c2n/components
 ```
 
 ```js
-import '@c2n/reorder-list'
+import '@c2n/components/reorder-list'
 ```
 
 ## Complete example
@@ -26,7 +26,7 @@ import '@c2n/reorder-list'
 </c2-reorder-list>
 
 <script type="module">
-  import '@c2n/reorder-list'
+  import '@c2n/components/reorder-list'
 
   const queue = document.querySelector('#queue')
   queue.addEventListener('reorder', (event) => {

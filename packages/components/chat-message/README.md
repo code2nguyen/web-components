@@ -1,10 +1,10 @@
-# `@c2n/chat-message`
+# `@c2n/components/chat-message`
 
 A flexible Lit message row for assistant answers, conversations and activity updates.
 
 ```html
 <script type="module">
-  import '@c2n/chat-message'
+  import '@c2n/components/chat-message'
 </script>
 
 <c2-chat-message>

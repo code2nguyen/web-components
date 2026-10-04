@@ -3,12 +3,12 @@
 Skeleton built with Lit: a placeholder block standing in for content that has not arrived, in three shapes and three animations.
 
 ```bash
-npm install @c2n/skeleton
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/skeleton'
+  import '@c2n/components/skeleton'
 </script>
 
 <c2-skeleton></c2-skeleton>
@@ -24,4 +24,4 @@ npm install @c2n/skeleton
 
 Theme it with `--c2-skeleton--width`, `--c2-skeleton--height`, `--c2-skeleton--border-radius`, `--c2-skeleton--background-color`, `--c2-skeleton__sheen--color` (the `wave` highlight), `--c2-skeleton__pulse--opacity`, `--c2-skeleton--animation-duration`, `--c2-skeleton--gap`, `--c2-skeleton__last-line--width` and `--c2-skeleton__circle--size`. The full list is in `custom-elements.json` and on the docs site.
 
-Build a skeleton that traces the layout it replaces, then swap the whole thing for the real content. For a wait with no shape to hold, use [`@c2n/spinner`](../spinner); for one with a measurable amount of work left, [`@c2n/progress`](../progress).
+Build a skeleton that traces the layout it replaces, then swap the whole thing for the real content. For a wait with no shape to hold, use [`@c2n/components/spinner`](../spinner); for one with a measurable amount of work left, [`@c2n/components/progress`](../progress).

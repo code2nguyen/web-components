@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcore?label=core%20downloads)](https://www.npmjs.com/package/@c2n/core)
 [![License](https://img.shields.io/github/license/code2nguyen/web-components)](LICENSE)
 
-Small, themeable UI components that work in any stack. Built on [Lit](https://lit.dev), one npm package per component, usable from plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
+Small, themeable UI components that work in any stack. Built on [Lit](https://lit.dev), one npm package with an entry per component, usable from plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
 
 **[Docs & live demos](https://code2nguyen.github.io/web-components/)** · [Components](https://code2nguyen.github.io/web-components/docs) · [Examples](https://code2nguyen.github.io/web-components/examples) · [Theming](https://code2nguyen.github.io/web-components/guides/theming)
 

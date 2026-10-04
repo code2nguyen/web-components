@@ -63,6 +63,10 @@
       "types": "./dist/attachment.d.ts",
       "default": "./dist/attachment.js"
     },
+    "./attachment/attachment-group.js": {
+      "types": "./dist/attachment/attachment-group.d.ts",
+      "default": "./dist/attachment/attachment-group.js"
+    },
     "./autocomplete": {
       "types": "./dist/autocomplete.d.ts",
       "default": "./dist/autocomplete.js"
@@ -111,6 +115,114 @@
       "types": "./dist/chart.d.ts",
       "default": "./dist/chart.js"
     },
+    "./chart/area-chart.js": {
+      "types": "./dist/chart/area-chart.d.ts",
+      "default": "./dist/chart/area-chart.js"
+    },
+    "./chart/bar-chart.js": {
+      "types": "./dist/chart/bar-chart.d.ts",
+      "default": "./dist/chart/bar-chart.js"
+    },
+    "./chart/bubble-chart.js": {
+      "types": "./dist/chart/bubble-chart.d.ts",
+      "default": "./dist/chart/bubble-chart.js"
+    },
+    "./chart/butterfly-chart.js": {
+      "types": "./dist/chart/butterfly-chart.d.ts",
+      "default": "./dist/chart/butterfly-chart.js"
+    },
+    "./chart/candlestick-chart.js": {
+      "types": "./dist/chart/candlestick-chart.d.ts",
+      "default": "./dist/chart/candlestick-chart.js"
+    },
+    "./chart/chart-adapter.js": {
+      "types": "./dist/chart/chart-adapter.d.ts",
+      "default": "./dist/chart/chart-adapter.js"
+    },
+    "./chart/chart-base.js": {
+      "types": "./dist/chart/chart-base.d.ts",
+      "default": "./dist/chart/chart-base.js"
+    },
+    "./chart/chart-data.js": {
+      "types": "./dist/chart/chart-data.d.ts",
+      "default": "./dist/chart/chart-data.js"
+    },
+    "./chart/chart-legend.js": {
+      "types": "./dist/chart/chart-legend.d.ts",
+      "default": "./dist/chart/chart-legend.js"
+    },
+    "./chart/chart-series.js": {
+      "types": "./dist/chart/chart-series.d.ts",
+      "default": "./dist/chart/chart-series.js"
+    },
+    "./chart/chart-theme.js": {
+      "types": "./dist/chart/chart-theme.d.ts",
+      "default": "./dist/chart/chart-theme.js"
+    },
+    "./chart/chart-tooltip.js": {
+      "types": "./dist/chart/chart-tooltip.d.ts",
+      "default": "./dist/chart/chart-tooltip.js"
+    },
+    "./chart/chart-types.js": {
+      "types": "./dist/chart/chart-types.d.ts",
+      "default": "./dist/chart/chart-types.js"
+    },
+    "./chart/echarts-chart-base.js": {
+      "types": "./dist/chart/echarts-chart-base.d.ts",
+      "default": "./dist/chart/echarts-chart-base.js"
+    },
+    "./chart/gauge-chart.js": {
+      "types": "./dist/chart/gauge-chart.d.ts",
+      "default": "./dist/chart/gauge-chart.js"
+    },
+    "./chart/line-chart.js": {
+      "types": "./dist/chart/line-chart.d.ts",
+      "default": "./dist/chart/line-chart.js"
+    },
+    "./chart/map-chart.js": {
+      "types": "./dist/chart/map-chart.d.ts",
+      "default": "./dist/chart/map-chart.js"
+    },
+    "./chart/map-layer.js": {
+      "types": "./dist/chart/map-layer.d.ts",
+      "default": "./dist/chart/map-layer.js"
+    },
+    "./chart/map-scale.js": {
+      "types": "./dist/chart/map-scale.d.ts",
+      "default": "./dist/chart/map-scale.js"
+    },
+    "./chart/overlap-chart.js": {
+      "types": "./dist/chart/overlap-chart.d.ts",
+      "default": "./dist/chart/overlap-chart.js"
+    },
+    "./chart/overlap-layout.js": {
+      "types": "./dist/chart/overlap-layout.d.ts",
+      "default": "./dist/chart/overlap-layout.js"
+    },
+    "./chart/pie-chart.js": {
+      "types": "./dist/chart/pie-chart.d.ts",
+      "default": "./dist/chart/pie-chart.js"
+    },
+    "./chart/pyramid-chart.js": {
+      "types": "./dist/chart/pyramid-chart.d.ts",
+      "default": "./dist/chart/pyramid-chart.js"
+    },
+    "./chart/radar-chart.js": {
+      "types": "./dist/chart/radar-chart.d.ts",
+      "default": "./dist/chart/radar-chart.js"
+    },
+    "./chart/scatter-chart.js": {
+      "types": "./dist/chart/scatter-chart.d.ts",
+      "default": "./dist/chart/scatter-chart.js"
+    },
+    "./chart/sparkline.js": {
+      "types": "./dist/chart/sparkline.d.ts",
+      "default": "./dist/chart/sparkline.js"
+    },
+    "./chart/uplot-chart-base.js": {
+      "types": "./dist/chart/uplot-chart-base.d.ts",
+      "default": "./dist/chart/uplot-chart-base.js"
+    },
     "./chat-input": {
       "types": "./dist/chat-input.d.ts",
       "default": "./dist/chat-input.js"
@@ -155,6 +267,18 @@
       "types": "./dist/command.d.ts",
       "default": "./dist/command.js"
     },
+    "./command/command-group.js": {
+      "types": "./dist/command/command-group.d.ts",
+      "default": "./dist/command/command-group.js"
+    },
+    "./command/command-item.js": {
+      "types": "./dist/command/command-item.d.ts",
+      "default": "./dist/command/command-item.js"
+    },
+    "./command/command-separator.js": {
+      "types": "./dist/command/command-separator.d.ts",
+      "default": "./dist/command/command-separator.js"
+    },
     "./comparison-bar": {
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
@@ -171,6 +295,14 @@
       "types": "./dist/dashboard.d.ts",
       "default": "./dist/dashboard.js"
     },
+    "./dashboard/dash-card.js": {
+      "types": "./dist/dashboard/dash-card.d.ts",
+      "default": "./dist/dashboard/dash-card.js"
+    },
+    "./dashboard/dashboard-host.js": {
+      "types": "./dist/dashboard/dashboard-host.d.ts",
+      "default": "./dist/dashboard/dashboard-host.js"
+    },
     "./date-input": {
       "types": "./dist/date-input.d.ts",
       "default": "./dist/date-input.js"
@@ -183,6 +315,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./details/details-context.js": {
+      "types": "./dist/details/details-context.d.ts",
+      "default": "./dist/details/details-context.js"
+    },
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
@@ -191,9 +327,41 @@
       "types": "./dist/gantt.d.ts",
       "default": "./dist/gantt.js"
     },
+    "./gantt/gantt-model.js": {
+      "types": "./dist/gantt/gantt-model.d.ts",
+      "default": "./dist/gantt/gantt-model.js"
+    },
+    "./gantt/gantt-task.js": {
+      "types": "./dist/gantt/gantt-task.d.ts",
+      "default": "./dist/gantt/gantt-task.js"
+    },
+    "./gantt/gantt-types.js": {
+      "types": "./dist/gantt/gantt-types.d.ts",
+      "default": "./dist/gantt/gantt-types.js"
+    },
     "./google-map": {
       "types": "./dist/google-map.d.ts",
       "default": "./dist/google-map.js"
+    },
+    "./google-map/geo.js": {
+      "types": "./dist/google-map/geo.d.ts",
+      "default": "./dist/google-map/geo.js"
+    },
+    "./google-map/google-map-marker.js": {
+      "types": "./dist/google-map/google-map-marker.d.ts",
+      "default": "./dist/google-map/google-map-marker.js"
+    },
+    "./google-map/google-map-route.js": {
+      "types": "./dist/google-map/google-map-route.d.ts",
+      "default": "./dist/google-map/google-map-route.js"
+    },
+    "./google-map/google-maps-loader.js": {
+      "types": "./dist/google-map/google-maps-loader.d.ts",
+      "default": "./dist/google-map/google-maps-loader.js"
+    },
+    "./google-map/google-street-view.js": {
+      "types": "./dist/google-map/google-street-view.d.ts",
+      "default": "./dist/google-map/google-street-view.js"
     },
     "./header": {
       "types": "./dist/header.d.ts",
@@ -210,6 +378,10 @@
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
+    },
+    "./kanban/kanban-column.js": {
+      "types": "./dist/kanban/kanban-column.d.ts",
+      "default": "./dist/kanban/kanban-column.js"
     },
     "./kbd": {
       "types": "./dist/kbd.d.ts",
@@ -231,6 +403,10 @@
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
     },
+    "./list-item/list-item-context.js": {
+      "types": "./dist/list-item/list-item-context.d.ts",
+      "default": "./dist/list-item/list-item-context.js"
+    },
     "./log-viewer": {
       "types": "./dist/log-viewer.d.ts",
       "default": "./dist/log-viewer.js"
@@ -243,6 +419,10 @@
       "types": "./dist/masonry.d.ts",
       "default": "./dist/masonry.js"
     },
+    "./masonry/masonry-item.js": {
+      "types": "./dist/masonry/masonry-item.d.ts",
+      "default": "./dist/masonry/masonry-item.js"
+    },
     "./mat-icon": {
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
@@ -250,6 +430,10 @@
     "./menu": {
       "types": "./dist/menu.d.ts",
       "default": "./dist/menu.js"
+    },
+    "./menu/menu-item.js": {
+      "types": "./dist/menu/menu-item.d.ts",
+      "default": "./dist/menu/menu-item.js"
     },
     "./modal": {
       "types": "./dist/modal.d.ts",
@@ -262,6 +446,14 @@
     "./navigation-menu": {
       "types": "./dist/navigation-menu.d.ts",
       "default": "./dist/navigation-menu.js"
+    },
+    "./navigation-menu/navigation-menu-item.js": {
+      "types": "./dist/navigation-menu/navigation-menu-item.d.ts",
+      "default": "./dist/navigation-menu/navigation-menu-item.js"
+    },
+    "./navigation-menu/navigation-menu-link.js": {
+      "types": "./dist/navigation-menu/navigation-menu-link.d.ts",
+      "default": "./dist/navigation-menu/navigation-menu-link.js"
     },
     "./notepad": {
       "types": "./dist/notepad.d.ts",
@@ -302,6 +494,18 @@
     "./radio": {
       "types": "./dist/radio.d.ts",
       "default": "./dist/radio.js"
+    },
+    "./radio/radio-context.js": {
+      "types": "./dist/radio/radio-context.d.ts",
+      "default": "./dist/radio/radio-context.js"
+    },
+    "./radio/radio-group.js": {
+      "types": "./dist/radio/radio-group.d.ts",
+      "default": "./dist/radio/radio-group.js"
+    },
+    "./radio/radio.js": {
+      "types": "./dist/radio/radio.d.ts",
+      "default": "./dist/radio/radio.js"
     },
     "./rate": {
       "types": "./dist/rate.d.ts",
@@ -359,6 +563,14 @@
       "types": "./dist/steps.d.ts",
       "default": "./dist/steps.js"
     },
+    "./steps/step-types.js": {
+      "types": "./dist/steps/step-types.d.ts",
+      "default": "./dist/steps/step-types.js"
+    },
+    "./steps/step.js": {
+      "types": "./dist/steps/step.d.ts",
+      "default": "./dist/steps/step.js"
+    },
     "./switch": {
       "types": "./dist/switch.d.ts",
       "default": "./dist/switch.js"
@@ -367,9 +579,25 @@
       "types": "./dist/table.d.ts",
       "default": "./dist/table.js"
     },
+    "./table/table-column.js": {
+      "types": "./dist/table/table-column.d.ts",
+      "default": "./dist/table/table-column.js"
+    },
+    "./table/table-types.js": {
+      "types": "./dist/table/table-types.d.ts",
+      "default": "./dist/table/table-types.js"
+    },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
       "default": "./dist/tabs.js"
+    },
+    "./tabs/tab-context.js": {
+      "types": "./dist/tabs/tab-context.d.ts",
+      "default": "./dist/tabs/tab-context.js"
+    },
+    "./tabs/tab.js": {
+      "types": "./dist/tabs/tab.d.ts",
+      "default": "./dist/tabs/tab.js"
     },
     "./tag-input": {
       "types": "./dist/tag-input.d.ts",
@@ -378,6 +606,10 @@
     "./text-field": {
       "types": "./dist/text-field.d.ts",
       "default": "./dist/text-field.js"
+    },
+    "./text-field/text-field-clear.js": {
+      "types": "./dist/text-field/text-field-clear.d.ts",
+      "default": "./dist/text-field/text-field-clear.js"
     },
     "./textarea": {
       "types": "./dist/textarea.d.ts",
@@ -395,6 +627,10 @@
       "types": "./dist/timeline.d.ts",
       "default": "./dist/timeline.js"
     },
+    "./timeline/timeline-item.js": {
+      "types": "./dist/timeline/timeline-item.d.ts",
+      "default": "./dist/timeline/timeline-item.js"
+    },
     "./toast": {
       "types": "./dist/toast.d.ts",
       "default": "./dist/toast.js"
@@ -411,6 +647,14 @@
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
     },
+    "./tree/tree-item.js": {
+      "types": "./dist/tree/tree-item.d.ts",
+      "default": "./dist/tree/tree-item.js"
+    },
+    "./tree/tree-types.js": {
+      "types": "./dist/tree/tree-types.d.ts",
+      "default": "./dist/tree/tree-types.js"
+    },
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
@@ -418,6 +662,10 @@
     "./virtual-list": {
       "types": "./dist/virtual-list.d.ts",
       "default": "./dist/virtual-list.js"
+    },
+    "./virtual-list/virtual-list-types.js": {
+      "types": "./dist/virtual-list/virtual-list-types.d.ts",
+      "default": "./dist/virtual-list/virtual-list-types.js"
     },
     "./week-planner": {
       "types": "./dist/week-planner.d.ts",

@@ -3,12 +3,12 @@
 `c2-masonry` automatically packs explicitly sized `c2-masonry-item` tiles into the first free grid cells. Use it for dashboards where cards have different row and column spans and should close gaps after content changes. Use `c2-dashboard` instead when the application chooses fixed tracks and card coordinates. This package does not depend on `c2-dashboard` or any application framework.
 
 ```bash
-npm install @c2n/masonry
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/masonry'
+  import '@c2n/components/masonry'
 </script>
 
 <c2-masonry id="operations" class="operations" editable>
@@ -132,4 +132,4 @@ All presentation settings below are CSS custom properties; row/column spans rema
 | `--c2-masonry-item__dragging--opacity`         | `0.92`                            | Active tile opacity   |
 | `--c2-masonry-item__dragging--box-shadow`      | `0 12px 28px rgb(15 23 42 / 24%)` | Active tile elevation |
 
-The root import registers both tags. For tree-shaken use, `@c2n/masonry/masonry-item.js` registers only the tile element. The package's `custom-elements.json` and the UI API tab provide machine-readable details.
+The root import registers both tags. For tree-shaken use, `@c2n/components/masonry` registers only the tile element. The package's `custom-elements.json` and the UI API tab provide machine-readable details.

@@ -3,11 +3,11 @@
 Notification cards and a stack manager for bursts of notifications.
 
 ```sh
-npm install @c2n/toast
+npm install @c2n/components
 ```
 
 ```ts
-import { toast, getToastRegion } from '@c2n/toast'
+import { toast, getToastRegion } from '@c2n/components/toast'
 
 toast.show({ message: 'New message received', variant: 'info' })
 const id = toast.show({ id: 'upload', message: 'Uploading…', duration: 0 })

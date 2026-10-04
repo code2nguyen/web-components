@@ -85,8 +85,8 @@ Exact component facts (attributes, slots, events, CSS parts, CSS variables) come
 
 ## Core conventions
 
-- Install only the package you need, for example \`npm install @c2n/text-field\`.
-- Importing a package registers its custom element, for example \`import '@c2n/text-field'\`.
+- Install the one component package, \`npm install @c2n/components\`, and import only the components you use.
+- Importing a component's entry registers its custom element, for example \`import '@c2n/components/text-field'\`.
 - Theme components with inheritable CSS variables. Component variables follow \`--c2-<component>__<part>[__<state>]--<property>\`.
 - Prefer public properties for non-string values when using a framework.
 - Text, selection, toggle, range, and chat form controls participate in \`FormData\`, reset, disabled fieldsets, and constraint validation.

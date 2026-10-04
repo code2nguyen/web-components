@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useMemo, useRef } from 'react'
 import type { Service } from '../../lib/domain/telemetry'
-import type { TableColumnConfig } from '@c2n/components/table'
+import type { TableColumnConfig } from '@c2n/components/table/table-types.js'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
 import { useRenderedRows } from '@c2n/components/react'

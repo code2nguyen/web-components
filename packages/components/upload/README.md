@@ -1,9 +1,9 @@
 # Upload
 
-`@c2n/upload` is a Lit web component for browsing or dropping files, validating them, uploading one or many files, and presenting the queue with `c2-attachment`.
+`@c2n/components/upload` is a Lit web component for browsing or dropping files, validating them, uploading one or many files, and presenting the queue with `c2-attachment`.
 
 ```bash
-npm install @c2n/upload
+npm install @c2n/components
 ```
 
 ```html

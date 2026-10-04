@@ -44,10 +44,10 @@ export function registerC2Elements(): Promise<void> {
     import('@c2n/components/tree'),
     import('@c2n/components/upload'),
     // Only the chart kinds the app draws: the barrel would pull the optional ECharts engines in.
-    import('@c2n/components/chart'),
-    import('@c2n/components/chart'),
-    import('@c2n/components/chart'),
-    import('@c2n/components/chart'),
+    import('@c2n/components/chart/butterfly-chart.js'),
+    import('@c2n/components/chart/bar-chart.js'),
+    import('@c2n/components/chart/sparkline.js'),
+    import('@c2n/components/chart/chart-series.js'),
     import('@c2n/feather-icons/icons/activity.js'),
     import('@c2n/feather-icons/icons/alert-triangle.js'),
     import('@c2n/feather-icons/icons/book-open.js'),
@@ -71,7 +71,7 @@ let echartsRegistration: Promise<void> | undefined
 
 /** The butterfly chart runs on ECharts (~800 KB), so it is registered only when the Differences view first opens. */
 export function registerEchartsElements(): Promise<void> {
-  echartsRegistration ??= import('@c2n/components/chart').then(() => undefined)
+  echartsRegistration ??= import('@c2n/components/chart/butterfly-chart.js').then(() => undefined)
   return echartsRegistration
 }
 

@@ -1,6 +1,6 @@
 {
   "extends": "@c2n/config/tsconfig.lib.json",
-  "include": ["barrel.ts", "react.tsx", "vue.ts", "../dist/*.d.ts"],
+  "include": ["barrel.ts", "react.tsx", "vue.ts", "../dist/*.d.ts", "../dist/*/*.d.ts"],
   "compilerOptions": {
     "composite": false,
     "incremental": false,

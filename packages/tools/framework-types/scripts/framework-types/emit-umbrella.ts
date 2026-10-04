@@ -88,6 +88,11 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
     })
 }
 
+/** The subpath modules of an entry (`@c2n/chart/butterfly-chart.js`), each published as `./<name>/<module>.js`. */
+function subpathModules(entry: UmbrellaEntry): string[] {
+  return entry.modules.filter((module) => module.startsWith(`${entry.pkg}/`))
+}
+
 export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string, scopeDir: string): UmbrellaFile[] {
   const entries = umbrellaEntries(packages)
   const files: UmbrellaFile[] = []
@@ -97,6 +102,13 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
     const body = [BANNER, `// Every module of ${entry.pkg}. Importing this registers each of its elements.`, ``, ...reexports(entry.modules), ``].join('\n')
     files.push({ path: `src/${entry.name}.js`, contents: body, parser: 'typescript' })
     files.push({ path: `src/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
+    // One module of a multi-module package on its own (`@c2n/components/chart/butterfly-chart.js`), so an application
+    // can register a single chart, or defer one, without loading every module the package entry gathers.
+    for (const module of subpathModules(entry)) {
+      const single = [BANNER, `// ${module} alone.`, ``, `export * from '${module}'`, ``].join('\n')
+      files.push({ path: `src/${entry.name}/${module.slice(entry.pkg.length + 1)}`, contents: single, parser: 'typescript' })
+      files.push({ path: `src/${entry.name}/${module.slice(entry.pkg.length + 1).replace(/\.js$/, '.d.ts')}`, contents: single, parser: 'typescript' })
+    }
   }
 
   const barrel = [
@@ -188,7 +200,13 @@ function emitPackageJson(entries: UmbrellaEntry[], umbrellaDir: string, scopeDir
   const readPackage = (pkg: string) => readJson(join(scopeDir, pkg.slice('@c2n/'.length), 'package.json'))
 
   const exports: Record<string, unknown> = { '.': { types: './dist/index.d.ts', default: './dist/index.js' } }
-  for (const entry of entries) exports[`./${entry.name}`] = { types: `./dist/${entry.name}.d.ts`, default: `./dist/${entry.name}.js` }
+  for (const entry of entries) {
+    exports[`./${entry.name}`] = { types: `./dist/${entry.name}.d.ts`, default: `./dist/${entry.name}.js` }
+    for (const module of subpathModules(entry)) {
+      const file = `${entry.name}/${module.slice(entry.pkg.length + 1)}`
+      exports[`./${file}`] = { types: `./dist/${file.replace(/\.js$/, '.d.ts')}`, default: `./dist/${file}` }
+    }
+  }
   exports['./react'] = { types: './dist/react.d.ts', default: './dist/react.js' }
   exports['./vue'] = { types: './dist/vue.d.ts', default: './dist/vue.js' }
   for (const stylesheet of THEME_STYLESHEETS) exports[`./${stylesheet}`] = `./${stylesheet}`

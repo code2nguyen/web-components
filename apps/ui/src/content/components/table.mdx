@@ -327,9 +327,9 @@ only. A child whose line is outside the window is left unassigned, and a line th
 shows the column's formatted value until it arrives. After a sort, filter or page change the same line holds a
 different row, and `range-change` fires again with the new rows: re-render the children from it.
 
-The package ships that subscription as `useRenderedRows`, for React in `@c2n/table/react` and for Vue 3 in
-`@c2n/table/vue`, the same entries that carry the JSX and template types (both frameworks are optional peer
-dependencies: `@c2n/table` itself never imports them). Each one is seeded from `renderedRange`, follows the element when the table remounts, returns `[]` on the
+The package ships that subscription as `useRenderedRows`, for React in `@c2n/components/react` and for Vue 3 in
+`@c2n/components/vue`, the same entries that carry the JSX and template types (both frameworks are optional peer
+dependencies: `@c2n/components/table` itself never imports them). Each one is seeded from `renderedRange`, follows the element when the table remounts, returns `[]` on the
 server and before the element upgrades, and unsubscribes on unmount.
 
 ```tsx tag=CodeBlock
@@ -348,7 +348,7 @@ const rendered = useRenderedRows(useTemplateRef<Table>('table')) // Ref<TableRen
 // <button v-for="{ line, key, row } in rendered" :key="key" :slot="`cell:${line}:action`">Open {{ row.name }}</button>
 ```
 
-Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table`, the
+Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, the
 dependency-free core of both: it reports the rows already rendered, then every `range-change`, and returns the
 function that unsubscribes.
 
@@ -478,4 +478,4 @@ else about it (`variant`, the labels, `page-size-options`, the styling) is still
 same. The table emits one `page-change`: the pager's own event does not leave the table. Sorting starts again at page
 one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
 
-`@c2n/pagination` is deliberately **not** a dependency of `@c2n/table` — install and import it yourself.
+`@c2n/components/table` deliberately does **not** import `@c2n/components/pagination` — import it yourself.

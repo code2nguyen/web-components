@@ -3,12 +3,12 @@
 Modal dialog built on the native `<dialog>` element, with Lit.
 
 ```bash
-npm install @c2n/modal
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/modal'
+  import '@c2n/components/modal'
 </script>
 
 <button onclick="invite.show()">Invite</button>

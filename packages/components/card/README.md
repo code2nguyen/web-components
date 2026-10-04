@@ -3,12 +3,12 @@
 Themeable surface that groups related content and actions, built with Lit.
 
 ```bash
-npm install @c2n/card
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/card'
+  import '@c2n/components/card'
 </script>
 
 <c2-card>

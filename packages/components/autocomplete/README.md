@@ -3,7 +3,7 @@
 `<c2-autocomplete>` is a keyboard-accessible combobox composed from `c2-overlay`, `c2-list` and `c2-list-item`.
 
 ```bash
-npm install @c2n/autocomplete
+npm install @c2n/components
 ```
 
 ```html
@@ -11,7 +11,7 @@ npm install @c2n/autocomplete
 ```
 
 ```js
-import '@c2n/autocomplete'
+import '@c2n/components/autocomplete'
 
 const autocomplete = document.querySelector('c2-autocomplete')
 autocomplete.suggestions = [

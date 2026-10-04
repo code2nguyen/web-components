@@ -1,6 +1,6 @@
 'use client'
 
-import type { SortModel } from '@c2n/components/table'
+import type { SortModel } from '@c2n/components/table/table-types.js'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'

@@ -4,7 +4,7 @@ File and image attachments with metadata, upload progress, failure states, actio
 
 ```html
 <script type="module">
-  import '@c2n/attachment'
+  import '@c2n/components/attachment'
 </script>
 
 <c2-attachment-group>

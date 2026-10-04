@@ -3,7 +3,7 @@
 A form-associated, themeable one-time-code field that renders one cell per character.
 
 ```bash
-npm install @c2n/otp-input
+npm install @c2n/components
 ```
 
 ```html
