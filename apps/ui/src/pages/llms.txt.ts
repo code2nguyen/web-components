@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
 import { EXAMPLE_FRAMEWORK_LABELS, EXAMPLE_FRAMEWORKS } from '../schemas'
+import umbrella from '@c2n/components/package.json'
 
 export const prerender = true
 
@@ -30,8 +31,11 @@ export const GET: APIRoute = async () => {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([category, entries]) => {
       const items = entries.map((entry) => {
-        // Every component ships in @c2n/components; its entry is named after the workspace package.
-        const pkg = `@c2n/components/${(entry.data.package ?? `@c2n/${entry.id}`).slice('@c2n/'.length)}`
+        // Every component ships in @c2n/components, under its package's entry; a page documenting one element of a
+        // multi-element package (a chart) points at that element's own module when the package publishes it.
+        const name = (entry.data.package ?? `@c2n/${entry.id}`).slice('@c2n/'.length)
+        const single = `./${name}/${entry.id}.js`
+        const pkg = single in umbrella.exports ? `@c2n/components${single.slice(1)}` : `@c2n/components/${name}`
         const tag = entry.data.tag ?? `c2-${entry.id}`
         const docs = link(`/components/${entry.id}/`)
         const api = link(`/components/${entry.id}/api/`)
