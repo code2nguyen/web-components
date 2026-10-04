@@ -12,6 +12,8 @@ what actually happened, and the smallest change that would have avoided it.
 **Who clears entries:** whoever fixes the component. Move the entry to `## Fixed` with the commit or PR, or
 to `## Won't fix` with the reason. Do not delete an entry without resolving it.
 
+**Components that do not exist yet** are candidates, not feedback: they are listed, with a decision column, in [`COMPONENT-ROADMAP.md`](COMPONENT-ROADMAP.md).
+
 **What does not belong here:** bugs in the app rather than the component, and anything you fixed in the
 component in the same change (that is what the commit message and the test are for).
 
