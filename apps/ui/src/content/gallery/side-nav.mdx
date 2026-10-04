@@ -82,46 +82,6 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
 <c2-side-nav opened class="bordered"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    display: block;
-    height: 150px;
-    width: 100%;
-    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
-    border-radius: 8px;
-    overflow: hidden;
-    --c2-side-nav__open--width: 104px;
-    --c2-side-nav--background-color: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-side-nav--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-side-nav__divider--width: 0px;
-    --c2-side-nav__scrollbar--color: rgba(255, 255, 255, 0.25);
-    --c2-side-nav--padding-top: 10px;
-    --c2-side-nav--padding-right: 8px;
-    --c2-side-nav--padding-bottom: 10px;
-    --c2-side-nav--padding-left: 8px;
-  }
-  .dark .row {
-    display: block;
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 12px;
-    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    text-decoration: none;
-  }
-  .dark .row.active {
-    color: var(--c2-theme--color-on-dark-surface, #ffffff);
-    background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-  .dark .page {
-    padding: 10px;
-    font-size: 12px;
-    color: var(--c2-theme--color-on-surface-variant, #71717a);
-  }
-</style>
-<c2-side-nav opened class="dark"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
-```
-
 ```html tag=MdxCodeBlock,label=Floating card
 <style>
   .floating {

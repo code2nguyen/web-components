@@ -125,33 +125,6 @@ Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio t
 </c2-radio-group>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-radio-group__label--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-radio-group__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-radio__control--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-radio__control__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-radio__control__checked--background-color: #5aa3ff;
-    --c2-radio__control__checked__hover--background-color: #7bb6ff;
-    --c2-radio__dot--color: #032a5c;
-    --c2-radio__control__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-radio__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<c2-radio-group client:only="lit" class="dark" value="system">
-  <span slot="label">Appearance</span>
-  <span slot="description">Choose how the app looks.</span>
-  <c2-radio value="light">Light</c2-radio>
-  <c2-radio value="dark">Dark</c2-radio>
-  <c2-radio value="system">System</c2-radio>
-</c2-radio-group>
-```
-
 ```html tag=MdxCodeBlock,label=Compact list
 <style>
   .compact {

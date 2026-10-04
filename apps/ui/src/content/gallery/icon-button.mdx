@@ -262,29 +262,4 @@ Inline SVG, `@c2n/feather-icons` and `@c2n/components/mat-icon` all work in the 
 </div>
 ```
 
-```html tag=MdxCodeBlock,label=Dark toolbar
-<style>
-  .dark-toolbar {
-    display: inline-flex;
-    gap: 4px;
-    padding: 6px;
-    border-radius: 999px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-  }
-  .dark-toolbar-item {
-    --c2-icon-button__state-layer--size: 36px;
-    --c2-icon-button__icon--width: 18px;
-    --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-primary, #ffffff);
-  }
-</style>
-<div class="dark-toolbar">
-  <c2-icon-button class="dark-toolbar-item" tooltip="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></c2-icon-button>
-  <c2-icon-button class="dark-toolbar-item" tooltip="Camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
-  <c2-icon-button class="dark-toolbar-item" tooltip="More"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></c2-icon-button>
-</div>
-```
-
 </GalleryGrid>

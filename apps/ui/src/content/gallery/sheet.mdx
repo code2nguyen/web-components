@@ -99,23 +99,6 @@ Curated looks for `c2-sheet`. Each card shows a trigger; open the sheet to see t
 </c2-sheet>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .sg-dark {
-    --c2-sheet--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-sheet--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-sheet__close--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-sheet__close__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-sheet__close__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-  }
-</style>
-<c2-button onclick="document.getElementById('sg-dark').show()">Open</c2-button>
-<c2-sheet id="sg-dark" class="sg-dark">
-  <span slot="title">Dark</span>
-  <div>Recoloured through its own variables.</div>
-</c2-sheet>
-```
-
 ```html tag=MdxCodeBlock,label=Frosted
 <style>
   .sg-frosted {

@@ -75,27 +75,6 @@ Each example has a simulated upload transport. Choose or drop local files to see
 </c2-upload>
 ```
 
-```html tag=MdxCodeBlock,label=Dark workspace,description=Upload surface adapted to a permanently dark canvas,useWhen=The control lives in a dark editor or media workspace
-<style>
-  .dark-upload {
-    --c2-upload__dropzone--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-upload__dropzone--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-upload__dropzone__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-upload__dropzone__hover--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-upload__dropzone__drag--background: #172554;
-    --c2-upload__dropzone__drag--border: 1px dashed #60a5fa;
-    --c2-upload__prompt--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-upload__hint--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-upload__icon--color: #60a5fa;
-    --c2-upload__action--color: #93c5fd;
-  }
-</style>
-<c2-upload class="dark-upload" data-upload-demo multiple aria-label="Upload workspace assets">
-  <span slot="prompt">Drop workspace assets</span>
-  <span slot="hint">Files upload securely to this workspace</span>
-</c2-upload>
-```
-
 </GalleryGrid>
 
 Assigned prompt, hint, icon, action, and empty-state nodes remain directly styleable. Use the documented `dropzone`, `prompt`, `hint`, `empty`, `errors`, and `list` parts for upload-owned regions and fallbacks.

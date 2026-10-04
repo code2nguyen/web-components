@@ -51,21 +51,6 @@ card is `manual` so trying it does not repaint this page.
 <c2-theme-select class="solid" manual show-label></c2-theme-select>
 ```
 
-```html tag=MdxCodeBlock,label=Dark menu
-<style>
-  .dark-menu {
-    --c2-theme-select__menu--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-theme-select__menu--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-theme-select__menu--border-radius: 12px;
-    --c2-theme-select__menu-item--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-theme-select__menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-theme-select__menu-item__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-theme-select__menu-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-<c2-theme-select class="dark-menu" manual></c2-theme-select>
-```
-
 ```html tag=MdxCodeBlock,label=Compact toggle
 <style>
   .compact {

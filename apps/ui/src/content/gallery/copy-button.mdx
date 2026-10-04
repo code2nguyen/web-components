@@ -80,32 +80,6 @@ The shape it was built for: a block with the button pinned in its corner, copyin
 <pre class="snippet">npm install @c2n/components<c2-copy-button pin reveal="always"></c2-copy-button></pre>
 ```
 
-```html tag=MdxCodeBlock,label=Dark code block
-<style>
-  .dark-block {
-    position: relative;
-    margin: 0;
-    padding: 14px 46px 14px 16px;
-    border-radius: 8px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    box-sizing: border-box;
-    max-width: 100%;
-    font-size: 12.5px;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .dark-block c2-copy-button {
-    --c2-copy-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-copy-button__container__hover--background-color: rgba(255, 255, 255, 0.1);
-    --c2-copy-button__container__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-copy-button__container__copied--color: #4ade80;
-  }
-</style>
-<pre class="dark-block">git clone git@github.com:code2nguyen/web-components.git<c2-copy-button pin reveal="always"></c2-copy-button></pre>
-```
-
 ```html tag=MdxCodeBlock,label=Detail card
 <style>
   .detail {

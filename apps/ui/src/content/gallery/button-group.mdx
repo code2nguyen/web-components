@@ -199,32 +199,4 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
 </c2-button-group>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    display: inline-flex;
-    --c2-button-group--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button-group__divider--color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button__container--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-button__container__hover--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-button__container__selected--background-color: #5aa3ff;
-    --c2-button__container__selected--color: #032a5c;
-    --c2-button__container__selected--border: 1px solid #5aa3ff;
-    --c2-button__container__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-  }
-</style>
-<div class="dark">
-  <c2-button-group client:only="lit" selection="single" value="dark">
-    <c2-button value="light">Light</c2-button>
-    <c2-button value="dark">Dark</c2-button>
-    <c2-button value="system">System</c2-button>
-  </c2-button-group>
-</div>
-```
-
 </GalleryGrid>

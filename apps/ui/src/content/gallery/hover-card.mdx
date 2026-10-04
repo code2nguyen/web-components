@@ -83,23 +83,6 @@ Curated looks for `c2-hover-card`. Hover the trigger in a card to see it. The ca
 <c2-hover-card class="link-preview" open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">the release notes</a><div class="thumb"></div><div class="host">github.com</div><strong>v0.0.20 — hover cards and range sliders</strong></c2-hover-card>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark-card {
-    --c2-hover-card--background-color: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-hover-card--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-hover-card--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-hover-card--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-    --c2-hover-card--width: 240px;
-  }
-  .trigger {
-    color: var(--c2-theme--color-primary, rgb(2, 101, 220));
-    font-weight: 500;
-  }
-</style>
-<c2-hover-card class="dark-card" open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">#design-system</a>Channel for tokens, components and the docs site. 48 members.</c2-hover-card>
-```
-
 ```html tag=MdxCodeBlock,label=Compact and quick
 <style>
   .compact-card {

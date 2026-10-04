@@ -139,24 +139,4 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
 </c2-breadcrumb>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    padding: 12px 16px;
-    border-radius: 10px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-breadcrumb__item--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-breadcrumb__item__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-breadcrumb__item__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-breadcrumb__item__current--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-breadcrumb__separator--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-</style>
-<c2-breadcrumb client:only="lit" class="dark">
-  <c2-link-button href="#">Console</c2-link-button>
-  <c2-link-button href="#">Databases</c2-link-button>
-  <c2-link-button href="#">production</c2-link-button>
-</c2-breadcrumb>
-```
-
 </GalleryGrid>

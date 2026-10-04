@@ -39,22 +39,6 @@ Use classes for assigned thumbnail, name, metadata, and action nodes. The matchi
 <c2-attachment class="compact" name="notes.txt" type="TXT" size="3 KB" removable></c2-attachment>
 ```
 
-```html tag=MdxCodeBlock,label=Dark,description=Dark surface using component-level variables,useWhen=The attachment sits on a permanently dark region
-<style>
-  .dark {
-    --c2-attachment--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-attachment--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-attachment__media--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__media--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__metadata--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-attachment__action--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__action__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-</style>
-<c2-attachment class="dark" name="archive.tar.gz" type="Archive" size="32 MB" removable></c2-attachment>
-```
-
 </GalleryGrid>
 
 ## Groups
@@ -93,54 +77,3 @@ Groups provide spacing and collection semantics without changing the attachments
 ## Mixed media
 
 The mixed layout follows the reference composition: visual files form a tile row, while ordinary attachments and upload states span the full width below it.
-
-```html tag=MdxCodeBlock,label=Dark mixed attachments,description=Image tiles followed by full-width file and upload rows,useWhen=A message or record contains mixed visual and document attachments
-<style>
-  .reference-attachments {
-    width: min(100%, 760px);
-    --c2-attachment-group--gap: 14px;
-    --c2-attachment-group--min-column-width: 180px;
-    --c2-attachment--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-attachment--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 12%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__media--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__media--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__metadata--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-attachment__status--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-attachment__action--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__action__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 12%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-attachment__tile--width: 100%;
-  }
-  .reference-media {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background:
-      linear-gradient(135deg, transparent 38%, rgba(255, 255, 255, 0.16) 39% 42%, transparent 43%),
-      linear-gradient(30deg, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b)), var(--c2-theme--color-dark-surface, #18181b) 55%, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 41%, var(--c2-theme--color-dark-surface, #18181b)));
-  }
-  .reference-media.desk {
-    background:
-      linear-gradient(80deg, transparent 47%, rgba(255, 255, 255, 0.18) 48% 52%, transparent 53%),
-      linear-gradient(160deg, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b)), color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 41%, var(--c2-theme--color-dark-surface, #18181b)) 48%, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b)) 49%);
-  }
-  .reference-media.office {
-    background:
-      linear-gradient(0deg, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b)) 0 22%, transparent 23%),
-      linear-gradient(145deg, color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 41%, var(--c2-theme--color-dark-surface, #18181b)), color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b)) 55%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-</style>
-<c2-attachment-group class="reference-attachments" layout="mixed" aria-label="Reference files">
-  <c2-attachment layout="tile" name="workspace.png" type="PNG" size="820 KB">
-    <span class="reference-media" slot="media" aria-hidden="true"></span>
-  </c2-attachment>
-  <c2-attachment layout="tile" name="desk-reference.jpg" type="JPG" size="1.1 MB">
-    <span class="reference-media desk" slot="media" aria-hidden="true"></span>
-  </c2-attachment>
-  <c2-attachment layout="tile" name="office-reference.jpg" type="JPG" size="940 KB">
-    <span class="reference-media office" slot="media" aria-hidden="true"></span>
-  </c2-attachment>
-  <c2-attachment name="sales-dashboard.pdf" status="uploading" progress="64" removable></c2-attachment>
-  <c2-attachment name="message-renderer.tsx" type="TypeScript" size="12 KB" removable></c2-attachment>
-</c2-attachment-group>
-```

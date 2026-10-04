@@ -34,37 +34,6 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
 </c2-stat>
 ```
 
-```html tag=MdxCodeBlock,label=Midnight terminal
-<style>
-  .terminal-stat {
-    width: 290px;
-    --c2-stat--padding: 20px;
-    --c2-stat--background: linear-gradient(145deg, #111827 0%, #09111e 100%);
-    --c2-stat--color: #f8fafc;
-    --c2-stat--border: 1px solid rgba(34, 211, 238, 0.24);
-    --c2-stat--border-radius: 16px;
-    --c2-stat--box-shadow: 0 20px 50px rgba(2, 8, 23, 0.38), inset 0 1px rgba(255, 255, 255, 0.04);
-    --c2-stat__icon--size: 46px;
-    --c2-stat__icon--background: rgba(34, 211, 238, 0.12);
-    --c2-stat__icon--color: #67e8f9;
-    --c2-stat__icon--border-radius: 13px;
-    --c2-stat__value--font-size: 30px;
-    --c2-stat__value--line-height: 36px;
-    --c2-stat__label--color: #94a3b8;
-    --c2-stat__description--color: #64748b;
-  }
-  .terminal-stat c2-badge {
-    --c2-badge--background: rgba(34, 197, 94, 0.14);
-    --c2-badge--color: #86efac;
-  }
-</style>
-<c2-stat class="terminal-stat" value="99.98%" label="Pricing coverage">
-  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9m5 10V5m6 14v-7m5 7V3"></path></svg>
-  <c2-badge slot="trend" tone="success">Live</c2-badge>
-  <span slot="description">1.82M instruments priced today</span>
-</c2-stat>
-```
-
 ```html tag=MdxCodeBlock,label=Market drawdown
 <style>
   .drawdown-stat {

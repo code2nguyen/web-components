@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcore?label=core%20downloads)](https://www.npmjs.com/package/@c2n/core)
 [![License](https://img.shields.io/github/license/code2nguyen/web-components)](LICENSE)
 
-**Every building block your AI needs to ship a web app.** 100+ components and 800+ ready-made variants, built with AI and for AI. Your coding agent reads the exact API of every element over MCP and composes it into real apps, in plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
+**Every building block your AI needs to ship a web app.** 100+ components and 700+ ready-made variants, built with AI and for AI. Your coding agent reads the exact API of every element over MCP and composes it into real apps, in plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
 
 **[Docs & live demos](https://code2nguyen.github.io/web-components/)** · [Components](https://code2nguyen.github.io/web-components/docs) · [Examples](https://code2nguyen.github.io/web-components/examples) · [Theming](https://code2nguyen.github.io/web-components/guides/theming)
 
@@ -17,7 +17,7 @@
 ## Highlights
 
 - **Built for AI agents**: an MCP server (`@c2n/mcp`) and a Claude Code / Codex / Copilot skill (`@c2n/skill`) hand your agent exact APIs, examples and themes, so it builds instead of guessing.
-- **100+ components, 800+ variants**: inputs, tables, charts, maps, overlays, navigation, chat, dashboards, plus icon sets and illustrations.
+- **100+ components, 700+ variants**: inputs, tables, charts, maps, overlays, navigation, chat, dashboards, plus icon sets and illustrations.
 - **One package, ship only what you use**: `npm install @c2n/components`, import `@c2n/components/table`; bundlers drop the rest.
 - **Themed with CSS variables**: ~35 `--c2-theme--*` tokens restyle the whole app, light and dark built in.
 - **Any framework**: generated React/Vue types, an Angular forms adapter, SSR-safe elements.

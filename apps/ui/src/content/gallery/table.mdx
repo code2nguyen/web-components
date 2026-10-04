@@ -931,39 +931,6 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
 </c2-table>
 ```
 
-```html tag=MdxCodeBlock,label=Dark console
-<style>
-  .console {
-    height: 296px;
-    width: 100%;
-    --c2-table--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-table--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-table--border-top: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-table--border-right: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-table--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-table--border-left: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-table__header--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-table__header--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-table__resizer--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-table__row__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-table__cell--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-table__sort-icon__active--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<c2-table client:only="lit" class="console" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
-  <c2-table-column field="service" header="Service" width="minmax(140px, 2fr)"></c2-table-column>
-  <c2-table-column field="region" header="Region" width="1fr"></c2-table-column>
-  <c2-table-column field="tier" header="Tier" width="90px" align="center"></c2-table-column>
-  <c2-table-column field="state" header="State" width="100px" align="center"></c2-table-column>
-  <c2-table-column field="uptime" header="Uptime" width="100px" align="end" format="percent" format-options='{"minimumFractionDigits":2}'></c2-table-column>
-  <c2-table-column field="p95" header="p95" width="90px" align="end" format="number"></c2-table-column>
-  <c2-table-column field="requests" header="Requests" width="110px" align="end" format="number"></c2-table-column>
-</c2-table>
-```
-
 ```html tag=MdxCodeBlock,label=Soft cards
 <style>
   .soft {

@@ -138,24 +138,6 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
 <div class="spacious"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item></div>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 200px;
-    padding: 6px;
-    border-radius: 10px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-list-item--color: var(--c2-theme--color-outline, #d4d4d8);
-    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__hover--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-<div class="dark"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item><c2-list-item disabled>Disabled item</c2-list-item></div>
-```
-
 ```html tag=MdxCodeBlock,label=Outlined selected
 <style>
   .outlined {

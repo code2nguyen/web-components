@@ -9,7 +9,7 @@ import { FeatherArrowRightIcon, FeatherCpuIcon, FeatherLayersIcon, FeatherSlider
 
 const base = import.meta.env.BASE_URL
 const componentCount = (await getCollection('components')).length
-// Gallery cards are the fences on each component's gallery page; rounded down so the hero reads "800+", not "841".
+// Gallery cards are the fences on each component's gallery page; rounded down so the hero reads "700+", not "841".
 const variantCount = (await getCollection('gallery')).reduce((n, entry) => n + (entry.body?.match(/tag=MdxCodeBlock/g)?.length ?? 0), 0)
 const roundDown = (n: number, step: number) => Math.floor(n / step) * step
 const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
