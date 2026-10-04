@@ -260,6 +260,7 @@ export class Gantt extends LitElement {
   #formatters?: { locale: string; value: GanttFormatters }
   #observer?: MutationObserver
   #resizeObserver?: ResizeObserver
+  #measureFrame = 0
 
   override connectedCallback(): void {
     super.connectedCallback()
@@ -268,7 +269,12 @@ export class Gantt extends LitElement {
     if (isServer) return
     this.#observer ??= new MutationObserver(() => this.#markChildrenDirty())
     this.#observer.observe(this, { childList: true, subtree: true, characterData: true })
-    this.#resizeObserver ??= new ResizeObserver(() => this.#measure())
+    // Measure on the next frame, not in the callback: switching to the compact layout changes the probe's row height,
+    // which would resize an observed element inside the same delivery and raise "ResizeObserver loop completed".
+    this.#resizeObserver ??= new ResizeObserver(() => {
+      cancelAnimationFrame(this.#measureFrame)
+      this.#measureFrame = requestAnimationFrame(() => this.#measure())
+    })
     this.#resizeObserver.observe(this)
   }
 
@@ -276,6 +282,8 @@ export class Gantt extends LitElement {
     this.removeEventListener(GANTT_TASK_CHANGE_EVENT, this.#onTaskChange)
     this.#observer?.disconnect()
     this.#resizeObserver?.disconnect()
+    cancelAnimationFrame(this.#measureFrame)
+    this.#probeObserved = false
     super.disconnectedCallback()
   }
 
