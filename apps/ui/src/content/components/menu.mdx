@@ -21,13 +21,17 @@ Activating a row fires `menu-select` and closes the menu, unless the menu (or th
 
 Choose where it opens with `placement`: `top`, `right`, `bottom` or `left`, optionally aligned with `-start` or `-end`. `offset` sets the gap from the trigger and `cross-offset` shifts the menu sideways along the trigger. All offsets are pixel numbers, and floating-ui can still flip the menu when the preferred side has no room.
 
+The menu never writes attributes on its own host or its rows, so server-rendered markup matches the hydrated element. While something is slotted into `trigger` the host is an inline box and matches `c2-menu:state(has-trigger)`; without one it is `display: contents`. Earlier releases wrote a `has-trigger` attribute (replace `c2-menu[has-trigger]` with `c2-menu:state(has-trigger)`), a `placement="right-start"` attribute on submenus (the default is now applied without it), and `reserve-indicator` on the rows (still accepted as an attribute, no longer written). For a plain `<button>` trigger the menu does write `aria-haspopup` and `aria-expanded` on it, since a foreign element has no other way to carry them; render them in your markup (`aria-haspopup="menu" aria-expanded="false"`) and the first write changes nothing.
+
 Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/menu
+```typescript tag=CodeBlock
+import '@c2n/components/menu'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 `c2-menu-item` ships in the same package and is registered with it.
 

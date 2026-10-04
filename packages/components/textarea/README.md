@@ -3,11 +3,11 @@
 Multiline Lit input with native resizing, helper and error text, character counting, and CSS custom properties.
 
 ```sh
-npm install @c2n/textarea
+npm install @c2n/components
 ```
 
 ```js
-import '@c2n/textarea'
+import '@c2n/components/textarea'
 ```
 
 ```html

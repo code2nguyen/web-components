@@ -4,7 +4,7 @@ Decorative, pointer-transparent gradient that travels inside a masked border cha
 distributed beams plus configurable size, line width, outset, duration and direction.
 
 ```bash
-npm install @c2n/border-beam
+npm install @c2n/components
 ```
 
 ```html

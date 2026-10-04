@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gantt scenarios</title>
+    <style>
+      body {
+        margin: 24px;
+        font: 14px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        width: 900px;
+      }
+      main.narrow {
+        width: 400px;
+      }
+    </style>
+    <script type="module">
+      import '../src/gantt.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

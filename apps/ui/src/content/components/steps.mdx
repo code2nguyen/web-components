@@ -75,11 +75,13 @@ Every marker of a list hangs from the same line, so the rails line up from step 
 **Interactive.** `interactive` turns every row that is not a disclosure into a button, and the list keeps one
 selected step — see [Selecting a step](#selecting-a-step).
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/steps
+```typescript tag=CodeBlock
+import '@c2n/components/steps'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 
@@ -386,7 +388,7 @@ trace.updateStep('install', { status: 'success', trailing: '19 s' })
 ```
 
 Nothing stops you doing the same to slotted markup — a `c2-step` is an element, and setting `status` on it is
-enough. The parent list watches the attribute, so a stage rolls its status up from that alone:
+enough — as a property or an attribute. The step tells its list, so a stage rolls its status up from that alone:
 
 ```js tag=CodeBlock
 document.querySelector('c2-step[data-id="e2e"]').status = 'running'
@@ -426,6 +428,34 @@ trace.addEventListener('step-toggle', (event) => {
   console.log(event.target.label, event.detail.path, event.detail.collapsed)
 })
 ```
+
+## Styling by state
+
+A step never writes an attribute on its own host, so server-rendered markup matches the hydrated element:
+neither the `status` the list rolls up nor a `collapsed` the reader toggles is reflected. Page CSS reads a step
+through its custom states instead:
+
+| State                                                                                                                             | When                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `:state(pending)`, `:state(running)`, `:state(current)`, `:state(success)`, `:state(error)`, `:state(warning)`, `:state(skipped)` | The step's current status, authored or rolled up             |
+| `:state(collapsed)`                                                                                                               | A group is folded away                                       |
+| `:state(has-children)`                                                                                                            | The step has sub-steps, so it is a group                     |
+| `:state(last)`                                                                                                                    | The last step of its group                                   |
+| `:state(grouped)`                                                                                                                 | The list holds a group anywhere                              |
+| `:state(marker-icon)`, `:state(marker-number)`, `:state(marker-none)`                                                             | The list's `marker` mode                                     |
+| `:state(entering)`                                                                                                                | A step that arrived in a running trace is growing into place |
+| `:state(settling)`                                                                                                                | Its marker is giving the beat of a status that changed       |
+
+```css tag=CodeBlock
+c2-step:state(error) {
+  --c2-step__row--background: #fef2f2;
+}
+```
+
+Earlier releases wrote `entering`, `settling`, `last`, `marker`, `grouped` and `has-children` attributes on the
+host and reflected `status` and `collapsed`; replace `c2-step[last]` with `c2-step:state(last)`,
+`c2-step[marker='number']` with `c2-step:state(marker-number)`, `c2-step[status='error']` with
+`c2-step:state(error)`, and likewise for the others. An authored `status` or `collapsed` attribute still works.
 
 ## Rendering a row yourself
 

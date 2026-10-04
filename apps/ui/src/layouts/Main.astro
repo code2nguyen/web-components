@@ -23,7 +23,12 @@ interface Props {
   /** Which top-level nav item is active. */
   section?: 'overview' | 'getting-started' | 'components' | 'icons' | 'guides' | 'examples'
 }
-const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
+const {
+  title,
+  description = 'A library of small, themable Lit web components published as one npm package, @c2n/components.',
+  withSidebar,
+  section,
+} = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
 const mobileNavItems = [
   { value: 'overview', label: 'Overview', href: `${base}/`, current: section === 'overview' },
@@ -129,6 +134,9 @@ const mobileNavItems = [
 
     <SearchPalette />
 
+    <script>
+      import '../data/google-maps-config'
+    </script>
     <style lang="scss">
       .skip-link {
         position: absolute;

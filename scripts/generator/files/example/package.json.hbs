@@ -8,15 +8,14 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@c2n/button": "*",
-    "@c2n/theme": "*"
+    "@c2n/components": "*"
   },
   "devDependencies": {
     "@c2n/config": "*"
   },
   "wireit": {
     "build": {
-      "dependencies": ["../../../packages/components/button:build", "../../../packages/tools/theme:build"],
+      "dependencies": ["../../../packages/umbrella:build"],
       "command": "vite build",
       "files": ["src/**", "index.html", "vite.config.ts", "tsconfig*.json", "package.json"],
       "output": ["dist"]

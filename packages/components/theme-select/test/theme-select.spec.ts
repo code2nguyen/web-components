@@ -285,3 +285,23 @@ test('the trigger and the menu take their look from the component variables', as
   await expect(page.getByRole('menu')).toHaveCSS('background-color', 'rgb(20, 30, 40)')
   await expect(page.getByRole('menuitemradio', { name: 'System' })).toHaveCSS('color', 'rgb(120, 200, 255)')
 })
+
+test('the menu offset sets the gap between the trigger and the menu', async ({ page, scenario }) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  await scenario()
+  const host = page.locator('c2-theme-select')
+  const trigger = page.getByRole('button', { name: 'Theme: System', exact: true })
+  const overlay = page.locator('c2-theme-select c2-overlay')
+  const gap = async () => (await overlay.boundingBox())!.y - ((await trigger.boundingBox())!.y + (await trigger.boundingBox())!.height)
+
+  await trigger.hover()
+  await expect(page.getByRole('menu')).toBeVisible()
+  await expect.poll(gap).toBeCloseTo(6, 0)
+  await page.mouse.move(1, 1)
+  await expect(page.getByRole('menu')).toBeHidden()
+
+  await host.evaluate((element) => element.style.setProperty('--c2-theme-select__menu--offset', '24px'))
+  await trigger.hover()
+  await expect(page.getByRole('menu')).toBeVisible()
+  await expect.poll(gap).toBeCloseTo(24, 0)
+})

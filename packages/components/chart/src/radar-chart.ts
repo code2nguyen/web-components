@@ -29,6 +29,12 @@ export interface RadarChart {
  * @tag c2-radar-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of each profile's outline.
+ * @cssproperty {pixel} [--c2-chart__point--radius=2.5px] - Radius of the marker on each spoke.
+ * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of each profile's fill, unless `fill-opacity` is set.
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the web's rings.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-radar-chart')
 export class RadarChart extends EchartsChartBase {
@@ -72,7 +78,7 @@ export class RadarChart extends EchartsChartBase {
         radius: '68%',
         axisName: { color: theme.axisColor, fontSize: theme.axisFontSize },
         axisLine: { lineStyle: { color: theme.gridColor } },
-        splitLine: { lineStyle: { color: theme.gridColor } },
+        splitLine: { lineStyle: { color: theme.gridColor, width: theme.gridWidth } },
         splitArea: { show: false },
       },
     }

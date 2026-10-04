@@ -3,12 +3,12 @@
 Separator built with Lit: a horizontal or vertical rule with an optional label, themed through CSS custom properties.
 
 ```bash
-npm install @c2n/separator
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/separator'
+  import '@c2n/components/separator'
 </script>
 
 <c2-separator></c2-separator>

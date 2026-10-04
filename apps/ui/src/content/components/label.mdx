@@ -13,10 +13,10 @@ import { Checkbox } from '@c2n/checkbox'
 
 `c2-label` is the caption for a form control. Point `for` at the control's `id`: clicking the label toggles native checkboxes and radios (including the one inside `c2-checkbox`) and focuses anything else, and the label sets `aria-labelledby` on the control so screen readers announce it. `required` appends a marker (an asterisk by default, replace it through the `required-indicator` slot). Typography inherits from the surrounding text until you set the `--c2-label__container--*` variables for font, size, weight, spacing or transform.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/label
+```typescript tag=CodeBlock
+import '@c2n/components/label'
 ```
 
 ## Usage

@@ -13,7 +13,7 @@ export function CorrelatedEvidence({
   currentHref,
 }: Readonly<{ traces: readonly Trace[]; logs: readonly LogRecord[]; state: InvestigationState; currentHref: string }>) {
   const { demoState } = useDemoState()
-  if (demoState === 'loading') return <c2-skeleton aria-label="Loading correlated evidence" />
+  if (demoState === 'loading') return <c2-skeleton label="Loading correlated evidence" />
   if (demoState === 'error')
     return (
       <c2-status-panel

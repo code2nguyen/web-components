@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import type { SelectEventMap } from '@c2n/select'
-import { toast } from '@c2n/toast'
+import type { SelectEventMap } from '@c2n/components/select'
+import { toast } from '@c2n/components/toast'
 import ConversationList from './components/ConversationList.vue'
 import ThreadPanel from './components/ThreadPanel.vue'
 import { CONVERSATIONS, STATUS_LABEL, type Conversation, type Status } from './data/conversations'

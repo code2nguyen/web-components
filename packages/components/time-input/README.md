@@ -3,7 +3,7 @@
 A form-associated, themeable time-of-day input for Lit applications.
 
 ```bash
-npm install @c2n/time-input
+npm install @c2n/components
 ```
 
 ```html

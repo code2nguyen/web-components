@@ -3,12 +3,12 @@
 Badge built with Lit: a tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 
 ```bash
-npm install @c2n/badge
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/badge'
+  import '@c2n/components/badge'
 </script>
 
 <c2-badge tone="success">Active</c2-badge>

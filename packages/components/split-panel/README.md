@@ -3,12 +3,12 @@
 Split panel built with Lit: two panels separated by a divider the user drags (or moves with the keyboard) to resize them.
 
 ```bash
-npm install @c2n/split-panel
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/split-panel'
+  import '@c2n/components/split-panel'
 </script>
 
 <c2-split-panel position="30" primary="start" style="height: 400px">

@@ -41,10 +41,11 @@ export interface Details {
  *
  * @event {ToggleEvent} toggle - Re-dispatched from the native details after it opens or closes (`newState` is `open` or `closed`).
  *
- * @cssproperty {border} [--c2-details--border-top=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-details--border-right=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-details--border-bottom=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-details--border-left=1px solid rgb(213, 213, 213)]
+ * @cssproperty {border} [--c2-details--border=1px solid rgb(213, 213, 213)] - Frame on all four sides; each per-side variable falls back to it.
+ * @cssproperty {border} [--c2-details--border-top=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
+ * @cssproperty {border} [--c2-details--border-right=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
+ * @cssproperty {border} [--c2-details--border-bottom=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
+ * @cssproperty {border} [--c2-details--border-left=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
  *
  * @cssproperty {border-radius} [--c2-details--border-top-left-radius=8px]
  * @cssproperty {border-radius} [--c2-details--border-top-right-radius=8px]

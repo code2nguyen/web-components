@@ -3,12 +3,12 @@
 Hierarchical tree view with expansion, selection, checkbox selection and lazy loading, built with Lit.
 
 ```bash
-npm install @c2n/tree
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/tree'
+  import '@c2n/components/tree'
 </script>
 
 <c2-tree aria-label="Files" expanded-items="src" value="app">

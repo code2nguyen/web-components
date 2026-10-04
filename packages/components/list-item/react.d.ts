@@ -17,11 +17,16 @@ import type { ListItem } from '@c2n/list-item'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-list-item': C2Props<ListItem>
+      'c2-list-item': C2Props<ListItem> & {
+        'joined-before'?: Attribute
+        'joined-after'?: Attribute
+      }
     }
   }
 }

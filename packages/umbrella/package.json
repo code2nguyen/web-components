@@ -1,7 +1,7 @@
 {
   "name": "@c2n/components",
-  "version": "0.0.24",
-  "description": "Every c2n web component in one install: the whole library, one import per component, JSX and Vue template types for every tag, and the base theme",
+  "version": "1.0.0",
+  "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
   "keywords": [
@@ -23,496 +23,619 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "scripts": {
-    "type-check": "wireit"
+    "build": "wireit",
+    "type-check": "wireit",
+    "prepack": "npm run build"
   },
   "wireit": {
-    "type-check": {
+    "build": {
       "dependencies": [
         "../tools/framework-types:build"
+      ],
+      "command": "node scripts/bundle.ts",
+      "files": [
+        "src/**",
+        "scripts/bundle.ts",
+        "package.json"
+      ],
+      "output": [
+        "dist/**",
+        "custom-elements.json"
+      ]
+    },
+    "type-check": {
+      "dependencies": [
+        "build"
       ],
       "command": "node scripts/type-check.ts"
     }
   },
-  "devDependencies": {
-    "@c2n/config": "*"
-  },
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./accordion": {
-      "types": "./lib/accordion.d.ts",
-      "default": "./lib/accordion.js"
+      "types": "./dist/accordion.d.ts",
+      "default": "./dist/accordion.js"
     },
     "./attachment": {
-      "types": "./lib/attachment.d.ts",
-      "default": "./lib/attachment.js"
+      "types": "./dist/attachment.d.ts",
+      "default": "./dist/attachment.js"
+    },
+    "./attachment/attachment-group": {
+      "types": "./dist/attachment/attachment-group.d.ts",
+      "default": "./dist/attachment/attachment-group.js"
     },
     "./autocomplete": {
-      "types": "./lib/autocomplete.d.ts",
-      "default": "./lib/autocomplete.js"
+      "types": "./dist/autocomplete.d.ts",
+      "default": "./dist/autocomplete.js"
     },
     "./avatar": {
-      "types": "./lib/avatar.d.ts",
-      "default": "./lib/avatar.js"
+      "types": "./dist/avatar.d.ts",
+      "default": "./dist/avatar.js"
     },
     "./badge": {
-      "types": "./lib/badge.d.ts",
-      "default": "./lib/badge.js"
+      "types": "./dist/badge.d.ts",
+      "default": "./dist/badge.js"
     },
     "./banner": {
-      "types": "./lib/banner.d.ts",
-      "default": "./lib/banner.js"
+      "types": "./dist/banner.d.ts",
+      "default": "./dist/banner.js"
     },
     "./border-beam": {
-      "types": "./lib/border-beam.d.ts",
-      "default": "./lib/border-beam.js"
+      "types": "./dist/border-beam.d.ts",
+      "default": "./dist/border-beam.js"
     },
     "./breadcrumb": {
-      "types": "./lib/breadcrumb.d.ts",
-      "default": "./lib/breadcrumb.js"
+      "types": "./dist/breadcrumb.d.ts",
+      "default": "./dist/breadcrumb.js"
     },
     "./button": {
-      "types": "./lib/button.d.ts",
-      "default": "./lib/button.js"
+      "types": "./dist/button.d.ts",
+      "default": "./dist/button.js"
     },
     "./button-group": {
-      "types": "./lib/button-group.d.ts",
-      "default": "./lib/button-group.js"
+      "types": "./dist/button-group.d.ts",
+      "default": "./dist/button-group.js"
     },
     "./card": {
-      "types": "./lib/card.d.ts",
-      "default": "./lib/card.js"
+      "types": "./dist/card.d.ts",
+      "default": "./dist/card.js"
     },
     "./carousel": {
-      "types": "./lib/carousel.d.ts",
-      "default": "./lib/carousel.js"
+      "types": "./dist/carousel.d.ts",
+      "default": "./dist/carousel.js"
     },
     "./cascader": {
-      "types": "./lib/cascader.d.ts",
-      "default": "./lib/cascader.js"
+      "types": "./dist/cascader.d.ts",
+      "default": "./dist/cascader.js"
     },
     "./chart": {
-      "types": "./lib/chart.d.ts",
-      "default": "./lib/chart.js"
+      "types": "./dist/chart.d.ts",
+      "default": "./dist/chart.js"
+    },
+    "./chart/area-chart": {
+      "types": "./dist/chart/area-chart.d.ts",
+      "default": "./dist/chart/area-chart.js"
+    },
+    "./chart/bar-chart": {
+      "types": "./dist/chart/bar-chart.d.ts",
+      "default": "./dist/chart/bar-chart.js"
+    },
+    "./chart/bubble-chart": {
+      "types": "./dist/chart/bubble-chart.d.ts",
+      "default": "./dist/chart/bubble-chart.js"
+    },
+    "./chart/butterfly-chart": {
+      "types": "./dist/chart/butterfly-chart.d.ts",
+      "default": "./dist/chart/butterfly-chart.js"
+    },
+    "./chart/candlestick-chart": {
+      "types": "./dist/chart/candlestick-chart.d.ts",
+      "default": "./dist/chart/candlestick-chart.js"
+    },
+    "./chart/chart-legend": {
+      "types": "./dist/chart/chart-legend.d.ts",
+      "default": "./dist/chart/chart-legend.js"
+    },
+    "./chart/chart-series": {
+      "types": "./dist/chart/chart-series.d.ts",
+      "default": "./dist/chart/chart-series.js"
+    },
+    "./chart/chart-tooltip": {
+      "types": "./dist/chart/chart-tooltip.d.ts",
+      "default": "./dist/chart/chart-tooltip.js"
+    },
+    "./chart/gauge-chart": {
+      "types": "./dist/chart/gauge-chart.d.ts",
+      "default": "./dist/chart/gauge-chart.js"
+    },
+    "./chart/line-chart": {
+      "types": "./dist/chart/line-chart.d.ts",
+      "default": "./dist/chart/line-chart.js"
+    },
+    "./chart/map-chart": {
+      "types": "./dist/chart/map-chart.d.ts",
+      "default": "./dist/chart/map-chart.js"
+    },
+    "./chart/map-layer": {
+      "types": "./dist/chart/map-layer.d.ts",
+      "default": "./dist/chart/map-layer.js"
+    },
+    "./chart/overlap-chart": {
+      "types": "./dist/chart/overlap-chart.d.ts",
+      "default": "./dist/chart/overlap-chart.js"
+    },
+    "./chart/pie-chart": {
+      "types": "./dist/chart/pie-chart.d.ts",
+      "default": "./dist/chart/pie-chart.js"
+    },
+    "./chart/pyramid-chart": {
+      "types": "./dist/chart/pyramid-chart.d.ts",
+      "default": "./dist/chart/pyramid-chart.js"
+    },
+    "./chart/radar-chart": {
+      "types": "./dist/chart/radar-chart.d.ts",
+      "default": "./dist/chart/radar-chart.js"
+    },
+    "./chart/scatter-chart": {
+      "types": "./dist/chart/scatter-chart.d.ts",
+      "default": "./dist/chart/scatter-chart.js"
+    },
+    "./chart/sparkline": {
+      "types": "./dist/chart/sparkline.d.ts",
+      "default": "./dist/chart/sparkline.js"
     },
     "./chat-input": {
-      "types": "./lib/chat-input.d.ts",
-      "default": "./lib/chat-input.js"
+      "types": "./dist/chat-input.d.ts",
+      "default": "./dist/chat-input.js"
     },
     "./chat-message": {
-      "types": "./lib/chat-message.d.ts",
-      "default": "./lib/chat-message.js"
+      "types": "./dist/chat-message.d.ts",
+      "default": "./dist/chat-message.js"
     },
     "./chat-message-list": {
-      "types": "./lib/chat-message-list.d.ts",
-      "default": "./lib/chat-message-list.js"
+      "types": "./dist/chat-message-list.d.ts",
+      "default": "./dist/chat-message-list.js"
     },
     "./chatbot": {
-      "types": "./lib/chatbot.d.ts",
-      "default": "./lib/chatbot.js"
+      "types": "./dist/chatbot.d.ts",
+      "default": "./dist/chatbot.js"
     },
     "./checkbox": {
-      "types": "./lib/checkbox.d.ts",
-      "default": "./lib/checkbox.js"
+      "types": "./dist/checkbox.d.ts",
+      "default": "./dist/checkbox.js"
     },
     "./code-editor": {
-      "types": "./lib/code-editor.d.ts",
-      "default": "./lib/code-editor.js"
+      "types": "./dist/code-editor.d.ts",
+      "default": "./dist/code-editor.js"
     },
     "./code-viewer": {
-      "types": "./lib/code-viewer.d.ts",
-      "default": "./lib/code-viewer.js"
+      "types": "./dist/code-viewer.d.ts",
+      "default": "./dist/code-viewer.js"
     },
     "./color-area": {
-      "types": "./lib/color-area.d.ts",
-      "default": "./lib/color-area.js"
+      "types": "./dist/color-area.d.ts",
+      "default": "./dist/color-area.js"
     },
     "./color-select": {
-      "types": "./lib/color-select.d.ts",
-      "default": "./lib/color-select.js"
+      "types": "./dist/color-select.d.ts",
+      "default": "./dist/color-select.js"
     },
     "./color-slider": {
-      "types": "./lib/color-slider.d.ts",
-      "default": "./lib/color-slider.js"
+      "types": "./dist/color-slider.d.ts",
+      "default": "./dist/color-slider.js"
     },
     "./command": {
-      "types": "./lib/command.d.ts",
-      "default": "./lib/command.js"
+      "types": "./dist/command.d.ts",
+      "default": "./dist/command.js"
+    },
+    "./command/command-group": {
+      "types": "./dist/command/command-group.d.ts",
+      "default": "./dist/command/command-group.js"
+    },
+    "./command/command-item": {
+      "types": "./dist/command/command-item.d.ts",
+      "default": "./dist/command/command-item.js"
+    },
+    "./command/command-separator": {
+      "types": "./dist/command/command-separator.d.ts",
+      "default": "./dist/command/command-separator.js"
     },
     "./comparison-bar": {
-      "types": "./lib/comparison-bar.d.ts",
-      "default": "./lib/comparison-bar.js"
+      "types": "./dist/comparison-bar.d.ts",
+      "default": "./dist/comparison-bar.js"
     },
     "./context-menu": {
-      "types": "./lib/context-menu.d.ts",
-      "default": "./lib/context-menu.js"
+      "types": "./dist/context-menu.d.ts",
+      "default": "./dist/context-menu.js"
     },
     "./copy-button": {
-      "types": "./lib/copy-button.d.ts",
-      "default": "./lib/copy-button.js"
+      "types": "./dist/copy-button.d.ts",
+      "default": "./dist/copy-button.js"
     },
     "./dashboard": {
-      "types": "./lib/dashboard.d.ts",
-      "default": "./lib/dashboard.js"
+      "types": "./dist/dashboard.d.ts",
+      "default": "./dist/dashboard.js"
+    },
+    "./dashboard/dash-card": {
+      "types": "./dist/dashboard/dash-card.d.ts",
+      "default": "./dist/dashboard/dash-card.js"
     },
     "./date-input": {
-      "types": "./lib/date-input.d.ts",
-      "default": "./lib/date-input.js"
+      "types": "./dist/date-input.d.ts",
+      "default": "./dist/date-input.js"
     },
     "./date-selector": {
-      "types": "./lib/date-selector.d.ts",
-      "default": "./lib/date-selector.js"
+      "types": "./dist/date-selector.d.ts",
+      "default": "./dist/date-selector.js"
     },
     "./details": {
-      "types": "./lib/details.d.ts",
-      "default": "./lib/details.js"
+      "types": "./dist/details.d.ts",
+      "default": "./dist/details.js"
     },
     "./flow": {
-      "types": "./lib/flow.d.ts",
-      "default": "./lib/flow.js"
+      "types": "./dist/flow.d.ts",
+      "default": "./dist/flow.js"
+    },
+    "./gantt": {
+      "types": "./dist/gantt.d.ts",
+      "default": "./dist/gantt.js"
+    },
+    "./gantt/gantt-task": {
+      "types": "./dist/gantt/gantt-task.d.ts",
+      "default": "./dist/gantt/gantt-task.js"
+    },
+    "./google-map": {
+      "types": "./dist/google-map.d.ts",
+      "default": "./dist/google-map.js"
+    },
+    "./google-map/google-map-marker": {
+      "types": "./dist/google-map/google-map-marker.d.ts",
+      "default": "./dist/google-map/google-map-marker.js"
+    },
+    "./google-map/google-map-route": {
+      "types": "./dist/google-map/google-map-route.d.ts",
+      "default": "./dist/google-map/google-map-route.js"
+    },
+    "./google-map/google-street-view": {
+      "types": "./dist/google-map/google-street-view.d.ts",
+      "default": "./dist/google-map/google-street-view.js"
     },
     "./header": {
-      "types": "./lib/header.d.ts",
-      "default": "./lib/header.js"
+      "types": "./dist/header.d.ts",
+      "default": "./dist/header.js"
     },
     "./hover-card": {
-      "types": "./lib/hover-card.d.ts",
-      "default": "./lib/hover-card.js"
+      "types": "./dist/hover-card.d.ts",
+      "default": "./dist/hover-card.js"
     },
     "./icon-button": {
-      "types": "./lib/icon-button.d.ts",
-      "default": "./lib/icon-button.js"
+      "types": "./dist/icon-button.d.ts",
+      "default": "./dist/icon-button.js"
+    },
+    "./kanban": {
+      "types": "./dist/kanban.d.ts",
+      "default": "./dist/kanban.js"
+    },
+    "./kanban/kanban-column": {
+      "types": "./dist/kanban/kanban-column.d.ts",
+      "default": "./dist/kanban/kanban-column.js"
     },
     "./kbd": {
-      "types": "./lib/kbd.d.ts",
-      "default": "./lib/kbd.js"
+      "types": "./dist/kbd.d.ts",
+      "default": "./dist/kbd.js"
     },
     "./label": {
-      "types": "./lib/label.d.ts",
-      "default": "./lib/label.js"
+      "types": "./dist/label.d.ts",
+      "default": "./dist/label.js"
     },
     "./link-button": {
-      "types": "./lib/link-button.d.ts",
-      "default": "./lib/link-button.js"
+      "types": "./dist/link-button.d.ts",
+      "default": "./dist/link-button.js"
     },
     "./list": {
-      "types": "./lib/list.d.ts",
-      "default": "./lib/list.js"
+      "types": "./dist/list.d.ts",
+      "default": "./dist/list.js"
     },
     "./list-item": {
-      "types": "./lib/list-item.d.ts",
-      "default": "./lib/list-item.js"
+      "types": "./dist/list-item.d.ts",
+      "default": "./dist/list-item.js"
     },
     "./log-viewer": {
-      "types": "./lib/log-viewer.d.ts",
-      "default": "./lib/log-viewer.js"
+      "types": "./dist/log-viewer.d.ts",
+      "default": "./dist/log-viewer.js"
     },
     "./marker": {
-      "types": "./lib/marker.d.ts",
-      "default": "./lib/marker.js"
+      "types": "./dist/marker.d.ts",
+      "default": "./dist/marker.js"
     },
     "./masonry": {
-      "types": "./lib/masonry.d.ts",
-      "default": "./lib/masonry.js"
+      "types": "./dist/masonry.d.ts",
+      "default": "./dist/masonry.js"
+    },
+    "./masonry/masonry-item": {
+      "types": "./dist/masonry/masonry-item.d.ts",
+      "default": "./dist/masonry/masonry-item.js"
     },
     "./mat-icon": {
-      "types": "./lib/mat-icon.d.ts",
-      "default": "./lib/mat-icon.js"
+      "types": "./dist/mat-icon.d.ts",
+      "default": "./dist/mat-icon.js"
     },
     "./menu": {
-      "types": "./lib/menu.d.ts",
-      "default": "./lib/menu.js"
+      "types": "./dist/menu.d.ts",
+      "default": "./dist/menu.js"
+    },
+    "./menu/menu-item": {
+      "types": "./dist/menu/menu-item.d.ts",
+      "default": "./dist/menu/menu-item.js"
     },
     "./modal": {
-      "types": "./lib/modal.d.ts",
-      "default": "./lib/modal.js"
+      "types": "./dist/modal.d.ts",
+      "default": "./dist/modal.js"
     },
     "./month-planner": {
-      "types": "./lib/month-planner.d.ts",
-      "default": "./lib/month-planner.js"
+      "types": "./dist/month-planner.d.ts",
+      "default": "./dist/month-planner.js"
     },
     "./navigation-menu": {
-      "types": "./lib/navigation-menu.d.ts",
-      "default": "./lib/navigation-menu.js"
+      "types": "./dist/navigation-menu.d.ts",
+      "default": "./dist/navigation-menu.js"
+    },
+    "./navigation-menu/navigation-menu-item": {
+      "types": "./dist/navigation-menu/navigation-menu-item.d.ts",
+      "default": "./dist/navigation-menu/navigation-menu-item.js"
+    },
+    "./navigation-menu/navigation-menu-link": {
+      "types": "./dist/navigation-menu/navigation-menu-link.d.ts",
+      "default": "./dist/navigation-menu/navigation-menu-link.js"
     },
     "./notepad": {
-      "types": "./lib/notepad.d.ts",
-      "default": "./lib/notepad.js"
+      "types": "./dist/notepad.d.ts",
+      "default": "./dist/notepad.js"
     },
     "./number-input": {
-      "types": "./lib/number-input.d.ts",
-      "default": "./lib/number-input.js"
+      "types": "./dist/number-input.d.ts",
+      "default": "./dist/number-input.js"
     },
     "./otp-input": {
-      "types": "./lib/otp-input.d.ts",
-      "default": "./lib/otp-input.js"
+      "types": "./dist/otp-input.d.ts",
+      "default": "./dist/otp-input.js"
     },
     "./overlay": {
-      "types": "./lib/overlay.d.ts",
-      "default": "./lib/overlay.js"
+      "types": "./dist/overlay.d.ts",
+      "default": "./dist/overlay.js"
     },
     "./page-editor": {
-      "types": "./lib/page-editor.d.ts",
-      "default": "./lib/page-editor.js"
+      "types": "./dist/page-editor.d.ts",
+      "default": "./dist/page-editor.js"
     },
     "./pagination": {
-      "types": "./lib/pagination.d.ts",
-      "default": "./lib/pagination.js"
+      "types": "./dist/pagination.d.ts",
+      "default": "./dist/pagination.js"
     },
     "./progress": {
-      "types": "./lib/progress.d.ts",
-      "default": "./lib/progress.js"
+      "types": "./dist/progress.d.ts",
+      "default": "./dist/progress.js"
     },
     "./qr-code": {
-      "types": "./lib/qr-code.d.ts",
-      "default": "./lib/qr-code.js"
+      "types": "./dist/qr-code.d.ts",
+      "default": "./dist/qr-code.js"
     },
     "./questionnaire": {
-      "types": "./lib/questionnaire.d.ts",
-      "default": "./lib/questionnaire.js"
+      "types": "./dist/questionnaire.d.ts",
+      "default": "./dist/questionnaire.js"
     },
     "./radio": {
-      "types": "./lib/radio.d.ts",
-      "default": "./lib/radio.js"
+      "types": "./dist/radio.d.ts",
+      "default": "./dist/radio.js"
+    },
+    "./radio/radio-group": {
+      "types": "./dist/radio/radio-group.d.ts",
+      "default": "./dist/radio/radio-group.js"
+    },
+    "./radio/radio": {
+      "types": "./dist/radio/radio.d.ts",
+      "default": "./dist/radio/radio.js"
     },
     "./rate": {
-      "types": "./lib/rate.d.ts",
-      "default": "./lib/rate.js"
+      "types": "./dist/rate.d.ts",
+      "default": "./dist/rate.js"
     },
     "./reorder-list": {
-      "types": "./lib/reorder-list.d.ts",
-      "default": "./lib/reorder-list.js"
+      "types": "./dist/reorder-list.d.ts",
+      "default": "./dist/reorder-list.js"
     },
     "./select": {
-      "types": "./lib/select.d.ts",
-      "default": "./lib/select.js"
+      "types": "./dist/select.d.ts",
+      "default": "./dist/select.js"
     },
     "./separator": {
-      "types": "./lib/separator.d.ts",
-      "default": "./lib/separator.js"
+      "types": "./dist/separator.d.ts",
+      "default": "./dist/separator.js"
     },
     "./sheet": {
-      "types": "./lib/sheet.d.ts",
-      "default": "./lib/sheet.js"
+      "types": "./dist/sheet.d.ts",
+      "default": "./dist/sheet.js"
     },
     "./shortcut": {
-      "types": "./lib/shortcut.d.ts",
-      "default": "./lib/shortcut.js"
+      "types": "./dist/shortcut.d.ts",
+      "default": "./dist/shortcut.js"
     },
     "./side-nav": {
-      "types": "./lib/side-nav.d.ts",
-      "default": "./lib/side-nav.js"
+      "types": "./dist/side-nav.d.ts",
+      "default": "./dist/side-nav.js"
     },
     "./skeleton": {
-      "types": "./lib/skeleton.d.ts",
-      "default": "./lib/skeleton.js"
+      "types": "./dist/skeleton.d.ts",
+      "default": "./dist/skeleton.js"
     },
     "./slider": {
-      "types": "./lib/slider.d.ts",
-      "default": "./lib/slider.js"
+      "types": "./dist/slider.d.ts",
+      "default": "./dist/slider.js"
     },
     "./spinner": {
-      "types": "./lib/spinner.d.ts",
-      "default": "./lib/spinner.js"
+      "types": "./dist/spinner.d.ts",
+      "default": "./dist/spinner.js"
     },
     "./split-panel": {
-      "types": "./lib/split-panel.d.ts",
-      "default": "./lib/split-panel.js"
+      "types": "./dist/split-panel.d.ts",
+      "default": "./dist/split-panel.js"
     },
     "./stat": {
-      "types": "./lib/stat.d.ts",
-      "default": "./lib/stat.js"
+      "types": "./dist/stat.d.ts",
+      "default": "./dist/stat.js"
     },
     "./status-panel": {
-      "types": "./lib/status-panel.d.ts",
-      "default": "./lib/status-panel.js"
+      "types": "./dist/status-panel.d.ts",
+      "default": "./dist/status-panel.js"
     },
     "./steps": {
-      "types": "./lib/steps.d.ts",
-      "default": "./lib/steps.js"
+      "types": "./dist/steps.d.ts",
+      "default": "./dist/steps.js"
+    },
+    "./steps/step": {
+      "types": "./dist/steps/step.d.ts",
+      "default": "./dist/steps/step.js"
     },
     "./switch": {
-      "types": "./lib/switch.d.ts",
-      "default": "./lib/switch.js"
+      "types": "./dist/switch.d.ts",
+      "default": "./dist/switch.js"
     },
     "./table": {
-      "types": "./lib/table.d.ts",
-      "default": "./lib/table.js"
+      "types": "./dist/table.d.ts",
+      "default": "./dist/table.js"
+    },
+    "./table/table-column": {
+      "types": "./dist/table/table-column.d.ts",
+      "default": "./dist/table/table-column.js"
     },
     "./tabs": {
-      "types": "./lib/tabs.d.ts",
-      "default": "./lib/tabs.js"
+      "types": "./dist/tabs.d.ts",
+      "default": "./dist/tabs.js"
+    },
+    "./tabs/tab": {
+      "types": "./dist/tabs/tab.d.ts",
+      "default": "./dist/tabs/tab.js"
     },
     "./tag-input": {
-      "types": "./lib/tag-input.d.ts",
-      "default": "./lib/tag-input.js"
+      "types": "./dist/tag-input.d.ts",
+      "default": "./dist/tag-input.js"
     },
     "./text-field": {
-      "types": "./lib/text-field.d.ts",
-      "default": "./lib/text-field.js"
+      "types": "./dist/text-field.d.ts",
+      "default": "./dist/text-field.js"
+    },
+    "./text-field/text-field-clear": {
+      "types": "./dist/text-field/text-field-clear.d.ts",
+      "default": "./dist/text-field/text-field-clear.js"
     },
     "./textarea": {
-      "types": "./lib/textarea.d.ts",
-      "default": "./lib/textarea.js"
+      "types": "./dist/textarea.d.ts",
+      "default": "./dist/textarea.js"
     },
     "./theme-select": {
-      "types": "./lib/theme-select.d.ts",
-      "default": "./lib/theme-select.js"
+      "types": "./dist/theme-select.d.ts",
+      "default": "./dist/theme-select.js"
     },
     "./time-input": {
-      "types": "./lib/time-input.d.ts",
-      "default": "./lib/time-input.js"
+      "types": "./dist/time-input.d.ts",
+      "default": "./dist/time-input.js"
     },
     "./timeline": {
-      "types": "./lib/timeline.d.ts",
-      "default": "./lib/timeline.js"
+      "types": "./dist/timeline.d.ts",
+      "default": "./dist/timeline.js"
+    },
+    "./timeline/timeline-item": {
+      "types": "./dist/timeline/timeline-item.d.ts",
+      "default": "./dist/timeline/timeline-item.js"
     },
     "./toast": {
-      "types": "./lib/toast.d.ts",
-      "default": "./lib/toast.js"
+      "types": "./dist/toast.d.ts",
+      "default": "./dist/toast.js"
     },
     "./todo-list": {
-      "types": "./lib/todo-list.d.ts",
-      "default": "./lib/todo-list.js"
+      "types": "./dist/todo-list.d.ts",
+      "default": "./dist/todo-list.js"
     },
     "./tooltip": {
-      "types": "./lib/tooltip.d.ts",
-      "default": "./lib/tooltip.js"
+      "types": "./dist/tooltip.d.ts",
+      "default": "./dist/tooltip.js"
     },
     "./tree": {
-      "types": "./lib/tree.d.ts",
-      "default": "./lib/tree.js"
+      "types": "./dist/tree.d.ts",
+      "default": "./dist/tree.js"
+    },
+    "./tree/tree-item": {
+      "types": "./dist/tree/tree-item.d.ts",
+      "default": "./dist/tree/tree-item.js"
     },
     "./upload": {
-      "types": "./lib/upload.d.ts",
-      "default": "./lib/upload.js"
+      "types": "./dist/upload.d.ts",
+      "default": "./dist/upload.js"
     },
     "./virtual-list": {
-      "types": "./lib/virtual-list.d.ts",
-      "default": "./lib/virtual-list.js"
+      "types": "./dist/virtual-list.d.ts",
+      "default": "./dist/virtual-list.js"
     },
     "./week-planner": {
-      "types": "./lib/week-planner.d.ts",
-      "default": "./lib/week-planner.js"
+      "types": "./dist/week-planner.d.ts",
+      "default": "./dist/week-planner.js"
+    },
+    "./working-indicator": {
+      "types": "./dist/working-indicator.d.ts",
+      "default": "./dist/working-indicator.js"
     },
     "./react": {
-      "types": "./react.d.ts",
-      "default": "./react.js"
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
     },
     "./vue": {
-      "types": "./vue.d.ts",
-      "default": "./vue.js"
+      "types": "./dist/vue.d.ts",
+      "default": "./dist/vue.js"
     },
     "./theme.css": "./theme.css",
     "./base.css": "./base.css",
     "./tokens.css": "./tokens.css",
+    "./custom-elements.json": "./custom-elements.json",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "lib",
-    "react.js",
-    "react.d.ts",
-    "vue.js",
-    "vue.d.ts",
+    "dist",
+    "custom-elements.json",
     "theme.css",
     "base.css",
     "tokens.css"
   ],
+  "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/accordion": "0.0.24",
-    "@c2n/attachment": "0.0.24",
-    "@c2n/autocomplete": "0.0.24",
-    "@c2n/avatar": "0.0.24",
-    "@c2n/badge": "0.0.24",
-    "@c2n/banner": "0.0.24",
-    "@c2n/border-beam": "0.0.24",
-    "@c2n/breadcrumb": "0.0.24",
-    "@c2n/button": "0.0.24",
-    "@c2n/button-group": "0.0.24",
-    "@c2n/card": "0.0.24",
-    "@c2n/carousel": "0.0.24",
-    "@c2n/cascader": "0.0.24",
-    "@c2n/chart": "0.0.24",
-    "@c2n/chat-input": "0.0.24",
-    "@c2n/chat-message": "0.0.24",
-    "@c2n/chat-message-list": "0.0.24",
-    "@c2n/chatbot": "0.0.24",
-    "@c2n/checkbox": "0.0.24",
-    "@c2n/code-editor": "0.0.24",
-    "@c2n/code-viewer": "0.0.24",
-    "@c2n/color-area": "0.0.24",
-    "@c2n/color-select": "0.0.24",
-    "@c2n/color-slider": "0.0.24",
-    "@c2n/command": "0.0.24",
-    "@c2n/comparison-bar": "0.0.24",
-    "@c2n/context-menu": "0.0.24",
-    "@c2n/copy-button": "0.0.24",
-    "@c2n/dashboard": "0.0.24",
-    "@c2n/date-input": "0.0.24",
-    "@c2n/date-selector": "0.0.24",
-    "@c2n/details": "0.0.24",
-    "@c2n/flow": "0.0.24",
-    "@c2n/header": "0.0.24",
-    "@c2n/hover-card": "0.0.24",
-    "@c2n/icon-button": "0.0.24",
-    "@c2n/kbd": "0.0.24",
-    "@c2n/label": "0.0.24",
-    "@c2n/link-button": "0.0.24",
-    "@c2n/list": "0.0.24",
-    "@c2n/list-item": "0.0.24",
-    "@c2n/log-viewer": "0.0.24",
-    "@c2n/marker": "0.0.24",
-    "@c2n/masonry": "0.0.24",
-    "@c2n/mat-icon": "0.0.24",
-    "@c2n/menu": "0.0.24",
-    "@c2n/modal": "0.0.24",
-    "@c2n/month-planner": "0.0.24",
-    "@c2n/navigation-menu": "0.0.24",
-    "@c2n/notepad": "0.0.24",
-    "@c2n/number-input": "0.0.24",
-    "@c2n/otp-input": "0.0.24",
-    "@c2n/overlay": "0.0.24",
-    "@c2n/page-editor": "0.0.24",
-    "@c2n/pagination": "0.0.24",
-    "@c2n/progress": "0.0.24",
-    "@c2n/qr-code": "0.0.24",
-    "@c2n/questionnaire": "0.0.24",
-    "@c2n/radio": "0.0.24",
-    "@c2n/rate": "0.0.24",
-    "@c2n/reorder-list": "0.0.24",
-    "@c2n/select": "0.0.24",
-    "@c2n/separator": "0.0.24",
-    "@c2n/sheet": "0.0.24",
-    "@c2n/shortcut": "0.0.24",
-    "@c2n/side-nav": "0.0.24",
-    "@c2n/skeleton": "0.0.24",
-    "@c2n/slider": "0.0.24",
-    "@c2n/spinner": "0.0.24",
-    "@c2n/split-panel": "0.0.24",
-    "@c2n/stat": "0.0.24",
-    "@c2n/status-panel": "0.0.24",
-    "@c2n/steps": "0.0.24",
-    "@c2n/switch": "0.0.24",
-    "@c2n/table": "0.0.24",
-    "@c2n/tabs": "0.0.24",
-    "@c2n/tag-input": "0.0.24",
-    "@c2n/text-field": "0.0.24",
-    "@c2n/textarea": "0.0.24",
-    "@c2n/theme": "0.0.24",
-    "@c2n/theme-select": "0.0.24",
-    "@c2n/time-input": "0.0.24",
-    "@c2n/timeline": "0.0.24",
-    "@c2n/toast": "0.0.24",
-    "@c2n/todo-list": "0.0.24",
-    "@c2n/tooltip": "0.0.24",
-    "@c2n/tree": "0.0.24",
-    "@c2n/upload": "0.0.24",
-    "@c2n/virtual-list": "0.0.24",
-    "@c2n/week-planner": "0.0.24"
+    "@c2n/core": "1.0.0",
+    "@c2n/phosphor-icons": "1.0.0",
+    "@c2n/task-icons": "1.0.0",
+    "@c2n/theme": "1.0.0",
+    "@ctrl/tinycolor": "4.2.0",
+    "@floating-ui/dom": "1.8.0",
+    "@lit-labs/motion": "1.1.0",
+    "@lit/context": "1.1.6",
+    "@lit/task": "1.0.3",
+    "@types/geojson": "7946.0.16",
+    "@types/google.maps": "^3.66.4",
+    "@types/topojson-specification": "1.0.5",
+    "@upsetjs/venn.js": "2.0.0",
+    "d3-geo": "3.1.1",
+    "lit": "3.3.3",
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.1",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-transform": "^1.12.2",
+    "prosemirror-view": "^1.42.6",
+    "shiki": "4.4.3",
+    "topojson-client": "3.1.0",
+    "uqr": "^0.1.3"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.0.0",
@@ -527,7 +650,9 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
-    "uplot": "^1.6.31"
+    "react": ">=18.0.0",
+    "uplot": "^1.6.31",
+    "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "@codemirror/autocomplete": {
@@ -566,8 +691,110 @@
     "echarts": {
       "optional": true
     },
+    "react": {
+      "optional": true
+    },
     "uplot": {
       "optional": true
+    },
+    "vue": {
+      "optional": true
     }
+  },
+  "devDependencies": {
+    "@c2n/accordion": "*",
+    "@c2n/attachment": "*",
+    "@c2n/autocomplete": "*",
+    "@c2n/avatar": "*",
+    "@c2n/badge": "*",
+    "@c2n/banner": "*",
+    "@c2n/border-beam": "*",
+    "@c2n/breadcrumb": "*",
+    "@c2n/button": "*",
+    "@c2n/button-group": "*",
+    "@c2n/card": "*",
+    "@c2n/carousel": "*",
+    "@c2n/cascader": "*",
+    "@c2n/chart": "*",
+    "@c2n/chat-input": "*",
+    "@c2n/chat-message": "*",
+    "@c2n/chat-message-list": "*",
+    "@c2n/chatbot": "*",
+    "@c2n/checkbox": "*",
+    "@c2n/code-editor": "*",
+    "@c2n/code-viewer": "*",
+    "@c2n/color-area": "*",
+    "@c2n/color-select": "*",
+    "@c2n/color-slider": "*",
+    "@c2n/command": "*",
+    "@c2n/comparison-bar": "*",
+    "@c2n/config": "*",
+    "@c2n/context-menu": "*",
+    "@c2n/copy-button": "*",
+    "@c2n/dashboard": "*",
+    "@c2n/date-input": "*",
+    "@c2n/date-selector": "*",
+    "@c2n/details": "*",
+    "@c2n/flow": "*",
+    "@c2n/gantt": "*",
+    "@c2n/google-map": "*",
+    "@c2n/header": "*",
+    "@c2n/hover-card": "*",
+    "@c2n/icon-button": "*",
+    "@c2n/kanban": "*",
+    "@c2n/kbd": "*",
+    "@c2n/label": "*",
+    "@c2n/link-button": "*",
+    "@c2n/list": "*",
+    "@c2n/list-item": "*",
+    "@c2n/log-viewer": "*",
+    "@c2n/marker": "*",
+    "@c2n/masonry": "*",
+    "@c2n/mat-icon": "*",
+    "@c2n/menu": "*",
+    "@c2n/modal": "*",
+    "@c2n/month-planner": "*",
+    "@c2n/navigation-menu": "*",
+    "@c2n/notepad": "*",
+    "@c2n/number-input": "*",
+    "@c2n/otp-input": "*",
+    "@c2n/overlay": "*",
+    "@c2n/page-editor": "*",
+    "@c2n/pagination": "*",
+    "@c2n/progress": "*",
+    "@c2n/qr-code": "*",
+    "@c2n/questionnaire": "*",
+    "@c2n/radio": "*",
+    "@c2n/rate": "*",
+    "@c2n/reorder-list": "*",
+    "@c2n/select": "*",
+    "@c2n/separator": "*",
+    "@c2n/sheet": "*",
+    "@c2n/shortcut": "*",
+    "@c2n/side-nav": "*",
+    "@c2n/skeleton": "*",
+    "@c2n/slider": "*",
+    "@c2n/spinner": "*",
+    "@c2n/split-panel": "*",
+    "@c2n/stat": "*",
+    "@c2n/status-panel": "*",
+    "@c2n/steps": "*",
+    "@c2n/switch": "*",
+    "@c2n/table": "*",
+    "@c2n/tabs": "*",
+    "@c2n/tag-input": "*",
+    "@c2n/text-field": "*",
+    "@c2n/textarea": "*",
+    "@c2n/theme-select": "*",
+    "@c2n/time-input": "*",
+    "@c2n/timeline": "*",
+    "@c2n/toast": "*",
+    "@c2n/todo-list": "*",
+    "@c2n/tooltip": "*",
+    "@c2n/tree": "*",
+    "@c2n/upload": "*",
+    "@c2n/virtual-list": "*",
+    "@c2n/week-planner": "*",
+    "@c2n/working-indicator": "*"
   }
 }

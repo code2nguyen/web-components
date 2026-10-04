@@ -11,10 +11,10 @@ import { OtpInput } from '@c2n/otp-input'
 
 `c2-otp-input` collects a verification code as a row of cells. One native input sits over the cells, so typing, Backspace, pasting a whole code and SMS or password-manager autofill (`autocomplete="one-time-code"`) behave natively and screen readers announce a single text box. Set `length` for the number of cells, `mode="alphanumeric"` to accept letters, `group` to split the cells with a separator, and `masked` to hide what was typed. The element fires `complete` once every cell is filled, and reports `tooShort` validity for a partial code.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/otp-input
+```typescript tag=CodeBlock
+import '@c2n/components/otp-input'
 ```
 
 ## Usage

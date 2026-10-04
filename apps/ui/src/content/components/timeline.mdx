@@ -15,10 +15,10 @@ when an entry needs a link, a relative time or an icon; `datetime` makes the tim
 `tone` colours an entry's marker, and `layout="split"` moves the timestamps into a column of their own before the
 rail. The connector stops at the last entry by itself, including for entries added later.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/timeline
+```typescript tag=CodeBlock
+import '@c2n/components/timeline'
 ```
 
 ## Usage
@@ -56,4 +56,18 @@ npm install @c2n/timeline
     </c2-timeline-item>
   </c2-timeline>
 </div>
+```
+
+## Styling by position
+
+The timeline tells each entry whether it is the last one and which layout it is in, and the entry exposes both as
+custom states rather than attributes, so server-rendered markup matches the hydrated element:
+`c2-timeline-item:state(last)` and `c2-timeline-item:state(split)`. Earlier releases wrote `last` and `split`
+attributes on the entries; replace `c2-timeline-item[last]` with `c2-timeline-item:state(last)`, and likewise for
+`split`.
+
+```css tag=CodeBlock
+c2-timeline-item:state(last) {
+  --c2-timeline-item__marker--background: var(--c2-theme--color-primary, #476ef9);
+}
 ```

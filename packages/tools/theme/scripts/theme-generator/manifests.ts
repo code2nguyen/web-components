@@ -3,7 +3,7 @@
  * properties into `CssVar` records parsed with the component variable grammar
  * `--<prefix>[__<part>[__<state>]]--<property>`.
  */
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -49,7 +49,8 @@ const STATES = new Set([
   'invalid',
 ])
 
-const EXCLUDED_PACKAGES = new Set(['@c2n/design-board', '@c2n/json-form'])
+// `@c2n/components` merges the manifests of the packages it bundles, so reading it would map every variable twice.
+const EXCLUDED_PACKAGES = new Set(['@c2n/design-board', '@c2n/json-form', '@c2n/components'])
 
 const NAME_PATTERN = /^--(c2-[a-z0-9-]+?)(?:__(.+?))?--(-?[a-z-]+)$/
 
@@ -145,4 +146,38 @@ export function readCssVars(packages: DiscoveredPackage[]): { vars: CssVar[]; un
     }
   }
   return { vars, unparsed }
+}
+
+const DIRECT_FALLBACK = /var\(\s*(--c2-[\w-]+)\s*,\s*var\(\s*(--c2-[\w-]+)/g
+
+/** Every `.js`/`.css` file under `dir`, recursively. */
+function builtFiles(dir: string): string[] {
+  if (!existsSync(dir)) return []
+  const files: string[] = []
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry)
+    if (statSync(path).isDirectory()) files.push(...builtFiles(path))
+    else if (path.endsWith('.js') || path.endsWith('.css')) files.push(path)
+  }
+  return files
+}
+
+/**
+ * Collects the direct fallbacks a component's built stylesheet wires between its own variables: `css.cssVar(a, b)`
+ * compiles to `var(--a, var(--b, <default>))`, recorded as `--a → {--b}`. Read from the package's `dist/`, where Vite
+ * inlines the compiled SCSS, because the manifest documents each variable on its own and says nothing about the chain.
+ */
+export function collectFallbackChains(source: string, chains = new Map<string, Set<string>>()): Map<string, Set<string>> {
+  for (const [, from, to] of source.matchAll(DIRECT_FALLBACK)) {
+    const targets = chains.get(from) ?? new Set<string>()
+    targets.add(to)
+    chains.set(from, targets)
+  }
+  return chains
+}
+
+export function readFallbackChains(packages: DiscoveredPackage[]): Map<string, Set<string>> {
+  const chains = new Map<string, Set<string>>()
+  for (const { dir } of packages) for (const file of builtFiles(join(dir, 'dist'))) collectFallbackChains(readFileSync(file, 'utf8'), chains)
+  return chains
 }

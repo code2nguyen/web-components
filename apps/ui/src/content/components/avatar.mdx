@@ -11,10 +11,10 @@ import { Avatar, AvatarGroup } from '@c2n/avatar'
 
 `c2-avatar` shows a person or entity. It resolves its content in order: the `src` image (a broken image fires `error` and falls back to the initials), then slotted content such as an icon or emoji, then the initials computed from `name`. `initial-count="2"` picks the first and last word of a longer name, and `initials` overrides the computation. `auto-color` derives a stable background hue from the name, `status` adds a presence dot, and the `badge` slot replaces the dot with your own element. One `--c2-avatar--size` token drives the width, height and font size. The same package also exports `c2-avatar-group`, which stacks avatars responsively and replaces those that no longer fit with an automatic count.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/avatar
+```typescript tag=CodeBlock
+import '@c2n/components/avatar'
 ```
 
 ## Usage
@@ -112,3 +112,5 @@ avatar.addEventListener('avatar-remove', () => {
 ```
 
 The component owns selection and the local preview, not network transport. `avatar-change` provides the selected `File`; `avatar-remove` identifies the previous source. Invalid files emit `file-reject`. Call `browse()` or `removeImage()` when external controls need to trigger the same actions, and customize their graphics with the `edit-icon` and `remove-icon` slots.
+
+`c2-avatar-group` never marks the avatars it hides with an attribute, so the markup your page rendered stays exactly as written. A hidden avatar matches the custom state `c2-avatar:state(group-hidden)` instead (earlier releases wrote a `data-c2-avatar-group-hidden` attribute on it), and the group's `visible`, `hiddenCount` and `overflow-change` report the counts.

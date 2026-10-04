@@ -3,12 +3,12 @@
 Contextual hint shown when its target is hovered or focused, built with Lit on the Popover API and floating-ui.
 
 ```bash
-npm install @c2n/tooltip
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/tooltip'
+  import '@c2n/components/tooltip'
 </script>
 
 <button>Save<c2-tooltip>Save changes (⌘S)</c2-tooltip></button>

@@ -3,7 +3,7 @@
 `<c2-cascader>` selects a path through nested data in one multi-column floating panel.
 
 ```bash
-npm install @c2n/cascader
+npm install @c2n/components
 ```
 
 ```html
@@ -11,7 +11,7 @@ npm install @c2n/cascader
 ```
 
 ```js
-import '@c2n/cascader'
+import '@c2n/components/cascader'
 
 const cascader = document.querySelector('#location')
 cascader.options = [

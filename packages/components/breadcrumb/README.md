@@ -3,12 +3,12 @@
 Breadcrumb built with Lit: a navigation trail of `c2-link-button` items with separators, an automatic current page and optional collapsing.
 
 ```bash
-npm install @c2n/breadcrumb
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/breadcrumb'
+  import '@c2n/components/breadcrumb'
 </script>
 
 <c2-breadcrumb>

@@ -3,7 +3,7 @@
 `<c2-todo-list>` is a to-do list with the feel of a paper one. Tasks are plain text, checked off with a hand-drawn
 tick (or cross) and a pen stroke through the text; a task you drop gets a red ✗. Progress shows as a ring beside the
 heading, a bar, or a large hero ring. Click a task to add a note, drag a row to reorder it, swipe it left to archive
-or delete it and right to check it (the swipe and the reordering come from `@c2n/reorder-list`), or use its ⋯ menu
+or delete it and right to check it (the swipe and the reordering come from `@c2n/components/reorder-list`), or use its ⋯ menu
 (also a right-click, and the keys N, I, X, E and Delete), which also sets the task's highlight and text colour from a
 swatch submenu. Click a task's icon to change it. Archived tasks collect at the bottom and every removal can be undone.
 
@@ -14,7 +14,7 @@ the list's icon, the done mark, the density and the progress style; with `storag
 `localStorage`.
 
 ```bash
-npm install @c2n/todo-list
+npm install @c2n/components
 ```
 
 ```html
@@ -27,7 +27,7 @@ npm install @c2n/todo-list
 ```
 
 ```js
-import '@c2n/todo-list'
+import '@c2n/components/todo-list'
 
 const list = document.querySelector('c2-todo-list')
 list.addEventListener('tasks-change', (event) => save(event.detail.tasks))

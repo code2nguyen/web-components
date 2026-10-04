@@ -11,20 +11,28 @@ export type ThemeName = BundledTheme | 'css-variables'
 export const CSS_VARIABLES_THEME = 'css-variables'
 const CSS_VARIABLES_PREFIX = '--c2-code-viewer__theme--'
 
-/** Defaults baked into the `css-variables` theme (a GitHub-light-like palette), overridable per element. */
-export const CSS_VARIABLE_DEFAULTS: Record<string, string> = {
-  foreground: '#24292e',
-  background: '#ffffff',
-  'token-constant': '#005cc5',
-  'token-string': '#032f62',
-  'token-comment': '#6a737d',
-  'token-keyword': '#d73a49',
-  'token-parameter': '#24292e',
-  'token-function': '#6f42c1',
-  'token-string-expression': '#22863a',
-  'token-punctuation': '#24292e',
-  'token-link': '#032f62',
+/**
+ * Every custom property the `css-variables` theme reads, with the default baked into it (a GitHub-light-like palette),
+ * overridable per element. shiki writes each one into the token spans and the frame as `var(<name>, <default>)`.
+ */
+const CSS_VARIABLES: Record<string, string> = {
+  '--c2-code-viewer__theme--foreground': '#24292e',
+  '--c2-code-viewer__theme--background': '#ffffff',
+  '--c2-code-viewer__theme--token-constant': '#005cc5',
+  '--c2-code-viewer__theme--token-string': '#032f62',
+  '--c2-code-viewer__theme--token-comment': '#6a737d',
+  '--c2-code-viewer__theme--token-keyword': '#d73a49',
+  '--c2-code-viewer__theme--token-parameter': '#24292e',
+  '--c2-code-viewer__theme--token-function': '#6f42c1',
+  '--c2-code-viewer__theme--token-string-expression': '#22863a',
+  '--c2-code-viewer__theme--token-punctuation': '#24292e',
+  '--c2-code-viewer__theme--token-link': '#032f62',
 }
+
+/** The same defaults keyed the way shiki's `variableDefaults` expects: the name without the prefix. */
+export const CSS_VARIABLE_DEFAULTS: Record<string, string> = Object.fromEntries(
+  Object.entries(CSS_VARIABLES).map(([name, value]) => [name.slice(CSS_VARIABLES_PREFIX.length), value]),
+)
 
 export interface HighlightOptions {
   code: string
@@ -54,13 +62,29 @@ export function normalizeLang(lang: string | undefined): string {
   return id in bundledLanguages ? id : 'plaintext'
 }
 
+/**
+ * Tokenizes one character with no time limit, so the grammar's regular expressions are compiled before a real line is
+ * timed. Shiki gives each line 500 ms and returns the rest of a line that overruns as one uncoloured token; the first
+ * line also pays for compiling the grammar's root patterns, which on a busy WebKit can take longer than that.
+ */
+function warmUp(core: HighlighterCore, lang: string) {
+  try {
+    core.getLanguage(lang).tokenizeLine('a', null, 0)
+  } catch {
+    // Only an optimisation: the grammar stays loaded and the real highlight reports any failure.
+  }
+}
+
 async function ensureLanguage(core: HighlighterCore, lang: string) {
   if (lang === 'plaintext' || core.getLoadedLanguages().includes(lang)) return
   const key = `lang:${lang}`
   if (!pending.has(key)) {
     pending.set(
       key,
-      core.loadLanguage(bundledLanguages[lang as BundledLanguage]).finally(() => pending.delete(key)),
+      core
+        .loadLanguage(bundledLanguages[lang as BundledLanguage])
+        .then(() => warmUp(core, lang))
+        .finally(() => pending.delete(key)),
     )
   }
   await pending.get(key)

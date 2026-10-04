@@ -1,0 +1,61 @@
+{
+  "name": "@c2n/example-log-lens-nextjs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "wireit",
+    "type-check": "wireit",
+    "test:unit": "node --test test/unit/*.test.ts",
+    "preview": "node test/serve-static.mjs"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../../packages/core:build",
+        "../../../packages/umbrella:build",
+        "../../../packages/icons/feather-icons:build"
+      ],
+      "command": "tsc --noEmit"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "app/**",
+        "components/**",
+        "features/**",
+        "lib/**",
+        "public/**",
+        "types/**",
+        "app.config.json",
+        "next.config.ts",
+        "next-env.d.ts",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "output": [
+        "out/**"
+      ],
+      "command": "next build"
+    }
+  },
+  "dependencies": {
+    "@c2n/components": "*",
+    "@c2n/core": "*",
+    "@c2n/feather-icons": "*",
+    "echarts": "6.1.0",
+    "next": "16.3.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "uplot": "1.6.32"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

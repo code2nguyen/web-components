@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@c2n/badge'
+import type { BadgeTone } from '@c2n/components/badge'
 
 export type Status = 'open' | 'waiting' | 'closed'
 

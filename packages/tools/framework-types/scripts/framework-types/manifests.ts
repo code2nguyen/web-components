@@ -55,11 +55,14 @@ interface Manifest {
 interface PackageJson {
   name?: string
   exports?: Record<string, { types?: string } | string>
-  private?: boolean
+  c2n?: { status?: string }
 }
 
-/** Packages that are work in progress and deliberately outside the build graph. */
-const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form'])
+/**
+ * Packages that are work in progress and deliberately outside the build graph, and `@c2n/components`, whose merged
+ * manifest documents the elements of the packages it bundles a second time.
+ */
+const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form', '@c2n/components'])
 
 /** Nearest `node_modules/@c2n` above this package: the workspace symlinks, one per `@c2n` package. */
 export function scopeDir(): string {
@@ -86,11 +89,40 @@ function moduleSpecifier(pkg: PackageJson, packageName: string, modulePath: stri
   return packageName
 }
 
+/** A framework a package may ship runtime bindings for, next to its generated types. */
+export type Framework = 'react' | 'vue'
+export const FRAMEWORKS: readonly Framework[] = ['react', 'vue']
+
+/**
+ * Where a package's own binding for `framework` lives (hooks, composables): `src/<framework>.ts`, built as a Vite lib
+ * entry to `dist/<framework>.js` with its declarations at `types/src/<framework>.d.ts`. The generated
+ * `<package>/<framework>.js` / `.d.ts` re-export it, so `@c2n/table/react` is the hooks and the JSX types in one
+ * import. The binding may import its framework; the package's other entries never import it.
+ */
+export function bindingPaths(framework: Framework): { source: string; module: string; types: string } {
+  return { source: `src/${framework}.ts`, module: `./dist/${framework}.js`, types: `./types/src/${framework}.js` }
+}
+
 export interface DiscoveredPackage {
   name: string
   /** Absolute path of the package in the workspace (symlinks resolved). */
   dir: string
   elements: CustomElement[]
+  /** Frameworks the package ships a binding for (see {@link bindingPaths}). */
+  bindings: Framework[]
+}
+
+function readBindings(name: string, dir: string): Framework[] {
+  return FRAMEWORKS.filter((framework) => {
+    const paths = bindingPaths(framework)
+    if (!existsSync(join(dir, paths.source))) return false
+    for (const built of [paths.module, paths.types.replace(/\.js$/, '.d.ts')]) {
+      if (!existsSync(join(dir, built))) {
+        throw new Error(`[framework-types] ${name} has ${paths.source} but no ${built}: add it to the package's Vite lib entries and build it`)
+      }
+    }
+    return true
+  })
 }
 
 export function readPackages(): DiscoveredPackage[] {
@@ -107,7 +139,7 @@ export function readPackages(): DiscoveredPackage[] {
     if (!existsSync(manifestPath) || !existsSync(packagePath)) continue
 
     const pkg = JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson
-    if (pkg.private) continue
+    if (pkg.c2n?.status === 'wip') continue
 
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Manifest
     const elements: CustomElement[] = []
@@ -137,7 +169,8 @@ export function readPackages(): DiscoveredPackage[] {
       }
     }
 
-    if (elements.length > 0) packages.push({ name, dir, elements: elements.sort((a, b) => a.tagName.localeCompare(b.tagName)) })
+    if (elements.length > 0)
+      packages.push({ name, dir, elements: elements.sort((a, b) => a.tagName.localeCompare(b.tagName)), bindings: readBindings(name, dir) })
   }
 
   return packages.sort((a, b) => a.name.localeCompare(b.name))

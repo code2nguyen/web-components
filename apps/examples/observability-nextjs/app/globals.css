@@ -1,4 +1,4 @@
-@import '@c2n/theme/theme.css';
+@import '@c2n/components/theme.css';
 
 :root {
   color-scheme: light;
@@ -578,6 +578,13 @@ c2-status-panel {
   width: min(100%, 1480px);
   margin-inline: auto;
   gap: 1.5rem;
+}
+
+/* The alerts page keeps a no-JavaScript baseline next to the prerendered workspace. React streams the workspace in
+   before it hydrates, so hide the baseline as soon as the workspace is in place rather than waiting for an effect:
+   otherwise the page briefly has two h1s. Without JavaScript the workspace stays in its hidden stream container. */
+.feature-stack:has(> [data-alerts-workspace]) > #alerts-server-baseline {
+  display: none;
 }
 
 .section-heading,

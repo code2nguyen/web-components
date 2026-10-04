@@ -19,11 +19,13 @@ names each level, a single `c2-chart-series` supplies its value, and one row is 
 ECharts and, like the [pie chart](../pie-chart), has no axes, a per-level tooltip and a legend whose entries
 highlight a level (or, with `legend-action="toggle"`, switch it off). Clicking a level highlights it too.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/pyramid-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

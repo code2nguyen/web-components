@@ -39,6 +39,27 @@ export const overrides: Record<string, Override> = {
   '--c2-log-viewer__copy--border-radius': { exclude: 'terminal copy control shape' },
   '--c2-log-viewer__copy__hover--background': { exclude: 'terminal copy control contrast' },
   '--c2-log-viewer__copy__focus--outline': { exclude: 'terminal copy focus contrast' },
+  // Kanban: the drag feedback is the accent and the over-limit pill a light error tint.
+  '--c2-kanban-column__card__picked--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  '--c2-kanban-column__card__picked--box-shadow': { token: 'shadow-md' },
+  '--c2-kanban-column__card--border': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-kanban-column__card__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-kanban-column__placeholder--border': { token: 'color-primary', value: '2px dashed var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  '--c2-kanban-column__placeholder--background-color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 8%, transparent)',
+  },
+  '--c2-kanban-column__count__over--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 10%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-kanban-column__empty--border': {
+    token: 'color-outline',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
   // Masonry defaults have no outer rounding; the edit preview and elevation follow the active brand theme.
   '--c2-masonry--border-radius': { exclude: 'square outer layout by default' },
   '--c2-masonry-item--border-radius': { exclude: 'square tile by default' },
@@ -111,6 +132,8 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
   '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
+  // The done mark is a semantic success green; #16a34a keeps 3:1 against both the light and the dark surface.
+  '--c2-working-indicator__done--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -199,6 +222,18 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__series-6--color': { token: 'chart-series-6' },
   '--c2-chart__series-7--color': { token: 'chart-series-7' },
   '--c2-chart__series-8--color': { token: 'chart-series-8' },
+  // A gantt task's numeric tone is a slot of the same categorical palette, so a roadmap and a chart agree.
+  '--c2-gantt__series-1--color': { token: 'chart-series-1' },
+  '--c2-gantt__series-2--color': { token: 'chart-series-2' },
+  '--c2-gantt__series-3--color': { token: 'chart-series-3' },
+  '--c2-gantt__series-4--color': { token: 'chart-series-4' },
+  '--c2-gantt__series-5--color': { token: 'chart-series-5' },
+  '--c2-gantt__series-6--color': { token: 'chart-series-6' },
+  '--c2-gantt__series-7--color': { token: 'chart-series-7' },
+  '--c2-gantt__series-8--color': { token: 'chart-series-8' },
+  // Dependency arrows are structure, drawn at the strength of a resting control border rather than as text.
+  '--c2-gantt__link--color': { token: 'color-outline-strong' },
+  '--c2-gantt__tooltip--box-shadow': { token: 'shadow-md' },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },

@@ -10,12 +10,12 @@ The goal is less code per screen. Three layers do the work: a theme that makes t
 
 ## 1. Load the theme once
 
-Install `@c2n/theme` with the components you use, import it at the application root, and set the tokens that differ from the defaults. Every `c2-*` element then follows your brand without per-component CSS.
+Install `@c2n/components`, which brings in `@c2n/theme`, import the theme at the application root, and set the tokens that differ from the defaults. Every `c2-*` element then follows your brand without per-component CSS.
 
 ```typescript tag=CodeBlock
-import '@c2n/theme/theme.css'
-import '@c2n/button'
-import '@c2n/text-field'
+import '@c2n/components/theme.css'
+import '@c2n/components/button'
+import '@c2n/components/text-field'
 ```
 
 ```css tag=CodeBlock
@@ -26,7 +26,7 @@ import '@c2n/text-field'
 }
 ```
 
-If the application already has design tokens, load `@c2n/theme/base.css` alone and bridge your tokens onto the `--c2-theme--*` names, as `apps/ui/src/assets/c2-theme.scss` does for this site. Dark mode then follows your own switch. See [Theming](./theming) for the token list.
+If the application already has design tokens, load `@c2n/components/base.css` alone and bridge your tokens onto the `--c2-theme--*` names, as `apps/ui/src/assets/c2-theme.scss` does for this site. Dark mode then follows your own switch. See [Theming](./theming) for the token list.
 
 ## 2. Use the tags directly
 
@@ -37,7 +37,7 @@ With the theme in place, a component that appears once needs nothing else:
 <c2-text-field placeholder="Email" type="email"></c2-text-field>
 ```
 
-Attributes, slots and events are documented on each component's API tab. Icons are components too: `c2-feather-<name>` from `@c2n/feather-icons`.
+Attributes, slots and events are documented on each component's API tab. Icons are components too: `c2-feather-<name>` from the separate `@c2n/feather-icons` package (`npm install @c2n/feather-icons`), each registered by its own module: `import '@c2n/feather-icons/icons/copy.js'` defines `c2-feather-copy`.
 
 ## 3. Variant components for repeated looks
 
@@ -77,7 +77,7 @@ The moment the same look appears twice, name it. A variant wraps one c2 componen
 
 ```typescript tag=CodeBlock
 import { css } from 'lit'
-import { Button } from '@c2n/button'
+import { Button } from '@c2n/components/button'
 
 export class DangerButton extends Button {
   static override styles = [

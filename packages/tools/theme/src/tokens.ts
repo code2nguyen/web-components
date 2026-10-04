@@ -83,6 +83,13 @@ export const tokens: TokenDef[] = [
   token('disabled-opacity', 'disabled', '0.38', 'Opacity of disabled components.'),
   token('motion-scale', 'motion', '1', 'Multiplier applied to every transition and animation duration (0 disables motion).'),
   // Elevation
+  token(
+    'shadow-sm',
+    'shadow',
+    '0 1px 3px rgba(0, 0, 0, 0.18)',
+    "Shadow of small raised controls, such as an avatar's remove button.",
+    '0 1px 3px rgba(0, 0, 0, 0.5)',
+  ),
   token('shadow-md', 'shadow', '0 8px 24px rgba(24, 24, 27, 0.08)', 'Shadow of popovers, menus and tooltips.', '0 8px 24px rgba(0, 0, 0, 0.45)'),
   token('shadow-lg', 'shadow', '0 24px 60px rgba(0, 0, 0, 0.25)', 'Shadow of dialogs and drawers.', '0 24px 60px rgba(0, 0, 0, 0.6)'),
   // Data visualisation. The categorical palette is a set: recolour it as a whole, never one slot at a time.

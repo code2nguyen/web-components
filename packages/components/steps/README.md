@@ -12,14 +12,14 @@ A parent that authors no `status` takes the most urgent one under it, so a stage
 that something below it failed, on its own.
 
 ```bash
-npm install @c2n/steps
+npm install @c2n/components
 ```
 
 ## Markup
 
 ```html
 <script type="module">
-  import '@c2n/steps'
+  import '@c2n/components/steps'
 </script>
 
 <c2-steps aria-label="Pipeline">

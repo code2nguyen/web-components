@@ -79,6 +79,35 @@ test('lays the steps out in one column per dependency depth and styles edges fro
   await accessible(page)
 })
 
+test('each edge and status colour variable reaches the line, the arrowhead and the marker of its state', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  await host(page).evaluate((element: Flow) => {
+    element.style.setProperty('--c2-flow__edge--color', 'rgb(1, 2, 3)')
+    element.style.setProperty('--c2-flow__edge__done--color', 'rgb(10, 20, 30)')
+    element.style.setProperty('--c2-flow__edge__active--color', 'rgb(40, 50, 60)')
+    element.style.setProperty('--c2-flow__success--color', 'rgb(70, 80, 90)')
+    element.style.setProperty('--c2-flow__pending--color', 'rgb(100, 110, 120)')
+  })
+  await expect(page.locator('c2-flow .edge--done').first()).toHaveCSS('stroke', 'rgb(10, 20, 30)')
+  await expect(page.locator('c2-flow .arrow.mark--done').first()).toHaveCSS('background-color', 'rgb(10, 20, 30)')
+  await expect(page.locator('c2-flow .edge--active')).toHaveCSS('stroke', 'rgb(40, 50, 60)')
+  await expect(page.locator('c2-flow .arrow.mark--active')).toHaveCSS('background-color', 'rgb(40, 50, 60)')
+  // build → deploy: neither step has run.
+  await expect(page.locator('c2-flow .edge:not(.edge--done):not(.edge--active)').last()).toHaveCSS('stroke', 'rgb(1, 2, 3)')
+  await expect(node(page, 'checkout').locator('.status')).toHaveCSS('color', 'rgb(70, 80, 90)')
+  await expect(node(page, 'deploy').locator('.status')).toHaveCSS('color', 'rgb(100, 110, 120)')
+})
+
+test('the auto layout reads --c2-flow__rank--gap and --c2-flow__node--gap', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  const base = await layout(page)
+  await renderScenario(flow({ attributes: 'style="--c2-flow__rank--gap: 172px; --c2-flow__node--gap: 70px"' }))
+  const wide = await layout(page)
+  expect(wide.install.x - wide.checkout.x).toBe(base.install.x - base.checkout.x + 100)
+  // lint and test share a rank, one node gap apart.
+  expect(Math.abs(wide.test.y - wide.lint.y)).toBe(Math.abs(base.test.y - base.lint.y) + 50)
+})
+
 test('direction="TB" stacks the ranks from top to bottom', async ({ page, renderScenario }) => {
   await renderScenario(flow({ attributes: 'direction="TB"' }))
   const positions = await layout(page)

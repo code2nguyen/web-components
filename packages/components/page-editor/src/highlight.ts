@@ -7,7 +7,17 @@
  *
  * Tokens are coloured with shiki's `css-variables` theme pointed at private `--_tok-*` variables, which the
  * stylesheet sets from the component's documented `--c2-page-editor__syntax-*--color` variables: the theme, dark mode
- * and a consumer's overrides all apply, and the editor never writes a literal colour.
+ * and a consumer's overrides all apply, and the editor never writes a literal colour. Each token span gets an inline
+ * `color: var(--_tok-token-<kind>)` decoration; `.code-block` defines those from:
+ *
+ * - `--_tok-token-keyword` ← `--c2-page-editor__syntax-keyword--color`
+ * - `--_tok-token-string` (and `-string-expression`) ← `--c2-page-editor__syntax-string--color`
+ * - `--_tok-token-function` ← `--c2-page-editor__syntax-function--color`
+ * - `--_tok-token-constant` ← `--c2-page-editor__syntax-constant--color`
+ * - `--_tok-token-comment` ← `--c2-page-editor__syntax-comment--color`
+ * - `--_tok-token-parameter` ← `--c2-page-editor__syntax-parameter--color`
+ * - `--_tok-token-punctuation` ← `--c2-page-editor__syntax-punctuation--color`
+ * - `--_tok-token-link` ← `--c2-page-editor__syntax-link--color`
  */
 import type { Node as ProseNode } from 'prosemirror-model'
 import { Plugin, PluginKey, type EditorState } from 'prosemirror-state'
@@ -45,6 +55,14 @@ async function loadLanguage(language: string): Promise<boolean> {
   })
   core = await corePromise
   await core.loadLanguage(bundledLanguages[language as keyof typeof bundledLanguages])
+  // Compile the grammar's root patterns now, with no time limit. Shiki gives each line 500 ms and returns the rest of a
+  // line that overruns as one uncoloured token, which `tokenize` would then cache; the first line also pays for this
+  // compilation, which on a busy WebKit can take longer than that.
+  try {
+    core.getLanguage(language).tokenizeLine('a', null, 0)
+  } catch {
+    // The grammar still loads: `tokenize` leaves a block it cannot handle as plain text.
+  }
   return true
 }
 
@@ -53,7 +71,11 @@ function ensureLanguage(language: string): Promise<boolean> {
   let pending = loading.get(language)
   if (!pending) {
     pending = loadLanguage(language)
-      .catch(() => false)
+      .catch((error: unknown) => {
+        // The block stays plain text for this page; say why rather than fail silently.
+        console.warn(`c2-page-editor: the ${language} grammar could not be loaded, so its code blocks stay uncoloured.`, error)
+        return false
+      })
       .then((ok) => {
         if (ok) loaded.add(language)
         else unavailable.add(language)

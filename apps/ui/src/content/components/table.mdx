@@ -16,13 +16,13 @@ Rows and columns are both readable from markup as JSON and from script as proper
 
 Give the host a height (or `--c2-table--max-height`); the header stays sticky while the rows scroll under it. Tab moves into the header, the arrow keys walk cells, Enter sorts the focused column, Space selects the focused row and shift-click selects a range.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/table
+```typescript tag=CodeBlock
+import '@c2n/components/table'
 ```
 
-`@c2n/checkbox` and `@c2n/spinner` are dependencies of the package and are registered for you.
+The entry also registers `c2-checkbox` and `c2-spinner`, which it renders internally.
 
 ## Usage
 
@@ -116,7 +116,7 @@ From script the array can carry the things an attribute cannot — `renderCell`,
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import type { TableColumnConfig } from '@c2n/table/table-types.js'
+import type { TableColumnConfig } from '@c2n/components/table'
 
 const columns: TableColumnConfig[] = [
   { field: 'name', header: 'Name', width: '2fr' },
@@ -139,7 +139,7 @@ which is enough to look at a response before deciding how to present it.
 ### Selecting rows: row keys
 
 Selection names a row by its **key**, and so do `value`, the `selection-change` and `row-click` details and the
-`cell:<key>:<id>` slots. The key is the row's `row-key` field as a string — with `row-key="id"`, `{ "id": 7 }` is the
+`range-change` rows. The key is the row's `row-key` field as a string — with `row-key="id"`, `{ "id": 7 }` is the
 row `"7"` — or whatever `getRowKey(row)` returns, for a key no single field holds. `value` stores strings, so
 `table.value = [7, 8]` and `value="7;8"` select the same two rows.
 
@@ -162,6 +162,34 @@ A click selects a row on its own, and clicking the row that is already the whole
 **Always set a key on a selectable table.** Without one a row's key is its position in the sorted rows — `"0"`, `"1"`,
 … — so a sort, a filter or a new `rows` array hands the selection to whichever rows now sit there. The table warns
 about it once in the console. `selectRows()` and `deselectRows()` fire `selection-change`, like `selectAll()`.
+
+### Opening a row: row-activate
+
+A table used for navigation — each row leads to a detail page — listens for `row-activate`. It fires for a pointer
+click on a row and for Enter on a focused body cell, so one listener serves the mouse and the keyboard alike; `row-click`
+stays pointer-only. Its detail is the `row-click` one (`row`, `rowIndex`, `key`). A click or Enter that belongs to a
+control inside a cell (a button, link or input) does not activate the row, and Space never does. In a selectable table
+it fires before the selection is applied, so a click or Enter both selects and activates.
+
+`row-activate` does not bubble: a table nested in another table's cell would otherwise open the outer row as well.
+Put the listener on the table itself.
+
+```typescript tag=CodeBlock
+table.addEventListener('row-activate', (event) => {
+  location.href = `/services/${event.detail.key}`
+})
+```
+
+### Naming the table
+
+Name the table the way you would any grid: `aria-label`, or `aria-labelledby` pointing at a heading. Both are read
+from the host and handed to the grid inside the shadow root, and follow later changes. An id cannot be resolved across
+the shadow boundary, so with `aria-labelledby` the grid is named after the referenced elements' text.
+
+```html tag=CodeBlock
+<h2 id="services-heading">Services</h2>
+<c2-table aria-labelledby="services-heading" row-key="id"></c2-table>
+```
 
 ### Totals: the summary row
 
@@ -244,8 +272,8 @@ ignores `group-by` and says so in the console. Style a group with `--c2-table__g
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import '@c2n/table'
-import '@c2n/badge'
+import '@c2n/components/table'
+import '@c2n/components/badge'
 
 const table = document.querySelector('c2-table')!
 table.rows = await fetchPeople()
@@ -253,6 +281,79 @@ table.rows = await fetchPeople()
 const status = table.querySelector<HTMLElement & { renderCell?: unknown }>('c2-table-column[field="status"]')!
 status.renderCell = ({ value }) => html`<c2-badge tone=${value === 'active' ? 'success' : 'warning'}>${value}</c2-badge>`
 ```
+
+What `renderCell` returns lives in the table's shadow root, where a page stylesheet does not reach. Give it a `part`
+and the table exposes it as is, so `c2-table::part(<name>)` styles it. `::part()` takes no attribute or class
+selector, so put the variant in the part name:
+
+```typescript tag=CodeBlock
+status.renderCell = ({ value }) => html`<span part="status status-${value}">${value}</span>`
+```
+
+```css tag=CodeBlock
+c2-table::part(status) {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 8px;
+}
+c2-table::part(status-failed) {
+  color: #b91c1c;
+}
+```
+
+### Wrapping long text
+
+Cells clip to one line by default, which is what a windowed grid of uniform rows needs. Add `wrap` and body cells
+grow instead: text wraps, cells are top-aligned with `--c2-table__cell__wrap--padding`, and each row takes the height
+of its tallest cell (at least `--c2-table__row--height`). Rows of different heights cannot be windowed, so **`wrap`
+turns virtualization off** whatever `virtual` says — every row is rendered. Keep it for a few hundred rows, or page
+them with `page-size`.
+
+```html tag=CodeBlock
+<c2-table row-key="id" wrap>
+  <c2-table-column field="title" header="Title" width="200px"></c2-table-column>
+  <c2-table-column field="notes" header="Notes" width="2fr"></c2-table-column>
+</c2-table>
+```
+
+### Rendering cells with a framework, while virtualizing
+
+A column marked `cell-slot` takes each cell's body from a light-DOM child named `cell:{line}:{field}`, so React,
+Vue, Svelte or Angular can render it with their own templates. `line` is the cell's display line, counted across the
+whole dataset after sort, filter and grouping with the page offset included: the first row shown is line 0 on the
+first page. Only the rendered window has those slots: `range-change` reports one `{ line, key, row }` entry per
+rendered data row in `detail.rows` (and `renderedRange` holds the last window), so render children for those lines
+only. A child whose line is outside the window is left unassigned, and a line that scrolls in before its child exists
+shows the column's formatted value until it arrives. After a sort, filter or page change the same line holds a
+different row, and `range-change` fires again with the new rows: re-render the children from it.
+
+The package ships that subscription as `useRenderedRows`, for React in `@c2n/components/react` and for Vue 3 in
+`@c2n/components/vue`, the same entries that carry the JSX and template types (both frameworks are optional peer
+dependencies: `@c2n/components/table` itself never imports them). Each one is seeded from `renderedRange`, follows the element when the table remounts, returns `[]` on the
+server and before the element upgrades, and unsubscribes on unmount.
+
+```tsx tag=CodeBlock
+import { useRenderedRows } from '@c2n/components/react'
+
+const tableRef = useRef<Table>(null)
+const rendered = useRenderedRows(tableRef) // TableRenderedRow[]
+// {rendered.map(({ line, key, row }) => <button key={key} slot={`cell:${line}:action`}>Open {row.name}</button>)}
+```
+
+```ts tag=CodeBlock
+import { useTemplateRef } from 'vue'
+import { useRenderedRows } from '@c2n/components/vue'
+
+const rendered = useRenderedRows(useTemplateRef<Table>('table')) // Ref<TableRenderedRow[]>
+// <button v-for="{ line, key, row } in rendered" :key="key" :slot="`cell:${line}:action`">Open {{ row.name }}</button>
+```
+
+Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, the
+dependency-free core of both: it reports the rows already rendered, then every `range-change`, and returns the
+function that unsubscribes.
+
+Enter and Space on a control inside a cell — a slotted button, a `renderCell` input — belong to that control; the grid
+only handles them when the cell itself has the focus.
 
 ### Animating realtime row updates
 
@@ -298,6 +399,19 @@ table.rowStyle = ({ row }) => {
 
 Use `highlight-updates` for a short acknowledgement pulse; use `rowStyle` when color encodes a state that should
 remain until the underlying data crosses another threshold.
+
+To style rows by state from a stylesheet instead, set `rowPart`: the part names it returns are added to the row beside
+`row`, since `::part(row)` cannot be filtered by the row's data.
+
+```js tag=CodeBlock
+table.rowPart = ({ row }) => (row.status === 'failed' ? 'row-failed' : undefined)
+```
+
+```css tag=CodeBlock
+c2-table::part(row-failed) {
+  background: #fef2f2;
+}
+```
 
 ### Loading rows lazily
 
@@ -364,4 +478,4 @@ else about it (`variant`, the labels, `page-size-options`, the styling) is still
 same. The table emits one `page-change`: the pager's own event does not leave the table. Sorting starts again at page
 one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
 
-`@c2n/pagination` is deliberately **not** a dependency of `@c2n/table` — install and import it yourself.
+`@c2n/components/table` deliberately does **not** import `@c2n/components/pagination` — import it yourself.

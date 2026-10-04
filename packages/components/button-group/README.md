@@ -3,12 +3,12 @@
 Button group built with Lit: attach `c2-button` / `c2-icon-button` items into one joined control or a polished segmented selector.
 
 ```bash
-npm install @c2n/button-group
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/button-group'
+  import '@c2n/components/button-group'
 </script>
 
 <c2-button-group>

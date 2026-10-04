@@ -518,6 +518,20 @@ test('paper and paper-color work without the picker', async ({ page, renderScena
   await expect(sheet).toHaveCSS('background-color', 'rgb(232, 243, 228)')
 })
 
+test('the ruling, margin and paper colour variables reach the sheet, the writing and the paper picker', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-notepad label="Notes" paper-picker paper-color="yellow" style="--c2-notepad__paper-yellow--background: rgb(250, 240, 200); --c2-notepad__paper-yellow--color: rgb(60, 30, 10); --c2-notepad__rule--spacing: 40px; --c2-notepad__margin--inset: 80px"></c2-notepad>',
+  )
+  const host = page.locator('c2-notepad')
+  await expect(host.locator('.sheet')).toHaveCSS('background-color', 'rgb(250, 240, 200)')
+  await expect(host.locator('.writing')).toHaveCSS('line-height', '40px')
+  await expect(host.locator('.margin')).toHaveCSS('width', '80px')
+  await page.getByRole('button', { name: 'Paper' }).click()
+  const swatch = page.getByRole('dialog', { name: 'Paper' }).getByRole('radio', { name: 'Yellow', exact: true }).locator('.swatch')
+  await expect(swatch).toHaveCSS('background-color', 'rgb(250, 240, 200)')
+  await expect(swatch).toHaveCSS('color', 'rgb(60, 30, 10)')
+})
+
 test('the bundled handwriting face is registered only when the page uses it', async ({ page, renderScenario }) => {
   await renderScenario('<c2-notepad label="Notes" value="Hello"></c2-notepad>')
   await expect

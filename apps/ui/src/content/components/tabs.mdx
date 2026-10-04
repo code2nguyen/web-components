@@ -18,11 +18,13 @@ import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons
 
 `c2-tabs` pairs a row of `c2-tab` headers with content panels. Every `<c2-tab for="…">` child becomes a tab; every other child is a panel and is shown when its `id` matches the tab's `for`. Set the initial tab with `selected-tab`, or leave it out to start on the first enabled tab. The strip is a proper `tablist`: Left/Right arrows, Home and End move between tabs (disabled tabs are skipped), Enter and Space activate. Tab labels are slotted content, so an icon component (`c2-feather-*`, `c2-mat-icon`) or an inline SVG can sit next to, or instead of, the text; give icon-only tabs an `aria-label`. It fires `change` (`detail.value`) after a user picks a tab; listen for the cancelable `tab-change` from a `c2-tab` and call `preventDefault()` to veto a switch.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/tabs
+```typescript tag=CodeBlock
+import '@c2n/components/tabs'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`. The `c2-mat-icon` examples also need a Material icon font, which `c2-mat-icon` does not load: `npm install @fontsource/material-icons`, then `import '@fontsource/material-icons'`.
 
 ## Usage
 

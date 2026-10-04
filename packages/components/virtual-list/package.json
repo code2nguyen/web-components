@@ -1,6 +1,7 @@
 {
   "name": "@c2n/virtual-list",
   "version": "0.0.24",
+  "private": true,
   "type": "module",
   "main": "dist/virtual-list.js",
   "exports": {
@@ -41,10 +42,6 @@
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -73,10 +70,10 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.24",
-    "@c2n/list-item": "0.0.24",
-    "@c2n/spinner": "0.0.24",
-    "@c2n/text-field": "0.0.24",
+    "@c2n/core": "*",
+    "@c2n/list-item": "*",
+    "@c2n/spinner": "*",
+    "@c2n/text-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

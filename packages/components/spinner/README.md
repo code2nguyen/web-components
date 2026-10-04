@@ -3,12 +3,12 @@
 Spinner built with Lit: a circular progress ring, indeterminate by default or showing a value, with optional text.
 
 ```bash
-npm install @c2n/spinner
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/spinner'
+  import '@c2n/components/spinner'
 </script>
 
 <c2-spinner></c2-spinner>

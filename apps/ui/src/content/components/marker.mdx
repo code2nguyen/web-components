@@ -11,10 +11,10 @@ import { Marker } from '@c2n/marker'
 
 `c2-marker` draws attention to a few words inside running text the way a pen would. `variant` picks the mark: `highlight` (the default) paints a translucent stroke behind the text, `underline` and `strike-through` draw a line under or through it, and `box` and `circle` draw an outline around it. The highlight and the lines follow the text when it wraps; the box and circle keep their text on one line. Add `animated` and the mark is drawn the first time it scrolls into view, or appears at once when the reader prefers reduced motion. Colours, stroke width, padding and timing are CSS variables. The element is announced as a mark (a deletion for `strike-through`), and the drawn outline is decorative.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/marker
+```typescript tag=CodeBlock
+import '@c2n/components/marker'
 ```
 
 ## Usage

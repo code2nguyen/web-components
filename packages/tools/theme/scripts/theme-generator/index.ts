@@ -5,7 +5,9 @@
  * variable against the `--c2-theme--*` design tokens (`src/tokens.ts`) and writes into `dist/`:
  *
  * - `tokens.css`  the token defaults (light + dark)
- * - `base.css`    `--c2-<component>…: var(--c2-theme--…, <original default>)` for every mapped variable
+ * - `base.css`    `--c2-<component>…: var(--c2-theme--…, <original default>)` for every mapped variable, except a
+ *                 per-side variable that falls through to a component shorthand mapped to the same value
+ *                 (`shorthands.ts`), so the shorthand stays settable
  * - `theme.css`   tokens.css + base.css
  * - `tokens.json` tokens + the variable → token mapping (consumed by the docs site and the MCP server)
  * - `report.json` coverage per package and the list of unmapped variables
@@ -22,7 +24,8 @@ import { fileURLToPath } from 'node:url'
 import { tokens } from '../../src/tokens.ts'
 import { classify } from './classify.ts'
 import { buildReport, buildTokensJson, formatCss, renderBaseCss, renderTokensCss, type ClassifiedVar } from './emit.ts'
-import { discoverPackages, readCssVars } from './manifests.ts'
+import { discoverPackages, readCssVars, readFallbackChains } from './manifests.ts'
+import { coveredByShorthand } from './shorthands.ts'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const distDir = join(packageRoot, 'dist')
@@ -37,15 +40,17 @@ async function main(): Promise<void> {
 
   const classified: ClassifiedVar[] = vars.map((cssVar) => ({ cssVar, result: classify(cssVar, byPrefix.get(cssVar.prefix) ?? []) }))
 
+  const covered = coveredByShorthand(classified, readFallbackChains(packages))
+
   mkdirSync(distDir, { recursive: true })
   const tokensCss = await formatCss(join(distDir, 'tokens.css'), renderTokensCss(tokens))
-  const baseCss = await formatCss(join(distDir, 'base.css'), renderBaseCss(classified))
+  const baseCss = await formatCss(join(distDir, 'base.css'), renderBaseCss(classified, covered))
   writeFileSync(join(distDir, 'tokens.css'), tokensCss)
   writeFileSync(join(distDir, 'base.css'), baseCss)
   writeFileSync(join(distDir, 'theme.css'), `${tokensCss}\n${baseCss}`)
   writeFileSync(join(distDir, 'tokens.json'), JSON.stringify(buildTokensJson(tokens, classified), null, 2) + '\n')
 
-  const report = buildReport(classified, unparsed)
+  const report = buildReport(classified, unparsed, covered)
   writeFileSync(join(distDir, 'report.json'), JSON.stringify(report, null, 2) + '\n')
 
   const rows = Object.entries(report.packages).map(([pkg, r]) => ({
@@ -61,6 +66,7 @@ async function main(): Promise<void> {
   console.log(
     `[theme-generator] ${packages.length} packages, ${total} variables: ${mapped} mapped, ${unmapped} unmapped, ${excluded} excluded, ${noDefault} without default`,
   )
+  if (covered.size) console.log(`[theme-generator] ${covered.size} longhand variables fall through to their shorthand: ${[...covered.keys()].join(', ')}`)
   if (unparsed.length) console.warn(`[theme-generator] ${unparsed.length} variable names did not match the grammar:\n  ${unparsed.join('\n  ')}`)
   console.log(`[theme-generator] wrote tokens.css, base.css, theme.css, tokens.json, report.json to ${distDir}`)
 }

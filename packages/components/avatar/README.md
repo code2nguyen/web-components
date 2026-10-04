@@ -3,12 +3,12 @@
 Avatar components built with Lit: `c2-avatar` renders an image, initials or slotted content, while `c2-avatar-group` creates a responsive overlapping stack with an automatic overflow count.
 
 ```bash
-npm install @c2n/avatar
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/avatar'
+  import '@c2n/components/avatar'
 </script>
 
 <c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar>

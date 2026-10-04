@@ -18,10 +18,10 @@ months vertically.
 
 <DateSelectorExamplesRuntime />
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/date-selector
+```typescript tag=CodeBlock
+import '@c2n/components/date-selector'
 ```
 
 ## Usage
@@ -65,7 +65,7 @@ second key with `end-name`. `required` treats an unfinished range as missing.
 Build the bounds from the local date parts rather than `toISOString()`, which is UTC and can land on the wrong day:
 
 ```ts tag=CodeBlock
-import type { DateSelector } from '@c2n/date-selector'
+import type { DateSelector } from '@c2n/components/date-selector'
 
 function isoDaysFromToday(offset: number) {
   const date = new Date()

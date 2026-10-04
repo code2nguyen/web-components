@@ -4,6 +4,7 @@ import Main from '../../layouts/Main.astro'
 import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
 import SiteCard from '../../components/ui/SiteCard.astro'
 import { COMPONENT_CATEGORIES } from '../../schemas'
+import { importPathFor } from '../../utils/import-path'
 
 const base = import.meta.env.BASE_URL
 const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
@@ -19,8 +20,8 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
   <DocComponentLayout headings={headings}>
     <h1>Components</h1>
     <p>
-      {components.length} components, each published as its own npm package under the <code>@c2n</code> scope. Every component is themed through CSS custom properties
-      and documented with live, editable examples.
+      {components.length} components, all in one npm package, <code>@c2n/components</code>: each card names the entry to import. Every component is themed
+      through CSS custom properties and documented with live, editable examples.
     </p>
     {
       groups.map((group) => (
@@ -35,7 +36,7 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
                     <c2-feather-arrow-right class="site-card__arrow" />
                   </span>
                   <span class="component-index__desc">Shared data, engines, legends, tooltips, realtime updates, events, states and theming.</span>
-                  <code class="component-index__pkg">@c2n/chart</code>
+                  <code class="component-index__pkg">@c2n/components/chart</code>
                 </SiteCard>
               </li>
             )}
@@ -47,7 +48,7 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
                     <c2-feather-arrow-right class="site-card__arrow" />
                   </span>
                   <span class="component-index__desc">{component.data.description}</span>
-                  <code class="component-index__pkg">{component.data.package ?? `@c2n/${component.id}`}</code>
+                  <code class="component-index__pkg">{importPathFor(component.data.package ?? `@c2n/${component.id}`, component.id)}</code>
                 </SiteCard>
               </li>
             ))}
@@ -81,10 +82,10 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
       --c2-card__hover--box-shadow: none;
     }
     :global(.component-index__card--overview) {
-      --c2-card--border-top-color: var(--site-color-primary);
-      --c2-card--border-right-color: var(--site-color-primary);
-      --c2-card--border-bottom-color: var(--site-color-primary);
-      --c2-card--border-left-color: var(--site-color-primary);
+      --c2-card--border-top: 1px solid var(--site-color-primary);
+      --c2-card--border-right: 1px solid var(--site-color-primary);
+      --c2-card--border-bottom: 1px solid var(--site-color-primary);
+      --c2-card--border-left: 1px solid var(--site-color-primary);
       --c2-card--background: var(--site-color-primary-soft);
     }
     &__title {

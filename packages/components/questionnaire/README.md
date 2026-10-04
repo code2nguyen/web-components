@@ -3,12 +3,12 @@
 A form-associated Lit questionnaire with single and multiple selection, free-text alternatives, validation, keyboard shortcuts and multi-step navigation.
 
 ```bash
-npm install @c2n/questionnaire
+npm install @c2n/components
 ```
 
 ```ts
-import '@c2n/questionnaire'
-import type { Questionnaire } from '@c2n/questionnaire'
+import '@c2n/components/questionnaire'
+import type { Questionnaire } from '@c2n/components/questionnaire'
 
 const questionnaire = document.querySelector<Questionnaire>('c2-questionnaire')!
 questionnaire.questions = [

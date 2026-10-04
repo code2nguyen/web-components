@@ -510,17 +510,71 @@ test('a cell-slot column takes its body from a light-DOM child and falls back to
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
     <c2-table-column field="name" header="Name" width="240px"></c2-table-column>
     <c2-table-column field="score" header="Score" width="240px" align="end" format="number" cell-slot></c2-table-column>
-    <b slot="cell:2:score" data-testid="slotted">record</b>
+    <b slot="cell:1:score" data-testid="slotted">record</b>
   </c2-table>`)
 
   await expect(page.getByTestId('slotted')).toHaveText('record')
-  // Row 1 has no child, so the column's own formatting still shows.
+  // A slotted child is not in its row's text, so ask which row its slot sits in: line 1 is Grace Hopper.
+  await expect.poll(() => page.getByTestId('slotted').evaluate((node) => node.assignedSlot?.closest<HTMLElement>('.row')?.dataset.rowKey)).toBe('2')
+  // Line 0 has no child, so the column's own formatting still shows.
   await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
+})
+
+// Slots are named by display line, so a sort that keeps every key in the window still moves rows between lines:
+// `range-change` fires with the new `rows` and the child named for line 0 lands in whatever row is now first.
+test('sorting re-assigns cell slots by line and reports the new rows', async ({ page, renderScenario }) => {
+  await renderScenario(
+    table(
+      '',
+      `<c2-table-column field="name" header="Name" width="200px"></c2-table-column>
+      <c2-table-column field="score" header="Score" width="200px" sortable cell-slot></c2-table-column>`,
+    ),
+  )
+  const host = page.locator('c2-table')
+  await host.evaluate((element) => {
+    type Rendered = { line: number; key: string; row: { name: string } }
+    const reports: Rendered[][] = []
+    ;(window as unknown as { reports: Rendered[][] }).reports = reports
+    const sync = (rendered: Rendered[]) => {
+      for (const child of [...element.querySelectorAll('[slot^="cell:"]')]) child.remove()
+      for (const { line, row } of rendered) {
+        const child = document.createElement('i')
+        child.slot = `cell:${line}:score`
+        child.textContent = `line ${line}: ${row.name}`
+        element.append(child)
+      }
+    }
+    element.addEventListener('range-change', (event) => {
+      const rendered = (event as CustomEvent<{ rows: Rendered[] }>).detail.rows
+      reports.push(rendered)
+      sync(rendered)
+    })
+    sync((element as HTMLElement & { renderedRange: { rows: Rendered[] } }).renderedRange.rows)
+  })
+  // The text the first displayed row shows through its slot: slotted children are not in the row's own text.
+  const firstRowSlotted = () =>
+    host.evaluate((element) => {
+      const slot = element.shadowRoot!.querySelector('.row--body')!.querySelector('slot')!
+      return slot
+        .assignedNodes()
+        .map((node) => node.textContent)
+        .join('')
+    })
+  await expect.poll(firstRowSlotted).toBe('line 0: Ada Lovelace')
+
+  await page.getByRole('columnheader', { name: 'Score' }).click()
+  await expect(host.locator('.row--body').first()).toContainText('Alan Turing')
+  await expect.poll(firstRowSlotted).toBe('line 0: Alan Turing')
+  const last = await page.evaluate(() => {
+    const reports = (window as unknown as { reports: { line: number; key: string }[][] }).reports
+    return reports[reports.length - 1].map(({ line, key }) => `${line}:${key}`)
+  })
+  expect(last).toEqual(['0:3', '1:2', '2:1'])
 })
 
 test('redistributes an interactive cell slot after property-driven rows and columns update', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
-    <button slot="cell:2:action">Acknowledge</button>
+    <button slot="cell:1:action">Acknowledge</button>
   </c2-table>`)
   const host = page.locator('c2-table')
   await host.evaluate(async (element, nextRows) => {
@@ -557,7 +611,7 @@ test('stable table parts style shared regions while dynamic cell slots stay cons
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
     <div slot="toolbar">Toolbar</div><div slot="footer">Footer</div>
     <c2-table-column field="score" header="Score" width="240px" cell-slot></c2-table-column>
-    <b class="slot-probe" slot="cell:2:score">record</b>
+    <b class="slot-probe" slot="cell:1:score">record</b>
   </c2-table>`)
   await page.addStyleTag({
     content: 'c2-table::part(toolbar){background:rgb(1,2,3)}c2-table::part(footer){background:rgb(4,5,6)}c2-table::part(state){background:rgb(7,8,9)}',
@@ -874,4 +928,72 @@ test('a selected row paints its text with the selected colour, over a custom cel
       .locator('c2-table')
       .evaluate((element) => [...element.shadowRoot!.querySelectorAll('.row--body')].map((row) => getComputedStyle(row.querySelector('.cell-content')!).color))
   expect(await colors()).toEqual(['rgb(200, 200, 200)', 'rgb(255, 255, 255)', 'rgb(200, 200, 200)'])
+})
+
+test('the grid takes its accessible name from the host aria-label and aria-labelledby, and follows changes', async ({ page, renderScenario }) => {
+  await renderScenario(`<h2 id="people-heading">Team members</h2>${table('aria-label="People"')}`)
+  const host = page.locator('c2-table')
+  await expect(page.getByRole('grid', { name: 'People' })).toBeVisible()
+
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Staff'))
+  await expect(page.getByRole('grid', { name: 'Staff' })).toBeVisible()
+
+  // A light-DOM id cannot be resolved from the shadow root: the referenced text names the grid, and wins over aria-label.
+  await host.evaluate((element) => element.setAttribute('aria-labelledby', 'people-heading'))
+  await expect(page.getByRole('grid', { name: 'Team members' })).toBeVisible()
+
+  await host.evaluate((element) => {
+    element.removeAttribute('aria-labelledby')
+    element.removeAttribute('aria-label')
+  })
+  await expect(page.getByRole('grid')).toHaveAccessibleName('')
+  await accessible(page)
+})
+
+test('row-activate fires for a click and for Enter on a focused cell, not for controls inside a cell', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="none"'))
+  const host = page.locator('c2-table')
+  await host.evaluate((element) => {
+    const events: unknown[] = []
+    element.setAttribute('data-events', '[]')
+    element.addEventListener('row-activate', (event) => {
+      events.push({ ...(event as CustomEvent).detail, bubbles: event.bubbles })
+      element.setAttribute('data-events', JSON.stringify(events))
+    })
+    // A button rendered in a cell keeps its click and its Enter.
+    const column = element.querySelector('c2-table-column[field="team"]') as HTMLElement & { renderCell?: unknown }
+    column.renderCell = ({ value }: { value: unknown }) => {
+      const button = document.createElement('button')
+      button.textContent = String(value)
+      return button
+    }
+  })
+  const events = async () => JSON.parse((await host.getAttribute('data-events')) ?? '[]') as Array<{ key: string; rowIndex: number; bubbles: boolean }>
+
+  await page.getByRole('gridcell', { name: 'Grace Hopper' }).click()
+  await expect.poll(async () => (await events()).map((event) => event.key)).toEqual(['2'])
+  expect((await events())[0]).toMatchObject({ rowIndex: 1, bubbles: false })
+
+  // The click focused that cell: arrow down to the next row and open it with Enter.
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect.poll(async () => (await events()).map((event) => event.key)).toEqual(['2', '3'])
+
+  // Space does not activate; a control inside a cell keeps its click and Enter.
+  await page.keyboard.press(' ')
+  const button = page.getByRole('button', { name: 'Compilers' })
+  await button.click()
+  await button.press('Enter')
+  expect((await events()).map((event) => event.key)).toEqual(['2', '3'])
+})
+
+test('in a selectable table, a click and Enter still fire row-activate as well as selecting', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single"'))
+  const host = page.locator('c2-table')
+  await watch(host, 'row-activate')
+  await page.getByRole('gridcell', { name: 'Ada Lovelace' }).click()
+  await expect(host).toHaveJSProperty('value', ['1'])
+  await page.keyboard.press('Enter')
+  await expect.poll(async () => JSON.parse((await host.getAttribute('data-events')) ?? '[]').length).toBe(2)
+  await expect(host).toHaveJSProperty('value', [])
 })

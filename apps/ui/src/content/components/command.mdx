@@ -16,10 +16,10 @@ Focus never leaves the search field. Arrow Up/Down move the highlight between th
 
 Put it inside a `c2-modal` and open it from a `c2-shortcut` binding for a ⌘K palette, or place it inline — in a page, a sidebar or a popover. When results come from a server, set `manual-filter`: the palette then shows every row as given, and your `input` listener reads `query` and replaces the rows.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/command
+```typescript tag=CodeBlock
+import '@c2n/components/command'
 ```
 
 `c2-command-item`, `c2-command-group` and `c2-command-separator` ship in the same package and are registered with it.
@@ -61,3 +61,21 @@ Type into any palette below; try `face` (a keyword of "Search emoji") or `zzz`.
   </c2-command>
 </div>
 ```
+
+## Filling a height-capped container
+
+By default only the list is capped (`--c2-command__list--max-height`, 320px), so a long list inside a modal or a panel with its own `max-height` pushes the footer out and the container grows a second scrollbar. Cap the palette instead: `--c2-command--max-height` limits the whole host, the field and the footer keep their height, and the list shrinks to what is left and scrolls on its own. Lift the list's own cap with `none` when it should grow to fill that height rather than stop at 320px.
+
+```css tag=CodeBlock
+c2-modal.palette {
+  --c2-modal--max-height: min(70vh, 560px);
+}
+
+c2-modal.palette c2-command {
+  /* The modal's content box: its max-height minus its 1px top and bottom border. */
+  --c2-command--max-height: calc(min(70vh, 560px) - 2px);
+  --c2-command__list--max-height: none;
+}
+```
+
+Give it a length (or a `calc()`), not a percentage: a percentage only resolves against a parent with a definite `height`, and a container capped by `max-height` alone has none. Leave the host's `display` alone — its flex column is what lets the list shrink, and `display: block` brings the overflow back.

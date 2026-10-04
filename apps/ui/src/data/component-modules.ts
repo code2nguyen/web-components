@@ -3,6 +3,9 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/kanban'
+import '@c2n/gantt'
+import '@c2n/working-indicator'
 import '@c2n/page-editor'
 import '@c2n/notepad'
 import '@c2n/todo-list'
@@ -12,6 +15,7 @@ import './flow-examples'
 import '@c2n/week-planner'
 import '@c2n/month-planner'
 import './planner-examples'
+import '@c2n/google-map'
 import '@c2n/hover-card'
 import '@c2n/command'
 import '@c2n/marker'

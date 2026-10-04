@@ -3,12 +3,12 @@
 Copy button built with Lit: puts text on the clipboard — the element it sits in, another element by `id`, or a literal string.
 
 ```bash
-npm install @c2n/copy-button
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/copy-button'
+  import '@c2n/components/copy-button'
 </script>
 
 <!-- Copies its parent, pinned in the corner, revealed on hover. -->

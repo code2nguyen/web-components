@@ -1,0 +1,58 @@
+name: Example app tests
+
+# Runs the browser suite of every example app that has one, against a production build of the app and the
+# component packages it consumes. orders-admin-angular, trading-dashboard-react and the two HTML examples have no
+# suite yet; they are still built (and the Angular templates type-checked by `ng build`) by `npm run ui:build` in
+# deploy.yml.
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: examples-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.example }} (Chromium)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Static export served by test/serve-static.mjs on 127.0.0.1:4180 (the Playwright webServer).
+          - example: observability-nextjs
+            test: npm run test:e2e -w apps/examples/observability-nextjs
+          # Vite dev server on 127.0.0.1:4176; it resolves the components through their built `dist/`.
+          - example: support-inbox-vue
+            test: npm run test:browser -w apps/examples/support-inbox-vue
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      # Wireit caches the component builds both jobs share.
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - run: npm ci
+      # The app's wireit build depends on (and so builds) every component package it imports.
+      - name: Build ${{ matrix.example }} and its component packages
+        run: npm run build -w apps/examples/${{ matrix.example }}
+      - run: npx playwright install --with-deps chromium
+      - name: Run the ${{ matrix.example }} browser suite
+        run: ${{ matrix.test }}
+      - name: Upload the Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ matrix.example }}
+          path: |
+            apps/examples/${{ matrix.example }}/playwright-report/
+            apps/examples/${{ matrix.example }}/test-results/
+          retention-days: 7

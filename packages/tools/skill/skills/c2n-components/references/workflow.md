@@ -4,16 +4,15 @@ Build screens from `@c2n/*` web components with as little code as possible. Thre
 
 ## 1. Theme once
 
-- Install `@c2n/theme` next to the component packages you use.
-- Or install `@c2n/components`, which depends on every component package and the theme (icon sets excluded). A project that declares only it imports through it: `@c2n/components/theme.css`, and `@c2n/components/<name>` for each component.
-- Import `@c2n/theme/theme.css` once at the application root (tokens + base theme). If the app already owns a token system, import only `@c2n/theme/base.css` and bridge your tokens onto the `--c2-theme--*` names.
+- Install `@c2n/components`, the one published component package. It brings in `@c2n/theme` and re-exports its stylesheets, so import them through it (`@c2n/components/theme.css`) and each component through its entry (`@c2n/components/<name>`). Icon sets are separate packages.
+- Import `@c2n/components/theme.css` once at the application root (tokens + base theme). If the app already owns a token system, import only `@c2n/components/base.css` and bridge your tokens onto the `--c2-theme--*` names.
 - Override the tokens that differ from the defaults on `:root` (light) and under your dark-mode selector. About 35 tokens (`--c2-theme--color-primary`, `--c2-theme--radius-md`, `--c2-theme--font-family`, `--c2-theme--focus-ring`, …) drive every component.
 - Never set component variables globally when a token exists for the job.
 
 ## 2. Use the tags directly
 
-- Register an element with a side-effect import (`import '@c2n/button'`, or `import '@c2n/components/button'` through the umbrella) at the application entry, or in the module that renders it. `@c2n/components/<name>` registers every element of that package (`@c2n/components/table` defines `c2-table` and `c2-table-column`) and is the same module as `@c2n/<name>`; avoid the bare `@c2n/components` barrel, which registers the whole library.
-- Write plain markup: `<c2-button>Save</c2-button>`. Attributes, slots and events come from the component API (MCP `get_component`, or `node_modules/@c2n/<name>/custom-elements.json`).
+- Register an element with a side-effect import (`import '@c2n/components/button'`) at the application entry, or in the module that renders it. An entry registers every element it groups (`@c2n/components/table` defines `c2-table` and `c2-table-column`); avoid the bare `@c2n/components` barrel, which registers the whole library.
+- Write plain markup: `<c2-button>Save</c2-button>`. Attributes, slots and events come from the component API (MCP `get_component`, or `node_modules/@c2n/components/custom-elements.json`).
 - Retrieve `get_examples` next: begin from the unmodified Default sample, then choose a look from the docs gallery: `view: "index"` lists every card with a summary and screenshot, `search_examples` finds a look across components, and `label: "<slug>"` fetches one. Copy its theme-following CSS, swap any remaining colour literal for your tokens, and start a variant from it with `generate_variant` `example`. Use `get_presets` when structured values are more useful than a complete pattern.
 - Icons are components: `c2-feather-<name>` from `@c2n/feather-icons/icons/<name>.js`, sized and coloured through `--c2-feather-icon--size|color|stroke-width`.
 - A component that appears once with the themed default look needs nothing else.
@@ -36,7 +35,7 @@ Every variant lives in one directory (`src/components/ui/`, `src/ui/`…), one f
 ## 4. Verify
 
 - Every element used is registered (no `HTMLUnknownElement`, no empty tags).
-- `@c2n/theme` is imported exactly once; tokens overridden on `:root` and the dark selector.
+- The theme is imported exactly once (`@c2n/components/theme.css`, or `@c2n/components/base.css` when the app maps its own tokens); tokens overridden on `:root` and the dark selector.
 - Prefer CSS custom properties. Every `::part()` selector must name a CSS part documented by `get_component`; no repeated inline `style="--c2-…"`.
 - Every variable, attribute, slot and event name exists in the component API.
 - Variant tags contain a hyphen and do not start with `c2-`.

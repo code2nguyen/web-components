@@ -2,15 +2,15 @@
 
 ## Layers
 
-1. **Tokens** `--c2-theme--<name>` (from `@c2n/theme/tokens.css`, ~35 of them). Set by the application.
-2. **Base theme** `@c2n/theme/base.css`: `--c2-<component>__<part>--<prop>: var(--c2-theme--<token>, <component default>)` on `:root`/`:host` for every mapped component variable. Generated from the component manifests.
+1. **Tokens** `--c2-theme--<name>` (from `@c2n/components/tokens.css`, ~35 of them). Set by the application.
+2. **Base theme** `@c2n/components/base.css`: `--c2-<component>__<part>--<prop>: var(--c2-theme--<token>, <component default>)` on `:root`/`:host` for every mapped component variable. Generated from the component manifests.
 3. **Component variables** `--c2-<component>__<part>[__<state>]--<property>`: the fine-grained escape hatch. Set on an element, a class or any ancestor; they always win over the base theme.
 4. **Variant components** built from 2 and 3.
 
 ## Install
 
 ```ts
-import '@c2n/theme/theme.css' // tokens + base theme, once
+import '@c2n/components/theme.css' // tokens + base theme, once
 ```
 
 ```css
@@ -25,7 +25,7 @@ import '@c2n/theme/theme.css' // tokens + base theme, once
 ## Bring your own tokens
 
 ```css
-@import '@c2n/theme/base.css';
+@import '@c2n/components/base.css';
 :root {
   --c2-theme--color-primary: var(--brand-600);
   --c2-theme--color-on-primary: var(--brand-on-600);
@@ -51,7 +51,7 @@ Dark mode then follows the app's own switch because the bridged values flip.
 - Shape: `radius-sm|md|lg|xl|full`.
 - Borders: `border-width`, `border` (composite: the whole resting border shorthand; falls back to `border-width solid color-outline`).
 - Interaction: `focus-ring` (outline shorthand), `disabled-opacity`, `motion-scale` (multiplies every duration; `0` disables motion).
-- Elevation: `shadow-md`, `shadow-lg`.
+- Elevation: `shadow-sm`, `shadow-md`, `shadow-lg`.
 
 Composite tokens wrap their primitives: `var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, #bcbcc6))`, so set the shorthand or just the colour.
 

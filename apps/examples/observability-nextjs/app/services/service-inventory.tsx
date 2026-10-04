@@ -35,10 +35,12 @@ export function ServiceInventory() {
   return (
     <>
       <ServiceFilters />
-      <p aria-live="polite">{rows.length} services</p>
+      <p aria-live="polite">
+        {rows.length} {rows.length === 1 ? 'service' : 'services'}
+      </p>
       {demoState === 'loading' ? (
-        <div className="skeleton-grid" aria-label="Loading service inventory">
-          <c2-skeleton />
+        <div className="skeleton-grid" aria-busy="true">
+          <c2-skeleton label="Loading service inventory" />
           <c2-skeleton />
           <c2-skeleton />
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import type { Dashboard } from '@c2n/dashboard'
+import type { Dashboard } from '@c2n/components/dashboard'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
@@ -142,8 +142,10 @@ export function OperationalDashboard() {
               </c2-button>
             ))}
           </c2-button-group>
-          <c2-button onClick={resetLayout} aria-label="Reset dashboard layout">
-            Reset layout
+          {/* c2-button does not hand a host aria-label to the button it renders, so the name comes from the content, as in PanelControls. */}
+          <c2-button onClick={resetLayout}>
+            <span className={styles.srOnly}>Reset dashboard layout</span>
+            <span aria-hidden="true">Reset layout</span>
           </c2-button>
         </div>
       </header>

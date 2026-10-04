@@ -25,6 +25,9 @@ export interface ScatterChart {
  * @tag c2-scatter-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-scatter-chart')
 export class ScatterChart extends EchartsChartBase {

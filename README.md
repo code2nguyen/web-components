@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcore?label=core%20downloads)](https://www.npmjs.com/package/@c2n/core)
 [![License](https://img.shields.io/github/license/code2nguyen/web-components)](LICENSE)
 
-Small, themeable UI components that work in any stack. Built on [Lit](https://lit.dev), one npm package per component, usable from plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
+Small, themeable UI components that work in any stack. Built on [Lit](https://lit.dev), one npm package with an entry per component, usable from plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
 
 **[Docs & live demos](https://code2nguyen.github.io/web-components/)** · [Components](https://code2nguyen.github.io/web-components/docs) · [Examples](https://code2nguyen.github.io/web-components/examples) · [Theming](https://code2nguyen.github.io/web-components/guides/theming)
 
@@ -17,7 +17,7 @@ Small, themeable UI components that work in any stack. Built on [Lit](https://li
 ## Highlights
 
 - **80+ components**: inputs, tables, charts, overlays, navigation, chat, plus Feather/Phosphor icon sets.
-- **Install only what you use**: `@c2n/button`, `@c2n/table`, … or everything at once with `@c2n/components`.
+- **One package, ship only what you use**: `npm install @c2n/components`, then import each component you use (`@c2n/components/table`); bundlers leave the rest out.
 - **Themed with CSS variables**: set ~35 `--c2-theme--*` tokens for the whole app, or fine-tune any part of any component. Light and dark built in.
 - **Framework friendly**: generated React/Vue types, an Angular forms adapter, SSR-safe elements.
 - **AI ready**: an MCP server (`@c2n/mcp`) and a Claude Code / Codex / Copilot skill (`@c2n/skill`) give coding agents the exact component APIs.

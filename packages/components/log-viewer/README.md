@@ -7,7 +7,7 @@ Use it for large application/server logs, live streams and multiline incident tr
 ## Installation
 
 ```bash
-npm install @c2n/log-viewer
+npm install @c2n/components
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install @c2n/log-viewer
 ```
 
 ```ts
-import '@c2n/log-viewer'
+import '@c2n/components/log-viewer'
 
 const viewer = document.querySelector('c2-log-viewer')!
 viewer.appendEntries({ message: 'Failed\nRetry scheduled', level: 'error', requestId: '42' })

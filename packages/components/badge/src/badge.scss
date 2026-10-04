@@ -131,10 +131,15 @@
 }
 
 // Anchored: overlay pinned to a corner of the slotted anchor, ringed in the page colour. A circular anchor moves the
-// badge 14.6% inwards, which is where the corner meets the circle: (1 - 1/sqrt(2)) / 2.
+// badge 14.6% inwards, which is where the corner meets the circle: (1 - 1/sqrt(2)) / 2. The corner rules read the
+// public offsets themselves; `--_offset-*` is set only by the circular shape, to swap the default for that inset.
+$_offset-x: var(--_offset-x, #{css.cssVar(anchor--offset-x)});
+$_offset-y: var(--_offset-y, #{css.cssVar(anchor--offset-y)});
+
 .c2-badge.is-anchored {
-  --_offset-x: #{css.cssVar(anchor--offset-x)};
-  --_offset-y: #{css.cssVar(anchor--offset-y)};
+  // Unset unless the shape sets them, so an ancestor's custom property of the same name cannot leak in.
+  --_offset-x: initial;
+  --_offset-y: initial;
   position: absolute;
   z-index: 1;
   border: css.cssVar(anchor--border);
@@ -147,26 +152,26 @@
 
 :host([placement='top-right']) .c2-badge.is-anchored,
 :host(:not([placement])) .c2-badge.is-anchored {
-  top: var(--_offset-y);
-  right: var(--_offset-x);
+  top: $_offset-y;
+  right: $_offset-x;
   transform: translate(50%, -50%);
 }
 
 :host([placement='top-left']) .c2-badge.is-anchored {
-  top: var(--_offset-y);
-  left: var(--_offset-x);
+  top: $_offset-y;
+  left: $_offset-x;
   transform: translate(-50%, -50%);
 }
 
 :host([placement='bottom-right']) .c2-badge.is-anchored {
-  bottom: var(--_offset-y);
-  right: var(--_offset-x);
+  bottom: $_offset-y;
+  right: $_offset-x;
   transform: translate(50%, 50%);
 }
 
 :host([placement='bottom-left']) .c2-badge.is-anchored {
-  bottom: var(--_offset-y);
-  left: var(--_offset-x);
+  bottom: $_offset-y;
+  left: $_offset-x;
   transform: translate(-50%, 50%);
 }
 

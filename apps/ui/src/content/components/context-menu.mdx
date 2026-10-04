@@ -21,13 +21,13 @@ The menu is a `c2-menu` placed at the pointer, so it has the same keyboard suppo
 
 Every row activated fires `context-menu-select`, which carries the row's `value` together with the `context` the menu was opened on, so one listener knows both what was chosen and where.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/context-menu
+```typescript tag=CodeBlock
+import '@c2n/components/context-menu'
 ```
 
-`@c2n/menu` is a dependency of the package and is registered for you.
+The entry also registers `c2-menu`, which it renders internally.
 
 ## Usage
 
@@ -103,8 +103,8 @@ Right-click (or long-press) inside each example. The table row builds its menu f
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import type { ContextMenu } from '@c2n/context-menu'
-import type { TableCellEventDetail } from '@c2n/table/table-types.js'
+import type { ContextMenu } from '@c2n/components/context-menu'
+import type { TableCellEventDetail } from '@c2n/components/table'
 
 const menu = document.querySelector<ContextMenu>('c2-context-menu')!
 

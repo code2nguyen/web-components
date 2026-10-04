@@ -41,7 +41,7 @@
   const mix = (from: number, to: number, progress: number) => from + (to - from) * progress
 
   const waitUntilReady = (chart: ReplayChart): Promise<void> => {
-    if (chart.hasAttribute('data-chart-ready')) return Promise.resolve()
+    if (chart.matches(':state(ready)')) return Promise.resolve()
     return new Promise((resolve) => {
       chart.addEventListener('chart-ready', () => resolve(), { once: true })
       chart.addEventListener('chart-error', () => resolve(), { once: true })

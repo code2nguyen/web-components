@@ -11,10 +11,10 @@ import { ComparisonBar } from '@c2n/comparison-bar'
 
 `c2-comparison-bar` splits its width between two or three amounts in any unit: `start-value` on the start side, `end-value` on the end side and, optionally, `middle-value` between them. The bar computes each segment's share, and `show-value` prints it as a percentage: the start and end shares at their edges, the middle share centred under its segment. The printed shares always add up to 100. `precision` sets the fraction digits (2 by default) and `locale` the number format. `start-label`, `middle-label` and `end-label` name the segments for assistive technology, which reads the whole bar as one image ("Bid 22.43%, Ask 77.57%"), and the `start`, `middle` and `end` slots replace the printed text when you want counts instead of percentages.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/comparison-bar
+```typescript tag=CodeBlock
+import '@c2n/components/comparison-bar'
 ```
 
 ## Usage

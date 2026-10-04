@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
-import { expect } from '@playwright/test'
+import { expect } from '../../../../tests/component-fixture'
 import { test } from '../../../../tests/fixture'
 // Pulls in the `window.mapScenario` declaration the scenario page installs.
 import './map-scenario-api'
@@ -30,7 +30,7 @@ interface MapInternals {
 test('joins rows to countries by ISO alpha-3 code and shades them on a sequential scale', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+  await expect(chart).toHaveState('engine-echarts')
 
   const result = await chart.evaluate((element) => {
     const map = element as unknown as MapInternals
@@ -90,7 +90,7 @@ test('the engine draws every country, shaded ones in their scale colour, without
   })
   await open(page, 'world', '&renderer=svg')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const fills = await chart.evaluate((element) => {
     const paths = Array.from(element.shadowRoot?.querySelectorAll('.plot svg path') ?? [])
     const count = (color: string) => paths.filter((path) => path.getAttribute('fill') === color).length
@@ -111,7 +111,7 @@ test('the engine draws every country, shaded ones in their scale colour, without
 test('reads scale colours the theme writes as color-mix()', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const usa = await chart.evaluate((element) => {
     // `@c2n/theme` sets the scale ends as color-mix() expressions, which Chrome computes to `color(srgb …)`.
     element.style.setProperty('--c2-chart__scale-end--color', 'color-mix(in srgb, #0265dc 70%, #18181b)')
@@ -132,7 +132,7 @@ test('draws a gradient key with its real bounds and a no-data swatch', async ({ 
 test('shows the hovered region with its value, and says when a region has no data', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const detail = await chart.evaluate(async (element) => {
     const next = () =>
@@ -174,7 +174,7 @@ async function pointOf(page: Page, lonLat: [number, number]): Promise<{ x: numbe
 test('a real pointer over a country shows its tooltip', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   // Inland Brazil, far from any border.
   const { x, y } = await pointOf(page, [-52, -10])
   await page.mouse.move(x, y)
@@ -194,7 +194,7 @@ test('lists the joined rows in a table a screen reader can reach', async ({ page
 test('bins a diverging scale into classes around a neutral midpoint', async ({ page }) => {
   await open(page, 'diverging')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     const map = element as unknown as MapInternals
@@ -218,7 +218,7 @@ test('bins a diverging scale into classes around a neutral midpoint', async ({ p
 test('sizes points by area, draws the largest first and reports the row a hovered point stands for', async ({ page }) => {
   await open(page, 'layers')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate(async (element) => {
     const map = element as unknown as MapInternals
@@ -268,7 +268,7 @@ test('sizes points by area, draws the largest first and reports the row a hovere
 test('toggles a layer from the legend', async ({ page }) => {
   await open(page, 'layers')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const routes = chart.locator('.legend-item', { hasText: 'Routes' })
   await expect(chart.locator('.legend-item')).toHaveText(['Users', 'Routes'])
   await routes.click()
@@ -280,7 +280,7 @@ test('toggles a layer from the legend', async ({ page }) => {
 test('draws an SVG map whose regions are its element ids, binned into named classes', async ({ page }) => {
   await open(page, 'svg')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     const map = element as unknown as MapInternals
@@ -305,7 +305,7 @@ test('draws an SVG map whose regions are its element ids, binned into named clas
 test('selects regions as a form control and fits the view to the extent', async ({ page }) => {
   await open(page, 'picker')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const before = await chart.evaluate((element) => {
     const map = element as unknown as MapInternals
@@ -348,7 +348,7 @@ test('selects regions as a form control and fits the view to the extent', async 
 test('a real click on a country selects it', async ({ page }) => {
   await open(page, 'picker')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   // Central Spain.
   const { x, y } = await pointOf(page, [-3.7, 40])
   await page.mouse.click(x, y)
@@ -357,7 +357,7 @@ test('a real click on a country selects it', async ({ page }) => {
 
 test('a cancelled point-click keeps the selection', async ({ page }) => {
   await open(page, 'picker')
-  await expect(page.locator('c2-map-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-map-chart')).toHaveState('ready')
   const value = await page.evaluate(() => {
     const chart = document.querySelector('c2-map-chart') as unknown as HTMLElement & { value: string[] }
     chart.addEventListener('point-click', (event) => event.preventDefault())
@@ -370,7 +370,7 @@ test('a cancelled point-click keeps the selection', async ({ page }) => {
 test('zoom buttons zoom the map and report the visible area', async ({ page }) => {
   await open(page, 'picker')
   const chart = page.locator('c2-map-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.getByRole('button', { name: 'Zoom in' }).click()
   await expect
     .poll(() =>

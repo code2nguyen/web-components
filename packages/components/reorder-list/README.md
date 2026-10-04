@@ -7,11 +7,11 @@ Use this component for one vertical queue. It does not support grids, moving ite
 ## Installation
 
 ```sh
-npm install @c2n/reorder-list
+npm install @c2n/components
 ```
 
 ```js
-import '@c2n/reorder-list'
+import '@c2n/components/reorder-list'
 ```
 
 ## Complete example
@@ -26,7 +26,7 @@ import '@c2n/reorder-list'
 </c2-reorder-list>
 
 <script type="module">
-  import '@c2n/reorder-list'
+  import '@c2n/components/reorder-list'
 
   const queue = document.querySelector('#queue')
   queue.addEventListener('reorder', (event) => {
@@ -43,18 +43,18 @@ Ordinary items do not need `slot` attributes. The component assigns private proj
 - Pointer: press a movable row, cross `dragStartThreshold`, move to the visible placeholder, and release inside the list. Mouse, touch, and pen use the same Pointer Events path.
 - Keyboard: focus a movable placement, press Space to pick it up, move with ArrowUp/ArrowDown or Home/End, press Space to commit, or Escape to cancel.
 - Interactive descendants such as buttons, links, inputs, and editable content keep their native pointer and keyboard behavior.
-- Whole-row touch reordering owns vertical direct manipulation while editing is enabled. Automatic scrolling moves the nearest eligible vertical scroll container. Set `autoScrollDisabled` when the application must own scrolling.
+- Whole-row touch reordering owns vertical direct manipulation while editing is enabled. Automatic scrolling moves the nearest eligible vertical scroll container. Set `autoScrollDisabled` (`auto-scroll-disabled`) when the application must own scrolling.
 - Fixed items reject pickup and retain their absolute indexes. Movable items can cross them.
 
 Provide `aria-label` or `aria-labelledby` when surrounding context does not already give the editable list an accessible name. `data-reorder-label` supplies concise announcement text; otherwise the component uses the item's accessible or visible text.
 
 ## Public API
 
-| Property             | Attribute            | Default | Purpose                                                                         |
-| -------------------- | -------------------- | ------- | ------------------------------------------------------------------------------- |
-| `editable`           | `editable`           | `false` | Enables pointer and keyboard reordering.                                        |
-| `dragStartThreshold` | `dragstartthreshold` | `10`    | Summed pointer travel in CSS pixels required for pickup. Invalid values use 10. |
-| `autoScrollDisabled` | `autoscrolldisabled` | `false` | Disables component-driven ancestor scrolling.                                   |
+| Property             | Attribute              | Default | Purpose                                                                         |
+| -------------------- | ---------------------- | ------- | ------------------------------------------------------------------------------- |
+| `editable`           | `editable`             | `false` | Enables pointer and keyboard reordering.                                        |
+| `dragStartThreshold` | `drag-start-threshold` | `10`    | Summed pointer travel in CSS pixels required for pickup. Invalid values use 10. |
+| `autoScrollDisabled` | `auto-scroll-disabled` | `false` | Disables component-driven ancestor scrolling.                                   |
 
 Direct-child markers:
 

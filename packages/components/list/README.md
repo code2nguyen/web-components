@@ -3,13 +3,13 @@
 Vertical list of `c2-list-item` rows with single or multiple selection, built with Lit.
 
 ```bash
-npm install @c2n/list @c2n/list-item
+npm install @c2n/components
 ```
 
 ```html
 <script type="module">
-  import '@c2n/list'
-  import '@c2n/list-item'
+  import '@c2n/components/list'
+  import '@c2n/components/list-item'
 </script>
 
 <c2-list value="design" multiple>

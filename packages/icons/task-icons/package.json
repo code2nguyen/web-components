@@ -1,6 +1,6 @@
 {
   "name": "@c2n/task-icons",
-  "version": "0.0.24",
+  "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
   "sideEffects": true,
@@ -79,7 +79,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.24",
+    "@c2n/core": "1.0.0",
     "lit": "3.3.3"
   },
   "devDependencies": {

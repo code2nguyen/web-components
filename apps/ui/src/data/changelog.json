@@ -2,6 +2,241 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.0",
+      "date": "2026-10-04",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["components"],
+              "text": "Export element subpaths without the .js extension",
+              "hash": "5d06804"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Publish @c2n/components as the only component package",
+              "hash": "9490c75"
+            },
+            {
+              "scopes": ["steps", "chart", "avatar"],
+              "text": "No host writes on first render",
+              "hash": "ff2b634"
+            },
+            {
+              "scopes": ["text-field"],
+              "text": "Expose state as custom states instead of host classes",
+              "hash": "6a0de84"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Name cell slots by display line and report rendered rows",
+              "hash": "7a4ff4d"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["working-indicator"],
+              "text": "Add c2-working-indicator",
+              "hash": "4d3d1d8"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Row-activate for keyboard and pointer, grid named from the host",
+              "hash": "4e81bc8"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Ship useRenderedRows for React and Vue",
+              "hash": "63ee3aa"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Raw-html helper for many-instance markup; check app CSS variables in CI",
+              "hash": "2f0e3e9"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Row parts, cell wrapping, rendered-range event and keys for cell controls",
+              "hash": "0a88c2b"
+            },
+            {
+              "scopes": ["command"],
+              "text": "Cap the whole palette with --c2-command--max-height",
+              "hash": "7b4eec9"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Let a component shorthand variable work under base.css",
+              "hash": "b9ff328"
+            },
+            {
+              "scopes": ["dashboard"],
+              "text": "Named panel sizes stored with the layout",
+              "hash": "3ba3c1c"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Render cards from items through renderItem",
+              "hash": "b1d1707"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Add c2-kanban board",
+              "hash": "6f72719"
+            },
+            {
+              "scopes": ["log-lens"],
+              "text": "Adopt the new c2n components across every view",
+              "hash": "99d8d9f"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Add @c2n/gantt, a read-only Gantt chart",
+              "hash": "77eaf2d"
+            },
+            {
+              "scopes": ["google-map"],
+              "text": "Add @c2n/google-map with map, marker, route and street view",
+              "hash": "d4da6a8"
+            },
+            {
+              "scopes": [],
+              "text": "Add Log Lens, an OpenTelemetry log analyzer example in Next.js",
+              "hash": "b0edf73"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["code-viewer", "page-editor"],
+              "text": "A failed grammar warm-up no longer unloads the grammar",
+              "hash": "81b4469"
+            },
+            {
+              "scopes": ["code-viewer", "page-editor"],
+              "text": "Compile a grammar before shiki times its first line",
+              "hash": "f88ebe1"
+            },
+            {
+              "scopes": ["code-viewer", "page-editor"],
+              "text": "Fall back to the ES2018 regex target without the v flag",
+              "hash": "34ef6f3"
+            },
+            {
+              "scopes": ["code-viewer", "page-editor"],
+              "text": "Pin shiki's regex target so WebKit highlights code",
+              "hash": "5bfd084"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Element-only subpaths and accurate README imports",
+              "hash": "f1c3ce4"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Per-module subpaths, docs and READMEs on @c2n/components",
+              "hash": "f2234bd"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Measure on the next frame to avoid a ResizeObserver loop",
+              "hash": "dc87f3a"
+            },
+            {
+              "scopes": ["page-editor"],
+              "text": "Warn when a code grammar fails to load",
+              "hash": "2076b20"
+            },
+            {
+              "scopes": ["working-indicator"],
+              "text": "Keep the label when space runs out",
+              "hash": "987e7d1"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Define shadow-sm and reject overrides naming an unknown token",
+              "hash": "96854f3"
+            },
+            {
+              "scopes": ["button"],
+              "text": "Name the inner button from the host aria-label",
+              "hash": "414af07"
+            },
+            {
+              "scopes": ["overlay", "hover-card"],
+              "text": "Reposition an open popup when its offset variables change",
+              "hash": "d83d3ef"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Wire grid width, axis-line colour and sparkline tones; document mark variables only where drawn",
+              "hash": "b1af6e1"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Kebab-case drag-start-threshold and auto-scroll-disabled",
+              "hash": "31cbe93"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Keep the dragged card under the pointer",
+              "hash": "7809686"
+            },
+            {
+              "scopes": ["google-map"],
+              "text": "Fixes found against the live Maps API",
+              "hash": "46de2cb"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Radio's import, icon and font notes, and grouped tags in the studio",
+              "hash": "864fb39"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Icon class names in the studio, and theme/install wording cubic flagged",
+              "hash": "7a26711"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Import every element a usage card shows, and keep the studio's import map small",
+              "hash": "1deef67"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Point llms.txt chart pages at their own chart entry",
+              "hash": "1809a21"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Import table and step types from their component entries",
+              "hash": "c48b97c"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Name Log Lens pattern-table cell slots by display line",
+              "hash": "f92ee48"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.0.24",
       "date": "2026-10-03",
       "sections": [

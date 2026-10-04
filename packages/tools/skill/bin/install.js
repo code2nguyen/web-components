@@ -19,7 +19,7 @@ const copilotInstructions = `${instructionsStart}
 - Never write a \`c2-*\` tag, attribute, slot, event or \`--c2-*\` variable from memory. Before using a component, call the c2n MCP tool \`get_component\` for its API and \`get_examples\` for markup; call \`get_theme\` before writing CSS. Without the MCP tools, read \`node_modules/@c2n/<name>/custom-elements.json\`.
 - Build the child elements a container expects: \`get_component\` lists them under "Children" (\`c2-dashboard\` holds \`c2-dash-card\`, \`c2-tabs\` holds \`c2-tab\`).
 - Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for parts \`get_component\` lists.
-- Theme once: import \`@c2n/theme/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
+- Theme once: import \`@c2n/components/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
 - The \`c2n-components\` skill (\`.github/skills/c2n-components/SKILL.md\`) has the full workflow.
 ${instructionsEnd}`
 

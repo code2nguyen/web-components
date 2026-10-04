@@ -13,10 +13,10 @@ import { Masonry } from '@c2n/masonry'
 
 The container responds to its own width, not the viewport: below 600 px it has 1 column; at 600 px it has 6; at 960 px it has 9; and at 1280 px it has 12. Each tile's `cols` is the base width. `cols-xs`, `cols-sm`, `cols-md`, and `cols-lg` override it in their respective ranges. The component keeps one tile order, clamps over-wide spans for rendering, and repacks that same order at every width.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/masonry
+```typescript tag=CodeBlock
+import '@c2n/components/masonry'
 ```
 
 ## Usage
@@ -206,7 +206,7 @@ The Conversion tile above replaces the built-in move artwork with an SVG in its 
 Committed edits save to `localStorage` and restore automatically by default. Give the container a stable `id` to keep its default storage key stable, or set `storage-key="operations-layout"` to choose the exact key. Use `save-layout="false"` to disable storage; the repository's Boolean converter recognizes the literal `"false"`. A completed user edit still sends one nonbubbling `layout-change` from the container. Its `detail.layout` has `version: 1` and an ordered `items` array of `{ id, rows, columns: { xs, sm, md, lg } }`; it stores no coordinates. Applications can also assign a snapshot through the property-only `layout` input, which takes precedence over stored data:
 
 ```js tag=CodeBlock
-import '@c2n/masonry'
+import '@c2n/components/masonry'
 
 const masonry = document.querySelector('c2-masonry')
 masonry.addEventListener('layout-change', (event) => {

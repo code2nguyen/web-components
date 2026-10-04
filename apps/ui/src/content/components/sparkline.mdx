@@ -32,11 +32,13 @@ It takes the bare `number[]` shape as well as rows, which is usually all a cell 
 uPlot is what makes a sparkline per row affordable — the engine loads once for the page, and each instance
 is a single canvas.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/chart uplot
+```typescript tag=CodeBlock
+import '@c2n/components/chart/sparkline'
 ```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
 
 ## Usage
 
@@ -116,8 +118,8 @@ The values are a France 2015–2024 extract from the public [Our World in Data E
 ## Tone
 
 `tone="auto"` compares the last value with the first and paints the line with the positive or negative tone
-— `--c2-chart__tone-positive--color` and `--c2-chart__tone-negative--color`. `positive` and `negative` force
-one of them, and `neutral` (the default) keeps the series' palette colour, which is what you want when the
+— `--c2-chart__tone-positive--color` and `--c2-chart__tone-negative--color`, which fall back to the chart-wide
+`--c2-chart__positive--color` and `--c2-chart__negative--color` when unset. `positive` and `negative` force one of them, and `neutral` (the default) keeps the series' palette colour, which is what you want when the
 sparkline sits next to other charts that share it.
 
 A flat series, a series with fewer than two points, or a non-numeric end falls back to the palette colour

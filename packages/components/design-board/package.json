@@ -2,6 +2,9 @@
   "name": "@c2n/design-board",
   "version": "0.0.13",
   "private": true,
+  "c2n": {
+    "status": "wip"
+  },
   "type": "module",
   "main": "dist/design-board.js",
   "exports": {
@@ -19,10 +22,6 @@
     "lit"
   ],
   "author": "code2nguyen@gmail.com",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
@@ -33,7 +32,7 @@
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "@c2n/core": "0.0.13",
+    "@c2n/core": "*",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },

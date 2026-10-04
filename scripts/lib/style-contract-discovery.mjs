@@ -38,7 +38,7 @@ export function discoverPublishableContracts(repoRoot) {
     const packageFile = join(directory, 'package.json')
     if (!existsSync(packageFile)) continue
     const metadata = readJson(packageFile, 'package metadata')
-    if (metadata.private === true) continue
+    if (metadata.c2n?.status === 'wip') continue
     if (typeof metadata.name !== 'string' || !metadata.name) throw new Error(`publishable package at ${directory}: missing name`)
     const manifestFile = resolve(directory, metadata.customElements ?? 'custom-elements.json')
     if (!existsSync(manifestFile)) throw new Error(`${metadata.name}: missing manifest ${manifestFile}`)

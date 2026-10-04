@@ -31,6 +31,9 @@ export interface LineChart {
  * @tag c2-line-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of a line series.
+ * @cssproperty {pixel} [--c2-chart__point--radius=2.5px] - Radius of a data point marker.
  */
 @customElement('c2-line-chart')
 export class LineChart extends UplotChartBase {

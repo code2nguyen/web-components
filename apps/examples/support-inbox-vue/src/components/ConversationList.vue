@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListEventMap } from '@c2n/list'
+import type { ListEventMap } from '@c2n/components/list'
 import { STATUS_TONE, type Conversation } from '../data/conversations'
 
 defineProps<{ conversations: Conversation[]; activeId: string }>()
@@ -11,7 +11,7 @@ const emit = defineEmits<{ select: [id: string] }>()
  * no synthetic event system in the way and no `on*` spelling to invent, which is the main thing React has to
  * work around.
  *
- * The detail comes typed: `@c2n/list/vue` declares the handler with the component's own event map, so the
+ * The detail comes typed: `@c2n/components/vue` declares the handler with the component's own event map, so the
  * template binding is checked and there is nothing to cast here.
  */
 function handleSelection(event: ListEventMap['selection-change']) {

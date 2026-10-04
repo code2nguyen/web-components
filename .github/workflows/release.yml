@@ -1,7 +1,8 @@
 name: Release to npm
 
-# Manual only: publishing is deliberate. Run it from the Actions tab, pick the bump, and the whole
-# monorepo is versioned together (fixed versioning, see the `version` field in lerna.json).
+# Manual only: publishing is deliberate. Run it from the Actions tab, pick the bump, and every public package is
+# versioned together (fixed versioning, see the `version` field in lerna.json). The component packages are private
+# workspaces: they ship inside @c2n/components, so a release publishes about a dozen packages.
 # A real release writes its version commit to `release/v<version>` and opens a PR back to the selected
 # source branch. Merge that PR before starting the next version. If any step fails, rerun the same run:
 # it resumes the release branch or tag and publishes only packages that are still missing from npm.

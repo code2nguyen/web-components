@@ -3,7 +3,7 @@
 `<c2-rate>` is an accessible, form-associated star rating input with pointer preview, keyboard control and optional half-star values.
 
 ```bash
-npm install @c2n/rate
+npm install @c2n/components
 ```
 
 ```html
@@ -11,7 +11,7 @@ npm install @c2n/rate
 ```
 
 ```js
-import '@c2n/rate'
+import '@c2n/components/rate'
 
 document.querySelector('c2-rate').addEventListener('rate-change', (event) => {
   console.log(event.detail.value)
