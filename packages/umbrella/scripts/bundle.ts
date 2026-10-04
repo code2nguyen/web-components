@@ -126,12 +126,27 @@ function declarationFiles(dir: string): string[] {
   })
 }
 
+/**
+ * `tsc` drops a `/// <reference types="…" />` from the declarations it emits, so a package whose types use a global
+ * namespace (`google.maps` from `@types/google.maps`) relies on its own compilation having loaded it. Restore the
+ * reference on every copied file of a package that lists such a dependency, for each global it actually names.
+ */
+function globalTypeReferences(name: string): { types: string; namespace: RegExp }[] {
+  return Object.keys(packageJsons.get(name)!.dependencies ?? {})
+    .filter((dependency) => dependency.startsWith('@types/'))
+    .map((dependency) => dependency.slice('@types/'.length))
+    .map((types) => ({ types, namespace: new RegExp(`\\b${types.replace(/\./g, '\\.')}\\b`) }))
+}
+
 for (const [name, root] of roots) {
   const files = [...declarationFiles(join(root, 'types')), ...['react.d.ts', 'vue.d.ts'].map((file) => join(root, file)).filter(existsSync)]
+  const references = globalTypeReferences(name)
   for (const file of files) {
     const target = copied(name, file)
+    const source = rewrite(readFileSync(file, 'utf8'), target)
+    const directives = references.filter(({ types, namespace }) => namespace.test(source) && !source.includes(`types="${types}"`))
     mkdirSync(dirname(target), { recursive: true })
-    writeFileSync(target, rewrite(readFileSync(file, 'utf8'), target))
+    writeFileSync(target, directives.map(({ types }) => `/// <reference types="${types}" />\n`).join('') + source)
   }
 }
 

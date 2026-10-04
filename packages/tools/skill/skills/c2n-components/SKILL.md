@@ -43,7 +43,7 @@ Each component has a gallery of designed looks on the docs site. Start from one 
 - Fetch the chosen card with `get_examples` `label: "<slug>"`. Its CSS already uses `var(--c2-theme--…, literal)` wherever a colour belongs to the theme; a literal left over is the card's own accent, so replace it with the application's token (usually `--c2-theme--color-primary…`) rather than pasting it.
 - When the look repeats, `generate_variant` with `example: "<slug>"` turns the card into a class or Lit subclass under the app's prefix.
 
-Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/<name>/custom-elements.json` (resolved from `@c2n/components` when the project installed only the umbrella) for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
+Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/components/custom-elements.json` for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
 
 ## 3. Theme once
 

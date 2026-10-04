@@ -20,6 +20,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-list-item': DefineComponent<
       C2Props<ListItem> & {
+        'joined-before'?: unknown
+        'joined-after'?: unknown
         onClick?: (event: EventOf<ListItem, 'click'>) => void
         onSelectedChange?: (event: EventOf<ListItem, 'selected-change'>) => void
       }

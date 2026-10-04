@@ -181,14 +181,14 @@
   }
 }
 
-// Adjacent selected rows inside a `c2-list` are marked `joined-before` / `joined-after` by the list: square the corners
+// Adjacent selected rows inside a `c2-list` are joined by the list (`:state(joined-before)` / `:state(joined-after)`): square the corners
 // that face each other so the run reads as one block.
-:host([selected][joined-before]) .c2-list-item {
+:host([selected]:state(joined-before)) .c2-list-item {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
-:host([selected][joined-after]) .c2-list-item {
+:host([selected]:state(joined-after)) .c2-list-item {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }

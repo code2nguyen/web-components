@@ -168,6 +168,8 @@ test('the click that ends a drag does not follow a link, a plain click does', as
   await dragTrack(page, -200, { x: box.x + box.width / 2, y: box.y + box.height / 2 })
   await expect(indicator(page, 2)).toHaveAttribute('aria-current', 'true')
   expect(new URL(page.url()).hash).toBe('')
+  // Let the track finish snapping first: a click on a slide still sliding in lands on a moving target.
+  await expect.poll(() => slideAtStart(page)).toBe(1)
   await page.getByRole('link', { name: 'Link 2' }).click()
   await expect.poll(() => new URL(page.url()).hash).toBe('#link-2')
 })

@@ -187,6 +187,14 @@
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
     },
+    "./gantt": {
+      "types": "./dist/gantt.d.ts",
+      "default": "./dist/gantt.js"
+    },
+    "./google-map": {
+      "types": "./dist/google-map.d.ts",
+      "default": "./dist/google-map.js"
+    },
     "./header": {
       "types": "./dist/header.d.ts",
       "default": "./dist/header.js"
@@ -198,6 +206,10 @@
     "./icon-button": {
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
+    },
+    "./kanban": {
+      "types": "./dist/kanban.d.ts",
+      "default": "./dist/kanban.js"
     },
     "./kbd": {
       "types": "./dist/kbd.d.ts",
@@ -411,6 +423,10 @@
       "types": "./dist/week-planner.d.ts",
       "default": "./dist/week-planner.js"
     },
+    "./working-indicator": {
+      "types": "./dist/working-indicator.d.ts",
+      "default": "./dist/working-indicator.js"
+    },
     "./react": {
       "types": "./dist/react.d.ts",
       "default": "./dist/react.js"
@@ -444,6 +460,7 @@
     "@lit/context": "1.1.6",
     "@lit/task": "1.0.3",
     "@types/geojson": "7946.0.16",
+    "@types/google.maps": "^3.66.4",
     "@types/topojson-specification": "1.0.5",
     "@upsetjs/venn.js": "2.0.0",
     "d3-geo": "3.1.1",
@@ -473,7 +490,9 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
-    "uplot": "^1.6.31"
+    "react": ">=18.0.0",
+    "uplot": "^1.6.31",
+    "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "@codemirror/autocomplete": {
@@ -512,7 +531,13 @@
     "echarts": {
       "optional": true
     },
+    "react": {
+      "optional": true
+    },
     "uplot": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
@@ -551,9 +576,12 @@
     "@c2n/date-selector": "*",
     "@c2n/details": "*",
     "@c2n/flow": "*",
+    "@c2n/gantt": "*",
+    "@c2n/google-map": "*",
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
@@ -606,6 +634,7 @@
     "@c2n/tree": "*",
     "@c2n/upload": "*",
     "@c2n/virtual-list": "*",
-    "@c2n/week-planner": "*"
+    "@c2n/week-planner": "*",
+    "@c2n/working-indicator": "*"
   }
 }

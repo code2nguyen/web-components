@@ -41,6 +41,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Code Viewer** — `c2-code-viewer` · `@c2n/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Flow** — `c2-flow` · `@c2n/flow` — A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
+- **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
+- **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
@@ -68,6 +70,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Status Panel** — `c2-status-panel` · `@c2n/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps.
 - **Toast** — `c2-toast, c2-toast-region` · `@c2n/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
 - **Tooltip** — `c2-tooltip` · `@c2n/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
+- **Working Indicator** — `c2-working-indicator` · `@c2n/working-indicator` — A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.
 
 ## Icons
 
@@ -116,6 +119,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
+- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Separator** — `c2-separator` · `@c2n/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.

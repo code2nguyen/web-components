@@ -95,7 +95,7 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
 
 - **Standalone**: a click toggles `selected` and fires `selected-change` with `detail.selected` and `detail.value`.
 - **In a list**: the click bubbles to the `c2-list`, which updates its `value` and pushes the selected state back down. Listen to `selection-change` on the list (or the select) instead.
-- **Adjacent selection**: in a `multiple` list, selected rows that touch lose the corner radius between them and read as one block; a selected row on its own keeps its full radius.
+- **Adjacent selection**: in a `multiple` list, selected rows that touch lose the corner radius between them and read as one block; a selected row on its own keeps its full radius. The joined rows match `c2-list-item:state(joined-before)` / `:state(joined-after)`; earlier releases wrote `joined-before` / `joined-after` attributes on them instead (`c2-list-item[joined-before]` → `c2-list-item:state(joined-before)`).
 - **Keyboard**: a standalone row is a tab stop; Enter and Space toggle it. In a list the list moves focus with the arrow keys and selects with Enter or Space.
 - **`description`**: a second line under the content, muted and smaller; `label` keeps the select trigger to the first line.
 - **`href`**: the row renders as a link (`role="link"`); inside a list it still takes part in the selection.

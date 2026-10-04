@@ -106,3 +106,7 @@ list.renderItem = ({ item }) => html`
   <span slot="description">${item.team} · ${item.score.toLocaleString()}</span>
 `
 ```
+
+The rows live in the list's shadow root, so a page stylesheet does not reach what `renderItem` returns — but a
+`part` on it does: return `<span part="team team-${item.team}">` and style it with `c2-virtual-list::part(team)`.
+Put the variant in the part name, since `::part()` takes no attribute or class selector.

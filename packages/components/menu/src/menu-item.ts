@@ -36,8 +36,9 @@ export interface MenuItem {
  * `keep-open`. The default slot is the label, `description` a second muted line, `prefix-icon` / `suffix-icon` take an
  * inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`, and `shortcut` holds a keyboard hint (plain text or a `c2-kbd`).
  *
- * Rows never handle the keyboard themselves: the menu owns arrow keys, typeahead and the roving `tabindex`, and marks
- * every row `reserve-indicator` while any sibling is checkable so the labels of plain and checkable rows line up.
+ * Rows never handle the keyboard themselves: the menu owns arrow keys, typeahead and the roving `tabindex`, and
+ * sets `reserveIndicator` on every row while any sibling is checkable so the labels of plain and checkable rows line up
+ * (a property, not reflected: the menu never writes attributes on its rows).
  *
  * @tag c2-menu-item
  *
@@ -140,7 +141,7 @@ export class MenuItem extends LitElement {
   @property({ type: Boolean, reflect: true }) expanded = false
 
   /** Private: set by the parent menu on every row while any sibling is checkable, so the labels line up. */
-  @property({ type: Boolean, reflect: true, attribute: 'reserve-indicator' }) reserveIndicator = false
+  @property({ type: Boolean, attribute: 'reserve-indicator' }) reserveIndicator = false
 
   private readonly slotPresence = new SlotPresenceController(this, ['description', 'submenu'])
 

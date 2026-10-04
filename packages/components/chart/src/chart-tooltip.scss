@@ -20,7 +20,9 @@
   pointer-events: none;
 }
 
-:host([hidden]) {
+// Shown only while the chart has a hovered point; an authored `hidden` still wins.
+:host([hidden]),
+:host(:not(:state(open))) {
   display: none;
 }
 

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kanban test scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 14px system-ui;
+        color: #18181b;
+        background: white;
+      }
+    </style>
+    <script type="module">
+      import { html } from 'lit'
+      import '../src/kanban.ts'
+      window.kanbanHtml = html
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

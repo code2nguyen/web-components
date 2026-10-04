@@ -6,7 +6,7 @@ import { closestCssVariable, documentedCssVariables, sourceFiles, unknownCssVari
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const requested = process.argv.slice(2)
-const roots = (requested.length > 0 ? requested : ['apps/examples/observability-nextjs']).map((path) => resolve(repoRoot, path))
+const roots = (requested.length > 0 ? requested : ['apps/ui', 'apps/examples']).map((path) => resolve(repoRoot, path))
 const documented = documentedCssVariables(repoRoot)
 const problems = []
 

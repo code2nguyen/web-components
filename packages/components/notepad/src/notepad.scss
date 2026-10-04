@@ -1,3 +1,4 @@
+@use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-notepad,
   $theme: (
@@ -23,14 +24,8 @@
     margin--gap: 0px,
     headline--color: transparent,
     writing--color: #1e2a4a,
-    writing--font-family: (
-      'C2 Notepad Hand',
-      'Patrick Hand',
-      'Segoe Print',
-      'Bradley Hand',
-      'Comic Sans MS',
-      cursive,
-    ),
+    // One unquoted string, so the family names keep their quotes when the list is interpolated into the fallback.
+    writing--font-family: string.unquote("'C2 Notepad Hand', 'Patrick Hand', 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive"),
     writing--font-size: 18px,
     placeholder--color: #8a909b,
     selection--background: rgba(255, 214, 64, 0.45),
@@ -144,6 +139,18 @@
 :host {
   --_paper: var(--_pad-paper);
   --_ink: #{css.cssVar(writing--color)};
+  // The ruling, read by the sheet's layers and the writing inside it. The pad presets set the documented variables
+  // these read; the `pad`, `paper`, `paper-color` and `error` rules override the colours on `.sheet`.
+  --_rule: #{css.cssVar(rule--spacing)};
+  --_size: #{css.cssVar(writing--font-size)};
+  --_inset: #{css.cssVar(margin--inset)};
+  --_gap: #{css.cssVar(margin--gap)};
+  // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
+  --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
+  --_rule-c: #{css.cssVar(rule--color)};
+  --_grid-c: #{css.cssVar(grid--color)};
+  --_dot-c: #{css.cssVar(dot--color)};
+  --_margin-c: #{css.cssVar(margin--color)};
 }
 :host([paper-color='yellow']) {
   --_paper: #{css.cssVar(paper-yellow--background)};
@@ -198,16 +205,6 @@
 }
 
 .sheet {
-  --_rule: #{css.cssVar(rule--spacing)};
-  --_size: #{css.cssVar(writing--font-size)};
-  --_inset: #{css.cssVar(margin--inset)};
-  --_gap: #{css.cssVar(margin--gap)};
-  // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
-  --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
-  --_rule-c: #{css.cssVar(rule--color)};
-  --_grid-c: #{css.cssVar(grid--color)};
-  --_dot-c: #{css.cssVar(dot--color)};
-  --_margin-c: #{css.cssVar(margin--color)};
   position: relative;
   z-index: 1;
   display: flex;

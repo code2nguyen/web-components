@@ -105,6 +105,29 @@ npm install @c2n/components
 </div>
 ```
 
+## Named panel sizes
+
+When the user picks a pane's size from a fixed set ("small", "wide") rather than dragging tracks, declare the set on
+the grid with `sizes` — each name maps to a `colSpan` and/or `rowSpan` — and give each card its authored size with
+`size`. `setPanelSize(cardId, name)` changes one at runtime (`null` gives the card its authored size back). With a
+`storage-key` the choice is stored alongside the tracks and the card order (`{ version: 1, columns, rows, order,
+breakpoint, sizes }`), `layout-change` reports every card's size in `detail.sizes`, and `reset()` forgets the
+choices with the tracks. On restore a payload of another version is discarded, a choice naming an unknown size or a
+card that is gone is ignored (the card keeps its authored size), and a layout stored before sizes existed still
+restores. A `layout` record entry with its own span wins over the size.
+
+```html tag=CodeBlock
+<c2-dashboard storage-key="ops" columns="2" rows="2" sizes='{"small":{"colSpan":1},"wide":{"colSpan":2}}'>
+  <c2-dash-card card-id="cpu" col="1" row="1" size="small">…</c2-dash-card>
+  <c2-dash-card card-id="logs" col="1" row="2" size="wide">…</c2-dash-card>
+</c2-dashboard>
+<script type="module">
+  const grid = document.querySelector('c2-dashboard')
+  grid.addEventListener('layout-change', (event) => console.log(event.detail.sizes)) // { cpu: 'wide', logs: 'wide' }
+  grid.setPanelSize('cpu', 'wide')
+</script>
+```
+
 ## Adding and removing panes
 
 Panes can come and go at runtime. A `c2-dash-card` appended to a grid that is already on screen fades and scales

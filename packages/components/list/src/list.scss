@@ -104,14 +104,14 @@
 }
 
 // Flush lists (no vertical padding): the first and last rows take the list's corner radius.
-:host(.padding-top-0) {
+:host(:state(padding-top-0)) {
   ::slotted(c2-list-item:first-child) {
     --c2-list-item--border-top-left-radius: #{css.cssVar(border-top-left-radius)};
     --c2-list-item--border-top-right-radius: #{css.cssVar(border-top-right-radius)};
   }
 }
 
-:host(.padding-bottom-0) {
+:host(:state(padding-bottom-0)) {
   ::slotted(c2-list-item:last-child) {
     --c2-list-item--border-bottom-left-radius: #{css.cssVar(border-bottom-left-radius)};
     --c2-list-item--border-bottom-right-radius: #{css.cssVar(border-bottom-right-radius)};

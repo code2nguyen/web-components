@@ -1,0 +1,81 @@
+---
+title: 'Google Map'
+description: 'Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { GoogleMap } from '@c2n/google-map'
+import { GoogleMapMarker } from '@c2n/google-map/google-map-marker.js'
+import { GoogleMapRoute } from '@c2n/google-map/google-map-route.js'
+import { GoogleStreetView } from '@c2n/google-map/google-street-view.js'
+
+`c2-google-map` shows an interactive Google map. Declare what goes on it as children: `c2-google-map-marker` for a
+pin, `c2-google-map-route` for the road route between an `origin` and a `destination` (with its distance and travel
+time in `route-change`). `c2-google-street-view` is a Street View panorama of its own, or the one the map's pegman
+opens when it is linked with `for`. Everything else the Maps JavaScript API offers stays reachable through the
+element's `map` property, the underlying `google.maps.Map`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/components
+```
+
+## API key
+
+The Maps JavaScript API runs in the browser, so its key is always visible to the page, and no server can hide it.
+Protect it in the Google Cloud console instead: restrict it to your sites' HTTP referrers, allow only the APIs the
+page uses (Maps JavaScript API, plus Routes API for `c2-google-map-route`), and set a quota. Configure it once for
+the whole page, before or after the maps render:
+
+```ts tag=CodeBlock
+import { configureGoogleMaps } from '@c2n/components/google-map'
+
+configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, language: 'en', region: 'VN' })
+```
+
+An `api-key` attribute on the element works too, when there is only one map. Markers and route markers need a map
+ID: without `map-id` the map uses Google's `DEMO_MAP_ID`, which is for development only.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/google-map
+<style>
+  .usage-map {
+    width: 100%;
+    --c2-google-map__container--height: 320px;
+    --c2-google-street-view__container--height: 320px;
+  }
+</style>
+<div data-label="Markers">
+  <c2-google-map class="usage-map" center="10.7769,106.7009" zoom="14" gesture-handling="cooperative">
+    <c2-google-map-marker position="10.7725,106.6980" label="Ben Thanh Market" glyph="1"></c2-google-map-marker>
+    <c2-google-map-marker position="10.7798,106.6990" label="Notre-Dame Cathedral" glyph="2"></c2-google-map-marker>
+    <c2-google-map-marker position="10.7769,106.7031" label="Saigon Opera House" glyph="3"></c2-google-map-marker>
+  </c2-google-map>
+</div>
+<div data-label="Route A to B">
+  <c2-google-map class="usage-map" gesture-handling="cooperative">
+    <c2-google-map-route origin="Ben Thanh Market, Ho Chi Minh City" destination="Landmark 81, Ho Chi Minh City"></c2-google-map-route>
+  </c2-google-map>
+</div>
+<div data-label="Street View">
+  <c2-google-street-view class="usage-map" position="48.8584,2.2945" heading="320" pitch="10"></c2-google-street-view>
+</div>
+```
+
+## Distance and travel time
+
+`c2-google-map-route` computes the route again whenever `origin`, `destination`, `waypoints` or `travel-mode`
+changes, and reports it:
+
+```ts tag=CodeBlock
+const route = document.querySelector('c2-google-map-route')!
+route.addEventListener('route-change', (event) => {
+  const { distanceMeters, durationMillis, distanceText, durationText } = event.detail
+  console.log(`${distanceText} · ${durationText}`) // "8.1 km · 21 mins"
+})
+```

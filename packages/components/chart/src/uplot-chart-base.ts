@@ -21,7 +21,9 @@ export type UplotSeriesStyle = Omit<Series, 'label' | 'show'>
  *
  * Defines no tag and is never registered.
  *
- * @cssproperty {color} [--c2-chart__axis-line--color=#e4e4e7] - Colour of the axis rules uPlot draws at the plot edges.
+ * @cssproperty {color} [--c2-chart__axis-line--color=#e4e4e7] - Colour of the tick marks uPlot draws along each axis at the plot edges.
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 export abstract class UplotChartBase extends ChartBase {
   protected override readonly engineName = 'uplot' as const
@@ -78,17 +80,24 @@ export abstract class UplotChartBase extends ChartBase {
     // `scale` and `side` are spread in only for the right-hand axis: uPlot fills its per-index defaults with
     // `assign`, which copies an explicit `undefined` straight over them — the x axis would lose its side and
     // stop being drawn at the bottom.
+    // The tick marks along each axis are the rules uPlot draws at the plot edges; their colour has its own variable,
+    // resolved through a scratch probe because the shared probe block carries only the variables every chart reads.
+    const axisLineColor = this.themeController.resolveColor('var(--c2-chart__axis-line--color, #e4e4e7)', theme.gridColor)
     const axis = (show: boolean, isX: boolean, scale?: string): Axis => ({
       ...(scale ? { scale, side: 1 as const } : {}),
       show,
       stroke: theme.axisColor,
       font: `${theme.axisFontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`,
-      ticks: { show, stroke: theme.gridColor, width: 1 },
+      ticks: { show, stroke: axisLineColor, width: 1 },
       // Only the left axis contributes grid lines; a second set from the right one would not line up with it.
       grid:
         scale === RIGHT_SCALE
           ? { show: false }
-          : { show: isX ? this.grid === 'x' || this.grid === 'both' : this.grid === 'y' || this.grid === 'both', stroke: theme.gridColor, width: 1 },
+          : {
+              show: isX ? this.grid === 'x' || this.grid === 'both' : this.grid === 'y' || this.grid === 'both',
+              stroke: theme.gridColor,
+              width: theme.gridWidth,
+            },
       values: isX
         ? (_self: unknown, splits: number[]) => splits.map((value) => this.formatAxisX(value))
         : (_self: unknown, splits: number[]) => splits.map((value) => this.formatValue(value)),

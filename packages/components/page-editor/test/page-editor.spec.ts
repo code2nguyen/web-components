@@ -312,3 +312,46 @@ test('is accessible with its menus open', async ({ page, renderScenario }) => {
   await expect(slashMenu(page)).toBeVisible()
   await accessible(page)
 })
+
+test('code tokens take their colour from the --c2-page-editor__syntax-*--color variables', async ({ page, renderScenario }) => {
+  // With the code ink set to the same colour, the 80/20 mix leaves the syntax colour itself.
+  await renderScenario(
+    `<c2-page-editor label="Notes" style="--c2-page-editor__syntax-keyword--color: rgb(255, 0, 0); --c2-page-editor__code-block--color: rgb(255, 0, 0)"></c2-page-editor>`,
+  )
+  const errors: string[] = []
+  page.on('console', (message) => ['error', 'warning'].includes(message.type()) && !message.text().includes('lit.dev/msg') && errors.push(message.text()))
+  page.on('pageerror', (error) => errors.push(error.message))
+  await host(page).evaluate((element: HTMLElement & { value: string }) => (element.value = '```js\nif (ok) {}\n```'))
+  const block = page$(page).locator('pre').first()
+  await expect(page$(page).locator('.code-language')).toHaveText('JavaScript')
+  await expect(block).toContainText('if (ok)')
+  const keyword = block.locator('span[style*="--_tok-token-keyword"]').first()
+  try {
+    await expect(keyword).toHaveText('if', { timeout: 15_000 })
+  } catch (error) {
+    // Say what the block holds instead, so a failure in one engine shows whether tokens are missing or coloured otherwise.
+    const html = await block.evaluate((element) => element.outerHTML)
+    // The editor's own view of it: the block's language and how many syntax decorations the highlighter holds.
+    const editor = await host(page).evaluate((element) => {
+      type Plugin = { key: string; getState(state: unknown): { find(): unknown[] } | undefined }
+      type View = { state: { plugins: Plugin[]; doc: { firstChild: { attrs: { language?: string } } | null } } }
+      const { view } = element as unknown as { view: View }
+      const highlight = view.state.plugins.find((plugin) => plugin.key.startsWith('c2-page-editor-highlight'))
+      return { language: view.state.doc.firstChild?.attrs.language, decorations: highlight?.getState(view.state)?.find().length }
+    })
+    throw new Error(`${(error as Error).message}\ncode block: ${html}\neditor: ${JSON.stringify(editor)}\npage errors: ${JSON.stringify(errors)}`, {
+      cause: error,
+    })
+  }
+  // A browser serializes a mixed colour its own way: compare with the same mix computed in the page.
+  const red = await page.evaluate(() => {
+    const probe = document.body.appendChild(document.createElement('span'))
+    probe.style.color = 'color-mix(in srgb, rgb(255, 0, 0) 80%, rgb(255, 0, 0))'
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  })
+  await expect(keyword).toHaveCSS('color', red)
+  await host(page).evaluate((element) => element.style.setProperty('--c2-page-editor__syntax-keyword--color', 'rgb(0, 0, 255)'))
+  await expect(keyword).not.toHaveCSS('color', red)
+})

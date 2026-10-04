@@ -320,6 +320,31 @@ nav.close()
 nav.value = 'item-2'
 ```
 
+## Rendering from Astro
+
+Make the bar the island and hand it its items as **plain HTML**. Written as tags inside `<NavigationMenu client:load>`, the items are claimed by `@astrojs/lit` too, since importing the package registers them on the server: each one is server-rendered with declarative shadow DOM, its `href` is set as a property (it is not reflected, so the link is missing from the HTML) and it is marked `defer-hydration`, which nothing removes for a child that is not an island itself. Serialize the items to a string and pass it through `set:html` instead; the renderer leaves that string alone, and the bar's module upgrades the items in the browser.
+
+```astro tag=CodeBlock
+---
+import { NavigationMenu } from '@c2n/components/navigation-menu'
+
+const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+const links = [
+  { value: 'docs', label: 'Docs', href: '/docs/', current: true },
+  { value: 'blog', label: 'Blog', href: '/blog/', current: false },
+]
+const items = links
+  .map(({ value, label, href, current }) => `<c2-navigation-menu-item value="${escape(value)}" href="${escape(href)}"${current ? ' current' : ''}>${escape(label)}</c2-navigation-menu-item>`)
+  .join('')
+---
+
+<NavigationMenu client:load aria-label="Main">
+  <Fragment set:html={items} />
+</NavigationMenu>
+```
+
+Check the built page rather than the dev server: every `<c2-navigation-menu-item>` in `dist/**/*.html` should carry its `href` attribute and no `defer-hydration`. The same applies to rows inside a `panel`, since `c2-navigation-menu-link` keeps its `href` as an unreflected property as well.
+
 ## Theming
 
 `--c2-navigation-menu--*` covers the bar itself (gap, padding, background, border, radius). `--c2-navigation-menu-item--*` is a trigger, with `__hover`, `__expanded`, `__current`, `__focus` and `__disabled` states, an `__icon` part and the `__indicator` line under the current or open item. The panel surface hangs off the item as `--c2-navigation-menu-item__panel--*`, and the rows inside it are `--c2-navigation-menu-link--*`, including `__description` and `__current`.

@@ -42,6 +42,7 @@
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
+    "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
     "test:style-contracts": "playwright test tests/style-contracts",
     "verify:style-contracts": "node scripts/verify-style-contracts.mjs"
@@ -93,6 +94,9 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/kanban:build",
+        "./packages/components/gantt:build",
+        "./packages/components/working-indicator:build",
         "./packages/components/page-editor:build",
         "./packages/components/notepad:build",
         "./packages/components/todo-list:build",
@@ -100,6 +104,7 @@
         "./packages/components/flow:build",
         "./packages/components/week-planner:build",
         "./packages/components/month-planner:build",
+        "./packages/components/google-map:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",
         "./packages/components/marker:build",
@@ -197,6 +202,7 @@
         "./apps/examples/data-platform-html:build",
         "./apps/examples/trading-dashboard-react:build",
         "./apps/examples/observability-nextjs:build",
+        "./apps/examples/log-lens-nextjs:build",
         "./apps/examples/orders-admin-angular:build",
         "./apps/examples/support-inbox-vue:build"
       ]

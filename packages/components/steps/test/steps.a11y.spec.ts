@@ -49,7 +49,7 @@ test('a group is reachable and operable from the keyboard', async ({ page, scena
   await expect(page.locator('c2-step#build details')).toHaveJSProperty('open', true)
 
   await page.keyboard.press('Enter')
-  await expect(page.locator('c2-step#build')).toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', true)
   await expect(page.locator('c2-step#build details')).toHaveJSProperty('open', false)
 })
 

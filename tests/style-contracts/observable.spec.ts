@@ -16,7 +16,7 @@ type ReviewedCase = {
   target: string
   assertion: 'computed-style' | 'geometry' | 'pseudo-style' | 'slotted-style' | 'delegated-style' | 'programmatic-output'
   declaration?: string
-  pseudo?: '::before' | '::after'
+  pseudo?: '::before' | '::after' | '::placeholder'
   valueSyntax?: string
   syntaxRationale?: string
   outputProbe?: 'canvas-bitmap' | 'svg-bitmap' | 'image-bitmap' | 'text-content'

@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
-import { expect } from '@playwright/test'
+import { expect } from '../../../../tests/component-fixture'
 import { test } from '../../../../tests/fixture'
 // Pulls in the `window.bubbleScenario` declaration the scenario page installs.
 import './bubble-scenario-api'
@@ -26,7 +26,7 @@ interface BubbleInternals {
 test('groups one-row-per-point data by series-field, in the order the groups first appear', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+  await expect(chart).toHaveState('engine-echarts')
 
   const result = await chart.evaluate((element) => {
     const bubble = element as unknown as BubbleInternals
@@ -47,7 +47,7 @@ test('groups one-row-per-point data by series-field, in the order the groups fir
 test('sizes bubbles by area between the minimum and maximum size variables', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const diameters = await chart.evaluate(async (element) => {
     const bubble = element as unknown as BubbleInternals & { updateComplete: Promise<boolean>; sizeMax?: number }
@@ -80,7 +80,7 @@ test('sizes bubbles by area between the minimum and maximum size variables', asy
 test('reports the hovered row, not its draw position, with its label and size', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const detail = await chart.evaluate(async (element) => {
     const tooltip = new Promise<{ label?: string; size?: number | null; formattedSize?: string; formattedX: string; entries: { formatted: string }[] }>(
@@ -106,7 +106,7 @@ test('reports the hovered row, not its draw position, with its label and size', 
 test('reads one column per series, sharing the size column', async ({ page }) => {
   await open(page, 'wide')
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     const bubble = element as unknown as BubbleInternals
@@ -134,7 +134,7 @@ test('reads one column per series, sharing the size column', async ({ page }) =>
 test('lets a declared series relabel, recolour and limit the groups', async ({ page }) => {
   await open(page, 'declared')
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     const bubble = element as unknown as BubbleInternals
@@ -149,7 +149,7 @@ test('lets a declared series relabel, recolour and limit the groups', async ({ p
 test('size-legend ends the legend with a size key that follows the data', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const key = chart.locator('[part="size-legend"] svg')
   await expect(key).toHaveAttribute('aria-label', 'Population: 1.4K, 360, 89')
 
@@ -170,7 +170,7 @@ test('size-legend ends the legend with a size key that follows the data', async 
 test('hides the size key by default', async ({ page }) => {
   await open(page, 'wide')
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await expect(chart.locator('.legend-item')).toHaveCount(2)
   await expect(chart.locator('[part="size-legend"]')).toHaveCount(0)
 })
@@ -182,7 +182,7 @@ test('shows the error state when series-field has no y-field', async ({ page }) 
 
 test('has no automated accessibility violations', async ({ page }) => {
   await open(page)
-  await expect(page.locator('c2-bubble-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-bubble-chart')).toHaveState('ready')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
@@ -190,7 +190,7 @@ test('has no automated accessibility violations', async ({ page }) => {
 test('draws bubble labels in the chart text colour unless their own variable is set', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const colors = await chart.evaluate((element) => {
     const bubble = element as unknown as BubbleInternals & { bubbleStyle(): { labelColor: string } }
     element.style.setProperty('--c2-chart--color', 'rgb(1, 2, 3)')
@@ -205,7 +205,7 @@ test('draws bubble labels in the chart text colour unless their own variable is 
 test('widens both axes to rounded ticks so no bubble spills over the plot edge', async ({ page }) => {
   await open(page, 'wide')
   const chart = page.locator('c2-bubble-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     type Bound = (extent: { min: number; max: number }) => number

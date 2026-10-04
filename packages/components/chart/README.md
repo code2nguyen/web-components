@@ -112,5 +112,7 @@ messages) is ordinary DOM and does expose parts.
 `chart-ready`, `chart-error`, `point-click`, `point-hover`, `range-change`, `series-toggle`, `legend-change`
 and `tooltip-change`. The
 semantic ones do not bubble: several components fire similarly named events, so a listener belongs on the
-element itself. The host also carries `data-chart-ready` once the first frame is drawn, which is the
-signal to wait on in a test.
+element itself. The host also matches the custom state `:state(ready)` once the first frame is drawn
+(`c2-line-chart:state(ready)`), which is the signal to wait on in a test; `:state(engine-uplot)` or
+`:state(engine-echarts)` names the engine. Earlier releases wrote `data-chart-ready` and `data-chart-engine`
+attributes on the host instead, which a server-rendered page never had.

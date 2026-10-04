@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { failOnConsoleErrors } from './console-guard'
 
-test.beforeEach(({ page }) => {
-  page.on('console', (message) => {
-    if (message.type() === 'error') throw new Error(`Browser console error: ${message.text()}`)
-  })
-})
+test.beforeEach(({ page }) => failOnConsoleErrors(page))
 
 test('dashboard renders a coherent scoped baseline and deterministic panel states', async ({ page }) => {
+  // The replay advances one tick per 15-second data step (REPLAY_STEP_MS); a fake clock reaches tick 1 without waiting for it.
+  await page.clock.install()
   await page.goto('./dashboards/')
   await expect(page.getByRole('heading', { name: 'Operational dashboard' })).toBeVisible()
   await expect(page.locator('[data-panel-id]')).toHaveCount(7)
@@ -22,9 +21,10 @@ test('dashboard renders a coherent scoped baseline and deterministic panel state
   await page.locator('c2-list-item[value="30m"]').click()
   await expect(page.getByText(/30 minutes · desktop layout/)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Play' }).click()
-  await expect(page.getByText(/Replay snapshot: playing at tick 1/)).toBeVisible({ timeout: 7_000 })
-  await page.getByRole('button', { name: 'Pause' }).click()
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await page.clock.runFor(15_000)
+  await expect(page.getByText(/Replay snapshot: playing at tick 1/)).toBeVisible()
+  await page.getByRole('button', { name: 'Pause', exact: true }).click()
   await expect(page.getByText(/Replay snapshot: paused at tick 1/)).toBeVisible()
   await page.getByRole('button', { name: 'Refresh replay from baseline' }).click()
   await expect(page.getByText(/Replay snapshot: paused at tick 0/)).toBeVisible()
@@ -76,9 +76,15 @@ test('invalid saved layout recovers without affecting the page and tablet keeps 
 
   await page.setViewportSize({ width: 768, height: 1024 })
   await page.reload()
-  const visualOrder = await page
-    .locator('[data-panel-id]')
-    .evaluateAll((nodes) => nodes.map((node) => ({ id: node.getAttribute('data-panel-id'), top: node.getBoundingClientRect().top })))
-  expect(visualOrder.map(({ top }) => top)).toEqual([...visualOrder.map(({ top }) => top)].sort((left, right) => left - right))
+  // The server renders the desktop placement; the tablet one applies once the client reads the viewport.
+  await expect(page.getByText(/· tablet layout/)).toBeVisible()
+  const visualTops = () =>
+    page.locator('[data-panel-id]').evaluateAll((nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().top + window.scrollY)))
+  await expect
+    .poll(async () => {
+      const tops = await visualTops()
+      return tops.every((top, index) => index === 0 || top > tops[index - 1])
+    })
+    .toBe(true)
   await expect(page.getByRole('button', { name: 'Move Request traffic before' })).toBeDisabled()
 })

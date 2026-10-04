@@ -1,0 +1,106 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Gantt, GanttTask } from '@c2n/gantt'
+
+## Presets
+
+Looks for project plans and roadmaps. The bar is drawn from one hue, `--c2-gantt__bar--color`, mixed against the
+chart's background by `__bar--background-mix`, `__bar--border-mix` and `__progress--background-mix`; a task's `tone`
+swaps the hue. Density comes from `__row--height` and `__bar--height`, and the zoom from the three
+`__column-*--width` variables.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-gantt aria-label="Docs relaunch" today="2026-10-01">
+  <c2-gantt-task task-id="design" label="Design">
+    <c2-gantt-task task-id="ia" start="2026-09-28" end="2026-10-02" progress="0.8">Information architecture</c2-gantt-task>
+    <c2-gantt-task task-id="vis" start="2026-10-05" end="2026-10-16" progress="0.35" dependencies="ia">Visual design</c2-gantt-task>
+    <c2-gantt-task task-id="review" start="2026-10-16" milestone dependencies="vis">Design review</c2-gantt-task>
+  </c2-gantt-task>
+  <c2-gantt-task task-id="build" label="Build">
+    <c2-gantt-task task-id="pages" start="2026-10-12" end="2026-10-30" dependencies="ia">Component pages</c2-gantt-task>
+    <c2-gantt-task task-id="search" start="2026-10-19" end="2026-11-03" dependencies="review">Search and navigation</c2-gantt-task>
+  </c2-gantt-task>
+</c2-gantt>
+```
+
+```html tag=MdxCodeBlock,label=Roadmap
+<style>
+  .gantt-roadmap {
+    --c2-gantt__list--width: 170px;
+    --c2-gantt__row--height: 36px;
+    --c2-gantt__bar--height: 22px;
+    --c2-gantt__bar--border-radius: 999px;
+    --c2-gantt__bar--background-mix: 22%;
+    --c2-gantt__bar--border-mix: 0%;
+    --c2-gantt__progress--background-mix: 48%;
+    --c2-gantt__column-month--width: 4px;
+  }
+</style>
+<c2-gantt class="gantt-roadmap" scale="month" aria-label="Roadmap" today="2026-10-01">
+  <c2-gantt-task task-id="platform" label="Platform">
+    <c2-gantt-task task-id="ssr" start="2026-10-05" end="2026-11-13" progress="0.6" tone="1">SSR audit</c2-gantt-task>
+    <c2-gantt-task task-id="svelte" start="2026-11-16" end="2027-01-22" progress="0.1" tone="1" dependencies="ssr">Svelte adapter</c2-gantt-task>
+  </c2-gantt-task>
+  <c2-gantt-task task-id="ds" label="Design system">
+    <c2-gantt-task task-id="gantt" start="2026-10-12" end="2026-12-04" progress="0.2" tone="2">Gantt</c2-gantt-task>
+    <c2-gantt-task task-id="tokens" start="2026-11-02" end="2026-12-18" progress="0.3" tone="6">Token audit</c2-gantt-task>
+  </c2-gantt-task>
+  <c2-gantt-task task-id="docs" label="Docs">
+    <c2-gantt-task task-id="guides" start="2026-11-23" end="2027-02-12" tone="3">Framework guides</c2-gantt-task>
+    <c2-gantt-task task-id="v1" start="2027-03-01" milestone dependencies="guides">v1.0</c2-gantt-task>
+  </c2-gantt-task>
+</c2-gantt>
+```
+
+```html tag=MdxCodeBlock,label=Minimal
+<style>
+  .gantt-minimal {
+    width: 440px;
+    --c2-gantt--border: 0;
+    --c2-gantt__header--background: transparent;
+    --c2-gantt__row--border-bottom: 0;
+    --c2-gantt__grid-line--color: transparent;
+    --c2-gantt__weekend--background: transparent;
+    --c2-gantt__bar--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-gantt__bar--background-mix: 10%;
+    --c2-gantt__bar--border-mix: 0%;
+    --c2-gantt__progress--background-mix: 80%;
+    --c2-gantt__bar--height: 8px;
+    --c2-gantt__bar--border-radius: 999px;
+    --c2-gantt__link--color: transparent;
+    --c2-gantt__today--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-gantt__today--width: 1px;
+  }
+</style>
+<c2-gantt class="gantt-minimal" layout="split" hide-list aria-label="Release train" today="2026-10-08">
+  <c2-gantt-task start="2026-10-01" end="2026-10-09" progress="1">Freeze</c2-gantt-task>
+  <c2-gantt-task start="2026-10-07" end="2026-10-16" progress="0.5">Release candidate</c2-gantt-task>
+  <c2-gantt-task start="2026-10-14" end="2026-10-23">Rollout</c2-gantt-task>
+</c2-gantt>
+```
+
+```html tag=MdxCodeBlock,label=Dense
+<style>
+  .gantt-dense {
+    --c2-gantt__row--height: 26px;
+    --c2-gantt__bar--height: 14px;
+    --c2-gantt__bar--border-radius: 3px;
+    --c2-gantt__header--height: 40px;
+    --c2-gantt__list--width: 200px;
+    --c2-gantt__column-day--width: 22px;
+    --c2-gantt--font-size: 12px;
+  }
+</style>
+<c2-gantt class="gantt-dense" scale="day" week-start="monday" aria-label="Sprint 42" today="2026-10-07">
+  <c2-gantt-task task-id="api" start="2026-10-05" end="2026-10-07" progress="1" tone="success">API contract</c2-gantt-task>
+  <c2-gantt-task task-id="ui" start="2026-10-07" end="2026-10-12" progress="0.5" dependencies="api">Settings screen</c2-gantt-task>
+  <c2-gantt-task task-id="mig" start="2026-10-08" end="2026-10-09" tone="warning">Data migration</c2-gantt-task>
+  <c2-gantt-task task-id="qa" start="2026-10-13" end="2026-10-14" dependencies="ui mig">QA pass</c2-gantt-task>
+  <c2-gantt-task task-id="ship" start="2026-10-15" milestone dependencies="qa">Ship</c2-gantt-task>
+</c2-gantt>
+```
+
+</GalleryGrid>

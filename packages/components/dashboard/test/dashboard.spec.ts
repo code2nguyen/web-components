@@ -393,3 +393,73 @@ test('a card added after the grid is alive registers with it', async ({ page, sc
   await drag(page, page.locator('#two').getByRole('separator'), -60, 0)
   await expect.poll(() => width(page.locator('#two'))).toBe(375)
 })
+
+test('a card takes the spans of its named size, and a runtime size is reported, stored, restored and reset', async ({ page, scenario }) => {
+  await scenario('sizes')
+  const subject = page.locator('#subject')
+  const one = page.locator('#one')
+  // `small` is one column; `huge` is not a size the grid knows, so `two` keeps its own spans.
+  await expect.poll(() => width(one)).toBe(315)
+  expect(await subject.evaluate((node) => (node as Dashboard).panelSizes)).toEqual({ one: 'small' })
+
+  expect(await subject.evaluate((node) => (node as Dashboard).setPanelSize('one', 'wide'))).toBe(true)
+  await expect.poll(() => width(one)).toBe(640)
+  const detail = await page.getByRole('status').evaluate((node) => JSON.parse((node as HTMLElement).dataset.detail ?? '{}'))
+  expect(detail).toMatchObject({ order: ['one', 'two'], breakpoint: null, sizes: { one: 'wide' } })
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2n-dashboard-test') ?? '{}'))
+  expect(stored).toMatchObject({ version: 1, sizes: { one: 'wide' } })
+
+  // Unknown cards and sizes change nothing.
+  expect(await subject.evaluate((node) => (node as Dashboard).setPanelSize('missing', 'wide'))).toBe(false)
+  expect(await subject.evaluate((node) => (node as Dashboard).setPanelSize('two', 'huge'))).toBe(false)
+
+  await scenario('sizes-restored')
+  await expect.poll(() => width(page.locator('#one'))).toBe(640)
+
+  // Reset forgets the choice along with the tracks: back to the authored size, nothing stored.
+  await page.locator('#subject').evaluate((node) => (node as Dashboard).reset())
+  await expect.poll(() => width(page.locator('#one'))).toBe(315)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('c2n-dashboard-test'))).toBeNull()
+})
+
+test('setPanelSize(id, null) gives the card its authored size back', async ({ page, scenario }) => {
+  await scenario('sizes')
+  const subject = page.locator('#subject')
+  await subject.evaluate((node) => (node as Dashboard).setPanelSize('two', 'wide'))
+  await expect.poll(() => width(page.locator('#two'))).toBe(640)
+  await subject.evaluate((node) => (node as Dashboard).setPanelSize('two', null))
+  await expect.poll(() => width(page.locator('#two'))).toBe(315)
+  expect(await subject.evaluate((node) => (node as Dashboard).panelSizes)).toEqual({ one: 'small' })
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2n-dashboard-test') ?? '{}'))
+  expect(stored.sizes).toEqual({})
+})
+
+test('a stored size naming an unknown size or card falls back to the authored size', async ({ page, scenario }) => {
+  await scenario()
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'c2n-dashboard-test',
+      JSON.stringify({ version: 1, columns: ['200px', '1fr'], rows: ['1fr', '1fr'], sizes: { one: 'giant', ghost: 'wide', two: 7 } }),
+    ),
+  )
+  await scenario('sizes-restored')
+  // The tracks still apply; the size choices do not.
+  await expect.poll(() => width(page.locator('#one'))).toBe(200)
+  expect(await page.locator('#subject').evaluate((node) => (node as Dashboard).panelSizes)).toEqual({ one: 'small' })
+  await page.evaluate(() => localStorage.removeItem('c2n-dashboard-test'))
+})
+
+test('a stored layout of another version is discarded; one from before sizes still restores', async ({ page, scenario }) => {
+  await scenario()
+  await page.evaluate(() =>
+    localStorage.setItem('c2n-dashboard-test', JSON.stringify({ version: 2, columns: ['200px', '1fr'], rows: ['1fr'], sizes: { one: 'wide' } })),
+  )
+  await scenario('storage-restored')
+  expect(await page.locator('#subject').evaluate((node) => (node as Dashboard).columnSizes)).toEqual(['1fr', '1fr'])
+
+  // Unversioned and version-1 payloads without `sizes` are what earlier releases stored.
+  await page.evaluate(() => localStorage.setItem('c2n-dashboard-test', JSON.stringify({ columns: ['200px', '1fr'], rows: ['1fr'] })))
+  await scenario('storage-restored')
+  expect(await page.locator('#subject').evaluate((node) => (node as Dashboard).columnSizes)).toEqual(['200px', '1fr'])
+  await page.evaluate(() => localStorage.removeItem('c2n-dashboard-test'))
+})

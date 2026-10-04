@@ -412,3 +412,40 @@ test('menu items state their semantics without writing host attributes, so serve
   expect(await written()).toEqual([])
   await accessible(page)
 })
+
+// The menu settles its trigger, its rows and its submenus while the page upgrades, which is before React (or any
+// framework) hydrates: an attribute written then is one the server never rendered. So `has-trigger` is a custom
+// state, a submenu's `right-start` default is applied without writing `placement`, and `reserveIndicator` is not
+// reflected onto the rows.
+test('upgrading writes no attribute on the menus or their rows', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-menu aria-label="Share">
+    ${trigger}
+    <c2-menu-item type="checkbox" value="pin">Pin</c2-menu-item>
+    <c2-menu-item value="invite">
+      Invite people
+      <c2-menu slot="submenu" aria-label="Invite"><c2-menu-item value="email">By email</c2-menu-item></c2-menu>
+    </c2-menu-item>
+  </c2-menu>
+  <c2-menu aria-label="Detached" anchor="elsewhere"><c2-menu-item value="x">X</c2-menu-item></c2-menu>`)
+  const root = page.locator('c2-menu[aria-label="Share"]')
+  const nested = page.locator('c2-menu[aria-label="Invite"]')
+  const detached = page.locator('c2-menu[aria-label="Detached"]')
+  await expect.poll(() => root.evaluate((el) => el.matches(':state(has-trigger)'))).toBe(true)
+  await expect(root).toHaveCSS('display', 'inline-flex')
+  expect(await nested.evaluate((el) => el.matches(':state(has-trigger)'))).toBe(false)
+  await expect(nested).toHaveCSS('display', 'contents')
+  await expect(detached).toHaveCSS('display', 'contents')
+  await expect.poll(() => row(page, 'invite').evaluate((el) => (el as HTMLElement & { reserveIndicator: boolean }).reserveIndicator)).toBe(true)
+
+  const unauthored = await page.locator('c2-menu, c2-menu-item').evaluateAll((els) =>
+    els.flatMap((el) =>
+      el
+        .getAttributeNames()
+        .filter((name) => !['aria-label', 'slot', 'value', 'type', 'anchor', 'tabindex'].includes(name))
+        .map((name) => `${el.localName}[${name}]`),
+    ),
+  )
+  expect(unauthored).toEqual([])
+  const placement = await nested.evaluate((el) => (el.shadowRoot?.querySelector('c2-overlay') as HTMLElement & { placement?: string }).placement)
+  expect(placement).toBe('right-start')
+})

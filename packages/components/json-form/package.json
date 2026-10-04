@@ -36,17 +36,13 @@
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "@c2n/core": "0.0.13",
+    "@c2n/core": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/checkbox": "0.0.13",
+    "@c2n/checkbox": "*",
     "@c2n/config": "*",
     "custom-elements-manifest": "2.1.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
   },
   "customElements": "custom-elements.json"
 }

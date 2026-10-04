@@ -57,3 +57,17 @@ npm install @c2n/components
   </c2-timeline>
 </div>
 ```
+
+## Styling by position
+
+The timeline tells each entry whether it is the last one and which layout it is in, and the entry exposes both as
+custom states rather than attributes, so server-rendered markup matches the hydrated element:
+`c2-timeline-item:state(last)` and `c2-timeline-item:state(split)`. Earlier releases wrote `last` and `split`
+attributes on the entries; replace `c2-timeline-item[last]` with `c2-timeline-item:state(last)`, and likewise for
+`split`.
+
+```css tag=CodeBlock
+c2-timeline-item:state(last) {
+  --c2-timeline-item__marker--background: var(--c2-theme--color-primary, #476ef9);
+}
+```

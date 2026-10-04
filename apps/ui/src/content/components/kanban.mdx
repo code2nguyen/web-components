@@ -1,0 +1,122 @@
+---
+title: 'Kanban'
+description: 'Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KanbanExamplesRuntime from '../../components/KanbanExamplesRuntime.astro'
+
+import { Kanban } from '@c2n/kanban'
+
+`c2-kanban` lays out `c2-kanban-column` columns and lets people move cards between and within them. It owns the
+layout and the interaction only: the cards come from `items`, and what a card shows is up to `renderItem`. Each column
+has a `header`, a `footer` and an `empty` slot for anything else, such as an add-card control in the footer.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/components
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/kanban
+<div data-label="Custom cards">
+  <style>
+    .usage-board {
+      --c2-kanban-column--width: 230px;
+    }
+    .usage-footer {
+      margin: 0;
+      color: var(--c2-theme--color-on-surface-variant, #71717a);
+      font-size: 12px;
+    }
+  </style>
+  <c2-kanban
+    client:only="lit"
+    class="usage-board"
+    data-kanban-example="sprint"
+    editable
+    aria-label="Sprint 42"
+    items='[{"id":"C2-118","column":"todo","title":"Empty state for search","type":"feature","owner":"Vinh Nguyen","points":3},{"id":"C2-121","column":"todo","title":"Date input loses focus","type":"bug","owner":"Ana Lima","points":2},{"id":"C2-109","column":"doing","title":"Tree drag handles","type":"feature","owner":"Mo Kader","points":5},{"id":"C2-104","column":"doing","title":"Toast stacking order","type":"bug","owner":"Ana Lima","points":1},{"id":"C2-099","column":"done","title":"Docs for tag input","type":"docs","owner":"Vinh Nguyen","points":1}]'
+  >
+    <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+    <c2-kanban-column column-id="doing" label="In progress" limit="1"></c2-kanban-column>
+    <c2-kanban-column column-id="done" label="Done">
+      <p slot="footer" class="usage-footer" data-kanban-status>Move a card to see card-move</p>
+    </c2-kanban-column>
+  </c2-kanban>
+</div>
+<div data-label="Default cards, read-only">
+  <c2-kanban
+    client:only="lit"
+    class="usage-board"
+    aria-label="Released"
+    items='[{"id":"1","column":"shipped","title":"Masonry layout","description":"Shipped in 0.0.17"},{"id":"2","column":"shipped","title":"QR code error levels"}]'
+  >
+    <c2-kanban-column column-id="shipped" label="Shipped"></c2-kanban-column>
+    <c2-kanban-column column-id="blocked" label="Blocked"><span slot="empty">Nothing is blocked</span></c2-kanban-column>
+  </c2-kanban>
+</div>
+```
+
+<KanbanExamplesRuntime />
+
+Each item needs a unique key (`id` by default, `item-key` to change it) and the `column-id` of its column (`column`
+by default, `column-field`). Items keep their array order within a column, and an item whose column matches no
+`c2-kanban-column` is not shown. Without `renderItem`, a card shows the `title` field and a muted `description`
+(`label-field`, `description-field`). The label field also names the card in screen-reader announcements.
+
+`renderItem` is a JavaScript property. It receives `{ item, index, column }` and returns a Lit template, a DOM node or
+a string. The board draws the card box around it (background, border, padding, focus ring, drag lift, set through
+`--c2-kanban-column__card--*`). The content renders inside the column's shadow root, so a page stylesheet does not
+reach it: build it from `c2-*` elements, inline styles, or a `<style>` in the template.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+board.items = tasks
+board.renderItem = ({ item }) => html`
+  <span>${item.title}</span>
+  <c2-badge tone=${item.type === 'bug' ? 'danger' : 'primary'}>${item.type}</c2-badge>
+  <c2-avatar name=${item.owner} auto-color></c2-avatar>
+`
+```
+
+A column's default header shows its `label` and card count. `limit` adds a soft work-in-progress limit: over it the
+count reads `3 / 2` in the over colour and the column takes the over border, but cards can still be dropped. Put your
+own header in the `header` slot (it replaces the default one), anything below the cards in `footer`, and replace the
+"No cards" hint through `empty`.
+
+Moving needs `editable`. A pointer press on a card, then a drag past a few pixels, lifts the card; a dashed gap marks
+where it lands and the board scrolls sideways near its edges. Releasing far outside the board, or pressing Escape,
+cancels. Presses on buttons, links and inputs inside a card keep their own behaviour. With the keyboard, the board is
+one tab stop: the arrow keys move focus between cards, Space picks the focused card up, the arrow keys, Home and End
+move it (Left and Right change column), Space drops it and Escape returns it. Each step is announced through a live
+region. Give the board a name with `aria-label` or `aria-labelledby`.
+
+A drop updates `items` and fires `card-move` just before:
+
+```js tag=CodeBlock
+board.addEventListener('card-move', (event) => {
+  const { key, toColumn, toIndex, items } = event.detail
+  if (!canMove(key, toColumn)) {
+    event.preventDefault() // the card goes back
+    return
+  }
+  saveTask(key, { status: toColumn, position: toIndex })
+})
+```
+
+The detail carries the moved `item` (before the move), its `key`, the `fromColumn`/`toColumn` ids, the
+`fromIndex`/`toIndex` within those columns, the input method (`mouse`, `touch`, `pen` or `keyboard`) and the whole
+`items` array after the move, where the moved item is a copy with its column field set. Calling `preventDefault()`
+keeps the card where it was. A cancelled or no-op move fires nothing. Assign a new `items` array at any time and the
+board follows it.
+
+The board's own variables are the gap, padding and scroll snapping of the row (`--c2-kanban--*`); everything about a
+column and its cards is a `--c2-kanban-column__*` variable, which can be set on the board to reach every column. For
+columns that scroll, set `--c2-kanban-column--max-height` with `--c2-kanban-column__cards--overflow-y: auto`; for a
+phone layout that snaps to columns, set `--c2-kanban--scroll-snap-type: x mandatory`.

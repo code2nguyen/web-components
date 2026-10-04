@@ -4,6 +4,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './avatar-group.scss?inline'
+import type { Avatar } from './avatar'
 
 export type AvatarGroupCountMode = 'hidden' | 'total'
 
@@ -22,12 +23,13 @@ export interface AvatarGroup {
   removeEventListener: TypedRemoveEventListener<AvatarGroup, AvatarGroupEventMap>
 }
 
-const HIDDEN_ATTRIBUTE = 'data-c2-avatar-group-hidden'
-
 /**
  * Responsive stack of `c2-avatar` elements. It observes its rendered width and each avatar's actual size, then hides
  * the avatars that no longer fit and replaces them with a count. The host fills the available inline space up to
  * `--c2-avatar-group--max-width`, so it also reacts when its parent becomes narrower.
+ *
+ * A hidden avatar is never marked with an attribute: it matches the custom state `c2-avatar:state(group-hidden)`,
+ * so neither the group's host nor the avatars the page rendered ever differ from the server's markup.
  *
  * @tag c2-avatar-group
  *
@@ -100,7 +102,7 @@ export class AvatarGroup extends LitElement {
     super.disconnectedCallback()
     this.resizeObserver?.disconnect()
     cancelAnimationFrame(this.measureFrame)
-    this.avatarItems.forEach((item) => item.removeAttribute(HIDDEN_ATTRIBUTE))
+    this.avatarItems.forEach((item) => AvatarGroup.setHidden(item, false))
   }
 
   private get avatarItems(): HTMLElement[] {
@@ -108,6 +110,14 @@ export class AvatarGroup extends LitElement {
     return this.slotElement
       .assignedElements({ flatten: true })
       .filter((element): element is HTMLElement => element instanceof HTMLElement && element.localName === 'c2-avatar')
+  }
+
+  /**
+   * Hides an avatar through its custom state. Assigning the property to an avatar that has not upgraded would leave
+   * an own property shadowing the accessor for good, so one that has not is left as it is.
+   */
+  private static setHidden(item: HTMLElement, hidden: boolean): void {
+    if ('groupHidden' in item) (item as Avatar).groupHidden = hidden
   }
 
   private handleSlotChange(): void {
@@ -126,7 +136,7 @@ export class AvatarGroup extends LitElement {
 
   private measure(): void {
     const items = this.avatarItems
-    items.forEach((item) => item.removeAttribute(HIDDEN_ATTRIBUTE))
+    items.forEach((item) => AvatarGroup.setHidden(item, false))
 
     const total = items.length
     const available = this.getBoundingClientRect().width
@@ -154,7 +164,7 @@ export class AvatarGroup extends LitElement {
       }
     }
 
-    items.forEach((item, index) => item.toggleAttribute(HIDDEN_ATTRIBUTE, index >= visible))
+    items.forEach((item, index) => AvatarGroup.setHidden(item, index >= visible))
     this.commitCounts(total, visible)
   }
 

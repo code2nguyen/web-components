@@ -17,11 +17,15 @@ import type { Button } from '@c2n/button'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-button': C2Props<Button>
+      'c2-button': C2Props<Button> & {
+        'aria-label'?: Attribute
+      }
     }
   }
 }

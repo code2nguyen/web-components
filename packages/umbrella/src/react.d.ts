@@ -6,6 +6,8 @@
 //
 // Register an element before React renders it, and pass kebab-case attribute names when server-rendering:
 // a camelCase prop that reaches the server as an attribute is never seen by the element.
+//
+// It also re-exports the hooks of table, which import React.
 
 import '@c2n/accordion/react'
 import '@c2n/attachment/react'
@@ -40,9 +42,12 @@ import '@c2n/date-input/react'
 import '@c2n/date-selector/react'
 import '@c2n/details/react'
 import '@c2n/flow/react'
+import '@c2n/gantt/react'
+import '@c2n/google-map/react'
 import '@c2n/header/react'
 import '@c2n/hover-card/react'
 import '@c2n/icon-button/react'
+import '@c2n/kanban/react'
 import '@c2n/kbd/react'
 import '@c2n/label/react'
 import '@c2n/link-button/react'
@@ -81,7 +86,7 @@ import '@c2n/stat/react'
 import '@c2n/status-panel/react'
 import '@c2n/steps/react'
 import '@c2n/switch/react'
-import '@c2n/table/react'
+export * from '@c2n/table/react'
 import '@c2n/tabs/react'
 import '@c2n/tag-input/react'
 import '@c2n/text-field/react'
@@ -96,5 +101,6 @@ import '@c2n/tree/react'
 import '@c2n/upload/react'
 import '@c2n/virtual-list/react'
 import '@c2n/week-planner/react'
+import '@c2n/working-indicator/react'
 
 export {}

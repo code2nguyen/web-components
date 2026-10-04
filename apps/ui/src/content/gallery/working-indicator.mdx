@@ -1,0 +1,98 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { WorkingIndicator } from '@c2n/working-indicator'
+
+## Presets
+
+Curated looks for `c2-working-indicator`. Open any card in the studio to start from it. The indicator and label colours, `--c2-working-indicator__label--highlight-color` and the animation durations do most of the work; the `indicator`, `effect` and `ellipsis` attributes pick the motion.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-working-indicator></c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Agent
+<style>
+  .agent {
+    --c2-working-indicator__indicator--color: #d97757;
+    --c2-working-indicator__label--color: #d97757;
+    --c2-working-indicator__label--highlight-color: color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-working-indicator__indicator--size: 18px;
+    --c2-working-indicator--font-size: 15px;
+  }
+</style>
+<c2-working-indicator class="agent" messages='["Scheming","Pondering","Brewing"]' elapsed>
+  <span slot="meta">esc to interrupt</span>
+</c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Minimal dots
+<style>
+  .minimal {
+    --c2-working-indicator__indicator--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 45%, var(--c2-theme--color-surface, #ffffff));
+    --c2-working-indicator__indicator--size: 20px;
+    --c2-working-indicator--font-weight: 400;
+  }
+</style>
+<c2-working-indicator class="minimal" indicator="dots" effect="pulse" ellipsis="none" label="Typing"></c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Wave
+<style>
+  .wave {
+    --c2-working-indicator__indicator--color: #7c3aed;
+    --c2-working-indicator__label--highlight-color: #7c3aed;
+    --c2-working-indicator__label--animation-duration: 1.6s;
+    --c2-working-indicator__label--stagger: 0.08s;
+    --c2-working-indicator--font-size: 16px;
+  }
+</style>
+<c2-working-indicator class="wave" indicator="orbit" effect="wave" ellipsis="bounce" label="Generating ideas"></c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Progress fill
+<style>
+  .progress {
+    --c2-working-indicator__indicator--color: #0f766e;
+    --c2-working-indicator__label--highlight-color: #0f766e;
+    --c2-working-indicator--font-size: 16px;
+    --c2-working-indicator--font-weight: 600;
+  }
+</style>
+<c2-working-indicator class="progress" indicator="ring" effect="fill" ellipsis="none" label="Uploading 3 files" value="62" elapsed></c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal-line {
+    display: inline-flex;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .terminal {
+    --c2-working-indicator__indicator--color: #4ade80;
+    --c2-working-indicator__label--color: #a1a1aa;
+    --c2-working-indicator__label--highlight-color: #fafafa;
+    --c2-working-indicator__meta--color: #71717a;
+    --c2-working-indicator--font-weight: 400;
+    --c2-working-indicator--font-size: 13px;
+  }
+</style>
+<div class="terminal-line">
+  <c2-working-indicator class="terminal" ellipsis="static" label="Running 128 tests" elapsed></c2-working-indicator>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Done
+<c2-working-indicator state="done" label="Scheming" done-label="Schemed for 14s"></c2-working-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Error
+<c2-working-indicator state="error" done-label="Deploy failed — retry?"></c2-working-indicator>
+```
+
+</GalleryGrid>

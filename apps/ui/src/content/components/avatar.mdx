@@ -112,3 +112,5 @@ avatar.addEventListener('avatar-remove', () => {
 ```
 
 The component owns selection and the local preview, not network transport. `avatar-change` provides the selected `File`; `avatar-remove` identifies the previous source. Invalid files emit `file-reject`. Call `browse()` or `removeImage()` when external controls need to trigger the same actions, and customize their graphics with the `edit-icon` and `remove-icon` slots.
+
+`c2-avatar-group` never marks the avatars it hides with an attribute, so the markup your page rendered stays exactly as written. A hidden avatar matches the custom state `c2-avatar:state(group-hidden)` instead (earlier releases wrote a `data-c2-avatar-group-hidden` attribute on it), and the group's `visible`, `hiddenCount` and `overflow-change` report the counts.

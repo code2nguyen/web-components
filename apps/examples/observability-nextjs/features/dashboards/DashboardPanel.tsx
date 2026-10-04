@@ -39,7 +39,9 @@ function ChartView({ projection, chart }: ChartViewProps) {
 
   return (
     <figure className={styles.chartFigure} aria-labelledby={`${projection.panelId}-title`} aria-describedby={`${projection.panelId}-summary`}>
-      <div className={styles.chartCanvas} role="img" aria-label={`${projection.title}. ${projection.summary}`}>
+      {/* Not role="img": the chart's legend entries are buttons, which an img role would hide from assistive technology. The figure is
+          labelled by the panel title and described by the text summary below. */}
+      <div className={styles.chartCanvas}>
         {chart === 'line' ? (
           <c2-line-chart ref={lineRef} {...attributes}>
             {series}
@@ -57,7 +59,8 @@ function ChartView({ projection, chart }: ChartViewProps) {
       <figcaption id={`${projection.panelId}-summary`} className={styles.chartSummary}>
         <strong>Text summary:</strong> {projection.summary}
       </figcaption>
-      <div className={styles.dataAlternative} data-chart-alternative>
+      {/* A scrolling region must be reachable by keyboard (WCAG 2.1.1), and a named region says what it scrolls. */}
+      <div className={styles.dataAlternative} data-chart-alternative role="region" tabIndex={0} aria-label={`${projection.title} data`}>
         <table>
           <caption>{projection.title} data</caption>
           <thead>
