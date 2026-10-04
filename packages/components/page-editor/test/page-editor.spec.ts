@@ -320,7 +320,8 @@ test('code tokens take their colour from the --c2-page-editor__syntax-*--color v
   )
   await host(page).evaluate((element: HTMLElement & { value: string }) => (element.value = '```js\nif (ok) {}\n```'))
   const keyword = page$(page).locator('pre span[style*="--_tok-token-keyword"]').first()
-  await expect(keyword).toHaveText('if')
+  // The first code block loads shiki and its grammar, which takes longer than the default wait on a cold WebKit page.
+  await expect(keyword).toHaveText('if', { timeout: 20_000 })
   // A browser serializes a mixed colour its own way: compare with the same mix computed in the page.
   const red = await page.evaluate(() => {
     const probe = document.body.appendChild(document.createElement('span'))
