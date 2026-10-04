@@ -101,6 +101,7 @@ function tokenize(text: string, language: string): Span[] {
   const spans: Span[] = []
   try {
     const { tokens } = core!.codeToTokens(text, { lang: language, theme: THEME })
+    console.log('[probe:pe]', JSON.stringify({ language, line0: tokens[0]?.map((x) => [x.content, x.color]) }))
     for (const line of tokens) {
       for (const token of line) {
         if (!token.content.trim()) continue
@@ -112,7 +113,8 @@ function tokenize(text: string, language: string): Span[] {
         if (styles.length) spans.push({ from: token.offset, to: token.offset + token.content.length, style: styles.join('; ') })
       }
     }
-  } catch {
+  } catch (e) {
+    console.log('[probe:pe-throw]', String((e as Error)?.stack ?? e).slice(0, 1500))
     // A grammar that fails on this text leaves it plain.
   }
   cache.set(key, spans)

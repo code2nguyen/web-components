@@ -141,6 +141,17 @@ export async function highlight({
   const language = normalizeLang(lang)
   await Promise.all([ensureLanguage(core, language), ensureTheme(core, theme), darkTheme ? ensureTheme(core, darkTheme) : undefined])
 
+  {
+    const g = core.getLanguage(language) as unknown as { _grammar?: unknown; name?: string }
+    const t = core.codeToTokens(code, { lang: language, theme })
+    console.log('[probe:cv]', JSON.stringify({ lang, language, loaded: core.getLoadedLanguages(), grammarName: g?.name, line0: t.tokens[0]?.map((x) => [x.content, x.color]) }))
+    try {
+      const strict = await createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: false }), langs: [bundledLanguages[language as BundledLanguage]], themes: [] })
+      console.log('[probe:cv-strict]', JSON.stringify(strict.codeToTokens(code, { lang: language, theme: 'none' }).tokens[0]?.map((x) => x.content)))
+    } catch (e) {
+      console.log('[probe:cv-strict-throw]', String((e as Error)?.stack ?? e).slice(0, 1500))
+    }
+  }
   const themeOptions = darkTheme ? { themes: { light: theme, dark: darkTheme }, defaultColor: false as const } : { theme }
 
   const html = core.codeToHtml(code, {

@@ -1,6 +1,10 @@
 import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
+test.beforeEach(({ page }) => {
+  page.on('console', (m) => m.text().startsWith('[probe') && console.log(m.text()))
+})
+
 const page$ = (page: Page) => page.getByRole('textbox', { name: 'Notes' })
 const host = (page: Page) => page.locator('c2-page-editor')
 const toolbar = (page: Page) => page.getByRole('toolbar', { name: 'Formatting' })

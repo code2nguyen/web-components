@@ -1,5 +1,9 @@
 import { test, expect, props, watch, accessible, clipboard } from '../../../../tests/component-fixture'
 
+test.beforeEach(({ page }) => {
+  page.on('console', (m) => m.text().startsWith('[probe') && console.log(m.text()))
+})
+
 test('initial title and source discovery do not schedule a second Lit update', async ({ page, renderScenario }) => {
   const warnings: string[] = []
   page.on('console', (message) => {
