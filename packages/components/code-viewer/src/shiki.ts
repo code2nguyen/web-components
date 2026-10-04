@@ -68,7 +68,11 @@ export function normalizeLang(lang: string | undefined): string {
  * line also pays for compiling the grammar's root patterns, which on a busy WebKit can take longer than that.
  */
 function warmUp(core: HighlighterCore, lang: string) {
-  core.getLanguage(lang).tokenizeLine('a', null, 0)
+  try {
+    core.getLanguage(lang).tokenizeLine('a', null, 0)
+  } catch {
+    // Only an optimisation: the grammar stays loaded and the real highlight reports any failure.
+  }
 }
 
 async function ensureLanguage(core: HighlighterCore, lang: string) {
