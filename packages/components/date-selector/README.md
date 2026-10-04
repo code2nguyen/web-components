@@ -7,7 +7,10 @@ npm install @c2n/components
 ```
 
 ```html
-<script type="module" src="@c2n/components/date-selector"></script>
+<!-- in a page your bundler (Vite, …) serves -->
+<script type="module">
+  import '@c2n/components/date-selector'
+</script>
 
 <c2-date-selector from="2026-09-10" to="2026-09-15" min="2026-09-01" name="trip"></c2-date-selector>
 ```

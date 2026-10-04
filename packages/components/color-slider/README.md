@@ -1,6 +1,6 @@
 # Color Slider
 
-`c2-color-slider` is a horizontal hue input. Install `@c2n/components/color-slider` and import it before using the custom element:
+`c2-color-slider` is a horizontal hue input. Install `@c2n/components` and import `@c2n/components/color-slider` before using the custom element:
 
 ```html
 <c2-color-slider aria-label="Hue" value="120"></c2-color-slider>

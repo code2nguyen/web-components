@@ -132,4 +132,4 @@ All presentation settings below are CSS custom properties; row/column spans rema
 | `--c2-masonry-item__dragging--opacity`         | `0.92`                            | Active tile opacity   |
 | `--c2-masonry-item__dragging--box-shadow`      | `0 12px 28px rgb(15 23 42 / 24%)` | Active tile elevation |
 
-The root import registers both tags. For tree-shaken use, `@c2n/components/masonry` registers only the tile element. The package's `custom-elements.json` and the UI API tab provide machine-readable details.
+The root import registers both tags. For tree-shaken use, `@c2n/components/masonry/masonry-item.js` registers only the tile element. The package's `custom-elements.json` and the UI API tab provide machine-readable details.

@@ -30,7 +30,8 @@ export const GET: APIRoute = async () => {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([category, entries]) => {
       const items = entries.map((entry) => {
-        const pkg = entry.data.package ?? `@c2n/${entry.id}`
+        // Every component ships in @c2n/components; its entry is named after the workspace package.
+        const pkg = `@c2n/components/${(entry.data.package ?? `@c2n/${entry.id}`).slice('@c2n/'.length)}`
         const tag = entry.data.tag ?? `c2-${entry.id}`
         const docs = link(`/components/${entry.id}/`)
         const api = link(`/components/${entry.id}/api/`)
@@ -59,7 +60,7 @@ export const GET: APIRoute = async () => {
 
   const body = `# C2N Web Components
 
-> Framework-agnostic Lit web components published as individual \`@c2n/*\` npm packages. Components use the \`c2-*\` custom-element prefix, work in plain HTML and major frameworks, and expose their visual design through CSS custom properties.
+> Framework-agnostic Lit web components published as one npm package, \`@c2n/components\`, with an entry per component. Components use the \`c2-*\` custom-element prefix, work in plain HTML and major frameworks, and expose their visual design through CSS custom properties.
 
 Use this file as a map of the documentation. Component pages contain installation and usage guidance, gallery pages contain complete styled examples, and API pages are generated from each package's custom-elements manifest. [llms-full.txt](${link('/llms-full.txt')}) holds the full text of the c2n agent skill: the application workflow, theming rules, variant patterns, framework notes and a compact component catalog.
 
@@ -79,9 +80,9 @@ Exact component facts (attributes, slots, events, CSS parts, CSS variables) come
 
 - **MCP server**: \`npx -y @c2n/mcp\` (stdio) exposes \`list_components\`, \`search_components\`, \`get_component\`, \`get_examples\`, \`get_presets\`, \`get_theme\`, \`generate_variant\` and \`get_workflow_guide\` over a bundled registry built from every package.
 - **Skill**: \`npm install --save-dev @c2n/skill && npx c2n-skill install\` copies the \`c2n-components\` skill into a project for Claude Code, Codex or Google Antigravity and merges the MCP server into their configuration.
-- **Manifests**: every installed package ships \`custom-elements.json\` (\`node_modules/@c2n/<name>/custom-elements.json\`, also exported as \`@c2n/<name>/custom-elements.json\`), the same manifest the API pages render.
-- **Framework glue**: each package exports \`@c2n/<name>/react\` (JSX types) and \`@c2n/<name>/vue\` (Volar types); \`@c2n/angular\` supplies the \`ControlValueAccessor\` pair for form controls; \`@c2n/framework-types\` ships \`html-custom-data.json\` and \`web-types.json\` for editors.
-- **Theme**: \`@c2n/theme\` defines the \`--c2-theme--*\` tokens; import \`@c2n/theme/theme.css\` once and set tokens instead of per-component variables when a token exists.
+- **Manifests**: \`@c2n/components\` ships one merged \`custom-elements.json\` (\`node_modules/@c2n/components/custom-elements.json\`, also exported as \`@c2n/components/custom-elements.json\`), the same data the API pages render.
+- **Framework glue**: \`@c2n/components/react\` (JSX types) and \`@c2n/components/vue\` (Volar types) declare every tag; \`@c2n/angular\` supplies the \`ControlValueAccessor\` pair for form controls; \`@c2n/framework-types\` ships \`html-custom-data.json\` and \`web-types.json\` for editors.
+- **Theme**: \`@c2n/theme\` defines the \`--c2-theme--*\` tokens; import \`@c2n/components/theme.css\` once and set tokens instead of per-component variables when a token exists.
 
 ## Core conventions
 

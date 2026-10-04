@@ -51,6 +51,8 @@ export interface UmbrellaEntry {
    * `/vue` re-export it instead.
    */
   frameworks: Framework[]
+  /** Modules of the package that define a custom element (`@c2n/chart/line-chart.js`), from its manifest. */
+  elementModules: Set<string>
 }
 
 export interface UmbrellaFile {
@@ -84,13 +86,18 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
         name: pkg.name.slice('@c2n/'.length),
         modules: [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()],
         frameworks: pkg.bindings,
+        elementModules: new Set(pkg.elements.map((element) => element.module)),
       }
     })
 }
 
-/** The subpath modules of an entry (`@c2n/chart/butterfly-chart.js`), each published as `./<name>/<module>.js`. */
+/**
+ * The subpath modules of an entry that define an element (`@c2n/chart/butterfly-chart.js`), each published as
+ * `./<name>/<module>.js`. Base classes and helpers (`chart-base.js`, `gantt-model.js`) stay internal: they register
+ * nothing, and their exports remain reachable through the package entry.
+ */
 function subpathModules(entry: UmbrellaEntry): string[] {
-  return entry.modules.filter((module) => module.startsWith(`${entry.pkg}/`))
+  return entry.modules.filter((module) => module.startsWith(`${entry.pkg}/`) && entry.elementModules.has(module))
 }
 
 export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string, scopeDir: string): UmbrellaFile[] {
