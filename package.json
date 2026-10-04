@@ -94,6 +94,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/gantt:build",
         "./packages/components/working-indicator:build",
         "./packages/components/page-editor:build",
         "./packages/components/notepad:build",

@@ -1,0 +1,543 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-gantt,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-family: inherit,
+    font-size: 12px,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    max-height: none,
+    header--background: #fafafa,
+    header--color: #71717a,
+    header--height: 48px,
+    header__major--color: #18181b,
+    header__major--font-weight: 600,
+    header__today--color: rgb(2, 101, 220),
+    list--width: 260px,
+    list--border-right: 1px solid #e4e4e7,
+    list--indent: 16px,
+    list__group--font-weight: 600,
+    list__duration--color: #71717a,
+    row--height: 32px,
+    row-compact--height: 44px,
+    row--border-bottom: 1px solid #e4e4e7,
+    row__hover--background: #f4f4f5,
+    row__selected--background: rgba(2, 101, 220, 0.08),
+    row__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    grid-line--color: #e4e4e7,
+    weekend--background: #fafafa,
+    column-day--width: 28px,
+    column-week--width: 16px,
+    column-month--width: 5px,
+    bar--height: 20px,
+    bar-compact--height: 14px,
+    bar--color: rgb(2, 101, 220),
+    bar--background-mix: 16%,
+    bar--border-mix: 45%,
+    bar--border-radius: 6px,
+    bar--font-weight: 500,
+    bar__selected--outline-width: 2px,
+    progress--background-mix: 36%,
+    label--color: #71717a,
+    summary--color: #18181b,
+    summary--height: 6px,
+    milestone--size: 12px,
+    milestone--color: #18181b,
+    link--color: #a1a1aa,
+    link__active--color: rgb(2, 101, 220),
+    link--width: 1.25px,
+    today--color: #dc2626,
+    today--width: 2px,
+    tooltip--background: #ffffff,
+    tooltip--color: #18181b,
+    tooltip--muted-color: #71717a,
+    tooltip--border: 1px solid #d4d4d8,
+    tooltip--border-radius: 8px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--width: 240px,
+    tone-success--color: #15803d,
+    tone-warning--color: #a16207,
+    tone-danger--color: #dc2626,
+    tone-neutral--color: #71717a,
+    series-1--color: #0265dc,
+    series-2--color: #ea580c,
+    series-3--color: #0f766e,
+    series-4--color: #db2777,
+    series-5--color: #a16207,
+    series-6--color: #7c3aed,
+    series-7--color: #0891b2,
+    series-8--color: #52525b,
+    skeleton--background: #f4f4f5,
+    empty--color: #71717a,
+    empty--padding: 32px 16px,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  color: css.cssVar(color);
+}
+:host([hidden]) {
+  display: none;
+}
+
+.gantt {
+  --_surface: #{css.cssVar(background)};
+  --_column: #{css.cssVar(column-week--width)};
+  --_row: #{css.cssVar(row--height)};
+  --_bar: #{css.cssVar(bar--height)};
+  --_list: #{css.cssVar(list--width)};
+  // Height of the label line above each bar in the compact layout; the link geometry assumes it.
+  --_label-line: 16px;
+  position: relative;
+  box-sizing: border-box;
+  background: var(--_surface);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  overflow: hidden;
+}
+.gantt.scale-day {
+  --_column: #{css.cssVar(column-day--width)};
+}
+.gantt.scale-month {
+  --_column: #{css.cssVar(column-month--width)};
+}
+.gantt.compact {
+  --_row: #{css.cssVar(row-compact--height)};
+  --_bar: #{css.cssVar(bar-compact--height)};
+}
+.gantt.no-list {
+  --_list: 0px;
+}
+
+// Resolves the column width and row height to pixels for the layout code.
+.probe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  width: var(--_column);
+  height: var(--_row);
+}
+
+.scroller {
+  overflow: auto;
+  max-height: css.cssVar(max-height);
+  overscroll-behavior-x: contain;
+}
+.content {
+  position: relative;
+  min-width: 100%;
+}
+
+/* ---- header ---- */
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  height: css.cssVar(header--height);
+  background: css.cssVar(header--background);
+  color: css.cssVar(header--color);
+  border-bottom: css.cssVar(row--border-bottom);
+}
+.corner {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  flex: 0 0 var(--_list);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0 12px 7px;
+  background: css.cssVar(header--background);
+  border-right: css.cssVar(list--border-right);
+  font-weight: css.cssVar(header__major--font-weight);
+  overflow: hidden;
+}
+.no-list .corner {
+  display: none;
+}
+.corner-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.corner-days {
+  flex: 0 0 auto;
+}
+.scale {
+  position: relative;
+  flex: 0 0 auto;
+}
+.tick {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 50%;
+  overflow: hidden;
+  white-space: nowrap;
+  border-left: 1px solid css.cssVar(grid-line--color);
+  font-variant-numeric: tabular-nums;
+}
+.tick.major {
+  top: 0;
+  padding-left: 8px;
+  color: css.cssVar(header__major--color);
+  font-weight: css.cssVar(header__major--font-weight);
+}
+.tick.minor {
+  top: 50%;
+  justify-content: center;
+}
+.tick.minor.today {
+  color: css.cssVar(header__today--color);
+  font-weight: css.cssVar(header__major--font-weight);
+}
+
+/* ---- body ---- */
+.body {
+  display: flex;
+  align-items: flex-start;
+}
+.list {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  flex: 0 0 var(--_list);
+  background: var(--_surface);
+  border-right: css.cssVar(list--border-right);
+}
+// Hidden from sight but not from assistive technology: the rows still carry the chart's semantics and focus.
+.no-list .list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+}
+.row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--_row);
+  border-bottom: css.cssVar(row--border-bottom);
+  cursor: default;
+  outline: none;
+}
+.row:hover {
+  background: css.cssVar(row__hover--background);
+}
+.row.selected {
+  background: css.cssVar(row__selected--background);
+}
+.row:focus-visible {
+  outline: css.cssVar(row__focus--outline);
+  outline-offset: -2px;
+}
+.cell-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: calc(8px + var(--_depth, 0) * #{css.cssVar(list--indent)});
+  padding-right: 8px;
+}
+.row.group .cell-name {
+  font-weight: css.cssVar(list__group--font-weight);
+}
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toggle {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: css.cssVar(header--color);
+  cursor: pointer;
+}
+.toggle:hover {
+  background: css.cssVar(row__hover--background);
+}
+.toggle svg {
+  transition: transform 150ms;
+}
+.row[aria-expanded='false'] .toggle svg {
+  transform: rotate(-90deg);
+}
+.cell-days {
+  flex: 0 0 auto;
+  padding: 0 12px 0 4px;
+  color: css.cssVar(list__duration--color);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- timeline ---- */
+.timeline {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.weekend,
+.line,
+.today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.weekend {
+  background: css.cssVar(weekend--background);
+}
+.line {
+  width: 1px;
+  background: css.cssVar(grid-line--color);
+}
+.track {
+  position: relative;
+  box-sizing: border-box;
+  height: var(--_row);
+  border-bottom: css.cssVar(row--border-bottom);
+}
+.track.hover {
+  background: css.cssVar(row__hover--background);
+}
+.track.selected {
+  background: css.cssVar(row__selected--background);
+}
+.links {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: visible;
+  pointer-events: none;
+}
+.links path {
+  fill: none;
+  stroke: css.cssVar(link--color);
+  stroke-width: css.cssVar(link--width);
+}
+.links path.active {
+  stroke: css.cssVar(link__active--color);
+  stroke-width: calc(#{css.cssVar(link--width)} + 0.5px);
+}
+.links path.head {
+  fill: css.cssVar(link--color);
+  stroke: none;
+}
+.links path.head.active {
+  fill: css.cssVar(link__active--color);
+}
+
+.bar,
+.milestone,
+.summary,
+.outside {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.compact .bar,
+.compact .milestone,
+.compact .summary {
+  top: calc(var(--_label-line) + (100% - var(--_label-line)) / 2);
+}
+.bar {
+  --_tone: #{css.cssVar(bar--color)};
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--_bar);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--_tone) #{css.cssVar(bar--background-mix)}, var(--_surface));
+  border: 1px solid color-mix(in srgb, var(--_tone) #{css.cssVar(bar--border-mix)}, var(--_surface));
+  border-radius: css.cssVar(bar--border-radius);
+  cursor: pointer;
+}
+.bar:hover,
+.bar.hover {
+  border-color: var(--_tone);
+}
+.bar.selected,
+.milestone.selected {
+  outline: css.cssVar(bar__selected--outline-width) solid var(--_tone);
+  outline-offset: 1px;
+}
+.progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--_tone) #{css.cssVar(progress--background-mix)}, var(--_surface));
+}
+.bar-label {
+  position: relative;
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: css.cssVar(bar--font-weight);
+}
+@each $tone in success, warning, danger, neutral {
+  .tone-#{$tone} {
+    --_tone: #{css.cssVar(tone-#{$tone}--color)};
+  }
+}
+@for $slot from 1 through 8 {
+  .tone-#{$slot} {
+    --_tone: #{css.cssVar(series-#{$slot}--color)};
+  }
+}
+.outside {
+  white-space: nowrap;
+  color: css.cssVar(label--color);
+  pointer-events: none;
+}
+.summary {
+  height: css.cssVar(summary--height);
+  background: css.cssVar(summary--color);
+  border-radius: 1px;
+  cursor: pointer;
+}
+// The brackets hanging off each end of a summary bar.
+.summary::before,
+.summary::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  border-top: css.cssVar(summary--height) solid css.cssVar(summary--color);
+}
+.summary::before {
+  left: 0;
+  border-right: css.cssVar(summary--height) solid transparent;
+}
+.summary::after {
+  right: 0;
+  border-left: css.cssVar(summary--height) solid transparent;
+}
+.milestone {
+  --_tone: #{css.cssVar(milestone--color)};
+  box-sizing: border-box;
+  width: css.cssVar(milestone--size);
+  height: css.cssVar(milestone--size);
+  margin-left: calc(#{css.cssVar(milestone--size)} / -2);
+  background: var(--_tone);
+  border-radius: 2px;
+  transform: translateY(-50%) rotate(45deg);
+  cursor: pointer;
+}
+.milestone[class*='tone-'] {
+  background: var(--_tone);
+}
+.above {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  height: var(--_label-line);
+  padding-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: css.cssVar(bar--font-weight);
+  pointer-events: none;
+}
+.above .dates {
+  margin-left: 6px;
+  color: css.cssVar(label--color);
+  font-weight: normal;
+}
+
+.today {
+  z-index: 2;
+  width: css.cssVar(today--width);
+  margin-left: calc(#{css.cssVar(today--width)} / -2);
+  background: css.cssVar(today--color);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 4;
+  box-sizing: border-box;
+  width: css.cssVar(tooltip--width);
+  padding: 10px 12px;
+  background: css.cssVar(tooltip--background);
+  color: css.cssVar(tooltip--color);
+  border: css.cssVar(tooltip--border);
+  border-radius: css.cssVar(tooltip--border-radius);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  pointer-events: none;
+}
+.tooltip-title {
+  font-weight: css.cssVar(header__major--font-weight);
+}
+.tooltip dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 6px 0 0;
+}
+.tooltip dt {
+  color: css.cssVar(tooltip--muted-color);
+}
+.tooltip dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- states ---- */
+.empty {
+  display: grid;
+  place-items: center;
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}
+.skeleton {
+  display: grid;
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: var(--_row);
+  padding: 0 12px;
+  border-bottom: css.cssVar(row--border-bottom);
+}
+.skeleton-row span {
+  height: 10px;
+  border-radius: 4px;
+  background: css.cssVar(skeleton--background);
+}
+.skeleton-row span + span {
+  height: var(--_bar);
+  border-radius: css.cssVar(bar--border-radius);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-row span {
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle svg {
+    transition: none;
+  }
+}

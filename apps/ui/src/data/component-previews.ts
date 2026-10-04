@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
+  <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
+  <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
+  <c2-gantt-task task-id="c" start="2026-10-15" milestone dependencies="b">Ship</c2-gantt-task>
+</c2-gantt>`,
   'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">
   <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))"></c2-working-indicator>
   <c2-working-indicator indicator="dots" effect="wave" label="Generating"></c2-working-indicator>

@@ -1,0 +1,89 @@
+{
+  "name": "@c2n/gantt",
+  "version": "0.0.24",
+  "type": "module",
+  "main": "dist/gantt.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/gantt.d.ts",
+      "default": "./dist/gantt.js"
+    },
+    "./gantt-task.js": {
+      "types": "./types/src/gantt-task.d.ts",
+      "default": "./dist/gantt-task.js"
+    },
+    "./gantt-model.js": {
+      "types": "./types/src/gantt-model.d.ts",
+      "default": "./dist/gantt-model.js"
+    },
+    "./gantt-types.js": {
+      "types": "./types/src/gantt-types.d.ts",
+      "default": "./dist/gantt-types.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "gantt",
+    "timeline",
+    "project",
+    "schedule",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.24",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json",
+  "description": "A read-only Gantt chart web component: tasks, groups, milestones and dependencies on a day, week or month scale."
+}

@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/gantt": "*",
     "@c2n/working-indicator": "*",
     "@c2n/core": "*",
     "@c2n/page-editor": "*",
