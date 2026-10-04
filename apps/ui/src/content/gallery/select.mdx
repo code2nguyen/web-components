@@ -112,8 +112,8 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
   .brand-outline {
     width: 190px;
     --c2-select__button--color: color-mix(in srgb, #7c3aed 75%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-select__button__hover--color: color-mix(in srgb, #9b31ff 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-select__button__suffix-icon--color: color-mix(in srgb, #b24cff 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-select__button__hover--color: light-dark(#6d28d9, #9c6fe3);
+    --c2-select__button__suffix-icon--color: light-dark(#7c3aed, #9a69ef);
     --c2-select__button--border-top: 1px solid #7c3aed;
     --c2-select__button--border-right: 1px solid #7c3aed;
     --c2-select__button--border-bottom: 1px solid #7c3aed;
@@ -122,15 +122,15 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
     --c2-select__button__hover--border-right: 1px solid #6d28d9;
     --c2-select__button__hover--border-bottom: 1px solid #6d28d9;
     --c2-select__button__hover--border-left: 1px solid #6d28d9;
-    --c2-select__button__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--background: light-dark(#f5f3ff, #1a1536);
     --c2-select__button__open--border-top: 1px solid #6d28d9;
     --c2-select__button__open--border-right: 1px solid #6d28d9;
     --c2-select__button__open--border-bottom: 1px solid #6d28d9;
     --c2-select__button__open--border-left: 1px solid #6d28d9;
     --c2-select__button__focus--outline: 2px solid rgba(124, 58, 237, 0.35);
-    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__selected--color: color-mix(in srgb, #9b31ff 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-list-item__selected__hover--background: color-mix(in srgb, #370bf4 9%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__selected--background: light-dark(#f5f3ff, #1a1536);
+    --c2-list-item__selected--color: light-dark(#6d28d9, #9c6fe3);
+    --c2-list-item__selected__hover--background: light-dark(#ede9fe, #1b1539);
   }
 </style>
 <c2-select value="FR" placeholder="Country" class="brand-outline" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>

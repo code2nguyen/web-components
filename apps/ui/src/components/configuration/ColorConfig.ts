@@ -9,7 +9,7 @@ import '@c2n/components/icon-button'
 import '@c2n/feather-icons/icons/eye.js'
 import '@c2n/feather-icons/icons/eye-off.js'
 import type { TextField } from '@c2n/components/text-field'
-import { formatAlpha, parseAlpha } from '../../utils/css-value.ts'
+import { formatAlpha, formatLightDark, parseAlpha, parseLightDark } from '../../utils/css-value.ts'
 
 /**
  * Colour control: swatch + hex + alpha, with an eye button that hides the colour (`transparent`) while remembering it.
@@ -18,6 +18,9 @@ import { formatAlpha, parseAlpha } from '../../utils/css-value.ts'
  * an unset value, `currentColor`, `var(--token)`, a gradient — stays verbatim in the text field beside it instead of
  * being coerced to `#000000`. Editing commits on `input` (per keystroke, once the text parses) rather than only on
  * blur, and the alpha field shows `44%`, not `43.921568627450981%`.
+ *
+ * A `light-dark(<light>, <dark>)` value (how a gallery card gives a variant colour its dark-theme shade) shows as two
+ * swatches, light then dark, each editing its own half.
  */
 @customElement('demo-color-config')
 export class ColorConfig extends LitElement {
@@ -95,6 +98,14 @@ export class ColorConfig extends LitElement {
         min-width: 0;
         width: auto;
         --c2-text-field--padding-left: 26px;
+      }
+      .pair {
+        display: flex;
+        gap: 2px;
+        min-width: 0;
+      }
+      .pair .hex {
+        width: 78px;
       }
       .alpha {
         width: 48px;
@@ -207,6 +218,39 @@ export class ColorConfig extends LitElement {
     }
   }
 
+  /** One half of a `light-dark()` pair: its own swatch and hex field, the other half kept as written. */
+  private renderPairHalf(halves: [string, string], index: 0 | 1) {
+    const color = new TinyColor(halves[index])
+    const label = index === 0 ? 'Light theme colour' : 'Dark theme colour'
+    const commit = (next: TinyColor) => {
+      const value = next.getAlpha() < 1 ? next.toRgbString() : next.toHexString()
+      const updated: [string, string] = [...halves]
+      updated[index] = value
+      this.emit(formatLightDark(updated[0], updated[1]), '')
+    }
+    return html`<div class="group">
+      <c2-color-select
+        placement="bottom-end"
+        title=${label}
+        .color=${color.isValid ? color.toRgbString() : 'transparent'}
+        @change=${(event: CustomEvent<ColorSelectChangeEventDetail>) => {
+          const { h, s, v, a } = event.detail
+          commit(new TinyColor({ h, s, v, a }))
+        }}
+      ></c2-color-select>
+      <c2-text-field
+        class="hex"
+        spellcheck="false"
+        aria-label=${label}
+        .value=${color.isValid ? color.toHexString() : halves[index]}
+        @input=${(event: Event & { target: TextField }) => {
+          const next = new TinyColor(event.target.value.trim())
+          if (next.isValid) commit(next)
+        }}
+      ></c2-text-field>
+    </div>`
+  }
+
   /**
    * The swatch is always offered, even with nothing set.
    *
@@ -216,6 +260,10 @@ export class ColorConfig extends LitElement {
    * its checkerboard, which reads as "unset" rather than as black.
    */
   render() {
+    const pair = this.isHidden ? null : parseLightDark(this._value)
+    if (pair && pair.every((half) => new TinyColor(half).isValid)) {
+      return html`<div class="color-config"><div class="pair">${this.renderPairHalf(pair, 0)}${this.renderPairHalf(pair, 1)}</div></div>`
+    }
     const color = this.pickable
     return html`<div class="color-config">
       <div class="group ${this.isHidden ? 'is-hidden' : ''}">

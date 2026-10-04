@@ -48,10 +48,10 @@ The examples below are real application patterns rather than visual variants. Th
   }
   .autocomplete-example [slot] button {
     flex: none;
-    border: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
+    border: 1px solid light-dark(#ddd6fe, #1d1254);
     border-radius: 999px;
     padding: 3px 10px;
-    color: color-mix(in srgb, #9b31ff 65%, var(--c2-theme--color-on-surface, #18181b));
+    color: light-dark(#6d28d9, #9c6fe3);
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     font: inherit;
     font-weight: 600;
@@ -59,7 +59,7 @@ The examples below are real application patterns rather than visual variants. Th
     cursor: pointer;
   }
   .autocomplete-example [slot] button:hover {
-    background: color-mix(in srgb, #370bf4 9%, var(--c2-theme--color-surface, #ffffff));
+    background: light-dark(#ede9fe, #1b1539);
   }
 </style>
 <div data-label="Mention teammate">

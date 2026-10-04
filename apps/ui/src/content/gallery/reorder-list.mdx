@@ -29,7 +29,7 @@ import { ReorderList } from '@c2n/components/reorder-list'
     --c2-reorder-list__dragging-item--box-shadow: 0 18px 40px rgb(76 29 149 / 28%);
   }
   .operations-queue::part(container) {
-    border: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
+    border: 1px solid light-dark(#ddd6fe, #1d1254);
     border-radius: 14px;
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
   }
@@ -42,13 +42,13 @@ import { ReorderList } from '@c2n/components/reorder-list'
     justify-content: space-between;
     gap: 16px;
     padding: 14px;
-    border: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
+    border: 1px solid light-dark(#ddd6fe, #1d1254);
     border-radius: 10px;
     background: var(--c2-theme--color-surface, #ffffff);
-    color: color-mix(in srgb, #4408af 50%, var(--c2-theme--color-on-surface, #18181b));
+    color: light-dark(#2e1065, #9182ad);
   }
   .operation[data-fixed] {
-    background: color-mix(in srgb, #8719ff 10%, var(--c2-theme--color-surface, #ffffff));
+    background: light-dark(#f3e8ff, #26153c);
   }
 </style>
 <c2-reorder-list client:only="lit" class="operations-queue" editable aria-label="Incident response queue">

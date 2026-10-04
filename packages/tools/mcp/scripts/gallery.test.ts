@@ -3,39 +3,46 @@ import test from 'node:test'
 
 import { themeExampleCss } from './gallery.ts'
 
-const PAPER = 'var(--c2-theme--color-surface, #ffffff)'
-const INK = 'var(--c2-theme--color-on-surface, #18181b)'
 const theme = (css: string, neutrals: 'all' | 'tinted-blocks' = 'all') => themeExampleCss(css, [], { neutrals }).css
 
-/** The colour a `color-mix(in srgb, #base N%, var(--x, #fallback))` renders under the light theme. */
-function lightValue(value: string): number[] {
-  const match = /color-mix\(in srgb, #([0-9a-f]{6}) (\d+)%, var\([^,]+, #([0-9a-f]{6})\)\)/.exec(value)
-  assert.ok(match, `not a colour mix: ${value}`)
-  const channels = (hex: string) => [0, 2, 4].map((at) => parseInt(hex.slice(at, at + 2), 16))
-  const share = Number(match[2]) / 100
-  const base = channels(match[1])
-  return channels(match[3]).map((other, index) => Math.round(base[index] * share + other * (1 - share)))
+/** The `light-dark(<light>, <dark>)` pair a declaration was given. */
+function pairOf(css: string, name: string): [string, string] {
+  const match = new RegExp(`${name}: light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\)`).exec(css)
+  assert.ok(match, `${name} is not a light-dark() pair in ${css}`)
+  return [match[1], match[2]]
 }
 
-test('a tint becomes a share of its hue over paper that renders the authored tint on light paper', () => {
-  const css = theme('.a { --c2-x__option--background: #f3e8ff; }')
-  assert.match(css, new RegExp(`color-mix\\(in srgb, #[0-9a-f]{6} \\d+%, ${PAPER.replace(/[()]/g, '\\$&')}\\)`))
-  const [r, g, b] = lightValue(css)
-  assert.ok(Math.abs(r - 0xf3) <= 1 && Math.abs(g - 0xe8) <= 1 && Math.abs(b - 0xff) <= 1, `${r},${g},${b}`)
+const rgb = (hex: string) => [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16))
+function contrast(a: string, b: string): number {
+  const luminance = (hex: string) => {
+    const [r, g, b] = rgb(hex).map((channel) => {
+      const c = channel / 255
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+test('a tint becomes a light-dark() pair: the authored tint, then a dark wash of its hue', () => {
+  const [light, dark] = pairOf(theme('.a { --c2-x__option--background: #f3e8ff; }'), '--c2-x__option--background')
+  assert.equal(light, '#f3e8ff')
+  const [r, g, b] = rgb(dark)
+  assert.ok(b > r && r > g && Math.max(r, g, b) < 90, `a dark purple, got ${dark}`)
 })
 
-test('accent text next to a tint mixes over ink and keeps the authored colour on light paper', () => {
-  const css = theme('.a { --c2-x__option--background: #eff6ff; --c2-x__option--color: #1e40af; }')
-  const text = /--c2-x__option--color: ([^;]+);/.exec(css)![1]
-  assert.ok(text.endsWith(`${INK})`), text)
-  const [r, g, b] = lightValue(text)
-  assert.ok(Math.abs(r - 0x1e) <= 2 && Math.abs(g - 0x40) <= 2 && Math.abs(b - 0xaf) <= 2, `${r},${g},${b}`)
-})
-
-test('a bright accent keeps its hue a shade deeper in light, so dark mode has room to lighten it', () => {
+test('accent text next to a tint keeps its authored colour in light and reads on the dark wash', () => {
   const css = theme('.a { --c2-x__option--background: #f3e8ff; --c2-x__option--color: #7e22ce; }')
-  const [r, g, b] = lightValue(/--c2-x__option--color: ([^;]+);/.exec(css)![1])
-  assert.ok(b > r && r > g && b <= 0xce && b >= 0xa0, `${r},${g},${b}`)
+  const [, wash] = pairOf(css, '--c2-x__option--background')
+  const [light, dark] = pairOf(css, '--c2-x__option--color')
+  assert.equal(light, '#7e22ce')
+  assert.ok(contrast(dark, wash) >= 4.5, `${dark} on ${wash}`)
+  assert.ok(contrast(dark, '#18181b') >= 4.5, `${dark} on the dark surface`)
+})
+
+test('a pale blue counts as a tint even though its channels are only 16 apart', () => {
+  assert.deepEqual(pairOf(theme('.a { --c2-x--background: #eff6ff; }'), '--c2-x--background')[0], '#eff6ff')
 })
 
 test('accent text away from a tint stays literal: its background may be one the component computes', () => {
@@ -62,9 +69,14 @@ test('tinted-blocks leaves greys alone outside a tinted block and themes them in
   )
 })
 
-test('a second run is a no-op, and themes the text of a tint the first run already wrote', () => {
+test('a second run is a no-op, and themes the text of a tint the first run already paired', () => {
   const once = theme('.a { --c2-x--background: #f3e8ff; --c2-x__theme--token-keyword: #5f6e00; }', 'tinted-blocks')
   assert.equal(theme(once, 'tinted-blocks'), once)
-  const partial = `.a { --c2-x--background: color-mix(in srgb, #8719ff 10%, ${PAPER}); --c2-x__theme--token-keyword: #5f6e00; }`
-  assert.match(theme(partial, 'tinted-blocks'), /token-keyword: color-mix\(in srgb, #[0-9a-f]{6} \d+%, var\(--c2-theme--color-on-surface/)
+  const partial = '.a { --c2-x--background: light-dark(#f3e8ff, #26153c); --c2-x__theme--token-keyword: #5f6e00; }'
+  assert.equal(pairOf(theme(partial, 'tinted-blocks'), '--c2-x__theme--token-keyword')[0], '#5f6e00')
+})
+
+test('a pair an author tuned by hand is left as written', () => {
+  const tuned = '.a { --c2-x--background: light-dark(#f3e8ff, #3b0764); --c2-x--color: light-dark(#7e22ce, #e9d5ff); }'
+  assert.equal(theme(tuned, 'tinted-blocks'), tuned)
 })

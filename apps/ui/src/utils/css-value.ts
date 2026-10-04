@@ -185,6 +185,21 @@ export function isUnpickableColor(raw: string | undefined | null): boolean {
   return /^(var|url|linear-gradient|radial-gradient|conic-gradient|repeating-|image-set|color-mix)/i.test(value) || splitTopLevel(value).length > 1
 }
 
+/**
+ * The two halves of a `light-dark(<light>, <dark>)` colour (what the gallery cards use for a variant's own colours),
+ * or null for any other value. The halves are returned as written.
+ */
+export function parseLightDark(raw: string | undefined | null): [string, string] | null {
+  const match = /^light-dark\((.*)\)$/i.exec((raw ?? '').trim())
+  if (!match) return null
+  const halves = splitTopLevel(match[1], 'comma').map((half) => half.trim())
+  return halves.length === 2 && halves.every(Boolean) ? [halves[0], halves[1]] : null
+}
+
+export function formatLightDark(light: string, dark: string): string {
+  return `light-dark(${light}, ${dark})`
+}
+
 /** Formats an alpha channel (0-1) as the percentage the inspector shows, without float noise (`43.9%`, not `43.921568…%`). */
 export function formatAlpha(alpha: number): string {
   return `${roundTo(alpha * 100, 1)}%`

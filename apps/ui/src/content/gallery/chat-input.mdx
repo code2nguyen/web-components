@@ -62,39 +62,39 @@ Each composition below is a complete assistant prompt experience. The cards stay
     gap: 18px;
     width: min(100%, 720px);
     padding: 30px;
-    border: 1px solid color-mix(in srgb, #784f08 17%, var(--c2-theme--color-surface, #ffffff));
+    border: 1px solid #e8e1d5;
     border-radius: 24px;
-    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
-    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
+    background: #f7f3ec;
+    color: #2f2b26;
     font-family: Georgia, serif;
   }
   .research-attachment {
     --c2-attachment--min-height: 62px;
     --c2-attachment--gap: 10px;
     --c2-attachment--padding: 8px 10px;
-    --c2-attachment--background: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 62%, transparent);
-    --c2-attachment--border: 1px solid color-mix(in srgb, #714c08 19%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment--background: rgba(255, 255, 255, 0.62);
+    --c2-attachment--border: 1px solid #e4ddd0;
     --c2-attachment--border-radius: 14px;
-    --c2-attachment--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment--color: #2f2b26;
     --c2-attachment__media--size: 40px;
-    --c2-attachment__media--background: color-mix(in srgb, #865702 19%, var(--c2-theme--color-surface, #ffffff));
-    --c2-attachment__media--color: color-mix(in srgb, #c2a67f 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-attachment__metadata--color: color-mix(in srgb, #c6ae8b 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-attachment__action--color: color-mix(in srgb, #e4c8a1 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-attachment__action__hover--background: color-mix(in srgb, #865405 14%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment__media--background: #e8dfcf;
+    --c2-attachment__media--color: #6d5f4d;
+    --c2-attachment__metadata--color: #6f6353;
+    --c2-attachment__action--color: #7e705e;
+    --c2-attachment__action__hover--background: #eee7dc;
   }
   .research-composer {
-    --c2-chat-input__container--border: 1px solid color-mix(in srgb, #693b01 24%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chat-input__container--border: 1px solid #d9d0c2;
     --c2-chat-input__container--border-radius: 18px;
-    --c2-chat-input__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 1%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chat-input__container--background: #fffdf9;
+    --c2-chat-input__container--color: #2f2b26;
     --c2-chat-input__container--padding: 12px;
     --c2-chat-input__container__hover--border: 1px solid #b9aa96;
     --c2-chat-input__container__focus--border: 1px solid #9a6c42;
     --c2-chat-input__container__focus--box-shadow: 0 0 0 3px rgba(154, 108, 66, 0.14);
     --c2-chat-input__textarea--font-family: Georgia, serif;
     --c2-chat-input__textarea--font-size: 15px;
-    --c2-chat-input__placeholder--color: color-mix(in srgb, #f1dbbb 60%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-chat-input__placeholder--color: #9a8d7b;
     --c2-chat-input__send-button--background: #b65f3c;
     --c2-chat-input__send-button__hover--background: #98482d;
     --c2-chat-input__send-button__active--background: #7f3b27;
@@ -103,8 +103,8 @@ Each composition below is a complete assistant prompt experience. The cards stay
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: color-mix(in srgb, #e4c8a1 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-icon-button__hover--background-color: color-mix(in srgb, #865405 14%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon--color: #7e705e;
+    --c2-icon-button__hover--background-color: #eee7dc;
   }
 </style>
 
@@ -138,8 +138,8 @@ Each composition below is a complete assistant prompt experience. The cards stay
     width: min(100%, 720px);
     padding: 30px;
     border-radius: 24px;
-    background: linear-gradient(145deg, color-mix(in srgb, #0c54ff 7%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)) 58%, var(--c2-theme--color-surface, #ffffff));
-    color: color-mix(in srgb, #16328d 50%, var(--c2-theme--color-on-surface, #18181b));
+    background: linear-gradient(145deg, light-dark(#eef3ff, #151e36), light-dark(#f8f5ff, #1e1536) 58%, var(--c2-theme--color-surface, #ffffff));
+    color: light-dark(#172554, #868da5);
     font-family: Inter, system-ui, sans-serif;
   }
   .copilot-kicker {
@@ -175,9 +175,9 @@ Each composition below is a complete assistant prompt experience. The cards stay
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: color-mix(in srgb, #b0d0fb 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-icon-button__icon__hover--color: color-mix(in srgb, #5a49ff 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-icon-button__hover--background-color: color-mix(in srgb, #0c45ff 7%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon--color: light-dark(#64748b, #7a879b);
+    --c2-icon-button__icon__hover--color: light-dark(#4338ca, #817ad9);
+    --c2-icon-button__hover--background-color: light-dark(#eef2ff, #151c36);
   }
 </style>
 

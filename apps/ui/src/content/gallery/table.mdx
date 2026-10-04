@@ -137,8 +137,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
     padding: 2px 10px;
     border-radius: 6px;
     font-size: 12px;
-    color: color-mix(in srgb, #4c40fe 60%, var(--c2-theme--color-on-surface, #18181b));
-    background: color-mix(in srgb, #0c45ff 7%, var(--c2-theme--color-surface, #ffffff));
+    color: light-dark(#3730a3, #837ec4);
+    background: light-dark(#eef2ff, #151c36);
   }
 </style>
 <c2-table client:only="lit" class="pills" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -253,7 +253,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .checkbox-card {
     height: 296px;
     width: 100%;
-    --c2-table__row__selected--background: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-table__row__selected--background: light-dark(#edf1fe, #151c35);
     --c2-table__row__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-table__selection-cell--width: 44px;
   }

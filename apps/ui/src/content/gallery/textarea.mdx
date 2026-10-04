@@ -32,14 +32,14 @@ import { Textarea } from '@c2n/components/textarea'
 <style>
   .notebook {
     width: 280px;
-    --c2-textarea__container--background: color-mix(in srgb, #ffcd05 8%, var(--c2-theme--color-surface, #ffffff));
-    --c2-textarea__container--color: color-mix(in srgb, #d85203 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-textarea__container--background: light-dark(#fffbeb, #352f18);
+    --c2-textarea__container--color: light-dark(#78350f, #b69582);
     --c2-textarea__container--border: 1px solid #fcd34d;
     --c2-textarea__container--font-family: monospace;
     --c2-textarea__container--line-height: 24px;
     --c2-textarea__container__focus--border: 1px solid #d97706;
     --c2-textarea__container__focus--outline: 3px solid rgba(217, 119, 6, 0.2);
-    --c2-textarea__placeholder--color: color-mix(in srgb, #fe6302 53%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-textarea__placeholder--color: light-dark(#92400e, #be9176);
   }
 </style>
 <c2-textarea class="notebook" label="Ideas" placeholder="Capture an idea…" rows="4"></c2-textarea>

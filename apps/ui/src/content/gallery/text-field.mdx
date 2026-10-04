@@ -107,10 +107,10 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
 <style>
   .brand-ring {
     width: 220px;
-    --c2-text-field--border-top: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-right: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-bottom: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-left: 1px solid color-mix(in srgb, #370ef9 17%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field--border-top: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-right: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-bottom: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-left: 1px solid light-dark(#ddd6fe, #1d1254);
     --c2-text-field__hover--border-top: 1px solid #a78bfa;
     --c2-text-field__hover--border-right: 1px solid #a78bfa;
     --c2-text-field__hover--border-bottom: 1px solid #a78bfa;
@@ -120,7 +120,7 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
     --c2-text-field__focus--border-bottom: 1px solid #7c3aed;
     --c2-text-field__focus--border-left: 1px solid #7c3aed;
     --c2-text-field__focus--outline: 3px solid rgba(124, 58, 237, 0.2);
-    --c2-text-field__icon--color: color-mix(in srgb, #b24cff 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-text-field__icon--color: light-dark(#7c3aed, #a072ef);
   }
 </style>
 <c2-text-field placeholder="Your email" class="brand-ring"></c2-text-field>

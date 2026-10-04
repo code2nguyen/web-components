@@ -45,18 +45,18 @@ The first four examples use the component's built-in appearance, with no CSS var
   .commerce-light {
     width: 100%; height: 320px;
     --c2-log-viewer--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-log-viewer--color: color-mix(in srgb, #243a5b 50%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-log-viewer--color: light-dark(#1e293b, #9499a1);
     --c2-log-viewer--border: 1px solid #cbd5e1;
-    --c2-log-viewer__token--color: color-mix(in srgb, #206bff 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__timestamp--color: color-mix(in srgb, #b0d0fb 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__attribute--color: color-mix(in srgb, #7692b7 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__level--color: color-mix(in srgb, #9b31ff 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__level__info--color: color-mix(in srgb, #00d893 50%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__level__warning--color: color-mix(in srgb, #fe6302 53%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-log-viewer__level__error--color: color-mix(in srgb, #ff0f4e 65%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-log-viewer__token--color: light-dark(#1d4ed8, #7390e4);
+    --c2-log-viewer__timestamp--color: light-dark(#64748b, #8894a6);
+    --c2-log-viewer__attribute--color: light-dark(#475569, #8c95a1);
+    --c2-log-viewer__level--color: light-dark(#6d28d9, #aa84e6);
+    --c2-log-viewer__level__info--color: light-dark(#047857, #58a38e);
+    --c2-log-viewer__level__warning--color: light-dark(#92400e, #b9886a);
+    --c2-log-viewer__level__error--color: light-dark(#be123c, #d6788f);
     --c2-log-viewer__entry--box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
-    --c2-log-viewer__entry__hover--background: color-mix(in srgb, #0c45ff 7%, var(--c2-theme--color-surface, #ffffff));
-    --c2-log-viewer__entry__highlighted--background: color-mix(in srgb, #0f73f8 15%, var(--c2-theme--color-surface, #ffffff));
+    --c2-log-viewer__entry__hover--background: light-dark(#eef2ff, #151c36);
+    --c2-log-viewer__entry__highlighted--background: light-dark(#dbeafe, #132b4d);
     --c2-log-viewer__entry__highlighted--box-shadow: inset 3px 0 0 #2563eb;
   }
 </style>

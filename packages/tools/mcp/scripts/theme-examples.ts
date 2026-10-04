@@ -1,7 +1,8 @@
 /**
  * Applies `themeExampleCss` to the `<style>` block of every live example in the docs (`MdxCodeBlock` and `UsageBlock`
- * fences under `apps/ui/src/content/{components,gallery}`), so a card's greys, tints and deep accent text follow the
- * `--c2-theme--*` tokens and read in both the light and the dark theme. The registry applies the same transform to
+ * fences under `apps/ui/src/content/{components,gallery}`), so a card reads in both the light and the dark theme: its
+ * greys follow the `--c2-theme--*` tokens, and its tints and the accent text on them become `light-dark()` pairs whose
+ * light half is the authored colour and whose dark half is a starting point for the author to tune. The registry applies the same transform to
  * what it serves; this writes it back into the MDX the site renders.
  *
  *   node scripts/theme-examples.ts           rewrite the MDX files in place
@@ -10,7 +11,8 @@
  * Greys are themed only inside a block that also paints a tint: elsewhere they were tuned by hand against the
  * audit, and a grey drawn on a colour the component computes (an avatar's auto colour) must not flip.
  *
- * Idempotent: a value that already reads a variable or a `color-mix()` is left alone. Needs the built theme
+ * Idempotent: a value that already reads a variable, a `color-mix()` or a `light-dark()` pair is left alone, so a
+ * pair tuned by hand stays as written. Needs the built theme
  * (`packages/tools/theme/dist/tokens.json`). Plain node on Node 24 type stripping: erasable TypeScript only.
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
