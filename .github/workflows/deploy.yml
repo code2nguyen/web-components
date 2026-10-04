@@ -50,6 +50,9 @@ jobs:
           # GOOGLE_MAPS_API_KEY repository secret, when set, takes its place.
           PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'AIzaSyB9u7tyP1OSxruJJeVvksagghg-3pGHI6Y' }}
 
+      - name: Check the @c2n/components bundle size
+        run: npm run check:bundle-size
+
       - name: Check component documentation coverage
         run: npm run docs:check
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
-import { groupByConverter, sortModelConverter } from '@c2n/table/table-types.js'
+import { groupByConverter, sortModelConverter } from '@c2n/components/table'
 
 import { getElemenetProperty, isDataAttribute } from './dom.ts'
 

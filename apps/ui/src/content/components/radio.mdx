@@ -7,7 +7,7 @@ category: 'Inputs'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Radio, RadioGroup } from '@c2n/radio'
+import { Radio, RadioGroup } from '@c2n/components/radio'
 
 `c2-radio` is one option: a native `<input type="radio">` with its label beside it and an optional `description` slot underneath. `c2-radio-group` turns several of them into one form-associated control with one `value` and one `name`, disables them together, and restores the native keyboard model across the shadow boundary: Arrow keys move and select, and only the selected option is a tab stop. Radios can sit anywhere inside the group, including in wrapper elements. Standalone radios sharing a `name` in the same root still uncheck each other and participate in forms individually, but only the group provides arrow-key navigation and a single `change` event with the new value.
 

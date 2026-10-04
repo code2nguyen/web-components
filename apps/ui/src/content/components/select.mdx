@@ -7,8 +7,8 @@ category: 'Inputs'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Select } from '@c2n/select'
-import { ListItem } from '@c2n/list-item'
+import { Select } from '@c2n/components/select'
+import { ListItem } from '@c2n/components/list-item'
 
 `c2-select` is a trigger button plus a popover. The options are plain `c2-list-item` children, so everything you know about list items applies here: `value` identifies an option, `label` gives the trigger a short text when the row content is rich, `disabled` greys a row out, and the `prefix-icon` / `suffix-icon` slots decorate it. Inside the popover the rows live in a `c2-list` that owns the selection, keeps the dropdown open in `multiple` mode and lists every selected label in the trigger. The dropdown is a native popover on the top layer, positioned by `c2-overlay`, so it flips above the trigger near the bottom of the viewport and is never clipped by an `overflow: hidden` parent.
 

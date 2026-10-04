@@ -7,7 +7,7 @@ category: 'Inputs'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { TagInput } from '@c2n/tag-input'
+import { TagInput } from '@c2n/components/tag-input'
 
 `c2-tag-input` collects a list of short values in one field: type an address, press comma or Enter, and it becomes a tag; paste a column of addresses and each line becomes a tag. The value is a `string[]` (in markup, separate tags with semicolons), and the element is form-associated: every tag is submitted as its own entry under `name`, `required` asks for at least one tag, and form reset restores the initial tags.
 

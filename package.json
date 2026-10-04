@@ -45,7 +45,8 @@
     "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
     "test:style-contracts": "playwright test tests/style-contracts",
-    "verify:style-contracts": "node scripts/verify-style-contracts.mjs"
+    "verify:style-contracts": "node scripts/verify-style-contracts.mjs",
+    "check:bundle-size": "npm run size -w packages/umbrella"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -210,6 +211,7 @@
     "ui:build": {
       "dependencies": [
         "build",
+        "./packages/umbrella:build",
         "examples:build"
       ],
       "command": "npm run build -w apps/ui"

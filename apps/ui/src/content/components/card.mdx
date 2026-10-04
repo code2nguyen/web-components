@@ -7,8 +7,8 @@ category: 'Layout'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Card } from '@c2n/card'
-import { Button } from '@c2n/button'
+import { Card } from '@c2n/components/card'
+import { Button } from '@c2n/components/button'
 
 `c2-card` is a surface with four optional sections: `media` (an image or any block that bleeds to the edges and is clipped to the card radius), `header`, the default slot for the body, and `footer` (a flex row for actions). A section is rendered only when its slot has content, so a bare `<c2-card>text</c2-card>` is just a padded box. Set `href` to make the whole card a link, or `interactive` to give it button semantics (focusable, Enter and Space click it). `disabled` dims the card and blocks interaction. Hover, focus and disabled looks are all tokens; `--c2-card__hover--transform` with a hover shadow gives the classic lift.
 

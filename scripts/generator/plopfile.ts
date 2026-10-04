@@ -87,7 +87,7 @@ export default function (plop: NodePlopAPI) {
               type: 'append',
               path: '../../apps/ui/src/data/component-modules.ts',
               pattern: /^ \*\/$/m,
-              template: "import '@c2n/{{ dashCase name }}'",
+              template: "import '@c2n/components/{{ dashCase name }}'",
             },
             {
               type: 'append',

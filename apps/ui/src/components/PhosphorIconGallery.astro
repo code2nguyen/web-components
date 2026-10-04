@@ -57,7 +57,7 @@ const weights = [
 <script>
   import { openIconInStudio } from '../utils/playground.ts'
 
-  import '@c2n/copy-button'
+  import '@c2n/components/copy-button'
   import '@c2n/phosphor-icons'
 </script>
 
@@ -158,10 +158,10 @@ const weights = [
 </style>
 
 <script>
-  import type { CopyButton } from '@c2n/copy-button'
+  import type { CopyButton } from '@c2n/components/copy-button'
   import type { PhosphorIcon, PhosphorIconWeight } from '@c2n/phosphor-icons'
-  import type { TextField } from '@c2n/text-field'
-  import type { Select } from '@c2n/select'
+  import type { TextField } from '@c2n/components/text-field'
+  import type { Select } from '@c2n/components/select'
 
   const filter = document.querySelector<TextField>('.phosphor-icon-gallery__filter')
   // `c2-select.value` is an array (one entry unless `multiple`); `selectedValue` is the single-value view.

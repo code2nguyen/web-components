@@ -1,7 +1,7 @@
 import { html } from 'lit'
-import type { ContextMenu, ContextMenuContext } from '@c2n/context-menu'
-import type { Table } from '@c2n/table'
-import type { TableCellEventDetail } from '@c2n/table/table-types.js'
+import type { ContextMenu, ContextMenuContext } from '@c2n/components/context-menu'
+import type { Table } from '@c2n/components/table'
+import type { TableCellEventDetail } from '@c2n/components/table'
 
 /**
  * Makes the context-menu examples live. `[data-context-menu-demo="table"]` builds a menu per right-clicked cell with

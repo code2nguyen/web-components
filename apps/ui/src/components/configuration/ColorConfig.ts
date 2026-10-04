@@ -1,14 +1,14 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TinyColor } from '@ctrl/tinycolor'
-import type { ColorSelectChangeEventDetail } from '@c2n/color-select'
+import type { ColorSelectChangeEventDetail } from '@c2n/components/color-select'
 
-import '@c2n/text-field'
-import '@c2n/color-select'
-import '@c2n/icon-button'
+import '@c2n/components/text-field'
+import '@c2n/components/color-select'
+import '@c2n/components/icon-button'
 import '@c2n/feather-icons/icons/eye.js'
 import '@c2n/feather-icons/icons/eye-off.js'
-import type { TextField } from '@c2n/text-field'
+import type { TextField } from '@c2n/components/text-field'
 import { formatAlpha, parseAlpha } from '../../utils/css-value.ts'
 
 /**

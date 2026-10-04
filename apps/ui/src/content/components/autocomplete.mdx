@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import AutocompleteExamplesRuntime from '../../components/AutocompleteExamplesRuntime.astro'
 
-import { Autocomplete } from '@c2n/autocomplete'
+import { Autocomplete } from '@c2n/components/autocomplete'
 
 `c2-autocomplete` filters a local `suggestions` array or asks an asynchronous `dataSource` for matches. Its overlay composes an optional header, a real `c2-list` of `c2-list-item` rows, and an optional footer. Like `c2-virtual-list`, the default renderer reads only `labelField` and optional `descriptionField`. Arbitrary objects use field mappings and `renderItem`; no group, icon, meta or type fields receive special treatment. The component keeps selection and keyboard accessibility around custom content, cancels stale server requests and returns the original selected item.
 

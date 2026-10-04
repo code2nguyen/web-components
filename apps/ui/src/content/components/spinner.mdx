@@ -7,8 +7,8 @@ category: 'Feedback'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Spinner } from '@c2n/spinner'
-import { Button } from '@c2n/button'
+import { Spinner } from '@c2n/components/spinner'
+import { Button } from '@c2n/components/button'
 
 `c2-spinner` is a ring that spins while something is in flight. Give it a `value` (out of `max`, 100 by default) and it turns into a determinate ring that fills clockwise and animates between values. Text in the default slot sits beside the ring and doubles as its accessible name; without text, `label` (or "Loading") names it. It is a `progressbar` for assistive technology, with `aria-valuenow` when determinate. Size, stroke, colours and speed are variables, and the reduced-motion setting replaces the pulsing arc with a slow, steady turn.
 

@@ -5,11 +5,11 @@ import { $configCodeStore } from '../../store/config-code-store.ts'
 import { $configStore } from '../../store/config-store.ts'
 import { generateCode, getChanges, type CodeFormat } from '../../utils/playground.ts'
 
-import '@c2n/code-viewer'
-import '@c2n/tabs'
-import '@c2n/tabs/tab.js'
-import '@c2n/text-field'
-import type { TextField } from '@c2n/text-field'
+import '@c2n/components/code-viewer'
+import '@c2n/components/tabs'
+import '@c2n/components/tabs/tab'
+import '@c2n/components/text-field'
+import type { TextField } from '@c2n/components/text-field'
 
 const FORMATS: { id: CodeFormat; label: string; hint: string }[] = [
   { id: 'html', label: 'HTML', hint: 'Drop-in snippet: the example markup with a class and the overrides in a <style> block.' },
