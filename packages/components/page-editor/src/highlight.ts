@@ -63,7 +63,11 @@ function ensureLanguage(language: string): Promise<boolean> {
   let pending = loading.get(language)
   if (!pending) {
     pending = loadLanguage(language)
-      .catch(() => false)
+      .catch((error: unknown) => {
+        // The block stays plain text for this page; say why rather than fail silently.
+        console.warn(`c2-page-editor: the ${language} grammar could not be loaded, so its code blocks stay uncoloured.`, error)
+        return false
+      })
       .then((ok) => {
         if (ok) loaded.add(language)
         else unavailable.add(language)

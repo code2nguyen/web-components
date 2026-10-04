@@ -319,7 +319,7 @@ test('code tokens take their colour from the --c2-page-editor__syntax-*--color v
     `<c2-page-editor label="Notes" style="--c2-page-editor__syntax-keyword--color: rgb(255, 0, 0); --c2-page-editor__code-block--color: rgb(255, 0, 0)"></c2-page-editor>`,
   )
   const errors: string[] = []
-  page.on('console', (message) => message.type() === 'error' && errors.push(message.text()))
+  page.on('console', (message) => ['error', 'warning'].includes(message.type()) && !message.text().includes('lit.dev/msg') && errors.push(message.text()))
   page.on('pageerror', (error) => errors.push(error.message))
   await host(page).evaluate((element: HTMLElement & { value: string }) => (element.value = '```js\nif (ok) {}\n```'))
   const block = page$(page).locator('pre').first()
@@ -331,7 +331,17 @@ test('code tokens take their colour from the --c2-page-editor__syntax-*--color v
   } catch (error) {
     // Say what the block holds instead, so a failure in one engine shows whether tokens are missing or coloured otherwise.
     const html = await block.evaluate((element) => element.outerHTML)
-    throw new Error(`${(error as Error).message}\ncode block: ${html}\npage errors: ${JSON.stringify(errors)}`, { cause: error })
+    // The editor's own view of it: the block's language and how many syntax decorations the highlighter holds.
+    const editor = await host(page).evaluate((element) => {
+      type Plugin = { key: string; getState(state: unknown): { find(): unknown[] } | undefined }
+      type View = { state: { plugins: Plugin[]; doc: { firstChild: { attrs: { language?: string } } | null } } }
+      const { view } = element as unknown as { view: View }
+      const highlight = view.state.plugins.find((plugin) => plugin.key.startsWith('c2-page-editor-highlight'))
+      return { language: view.state.doc.firstChild?.attrs.language, decorations: highlight?.getState(view.state)?.find().length }
+    })
+    throw new Error(`${(error as Error).message}\ncode block: ${html}\neditor: ${JSON.stringify(editor)}\npage errors: ${JSON.stringify(errors)}`, {
+      cause: error,
+    })
   }
   // A browser serializes a mixed colour its own way: compare with the same mix computed in the page.
   const red = await page.evaluate(() => {
