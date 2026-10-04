@@ -131,7 +131,7 @@
     background-color: css.cssVar(tab__hover--background-color, tab--background-color);
   }
 
-  ::slotted(c2-tab[selected]) {
+  ::slotted(c2-tab:state(selected)) {
     color: css.cssVar(tab__selected--color, tab__hover--color, tab--color);
     background-color: css.cssVar(tab__selected--background-color, tab__hover--background-color, tab--background-color);
   }

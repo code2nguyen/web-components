@@ -33,17 +33,25 @@ export interface Tabs {
 /**
  * Tab strip that shows one content panel at a time.
  *
- * Light-DOM children are split in two groups: every `<c2-tab for="…">` becomes a tab in the header
- * (they slot themselves into `tab`), every other child is a panel whose `id` matches a tab's `for`.
- * Only the panel of the selected tab is rendered. The header is a `tablist`: Arrow keys, Home and
- * End move between tabs, Enter and Space activate the focused one.
+ * Light-DOM children are split in two groups: every `<c2-tab for="…">` becomes a tab in the header,
+ * every other child is a panel whose `id` matches a tab's `for`. Only the panel of the selected tab is
+ * rendered. The header is a `tablist`: Arrow keys, Home and End move between tabs, Enter and Space
+ * activate the focused one.
+ *
+ * The strip assigns its children to its slots itself (manual slot assignment), so neither the tabs nor the
+ * panels need a `slot` attribute and none is written on them; a `slot="tab"` already in the markup is
+ * harmless. When the shadow root was server-rendered (declarative shadow DOM, which has no manual mode)
+ * the strip falls back to writing `slot` on the tabs and the selected panel. The selected tab matches
+ * `c2-tab:state(selected)`. Panels without a `role` get `role="tabpanel"` and `aria-labelledby` (and the
+ * tab an `id` for it): a plain element has no `ElementInternals`, so write those yourself in
+ * server-rendered markup and nothing is added.
  *
  * @tag c2-tabs
  *
  * @slotcomponent c2-tab
  *
- * @slot tab - The `<c2-tab>` elements (assigned automatically).
- * @slot tab-content - The panel of the selected tab (assigned automatically from the child whose `id` matches `selected-tab`).
+ * @slot tab - The `<c2-tab>` children (assigned by the strip; no `slot` attribute needed).
+ * @slot tab-content - The panel of the selected tab (assigned by the strip from the child whose `id` matches `selected-tab`; no `slot` attribute needed).
  *
  * @event {CustomEvent<TabsSelectionChangeEventDetail>} selection-change - Fired after the user selects another tab. `detail.value` is the new `selected-tab`. Not fired for programmatic changes. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
@@ -103,6 +111,10 @@ export interface Tabs {
 export class Tabs extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // The strip picks its children for each slot itself instead of writing `slot` on them: an attribute written on a
+  // child while the page upgrades is one the server never rendered, which React reports as a hydration mismatch.
+  static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
+
   /** Accessible name for the tab list. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
@@ -117,6 +129,9 @@ export class Tabs extends LitElement {
   @query('slot[name="tab"]')
   private tabsSlot!: HTMLSlotElement
 
+  @query('slot[name="tab-content"]')
+  private contentSlot!: HTMLSlotElement
+
   @state()
   private indicatorStyle = ''
 
@@ -126,16 +141,51 @@ export class Tabs extends LitElement {
 
   private resizeObserver?: ResizeObserver
 
+  /** Tabs and panels added or removed later are (re)assigned to their slots. */
+  private childObserver?: MutationObserver
+
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer && typeof ResizeObserver !== 'undefined' && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver(() => this.updateIndicator())
+    }
+    if (!isServer) {
+      this.childObserver ??= new MutationObserver(() => this.assignSlots())
+      this.childObserver.observe(this, { childList: true })
+      // A reconnected strip may have missed child changes while it was detached.
+      if (this.hasUpdated) this.assignSlots()
     }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.resizeObserver?.disconnect()
+    this.childObserver?.disconnect()
+  }
+
+  override firstUpdated() {
+    this.assignSlots()
+  }
+
+  /**
+   * Whether this strip assigns its slots by hand. False only when the shadow root came from declarative shadow DOM
+   * (server rendering), which is always in named mode; the strip then falls back to `slot` attributes.
+   */
+  private get manualSlots(): boolean {
+    return (this.renderRoot as ShadowRoot).slotAssignment === 'manual'
+  }
+
+  /** Puts every `<c2-tab>` child in the `tab` slot, then re-resolves the visible panel. */
+  private assignSlots() {
+    if (!this.tabsSlot) return
+    const tabs = [...this.children].filter((child) => child.localName === TAB_TAG)
+    if (this.manualSlots) {
+      // `assign()` fires `slotchange` when the set changes, which runs `handleTabSlotChange`.
+      this.tabsSlot.assign(...tabs)
+    } else {
+      for (const tab of tabs) if (tab.getAttribute('slot') !== 'tab') tab.setAttribute('slot', 'tab')
+    }
+    this.syncPanels()
   }
 
   /** Slotted `<c2-tab>` elements, in DOM order. */
@@ -224,18 +274,32 @@ export class Tabs extends LitElement {
       tab.tabIndex = tab === focusable ? 0 : -1
       tab.requestUpdate()
     }
+    this.syncPanels()
+  }
 
-    for (const child of this.children) {
-      if (child.localName === TAB_TAG) continue
-      if (child.id && child.id === this.selectedTab) {
-        child.setAttribute('slot', 'tab-content')
-        if (!child.hasAttribute('role')) child.setAttribute('role', 'tabpanel')
-        if (selected && !child.hasAttribute('aria-labelledby')) {
-          if (!selected.id) selected.id = `${child.id}-tab`
-          child.setAttribute('aria-labelledby', selected.id)
-        }
-      } else if (child.getAttribute('slot') === 'tab-content') {
-        child.removeAttribute('slot')
+  /** Shows the panel of the selected tab in `tab-content` and gives it the `tabpanel` semantics it lacks. */
+  private syncPanels() {
+    if (!this.contentSlot) return
+    const selected = this.tabs.find((t) => t.for === this.selectedTab)
+    const panel = [...this.children].find((child) => child.localName !== TAB_TAG && !!child.id && child.id === this.selectedTab)
+
+    if (this.manualSlots) {
+      const assigned = this.contentSlot.assignedElements()
+      if (assigned.length !== (panel ? 1 : 0) || assigned[0] !== panel) this.contentSlot.assign(...(panel ? [panel] : []))
+    } else {
+      for (const child of this.children) {
+        if (child === panel) child.setAttribute('slot', 'tab-content')
+        else if (child.localName !== TAB_TAG && child.getAttribute('slot') === 'tab-content') child.removeAttribute('slot')
+      }
+    }
+
+    // A plain element has no ElementInternals, so these can only be attributes. They are skipped when the author
+    // wrote them, which is how server-rendered markup avoids any write.
+    if (panel) {
+      if (!panel.hasAttribute('role')) panel.setAttribute('role', 'tabpanel')
+      if (selected && !panel.hasAttribute('aria-labelledby')) {
+        if (!selected.id) selected.id = `${panel.id}-tab`
+        panel.setAttribute('aria-labelledby', selected.id)
       }
     }
   }

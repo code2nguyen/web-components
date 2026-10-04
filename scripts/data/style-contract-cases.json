@@ -25,7 +25,7 @@
       "id": "chart-linked-tooltip-visible",
       "tag": "c2-chart-tooltip",
       "fixture": "<c2-line-chart id=\"style-chart\" x-field=\"t\" data='[{\"t\":0,\"s0\":10},{\"t\":1,\"s0\":20},{\"t\":2,\"s0\":15}]'><c2-chart-series field=\"s0\" label=\"First\"></c2-chart-series></c2-line-chart><c2-chart-tooltip for=\"style-chart\" position=\"inline\"></c2-chart-tooltip>",
-      "settledWhen": "c2-line-chart[data-chart-ready] .u-over",
+      "settledWhen": "c2-line-chart:state(ready) .u-over",
       "hoverTarget": "c2-line-chart .u-over",
       "dimensions": [{ "target": "c2-line-chart", "width": "500px", "height": "320px" }]
     },
@@ -329,7 +329,7 @@
       "id": "tabs-three",
       "tag": "c2-tabs",
       "fixture": "<c2-tabs selected-tab=\"b\"><c2-tab for=\"a\">Alpha</c2-tab><c2-tab for=\"b\">Beta</c2-tab><c2-tab for=\"c\" disabled>Gamma</c2-tab><div id=\"a\">Alpha panel</div><div id=\"b\">Beta panel</div><div id=\"c\">Gamma panel</div></c2-tabs>",
-      "settledWhen": "c2-tabs c2-tab[for=\"b\"][selected]",
+      "settledWhen": "c2-tabs c2-tab[for=\"b\"]:state(selected)",
       "modules": ["/packages/components/tabs/src/tabs.ts", "/packages/components/tabs/src/tab.ts"],
       "dimensions": [{ "target": "c2-tabs", "width": "480px" }]
     },
@@ -337,7 +337,7 @@
       "id": "tabs-hovered-tab",
       "tag": "c2-tabs",
       "fixture": "<c2-tabs selected-tab=\"b\"><c2-tab for=\"a\">Alpha</c2-tab><c2-tab for=\"b\">Beta</c2-tab><c2-tab for=\"c\" disabled>Gamma</c2-tab><div id=\"a\">Alpha panel</div><div id=\"b\">Beta panel</div><div id=\"c\">Gamma panel</div></c2-tabs>",
-      "settledWhen": "c2-tabs c2-tab[for=\"b\"][selected]",
+      "settledWhen": "c2-tabs c2-tab[for=\"b\"]:state(selected)",
       "modules": ["/packages/components/tabs/src/tabs.ts", "/packages/components/tabs/src/tab.ts"],
       "dimensions": [{ "target": "c2-tabs", "width": "480px" }],
       "hoverTarget": "c2-tabs c2-tab[for=\"a\"]"

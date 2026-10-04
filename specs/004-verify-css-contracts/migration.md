@@ -34,3 +34,42 @@ No variable changed. The host no longer carries the `.focus-within`, `.error`, `
 | `c2-text-field.error`        | `c2-text-field:state(error)`                                          |
 | `c2-text-field.read-only`    | `c2-text-field:state(read-only)`                                      |
 | `c2-text-field.disabled`     | `c2-text-field:state(disabled)`                                       |
+
+## `c2-list` host classes and `c2-list-item` join attributes
+
+No variable changed. `c2-list` no longer toggles `.padding-top-0` / `.padding-bottom-0` classes on its own host, and no longer writes `joined-before` / `joined-after` attributes on its rows (both happened on the first render, so a server-rendered list differed from the hydrated one, and a framework that owns `class` wiped the classes). They are custom states now. `c2-list-item` still accepts `joined-before` / `joined-after` as attributes (that is how `c2-virtual-list` sets them); the list sets the `joinedBefore` / `joinedAfter` properties instead.
+
+| Old selector                  | Replacement                         |
+| ----------------------------- | ----------------------------------- |
+| `c2-list.padding-top-0`       | `c2-list:state(padding-top-0)`      |
+| `c2-list.padding-bottom-0`    | `c2-list:state(padding-bottom-0)`   |
+| `c2-list-item[joined-before]` | `c2-list-item:state(joined-before)` |
+| `c2-list-item[joined-after]`  | `c2-list-item:state(joined-after)`  |
+
+## `c2-tabs` slot assignment and `c2-tab[selected]`
+
+No variable changed. `c2-tab` no longer writes `slot="tab"` on itself, and `c2-tabs` no longer writes `slot="tab-content"` on the selected panel: the strip's shadow root uses manual slot assignment and assigns its `c2-tab` children and the selected panel itself. Markup that already carries `slot="tab"` / `slot="tab-content"` keeps working (the attributes are ignored). A server-rendered (declarative shadow DOM) strip, whose shadow root is always in named mode, falls back to writing `slot` as before. `selected` on `c2-tab` is no longer reflected; it is the custom state `selected`.
+
+| Old selector                                 | Replacement                                                                |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `c2-tab[selected]`                           | `c2-tab:state(selected)`                                                   |
+| `c2-tab[slot='tab']`, `[slot='tab-content']` | `c2-tabs > c2-tab`; the visible panel is `c2-tabs > [id='<selected-tab>']` |
+
+## `c2-timeline-item` position attributes
+
+No variable changed. `c2-timeline-item` no longer writes the `last` and `split` attributes on itself (the timeline set them while the page upgraded); they are custom states.
+
+| Old selector              | Replacement                     |
+| ------------------------- | ------------------------------- |
+| `c2-timeline-item[last]`  | `c2-timeline-item:state(last)`  |
+| `c2-timeline-item[split]` | `c2-timeline-item:state(split)` |
+
+## `c2-menu` host attributes
+
+No variable changed. `c2-menu` no longer writes `has-trigger` on its host (now a custom state), no longer writes `placement="right-start"` on a submenu (the default is applied without touching the attribute), and no longer reflects `reserve-indicator` onto its rows (`reserveIndicator` is still accepted as a property or attribute).
+
+| Old selector                                       | Replacement                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| `c2-menu[has-trigger]`                             | `c2-menu:state(has-trigger)`                                     |
+| `c2-menu[slot='submenu'][placement='right-start']` | `c2-menu[slot='submenu']:not([placement])`                       |
+| `c2-menu-item[reserve-indicator]`                  | none: style a checkable row by `c2-menu-item:not([type='item'])` |

@@ -78,3 +78,45 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(option(page, 'Cherry')).toHaveHostAria('aria-selected', 'false')
   expect(await hostAttributes()).toEqual([])
 })
+
+// The list measures its padding and joins adjacent selected rows on the first render, which is before React (or any
+// framework) hydrates: a class or attribute written then differs from the server markup, and a framework that owns
+// `class` wipes it on its next render. Both are custom states instead.
+test('flush padding and joined rows are custom states, never classes or attributes', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-list aria-label="Fruit" multiple value="a;b" style="--c2-list--padding-top: 0; --c2-list--padding-bottom: 0; --c2-list--border-top-left-radius: 12px; --c2-list--border-bottom-left-radius: 12px">${rows.replace(' disabled', '')}</c2-list>`,
+  )
+  const host = page.locator('c2-list')
+  const box = (name: string) => option(page, name).locator('.c2-list-item')
+  const states = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('c2-list, c2-list-item')].flatMap((element) =>
+        ['padding-top-0', 'padding-bottom-0', 'joined-before', 'joined-after']
+          .filter((name) => element.matches(`:state(${name})`))
+          .map((name) => `${element.localName}:${name}`),
+      ),
+    )
+  const unauthored = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('c2-list, c2-list-item')].flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => !['aria-label', 'multiple', 'value', 'style', 'tabindex', 'selected'].includes(name))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
+    )
+
+  await expect.poll(states).toEqual(['c2-list:padding-top-0', 'c2-list:padding-bottom-0', 'c2-list-item:joined-after', 'c2-list-item:joined-before'])
+  await expect(box('Apple')).toHaveCSS('border-top-left-radius', '12px')
+  await expect(box('Apple')).toHaveCSS('border-bottom-left-radius', '0px')
+  await expect(box('Banana')).toHaveCSS('border-top-left-radius', '0px')
+  await expect(box('Cherry')).toHaveCSS('border-bottom-left-radius', '12px')
+  expect(await unauthored()).toEqual([])
+
+  await option(page, 'Banana').click()
+  await expect(host).toHaveJSProperty('value', ['a'])
+  await expect.poll(states).toEqual(['c2-list:padding-top-0', 'c2-list:padding-bottom-0'])
+  await expect(box('Apple')).toHaveCSS('border-bottom-left-radius', '6px')
+  expect(await unauthored()).toEqual([])
+  await expect(host).not.toHaveAttribute('class')
+})
