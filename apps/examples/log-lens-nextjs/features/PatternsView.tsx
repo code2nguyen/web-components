@@ -1,5 +1,6 @@
 'use client'
 
+import { useRenderedRows } from '@c2n/table/react'
 import { useMemo, useRef, useState } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
@@ -34,10 +35,10 @@ interface Row extends Record<string, unknown> {
   first: string
 }
 
-function Trend({ id, data, label }: Readonly<{ id: string; data: number[]; label: string }>) {
+function Trend({ line, data, label }: Readonly<{ line: number; data: number[]; label: string }>) {
   const ref = useRef<HTMLElementTagNameMap['c2-sparkline']>(null)
   useElementProperties(ref, 'c2-sparkline', { data }, [data])
-  return <c2-sparkline ref={ref} slot={`cell:${id}:trend`} className="ll-trend" type="area" tone="neutral" aria-label={label} />
+  return <c2-sparkline ref={ref} slot={`cell:${line}:trend`} className="ll-trend" type="area" tone="neutral" aria-label={label} />
 }
 
 export function PatternsView({
@@ -49,6 +50,8 @@ export function PatternsView({
 }: Readonly<{ analysis: Analysis; records: LogRecord[]; lens: Focus; selectedId: string; actions: LensActions }>) {
   const [order, setOrder] = useState<Order>('common')
   const tableRef = useRef<HTMLElementTagNameMap['c2-table']>(null)
+  // `cell-slot` children go to the display lines the table rendered (`cell:<line>:<field>`), looked up by row key.
+  const rendered = useRenderedRows(tableRef)
   const filtered = !isEmptyFocus(lens)
 
   const { visible, counts, histograms } = useMemo(() => {
@@ -114,15 +117,15 @@ export function PatternsView({
             <c2-table-column field="count" header="Count" width="80px" align="end" format="number" />
             <c2-table-column field="trend" header="Over time" width="140px" cell-slot />
             <c2-table-column field="first" header="First seen" width="96px" />
-            {visible.map((pattern) => (
-              <SeverityBadge key={`${pattern.id}-severity`} slot={`cell:${pattern.id}:severity`} severity={pattern.severity} />
-            ))}
-            {visible.map((pattern) => (
-              <PatternText key={`${pattern.id}-template`} slot={`cell:${pattern.id}:template`} template={pattern.template} />
-            ))}
-            {visible.map((pattern) => (
-              <Trend key={`${pattern.id}-trend`} id={pattern.id} data={histograms.get(pattern.id) ?? []} label={`Occurrences of ${pattern.id} over time`} />
-            ))}
+            {rendered.flatMap(({ line, key }) => {
+              const pattern = analysis.patternById.get(key)
+              if (!pattern) return []
+              return [
+                <SeverityBadge key={`${line}:severity`} slot={`cell:${line}:severity`} severity={pattern.severity} />,
+                <PatternText key={`${line}:template`} slot={`cell:${line}:template`} template={pattern.template} />,
+                <Trend key={`${line}:trend`} line={line} data={histograms.get(pattern.id) ?? []} label={`Occurrences of ${pattern.id} over time`} />,
+              ]
+            })}
           </c2-table>
           <div slot="end" className="ll-split__detail">
             <PatternDetail analysis={analysis} patternId={shownId} actions={actions} />
