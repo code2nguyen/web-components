@@ -49,7 +49,9 @@ async function loadLanguage(language: string): Promise<boolean> {
   ])
   if (!(language in bundledLanguages)) return false
   corePromise ??= createHighlighterCore({
-    engine: createJavaScriptRegexEngine({ forgiving: true }),
+    // An explicit target: `auto` misreads JavaScriptCore's regex support (Safari, WebKit), and the grammars then match
+    // nothing. ES2024 is the `v` flag, which every supported browser has.
+    engine: createJavaScriptRegexEngine({ forgiving: true, target: 'ES2024' }),
     themes: [createCssVariablesTheme({ name: THEME, variablePrefix: '--_tok-', variableDefaults: {}, fontStyle: true })],
     langs: [],
   })
