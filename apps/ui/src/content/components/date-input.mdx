@@ -17,7 +17,7 @@ import { DateInput } from '@c2n/date-input'
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/date-input
+npm install @c2n/components
 ```
 
 ## Usage
@@ -71,7 +71,7 @@ Listen for `input` while the value changes and `change` when it is committed. Ca
 The bounds are local-calendar `YYYY-MM-DD` strings, so build them from the local date parts rather than `toISOString()`, which is UTC and can land on the wrong day:
 
 ```ts tag=CodeBlock
-import type { DateInput } from '@c2n/date-input'
+import type { DateInput } from '@c2n/components/date-input'
 
 function isoDaysFromToday(offset: number) {
   const date = new Date()

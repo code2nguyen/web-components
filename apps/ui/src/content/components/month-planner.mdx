@@ -32,7 +32,7 @@ Enter picks and Escape closes. Set `month-picker="false"` for a plain title.
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/month-planner
+npm install @c2n/components
 ```
 
 ## Usage
@@ -131,7 +131,7 @@ Enter on it) fires `event-click` with the entry in `event.detail.event`. The hea
 month now shown (`YYYY-MM`), which is where to load the next month's plan.
 
 ```ts tag=CodeBlock
-import '@c2n/month-planner'
+import '@c2n/components/month-planner'
 
 const planner = document.querySelector('c2-month-planner')!
 planner.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]

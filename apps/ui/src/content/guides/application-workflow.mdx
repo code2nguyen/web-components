@@ -14,8 +14,8 @@ Install `@c2n/theme` with the components you use, import it at the application r
 
 ```typescript tag=CodeBlock
 import '@c2n/theme/theme.css'
-import '@c2n/button'
-import '@c2n/text-field'
+import '@c2n/components/button'
+import '@c2n/components/text-field'
 ```
 
 ```css tag=CodeBlock
@@ -77,7 +77,7 @@ The moment the same look appears twice, name it. A variant wraps one c2 componen
 
 ```typescript tag=CodeBlock
 import { css } from 'lit'
-import { Button } from '@c2n/button'
+import { Button } from '@c2n/components/button'
 
 export class DangerButton extends Button {
   static override styles = [

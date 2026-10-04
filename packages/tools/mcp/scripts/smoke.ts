@@ -28,7 +28,7 @@ const list = textOf(await client.callTool({ name: 'list_components', arguments: 
 assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_components lacks c2-button')
 
 const tab = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab' } }))
-assert(tab.includes("import '@c2n/tabs/tab.js'") || tab.includes('@c2n/tabs/tab.js'), 'get_component c2-tab must resolve @c2n/tabs/tab.js')
+assert(tab.includes("import '@c2n/components/tabs'"), 'get_component c2-tab must resolve @c2n/components/tabs')
 
 const icon = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-feather-arrow-right' } }))
 assert(icon.includes('@c2n/feather-icons/icons/arrow-right.js'), 'icon tag must resolve to its module')
@@ -67,7 +67,7 @@ const variant = textOf(
     },
   }),
 )
-assert(variant.includes('extends Button') && variant.includes("from '@c2n/button'"), 'generate_variant lit output is wrong')
+assert(variant.includes('extends Button') && variant.includes("from '@c2n/components/button'"), 'generate_variant lit output is wrong')
 
 const badVariant = textOf(
   await client.callTool({

@@ -1,6 +1,7 @@
 {
   "name": "@c2n/{{dashCase name}}",
   "version": "{{packageVersion}}",
+  "private": true,
   "type": "module",
   "main": "dist/{{dashCase name}}.js",
   "exports": {
@@ -13,7 +14,6 @@
   "keywords": ["{{dashCase name}}", "web component", "lit"],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "publishConfig": { "registry": "https://registry.npmjs.org", "access": "public" },
   "repository": { "type": "git", "url": "https://github.com/code2nguyen/web-components.git" },
   "scripts": {
     "dev": "vite",
@@ -26,7 +26,7 @@
     "build": { "dependencies": ["type-check"], "command": "vite build" }
   },
   "dependencies": {
-    "@c2n/core": "{{packageVersion}}",
+    "@c2n/core": "*",
     "lit": "3.3.3"
   },
   "devDependencies": { "@c2n/config": "*" },

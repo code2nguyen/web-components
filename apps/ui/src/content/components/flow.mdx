@@ -21,10 +21,10 @@ Right-click the canvas or a node (or long-press it, or press Shift+F10) for the 
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/flow
+npm install @c2n/components
 ```
 
-`@c2n/context-menu` and `@c2n/menu` are dependencies of the package and are registered for you.
+The entry also registers `c2-context-menu` and `c2-menu`, which it renders internally.
 
 ## Usage
 
@@ -122,7 +122,7 @@ An edge's label is edited in the same inline field, opened halfway along the edg
 The inline editor replaces the label of a node drawn by the flow. A node drawn by `renderNode` or a `node:<id>` slot gets the editor over its whole body and the same `node-edit` event, but must render `node.label` itself for the new name to show.
 
 ```ts tag=CodeBlock
-import type { FlowEdge } from '@c2n/flow'
+import type { FlowEdge } from '@c2n/components/flow'
 
 const flow = document.querySelector('c2-flow')!
 let next = 1
@@ -196,7 +196,7 @@ c2-flow.diagram {
 
 ```ts tag=CodeBlock
 import { html } from 'lit'
-import '@c2n/flow'
+import '@c2n/components/flow'
 
 const flow = document.querySelector('c2-flow')!
 flow.renderNode = ({ node, status }) => html`

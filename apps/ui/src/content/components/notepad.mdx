@@ -18,7 +18,7 @@ The value is plain, line-based Markdown, so it reads well when you store it, sea
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/notepad
+npm install @c2n/components
 ```
 
 ## Usage
@@ -151,7 +151,7 @@ Thursday sync
 Formats Markdown has no syntax for are written as inline HTML, which every Markdown renderer passes through. Anything else is kept as text. `text` gives the same page as plain text, without formatting or checklist markers. Pasted plain text is read as this dialect, and copied text is written in it.
 
 ```ts tag=CodeBlock
-import '@c2n/notepad'
+import '@c2n/components/notepad'
 
 const notepad = document.querySelector('c2-notepad')!
 notepad.addEventListener('input', () => save(notepad.value))

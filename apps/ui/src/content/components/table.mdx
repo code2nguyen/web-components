@@ -19,10 +19,10 @@ Give the host a height (or `--c2-table--max-height`); the header stays sticky wh
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/table
+npm install @c2n/components
 ```
 
-`@c2n/checkbox` and `@c2n/spinner` are dependencies of the package and are registered for you.
+The entry also registers `c2-checkbox` and `c2-spinner`, which it renders internally.
 
 ## Usage
 
@@ -116,7 +116,7 @@ From script the array can carry the things an attribute cannot — `renderCell`,
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import type { TableColumnConfig } from '@c2n/table/table-types.js'
+import type { TableColumnConfig } from '@c2n/components/table'
 
 const columns: TableColumnConfig[] = [
   { field: 'name', header: 'Name', width: '2fr' },
@@ -244,8 +244,8 @@ ignores `group-by` and says so in the console. Style a group with `--c2-table__g
 
 ```typescript tag=CodeBlock
 import { html } from 'lit'
-import '@c2n/table'
-import '@c2n/badge'
+import '@c2n/components/table'
+import '@c2n/components/badge'
 
 const table = document.querySelector('c2-table')!
 table.rows = await fetchPeople()

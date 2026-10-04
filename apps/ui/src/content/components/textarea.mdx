@@ -15,7 +15,7 @@ Give the control an accessible name using `label` or `aria-label`. Use `help` fo
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/textarea
+npm install @c2n/components
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ npm install @c2n/textarea
 Listen for `input` to read each edit or `change` when an edit is committed. Both events expose the updated `value` property on the host. Set the property for programmatic updates. After user input, changes to the `value` attribute only affect the reset value; `reset()` restores that attribute and clears the error state.
 
 ```ts tag=CodeBlock
-import '@c2n/textarea'
+import '@c2n/components/textarea'
 
 const field = document.querySelector('c2-textarea')!
 field.addEventListener('input', () => console.log(field.value))

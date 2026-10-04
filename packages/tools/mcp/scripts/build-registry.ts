@@ -200,8 +200,13 @@ function usageRows(html: string): { label: string; html: string }[] {
   return rows
 }
 
-/** `@c2n/tabs` + `src/tab.ts` → `@c2n/tabs/tab.js`; `@c2n/feather-icons` + `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`. */
+/**
+ * The module an application imports to register the element. A package `@c2n/components` bundles is reached through
+ * its entry (`@c2n/tabs` + `src/tab.ts` → `@c2n/components/tabs`), since only the umbrella is published; an icon set
+ * through its own subpath (`@c2n/feather-icons` + `src/icons/x.ts` → `@c2n/feather-icons/icons/x.js`).
+ */
 function modulePathFor(pkg: PackageJson, modulePath: string): string {
+  if (umbrellaPackages.has(pkg.name)) return `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}`
   const rel = modulePath.replace(/^src\//, '').replace(/\.ts$/, '')
   const exportsMap = pkg.exports ?? {}
   const mainTarget = typeof exportsMap['.'] === 'object' && exportsMap['.'] ? (exportsMap['.'] as { default?: string }).default : pkg.main
@@ -449,9 +454,9 @@ for (const dir of packageDirs.sort()) {
       icons,
       composition: { internal: [...internal].sort(), slotted: [...slotted].sort(), usedBy: [] },
       install: {
-        npm: `npm install ${pkg.name} @c2n/theme`,
+        npm: umbrellaPackages.has(pkg.name) ? `npm install ${UMBRELLA}` : `npm install ${pkg.name} @c2n/theme`,
         // A package whose elements are documented one page at a time is also imported one element at a time.
-        import: tagPattern || docs.length > 1 ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
+        import: tagPattern || docs.length > 1 || umbrellaPackages.has(pkg.name) ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
         importClass: `import { ${docElements[0].className} } from '${docElements[0].modulePath}'`,
         umbrella: umbrellaPackages.has(pkg.name) ? `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}` : undefined,
       },

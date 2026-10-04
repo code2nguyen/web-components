@@ -14,7 +14,7 @@ import { Toast } from '@c2n/toast'
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/toast
+npm install @c2n/components
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ npm install @c2n/toast
 The shared `toast` manager creates a region in `document.body` on its first `show()` call. Importing the package is safe during server rendering; call the manager in browser event handlers. Managed toasts are dismissible by default and stay visible for 5,000 milliseconds.
 
 ```ts tag=CodeBlock
-import { toast } from '@c2n/toast'
+import { toast } from '@c2n/components/toast'
 
 toast.show({ heading: 'New message', message: 'Alex commented on your document.', variant: 'info' })
 toast.show({ message: 'Your export is ready.', variant: 'success' })
@@ -68,7 +68,7 @@ toast.clear()
 Use `getToastRegion()` to configure the shared stack, or place your own `<c2-toast-region>` in the application shell and call its methods. The region exposes `show(options)`, `updateToast(id, options)`, `dismiss(id)`, `clear()`, `pause()`, `resume()`, `count`, and `queuedCount`. `max-visible` is clamped to at least one. Changing capacity preserves the remaining lifetime of toasts moved into the queue.
 
 ```ts tag=CodeBlock
-import { getToastRegion } from '@c2n/toast'
+import { getToastRegion } from '@c2n/components/toast'
 
 const region = getToastRegion()
 region.position = 'top-right'
@@ -85,7 +85,7 @@ Choose effects independently with `enter-animation` and `exit-animation` on the 
 Directions describe movement: `slide-down` enters from above and exits downward; `slide-right` enters from the left and exits toward the right. Try each combination with the controls in the management demo.
 
 ```ts tag=CodeBlock
-import { getToastRegion } from '@c2n/toast'
+import { getToastRegion } from '@c2n/components/toast'
 
 const region = getToastRegion()
 region.enterAnimation = 'slide-down'
@@ -101,7 +101,7 @@ Animations are skipped for `prefers-reduced-motion`, zero duration, `none`, or w
 ## Actions and dismissal
 
 ```ts tag=CodeBlock
-import { getToastRegion } from '@c2n/toast'
+import { getToastRegion } from '@c2n/components/toast'
 
 const region = getToastRegion()
 region.addEventListener('toast-action', event => {
@@ -132,7 +132,7 @@ Icons are vertically centered by default. Set `--c2-toast__icon--align-self: fle
 Timed managed toasts show a thin countdown bar along the bottom by default. It shrinks from full to empty as the dismissal time runs out. Set `region.showProgress = false` to hide it for a region. Each toast can override the setting with `showProgress: true` or `false`:
 
 ```ts tag=CodeBlock
-import { toast } from '@c2n/toast'
+import { toast } from '@c2n/components/toast'
 
 toast.show({ message: 'Changes saved.', duration: 6000 })
 toast.show({ message: 'Quiet notification.', showProgress: false })

@@ -2,6 +2,7 @@
 import CodeBlock from './CodeBlock.astro'
 import SiteIconButton from './ui/SiteIconButton.astro'
 import type { CodeLanguage } from 'astro'
+import umbrella from '@c2n/components/package.json'
 
 /**
  * Docs usage frame produced by a ```html tag=UsageBlock,package=… fence (see plugin/mdx-codeblock-remark.mjs).
@@ -25,6 +26,9 @@ interface Props {
 }
 
 const { code, lang, uid, style, package: pkg } = Astro.props
+// Only `@c2n/components` is published: a package it bundles is imported through its entry there.
+const entry = pkg?.startsWith('@c2n/') ? `./${pkg.slice('@c2n/'.length)}` : undefined
+const importPath = entry && entry in umbrella.exports ? `@c2n/components/${entry.slice(2)}` : pkg
 ---
 
 <section class="usage" data-uid={uid}>
@@ -45,7 +49,7 @@ const { code, lang, uid, style, package: pkg } = Astro.props
       pkg && (
         <div class="usage__code-section">
           <span class="usage__code-label">Import</span>
-          <CodeBlock code={`import '${pkg}'`} lang="typescript" bare />
+          <CodeBlock code={`import '${importPath}'`} lang="typescript" bare />
         </div>
       )
     }

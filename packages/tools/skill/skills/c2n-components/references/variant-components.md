@@ -62,7 +62,7 @@ When the variant must be a tag of its own. The docs studio's Code tab and MCP `g
 
 ```ts
 import { css } from 'lit'
-import { Button } from '@c2n/button'
+import { Button } from '@c2n/components/button'
 
 export class DangerButton extends Button {
   static override styles = [

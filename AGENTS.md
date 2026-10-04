@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Overview
 
-`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own publishable package (`@c2n/<name>`, all versioned together by Lerna at the root `lerna.json` version). Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`. Manual verification also uses each package's Vite dev harness and the Astro UI app in `apps/ui`.
+`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own **private** workspace package (`@c2n/<name>`); the one published component package is `@c2n/components` (`packages/umbrella`), which bundles them all. Public packages are versioned together by Lerna at the root `lerna.json` version. Work-in-progress packages are marked `"c2n": { "status": "wip" }`. Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`. Manual verification also uses each package's Vite dev harness and the Astro UI app in `apps/ui`.
 
 ## Commands
 
@@ -35,7 +35,7 @@ npm run generate                  # scaffold a new component (plop)
 npm run clean                     # nuke node_modules, dist, types, custom-elements.json, package-lock
 ```
 
-Release: `npm run build` then `npx lerna publish patch --no-private --exact --yes`.
+Release: `npm run build && npm run build:tools` then `npx lerna publish patch --no-private --exact --yes` (publishes `@c2n/components` and the other public packages; component packages are private and ship inside it).
 
 CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm run format:check`, `npm run ui:build` and deploys `apps/ui/dist/` to GitHub Pages. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix).
 

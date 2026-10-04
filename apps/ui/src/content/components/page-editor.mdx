@@ -19,7 +19,7 @@ The value is GitHub-flavoured Markdown, so it can be stored, searched and render
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/page-editor
+npm install @c2n/components
 ```
 
 ## Usage
@@ -117,7 +117,7 @@ Read the [guide](https://example.com/guide).
 Formats Markdown has no syntax for are inline HTML, which Markdown renderers pass through: `<u>`, `<span data-color>`, `<mark data-color>`, and `<br>` for a line break or an empty line. `text` gives the page as plain text, and `toHTML()` as HTML with real nested lists. `markdownToHTML(value)` renders a stored value without an editor on the page.
 
 ```ts tag=CodeBlock
-import '@c2n/page-editor'
+import '@c2n/components/page-editor'
 
 const editor = document.querySelector('c2-page-editor')!
 editor.addEventListener('input', () => save(editor.value))

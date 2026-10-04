@@ -63,7 +63,7 @@ The `;`-separated multi-value properties behave the same way: `value="a;b"` and 
 Every component that fires events declares an event map, so `addEventListener` narrows the detail with no cast:
 
 ```typescript tag=CodeBlock
-import type { Table } from '@c2n/table'
+import type { Table } from '@c2n/components/table'
 
 const table = document.querySelector('c2-table') as Table
 
@@ -88,21 +88,19 @@ Selection events **do not bubble**. Five components fire `selection-change`, so 
 
 ## React
 
-Two packages, no wrapper. `@c2n/<name>/react` declares the tags in JSX; the props are derived from the element class, so a renamed property is a build error rather than a silent no-op.
+No wrapper. `@c2n/components/react` declares the tags in JSX; the props are derived from the element class, so a renamed property is a build error rather than a silent no-op.
 
 ```tsx tag=CodeBlock
-// src/c2-elements.d.ts — one import per package you use
-import '@c2n/table/react'
-import '@c2n/select/react'
+// src/c2-elements.d.ts — every c2-* tag
+import '@c2n/components/react'
 ```
 
-With `@c2n/components` installed, `import '@c2n/components/react'` declares every tag in one line.
+One line declares every tag; nothing is registered by it, so it costs no bundle size.
 
 ```tsx tag=CodeBlock
 // src/main.tsx — registration must happen before the first render
 import '@c2n/theme/theme.css'
-import '@c2n/table'
-import '@c2n/table/table-column.js'
+import '@c2n/components/table'
 ```
 
 React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. That holds on the client only. On a **server-rendered page** — Next.js, React Router in SSR mode — React writes a custom element's props into the HTML verbatim, the parser lowercases them, and hydration does not set properties: `minWidth="240"` reaches the element as `minwidth`, an attribute it does not declare. Write the kebab-case attribute name instead, `min-width`, `expand-full`, `storage-key`; the generated types list it next to the property. The component forwards the lowercase lookalike to the real attribute and warns in the console, so the value survives, but the warning is telling you to fix the spelling. For a converter-backed array or object, pass its JSON string during SSR; the generated React declarations accept both the property value and this serialized attribute form.
@@ -180,7 +178,7 @@ One required piece of configuration, or every `c2-*` tag is resolved as a Vue co
 vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('c2-') } } })
 ```
 
-`@c2n/<name>/vue` (or `@c2n/components/vue` for every tag at once) registers the tags with Volar so templates can be checked strictly, and `@c2n/framework-types/tsconfig.vue.json` carries the compiler options that go with them:
+`@c2n/components/vue` registers every tag with Volar so templates can be checked strictly, and `@c2n/framework-types/tsconfig.vue.json` carries the compiler options that go with them:
 
 ```json tag=CodeBlock
 {
@@ -235,9 +233,8 @@ Register the elements at module scope before anything renders — the root `+lay
 
 ```html tag=CodeBlock
 <script lang="ts">
-  import '@c2n/table'
-  import '@c2n/table/table-column.js'
-  import type { TableEventMap } from '@c2n/table'
+  import '@c2n/components/table'
+  import type { TableEventMap } from '@c2n/components/table'
 
   let { orders } = $props()
   let selected = $state<string[]>([])
@@ -281,7 +278,7 @@ Import what you render at the top of the module and use the tags. Extend a compo
 ```html tag=CodeBlock
 <script type="module">
   import '@c2n/theme/theme.css'
-  import '@c2n/button'
+  import '@c2n/components/button'
 </script>
 <c2-button>Save</c2-button>
 ```
