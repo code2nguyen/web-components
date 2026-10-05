@@ -365,6 +365,30 @@ test.describe('dated week', () => {
     await expect(page.locator('c2-week-planner').getByRole('group', { name: 'Wednesday, September 30, today' })).toBeInViewport({ ratio: 1 })
   })
 
+  test('pages a narrow strip with one pair of arrows, crossing into the next and previous weeks', async ({ page, scenario }) => {
+    await scenario('dated-narrow')
+    const planner = page.locator('c2-week-planner')
+    const status = page.getByRole('status')
+    // The typical week's day arrows are not shown next to the week arrows.
+    await expect(planner.locator('.nav:not(.today-button)')).toHaveCount(2)
+
+    // Opens on Wednesday 30: Thursday to Sunday are a page each, then the arrow steps into the next week.
+    for (const day of ['Thursday, October 1', 'Friday, October 2', 'Saturday, October 3', 'Sunday, October 4']) {
+      await planner.getByRole('button', { name: 'Next days' }).click()
+      await expect(planner.getByRole('group', { name: day })).toBeInViewport({ ratio: 1 })
+    }
+    await expect(status).toHaveText('')
+    await planner.getByRole('button', { name: 'Next week' }).click()
+    await expect(status).toHaveText('week:2026-10-05..2026-10-11')
+    await expect(planner.getByRole('group', { name: 'Monday, October 5' })).toBeInViewport({ ratio: 1 })
+
+    // Back across the edge: the previous week opens on its last day.
+    await planner.getByRole('button', { name: 'Previous week' }).click()
+    await expect(status).toHaveText('week:2026-09-28..2026-10-04')
+    await expect(planner.getByRole('group', { name: /^Sunday, October 4/ })).toBeInViewport({ ratio: 1 })
+    await expect(planner.getByRole('button', { name: 'Previous days' })).toBeVisible()
+  })
+
   test('has no axe violations', async ({ page, scenario }) => {
     await scenario('editable-dated')
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()

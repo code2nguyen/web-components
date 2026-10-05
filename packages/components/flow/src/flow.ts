@@ -169,9 +169,11 @@ interface Connection {
  * **Editing.** `editable` lets the user draw the diagram. The flow stays controlled: it never changes `nodes` or
  * `edges` itself, it fires an event and the application updates the properties.
  *
- * - *Add a node*: double-click (or double-tap) empty canvas, choose **Add node** in the canvas menu, or press `N`
- *   (in the centre of the view; on the selected node, a node connected after it) or Enter on the empty canvas:
- *   `node-add` with the `position` to give the new node.
+ * - *Add a node*: double-click (or double-tap) empty canvas (unless `no-double-click-add`), choose **Add node** in
+ *   the canvas menu, press `N` or Enter on the empty canvas, or call `addNode()`: `node-add` with the `position` to
+ *   give the new node. `N` and `addNode()` place it where it is easy to find: connected after the selected node (`N`:
+ *   the focused node, when it is the selected one), else beside the focused node, else in the middle of the view;
+ *   always in a spot no node covers, and the view pans to show it once the application has added it.
  * - *Rename*: double-click a node, press Enter on the selected node or F2 on the focused one, or choose **Rename**:
  *   an inline field opens over the label. Enter or leaving the field commits (`node-edit`), Escape cancels. A node
  *   drawn by `renderNode` or a `node:<id>` slot gets the field over its whole body and the same event, but must
@@ -192,7 +194,9 @@ interface Connection {
  *
  * **Actions.** Buttons slotted into `actions` sit in a toolbar over the canvas, at the top by default;
  * `actions-placement` moves it to the `right`, `bottom` or `left` edge, where it stacks vertically. Wire them to the
- * public methods: `addNode()` asks for a node as `N` does, `resetLayout()` goes back to the auto layout, `fitView()`,
+ * public methods: `addNode()` asks for a node as `N` does (with `no-double-click-add`, it is the way a pointer adds
+ * one), and `dragNewNode(event)`, called from the same button's `pointerdown`, lets the user drag the new node onto
+ * the canvas as a design tool drags a shape; `resetLayout()` goes back to the auto layout, `fitView()`,
  * `zoomIn()` and `zoomOut()` move the view. The toolbar's look and its alignment along the edge are CSS variables.
  *
  * @tag c2-flow
@@ -300,6 +304,8 @@ interface Connection {
  * @cssproperty {color} [--c2-flow__connector--background-color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-flow__connector--border-color=#ffffff]
  * @cssproperty {color} [--c2-flow__node__connect-target--border-color=rgb(2, 101, 220)] - Border of the node a connection would be made to.
+ * @cssproperty {border} [--c2-flow__ghost--border=1.5px dashed rgb(2, 101, 220)] - Outline of the placeholder that follows the pointer while `dragNewNode()` drags a new node onto the canvas.
+ * @cssproperty {color} [--c2-flow__ghost--background-color=rgba(2, 101, 220, 0.06)]
  * @cssproperty {box-shadow} [--c2-flow__node__connect-target--box-shadow=0 0 0 3px rgba(2, 101, 220, 0.2)]
  * @cssproperty {color} [--c2-flow__edge__draft--color=rgb(2, 101, 220)] - The edge drawn while a connection is being made.
  * @cssproperty {color} [--c2-flow__edge__selected--color=rgb(2, 101, 220)] - Selected edge of an `editable` flow.
@@ -335,6 +341,13 @@ export class Flow extends LitElement {
    * `node-delete`, `edge-add` and `edge-delete` and the application updates `nodes` and `edges`.
    */
   @property({ type: Boolean }) editable = false
+
+  /**
+   * Turns off adding a node by double-clicking (or double-tapping) empty canvas, for an application whose `actions`
+   * toolbar has an add button calling `addNode()`: a double-click then only selects nothing, and no node appears
+   * where the user merely meant to deselect or zoom. The canvas menu's **Add node**, `N` and Enter still add one.
+   */
+  @property({ type: Boolean, attribute: 'no-double-click-add' }) noDoubleClickAdd = false
 
   /** Edge of the canvas the `actions` toolbar sits on: `top` or `bottom` lay the buttons out in a row, `left` or `right` in a column (and the arrow keys follow). */
   @property({ attribute: 'actions-placement' }) actionsPlacement: FlowActionsPlacement = 'top'
@@ -372,6 +385,8 @@ export class Flow extends LitElement {
   @state() private cardId: string | null = null
   @state() private highlightId: string | null = null
   @state() private focusId: string | null = null
+  /** Where the placeholder of a node dragged in by `dragNewNode()` is, in canvas pixels; null when not over the canvas. */
+  @state() private ghost: FlowPoint | null = null
   @state() private draggingId: string | null = null
   @state() private panning = false
   @state() private custom = false
@@ -420,6 +435,7 @@ export class Flow extends LitElement {
   private editedLayout = false
   /** A keyboard `N`: focus the node the application adds in answer. */
   private focusAdded: Set<string> | null = null
+  private newNodeDrag: { pointerId: number; startX: number; startY: number; moved: boolean } | null = null
   private readonly slotPresence = new SlotPresenceController(this, ['actions'])
   /** A keyboard delete: where focus goes once the application has removed the node. */
   private refocus: { removed: string; next: string | null } | null = null
@@ -455,6 +471,7 @@ export class Flow extends LitElement {
     cancelAnimationFrame(this.tween)
     this.clearCardTimers()
     this.stopCardPositioning()
+    this.endNewNodeDrag()
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -471,13 +488,15 @@ export class Flow extends LitElement {
   }
 
   /**
-   * Asks for a new node as `N` does: connected after the selected node, or else in the middle of the view, in a spot no
-   * node covers. Fires `node-add`, and focus moves to the node once the application has added it. Does nothing unless
-   * the flow is `editable`.
+   * Asks for a new node as `N` does: connected after the selected node, else beside the node that has focus, else in
+   * the middle of the view, in a spot no node covers. Fires `node-add`; once the application has added the node, it
+   * is selected and focused, and the view pans to show it if it is out of sight. Does nothing unless the flow is
+   * `editable`.
    */
   addNode(): void {
     if (!this.editable) return
-    this.requestNodeFromKeyboard(this.selected !== null && this.byId.has(this.selected) ? this.selected : null)
+    const selected = this.selected !== null && this.byId.has(this.selected) ? this.selected : null
+    this.requestNodeNearby(selected ?? this.focusedNodeId(), selected !== null)
   }
 
   zoomIn(): void {
@@ -877,7 +896,9 @@ export class Flow extends LitElement {
           if (selected && this.isDoubleTap(`edge:${edge}`, event)) void this.editEdgeLabel(selected.source, selected.target)
         } else {
           this.select(null)
-          if (this.editable && this.isDoubleTap('canvas', event)) this.requestNode(this.centred(this.toCanvas(event.clientX, event.clientY)))
+          if (this.editable && !this.noDoubleClickAdd && this.isDoubleTap('canvas', event)) {
+            this.requestNode(this.centred(this.toCanvas(event.clientX, event.clientY)))
+          }
         }
       }
     }
@@ -888,6 +909,21 @@ export class Flow extends LitElement {
     this.custom = true
     this.save()
     this.emitLayout('drag')
+  }
+
+  /**
+   * The stage clips its content but is still a scroll container: focusing a node out of sight (a click on one cut by
+   * the edge, the keyboard, a node just added) makes the browser scroll it, which shifts the drawing without the pan
+   * the pointer maths use. Fold any such scroll into the pan, so the node stays in sight and drags stay under the pointer.
+   */
+  private handleStageScroll = () => {
+    const stage = this.stage
+    if (!stage || (!stage.scrollLeft && !stage.scrollTop)) return
+    this.tx -= stage.scrollLeft
+    this.ty -= stage.scrollTop
+    stage.scrollLeft = 0
+    stage.scrollTop = 0
+    this.viewTouched = true
   }
 
   private handleWheel = (event: WheelEvent) => {
@@ -951,20 +987,116 @@ export class Flow extends LitElement {
     this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
   }
 
-  /** `N`: a node connected after the selected node, or else one in the middle of the view. */
-  private requestNodeFromKeyboard(id: string | null) {
-    if (id !== null && id === this.selected) {
-      const p = this.positions.get(id)!
+  /** The node that has focus, if focus is on one. */
+  private focusedNodeId(): string | null {
+    const active = (this.renderRoot as ShadowRoot).activeElement
+    const id = active instanceof HTMLElement ? (active.closest<HTMLElement>('.node')?.dataset.nodeId ?? null) : null
+    return id !== null && this.byId.has(id) ? id : null
+  }
+
+  /**
+   * `N` and `addNode()`: a node next to `id`, connected after it when `connect` (the next rank along the layout's
+   * axis), else beside it (the next spot across the axis); without `id`, one in the middle of the view. Always in a
+   * spot no node covers.
+   */
+  private requestNodeNearby(id: string | null, connect: boolean) {
+    const p = id !== null ? this.positions.get(id) : undefined
+    if (id !== null && p) {
       const size = this.sizeOf(id)
-      const { rankGap } = this.layoutOptions()
-      const start = this.direction === 'LR' ? { x: p.x + size.width + rankGap, y: p.y } : { x: p.x, y: p.y + size.height + rankGap }
-      this.requestNode(this.freeSpot(start), id, true)
+      const { rankGap, nodeGap } = this.layoutOptions()
+      const lr = this.direction === 'LR'
+      const start = connect
+        ? lr
+          ? { x: p.x + size.width + rankGap, y: p.y }
+          : { x: p.x, y: p.y + size.height + rankGap }
+        : lr
+          ? { x: p.x, y: p.y + size.height + nodeGap }
+          : { x: p.x + size.width + nodeGap, y: p.y }
+      this.requestNode(this.freeSpot(start), connect ? id : undefined, true)
       return
     }
     const stage = this.stage
     if (!stage) return
     const rect = stage.getBoundingClientRect()
     this.requestNode(this.freeSpot(this.centred(this.toCanvas(rect.left + rect.width / 2, rect.top + rect.height / 2))), undefined, true)
+  }
+
+  /**
+   * Starts dragging a new node onto the canvas from outside it, the way a design tool drags a shape from its toolbar:
+   * call it from the `pointerdown` of a button in the `actions` slot. While the pointer is over the canvas a
+   * placeholder follows it; releasing there fires `node-add` at that spot (moved aside if it would cover a node), and
+   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere, or Escape, cancels. A
+   * press that does not move does nothing, so the same button can call `addNode()` on `click`. On a touch screen,
+   * give the button `touch-action: none` so the drag is not taken as a page scroll. Does nothing unless `editable`.
+   */
+  dragNewNode(event: PointerEvent): void {
+    if (!this.editable || (event.pointerType === 'mouse' && event.button !== 0)) return
+    this.endNewNodeDrag()
+    this.newNodeDrag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false }
+    window.addEventListener('pointermove', this.handleNewNodeMove)
+    window.addEventListener('pointerup', this.handleNewNodeUp)
+    window.addEventListener('pointercancel', this.endNewNodeDrag)
+    window.addEventListener('keydown', this.handleNewNodeKey, true)
+  }
+
+  /** Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas. */
+  private dropPoint(clientX: number, clientY: number): FlowPoint | null {
+    const rect = this.stage?.getBoundingClientRect()
+    if (!rect || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null
+    return this.centred(this.toCanvas(clientX, clientY))
+  }
+
+  private handleNewNodeMove = (event: PointerEvent) => {
+    const drag = this.newNodeDrag
+    if (!drag || event.pointerId !== drag.pointerId) return
+    if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_THRESHOLD) return
+    drag.moved = true
+    event.preventDefault()
+    this.ghost = this.dropPoint(event.clientX, event.clientY)
+  }
+
+  private handleNewNodeUp = (event: PointerEvent) => {
+    const drag = this.newNodeDrag
+    if (!drag || event.pointerId !== drag.pointerId) return
+    const point = drag.moved ? this.dropPoint(event.clientX, event.clientY) : null
+    this.endNewNodeDrag()
+    if (point) this.requestNode(this.freeSpot(point), undefined, true)
+  }
+
+  private handleNewNodeKey = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !this.newNodeDrag) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.endNewNodeDrag()
+  }
+
+  private endNewNodeDrag = () => {
+    this.newNodeDrag = null
+    this.ghost = null
+    window.removeEventListener('pointermove', this.handleNewNodeMove)
+    window.removeEventListener('pointerup', this.handleNewNodeUp)
+    window.removeEventListener('pointercancel', this.endNewNodeDrag)
+    window.removeEventListener('keydown', this.handleNewNodeKey, true)
+  }
+
+  /** Pans the view, if needed, so node `id` is in sight with a margin; the zoom stays as it is. */
+  private reveal(id: string) {
+    const stage = this.stage
+    const p = this.positions.get(id)
+    if (!stage || !p) return
+    const size = this.sizeOf(id)
+    const shift = (start: number, length: number, room: number) => {
+      const end = start + length
+      // Too big to fit: show its start.
+      if (length > room - FIT_PADDING * 2 || start < FIT_PADDING) return FIT_PADDING - start
+      return end > room - FIT_PADDING ? room - FIT_PADDING - end : 0
+    }
+    const dx = shift(p.x * this.zoom + this.tx, size.width * this.zoom, stage.clientWidth)
+    const dy = shift(p.y * this.zoom + this.ty, size.height * this.zoom, stage.clientHeight)
+    if (!dx && !dy) return
+    this.tx += dx
+    this.ty += dy
+    this.viewTouched = true
   }
 
   /** Ends a connection: an edge to `target`, or a new connected node at `point` when there is no target. */
@@ -1133,14 +1265,14 @@ export class Flow extends LitElement {
     }
     if (plainKey(event, 'n')) {
       event.preventDefault()
-      this.requestNodeFromKeyboard(id)
+      this.requestNodeNearby(id, id !== null && id === this.selected)
       return true
     }
     if (id === null) {
       // The empty canvas, the only place that takes focus when there is no node.
       if (event.key !== 'Enter' || this.nodes.length) return false
       event.preventDefault()
-      this.requestNodeFromKeyboard(null)
+      this.requestNodeNearby(null, false)
       return true
     }
     if (event.key === 'F2' || (event.key === 'Enter' && id === this.selected && !event.shiftKey)) {
@@ -1603,6 +1735,7 @@ export class Flow extends LitElement {
       const fresh = this.nodes.filter((node) => !added.has(node.id))
       if (fresh.length === 1) {
         this.select(fresh[0].id)
+        this.reveal(fresh[0].id)
         void this.focusNode(fresh[0].id)
       }
     }
@@ -1883,6 +2016,15 @@ export class Flow extends LitElement {
     items[index].focus()
   }
 
+  private renderGhost(at: FlowPoint) {
+    const size = this.typicalSize()
+    return html`<div
+      class="ghost"
+      aria-hidden="true"
+      style=${`transform: translate(${at.x}px, ${at.y}px); width: ${size.width}px; height: ${size.height}px`}
+    ></div>`
+  }
+
   override render() {
     const direction = this.direction === 'TB' ? 'tb' : 'lr'
     const stageClasses = [
@@ -1915,6 +2057,7 @@ export class Flow extends LitElement {
           @pointerup=${this.handlePointerUp}
           @pointercancel=${this.handlePointerUp}
           @wheel=${this.handleWheel}
+          @scroll=${this.handleStageScroll}
           @keydown=${this.handleKeydown}
           @focusin=${this.handleFocusIn}
           @focusout=${this.handleFocusOut}
@@ -1926,6 +2069,7 @@ export class Flow extends LitElement {
               (node) => node.id,
               (node, index) => this.renderNodeElement(node, index),
             )}
+            ${this.ghost ? this.renderGhost(this.ghost) : nothing}
           </div>
           ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">Press N or Enter to add a node.</span>` : nothing}
         </div>
