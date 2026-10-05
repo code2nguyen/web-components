@@ -257,17 +257,22 @@ export class ColorConfig extends LitElement {
     </div>`
   }
 
+  /** The eye button: `handleToggle` remembers what it hides, a single colour or a whole `light-dark()` pair. */
+  private renderToggle() {
+    return html`<c2-icon-button
+      class="toggle"
+      aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
+      tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
+      @click=${this.handleToggle}
+    >
+      ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
+    </c2-icon-button>`
+  }
+
   private renderPair(halves: [string, string]) {
     return html`<div class="color-config">
       <div class="pair">${this.renderPairHalf(halves, 0)}${this.renderPairHalf(halves, 1)}</div>
-      <c2-icon-button
-        class="toggle"
-        aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
-        tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
-        @click=${() => (this.isHidden ? this.emit(this.hiddenColor, '') : this.emit(this.hiddenValue(), this._value))}
-      >
-        ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
-      </c2-icon-button>
+      ${this.renderToggle()}
     </div>`
   }
 
@@ -300,18 +305,7 @@ export class ColorConfig extends LitElement {
             : html`<c2-text-field class="raw" spellcheck="false" placeholder="unset" .value=${this._value} @input=${this.handleRawInput}></c2-text-field>`
         }
       </div>
-      ${
-        color
-          ? html`<c2-icon-button
-              class="toggle"
-              aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
-              tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
-              @click=${this.handleToggle}
-            >
-              ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
-            </c2-icon-button>`
-          : nothing
-      }
+      ${color ? this.renderToggle() : nothing}
     </div>`
   }
 }

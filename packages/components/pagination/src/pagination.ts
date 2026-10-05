@@ -523,10 +523,13 @@ export class Pagination extends LitElement {
     this.lastPressedNav = null
     const button = this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed}"]`)
     if (!button?.disabled) return
-    // Chromium blurs a focused button as it becomes disabled, so focus is already gone here; only a move the user
-    // made since (focus on another control) wins over the hand-off.
+    // Chromium blurs a focused button as it becomes disabled, so focus is already gone here (to the body). Focus that
+    // has moved anywhere else since, inside the pagination or out of it (a page-change handler focusing the results),
+    // wins over the hand-off.
     const active = this.shadowRoot?.activeElement
     if (active && active !== button) return
+    const outside = document.activeElement
+    if (outside && outside !== document.body && outside !== this) return
     this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed === 'previous' ? 'next' : 'previous'}"]`)?.focus()
   }
 

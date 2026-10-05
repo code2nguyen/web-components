@@ -4,8 +4,12 @@
  * eligible block, greys follow the `--c2-theme--*` tokens and a pale tint no theme role owns, plus the accent text on
  * it, becomes a `light-dark()` pair whose light half is the authored colour and whose dark half is a starting point to
  * tune. Blocks painting a strong colour, blocks designed dark and blocks over a translucent light surface are left as
- * written (see `themeExampleCss`). The registry applies the same transform to what it serves; this writes it back
- * into the MDX the site renders.
+ * written (see `themeExampleCss`). This writes the result into the MDX the site renders.
+ *
+ * The registry runs the same function over the CSS it serves with the default `neutrals: 'all'`, so a grey this
+ * script leaves as authored (outside a tinted block) still reaches agents as a theme token or an ink/paper mix. The
+ * difference is deliberate: the docs keep greys that were tuned by hand against the audit, while copied cards should
+ * follow whatever theme the receiving app sets. Tints and their text are paired the same way in both.
  *
  *   node scripts/theme-examples.ts           rewrite the MDX files in place
  *   node scripts/theme-examples.ts --check   fail, listing the files, when an example still has a colour it would theme
