@@ -260,8 +260,7 @@ test('restores a committed snapshot on a fresh element at every width range', as
         page.locator('#restored').evaluate((host) => {
           const tiles = [...host.shadowRoot!.querySelectorAll<HTMLElement>('.tile')]
           return tiles.map((tile) => {
-            const slot = tile.querySelector('slot')!.name
-            const item = [...host.children].find((child) => child.slot === slot)!
+            const item = tile.querySelector('slot')!.assignedElements()[0]
             return { id: item.getAttribute('item-id'), span: Number(getComputedStyle(tile).gridColumnEnd.replace('span ', '')) }
           })
         }),
@@ -463,6 +462,41 @@ test('adds no host attribute on connect, so server-rendered markup hydrates unch
   await scenario('editing')
   await expect(page.locator('c2-masonry-item')).not.toHaveCount(0)
   await expect(page.locator('c2-masonry')).not.toHaveAttribute('tabindex')
+})
+
+// React reported the `slot` the container used to write on each item as a hydration mismatch.
+test('places tiles without writing slot on its items, also after items change', async ({ page, scenario }) => {
+  await scenario('small')
+  const placed = () =>
+    page
+      .locator('c2-masonry')
+      .evaluate((host) =>
+        [...host.shadowRoot!.querySelectorAll('.tile')].map((tile) => tile.querySelector('slot')!.assignedElements()[0]?.getAttribute('item-id') ?? null),
+      )
+  await expect.poll(placed).toEqual(['tile-1', 'tile-2', 'tile-3'])
+  await page.locator('c2-masonry').evaluate((host) => {
+    const item = document.createElement('c2-masonry-item')
+    item.setAttribute('item-id', 'newest')
+    host.prepend(item)
+    host.querySelector('[item-id="tile-2"]')!.remove()
+  })
+  await expect.poll(placed).toEqual(['newest', 'tile-1', 'tile-3'])
+  await expect(page.locator('c2-masonry-item[slot]')).toHaveCount(0)
+})
+
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the container then falls back to writing `slot`.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, scenario }) => {
+  await scenario('empty')
+  await page
+    .locator('main')
+    .evaluate((main) =>
+      main.setHTMLUnsafe(
+        '<div style="width:800px"><c2-masonry id="ssr"><template shadowrootmode="open"></template><c2-masonry-item item-id="a">A</c2-masonry-item><c2-masonry-item item-id="b">B</c2-masonry-item></c2-masonry></div>',
+      ),
+    )
+  await expect(page.locator('#ssr c2-masonry-item[item-id="a"]')).toHaveAttribute('slot', 'masonry-tile-0')
+  await expect(page.locator('#ssr c2-masonry-item[item-id="b"]')).toBeVisible()
 })
 
 test('cancels a held gesture when the active tile disappears', async ({ page, scenario }) => {

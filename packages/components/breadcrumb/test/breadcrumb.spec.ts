@@ -33,3 +33,29 @@ test('adding a page moves automatic current-page state to the new last item', as
   await expect(page.getByRole('link', { name: 'New' })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
 })
+// React reported the `slot` the trail used to write on each item as a hydration mismatch.
+test('places items and the separator without writing slot on the items', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb><span slot="separator">/</span>${items}</c2-breadcrumb>`)
+  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
+  await expect(page.locator('c2-breadcrumb [part="separator"]').first()).toHaveText('/')
+  await expect(page.locator('c2-breadcrumb > c2-link-button[slot]')).toHaveCount(0)
+  // Replacing an item keeps the count, so only the assignment changes.
+  await page.locator('c2-breadcrumb').evaluate((el) => {
+    const next = document.createElement('c2-link-button')
+    next.setAttribute('href', '#shop')
+    next.textContent = 'Shop'
+    el.querySelector('[href="#products"]')!.replaceWith(next)
+  })
+  await expect(page.getByRole('link', { name: 'Shop' })).toBeVisible()
+  await expect(page.locator('c2-breadcrumb > c2-link-button[slot]')).toHaveCount(0)
+})
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the trail then falls back to writing `slot` on its items.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page
+    .locator('#mount')
+    .evaluate((mount, markup) => mount.setHTMLUnsafe(`<c2-breadcrumb><template shadowrootmode="open"></template>${markup}</c2-breadcrumb>`), items)
+  await expect(page.locator('c2-link-button[href="#home"]')).toHaveAttribute('slot', 'item-0')
+  await expect(page.getByRole('link', { name: 'Item', exact: true })).toBeVisible()
+})
