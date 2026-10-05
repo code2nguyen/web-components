@@ -2,6 +2,94 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.1",
+      "date": "2026-10-05",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["pagination"],
+              "text": "Read document focus only once it has left the pagination",
+              "hash": "49ae73e"
+            },
+            {
+              "scopes": ["pagination"],
+              "text": "Leave focus that a page-change handler moved elsewhere",
+              "hash": "6c1de80"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Keep the initial scroll for the render after hydration",
+              "hash": "f288de1"
+            },
+            {
+              "scopes": ["pagination"],
+              "text": "Keep keyboard focus when Next or Previous disables itself",
+              "hash": "7d9c9ca"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Match the server's empty frame while hydrating",
+              "hash": "e35b99e"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Readable over-limit count in both themes",
+              "hash": "4e5eaba"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Import isServer from lit so the bundle keeps it external",
+              "hash": "4ea7ea9"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Give the week-planner Dated week today header a dark-mode colour",
+              "hash": "c4e8d9d"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Pair the log-viewer border and icon-button danger fallback for dark mode",
+              "hash": "f8f2015"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Address review findings on the light-dark() gallery pairs",
+              "hash": "6ad6019"
+            },
+            {
+              "scopes": ["gallery"],
+              "text": "Give variant colours explicit light-dark() pairs",
+              "hash": "135a3f0"
+            },
+            {
+              "scopes": ["gallery"],
+              "text": "Theme tinted examples so they read in dark mode",
+              "hash": "9364ff5"
+            },
+            {
+              "scopes": ["gallery"],
+              "text": "Keep the autocomplete issue-jump card dark in both themes",
+              "hash": "8f8d84c"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Use the color-outline-variant token in the google-map gallery",
+              "hash": "29cc319"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.0",
       "date": "2026-10-04",
       "sections": [
