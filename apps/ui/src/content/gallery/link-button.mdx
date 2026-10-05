@@ -5,7 +5,7 @@ description: 'Ready-made looks for c2-link-button: text links, navigation items,
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { LinkButton } from '@c2n/link-button'
+import { LinkButton } from '@c2n/components/link-button'
 import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
 import { FeatherExternalLinkIcon as FeatherExternalLink } from '@c2n/feather-icons/icons/external-link.js'
 import { FeatherChevronRightIcon as FeatherChevronRight } from '@c2n/feather-icons/icons/chevron-right.js'
@@ -190,43 +190,6 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
   <c2-link-button class="sidebar-item" href="#"><c2-feather-bar-chart-2 slot="prefix-icon"></c2-feather-bar-chart-2>Analytics</c2-link-button>
   <c2-link-button class="sidebar-item" href="#"><c2-feather-users slot="prefix-icon"></c2-feather-users>Members</c2-link-button>
   <c2-link-button class="sidebar-item" href="#"><c2-feather-settings slot="prefix-icon"></c2-feather-settings>Settings</c2-link-button>
-</nav>
-```
-
-```html tag=MdxCodeBlock,label=Dark sidebar
-<style>
-  .dark-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    width: 200px;
-    padding: 6px;
-    border-radius: 10px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-  }
-  .dark-sidebar-item {
-    --c2-link-button__container--padding-left: 10px;
-    --c2-link-button__container--padding-right: 10px;
-    --c2-link-button__container--padding-top: 7px;
-    --c2-link-button__container--padding-bottom: 7px;
-    --c2-link-button__container--gap: 10px;
-    --c2-link-button__container--border-radius: 6px;
-    --c2-link-button__container--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-link-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-link-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-link-button__container__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-link-button__container__selected--font-weight: 500;
-  }
-  .dark-sidebar-item::part(link) {
-    justify-content: flex-start;
-  }
-</style>
-<nav class="dark-sidebar">
-  <c2-link-button class="dark-sidebar-item" href="#"><c2-feather-home slot="prefix-icon"></c2-feather-home>Home</c2-link-button>
-  <c2-link-button class="dark-sidebar-item" href="#" selected><c2-feather-bar-chart-2 slot="prefix-icon"></c2-feather-bar-chart-2>Analytics</c2-link-button>
-  <c2-link-button class="dark-sidebar-item" href="#"><c2-feather-users slot="prefix-icon"></c2-feather-users>Members</c2-link-button>
 </nav>
 ```
 

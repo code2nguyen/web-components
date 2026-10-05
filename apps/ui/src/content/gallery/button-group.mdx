@@ -1,9 +1,9 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { ButtonGroup } from '@c2n/button-group'
-import { Button } from '@c2n/button'
-import { IconButton } from '@c2n/icon-button'
+import { ButtonGroup } from '@c2n/components/button-group'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
 
 ## Presets
 
@@ -51,9 +51,9 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
   .wide-segmented {
     width: 360px;
     max-width: 100%;
-    --c2-button-group__indicator--background-color: #edf1fe;
-    --c2-button-group__indicator--border: 1px solid #c7d6ff;
-    --c2-button-group__segmented-item__selected--color: #0265dc;
+    --c2-button-group__indicator--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button-group__indicator--border: 1px solid light-dark(#c7d6ff, #11255f);
+    --c2-button-group__segmented-item__selected--color: var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <c2-button-group client:only="lit" class="wide-segmented" appearance="segmented" size="l" stretched value="month">
@@ -183,13 +183,13 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
     width: 300px;
     max-width: 100%;
     --c2-button-group__item--flex: 1 1 0;
-    --c2-button-group--border: 1px solid #d4d4d8;
-    --c2-button-group__divider--color: #d4d4d8;
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #3f3f46;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__selected--background-color: #edf1fe;
-    --c2-button__container__selected--color: #0265dc;
+    --c2-button-group--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button-group__divider--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__selected--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__selected--color: var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <c2-button-group client:only="lit" class="full" selection="single" value="no">
@@ -197,34 +197,6 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
   <c2-button value="no">No</c2-button>
   <c2-button value="maybe">Maybe</c2-button>
 </c2-button-group>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    display: inline-flex;
-    --c2-button-group--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button-group__divider--color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button__container--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-button__container__hover--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-button__container__selected--background-color: #5aa3ff;
-    --c2-button__container__selected--color: #032a5c;
-    --c2-button__container__selected--border: 1px solid #5aa3ff;
-    --c2-button__container__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-  }
-</style>
-<div class="dark">
-  <c2-button-group client:only="lit" selection="single" value="dark">
-    <c2-button value="light">Light</c2-button>
-    <c2-button value="dark">Dark</c2-button>
-    <c2-button value="system">System</c2-button>
-  </c2-button-group>
-</div>
 ```
 
 </GalleryGrid>

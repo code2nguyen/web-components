@@ -7,7 +7,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
 
-import { Upload } from '@c2n/upload'
+import { Upload } from '@c2n/components/upload'
 
 <UploadExamplesRuntime />
 
@@ -33,7 +33,7 @@ Each example has a simulated upload transport. Choose or drop local files to see
     --c2-upload__dropzone--border: 1px dashed #8b5cf6;
     --c2-upload__dropzone__drag--background: color-mix(in srgb, #7c3aed 12%, var(--c2-theme--color-surface, #ffffff));
     --c2-upload__dropzone__drag--border: 1px dashed #6d28d9;
-    --c2-upload__icon--color: #7c3aed;
+    --c2-upload__icon--color: light-dark(#7c3aed, #a78bfa);
     --c2-upload__action--color: color-mix(in srgb, #7c3aed 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
@@ -72,27 +72,6 @@ Each example has a simulated upload transport. Choose or drop local files to see
     <path d="M12 3v12M7 10l5 5 5-5"></path><path d="M5 21h14"></path>
   </svg>
   <span slot="action">Import CSV</span>
-</c2-upload>
-```
-
-```html tag=MdxCodeBlock,label=Dark workspace,description=Upload surface adapted to a permanently dark canvas,useWhen=The control lives in a dark editor or media workspace
-<style>
-  .dark-upload {
-    --c2-upload__dropzone--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-upload__dropzone--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-upload__dropzone__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-upload__dropzone__hover--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-upload__dropzone__drag--background: #172554;
-    --c2-upload__dropzone__drag--border: 1px dashed #60a5fa;
-    --c2-upload__prompt--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-upload__hint--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-upload__icon--color: #60a5fa;
-    --c2-upload__action--color: #93c5fd;
-  }
-</style>
-<c2-upload class="dark-upload" data-upload-demo multiple aria-label="Upload workspace assets">
-  <span slot="prompt">Drop workspace assets</span>
-  <span slot="hint">Files upload securely to this workspace</span>
 </c2-upload>
 ```
 

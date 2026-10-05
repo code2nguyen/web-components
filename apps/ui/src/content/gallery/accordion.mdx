@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Accordion } from '@c2n/accordion'
+import { Accordion } from '@c2n/components/accordion'
 
 ## Presets
 
@@ -108,13 +108,13 @@ One connected surface by default, with shared dividers and animated panels. The 
     width: 280px;
     max-width: 100%;
     --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: #bbf7d0;
+    --c2-accordion--border-color: light-dark(#bbf7d0, #11542b);
     --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__open--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-details__header__icon--color: #16a34a;
+    --c2-details__header__icon--color: light-dark(#16a34a, #85cca0);
     --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details__content--border-top: 1px solid #dcfce7;
+    --c2-details__content--border-top: 1px solid light-dark(#dcfce7, #134627);
     --c2-details__content--padding-top: 12px;
   }
   .multiple p {
@@ -295,37 +295,6 @@ One connected surface by default, with shared dividers and animated panels. The 
     <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
     <p>No. You only pay for the plan you choose.</p>
   </c2-details>
-</c2-accordion>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 280px;
-    max-width: 100%;
-    --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-accordion--border-radius: 10px;
-    --c2-details--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-details__header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-details__header__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details__header__open--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details__header__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-details__header__focus--outline: 2px solid rgba(96, 165, 250, 0.6);
-    --c2-details__content--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-details__content--padding-top: 12px;
-  }
-  .dark p {
-    margin: 0;
-    color: inherit;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-</style>
-<c2-accordion class="dark" client:only="lit">
-  <c2-details label="Keyboard shortcuts" expanded><p>Press ⌘K to open the command palette from anywhere.</p></c2-details>
-  <c2-details label="Appearance"><p>Follow the system theme or pick light and dark manually.</p></c2-details>
-  <c2-details label="Notifications"><p>Choose which events send an email or a push notification.</p></c2-details>
 </c2-accordion>
 ```
 

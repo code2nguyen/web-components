@@ -52,6 +52,19 @@ test('reaching the last page hands focus to the control that is still usable', a
   await expect(page.getByRole('button', { name: 'Previous' })).toBeFocused()
 })
 
+test('a page-change handler that moves focus out of the pagination keeps it there', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-pagination total-pages="2" page="1"></c2-pagination><button id="results">Results</button>')
+  await page.evaluate(() => {
+    const results = document.querySelector<HTMLButtonElement>('#results')!
+    document.querySelector('c2-pagination')!.addEventListener('page-change', () => results.focus())
+  })
+  const next = page.getByRole('button', { name: 'Next' })
+  await next.focus()
+  await page.keyboard.press('Enter')
+  await expect(next).toBeDisabled()
+  await expect(page.locator('#results')).toBeFocused()
+})
+
 test('the numbers around the current page collapse into an ellipsis', async ({ page, renderScenario }) => {
   await renderScenario('<c2-pagination total-pages="20" page="10"></c2-pagination>')
   const numbers = page.locator('c2-pagination').locator('button.c2-pagination-item')

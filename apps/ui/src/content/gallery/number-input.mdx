@@ -5,7 +5,7 @@ description: 'Ready-made numeric fields with default, compact and accounting tre
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { NumberInput } from '@c2n/number-input'
+import { NumberInput } from '@c2n/components/number-input'
 
 ## Presets
 
@@ -41,7 +41,8 @@ Use the public field, value, adornment and stepper variables to fit different da
     width: 220px;
     --c2-number-input--border-radius: 8px;
     --c2-number-input__adornment--color: color-mix(in srgb, #166534 65%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-number-input__stepper__hover--background: #dcfce7;
+    --c2-number-input__stepper__hover--background: light-dark(#dcfce7, #134627);
+    --c2-number-input__stepper__hover--color: light-dark(#166534, #bbf7d0);
     --c2-number-input__focus--border: 1px solid #16a34a;
     --c2-number-input__focus--outline: 2px solid rgba(22, 163, 74, 0.25);
   }

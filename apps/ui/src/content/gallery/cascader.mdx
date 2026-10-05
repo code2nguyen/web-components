@@ -5,7 +5,7 @@ description: 'Hierarchical pickers for locations, teams and catalogues, with cli
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Cascader } from '@c2n/cascader'
+import { Cascader } from '@c2n/components/cascader'
 
 ## Selection patterns
 
@@ -27,8 +27,8 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
     --c2-cascader__trigger--width: 260px;
     --c2-cascader__trigger--border-radius: 999px;
     --c2-cascader__trigger--padding: 8px 12px 8px 16px;
-    --c2-cascader__option__active--background: #f3e8ff;
-    --c2-cascader__option__selected--color: #7e22ce;
+    --c2-cascader__option__active--background: light-dark(#f3e8ff, #26153c);
+    --c2-cascader__option__selected--color: light-dark(#7e22ce, #a76cdc);
     --c2-cascader__trigger__open--border: 1px solid #9333ea;
     --c2-cascader__trigger__focus--outline: 2px solid rgba(147, 51, 234, 0.35);
   }
@@ -42,43 +42,12 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
 ></c2-cascader>
 ```
 
-```html tag=MdxCodeBlock,label=Dark catalogue
-<style>
-  .catalog-cascader {
-    --c2-cascader__trigger--width: 250px;
-    --c2-cascader__trigger--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-cascader__trigger--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-cascader__trigger--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__trigger__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__trigger__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__trigger__open--border: 1px solid #f59e0b;
-    --c2-cascader__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-cascader__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-cascader__panel--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-cascader__panel--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__column--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__option--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-cascader__option__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__option__active--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-cascader__option__active--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-cascader__option__selected--color: #fbbf24;
-  }
-</style>
-<c2-cascader
-  class="catalog-cascader"
-  aria-label="Choose a product category"
-  placeholder="Browse catalogue"
-  value="electronics;computers;laptops"
-  options='[{"value":"electronics","label":"Electronics","children":[{"value":"computers","label":"Computers","children":[{"value":"laptops","label":"Laptops"},{"value":"desktops","label":"Desktops"}]},{"value":"audio","label":"Audio","children":[{"value":"headphones","label":"Headphones"},{"value":"speakers","label":"Speakers"}]}]},{"value":"home","label":"Home","children":[{"value":"lighting","label":"Lighting"},{"value":"furniture","label":"Furniture"}]}]'
-></c2-cascader>
-```
-
 ```html tag=MdxCodeBlock,label=Choose any level
 <style>
   .level-cascader {
     --c2-cascader__trigger--width: 280px;
-    --c2-cascader__option__active--background: #ecfdf5;
-    --c2-cascader__option__selected--color: #047857;
+    --c2-cascader__option__active--background: light-dark(#ecfdf5, #153026);
+    --c2-cascader__option__selected--color: light-dark(#047857, #58a38e);
     --c2-cascader__trigger__open--border: 1px solid #10b981;
   }
 </style>

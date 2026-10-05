@@ -5,7 +5,7 @@ description: 'Ready-made looks for c2-split-panel: bare line, thick bar, accent 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { SplitPanel } from '@c2n/split-panel'
+import { SplitPanel } from '@c2n/components/split-panel'
 
 ## Presets
 
@@ -106,30 +106,6 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
   }
 </style>
 <c2-split-panel class="spg-cards">
-  <div slot="start">Start</div>
-  <div slot="end">End</div>
-</c2-split-panel>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .spg-dark {
-    height: 160px;
-    --c2-split-panel__divider--opacity: 1;
-    color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-split-panel__divider--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-split-panel__divider__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
-    --c2-split-panel__handle--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-split-panel__handle--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-split-panel__handle--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-split-panel__start--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-split-panel__end--background: var(--c2-theme--color-on-surface, #18181b);
-  }
-  .spg-dark [slot] {
-    padding: 12px;
-  }
-</style>
-<c2-split-panel class="spg-dark">
   <div slot="start">Start</div>
   <div slot="end">End</div>
 </c2-split-panel>

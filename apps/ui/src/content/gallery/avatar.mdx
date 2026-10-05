@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Avatar, AvatarGroup } from '@c2n/avatar'
+import { Avatar, AvatarGroup } from '@c2n/components/avatar'
 
 ## Presets
 
@@ -17,8 +17,8 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <style>
   .large-soft {
     --c2-avatar--size: 48px;
-    --c2-avatar--background: #ede9fe;
-    --c2-avatar--color: #5b21b6;
+    --c2-avatar--background: light-dark(#ede9fe, #1b1539);
+    --c2-avatar--color: light-dark(#5b21b6, #9875cf);
   }
 </style>
 <c2-avatar name="Elisa Jasmin" initial-count="2" class="large-soft" client:only="lit"></c2-avatar>

@@ -5,7 +5,7 @@ description: 'Ready-made looks for c2-navigation-menu: underline and pill bars, 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { NavigationMenu } from '@c2n/navigation-menu'
+import { NavigationMenu } from '@c2n/components/navigation-menu'
 
 ## Bar
 
@@ -98,44 +98,6 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
   }
 </style>
 <c2-navigation-menu class="no-indicator" aria-label="No indicator" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
-```
-
-```html tag=MdxCodeBlock,label=Dark header
-<style>
-  .dark {
-    --c2-navigation-menu--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-navigation-menu--padding-top: 6px;
-    --c2-navigation-menu--padding-right: 10px;
-    --c2-navigation-menu--padding-bottom: 6px;
-    --c2-navigation-menu--padding-left: 10px;
-    --c2-navigation-menu--border-top-left-radius: 10px;
-    --c2-navigation-menu--border-top-right-radius: 10px;
-    --c2-navigation-menu--border-bottom-left-radius: 10px;
-    --c2-navigation-menu--border-bottom-right-radius: 10px;
-    --c2-navigation-menu-item--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-navigation-menu-item__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-navigation-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__expanded--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-navigation-menu-item__expanded--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__current--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-navigation-menu-item__indicator--color: #a78bfa;
-    --c2-navigation-menu-item__panel--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-navigation-menu-item__panel--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__panel--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__panel--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__panel--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-item__panel--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --c2-navigation-menu-link--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-navigation-menu-link__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-navigation-menu-link__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-  .dark .stack {
-    display: grid;
-    gap: 2px;
-    width: 220px;
-  }
-</style>
-<c2-navigation-menu class="dark" aria-label="Dark" client:only="lit"><c2-navigation-menu-item value="platform">Platform<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Overview<span slot="description">What it does</span></c2-navigation-menu-link><c2-navigation-menu-link href="#b">Security<span slot="description">SOC 2 and SSO</span></c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="company" href="#company" current>Company</c2-navigation-menu-item></c2-navigation-menu>
 ```
 
 </GalleryGrid>

@@ -5,8 +5,8 @@ description: 'Ready-made looks for c2-command: the default palette, a floating �
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Command } from '@c2n/command'
-import { Kbd } from '@c2n/kbd'
+import { Command } from '@c2n/components/command'
+import { Kbd } from '@c2n/components/kbd'
 
 ## Presets
 
@@ -41,8 +41,8 @@ import { Kbd } from '@c2n/kbd'
     --c2-command-item--border-top-right-radius: 10px;
     --c2-command-item--border-bottom-left-radius: 10px;
     --c2-command-item--border-bottom-right-radius: 10px;
-    --c2-command-item__active--background: #eef4fd;
-    --c2-command-item__active--color: rgb(2, 101, 220);
+    --c2-command-item__active--background: light-dark(#eef4fd, #152033);
+    --c2-command-item__active--color: light-dark(rgb(2, 101, 220), #3f89e2);
   }
 </style>
 <c2-command class="floating" placeholder="Search or jump to…" client:only="lit"><c2-command-item value="new">New document<c2-kbd slot="shortcut">⌘N</c2-kbd></c2-command-item><c2-command-item value="open">Open recent<c2-kbd slot="shortcut">⌘O</c2-kbd></c2-command-item><c2-command-item value="share">Share<c2-kbd slot="shortcut">⌘⇧S</c2-kbd></c2-command-item><span slot="footer">↑↓ navigate · ↵ select · esc close</span></c2-command>
@@ -79,29 +79,6 @@ import { Kbd } from '@c2n/kbd'
   }
 </style>
 <c2-command class="compact" placeholder="Assign to…" client:only="lit"><c2-command-item value="ada">Ada Lovelace</c2-command-item><c2-command-item value="alan">Alan Turing</c2-command-item><c2-command-item value="grace">Grace Hopper</c2-command-item><c2-command-item value="linus">Linus Torvalds</c2-command-item><c2-command-item value="margaret">Margaret Hamilton</c2-command-item></c2-command>
-```
-
-```html tag=MdxCodeBlock,label=Midnight
-<style>
-  .midnight {
-    width: 100%;
-    --c2-command--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-command--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-command--border-top: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command--border-right: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command--border-left: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command__field--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command__placeholder--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-command__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-command-group__heading--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-command-separator--color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-command-item--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-command-item__active--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-command-item__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<c2-command class="midnight" client:only="lit"><c2-command-group heading="Project"><c2-command-item value="deploy">Deploy to production</c2-command-item><c2-command-item value="logs">View logs</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Account"><c2-command-item value="tokens">API tokens</c2-command-item><c2-command-item value="signout">Sign out</c2-command-item></c2-command-group></c2-command>
 ```
 
 </GalleryGrid>

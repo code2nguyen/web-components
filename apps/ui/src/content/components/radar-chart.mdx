@@ -10,9 +10,9 @@ apiTags: ['c2-radar-chart', 'c2-chart-series', 'c2-chart-legend']
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { RadarChart } from '@c2n/chart/radar-chart.js'
-import { ChartSeries } from '@c2n/chart/chart-series.js'
-import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { RadarChart } from '@c2n/components/chart/radar-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { ChartLegend } from '@c2n/components/chart/chart-legend'
 
 Radar charts compare profiles across a shared set of indicators. Each data row defines one indicator through
 `label-field`, while each `c2-chart-series` becomes a polygon drawn across those rows. Use a common `max` when

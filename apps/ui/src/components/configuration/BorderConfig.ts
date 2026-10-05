@@ -1,12 +1,12 @@
 import { LitElement, html, css } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 
-import '@c2n/text-field'
-import '@c2n/select'
-import '@c2n/list-item'
+import '@c2n/components/text-field'
+import '@c2n/components/select'
+import '@c2n/components/list-item'
 import './ColorConfig.ts'
-import type { TextField } from '@c2n/text-field'
-import type { SelectionChangeEventDetail } from '@c2n/list'
+import type { TextField } from '@c2n/components/text-field'
+import type { SelectionChangeEventDetail } from '@c2n/components/list'
 import { BORDER_STYLES, formatBorder, parseBorder, parseLength, type BorderValue } from '../../utils/css-value.ts'
 
 /**

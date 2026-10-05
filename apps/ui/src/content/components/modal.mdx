@@ -7,8 +7,8 @@ category: 'Feedback'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Modal } from '@c2n/modal'
-import { Button } from '@c2n/button'
+import { Modal } from '@c2n/components/modal'
+import { Button } from '@c2n/components/button'
 
 `c2-modal` wraps a native `<dialog>` opened with `showModal()`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. Open it with the `open` attribute or `show()`; close it with `close(returnValue)`, the built-in × button, a backdrop click or Escape, each of which `hide-close`, `no-backdrop-close` and `no-escape` can turn off. Put the heading in the `title` slot (it labels the dialog; use `label` when there is none), the content in the default slot (it scrolls past `--c2-modal--max-height`) and the actions in `footer`. `close` fires with `detail.returnValue`, `open` after showing. The page stops scrolling while a modal is open unless `no-scroll-lock` is set.
 

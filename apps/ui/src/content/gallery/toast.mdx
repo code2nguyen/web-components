@@ -5,7 +5,7 @@ description: 'Notification styles with custom SVGs, Feather icon components, act
 
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
-import { Toast } from '@c2n/toast'
+import { Toast } from '@c2n/components/toast'
 import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
 import { FeatherDownloadCloudIcon as FeatherDownloadCloud } from '@c2n/feather-icons/icons/download-cloud.js'
 import { FeatherWifiOffIcon as FeatherWifiOff } from '@c2n/feather-icons/icons/wifi-off.js'
@@ -29,25 +29,10 @@ import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
     width: 320px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__container--border: 1px solid #bbf7d0;
+    --c2-toast__container--border: 1px solid light-dark(#bbf7d0, #11542b);
   }
 </style>
 <c2-toast class="success" variant="success" heading="Payment received" message="Your receipt is ready to download."></c2-toast>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 320px;
-    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__icon__info--color: #93c5fd;
-    --c2-toast__close--color: var(--c2-theme--color-outline, #d4d4d8);
-    --c2-toast__close__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-<c2-toast class="dark" variant="info" dismissible heading="New notification" message="Your teammate shared a file."></c2-toast>
 ```
 
 ```html tag=MdxCodeBlock,label=Minimal
@@ -75,9 +60,9 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
   .celebration {
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__container--border: 1px solid #e9d5ff;
+    --c2-toast__container--border: 1px solid light-dark(#e9d5ff, #321257);
     --c2-toast__container--color: color-mix(in srgb, #9333ea 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__icon--color: #9333ea;
+    --c2-toast__icon--color: light-dark(#9333ea, #b06ded);
     --c2-toast__icon--size: 26px;
   }
 </style>
@@ -106,9 +91,9 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
   .download {
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__container--border: 1px solid #bfdbfe;
+    --c2-toast__container--border: 1px solid light-dark(#bfdbfe, #11325e);
     --c2-toast__container--color: color-mix(in srgb, #2563eb 60%, var(--c2-theme--color-on-surface, #18181b));
-    --c2-toast__icon--color: #2563eb;
+    --c2-toast__icon--color: light-dark(#2563eb, #789def);
     --c2-toast__icon--size: 28px;
     --c2-toast__action--color: color-mix(in srgb, #2563eb 75%, var(--c2-theme--color-on-surface, #18181b));
   }
@@ -122,11 +107,11 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .offline {
     width: 340px;
-    --c2-toast__container--background: #fffbeb;
+    --c2-toast__container--background: light-dark(#fffbeb, #352f18);
     --c2-toast__container--border: 1px solid #fde68a;
-    --c2-toast__container--color: #78350f;
-    --c2-toast__icon__warning--color: #b45309;
-    --c2-toast__action--color: #92400e;
+    --c2-toast__container--color: light-dark(#78350f, #b69582);
+    --c2-toast__icon__warning--color: light-dark(#b45309, #ca8b5c);
+    --c2-toast__action--color: light-dark(#92400e, #be9176);
   }
 </style>
 <c2-toast class="offline" variant="warning" heading="You are offline" message="Your changes will sync when you reconnect." action-label="Try again">
@@ -138,12 +123,12 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .security {
     width: 340px;
-    --c2-toast__container--background: #f0fdfa;
+    --c2-toast__container--background: light-dark(#f0fdfa, #15302c);
     --c2-toast__container--border: 1px solid #99f6e4;
-    --c2-toast__container--color: #134e4a;
-    --c2-toast__icon--color: #0f766e;
-    --c2-toast__close--color: #0f766e;
-    --c2-toast__close__hover--background: #ccfbf1;
+    --c2-toast__container--color: light-dark(#134e4a, #b0c2c2);
+    --c2-toast__icon--color: light-dark(#0f766e, #a4c8c6);
+    --c2-toast__close--color: light-dark(#0f766e, #a4c8c6);
+    --c2-toast__close__hover--background: light-dark(#ccfbf1, #11574a);
   }
   .close-icon { --c2-feather-icon--size: 20px; }
 </style>
@@ -172,32 +157,18 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 <c2-toast class="text-only" no-icon message="Your preferences have been updated."></c2-toast>
 ```
 
-```html tag=MdxCodeBlock,label=Dark snackbar
-<style>
-  .snackbar {
-    width: 320px;
-    --c2-toast__container--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-toast__container--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-toast__container--border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-toast__container--border-radius: 6px;
-    --c2-toast__action--color: #93c5fd;
-  }
-</style>
-<c2-toast class="snackbar" no-icon message="Conversation archived." action-label="Undo"></c2-toast>
-```
-
 ```html tag=MdxCodeBlock,label=Editorial
 <style>
   .editorial {
     width: 340px;
-    --c2-toast__container--background: #fff7ed;
-    --c2-toast__container--color: #7c2d12;
+    --c2-toast__container--background: light-dark(#fff7ed, #342618);
+    --c2-toast__container--color: light-dark(#7c2d12, #c4a49a);
     --c2-toast__container--border: 1px solid #fed7aa;
     --c2-toast__container--border-radius: 2px;
     --c2-toast__container--box-shadow: none;
     --c2-toast__container--padding: 18px 20px;
-    --c2-toast__close--color: #9a3412;
-    --c2-toast__close__hover--background: #ffedd5;
+    --c2-toast__close--color: light-dark(#9a3412, #d0a79a);
+    --c2-toast__close__hover--background: light-dark(#ffedd5, #553814);
   }
 </style>
 <c2-toast class="editorial" no-icon dismissible heading="A quick reminder" message="Your free trial ends in three days."></c2-toast>
@@ -224,26 +195,11 @@ These cards show static remaining-time previews. The manager animates the bar fr
 <style>
   .countdown {
     width: 340px;
-    --c2-toast__progress--color: #15803d;
-    --c2-toast__progress--background: #dcfce7;
+    --c2-toast__progress--color: light-dark(#15803d, #79b490);
+    --c2-toast__progress--background: light-dark(#dcfce7, #134627);
   }
 </style>
 <c2-toast class="countdown" variant="success" heading="Changes saved" message="This notification will close shortly." show-progress progress="0.65"></c2-toast>
-```
-
-```html tag=MdxCodeBlock,label=Dark countdown
-<style>
-  .dark-countdown {
-    width: 340px;
-    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__progress--height: 4px;
-    --c2-toast__progress--color: #a78bfa;
-    --c2-toast__progress--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-<c2-toast class="dark-countdown" no-icon heading="Export complete" message="Your download is ready." show-progress progress="0.35"></c2-toast>
 ```
 
 </GalleryGrid>

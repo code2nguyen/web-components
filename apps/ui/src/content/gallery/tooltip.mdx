@@ -5,7 +5,7 @@ description: 'Ready-made looks for c2-tooltip: dark and light bubbles, brand pil
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Tooltip } from '@c2n/tooltip'
+import { Tooltip } from '@c2n/components/tooltip'
 
 ## Presets
 
@@ -152,8 +152,8 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
 ```html tag=MdxCodeBlock,label=Warning
 <style>
   .warning {
-    --c2-tooltip--background-color: #fef3c7;
-    --c2-tooltip--color: #78350f;
+    --c2-tooltip--background-color: light-dark(#fef3c7, #5c4d13);
+    --c2-tooltip--color: light-dark(#78350f, #cfbbb0);
     --c2-tooltip--border: 1px solid #fcd34d;
     --c2-tooltip--box-shadow: none;
   }

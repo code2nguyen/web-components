@@ -7,8 +7,8 @@ category: 'Data display'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Table } from '@c2n/table'
-import { TableColumn } from '@c2n/table/table-column.js'
+import { Table } from '@c2n/components/table'
+import { TableColumn } from '@c2n/components/table/table-column'
 
 `c2-table` is one CSS grid: the header row and every body row are grid items using `grid-template-columns: subgrid`, so columns stay aligned without any scroll syncing, pinned columns are sticky cells instead of separate containers, and the whole body scrolls in a single viewport. Columns are declared either as `c2-table-column` children — definitions that render nothing themselves, the same way `c2-select` reads its `c2-list-item` children — or as a `columns` array of the same shape.
 

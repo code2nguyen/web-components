@@ -5,9 +5,9 @@ description: 'Real-world assistant, outgoing, research and agent message composi
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { ChatMessage } from '@c2n/chat-message'
-import { Avatar } from '@c2n/avatar'
-import { IconButton } from '@c2n/icon-button'
+import { ChatMessage } from '@c2n/components/chat-message'
+import { Avatar } from '@c2n/components/avatar'
+import { IconButton } from '@c2n/components/icon-button'
 import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
 import { FeatherCopyIcon as FeatherCopy } from '@c2n/feather-icons/icons/copy.js'
 import { FeatherRotateCcwIcon as FeatherRotateCcw } from '@c2n/feather-icons/icons/rotate-ccw.js'
@@ -170,7 +170,7 @@ Each card treats the message as part of a believable conversation. The examples 
     box-sizing: border-box;
     width: min(100%, 720px);
     padding: 30px;
-    border: 1px solid #e8e1d5;
+    border: 1px solid light-dark(#e8e1d5, #3a3329);
     border-radius: 24px;
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
     color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
@@ -224,79 +224,6 @@ Each card treats the message as part of a believable conversation. The examples 
         <a class="research-source" href="#source-2">2 · User interviews</a>
         <a class="research-source" href="#source-3">3 · Cohort analysis</a>
       </div>
-    </div>
-  </c2-chat-message>
-</section>
-```
-
-```html tag=MdxCodeBlock,label=Agent activity
-<style>
-  .agent-stage {
-    box-sizing: border-box;
-    width: min(100%, 720px);
-    padding: 28px;
-    border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    border-radius: 20px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-  .agent-message {
-    --c2-chat-message--gap: 11px;
-    --c2-chat-message--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    --c2-chat-message--font-size: 13px;
-    --c2-chat-message__message--max-width: 38rem;
-    --c2-chat-message__message--gap: 8px;
-    --c2-chat-message__message--padding-top: 12px;
-    --c2-chat-message__message--padding-right: 14px;
-    --c2-chat-message__message--padding-bottom: 12px;
-    --c2-chat-message__message--padding-left: 14px;
-    --c2-chat-message__message--border-top-left-radius: 10px;
-    --c2-chat-message__message--border-top-right-radius: 10px;
-    --c2-chat-message__message--border-bottom-left-radius: 10px;
-    --c2-chat-message__message--border-bottom-right-radius: 10px;
-    --c2-chat-message__message--border-top: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message__message--border-right: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message__message--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message__message--border-left: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message__message--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-chat-message__message--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-message__time--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-  .agent-status {
-    box-sizing: border-box;
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    margin-top: 2px;
-    border-radius: 9px;
-    background: #14532d;
-    color: #86efac;
-    --c2-feather-icon--size: 16px;
-  }
-  .agent-copy {
-    display: grid;
-    gap: 8px;
-  }
-  .agent-copy p {
-    margin: 0;
-    color: inherit;
-  }
-  .agent-copy .agent-command {
-    color: #86efac;
-  }
-</style>
-
-<section class="agent-stage">
-  <c2-chat-message class="agent-message" client:load>
-    <span class="agent-status" slot="avatar"><c2-feather-check></c2-feather-check></span>
-    <span slot="title">Codex</span>
-    <time slot="header-time">Completed in 8s</time>
-    <div class="agent-copy">
-      <p>Updated the message layout and regenerated its component manifest.</p>
-      <p class="agent-command">✓ 5 browser tests passed</p>
     </div>
   </c2-chat-message>
 </section>

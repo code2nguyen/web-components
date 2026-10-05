@@ -7,7 +7,7 @@ category: 'Navigation'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Breadcrumb } from '@c2n/breadcrumb'
+import { Breadcrumb } from '@c2n/components/breadcrumb'
 
 `c2-breadcrumb` shows where the user is in a hierarchy. Every child is one item: use `c2-link-button` with an `href` for the ancestors and either a link button or a plain element for the current page. The last item is marked as the current page automatically (`aria-current="page"`) and styled as text, and a separator is drawn between items, a chevron by default or the content of the `separator` slot. The trail always stays on one row: when it does not fit, items collapse behind an ellipsis in priority order (the current page always, then the first item, then the items closest to the current page), and `max-items` caps the visible count even when there is room. Clicking the ellipsis reveals every item. The whole trail sits in a `nav` landmark labelled "Breadcrumb" (override with `aria-label`).
 
@@ -30,9 +30,9 @@ Importing `@c2n/components/breadcrumb` also registers `c2-link-button`.
     --c2-breadcrumb__item--padding-bottom: 4px;
     --c2-breadcrumb__item--padding-left: 10px;
     --c2-breadcrumb__item--border-radius: 999px;
-    --c2-breadcrumb__item__hover--background-color: #f4f4f5;
-    --c2-breadcrumb__item__current--background-color: #edf1fe;
-    --c2-breadcrumb__item__current--color: #0265dc;
+    --c2-breadcrumb__item__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-breadcrumb__item__current--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-breadcrumb__item__current--color: var(--c2-theme--color-primary, #0265dc);
   }
   .home-icon {
     width: 16px;

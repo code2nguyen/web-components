@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Kbd } from '@c2n/kbd'
+import { Kbd } from '@c2n/components/kbd'
 
 ## Presets
 
@@ -23,18 +23,6 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
   }
 </style>
 <c2-kbd class="raised">Tab</c2-kbd>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    --c2-kbd--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-kbd--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-kbd--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-inverse-surface, #18181b);
-  }
-</style>
-<c2-kbd class="dark">⌘ + K</c2-kbd>
 ```
 
 ```html tag=MdxCodeBlock,label=Mechanical
@@ -60,9 +48,9 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
     --c2-kbd--height: 28px;
     --c2-kbd--border-radius: 999px;
     --c2-kbd--box-shadow: none;
-    --c2-kbd--background-color: #eef2ff;
-    --c2-kbd--color: #3730a3;
-    --c2-kbd--border: 1px solid #c7d2fe;
+    --c2-kbd--background-color: light-dark(#eef2ff, #151c36);
+    --c2-kbd--color: light-dark(#3730a3, #8c88c8);
+    --c2-kbd--border: 1px solid light-dark(#c7d2fe, #11205e);
   }
 </style>
 <c2-kbd class="round">?</c2-kbd>

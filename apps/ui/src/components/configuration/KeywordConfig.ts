@@ -1,9 +1,9 @@
 import { LitElement, html, css } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 
-import '@c2n/select'
-import '@c2n/list-item'
-import type { SelectionChangeEventDetail } from '@c2n/list'
+import '@c2n/components/select'
+import '@c2n/components/list-item'
+import type { SelectionChangeEventDetail } from '@c2n/components/list'
 
 /**
  * Select for a CSS property whose value is one of a fixed keyword set (`justify-content`, `text-transform`,

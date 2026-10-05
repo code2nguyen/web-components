@@ -1,12 +1,12 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Timeline, TimelineItem } from '@c2n/timeline'
-import { Badge } from '@c2n/badge'
-import { Accordion } from '@c2n/accordion'
-import { Avatar, AvatarGroup } from '@c2n/avatar'
-import { CopyButton } from '@c2n/copy-button'
-import { Kbd } from '@c2n/kbd'
+import { Timeline, TimelineItem } from '@c2n/components/timeline'
+import { Badge } from '@c2n/components/badge'
+import { Accordion } from '@c2n/components/accordion'
+import { Avatar, AvatarGroup } from '@c2n/components/avatar'
+import { CopyButton } from '@c2n/components/copy-button'
+import { Kbd } from '@c2n/components/kbd'
 
 ## Presets
 
@@ -160,7 +160,7 @@ headings, lists and code, styled by the page's own CSS.
     gap: 4px;
     margin: 0 0 16px;
     padding: 16px 18px;
-    border: 1px solid #dbe4ff;
+    border: 1px solid light-dark(#dbe4ff, #13214f);
     border-radius: 10px;
     background: linear-gradient(135deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)));
     font-size: 13px;
@@ -173,7 +173,7 @@ headings, lists and code, styled by the page's own CSS.
   .release-timeline .migration {
     margin: 0 0 16px;
     padding: 14px 16px;
-    border: 1px solid #fecaca;
+    border: 1px solid light-dark(#fecaca, #5c1113);
     border-radius: 10px;
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     font-size: 13px;

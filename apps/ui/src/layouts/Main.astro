@@ -5,9 +5,9 @@ import '@c2n/theme/base.css'
 import '../assets/global.scss'
 import SiteIconButton from '../components/ui/SiteIconButton.astro'
 import { FeatherGithubIcon, FeatherLayersIcon, FeatherSearchIcon } from '../components/ui/icons'
-import { Header } from '@c2n/header'
-import { LinkButton } from '@c2n/link-button'
-import { NavigationMenu } from '@c2n/navigation-menu'
+import { Header } from '@c2n/components/header'
+import { LinkButton } from '@c2n/components/link-button'
+import { NavigationMenu } from '@c2n/components/navigation-menu'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import SearchPalette from '../components/SearchPalette.astro'
 import { packageVersion } from '../data/package-release'
@@ -25,7 +25,7 @@ interface Props {
 }
 const {
   title,
-  description = 'A library of small, themable Lit web components published as one npm package, @c2n/components.',
+  description = '100+ web components and 700+ ready-made variants, built with AI and for AI: the building blocks your coding agent needs to ship any web app.',
   withSidebar,
   section,
 } = Astro.props

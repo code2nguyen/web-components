@@ -192,9 +192,9 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
 </style>
 
 <script>
-  import type { TextField } from '@c2n/text-field'
+  import type { TextField } from '@c2n/components/text-field'
 
-  import '@c2n/copy-button'
+  import '@c2n/components/copy-button'
 
   interface IconSearchEntry {
     id: 'feather-icons' | 'mat-icon' | 'phosphor-icons'
@@ -213,7 +213,7 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
 
   const loaders: Record<IconSearchEntry['id'], () => Promise<unknown>> = {
     'feather-icons': () => import('@c2n/feather-icons'),
-    'mat-icon': () => import('@c2n/mat-icon'),
+    'mat-icon': () => import('@c2n/components/mat-icon'),
     'phosphor-icons': () => import('@c2n/phosphor-icons'),
   }
   const loaded = new Map<IconSearchEntry['id'], Promise<unknown>>()

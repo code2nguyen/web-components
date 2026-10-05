@@ -3,7 +3,7 @@ import type { MarkdownHeading } from 'astro'
 import SiteSidebar from '../components/SiteSidebar.astro'
 import Toc from '../components/Toc.astro'
 import ViewTabs from '../components/ViewTabs.astro'
-import { SideNav } from '@c2n/side-nav'
+import { SideNav } from '@c2n/components/side-nav'
 
 interface Props {
   /** Id of the open component or icon set; also enables the Docs | Gallery | API tabs. */
@@ -244,7 +244,7 @@ const { componentId, currentId = componentId, section = 'components', headings =
 <script>
   import { installStudio } from '../utils/studio.ts'
 
-  import type { SideNav } from '@c2n/side-nav'
+  import type { SideNav } from '@c2n/components/side-nav'
 
   const docs = document.querySelector('.docs')
   const shell = document.querySelector<SideNav>('c2-side-nav.docs-shell')

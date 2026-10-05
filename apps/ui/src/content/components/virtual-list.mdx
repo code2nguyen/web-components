@@ -7,7 +7,7 @@ category: 'Data display'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { VirtualList } from '@c2n/virtual-list'
+import { VirtualList } from '@c2n/components/virtual-list'
 
 `c2-virtual-list` renders only the rows you can see. It windows `items` to the visible range plus an overscan margin with the same virtual scroller the data grid uses, so 50 000 rows cost the same DOM as twenty — and every visible row is a real `c2-list-item`, so the markup, slots, selection styling and theme are the ones you already know from `c2-list`.
 

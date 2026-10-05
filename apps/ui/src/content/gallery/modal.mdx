@@ -5,8 +5,8 @@ description: 'Ready-made looks for c2-modal: dividers, alerts, bottom sheets, to
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Modal } from '@c2n/modal'
-import { Button } from '@c2n/button'
+import { Modal } from '@c2n/components/modal'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -130,30 +130,6 @@ Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see 
 </style>
 <c2-button onclick="document.getElementById('mg-frosted').show()">Open</c2-button>
 <c2-modal id="mg-frosted" class="frosted">
-  <span slot="title">Invite your team</span>
-  <p>Share the link below with your teammates. They will be added with the Member role.</p>
-  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
-</c2-modal>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    --c2-modal--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-modal--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-modal--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-modal__body--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-modal__close--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-modal__close__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-modal__close__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-modal__backdrop--background: rgba(0, 0, 0, 0.7);
-  }
-  .dark p {
-    margin: 0;
-  }
-</style>
-<c2-button onclick="document.getElementById('mg-dark').show()">Open</c2-button>
-<c2-modal id="mg-dark" class="dark">
   <span slot="title">Invite your team</span>
   <p>Share the link below with your teammates. They will be added with the Member role.</p>
   <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>

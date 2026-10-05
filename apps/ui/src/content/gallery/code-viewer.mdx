@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { CodeViewer } from '@c2n/code-viewer'
+import { CodeViewer } from '@c2n/components/code-viewer'
 
 ## Presets
 
@@ -66,22 +66,6 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
 <c2-code-viewer style="width: 240px" class="highlighted" language="ts" theme="github-light-high-contrast" line-numbers highlight-lines="2" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
 ```
 
-```html tag=MdxCodeBlock,label=Dark pair
-<style>
-  .dark-pair {
-    --c2-code-viewer--border-top: none;
-    --c2-code-viewer--border-right: none;
-    --c2-code-viewer--border-bottom: none;
-    --c2-code-viewer--border-left: none;
-    --c2-code-viewer--border-top-left-radius: 10px;
-    --c2-code-viewer--border-top-right-radius: 10px;
-    --c2-code-viewer--border-bottom-left-radius: 10px;
-    --c2-code-viewer--border-bottom-right-radius: 10px;
-  }
-</style>
-<c2-code-viewer style="width: 240px" class="dark-pair" language="ts" theme="github-light" dark-theme="github-dark-default" color-scheme="dark" copyable code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
-```
-
 ```html tag=MdxCodeBlock,label=Diff
 <style>
   .diff {
@@ -108,17 +92,17 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--border-top-right-radius: 8px;
     --c2-code-viewer--border-bottom-left-radius: 8px;
     --c2-code-viewer--border-bottom-right-radius: 8px;
-    --c2-code-viewer__theme--background: #fdf6e3;
-    --c2-code-viewer__theme--foreground: #4a5c62;
-    --c2-code-viewer__theme--token-keyword: #5f6e00;
-    --c2-code-viewer__theme--token-function: #1a6aa3;
-    --c2-code-viewer__theme--token-string: #177069;
-    --c2-code-viewer__theme--token-string-expression: #177069;
-    --c2-code-viewer__theme--token-constant: #a83c0f;
-    --c2-code-viewer__theme--token-comment: #617070;
-    --c2-code-viewer__theme--token-parameter: #4a5c62;
-    --c2-code-viewer__theme--token-punctuation: #4a5c62;
-    --c2-code-viewer__theme--token-link: #1a6aa3;
+    --c2-code-viewer__theme--background: light-dark(#fdf6e3, #3d3216);
+    --c2-code-viewer__theme--foreground: light-dark(#4a5c62, #97a0a4);
+    --c2-code-viewer__theme--token-keyword: light-dark(#5f6e00, #9ba462);
+    --c2-code-viewer__theme--token-function: light-dark(#1a6aa3, #71a1c4);
+    --c2-code-viewer__theme--token-string: light-dark(#177069, #6fa5a1);
+    --c2-code-viewer__theme--token-string-expression: light-dark(#177069, #6fa5a1);
+    --c2-code-viewer__theme--token-constant: light-dark(#a83c0f, #ca8f77);
+    --c2-code-viewer__theme--token-comment: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-viewer__theme--token-parameter: light-dark(#4a5c62, #97a0a4);
+    --c2-code-viewer__theme--token-punctuation: light-dark(#4a5c62, #97a0a4);
+    --c2-code-viewer__theme--token-link: light-dark(#1a6aa3, #71a1c4);
   }
 </style>
 <c2-code-viewer style="width: 240px" class="solarized" language="ts" theme="css-variables" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>

@@ -1,5 +1,5 @@
-import type { MonthPlanner, MonthPlannerEvent } from '@c2n/month-planner'
-import type { WeekPlanner, WeekPlannerEvent } from '@c2n/week-planner'
+import type { MonthPlanner, MonthPlannerEvent } from '@c2n/components/month-planner'
+import type { WeekPlanner, WeekPlannerEvent } from '@c2n/components/week-planner'
 
 /**
  * Makes the editable planner examples live. `c2-month-planner[data-planner-demo="editable"]` and

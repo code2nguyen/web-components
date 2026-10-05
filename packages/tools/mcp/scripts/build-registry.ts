@@ -412,6 +412,8 @@ for (const dir of packageDirs.sort()) {
         const { css: authoredCss, html } = splitStyle(fence.body)
         const label = fence.meta.label ?? 'Example'
         const slug = exampleSlug(fence.section, label, slugs)
+        // Default `neutrals: 'all'`, unlike `theme-examples.ts`: a copied card follows the receiving app's theme, greys
+        // included, while the docs keep the greys that were tuned by hand.
         const themed = authoredCss ? themeExampleCss(authoredCss, themeData.tokens) : undefined
         if (themed) galleryColors.themed += themed.themed
         if (themed) galleryColors.literal += themed.literal

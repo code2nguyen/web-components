@@ -24,10 +24,10 @@ import SiteButton from './ui/SiteButton.astro'
 </section>
 
 <script>
-  import '@c2n/steps'
-  import '@c2n/log-viewer'
-  import type { StepNode, StepsSelectionChangeEventDetail } from '@c2n/steps'
-  import type { LogViewer } from '@c2n/log-viewer'
+  import '@c2n/components/steps'
+  import '@c2n/components/log-viewer'
+  import type { StepNode, StepsSelectionChangeEventDetail } from '@c2n/components/steps'
+  import type { LogViewer } from '@c2n/components/log-viewer'
 
   const LOG: [level: 'info' | 'warn', message: string][] = [
     ['info', 'Connecting to warehouse eu-west-1'],

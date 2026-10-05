@@ -1,4 +1,4 @@
-import type { LogViewer, LogEntry } from '@c2n/log-viewer'
+import type { LogViewer, LogEntry } from '@c2n/components/log-viewer'
 
 const accessRoutes = [
   'GET /health 200 2ms',

@@ -38,7 +38,7 @@ const studioCode = `<${studioTag}></${studioTag}>`
 <script>
   import { openIconInStudio } from '../utils/playground.ts'
 
-  import '@c2n/copy-button'
+  import '@c2n/components/copy-button'
   import '@c2n/feather-icons'
 </script>
 
@@ -130,7 +130,7 @@ const studioCode = `<${studioTag}></${studioTag}>`
 </style>
 
 <script>
-  import type { TextField } from '@c2n/text-field'
+  import type { TextField } from '@c2n/components/text-field'
 
   const filter = document.querySelector<TextField>('.feather-icon-gallery__filter')
   const items = Array.from(document.querySelectorAll<HTMLElement>('.feather-icon-gallery__item'))

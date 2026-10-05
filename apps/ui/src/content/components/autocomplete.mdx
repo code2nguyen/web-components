@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import AutocompleteExamplesRuntime from '../../components/AutocompleteExamplesRuntime.astro'
 
-import { Autocomplete } from '@c2n/autocomplete'
+import { Autocomplete } from '@c2n/components/autocomplete'
 
 `c2-autocomplete` filters a local `suggestions` array or asks an asynchronous `dataSource` for matches. Its overlay composes an optional header, a real `c2-list` of `c2-list-item` rows, and an optional footer. Like `c2-virtual-list`, the default renderer reads only `labelField` and optional `descriptionField`. Arbitrary objects use field mappings and `renderItem`; no group, icon, meta or type fields receive special treatment. The component keeps selection and keyboard accessibility around custom content, cancels stale server requests and returns the original selected item.
 
@@ -48,10 +48,10 @@ The examples below are real application patterns rather than visual variants. Th
   }
   .autocomplete-example [slot] button {
     flex: none;
-    border: 1px solid #ddd6fe;
+    border: 1px solid light-dark(#ddd6fe, #1d1254);
     border-radius: 999px;
     padding: 3px 10px;
-    color: #6d28d9;
+    color: light-dark(#6d28d9, #9c6fe3);
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     font: inherit;
     font-weight: 600;
@@ -59,7 +59,7 @@ The examples below are real application patterns rather than visual variants. Th
     cursor: pointer;
   }
   .autocomplete-example [slot] button:hover {
-    background: #ede9fe;
+    background: light-dark(#ede9fe, #1b1539);
   }
 </style>
 <div data-label="Mention teammate">

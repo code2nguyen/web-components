@@ -2,7 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 
-import { Dashboard } from '@c2n/dashboard'
+import { Dashboard } from '@c2n/components/dashboard'
 
 <ExampleModules />
 
@@ -190,42 +190,6 @@ markup inside the panes. The cards below move that surface onto the component it
   <c2-dash-card col="1" row="1"><span slot="header">Markets</span></c2-dash-card>
   <c2-dash-card col="2" row="1"><span slot="header">Positions</span></c2-dash-card>
   <c2-dash-card col="3" row="1"><span slot="header">Activity</span></c2-dash-card>
-</c2-dashboard>
-```
-
-```html tag=MdxCodeBlock,label=Terminal
-<style>
-  .terminal {
-    height: 220px;
-    --c2-dashboard--gap: 6px;
-    --c2-dashboard--padding: 6px;
-    --c2-dashboard--background: #09090b;
-    --c2-dashboard--border-radius: 6px;
-    --c2-dash-card--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-dash-card--border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-dash-card--border-radius: 4px;
-    --c2-dash-card__expanded--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-dash-card__header--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-dash-card__header--font-size: 12px;
-    --c2-dash-card__header--min-height: 28px;
-    --c2-dash-card__header--border-bottom: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-dash-card__control--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-dash-card__control__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-dash-card__control__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-dash-card__handle__hover--background: #22c55e;
-    --c2-dash-card__handle__active--background: #4ade80;
-  }
-</style>
-<c2-dashboard client:only="lit" class="terminal" columns="1fr 2fr" rows="1fr 1fr">
-  <c2-dash-card col="1" row="1" row-span="2" expand-full>
-    <span slot="header">processes</span>
-  </c2-dash-card>
-  <c2-dash-card col="2" row="1" expand-full>
-    <span slot="header">output</span>
-  </c2-dash-card>
-  <c2-dash-card col="2" row="2">
-    <span slot="header">logs</span>
-  </c2-dash-card>
 </c2-dashboard>
 ```
 

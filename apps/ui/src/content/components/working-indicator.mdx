@@ -7,7 +7,7 @@ category: 'Feedback'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { WorkingIndicator } from '@c2n/working-indicator'
+import { WorkingIndicator } from '@c2n/components/working-indicator'
 
 `c2-working-indicator` says that something is running right now, the way an agent shows "✻ Scheming… 12s". It is one line: an animated `indicator` (a cycling glyph, dots, a ring, a pulse or an orbit), a label that animates through its `effect` (`shimmer`, `wave`, `pulse` or `fill`), trailing dots from `ellipsis`, and an optional `elapsed` counter followed by the `meta` slot. Give it several `messages` and it rotates through them. When the work ends, set `state` to `done` or `error`: the animations stop, the indicator becomes a check or a cross, `done-label` replaces the text, and the line stays as a record. `paused` freezes the animations and the counter.
 

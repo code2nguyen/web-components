@@ -9,8 +9,8 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import '@fontsource/material-icons'
 
-import { IconButton } from '@c2n/icon-button'
-import { MatIcon } from '@c2n/mat-icon'
+import { IconButton } from '@c2n/components/icon-button'
+import { MatIcon } from '@c2n/components/mat-icon'
 import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
 import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
@@ -58,18 +58,18 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     --c2-icon-button__icon--height: 20px;
   }
   .soft {
-    --c2-icon-button--background-color: #dbeafe;
-    --c2-icon-button__hover--background-color: #bfdbfe;
-    --c2-icon-button__icon--color: #1d4ed8;
+    --c2-icon-button--background-color: light-dark(#dbeafe, #132b4d);
+    --c2-icon-button__hover--background-color: light-dark(#bfdbfe, #11325e);
+    --c2-icon-button__icon--color: light-dark(#1d4ed8, #7e99e5);
     --c2-icon-button--border-radius: 10px;
     --c2-icon-button__state-layer--size: 40px;
     --c2-icon-button__icon--width: 20px;
     --c2-icon-button__icon--height: 20px;
   }
   .danger {
-    --c2-icon-button--background-color: #fee2e2;
-    --c2-icon-button__hover--background-color: #fecaca;
-    --c2-icon-button__icon--color: #dc2626;
+    --c2-icon-button--background-color: light-dark(#fee2e2, #401416);
+    --c2-icon-button__hover--background-color: light-dark(#fecaca, #5c1113);
+    --c2-icon-button__icon--color: var(--c2-theme--color-error, light-dark(#dc2626, #f87171));
     --c2-icon-button--border-radius: 10px;
     --c2-icon-button__state-layer--size: 40px;
     --c2-icon-button__icon--width: 20px;

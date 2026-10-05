@@ -1,11 +1,11 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 
-import '@c2n/text-field'
-import '@c2n/icon-button'
+import '@c2n/components/text-field'
+import '@c2n/components/icon-button'
 import '@c2n/feather-icons/icons/link.js'
 import '@c2n/feather-icons/icons/link-2.js'
-import type { TextField } from '@c2n/text-field'
+import type { TextField } from '@c2n/components/text-field'
 import { collapseBoxShorthand, expandBoxShorthand, parseLength } from '../../utils/css-value.ts'
 
 type BoxKind = 'padding' | 'margin' | 'radius'

@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Radio, RadioGroup } from '@c2n/radio'
+import { Radio, RadioGroup } from '@c2n/components/radio'
 
 ## Presets
 
@@ -125,33 +125,6 @@ Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio t
 </c2-radio-group>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-radio-group__label--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-radio-group__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-radio__control--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-radio__control__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-radio__control__checked--background-color: #5aa3ff;
-    --c2-radio__control__checked__hover--background-color: #7bb6ff;
-    --c2-radio__dot--color: #032a5c;
-    --c2-radio__control__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-radio__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<c2-radio-group client:only="lit" class="dark" value="system">
-  <span slot="label">Appearance</span>
-  <span slot="description">Choose how the app looks.</span>
-  <c2-radio value="light">Light</c2-radio>
-  <c2-radio value="dark">Dark</c2-radio>
-  <c2-radio value="system">System</c2-radio>
-</c2-radio-group>
-```
-
 ```html tag=MdxCodeBlock,label=Compact list
 <style>
   .compact {
@@ -255,15 +228,15 @@ Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio t
     --c2-radio__container--padding-bottom: 6px;
     --c2-radio__container--padding-left: 12px;
     --c2-radio__container--border-radius: 6px;
-    --c2-radio__container__hover--background: #f4f4f5;
-    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__container__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-radio__container__checked--background: var(--c2-theme--color-primary-container, #edf1fe);
     --c2-radio__control--border: none;
     --c2-radio__control__hover--border: none;
     --c2-radio__state-layer--size: 20px;
     --c2-radio__icon--size: 16px;
-    --c2-radio__icon__checked--color: #0265dc;
+    --c2-radio__icon__checked--color: var(--c2-theme--color-primary, #0265dc);
     --c2-radio__label--font-size: 14px;
-    --c2-radio__label__checked--color: #0265dc;
+    --c2-radio__label__checked--color: var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <c2-radio-group client:only="lit" class="checklist" value="en" aria-label="Language">

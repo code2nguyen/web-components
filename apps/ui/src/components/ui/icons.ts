@@ -11,6 +11,7 @@ export { FeatherChevronDownIcon } from '@c2n/feather-icons/icons/chevron-down.js
 export { FeatherChevronRightIcon } from '@c2n/feather-icons/icons/chevron-right.js'
 export { FeatherCodeIcon } from '@c2n/feather-icons/icons/code.js'
 export { FeatherCopyIcon } from '@c2n/feather-icons/icons/copy.js'
+export { FeatherCpuIcon } from '@c2n/feather-icons/icons/cpu.js'
 export { FeatherExternalLinkIcon } from '@c2n/feather-icons/icons/external-link.js'
 export { FeatherFeatherIcon } from '@c2n/feather-icons/icons/feather.js'
 export { FeatherGithubIcon } from '@c2n/feather-icons/icons/github.js'

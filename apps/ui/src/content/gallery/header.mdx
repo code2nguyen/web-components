@@ -1,10 +1,10 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
-import { Header } from '@c2n/header'
-import { NavigationMenu } from '@c2n/navigation-menu'
-import { LinkButton } from '@c2n/link-button'
-import { Button } from '@c2n/button'
-import { IconButton } from '@c2n/icon-button'
+import { Header } from '@c2n/components/header'
+import { NavigationMenu } from '@c2n/components/navigation-menu'
+import { LinkButton } from '@c2n/components/link-button'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
 import { FeatherCommandIcon as FeatherCommand } from '@c2n/feather-icons/icons/command.js'
 import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
 import { FeatherGithubIcon as FeatherGithub } from '@c2n/feather-icons/icons/github.js'
@@ -68,64 +68,6 @@ Each example gets a full gallery row so the complete brand, navigation and actio
   <c2-link-button slot="actions" href="#docs">Docs</c2-link-button>
   <c2-icon-button class="compact-action" slot="actions" tooltip="Search" aria-label="Search"><c2-feather-search></c2-feather-search></c2-icon-button>
   <c2-button class="sign-in" slot="actions">Sign in</c2-button>
-</c2-header>
-```
-
-```html tag=MdxCodeBlock,label=Dark trading desk
-<style>
-  .trading-header {
-    width: 100%;
-    --c2-header--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-header--border-bottom: 1px solid rgba(34, 211, 238, 0.22);
-    --c2-header--box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
-  }
-  .trading-brand {
-    --c2-link-button__container--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-link-button__container--font-weight: 750;
-    --c2-link-button__container__hover--color: #67e8f9;
-    --c2-link-button__container__hover--text-decoration: none;
-  }
-  .trading-brand c2-feather-command { color: #22d3ee; }
-  .trading-header c2-navigation-menu-item {
-    --c2-navigation-menu-item--color: #94a3b8;
-    --c2-navigation-menu-item__hover--color: #f8fafc;
-    --c2-navigation-menu-item__hover--background: #111827;
-    --c2-navigation-menu-item__current--color: #67e8f9;
-    --c2-navigation-menu-item__indicator--color: #22d3ee;
-  }
-  .desk-link {
-    --c2-link-button__container--color: #94a3b8;
-    --c2-link-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-  }
-  .desk-search {
-    --c2-icon-button--background-color: #111827;
-    --c2-icon-button__hover--background-color: #1e293b;
-    --c2-icon-button__icon--color: #67e8f9;
-    --c2-icon-button__state-layer--size: 36px;
-    --c2-icon-button__icon--width: 18px;
-    --c2-icon-button__icon--height: 18px;
-  }
-  .desk-button {
-    --c2-button__container--background-color: #22d3ee;
-    --c2-button__container--color: #06202a;
-    --c2-button__container__hover--background-color: #67e8f9;
-    --c2-button__container--height: 36px;
-  }
-</style>
-<c2-header class="trading-header">
-  <c2-link-button class="trading-brand" slot="brand" href="#home">
-    <c2-feather-command slot="prefix-icon"></c2-feather-command>
-    Axiom Markets
-  </c2-link-button>
-  <c2-navigation-menu client:only="lit" aria-label="Trading desk">
-    <c2-navigation-menu-item value="terminal" href="#terminal" current>Terminal</c2-navigation-menu-item>
-    <c2-navigation-menu-item value="research" href="#research">Research</c2-navigation-menu-item>
-    <c2-navigation-menu-item value="pricing" href="#pricing">Pricing</c2-navigation-menu-item>
-  </c2-navigation-menu>
-  <c2-link-button class="desk-link" slot="actions" href="#status">Systems operational</c2-link-button>
-  <c2-icon-button class="desk-search" slot="actions" tooltip="Search markets" aria-label="Search markets"><c2-feather-search></c2-feather-search></c2-icon-button>
-  <c2-button class="desk-button" slot="actions">Open terminal</c2-button>
 </c2-header>
 ```
 

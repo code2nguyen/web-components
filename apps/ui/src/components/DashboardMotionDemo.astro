@@ -30,7 +30,7 @@ const code = `<c2-button class="motion-add">Add pane</c2-button>
 ${grid}
 
 <script type="module">
-  import '@c2n/dashboard'
+  import '@c2n/components/dashboard'
 
   const grid = document.querySelector('c2-dashboard')
   const names = ['Positions', 'News', 'Alerts', 'Watchlist', 'Price', 'Orders']
@@ -68,10 +68,10 @@ ${grid}
 </MdxCodeBlock>
 
 <script>
-  import '@c2n/dashboard'
-  import '@c2n/icon-button'
-  import type { Dashboard } from '@c2n/dashboard'
-  import type { DashCard } from '@c2n/dashboard/dash-card.js'
+  import '@c2n/components/dashboard'
+  import '@c2n/components/icon-button'
+  import type { Dashboard } from '@c2n/components/dashboard'
+  import type { DashCard } from '@c2n/components/dashboard/dash-card'
 
   const NAMES = ['Positions', 'News', 'Alerts', 'Watchlist', 'Price', 'Orders']
   const CLOSE_ICON =

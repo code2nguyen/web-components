@@ -7,8 +7,8 @@ category: 'Navigation'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Command } from '@c2n/command'
-import { Kbd } from '@c2n/kbd'
+import { Command } from '@c2n/components/command'
+import { Kbd } from '@c2n/components/kbd'
 
 `c2-command` is a search field above a list of `c2-command-item` rows, optionally sorted into `c2-command-group`s with a `heading` and divided by `c2-command-separator`s. Typing filters the rows: a row matches when every word of the query appears in its label, its `value` or its `keywords` (synonyms that are not shown). Groups left without a match disappear with their heading, separators hide while a query is typed, and the `empty` slot replaces the list when nothing matches.
 

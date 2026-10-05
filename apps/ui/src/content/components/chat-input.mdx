@@ -7,7 +7,7 @@ category: 'Chat'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { ChatInput } from '@c2n/chat-input'
+import { ChatInput } from '@c2n/components/chat-input'
 import { FeatherArrowUpIcon as FeatherArrowUp } from '@c2n/feather-icons/icons/arrow-up.js'
 
 `c2-chat-input` grows with its message until it reaches the configured maximum height. Enter fires `submit-message`; Shift+Enter or Alt+Enter inserts a newline. Empty messages are ignored, and canceling the event keeps the draft in place. The component also participates in forms through `name`, validation constraints, fieldset disabling and form reset.

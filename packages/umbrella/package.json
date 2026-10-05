@@ -25,7 +25,9 @@
   "scripts": {
     "build": "wireit",
     "type-check": "wireit",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "size": "wireit",
+    "size:update": "npm run build && node scripts/check-size.ts --update"
   },
   "wireit": {
     "build": {
@@ -48,6 +50,17 @@
         "build"
       ],
       "command": "node scripts/type-check.ts"
+    },
+    "size": {
+      "dependencies": [
+        "build"
+      ],
+      "command": "node scripts/check-size.ts",
+      "files": [
+        "scripts/check-size.ts",
+        "size-budget.json"
+      ],
+      "output": []
     }
   },
   "exports": {

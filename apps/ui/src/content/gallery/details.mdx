@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Details } from '@c2n/details'
+import { Details } from '@c2n/components/details'
 
 ## Presets
 
@@ -136,36 +136,6 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
 </c2-details>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .g p {
-    margin: 0;
-    color: inherit;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-  .dark {
-    --c2-details--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-details--border-top: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details--border-right: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details--border-bottom: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details--border-left: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details--border-top-left-radius: 10px;
-    --c2-details--border-top-right-radius: 10px;
-    --c2-details--border-bottom-left-radius: 10px;
-    --c2-details--border-bottom-right-radius: 10px;
-    --c2-details__header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-details__header__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-details__header__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-details__content--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<c2-details style="width: 240px" class="g dark" expanded>
-  <span slot="title">Shipping</span>
-  <p>Delivered in 3–5 business days. Free over $50.</p>
-</c2-details>
-```
-
 ```html tag=MdxCodeBlock,label=Description row
 <style>
   .g p {
@@ -241,8 +211,8 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__open--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details__header__icon--color: #16a34a;
-    --c2-details__content--border-top: 1px solid #dcfce7;
+    --c2-details__header__icon--color: light-dark(#16a34a, #59bb7d);
+    --c2-details__content--border-top: 1px solid light-dark(#dcfce7, #134627);
     --c2-details__content--padding-top: 12px;
   }
 </style>

@@ -5,7 +5,7 @@ description: 'Todo lists on paper, mint and night backgrounds, with highlighters
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { TodoList } from '@c2n/todo-list'
+import { TodoList } from '@c2n/components/todo-list'
 
 ## Looks
 
@@ -74,39 +74,6 @@ customize panel applies the same kinds of values for the viewer.
   heading="Launch"
   icon="rocket"
   tasks='[{"label":"Ship the v2.0 build","highlight":"pink","due":"Today","urgent":true},{"label":"Press release","highlight":"yellow","due":"Wed"},{"label":"Update the pricing page","done":true},{"label":"Thank the beta testers","ink":"violet"},{"label":"Plan the retro","ink":"green"}]'
-></c2-todo-list>
-```
-
-```html tag=MdxCodeBlock,label=Night sprint
-<style>
-  .todo-night {
-    width: 100%;
-    max-width: 400px;
-    --c2-todo-list__container--background-color: #1a1a1f;
-    --c2-todo-list__container--color: #f1f0ee;
-    --c2-todo-list__container--border: 1px solid #2e2e35;
-    --c2-todo-list__container--box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-    --c2-todo-list__meta--color: #a3a0a8;
-    --c2-todo-list__label__done--color: #a3a0a8;
-    --c2-todo-list__mark--color: #a3a0a8;
-    --c2-todo-list__track--color: #2e2e35;
-    --c2-todo-list__chip--background-color: #26262c;
-    --c2-todo-list__row__divider--color: #2e2e35;
-    --c2-todo-list__row__hover--background-color: #26262c;
-    --c2-todo-list__add--border-color: #2e2e35;
-    --c2-todo-list__accent--color: #6ee7b7;
-    --c2-todo-list__on-accent--color: #0b1220;
-    --c2-todo-list__dropped--color: #ff8a80;
-    --c2-todo-list__pen-red--color: #ff8a80;
-    --c2-todo-list__pen-blue--color: #7fb0ff;
-    --c2-todo-list__pen-violet--color: #c4b5fd;
-  }
-</style>
-<c2-todo-list
-  class="todo-night"
-  heading="Sprint 14"
-  icon="code"
-  tasks='[{"label":"Auth token refresh","done":true},{"label":"Flaky upload test","icon":"bug","done":true},{"label":"Release notes","icon":"news","due":"Thu"},{"label":"Retro agenda","ink":"violet","due":"Fri"},{"label":"Migrate the old cron jobs","dropped":true}]'
 ></c2-todo-list>
 ```
 

@@ -7,9 +7,9 @@ category: 'Navigation'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { SideNav } from '@c2n/side-nav'
-import { List } from '@c2n/list'
-import { ListItem } from '@c2n/list-item'
+import { SideNav } from '@c2n/components/side-nav'
+import { List } from '@c2n/components/list'
+import { ListItem } from '@c2n/components/list-item'
 
 `c2-side-nav` is an app-shell layout: the drawer goes in the `side-nav-content` slot, the page in the default slot, and both stretch to the host's height. It has two display modes. In **side** mode the drawer is part of the layout: it collapses to `--c2-side-nav__close--width` (0 by default, or a rail) and pushes the content. In **over** mode it leaves the flow, slides over the content with a backdrop, locks page scrolling, behaves as a dialog for assistive technology and closes on Escape or a click outside. Phones (under 600px) always use over mode; `tablet-mode` (600 to 959px, `over` by default) and `desktop-mode` (960px and up, `side` by default) choose the mode for the larger breakpoints. When the viewport crosses a breakpoint the drawer closes or reopens by itself and remembers your choice; on phones the initial `opened` is ignored so the overlay never covers the page on load.
 

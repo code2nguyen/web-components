@@ -5,8 +5,8 @@ description: 'Ready-made looks for c2-text-field: box styles, five sizes, states
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { TextField } from '@c2n/text-field'
-import { Label } from '@c2n/label'
+import { TextField } from '@c2n/components/text-field'
+import { Label } from '@c2n/components/label'
 import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
 import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
 import { FeatherLockIcon as FeatherLock } from '@c2n/feather-icons/icons/lock.js'
@@ -103,40 +103,14 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
 <c2-text-field placeholder="Your email" class="pill"></c2-text-field>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 220px;
-    --c2-text-field--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-text-field--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__hover--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__hover--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__hover--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__hover--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-text-field__focus--border-top: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field__focus--border-right: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field__focus--border-bottom: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field__focus--border-left: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-text-field__focus--outline: 3px solid rgba(244, 244, 245, 0.15);
-  }
-</style>
-<c2-text-field placeholder="Your email" class="dark"><c2-feather-mail slot="prefix-icon"></c2-feather-mail></c2-text-field>
-```
-
 ```html tag=MdxCodeBlock,label=Brand ring
 <style>
   .brand-ring {
     width: 220px;
-    --c2-text-field--border-top: 1px solid #ddd6fe;
-    --c2-text-field--border-right: 1px solid #ddd6fe;
-    --c2-text-field--border-bottom: 1px solid #ddd6fe;
-    --c2-text-field--border-left: 1px solid #ddd6fe;
+    --c2-text-field--border-top: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-right: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-bottom: 1px solid light-dark(#ddd6fe, #1d1254);
+    --c2-text-field--border-left: 1px solid light-dark(#ddd6fe, #1d1254);
     --c2-text-field__hover--border-top: 1px solid #a78bfa;
     --c2-text-field__hover--border-right: 1px solid #a78bfa;
     --c2-text-field__hover--border-bottom: 1px solid #a78bfa;
@@ -146,7 +120,7 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
     --c2-text-field__focus--border-bottom: 1px solid #7c3aed;
     --c2-text-field__focus--border-left: 1px solid #7c3aed;
     --c2-text-field__focus--outline: 3px solid rgba(124, 58, 237, 0.2);
-    --c2-text-field__icon--color: #7c3aed;
+    --c2-text-field__icon--color: light-dark(#7c3aed, #a072ef);
   }
 </style>
 <c2-text-field placeholder="Your email" class="brand-ring"></c2-text-field>

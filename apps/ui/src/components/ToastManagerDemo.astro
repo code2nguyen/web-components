@@ -1,7 +1,7 @@
 ---
-import { ToastRegion } from '@c2n/toast'
-import { Checkbox } from '@c2n/checkbox'
-import '@c2n/label'
+import { ToastRegion } from '@c2n/components/toast'
+import { Checkbox } from '@c2n/components/checkbox'
+import '@c2n/components/label'
 import SiteButton from './ui/SiteButton.astro'
 import SiteSelect from './ui/SiteSelect.astro'
 
@@ -66,9 +66,9 @@ const speedOptions = [
 </section>
 
 <script>
-  import type { ToastRegion, ToastAnimation } from '@c2n/toast'
-  import type { Select } from '@c2n/select'
-  import type { Checkbox } from '@c2n/checkbox'
+  import type { ToastRegion, ToastAnimation } from '@c2n/components/toast'
+  import type { Select } from '@c2n/components/select'
+  import type { Checkbox } from '@c2n/components/checkbox'
 
   // Astro islands own the runtime import. A second script import can use a different HMR URL.
   await customElements.whenDefined('c2-toast-region')

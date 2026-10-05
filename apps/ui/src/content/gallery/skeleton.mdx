@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Skeleton } from '@c2n/skeleton'
+import { Skeleton } from '@c2n/components/skeleton'
 
 ## Presets
 
@@ -102,20 +102,6 @@ Curated looks for `c2-skeleton`. Open any card in the studio to start from it. M
   <c2-skeleton variant="circle"></c2-skeleton>
   <c2-skeleton variant="text" lines="2"></c2-skeleton>
 </div>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 100%;
-    padding: 20px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-skeleton--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);
-  }
-</style>
-<div class="dark"><c2-skeleton variant="text" lines="3" animation="wave"></c2-skeleton></div>
 ```
 
 </GalleryGrid>

@@ -7,8 +7,8 @@ category: 'Navigation'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { NavigationMenu } from '@c2n/navigation-menu'
-import { Button } from '@c2n/button'
+import { NavigationMenu } from '@c2n/components/navigation-menu'
+import { Button } from '@c2n/components/button'
 
 `c2-navigation-menu` is the bar at the top of a site. Each `c2-navigation-menu-item` child is either a plain link (`href`) or, as soon as anything is slotted into its `panel`, a trigger that opens that content below the bar — a stack of `c2-navigation-menu-link` rows, a multi-column mega panel, or any markup you lay out yourself. Mark the entry of the page being shown `current` to get `aria-current="page"` and the indicator line.
 
