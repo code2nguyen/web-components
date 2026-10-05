@@ -1,13 +1,15 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyDeclaration, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { entryColumns, matchesFilter, validateEntries, validateFilter } from './log-model.js'
+import { columnOrder, matchesFilter, validateEntries, validateFilter } from './log-model.js'
 import type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
 import { LineIndex, textLayout, type TextLayout } from './log-position.js'
 import { LogTokenLines } from './log-tokens.js'
 import styles from './log-viewer.scss?inline'
 
 export type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
+
+const FRAME_INTERVAL = 16
 interface LayoutEntry {
   source: number
   highlighted: boolean
@@ -84,13 +86,16 @@ export class LogViewer extends LitElement {
   private layout: LayoutEntry[] = []
   private index = new LineIndex()
   private keys: string[] = ['message']
+  private discoveredKeys = new Set<string>()
   private widths: number[] = [240]
   private attributeWidths = new Map<string, number>()
   private lineHeight = 21.45
   private textWidth = 240
   private inset = 12
   private extent = 240
+  private widestLine = 0
   private viewTop = 0
+  private viewLeft = 0
   private viewportHeight = 480
   private observer?: ResizeObserver
   private frame = 0
@@ -100,9 +105,14 @@ export class LogViewer extends LitElement {
   private signature = ''
   private resetAnchor = false
   private follow = true
+  private appended = false
+  private deferred = false
+  private lastUpdate = -Infinity
+  private flush?: () => void
   private canvas?: CanvasRenderingContext2D | null
   private font = ''
   private measurements = new Map<string, number>()
+  private lineWidths = new WeakMap<LogEntry, { text: string; widths: number[] }>()
   private tokenLines = new WeakMap<TextLayout, LogTokenLines>()
   private copiedSource: number | null = null
   private hoveredSource: number | null = null
@@ -123,12 +133,15 @@ export class LogViewer extends LitElement {
   appendEntries(input: LogEntry | readonly LogEntry[]): void {
     const batch = validateEntries(input)
     if (!batch.length) return
-    const viewport = this.viewport
-    if (viewport) this.viewTop = viewport.scrollTop
-    this.follow = !viewport || viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
-    this.entries = this.entries.concat(batch)
+    // Scroll position and tail following are read once per frame in willUpdate; reading layout here would force it per append.
+    for (const entry of batch) {
+      this.entries.push(entry)
+      for (const key in entry) this.discoveredKeys.add(key)
+    }
+    this.appended = true
     this.needsLayout = true
-    this.requestUpdate()
+    if (!this.isUpdatePending) this.deferred = this.hasUpdated
+    super.requestUpdate()
   }
 
   /** Replace criteria; filter hides nonmatches, highlight marks matches while keeping every entry visible. null clears criteria. */
@@ -150,11 +163,12 @@ export class LogViewer extends LitElement {
   /** Clear retained entries; the current filter remains active. */
   clear(): void {
     this.entries = []
+    this.discoveredKeys.clear()
     this.copyVersion++
     this.copiedSource = null
     this.copyStatus = ''
     clearTimeout(this.copyTimer)
-    this.measurements.clear()
+    // Text widths depend on the font, not the entries: an application that replaces its whole snapshot reuses them.
     this.rebuild = true
     this.resetAnchor = true
     this.viewTop = 0
@@ -184,6 +198,8 @@ export class LogViewer extends LitElement {
     this.observer?.disconnect()
     cancelAnimationFrame(this.frame)
     this.frame = 0
+    // Render a waiting append now rather than from a timer firing after removal; cancelling would leave Lit's update pending.
+    this.flush?.()
     clearTimeout(this.copyTimer)
     this.copyVersion++
     this.copiedSource = null
@@ -208,6 +224,7 @@ export class LogViewer extends LitElement {
   private reflow(): void {
     // A loaded font can change glyph widths without changing its CSS font name.
     this.measurements.clear()
+    this.lineWidths = new WeakMap()
     this.rebuild = true
     this.needsLayout = true
     this.requestUpdate()
@@ -216,10 +233,12 @@ export class LogViewer extends LitElement {
   protected override willUpdate(changes: PropertyValues): void {
     // Scroll events can arrive after a resize/update. Capture user movement before reflow anchors or tail following.
     const viewport = this.viewport
-    if (this.hasUpdated && viewport && Math.abs(viewport.scrollTop - this.viewTop) > 0.5) {
+    // An append while resting at the bottom resumes following, as does any user movement that ends there.
+    if (this.hasUpdated && viewport && (Math.abs(viewport.scrollTop - this.viewTop) > 0.5 || (this.appended && !this.follow))) {
       this.viewTop = viewport.scrollTop
       this.follow = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
     }
+    this.appended = false
     if (changes.has('wrap') || changes.has('tabular') || changes.has('columns')) {
       this.needsLayout = true
       this.rebuild = true
@@ -231,13 +250,33 @@ export class LogViewer extends LitElement {
         : Math.max(0, Math.min(this.viewTop, this.index.total - this.viewport!.clientHeight))
   }
 
+  // Live streams make most measured lines unique; bound the cache instead of retaining every line ever measured.
   private measure = (text: string): number => {
     let width = this.measurements.get(text)
     if (width === undefined) {
+      if (this.measurements.size >= 50000) this.measurements.clear()
       width = this.canvas!.measureText(text).width
       this.measurements.set(text, width)
     }
     return width
+  }
+
+  /** Natural widths of an entry's primary text lines, kept while the font and the text stay the same. */
+  private widthsFor(entry: LogEntry, text: string): number[] {
+    let cached = this.lineWidths.get(entry)
+    if (!cached || cached.text !== text) {
+      cached = { text, widths: [] }
+      this.lineWidths.set(entry, cached)
+    }
+    return cached.widths
+  }
+
+  private plainLayout(entry: LogEntry): TextLayout {
+    const text = this.keys
+      .map((key) => (Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : ''))
+      .filter(Boolean)
+      .join(' ')
+    return textLayout(text, this.textWidth, this.measure, this.wrap, this.widthsFor(entry, text))
   }
 
   private buildLayout(): void {
@@ -249,6 +288,7 @@ export class LogViewer extends LitElement {
     if (font !== this.font) {
       this.font = font
       this.measurements.clear()
+      this.lineWidths = new WeakMap()
     }
     this.canvas!.font = font
     const anchorIndex = this.index.at(this.viewTop)
@@ -262,7 +302,7 @@ export class LogViewer extends LitElement {
     const cellStyle = getComputedStyle(probe.querySelector('.cell-probe')!)
     const horizontalPadding = parseFloat(cellStyle.paddingLeft) + parseFloat(cellStyle.paddingRight)
     const verticalPadding = parseFloat(cellStyle.paddingTop) + parseFloat(cellStyle.paddingBottom)
-    this.keys = this.columns.length ? [...new Set(this.columns)] : entryColumns(this.entries)
+    this.keys = this.columns.length ? [...new Set(this.columns)] : columnOrder(this.discoveredKeys)
     const messageWidth = probe.querySelector<HTMLElement>('.message-probe')!.getBoundingClientRect().width
     if (this.rebuild) this.attributeWidths.clear()
     if (this.tabular) {
@@ -283,14 +323,24 @@ export class LogViewer extends LitElement {
     this.widths = this.keys.map((key) =>
       key === 'message' ? Math.max(messageWidth, viewport.clientWidth - attributesWidth) : (this.attributeWidths.get(key) ?? horizontalPadding),
     )
-    const signature = JSON.stringify([this.keys, this.widths, this.font, this.lineHeight, this.textWidth, this.tabular, this.wrap])
+    // Unwrapped rows do not depend on column widths, so a widening column (common in live streams) only changes the extent.
+    const signature = JSON.stringify([
+      this.keys,
+      this.wrap && this.widths,
+      this.wrap && this.textWidth,
+      this.font,
+      this.lineHeight,
+      verticalPadding,
+      this.tabular,
+      this.wrap,
+    ])
     const restart = this.rebuild || signature !== this.signature
-    this.extent = restart ? (this.tabular ? this.widths.reduce((sum, width) => sum + width, 0) : this.textWidth) : this.extent
     const index = restart ? new LineIndex() : this.index
     const from = restart ? 0 : this.processed
     if (restart) {
       this.layout = []
       this.matchCount = 0
+      this.widestLine = 0
     }
     for (let source = from; source < this.entries.length; source++) {
       const entry = this.entries[source]
@@ -298,38 +348,34 @@ export class LogViewer extends LitElement {
       if (matches) this.matchCount++
       if (!matches && this.filterMode === 'filter') continue
       const cells = this.tabular
-        ? this.keys.map((key, column) =>
-            textLayout(
-              Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : '',
-              Math.max(1, this.widths[column] - horizontalPadding),
-              this.measure,
-              this.wrap,
-            ),
-          )
-        : [
-            textLayout(
-              this.keys
-                .map((key) => (Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : ''))
-                .filter(Boolean)
-                .join(' '),
-              this.textWidth,
-              this.measure,
-              this.wrap,
-            ),
-          ]
+        ? this.keys.map((key, column) => {
+            const text = Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : ''
+            // Attribute columns are sized to their widest value, so only the message ever wraps.
+            if (key !== 'message') return textLayout(text, Math.max(1, this.widths[column] - horizontalPadding), this.measure, false)
+            return textLayout(text, Math.max(1, this.widths[column] - horizontalPadding), this.measure, this.wrap, this.widthsFor(entry, text))
+          })
+        : [this.plainLayout(entry)]
       const height = Math.max(...cells.map((cell) => cell.lines.length)) * this.lineHeight + (this.tabular ? verticalPadding : 0)
       if (!this.wrap) {
-        if (this.tabular) {
-          const message = cells[this.keys.indexOf('message')]
-          if (message) for (const line of message.lines) this.extent = Math.max(this.extent, attributesWidth + this.measure(line) + horizontalPadding)
-        } else for (const line of cells[0].lines) this.extent = Math.max(this.extent, this.measure(line) + this.inset * 2)
+        // Unwrapped lines are the logical lines, whose widths are cached with the entry.
+        const primary = this.tabular ? cells[this.keys.indexOf('message')] : cells[0]
+        if (primary) {
+          const widths = this.lineWidths.get(entry)!.widths
+          primary.lines.forEach((line, i) => (this.widestLine = Math.max(this.widestLine, (widths[i] ??= this.measure(line)))))
+        }
       }
       this.layout.push({ source, cells, height, highlighted: this.filter !== null && this.filterMode === 'highlight' && matches })
       index.append(height)
     }
     this.index = index
+    this.extent = this.tabular
+      ? Math.max(
+          this.widths.reduce((sum, width) => sum + width, 0),
+          this.wrap || !this.keys.includes('message') ? 0 : attributesWidth + this.widestLine + horizontalPadding,
+        )
+      : Math.max(this.textWidth, this.wrap ? 0 : this.widestLine + this.inset * 2)
     if (anchor && !this.follow && !this.resetAnchor) {
-      const position = this.layout.findIndex((entry) => entry.source === anchor.source)
+      const position = this.layoutPosition(anchor.source)
       if (position >= 0) this.viewTop = index.offsets[position] + (anchorOffset * this.lineHeight) / oldLineHeight
     }
     this.needsLayout = false
@@ -339,14 +385,64 @@ export class LogViewer extends LitElement {
     this.signature = signature
   }
 
+  /** Layout entries are ordered by source, so the anchor is found by binary search instead of a scan. */
+  private layoutPosition(source: number): number {
+    let low = 0
+    let high = this.layout.length - 1
+    while (low <= high) {
+      const mid = (low + high) >>> 1
+      const value = this.layout[mid].source
+      if (value === source) return mid
+      if (value < source) low = mid + 1
+      else high = mid - 1
+    }
+    return -1
+  }
+
+  // A live stream can append many times per frame. An update requested only by appends renders at most once per frame
+  // interval, so layout and the scroll write happen once for a burst; an append after a quiet period renders right away.
+  // A timer rather than requestAnimationFrame keeps that latency independent of how a browser paces frames.
+  protected override async scheduleUpdate(): Promise<void> {
+    // Only append renders open the throttle window, so a hover or scroll render does not delay the next append.
+    const deferred = this.deferred
+    const wait = deferred ? this.lastUpdate + FRAME_INTERVAL - performance.now() : 0
+    if (wait > 0)
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, wait)
+        this.flush = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+      })
+    this.flush = undefined
+    this.deferred = false
+    if (deferred) this.lastUpdate = performance.now()
+    super.scheduleUpdate()
+  }
+
+  // Any other change (filter, properties, scrolling) renders right away, including one made before the wait has begun.
+  override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration, useNewValue?: boolean, newValue?: unknown): void {
+    super.requestUpdate(name, oldValue, options, useNewValue, newValue)
+    this.deferred = false
+    this.flush?.()
+  }
+
   protected override updated(): void {
     const viewport = this.viewport!
-    if (Math.abs(viewport.scrollTop - this.viewTop) > 0.5) viewport.scrollTop = this.viewTop
+    if (Math.abs(viewport.scrollTop - this.viewTop) > 0.5) {
+      viewport.scrollTop = this.viewTop
+      // The browser clamps and rounds a fractional offset; keep what it applied so the scroll event reads as this write's echo.
+      this.viewTop = viewport.scrollTop
+    }
   }
 
   private onScroll(): void {
     const viewport = this.viewport!
+    // The event echoing updated()'s own tail-following scrollTop write needs no second render of an unchanged window.
+    const echo = Math.abs(viewport.scrollTop - this.viewTop) <= 0.5 && viewport.scrollLeft === this.viewLeft && this.hoveredSource === null
     this.hoveredSource = null
+    this.viewLeft = viewport.scrollLeft
+    if (echo) return
     this.viewTop = viewport.scrollTop
     this.follow = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
     if (!this.frame)

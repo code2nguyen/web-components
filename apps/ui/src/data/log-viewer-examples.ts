@@ -101,6 +101,92 @@ const commerceEntries: LogEntry[] = [
   { timestamp: '14:08:22', level: 'WARN', source: 'payments', message: 'Payment authorization delayed\nProvider timeout / retry scheduled / cart preserved' },
   ...trace,
 ]
+// Live demo: 1,000 entries over five minutes (one every 300 ms on average, with the occasional burst), like a running service.
+const LIVE_TOTAL = 1000
+const LIVE_INTERVAL = 300
+const liveServices = ['api', 'worker', 'payments', 'inventory']
+const liveRoutes = ['GET /api/products', 'GET /api/cart', 'POST /api/cart/items', 'GET /api/orders', 'POST /api/checkout', 'GET /health']
+
+function liveEntry(index: number, at: Date): LogEntry {
+  const timestamp = at.toISOString().slice(11, 23)
+  const source = liveServices[index % liveServices.length]
+  const request = `req-${String(index + 1).padStart(5, '0')}`
+  if (index % 53 === 41)
+    return {
+      timestamp,
+      level: 'ERROR',
+      source: 'payments',
+      message: `POST /api/checkout 502 5002ms\n  upstream: payments / connect ETIMEDOUT\n  request: ${request} / retry in 500ms`,
+    }
+  if (index % 17 === 9)
+    return { timestamp, level: 'WARN', source, message: `Slow query · ${120 + (index % 400)}ms\n  ${request} / pool: ${18 + (index % 14)} of 32` }
+  if (source === 'worker') return { timestamp, level: 'INFO', source, message: `Job email.confirmation completed · ${request} / ${4 + (index % 40)}ms` }
+  const route = liveRoutes[index % liveRoutes.length]
+  return { timestamp, level: 'INFO', source, message: `${route} 200 ${2 + ((index * 7) % 180)}ms · ${request} / client: 192.0.2.${(index % 200) + 1}` }
+}
+
+function startLiveDemo(viewer: LogViewer): void {
+  const demo = viewer.closest<HTMLElement>('[data-log-demo]')!
+  const badge = demo.querySelector<HTMLElement>('[data-log-live-count]')
+  const toggle = demo.querySelector<HTMLElement>('[data-log-action="toggle"]')
+  viewer.columns = ['timestamp', 'level', 'source', 'message']
+  let count = 0
+  let running = false
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const render = () => {
+    if (badge)
+      badge.textContent =
+        count >= LIVE_TOTAL ? `${LIVE_TOTAL.toLocaleString('en')} entries · done` : `${count.toLocaleString('en')} / ${LIVE_TOTAL.toLocaleString('en')}`
+    if (toggle) toggle.textContent = count >= LIVE_TOTAL ? 'Replay' : running ? 'Pause' : 'Resume'
+  }
+  const tick = () => {
+    // Append only the new entries: the viewer keeps everything it already has.
+    const burst = Math.random() < 0.1 ? 2 + Math.floor(Math.random() * 3) : 1
+    const batch: LogEntry[] = []
+    for (let i = 0; i < burst && count < LIVE_TOTAL; i++) batch.push(liveEntry(count++, new Date()))
+    viewer.appendEntries(batch)
+    if (count >= LIVE_TOTAL) running = false
+    else timer = setTimeout(tick, LIVE_INTERVAL * burst * (0.5 + Math.random()))
+    render()
+  }
+  let visible = false
+  let offscreen = false
+  // jump: a reader pressing Resume or Replay wants the latest entry; resuming because the demo scrolled back into view keeps their place.
+  const play = (jump: boolean) => {
+    if (running) return
+    if (!visible) {
+      offscreen = true
+      return
+    }
+    if (count >= LIVE_TOTAL) {
+      count = 0
+      viewer.clear()
+    }
+    running = true
+    if (jump) viewer.scrollToEnd()
+    timer = setTimeout(tick, LIVE_INTERVAL)
+    render()
+  }
+  const pause = () => {
+    running = false
+    clearTimeout(timer)
+    render()
+  }
+  toggle?.addEventListener('click', () => (running ? pause() : play(true)))
+  // Stream only while the example, its buttons included, is on screen, so a reader scrolling past does not come back to a finished demo.
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting
+    if (visible && (count === 0 || offscreen)) {
+      offscreen = false
+      play(false)
+    } else if (!visible && running) {
+      offscreen = true
+      pause()
+    }
+  }).observe(demo)
+  render()
+}
+
 const virtualEntries = serverLogs(10000)
 const serverEntries = serverLogs(64)
 const seeded = new WeakSet<LogViewer>()
@@ -109,6 +195,7 @@ function seedExamples(): void {
   document.querySelectorAll<LogViewer>('c2-log-viewer[data-log-viewer-demo]').forEach((viewer) => {
     if (viewer.dataset.logViewerDemo === 'preview' || seeded.has(viewer)) return
     seeded.add(viewer)
+    if (viewer.dataset.logViewerDemo === 'live') return startLiveDemo(viewer)
     viewer.columns = ['timestamp', 'level', 'message']
     viewer.appendEntries(
       viewer.dataset.logViewerDemo === 'sticky'

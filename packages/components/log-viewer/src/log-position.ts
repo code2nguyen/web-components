@@ -27,8 +27,11 @@ export interface TextLayout {
   starts: number[]
 }
 
-/** Explicit line breaks, tabs and measured glyph widths; breaks long tokens without assuming equal glyph widths. */
-export function textLayout(text: string, width: number, measure: (text: string) => number, wrap: boolean): TextLayout {
+/**
+ * Explicit line breaks, tabs and measured glyph widths; breaks long tokens without assuming equal glyph widths.
+ * widths caches each logical line's natural width across calls, so rewrapping the same text at a new width does not measure it again.
+ */
+export function textLayout(text: string, width: number, measure: (text: string) => number, wrap: boolean, widths?: number[]): TextLayout {
   const result: TextLayout = { lines: [], logicalLines: text.replace(/\r\n?/g, '\n').replace(/\t/g, '    ').split('\n'), sources: [], starts: [] }
   const push = (line: string, source: number, start: number) => {
     result.lines.push(line)
@@ -37,7 +40,7 @@ export function textLayout(text: string, width: number, measure: (text: string) 
   }
   for (let source = 0; source < result.logicalLines.length; source++) {
     const logical = result.logicalLines[source]
-    if (!wrap || !logical || measure(logical) <= width) {
+    if (!wrap || !logical || (widths ? (widths[source] ??= measure(logical)) : measure(logical)) <= width) {
       push(logical, source, 0)
       continue
     }
