@@ -26,6 +26,7 @@ export interface ValidationResult {
 
 const CSS_FILE = /\.(css|scss|sass|less)$/i
 const JSX_FILE = /\.(jsx|tsx)$/i
+const HTML_FILE = /\.html?$/i
 const SCRIPT_FILE = /\.(jsx|tsx|[cm]?[jt]s)$/i
 
 /** Native element → replacement tags, the first one that exists in the registry wins. `input` goes by `type`. */
@@ -97,7 +98,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
 
   if (!isCss) {
     const stack: string[] = []
-    for (const tag of scanTags(source)) {
+    for (const tag of scanTags(source, HTML_FILE.test(filename))) {
       if (tag.name.startsWith('/')) {
         const name = tag.name.slice(1)
         const open = stack.lastIndexOf(name)
@@ -180,6 +181,8 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
   const lower = name.toLowerCase()
   const attributes = element.attributes.map((a) => a.name)
   if (attributes.includes(name)) return
+  // The HTML parser lowercases a static attribute name, so `PLACEHOLDER` is `placeholder` (and `readOnly` is `readonly`).
+  if (binding.kind === 'attribute' && attributes.includes(lower)) return
   if (binding.kind === 'property' && element.properties?.includes(name)) return
   // Inline handlers (`onclick`), ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
   if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-|on[a-z])/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
@@ -269,8 +272,10 @@ function checkCss(css: string, offset: number, report: Report) {
 }
 
 function checkDeclarations(declarations: string, offset: number, host: string, report: Report) {
-  for (const declaration of declarations.matchAll(/(^|;)\s*([a-z-]+)\s*:/g)) {
-    if (!BOX_PROPERTY.test(declaration[2])) continue
+  // CSS text (`padding: 4px; …`) or a JSX style object (`{{ padding: 4, borderTop: '…' }}`).
+  for (const declaration of declarations.matchAll(/(^|[;{,])\s*['"]?([a-zA-Z-]+)['"]?\s*:/g)) {
+    const property = declaration[2].replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
+    if (!BOX_PROPERTY.test(property)) continue
     report(
       offset + declaration.index + declaration[0].indexOf(declaration[2]),
       'warning',
@@ -329,7 +334,8 @@ function cssBlocks(source: string, isCss: boolean): { css: string; offset: numbe
 }
 
 /** Opening and closing tags, skipping comments, `<style>`/`<script>` bodies and `{…}` attribute values. */
-function* scanTags(source: string): Generator<Tag> {
+/** `caseless`: an HTML document, where `<BUTTON>` is `<button>`; elsewhere a capitalised tag is a framework component. */
+function* scanTags(source: string, caseless = false): Generator<Tag> {
   let i = 0
   while (i < source.length) {
     const lt = source.indexOf('<', i)
@@ -339,12 +345,14 @@ function* scanTags(source: string): Generator<Tag> {
       i = end < 0 ? source.length : end + 3
       continue
     }
-    const name = /^<(\/?[a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?=[\s/>])/.exec(source.slice(lt, lt + 80))
+    const name = (caseless ? /^<(\/?[a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?=[\s/>])/i : /^<(\/?[a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?=[\s/>])/).exec(
+      source.slice(lt, lt + 80),
+    )
     if (!name) {
       i = lt + 1
       continue
     }
-    const tag: Tag = { name: name[1], index: lt, end: lt, selfClosing: false, attributes: [] }
+    const tag: Tag = { name: name[1].toLowerCase(), index: lt, end: lt, selfClosing: false, attributes: [] }
     let j = lt + name[0].length
     while (j < source.length) {
       while (/\s/.test(source[j] ?? '')) j++
@@ -363,7 +371,8 @@ function* scanTags(source: string): Generator<Tag> {
         j = skipBalanced(source, j, '{', '}')
         continue
       }
-      const attr = /^(?:[:@#]|v-bind:|v-on:)?\[[^\]]*\][^\s=>"'{}]*|^[^\s=>"'{}]+/.exec(source.slice(j, j + 120))
+      // A slash ends a name: `<c2-button disabled/>` is self-closing, not an attribute `disabled/`.
+      const attr = /^(?:[:@#]|v-bind:|v-on:)?\[[^\]]*\][^\s=>"'{}/]*|^[^\s=>"'{}/]+/.exec(source.slice(j, j + 120))
       if (!attr || (attr[0] === '/' && source[j + 1] !== '>')) {
         j++
         continue
@@ -384,6 +393,7 @@ function* scanTags(source: string): Generator<Tag> {
         } else if (quote === '{') {
           const end = skipBalanced(source, k, '{', '}')
           entry.value = source.slice(k, end)
+          if (entry.name === 'style') entry.index = k
           j = end
         } else if (source.startsWith('${', k)) {
           const end = skipBalanced(source, k + 1, '{', '}')

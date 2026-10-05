@@ -63,7 +63,7 @@ npx -y @c2n/mcp validate src --strict   # warnings fail too (native controls, bo
 npx -y @c2n/mcp validate --hook         # Claude Code PostToolUse hook: reads the payload on stdin
 ```
 
-It reports native `<button>`/`<input>`/`<select>`/`<textarea>`/`<dialog>`/`<details>`/`<progress>` elements that a `c2-*` element replaces, unknown `c2-*` tags, attributes, slots, events and `--c2-*` variables (with "did you mean"), a static camelCase attribute the element ignores (`rowKey` for `row-key`), and `border`/`padding`/`background` rules on a `c2-*` host. A line holding `c2n-ignore`, or the line after a comment holding it, is skipped. In hook mode the findings go to stderr with exit code 2, which Claude Code hands back to the agent; `npx c2n-skill install` registers that hook in `.claude/settings.json`.
+It reports native `<button>`/`<input>`/`<select>`/`<textarea>`/`<dialog>`/`<details>`/`<progress>` elements that a `c2-*` element replaces, unknown `c2-*` tags, attributes, slots and `--c2-*` variables (with "did you mean"), events a `c2-*` element does not fire (with its event list), a static camelCase attribute the element ignores (`rowKey` for `row-key`), and `border`/`padding`/`background` rules on a `c2-*` host. A line holding `c2n-ignore`, or the line after a comment holding it, is skipped. In hook mode the findings go to stderr with exit code 2, which Claude Code hands back to the agent; `npx c2n-skill install` registers that hook in `.claude/settings.json`.
 
 Resources: `c2n://components`, `c2n://components/{tag}`, `c2n://theme`, `c2n://guide/{topic}`.
 

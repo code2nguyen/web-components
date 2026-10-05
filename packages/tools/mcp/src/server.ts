@@ -405,9 +405,11 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ code, filename, format }) => {
-      const result = validateMarkup(withInstalledApi(registry), code, filename)
+      // One installed view for both: a tag only the installed version has still gets its import line.
+      const installedApi = withInstalledApi(registry)
+      const result = validateMarkup(installedApi, code, filename)
       const elements = result.elements.map((e) => {
-        const resolved = resolveElement(registry, e.tag)
+        const resolved = resolveElement(installedApi, e.tag)
         return {
           ...e,
           modulePath: resolved ? importPath(e.modulePath, resolved.component.package, installedPackage(resolved.component.package)) : e.modulePath,

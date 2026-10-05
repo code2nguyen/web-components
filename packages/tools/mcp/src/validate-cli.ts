@@ -9,7 +9,26 @@ import { withInstalledApi } from './installed.ts'
 import { formatFindings, validateMarkup, type Finding } from './lib/validate.ts'
 import { loadRegistry } from './registry.ts'
 
-const EXTENSIONS = new Set(['.html', '.htm', '.jsx', '.tsx', '.vue', '.svelte', '.astro', '.mdx', '.ts', '.js', '.mjs', '.css', '.scss', '.sass', '.less'])
+const EXTENSIONS = new Set([
+  '.html',
+  '.htm',
+  '.jsx',
+  '.tsx',
+  '.vue',
+  '.svelte',
+  '.astro',
+  '.mdx',
+  '.ts',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.css',
+  '.scss',
+  '.sass',
+  '.less',
+])
 const SKIPPED_DIRECTORIES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', '.git', '.next', '.nuxt', '.svelte-kit', '.astro', '.angular'])
 
 export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--format json]

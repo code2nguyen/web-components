@@ -46,7 +46,7 @@ const components = [
   ]),
   component('icon-button', [element('c2-icon-button', 'icon-button', { attributes: ['disabled'] })]),
   component('text-field', [
-    element('c2-text-field', 'text-field', { attributes: ['placeholder', 'value', 'disabled', 'type'], events: ['input', 'change', 'clear'] }),
+    element('c2-text-field', 'text-field', { attributes: ['placeholder', 'value', 'disabled', 'type', 'readonly'], events: ['input', 'change', 'clear'] }),
   ]),
   component('textarea', [element('c2-textarea', 'textarea')]),
   component('checkbox', [element('c2-checkbox', 'checkbox')]),
@@ -62,7 +62,14 @@ const components = [
     element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
   ]),
   component('tabs', [element('c2-tabs', 'tabs'), element('c2-tab', 'tabs')]),
-  component('feather-icons', [element('c2-feather-{name}', 'feather-icons')], { tagPattern: 'c2-feather-{name}', icons: ['arrow-right'] }),
+  component(
+    'feather-icons',
+    [{ ...element('c2-feather-{name}', 'feather-icons'), modulePath: '@c2n/feather-icons/icons/{name}.js', className: 'Feather{Name}' }],
+    {
+      tagPattern: 'c2-feather-{name}',
+      icons: ['arrow-right'],
+    },
+  ),
 ]
 const registry: Registry = {
   schemaVersion: 1,
@@ -150,7 +157,10 @@ test('lists the elements a source uses with their modules', () => {
     elements.map((e) => e.tag),
     ['c2-tabs', 'c2-tab', 'c2-feather-arrow-right'],
   )
-  assert.ok(elements.every((e) => e.modulePath.startsWith('@c2n/')))
+  assert.deepEqual(
+    elements.map((e) => e.modulePath),
+    ['@c2n/components/tabs', '@c2n/components/tabs', '@c2n/feather-icons/icons/arrow-right.js'],
+  )
 })
 
 test('ignores comments, but not markup in strings and templates', () => {
@@ -178,4 +188,23 @@ test('reads Vue dynamic arguments, Svelte bind:this, Angular key filters and bou
   assert.deepEqual(rules('<c2-text-field bind:this={el} bind:value={v}></c2-text-field>', 'a.svelte'), [])
   assert.deepEqual(rules('<c2-text-field (keydown.enter)="go()" (window:resize)="r()"></c2-text-field>'), [])
   assert.deepEqual(rules('<input :type="kind"><input [type]="kind"><input type={kind}>'), [])
+})
+
+test('reads an HTML document case-insensitively, and a framework template case-sensitively', () => {
+  assert.deepEqual(rules('<BUTTON>Go</BUTTON>\n<INPUT TYPE="checkbox">', 'page.html'), ['1:native-element', '2:native-element'])
+  assert.deepEqual(rules('<c2-text-field PLACEHOLDER="x" readOnly></c2-text-field>', 'page.html'), [])
+  assert.deepEqual(rules('<Button>Go</Button>', 'App.vue'), [])
+  // The camelCase spelling of a kebab-case attribute is still the silent no-op.
+  assert.deepEqual(rules('<c2-table rowKey="id"></c2-table>', 'page.html'), ['1:unknown-attribute'])
+})
+
+test('treats a slash before > as self-closing, not as part of the last attribute', () => {
+  assert.deepEqual(rules('<c2-table><c2-button disabled/><span slot="toolbar"></span></c2-table>'), [])
+})
+
+test('flags box styling in a JSX style object on a c2 host', () => {
+  assert.deepEqual(rules('<c2-button style={{ padding: 4, borderTop: "1px solid", width: 10 }}>Go</c2-button>', 'A.tsx'), [
+    '1:host-box-style',
+    '1:host-box-style',
+  ])
 })
