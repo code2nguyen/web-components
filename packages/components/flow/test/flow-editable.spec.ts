@@ -802,6 +802,18 @@ test.describe('actions', () => {
     await page.getByRole('button', { name: 'Add node' }).click()
     await expect(node(page, 'new-2')).toBeVisible()
     expect(await recorded(page, 'node-add')).toHaveLength(2)
+
+    // A press that wanders past the drag threshold and is released back on the button is one click: one node, not a
+    // drop under the toolbar as well.
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(button.x + 6, button.y + 3, { steps: 3 })
+    await page.mouse.move(button.x, button.y, { steps: 3 })
+    await expect(ghost).toHaveCount(0)
+    await page.mouse.up()
+    await expect(node(page, 'new-3')).toBeVisible()
+    expect(await recorded(page, 'node-add')).toHaveLength(3)
+    await expect(node(page, 'new-4')).toHaveCount(0)
   })
 
   test('addNode() from the toolbar goes beside the node the keyboard was on, even though the button took focus', async ({ page, renderScenario }) => {

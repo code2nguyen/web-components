@@ -1036,8 +1036,9 @@ export class Flow extends LitElement {
    * Starts dragging a new node onto the canvas from outside it, the way a design tool drags a shape from its toolbar:
    * call it from the `pointerdown` of a button in the `actions` slot. While the pointer is over the canvas a
    * placeholder follows it; releasing there fires `node-add` at that spot (moved aside if it would cover a node), and
-   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere, or Escape, cancels. A
-   * press that does not move does nothing, so the same button can call `addNode()` on `click`. On a touch screen,
+   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere (the toolbar included),
+   * or Escape, cancels. A press that does not move, or comes back to the button, adds nothing here, so the same
+   * button can call `addNode()` on `click`. On a touch screen,
    * give the button `touch-action: none` so the drag is not taken as a page scroll. Does nothing unless `editable`.
    */
   dragNewNode(event: PointerEvent): void {
@@ -1050,10 +1051,16 @@ export class Flow extends LitElement {
     window.addEventListener('keydown', this.handleNewNodeKey, true)
   }
 
-  /** Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas. */
+  /**
+   * Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas or over
+   * the actions toolbar: a press that wanders a few pixels and is released back on the add button is that button's
+   * click, not a drop under the toolbar as well.
+   */
   private dropPoint(clientX: number, clientY: number): FlowPoint | null {
-    const rect = this.stage?.getBoundingClientRect()
-    if (!rect || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null
+    const inside = (rect: DOMRect | undefined) => !!rect && clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
+    if (!inside(this.stage?.getBoundingClientRect())) return null
+    const actions = this.renderRoot.querySelector<HTMLElement>('.actions')
+    if (actions && !actions.hidden && inside(actions.getBoundingClientRect())) return null
     return this.centred(this.toCanvas(clientX, clientY))
   }
 
