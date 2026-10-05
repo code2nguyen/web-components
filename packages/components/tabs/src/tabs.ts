@@ -1,11 +1,10 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { provide } from '@lit/context'
-import { isServer } from 'lit-html/is-server.js'
 import styles from './tabs.scss?inline'
 import { selectedTabContext } from './tab-context'
 // Registers `c2-tab` so consumers of the strip alone get the child element too (same pattern as select → list-item).

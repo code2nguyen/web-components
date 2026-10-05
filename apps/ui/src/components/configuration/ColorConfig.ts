@@ -1,15 +1,15 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TinyColor } from '@ctrl/tinycolor'
-import type { ColorSelectChangeEventDetail } from '@c2n/color-select'
+import type { ColorSelectChangeEventDetail } from '@c2n/components/color-select'
 
-import '@c2n/text-field'
-import '@c2n/color-select'
-import '@c2n/icon-button'
+import '@c2n/components/text-field'
+import '@c2n/components/color-select'
+import '@c2n/components/icon-button'
 import '@c2n/feather-icons/icons/eye.js'
 import '@c2n/feather-icons/icons/eye-off.js'
-import type { TextField } from '@c2n/text-field'
-import { formatAlpha, parseAlpha } from '../../utils/css-value.ts'
+import type { TextField } from '@c2n/components/text-field'
+import { formatAlpha, formatLightDark, parseAlpha, parseLightDark } from '../../utils/css-value.ts'
 
 /**
  * Colour control: swatch + hex + alpha, with an eye button that hides the colour (`transparent`) while remembering it.
@@ -18,6 +18,9 @@ import { formatAlpha, parseAlpha } from '../../utils/css-value.ts'
  * an unset value, `currentColor`, `var(--token)`, a gradient — stays verbatim in the text field beside it instead of
  * being coerced to `#000000`. Editing commits on `input` (per keystroke, once the text parses) rather than only on
  * blur, and the alpha field shows `44%`, not `43.921568627450981%`.
+ *
+ * A `light-dark(<light>, <dark>)` value (how a gallery card gives a variant colour its dark-theme shade) shows as two
+ * swatches, light then dark, each editing its own half.
  */
 @customElement('demo-color-config')
 export class ColorConfig extends LitElement {
@@ -95,6 +98,14 @@ export class ColorConfig extends LitElement {
         min-width: 0;
         width: auto;
         --c2-text-field--padding-left: 26px;
+      }
+      .pair {
+        display: flex;
+        gap: 2px;
+        min-width: 0;
+      }
+      .pair .hex {
+        width: 78px;
       }
       .alpha {
         width: 48px;
@@ -207,6 +218,64 @@ export class ColorConfig extends LitElement {
     }
   }
 
+  /** One half of a `light-dark()` pair: its own swatch and hex field, the other half kept as written. */
+  private renderPairHalf(halves: [string, string], index: 0 | 1) {
+    const color = new TinyColor(halves[index])
+    const label = index === 0 ? 'Light theme colour' : 'Dark theme colour'
+    const commit = (next: TinyColor) => {
+      const value = next.getAlpha() < 1 ? next.toRgbString() : next.toHexString()
+      const updated: [string, string] = [...halves]
+      updated[index] = value
+      // A hidden pair is edited in place of the remembered colour, as the single-colour control does.
+      if (this.isHidden) this.emit(this.hiddenValue(), formatLightDark(updated[0], updated[1]))
+      else this.emit(formatLightDark(updated[0], updated[1]), '')
+    }
+    return html`<div class="group ${this.isHidden ? 'is-hidden' : ''}">
+      <c2-color-select
+        placement="bottom-end"
+        title=${label}
+        .color=${color.isValid ? color.toRgbString() : 'transparent'}
+        @change=${(event: CustomEvent<ColorSelectChangeEventDetail>) => {
+          const { h, s, v, a } = event.detail
+          commit(new TinyColor({ h, s, v, a }))
+        }}
+      ></c2-color-select>
+      <c2-text-field
+        class="hex"
+        spellcheck="false"
+        aria-label=${label}
+        .value=${color.isValid ? (color.getAlpha() < 1 ? color.toHex8String() : color.toHexString()) : halves[index]}
+        @input=${(event: Event & { target: TextField }) => {
+          const raw = event.target.value.trim()
+          const next = new TinyColor(raw)
+          if (!next.isValid) return
+          // A plain six-digit hex keeps the half's alpha; only a value that spells its own alpha replaces it.
+          if (!/^#(?:[0-9a-f]{4}|[0-9a-f]{8})$|^(?:rgba|hsla)\(/i.test(raw) && color.isValid) next.setAlpha(color.getAlpha())
+          commit(next)
+        }}
+      ></c2-text-field>
+    </div>`
+  }
+
+  /** The eye button: `handleToggle` remembers what it hides, a single colour or a whole `light-dark()` pair. */
+  private renderToggle() {
+    return html`<c2-icon-button
+      class="toggle"
+      aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
+      tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
+      @click=${this.handleToggle}
+    >
+      ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
+    </c2-icon-button>`
+  }
+
+  private renderPair(halves: [string, string]) {
+    return html`<div class="color-config">
+      <div class="pair">${this.renderPairHalf(halves, 0)}${this.renderPairHalf(halves, 1)}</div>
+      ${this.renderToggle()}
+    </div>`
+  }
+
   /**
    * The swatch is always offered, even with nothing set.
    *
@@ -216,6 +285,8 @@ export class ColorConfig extends LitElement {
    * its checkerboard, which reads as "unset" rather than as black.
    */
   render() {
+    const pair = parseLightDark(this.isHidden ? this.hiddenColor : this._value)
+    if (pair && pair.every((half) => new TinyColor(half).isValid)) return this.renderPair(pair)
     const color = this.pickable
     return html`<div class="color-config">
       <div class="group ${this.isHidden ? 'is-hidden' : ''}">
@@ -234,18 +305,7 @@ export class ColorConfig extends LitElement {
             : html`<c2-text-field class="raw" spellcheck="false" placeholder="unset" .value=${this._value} @input=${this.handleRawInput}></c2-text-field>`
         }
       </div>
-      ${
-        color
-          ? html`<c2-icon-button
-              class="toggle"
-              aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
-              tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
-              @click=${this.handleToggle}
-            >
-              ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
-            </c2-icon-button>`
-          : nothing
-      }
+      ${color ? this.renderToggle() : nothing}
     </div>`
   }
 }

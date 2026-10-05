@@ -1,7 +1,7 @@
 ---
 // A trace written in front of you: the only way to see what `c2-steps` does when the data changes, since a static
 // example can only ever show one frame of it. Data-driven, because that is how an application drives one.
-import { Steps } from '@c2n/steps'
+import { Steps } from '@c2n/components/steps'
 import SiteButton from './ui/SiteButton.astro'
 ---
 
@@ -20,7 +20,7 @@ import SiteButton from './ui/SiteButton.astro'
 </section>
 
 <script>
-  import type { Steps, StepNode } from '@c2n/steps'
+  import type { Steps, StepNode } from '@c2n/components/steps'
 
   // Astro islands own the runtime import; this script only drives what they defined.
   await customElements.whenDefined('c2-steps')

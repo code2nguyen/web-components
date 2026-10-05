@@ -5,7 +5,7 @@ description: 'Ready-made date fields with default, soft and underline treatments
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { DateInput } from '@c2n/date-input'
+import { DateInput } from '@c2n/components/date-input'
 
 ## Presets
 
@@ -33,22 +33,6 @@ Each treatment keeps the native date picker and changes only the public CSS vari
   }
 </style>
 <c2-date-input class="soft" aria-label="Due date" value="2026-09-15"></c2-date-input>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 220px;
-    --c2-date-input--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-date-input--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
-    --c2-date-input--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-date-input__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
-    --c2-date-input__focus--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-date-input__focus--outline: 2px solid rgba(244, 244, 245, 0.25);
-    --c2-date-input__calendar-icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-  }
-</style>
-<c2-date-input class="dark" aria-label="Due date" value="2026-09-15"></c2-date-input>
 ```
 
 </GalleryGrid>

@@ -1,4 +1,4 @@
-import type { ChatMessageList } from '@c2n/chat-message-list'
+import type { ChatMessageList } from '@c2n/components/chat-message-list'
 
 /**
  * Makes the chat room examples live: a `c2-chat-input` inside `[data-chat-demo]` posts into the room's

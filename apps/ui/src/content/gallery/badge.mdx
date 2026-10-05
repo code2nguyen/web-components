@@ -1,9 +1,9 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Badge } from '@c2n/badge'
-import { Avatar } from '@c2n/avatar'
-import { IconButton } from '@c2n/icon-button'
+import { Badge } from '@c2n/components/badge'
+import { Avatar } from '@c2n/components/avatar'
+import { IconButton } from '@c2n/components/icon-button'
 import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
 
 ## Presets
@@ -53,22 +53,11 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
 ```html tag=MdxCodeBlock,label=Counter
 <style>
   .danger-counter {
-    --c2-badge__danger--background: #fee2e2;
-    --c2-badge__danger--color: #b91c1c;
+    --c2-badge__danger--background: light-dark(#fee2e2, #401416);
+    --c2-badge__danger--color: light-dark(#b91c1c, #d17273);
   }
 </style>
 <c2-badge class="danger-counter" tone="danger" count="120"></c2-badge>
-```
-
-```html tag=MdxCodeBlock,label=Dark counter
-<style>
-  .dark-counter {
-    --c2-badge--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-badge--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-badge--font-weight: 600;
-  }
-</style>
-<c2-badge class="dark-counter" count="8"></c2-badge>
 ```
 
 ```html tag=MdxCodeBlock,label=Status dot
@@ -133,8 +122,8 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
 ```html tag=MdxCodeBlock,label=Warm tones
 <style>
   .warm {
-    --c2-badge__warning--background: #ffedd5;
-    --c2-badge__warning--color: #c2410c;
+    --c2-badge__warning--background: light-dark(#ffedd5, #553814);
+    --c2-badge__warning--color: light-dark(#c2410c, #db9b81);
     --c2-badge--font-weight: 600;
   }
 </style>

@@ -153,9 +153,9 @@ const palette = rawElement('c2-modal', { class: 'search-palette', label: 'Search
 
 <script>
   import '../data/chrome-modules'
-  import type { Modal } from '@c2n/modal'
-  import type { Command } from '@c2n/command'
-  import type { Shortcut } from '@c2n/shortcut'
+  import type { Modal } from '@c2n/components/modal'
+  import type { Command } from '@c2n/components/command'
+  import type { Shortcut } from '@c2n/components/shortcut'
 
   const modal = document.querySelector<Modal>('.search-palette')
   const command = modal?.querySelector<Command>('.search-palette__command')

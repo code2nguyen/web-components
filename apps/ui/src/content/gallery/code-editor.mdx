@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { CodeEditor } from '@c2n/code-editor'
+import { CodeEditor } from '@c2n/components/code-editor'
 
 ## Presets
 
@@ -22,89 +22,6 @@ export function debounce(fn, wait = 200) {
     clearTimeout(timer)
     timer = setTimeout(() => fn(...args), wait)
   }
-}"
-></c2-code-editor>
-```
-
-```html tag=MdxCodeBlock,label=Midnight
-<style>
-  .midnight {
-    --c2-code-editor--background: #0d1117;
-    --c2-code-editor--color: #e6edf3;
-    --c2-code-editor--border: 1px solid #30363d;
-    --c2-code-editor__gutter--color: #7d8590;
-    --c2-code-editor__gutter--background: #0d1117;
-    --c2-code-editor__gutter--border-right: 1px solid #21262d;
-    --c2-code-editor__gutter__active--color: #e6edf3;
-    --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
-    --c2-code-editor__selection--background: rgba(56, 139, 253, 0.3);
-    --c2-code-editor__cursor--color: #e6edf3;
-    --c2-code-editor__theme--token-keyword: #ff7b72;
-    --c2-code-editor__theme--token-string: #a5d6ff;
-    --c2-code-editor__theme--token-comment: #8b949e;
-    --c2-code-editor__theme--token-constant: #79c0ff;
-    --c2-code-editor__theme--token-function: #d2a8ff;
-    --c2-code-editor__theme--token-type: #ffa657;
-    --c2-code-editor__theme--token-property: #79c0ff;
-    --c2-code-editor__theme--token-variable: #e6edf3;
-    --c2-code-editor__theme--token-tag: #7ee787;
-    --c2-code-editor__theme--token-punctuation: #e6edf3;
-    --c2-code-editor__theme--token-link: #a5d6ff;
-    --c2-code-editor__theme--token-invalid: #ff7b72;
-  }
-</style>
-<c2-code-editor
-  class="midnight"
-  language="javascript"
-  line-numbers
-  value="// Dark is a different set of variable values — no JavaScript theme.
-const palette = {
-  keyword: '#ff7b72',
-  string: '#a5d6ff',
-  comment: '#8b949e',
-}
-export default palette"
-></c2-code-editor>
-```
-
-```html tag=MdxCodeBlock,label=Terminal
-<style>
-  .terminal {
-    --c2-code-editor--background: #121212;
-    --c2-code-editor--color: #d8d8c0;
-    --c2-code-editor--border: 1px solid #2a2a2a;
-    --c2-code-editor--border-radius: 4px;
-    --c2-code-editor--font-size: 12px;
-    --c2-code-editor__gutter--color: #808078;
-    --c2-code-editor__gutter--background: #121212;
-    --c2-code-editor__gutter--border-right: 1px solid #2a2a2a;
-    --c2-code-editor__gutter__active--color: #d8d8c0;
-    --c2-code-editor__cursor--color: #8fc46b;
-    --c2-code-editor__active-line--background: rgba(143, 196, 107, 0.07);
-    --c2-code-editor__selection--background: rgba(143, 196, 107, 0.25);
-    --c2-code-editor__theme--token-keyword: #8fc46b;
-    --c2-code-editor__theme--token-string: #e6c384;
-    --c2-code-editor__theme--token-comment: #9a9a8a;
-    --c2-code-editor__theme--token-constant: #7fb4ca;
-    --c2-code-editor__theme--token-function: #e6c384;
-    --c2-code-editor__theme--token-type: #e6c384;
-    --c2-code-editor__theme--token-property: #7fb4ca;
-    --c2-code-editor__theme--token-variable: #d8d8c0;
-    --c2-code-editor__theme--token-tag: #8fc46b;
-    --c2-code-editor__theme--token-punctuation: #938f79;
-    --c2-code-editor__theme--token-link: #7fb4ca;
-    --c2-code-editor__theme--token-invalid: #e46876;
-  }
-</style>
-<c2-code-editor
-  class="terminal"
-  language="javascript"
-  line-numbers
-  value="const log = (msg) => process.stdout.write(`${msg}\n`)
-
-// Green on near-black, the way a terminal reads.
-for (const step of ['build', 'test', 'deploy']) {
-  log(`→ ${step}`)
 }"
 ></c2-code-editor>
 ```

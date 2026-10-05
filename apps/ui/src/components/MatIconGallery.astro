@@ -38,8 +38,8 @@ const studioCode = '<c2-mat-icon>home</c2-mat-icon>'
 <script>
   import { openIconInStudio } from '../utils/playground.ts'
 
-  import '@c2n/copy-button'
-  import '@c2n/mat-icon'
+  import '@c2n/components/copy-button'
+  import '@c2n/components/mat-icon'
 </script>
 
 <style lang="scss">
@@ -133,7 +133,7 @@ const studioCode = '<c2-mat-icon>home</c2-mat-icon>'
 </style>
 
 <script>
-  import type { TextField } from '@c2n/text-field'
+  import type { TextField } from '@c2n/components/text-field'
 
   const filter = document.querySelector<TextField>('.mat-icon-gallery__filter')
   const items = Array.from(document.querySelectorAll<HTMLElement>('.mat-icon-gallery__item'))

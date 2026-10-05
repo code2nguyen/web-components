@@ -1,5 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { isServer } from 'lit-html/is-server.js'
+import { LitElement, html, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query } from 'lit/decorators.js'
 import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'

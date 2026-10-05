@@ -1,8 +1,8 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Separator } from '@c2n/separator'
-import { Badge } from '@c2n/badge'
+import { Separator } from '@c2n/components/separator'
+import { Badge } from '@c2n/components/badge'
 
 ## Presets
 
@@ -113,28 +113,6 @@ Curated looks for `c2-separator`. Open any card in the studio to start from it. 
   <span>Italic</span>
   <c2-separator orientation="vertical" decorative style="--c2-separator--spacing: 2px"></c2-separator>
   <span>Link</span>
-</div>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    display: grid;
-    gap: 14px;
-    width: 240px;
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    font-size: 13px;
-    --c2-separator--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-separator__label--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-</style>
-<div class="dark">
-  <span>Signed in as ada@example.com</span>
-  <c2-separator></c2-separator>
-  <c2-separator>or</c2-separator>
 </div>
 ```
 

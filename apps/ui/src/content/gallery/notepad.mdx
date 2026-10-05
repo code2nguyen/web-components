@@ -4,8 +4,8 @@ title: 'Notepad gallery'
 
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
-import { Notepad } from '@c2n/notepad'
-import { IconButton } from '@c2n/icon-button'
+import { Notepad } from '@c2n/components/notepad'
+import { IconButton } from '@c2n/components/icon-button'
 import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
 import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
 
@@ -120,30 +120,6 @@ bring the **insurance card**!"></c2-notepad>
 </style>
 <c2-notepad class="index-card" label="Recipe" value="2 cans San Marzano, 5 garlic
 olive oil, basil, slow 40 min"><span slot="header">Nonna's tomato sauce · No. 14</span></c2-notepad>
-```
-
-```html tag=MdxCodeBlock,label=Night paper
-<style>
-  .night-paper {
-    width: 320px;
-    max-width: 100%;
-    --c2-notepad__sheet--background: #232a33;
-    --c2-notepad__rule--color: #3b4654;
-    --c2-notepad__margin--color: #6a4651;
-    --c2-notepad__writing--color: #e9e4d4;
-    --c2-notepad__placeholder--color: #7d8796;
-    --c2-notepad__header--color: #7d8796;
-    --c2-notepad__ink-blue--color: #9fb6ff;
-    --c2-notepad__ink-red--color: #ff8f8f;
-    --c2-notepad__ink-green--color: #8fe0a2;
-    --c2-notepad__ink-black--color: #ffffff;
-    --c2-notepad__highlight-yellow--background: rgba(255, 214, 64, 0.35);
-    --c2-notepad__texture--opacity: 0;
-  }
-</style>
-<c2-notepad class="night-paper" label="Night shift" value="02:10 deploy rolled back
-cause: <span data-ink=&quot;red&quot;>migration lock</span> on orders
-follow up with DBA at standup"><span slot="header">Night shift</span></c2-notepad>
 ```
 
 ```html tag=MdxCodeBlock,label=Tear-off pad

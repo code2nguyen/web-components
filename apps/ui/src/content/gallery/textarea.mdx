@@ -4,7 +4,7 @@ title: 'Textarea gallery'
 
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
-import { Textarea } from '@c2n/textarea'
+import { Textarea } from '@c2n/components/textarea'
 
 <GalleryGrid>
 
@@ -32,14 +32,14 @@ import { Textarea } from '@c2n/textarea'
 <style>
   .notebook {
     width: 280px;
-    --c2-textarea__container--background: #fffbeb;
-    --c2-textarea__container--color: #78350f;
+    --c2-textarea__container--background: light-dark(#fffbeb, #352f18);
+    --c2-textarea__container--color: light-dark(#78350f, #b69582);
     --c2-textarea__container--border: 1px solid #fcd34d;
     --c2-textarea__container--font-family: monospace;
     --c2-textarea__container--line-height: 24px;
     --c2-textarea__container__focus--border: 1px solid #d97706;
     --c2-textarea__container__focus--outline: 3px solid rgba(217, 119, 6, 0.2);
-    --c2-textarea__placeholder--color: #92400e;
+    --c2-textarea__placeholder--color: light-dark(#92400e, #be9176);
   }
 </style>
 <c2-textarea class="notebook" label="Ideas" placeholder="Capture an idea…" rows="4"></c2-textarea>

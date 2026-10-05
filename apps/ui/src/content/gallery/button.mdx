@@ -7,8 +7,8 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import '@fontsource/material-icons'
 
-import { Button } from '@c2n/button'
-import { MatIcon } from '@c2n/mat-icon'
+import { Button } from '@c2n/components/button'
+import { MatIcon } from '@c2n/components/mat-icon'
 import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
 import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
 import { FeatherDownloadIcon as FeatherDownload } from '@c2n/feather-icons/icons/download.js'
@@ -79,18 +79,6 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
   }
 </style>
 <c2-button class="link">Learn more</c2-button>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.35);
-  }
-</style>
-<c2-button class="dark">Dark</c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Neutral
@@ -523,24 +511,6 @@ Icons from `@c2n/feather-icons` and `@c2n/components/mat-icon` drop straight int
 <c2-button class="material-soft">
   <c2-mat-icon slot="prefix-icon">cloud_upload</c2-mat-icon>
   Upload
-</c2-button>
-```
-
-```html tag=MdxCodeBlock,label=Material dark pill
-<style>
-  .material-dark-pill {
-    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-button__container--border-radius: 999px;
-    --c2-button__container--padding-left: 14px;
-    --c2-button__container--padding-right: 20px;
-    --c2-button__icon--color: #fbbf24;
-  }
-</style>
-<c2-button class="material-dark-pill">
-  <c2-mat-icon slot="prefix-icon">star</c2-mat-icon>
-  Upgrade
 </c2-button>
 ```
 

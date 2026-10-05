@@ -1,5 +1,5 @@
 import { html } from 'lit'
-import type { Flow, FlowEdge, FlowNode } from '@c2n/flow'
+import type { Flow, FlowEdge, FlowNode } from '@c2n/components/flow'
 
 /**
  * Makes the flow examples live. `[data-flow-demo="events"]` reports clicks and layout changes into the `output` next

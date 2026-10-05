@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Progress } from '@c2n/progress'
+import { Progress } from '@c2n/components/progress'
 
 ## Presets
 
@@ -97,22 +97,6 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
   }
 </style>
 <c2-progress class="danger" value="92" show-value>Storage used</c2-progress>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 100%;
-    padding: 20px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-progress__indicator--background-color: #5aa3ff;
-    --c2-progress__track--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-progress__label--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-progress__value--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-  }
-</style>
-<div class="dark"><c2-progress value="72" show-value>Syncing workspace</c2-progress></div>
 ```
 
 ```html tag=MdxCodeBlock,label=Stacked

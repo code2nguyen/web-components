@@ -149,10 +149,10 @@ const timeline = rawElement(
 
 <script>
   // Plain tags upgraded here rather than one island per release: the page repeats each element dozens of times.
-  import '@c2n/timeline'
-  import '@c2n/badge'
-  import '@c2n/card'
-  import '@c2n/details'
+  import '@c2n/components/timeline'
+  import '@c2n/components/badge'
+  import '@c2n/components/card'
+  import '@c2n/components/details'
 
   // The preview cards need every component package; load them only once the first card is about to scroll into view.
   const canvases = document.querySelectorAll('.preview-card__canvas')

@@ -8,10 +8,10 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 
-import { ChatMessageList } from '@c2n/chat-message-list'
-import { ChatMessage } from '@c2n/chat-message'
-import { ChatInput } from '@c2n/chat-input'
-import { Avatar } from '@c2n/avatar'
+import { ChatMessageList } from '@c2n/components/chat-message-list'
+import { ChatMessage } from '@c2n/components/chat-message'
+import { ChatInput } from '@c2n/components/chat-input'
+import { Avatar } from '@c2n/components/avatar'
 
 <ExampleModules />
 
@@ -46,7 +46,7 @@ import '@c2n/components/chat-message-list'
     margin: 12px;
   }
   .chat-room .chat-demo-outgoing {
-    --c2-chat-message__message--background: #edf1fe;
+    --c2-chat-message__message--background: var(--c2-theme--color-primary-container, #edf1fe);
     --c2-chat-message__message--padding-top: 8px;
     --c2-chat-message__message--padding-right: 12px;
     --c2-chat-message__message--padding-bottom: 8px;

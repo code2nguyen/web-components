@@ -1,5 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { isServer } from 'lit-html/is-server.js'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'

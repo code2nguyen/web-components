@@ -126,7 +126,7 @@ const groups = COMPONENT_CATEGORIES.map((category) => ({
 
 <script>
   import '../data/component-modules'
-  import type { LogViewer } from '@c2n/log-viewer'
+  import type { LogViewer } from '@c2n/components/log-viewer'
   void customElements.whenDefined('c2-log-viewer').then(() => {
     document.querySelectorAll<LogViewer>('.gallery__canvas c2-log-viewer[data-log-viewer-demo="preview"]').forEach((viewer) => {
       viewer.columns = ['level', 'message']

@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Pagination } from '@c2n/pagination'
+import { Pagination } from '@c2n/components/pagination'
 
 ## Presets
 
@@ -95,25 +95,6 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
   }
 </style>
 <c2-pagination client:only="lit" class="table-footer" variant="compact" total-items="100" page-size="10" page="3"></c2-pagination>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    --c2-pagination__item--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-pagination__nav--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-pagination__item__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-pagination__nav__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-pagination__item__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-pagination__item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-pagination__item__selected--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-pagination__ellipsis--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    padding: 8px 12px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    border-radius: 10px;
-  }
-</style>
-<c2-pagination client:only="lit" class="dark" total-pages="9" page="3" hide-nav-labels></c2-pagination>
 ```
 
 </GalleryGrid>

@@ -60,9 +60,6 @@ const { code, lang, uid, style, label, offscreen } = Astro.props
     <SiteIconButton hydrate="defined" size="sm" label="Reset to authored example" class="example__reset" hidden>
       <c2-feather-rotate-ccw></c2-feather-rotate-ccw>
     </SiteIconButton>
-    <SiteIconButton hydrate="defined" size="sm" label="Invert preview background" class="example__canvas-toggle" aria-pressed="false">
-      <c2-feather-sun></c2-feather-sun>
-    </SiteIconButton>
     <SiteIconButton
       hydrate="defined"
       size="sm"
@@ -107,18 +104,6 @@ const { code, lang, uid, style, label, offscreen } = Astro.props
       > astro-island {
         display: contents;
       }
-    }
-    &.inverted &__canvas {
-      color-scheme: dark;
-      color: #f4f4f5;
-      background-color: #18181b;
-      --site-canvas-dot: rgba(244, 244, 245, 0.14);
-    }
-    html[data-theme='dark'] &.inverted &__canvas {
-      color-scheme: light;
-      color: #18181b;
-      background-color: #ffffff;
-      --site-canvas-dot: rgba(24, 24, 27, 0.14);
     }
 
     &__toolbar {
@@ -276,10 +261,6 @@ const { code, lang, uid, style, label, offscreen } = Astro.props
       codeToggle.setAttribute('aria-expanded', String(!expanded))
       codeToggle.setAttribute('aria-label', expanded ? 'Show code' : 'Hide code')
       if (codePanel) codePanel.hidden = expanded
-    })
-    example.querySelector<HTMLElement>('.example__canvas-toggle')?.addEventListener('click', (event) => {
-      const inverted = example.classList.toggle('inverted')
-      ;(event.currentTarget as HTMLElement).setAttribute('aria-pressed', String(inverted))
     })
   })
 </script>

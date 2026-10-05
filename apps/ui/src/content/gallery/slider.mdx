@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Slider } from '@c2n/slider'
+import { Slider } from '@c2n/components/slider'
 
 ## Presets
 
@@ -107,7 +107,7 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
   .warm {
     width: 220px;
     --c2-slider__track--height: 6px;
-    --c2-slider__track--color: #fee2e2;
+    --c2-slider__track--color: light-dark(#fee2e2, #401416);
     --c2-slider__fill--color: linear-gradient(90deg, #f59e0b, var(--c2-theme--color-error, #dc2626));
     --c2-slider__thumb--border: 2px solid var(--c2-theme--color-error, #dc2626);
     --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
@@ -129,29 +129,6 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
   <c2-slider orientation="vertical" value="40" show-value aria-label="Bass"></c2-slider>
   <c2-slider orientation="vertical" value="65" show-value aria-label="Mid"></c2-slider>
   <c2-slider orientation="vertical" value="30" show-value aria-label="Treble"></c2-slider>
-</div>
-```
-
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    width: 240px;
-    padding: 20px;
-    border-radius: 12px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-slider__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-slider__fill--color: #5aa3ff;
-    --c2-slider__thumb--color: var(--c2-theme--color-on-surface, #18181b);
-    --c2-slider__thumb--border: 2px solid #5aa3ff;
-    --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(90, 163, 255, 0.2);
-    --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(90, 163, 255, 0.28);
-    --c2-slider__thumb__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-slider__value--background: var(--c2-theme--color-surface-container-low, #fafafa);
-    --c2-slider__value--color: var(--c2-theme--color-on-surface, #18181b);
-  }
-</style>
-<div class="dark">
-  <c2-slider value="45" show-value aria-label="Brightness"></c2-slider>
 </div>
 ```
 

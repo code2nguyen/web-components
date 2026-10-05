@@ -1,8 +1,8 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { StatusPanel } from '@c2n/status-panel'
-import { Button } from '@c2n/button'
+import { StatusPanel } from '@c2n/components/status-panel'
+import { Button } from '@c2n/components/button'
 import { OfflineSymbol as SymbolOffline } from '@c2n/symbols'
 
 ## Presets
@@ -105,8 +105,8 @@ Classes style assigned media, text, and buttons directly. The same-named public 
     --c2-status-panel__media--size: 88px;
     --c2-status-panel__media-icon--size: 44px;
     --c2-status-panel__media--border-radius: 14px;
-    --c2-status-panel__media--background-color: #edf1fe;
-    --c2-status-panel__media--color: #0265dc;
+    --c2-status-panel__media--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-status-panel__media--color: var(--c2-theme--color-primary, #0265dc);
   }
   .not-found > [slot='media'] {
     font-size: 18px;
@@ -140,10 +140,10 @@ Classes style assigned media, text, and buttons directly. The same-named public 
 ```html tag=MdxCodeBlock,label=Custom media
 <style>
   .celebration {
-    --c2-status-panel__container--background-color: #fffbeb;
-    --c2-status-panel__title--color: #18181b;
-    --c2-status-panel__description--color: #57534e;
-    --c2-status-panel__media--background-color: #ffffff;
+    --c2-status-panel__container--background-color: light-dark(#fffbeb, #352f18);
+    --c2-status-panel__title--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-status-panel__description--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff));
+    --c2-status-panel__media--background-color: var(--c2-theme--color-surface, #ffffff);
     --c2-status-panel__media--size: 72px;
     --c2-status-panel__media-icon--size: 36px;
   }

@@ -4,9 +4,9 @@ title: 'Chat Input gallery'
 
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
-import { ChatInput } from '@c2n/chat-input'
-import { IconButton } from '@c2n/icon-button'
-import { Attachment } from '@c2n/attachment'
+import { ChatInput } from '@c2n/components/chat-input'
+import { IconButton } from '@c2n/components/icon-button'
+import { Attachment } from '@c2n/components/attachment'
 import { FeatherArrowUpIcon as FeatherArrowUp } from '@c2n/feather-icons/icons/arrow-up.js'
 import { FeatherAtSignIcon as FeatherAtSign } from '@c2n/feather-icons/icons/at-sign.js'
 import { FeatherMicIcon as FeatherMic } from '@c2n/feather-icons/icons/mic.js'
@@ -51,76 +51,6 @@ Each composition below is a complete assistant prompt experience. The cards stay
 <section class="default-stage">
   <div class="default-heading"><strong>How can I help?</strong><span>Ask a question, explore an idea or start a task</span></div>
   <c2-chat-input client:load aria-label="Message" placeholder="Ask anything…"></c2-chat-input>
-</section>
-```
-
-```html tag=MdxCodeBlock,label=Midnight assistant
-<style>
-  .midnight-stage {
-    box-sizing: border-box;
-    display: grid;
-    gap: 28px;
-    width: min(100%, 720px);
-    padding: 34px;
-    border-radius: 24px;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(109, 94, 252, 0.18), transparent 42%),
-      var(--c2-theme--color-on-surface, #18181b);
-    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    font-family: Inter, system-ui, sans-serif;
-  }
-  .midnight-heading {
-    display: grid;
-    gap: 7px;
-    text-align: center;
-  }
-  .midnight-heading strong {
-    font-size: 22px;
-    letter-spacing: -0.03em;
-  }
-  .midnight-heading span {
-    color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    font-size: 13px;
-  }
-  .midnight-composer {
-    --c2-chat-input__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__container--border-radius: 22px;
-    --c2-chat-input__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 96%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-chat-input__container--padding: 12px;
-    --c2-chat-input__container__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__container__focus--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__container__focus--box-shadow: 0 0 0 3px rgba(161, 161, 170, 0.14);
-    --c2-chat-input__placeholder--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 49%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-input__send-button--background: var(--c2-theme--color-surface-container-low, #fafafa);
-    --c2-chat-input__send-button--color: var(--c2-theme--color-on-surface, #18181b);
-    --c2-chat-input__send-button__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-chat-input__send-button__active--background: var(--c2-theme--color-outline, #d4d4d8);
-  }
-  .midnight-tool {
-    --c2-icon-button__state-layer--size: 32px;
-    --c2-icon-button__icon--width: 18px;
-    --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-
-<section class="midnight-stage">
-  <div class="midnight-heading">
-    <strong>What can I help you build?</strong>
-    <span>Reasoning and web access are ready</span>
-  </div>
-  <c2-chat-input class="midnight-composer" client:load aria-label="Message" placeholder="Message your assistant…">
-    <c2-icon-button class="midnight-tool" client:load slot="toolbar" tooltip="Add attachment">
-      <c2-feather-plus></c2-feather-plus>
-    </c2-icon-button>
-    <c2-icon-button class="midnight-tool" client:load slot="toolbar" tooltip="Use voice">
-      <c2-feather-mic></c2-feather-mic>
-    </c2-icon-button>
-    <c2-feather-arrow-up slot="send-icon"></c2-feather-arrow-up>
-  </c2-chat-input>
 </section>
 ```
 
@@ -208,15 +138,15 @@ Each composition below is a complete assistant prompt experience. The cards stay
     width: min(100%, 720px);
     padding: 30px;
     border-radius: 24px;
-    background: linear-gradient(145deg, #eef3ff, #f8f5ff 58%, #fff);
-    color: #172554;
+    background: linear-gradient(145deg, light-dark(#eef3ff, #151e36), light-dark(#f8f5ff, #1e1536) 58%, var(--c2-theme--color-surface, #ffffff));
+    color: light-dark(#172554, #868da5);
     font-family: Inter, system-ui, sans-serif;
   }
   .copilot-kicker {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #596579;
+    color: light-dark(#596579, #b3bdd1);
     font-size: 12px;
     font-weight: 600;
   }
@@ -245,9 +175,9 @@ Each composition below is a complete assistant prompt experience. The cards stay
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: #64748b;
-    --c2-icon-button__icon__hover--color: #4338ca;
-    --c2-icon-button__hover--background-color: #eef2ff;
+    --c2-icon-button__icon--color: light-dark(#64748b, #7a879b);
+    --c2-icon-button__icon__hover--color: light-dark(#4338ca, #817ad9);
+    --c2-icon-button__hover--background-color: light-dark(#eef2ff, #151c36);
   }
 </style>
 
@@ -259,77 +189,6 @@ Each composition below is a complete assistant prompt experience. The cards stay
     </c2-icon-button>
     <c2-icon-button class="copilot-tool" client:load slot="toolbar" tooltip="Choose tone">
       <c2-feather-sliders></c2-feather-sliders>
-    </c2-icon-button>
-    <c2-feather-arrow-up slot="send-icon"></c2-feather-arrow-up>
-  </c2-chat-input>
-</section>
-```
-
-```html tag=MdxCodeBlock,label=Developer agent
-<style>
-  .developer-stage {
-    box-sizing: border-box;
-    display: grid;
-    gap: 14px;
-    width: min(100%, 720px);
-    padding: 28px;
-    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    border-radius: 20px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-  .developer-context {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    font-size: 12px;
-  }
-  .developer-branch {
-    padding: 5px 9px;
-    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    border-radius: 999px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-  .developer-composer {
-    --c2-chat-input__container--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-input__container--border-radius: 14px;
-    --c2-chat-input__container--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-chat-input__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-input__container--padding: 11px;
-    --c2-chat-input__container__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-input__container__focus--border: 1px solid #22c55e;
-    --c2-chat-input__container__focus--box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
-    --c2-chat-input__textarea--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    --c2-chat-input__textarea--font-size: 13px;
-    --c2-chat-input__placeholder--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-input__send-button--border-radius: 8px;
-    --c2-chat-input__send-button--background: #22c55e;
-    --c2-chat-input__send-button--color: #052e16;
-    --c2-chat-input__send-button__hover--background: #4ade80;
-    --c2-chat-input__send-button__active--background: #16a34a;
-  }
-  .developer-tool {
-    --c2-icon-button__state-layer--size: 30px;
-    --c2-icon-button__icon--width: 16px;
-    --c2-icon-button__icon--height: 16px;
-    --c2-icon-button__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-icon-button__icon__hover--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-icon-button--border-radius: 7px;
-  }
-</style>
-
-<section class="developer-stage">
-  <div class="developer-context"><span class="developer-branch">⌘ codex/chat-input</span><span>3 files in context</span></div>
-  <c2-chat-input class="developer-composer" client:load aria-label="Agent instruction" min-rows="2" placeholder="Ask the agent to change the code…">
-    <c2-icon-button class="developer-tool" client:load slot="toolbar" tooltip="Add file">
-      <c2-feather-plus></c2-feather-plus>
-    </c2-icon-button>
-    <c2-icon-button class="developer-tool" client:load slot="toolbar" tooltip="Mention file">
-      <c2-feather-at-sign></c2-feather-at-sign>
     </c2-icon-button>
     <c2-feather-arrow-up slot="send-icon"></c2-feather-arrow-up>
   </c2-chat-input>

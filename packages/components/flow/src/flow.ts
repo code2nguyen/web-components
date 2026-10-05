@@ -1,5 +1,4 @@
-import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { isServer } from 'lit-html/is-server.js'
+import { LitElement, html, nothing, svg, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'

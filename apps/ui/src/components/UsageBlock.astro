@@ -38,9 +38,6 @@ const imports = pkg?.startsWith('@c2n/') ? importsFor(code, pkg, Astro.params.co
     <slot />
   </div>
   <div class="usage__toolbar">
-    <SiteIconButton hydrate="defined" size="sm" label="Invert preview background" class="usage__invert" aria-pressed="false">
-      <c2-feather-sun></c2-feather-sun>
-    </SiteIconButton>
     <SiteIconButton hydrate="defined" size="sm" label="Show code" class="usage__code-toggle" aria-expanded="false">
       <c2-feather-code></c2-feather-code>
     </SiteIconButton>
@@ -110,24 +107,6 @@ const imports = pkg?.startsWith('@c2n/') ? importsFor(code, pkg, Astro.params.co
         }
       }
     }
-    &.inverted &__canvas {
-      color-scheme: dark;
-      color: #f4f4f5;
-      background-color: #18181b;
-      --site-canvas-dot: rgba(244, 244, 245, 0.14);
-      > [data-label]::before {
-        color: #a1a1aa;
-      }
-    }
-    html[data-theme='dark'] &.inverted &__canvas {
-      color-scheme: light;
-      color: #18181b;
-      background-color: #ffffff;
-      --site-canvas-dot: rgba(24, 24, 27, 0.14);
-      > [data-label]::before {
-        color: #52525b;
-      }
-    }
 
     &__toolbar {
       display: flex;
@@ -191,10 +170,6 @@ const imports = pkg?.startsWith('@c2n/') ? importsFor(code, pkg, Astro.params.co
       codeToggle.setAttribute('aria-expanded', String(!expanded))
       codeToggle.setAttribute('aria-label', expanded ? 'Show code' : 'Hide code')
       if (codePanel) codePanel.hidden = expanded
-    })
-    usage.querySelector<HTMLElement>('.usage__invert')?.addEventListener('click', (event) => {
-      const inverted = usage.classList.toggle('inverted')
-      ;(event.currentTarget as HTMLElement).setAttribute('aria-pressed', String(inverted))
     })
   })
 </script>

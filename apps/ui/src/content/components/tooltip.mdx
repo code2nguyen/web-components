@@ -7,8 +7,8 @@ category: 'Feedback'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Tooltip } from '@c2n/tooltip'
-import { IconButton } from '@c2n/icon-button'
+import { Tooltip } from '@c2n/components/tooltip'
+import { IconButton } from '@c2n/components/icon-button'
 import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
 
 `c2-tooltip` describes the element it sits in: drop it inside a button and the button is the target, or point it at another element with `for="<id>"`. It shows after `delay` milliseconds on hover or focus and hides on leave, blur, press or Escape. The text is the slotted content, or the target's `data-tooltip` attribute when the slot is empty. It renders as a `popover` in the top layer, so it is never clipped by `overflow: hidden` or scrolling ancestors, and floating-ui flips the preferred `placement` when there is no room (the side in use is reflected as `current-placement`). The tooltip has `role="tooltip"` and the target gets `aria-describedby`, so screen readers announce it. `c2-icon-button` uses it for its `tooltip` attribute.

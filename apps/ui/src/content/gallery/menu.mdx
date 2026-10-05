@@ -6,9 +6,9 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 
-import { Menu } from '@c2n/menu'
-import { Button } from '@c2n/button'
-import { Kbd } from '@c2n/kbd'
+import { Menu } from '@c2n/components/menu'
+import { Button } from '@c2n/components/button'
+import { Kbd } from '@c2n/components/kbd'
 
 <ExampleModules />
 
@@ -73,28 +73,6 @@ Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the 
 <c2-menu class="compact" aria-label="Compact" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="cut">Cut</c2-menu-item><c2-menu-item value="copy">Copy</c2-menu-item><c2-menu-item value="paste">Paste</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
 ```
 
-```html tag=MdxCodeBlock,label=Dark
-<style>
-  .dark {
-    --c2-menu--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-menu--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --c2-menu__separator--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu__heading--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-menu-item--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-menu-item__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-menu-item__shortcut--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-menu-item__destructive--color: #f87171;
-    --c2-menu-item__destructive__hover--background: rgba(248, 113, 113, 0.14);
-  }
-</style>
-<c2-menu class="dark" aria-label="Dark" client:only="lit"><c2-button slot="trigger">Open</c2-button><h6>Workspace</h6><c2-menu-item value="settings">Settings<c2-kbd slot="shortcut">⌘,</c2-kbd></c2-menu-item><c2-menu-item value="members">Members</c2-menu-item><hr /><c2-menu-item value="leave" destructive>Leave workspace</c2-menu-item></c2-menu>
-```
-
 ```html tag=MdxCodeBlock,label=Wide with headings
 <style>
   .wide {
@@ -146,8 +124,8 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
 ```html tag=MdxCodeBlock,label=Tinted rows
 <style>
   .tinted {
-    --c2-menu-item__hover--background: #eef2ff;
-    --c2-menu-item__hover--color: #3730a3;
+    --c2-menu-item__hover--background: light-dark(#eef2ff, #151c36);
+    --c2-menu-item__hover--color: light-dark(#3730a3, #837ec4);
     --c2-menu-item__focus--outline: 2px solid rgba(99, 102, 241, 0.4);
     --c2-menu-item--font-weight: 500;
   }

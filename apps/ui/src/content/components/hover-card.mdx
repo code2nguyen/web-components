@@ -7,7 +7,7 @@ category: 'Feedback'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { HoverCard } from '@c2n/hover-card'
+import { HoverCard } from '@c2n/components/hover-card'
 
 `c2-hover-card` previews what sits behind a trigger — a profile behind a mention, the summary behind a link. Put the trigger in the `trigger` slot and the card content in the default slot. The card opens `open-delay` milliseconds (700 by default) after the trigger is hovered or focused and closes `close-delay` milliseconds (300) after the pointer and focus have left both the trigger and the card, or at once on Escape. Unlike [`c2-tooltip`](../tooltip), the card is interactive: the pointer can move into it, and links and buttons inside it follow the trigger in the tab order. Touch input does not open it. It renders as a `popover` in the top layer, so `overflow: hidden` ancestors never clip it, and floating-ui flips the preferred `placement` when there is no room. Treat the content as supplementary: anything in the card should also be reachable another way.
 

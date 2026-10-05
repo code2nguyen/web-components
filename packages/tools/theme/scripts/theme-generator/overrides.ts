@@ -52,6 +52,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 8%, transparent)',
   },
+  // Error text on a 10% wash of the same red is 4.1:1; a fifth of ink brings it to about 5.6:1 and stays light in dark mode.
+  '--c2-kanban-column__count__over--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-kanban-column__count__over--background-color': {
     token: 'color-error',
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 10%, var(--c2-theme--color-surface, #ffffff))',

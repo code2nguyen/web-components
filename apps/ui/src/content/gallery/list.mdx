@@ -5,9 +5,9 @@ description: 'Ready-made looks for c2-list: bordered menus, sidebars with headin
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { List } from '@c2n/list'
-import { ListItem } from '@c2n/list-item'
-import { Separator } from '@c2n/separator'
+import { List } from '@c2n/components/list'
+import { ListItem } from '@c2n/components/list-item'
+import { Separator } from '@c2n/components/separator'
 import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
 import { FeatherSendIcon as FeatherSend } from '@c2n/feather-icons/icons/send.js'
 import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
@@ -93,10 +93,10 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
 <style>
   .checklist {
     width: 220px;
-    --c2-list--border-top: 1px solid #e4e4e7;
-    --c2-list--border-right: 1px solid #e4e4e7;
-    --c2-list--border-bottom: 1px solid #e4e4e7;
-    --c2-list--border-left: 1px solid #e4e4e7;
+    --c2-list--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-list--border-top-left-radius: 10px;
     --c2-list--border-top-right-radius: 10px;
     --c2-list--border-bottom-left-radius: 10px;
@@ -105,10 +105,10 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
     --c2-list--padding-bottom: 6px;
     --c2-list--padding-left: 6px;
     --c2-list--padding-right: 6px;
-    --c2-list-item__selected--background: #f0fdf4;
-    --c2-list-item__selected--color: #166534;
-    --c2-list-item__selected__hover--background: #dcfce7;
-    --c2-list-item__icon--color: #16a34a;
+    --c2-list-item__selected--background: light-dark(#f0fdf4, #153020);
+    --c2-list-item__selected--color: light-dark(#166534, #90b49e);
+    --c2-list-item__selected__hover--background: light-dark(#dcfce7, #134627);
+    --c2-list-item__icon--color: light-dark(#16a34a, #59bb7d);
   }
 </style>
 <c2-list class="checklist" multiple value="design;tests" client:load>
@@ -155,46 +155,6 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
   <c2-list-item value="free">Free<span slot="description">1 project, community support</span></c2-list-item>
   <c2-list-item value="team">Team<span slot="description">Unlimited projects, SSO</span></c2-list-item>
   <c2-list-item value="enterprise">Enterprise<span slot="description">Audit log, dedicated support</span></c2-list-item>
-</c2-list>
-```
-
-```html tag=MdxCodeBlock,label=Command palette
-<style>
-  .palette {
-    width: 220px;
-    --c2-list--background: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-list--padding-top: 6px;
-    --c2-list--padding-bottom: 6px;
-    --c2-list--padding-left: 6px;
-    --c2-list--padding-right: 6px;
-    --c2-list--border-top-left-radius: 12px;
-    --c2-list--border-top-right-radius: 12px;
-    --c2-list--border-bottom-left-radius: 12px;
-    --c2-list--border-bottom-right-radius: 12px;
-    --c2-list--box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-    --c2-list__heading--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-    --c2-list__divider--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-list-item--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-list-item--font-size: 13px;
-    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-list-item__selected--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-list-item__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
-  }
-  .palette .shortcut {
-    font-size: 11px;
-    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 69%, var(--c2-theme--color-dark-surface, #18181b));
-  }
-</style>
-<c2-list class="palette" value="new" client:only="lit">
-  <h6>Actions</h6>
-  <c2-list-item value="new">New file<span slot="suffix-icon" class="shortcut">⌘N</span></c2-list-item>
-  <c2-list-item value="open">Open…<span slot="suffix-icon" class="shortcut">⌘O</span></c2-list-item>
-  <hr />
-  <h6>Recent</h6>
-  <c2-list-item value="tabs">tabs.ts</c2-list-item>
-  <c2-list-item value="card">card.ts</c2-list-item>
 </c2-list>
 ```
 

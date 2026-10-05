@@ -1,11 +1,11 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
-import '@c2n/select'
-import '@c2n/list-item'
-import '@c2n/text-field'
-import type { TextField } from '@c2n/text-field'
-import type { SelectionChangeEventDetail } from '@c2n/list'
+import '@c2n/components/select'
+import '@c2n/components/list-item'
+import '@c2n/components/text-field'
+import type { TextField } from '@c2n/components/text-field'
+import type { SelectionChangeEventDetail } from '@c2n/components/list'
 import { FONT_PROPERTY } from '../../utils/dom.ts'
 import { formatLength, parseLength } from '../../utils/css-value.ts'
 

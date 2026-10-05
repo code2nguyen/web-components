@@ -5,10 +5,10 @@ description: 'Chat rooms built from c2-chat-message-list, c2-chat-message and c2
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { ChatMessageList } from '@c2n/chat-message-list'
-import { ChatMessage } from '@c2n/chat-message'
-import { ChatInput } from '@c2n/chat-input'
-import { Avatar } from '@c2n/avatar'
+import { ChatMessageList } from '@c2n/components/chat-message-list'
+import { ChatMessage } from '@c2n/components/chat-message'
+import { ChatInput } from '@c2n/components/chat-input'
+import { Avatar } from '@c2n/components/avatar'
 
 Each card is a whole chat room: the list scrolls the conversation and the composer sits below it. The list's own variables set the spacing and the jump-to-latest button; the rows are styled through `c2-chat-message`.
 
@@ -43,75 +43,6 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
     <div>Great, I'll let the support team know.</div>
   </c2-chat-message>
 </c2-chat-message-list>
-```
-
-```html tag=MdxCodeBlock,label=Night assistant
-<style>
-  .night-room {
-    display: flex;
-    flex-direction: column;
-    height: 320px;
-    width: min(100%, 420px);
-    border-radius: 18px;
-    background: var(--c2-theme--color-dark-surface, #18181b);
-    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    overflow: hidden;
-  }
-  .night-list {
-    flex: 1;
-    --c2-chat-message-list__content--padding: 20px;
-    --c2-chat-message-list__content--gap: 20px;
-    --c2-chat-message-list__jump-button--background: var(--c2-theme--color-dark-surface-container, #27272a);
-    --c2-chat-message-list__jump-button--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-message-list__jump-button--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message-list__jump-button__hover--background: var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-message-list__badge--background: #a78bfa;
-    --c2-chat-message-list__badge--color: var(--c2-theme--color-dark-surface, #18181b);
-    --c2-chat-message-list__scrollbar__thumb--color: rgba(167, 139, 250, 0.35);
-    --c2-chat-message-list__scrollbar__thumb__hover--color: rgba(167, 139, 250, 0.6);
-  }
-  .night-list c2-chat-message {
-    --c2-chat-message__message--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-message__header__title--color: var(--c2-theme--color-on-dark-surface, #fafafa);
-  }
-  .night-list .night-outgoing {
-    --c2-chat-message__message--background: #312e81;
-    --c2-chat-message__message--padding-top: 8px;
-    --c2-chat-message__message--padding-right: 12px;
-    --c2-chat-message__message--padding-bottom: 8px;
-    --c2-chat-message__message--padding-left: 12px;
-    --c2-chat-message__message--border-top-left-radius: 14px;
-    --c2-chat-message__message--border-top-right-radius: 14px;
-    --c2-chat-message__message--border-bottom-left-radius: 14px;
-    --c2-chat-message__message--border-bottom-right-radius: 14px;
-  }
-  .night-input {
-    margin: 14px;
-    --c2-chat-input__container--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 2%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-input__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
-    --c2-chat-input__container--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
-    --c2-chat-input__send-button--background: #7c3aed;
-  }
-</style>
-
-<section class="night-room">
-  <c2-chat-message-list class="night-list" label="Conversation with Nova">
-    <c2-chat-message>
-      <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
-      <span slot="title">Nova</span>
-      <div>I summarised the three customer interviews. Want the themes or the quotes first?</div>
-    </c2-chat-message>
-    <c2-chat-message class="night-outgoing" align="right">
-      <div>Themes first, please.</div>
-    </c2-chat-message>
-    <c2-chat-message>
-      <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
-      <span slot="title">Nova</span>
-      <div>Onboarding friction, unclear pricing and a strong demand for exports.</div>
-    </c2-chat-message>
-  </c2-chat-message-list>
-  <c2-chat-input class="night-input" aria-label="Message" placeholder="Reply to Nova…"></c2-chat-input>
-</section>
 ```
 
 ```html tag=MdxCodeBlock,label=Support desk

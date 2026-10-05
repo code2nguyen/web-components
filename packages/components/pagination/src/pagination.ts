@@ -385,7 +385,10 @@ export class Pagination extends LitElement {
 
   private handleNav(target: number, control: 'previous' | 'next' | null) {
     if (this.disabled) return
-    this.lastPressedNav = control
+    // Only a press that left focus on the control hands it on; a click in a browser that does not focus buttons
+    // (Safari) should not pull focus into the pagination.
+    const focused = control !== null && this.shadowRoot?.activeElement?.getAttribute('data-nav') === control
+    this.lastPressedNav = focused ? control : null
     this.goToPage(target)
   }
 
@@ -518,9 +521,18 @@ export class Pagination extends LitElement {
     const pressed = this.lastPressedNav
     if (!pressed) return
     this.lastPressedNav = null
-    const active = this.shadowRoot?.activeElement
     const button = this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed}"]`)
-    if (!button || button !== active || !button.disabled) return
+    if (!button?.disabled) return
+    // Chromium blurs a focused button as it becomes disabled, so focus is already gone here (to the body). Focus that
+    // has moved anywhere else since, inside the pagination or out of it (a page-change handler focusing the results),
+    // wins over the hand-off.
+    const active = this.shadowRoot?.activeElement
+    if (active && active !== button) return
+    // Only once focus has left this shadow root does the document's focus say where it went: while a button here
+    // still holds it (Firefox and Safari keep focus on a disabled button), document.activeElement is retargeted to the
+    // outermost shadow host, which may be an ancestor component rather than this element.
+    const outside = document.activeElement
+    if (!active && outside && outside !== document.body) return
     this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed === 'previous' ? 'next' : 'previous'}"]`)?.focus()
   }
 

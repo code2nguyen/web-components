@@ -7,7 +7,7 @@ category: 'Layout'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Masonry } from '@c2n/masonry'
+import { Masonry } from '@c2n/components/masonry'
 
 `c2-masonry` packs direct `c2-masonry-item` children into the earliest available cells. It is useful when cards or charts have explicit row and column spans but the application should not manage coordinates. For fixed, author-positioned tracks, use [`c2-dashboard`](/web-components/components/dashboard) instead. Content stays in the application's markup, so forms and links work normally. If it is taller than a tile's declared height, it scrolls inside the tile.
 
@@ -83,8 +83,8 @@ import '@c2n/components/masonry'
   .operations-grid .card-badge {
     border-radius: 999px;
     padding: 3px 7px;
-    background: #dcfce7;
-    color: #166534;
+    background: light-dark(#dcfce7, #134627);
+    color: light-dark(#166534, #90b49e);
     font-size: 10px;
     font-weight: 700;
     white-space: nowrap;

@@ -1,9 +1,9 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
-import '@c2n/label'
-import '@c2n/icon-button'
-import '@c2n/tooltip'
+import '@c2n/components/label'
+import '@c2n/components/icon-button'
+import '@c2n/components/tooltip'
 import '@c2n/feather-icons/icons/rotate-ccw.js'
 import '@c2n/feather-icons/icons/info.js'
 

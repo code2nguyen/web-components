@@ -1,7 +1,6 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
-import { isServer } from 'lit-html/is-server.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { DashCardPlacement, DashboardCard, DashboardPanelSize } from './dashboard-host'

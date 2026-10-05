@@ -1,5 +1,5 @@
 ---
-description: 'Production-shaped autocomplete patterns: people mentions, issue navigation, asynchronous catalog search and a command launcher.'
+description: 'Production-shaped autocomplete patterns: people mentions, asynchronous catalog search and a command launcher.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -7,7 +7,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import AutocompleteExamplesRuntime from '../../components/AutocompleteExamplesRuntime.astro'
 
-import { Autocomplete } from '@c2n/autocomplete'
+import { Autocomplete } from '@c2n/components/autocomplete'
 
 ## Use cases
 
@@ -59,59 +59,6 @@ These examples exercise different capabilities instead of repeating the same dat
 </c2-autocomplete>
 ```
 
-```html tag=MdxCodeBlock,label=Jump to an issue
-<style>
-  .issue-jump {
-    width: 100%;
-    --c2-autocomplete--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-autocomplete--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-autocomplete--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-autocomplete__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-autocomplete__panel--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-autocomplete__panel--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-autocomplete__option__active--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-autocomplete__option__active--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-autocomplete__description--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-autocomplete__header--color: var(--c2-theme--color-outline, #d4d4d8);
-    --c2-autocomplete__footer--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-  }
-  .issue-filters {
-    display: flex;
-    gap: 6px;
-  }
-  .issue-filters button {
-    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    border-radius: 999px;
-    padding: 3px 9px;
-    color: var(--c2-theme--color-outline, #d4d4d8);
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
-  }
-  .issue-filters button[aria-pressed='true'] {
-    border-color: #818cf8;
-    color: var(--c2-theme--color-on-fill, #ffffff);
-    background: #3730a3;
-  }
-</style>
-<c2-autocomplete
-  client:only="lit"
-  class="issue-jump"
-  data-autocomplete-example="issues"
-  aria-label="Jump to an issue"
-  placeholder="Search key, title or project…"
-  item-key="key"
-  label-field="title"
-  description-field="project"
-  disabled-field="blocked"
-  search-fields="key;title;project"
-  suggestions='[{"key":"WEB-248","title":"Search panel closes on focus","project":"Web","updated":"2m ago","priority":"High"},{"key":"API-91","title":"Add cursor pagination","project":"Platform","updated":"1h ago","priority":"Medium"},{"key":"WEB-231","title":"Document custom row rendering","project":"Web","updated":"Yesterday","priority":"Low"},{"key":"OPS-44","title":"Rotate production credentials","project":"Operations","updated":"Monday","priority":"High","blocked":true}]'
->
-  <div slot="header" class="issue-filters"><button type="button" aria-pressed="true" data-issue-filter="all">All issues</button><button type="button" aria-pressed="false" data-issue-filter="mine">My project</button></div>
-  <span slot="footer" data-example-status>Blocked issues remain visible but cannot be selected</span>
-</c2-autocomplete>
-```
-
 ```html tag=MdxCodeBlock,label=Search a remote catalog
 <style>
   .catalog-search {
@@ -119,9 +66,10 @@ These examples exercise different capabilities instead of repeating the same dat
     --c2-autocomplete--border-radius: 12px;
     --c2-autocomplete__focus--border: 1px solid #d97706;
     --c2-autocomplete__focus--outline: 3px solid rgba(245, 158, 11, 0.2);
-    --c2-autocomplete__highlight--color: #b45309;
-    --c2-autocomplete__option__active--background: #fffbeb;
-    --c2-autocomplete__header--background: #fffbeb;
+    --c2-autocomplete__highlight--color: light-dark(#b45309, #ca8b5c);
+    --c2-autocomplete__option__active--background: light-dark(#fffbeb, #352f18);
+    --c2-autocomplete__header--background: light-dark(#fffbeb, #352f18);
+    --c2-autocomplete__header--color: light-dark(#92400e, #fcd34d);
   }
   .catalog-header {
     display: flex;
@@ -164,8 +112,8 @@ These examples exercise different capabilities instead of repeating the same dat
   .command-launcher {
     width: 100%;
     --c2-autocomplete--border-radius: 999px;
-    --c2-autocomplete__option__active--background: #eef2ff;
-    --c2-autocomplete__option__active--color: #312e81;
+    --c2-autocomplete__option__active--background: light-dark(#eef2ff, #151c36);
+    --c2-autocomplete__option__active--color: light-dark(#312e81, #8987b5);
     --c2-autocomplete__panel--box-shadow: 0 24px 70px rgba(30, 41, 59, 0.2);
   }
   .command-header {

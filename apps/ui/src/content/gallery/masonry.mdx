@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Masonry } from '@c2n/masonry'
+import { Masonry } from '@c2n/components/masonry'
 
 ## Gallery
 
@@ -116,102 +116,6 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
   <c2-masonry-item item-id="deploys" label="Deploys" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
     <div class="masonry-default-tile"><h3>Deployments today</h3><strong>3</strong><p>All checks passing</p><ul class="mini-list"><li><span>North region</span><span>09:42</span></li><li><span>West region</span><span>08:18</span></li></ul></div>
   </c2-masonry-item>
-</c2-masonry>
-```
-
-```html tag=MdxCodeBlock,label=Night watch
-<style>
-  .night-watch {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    --c2-masonry--gap: 8px;
-    --c2-masonry--row-height: 9px;
-    --c2-masonry--padding: 12px;
-    --c2-masonry--background: #101827;
-    --c2-masonry--border-radius: 14px;
-    --c2-masonry__placeholder--background: rgb(56 189 248 / 20%);
-    --c2-masonry__placeholder--border: 2px dashed #38bdf8;
-    --c2-masonry-item--background: #1e293b;
-    --c2-masonry-item--border: 1px solid #334155;
-    --c2-masonry-item--border-radius: 10px;
-    --c2-masonry-item__content--padding: 14px;
-    --c2-masonry-item__handle--background: #334155;
-    --c2-masonry-item__handle--color: #f8fafc;
-    --c2-masonry-item__handle__hover--background: #475569;
-  }
-
-  .night-watch h3 {
-    margin: 0 80px 6px 0;
-    color: #94a3b8;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .night-watch strong {
-    display: block;
-    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    font-size: 27px;
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-  }
-
-  .night-watch p {
-    margin: 7px 0 0;
-    color: #94a3b8;
-    font-size: 12px;
-  }
-
-  .night-watch .night-positive {
-    color: #5eead4;
-    font-weight: 600;
-  }
-
-  .night-watch .night-trend {
-    display: block;
-    width: 100%;
-    height: 58px;
-    margin-top: 15px;
-  }
-
-  .night-watch .night-trend path {
-    fill: none;
-    stroke: #38bdf8;
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .night-watch .night-list {
-    display: grid;
-    gap: 9px;
-    margin: 14px 0 0;
-    padding: 0;
-    list-style: none;
-    color: #cbd5e1;
-    font-size: 12px;
-  }
-
-  .night-watch .night-list li {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .night-watch .night-list li span {
-    color: #cbd5e1;
-  }
-
-  .night-watch .night-list b {
-    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-  }
-</style>
-<c2-masonry client:only="lit" class="night-watch" editable>
-  <c2-masonry-item item-id="requests" label="Requests" rows="13" cols="3" cols-sm="4" cols-md="5" cols-lg="6"><h3>Requests / min</h3><strong>12,804</strong><p><span class="night-positive">↑ 6.8%</span> from yesterday</p><svg class="night-trend" viewBox="0 0 240 58" preserveAspectRatio="none" aria-hidden="true"><path d="M2 47 29 42 54 45 80 31 107 35 133 22 159 27 184 15 211 20 238 7" /></svg></c2-masonry-item>
-  <c2-masonry-item item-id="errors" label="Errors" rows="10" cols="2" cols-sm="2" cols-md="2" cols-lg="3"><h3>Error rate</h3><strong>0.03%</strong><p>Below 0.1% threshold</p></c2-masonry-item>
-  <c2-masonry-item item-id="latency" label="Latency" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3"><h3>P95 latency</h3><strong>218 ms</strong><p>Target under 250 ms</p></c2-masonry-item>
-  <c2-masonry-item item-id="regions" label="Regions" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3"><h3>Regional health</h3><ul class="night-list"><li><span>North</span><b>Healthy</b></li><li><span>West</span><b>Healthy</b></li><li><span>East</span><b>Degraded</b></li></ul></c2-masonry-item>
 </c2-masonry>
 ```
 

@@ -1,5 +1,5 @@
 ---
-import type { TableColumnConfig, TableRow } from '@c2n/table/table-types.js'
+import type { TableColumnConfig, TableRow } from '@c2n/components/table'
 
 interface Props {
   variant: 'capabilities' | 'api'
@@ -59,7 +59,7 @@ const rows = variant === 'capabilities' ? capabilitiesRows : apiRows
 <c2-table stripe class={`chart-overview-table chart-overview-table--${variant}`} columns={JSON.stringify(columns)} rows={JSON.stringify(rows)}></c2-table>
 
 <script>
-  import '@c2n/table'
+  import '@c2n/components/table'
 </script>
 
 <style is:global>

@@ -7,9 +7,9 @@ category: 'Buttons'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { ButtonGroup } from '@c2n/button-group'
-import { Button } from '@c2n/button'
-import { IconButton } from '@c2n/icon-button'
+import { ButtonGroup } from '@c2n/components/button-group'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
 import ExampleModules from '../../components/ExampleModules.astro'
 import { FeatherAlignLeftIcon as FeatherAlignLeft } from '@c2n/feather-icons/icons/align-left.js'
 import { FeatherAlignCenterIcon as FeatherAlignCenter } from '@c2n/feather-icons/icons/align-center.js'
@@ -37,23 +37,23 @@ Importing `@c2n/components/button-group` also registers `c2-button` and `c2-icon
 ```html tag=UsageBlock,package=@c2n/button-group
 <style>
   .outlined {
-    --c2-button-group--border: 1px solid #d4d4d8;
-    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button-group--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button-group__divider--color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #3f3f46;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__hover--color: #18181b;
-    --c2-button__container__active--background-color: #e4e4e7;
-    --c2-button__container__selected--background-color: #edf1fe;
-    --c2-button__container__selected--color: #0265dc;
+    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__selected--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__selected--color: var(--c2-theme--color-primary, #0265dc);
     --c2-icon-button--background-color: transparent;
-    --c2-icon-button__hover--background-color: #f4f4f5;
-    --c2-icon-button__selected--background-color: #edf1fe;
-    --c2-icon-button__icon__selected--color: #0265dc;
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-icon-button__selected--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-icon-button__icon__selected--color: var(--c2-theme--color-primary, #0265dc);
     --c2-icon-button__state-layer--size: 36px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: #3f3f46;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
   .full {
     width: 320px;
