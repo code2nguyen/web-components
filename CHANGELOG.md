@@ -3,6 +3,16 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.2](https://github.com/code2nguyen/web-components/releases/tag/v1.0.2) — 2026-10-05
+
+### Fixes
+
+- **log-viewer:** Recognize the scroll event echoing a clamped tail write ([b4ffda7](https://github.com/code2nguyen/web-components/commit/b4ffda7))
+- **log-viewer:** Bound append renders by time in tests and on disconnect ([85fc73c](https://github.com/code2nguyen/web-components/commit/85fc73c))
+- **log-viewer:** Throttle append renders by time instead of animation frames ([e2d19cf](https://github.com/code2nguyen/web-components/commit/e2d19cf))
+- **log-viewer:** Stay on the latest entry when an app replaces its snapshot ([2969b92](https://github.com/code2nguyen/web-components/commit/2969b92))
+- **log-viewer:** Keep realtime appends responsive with frame-coalesced updates ([ac66641](https://github.com/code2nguyen/web-components/commit/ac66641))
+
 ## [1.0.1](https://github.com/code2nguyen/web-components/releases/tag/v1.0.1) — 2026-10-05
 
 ### Fixes

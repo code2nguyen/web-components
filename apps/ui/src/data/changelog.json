@@ -2,6 +2,43 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.2",
+      "date": "2026-10-05",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["log-viewer"],
+              "text": "Recognize the scroll event echoing a clamped tail write",
+              "hash": "b4ffda7"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Bound append renders by time in tests and on disconnect",
+              "hash": "85fc73c"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Throttle append renders by time instead of animation frames",
+              "hash": "e2d19cf"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Stay on the latest entry when an app replaces its snapshot",
+              "hash": "2969b92"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Keep realtime appends responsive with frame-coalesced updates",
+              "hash": "ac66641"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.1",
       "date": "2026-10-05",
       "sections": [
