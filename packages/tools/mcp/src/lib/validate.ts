@@ -64,8 +64,8 @@ const DOM_EVENTS = new Set(
     ' ',
   ),
 )
-/** React's own `on*` props, lowercased: DOM events minus those React has no prop for, plus `onDoubleClick`. */
-const REACT_EVENTS = new Set([...DOM_EVENTS].filter((e) => !['selectionchange', 'slotchange', 'formdata'].includes(e)).concat('doubleclick'))
+/** React's own `on*` props, lowercased: DOM events minus those React has no prop for, with `onDoubleClick` for `dblclick`. */
+const REACT_EVENTS = new Set([...DOM_EVENTS].filter((e) => !['dblclick', 'selectionchange', 'slotchange', 'formdata'].includes(e)).concat('doubleclick'))
 /**
  * Rules on a `c2-*` host that draw a second box around the component's own: restyle through its variables. A radius
  * alone draws nothing (it rounds a host shadow), so it is not one of them.
@@ -111,7 +111,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
       if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, jsx, report, used)
       else {
         checkNative(registry, tag, report)
-        const slot = tag.attributes.find((a) => a.name === 'slot')
+        const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
         if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
       }
       const style = tag.attributes.find((a) => a.name === 'style')
@@ -160,7 +160,7 @@ function checkElement(registry: Registry, tag: Tag, parent: string | undefined, 
   used.set(resolved.tag, resolved.modulePath)
   const element = resolved.element
   for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, jsx, report)
-  const slot = tag.attributes.find((a) => a.name === 'slot')
+  const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
   if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
 }
 
@@ -268,12 +268,13 @@ function checkSlot(registry: Registry, parent: string, slot: Tag['attributes'][n
   report(slot.index, 'error', 'unknown-slot', `\`<${resolved.tag}>\` has no slot \`${slot.value}\`.${hint.length ? didYouMean(hint) : list}`)
 }
 
+/** `type` and `slot` are matched case-insensitively, as an HTML document reads `TYPE` and `SLOT`. */
 function checkNative(registry: Registry, tag: Tag, report: Report) {
   let candidates = NATIVE[tag.name]
   if (tag.name === 'input') {
     // A bound type (`:type`, `[type]`, `type={t}`, `type=${t}`) is only known at runtime.
-    if (tag.attributes.some((a) => a.name !== 'type' && readBinding(a.name, false)?.name === 'type')) return
-    const type = tag.attributes.find((a) => a.name === 'type')?.value?.toLowerCase() ?? 'text'
+    if (tag.attributes.some((a) => a.name.toLowerCase() !== 'type' && readBinding(a.name, false)?.name === 'type')) return
+    const type = tag.attributes.find((a) => a.name.toLowerCase() === 'type')?.value?.toLowerCase() ?? 'text'
     if (SKIPPED_INPUT.has(type) || /[{}$]/.test(type)) return
     candidates = INPUT[type] ?? TEXT_INPUT
   }

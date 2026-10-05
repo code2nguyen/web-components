@@ -191,7 +191,16 @@ test('reads Vue dynamic arguments, Svelte bind:this, Angular key filters and bou
 })
 
 test('reads an HTML document case-insensitively, and a framework template case-sensitively', () => {
-  assert.deepEqual(rules('<BUTTON>Go</BUTTON>\n<INPUT TYPE="checkbox">', 'page.html'), ['1:native-element', '2:native-element'])
+  const upper = validateMarkup(
+    registry,
+    '<BUTTON>Go</BUTTON>\n<INPUT TYPE="checkbox">\n<c2-button><SPAN SLOT="prefx-icon"></SPAN></c2-button>',
+    'page.html',
+  ).findings
+  assert.deepEqual(
+    upper.map((f) => `${f.line}:${f.rule}`),
+    ['1:native-element', '2:native-element', '3:unknown-slot'],
+  )
+  assert.match(upper[1].message, /c2-checkbox/)
   assert.deepEqual(rules('<c2-text-field PLACEHOLDER="x" readOnly></c2-text-field>', 'page.html'), [])
   assert.deepEqual(rules('<Button>Go</Button>', 'App.vue'), [])
   // The camelCase spelling of a kebab-case attribute is still the silent no-op.
@@ -216,6 +225,7 @@ test('checks JSX on-props and HTML inline handlers against the events the elemen
     ['`onSelectionChange` listens for an event', '`<c2-table>` fires no `SelectionChnage` '],
   )
   assert.deepEqual(rules('<c2-table onclick="f()" onselection-change="g()" onclik="h()"></c2-table>'), ['1:unknown-event', '1:unknown-event'])
+  assert.deepEqual(rules('<c2-button onDoubleClick={f} onDblClick={g} />', 'A.tsx'), ['1:unknown-event'])
 })
 
 test('skips Angular class and style bindings, and does not treat name as global', () => {
