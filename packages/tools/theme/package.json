@@ -55,6 +55,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/inline-edit:build",
         "../../components/kanban:build",
         "../../components/gantt:build",
         "../../components/working-indicator:build",

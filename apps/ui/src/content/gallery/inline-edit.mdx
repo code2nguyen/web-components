@@ -1,0 +1,75 @@
+---
+description: 'Ready-made looks for c2-inline-edit: page titles, table cells, an always-visible pencil and an underlined field. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { InlineEdit } from '@c2n/components/inline-edit'
+
+## Presets
+
+The read view and the field share one box, so padding, radius and the font carry over from one to the other. `--c2-inline-edit__hover--background`, `--c2-inline-edit__editor--border` and the `__edit-icon` variables do most of the work.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>
+```
+
+```html tag=MdxCodeBlock,label=Page title
+<style>
+  .page-title {
+    width: 260px;
+    --c2-inline-edit--font-size: 24px;
+    --c2-inline-edit--font-weight: 700;
+    --c2-inline-edit--line-height: 32px;
+    --c2-inline-edit--padding-inline: 8px;
+    --c2-inline-edit--border-radius: 8px;
+    --c2-inline-edit__edit-icon--size: 18px;
+  }
+</style>
+<c2-inline-edit class="page-title" label="Page title" placeholder="Untitled" value="Roadmap"></c2-inline-edit>
+```
+
+```html tag=MdxCodeBlock,label=Table cell
+<style>
+  .table-cell {
+    width: 200px;
+    --c2-inline-edit--font-size: 13px;
+    --c2-inline-edit--line-height: 20px;
+    --c2-inline-edit--padding-block: 4px;
+    --c2-inline-edit--padding-inline: 8px;
+    --c2-inline-edit--border-radius: 0px;
+    --c2-inline-edit__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-inline-edit__editor--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-inline-edit class="table-cell" label="Customer" value="Acme Corporation"></c2-inline-edit>
+```
+
+```html tag=MdxCodeBlock,label=Visible pencil
+<style>
+  .visible-pencil {
+    --c2-inline-edit__edit-icon--opacity: 1;
+    --c2-inline-edit__edit-icon--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-inline-edit__hover--background: var(--c2-theme--color-primary-container, #edf1fe);
+  }
+</style>
+<c2-inline-edit class="visible-pencil" label="Display name" value="Ada Lovelace"></c2-inline-edit>
+```
+
+```html tag=MdxCodeBlock,label=Save and cancel
+<style>
+  .save-cancel {
+    width: 240px;
+    --c2-inline-edit__controls--gap: 2px;
+    --c2-inline-edit__control--size: 28px;
+    --c2-inline-edit__control--border-radius: 6px;
+    --c2-inline-edit__control__hover--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-inline-edit class="save-cancel" label="Email" value="ada@example.com" controls blur-action="none"></c2-inline-edit>
+```
+
+</GalleryGrid>

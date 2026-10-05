@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>inline-edit scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+    </style>
+    <script type="module">
+      import '../src/inline-edit.ts'
+      // Scenario-only: the select used as a slotted editor.
+      import '@c2n/select'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>
