@@ -106,8 +106,12 @@ test('accepts a runnable UI example customized through a documented property or 
       },
     },
   ]
-  const propertyExample = [{ path: 'demo.mdx', source: "import '@c2n/demo'\n```html tag=UsageBlock\n<style>c2-demo{--c2-demo--color:red}</style><c2-demo></c2-demo>\n```" }]
-  const partExample = [{ path: 'demo.mdx', source: "import '@c2n/demo'\n```html tag=MdxCodeBlock\n<style>c2-demo::part(body){padding:1rem}</style><c2-demo></c2-demo>\n```" }]
+  const propertyExample = [
+    { path: 'demo.mdx', source: "import '@c2n/demo'\n```html tag=UsageBlock\n<style>c2-demo{--c2-demo--color:red}</style><c2-demo></c2-demo>\n```" },
+  ]
+  const partExample = [
+    { path: 'demo.mdx', source: "import '@c2n/demo'\n```html tag=MdxCodeBlock\n<style>c2-demo::part(body){padding:1rem}</style><c2-demo></c2-demo>\n```" },
+  ]
 
   assert.deepEqual(exampleCoverageProblems(packages, propertyExample), [])
   assert.deepEqual(exampleCoverageProblems(packages, partExample), [])
@@ -170,7 +174,10 @@ test('generator merge preserves every reviewed decision and non-name-equivalent 
   ]
 
   const entries = mergeSlotStylingAuditEntries(elements, reviewed)
-  assert.deepEqual(entries.filter((entry) => reviewed.some((item) => item.slot === entry.slot)), reviewed)
+  assert.deepEqual(
+    entries.filter((entry) => reviewed.some((item) => item.slot === entry.slot)),
+    reviewed,
+  )
   assert.deepEqual(entries.find((entry) => entry.slot === 'header')?.parts, ['header'])
 })
 
@@ -196,4 +203,19 @@ test('requires shared state descriptions to name every applicable slot', async (
   const input = await fixture('shared-part.json')
   input.elements[0].parts.state = 'Container wrapping the `empty` slot and its fallback.'
   assert.match(validateSlotStylingAudit(input).errors.join('\n'), /related error slot/i)
+})
+
+test('counts a page that imports the package through the @c2n/components bundle, not a longer-named sibling', () => {
+  const packages = [
+    {
+      name: '@c2n/demo',
+      manifest: { modules: [{ declarations: [{ tagName: 'c2-demo', cssProperties: [{ name: '--c2-demo--color' }] }] }] },
+    },
+  ]
+  const example = '```html tag=MdxCodeBlock\n<style>.x { --c2-demo--color: red; }</style>\n<c2-demo class="x"></c2-demo>\n```'
+  assert.deepEqual(exampleCoverageProblems(packages, [{ path: 'demo.mdx', source: `import { Demo } from '@c2n/components/demo'\n${example}` }]), [])
+  assert.match(
+    exampleCoverageProblems(packages, [{ path: 'demo-item.mdx', source: `import '@c2n/components/demo-item'\n${example}` }]).join('\n'),
+    /no runnable UI example/i,
+  )
 })
