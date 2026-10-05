@@ -32,7 +32,7 @@ const umbrellaExports = new Set(
 )
 const umbrellaPackages = new Set([...umbrellaExports].filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath)).map((subpath) => `@c2n/${subpath.slice(2)}`))
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
-const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
+const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Editors & viewers', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
 
 interface Manifest {
