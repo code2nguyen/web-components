@@ -149,14 +149,21 @@ function startLiveDemo(viewer: LogViewer): void {
     else timer = setTimeout(tick, LIVE_INTERVAL * burst * (0.5 + Math.random()))
     render()
   }
-  const play = () => {
+  let visible = false
+  let offscreen = false
+  // jump: a reader pressing Resume or Replay wants the latest entry; resuming because the demo scrolled back into view keeps their place.
+  const play = (jump: boolean) => {
     if (running) return
+    if (!visible) {
+      offscreen = true
+      return
+    }
     if (count >= LIVE_TOTAL) {
       count = 0
       viewer.clear()
     }
     running = true
-    viewer.scrollToEnd()
+    if (jump) viewer.scrollToEnd()
     timer = setTimeout(tick, LIVE_INTERVAL)
     render()
   }
@@ -165,18 +172,18 @@ function startLiveDemo(viewer: LogViewer): void {
     clearTimeout(timer)
     render()
   }
-  let offscreen = false
-  toggle?.addEventListener('click', () => (running ? pause() : play()))
-  // Stream only while the example is on screen, so a reader scrolling past does not come back to a finished demo.
+  toggle?.addEventListener('click', () => (running ? pause() : play(true)))
+  // Stream only while the example, its buttons included, is on screen, so a reader scrolling past does not come back to a finished demo.
   new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting && (count === 0 || offscreen)) {
+    visible = entry.isIntersecting
+    if (visible && (count === 0 || offscreen)) {
       offscreen = false
-      play()
-    } else if (!entry.isIntersecting && running) {
+      play(false)
+    } else if (!visible && running) {
       offscreen = true
       pause()
     }
-  }).observe(viewer)
+  }).observe(demo)
   render()
 }
 

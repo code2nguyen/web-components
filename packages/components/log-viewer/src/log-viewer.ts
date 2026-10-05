@@ -8,6 +8,8 @@ import { LogTokenLines } from './log-tokens.js'
 import styles from './log-viewer.scss?inline'
 
 export type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
+
+const FRAME_INTERVAL = 16
 interface LayoutEntry {
   source: number
   highlighted: boolean
@@ -105,6 +107,7 @@ export class LogViewer extends LitElement {
   private follow = true
   private appended = false
   private deferred = false
+  private lastUpdate = -Infinity
   private flush?: () => void
   private canvas?: CanvasRenderingContext2D | null
   private font = ''
@@ -394,24 +397,29 @@ export class LogViewer extends LitElement {
     return -1
   }
 
-  // A live stream can append many times per frame: an update requested only by appends waits for the next frame, so layout and
-  // the scroll write happen once per frame. Any other change (filter, properties, scrolling) renders it right away.
+  // A live stream can append many times per frame. An update requested only by appends renders at most once per frame
+  // interval, so layout and the scroll write happen once for a burst; an append after a quiet period renders right away.
+  // A timer rather than requestAnimationFrame keeps that latency independent of how a browser paces frames.
   protected override async scheduleUpdate(): Promise<void> {
-    if (this.deferred)
+    const wait = this.deferred ? this.lastUpdate + FRAME_INTERVAL - performance.now() : 0
+    if (wait > 0)
       await new Promise<void>((resolve) => {
-        const frame = requestAnimationFrame(() => resolve())
+        const timer = setTimeout(resolve, wait)
         this.flush = () => {
-          cancelAnimationFrame(frame)
+          clearTimeout(timer)
           resolve()
         }
       })
     this.flush = undefined
     this.deferred = false
+    this.lastUpdate = performance.now()
     super.scheduleUpdate()
   }
 
+  // Any other change (filter, properties, scrolling) renders right away, including one made before the wait has begun.
   override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration, useNewValue?: boolean, newValue?: unknown): void {
     super.requestUpdate(name, oldValue, options, useNewValue, newValue)
+    this.deferred = false
     this.flush?.()
   }
 

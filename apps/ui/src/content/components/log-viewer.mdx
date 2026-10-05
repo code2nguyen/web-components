@@ -29,7 +29,7 @@ These examples model a server access stream and a commercial checkout incident. 
 
 **Try virtual scrolling:** the second example contains **10,000 entries**, including messages with different heights. Scroll through the stream, or jump between the beginning and the latest entry.
 
-**Try sticky attributes:** in the second example, scroll slowly through the long error trace. Its timestamp and `ERROR` label stay at the top while the message moves. They leave with that entry when the next one arrives.
+**Try sticky attributes:** in the third example, scroll slowly through the long error trace. Its timestamp and `ERROR` label stay at the top while the message moves. They leave with that entry when the next one arrives.
 
 ```html tag=UsageBlock,package=@c2n/log-viewer
 <style>
@@ -143,20 +143,22 @@ Appends follow the end when you are already there. Scroll up to read history and
 
 ### Streaming
 
-Pass `appendEntries()` **only the new entries**. The viewer keeps what it already has and lays out just the new rows, so a long-running stream costs the same per entry at 100 or 10,000 lines. Calls made in quick succession render together on the next frame. Avoid replacing the whole log on every update (`clear()` followed by `appendEntries(allEntries)`): each update then lays out every entry again.
+Pass `appendEntries()` **only the new entries**. The viewer keeps what it already has and lays out just the new rows while column widths stay the same, so a long-running stream costs the same per entry at 100 or 10,000 lines. When a new attribute value widens a column, an unwrapped log only updates its scroll width, but a wrapped one (`wrap`) lays out its retained rows again for the narrower message column. Calls made in quick succession render together, at most once per frame. Avoid replacing the whole log on every update (`clear()` followed by `appendEntries(allEntries)`): each update then lays out every entry again.
 
 ```ts tag=CodeBlock
-// React: keep the count already handed to the viewer and append the rest.
-const appended = useRef(0)
+// React: `logs` grows by appending ([...logs, entry]). Keep how much the viewer already has and append the rest.
+const appended = useRef({ first: undefined as LogEntry | undefined, count: 0 })
 useEffect(() => {
   const viewer = viewerRef.current
   if (!viewer) return
-  if (logs.length < appended.current) {
-    viewer.clear() // The application reset its log.
-    appended.current = 0
+  const handed = appended.current
+  // A different first entry (or a shorter log) means the application started a new log, not a longer one.
+  if (logs[0] !== handed.first || logs.length < handed.count) {
+    viewer.clear()
+    handed.count = 0
   }
-  viewer.appendEntries(logs.slice(appended.current))
-  appended.current = logs.length
+  viewer.appendEntries(logs.slice(handed.count))
+  appended.current = { first: logs[0], count: logs.length }
 }, [logs])
 ```
 

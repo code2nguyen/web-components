@@ -45,7 +45,7 @@ test('continuous live appends remain responsive with bounded rendering', async (
   await expect(viewer.locator('[data-index="10099"]')).toContainText('stream 99')
 })
 
-test('appends arriving in many tasks render at most once per frame', async ({ page, scenario }) => {
+test('appends arriving in many tasks render about once per frame', async ({ page, scenario }) => {
   await scenario('many')
   const result = await page.locator('c2-log-viewer').evaluate(async (element) => {
     const log = element as LogViewer
@@ -89,6 +89,8 @@ test('a widening attribute column does not re-lay out unwrapped entries', async 
     log.setFilter(null)
     await log.updateComplete
     const rebuild = performance.now() - started
+    // Past the append throttle window, so neither measurement includes a scheduling wait.
+    await new Promise((resolve) => setTimeout(resolve, 50))
     started = performance.now()
     log.appendEntries({ level: 'INFO', source: 'a-much-longer-source-name', message: 'wider' })
     await log.updateComplete
