@@ -528,8 +528,11 @@ export class Pagination extends LitElement {
     // wins over the hand-off.
     const active = this.shadowRoot?.activeElement
     if (active && active !== button) return
+    // Only once focus has left this shadow root does the document's focus say where it went: while a button here
+    // still holds it (Firefox and Safari keep focus on a disabled button), document.activeElement is retargeted to the
+    // outermost shadow host, which may be an ancestor component rather than this element.
     const outside = document.activeElement
-    if (outside && outside !== document.body && outside !== this) return
+    if (!active && outside && outside !== document.body) return
     this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed === 'previous' ? 'next' : 'previous'}"]`)?.focus()
   }
 
