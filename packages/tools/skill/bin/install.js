@@ -37,7 +37,7 @@ Then:
 - Build the child elements a container expects: \`get_component\` lists them under "Children" (\`c2-dashboard\` holds \`c2-dash-card\`, \`c2-tabs\` holds \`c2-tab\`).
 - Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for parts \`get_component\` lists.
 - Theme once: import \`@c2n/components/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
-- Before finishing, check what you wrote with the MCP tool \`validate_markup\` (or \`npx -y @c2n/mcp validate <paths>\`) and fix what it reports. Mark a deliberate native element with a \`c2n-ignore\` comment.
+- Before finishing, check what you wrote with the MCP tool \`validate_markup\` (or \`npx -y @c2n/mcp validate src\`) and fix what it reports. Mark a deliberate native element with a \`c2n-ignore\` comment.
 - The \`c2n-components\` skill (\`${skill}\`) has the full workflow.
 ${instructionsEnd}`
 }

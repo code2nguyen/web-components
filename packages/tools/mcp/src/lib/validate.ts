@@ -55,15 +55,17 @@ const TEXT_INPUT = ['c2-text-field']
 const SKIPPED_INPUT = new Set(['hidden', 'image'])
 
 const GLOBAL_ATTRIBUTES = new Set(
-  'id class style slot part exportparts title lang dir hidden inert tabindex role is nonce autofocus draggable contenteditable spellcheck translate accesskey autocapitalize enterkeyhint inputmode popover popovertarget popovertargetaction name key ref classname htmlfor suppresshydrationwarning dangerouslysetinnerhtml defer-hydration'.split(
+  'id class style slot part exportparts title lang dir hidden inert tabindex role is nonce autofocus draggable contenteditable spellcheck translate accesskey autocapitalize enterkeyhint inputmode popover popovertarget popovertargetaction key ref classname htmlfor suppresshydrationwarning dangerouslysetinnerhtml defer-hydration'.split(
     ' ',
   ),
 )
 const DOM_EVENTS = new Set(
-  'click dblclick auxclick contextmenu input change submit reset invalid focus blur focusin focusout keydown keyup keypress pointerdown pointerup pointermove pointerenter pointerleave pointerover pointerout pointercancel mousedown mouseup mousemove mouseenter mouseleave mouseover mouseout wheel touchstart touchend touchmove touchcancel dragstart drag dragend dragenter dragleave dragover drop scroll scrollend copy cut paste select toggle beforetoggle load error animationstart animationend animationiteration transitionstart transitionend transitionrun transitioncancel'.split(
+  'click dblclick auxclick contextmenu input change submit reset invalid focus blur focusin focusout keydown keyup keypress pointerdown pointerup pointermove pointerenter pointerleave pointerover pointerout pointercancel mousedown mouseup mousemove mouseenter mouseleave mouseover mouseout wheel touchstart touchend touchmove touchcancel dragstart drag dragend dragenter dragleave dragover drop scroll scrollend copy cut paste select toggle beforetoggle load error animationstart animationend animationiteration transitionstart transitionend transitionrun transitioncancel beforeinput compositionstart compositionupdate compositionend gotpointercapture lostpointercapture selectstart selectionchange cancel close resize slotchange formdata animationcancel'.split(
     ' ',
   ),
 )
+/** React's own `on*` props, lowercased: DOM events minus those React has no prop for, plus `onDoubleClick`. */
+const REACT_EVENTS = new Set([...DOM_EVENTS].filter((e) => !['selectionchange', 'slotchange', 'formdata'].includes(e)).concat('doubleclick'))
 /**
  * Rules on a `c2-*` host that draw a second box around the component's own: restyle through its variables. A radius
  * alone draws nothing (it rounds a host shadow), so it is not one of them.
@@ -165,16 +167,39 @@ function checkElement(registry: Registry, tag: Tag, parent: string | undefined, 
 function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attributes'][number], jsx: boolean, report: Report) {
   const binding = readBinding(attribute.name, jsx)
   if (!binding) return
+  const events = element.events.map((e) => e.name)
+  const list = events.length ? ` Its events: ${events.map((e) => `\`${e}\``).join(', ')}.` : ''
   if (binding.kind === 'event') {
-    const events = element.events.map((e) => e.name)
     if (!events.includes(binding.name) && !DOM_EVENTS.has(binding.name) && !/^ng[A-Z]/.test(binding.name)) {
-      report(
-        attribute.index,
-        'warning',
-        'unknown-event',
-        `\`<${tag}>\` fires no \`${binding.name}\` event.${events.length ? ` Its events: ${events.map((e) => `\`${e}\``).join(', ')}.` : ''}`,
-      )
+      report(attribute.index, 'warning', 'unknown-event', `\`<${tag}>\` fires no \`${binding.name}\` event.${list}`)
     }
+    return
+  }
+  if (binding.kind === 'react-event') {
+    // React 19 listens for the event named after `on` exactly as written; its own props (`onClick`) map to DOM events.
+    if (events.includes(binding.name) || REACT_EVENTS.has(binding.name.toLowerCase())) return
+    const kebab = binding.name.replace(/^[A-Z]/, (c) => c.toLowerCase()).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
+    report(
+      attribute.index,
+      'warning',
+      'unknown-event',
+      events.includes(kebab)
+        ? `\`${attribute.name}\` listens for an event named \`${binding.name}\`; \`<${tag}>\` fires \`${kebab}\`: write \`on${kebab}\` or add the listener through a ref.`
+        : `\`<${tag}>\` fires no \`${binding.name}\` event.${list}`,
+    )
+    return
+  }
+  if (binding.kind === 'handler') {
+    // Inline `on…` attributes exist for built-in events only; a custom event needs addEventListener.
+    if (DOM_EVENTS.has(binding.name)) return
+    report(
+      attribute.index,
+      'warning',
+      'unknown-event',
+      events.includes(binding.name)
+        ? `\`${attribute.name}\` does nothing: inline handlers exist only for built-in events. Listen for \`${binding.name}\` with addEventListener.`
+        : `\`${attribute.name}\` is not an event handler: \`<${tag}>\` fires no \`${binding.name}\` event.${list}`,
+    )
     return
   }
   const name = binding.name
@@ -184,8 +209,8 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
   // The HTML parser lowercases a static attribute name, so `PLACEHOLDER` is `placeholder` (and `readOnly` is `readonly`).
   if (binding.kind === 'attribute' && attributes.includes(lower)) return
   if (binding.kind === 'property' && element.properties?.includes(name)) return
-  // Inline handlers (`onclick`), ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
-  if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-|on[a-z])/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
+  // ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
+  if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
   const flat = (value: string) => value.toLowerCase().replaceAll('-', '')
   const loose = attributes.find((a) => flat(a) === flat(name))
   // A property binding (and a JSX prop, which React 19 assigns as a property) may use the camelCase spelling.
@@ -204,7 +229,7 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
 }
 
 /** Reads the framework binding syntaxes down to the attribute, property or event they name. */
-function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property' | 'event'; name: string } | undefined {
+function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property' | 'event' | 'react-event' | 'handler'; name: string } | undefined {
   if (raw.startsWith('@')) return { kind: 'event', name: raw.slice(1).split('.')[0] }
   if (raw.startsWith('v-on:')) return { kind: 'event', name: raw.slice(5).split('.')[0] }
   if (raw.startsWith('on:')) return { kind: 'event', name: raw.slice(3).split('|')[0] }
@@ -214,6 +239,8 @@ function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property
     return name.includes(':') ? undefined : { kind: 'event', name: name.split('.')[0] }
   }
   if (raw.startsWith('[attr.')) return { kind: 'attribute', name: raw.slice(6, -1) }
+  // `[class.active]` and `[style.color]` set a class or a style, not a property of the element.
+  if (/^\[(class|style)\./.test(raw)) return undefined
   if (/^\[[^\]]+\]$/.test(raw)) return raw.startsWith('[(') ? undefined : { kind: 'property', name: raw.slice(1, -1) }
   if (raw.startsWith('.')) return { kind: 'property', name: raw.slice(1).split('.')[0] }
   if (raw.startsWith('?')) return { kind: 'attribute', name: raw.slice(1) }
@@ -224,7 +251,8 @@ function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property
   if (raw.startsWith('bind:')) return raw === 'bind:this' ? undefined : { kind: 'property', name: raw.slice(5) }
   // Other prefixed names are directives (`v-model`, `client:load`, `#header`, `*ngIf`, `let-x`, spreads).
   if (/^(v-|#|\*|let-|\{|\.\.\.)/.test(raw) || raw.includes(':')) return undefined
-  if (jsx && /^on[A-Z]/.test(raw)) return undefined
+  if (jsx && /^on[A-Za-z]/.test(raw)) return { kind: 'react-event', name: raw.slice(2) }
+  if (!jsx && /^on[a-z]/i.test(raw)) return { kind: 'handler', name: raw.slice(2).toLowerCase() }
   return { kind: jsx ? 'property' : 'attribute', name: raw }
 }
 
@@ -272,6 +300,7 @@ function checkCss(css: string, offset: number, report: Report) {
 }
 
 function checkDeclarations(declarations: string, offset: number, host: string, report: Report) {
+  declarations = declarations.replace(/\/\*[\s\S]*?\*\//g, (comment) => ' '.repeat(comment.length))
   // CSS text (`padding: 4px; …`) or a JSX style object (`{{ padding: 4, borderTop: '…' }}`).
   for (const declaration of declarations.matchAll(/(^|[;{,])\s*['"]?([a-zA-Z-]+)['"]?\s*:/g)) {
     const property = declaration[2].replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
@@ -500,9 +529,11 @@ function ignoredLines(source: string, starts: number[]): Set<number> {
   const ignored = new Set<number>()
   for (const m of source.matchAll(/c2n-ignore/g)) {
     const { line } = position(starts, m.index)
+    const text = source.slice(starts[line - 1], starts[line] ?? source.length)
+    // Only the marker inside a comment (`<!-- -->`, `/* */`, `//`) counts, not the word in a string or in prose.
+    if (!/(<!--|\/\*|\/\/)/.test(source.slice(starts[line - 1], m.index))) continue
     ignored.add(line)
     // A comment on a line of its own covers the next line; one after an element covers only its own.
-    const text = source.slice(starts[line - 1], starts[line] ?? source.length)
     if (!/<(?!!--)[a-zA-Z]/.test(text.replace(/\{\/\*[\s\S]*?\*\/\}/g, ''))) ignored.add(line + 1)
   }
   return ignored

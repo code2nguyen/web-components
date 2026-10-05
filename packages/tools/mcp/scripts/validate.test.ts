@@ -208,3 +208,22 @@ test('flags box styling in a JSX style object on a c2 host', () => {
     '1:host-box-style',
   ])
 })
+
+test('checks JSX on-props and HTML inline handlers against the events the element fires', () => {
+  const tsx = validateMarkup(registry, '<c2-table onClick={f} onselection-change={g} onSelectionChange={h} onSelectionChnage={i} />', 'A.tsx').findings
+  assert.deepEqual(
+    tsx.map((f) => f.message.slice(0, 40)),
+    ['`onSelectionChange` listens for an event', '`<c2-table>` fires no `SelectionChnage` '],
+  )
+  assert.deepEqual(rules('<c2-table onclick="f()" onselection-change="g()" onclik="h()"></c2-table>'), ['1:unknown-event', '1:unknown-event'])
+})
+
+test('skips Angular class and style bindings, and does not treat name as global', () => {
+  assert.deepEqual(rules('<c2-table [class.active]="a" [style.color]="c"></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table name="x"></c2-table>'), ['1:unknown-attribute'])
+})
+
+test('only a c2n-ignore inside a comment counts, and comments in an inline style are skipped', () => {
+  assert.deepEqual(rules('<p>use c2n-ignore</p>\n<button>x</button>'), ['2:native-element'])
+  assert.deepEqual(rules('<c2-button style="color: red; /* note */ padding: 4px">Go</c2-button>'), ['1:host-box-style'])
+})

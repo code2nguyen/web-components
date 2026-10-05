@@ -160,7 +160,8 @@ export function withInstalledApi(registry: Registry): Registry {
       const prefix = component.elements[0]?.tag
       for (const [tag, api] of installed) {
         if (own.has(tag) || tagIndex[tag] || !prefix || !tag.startsWith(`${prefix}-`)) continue
-        elements.push({ ...api, tag, modulePath: component.elements[0].modulePath, description: '' })
+        // The package entry registers every element of the package; one element's own module may not.
+        elements.push({ ...api, tag, modulePath: component.install.umbrella ?? component.elements[0].modulePath, description: '' })
         tagIndex[tag] = id
       }
       return [id, { ...component, elements: elements.length ? elements : component.elements }]

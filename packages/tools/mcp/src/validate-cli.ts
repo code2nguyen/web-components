@@ -31,7 +31,7 @@ const EXTENSIONS = new Set([
 ])
 const SKIPPED_DIRECTORIES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', '.git', '.next', '.nuxt', '.svelte-kit', '.astro', '.angular'])
 
-export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--format json]
+export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--format json|text]
        c2n-mcp validate --hook
 
 Checks markup and CSS against the c2n component API (default path: src). Exits 1 on errors, or on warnings too with
@@ -90,9 +90,14 @@ export async function runValidate(args: string[]): Promise<number> {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
     if (arg === '--strict') strict = true
-    else if (arg === '--format') json = args[++i] === 'json'
-    else if (arg.startsWith('--format=')) json = arg.slice('--format='.length) === 'json'
-    else if (arg.startsWith('--')) {
+    else if (arg === '--format' || arg.startsWith('--format=')) {
+      const format = arg === '--format' ? args[++i] : arg.slice('--format='.length)
+      if (format !== 'json' && format !== 'text') {
+        console.error(`c2n validate: --format takes json or text, not ${format ?? 'nothing'}\n\n${VALIDATE_USAGE}`)
+        return 1
+      }
+      json = format === 'json'
+    } else if (arg.startsWith('--')) {
       console.error(`c2n validate: unknown option ${arg}\n\n${VALIDATE_USAGE}`)
       return 1
     } else paths.push(arg)
