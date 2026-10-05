@@ -28,7 +28,7 @@ function instructionsBlock(skill) {
 This project builds its UI from the c2n web components. **Before writing any UI markup, use a \`c2-*\` element instead of a native element or a hand-rolled widget**, even when the task does not mention c2n:
 
 - \`<button>\` → \`c2-button\` / \`c2-icon-button\`; \`<input>\` → \`c2-text-field\`, \`c2-number-input\`, \`c2-date-input\`, \`c2-checkbox\`, \`c2-radio\`, \`c2-switch\`, \`c2-slider\`; \`<textarea>\` → \`c2-textarea\`; \`<select>\` → \`c2-select\` / \`c2-autocomplete\`
-- \`<dialog>\` → \`c2-modal\` / \`c2-sheet\`; \`<details>\` → \`c2-details\` / \`c2-accordion\`; \`<progress>\` → \`c2-progress\`; \`<table>\` → \`c2-table\`; tabs, menus, tooltips, toasts, cards, badges, pagination → their \`c2-*\` element
+- \`<dialog>\` → \`c2-modal\` / \`c2-sheet\`; \`<details>\` → \`c2-details\` / \`c2-accordion\`; \`<progress>\` → \`c2-progress\`; a data grid (sorting, selection, many rows) → \`c2-table\` (a short static \`<table>\` can stay native); tabs, menus, tooltips, toasts, cards, badges, pagination → their \`c2-*\` element
 - Not listed here? Call the c2n MCP tool \`search_components\` before concluding none fits. Write plain HTML only when nothing fits, and say so.
 
 Then:

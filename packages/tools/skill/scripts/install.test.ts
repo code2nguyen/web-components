@@ -92,7 +92,9 @@ test('merges the c2n rules into CLAUDE.md and AGENTS.md, which each agent loads 
     assert.equal(claude.match(/<!-- c2n:start/g)?.length, 1)
     assert.match(claude, /instead of a native element/)
     assert.match(claude, /\.claude\/skills\/c2n-components\/SKILL\.md/)
-    assert.match(readFileSync(join(projectRoot, 'AGENTS.md'), 'utf8'), /\.agents\/skills\/c2n-components\/SKILL\.md/)
+    const agents = readFileSync(join(projectRoot, 'AGENTS.md'), 'utf8')
+    assert.match(agents, /\.agents\/skills\/c2n-components\/SKILL\.md/)
+    assert.equal(agents.match(/<!-- c2n:start/g)?.length, 1)
   } finally {
     rmSync(projectRoot, { recursive: true, force: true })
   }
