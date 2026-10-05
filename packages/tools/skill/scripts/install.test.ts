@@ -79,6 +79,25 @@ test('merges the Copilot rules block without touching the rest of the file', () 
   }
 })
 
+test('merges the c2n rules into CLAUDE.md and AGENTS.md, which each agent loads in every session', () => {
+  const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
+  try {
+    writeFileSync(join(projectRoot, 'CLAUDE.md'), '# Project\n')
+    const result = installProject({ projectRoot, agents: ['claude', 'codex', 'antigravity'], includeMcp: false })
+    installProject({ projectRoot, agents: ['claude', 'codex'], includeMcp: false })
+
+    assert.deepEqual(result.instructions, [join(projectRoot, 'CLAUDE.md'), join(projectRoot, 'AGENTS.md')])
+    const claude = readFileSync(join(projectRoot, 'CLAUDE.md'), 'utf8')
+    assert.match(claude, /^# Project\n\n<!-- c2n:start/)
+    assert.equal(claude.match(/<!-- c2n:start/g)?.length, 1)
+    assert.match(claude, /instead of a native element/)
+    assert.match(claude, /\.claude\/skills\/c2n-components\/SKILL\.md/)
+    assert.match(readFileSync(join(projectRoot, 'AGENTS.md'), 'utf8'), /\.agents\/skills\/c2n-components\/SKILL\.md/)
+  } finally {
+    rmSync(projectRoot, { recursive: true, force: true })
+  }
+})
+
 test('runs the project-installed MCP server when there is one, so starting it needs no network', () => {
   const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
   try {
