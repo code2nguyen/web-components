@@ -26,6 +26,7 @@ export interface ValidationResult {
 
 const CSS_FILE = /\.(css|scss|sass|less)$/i
 const JSX_FILE = /\.(jsx|tsx)$/i
+const SCRIPT_FILE = /\.(jsx|tsx|[cm]?[jt]s)$/i
 
 /** Native element → replacement tags, the first one that exists in the registry wins. `input` goes by `type`. */
 const NATIVE: Record<string, string[]> = {
@@ -91,6 +92,8 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
   const used = new Map<string, string>()
   const isCss = CSS_FILE.test(filename)
   const jsx = JSX_FILE.test(filename)
+  // Comments render nothing: blank them out, keeping offsets, so only code and markup are checked.
+  source = maskComments(source, isCss ? 'css' : SCRIPT_FILE.test(filename) ? 'script' : 'markup')
 
   if (!isCss) {
     const stack: string[] = []
@@ -119,11 +122,12 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
   for (const match of source.matchAll(/--c2-[a-z0-9_-]*[a-z0-9]/g)) {
     // A name built in a template (`--c2-button__${part}--color`) is not checkable.
     if (known.has(match[0]) || /^[_-]*(\$\{|\{)/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 4))) continue
-    // A family named in prose or a comment (`--c2-chart__series-1…`, `--c2-details*`) is a prefix of real names.
-    if (prefixes(known).has(match[0])) continue
+    const declared = /^\s*:/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 8))
+    const read = /var\(\s*$/.test(source.slice(Math.max(0, match.index - 8), match.index))
+    // A family named in prose (`--c2-chart__series-1…`, `--c2-details*`) is a prefix of real names; in code it is a typo.
+    if (!declared && !read && prefixes(known).has(match[0])) continue
     const hint = suggest([...known], match[0], 2)
     // Setting an unknown variable does nothing; reading one may be a value the component publishes at runtime.
-    const declared = /^\s*:/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 8))
     report(
       match.index,
       declared ? 'error' : 'warning',
@@ -201,7 +205,11 @@ function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property
   if (raw.startsWith('@')) return { kind: 'event', name: raw.slice(1).split('.')[0] }
   if (raw.startsWith('v-on:')) return { kind: 'event', name: raw.slice(5).split('.')[0] }
   if (raw.startsWith('on:')) return { kind: 'event', name: raw.slice(3).split('|')[0] }
-  if (/^\([^)]+\)$/.test(raw)) return { kind: 'event', name: raw.slice(1, -1) }
+  if (/^\([^)]+\)$/.test(raw)) {
+    // `(keydown.enter)` filters a key; `(window:resize)` listens on another target, not the element.
+    const name = raw.slice(1, -1)
+    return name.includes(':') ? undefined : { kind: 'event', name: name.split('.')[0] }
+  }
   if (raw.startsWith('[attr.')) return { kind: 'attribute', name: raw.slice(6, -1) }
   if (/^\[[^\]]+\]$/.test(raw)) return raw.startsWith('[(') ? undefined : { kind: 'property', name: raw.slice(1, -1) }
   if (raw.startsWith('.')) return { kind: 'property', name: raw.slice(1).split('.')[0] }
@@ -210,7 +218,7 @@ function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property
     const [name, modifier] = raw.slice(raw.indexOf(':') + 1).split('.')
     return { kind: modifier === 'attr' ? 'attribute' : 'property', name }
   }
-  if (raw.startsWith('bind:')) return { kind: 'property', name: raw.slice(5) }
+  if (raw.startsWith('bind:')) return raw === 'bind:this' ? undefined : { kind: 'property', name: raw.slice(5) }
   // Other prefixed names are directives (`v-model`, `client:load`, `#header`, `*ngIf`, `let-x`, spreads).
   if (/^(v-|#|\*|let-|\{|\.\.\.)/.test(raw) || raw.includes(':')) return undefined
   if (jsx && /^on[A-Z]/.test(raw)) return undefined
@@ -232,6 +240,8 @@ function checkSlot(registry: Registry, parent: string, slot: Tag['attributes'][n
 function checkNative(registry: Registry, tag: Tag, report: Report) {
   let candidates = NATIVE[tag.name]
   if (tag.name === 'input') {
+    // A bound type (`:type`, `[type]`, `type={t}`, `type=${t}`) is only known at runtime.
+    if (tag.attributes.some((a) => a.name !== 'type' && readBinding(a.name, false)?.name === 'type')) return
     const type = tag.attributes.find((a) => a.name === 'type')?.value?.toLowerCase() ?? 'text'
     if (SKIPPED_INPUT.has(type) || /[{}$]/.test(type)) return
     candidates = INPUT[type] ?? TEXT_INPUT
@@ -268,6 +278,45 @@ function checkDeclarations(declarations: string, offset: number, host: string, r
       `\`${declaration[2]}\` on the \`${host.replace(/[<>]/g, '')}\` host draws a second box around the component's own: set its \`--c2-…\` variables instead (get_component lists them).`,
     )
   }
+}
+
+/**
+ * Blanks comments with spaces (newlines kept, so positions hold): `<!-- -->` in markup, `/* *\/` in CSS, and `//` and
+ * `/* *\/` in scripts outside strings and template literals, whose text may be rendered markup.
+ */
+function maskComments(source: string, kind: 'css' | 'script' | 'markup'): string {
+  const out = source.split('')
+  const blank = (from: number, to: number) => {
+    for (let i = from; i < to && i < out.length; i++) if (out[i] !== '\n') out[i] = ' '
+  }
+  const blockComments = (open: string, close: string) => {
+    for (let i = source.indexOf(open); i >= 0; i = source.indexOf(open, i + 1)) {
+      const end = source.indexOf(close, i + open.length)
+      const stop = end < 0 ? source.length : end + close.length
+      blank(i, stop)
+      i = stop - 1
+    }
+  }
+  if (kind === 'markup') blockComments('<!--', '-->')
+  else if (kind === 'css') blockComments('/*', '*/')
+  else {
+    for (let i = 0; i < source.length; i++) {
+      const c = source[i]
+      if (c === '"' || c === "'") {
+        while (++i < source.length && source[i] !== c && source[i] !== '\n') if (source[i] === '\\') i++
+      } else if (c === '`') i = skipTemplate(source, i)
+      else if (c === '/' && source[i + 1] === '/') {
+        const end = source.indexOf('\n', i)
+        blank(i, end < 0 ? source.length : end)
+        i = end < 0 ? source.length : end
+      } else if (c === '/' && source[i + 1] === '*') {
+        const end = source.indexOf('*/', i + 2)
+        blank(i, end < 0 ? source.length : end + 2)
+        i = end < 0 ? source.length : end + 1
+      }
+    }
+  }
+  return out.join('')
 }
 
 /** The stylesheet sources of a file: the whole file for CSS, else `<style>` blocks and Lit `css\`` templates. */
@@ -314,15 +363,13 @@ function* scanTags(source: string): Generator<Tag> {
         j = skipBalanced(source, j, '{', '}')
         continue
       }
-      const attr = /^[^\s=>"'{}]+/.exec(source.slice(j, j + 120))
+      const attr = /^(?:[:@#]|v-bind:|v-on:)?\[[^\]]*\][^\s=>"'{}]*|^[^\s=>"'{}]+/.exec(source.slice(j, j + 120))
       if (!attr || (attr[0] === '/' && source[j + 1] !== '>')) {
         j++
         continue
       }
       const entry: Tag['attributes'][number] = { name: attr[0], index: j }
       j += attr[0].length
-      // Expression text the scanner landed in (`a && b`, `(e: Event)`) is not an attribute name.
-      if (!ATTRIBUTE_NAME.test(entry.name)) continue
       let k = j
       while (/\s/.test(source[k] ?? '')) k++
       if (source[k] === '=') {
@@ -348,7 +395,8 @@ function* scanTags(source: string): Generator<Tag> {
           j = k + entry.value.length
         }
       }
-      tag.attributes.push(entry)
+      // A runtime name (Vue `:[key]`, `@[event]`) or expression text is not checkable, but its value was consumed.
+      if (ATTRIBUTE_NAME.test(entry.name)) tag.attributes.push(entry)
     }
     tag.end = j
     yield tag

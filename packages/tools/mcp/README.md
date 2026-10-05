@@ -58,9 +58,9 @@ Gallery cards are served with a generated summary of what they change and CSS wh
 `validate_markup` is also a CLI, for CI and editor hooks. It reads HTML, JSX/TSX, Vue, Svelte, Astro, Angular and Lit templates and CSS, and checks them against the API of the `@c2n/*` packages the project has installed:
 
 ```bash
-npx c2n-mcp validate src            # exit 1 on errors
-npx c2n-mcp validate src --strict   # warnings fail too (native controls, box styling on a c2 host)
-npx c2n-mcp validate --hook         # Claude Code PostToolUse hook: reads the payload on stdin
+npx -y @c2n/mcp validate src            # exit 1 on errors
+npx -y @c2n/mcp validate src --strict   # warnings fail too (native controls, box styling on a c2 host)
+npx -y @c2n/mcp validate --hook         # Claude Code PostToolUse hook: reads the payload on stdin
 ```
 
 It reports native `<button>`/`<input>`/`<select>`/`<textarea>`/`<dialog>`/`<details>`/`<progress>` elements that a `c2-*` element replaces, unknown `c2-*` tags, attributes, slots, events and `--c2-*` variables (with "did you mean"), a static camelCase attribute the element ignores (`rowKey` for `row-key`), and `border`/`padding`/`background` rules on a `c2-*` host. A line holding `c2n-ignore`, or the line after a comment holding it, is skipped. In hook mode the findings go to stderr with exit code 2, which Claude Code hands back to the agent; `npx c2n-skill install` registers that hook in `.claude/settings.json`.

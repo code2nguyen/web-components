@@ -394,7 +394,12 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         'Checks HTML, JSX, Vue, Svelte, Astro, Angular or Lit markup and CSS you wrote against the installed c2n API: native controls a c2-* element replaces (<button>, <input>, <select>, <textarea>, <dialog>, <details>, <progress>), unknown c2-* tags, attributes, slots, events and --c2-* variables (with "did you mean"), and box styling on a c2-* host. Lists the imports that register the elements used. Call it on every file you write before finishing.',
       inputSchema: {
         code: z.string().min(1).describe('The source to check: a component file, a template, a stylesheet or a snippet'),
-        filename: z.string().optional().describe('File name, for the language (`App.tsx`, `form.vue`, `styles.css`); defaults to HTML'),
+        filename: z
+          .string()
+          .optional()
+          .describe(
+            'File name, which sets how the source is read (`App.tsx`: JSX props; `styles.css`: a stylesheet). Always pass it; without it the source is read as HTML',
+          ),
         format: formatSchema,
       },
       annotations: readOnly,

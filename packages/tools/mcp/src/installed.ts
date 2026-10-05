@@ -10,12 +10,14 @@ import type { ElementEntry, Registry } from './registry-types.ts'
 /** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
 
+export type InstalledElement = Pick<ElementEntry, 'className' | 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties' | 'properties'>
+
 export interface InstalledInfo {
   version: string
   /** Set when the project reaches the package through `@c2n/components`: import it from the umbrella's entry. */
   via?: { package: typeof UMBRELLA; version: string }
   /** Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. */
-  elements?: Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties'>>
+  elements?: Map<string, InstalledElement>
 }
 
 const TTL = 10_000
@@ -47,6 +49,8 @@ export function installedPackage(name: string): InstalledInfo | null {
           modules?: {
             declarations?: {
               tagName?: string
+              name?: string
+              members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
               attributes?: unknown[]
               slots?: unknown[]
               events?: unknown[]
@@ -55,11 +59,13 @@ export function installedPackage(name: string): InstalledInfo | null {
             }[]
           }[]
         }
-        const elements = new Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties'>>()
+        const elements = new Map<string, InstalledElement>()
         for (const mod of manifest.modules ?? []) {
           for (const decl of mod.declarations ?? []) {
             if (!decl.tagName) continue
             elements.set(decl.tagName, {
+              className: decl.name ?? '',
+              properties: publicProperties(decl.members),
               attributes: (decl.attributes ?? []) as ElementEntry['attributes'],
               slots: (decl.slots ?? []) as ElementEntry['slots'],
               events: (decl.events ?? []) as ElementEntry['events'],
@@ -78,6 +84,14 @@ export function installedPackage(name: string): InstalledInfo | null {
   }
   cache.packages.set(name, info)
   return info
+}
+
+/** Public instance fields of a manifest declaration: what a property binding may set. */
+export function publicProperties(members: { kind?: string; name?: string; static?: boolean; privacy?: string }[] = []): string[] {
+  const names = members
+    .filter((m) => m.kind === 'field' && m.name && !m.static && (!m.privacy || m.privacy === 'public') && !/^[_#]/.test(m.name))
+    .map((m) => m.name as string)
+  return [...new Set(names)]
 }
 
 /** Every dependency the project's own `package.json` names. */
@@ -133,12 +147,24 @@ export function umbrellaInstalled(): InstalledInfo | null {
  * manifest, so a check runs against the version the project has rather than the one this server bundles.
  */
 export function withInstalledApi(registry: Registry): Registry {
+  const tagIndex = { ...registry.tagIndex }
   const components = Object.fromEntries(
     Object.entries(registry.components).map(([id, component]) => {
       const installed = installedPackage(component.package)?.elements
-      if (!installed) return [id, component]
-      return [id, { ...component, elements: component.elements.map((element) => ({ ...element, ...installed.get(element.tag) })) }]
+      if (!installed || component.tagPattern) return [id, component]
+      // The umbrella's merged manifest covers every package, so only this package's own tags count.
+      const own = new Set(component.elements.map((e) => e.tag))
+      const elements = component.elements.filter((element) => installed.has(element.tag)).map((element) => ({ ...element, ...installed.get(element.tag) }))
+      for (const element of component.elements) if (!installed.has(element.tag) && tagIndex[element.tag] === id) delete tagIndex[element.tag]
+      // An element the installed version added, when its tag carries this package's prefix (`c2-table-…`).
+      const prefix = component.elements[0]?.tag
+      for (const [tag, api] of installed) {
+        if (own.has(tag) || tagIndex[tag] || !prefix || !tag.startsWith(`${prefix}-`)) continue
+        elements.push({ ...api, tag, modulePath: component.elements[0].modulePath, description: '' })
+        tagIndex[tag] = id
+      }
+      return [id, { ...component, elements: elements.length ? elements : component.elements }]
     }),
   )
-  return { ...registry, components }
+  return { ...registry, components, tagIndex }
 }

@@ -119,6 +119,12 @@ test('adds the Claude Code validate hook once, next to the hooks already there',
       hooks: [{ type: 'command', command: `npx -y @c2n/mcp@${version} validate --hook`, timeout: 30 }],
     })
 
+    // --no-hook on a project that has the hook removes it and leaves the rest.
+    assert.deepEqual(installProject({ projectRoot, agents: ['claude'], includeHook: false }).hooks, [])
+    const disabled = JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8'))
+    assert.deepEqual(disabled.hooks.PostToolUse, [own])
+    assert.deepEqual(disabled.permissions, { allow: ['Bash(ls)'] })
+
     rmSync(join(projectRoot, '.claude/settings.json'))
     assert.deepEqual(installProject({ projectRoot, agents: ['claude'], includeHook: false }).hooks, [])
     assert.equal(existsSync(join(projectRoot, '.claude/settings.json')), false)

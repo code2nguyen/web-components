@@ -60,15 +60,26 @@ function mergeInstructions(file, block) {
  * so the agent fixes them in the same turn instead of waiting to be asked. Earlier c2n entries are replaced.
  */
 function mergeClaudeHook(file, command) {
+  if (!command && !existsSync(file)) return false
   mkdirSync(dirname(file), { recursive: true })
   const value = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {}
   const hooks = (value.hooks ??= {})
+  const before = JSON.stringify(hooks.PostToolUse ?? [])
   const entries = (hooks.PostToolUse ?? [])
-    .map((entry) => ({ ...entry, hooks: (entry.hooks ?? []).filter((hook) => !String(hook.command ?? '').includes('validate --hook')) }))
+    .map((entry) => ({ ...entry, hooks: (entry.hooks ?? []).filter((hook) => !isC2nHook(hook)) }))
     .filter((entry) => entry.hooks.length > 0)
-  entries.push({ matcher: 'Write|Edit|MultiEdit', hooks: [{ type: 'command', command, timeout: 30 }] })
-  hooks.PostToolUse = entries
+  if (command) entries.push({ matcher: 'Write|Edit|MultiEdit', hooks: [{ type: 'command', command, timeout: 30 }] })
+  if (!command && JSON.stringify(entries) === before) return false
+  if (entries.length) hooks.PostToolUse = entries
+  else delete hooks.PostToolUse
+  if (Object.keys(hooks).length === 0) delete value.hooks
   writeFileSync(file, JSON.stringify(value, null, 2) + '\n')
+  return true
+}
+
+/** The hook this installer writes, whichever way it starts the server. */
+function isC2nHook(hook) {
+  return /@c2n\/mcp\b.*\bvalidate --hook\b/.test(String(hook.command ?? ''))
 }
 
 function copyDirectory(source, destination) {
@@ -164,11 +175,11 @@ export function installProject({ projectRoot = process.cwd(), agents = allAgents
     configs.push(file)
   }
   const hooks = []
-  if (includeHook && selected.includes('claude')) {
+  if (selected.includes('claude')) {
+    // --no-hook also takes out a hook an earlier install added.
     const file = join(root, '.claude/settings.json')
     const validate = local ? `node "$CLAUDE_PROJECT_DIR/${localServer}"` : `npx -y @c2n/mcp@${packageJson.version}`
-    mergeClaudeHook(file, `${validate} validate --hook`)
-    hooks.push(file)
+    if (mergeClaudeHook(file, includeHook ? `${validate} validate --hook` : undefined) && includeHook) hooks.push(file)
   }
   const instructions = []
   for (const agent of selected) {
@@ -183,7 +194,7 @@ export function installProject({ projectRoot = process.cwd(), agents = allAgents
 }
 
 function usage() {
-  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity|copilot] [--project <path>] [--mcp auto|local|npx] [--no-mcp] [--no-hook]\n\nThe default is --agent all --project . --mcp auto.\n--mcp local runs the project's own node_modules/@c2n/mcp (no download when the agent starts it, which is what works\nbehind a proxy); npx fetches @c2n/mcp on start; auto picks local when @c2n/mcp is installed in the project.\n--no-hook skips the Claude Code hook that checks every file the agent writes with \`c2n-mcp validate\`.`
+  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity|copilot] [--project <path>] [--mcp auto|local|npx] [--no-mcp] [--no-hook]\n\nThe default is --agent all --project . --mcp auto.\n--mcp local runs the project's own node_modules/@c2n/mcp (no download when the agent starts it, which is what works\nbehind a proxy); npx fetches @c2n/mcp on start; auto picks local when @c2n/mcp is installed in the project.\n--no-hook leaves out (or removes) the Claude Code hook that checks every file the agent writes with \`c2n-mcp validate\`.`
 }
 
 export function run(argv = process.argv.slice(2)) {

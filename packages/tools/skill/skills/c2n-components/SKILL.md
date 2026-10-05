@@ -94,7 +94,7 @@ Read `references/frameworks.md` for details.
 
 ## 7. Verify
 
-- Run `validate_markup` on every file you wrote (or `npx -y @c2n/mcp validate <paths>` without MCP) and fix what it reports: native controls with a `c2-*` replacement, unknown tags, attributes, slots, events and `--c2-*` variables, box styling on a `c2-*` host. A deliberate native element gets a `c2n-ignore` comment.
+- Run `validate_markup` on every file you wrote, passing its `filename` so CSS and JSX/Vue/Angular syntax are read as such (or `npx -y @c2n/mcp validate <paths>` without MCP), and fix what it reports: native controls with a `c2-*` replacement; unknown `c2-*` tags and unknown attributes, slots, events and `--c2-*` variables of c2 elements; box styling on a `c2-*` host. It does not check other tags. A deliberate native element gets a `c2n-ignore` comment.
 - Every element used is registered (no empty tags, no `HTMLUnknownElement`); the theme (`@c2n/components/theme.css` or `base.css`) imported exactly once.
 - Every variable, attribute, slot and event name exists in `get_component` / the manifest.
 - Every `::part()` name exists in `get_component`; no repeated inline variable styles; repeated looks became variants.

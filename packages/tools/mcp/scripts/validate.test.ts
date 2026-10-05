@@ -1,9 +1,85 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { validateMarkup, type Finding } from '../src/lib/validate.ts'
-import { loadRegistry } from '../src/registry.ts'
+import type { ComponentEntry, ElementEntry, Registry } from '../src/registry-types.ts'
 
-const registry = loadRegistry()
+// A small registry of its own: `data/registry.json` is a build artifact, and deploy.yml runs these tests before it exists.
+type Api = { attributes?: string[]; properties?: string[]; slots?: string[]; events?: string[]; css?: string[] }
+function element(tag: string, pkg: string, api: Api = {}): ElementEntry {
+  return {
+    tag,
+    className: '',
+    modulePath: `@c2n/components/${pkg}`,
+    description: '',
+    attributes: (api.attributes ?? []).map((name) => ({ name, type: '' })),
+    properties: api.properties,
+    slots: (api.slots ?? []).map((name) => ({ name })),
+    events: (api.events ?? []).map((name) => ({ name })),
+    cssParts: [],
+    cssProperties: (api.css ?? []).map((name) => ({ name, type: '', part: '', property: '' })),
+  }
+}
+function component(id: string, elements: ElementEntry[], extra: Partial<ComponentEntry> = {}): ComponentEntry {
+  return {
+    id,
+    package: `@c2n/${id}`,
+    title: id,
+    description: '',
+    category: 'Test',
+    status: 'stable',
+    docsUrl: '',
+    elements,
+    composition: { internal: [], slotted: [], usedBy: [] },
+    install: { npm: '', import: '', importClass: '' },
+    examples: [],
+    hasGallery: false,
+    ...extra,
+  }
+}
+const components = [
+  component('button', [
+    element('c2-button', 'button', {
+      attributes: ['disabled', 'type', 'value', 'name'],
+      slots: ['default', 'prefix-icon', 'suffix-icon'],
+      css: ['--c2-button__container--background-color', '--c2-button__container--border'],
+    }),
+  ]),
+  component('icon-button', [element('c2-icon-button', 'icon-button', { attributes: ['disabled'] })]),
+  component('text-field', [
+    element('c2-text-field', 'text-field', { attributes: ['placeholder', 'value', 'disabled', 'type'], events: ['input', 'change', 'clear'] }),
+  ]),
+  component('textarea', [element('c2-textarea', 'textarea')]),
+  component('checkbox', [element('c2-checkbox', 'checkbox')]),
+  component('switch', [element('c2-switch', 'switch')]),
+  component('select', [element('c2-select', 'select', { slots: ['button-prefix-icon'] })]),
+  component('table', [
+    element('c2-table', 'table', {
+      attributes: ['row-key', 'rows', 'selection'],
+      properties: ['rows', 'rowKey', 'selection'],
+      slots: ['toolbar', 'cell:{line}:{field}'],
+      events: ['selection-change'],
+    }),
+    element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
+  ]),
+  component('tabs', [element('c2-tabs', 'tabs'), element('c2-tab', 'tabs')]),
+  component('feather-icons', [element('c2-feather-{name}', 'feather-icons')], { tagPattern: 'c2-feather-{name}', icons: ['arrow-right'] }),
+]
+const registry: Registry = {
+  schemaVersion: 1,
+  c2nVersion: '0.0.0',
+  categories: ['Test'],
+  components: Object.fromEntries(components.map((c) => [c.id, c])),
+  tagIndex: Object.fromEntries(components.flatMap((c) => (c.tagPattern ? [] : c.elements.map((e) => [e.tag, c.id])))),
+  packageIndex: Object.fromEntries(components.map((c) => [c.package, c.id])),
+  theme: {
+    package: '@c2n/theme',
+    install: { npm: '', imports: [] },
+    tokens: [{ name: '--c2-theme--color-primary', category: 'color', light: '#000', description: '', usedBy: 1 }],
+    mapping: {},
+    darkMode: '',
+  },
+  guides: { workflow: '', theming: '', 'variant-components': '', frameworks: '' },
+}
 const rules = (source: string, filename?: string) => validateMarkup(registry, source, filename).findings.map((f: Finding) => `${f.line}:${f.rule}`)
 
 test('suggests the c2 element for a native control, by input type', () => {
@@ -75,4 +151,31 @@ test('lists the elements a source uses with their modules', () => {
     ['c2-tabs', 'c2-tab', 'c2-feather-arrow-right'],
   )
   assert.ok(elements.every((e) => e.modulePath.startsWith('@c2n/')))
+})
+
+test('ignores comments, but not markup in strings and templates', () => {
+  const source = [
+    '// <button>in a comment</button>',
+    '/* <c2-buton> */',
+    "const a = '<button>rendered</button>'",
+    'const b = html`<input type="email">` // https://example.com',
+    '{/* <c2-button varient="x"> */}',
+  ].join('\n')
+  assert.deepEqual(rules(source, 'a.tsx'), ['3:native-element', '4:native-element'])
+  assert.deepEqual(rules('<!-- <button>old</button> -->\n<button>new</button>'), ['2:native-element'])
+})
+
+test('reports a variable family prefix used in code, not in prose', () => {
+  assert.deepEqual(rules('.x { --c2-button__container: red; color: var(--c2-button__container) }', 'a.css'), [
+    '1:unknown-css-variable',
+    '1:unknown-css-variable',
+  ])
+  assert.deepEqual(rules('<p>The --c2-button__container… variables</p>'), [])
+})
+
+test('reads Vue dynamic arguments, Svelte bind:this, Angular key filters and bound input types', () => {
+  assert.deepEqual(rules('<c2-text-field :[name]="v" @[event]="f" v-bind:[other]="w"></c2-text-field>', 'a.vue'), [])
+  assert.deepEqual(rules('<c2-text-field bind:this={el} bind:value={v}></c2-text-field>', 'a.svelte'), [])
+  assert.deepEqual(rules('<c2-text-field (keydown.enter)="go()" (window:resize)="r()"></c2-text-field>'), [])
+  assert.deepEqual(rules('<input :type="kind"><input [type]="kind"><input type={kind}>'), [])
 })

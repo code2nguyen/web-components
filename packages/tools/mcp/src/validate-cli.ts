@@ -3,8 +3,8 @@
  * `--hook` reads a Claude Code `PostToolUse` payload from stdin and checks the file the agent just wrote: findings go
  * to stderr with exit code 2, which Claude Code hands back to the agent so it fixes them in the same turn.
  */
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { extname, join, relative } from 'node:path'
+import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { extname, join, relative, resolve } from 'node:path'
 import { withInstalledApi } from './installed.ts'
 import { formatFindings, validateMarkup, type Finding } from './lib/validate.ts'
 import { loadRegistry } from './registry.ts'
@@ -18,21 +18,23 @@ export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--
 Checks markup and CSS against the c2n component API (default path: src). Exits 1 on errors, or on warnings too with
 --strict. --hook reads a Claude Code PostToolUse payload from stdin and reports the written file's findings to the agent.`
 
-function collect(path: string, files: string[]) {
-  const stat = statSync(path)
+/** Files under `path`, each once. Links inside the tree are not followed: one pointing back up would never end. */
+function collect(path: string, files: Set<string>, top = true) {
+  const stat = top ? statSync(path) : lstatSync(path)
   if (stat.isDirectory()) {
-    for (const name of readdirSync(path)) if (!SKIPPED_DIRECTORIES.has(name)) collect(join(path, name), files)
-  } else if (EXTENSIONS.has(extname(path).toLowerCase())) files.push(path)
-}
-
-function check(file: string): Finding[] {
-  return validateMarkup(withInstalledApi(loadRegistryOnce()), readFileSync(file, 'utf8'), file).findings
+    for (const name of readdirSync(path)) if (!SKIPPED_DIRECTORIES.has(name)) collect(join(path, name), files, false)
+  } else if ((top || stat.isFile()) && EXTENSIONS.has(extname(path).toLowerCase())) files.add(resolve(path))
 }
 
 let registry: ReturnType<typeof loadRegistry> | undefined
-function loadRegistryOnce() {
-  registry ??= loadRegistry()
+/** The registry with the project's installed manifests overlaid, built once per run. */
+function installedRegistry() {
+  registry ??= withInstalledApi(loadRegistry())
   return registry
+}
+
+function check(file: string): Finding[] {
+  return validateMarkup(installedRegistry(), readFileSync(file, 'utf8'), file).findings
 }
 
 async function readStdin(): Promise<string> {
@@ -63,17 +65,28 @@ export async function runValidate(args: string[]): Promise<number> {
     return 2
   }
 
-  const strict = args.includes('--strict')
-  const json = args.includes('--format=json') || args.join(' ').includes('--format json')
-  const paths = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--format')
-  const files: string[] = []
+  let strict = false
+  let json = false
+  const paths: string[] = []
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]
+    if (arg === '--strict') strict = true
+    else if (arg === '--format') json = args[++i] === 'json'
+    else if (arg.startsWith('--format=')) json = arg.slice('--format='.length) === 'json'
+    else if (arg.startsWith('--')) {
+      console.error(`c2n validate: unknown option ${arg}\n\n${VALIDATE_USAGE}`)
+      return 1
+    } else paths.push(arg)
+  }
+  const found = new Set<string>()
   for (const path of paths.length ? paths : ['src']) {
     if (!existsSync(path)) {
       console.error(`c2n validate: ${path} does not exist`)
       return 1
     }
-    collect(path, files)
+    collect(path, found)
   }
+  const files = [...found].map((file) => relative(process.cwd(), file) || file)
   const results = files.map((file) => ({ file, findings: check(file) })).filter((r) => r.findings.length)
   const all = results.flatMap((r) => r.findings)
   const errors = all.filter((f) => f.severity === 'error').length
