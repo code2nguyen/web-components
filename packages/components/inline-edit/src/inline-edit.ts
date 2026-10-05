@@ -61,7 +61,7 @@ type EditorElement = HTMLElement & { value?: unknown }
  *
  * @tag c2-inline-edit
  *
- * @slot editor - A control used instead of the built-in input while editing. It must expose `value` and fire `change` when a choice is made.
+ * @slot editor - A control used instead of the built-in input while editing. It must expose `value` and fire `change` when a choice is made, and carry its own accessible name (`aria-label`): `label` names only the built-in field and the read view. It gets `aria-invalid` while a `required` draft is refused.
  * @slot preview - Content shown in the read view instead of the value text, e.g. a badge. Update it yourself on `change`.
  * @slot edit-icon - Replaces the pencil shown next to the value on hover and focus.
  * @slot save-icon - Replaces the check mark of the save button (`controls`).
@@ -95,7 +95,7 @@ type EditorElement = HTMLElement & { value?: unknown }
  *
  * @cssproperty {color} [--c2-inline-edit__editor--background=#ffffff]
  * @cssproperty {border} [--c2-inline-edit__editor--border=1px solid #0265dc]
- * @cssproperty {border} [--c2-inline-edit__editor__error--border=1px solid #dc2626] - Field border while the draft is refused (`required` and empty).
+ * @cssproperty {border} [--c2-inline-edit__editor__error--border=1px solid #dc2626] - Field border while the draft is refused (`required` and empty); drawn as an outline around a slotted `editor`.
  *
  * @cssproperty {pixel} [--c2-inline-edit__controls--gap=4px] - Space between the field and the save and cancel buttons.
  * @cssproperty {pixel} [--c2-inline-edit__control--size=24px]
@@ -123,11 +123,11 @@ export class InlineEdit extends LitElement {
   /** Text shown in the read view and the field while the value is empty. */
   @property({ type: String }) placeholder = ''
 
-  /** Accessible name of the field and of the read view, e.g. `Project name`. */
+  /** Accessible name of the built-in field and of the read view, e.g. `Project name`. A slotted `editor` needs its own. */
   @property({ type: String }) label = ''
 
   /** Form field name. The committed value is submitted under it. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /**
    * Turns the value into the read view's text, e.g. a currency or a date. Without it, the read view shows the label
@@ -143,7 +143,7 @@ export class InlineEdit extends LitElement {
   /** What enters edit mode from the read view: `click` (default), `dblclick`, or `none` (only `edit()`). Enter and Space always work in `click` and `dblclick`. */
   @property({ type: String }) activation: InlineEditActivation = 'click'
 
-  /** What leaving the field does: `commit` (default), `cancel`, or `none` (stay in edit mode). */
+  /** What leaving the field does: `commit` (default; a refused draft stays open with its text), `cancel`, or `none` (stay in edit mode). */
   @property({ type: String, attribute: 'blur-action' }) blurAction: InlineEditBlurAction = 'commit'
 
   /** Shows save and cancel buttons next to the field while editing. */
@@ -178,6 +178,9 @@ export class InlineEdit extends LitElement {
 
   @query('.field') private readonly field?: HTMLInputElement | HTMLTextAreaElement | null
   @query('.display') private readonly display?: HTMLElement | null
+
+  /** The slotted editor this element marked `aria-invalid`, so the mark can be removed again. */
+  private markedEditor: HTMLElement | null = null
 
   /** The value as it stood when the element was created or last reset by its form. */
   private defaultValue: string | null = null
@@ -285,7 +288,8 @@ export class InlineEdit extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= this.getAttribute('value')
+    // A value assigned as a property before connection counts as the authored one when there is no attribute.
+    this.defaultValue ??= this.getAttribute('value') ?? this.value
     this.syncSlots()
   }
 
@@ -406,8 +410,9 @@ export class InlineEdit extends LitElement {
       this.cancel()
       return
     }
-    // A refused draft cannot stay open behind focus that has moved on: fall back to the committed value.
-    if (!this.commit()) this.cancel()
+    // A refused draft (`required` and empty, or a canceled `edit-commit`) stays open with its text, without taking
+    // focus back: the user returns to fix it, or presses Escape.
+    this.commit()
   }
 
   /** Keeps focus in the field while a control button is pressed, so blur does not commit first. */
@@ -424,7 +429,8 @@ export class InlineEdit extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('editing') && this.editing && !this.interactive) this.editing = false
+    // Disabling, making read-only or disabling the fieldset closes an open editor without committing.
+    if (this.editing && !this.interactive) this.editing = false
     if (changed.has('editing') && this.editing && !changed.get('editing')) {
       // Every way into edit mode (`edit()`, a click, the property) starts from the committed value.
       this.draft = this.value
@@ -432,12 +438,26 @@ export class InlineEdit extends LitElement {
     }
   }
 
-  protected override updated(changed: PropertyValues<this>): void {
+  protected override updated(changed: PropertyValues): void {
     this.internals.setFormValue(this.value)
-    if (this.required && this.value === '') {
+    if (this.required && this.value.trim() === '') {
       this.internals.setValidity({ valueMissing: true }, 'Please fill in this field.', this.display ?? undefined)
     } else {
       this.internals.setValidity({})
+    }
+
+    const editor = this.hasEditor ? this.slottedEditor : null
+    if (editor && (changed.has('invalid') || changed.has('editing'))) {
+      // The slotted control is the field the user is on, so it carries the refusal; only a mark this element set is removed.
+      if (this.invalid && this.editing) {
+        if (!editor.hasAttribute('aria-invalid')) {
+          editor.setAttribute('aria-invalid', 'true')
+          this.markedEditor = editor
+        }
+      } else if (this.markedEditor) {
+        this.markedEditor.removeAttribute('aria-invalid')
+        this.markedEditor = null
+      }
     }
 
     const states: Record<string, boolean> = {

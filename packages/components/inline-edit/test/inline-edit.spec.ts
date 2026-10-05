@@ -199,6 +199,76 @@ test('submits the committed value with its form and resets to the authored one',
   expect(await read()).toBe('Gemini')
   await page.getByRole('button', { name: 'Reset' }).click()
   await expect(page.getByRole('button', { name: 'Project name: Apollo' })).toBeVisible()
+  expect(await read()).toBe('Apollo')
+})
+
+test('a disabled fieldset blocks editing and leaves the value out of the form', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><fieldset disabled>${field('name="project"')}</fieldset></form>`)
+  const display = page.getByRole('button', { name: 'Project name: Apollo' })
+  await expect(display).toBeDisabled()
+  await pointerClick(display)
+  await expect(page.getByRole('textbox')).toHaveCount(0)
+  await expect(page.locator('c2-inline-edit')).toHaveState('disabled')
+  expect(await page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).has('project'))).toBe(false)
+})
+
+test('a name set as a property submits the value', async ({ page, renderScenario }) => {
+  await renderScenario(`<form>${field()}</form>`)
+  await props(page.locator('c2-inline-edit'), { name: 'project' })
+  expect(await page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('project'))).toBe('Apollo')
+})
+
+test('a value set as a property before connection is what form reset restores', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form><button type="button">Reset form</button>')
+  await page.locator('form').evaluate(async (form) => {
+    const element = document.createElement('c2-inline-edit') as HTMLElement & { value: string; label: string; updateComplete: Promise<boolean> }
+    element.value = 'Apollo'
+    element.label = 'Project name'
+    form.append(element)
+    await element.updateComplete
+    element.value = 'Gemini'
+    await element.updateComplete
+    ;(form as HTMLFormElement).reset()
+    await element.updateComplete
+  })
+  await expect(page.getByRole('button', { name: 'Project name: Apollo' })).toBeVisible()
+})
+
+test('a veto while leaving the field keeps the draft open without taking focus back', async ({ page, renderScenario }) => {
+  await renderScenario(`${field()}<a href="#">Outside</a>`)
+  await page.locator('c2-inline-edit').evaluate((element) => element.addEventListener('edit-commit', (event) => event.preventDefault()))
+  await page.getByRole('button', { name: 'Project name: Apollo' }).click()
+  await page.keyboard.type('Gemini')
+  await page.getByRole('link', { name: 'Outside' }).click()
+  await expect(page.getByRole('link', { name: 'Outside' })).toBeFocused()
+  await expect(page.getByRole('textbox', { name: 'Project name' })).toHaveValue('Gemini')
+})
+
+test('disabling or making read-only while editing closes the editor without committing', async ({ page, renderScenario }) => {
+  await renderScenario(field())
+  const host = page.locator('c2-inline-edit')
+  for (const change of [{ disabled: true }, { readOnly: true }]) {
+    await props(host, { disabled: false, readOnly: false })
+    await page.getByRole('button', { name: 'Project name: Apollo' }).click()
+    await page.keyboard.type('Gemini')
+    await props(host, change)
+    await expect(page.getByRole('textbox')).toHaveCount(0)
+    await expect(host).toHaveJSProperty('value', 'Apollo')
+  }
+})
+
+test('a refused draft in a slotted editor is marked invalid on the control', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-inline-edit label="Priority" value="low" required>
+    <select slot="editor" aria-label="Priority"><option value="">None</option><option value="low">Low</option></select>
+  </c2-inline-edit>`)
+  await page.getByRole('button', { name: 'Priority: Low' }).click()
+  const select = page.getByRole('combobox', { name: 'Priority' })
+  await select.selectOption('')
+  await expect(select).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.locator('c2-inline-edit')).toHaveState('invalid')
+  await select.selectOption('low')
+  await expect(page.getByRole('button', { name: 'Priority: Low' })).toBeVisible()
+  await expect(page.locator('select')).not.toHaveAttribute('aria-invalid')
 })
 
 test('the editing property opens and closes the editor', async ({ page, renderScenario }) => {

@@ -1,6 +1,6 @@
 ---
 title: 'Inline Edit'
-description: 'Text that turns into a field on click: Enter commits, Escape cancels, and any control can be the editor.'
+description: 'Text that turns into a field on click: Enter commits, Escape cancels, and any control with a value can be the editor.'
 category: 'Inputs'
 ---
 
@@ -11,11 +11,11 @@ import { InlineEdit } from '@c2n/components/inline-edit'
 import { Select } from '@c2n/components/select'
 import { ListItem } from '@c2n/components/list-item'
 
-`c2-inline-edit` is the edit-in-place pattern of Notion page titles, Airtable cells and Linear issue fields. At rest it is plain text in the page's own font, with a soft background and a pencil on hover. A click, or Enter or Space on the focused text, swaps in a field in the same box, so nothing moves. **Enter** commits, **Escape** cancels, and focus returns to the text. Leaving the field commits by default: set `blur-action="cancel"` to discard instead, or `blur-action="none"` to keep it open. `controls` adds save and cancel buttons. With `multiline` the field is a textarea, Enter adds a line and **Ctrl/⌘+Enter** commits.
+`c2-inline-edit` is the edit-in-place pattern of Notion page titles, Airtable cells and Linear issue fields. At rest it is plain text in the page's own font; a soft background and a pencil appear on hover, and the pencil also shows on keyboard focus. A click, or Enter or Space on the focused text, swaps in a field in the same box, so nothing moves. **Enter** commits, **Escape** cancels, and focus returns to the text. Leaving the field commits by default, and a refused draft stays open with its text: set `blur-action="cancel"` to discard instead, or `blur-action="none"` to keep it open. `controls` adds save and cancel buttons. With `multiline` the field is a textarea, Enter adds a line and **Ctrl/⌘+Enter** commits.
 
 `value` is always the committed value. Every commit that changes it fires a cancelable `edit-commit` event first, with `detail.value` and `detail.previousValue`. Call `preventDefault()` to reject the draft and keep the field open, for validation or a failed save. Then `value` updates and `input` and `change` fire. Typing fires nothing on the host. The element is form-associated: `name` submits the committed value, `required` refuses an empty draft, and form reset restores the authored `value`.
 
-To edit with another control, slot it as `editor`: a `c2-select`, a `c2-number-input`, a native `<select>`, anything with a `value` that fires `change`. The inline edit sets the control's value when editing starts and commits on its `change`. The read view shows the label of the option whose `value` matches, so a select shows "In progress" rather than `doing`. Use `formatValue` for any other display, or the `preview` slot for rich content such as a badge.
+To edit with another control, slot it as `editor`: a `c2-select`, a `c2-number-input`, a native `<select>`, anything with a `value` that fires `change`. Give it its own `aria-label`: `label` names only the built-in field and the read view. The inline edit sets the control's value when editing starts and commits on its `change`. The read view shows the label of the option whose `value` matches, so a select shows "In progress" rather than `doing`. Use `formatValue` for any other display, or the `preview` slot for rich content such as a badge.
 
 The element inherits its font, so it fits a heading or a table cell as is. It sizes to its text: give the host a `width` (or `display: block`) to make it fill a column.
 

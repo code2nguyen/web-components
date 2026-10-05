@@ -156,6 +156,12 @@
     border: none;
     background: none;
   }
+
+  // The slotted control keeps its own border, so a refused draft is ringed outside it instead.
+  .invalid > &.custom {
+    outline: css.cssVar(editor__error--border);
+    outline-offset: 2px;
+  }
 }
 
 .field {

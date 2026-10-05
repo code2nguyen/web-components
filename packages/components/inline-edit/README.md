@@ -1,6 +1,6 @@
 # Inline Edit
 
-`c2-inline-edit` is text that turns into a field when clicked: Enter commits, Escape cancels, and any control can be the editor. It ships in the single `@c2n/components` package.
+`c2-inline-edit` is text that turns into a field when clicked: Enter commits (Ctrl/⌘+Enter with `multiline`), Escape cancels, and any control with a `value` that fires `change` can be the editor. It ships in the single `@c2n/components` package.
 
 ```bash
 npm install @c2n/components
@@ -8,6 +8,8 @@ npm install @c2n/components
 
 ```js
 import '@c2n/components/inline-edit'
+// Only for the c2-select editor below:
+import '@c2n/components/select'
 ```
 
 ```html
