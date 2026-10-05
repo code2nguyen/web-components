@@ -59,6 +59,19 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/tools/theme` — wrap the generated token blocks in a cascade layer (or
   `:where()`) so any unlayered app override wins regardless of specificity, and say so in the theming guide.
 
+### `c2-button` has no shadow variable and `c2-link-button` no border variable
+
+- **Severity:** gap
+- **Hit while:** checking the Data Platform example (`apps/examples/data-platform-html`) with `c2n-mcp validate`, 2026-10-05.
+- **What happens:** the example's primary button glows (`box-shadow` with a hover state) and its filter pills are
+  outlined, but neither component exposes a variable for it, so `src/style.css` puts `box-shadow` and `border` on the
+  `c2-button` / `c2-link-button` hosts. That box sits outside the component's own container: the host needs a
+  matching `border-radius`, and the shadow does not follow the container's states. The rules carry a `c2n-ignore`
+  comment pointing here.
+- **Where the fix belongs:** `packages/components/button` — `--c2-button__container--box-shadow` (plus
+  `__hover`); `packages/components/link-button` — `--c2-link-button__container--border` (plus `__hover`), like
+  `c2-button`'s. Then move the example onto them and drop the comments.
+
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                     |

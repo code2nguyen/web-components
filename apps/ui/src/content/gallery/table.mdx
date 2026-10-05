@@ -335,7 +335,7 @@ flickering between colors. Every third replay tick performs an add or delete so 
 <div class="market-watchlist" data-market-table>
   <c2-table client:only="lit" row-key="symbol" animate-updates update-duration="720"></c2-table>
   <div class="market-controls">
-    <c2-button size="sm">Pause</c2-button>
+    <c2-button>Pause</c2-button>
     <span data-market-status>Preparing replay…</span>
   </div>
 </div>
@@ -398,9 +398,9 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
 <c2-table client:only="lit" class="toolbar-title" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
   <div class="bar" slot="toolbar">
     <span class="title">Team scorecard</span>
-    <c2-badge variant="neutral">6 people</c2-badge>
-    <c2-button class="ghost" size="sm">Export</c2-button>
-    <c2-button size="sm">Add person</c2-button>
+    <c2-badge tone="neutral">6 people</c2-badge>
+    <c2-button class="ghost">Export</c2-button>
+    <c2-button>Add person</c2-button>
   </div>
   <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
@@ -436,7 +436,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
       placeholder="Search people"
       oninput="const table = this.closest('c2-table'); table.allRows ??= table.rows; table.rows = table.allRows.filter((row) => Object.values(row).join(' ').toLowerCase().includes(this.value.toLowerCase())); this.nextElementSibling.textContent = table.rows.length + ' of ' + table.allRows.length"
     ></c2-text-field>
-    <c2-badge variant="neutral">6 of 6</c2-badge>
+    <c2-badge tone="neutral">6 of 6</c2-badge>
   </div>
   <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
@@ -479,8 +479,8 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
       <c2-list-item value="us">us-east-1</c2-list-item>
       <c2-list-item value="ap">ap-south-1</c2-list-item>
     </c2-select>
-    <c2-badge variant="danger">1 down</c2-badge>
-    <c2-badge variant="warning">1 degraded</c2-badge>
+    <c2-badge tone="danger">1 down</c2-badge>
+    <c2-badge tone="warning">1 degraded</c2-badge>
     <c2-select class="range" value="24h" aria-label="Time range">
       <c2-list-item value="24h">Last 24 hours</c2-list-item>
       <c2-list-item value="7d">Last 7 days</c2-list-item>
@@ -524,7 +524,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
 </style>
 <c2-table client:only="lit" class="footer-total" sortable row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
   <div class="bar" slot="footer">
-    <c2-badge variant="neutral">6 orders</c2-badge>
+    <c2-badge tone="neutral">6 orders</c2-badge>
     <span class="total">€41,857.35</span>
   </div>
   <c2-table-column field="order" header="Order" width="110px"></c2-table-column>
@@ -798,7 +798,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   <div class="empty" slot="empty">
     <strong>No people match those filters</strong>
     <span>Clear the search to see the whole team.</span>
-    <c2-button size="sm">Clear filters</c2-button>
+    <c2-button>Clear filters</c2-button>
   </div>
   <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
@@ -826,7 +826,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 <c2-table client:only="lit" class="error-card" error="The scorecard service did not answer." row-key="id" rows='[]'>
   <div class="failed" slot="error">
     <span>The scorecard service did not answer.</span>
-    <c2-button size="sm">
+    <c2-button>
       <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
       Retry
     </c2-button>
