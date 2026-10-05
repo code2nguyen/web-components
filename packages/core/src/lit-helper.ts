@@ -144,13 +144,16 @@ class AssignSlotDirective extends Directive {
     const slot = part.element as HTMLSlotElement
     // A new template instance is still a detached fragment here, and an assignment made before the slot is in the
     // shadow tree does not take effect; Lit inserts the fragment before the microtask runs.
-    if (slot.isConnected) assignNodes(slot, nodes)
+    if (slot.getRootNode() instanceof ShadowRoot) assignNodes(slot, nodes)
     else queueMicrotask(() => assignNodes(slot, nodes))
     return noChange
   }
 }
 
 function assignNodes(slot: HTMLSlotElement, nodes: readonly (Element | Text)[]): void {
+  // A named-mode root (declarative shadow DOM) routes by `slot` attribute and ignores `assign()`.
+  const root = slot.getRootNode()
+  if (!(root instanceof ShadowRoot) || root.slotAssignment !== 'manual') return
   const assigned = slot.assignedNodes()
   if (assigned.length !== nodes.length || nodes.some((node, index) => node !== assigned[index])) slot.assign(...nodes)
 }

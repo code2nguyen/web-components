@@ -59,3 +59,10 @@ test('a server-rendered shadow root falls back to slot attributes', async ({ pag
   await expect(page.locator('c2-link-button[href="#home"]')).toHaveAttribute('slot', 'item-0')
   await expect(page.getByRole('link', { name: 'Item', exact: true })).toBeVisible()
 })
+test('a child that gains slot="separator" later becomes the separator', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb><span id="sep">/</span>${items}</c2-breadcrumb>`)
+  await expect(page.locator('c2-breadcrumb [part="separator"]')).toHaveCount(4)
+  await page.locator('#sep').evaluate((sep) => sep.setAttribute('slot', 'separator'))
+  await expect(page.locator('c2-breadcrumb [part="separator"]')).toHaveCount(3)
+  await expect(page.locator('c2-breadcrumb [part="separator"]').first()).toHaveText('/')
+})

@@ -91,8 +91,12 @@ export class Breadcrumb extends LitElement {
     if (!isServer) {
       this.separatorNodes = [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
       this.assignItems()
-      this.observer ??= new MutationObserver(() => this.assignItems())
-      this.observer.observe(this, { childList: true })
+      // `slot` changes too: a child that gains or loses `slot="separator"` changes which slot it belongs in, which
+      // manual assignment does not pick up by itself.
+      this.observer ??= new MutationObserver((records) => {
+        if (records.some((record) => record.type === 'childList' || record.target.parentElement === this)) this.assignItems()
+      })
+      this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver ??= new ResizeObserver((entries) => {
           const width = entries[0]?.contentRect.width ?? 0
