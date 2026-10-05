@@ -261,8 +261,14 @@ export class Gantt extends LitElement {
   #observer?: MutationObserver
   #resizeObserver?: ResizeObserver
   #measureFrame = 0
+  /**
+   * Upgrading over server-rendered markup. The server cannot read the task children, so it rendered an empty frame;
+   * the first client render must match it or Lit's hydration throws, and the timeline fills in on the update after.
+   */
+  #hydrating = false
 
   override connectedCallback(): void {
+    if (!isServer && !this.hasUpdated && this.shadowRoot?.hasChildNodes()) this.#hydrating = true
     super.connectedCallback()
     this.internals.role = 'treegrid'
     this.addEventListener(GANTT_TASK_CHANGE_EVENT, this.#onTaskChange)
@@ -312,6 +318,10 @@ export class Gantt extends LitElement {
   }
 
   protected override updated(): void {
+    if (this.#hydrating) {
+      this.#hydrating = false
+      void this.updateComplete.then(() => this.requestUpdate())
+    }
     // Measuring happens in the ResizeObserver callback, which runs after layout and outside this update; reading
     // and setting state here would schedule a second update every time.
     this.#observeProbe()
@@ -832,8 +842,9 @@ export class Gantt extends LitElement {
     const classes = { gantt: true, [`scale-${this.#scale}`]: true, compact, 'no-list': this.hideList || compact }
     let body: unknown
     if (this.loading) body = this.#renderSkeleton()
-    // A server cannot read the children, so markup mode renders an empty frame there and fills in on upgrade.
-    else if (isServer && this.#modelSource === 'markup') body = nothing
+    // A server cannot read the children, so markup mode renders an empty frame there and fills in on upgrade, after
+    // the hydrating render has matched that frame.
+    else if ((isServer || this.#hydrating) && this.#modelSource === 'markup') body = nothing
     else if (!this.#model.rows.length) body = html`<div class="empty" part="empty"><slot name="empty">No tasks to show</slot></div>`
     else {
       const rows = this.#visible()
