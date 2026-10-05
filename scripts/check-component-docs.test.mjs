@@ -219,3 +219,16 @@ test('counts a page that imports the package through the @c2n/components bundle,
     /no runnable UI example/i,
   )
 })
+
+test('a package name is matched literally and a dotted sibling does not stand in for it', () => {
+  const packages = [
+    {
+      name: '@c2n/demo',
+      manifest: { modules: [{ declarations: [{ tagName: 'c2-demo', cssProperties: [{ name: '--c2-demo--color' }] }] }] },
+    },
+  ]
+  const example = '```html tag=MdxCodeBlock\n<style>.x { --c2-demo--color: red; }</style>\n<c2-demo class="x"></c2-demo>\n```'
+  for (const impostor of ["import '@c2n/components/demo.v2'", "import '@c2nXdemo'", "import '@c2n/components/demo_next'"]) {
+    assert.match(exampleCoverageProblems(packages, [{ path: 'other.mdx', source: `${impostor}\n${example}` }]).join('\n'), /no runnable UI example/i, impostor)
+  }
+})

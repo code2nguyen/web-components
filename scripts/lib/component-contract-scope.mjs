@@ -63,8 +63,9 @@ export function exampleCoverageProblems(packages, documents) {
     const parts = declarations.flatMap((declaration) => (declaration.cssParts ?? []).map(({ name: part }) => part))
     // A page names its package directly (`package=@c2n/table`) or through the bundle's entry, which is how the docs
     // import it (`@c2n/components/table`, `@c2n/components/chart/line-chart`).
+    const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const entry = name.replace(/^@c2n\//, '')
-    const namesPackage = new RegExp(`(?:${name}|@c2n/components/${entry})(?![a-z0-9-])`)
+    const namesPackage = new RegExp(`(?:${escape(name)}|@c2n/components/${escape(entry)})(?![a-z0-9._-])`)
     const fences = documents
       .filter(({ source }) => namesPackage.test(source))
       .flatMap(({ source }) => [...source.matchAll(/```html[^\n]*\btag=(?:UsageBlock|MdxCodeBlock)\b[^\n]*\n([\s\S]*?)```/g)].map((match) => match[1]))

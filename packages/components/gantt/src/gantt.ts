@@ -321,6 +321,8 @@ export class Gantt extends LitElement {
     if (this.#hydrating) {
       this.#hydrating = false
       void this.updateComplete.then(() => this.requestUpdate())
+      // This pass rendered the server's empty frame: the one-time scroll and the probe wait for the timeline.
+      return
     }
     // Measuring happens in the ResizeObserver callback, which runs after layout and outside this update; reading
     // and setting state here would schedule a second update every time.
