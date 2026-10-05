@@ -30,7 +30,7 @@ Generated project files:
 | Antigravity | `.agents/skills/c2n-components/` | `.agents/mcp_config.json` |
 | Copilot     | `.github/skills/c2n-components/` | `.vscode/mcp.json`        |
 
-For Copilot the installer also merges a short c2n rules block into `.github/copilot-instructions.md`, which Copilot reads in every chat.
+The installer also merges a short c2n rules block into the instructions file each agent reads in every session — `CLAUDE.md` (Claude), `AGENTS.md` (Codex), `.github/copilot-instructions.md` (Copilot). That block is what makes the agent use `c2-*` elements instead of native `<button>`, `<input>`, `<select>`, `<dialog>`… when a request does not mention c2n: the skill and the MCP server only help once the agent decides to use them. Only the text between the `c2n:start`/`c2n:end` markers is managed; re-running the installer replaces it and leaves the rest of the file alone.
 
 The MCP configurations start the server with `npx -y @c2n/mcp@<version>`. Behind a proxy that download can fail silently when the agent starts it; install `@c2n/mcp` as a dev dependency and the installer points every configuration at `node_modules/@c2n/mcp` instead (`--mcp auto`, the default, or force it with `--mcp local`).
 
@@ -40,7 +40,7 @@ Restart the selected agent after installation so it discovers both additions. Th
 
 ## Use with an agent
 
-Ask the agent to use c2n explicitly when starting an application task, for example:
+With the rules block installed, ordinary requests ("build the settings form") should already use c2n. You can still ask for it explicitly, for example:
 
 ```text
 Use the c2n skill and MCP server to build this settings form. Check each component API before writing markup, load @c2n/theme once, and create application variants for repeated styles.
