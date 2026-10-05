@@ -49,23 +49,27 @@ test('appends arriving in many tasks render at most once per 16ms', async ({ pag
   await scenario('many')
   const result = await page.locator('c2-log-viewer').evaluate(async (element) => {
     const log = element as LogViewer
-    let updates = 0
-    const updated = (log as unknown as { updated: () => void }).updated.bind(log)
-    ;(log as unknown as { updated: () => void }).updated = () => {
-      updates++
-      updated()
+    const renders: number[] = []
+    // Stamped where an update starts, so a slow render followed by a fast one does not read as a short gap.
+    const hooks = log as unknown as { willUpdate: (changes: Map<PropertyKey, unknown>) => void }
+    const willUpdate = hooks.willUpdate.bind(log)
+    hooks.willUpdate = (changes) => {
+      renders.push(performance.now())
+      willUpdate(changes)
     }
-    const started = performance.now()
     for (let i = 0; i < 200; i++) {
       log.appendEntries({ level: 'info', message: `task ${i}` })
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
     await log.updateComplete
-    return { updates, elapsed: performance.now() - started, count: log.entryCount }
+    const gaps = renders.slice(1).map((time, i) => time - renders[i])
+    // A render closer than the 16ms window to the previous one is an append that was not coalesced.
+    return { count: log.entryCount, close: gaps.filter((gap) => gap < 14).length }
   })
   expect(result.count).toBe(10200)
-  // The throttle is timed, not frame-paced, so the bound is elapsed time; the margin covers timer jitter and a resize reflow.
-  expect(result.updates).toBeLessThan((result.elapsed / 16) * 1.25 + 3)
+  // The bound is the throttle's own guarantee rather than a count, so a slow runner cannot make it pass vacuously by
+  // appending less often than once per window; the margin allows a resize or font reflow render, which is not throttled.
+  expect(result.close).toBeLessThanOrEqual(2)
 })
 
 test('a widening attribute column does not re-lay out unwrapped entries', async ({ page, scenario }) => {

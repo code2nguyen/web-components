@@ -429,7 +429,11 @@ export class LogViewer extends LitElement {
 
   protected override updated(): void {
     const viewport = this.viewport!
-    if (Math.abs(viewport.scrollTop - this.viewTop) > 0.5) viewport.scrollTop = this.viewTop
+    if (Math.abs(viewport.scrollTop - this.viewTop) > 0.5) {
+      viewport.scrollTop = this.viewTop
+      // The browser clamps and rounds a fractional offset; keep what it applied so the scroll event reads as this write's echo.
+      this.viewTop = viewport.scrollTop
+    }
   }
 
   private onScroll(): void {
