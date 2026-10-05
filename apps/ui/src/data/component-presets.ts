@@ -2863,8 +2863,8 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-tag-input__tag--padding-left': '10px',
           '--c2-tag-input__tag--border': '1px solid transparent',
           '--c2-tag-input__tag--background': 'var(--c2-theme--color-primary-container, #edf1fe)',
-          '--c2-tag-input__tag--color': 'light-dark(#2f56e6, #607eea)',
-          '--c2-tag-input__remove-icon--color': 'light-dark(#2f56e6, #607eea)',
+          '--c2-tag-input__tag--color': 'light-dark(#2f56e6, #93a8f5)',
+          '--c2-tag-input__remove-icon--color': 'light-dark(#2f56e6, #93a8f5)',
         },
       },
       {

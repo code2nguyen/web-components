@@ -385,7 +385,10 @@ export class Pagination extends LitElement {
 
   private handleNav(target: number, control: 'previous' | 'next' | null) {
     if (this.disabled) return
-    this.lastPressedNav = control
+    // Only a press that left focus on the control hands it on; a click in a browser that does not focus buttons
+    // (Safari) should not pull focus into the pagination.
+    const focused = control !== null && this.shadowRoot?.activeElement?.getAttribute('data-nav') === control
+    this.lastPressedNav = focused ? control : null
     this.goToPage(target)
   }
 
@@ -518,9 +521,12 @@ export class Pagination extends LitElement {
     const pressed = this.lastPressedNav
     if (!pressed) return
     this.lastPressedNav = null
-    const active = this.shadowRoot?.activeElement
     const button = this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed}"]`)
-    if (!button || button !== active || !button.disabled) return
+    if (!button?.disabled) return
+    // Chromium blurs a focused button as it becomes disabled, so focus is already gone here; only a move the user
+    // made since (focus on another control) wins over the hand-off.
+    const active = this.shadowRoot?.activeElement
+    if (active && active !== button) return
     this.shadowRoot?.querySelector<HTMLButtonElement>(`[data-nav="${pressed === 'previous' ? 'next' : 'previous'}"]`)?.focus()
   }
 
