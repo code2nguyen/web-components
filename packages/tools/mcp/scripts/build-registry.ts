@@ -49,6 +49,7 @@ interface Manifest {
       events?: { name: string; type?: { text?: string }; description?: string }[]
       cssParts?: { name: string; description?: string }[]
       cssProperties?: { name?: string; type?: { text?: string }; default?: string; description?: string }[]
+      members?: { kind: string; name: string; static?: boolean; privacy?: string }[]
       internalComponents?: string[]
       slotComponents?: string[]
     }[]
@@ -343,6 +344,7 @@ for (const dir of packageDirs.sort()) {
           .map((e) => ({ name: e.name, type: e.type?.text, description: e.description?.trim() || undefined })),
         cssParts: (decl.cssParts ?? []).map((part) => ({ name: part.name, description: part.description?.trim() || undefined })),
         cssProperties,
+        properties: [...new Set((decl.members ?? []).filter((m) => m.kind === 'field' && !m.static && !m.privacy && !/^[_#]/.test(m.name)).map((m) => m.name))],
       })
     }
   }

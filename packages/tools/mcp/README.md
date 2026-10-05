@@ -38,19 +38,32 @@ Restart the agent after adding its MCP configuration, then ask it to use the c2n
 
 ## Tools
 
-| Tool                 | Purpose                                                                                   |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| `list_components`    | Every component with tag, package, category, description, installed version               |
-| `search_components`  | Free-text search across names, descriptions, attributes, slots, events, examples, icons   |
-| `get_component`      | Full API of one component, CSS variables grouped by part/state with their theme token     |
-| `get_examples`       | Usage rows and gallery cards; `view: "index"` lists every look (summary, screenshot)      |
-| `search_examples`    | Find a look across every component's gallery ("glass", "pill", "underline")               |
-| `get_presets`        | Curated presets as CSS variable values                                                    |
-| `get_theme`          | The `--c2-theme--*` tokens, install/mapping snippets; per-component mapping with `tag`    |
-| `generate_variant`   | CSS class / HTML + style / Lit subclass / JSON from overrides, a preset or a gallery card |
-| `get_workflow_guide` | `workflow`, `theming`, `variant-components`, `frameworks`                                 |
+| Tool                 | Purpose                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `list_components`    | Every component with tag, package, category, description, installed version                             |
+| `search_components`  | Free-text search across names, descriptions, attributes, slots, events, examples, icons                 |
+| `get_component`      | Full API of one component, CSS variables grouped by part/state with their theme token                   |
+| `get_examples`       | Usage rows and gallery cards; `view: "index"` lists every look (summary, screenshot)                    |
+| `search_examples`    | Find a look across every component's gallery ("glass", "pill", "underline")                             |
+| `get_presets`        | Curated presets as CSS variable values                                                                  |
+| `get_theme`          | The `--c2-theme--*` tokens, install/mapping snippets; per-component mapping with `tag`                  |
+| `generate_variant`   | CSS class / HTML + style / Lit subclass / JSON from overrides, a preset or a gallery card               |
+| `validate_markup`    | Checks markup/CSS you wrote: native controls to replace, unknown tags/attributes/slots/events/variables |
+| `get_workflow_guide` | `workflow`, `theming`, `variant-components`, `frameworks`                                               |
 
 Gallery cards are served with a generated summary of what they change and CSS whose colours follow the `--c2-theme--*` tokens wherever a literal equals a token's value (`var(--c2-theme--color-outline, #d4d4d8)`), so a copied card follows the application's theme and dark mode. Each card also links light and dark PNG captures hosted with the docs site (`gallery-shots/<component>/<slug>.<theme>.png`, written by `apps/ui/scripts/gallery-shots.mjs` in the Pages deploy).
+
+## Validate from the command line
+
+`validate_markup` is also a CLI, for CI and editor hooks. It reads HTML, JSX/TSX, Vue, Svelte, Astro, Angular and Lit templates and CSS, and checks them against the API of the `@c2n/*` packages the project has installed:
+
+```bash
+npx c2n-mcp validate src            # exit 1 on errors
+npx c2n-mcp validate src --strict   # warnings fail too (native controls, box styling on a c2 host)
+npx c2n-mcp validate --hook         # Claude Code PostToolUse hook: reads the payload on stdin
+```
+
+It reports native `<button>`/`<input>`/`<select>`/`<textarea>`/`<dialog>`/`<details>`/`<progress>` elements that a `c2-*` element replaces, unknown `c2-*` tags, attributes, slots, events and `--c2-*` variables (with "did you mean"), a static camelCase attribute the element ignores (`rowKey` for `row-key`), and `border`/`padding`/`background` rules on a `c2-*` host. A line holding `c2n-ignore`, or the line after a comment holding it, is skipped. In hook mode the findings go to stderr with exit code 2, which Claude Code hands back to the agent; `npx c2n-skill install` registers that hook in `.claude/settings.json`.
 
 Resources: `c2n://components`, `c2n://components/{tag}`, `c2n://theme`, `c2n://guide/{topic}`.
 

@@ -100,6 +100,33 @@ test('merges the c2n rules into CLAUDE.md and AGENTS.md, which each agent loads 
   }
 })
 
+test('adds the Claude Code validate hook once, next to the hooks already there', () => {
+  const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
+  try {
+    mkdirSync(join(projectRoot, '.claude'), { recursive: true })
+    const own = { matcher: 'Bash', hooks: [{ type: 'command', command: 'echo ok' }] }
+    writeFileSync(join(projectRoot, '.claude/settings.json'), JSON.stringify({ permissions: { allow: ['Bash(ls)'] }, hooks: { PostToolUse: [own] } }))
+    installProject({ projectRoot, agents: ['claude'] })
+    const result = installProject({ projectRoot, agents: ['claude'] })
+
+    assert.deepEqual(result.hooks, [join(projectRoot, '.claude/settings.json')])
+    const settings = JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8'))
+    assert.deepEqual(settings.permissions, { allow: ['Bash(ls)'] })
+    assert.deepEqual(settings.hooks.PostToolUse[0], own)
+    assert.equal(settings.hooks.PostToolUse.length, 2)
+    assert.deepEqual(settings.hooks.PostToolUse[1], {
+      matcher: 'Write|Edit|MultiEdit',
+      hooks: [{ type: 'command', command: `npx -y @c2n/mcp@${version} validate --hook`, timeout: 30 }],
+    })
+
+    rmSync(join(projectRoot, '.claude/settings.json'))
+    assert.deepEqual(installProject({ projectRoot, agents: ['claude'], includeHook: false }).hooks, [])
+    assert.equal(existsSync(join(projectRoot, '.claude/settings.json')), false)
+  } finally {
+    rmSync(projectRoot, { recursive: true, force: true })
+  }
+})
+
 test('runs the project-installed MCP server when there is one, so starting it needs no network', () => {
   const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
   try {
@@ -113,6 +140,8 @@ test('runs the project-installed MCP server when there is one, so starting it ne
     assert.deepEqual(vscode.servers.c2n, { type: 'stdio', command: 'node', args: ['${workspaceFolder}/node_modules/@c2n/mcp/dist/cli.js'] })
     const claude = JSON.parse(readFileSync(join(projectRoot, '.mcp.json'), 'utf8'))
     assert.deepEqual(claude.mcpServers.c2n.args, ['node_modules/@c2n/mcp/dist/cli.js'])
+    const settings = JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8'))
+    assert.equal(settings.hooks.PostToolUse[0].hooks[0].command, 'node "$CLAUDE_PROJECT_DIR/node_modules/@c2n/mcp/dist/cli.js" validate --hook')
     assert.match(readFileSync(join(projectRoot, '.codex/config.toml'), 'utf8'), /command = "node"\nargs = \["node_modules\/@c2n\/mcp\/dist\/cli\.js"\]/)
 
     assert.equal(installProject({ projectRoot, agents: ['claude'], mcp: 'npx' }).mcp, 'npx')

@@ -63,6 +63,8 @@ The MCP server starts through the exact matching `@c2n/mcp` release. For an MCP-
 
 See the [AI tools guide](https://code2nguyen.github.io/web-components/guides/ai-tools) for installation, verification, manual configuration and troubleshooting in each supported agent.
 
+For Claude Code the installer also adds a `PostToolUse` hook to `.claude/settings.json`: after every file the agent writes, `c2n-mcp validate --hook` checks it and hands the findings (native controls to replace, unknown tags, attributes, slots or variables) back to the agent, which fixes them in the same turn. Other hooks in the file are kept. Skip it with `--no-hook`; run the same check in CI with `npx c2n-mcp validate src`.
+
 ## What the skill does
 
 1. Detects the project (framework, installed `@c2n/*` packages, existing theme bridge and variants).

@@ -5,8 +5,14 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createServer } from './server.ts'
 
 const args = process.argv.slice(2)
+if (args[0] === 'validate') {
+  const { runValidate } = await import('./validate-cli.ts')
+  process.exit(await runValidate(args.slice(1)))
+}
 if (args.includes('--help') || args.includes('-h')) {
-  console.log('c2n-mcp — c2n web-component documentation and generation tools over stdio\n\nUsage: c2n-mcp [--help] [--version]')
+  console.log(
+    'c2n-mcp — c2n web-component documentation and generation tools over stdio\n\nUsage: c2n-mcp [--help] [--version]\n       c2n-mcp validate [paths…] [--strict] [--format json] [--hook]',
+  )
   process.exit(0)
 }
 if (args.includes('--version') || args.includes('-v')) {

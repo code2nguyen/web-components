@@ -49,6 +49,8 @@ export interface ElementEntry {
   modulePath: string
   description: string
   attributes: { name: string; type: string; default?: string; description?: string }[]
+  /** Public instance properties, attribute-backed or not (`rows`, `renderCell`): what a property binding may set. */
+  properties?: string[]
   slots: { name: string; description?: string }[]
   events: { name: string; type?: string; description?: string }[]
   cssParts: { name: string; description?: string }[]

@@ -31,8 +31,9 @@ When c2n MCP tools are available:
 3. `get_examples` for real markup. Start with the default example, then pick a look from the docs gallery (§2a). Preserve any accessibility note returned with an example.
 4. `get_presets` when a curated visual treatment is useful. A preset is structured CSS-variable and attribute data suitable for generation; a gallery example is broader usage and composition context.
 5. `get_theme` **before writing any CSS**, so overrides go on tokens when a token exists.
-6. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
-7. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
+6. `validate_markup` on what you wrote, before finishing (§7).
+7. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
+8. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
 
 ### 2a. Find the look in the gallery
 
@@ -93,6 +94,7 @@ Read `references/frameworks.md` for details.
 
 ## 7. Verify
 
+- Run `validate_markup` on every file you wrote (or `npx -y @c2n/mcp validate <paths>` without MCP) and fix what it reports: native controls with a `c2-*` replacement, unknown tags, attributes, slots, events and `--c2-*` variables, box styling on a `c2-*` host. A deliberate native element gets a `c2n-ignore` comment.
 - Every element used is registered (no empty tags, no `HTMLUnknownElement`); the theme (`@c2n/components/theme.css` or `base.css`) imported exactly once.
 - Every variable, attribute, slot and event name exists in `get_component` / the manifest.
 - Every `::part()` name exists in `get_component`; no repeated inline variable styles; repeated looks became variants.

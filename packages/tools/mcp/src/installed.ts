@@ -5,7 +5,7 @@
  */
 import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { ElementEntry } from './registry-types.ts'
+import type { ElementEntry, Registry } from './registry-types.ts'
 
 /** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
@@ -126,4 +126,19 @@ export function importPath(modulePath: string, pkg: string, installed: Installed
 /** The project's `@c2n/components`, when its `package.json` declares it. */
 export function umbrellaInstalled(): InstalledInfo | null {
   return declaredDependencies(projectRoot()).has(UMBRELLA) ? installedPackage(UMBRELLA) : null
+}
+
+/**
+ * The registry with each installed package's attributes, slots, events, parts and CSS variables read from its own
+ * manifest, so a check runs against the version the project has rather than the one this server bundles.
+ */
+export function withInstalledApi(registry: Registry): Registry {
+  const components = Object.fromEntries(
+    Object.entries(registry.components).map(([id, component]) => {
+      const installed = installedPackage(component.package)?.elements
+      if (!installed) return [id, component]
+      return [id, { ...component, elements: component.elements.map((element) => ({ ...element, ...installed.get(element.tag) })) }]
+    }),
+  )
+  return { ...registry, components }
 }
