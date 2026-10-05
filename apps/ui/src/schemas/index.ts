@@ -1,6 +1,17 @@
 import { z } from 'astro:content'
 
-export const COMPONENT_CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat'] as const
+export const COMPONENT_CATEGORIES = [
+  'Inputs',
+  'Buttons',
+  'Navigation',
+  'Layout',
+  'Data display',
+  'Editors & viewers',
+  'Chart',
+  'Planning',
+  'Feedback',
+  'Chat',
+] as const
 
 export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
 
