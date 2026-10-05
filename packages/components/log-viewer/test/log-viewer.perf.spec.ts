@@ -57,6 +57,7 @@ test('appends arriving in many tasks render at most once per 16ms', async ({ pag
       renders.push(performance.now())
       willUpdate(changes)
     }
+    const started = performance.now()
     for (let i = 0; i < 200; i++) {
       log.appendEntries({ level: 'info', message: `task ${i}` })
       await new Promise((resolve) => setTimeout(resolve, 0))
@@ -64,12 +65,15 @@ test('appends arriving in many tasks render at most once per 16ms', async ({ pag
     await log.updateComplete
     const gaps = renders.slice(1).map((time, i) => time - renders[i])
     // A render closer than the 16ms window to the previous one is an append that was not coalesced.
-    return { count: log.entryCount, close: gaps.filter((gap) => gap < 14).length }
+    const windows = (performance.now() - started) / 16
+    return { count: log.entryCount, renders: renders.length, windows, close: gaps.filter((gap) => gap < 14).length }
   })
   expect(result.count).toBe(10200)
   // The bound is the throttle's own guarantee rather than a count, so a slow runner cannot make it pass vacuously by
   // appending less often than once per window; the margin allows a resize or font reflow render, which is not throttled.
   expect(result.close).toBeLessThanOrEqual(2)
+  // And it still renders during the stream: about once per window, so a quarter of them catches over-coalescing.
+  expect(result.renders).toBeGreaterThanOrEqual(Math.floor(result.windows / 4))
 })
 
 test('a widening attribute column does not re-lay out unwrapped entries', async ({ page, scenario }) => {
