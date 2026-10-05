@@ -165,8 +165,7 @@ export class LogViewer extends LitElement {
     this.copiedSource = null
     this.copyStatus = ''
     clearTimeout(this.copyTimer)
-    this.measurements.clear()
-    this.lineWidths = new WeakMap()
+    // Text widths depend on the font, not the entries: an application that replaces its whole snapshot reuses them.
     this.rebuild = true
     this.resetAnchor = true
     this.viewTop = 0
@@ -250,7 +249,7 @@ export class LogViewer extends LitElement {
   private measure = (text: string): number => {
     let width = this.measurements.get(text)
     if (width === undefined) {
-      if (this.measurements.size >= 20000) this.measurements.clear()
+      if (this.measurements.size >= 50000) this.measurements.clear()
       width = this.canvas!.measureText(text).width
       this.measurements.set(text, width)
     }

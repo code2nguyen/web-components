@@ -25,7 +25,9 @@ import '@c2n/components/log-viewer'
 
 These examples model a server access stream and a commercial checkout incident. The log viewers use their **default CSS values**; the surrounding title bars and navigation buttons belong to the application.
 
-**Try virtual scrolling:** the first example contains **10,000 entries**, including messages with different heights. Scroll through the stream, or jump between the beginning and the latest entry.
+**Try live streaming:** the first example receives **1,000 entries over five minutes**, like a running service. It stays on the latest entry as they arrive; scroll up to read and new entries keep your place, then press **Latest entry** (or End) to follow again.
+
+**Try virtual scrolling:** the second example contains **10,000 entries**, including messages with different heights. Scroll through the stream, or jump between the beginning and the latest entry.
 
 **Try sticky attributes:** in the second example, scroll slowly through the long error trace. Its timestamp and `ERROR` label stay at the top while the message moves. They leave with that entry when the next one arrives.
 
@@ -58,6 +60,21 @@ These examples model a server access stream and a commercial checkout incident. 
     --c2-button__container__hover--color: #ffffff;
   }
 </style>
+<div class="feature-row" data-label="Live stream · 1,000 entries in 5 minutes">
+  <div class="log-demo" data-log-demo>
+    <div class="log-demo__bar">
+      <span class="log-demo__dot" aria-hidden="true"></span>
+      <span class="log-demo__title">Checkout service / live</span>
+      <span class="log-demo__badge" data-log-live-count>0 / 1,000</span>
+    </div>
+    <c2-log-viewer class="log-demo__viewer" data-log-viewer-demo="live" wrap aria-label="Live checkout service log"></c2-log-viewer>
+    <div class="log-demo__footer">
+      <span class="log-demo__hint">New entries follow the end. Scroll up to pause following.</span>
+      <c2-button class="log-demo__action" data-log-action="toggle">Pause</c2-button>
+      <c2-button class="log-demo__action" data-log-action="end">Latest entry</c2-button>
+    </div>
+  </div>
+</div>
 <div class="feature-row" data-label="Virtual scrolling · 10,000 entries">
   <div class="log-demo" data-log-demo>
     <div class="log-demo__bar">
@@ -123,6 +140,25 @@ The viewer renders the entries in the visible window plus a small overscan margi
 In continuous text mode (`tabular="false"`), it also renders only the visible lines **inside** a very large entry. A single long trace can be read without mounting all of its text.
 
 Appends follow the end when you are already there. Scroll up to read history and incoming entries preserve your position. Call `scrollToEnd()` to resume following.
+
+### Streaming
+
+Pass `appendEntries()` **only the new entries**. The viewer keeps what it already has and lays out just the new rows, so a long-running stream costs the same per entry at 100 or 10,000 lines. Calls made in quick succession render together on the next frame. Avoid replacing the whole log on every update (`clear()` followed by `appendEntries(allEntries)`): each update then lays out every entry again.
+
+```ts tag=CodeBlock
+// React: keep the count already handed to the viewer and append the rest.
+const appended = useRef(0)
+useEffect(() => {
+  const viewer = viewerRef.current
+  if (!viewer) return
+  if (logs.length < appended.current) {
+    viewer.clear() // The application reset its log.
+    appended.current = 0
+  }
+  viewer.appendEntries(logs.slice(appended.current))
+  appended.current = logs.length
+}, [logs])
+```
 
 ## Sticky attributes
 

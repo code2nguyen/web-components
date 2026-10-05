@@ -96,3 +96,38 @@ test('a widening attribute column does not re-lay out unwrapped entries', async 
   })
   expect(result.widening).toBeLessThan(result.rebuild / 4)
 })
+
+test('a live stream stays on the latest entry, including when the application replaces its snapshot', async ({ page, scenario }) => {
+  await scenario('default')
+  const result = await page.locator('c2-log-viewer').evaluate(async (element) => {
+    const log = element as LogViewer
+    const viewport = log.shadowRoot!.querySelector<HTMLElement>('[part="viewport"]')!
+    const atEnd = () => viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
+    const entry = (n: number) => ({
+      timestamp: `14:00:${String(n % 60).padStart(2, '0')}`,
+      level: n % 9 ? 'INFO' : 'ERROR',
+      message: `request ${n}` + '\nretry'.repeat(n % 3),
+    })
+    log.clear()
+    const all = Array.from({ length: 3000 }, (_, n) => entry(n))
+    log.appendEntries(all)
+    await log.updateComplete
+    let appendedAway = 0
+    let replacedAway = 0
+    for (let n = 3000; n < 3020; n++) {
+      all.push(entry(n))
+      log.appendEntries(all[n])
+      await log.updateComplete
+      if (!atEnd()) appendedAway++
+    }
+    for (let n = 3020; n < 3040; n++) {
+      all.push(entry(n))
+      log.clear()
+      log.appendEntries(all)
+      await log.updateComplete
+      if (!atEnd()) replacedAway++
+    }
+    return { appendedAway, replacedAway, count: log.entryCount }
+  })
+  expect(result).toEqual({ appendedAway: 0, replacedAway: 0, count: 3040 })
+})
