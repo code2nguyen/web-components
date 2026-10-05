@@ -262,6 +262,7 @@ export class Gantt extends LitElement {
   #observer?: MutationObserver
   #resizeObserver?: ResizeObserver
   #measureFrame = 0
+  #tooltipFrame = 0
   /**
    * Upgrading over server-rendered markup. The server cannot read the task children, so it rendered an empty frame;
    * the first client render must match it or Lit's hydration throws, and the timeline fills in on the update after.
@@ -284,8 +285,8 @@ export class Gantt extends LitElement {
     })
     this.#resizeObserver.observe(this)
     // Scroll events do not cross the shadow boundary, so the chart's own scroller repositions through its listener.
-    addEventListener('scroll', this.#placeTooltip, { capture: true, passive: true })
-    addEventListener('resize', this.#placeTooltip, { passive: true })
+    addEventListener('scroll', this.#schedulePlaceTooltip, { capture: true, passive: true })
+    addEventListener('resize', this.#schedulePlaceTooltip, { passive: true })
   }
 
   override disconnectedCallback(): void {
@@ -294,8 +295,9 @@ export class Gantt extends LitElement {
     this.#resizeObserver?.disconnect()
     cancelAnimationFrame(this.#measureFrame)
     this.#probeObserved = false
-    removeEventListener('scroll', this.#placeTooltip, { capture: true })
-    removeEventListener('resize', this.#placeTooltip)
+    cancelAnimationFrame(this.#tooltipFrame)
+    removeEventListener('scroll', this.#schedulePlaceTooltip, { capture: true })
+    removeEventListener('resize', this.#schedulePlaceTooltip)
     super.disconnectedCallback()
   }
 
@@ -797,14 +799,16 @@ export class Gantt extends LitElement {
    * Shows the tooltip and puts it under its row (above when the viewport has no room below), starting a little into
    * the bar and kept inside the visible part of the timeline. Fixed coordinates: the popover lives in the top layer.
    */
-  #placeTooltip = () => {
-    if (isServer) return
+  #placeTooltip() {
+    // Hover and keyboard focus are the only ways in, so no tooltip state means nothing to query.
+    if (isServer || !(this.hoverId ?? (this.keyboardFocus ? this.focusId : null))) return
     const tip = this.renderRoot.querySelector<HTMLElement>('.tooltip')
     const id = tip?.dataset.for
     const mark = id ? this.renderRoot.querySelector<HTMLElement>(`.timeline [data-id="${CSS.escape(id)}"]`) : null
     const track = mark?.closest<HTMLElement>('.track')
     const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
-    if (!tip || !mark || !track || !scroller) return
+    // Without the popover API the tooltip stays hidden by the stylesheet, and `:popover-open` would not even parse.
+    if (!tip || !mark || !track || !scroller || typeof tip.showPopover !== 'function') return
     if (!tip.matches(':popover-open')) {
       try {
         tip.showPopover()
@@ -818,13 +822,20 @@ export class Gantt extends LitElement {
     const list = this.renderRoot.querySelector<HTMLElement>('.list')
     const listWidth = this.hideList || this.#compact ? 0 : (list?.offsetWidth ?? 0)
     const { width, height } = tip.getBoundingClientRect()
-    const minLeft = Math.max(0, view.left + listWidth) + TOOLTIP_GAP
     const maxLeft = Math.min(innerWidth, view.left + scroller.clientWidth) - width - TOOLTIP_GAP
+    // When the visible timeline is narrower than the tooltip, it overlaps the list rather than run past the right edge.
+    const minLeft = Math.max(TOOLTIP_GAP, Math.min(view.left + listWidth + TOOLTIP_GAP, maxLeft))
     const left = Math.max(minLeft, Math.min(bar.left + Math.min(bar.width, 40), maxLeft))
     const roomBelow = innerHeight - row.bottom
     const top = roomBelow >= height + TOOLTIP_GAP || roomBelow >= row.top ? row.bottom + TOOLTIP_GAP : row.top - height - TOOLTIP_GAP
     tip.style.left = `${Math.round(left)}px`
     tip.style.top = `${Math.round(top)}px`
+  }
+
+  /** Scroll and resize fire in bursts; one placement per frame is enough. */
+  #schedulePlaceTooltip = () => {
+    cancelAnimationFrame(this.#tooltipFrame)
+    this.#tooltipFrame = requestAnimationFrame(() => this.#placeTooltip())
   }
 
   #defaultTooltip(row: GanttRow) {
@@ -889,7 +900,7 @@ export class Gantt extends LitElement {
       const rows = this.#visible()
       const range = this.#range()
       const width = (range.end - range.start + 1) * this.#column
-      body = html`<div class="scroller" part="scroller" @scroll=${this.#placeTooltip}>
+      body = html`<div class="scroller" part="scroller" @scroll=${this.#schedulePlaceTooltip}>
         <div class="content" style=${styleMap({ width: `calc(var(--_list) + ${width}px)` })}>
           <div class="head" aria-hidden="true">
             <div class="corner">

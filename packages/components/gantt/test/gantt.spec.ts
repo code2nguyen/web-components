@@ -317,9 +317,21 @@ test('a clicked bar keeps its tooltip whole, outside the chart frame', async ({ 
   const chart = (await page.locator('c2-gantt').boundingBox())!
   const tip = (await tooltip.boundingBox())!
   expect(tip.y + tip.height).toBeGreaterThan(chart.y + chart.height)
-  // It stays up after the click: the selection and the row focus do not take it away.
-  await page.waitForTimeout(300)
+  // It stays up after the click: the selection and the row focus that follow it do not take it away.
+  await expect(rowOf(page, 'review')).toBeFocused()
+  await expect(rowOf(page, 'review')).toHaveAttribute('aria-selected', 'true')
   await expect(tooltip).toBeVisible()
+})
+
+test('in a timeline narrower than the tooltip, the tooltip overlaps the list instead of overflowing the chart', async ({ page, renderScenario }) => {
+  // 500px with the 260px list leaves ~240px of timeline for a 240px tooltip.
+  await renderScenario(dataChart('layout="split" style="width: 500px"'))
+  await barOf(page, 'vis').hover()
+  const tooltip = page.locator('c2-gantt .tooltip')
+  await expect(tooltip).toContainText('Visual design')
+  const chart = (await page.locator('c2-gantt').boundingBox())!
+  const tip = (await tooltip.boundingBox())!
+  expect(tip.x + tip.width).toBeLessThanOrEqual(chart.x + chart.width)
 })
 
 test('bars scrolled under the task list stay behind it', async ({ page, renderScenario }) => {

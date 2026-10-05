@@ -481,12 +481,17 @@
   margin: 0;
   overflow: visible;
   padding: 10px 12px;
+  // Shown only as an open popover, so a browser without the popover API shows no tooltip rather than a stray box.
+  display: none;
   background: css.cssVar(tooltip--background);
   color: css.cssVar(tooltip--color);
   border: css.cssVar(tooltip--border);
   border-radius: css.cssVar(tooltip--border-radius);
   box-shadow: css.cssVar(tooltip--box-shadow);
   pointer-events: none;
+}
+.tooltip:popover-open {
+  display: block;
 }
 .tooltip-title {
   font-weight: css.cssVar(header__major--font-weight);
