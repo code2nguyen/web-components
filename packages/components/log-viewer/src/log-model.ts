@@ -52,7 +52,12 @@ export function matchesFilter(entry: LogEntry, filter: LogFilter | null): boolea
 }
 
 export function entryColumns(entries: readonly LogEntry[]): string[] {
-  const keys = new Set(entries.flatMap((entry) => Object.keys(entry)))
+  return columnOrder(entries.flatMap((entry) => Object.keys(entry)))
+}
+
+/** Attribute names in first-seen order, conventional attributes first and message last. */
+export function columnOrder(seen: Iterable<string>): string[] {
+  const keys = new Set(seen)
   const conventional = ['timestamp', 'level', 'source'].filter((key) => keys.delete(key))
   keys.delete('message')
   return [...conventional, ...keys, 'message']
