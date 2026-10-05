@@ -199,6 +199,12 @@ const lightDark = (light: string, dark: Rgb) => `light-dark(${light}, ${hex(dark
 const lightHalf = (value: string) => /light-dark\(\s*(#[0-9a-f]{3,8}|rgba?\([^)]*\))/i.exec(value)?.[1]
 
 // Syntax colours (`--c2-code-viewer__theme--token-keyword`) and a theme's `foreground` are text as well.
+/**
+ * A part that is painted rather than read (`--c2-tabs__indicator--color` is the selected pill's fill): its `color` is a
+ * surface, so lightening it for dark mode would put light icons on a light fill.
+ */
+const FILL_PART = /__(?:indicator|track|thumb|bar|fill|progress|marker|dot|ring|beam|swatch|line)(?:__|--)/
+const isTextDeclaration = (name: string, property: string) => isTextProperty(property) && !FILL_PART.test(name)
 const isTextProperty = (property: string) =>
   /(^|-)color$|^fill$|^stroke$|caret|^token-|^foreground$/.test(property) && !/border|outline|background/.test(property)
 
@@ -260,7 +266,7 @@ export function themeExampleCss(
         const color = parseColor(literal)
         if (!color || color[3] < 0.5) return false
         if (/background/.test(property)) return lightness(color) < 0.35
-        return isTextProperty(property) && lightness(color) >= 0.85
+        return isTextDeclaration(name, property) && lightness(color) >= 0.85
       })
     })
     // A block that paints a tint: its accent text and (with `tinted-blocks`) its greys flip with the tint. Unless it
@@ -268,7 +274,7 @@ export function themeExampleCss(
     // The block's tints, including the light half of a pair a first run already wrote, so a second run themes what
     // the first one left. Their dark halves are what accent text in the block has to read on.
     const tints = [...body.matchAll(DECLARATION)]
-      .filter(([, name]) => !isTextProperty(propertyOf(name)))
+      .filter(([, name]) => !isTextDeclaration(name, propertyOf(name)))
       .flatMap(([, , , value]) => [...literalColors(value), lightHalf(value) ?? ''])
       .map((literal) => parseColor(literal))
       .filter((color): color is [number, number, number, number] => !!color && isTint(color))
@@ -292,20 +298,23 @@ export function themeExampleCss(
       const property = propertyOf(name)
       return `${name}${colon}${value.replace(COLOR, (match) => {
         const color = parseColor(match)
-        if (color && isTint(color) && !isTextProperty(property)) {
-          themed++
-          return lightDark(match, darkTint(color, dark))
-        }
-        const token = themeNeutrals ? pickToken(property, byValue.get(normalizeColor(match)) ?? []) : undefined
+        // A theme role's exact value stays that role, so an app's own tokens restyle it; a tint is only paired when
+        // no role owns it.
+        const roles = byValue.get(normalizeColor(match)) ?? []
+        const token = themeNeutrals || (color && isTint(color)) ? pickToken(property, roles) : undefined
         if (token) {
           themed++
           return `var(${token}, ${match})`
+        }
+        if (color && isTint(color) && !isTextDeclaration(name, property)) {
+          themed++
+          return lightDark(match, darkTint(color, dark))
         }
         if (color && color[3] === 1 && isNeutral(color) && themeNeutrals) {
           themed++
           return mixNeutral(color)
         }
-        if (color && tinted && isAccentText(color) && isTextProperty(property)) {
+        if (color && tinted && isAccentText(color) && isTextDeclaration(name, property)) {
           themed++
           return lightDark(match, darkText(color, textBackgrounds, dark))
         }

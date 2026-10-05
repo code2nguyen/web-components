@@ -1,12 +1,14 @@
 /**
  * Applies `themeExampleCss` to the `<style>` block of every live example in the docs (`MdxCodeBlock` and `UsageBlock`
- * fences under `apps/ui/src/content/{components,gallery}`), so a card reads in both the light and the dark theme: its
- * greys follow the `--c2-theme--*` tokens, and its tints and the accent text on them become `light-dark()` pairs whose
- * light half is the authored colour and whose dark half is a starting point for the author to tune. The registry applies the same transform to
- * what it serves; this writes it back into the MDX the site renders.
+ * fences under `apps/ui/src/content/{components,gallery}`), so a card reads in both the light and the dark theme. In an
+ * eligible block, greys follow the `--c2-theme--*` tokens and a pale tint no theme role owns, plus the accent text on
+ * it, becomes a `light-dark()` pair whose light half is the authored colour and whose dark half is a starting point to
+ * tune. Blocks painting a strong colour, blocks designed dark and blocks over a translucent light surface are left as
+ * written (see `themeExampleCss`). The registry applies the same transform to what it serves; this writes it back
+ * into the MDX the site renders.
  *
  *   node scripts/theme-examples.ts           rewrite the MDX files in place
- *   node scripts/theme-examples.ts --check   fail, listing the files, when an example still has literals to theme
+ *   node scripts/theme-examples.ts --check   fail, listing the files, when an example still has a colour it would theme
  *
  * Greys are themed only inside a block that also paints a tint: elsewhere they were tuned by hand against the
  * audit, and a grey drawn on a colour the component computes (an avatar's auto colour) must not flip.

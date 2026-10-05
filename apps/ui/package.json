@@ -5,8 +5,8 @@
   "version": "0.0.0",
   "scripts": {
     "sync:examples": "node scripts/sync-examples.mjs",
-    "prestart": "npm run --prefix ../../ build && npm run --prefix ../../ build -w packages/umbrella && npm run --prefix ../../ examples:build && npm run sync:examples",
-    "predev": "npm run sync:examples",
+    "prestart": "npm run --prefix ../../ build && npm run --prefix ../../ build -w @c2n/components && npm run --prefix ../../ examples:build && npm run sync:examples",
+    "predev": "npm run --prefix ../../ build -w @c2n/components && npm run sync:examples",
     "dev": "astro dev",
     "start": "astro dev",
     "prebuild": "npm run sync:examples",

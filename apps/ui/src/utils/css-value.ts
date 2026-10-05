@@ -190,9 +190,30 @@ export function isUnpickableColor(raw: string | undefined | null): boolean {
  * or null for any other value. The halves are returned as written.
  */
 export function parseLightDark(raw: string | undefined | null): [string, string] | null {
-  const match = /^light-dark\((.*)\)$/i.exec((raw ?? '').trim())
-  if (!match) return null
-  const halves = splitTopLevel(match[1], 'comma').map((half) => half.trim())
+  const value = (raw ?? '').trim()
+  const open = /^light-dark\(/i.exec(value)
+  if (!open) return null
+  // The function's own closing paren has to be the last character: `light-dark(#fff, #000))` is not a pair.
+  let depth = 0
+  for (let index = open[0].length - 1; index < value.length; index++) {
+    if (value[index] === '(') depth++
+    else if (value[index] === ')' && --depth === 0 && index !== value.length - 1) return null
+  }
+  if (depth !== 0) return null
+  const inner = value.slice(open[0].length, -1)
+  // Split on top-level commas keeping empty fields, so `light-dark(#fff,,#000)` is rejected rather than read as a pair.
+  const halves: string[] = []
+  let level = 0
+  let current = ''
+  for (const char of inner) {
+    if (char === '(') level++
+    if (char === ')') level--
+    if (char === ',' && level === 0) {
+      halves.push(current.trim())
+      current = ''
+    } else current += char
+  }
+  halves.push(current.trim())
   return halves.length === 2 && halves.every(Boolean) ? [halves[0], halves[1]] : null
 }
 

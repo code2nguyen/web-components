@@ -226,9 +226,11 @@ export class ColorConfig extends LitElement {
       const value = next.getAlpha() < 1 ? next.toRgbString() : next.toHexString()
       const updated: [string, string] = [...halves]
       updated[index] = value
-      this.emit(formatLightDark(updated[0], updated[1]), '')
+      // A hidden pair is edited in place of the remembered colour, as the single-colour control does.
+      if (this.isHidden) this.emit(this.hiddenValue(), formatLightDark(updated[0], updated[1]))
+      else this.emit(formatLightDark(updated[0], updated[1]), '')
     }
-    return html`<div class="group">
+    return html`<div class="group ${this.isHidden ? 'is-hidden' : ''}">
       <c2-color-select
         placement="bottom-end"
         title=${label}
@@ -242,12 +244,30 @@ export class ColorConfig extends LitElement {
         class="hex"
         spellcheck="false"
         aria-label=${label}
-        .value=${color.isValid ? color.toHexString() : halves[index]}
+        .value=${color.isValid ? (color.getAlpha() < 1 ? color.toHex8String() : color.toHexString()) : halves[index]}
         @input=${(event: Event & { target: TextField }) => {
-          const next = new TinyColor(event.target.value.trim())
-          if (next.isValid) commit(next)
+          const raw = event.target.value.trim()
+          const next = new TinyColor(raw)
+          if (!next.isValid) return
+          // A plain six-digit hex keeps the half's alpha; only a value that spells its own alpha replaces it.
+          if (!/^#(?:[0-9a-f]{4}|[0-9a-f]{8})$|^(?:rgba|hsla)\(/i.test(raw) && color.isValid) next.setAlpha(color.getAlpha())
+          commit(next)
         }}
       ></c2-text-field>
+    </div>`
+  }
+
+  private renderPair(halves: [string, string]) {
+    return html`<div class="color-config">
+      <div class="pair">${this.renderPairHalf(halves, 0)}${this.renderPairHalf(halves, 1)}</div>
+      <c2-icon-button
+        class="toggle"
+        aria-label=${this.isHidden ? 'Show this colour' : 'Hide this colour'}
+        tooltip=${this.isHidden ? 'Show colour' : 'Hide colour'}
+        @click=${() => (this.isHidden ? this.emit(this.hiddenColor, '') : this.emit(this.hiddenValue(), this._value))}
+      >
+        ${this.isHidden ? html`<c2-feather-eye-off></c2-feather-eye-off>` : html`<c2-feather-eye></c2-feather-eye>`}
+      </c2-icon-button>
     </div>`
   }
 
@@ -260,10 +280,8 @@ export class ColorConfig extends LitElement {
    * its checkerboard, which reads as "unset" rather than as black.
    */
   render() {
-    const pair = this.isHidden ? null : parseLightDark(this._value)
-    if (pair && pair.every((half) => new TinyColor(half).isValid)) {
-      return html`<div class="color-config"><div class="pair">${this.renderPairHalf(pair, 0)}${this.renderPairHalf(pair, 1)}</div></div>`
-    }
+    const pair = parseLightDark(this.isHidden ? this.hiddenColor : this._value)
+    if (pair && pair.every((half) => new TinyColor(half).isValid)) return this.renderPair(pair)
     const color = this.pickable
     return html`<div class="color-config">
       <div class="group ${this.isHidden ? 'is-hidden' : ''}">

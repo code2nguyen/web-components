@@ -80,3 +80,18 @@ test('a pair an author tuned by hand is left as written', () => {
   const tuned = '.a { --c2-x--background: light-dark(#f3e8ff, #3b0764); --c2-x--color: light-dark(#7e22ce, #e9d5ff); }'
   assert.equal(theme(tuned, 'tinted-blocks'), tuned)
 })
+
+test('a fill part named …--color is not text: a tab indicator is not lightened for dark mode', () => {
+  const css = '.a { --c2-tabs--background-color: #fef3c7; --c2-tabs__indicator--color: #f59e0b; --c2-tabs__tab--color: #b45309; }'
+  const out = theme(css, 'tinted-blocks')
+  assert.match(out, /--c2-tabs__indicator--color: #f59e0b;/)
+  assert.equal(pairOf(out, '--c2-tabs__tab--color')[0], '#b45309')
+})
+
+test('a tint that is exactly a theme role stays that role, so an app theme still restyles it', () => {
+  const tokens = [{ name: '--c2-theme--color-primary-container', light: '#edf1fe', dark: '#0f2d5c' }]
+  assert.equal(
+    themeExampleCss('.a { --c2-x__tag--background: #edf1fe; }', tokens, { neutrals: 'tinted-blocks' }).css,
+    '.a { --c2-x__tag--background: var(--c2-theme--color-primary-container, #edf1fe); }',
+  )
+})
