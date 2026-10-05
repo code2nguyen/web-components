@@ -435,6 +435,8 @@ export class Flow extends LitElement {
   private editedLayout = false
   /** A keyboard `N`: focus the node the application adds in answer. */
   private focusAdded: Set<string> | null = null
+  /** The node that last had focus, while focus stays in the flow or its toolbar; see `lastFocusedNode()`. */
+  private lastFocusedId: string | null = null
   private newNodeDrag: { pointerId: number; startX: number; startY: number; moved: boolean } | null = null
   private readonly slotPresence = new SlotPresenceController(this, ['actions'])
   /** A keyboard delete: where focus goes once the application has removed the node. */
@@ -488,15 +490,15 @@ export class Flow extends LitElement {
   }
 
   /**
-   * Asks for a new node as `N` does: connected after the selected node, else beside the node that has focus, else in
-   * the middle of the view, in a spot no node covers. Fires `node-add`; once the application has added the node, it
-   * is selected and focused, and the view pans to show it if it is out of sight. Does nothing unless the flow is
-   * `editable`.
+   * Asks for a new node as `N` does: connected after the selected node, else beside the node that last had focus in the
+   * flow (a toolbar button calling this has taken focus by then), else in the middle of the view, in a spot no node
+   * covers. Fires `node-add`; once the application has added the node, it is selected and focused, and the view pans
+   * to show it if it is out of sight. Does nothing unless the flow is `editable`.
    */
   addNode(): void {
     if (!this.editable) return
     const selected = this.selected !== null && this.byId.has(this.selected) ? this.selected : null
-    this.requestNodeNearby(selected ?? this.focusedNodeId(), selected !== null)
+    this.requestNodeNearby(selected ?? this.focusedNodeId() ?? this.lastFocusedNode(), selected !== null)
   }
 
   zoomIn(): void {
@@ -987,6 +989,15 @@ export class Flow extends LitElement {
     this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
   }
 
+  /**
+   * The node that last had focus while focus is still in the flow: a toolbar button takes focus before its `click`
+   * calls `addNode()`, and the node the user was on should still count.
+   */
+  private lastFocusedNode(): string | null {
+    const id = this.lastFocusedId
+    return id !== null && this.byId.has(id) ? id : null
+  }
+
   /** The node that has focus, if focus is on one. */
   private focusedNodeId(): string | null {
     const active = (this.renderRoot as ShadowRoot).activeElement
@@ -1383,6 +1394,7 @@ export class Flow extends LitElement {
   private handleFocusIn = (event: FocusEvent) => {
     const id = this.nodeIdFromEvent(event)
     if (!id) return
+    this.lastFocusedId = id
     this.focusId = id
     this.highlightId = id
     this.scheduleCard(id)
@@ -1393,6 +1405,8 @@ export class Flow extends LitElement {
     // A keyboard connection lasts while focus stays in the flow.
     if (this.connection?.keyboard && !(next && this.renderRoot.contains(next))) this.cancelConnection()
     if (next && (this.card?.contains(next) || this.contains(next))) return
+    // Focus left the flow (its toolbar counts as inside): a later addNode() no longer goes beside that node.
+    if (!(next && this.renderRoot.contains(next))) this.lastFocusedId = null
     this.highlightId = null
     this.scheduleCardClose()
   }

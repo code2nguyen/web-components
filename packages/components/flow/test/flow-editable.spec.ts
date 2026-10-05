@@ -804,6 +804,30 @@ test.describe('actions', () => {
     expect(await recorded(page, 'node-add')).toHaveLength(2)
   })
 
+  test('addNode() from the toolbar goes beside the node the keyboard was on, even though the button took focus', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      element.querySelector('button')!.addEventListener('click', () => element.addNode())
+    })
+    // Focused from the keyboard, not selected.
+    await node(page, 'review').focus()
+    await expect(host(page)).toHaveJSProperty('selected', null)
+    await page.getByRole('button', { name: 'Add node' }).click()
+    const [add] = await recorded(page, 'node-add')
+    expect(add.detail.source).toBeUndefined()
+    const positions = await layout(page)
+    expect(positions['new-1'].x).toBe(positions.review.x)
+    expect(positions['new-1'].y).toBeGreaterThan(positions.review.y)
+
+    // Once focus has left the flow, the next add goes to the middle of the view again.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.locator('body').click({ position: { x: 2, y: 2 } })
+    await page.getByRole('button', { name: 'Add node' }).click()
+    await expect(node(page, 'new-2')).toBeVisible()
+    expect((await layout(page))['new-2'].x).not.toBe(positions.review.x)
+  })
+
   test('no-double-click-add: double-clicking empty canvas adds nothing, N and addNode() still do', async ({ page, renderScenario }) => {
     await renderScenario(withActions('editable no-double-click-add'))
     await wire(page)
