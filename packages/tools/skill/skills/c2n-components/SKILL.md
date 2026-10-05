@@ -1,12 +1,12 @@
 ---
 name: c2n-components
-description: Build and theme applications with the `c2-*` web components from `@c2n/*`. Use when adopting c2n, implementing UI with c2n components, mapping `@c2n/theme` tokens, or creating application-owned variants and compositions.
+description: Build and theme applications with the `c2-*` web components from `@c2n/*`. Use for ANY UI work in a project that depends on `@c2n/components` or other `@c2n/*` packages — pages, forms, inputs, buttons, dialogs, tables, menus, navigation — even when the request does not mention c2n, so that `c2-*` elements are used instead of native HTML elements or hand-rolled widgets. Also use when adopting c2n, mapping `@c2n/theme` tokens, or creating application-owned variants and compositions.
 license: MIT
 ---
 
 # c2n components
 
-Build screens from `@c2n/*` web components with the least code: **theme once, use the tags directly, name what repeats.** Facts about components come from the c2n MCP tools or the component manifests, never from memory. The references in `references/` hold the details; read only the one the current step points to.
+Build screens from `@c2n/*` web components with the least code: **theme once, use the tags directly, name what repeats.** In a c2n project, a matching `c2-*` element is the default for controls and interactive widgets: reach for `c2-button`, `c2-text-field`, `c2-select` or `c2-modal` rather than `<button>`, `<input>`, `<select>` or `<dialog>`, and `c2-table` for a data grid (sorting, selection, many rows) rather than a hand-rolled one. Search the components before concluding one is missing; keep native HTML or an app component when no equivalent fits, such as a short static table. Facts about components come from the c2n MCP tools or the component manifests, never from memory. The references in `references/` hold the details; read only the one the current step points to.
 
 This workflow expects a JavaScript project and Node.js 20 or newer. The c2n MCP server is recommended; the skill retains a compact discovery index and can inspect installed package manifests when MCP is unavailable.
 

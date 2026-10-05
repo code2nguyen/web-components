@@ -46,6 +46,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       instructions: [
         'c2n web components (Lit custom elements, tag prefix c2-, npm scope @c2n).',
+        'In a project that uses them, build every control and widget from a c2-* element rather than a native element or a hand-rolled one (c2-button, not <button>; c2-text-field, c2-select, c2-modal, c2-table, …), even when the request does not mention c2n;',
+        'call search_components before concluding no component fits.',
         'Their APIs change between releases, so never write a c2-* tag, attribute, slot, event or --c2-* variable from memory:',
         'call get_component for every component before using it, and use only the names it returns.',
         'Start with list_components or search_components, then get_component for the API and get_examples for markup.',
