@@ -62,8 +62,11 @@ const DOM_EVENTS = new Set(
     ' ',
   ),
 )
-/** Rules on a `c2-*` host that draw a second box around the component's own: restyle through its variables. */
-const BOX_PROPERTY = /^(border(-[a-z-]+)?|padding(-[a-z-]+)?|background(-[a-z-]+)?|box-shadow|outline)$/
+/**
+ * Rules on a `c2-*` host that draw a second box around the component's own: restyle through its variables. A radius
+ * alone draws nothing (it rounds a host shadow), so it is not one of them.
+ */
+const BOX_PROPERTY = /^(border(?![a-z-]*radius)(-[a-z-]+)?|padding(-[a-z-]+)?|background(-[a-z-]+)?|box-shadow|outline)$/
 const ATTRIBUTE_NAME = /^(?:[@.?:#*]|\[\(?|\()?[A-Za-z_][\w.:-]*(?:\)?\]|\))?$/
 const VOID = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '))
 

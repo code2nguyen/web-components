@@ -59,7 +59,7 @@ test('accepts templated slot names and framework directives', () => {
 test('flags unknown CSS variables and box styling on a c2 host', () => {
   const findings = validateMarkup(
     registry,
-    'c2-button { padding: 4px; margin: 0; color: red }\n.x c2-select::part(button) { padding: 1px }\n.y { --c2-button__container--background-color: red; --c2-buttn--x: 1px; width: var(--c2-theme--color-primary) }\n/* the --c2-chart__series-1… family */',
+    'c2-button { padding: 4px; margin: 0; color: red; border-radius: 8px; border-top-left-radius: 2px }\n.x c2-select::part(button) { padding: 1px }\n.y { --c2-button__container--background-color: red; --c2-buttn--x: 1px; width: var(--c2-theme--color-primary) }\n/* the --c2-chart__series-1… family */',
     'a.css',
   ).findings
   assert.deepEqual(
