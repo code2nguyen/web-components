@@ -12,12 +12,12 @@ Create a new `@c2n/<name>` package with the repo's plop generator, implement the
 
 From `$ARGUMENTS` and the conversation, determine:
 
-| Input                       | Notes                                                                                                                                                                                                 |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Name**                    | Title Case words, e.g. `Dropdown List`. Plop derives `dashCase` (`dropdown-list`, tag `c2-dropdown-list`, package `@c2n/dropdown-list`), `pascalCase` (`DropdownList`), `camelCase` (`dropdownList`). |
-| **Package type**            | `npm package` → `packages/components/<name>` (default). `open package` → `open-packages/<name>` (MIT "open" components composed from `packages/components/*`, e.g. `chatbot`).                        |
-| **Category**                | One of the enum in `apps/ui/src/schemas/index.ts` (`Inputs`, `Buttons`, `Navigation`, `Layout`, `Data display`, `Feedback`, `Chat`). Drives sidebar grouping, landing gallery and ⌘K search.          |
-| **Description + behaviour** | One sentence for the doc frontmatter, plus what the element does: attributes, slots, events, states, which existing components it composes.                                                           |
+| Input                       | Notes                                                                                                                                                                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**                    | Title Case words, e.g. `Dropdown List`. Plop derives `dashCase` (`dropdown-list`, tag `c2-dropdown-list`, package `@c2n/dropdown-list`), `pascalCase` (`DropdownList`), `camelCase` (`dropdownList`).                                  |
+| **Package type**            | `npm package` → `packages/components/<name>` (default). `open package` → `open-packages/<name>` (MIT "open" components composed from `packages/components/*`, e.g. `chatbot`).                                                         |
+| **Category**                | One of the enum in `apps/ui/src/schemas/index.ts` (`Inputs`, `Buttons`, `Navigation`, `Layout`, `Data display`, `Editors & viewers`, `Chart`, `Planning`, `Feedback`, `Chat`). Drives sidebar grouping, landing gallery and ⌘K search. |
+| **Description + behaviour** | One sentence for the doc frontmatter, plus what the element does: attributes, slots, events, states, which existing components it composes.                                                                                            |
 
 If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
 

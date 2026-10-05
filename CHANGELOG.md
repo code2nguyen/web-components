@@ -3,6 +3,28 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.1](https://github.com/code2nguyen/web-components/releases/tag/v1.0.1) — 2026-10-05
+
+### Fixes
+
+- **pagination:** Read document focus only once it has left the pagination ([49ae73e](https://github.com/code2nguyen/web-components/commit/49ae73e))
+- **pagination:** Leave focus that a page-change handler moved elsewhere ([6c1de80](https://github.com/code2nguyen/web-components/commit/6c1de80))
+- **gantt:** Keep the initial scroll for the render after hydration ([f288de1](https://github.com/code2nguyen/web-components/commit/f288de1))
+- **pagination:** Keep keyboard focus when Next or Previous disables itself ([7d9c9ca](https://github.com/code2nguyen/web-components/commit/7d9c9ca))
+- **gantt:** Match the server's empty frame while hydrating ([e35b99e](https://github.com/code2nguyen/web-components/commit/e35b99e))
+- **kanban:** Readable over-limit count in both themes ([4e5eaba](https://github.com/code2nguyen/web-components/commit/4e5eaba))
+- **components:** Import isServer from lit so the bundle keeps it external ([4ea7ea9](https://github.com/code2nguyen/web-components/commit/4ea7ea9))
+
+### Docs site & examples
+
+- **ui:** Give the week-planner Dated week today header a dark-mode colour ([c4e8d9d](https://github.com/code2nguyen/web-components/commit/c4e8d9d))
+- **ui:** Pair the log-viewer border and icon-button danger fallback for dark mode ([f8f2015](https://github.com/code2nguyen/web-components/commit/f8f2015))
+- **ui:** Address review findings on the light-dark() gallery pairs ([6ad6019](https://github.com/code2nguyen/web-components/commit/6ad6019))
+- **gallery:** Give variant colours explicit light-dark() pairs ([135a3f0](https://github.com/code2nguyen/web-components/commit/135a3f0))
+- **gallery:** Theme tinted examples so they read in dark mode ([9364ff5](https://github.com/code2nguyen/web-components/commit/9364ff5))
+- **gallery:** Keep the autocomplete issue-jump card dark in both themes ([8f8d84c](https://github.com/code2nguyen/web-components/commit/8f8d84c))
+- **ui:** Use the color-outline-variant token in the google-map gallery ([29cc319](https://github.com/code2nguyen/web-components/commit/29cc319))
+
 ## [1.0.0](https://github.com/code2nguyen/web-components/releases/tag/v1.0.0) — 2026-10-04
 
 ### Breaking changes
