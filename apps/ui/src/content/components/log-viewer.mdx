@@ -143,7 +143,7 @@ Appends follow the end when you are already there. Scroll up to read history and
 
 ### Streaming
 
-Pass `appendEntries()` **only the new entries**. The viewer keeps what it already has and lays out just the new rows while column widths stay the same, so a long-running stream costs the same per entry at 100 or 10,000 lines. When a new attribute value widens a column, an unwrapped log only updates its scroll width, but a wrapped one (`wrap`) lays out its retained rows again for the narrower message column. Calls made in quick succession render together, at most once per frame. Avoid replacing the whole log on every update (`clear()` followed by `appendEntries(allEntries)`): each update then lays out every entry again.
+Pass `appendEntries()` **only the new entries**. The viewer keeps what it already has and lays out just the new rows while column widths stay the same, so a long-running stream costs the same per entry at 100 or 10,000 lines. When a new attribute value widens a column, an unwrapped log only updates its scroll width, but a wrapped one (`wrap`) lays out its retained rows again for the narrower message column. Calls made in quick succession render together, at most once per 16ms during a burst. Avoid replacing the whole log on every update (`clear()` followed by `appendEntries(allEntries)`): each update then lays out every entry again.
 
 ```ts tag=CodeBlock
 // React: `logs` grows by appending ([...logs, entry]). Keep how much the viewer already has and append the rest.

@@ -198,6 +198,8 @@ export class LogViewer extends LitElement {
     this.observer?.disconnect()
     cancelAnimationFrame(this.frame)
     this.frame = 0
+    // Render a waiting append now rather than from a timer firing after removal; cancelling would leave Lit's update pending.
+    this.flush?.()
     clearTimeout(this.copyTimer)
     this.copyVersion++
     this.copiedSource = null
@@ -401,7 +403,9 @@ export class LogViewer extends LitElement {
   // interval, so layout and the scroll write happen once for a burst; an append after a quiet period renders right away.
   // A timer rather than requestAnimationFrame keeps that latency independent of how a browser paces frames.
   protected override async scheduleUpdate(): Promise<void> {
-    const wait = this.deferred ? this.lastUpdate + FRAME_INTERVAL - performance.now() : 0
+    // Only append renders open the throttle window, so a hover or scroll render does not delay the next append.
+    const deferred = this.deferred
+    const wait = deferred ? this.lastUpdate + FRAME_INTERVAL - performance.now() : 0
     if (wait > 0)
       await new Promise<void>((resolve) => {
         const timer = setTimeout(resolve, wait)
@@ -412,7 +416,7 @@ export class LogViewer extends LitElement {
       })
     this.flush = undefined
     this.deferred = false
-    this.lastUpdate = performance.now()
+    if (deferred) this.lastUpdate = performance.now()
     super.scheduleUpdate()
   }
 

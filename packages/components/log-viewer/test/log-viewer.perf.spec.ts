@@ -45,35 +45,27 @@ test('continuous live appends remain responsive with bounded rendering', async (
   await expect(viewer.locator('[data-index="10099"]')).toContainText('stream 99')
 })
 
-test('appends arriving in many tasks render about once per frame', async ({ page, scenario }) => {
+test('appends arriving in many tasks render at most once per 16ms', async ({ page, scenario }) => {
   await scenario('many')
   const result = await page.locator('c2-log-viewer').evaluate(async (element) => {
     const log = element as LogViewer
     let updates = 0
-    let frames = 0
     const updated = (log as unknown as { updated: () => void }).updated.bind(log)
     ;(log as unknown as { updated: () => void }).updated = () => {
       updates++
       updated()
     }
-    let counting = true
-    const tick = () => {
-      frames++
-      if (counting) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
+    const started = performance.now()
     for (let i = 0; i < 200; i++) {
       log.appendEntries({ level: 'info', message: `task ${i}` })
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
     await log.updateComplete
-    counting = false
-    return { updates, frames, count: log.entryCount }
+    return { updates, elapsed: performance.now() - started, count: log.entryCount }
   })
   expect(result.count).toBe(10200)
-  // About one render per frame; the margin covers the counter's start/stop frames and an occasional resize reflow under load.
-  expect(result.updates).toBeLessThan(result.frames * 1.5 + 3)
-  expect(result.updates).toBeLessThan(200)
+  // The throttle is timed, not frame-paced, so the bound is elapsed time; the margin covers timer jitter and a resize reflow.
+  expect(result.updates).toBeLessThan((result.elapsed / 16) * 1.25 + 3)
 })
 
 test('a widening attribute column does not re-lay out unwrapped entries', async ({ page, scenario }) => {
