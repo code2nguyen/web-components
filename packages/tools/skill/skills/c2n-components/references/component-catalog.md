@@ -41,7 +41,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Flow** — `c2-flow` · `@c2n/components/flow` — A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
-- **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
@@ -119,7 +118,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
-- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
@@ -138,6 +136,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Planning
 
+- **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
+- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
 - **Month Planner** — `c2-month-planner` · `@c2n/components/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **Notepad** — `c2-notepad` · `@c2n/components/notepad` — A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.
 - **Todo List** — `c2-todo-list` · `@c2n/components/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
