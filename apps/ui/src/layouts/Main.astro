@@ -4,7 +4,7 @@ import logoRef from '../assets/logo.svg?raw'
 import '@c2n/theme/base.css'
 import '../assets/global.scss'
 import SiteIconButton from '../components/ui/SiteIconButton.astro'
-import { FeatherGithubIcon, FeatherLayersIcon, FeatherSearchIcon } from '../components/ui/icons'
+import { FeatherGithubIcon, FeatherLayersIcon, FeatherSearchIcon, PhosphorDiscordLogoIcon } from '../components/ui/icons'
 import { Header } from '@c2n/components/header'
 import { LinkButton } from '@c2n/components/link-button'
 import { NavigationMenu } from '@c2n/components/navigation-menu'
@@ -30,6 +30,7 @@ const {
   section,
 } = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
+const discordUrl = 'https://discord.gg/REPLACE_ME' // c2n-webcomponents server invite
 const mobileNavItems = [
   { value: 'overview', label: 'Overview', href: `${base}/`, current: section === 'overview' },
   { value: 'getting-started', label: 'Getting started', href: `${base}/getting-started/`, current: section === 'getting-started' },
@@ -97,6 +98,10 @@ const mobileNavItems = [
         <LinkButton client:load class="site-header__github" href={repoUrl} external aria-label="GitHub repository">
           <FeatherGithubIcon client:load slot="prefix-icon" />
           <c2-tooltip>GitHub repository</c2-tooltip>
+        </LinkButton>
+        <LinkButton client:load class="site-header__github site-header__discord" href={discordUrl} external aria-label="Discord community">
+          <PhosphorDiscordLogoIcon client:load slot="prefix-icon" />
+          <c2-tooltip>Join the c2n-webcomponents Discord</c2-tooltip>
         </LinkButton>
       </div>
 
@@ -217,6 +222,7 @@ const mobileNavItems = [
           --c2-link-button__container__hover--background-color: var(--site-color-surface-container-3);
           --c2-link-button__container__hover--text-decoration: none;
           --c2-link-button__icon--size: 16px;
+          --c2-phosphor-icon--size: 16px;
         }
 
         &__brand {
