@@ -224,8 +224,40 @@ test('initializes from authored ordinary children without success events or publ
   expect(await visualIds(host)).toEqual(['first', 'second'])
   await expect(host.locator('[part="container"]')).toHaveAttribute('role', 'list')
   await expect(host.locator('[role="listitem"]')).toHaveCount(2)
+  // React reported the `slot` the list used to write on each item as a hydration mismatch.
+  await expect(page.locator('#first')).not.toHaveAttribute('slot')
+  await expect(page.locator('#second')).not.toHaveAttribute('slot')
+})
+
+test('items added later are placed without writing slot on them', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list aria-label="Tasks"><div id="first">First</div></c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await host.evaluate((element) => {
+    const item = document.createElement('div')
+    item.id = 'added'
+    item.textContent = 'Added'
+    element.prepend(item)
+  })
+  await expect.poll(() => visualIds(host)).toEqual(['added', 'first'])
+  await expect(page.locator('#added')).toBeVisible()
+  await expect(page.locator('#added')).not.toHaveAttribute('slot')
+})
+
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the list then falls back to writing `slot` on its items.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page
+    .locator('#mount')
+    .evaluate((mount) =>
+      mount.setHTMLUnsafe(
+        '<c2-reorder-list aria-label="Tasks"><template shadowrootmode="open"></template><div id="first">First</div><div id="second">Second</div></c2-reorder-list>',
+      ),
+    )
+  const host = page.locator('c2-reorder-list')
   await expect(page.locator('#first')).toHaveAttribute('slot', /^c2-reorder-item-/)
-  expect(await host.evaluate((element) => [...element.children].filter((child) => /^\d+$/.test((child as HTMLElement).slot)).length)).toBe(0)
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'second'])
+  await expect(page.locator('#second')).toBeVisible()
 })
 
 test('reconciles inserted, removed, and externally reordered children without firing success events', async ({ page, renderScenario }) => {
@@ -1245,4 +1277,28 @@ test('has no detectable accessibility violations with swipe actions revealed', a
   await swipeItem(page, '#first', -170)
   await expect(page.locator('c2-reorder-list').getByRole('button', { name: 'Archive' })).toBeVisible()
   await accessible(page)
+})
+
+test('a child that moves into or out of the placeholder slot later stops or starts being an item', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  expect(await visualIds(host)).toEqual(['first', 'second', 'third'])
+  await page.locator('#second').evaluate((item) => item.setAttribute('slot', 'placeholder'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'third'])
+  await page.locator('#second').evaluate((item) => item.removeAttribute('slot'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'second', 'third'])
+})
+
+test('moving the focused item into a special slot moves focus to its neighbour', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  const focusedId = () =>
+    host.evaluate((element) => (element.shadowRoot!.activeElement?.querySelector('slot') as HTMLSlotElement | null)?.assignedElements()[0]?.id ?? '')
+  await host.locator('.list-item[data-assignment-id]').nth(1).focus()
+  await page.locator('#second').evaluate((item) => item.setAttribute('slot', 'placeholder'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'third'])
+  await expect.poll(focusedId).toBe('third')
+  await page.locator('#third').evaluate((item) => item.setAttribute('slot', 'dragging-item'))
+  await expect.poll(() => visualIds(host)).toEqual(['first'])
+  await expect.poll(focusedId).toBe('first')
 })

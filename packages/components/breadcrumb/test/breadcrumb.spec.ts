@@ -33,3 +33,63 @@ test('adding a page moves automatic current-page state to the new last item', as
   await expect(page.getByRole('link', { name: 'New' })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
 })
+// React reported the `slot` the trail used to write on each item as a hydration mismatch.
+test('places items and the separator without writing slot on the items', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb><span slot="separator">/</span>${items}</c2-breadcrumb>`)
+  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
+  await expect(page.locator('c2-breadcrumb [part="separator"]').first()).toHaveText('/')
+  await expect(page.locator('c2-breadcrumb > c2-link-button[slot]')).toHaveCount(0)
+  // Replacing an item keeps the count, so only the assignment changes.
+  await page.locator('c2-breadcrumb').evaluate((el) => {
+    const next = document.createElement('c2-link-button')
+    next.setAttribute('href', '#shop')
+    next.textContent = 'Shop'
+    el.querySelector('[href="#products"]')!.replaceWith(next)
+  })
+  await expect(page.getByRole('link', { name: 'Shop' })).toBeVisible()
+  await expect(page.locator('c2-breadcrumb > c2-link-button[slot]')).toHaveCount(0)
+})
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the trail then falls back to writing `slot` on its items.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page
+    .locator('#mount')
+    .evaluate((mount, markup) => mount.setHTMLUnsafe(`<c2-breadcrumb><template shadowrootmode="open"></template>${markup}</c2-breadcrumb>`), items)
+  await expect(page.locator('c2-link-button[href="#home"]')).toHaveAttribute('slot', 'item-0')
+  await expect(page.getByRole('link', { name: 'Item', exact: true })).toBeVisible()
+})
+test('a child that gains slot="separator" later becomes the separator', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb><span id="sep">/</span>${items}</c2-breadcrumb>`)
+  await expect(page.locator('c2-breadcrumb [part="separator"]')).toHaveCount(4)
+  await page.locator('#sep').evaluate((sep) => sep.setAttribute('slot', 'separator'))
+  await expect(page.locator('c2-breadcrumb [part="separator"]')).toHaveCount(3)
+  await expect(page.locator('c2-breadcrumb [part="separator"]').first()).toHaveText('/')
+})
+test('a mutation inside an item does not reassign the trail', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb>${items}</c2-breadcrumb>`)
+  const calls = await page.locator('c2-breadcrumb').evaluate(async (element) => {
+    let count = 0
+    const trail = element as unknown as { assignItems(): void }
+    const original = trail.assignItems.bind(trail)
+    trail.assignItems = () => {
+      count++
+      original()
+    }
+    const item = element.querySelector('c2-link-button')!
+    item.append(document.createElement('span'))
+    item.setAttribute('data-x', '1')
+    item.firstElementChild?.setAttribute('slot', 'icon')
+    await new Promise((resolve) => setTimeout(resolve))
+    const inner = count
+    element.append(document.createElement('c2-link-button'))
+    await new Promise((resolve) => setTimeout(resolve))
+    return { inner, direct: count }
+  })
+  expect(calls).toEqual({ inner: 0, direct: 1 })
+})
+test('assignSlot() on an element that is not a <slot> throws its documented error', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb>${items}</c2-breadcrumb>`)
+  const message = await page.evaluate(() => (window as unknown as { __assignSlotOnNonSlot(): string }).__assignSlotOnNonSlot())
+  expect(message).toBe('assignSlot() must be placed on a <slot> element.')
+})

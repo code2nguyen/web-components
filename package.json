@@ -96,6 +96,8 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/search-field:build",
+        "./packages/components/inline-edit:build",
         "./packages/components/kanban:build",
         "./packages/components/gantt:build",
         "./packages/components/working-indicator:build",

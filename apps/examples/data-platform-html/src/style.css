@@ -300,6 +300,7 @@ c2-button.btn-primary-large {
   --c2-button__container__hover--background-color: #0369a1;
   --c2-button__container__hover--border: 1px solid rgba(56, 189, 248, 0.9);
   border-radius: 12px;
+  /* c2n-ignore: c2-button has no box-shadow variable (COMPONENT-FEEDBACK.md) */
   box-shadow:
     0 4px 18px rgba(2, 132, 199, 0.35),
     0 0 0 1px rgba(56, 189, 248, 0.2);
@@ -311,6 +312,7 @@ c2-button.btn-primary-large {
 c2-button.btn-primary:hover,
 c2-button.btn-primary-large:hover {
   transform: translateY(-2px);
+  /* c2n-ignore: c2-button has no box-shadow variable (COMPONENT-FEEDBACK.md) */
   box-shadow:
     0 8px 28px rgba(2, 132, 199, 0.5),
     0 0 20px rgba(56, 189, 248, 0.3);
@@ -1099,6 +1101,7 @@ c2-link-button.filter-pill {
   --c2-link-button__container__hover--background-color: rgba(34, 211, 238, 0.18);
   --c2-link-button__container__hover--color: #cffafe;
   --c2-link-button__container__hover--text-decoration: none;
+  /* c2n-ignore: c2-link-button has no border variable (COMPONENT-FEEDBACK.md) */
   border: 1px solid rgba(34, 211, 238, 0.28);
   border-radius: 999px;
 }
@@ -1108,6 +1111,7 @@ c2-link-button.pill-amber {
   --c2-link-button__container--color: #fde68a;
   --c2-link-button__container__hover--background-color: rgba(251, 191, 36, 0.18);
   --c2-link-button__container__hover--color: #fef3c7;
+  /* c2n-ignore: c2-link-button has no border variable (COMPONENT-FEEDBACK.md) */
   border-color: rgba(251, 191, 36, 0.28);
 }
 

@@ -435,6 +435,8 @@ export class Flow extends LitElement {
   private editedLayout = false
   /** A keyboard `N`: focus the node the application adds in answer. */
   private focusAdded: Set<string> | null = null
+  /** The node that last had focus, while focus stays in the flow or its toolbar; see `lastFocusedNode()`. */
+  private lastFocusedId: string | null = null
   private newNodeDrag: { pointerId: number; startX: number; startY: number; moved: boolean } | null = null
   private readonly slotPresence = new SlotPresenceController(this, ['actions'])
   /** A keyboard delete: where focus goes once the application has removed the node. */
@@ -451,6 +453,8 @@ export class Flow extends LitElement {
       this.internals.role = 'group'
       this.internals.ariaRoleDescription = 'flow diagram'
     }
+    // On the host, not the stage: focus can also leave from the slotted toolbar, which the stage never hears about.
+    this.addEventListener('focusout', this.handleHostFocusOut)
   }
 
   override connectedCallback() {
@@ -488,15 +492,15 @@ export class Flow extends LitElement {
   }
 
   /**
-   * Asks for a new node as `N` does: connected after the selected node, else beside the node that has focus, else in
-   * the middle of the view, in a spot no node covers. Fires `node-add`; once the application has added the node, it
-   * is selected and focused, and the view pans to show it if it is out of sight. Does nothing unless the flow is
-   * `editable`.
+   * Asks for a new node as `N` does: connected after the selected node, else beside the node that last had focus in the
+   * flow (a toolbar button calling this has taken focus by then), else in the middle of the view, in a spot no node
+   * covers. Fires `node-add`; once the application has added the node, it is selected and focused, and the view pans
+   * to show it if it is out of sight. Does nothing unless the flow is `editable`.
    */
   addNode(): void {
     if (!this.editable) return
     const selected = this.selected !== null && this.byId.has(this.selected) ? this.selected : null
-    this.requestNodeNearby(selected ?? this.focusedNodeId(), selected !== null)
+    this.requestNodeNearby(selected ?? this.focusedNodeId() ?? this.lastFocusedNode(), selected !== null)
   }
 
   zoomIn(): void {
@@ -987,6 +991,15 @@ export class Flow extends LitElement {
     this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
   }
 
+  /**
+   * The node that last had focus while focus is still in the flow: a toolbar button takes focus before its `click`
+   * calls `addNode()`, and the node the user was on should still count.
+   */
+  private lastFocusedNode(): string | null {
+    const id = this.lastFocusedId
+    return id !== null && this.byId.has(id) ? id : null
+  }
+
   /** The node that has focus, if focus is on one. */
   private focusedNodeId(): string | null {
     const active = (this.renderRoot as ShadowRoot).activeElement
@@ -1025,8 +1038,9 @@ export class Flow extends LitElement {
    * Starts dragging a new node onto the canvas from outside it, the way a design tool drags a shape from its toolbar:
    * call it from the `pointerdown` of a button in the `actions` slot. While the pointer is over the canvas a
    * placeholder follows it; releasing there fires `node-add` at that spot (moved aside if it would cover a node), and
-   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere, or Escape, cancels. A
-   * press that does not move does nothing, so the same button can call `addNode()` on `click`. On a touch screen,
+   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere (the toolbar included),
+   * or Escape, cancels. A press that does not move, or comes back to the button, adds nothing here, so the same
+   * button can call `addNode()` on `click`. On a touch screen,
    * give the button `touch-action: none` so the drag is not taken as a page scroll. Does nothing unless `editable`.
    */
   dragNewNode(event: PointerEvent): void {
@@ -1039,10 +1053,18 @@ export class Flow extends LitElement {
     window.addEventListener('keydown', this.handleNewNodeKey, true)
   }
 
-  /** Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas. */
+  /**
+   * Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas or over
+   * the actions toolbar: a press that wanders a few pixels and is released back on the add button is that button's
+   * click, not a drop under the toolbar as well. The toolbar is the visible panel (the slot's box), not the `.actions`
+   * strip that positions it along the whole edge: canvas beside the panel still takes a drop.
+   */
   private dropPoint(clientX: number, clientY: number): FlowPoint | null {
-    const rect = this.stage?.getBoundingClientRect()
-    if (!rect || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null
+    const inside = (rect: DOMRect | undefined) => !!rect && clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
+    if (!inside(this.stage?.getBoundingClientRect())) return null
+    const actions = this.renderRoot.querySelector<HTMLElement>('.actions')
+    const panel = actions?.querySelector('slot')
+    if (actions && !actions.hidden && panel && inside(panel.getBoundingClientRect())) return null
     return this.centred(this.toCanvas(clientX, clientY))
   }
 
@@ -1383,6 +1405,7 @@ export class Flow extends LitElement {
   private handleFocusIn = (event: FocusEvent) => {
     const id = this.nodeIdFromEvent(event)
     if (!id) return
+    this.lastFocusedId = id
     this.focusId = id
     this.highlightId = id
     this.scheduleCard(id)
@@ -1395,6 +1418,15 @@ export class Flow extends LitElement {
     if (next && (this.card?.contains(next) || this.contains(next))) return
     this.highlightId = null
     this.scheduleCardClose()
+  }
+
+  /**
+   * Focus left the flow altogether, from a node or from the toolbar (which counts as inside): a later `addNode()` no
+   * longer goes beside the node it was last on. A target in the shadow root is retargeted to the host here.
+   */
+  private handleHostFocusOut = (event: FocusEvent) => {
+    const next = event.relatedTarget as Node | null
+    if (!(next && (next === this || this.contains(next) || this.renderRoot.contains(next)))) this.lastFocusedId = null
   }
 
   // ---------------------------------------------------------------------------------------------------------------

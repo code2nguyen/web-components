@@ -80,7 +80,7 @@ Use this file as a map of the documentation. Component pages contain installatio
 
 Exact component facts (attributes, slots, events, CSS parts, CSS variables) come from structured sources, never from memory:
 
-- **MCP server**: \`npx -y @c2n/mcp\` (stdio) exposes \`list_components\`, \`search_components\`, \`get_component\`, \`get_examples\`, \`get_presets\`, \`get_theme\`, \`generate_variant\` and \`get_workflow_guide\` over a bundled registry built from every package.
+- **MCP server**: \`npx -y @c2n/mcp\` (stdio) exposes \`list_components\`, \`search_components\`, \`get_component\`, \`get_examples\`, \`search_examples\`, \`get_presets\`, \`get_theme\`, \`generate_variant\`, \`validate_markup\` and \`get_workflow_guide\` over a bundled registry built from every package.
 - **Skill**: \`npm install --save-dev @c2n/skill && npx c2n-skill install\` copies the \`c2n-components\` skill into a project for Claude Code, Codex or Google Antigravity and merges the MCP server into their configuration.
 - **Manifests**: \`@c2n/components\` ships one merged \`custom-elements.json\` (\`node_modules/@c2n/components/custom-elements.json\`, also exported as \`@c2n/components/custom-elements.json\`), the same data the API pages render.
 - **Framework glue**: \`@c2n/components/react\` (JSX types) and \`@c2n/components/vue\` (Volar types) declare every tag; \`@c2n/angular\` supplies the \`ControlValueAccessor\` pair for form controls; \`@c2n/framework-types\` ships \`html-custom-data.json\` and \`web-types.json\` for editors.

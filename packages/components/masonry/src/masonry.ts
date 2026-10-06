@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { property } from '@c2n/core/lit-helper.js'
+import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -83,6 +83,10 @@ interface PointerSession {
 @customElement('c2-masonry')
 export class Masonry extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  // Tiles pick their item by hand instead of writing `slot` on it: an attribute written on a child while the page
+  // upgrades is one the server never rendered, which React reports as a hydration mismatch.
+  static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
 
   /** Shows separate move and resize controls when every tile has a unique identity. */
   @property({ type: Boolean }) editable = false
@@ -183,6 +187,19 @@ export class Masonry extends LitElement {
     this.animateRelocatedTiles()
   }
 
+  /**
+   * Whether tiles assign their slots by hand. False only when the shadow root came from declarative shadow DOM
+   * (server rendering), which is always in named mode; the container then falls back to `slot` attributes.
+   */
+  private get manualSlots(): boolean {
+    return (this.renderRoot as ShadowRoot).slotAssignment === 'manual'
+  }
+
+  private slotContent(id: string): MasonryItem[] {
+    const item = this.itemById.get(id)
+    return item ? [item] : []
+  }
+
   private scheduleSync(): void {
     if (this.syncQueued) return
     this.syncQueued = true
@@ -258,7 +275,7 @@ export class Masonry extends LitElement {
       if (seen.has(id)) id = `__invalid-${index}`
       seen.add(id)
       const slot = `masonry-tile-${index}`
-      if (item.slot !== slot) item.slot = slot
+      if (!this.manualSlots && item.slot !== slot) item.slot = slot
       nextById.set(id, item)
       nextSlots.set(id, slot)
       for (const value of [item.colsXs, item.colsSm, item.colsMd, item.colsLg]) {
@@ -614,7 +631,7 @@ export class Masonry extends LitElement {
               data-item-id=${placement.id}
               style="grid-column:${placement.columnStart + 1} / span ${placement.columnSpan};grid-row:${placement.rowStart + 1} / span ${placement.rowSpan}"
             >
-              <slot name=${placement.slot}></slot>
+              <slot name=${placement.slot} ${assignSlot(this.slotContent(placement.id))}></slot>
             </div>`,
         )}
         ${

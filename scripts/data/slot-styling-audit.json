@@ -1049,6 +1049,44 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-inline-edit",
+      "slot": "cancel-icon",
+      "decision": "variables",
+      "variables": ["--c2-inline-edit__control__icon--size", "--c2-inline-edit__control--color", "--c2-inline-edit__control__hover--color"],
+      "reason": "The cancel button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "edit-icon",
+      "decision": "variables",
+      "variables": [
+        "--c2-inline-edit__edit-icon--size",
+        "--c2-inline-edit__edit-icon--color",
+        "--c2-inline-edit__edit-icon--opacity",
+        "--c2-inline-edit__edit-icon__hover--opacity"
+      ],
+      "reason": "The read view sizes, colours and fades the slotted pencil and its SVG fallback through the edit-icon variables."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "editor",
+      "decision": "assigned-content",
+      "reason": "The editor slot projects a consumer-owned control that draws its own box; style it through its own class or public contract."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "preview",
+      "decision": "assigned-content",
+      "reason": "The preview slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "save-icon",
+      "decision": "variables",
+      "variables": ["--c2-inline-edit__control__icon--size", "--c2-inline-edit__control--color", "--c2-inline-edit__control__hover--color"],
+      "reason": "The save button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
+    },
+    {
       "tag": "c2-kanban",
       "slot": "",
       "decision": "assigned-content",
@@ -1946,6 +1984,34 @@
       "decision": "part",
       "parts": ["tooltip"],
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "clear-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__clear-icon--color", "--c2-search-field__clear-icon__hover--color"],
+      "reason": "The clear button sizes the slotted icon and its SVG fallback through the icon size, and colours it through the clear-icon colour variables."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "recent-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__option-icon--color"],
+      "reason": "Each recent search sizes the slotted icon and its clock fallback through the icon size, and colours it through the option icon colour."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "search-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__icon--color"],
+      "reason": "The leading icon box sizes and colours the slotted icon and its magnifier fallback through the icon variables."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "suffix-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__icon--color"],
+      "reason": "The field sizes and colours the slotted suffix icon through the icon variables."
     },
     {
       "tag": "c2-select",

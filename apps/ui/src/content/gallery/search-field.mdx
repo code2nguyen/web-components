@@ -1,0 +1,84 @@
+---
+description: 'Ready-made looks for c2-search-field: a header command bar, a pill, an underlined field and a filled toolbar search. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SearchField } from '@c2n/components/search-field'
+
+## Presets
+
+The box is one set of variables (`--c2-search-field--border`, `--c2-search-field--background`, `--c2-search-field--border-radius`, `--c2-search-field--min-height`), with `--c2-search-field__hover--*` and `--c2-search-field__focus--*` states on top. The `--c2-search-field__shortcut--*` variables style the key hint, and the `--c2-search-field__panel--*` and `--c2-search-field__option--*` variables the recent-searches list.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-search-field placeholder="Search"></c2-search-field>
+```
+
+```html tag=MdxCodeBlock,label=Command bar
+<style>
+  .command-bar {
+    width: 260px;
+    --c2-search-field--min-height: 32px;
+    --c2-search-field--padding: 4px 6px 4px 10px;
+    --c2-search-field--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-search-field--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    --c2-search-field__focus--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-search-field__shortcut--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-search-field class="command-bar" placeholder="Search or jump to…" shortcut="mod+j"></c2-search-field>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    width: 260px;
+    --c2-search-field--min-height: 40px;
+    --c2-search-field--padding: 8px 16px;
+    --c2-search-field--border-radius: 999px;
+    --c2-search-field__focus--outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
+    --c2-search-field__panel--border-radius: 14px;
+    --c2-search-field__option--border-radius: 8px;
+  }
+</style>
+<c2-search-field class="pill" placeholder="Search products" recent="running shoes;rain jacket;water bottle"></c2-search-field>
+```
+
+```html tag=MdxCodeBlock,label=Underlined
+<style>
+  .underlined {
+    width: 260px;
+    --c2-search-field--padding: 6px 2px;
+    --c2-search-field--border-radius: 0;
+    --c2-search-field--background: transparent;
+    --c2-search-field--border: 0 solid transparent;
+    --c2-search-field__hover--border: 0 solid transparent;
+    --c2-search-field__focus--border: 0 solid transparent;
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-search-field class="underlined" placeholder="Search messages"></c2-search-field>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar
+<style>
+  .toolbar-search {
+    width: 220px;
+    --c2-search-field--min-height: 28px;
+    --c2-search-field--padding: 2px 8px;
+    --c2-search-field--gap: 6px;
+    --c2-search-field--font-size: 12px;
+    --c2-search-field--border-radius: 4px;
+    --c2-search-field__icon--size: 14px;
+    --c2-search-field--background: light-dark(#eef2ff, #1c2240);
+    --c2-search-field--border: 1px solid light-dark(#eef2ff, #1c2240);
+    --c2-search-field__icon--color: light-dark(#4338ca, #9ea3f0);
+  }
+</style>
+<c2-search-field class="toolbar-search" placeholder="Filter rows" shortcut="/"></c2-search-field>
+```
+
+</GalleryGrid>

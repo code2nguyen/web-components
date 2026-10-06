@@ -25,3 +25,5 @@ export { FeatherSearchIcon } from '@c2n/feather-icons/icons/search.js'
 export { FeatherSlidersIcon } from '@c2n/feather-icons/icons/sliders.js'
 export { FeatherSunIcon } from '@c2n/feather-icons/icons/sun.js'
 export { FeatherXIcon } from '@c2n/feather-icons/icons/x.js'
+// Feather has no brand logos beyond GitHub; the Discord mark comes from Phosphor.
+export { PhosphorDiscordLogoIcon } from '@c2n/phosphor-icons/icons/discord-logo.js'

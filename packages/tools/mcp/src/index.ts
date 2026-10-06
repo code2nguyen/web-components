@@ -1,4 +1,5 @@
 export { createServer } from './server.ts'
 export { loadRegistry, resolveElement } from './registry.ts'
 export { generateCode } from './lib/generate-code.ts'
+export { formatFindings, validateMarkup, type Finding, type Severity, type ValidationResult } from './lib/validate.ts'
 export type * from './registry-types.ts'

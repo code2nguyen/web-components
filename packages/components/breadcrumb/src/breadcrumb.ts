@@ -1,6 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -56,6 +56,10 @@ const ITEM_SLOT = 'item-'
 export class Breadcrumb extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Each item's slot picks its item by hand instead of writing `slot` on it: an attribute written on a child while the
+  // page upgrades is one the server never rendered, which React reports as a hydration mismatch.
+  static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
+
   /** Upper bound on visible items (the first, then the last ones behind an ellipsis). `0` lets the width decide alone. */
   @property({ type: Number, attribute: 'max-items' }) maxItems = 0
 
@@ -75,6 +79,8 @@ export class Breadcrumb extends LitElement {
   @query('.c2-breadcrumb-list') private list!: HTMLElement
 
   private observer?: MutationObserver
+  /** The items as of the last `assignItems()`, which each item slot renders. */
+  private itemElements: HTMLElement[] = []
   private resizeObserver?: ResizeObserver
   private measuredWidth = -1
   private automaticCurrent?: HTMLElement
@@ -85,8 +91,14 @@ export class Breadcrumb extends LitElement {
     if (!isServer) {
       this.separatorNodes = [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
       this.assignItems()
-      this.observer ??= new MutationObserver(() => this.assignItems())
-      this.observer.observe(this, { childList: true })
+      // `slot` changes too: a child that gains or loses `slot="separator"` changes which slot it belongs in, which
+      // manual assignment does not pick up by itself. Attribute records on children need `subtree`, so filter the
+      // records to the trail's own children: a mutation inside an item does not change the item list.
+      this.observer ??= new MutationObserver((records) => {
+        const affectsItems = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
+        if (records.some(affectsItems)) this.assignItems()
+      })
+      this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver ??= new ResizeObserver((entries) => {
           const width = entries[0]?.contentRect.width ?? 0
@@ -111,13 +123,26 @@ export class Breadcrumb extends LitElement {
   /** Gives every item its own slot so each can sit in a list item with its separator, and marks the last as current. */
   private assignItems() {
     const items = this.items
-    items.forEach((item, index) => {
-      const name = `${ITEM_SLOT}${index}`
-      if (item.getAttribute('slot') !== name) item.setAttribute('slot', name)
-    })
+    if (this.manualSlots) {
+      this.itemElements = items
+      this.requestUpdate()
+    } else {
+      items.forEach((item, index) => {
+        const name = `${ITEM_SLOT}${index}`
+        if (item.getAttribute('slot') !== name) item.setAttribute('slot', name)
+      })
+    }
     if (this.itemCount !== items.length) this.expanded = false
     this.itemCount = items.length
     this.markCurrent(items)
+  }
+
+  /**
+   * Whether slots are assigned by hand. False only when the shadow root came from declarative shadow DOM (server
+   * rendering), which is always in named mode; the trail then falls back to writing `slot` on its items.
+   */
+  private get manualSlots(): boolean {
+    return (this.renderRoot as ShadowRoot | undefined)?.slotAssignment === 'manual'
   }
 
   private markCurrent(items: HTMLElement[]) {
@@ -231,7 +256,8 @@ export class Breadcrumb extends LitElement {
   }
 
   private renderItem(index: number, last: boolean) {
-    return html`<li class="c2-breadcrumb-item" part="item"><slot name=${`${ITEM_SLOT}${index}`}></slot>${last ? nothing : this.renderSeparator()}</li>`
+    const slot = html`<slot name=${`${ITEM_SLOT}${index}`} ${assignSlot(this.itemElements.slice(index, index + 1))}></slot>`
+    return html`<li class="c2-breadcrumb-item" part="item">${slot}${last ? nothing : this.renderSeparator()}</li>`
   }
 
   private renderEllipsis(hidden: number) {
@@ -266,7 +292,12 @@ export class Breadcrumb extends LitElement {
           ${content}
         </ol>
       </nav>
-      <slot name="separator" class="c2-breadcrumb-separator-source" @slotchange=${this.handleSeparatorChange}></slot>
+      <slot
+        name="separator"
+        class="c2-breadcrumb-separator-source"
+        ${assignSlot([...this.children].filter((child) => child.getAttribute('slot') === 'separator'))}
+        @slotchange=${this.handleSeparatorChange}
+      ></slot>
     `
   }
 }

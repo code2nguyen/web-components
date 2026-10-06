@@ -38,6 +38,8 @@ permissions:
   # The workflow pushes an unprotected release branch and opens the version PR itself.
   contents: write
   pull-requests: write
+  # Creating the skip-review label and adding it to the version PR go through the issues API.
+  issues: write
   # npm provenance: lerna turns it on by itself for a public repo running in GitHub Actions, but only
   # if it can mint an OIDC token. Without this the publish still works, just unattested.
   id-token: write
@@ -290,6 +292,14 @@ jobs:
             fi
           else
             echo "Version PR already exists: $pr_url"
+          fi
+          # Keep cubic's automatic review off the version PR (cubic.yaml also ignores release/* head branches).
+          # Best effort: a missing label permission must not fail a release that has already published.
+          if gh label create skip-review --color ededed --description "Skip cubic's automatic AI review" --force &&
+            gh pr edit "$RELEASE_BRANCH" --add-label skip-review; then
+            echo "Labelled the version PR skip-review."
+          else
+            echo "::warning::Could not add the skip-review label to the version PR."
           fi
 
       - name: Push release tag

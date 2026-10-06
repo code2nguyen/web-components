@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -328,6 +328,10 @@
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
     },
+    "./inline-edit": {
+      "types": "./dist/inline-edit.d.ts",
+      "default": "./dist/inline-edit.js"
+    },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
@@ -459,6 +463,10 @@
     "./reorder-list": {
       "types": "./dist/reorder-list.d.ts",
       "default": "./dist/reorder-list.js"
+    },
+    "./search-field": {
+      "types": "./dist/search-field.d.ts",
+      "default": "./dist/search-field.js"
     },
     "./select": {
       "types": "./dist/select.d.ts",
@@ -623,10 +631,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.2",
-    "@c2n/phosphor-icons": "1.0.2",
-    "@c2n/task-icons": "1.0.2",
-    "@c2n/theme": "1.0.2",
+    "@c2n/core": "1.0.3",
+    "@c2n/phosphor-icons": "1.0.3",
+    "@c2n/task-icons": "1.0.3",
+    "@c2n/theme": "1.0.3",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -754,6 +762,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/inline-edit": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",
@@ -780,6 +789,7 @@
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/reorder-list": "*",
+    "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",
     "@c2n/sheet": "*",

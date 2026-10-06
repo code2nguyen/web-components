@@ -291,6 +291,11 @@ export const overrides: Record<string, Override> = {
   // Slider: white thumb on the page surface, accent thumb border, white ticks on the accent fill, bubble text on the inverse surface.
   '--c2-slider__thumb--color': { token: 'color-surface' },
   '--c2-slider__thumb--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
+  // The open field of an inline edit is drawn in the accent, like a focused text field.
+  '--c2-inline-edit__editor--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, #0265dc)',
+  },
   '--c2-slider__tick__filled--color': onPrimary,
   '--c2-slider__value--color': { token: 'color-on-inverse-surface' },
   // Switch: hovered off-track uses the outline colour, the thumb is a surface.
@@ -400,6 +405,7 @@ export const overrides: Record<string, Override> = {
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },

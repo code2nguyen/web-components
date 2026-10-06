@@ -21,7 +21,23 @@ const instructionFiles = {
   copilot: { file: '.github/copilot-instructions.md', skill: '.github/skills/c2n-components/SKILL.md' },
 }
 
-function instructionsBlock(skill) {
+/**
+ * `mcp`: whether this install configured the c2n MCP server. Without it (`--no-mcp`) the rules name the fallbacks the
+ * agent does have: the installed manifest for the API and the `@c2n/mcp validate` command for the check.
+ */
+function instructionsBlock(skill, mcp) {
+  const manifest = '`node_modules/@c2n/components/custom-elements.json`'
+  const search = mcp
+    ? 'Call the c2n MCP tool `search_components` before concluding none fits.'
+    : `Search ${manifest} (or the skill's \`references/component-catalog.md\`) before concluding none fits.`
+  const api = mcp
+    ? `Before using a component, call \`get_component\` for its API and \`get_examples\` for markup; call \`get_theme\` before writing CSS. Without the MCP tools, read ${manifest}.`
+    : `Before using a component, read its API (tags, attributes, slots, events, CSS variables) from ${manifest}.`
+  const children = `${mcp ? '`get_component`' : "the skill's `references/component-catalog.md`"} lists them under "Children"`
+  const parts = mcp ? 'parts `get_component` lists' : 'parts the manifest lists'
+  const validate = mcp
+    ? 'check what you wrote with the MCP tool `validate_markup` (or `npx -y @c2n/mcp validate src`)'
+    : 'check what you wrote with `npx -y @c2n/mcp validate src`'
   return `${instructionsStart}
 ## UI components: use c2n (\`c2-*\` elements from \`@c2n/*\`)
 
@@ -29,14 +45,15 @@ This project builds its UI from the c2n web components. **Before writing any UI 
 
 - \`<button>\` → \`c2-button\` / \`c2-icon-button\`; \`<input>\` → \`c2-text-field\`, \`c2-number-input\`, \`c2-date-input\`, \`c2-checkbox\`, \`c2-radio\`, \`c2-switch\`, \`c2-slider\`; \`<textarea>\` → \`c2-textarea\`; \`<select>\` → \`c2-select\` / \`c2-autocomplete\`
 - \`<dialog>\` → \`c2-modal\` / \`c2-sheet\`; \`<details>\` → \`c2-details\` / \`c2-accordion\`; \`<progress>\` → \`c2-progress\`; a data grid (sorting, selection, many rows) → \`c2-table\` (a short static \`<table>\` can stay native); tabs, menus, tooltips, toasts, cards, badges, pagination → their \`c2-*\` element
-- Not listed here? Call the c2n MCP tool \`search_components\` before concluding none fits. Write plain HTML only when nothing fits, and say so.
+- Not listed here? ${search} Write plain HTML only when nothing fits, and say so.
 
 Then:
 
-- Never write a \`c2-*\` tag, attribute, slot, event or \`--c2-*\` variable from memory. Before using a component, call \`get_component\` for its API and \`get_examples\` for markup; call \`get_theme\` before writing CSS. Without the MCP tools, read \`node_modules/@c2n/components/custom-elements.json\`.
-- Build the child elements a container expects: \`get_component\` lists them under "Children" (\`c2-dashboard\` holds \`c2-dash-card\`, \`c2-tabs\` holds \`c2-tab\`).
-- Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for parts \`get_component\` lists.
+- Never write a \`c2-*\` tag, attribute, slot, event or \`--c2-*\` variable from memory. ${api}
+- Build the child elements a container expects: ${children} (\`c2-dashboard\` holds \`c2-dash-card\`, \`c2-tabs\` holds \`c2-tab\`).
+- Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for ${parts}.
 - Theme once: import \`@c2n/components/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
+- Before finishing, ${validate} and fix what it reports. Mark a deliberate native element with a \`c2n-ignore\` comment.
 - The \`c2n-components\` skill (\`${skill}\`) has the full workflow.
 ${instructionsEnd}`
 }
@@ -51,6 +68,34 @@ function mergeInstructions(file, block) {
       ? current.slice(0, start) + block + current.slice(end + instructionsEnd.length)
       : `${current.trimEnd()}${current.trim() ? '\n\n' : ''}${block}\n`
   writeFileSync(file, next)
+}
+
+/**
+ * Claude Code runs a `PostToolUse` hook after every file the agent writes; exit code 2 hands its stderr back to the
+ * agent. `c2n-mcp validate --hook` uses that to report native controls and unknown c2 APIs in the file just written,
+ * so the agent fixes them in the same turn instead of waiting to be asked. Earlier c2n entries are replaced.
+ */
+function mergeClaudeHook(file, command) {
+  if (!command && !existsSync(file)) return false
+  mkdirSync(dirname(file), { recursive: true })
+  const value = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {}
+  const hooks = (value.hooks ??= {})
+  const before = JSON.stringify(hooks.PostToolUse ?? [])
+  const entries = (hooks.PostToolUse ?? [])
+    .map((entry) => ({ ...entry, hooks: (entry.hooks ?? []).filter((hook) => !isC2nHook(hook)) }))
+    .filter((entry) => entry.hooks.length > 0)
+  if (command) entries.push({ matcher: 'Write|Edit|MultiEdit', hooks: [{ type: 'command', command, timeout: 30 }] })
+  if (!command && JSON.stringify(entries) === before) return false
+  if (entries.length) hooks.PostToolUse = entries
+  else delete hooks.PostToolUse
+  if (Object.keys(hooks).length === 0) delete value.hooks
+  writeFileSync(file, JSON.stringify(value, null, 2) + '\n')
+  return true
+}
+
+/** The hook this installer writes, whichever way it starts the server. */
+function isC2nHook(hook) {
+  return /@c2n\/mcp\b.*\bvalidate --hook\b/.test(String(hook.command ?? ''))
 }
 
 function copyDirectory(source, destination) {
@@ -101,7 +146,7 @@ function mergeCodexServer(file, command) {
  */
 const localServer = 'node_modules/@c2n/mcp/dist/cli.js'
 
-export function installProject({ projectRoot = process.cwd(), agents = allAgents, includeMcp = true, mcp = 'auto' } = {}) {
+export function installProject({ projectRoot = process.cwd(), agents = allAgents, includeMcp = true, includeHook = true, mcp = 'auto' } = {}) {
   const selected = [...new Set(agents)]
   for (const agent of selected) {
     if (!supportedAgents.has(agent)) throw new Error(`Unknown agent "${agent}". Use ${allAgents.join(', ')}, or all.`)
@@ -111,7 +156,7 @@ export function installProject({ projectRoot = process.cwd(), agents = allAgents
   const root = resolve(projectRoot)
   const packageJson = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))
   const local = mcp === 'local' || (mcp === 'auto' && existsSync(join(root, localServer)))
-  if (local && includeMcp && !existsSync(join(root, localServer))) {
+  if (local && (includeMcp || includeHook) && !existsSync(join(root, localServer))) {
     throw new Error(`--mcp local needs @c2n/mcp in the project: npm i -D @c2n/mcp@${packageJson.version}`)
   }
   const command = local ? { command: 'node', args: [localServer] } : { command: 'npx', args: ['-y', `@c2n/mcp@${packageJson.version}`] }
@@ -145,20 +190,27 @@ export function installProject({ projectRoot = process.cwd(), agents = allAgents
     mergeJsonServer(file, { ...server, args }, 'servers')
     configs.push(file)
   }
+  const hooks = []
+  if (selected.includes('claude')) {
+    // --no-hook also takes out a hook an earlier install added.
+    const file = join(root, '.claude/settings.json')
+    const validate = local ? `node "$CLAUDE_PROJECT_DIR/${localServer}"` : `npx -y @c2n/mcp@${packageJson.version}`
+    if (mergeClaudeHook(file, includeHook ? `${validate} validate --hook` : undefined) && includeHook) hooks.push(file)
+  }
   const instructions = []
   for (const agent of selected) {
     const target = instructionFiles[agent]
     if (!target) continue
     const file = join(root, target.file)
-    mergeInstructions(file, instructionsBlock(target.skill))
+    mergeInstructions(file, instructionsBlock(target.skill, includeMcp))
     instructions.push(file)
   }
 
-  return { agents: selected, skills: [...installedSkills], configs, instructions, mcp: local ? 'local' : 'npx' }
+  return { agents: selected, skills: [...installedSkills], configs, hooks, instructions, mcp: local ? 'local' : 'npx' }
 }
 
 function usage() {
-  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity|copilot] [--project <path>] [--mcp auto|local|npx] [--no-mcp]\n\nThe default is --agent all --project . --mcp auto.\n--mcp local runs the project's own node_modules/@c2n/mcp (no download when the agent starts it, which is what works\nbehind a proxy); npx fetches @c2n/mcp on start; auto picks local when @c2n/mcp is installed in the project.`
+  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity|copilot] [--project <path>] [--mcp auto|local|npx] [--no-mcp] [--no-hook]\n\nThe default is --agent all --project . --mcp auto.\n--mcp local runs the project's own node_modules/@c2n/mcp (no download when the agent starts it, which is what works\nbehind a proxy); npx fetches @c2n/mcp on start; auto picks local when @c2n/mcp is installed in the project.\n--no-hook leaves out (or removes) the Claude Code hook that checks every file the agent writes with \`c2n-mcp validate\`.`
 }
 
 export function run(argv = process.argv.slice(2)) {
@@ -172,10 +224,12 @@ export function run(argv = process.argv.slice(2)) {
   let projectRoot = process.cwd()
   let agents = allAgents
   let includeMcp = true
+  let includeHook = true
   let mcp = 'auto'
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index]
     if (argument === '--no-mcp') includeMcp = false
+    else if (argument === '--no-hook') includeHook = false
     else if (argument === '--project') projectRoot = args[++index]
     else if (argument.startsWith('--project=')) projectRoot = argument.slice('--project='.length)
     else if (argument === '--mcp') mcp = args[++index] ?? ''
@@ -187,10 +241,11 @@ export function run(argv = process.argv.slice(2)) {
   if (!projectRoot) throw new Error('--project requires a path')
   if (agents.includes('all')) agents = allAgents
 
-  const result = installProject({ projectRoot, agents, includeMcp, mcp })
+  const result = installProject({ projectRoot, agents, includeMcp, includeHook, mcp })
   console.log(`Installed c2n for ${result.agents.join(', ')} in ${resolve(projectRoot)}`)
   for (const skill of result.skills) console.log(`  skill: ${skill}`)
   for (const config of result.configs) console.log(`  MCP:   ${config} (${result.mcp === 'local' ? 'runs node_modules/@c2n/mcp' : 'npx -y @c2n/mcp'})`)
+  for (const file of result.hooks) console.log(`  hook:  ${file} (c2n-mcp validate after each edit)`)
   for (const file of result.instructions) console.log(`  rules: ${file}`)
   console.log('Restart the selected agent so it discovers the skill and MCP server.')
 }

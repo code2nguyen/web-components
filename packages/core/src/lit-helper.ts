@@ -1,5 +1,7 @@
 import { property as litProperty, type PropertyDecorator as LitPropertyDecorator } from '@lit/reactive-element/decorators/property.js'
 import type { PropertyDeclaration } from '@lit/reactive-element'
+import { noChange } from 'lit'
+import { Directive, directive, PartType, type ElementPart, type PartInfo } from 'lit/directive.js'
 
 export { html, svg, nothing } from 'lit'
 export type { TemplateResult, SVGTemplateResult } from 'lit'
@@ -127,3 +129,45 @@ export function property(options?: PropertyDeclaration): LitPropertyDecorator {
     return result
   }) as LitPropertyDecorator
 }
+
+class AssignSlotDirective extends Directive {
+  constructor(partInfo: PartInfo) {
+    super(partInfo)
+    if (partInfo.type !== PartType.ELEMENT) throw new Error('assignSlot() must be placed on a <slot> element.')
+  }
+
+  render(_nodes: readonly (Element | Text)[]) {
+    return noChange
+  }
+
+  override update(part: ElementPart, [nodes]: [readonly (Element | Text)[]]) {
+    const slot = part.element
+    if (!(slot instanceof HTMLSlotElement)) throw new Error('assignSlot() must be placed on a <slot> element.')
+    // A new template instance is still a detached fragment here, and an assignment made before the slot is in the
+    // shadow tree does not take effect; Lit inserts the fragment before the microtask runs.
+    if (slot.getRootNode() instanceof ShadowRoot) assignNodes(slot, nodes)
+    else queueMicrotask(() => assignNodes(slot, nodes))
+    return noChange
+  }
+}
+
+function assignNodes(slot: HTMLSlotElement, nodes: readonly (Element | Text)[]): void {
+  // A named-mode root (declarative shadow DOM) routes by `slot` attribute and ignores `assign()`.
+  const root = slot.getRootNode()
+  if (!(root instanceof ShadowRoot) || root.slotAssignment !== 'manual') return
+  const assigned = slot.assignedNodes()
+  if (assigned.length !== nodes.length || nodes.some((node, index) => node !== assigned[index])) slot.assign(...nodes)
+}
+
+/**
+ * Assigns light-DOM children to the `<slot>` it is placed on, for a shadow root created with
+ * `slotAssignment: 'manual'`: `<slot ${assignSlot([item])}></slot>`.
+ *
+ * A component that routes its children into per-item slots must not write `slot` on them: under server rendering
+ * (Next.js, React Router) the element upgrades before React hydrates, and React reports the attribute it never
+ * rendered as a hydration mismatch. The assignment is only redone when the slot holds other nodes, so rendering the
+ * same items again (every frame of a drag) costs one `assignedNodes()` read per slot. In a named-mode shadow root
+ * (declarative shadow DOM always is one) `assign()` has no effect and the component must fall back to `slot`
+ * attributes; check `shadowRoot.slotAssignment`.
+ */
+export const assignSlot = directive(AssignSlotDirective)

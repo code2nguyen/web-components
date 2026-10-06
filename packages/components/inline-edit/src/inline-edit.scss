@@ -1,0 +1,238 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-inline-edit,
+  $theme: (
+    min-width: 48px,
+    padding-block: 2px,
+    padding-inline: 6px,
+    border-radius: 6px,
+    color: null,
+    font-size: null,
+    font-weight: null,
+    font-family: null,
+    line-height: null,
+
+    placeholder--color: #71717a,
+    hover--background: #f4f4f5,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    edit-icon--size: 14px,
+    edit-icon--color: #71717a,
+    edit-icon--gap: 6px,
+    edit-icon--opacity: 0,
+    edit-icon__hover--opacity: 1,
+
+    editor--background: #ffffff,
+    editor--border: 1px solid #0265dc,
+    editor__error--border: 1px solid #dc2626,
+
+    controls--gap: 4px,
+    control--size: 24px,
+    control__icon--size: 16px,
+    control--border-radius: 4px,
+    control--color: #71717a,
+    control__hover--color: #18181b,
+    control__hover--background: #f4f4f5,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: inline-block;
+  box-sizing: border-box;
+  max-width: 100%;
+  vertical-align: baseline;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+}
+
+:host(:state(disabled)) {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* The read view and the field share one box (padding, a 1px border, radius) so switching modes does not move the text. */
+.display,
+.editor-host {
+  box-sizing: border-box;
+  min-width: css.cssVar(min-width);
+  border: 1px solid transparent;
+  border-radius: css.cssVar(border-radius);
+  padding-block: css.cssVar(padding-block);
+  padding-inline: css.cssVar(padding-inline);
+}
+
+.display {
+  display: flex;
+  align-items: baseline;
+  gap: css.cssVar(edit-icon--gap);
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover:not(:disabled, .static) {
+    background: css.cssVar(hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 0;
+  }
+
+  &:disabled,
+  &.static {
+    cursor: default;
+  }
+}
+
+.text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+
+  &.placeholder {
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+.edit-icon {
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  color: css.cssVar(edit-icon--color);
+  opacity: css.cssVar(edit-icon--opacity);
+  transition: opacity 120ms ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(edit-icon--size);
+    height: css.cssVar(edit-icon--size);
+  }
+}
+
+.display:hover:not(:disabled) .edit-icon,
+.display:focus-visible .edit-icon {
+  opacity: css.cssVar(edit-icon__hover--opacity);
+}
+
+.editor {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(controls--gap);
+  width: 100%;
+
+  &.multiline {
+    align-items: flex-start;
+  }
+}
+
+.editor-host {
+  display: flex;
+  flex: 1 1 auto;
+  background: css.cssVar(editor--background);
+  border: css.cssVar(editor--border);
+
+  .invalid > & {
+    border: css.cssVar(editor__error--border);
+  }
+
+  // A slotted control draws its own box: only the layout stays.
+  &.custom {
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  // The slotted control keeps its own border, so a refused draft is ringed outside it instead.
+  .invalid > &.custom {
+    outline: css.cssVar(editor__error--border);
+    outline-offset: 2px;
+  }
+}
+
+.field {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  field-sizing: content;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+// Grows with its text: `field-sizing` where supported, a height set from script elsewhere.
+textarea.field {
+  resize: none;
+  overflow: hidden;
+}
+
+::slotted([slot='editor']) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.controls {
+  display: inline-flex;
+  flex: none;
+  gap: css.cssVar(controls--gap);
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(control--border-radius);
+  background: transparent;
+  color: css.cssVar(control--color);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(control__hover--background);
+    color: css.cssVar(control__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(control__icon--size);
+    height: css.cssVar(control__icon--size);
+  }
+}

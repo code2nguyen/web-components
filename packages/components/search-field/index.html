@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-search-field</title>
+    <script type="module" src="/src/search-field.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-search-field {
+        width: 320px;
+      }
+      .pill {
+        --c2-search-field--border-radius: 999px;
+        --c2-search-field--min-height: 40px;
+        --c2-search-field--padding: 8px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-search-field id="main" placeholder="Search issues" shortcut="/, mod+k" history-key="harness"></c2-search-field>
+    <output id="log">No search yet</output>
+    <c2-search-field placeholder="Filter" recent="label:bug;assignee:me;is:open"></c2-search-field>
+    <c2-search-field class="pill" value="running shoes" loading></c2-search-field>
+    <c2-search-field placeholder="Disabled" disabled></c2-search-field>
+    <script type="module">
+      const log = document.querySelector('#log')
+      document.querySelector('#main').addEventListener('search', (event) => {
+        log.textContent = `search (${event.detail.trigger}): "${event.detail.value}"`
+      })
+    </script>
+  </body>
+</html>

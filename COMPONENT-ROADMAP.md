@@ -50,9 +50,9 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 99 remain (20 P1): `c2-inline-edit` (#16) shipped in v1.0.3. Numbering is for reference only. Build order is in the delivery plan below.
 
-### A. Forms and input (25)
+### A. Forms and input (24)
 
 | #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
@@ -61,7 +61,7 @@ Domain patterns with no design-system home come from the products that made them
 | 3   | `c2-fieldset`         | Grouped controls with a legend and a disabled state that cascades                                   | Ark/Chakra fieldset, PrimeVue fieldset                                          | P2       | Proposed |
 | 4   | `c2-checkbox-group`   | Form-associated group of checkboxes with one value array (the counterpart of `c2-radio-group`)      | Web Awesome, Vaadin, PrimeVue checkbox group                                    | P1       | Proposed |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
-| 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Proposed |
+| 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Accept   |
 | 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Proposed |
 | 8   | `c2-mask-input`       | Pattern masks (IBAN, tax ID, postcode)                                                              | Mantine MaskInput, PrimeVue inputmask                                           | P2       | Proposed |
 | 9   | `c2-phone-input`      | Country picker, flag, E.164 value                                                                   | Stripe and Twilio sign-up flows                                                 | P2       | Proposed |
@@ -71,7 +71,6 @@ Domain patterns with no design-system home come from the products that made them
 | 13  | `c2-tree-select`      | Select from a hierarchy, single or multiple                                                         | antd TreeSelect, Mantine TreeSelect, PrimeVue treeselect                        | P2       | Proposed |
 | 14  | `c2-transfer-list`    | Move items between two lists (roles, permissions)                                                   | antd Transfer, PrimeVue PickList                                                | P3       | Proposed |
 | 15  | `c2-mention-input`    | `@user` and `#tag` suggestions inside text                                                          | antd Mentions; Slack, GitHub                                                    | P2       | Proposed |
-| 16  | `c2-inline-edit`      | Click-to-edit text or select, Enter commits, Escape cancels                                         | Ark editable, Carbon edit-in-place, PrimeVue Inplace; Notion, Airtable          | P1       | Proposed |
 | 17  | `c2-rich-text-editor` | Compact formatted-text field for comments and emails (`c2-page-editor` stays the full block editor) | PrimeVue Editor, Mantine Tiptap; Gmail, Linear comments                         | P2       | Proposed |
 | 18  | `c2-image-cropper`    | Crop, zoom and rotate before upload (avatars, logos)                                                | Ark image cropper                                                               | P2       | Proposed |
 | 19  | `c2-signature-pad`    | Draw a signature, export SVG or PNG                                                                 | Ark signature pad; DocuSign                                                     | P3       | Proposed |

@@ -1,5 +1,5 @@
 {
-  "total": 1113929,
+  "total": 1138796,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -66,7 +66,8 @@
     "header": 1257,
     "hover-card": 12315,
     "icon-button": 16353,
-    "index": 742067,
+    "index": 748277,
+    "inline-edit": 5120,
     "kanban": 9590,
     "kanban/kanban-column": 3408,
     "kbd": 1061,
@@ -101,6 +102,7 @@
     "rate": 2987,
     "react": 1777,
     "reorder-list": 12543,
+    "search-field": 18657,
     "select": 25250,
     "separator": 1536,
     "sheet": 3046,

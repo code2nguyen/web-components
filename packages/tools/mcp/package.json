@@ -1,6 +1,6 @@
 {
   "name": "@c2n/mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
   "type": "module",
   "bin": {
@@ -63,6 +63,7 @@
         "scripts/build-registry.ts",
         "scripts/gallery.ts",
         "src/registry-types.ts",
+        "src/installed.ts",
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",
         "../../icons/*/custom-elements.json",
