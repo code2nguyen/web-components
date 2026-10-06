@@ -49,7 +49,7 @@ interface RenderedTile extends MasonryPlacement {
 interface PointerSession {
   pointerId: number
   control: HTMLElement
-  resizeEdge?: 'right' | 'bottom'
+  resizeEdge?: 'right' | 'bottom' | 'corner'
   startX: number
   startY: number
   lastX: number
@@ -458,7 +458,8 @@ export class Masonry extends LitElement {
       const rowHeight = parseFloat(getComputedStyle(this).getPropertyValue('--c2-masonry--row-height')) || 8
       const deltaX = Math.round((pointer.lastX - pointer.startX) / cellWidth)
       const deltaY = Math.round((pointer.lastY - pointer.startY) / rowHeight)
-      this.resizeCandidate(pointer.resizeEdge === 'right' ? deltaX : 0, pointer.resizeEdge === 'bottom' ? deltaY : 0)
+      const edge = pointer.resizeEdge
+      this.resizeCandidate(edge === 'right' || edge === 'corner' ? deltaX : 0, edge === 'bottom' || edge === 'corner' ? deltaY : 0)
     }
     this.updateAutoScroll(pointer.lastY)
   }

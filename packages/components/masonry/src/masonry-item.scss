@@ -133,6 +133,16 @@ $_resize-hit-size: var(--_resize-hit-size, #{css.cssVar(resize-handle--size)});
   cursor: ew-resize;
 }
 
+.resize-edge--corner {
+  // Same layer as the edges, after them in the DOM so it wins where they meet; the move handle still sits above.
+  right: 0;
+  bottom: 0;
+  // A little wider than the edges so the diagonal is easy to grab, without reaching the move handle in the top corner.
+  width: calc(#{$_resize-hit-size} + 8px);
+  height: calc(#{$_resize-hit-size} + 8px);
+  cursor: nwse-resize;
+}
+
 .controls [part='resize-handle'] {
   width: auto;
   border-radius: 0;

@@ -438,6 +438,7 @@ test('resizes with a pointer and ignores a no-op press', async ({ page, scenario
 for (const { edge, dx, dy, dimension } of [
   { edge: 'right', dx: 120, dy: 0, dimension: 'columns' },
   { edge: 'bottom', dx: 0, dy: 24, dimension: 'rows' },
+  { edge: 'corner', dx: 120, dy: 24, dimension: 'both' },
 ] as const) {
   test(`resizes from the ${edge} border`, async ({ page, scenario }) => {
     await scenario('editing')
@@ -453,8 +454,9 @@ for (const { edge, dx, dy, dimension } of [
     const change = await page.evaluate(() => window.masonryEvents[0])
     expect(change.action).toBe('resize')
     const item = change.layout.items.find((entry) => entry.id === 'tile-2')!
-    if (dimension === 'rows') expect(item.rows).toBeGreaterThan(8)
-    else expect(item.columns.sm).toBeGreaterThan(2)
+    if (dimension !== 'columns') expect(item.rows).toBeGreaterThan(8)
+    if (dimension !== 'rows') expect(item.columns.sm).toBeGreaterThan(2)
+    else expect(item.columns.sm).toBe(2)
   })
 }
 
