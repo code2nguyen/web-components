@@ -23,6 +23,6 @@ document.addEventListener('remove', (event) => {
 
 - Attributes: `selectable`, `selected`, `removable`, `disabled`, `value`, `remove-label` (default `Remove`, followed by the chip's text).
 - Slots: default (label), `prefix`, `selected-icon`, `remove-icon`.
-- Events: `change` (a selectable chip was toggled; read `selected`), `remove` (`detail: { value }`, from the remove button, Backspace or Delete).
+- Events: `change` (a selectable chip was toggled; read `selected`), `remove` (`detail: { value }`, from the remove button, or Backspace/Delete on a selectable chip that also has `removable`).
 - Parts: `chip`, `action`, `remove-button`.
 - Theming: `--c2-chip__container--*` with `__hover`, `__selected`, `__focus` and `__disabled` states, `--c2-chip__icon--*`, `--c2-chip__selected-icon--display` and `--c2-chip__remove-button--*`.

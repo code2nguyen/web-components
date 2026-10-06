@@ -143,3 +143,16 @@ for (const state of ['default', 'prefix', 'selectable', 'selected', 'removable',
     expect(results.violations).toEqual([])
   })
 }
+
+test('the remove name and fallback value follow label text changes and ignore icon text', async ({ page, scenario }) => {
+  await scenario('removable-label')
+  await page.locator('c2-chip').evaluate((element) => {
+    // A framework patching the text node in place fires no slotchange.
+    const text = [...element.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())!
+    text.textContent = 'Research'
+  })
+  const remove = page.getByRole('button', { name: 'Remove Research' })
+  await expect(remove).toBeVisible()
+  await remove.click()
+  await expect(page.getByRole('status')).toHaveText('remove:Research')
+})

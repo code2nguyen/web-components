@@ -12,6 +12,7 @@ const markup: Record<string, string> = {
   removable: `<c2-chip id="subject" removable value="design">Design</c2-chip>`,
   'selectable-removable': `<c2-chip id="subject" selectable removable value="design">Design</c2-chip>`,
   disabled: `<c2-chip id="subject" selectable removable disabled value="design">Design</c2-chip>`,
+  'removable-label': `<c2-chip id="subject" removable><span slot="prefix" aria-hidden="true">#</span>Design</c2-chip>`,
   'remove-label': `<c2-chip id="subject" removable remove-label="Clear filter">Status: Active</c2-chip>`,
   list: `<c2-chip selectable removable value="design">Design</c2-chip>
     <c2-chip selectable removable value="research">Research</c2-chip>

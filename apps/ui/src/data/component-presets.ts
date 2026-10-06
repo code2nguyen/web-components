@@ -764,6 +764,9 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-chip__container--border': '1px solid #bfdbfe',
           '--c2-chip__container--background-color': '#eff6ff',
           '--c2-chip__container--color': '#1d4ed8',
+          '--c2-chip__container__selected--border': '1px solid #bfdbfe',
+          '--c2-chip__container__selected--background-color': '#eff6ff',
+          '--c2-chip__container__selected--color': '#1d4ed8',
         },
       },
       {

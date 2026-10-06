@@ -300,11 +300,11 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 168 ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, `c2-chip` powers `c2-filter-builder`, and `c2-confirm-dialog` backs destructive actions everywhere.
+The 166 still to build (168 less `c2-inline-edit` and `c2-chip`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |
-| 1    | Foundations (P1)     | 25         | `c2-form-field` wraps every existing input      |
+| 1    | Foundations (P1)     | 23         | `c2-form-field` wraps every existing input      |
 | 2    | Business apps (P2)   | 50         | Blocks collection opens (forms, settings pages) |
 | 3    | Data, media, AI (P2) | 43         | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
 | 4    | Specialized (P3)     | 50         | —                                               |

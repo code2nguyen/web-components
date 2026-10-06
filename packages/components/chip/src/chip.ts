@@ -109,13 +109,29 @@ export class Chip extends LitElement {
 
   private readonly slotPresence = new SlotPresenceController(this, ['prefix'])
 
+  // A framework that patches the text of an existing label node fires no slotchange, so watch the light DOM.
+  private labelObserver?: MutationObserver
+
   override connectedCallback() {
     super.connectedCallback()
     this.text = this.readText()
+    this.labelObserver ??= new MutationObserver(() => (this.text = this.readText()))
+    this.labelObserver.observe(this, { childList: true, characterData: true, subtree: true })
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.labelObserver?.disconnect()
+  }
+
+  /** The text of the default slot only: an icon's text in a named slot is not part of the label. */
   private readText(): string {
-    return (this.textContent ?? '').replace(/\s+/g, ' ').trim()
+    return [...this.childNodes]
+      .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
+      .map((node) => node.textContent ?? '')
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim()
   }
 
   private handleSlotChange = () => {
@@ -125,7 +141,7 @@ export class Chip extends LitElement {
   private handleToggle = () => {
     if (this.disabled) return
     this.selected = !this.selected
-    this.dispatchEvent(new Event('change', { bubbles: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
   private handleActionKeyDown = (event: KeyboardEvent) => {

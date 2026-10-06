@@ -76,6 +76,27 @@ const evaluationUrl = evaluationPath ? `https://github.com/code2nguyen/web-compo
       --c2-chip__container--color: var(--site-color-primary);
       --c2-chip__container--font-weight: 600;
     }
+
+    // Plain tags before upgrade: approximate the pills so the row does not reflow.
+    &__framework:not(:defined),
+    &__tag:not(:defined) {
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 8px;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--site-color-on-surface-muted);
+    }
+    &__framework:not(:defined) {
+      border-color: transparent;
+      background: var(--site-color-primary-soft);
+      color: var(--site-color-primary);
+      font-weight: 600;
+    }
   }
 
   .example-frame {
