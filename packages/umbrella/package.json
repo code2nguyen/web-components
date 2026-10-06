@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -220,6 +220,10 @@
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./chip": {
+      "types": "./dist/chip.d.ts",
+      "default": "./dist/chip.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"
@@ -327,6 +331,10 @@
     "./icon-button": {
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
+    },
+    "./indicator": {
+      "types": "./dist/indicator.d.ts",
+      "default": "./dist/indicator.js"
     },
     "./inline-edit": {
       "types": "./dist/inline-edit.d.ts",
@@ -631,10 +639,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.3",
-    "@c2n/phosphor-icons": "1.0.3",
-    "@c2n/task-icons": "1.0.3",
-    "@c2n/theme": "1.0.3",
+    "@c2n/core": "1.0.4",
+    "@c2n/phosphor-icons": "1.0.4",
+    "@c2n/task-icons": "1.0.4",
+    "@c2n/theme": "1.0.4",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -742,6 +750,7 @@
     "@c2n/chat-message-list": "*",
     "@c2n/chatbot": "*",
     "@c2n/checkbox": "*",
+    "@c2n/chip": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
@@ -762,6 +771,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -55,6 +55,8 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/indicator:build",
+        "../../components/chip:build",
         "../../components/search-field:build",
         "../../components/inline-edit:build",
         "../../components/kanban:build",

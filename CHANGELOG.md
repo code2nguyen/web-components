@@ -3,6 +3,38 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.4](https://github.com/code2nguyen/web-components/releases/tag/v1.0.4) — 2026-10-06
+
+### Features
+
+- **indicator:** Add c2-indicator, a dot or count pinned to an edge of any element ([c510627](https://github.com/code2nguyen/web-components/commit/c510627))
+- **chip:** Add c2-chip, a selectable and removable chip for filters and choices ([b6c13a1](https://github.com/code2nguyen/web-components/commit/b6c13a1))
+- **search-field:** Add c2-search-field, a search box with debounce, clear, shortcut hint and recent searches ([723b679](https://github.com/code2nguyen/web-components/commit/723b679))
+
+### Fixes
+
+- **indicator:** Keep the pulse behind the text, hide invalid counts, dot on the server ([6efab77](https://github.com/code2nguyen/web-components/commit/6efab77))
+- **list-item:** Recognise menu item checkbox/radio and input widget roles as row content ([862ff18](https://github.com/code2nguyen/web-components/commit/862ff18))
+- **list-item:** Count nested component controls and keep keyboard activation in disabled rows ([9fb0d49](https://github.com/code2nguyen/web-components/commit/9fb0d49))
+- **list-item:** Let controls inside a row keep their own click and key events ([3a92bb7](https://github.com/code2nguyen/web-components/commit/3a92bb7))
+- **chip:** Keep the label text current and free of icon text, compose change ([9700da9](https://github.com/code2nguyen/web-components/commit/9700da9))
+- **reorder-list:** Theme the list in dark mode ([ed008c9](https://github.com/code2nguyen/web-components/commit/ed008c9))
+- **inline-edit, flow:** Resize the fallback field outside the ResizeObserver callback, test the middle placement on empty canvas ([9ea8665](https://github.com/code2nguyen/web-components/commit/9ea8665))
+- **mcp:** Skip regex literals and JSX elements when masking comments in expressions ([ae7bbd8](https://github.com/code2nguyen/web-components/commit/ae7bbd8))
+- **inline-edit, reorder-list:** Regrow the fallback field on width changes, keep focus when the focused item leaves the list ([3f3726a](https://github.com/code2nguyen/web-components/commit/3f3726a))
+- **mcp:** Budget every JSON list, mask comments inside expressions, anchor c2n-ignore ranges, file new tags under their family ([9e7eaf5](https://github.com/code2nguyen/web-components/commit/9e7eaf5))
+- **search-field:** Escape on the recent-searches Clear button closes the panel ([9c01cfa](https://github.com/code2nguyen/web-components/commit/9c01cfa))
+- **search-field:** Address review: keyboard-reachable Clear, history-key switch, reset dedupe ([e9452ba](https://github.com/code2nguyen/web-components/commit/e9452ba))
+- **components:** Tighten slot observers in breadcrumb and reorder-list, guard assignSlot, clamp the gantt tooltip ([70392fb](https://github.com/code2nguyen/web-components/commit/70392fb))
+- **inline-edit:** Address release review: disabled form state, non-bubbling editor change, focus and multiline fallbacks ([3380f07](https://github.com/code2nguyen/web-components/commit/3380f07))
+- **reorder-list:** Read slotted children safely while server rendering ([8ad28cd](https://github.com/code2nguyen/web-components/commit/8ad28cd))
+- **mcp:** Address release review of validate_markup, installed-tag discovery and the skill installer ([8470830](https://github.com/code2nguyen/web-components/commit/8470830))
+- **flow:** Forget the last focused node when focus leaves from the toolbar, and only the visible toolbar refuses a drop ([f849fc7](https://github.com/code2nguyen/web-components/commit/f849fc7))
+
+### Docs site & examples
+
+- **ui:** Mark the current example nav link with selected, give Discord its own header class and a footer link ([41e05e5](https://github.com/code2nguyen/web-components/commit/41e05e5))
+
 ## [1.0.3](https://github.com/code2nguyen/web-components/releases/tag/v1.0.3) — 2026-10-06
 
 ### Features

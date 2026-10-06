@@ -136,3 +136,58 @@ test('an author-written role on the host wins and decides the state it implies',
   await expect(item).toHaveHostAria('aria-selected', 'false')
   await expect(item).toHaveHostAria('aria-pressed', null)
 })
+
+test('a button inside the row keeps its own click and keys, and does not toggle the row', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list-item value="a">Draft<button slot="suffix-icon" class="delete">Delete</button></c2-list-item>')
+  const item = page.locator('c2-list-item')
+  // A listener on the document (event delegation, React's root listener) must see the button as the target.
+  await page.evaluate(() => {
+    const seen: string[] = []
+    ;(window as unknown as { seen: string[] }).seen = seen
+    document.addEventListener('click', (event) => seen.push((event.target as Element).className || (event.target as Element).localName))
+  })
+  await page.locator('.delete').click()
+  await page.locator('.delete').press('Enter')
+  await page.locator('.delete').press('Space')
+  expect(await page.evaluate(() => (window as unknown as { seen: string[] }).seen)).toEqual(['delete', 'delete', 'delete'])
+  await expect(item).toHaveJSProperty('selected', false)
+  await item.click({ position: { x: 4, y: 4 } })
+  await expect(item).toHaveJSProperty('selected', true)
+})
+
+test('controls nested in another component and in a disabled row keep their events', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-list-item id="nested" value="a">Draft<x-action slot="suffix-icon" class="delete"></x-action></c2-list-item>
+    <c2-list-item id="disabled" value="b" disabled>Locked<button slot="suffix-icon" class="unlock">Unlock</button></c2-list-item>
+  `)
+  // A stand-in for c2-button / c2-select: the native control lives in the component's own shadow root.
+  await page.evaluate(() => {
+    customElements.define(
+      'x-action',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          this.attachShadow({ mode: 'open' }).innerHTML = '<button>Delete</button>'
+        }
+      },
+    )
+  })
+  await page.evaluate(() => {
+    const seen: string[] = []
+    ;(window as unknown as { seen: string[] }).seen = seen
+    document.addEventListener('click', (event) => seen.push((event.target as Element).className || (event.target as Element).localName))
+  })
+  await page.locator('x-action button').click()
+  await page.locator('x-action button').press('Enter')
+  // A disabled row takes no pointer events, but a focused control inside it still activates from the keyboard.
+  await page.locator('.unlock').press('Enter')
+  expect(await page.evaluate(() => (window as unknown as { seen: string[] }).seen)).toEqual(['delete', 'delete', 'unlock'])
+  await expect(page.locator('#nested')).toHaveJSProperty('selected', false)
+  await expect(page.locator('#disabled')).toHaveJSProperty('selected', false)
+})
+
+test('a roving-tabindex menu item in a row is recognised by its role alone', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list-item value="a">Draft<span slot="suffix-icon" role="menuitemcheckbox" tabindex="-1" class="pin">Pin</span></c2-list-item>')
+  await page.locator('.pin').click()
+  await expect(page.locator('c2-list-item')).toHaveJSProperty('selected', false)
+})

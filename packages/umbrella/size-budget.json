@@ -1,5 +1,5 @@
 {
-  "total": 1138796,
+  "total": 1146255,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -39,6 +39,7 @@
     "chat-message": 1709,
     "chatbot": 7122,
     "checkbox": 3103,
+    "chip": 2573,
     "code-editor": 7734,
     "code-viewer": 6630,
     "color-area": 9547,
@@ -66,7 +67,8 @@
     "header": 1257,
     "hover-card": 12315,
     "icon-button": 16353,
-    "index": 748277,
+    "index": 750720,
+    "indicator": 2443,
     "inline-edit": 5120,
     "kanban": 9590,
     "kanban/kanban-column": 3408,

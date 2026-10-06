@@ -366,6 +366,20 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-badge__info--color': { exclude: 'status colour' },
+  // Indicator tones are solid fills chosen against their text, readable on a light and a dark page alike. Only the
+  // primary pair follows the theme (accent + on-primary flip together); the error token lightens in a dark theme,
+  // where white text on it falls below 3:1, and the warning text must stay dark on amber. The saturated status fills
+  // take `color-on-fill`; the neutral grey is not one, so its pair stays literal.
+  '--c2-indicator__neutral--background': { exclude: 'solid status fill' },
+  '--c2-indicator__neutral--color': { exclude: 'white text on a fixed neutral fill' },
+  '--c2-indicator__success--background': { exclude: 'solid status fill' },
+  '--c2-indicator__success--color': { token: 'color-on-fill' },
+  '--c2-indicator__warning--background': { exclude: 'solid status fill' },
+  '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
+  '--c2-indicator__danger--background': { exclude: 'solid status fill' },
+  '--c2-indicator__danger--color': { token: 'color-on-fill' },
+  '--c2-indicator__info--background': { exclude: 'solid status fill' },
+  '--c2-indicator__info--color': { token: 'color-on-fill' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },
@@ -403,6 +417,7 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-chip__remove-button__hover--background-color': { exclude: 'translucent wash works on any chip background' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
@@ -516,6 +531,16 @@ export const overrides: Record<string, Override> = {
   '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
   '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
   '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
+  // Its borders, focus ring and drop placeholder follow the outline and brand colour, as masonry's do.
+  '--c2-reorder-list--container-border-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list--divider-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list__item__focus--outline-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list__placeholder--border-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list--placeholder-background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 8%, transparent)',
+  },
+  '--c2-reorder-list__dragging-item--box-shadow': { token: 'shadow-md' },
   // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
   // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
   // swipe actions are semantic colours that stay put.

@@ -4,7 +4,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
-import { ListItem } from '@c2n/list-item'
+import { ListItem, isFromInteractiveContent } from '@c2n/list-item'
 import { provide } from '@lit/context'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 
@@ -195,6 +195,9 @@ export class List extends LitElement {
 
   private handleKeydown(event: KeyboardEvent) {
     if (this.disabled) return
+    // Keys typed into a control inside a row (Enter on a delete button, letters in a text field) belong to it.
+    const row = this.items.find((item) => item.contains(event.target as Node))
+    if (row && isFromInteractiveContent(event, row)) return
     const enabled = this.enabledItems
     if (enabled.length === 0) return
     const current = event.target instanceof ListItem ? event.target : this.focusedItem

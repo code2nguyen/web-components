@@ -101,6 +101,11 @@ body {
   white-space: nowrap;
 }
 
+.inbox__status {
+  --c2-indicator--offset-x: 14.6%;
+  --c2-indicator--offset-y: 14.6%;
+}
+
 .inbox__marks {
   display: flex;
   align-items: center;

@@ -1049,6 +1049,32 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-indicator",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer-owned target; it keeps its own styles and the indicator is drawn over it."
+    },
+    {
+      "tag": "c2-indicator",
+      "slot": "label",
+      "decision": "variables",
+      "variables": [
+        "--c2-indicator__icon--size",
+        "--c2-indicator--color",
+        "--c2-indicator__neutral--color",
+        "--c2-indicator__primary--color",
+        "--c2-indicator__success--color",
+        "--c2-indicator__warning--color",
+        "--c2-indicator__danger--color",
+        "--c2-indicator__info--color",
+        "--c2-indicator--font-family",
+        "--c2-indicator--font-size",
+        "--c2-indicator--font-weight",
+        "--c2-indicator--line-height"
+      ],
+      "reason": "Slotted text inherits the indicator's tone colour and typography variables; a slotted SVG icon is sized by the icon size variable."
+    },
+    {
       "tag": "c2-inline-edit",
       "slot": "cancel-icon",
       "decision": "variables",
@@ -1757,6 +1783,34 @@
       "decision": "part",
       "parts": ["tooltip"],
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "",
+      "decision": "part",
+      "parts": ["action"],
+      "reason": "The action region (the toggle button of a selectable chip, the label wrapper of a plain one) owns the label slot's component-side presentation; the text takes the container font and colour variables."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "prefix",
+      "decision": "variables",
+      "variables": ["--c2-chip__icon--size", "--c2-chip__icon--color"],
+      "reason": "The prefix box sizes and colours the slotted icon or avatar through the icon variables."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "remove-icon",
+      "decision": "part",
+      "parts": ["remove-button"],
+      "reason": "The remove button owns the remove-icon slot and its cross fallback; it scales the icon to its own size."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "selected-icon",
+      "decision": "variables",
+      "variables": ["--c2-chip__icon--size", "--c2-chip__icon--color", "--c2-chip__selected-icon--display"],
+      "reason": "The selected mark sizes, colours and shows or hides the slotted icon and its check fallback through the icon variables."
     },
     {
       "tag": "c2-qr-code",

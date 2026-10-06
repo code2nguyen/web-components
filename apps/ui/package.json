@@ -17,6 +17,8 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/indicator": "*",
+    "@c2n/chip": "*",
     "@c2n/search-field": "*",
     "@c2n/inline-edit": "*",
     "@astrojs/lit": "^4.3.0",
