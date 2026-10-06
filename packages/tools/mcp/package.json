@@ -63,6 +63,7 @@
         "scripts/build-registry.ts",
         "scripts/gallery.ts",
         "src/registry-types.ts",
+        "src/installed.ts",
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",
         "../../icons/*/custom-elements.json",

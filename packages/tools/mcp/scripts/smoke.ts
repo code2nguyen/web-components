@@ -22,7 +22,7 @@ const client = new Client({ name: 'c2n-smoke', version: '0.0.0' })
 await client.connect(new StdioClientTransport({ command: process.execPath, args: [entry], cwd: packageRoot }))
 
 const { tools } = await client.listTools()
-assert(tools.length === 9, `expected 9 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
+assert(tools.length === 10, `expected 10 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
 
 const list = textOf(await client.callTool({ name: 'list_components', arguments: {} }))
 assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_components lacks c2-button')
@@ -80,6 +80,14 @@ const badVariant = textOf(
 )
 assert(badVariant.includes('Unknown variable'), 'generate_variant should warn on unknown variables')
 
+const validation = textOf(
+  await client.callTool({ name: 'validate_markup', arguments: { code: '<button>Go</button>\n<c2-table rowKey="id"></c2-table>', filename: 'page.html' } }),
+)
+assert(
+  validation.includes('native-element') && validation.includes('`row-key`') && validation.includes("import '@c2n/components/table'"),
+  'validate_markup should flag the native button and the camelCase attribute',
+)
+
 const guide = textOf(await client.callTool({ name: 'get_workflow_guide', arguments: { topic: 'variant-components' } }))
 assert(guide.includes('::part'), 'guide text missing')
 
@@ -117,6 +125,8 @@ try {
   assert(installedOnly.includes('c2-button') && !installedOnly.includes('c2-feather-'), 'list_components installedOnly misreads @c2n/components')
   const umbrellaTheme = textOf(await umbrellaClient.callTool({ name: 'get_theme', arguments: {} }))
   assert(umbrellaTheme.includes('@c2n/components/theme.css'), 'get_theme ignores @c2n/components')
+  const umbrellaValidation = textOf(await umbrellaClient.callTool({ name: 'validate_markup', arguments: { code: '<c2-tab></c2-tab>' } }))
+  assert(umbrellaValidation.includes("import '@c2n/components/tabs'"), 'validate_markup ignores @c2n/components')
   await umbrellaClient.close()
 } finally {
   rmSync(project, { recursive: true, force: true })

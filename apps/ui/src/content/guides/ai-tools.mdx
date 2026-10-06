@@ -31,7 +31,9 @@ The installer defaults to all supported agents. It copies project-scoped skills 
 | Google Antigravity | `.agents/skills/c2n-components/` | `.agents/mcp_config.json` |
 | GitHub Copilot     | `.github/skills/c2n-components/` | `.vscode/mcp.json`        |
 
-For GitHub Copilot in VS Code the installer also adds a short c2n block to `.github/copilot-instructions.md`, which Copilot loads into every chat: check each component with `get_component` before using it, build the child elements a container expects, and restyle only through documented CSS variables. Re-running the installer replaces that block in place and leaves the rest of the file alone. Use Copilot's agent mode, where it can call MCP tools.
+The installer also adds a short c2n rules block to the instructions file each agent loads in every session (`CLAUDE.md` for Claude Code, `AGENTS.md` for Codex, `.github/copilot-instructions.md` for GitHub Copilot): use a `c2-*` element instead of a native control even when the request does not mention c2n, check each component with `get_component` before using it, build the child elements a container expects, restyle only through documented CSS variables, and run `validate_markup` before finishing. Re-running the installer replaces that block in place and leaves the rest of the file alone. Use Copilot's agent mode, where it can call MCP tools.
+
+For Claude Code it also registers a `PostToolUse` hook in `.claude/settings.json`: after each `Write`, `Edit` or `MultiEdit` of a markup, script or stylesheet file (HTML, JSX/TSX, Vue, Svelte, Astro, MDX, JS/TS, CSS/SCSS/Less), `c2n-mcp validate --hook` checks that file and hands the problems back to the agent, which fixes them in the same turn. Files written another way, such as from a shell command, are not checked. `--no-hook` skips it. The same check runs in CI with `npx -y @c2n/mcp validate src` (exit 1 on errors, `--strict` for warnings too); mark a deliberate native element with a `c2n-ignore` comment.
 
 Install for only one agent when the project does not need every configuration:
 

@@ -17,6 +17,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { publicProperties } from '../src/installed.ts'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
 import { exampleSlug, summarizeExample, themeExampleCss } from './gallery.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, GuideTopic, Preset, Registry, ThemeEntry, ThemeToken } from '../src/registry-types.ts'
@@ -49,6 +50,7 @@ interface Manifest {
       events?: { name: string; type?: { text?: string }; description?: string }[]
       cssParts?: { name: string; description?: string }[]
       cssProperties?: { name?: string; type?: { text?: string }; default?: string; description?: string }[]
+      members?: { kind: string; name: string; static?: boolean; privacy?: string }[]
       internalComponents?: string[]
       slotComponents?: string[]
     }[]
@@ -343,6 +345,7 @@ for (const dir of packageDirs.sort()) {
           .map((e) => ({ name: e.name, type: e.type?.text, description: e.description?.trim() || undefined })),
         cssParts: (decl.cssParts ?? []).map((part) => ({ name: part.name, description: part.description?.trim() || undefined })),
         cssProperties,
+        properties: publicProperties(decl.members),
       })
     }
   }

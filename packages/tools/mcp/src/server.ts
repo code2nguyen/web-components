@@ -1,8 +1,9 @@
 /** The c2n MCP server: tools and resources over the bundled registry. */
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { importPath, installedPackage, umbrellaInstalled } from './installed.ts'
+import { importPath, installedPackage, umbrellaInstalled, withInstalledApi } from './installed.ts'
 import { generateCode, type CodeFormat } from './lib/generate-code.ts'
+import { formatFindings, validateMarkup } from './lib/validate.ts'
 import { loadRegistry, resolveElement, suggest } from './registry.ts'
 import type { GuideTopic, Registry } from './registry-types.ts'
 import {
@@ -58,6 +59,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         'For the look, browse the docs gallery before inventing CSS: get_examples with view "index" lists every card of a component (summary, screenshot), search_examples finds a look across components;',
         'adapt the chosen card to the application tokens (its remaining colour literals are accents to swap), and start a variant from it with generate_variant `example`.',
         'When a look repeats, call generate_variant (css | html | lit) instead of repeating inline styles.',
+        'Before finishing, call validate_markup on the markup and CSS you wrote and fix what it reports.',
         'get_workflow_guide explains the application workflow, theming, variant components and framework notes.',
       ].join(' '),
     },
@@ -380,6 +382,48 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         out.push(generateCode(f, input))
         out.push('```')
       }
+      return text(out.join('\n'))
+    },
+  )
+
+  server.registerTool(
+    'validate_markup',
+    {
+      title: 'Validate markup',
+      description:
+        'Checks HTML, JSX, Vue, Svelte, Astro, Angular or Lit markup and CSS you wrote against the installed c2n API: native controls a c2-* element replaces (<button>, <input>, <select>, <textarea>, <dialog>, <details>, <progress>), unknown c2-* tags, attributes, slots, events and --c2-* variables (with "did you mean"), and box styling on a c2-* host. Lists the imports that register the elements used. Call it on every file you write before finishing.',
+      inputSchema: {
+        code: z.string().min(1).describe('The source to check: a component file, a template, a stylesheet or a snippet'),
+        filename: z
+          .string()
+          .optional()
+          .describe(
+            'File name, which sets how the source is read (`App.tsx`: JSX props; `styles.css`: a stylesheet). Always pass it; without it the source is read as HTML',
+          ),
+        format: formatSchema,
+      },
+      annotations: readOnly,
+    },
+    ({ code, filename, format }) => {
+      // One installed view for both: a tag only the installed version has still gets its import line.
+      const installedApi = withInstalledApi(registry)
+      const result = validateMarkup(installedApi, code, filename)
+      const elements = result.elements.map((e) => {
+        const resolved = resolveElement(installedApi, e.tag)
+        return {
+          ...e,
+          modulePath: resolved ? importPath(e.modulePath, resolved.component.package, installedPackage(resolved.component.package)) : e.modulePath,
+        }
+      })
+      if (format === 'json') return json({ findings: result.findings, elements })
+      const errors = result.findings.filter((f) => f.severity === 'error').length
+      const out = [
+        result.findings.length
+          ? `${errors} error(s), ${result.findings.length - errors} warning(s)\n\n${formatFindings(filename ?? 'snippet', result.findings)}`
+          : 'No problems found.',
+      ]
+      const imports = [...new Set(elements.map((e) => `import '${e.modulePath}'`))]
+      if (imports.length) out.push(`\nThe elements used are registered by:\n\n\`\`\`ts\n${imports.join('\n')}\n\`\`\``)
       return text(out.join('\n'))
     },
   )
