@@ -38,7 +38,7 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.framework, text:
                   <span class="example-index__desc">{example.data.description}</span>
                   <span class="example-index__tags">
                     {example.data.tags.map((tag) => (
-                      <code>{tag}</code>
+                      <c2-chip>{tag}</c2-chip>
                     ))}
                   </span>
                 </SiteCard>
@@ -91,9 +91,28 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.framework, text:
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      code {
-        font-size: 11px;
-        color: var(--site-color-on-surface-muted);
+      c2-chip {
+        --c2-chip__container--height: 20px;
+        --c2-chip__container--padding-left: 7px;
+        --c2-chip__container--padding-right: 7px;
+        --c2-chip__container--font-size: 11px;
+        --c2-chip__container--border: 1px solid var(--site-color-outline-variant);
+        --c2-chip__container--background-color: transparent;
+        --c2-chip__container--color: var(--site-color-on-surface-muted);
+
+        // Plain tags before upgrade: approximate the pill so the card does not reflow.
+        &:not(:defined) {
+          box-sizing: border-box;
+          display: inline-flex;
+          align-items: center;
+          height: 20px;
+          padding: 0 7px;
+          border: 1px solid var(--site-color-outline-variant);
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 500;
+          color: var(--site-color-on-surface-muted);
+        }
       }
     }
   }

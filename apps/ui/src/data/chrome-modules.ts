@@ -6,6 +6,7 @@
  */
 import '@c2n/components/button'
 import '@c2n/components/checkbox'
+import '@c2n/components/chip'
 import '@c2n/components/command'
 import '@c2n/components/card'
 import '@c2n/components/details'

@@ -1,0 +1,53 @@
+---
+title: 'Chip'
+description: 'A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Chip } from '@c2n/components/chip'
+import { Avatar } from '@c2n/components/avatar'
+
+`c2-chip` is the chip of Material, Mantine and antd: a small pill for a filter ("Status: Active"), a choice among a few options, or a value someone entered. On its own it is a read-only label. `selectable` makes it a toggle button: a click, **Enter** or **Space** flips `selected`, fires `change` and shows a check mark (the `selected-icon` slot replaces it, `--c2-chip__selected-icon--display: none` hides it). `removable` adds a remove button named "Remove" plus the chip's text (`remove-label` changes the first word); it fires `remove`, and so do **Backspace** and **Delete** on a focused selectable chip. `detail.value` is the chip's `value`, or its text when no value is set.
+
+The chip never removes itself: drop it from your own list in the `remove` handler, and move focus to its neighbour, so a framework-rendered list stays in sync. The `prefix` slot takes an icon or a small avatar. `c2-badge` stays the non-interactive status label; use a chip when people pick or dismiss it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chip'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chip
+<style>
+  .person {
+    --c2-chip__container--padding-left: 4px;
+    --c2-chip__icon--size: 20px;
+    --c2-avatar--size: 20px;
+    --c2-avatar--font-size: 10px;
+  }
+</style>
+<div data-label="Default">
+  <c2-chip>Design</c2-chip>
+  <c2-chip>Research</c2-chip>
+  <c2-chip>Operations</c2-chip>
+</div>
+<div data-label="Selectable">
+  <c2-chip selectable selected value="open">Open</c2-chip>
+  <c2-chip selectable value="in-progress">In progress</c2-chip>
+  <c2-chip selectable value="done">Done</c2-chip>
+</div>
+<div data-label="Removable">
+  <c2-chip removable value="status">Status: Active</c2-chip>
+  <c2-chip removable value="owner">Owner: me</c2-chip>
+  <c2-chip class="person" removable value="ada"><c2-avatar slot="prefix" name="Ada Lovelace"></c2-avatar>Ada Lovelace</c2-chip>
+</div>
+<div data-label="Disabled">
+  <c2-chip selectable selected disabled>Archived</c2-chip>
+  <c2-chip removable disabled>Locked filter</c2-chip>
+</div>
+```

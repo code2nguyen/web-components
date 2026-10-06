@@ -1,5 +1,5 @@
 {
-  "total": 1138796,
+  "total": 1141369,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -39,6 +39,7 @@
     "chat-message": 1709,
     "chatbot": 7122,
     "checkbox": 3103,
+    "chip": 2573,
     "code-editor": 7734,
     "code-viewer": 6630,
     "color-area": 9547,

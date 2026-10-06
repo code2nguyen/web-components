@@ -1759,6 +1759,34 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-chip",
+      "slot": "",
+      "decision": "part",
+      "parts": ["action"],
+      "reason": "The action region (the toggle button of a selectable chip, the label wrapper of a plain one) owns the label slot's component-side presentation; the text takes the container font and colour variables."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "prefix",
+      "decision": "variables",
+      "variables": ["--c2-chip__icon--size", "--c2-chip__icon--color"],
+      "reason": "The prefix box sizes and colours the slotted icon or avatar through the icon variables."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "remove-icon",
+      "decision": "part",
+      "parts": ["remove-button"],
+      "reason": "The remove button owns the remove-icon slot and its cross fallback; it scales the icon to its own size."
+    },
+    {
+      "tag": "c2-chip",
+      "slot": "selected-icon",
+      "decision": "variables",
+      "variables": ["--c2-chip__icon--size", "--c2-chip__icon--color", "--c2-chip__selected-icon--display"],
+      "reason": "The selected mark sizes, colours and shows or hides the slotted icon and its check fallback through the icon variables."
+    },
+    {
       "tag": "c2-qr-code",
       "slot": "center",
       "decision": "assigned-content",
