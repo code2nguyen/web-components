@@ -1986,6 +1986,34 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-search-field",
+      "slot": "clear-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__clear-icon--color", "--c2-search-field__clear-icon__hover--color"],
+      "reason": "The clear button sizes the slotted icon and its SVG fallback through the icon size, and colours it through the clear-icon colour variables."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "recent-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__option-icon--color"],
+      "reason": "Each recent search sizes the slotted icon and its clock fallback through the icon size, and colours it through the option icon colour."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "search-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__icon--color"],
+      "reason": "The leading icon box sizes and colours the slotted icon and its magnifier fallback through the icon variables."
+    },
+    {
+      "tag": "c2-search-field",
+      "slot": "suffix-icon",
+      "decision": "variables",
+      "variables": ["--c2-search-field__icon--size", "--c2-search-field__icon--color"],
+      "reason": "The field sizes and colours the slotted suffix icon through the icon variables."
+    },
+    {
       "tag": "c2-select",
       "slot": "button-content",
       "decision": "assigned-content",

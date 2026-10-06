@@ -1,0 +1,48 @@
+---
+title: 'Search Field'
+description: 'A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SearchField } from '@c2n/components/search-field'
+
+`c2-search-field` is the query box of GitHub, Linear and Carbon. Typing fires a `search` event once the user pauses (`debounce`, 300 ms by default), **Enter** fires it at once, and the clear button or **Escape** empties the field and fires it with an empty query. `detail.value` is the query and `detail.trigger` says what started it: `input`, `submit`, `recent` or `clear`. The `search` event does not bubble, so listen on the element. `input` and `change` are re-dispatched from the inner input like any text field, and the element is form-associated: `name` submits the query with its form.
+
+`shortcut` focuses the field from anywhere on the page and shows the key as a hint while the field is empty: `mod+k` is ⌘K on a Mac and Ctrl+K elsewhere, `/` is the GitHub key, and `/, mod+k` accepts both. When two fields claim the same key, the first one on the page wins (the examples below use `mod+j`, because this site's search owns ⌘K). A single key such as `/` is ignored while focus is in another text field.
+
+Recent searches open under the field while it has focus: all of them while it is empty, and the ones containing the query while typing. The arrow keys move through them, and Enter or a click runs one. Pass the list yourself through `recent`, recording each `search` whose `trigger` is `submit` or `recent`. Or set `history-key`: the field then records the searches committed with Enter or picked from the list, keeps the latest `recent-limit` (5 by default) in `localStorage`, and fires `recent-change`. The panel's Clear button empties the list.
+
+Set `loading` while results are fetched: the magnifier turns into a spinner and the field is marked busy. Give the host a `width` and the field fills it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/search-field'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/search-field
+<style>
+  .search {
+    width: 280px;
+  }
+</style>
+<div data-label="Default">
+  <c2-search-field class="search" placeholder="Search issues"></c2-search-field>
+</div>
+<div data-label="Shortcut">
+  <c2-search-field class="search" placeholder="Search docs" shortcut="mod+j"></c2-search-field>
+  <c2-search-field class="search" placeholder="Jump to…" shortcut="/"></c2-search-field>
+</div>
+<div data-label="Recent searches">
+  <c2-search-field class="search" placeholder="Filter issues" recent="label:bug;assignee:me;is:open sort:updated"></c2-search-field>
+</div>
+<div data-label="States">
+  <c2-search-field class="search" value="quarterly report" loading></c2-search-field>
+  <c2-search-field class="search" placeholder="Disabled" disabled></c2-search-field>
+</div>
+```

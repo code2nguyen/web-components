@@ -1,0 +1,310 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-search-field,
+  $theme: (
+    min-height: 36px,
+    padding: 6px 10px,
+    gap: 8px,
+    color: #18181b,
+    background: #ffffff,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    font-size: 14px,
+    font-family: null,
+    placeholder--color: #71717a,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--background: null,
+    focus--outline: none,
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: #71717a,
+    clear-icon--color: #a1a1aa,
+    clear-icon__hover--color: #18181b,
+    spinner--color: rgb(2, 101, 220),
+
+    shortcut--height: 20px,
+    shortcut--padding: 0 6px,
+    shortcut--color: #71717a,
+    shortcut--background: #fafafa,
+    shortcut--border: 1px solid #e4e4e7,
+    shortcut--border-radius: 4px,
+    shortcut--font-size: 12px,
+
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
+    panel--max-height: 320px,
+    panel--padding: 4px,
+    panel--offset: 6px,
+
+    header--padding: 6px 8px,
+    header--color: #71717a,
+    header--font-size: 12px,
+    header--font-weight: 500,
+    header-action--color: rgb(2, 101, 220),
+
+    option--min-height: 32px,
+    option--padding: 6px 8px,
+    option--gap: 8px,
+    option--border-radius: 4px,
+    option--color: #18181b,
+    option__active--background: #f4f4f5,
+    option-icon--color: #71717a,
+    highlight--font-weight: 600,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(min-height);
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  transition: animation.standard(border), animation.standard(outline);
+  cursor: text;
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &:focus-within {
+    background: css.cssVar(focus--background, background);
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+:host(:state(disabled)) .field {
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+  pointer-events: none;
+}
+
+.input {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  line-height: 20px;
+  appearance: none;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    appearance: none;
+    display: none;
+  }
+}
+
+.icon,
+.spinner,
+.clear,
+::slotted([slot='suffix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  color: css.cssVar(icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+::slotted([slot='search-icon']),
+::slotted([slot='suffix-icon']),
+::slotted([slot='clear-icon']),
+::slotted([slot='recent-icon']) {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+::slotted([slot='suffix-icon']) {
+  color: css.cssVar(icon--color);
+}
+
+.spinner {
+  box-sizing: border-box;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  color: css.cssVar(spinner--color);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+.clear {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: css.cssVar(clear-icon--color);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(clear-icon__hover--color);
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.shortcut {
+  display: inline-flex;
+  box-sizing: border-box;
+  height: css.cssVar(shortcut--height);
+  flex: none;
+  align-items: center;
+  padding: css.cssVar(shortcut--padding);
+  color: css.cssVar(shortcut--color);
+  background: css.cssVar(shortcut--background);
+  border: css.cssVar(shortcut--border);
+  border-radius: css.cssVar(shortcut--border-radius);
+  font-family: inherit;
+  font-size: css.cssVar(shortcut--font-size);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:host(:state(focus-within)) .shortcut {
+  display: none;
+}
+
+c2-overlay {
+  --c2-overlay--offset-y: #{css.cssVar(panel--offset)};
+}
+
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  overflow: auto;
+  max-height: min(css.cssVar(panel--max-height), var(--c2-overlay--available-height, #{css.cssVar(panel--max-height)}));
+  flex-direction: column;
+  padding: css.cssVar(panel--padding);
+  color: css.cssVar(option--color);
+  background: css.cssVar(panel--background);
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  box-shadow: css.cssVar(panel--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: css.cssVar(header--padding);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.panel-action {
+  padding: 0;
+  color: css.cssVar(header-action--color);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.option {
+  display: flex;
+  box-sizing: border-box;
+  min-height: css.cssVar(option--min-height);
+  align-items: center;
+  gap: css.cssVar(option--gap);
+  padding: css.cssVar(option--padding);
+  border-radius: css.cssVar(option--border-radius);
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    background: css.cssVar(option__active--background);
+  }
+}
+
+.option-icon {
+  display: grid;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: none;
+  place-items: center;
+  color: css.cssVar(option-icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.option-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+mark {
+  color: inherit;
+  background: transparent;
+  font-weight: css.cssVar(highlight--font-weight);
+}
