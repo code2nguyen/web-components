@@ -224,8 +224,40 @@ test('initializes from authored ordinary children without success events or publ
   expect(await visualIds(host)).toEqual(['first', 'second'])
   await expect(host.locator('[part="container"]')).toHaveAttribute('role', 'list')
   await expect(host.locator('[role="listitem"]')).toHaveCount(2)
+  // React reported the `slot` the list used to write on each item as a hydration mismatch.
+  await expect(page.locator('#first')).not.toHaveAttribute('slot')
+  await expect(page.locator('#second')).not.toHaveAttribute('slot')
+})
+
+test('items added later are placed without writing slot on them', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list aria-label="Tasks"><div id="first">First</div></c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await host.evaluate((element) => {
+    const item = document.createElement('div')
+    item.id = 'added'
+    item.textContent = 'Added'
+    element.prepend(item)
+  })
+  await expect.poll(() => visualIds(host)).toEqual(['added', 'first'])
+  await expect(page.locator('#added')).toBeVisible()
+  await expect(page.locator('#added')).not.toHaveAttribute('slot')
+})
+
+// Declarative shadow DOM (server rendering) always yields a named-mode shadow root, where `assign()` does nothing:
+// the list then falls back to writing `slot` on its items.
+test('a server-rendered shadow root falls back to slot attributes', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page
+    .locator('#mount')
+    .evaluate((mount) =>
+      mount.setHTMLUnsafe(
+        '<c2-reorder-list aria-label="Tasks"><template shadowrootmode="open"></template><div id="first">First</div><div id="second">Second</div></c2-reorder-list>',
+      ),
+    )
+  const host = page.locator('c2-reorder-list')
   await expect(page.locator('#first')).toHaveAttribute('slot', /^c2-reorder-item-/)
-  expect(await host.evaluate((element) => [...element.children].filter((child) => /^\d+$/.test((child as HTMLElement).slot)).length)).toBe(0)
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'second'])
+  await expect(page.locator('#second')).toBeVisible()
 })
 
 test('reconciles inserted, removed, and externally reordered children without firing success events', async ({ page, renderScenario }) => {

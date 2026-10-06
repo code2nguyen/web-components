@@ -1,6 +1,6 @@
 import { html, LitElement, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { assignSlot, property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -204,6 +204,10 @@ function parseMotionDuration(value: string): number {
 export class ReorderList extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Each item's slot picks its item by hand instead of writing `slot` on it: an attribute written on a child while the
+  // page upgrades is one the server never rendered, which React reports as a hydration mismatch.
+  static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
+
   /** Enables pointer and keyboard reordering. */
   @property({ type: Boolean, reflect: true }) editable = false
 
@@ -309,7 +313,7 @@ export class ReorderList extends LitElement {
         )}
       </div>
       <div part="dragging-item" class=${classMap({ 'dragging-item': true, 'dragging-item--active': pointerItem !== null })} aria-hidden="true" inert>
-        <slot name="dragging-item"><span class="dragging-item__fallback">${activeLabel}</span></slot>
+        <slot name="dragging-item" ${assignSlot(this.getSpecialChildren('dragging-item'))}><span class="dragging-item__fallback">${activeLabel}</span></slot>
       </div>
       <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement}</p>
     `
@@ -323,7 +327,7 @@ export class ReorderList extends LitElement {
     const swipe = this.canSwipe(item)
     const tabbable = this.isKeyboardItem(item) && (this.focusedItem === item || (!this.focusedItem && this.firstKeyboardItem(order) === item))
     const describedBy = [draggable ? this.instructionsId : '', swipe && this.swipeShortcutText ? this.swipeInstructionsId : ''].filter(Boolean).join(' ')
-    const slot = html`<slot name=${this.getAssignmentId(item)}></slot>`
+    const slot = html`<slot name=${this.getAssignmentId(item)} ${assignSlot([item])}></slot>`
     return html`
       <div
         ${animate(() => this.itemMotionOptions())}
@@ -410,7 +414,7 @@ export class ReorderList extends LitElement {
   private renderPlaceholder(): TemplateResult {
     return html`
       <div part="placeholder" class="list-item placeholder" style=${styleMap(this.placeholderSize)} aria-hidden="true" inert>
-        <slot name="placeholder"><span class="dragging-placeholder"></span></slot>
+        <slot name="placeholder" ${assignSlot(this.getSpecialChildren('placeholder'))}><span class="dragging-placeholder"></span></slot>
       </div>
     `
   }
@@ -433,9 +437,22 @@ export class ReorderList extends LitElement {
 
   private reconcileAuthoredOrder(): void {
     const authored = this.getAuthoredItems()
-    for (const item of authored) item.setAttribute('slot', this.getAssignmentId(item))
+    if (!this.manualSlots) for (const item of authored) item.setAttribute('slot', this.getAssignmentId(item))
     this.visualOrder = authored
     if (this.focusedItem && !authored.includes(this.focusedItem)) this.focusedItem = this.firstMovable(authored)
+  }
+
+  /**
+   * Whether slots are assigned by hand. False only when the shadow root came from declarative shadow DOM (server
+   * rendering), which is always in named mode; the list then falls back to writing `slot` on its items.
+   */
+  private get manualSlots(): boolean {
+    return (this.renderRoot as ShadowRoot | undefined)?.slotAssignment === 'manual'
+  }
+
+  /** Children the author put in the `placeholder` or `dragging-item` slot, which manual assignment does not route. */
+  private getSpecialChildren(name: string): Element[] {
+    return Array.from(this.children).filter((child) => child.slot === name)
   }
 
   private getAuthoredItems(): HTMLElement[] {
