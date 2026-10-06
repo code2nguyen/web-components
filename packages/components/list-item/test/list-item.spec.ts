@@ -185,3 +185,9 @@ test('controls nested in another component and in a disabled row keep their even
   await expect(page.locator('#nested')).toHaveJSProperty('selected', false)
   await expect(page.locator('#disabled')).toHaveJSProperty('selected', false)
 })
+
+test('a roving-tabindex menu item in a row is recognised by its role alone', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list-item value="a">Draft<span slot="suffix-icon" role="menuitemcheckbox" tabindex="-1" class="pin">Pin</span></c2-list-item>')
+  await page.locator('.pin').click()
+  await expect(page.locator('c2-list-item')).toHaveJSProperty('selected', false)
+})

@@ -20,7 +20,7 @@ export interface ListItemEventMap {
  * that control, not to the row around it.
  */
 const INTERACTIVE_SELECTOR =
-  'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"], [role="tab"], [role="combobox"], [tabindex]:not([tabindex="-1"])'
+  'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="tab"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="textbox"], [role="searchbox"], [tabindex]:not([tabindex="-1"])'
 
 /**
  * Whether `event` started on an interactive element placed inside `row` (a delete button in the `suffix-icon` slot, a
