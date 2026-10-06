@@ -514,7 +514,8 @@ export class InlineEdit extends LitElement {
       const width = this.sizedField?.getBoundingClientRect().width ?? 0
       if (width === this.sizedFieldWidth) return
       this.sizedFieldWidth = width
-      this.autosize()
+      // Not in the callback: changing the observed field's height there makes WebKit report a ResizeObserver loop.
+      requestAnimationFrame(() => this.autosize())
     })
     this.fieldResizeObserver.observe(field)
   }

@@ -868,15 +868,22 @@ test.describe('actions', () => {
     // Once focus has left the flow from the toolbar button, the next add goes to the middle of the view again.
     await page.locator('body').click({ position: { x: 2, y: 2 } })
     await expect(page.getByRole('button', { name: 'Add node' })).not.toBeFocused()
+    // Pan the nodes up out of the middle, so the middle of the view is empty canvas: a node placed there stays put
+    // instead of being pushed aside by the overlap check, by a distance that depends on the browser's text metrics.
+    const view = (await page.locator('c2-flow .stage').boundingBox())!
+    await page.mouse.move(view.x + 24, view.y + view.height - 24)
+    await page.mouse.down()
+    await page.mouse.move(view.x + 24, view.y + view.height * 0.4, { steps: 8 })
+    await page.mouse.up()
     await page.getByRole('button', { name: 'Add node' }).click()
     await expect(node(page, 'new-2')).toBeVisible()
-    const view = (await page.locator('c2-flow .stage').boundingBox())!
     const added = await center(node(page, 'new-2'))
-    const beside = await center(node(page, 'new-1'))
+    const review = await center(node(page, 'review'))
     const middle = { x: view.x + view.width / 2, y: view.y + view.height / 2 }
-    expect(Math.hypot(added.x - middle.x, added.y - middle.y)).toBeLessThan(Math.hypot(beside.x - middle.x, beside.y - middle.y))
-    expect(Math.abs(added.x - middle.x)).toBeLessThan(view.width / 4)
-    expect(Math.abs(added.y - middle.y)).toBeLessThan(view.height / 4)
+    expect(Math.abs(added.x - middle.x)).toBeLessThan(view.width / 8)
+    expect(Math.abs(added.y - middle.y)).toBeLessThan(view.height / 8)
+    // Beside `review` would be just below it, now near the top of the view.
+    expect(added.y - review.y).toBeGreaterThan(view.height / 4)
   })
 
   test('no-double-click-add: double-clicking empty canvas adds nothing, N and addNode() still do', async ({ page, renderScenario }) => {
