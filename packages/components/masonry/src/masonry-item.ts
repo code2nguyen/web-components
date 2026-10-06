@@ -14,6 +14,7 @@ import styles from './masonry-item.scss?inline'
  * @csspart move-handle - Button that starts a move operation.
  * @csspart resize-handle - Keyboard-reachable bottom edge that starts a resize operation.
  * @csspart resize-edge - Pointer resize target on the right edge.
+ * @csspart resize-corner - Pointer resize target on the bottom-right corner; drags change columns and rows together.
  * @cssproperty {color} [--c2-masonry-item--background=transparent] - Tile surface.
  * @cssproperty {border} [--c2-masonry-item--border=none] - Tile border.
  * @cssproperty {border-radius} [--c2-masonry-item--border-radius=0px] - Tile corner radius.
@@ -85,6 +86,7 @@ export class MasonryItem extends LitElement {
                 aria-label=${`Resize ${label}`}
                 aria-describedby="edit-instructions"
               ></button>
+              <div part="resize-corner" class="resize-edge resize-edge--corner" data-masonry-action="resize" data-masonry-edge="corner"></div>
               <span id="edit-instructions" class="sr-only">Press Enter or Space, use arrow keys, then press Enter to save or Escape to cancel.</span>
             </div>`
           : null
