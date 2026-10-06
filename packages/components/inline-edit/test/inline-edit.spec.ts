@@ -411,3 +411,25 @@ test('a multiline field grows with its text', async ({ page, renderScenario }) =
   await expect.poll(async () => (await textarea.boundingBox())!.height).toBeGreaterThan(before * 2)
   expect(await textarea.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)).toBe(true)
 })
+
+test('without field-sizing, a multiline field regrows when its width shrinks while editing', async ({ page, renderScenario }) => {
+  // Firefox and Safari size the textarea from script; make Chromium take that path too.
+  await page.addInitScript(() => {
+    const supports = CSS.supports.bind(CSS)
+    CSS.supports = ((...args: [string, string?]) => (args[0] === 'field-sizing' ? false : supports(...(args as [string, string])))) as typeof CSS.supports
+  })
+  const text = 'A sentence long enough to wrap onto several lines once its container gets narrow'
+  await renderScenario(
+    `<div id="box" style="width: 640px"><c2-inline-edit style="display: block" label="Notes" value="${text}" multiline></c2-inline-edit></div>`,
+  )
+  await page.getByRole('button', { name: `Notes: ${text}` }).click()
+  const textarea = page.getByRole('textbox', { name: 'Notes' })
+  // Turn off the native sizing so only the script fallback sets the height.
+  await textarea.evaluate((element) => element.style.setProperty('field-sizing', 'fixed'))
+  const fits = () => textarea.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)
+  await expect.poll(fits).toBe(true)
+  const before = (await textarea.boundingBox())!.height
+  await page.locator('#box').evaluate((box) => ((box as HTMLElement).style.width = '120px'))
+  await expect.poll(async () => (await textarea.boundingBox())!.height).toBeGreaterThan(before * 2)
+  await expect.poll(fits).toBe(true)
+})

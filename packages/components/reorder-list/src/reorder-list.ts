@@ -436,10 +436,19 @@ export class ReorderList extends LitElement {
       const activeItem = this.session?.item ?? null
       const previousIndex = activeItem ? (this.session?.candidateIndex ?? 0) : 0
       if (this.session) this.cancelSession('Items changed. Reordering canceled.')
+      // The item whose wrapper has focus: its wrapper is still rendered here, even when the item itself was removed
+      // or moved into a special slot, so the next render would drop focus to the document without this.
+      const previousOrder = this.visualOrder
+      const focusedWrapper = (this.renderRoot as ShadowRoot | undefined)?.activeElement as HTMLElement | null | undefined
+      const focusedItem = this.getItemByAssignmentId(focusedWrapper?.dataset?.assignmentId)
       this.reconcileAuthoredOrder()
       if (activeItem && !activeItem.isConnected) {
         const movable = this.visualOrder.filter((item) => !this.isFixedItem(item))
         this.pendingFocus = movable[Math.min(previousIndex, Math.max(0, movable.length - 1))] ?? 'host'
+        this.requestUpdate()
+      } else if (focusedItem && !this.visualOrder.includes(focusedItem)) {
+        const remaining = this.visualOrder.filter((item) => this.isKeyboardItem(item))
+        this.pendingFocus = remaining[Math.min(previousOrder.indexOf(focusedItem), remaining.length - 1)] ?? 'host'
         this.requestUpdate()
       }
     })

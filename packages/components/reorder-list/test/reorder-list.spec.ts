@@ -1288,3 +1288,17 @@ test('a child that moves into or out of the placeholder slot later stops or star
   await page.locator('#second').evaluate((item) => item.removeAttribute('slot'))
   await expect.poll(() => visualIds(host)).toEqual(['first', 'second', 'third'])
 })
+
+test('moving the focused item into a special slot moves focus to its neighbour', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  const focusedId = () =>
+    host.evaluate((element) => (element.shadowRoot!.activeElement?.querySelector('slot') as HTMLSlotElement | null)?.assignedElements()[0]?.id ?? '')
+  await host.locator('.list-item[data-assignment-id]').nth(1).focus()
+  await page.locator('#second').evaluate((item) => item.setAttribute('slot', 'placeholder'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'third'])
+  await expect.poll(focusedId).toBe('third')
+  await page.locator('#third').evaluate((item) => item.setAttribute('slot', 'dragging-item'))
+  await expect.poll(() => visualIds(host)).toEqual(['first'])
+  await expect.poll(focusedId).toBe('first')
+})

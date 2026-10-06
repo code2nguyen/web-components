@@ -199,6 +199,11 @@ export class InlineEdit extends LitElement {
   /** The slotted editor whose `input` and `change` this element listens to. */
   private listenedEditor: EditorElement | null = null
 
+  /** Without `field-sizing`, the multiline field whose width is watched, since rewrapping changes the height it needs. */
+  private sizedField: HTMLTextAreaElement | null = null
+  private sizedFieldWidth = 0
+  private fieldResizeObserver: ResizeObserver | null = null
+
   /** True while a render swaps the read view and the editor, so focus leaving a removed node is not reported. */
   private swapping = false
 
@@ -310,11 +315,13 @@ export class InlineEdit extends LitElement {
     // A value assigned as a property before connection counts as the authored one when there is no attribute.
     this.defaultValue ??= this.getAttribute('value') ?? this.value
     this.syncSlots()
+    if (this.hasUpdated) this.observeFieldWidth()
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     this.listenEditor(null)
+    this.observeFieldWidth(null)
   }
 
   protected override createRenderRoot() {
@@ -324,7 +331,12 @@ export class InlineEdit extends LitElement {
   }
 
   private get interactive() {
-    return !this.disabled && !this.disabledByForm && !this.readOnly
+    return !this.isDisabled && !this.readOnly
+  }
+
+  /** Disabled by the attribute or by a disabled fieldset. */
+  private get isDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   private get slottedEditor(): EditorElement | null {
@@ -491,6 +503,27 @@ export class InlineEdit extends LitElement {
     field.style.height = `${field.scrollHeight}px`
   }
 
+  /** Reruns `autosize()` when the fallback-sized field changes width (a resized container wraps its text differently). */
+  private observeFieldWidth(field: HTMLTextAreaElement | null = this.editing && this.multiline && this.isConnected ? this.autosizedField : null) {
+    if (field === this.sizedField) return
+    this.fieldResizeObserver?.disconnect()
+    this.sizedField = field
+    if (!field || typeof ResizeObserver === 'undefined') return
+    this.sizedFieldWidth = field.getBoundingClientRect().width
+    this.fieldResizeObserver ??= new ResizeObserver(() => {
+      const width = this.sizedField?.getBoundingClientRect().width ?? 0
+      if (width === this.sizedFieldWidth) return
+      this.sizedFieldWidth = width
+      this.autosize()
+    })
+    this.fieldResizeObserver.observe(field)
+  }
+
+  /** The built-in textarea when its height comes from script, i.e. without `field-sizing`. */
+  private get autosizedField(): HTMLTextAreaElement | null {
+    return !supportsFieldSizing && this.field instanceof HTMLTextAreaElement ? this.field : null
+  }
+
   protected override willUpdate(changed: PropertyValues<this>): void {
     // Disabling, making read-only or disabling the fieldset closes an open editor without committing.
     if (this.editing && !this.interactive) {
@@ -515,9 +548,8 @@ export class InlineEdit extends LitElement {
 
   protected override updated(changed: PropertyValues): void {
     // A disabled control is left out of its form and barred from validation, whichever way it was disabled.
-    const disabled = this.disabled || this.disabledByForm
-    this.internals.setFormValue(disabled ? null : this.value)
-    if (!disabled && this.required && this.value.trim() === '') {
+    this.internals.setFormValue(this.isDisabled ? null : this.value)
+    if (!this.isDisabled && this.required && this.value.trim() === '') {
       this.internals.setValidity({ valueMissing: true }, 'Please fill in this field.', this.display ?? undefined)
     } else {
       this.internals.setValidity({})
@@ -542,7 +574,7 @@ export class InlineEdit extends LitElement {
       empty: this.value === '',
       invalid: this.invalid,
       'read-only': this.readOnly,
-      disabled,
+      disabled: this.isDisabled,
     }
     for (const [name, on] of Object.entries(states)) {
       if (on) this.internals.states.add(name)
@@ -550,6 +582,7 @@ export class InlineEdit extends LitElement {
     }
 
     if (this.editing && this.multiline) this.autosize()
+    this.observeFieldWidth()
 
     if (changed.has('editing') && this.editing && !changed.get('editing')) {
       // Rendered with `editing` already set: the editor shows the committed value, but focus is not taken on load.
@@ -574,7 +607,6 @@ export class InlineEdit extends LitElement {
     const content = html`<span class="text ${classMap({ placeholder: !text })}"
       ><slot name="preview" @slotchange=${this.syncSlots}>${text || this.placeholder}</slot></span
     >`
-    const disabled = this.disabled || this.disabledByForm
     if (this.readOnly || this.activation === 'none') {
       // With `activation="none"` the read view takes focus from script only, so focus can come back to it after an edit.
       return html`<span
@@ -587,7 +619,7 @@ export class InlineEdit extends LitElement {
     return html`<button
       class="display"
       type="button"
-      ?disabled=${disabled}
+      ?disabled=${this.isDisabled}
       aria-label=${ifDefined(this.label ? `${this.label}: ${text || this.placeholder}` : undefined)}
       @click=${this.handleDisplayClick}
       @dblclick=${this.handleDisplayDblclick}
