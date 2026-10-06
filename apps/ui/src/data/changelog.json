@@ -2,6 +2,135 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.4",
+      "date": "2026-10-06",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["indicator"],
+              "text": "Add c2-indicator, a dot or count pinned to an edge of any element",
+              "hash": "c510627"
+            },
+            {
+              "scopes": ["chip"],
+              "text": "Add c2-chip, a selectable and removable chip for filters and choices",
+              "hash": "b6c13a1"
+            },
+            {
+              "scopes": ["search-field"],
+              "text": "Add c2-search-field, a search box with debounce, clear, shortcut hint and recent searches",
+              "hash": "723b679"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["indicator"],
+              "text": "Keep the pulse behind the text, hide invalid counts, dot on the server",
+              "hash": "6efab77"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Recognise menu item checkbox/radio and input widget roles as row content",
+              "hash": "862ff18"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Count nested component controls and keep keyboard activation in disabled rows",
+              "hash": "9fb0d49"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Let controls inside a row keep their own click and key events",
+              "hash": "3a92bb7"
+            },
+            {
+              "scopes": ["chip"],
+              "text": "Keep the label text current and free of icon text, compose change",
+              "hash": "9700da9"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Theme the list in dark mode",
+              "hash": "ed008c9"
+            },
+            {
+              "scopes": ["inline-edit", "flow"],
+              "text": "Resize the fallback field outside the ResizeObserver callback, test the middle placement on empty canvas",
+              "hash": "9ea8665"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Skip regex literals and JSX elements when masking comments in expressions",
+              "hash": "ae7bbd8"
+            },
+            {
+              "scopes": ["inline-edit", "reorder-list"],
+              "text": "Regrow the fallback field on width changes, keep focus when the focused item leaves the list",
+              "hash": "3f3726a"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Budget every JSON list, mask comments inside expressions, anchor c2n-ignore ranges, file new tags under their family",
+              "hash": "9e7eaf5"
+            },
+            {
+              "scopes": ["search-field"],
+              "text": "Escape on the recent-searches Clear button closes the panel",
+              "hash": "9c01cfa"
+            },
+            {
+              "scopes": ["search-field"],
+              "text": "Address review: keyboard-reachable Clear, history-key switch, reset dedupe",
+              "hash": "e9452ba"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Tighten slot observers in breadcrumb and reorder-list, guard assignSlot, clamp the gantt tooltip",
+              "hash": "70392fb"
+            },
+            {
+              "scopes": ["inline-edit"],
+              "text": "Address release review: disabled form state, non-bubbling editor change, focus and multiline fallbacks",
+              "hash": "3380f07"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Read slotted children safely while server rendering",
+              "hash": "8ad28cd"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Address release review of validate_markup, installed-tag discovery and the skill installer",
+              "hash": "8470830"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Forget the last focused node when focus leaves from the toolbar, and only the visible toolbar refuses a drop",
+              "hash": "f849fc7"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Mark the current example nav link with selected, give Discord its own header class and a footer link",
+              "hash": "41e05e5"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.3",
       "date": "2026-10-06",
       "sections": [
