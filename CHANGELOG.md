@@ -3,6 +3,41 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.3](https://github.com/code2nguyen/web-components/releases/tag/v1.0.3) — 2026-10-06
+
+### Features
+
+- **inline-edit:** Add c2-inline-edit, click-to-edit text with any control as the editor ([22223c6](https://github.com/code2nguyen/web-components/commit/22223c6))
+- **mcp:** Add validate_markup and the c2n-mcp validate CLI and hook ([252c2b8](https://github.com/code2nguyen/web-components/commit/252c2b8))
+- **skill:** Make agents use c2-* elements instead of native HTML by default ([6243645](https://github.com/code2nguyen/web-components/commit/6243645))
+- **flow:** DragNewNode() drags a new node onto the canvas from a toolbar button ([ce024d2](https://github.com/code2nguyen/web-components/commit/ce024d2))
+- **flow:** No-double-click-add, and addNode() places the node where it is easy to see ([673a841](https://github.com/code2nguyen/web-components/commit/673a841))
+
+### Fixes
+
+- **mcp:** Read TYPE and SLOT case-insensitively, and reject onDblClick in JSX ([6477b8c](https://github.com/code2nguyen/web-components/commit/6477b8c))
+- **inline-edit:** Address review: keep vetoed blur drafts, close on disable, reflect name ([cd077b9](https://github.com/code2nguyen/web-components/commit/cd077b9))
+- **mcp:** Check on* handlers and tighten validate_markup's exemptions ([d1c2980](https://github.com/code2nguyen/web-components/commit/d1c2980))
+- **mcp:** Address second review of validate_markup ([39126f8](https://github.com/code2nguyen/web-components/commit/39126f8))
+- **breadcrumb:** Follow slot changes on existing children under manual assignment ([25843fc](https://github.com/code2nguyen/web-components/commit/25843fc))
+- **gantt:** Hide the tooltip without popover support, batch its placement ([b767f3e](https://github.com/code2nguyen/web-components/commit/b767f3e))
+- **flow:** A new-node drag released over the toolbar drops nothing ([45a03ba](https://github.com/code2nguyen/web-components/commit/45a03ba))
+- **flow:** AddNode() from the toolbar goes beside the node the keyboard was on ([6fbac4e](https://github.com/code2nguyen/web-components/commit/6fbac4e))
+- **mcp:** Address review of validate_markup ([3d822b3](https://github.com/code2nguyen/web-components/commit/3d822b3))
+- **gantt:** Keep the tooltip whole and the task list above scrolled bars ([104d0b2](https://github.com/code2nguyen/web-components/commit/104d0b2))
+- **mcp:** Do not flag border-radius on a c2 host, and check .mdx files ([40a4d8b](https://github.com/code2nguyen/web-components/commit/40a4d8b))
+- **components:** Assign item slots by hand instead of writing slot on children ([d8bc79c](https://github.com/code2nguyen/web-components/commit/d8bc79c))
+- **skill:** Limit the c2-table default to data grids and cover AGENTS.md re-install ([57af24d](https://github.com/code2nguyen/web-components/commit/57af24d))
+- **week-planner:** One pair of arrows on a narrow dated planner ([b756f13](https://github.com/code2nguyen/web-components/commit/b756f13))
+
+### Docs site & examples
+
+- **ui:** Use the non-expiring Discord invite ([d85471c](https://github.com/code2nguyen/web-components/commit/d85471c))
+- **ui:** Set the Discord invite link ([3e88130](https://github.com/code2nguyen/web-components/commit/3e88130))
+- **ui:** Link the c2n-webcomponents Discord from the site header ([e13bab8](https://github.com/code2nguyen/web-components/commit/e13bab8))
+- **ui:** Tone instead of variant on c2-badge, no size on c2-button in the table gallery ([8a0c810](https://github.com/code2nguyen/web-components/commit/8a0c810))
+- **examples:** Replace no-op c2 attributes and slots found by c2n-mcp validate ([4df79c8](https://github.com/code2nguyen/web-components/commit/4df79c8))
+
 ## [1.0.2](https://github.com/code2nguyen/web-components/releases/tag/v1.0.2) — 2026-10-05
 
 ### Fixes
