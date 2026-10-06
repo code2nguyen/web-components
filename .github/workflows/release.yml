@@ -38,6 +38,8 @@ permissions:
   # The workflow pushes an unprotected release branch and opens the version PR itself.
   contents: write
   pull-requests: write
+  # Creating the skip-review label and adding it to the version PR go through the issues API.
+  issues: write
   # npm provenance: lerna turns it on by itself for a public repo running in GitHub Actions, but only
   # if it can mint an OIDC token. Without this the publish still works, just unattested.
   id-token: write

@@ -1,8 +1,9 @@
 # cubic AI review settings: https://docs.cubic.dev/configure/cubic-yaml
 # Ignore rules only suppress automatic reviews; comment `@cubic-dev-ai review` on a PR to request one anyway.
-ignore:
-  head_branches:
-    - release/* # version PRs opened by the Release to npm workflow (.github/workflows/release.yml)
-    - develop # develop -> main promotion PRs
-  pr_labels:
-    - skip-review # opt any other PR out by adding this label
+reviews:
+  ignore:
+    head_branches:
+      - release/* # version PRs opened by the Release to npm workflow (.github/workflows/release.yml)
+      - develop # develop -> main promotion PRs
+    pr_labels:
+      - skip-review # opt any other PR out by adding this label
