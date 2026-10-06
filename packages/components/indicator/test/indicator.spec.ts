@@ -87,7 +87,7 @@ test('positions sit on each edge of the target, mirrored in a right-to-left page
     await expect.poll(() => centre(host), position).toEqual(point)
   }
 
-  await page.locator('main').evaluate((main) => (main.dir = 'rtl'))
+  await page.locator('main').evaluate((main) => main.setAttribute('dir', 'rtl'))
   await props(host, { position: 'top-end' })
   await expect.poll(() => centre(host)).toEqual({ x: 0, y: 0 })
   await props(host, { position: 'middle-start' })
