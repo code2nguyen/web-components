@@ -26,8 +26,26 @@ function text(value: string) {
   return { content: [{ type: 'text' as const, text: truncate(value) }] }
 }
 
+const JSON_MAX_CHARS = MAX_CHARS * 4
+
 function json(value: unknown) {
-  return { content: [{ type: 'text' as const, text: truncate(JSON.stringify(value, null, 2), MAX_CHARS * 4) }] }
+  return { content: [{ type: 'text' as const, text: truncate(JSON.stringify(value, null, 2), JSON_MAX_CHARS) }] }
+}
+
+/**
+ * `json()` for a result whose `items` may be long: drops trailing items until the document fits, rather than cutting
+ * the text (which leaves JSON no client can parse), and says how many there were.
+ */
+export function jsonList<T>(key: string, items: T[], rest: Record<string, unknown> = {}, max = JSON_MAX_CHARS) {
+  let kept = items
+  const render = () =>
+    JSON.stringify({ [key]: kept, ...rest, ...(kept.length < items.length ? { truncated: true, total: items.length, shown: kept.length } : {}) }, null, 2)
+  let out = render()
+  while (out.length > max && kept.length) {
+    kept = kept.slice(0, Math.floor((kept.length * max * 0.9) / out.length))
+    out = render()
+  }
+  return { content: [{ type: 'text' as const, text: out }] }
 }
 
 function notFound(registry: Registry, tag: string) {
@@ -415,7 +433,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           modulePath: resolved ? importPath(e.modulePath, resolved.component.package, installedPackage(resolved.component.package)) : e.modulePath,
         }
       })
-      if (format === 'json') return json({ findings: result.findings, elements })
+      if (format === 'json') return jsonList('findings', result.findings, { elements })
       const errors = result.findings.filter((f) => f.severity === 'error').length
       const out = [
         result.findings.length

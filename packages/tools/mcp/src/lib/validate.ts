@@ -25,9 +25,12 @@ export interface ValidationResult {
 }
 
 const CSS_FILE = /\.(css|scss|sass|less)$/i
-const JSX_FILE = /\.(jsx|tsx)$/i
+/** MDX is JSX with Markdown around it: a prop is a property and `onClick` is React's. */
+const JSX_FILE = /\.(jsx|tsx|mdx)$/i
 const HTML_FILE = /\.html?$/i
 const SCRIPT_FILE = /\.(jsx|tsx|[cm]?[jt]s)$/i
+/** Markup with script inside: `<script>` blocks, Astro frontmatter and `{/* *\/}` expression comments. */
+const MIXED_FILE = /\.(mdx|vue|svelte|astro)$/i
 
 /** Native element → replacement tags, the first one that exists in the registry wins. `input` goes by `type`. */
 const NATIVE: Record<string, string[]> = {
@@ -71,7 +74,8 @@ const REACT_EVENTS = new Set([...DOM_EVENTS].filter((e) => !['dblclick', 'select
  * alone draws nothing (it rounds a host shadow), so it is not one of them.
  */
 const BOX_PROPERTY = /^(border(?![a-z-]*radius)(-[a-z-]+)?|padding(-[a-z-]+)?|background(-[a-z-]+)?|box-shadow|outline)$/
-const ATTRIBUTE_NAME = /^(?:[@.?:#*]|\[\(?|\()?[A-Za-z_][\w.:-]*(?:\)?\]|\))?$/
+// `|` is a Svelte event modifier (`on:click|once`).
+const ATTRIBUTE_NAME = /^(?:[@.?:#*]|\[\(?|\()?[A-Za-z_][\w.:|-]*(?:\)?\]|\))?$/
 const VOID = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '))
 
 interface Tag {
@@ -85,7 +89,11 @@ interface Tag {
 export function validateMarkup(registry: Registry, source: string, filename = 'snippet.html'): ValidationResult {
   const findings: Finding[] = []
   const lines = lineStarts(source)
-  const ignored = ignoredLines(source, lines)
+  const isCss = CSS_FILE.test(filename)
+  const jsx = JSX_FILE.test(filename)
+  // Comments render nothing: blank them out, keeping offsets, so only code and markup are checked.
+  const masked = maskComments(source, isCss ? 'css' : MIXED_FILE.test(filename) ? 'mixed' : SCRIPT_FILE.test(filename) ? 'script' : 'markup')
+  const ignored = ignoredLines(source, masked, lines)
   const at = (index: number) => position(lines, index)
   const report = (index: number, severity: Severity, rule: Finding['rule'], message: string) => {
     const { line, column } = at(index)
@@ -93,10 +101,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
   }
   const known = knownVariables(registry)
   const used = new Map<string, string>()
-  const isCss = CSS_FILE.test(filename)
-  const jsx = JSX_FILE.test(filename)
-  // Comments render nothing: blank them out, keeping offsets, so only code and markup are checked.
-  source = maskComments(source, isCss ? 'css' : SCRIPT_FILE.test(filename) ? 'script' : 'markup')
+  source = masked
 
   if (!isCss) {
     const stack: string[] = []
@@ -114,7 +119,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
         const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
         if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
       }
-      const style = tag.attributes.find((a) => a.name === 'style')
+      const style = tag.attributes.find((a) => a.name.toLowerCase() === 'style')
       if (style?.value && tag.name.startsWith('c2-')) checkDeclarations(style.value, style.index, `<${tag.name}>`, report)
       if (!tag.selfClosing && !VOID.has(tag.name)) stack.push(tag.name)
     }
@@ -317,40 +322,55 @@ function checkDeclarations(declarations: string, offset: number, host: string, r
 
 /**
  * Blanks comments with spaces (newlines kept, so positions hold): `<!-- -->` in markup, `/* *\/` in CSS, and `//` and
- * `/* *\/` in scripts outside strings and template literals, whose text may be rendered markup.
+ * `/* *\/` in scripts outside strings and template literals, whose text may be rendered markup. Markup's `<script>`
+ * blocks are script; so are Astro frontmatter and `{/* *\/}` expressions in a mixed file (Vue, Svelte, Astro, MDX). In
+ * every kind, the comments of embedded stylesheets (`<style>`, Lit `css\``) are blanked too.
  */
-function maskComments(source: string, kind: 'css' | 'script' | 'markup'): string {
+function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed'): string {
   const out = source.split('')
   const blank = (from: number, to: number) => {
     for (let i = from; i < to && i < out.length; i++) if (out[i] !== '\n') out[i] = ' '
   }
-  const blockComments = (open: string, close: string) => {
-    for (let i = source.indexOf(open); i >= 0; i = source.indexOf(open, i + 1)) {
+  const blockComments = (open: string, close: string, from = 0, to = source.length) => {
+    for (let i = source.indexOf(open, from); i >= 0 && i < to; i = source.indexOf(open, i + 1)) {
       const end = source.indexOf(close, i + open.length)
-      const stop = end < 0 ? source.length : end + close.length
+      const stop = end < 0 || end + close.length > to ? to : end + close.length
       blank(i, stop)
       i = stop - 1
     }
   }
-  if (kind === 'markup') blockComments('<!--', '-->')
-  else if (kind === 'css') blockComments('/*', '*/')
-  else {
-    for (let i = 0; i < source.length; i++) {
+  const scriptComments = (from: number, to: number) => {
+    for (let i = from; i < to; i++) {
       const c = source[i]
       if (c === '"' || c === "'") {
-        while (++i < source.length && source[i] !== c && source[i] !== '\n') if (source[i] === '\\') i++
+        while (++i < to && source[i] !== c && source[i] !== '\n') if (source[i] === '\\') i++
       } else if (c === '`') i = skipTemplate(source, i)
       else if (c === '/' && source[i + 1] === '/') {
         const end = source.indexOf('\n', i)
-        blank(i, end < 0 ? source.length : end)
-        i = end < 0 ? source.length : end
+        const stop = end < 0 || end > to ? to : end
+        blank(i, stop)
+        i = stop
       } else if (c === '/' && source[i + 1] === '*') {
         const end = source.indexOf('*/', i + 2)
-        blank(i, end < 0 ? source.length : end + 2)
-        i = end < 0 ? source.length : end + 1
+        const stop = end < 0 || end + 2 > to ? to : end + 2
+        blank(i, stop)
+        i = stop - 1
       }
     }
   }
+  if (kind === 'css') blockComments('/*', '*/')
+  else if (kind === 'script') scriptComments(0, source.length)
+  else {
+    blockComments('<!--', '-->')
+    for (const m of source.matchAll(/(<script\b[^>]*>)([\s\S]*?)<\/script>/g)) scriptComments(m.index + m[1].length, m.index + m[1].length + m[2].length)
+    if (kind === 'mixed') {
+      const frontmatter = /^---\r?\n[\s\S]*?\n---/.exec(source)
+      if (frontmatter) scriptComments(3, frontmatter[0].length - 3)
+      for (const m of source.matchAll(/\{\s*(\/\*[\s\S]*?\*\/)\s*\}/g)) blank(m.index + m[0].indexOf('/*'), m.index + m[0].indexOf('/*') + m[1].length)
+    }
+  }
+  // `/* */` inside a `<style>` block or a Lit `css` template is CSS, whichever kind of file holds it.
+  if (kind !== 'css') for (const block of cssBlocks(source, false)) blockComments('/*', '*/', block.offset, block.offset + block.css.length)
   return out.join('')
 }
 
@@ -418,12 +438,12 @@ function* scanTags(source: string, caseless = false): Generator<Tag> {
         if (quote === '"' || quote === "'") {
           const end = closingQuote(source, k)
           entry.value = source.slice(k + 1, end)
-          if (entry.name === 'style') entry.index = k + 1
+          if (entry.name.toLowerCase() === 'style') entry.index = k + 1
           j = end + 1
         } else if (quote === '{') {
           const end = skipBalanced(source, k, '{', '}')
           entry.value = source.slice(k, end)
-          if (entry.name === 'style') entry.index = k
+          if (entry.name.toLowerCase() === 'style') entry.index = k
           j = end
         } else if (source.startsWith('${', k)) {
           const end = skipBalanced(source, k + 1, '{', '}')
@@ -526,16 +546,37 @@ function position(starts: number[], index: number): { line: number; column: numb
   return { line: lo + 1, column: index - starts[lo] + 1 }
 }
 
-function ignoredLines(source: string, starts: number[]): Set<number> {
+function ignoredLines(source: string, masked: string, starts: number[]): Set<number> {
   const ignored = new Set<number>()
   for (const m of source.matchAll(/c2n-ignore/g)) {
     const { line } = position(starts, m.index)
-    const text = source.slice(starts[line - 1], starts[line] ?? source.length)
-    // Only the marker inside a comment (`<!-- -->`, `/* */`, `//`) counts, not the word in a string or in prose.
-    if (!/(<!--|\/\*|\/\/)/.test(source.slice(starts[line - 1], m.index))) continue
-    ignored.add(line)
-    // A comment on a line of its own covers the next line; one after an element covers only its own.
-    if (!/<(?!!--)[a-zA-Z]/.test(text.replace(/\{\/\*[\s\S]*?\*\/\}/g, ''))) ignored.add(line + 1)
+    const lineStart = starts[line - 1]
+    // Only the marker inside a comment counts, not the word in a string or in prose: one the masking blanked (which
+    // covers the continuation lines of a multi-line comment), or one after a comment opener on its own line.
+    const opener = /(<!--|\/\*|\/\/)/.exec(source.slice(lineStart, m.index))
+    const inComment = masked.slice(m.index, m.index + 10) !== 'c2n-ignore'
+    if (!opener && !inComment) continue
+    // The comment around the marker: the nearest opener not closed before it, up to its closer on any later line.
+    const comment = [
+      { opener: '<!--', closer: '-->' },
+      { opener: '/*', closer: '*/' },
+      { opener: '//', closer: '\n' },
+    ]
+      .map(({ opener, closer }) => ({ open: source.lastIndexOf(opener, m.index), closer }))
+      .filter(({ open, closer }) => open >= 0 && (closer === '\n' ? open >= lineStart : !source.slice(open, m.index).includes(closer)))
+      .sort((x, y) => y.open - x.open)[0]
+    const open = comment?.open ?? m.index
+    const found = comment ? source.indexOf(comment.closer, m.index) : -1
+    const close = found < 0 ? (comment?.closer === '\n' ? source.length : m.index) : comment?.closer === '\n' ? found : found + (comment?.closer.length ?? 0)
+    const first = position(starts, open).line
+    const last = position(starts, close).line
+    for (let l = Math.min(first, line); l <= Math.max(last, line); l++) ignored.add(l)
+    // A comment on lines of its own covers the next line; one after (or before) an element covers only its own lines.
+    const around = (source.slice(starts[first - 1], Math.max(open, starts[first - 1])) + source.slice(close, starts[last] ?? source.length)).replace(
+      /\{\s*\}/g,
+      '',
+    )
+    if (!/<(?!!--)[a-zA-Z]/.test(around)) ignored.add(last + 1)
   }
   return ignored
 }

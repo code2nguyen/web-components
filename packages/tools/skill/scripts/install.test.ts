@@ -95,6 +95,10 @@ test('merges the c2n rules into CLAUDE.md and AGENTS.md, which each agent loads 
     const agents = readFileSync(join(projectRoot, 'AGENTS.md'), 'utf8')
     assert.match(agents, /\.agents\/skills\/c2n-components\/SKILL\.md/)
     assert.equal(agents.match(/<!-- c2n:start/g)?.length, 1)
+    // Installed without the MCP server, the rules name the fallbacks instead of tools the agent does not have.
+    assert.doesNotMatch(claude, /get_component|validate_markup|search_components/)
+    assert.match(claude, /custom-elements\.json/)
+    assert.match(claude, /npx -y @c2n\/mcp validate src/)
   } finally {
     rmSync(projectRoot, { recursive: true, force: true })
   }
@@ -124,6 +128,13 @@ test('adds the Claude Code validate hook once, next to the hooks already there',
     const disabled = JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8'))
     assert.deepEqual(disabled.hooks.PostToolUse, [own])
     assert.deepEqual(disabled.permissions, { allow: ['Bash(ls)'] })
+
+    // When the c2n hook was the only one, --no-hook takes the emptied `hooks` key out too.
+    writeFileSync(join(projectRoot, '.claude/settings.json'), JSON.stringify({ permissions: { allow: ['Bash(ls)'] } }))
+    installProject({ projectRoot, agents: ['claude'] })
+    assert.equal(JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8')).hooks.PostToolUse.length, 1)
+    installProject({ projectRoot, agents: ['claude'], includeHook: false })
+    assert.deepEqual(JSON.parse(readFileSync(join(projectRoot, '.claude/settings.json'), 'utf8')), { permissions: { allow: ['Bash(ls)'] } })
 
     rmSync(join(projectRoot, '.claude/settings.json'))
     assert.deepEqual(installProject({ projectRoot, agents: ['claude'], includeHook: false }).hooks, [])

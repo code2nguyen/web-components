@@ -18,6 +18,11 @@ export interface InstalledInfo {
   via?: { package: typeof UMBRELLA; version: string }
   /** Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. */
   elements?: Map<string, InstalledElement>
+  /**
+   * The tags of `elements` the package itself declares: all of them in its own manifest, and in the umbrella's merged
+   * one only those whose module path starts with the package's directory (`table/…`).
+   */
+  owned?: Set<string>
 }
 
 const TTL = 10_000
@@ -47,6 +52,7 @@ export function installedPackage(name: string): InstalledInfo | null {
       try {
         const manifest = JSON.parse(readFileSync(join(pkgJsonPath, '..', pkg.customElements), 'utf8')) as {
           modules?: {
+            path?: string
             declarations?: {
               tagName?: string
               name?: string
@@ -60,9 +66,12 @@ export function installedPackage(name: string): InstalledInfo | null {
           }[]
         }
         const elements = new Map<string, InstalledElement>()
+        const owned = new Set<string>()
+        const directory = umbrella ? `${name.slice('@c2n/'.length)}/` : ''
         for (const mod of manifest.modules ?? []) {
           for (const decl of mod.declarations ?? []) {
             if (!decl.tagName) continue
+            if ((mod.path ?? '').startsWith(directory)) owned.add(decl.tagName)
             elements.set(decl.tagName, {
               className: decl.name ?? '',
               properties: publicProperties(decl.members),
@@ -75,6 +84,7 @@ export function installedPackage(name: string): InstalledInfo | null {
           }
         }
         info.elements = elements
+        info.owned = owned
       } catch {
         /* manifest unreadable: keep the bundled API */
       }
@@ -150,16 +160,19 @@ export function withInstalledApi(registry: Registry): Registry {
   const tagIndex = { ...registry.tagIndex }
   const components = Object.fromEntries(
     Object.entries(registry.components).map(([id, component]) => {
-      const installed = installedPackage(component.package)?.elements
+      const info = installedPackage(component.package)
+      const installed = info?.elements
       if (!installed || component.tagPattern) return [id, component]
       // The umbrella's merged manifest covers every package, so only this package's own tags count.
       const own = new Set(component.elements.map((e) => e.tag))
       const elements = component.elements.filter((element) => installed.has(element.tag)).map((element) => ({ ...element, ...installed.get(element.tag) }))
       for (const element of component.elements) if (!installed.has(element.tag) && tagIndex[element.tag] === id) delete tagIndex[element.tag]
-      // An element the installed version added, when its tag carries this package's prefix (`c2-table-…`).
-      const prefix = component.elements[0]?.tag
+      // An element the installed version added: one the package's manifest declares and the registry does not know.
+      // Ownership comes from the manifest, not the tag, since a package may hold several families (`c2-line-chart`,
+      // `c2-chart-series`); of the pages documenting one package, the one representing it takes the new tags.
+      const representative = (registry.packageIndex[component.package] ?? id) === id
       for (const [tag, api] of installed) {
-        if (own.has(tag) || tagIndex[tag] || !prefix || !tag.startsWith(`${prefix}-`)) continue
+        if (!representative || own.has(tag) || tagIndex[tag] || !info.owned?.has(tag) || !component.elements.length) continue
         // The package entry registers every element of the package; one element's own module may not.
         elements.push({ ...api, tag, modulePath: component.install.umbrella ?? component.elements[0].modulePath, description: '' })
         tagIndex[tag] = id

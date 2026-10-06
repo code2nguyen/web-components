@@ -70,7 +70,7 @@ export async function runValidate(args: string[]): Promise<number> {
   if (args.includes('--hook')) {
     let file: string | undefined
     try {
-      const payload = JSON.parse(await readStdin()) as { tool_input?: { file_path?: string; notebook_path?: string } }
+      const payload = JSON.parse(await readStdin()) as { tool_input?: { file_path?: string } }
       file = payload.tool_input?.file_path
     } catch {
       return 0
