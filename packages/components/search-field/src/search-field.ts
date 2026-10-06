@@ -67,7 +67,7 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * @slot suffix-icon - Icon or control at the end of the field, after the clear button and the shortcut hint (a filter toggle, for instance).
  * @slot recent-icon - Replaces the clock shown before each recent search.
  *
- * @event {InputEvent} input - Re-dispatched from the inner input on every keystroke; also fired when the clear button or a recent search changes the value.
+ * @event {Event} input - Re-dispatched from the inner input on every keystroke; also fired when the clear button or a recent search changes the value.
  * @event {Event} change - Re-dispatched from the inner input when the value is committed; also fired when the clear button or a recent search changes the value.
  * @event {CustomEvent<SearchFieldSearchDetail>} search - The query to run: after the debounce while typing, at once on Enter, on a recent search, and with an empty value when cleared. Does not bubble; listen on the element.
  * @event {Event} clear - Fired when the clear button or Escape emptied the field, before `input`, `change` and `search`.
@@ -116,6 +116,7 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * @cssproperty {font-size} [--c2-search-field__header--font-size=12px]
  * @cssproperty {font-weight} [--c2-search-field__header--font-weight=500]
  * @cssproperty {color} [--c2-search-field__header-action--color=rgb(2, 101, 220)]
+ * @cssproperty {outline} [--c2-search-field__header-action__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Keyboard focus ring of the Clear button.
  *
  * @cssproperty {pixel} [--c2-search-field__option--min-height=32px]
  * @cssproperty {padding} [--c2-search-field__option--padding=6px 8px]
@@ -140,7 +141,7 @@ export class SearchField extends LitElement {
   /** Text shown while the field is empty. */
   @property({ type: String }) placeholder = ''
 
-  /** Accessible name of the field. Defaults to "Search" when there is no placeholder either. */
+  /** Accessible name of the field. Defaults to the placeholder, then to "Search". */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** Form field name: the query is submitted with the form under this name. */
@@ -259,6 +260,7 @@ export class SearchField extends LitElement {
     this.cancelPending()
     this.dirty = false
     this.value = this.getAttribute('value') ?? ''
+    this.lastSearch = this.value
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -307,14 +309,21 @@ export class SearchField extends LitElement {
     return this.historyKey ? `${STORAGE_PREFIX}${this.historyKey}` : ''
   }
 
-  private loadHistory() {
+  /**
+   * Reads the stored history into `recent`. On connection a key with nothing stored keeps the authored `recent` as a
+   * seed; after a key change it starts empty, so one key's searches never leak into another's history.
+   */
+  private loadHistory(keyChanged = false) {
     if (!this.storageKey) return
+    let stored: unknown = null
     try {
-      const stored = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as unknown
-      if (Array.isArray(stored)) this.recent = stored.filter((item): item is string => typeof item === 'string')
+      stored = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null')
     } catch {
-      // Storage unavailable (private mode, sandboxed frame) or a corrupted entry: keep the given list.
+      // Storage unavailable (private mode, sandboxed frame) or a corrupted entry: treat it as nothing stored.
     }
+    if (Array.isArray(stored)) this.recent = stored.filter((item): item is string => typeof item === 'string')
+    else if (keyChanged) this.recent = []
+    this.activeIndex = -1
   }
 
   private updateRecent(recent: string[]) {
@@ -442,9 +451,24 @@ export class SearchField extends LitElement {
     this.dismissed = false
   }
 
-  private handleFocusout() {
+  private handleFocusout(event: FocusEvent) {
+    // Moving between the input and the panel's Clear button keeps the panel open.
+    const next = event.relatedTarget as Node | null
+    if (next && this.renderRoot.contains(next)) return
     this.focused = false
     this.activeIndex = -1
+  }
+
+  private handlePanelKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Escape') return
+    event.preventDefault()
+    this.dismissed = true
+    this.input?.focus()
+  }
+
+  private handleClearRecentClick() {
+    this.clearRecent()
+    this.input?.focus()
   }
 
   private handleFieldClick(event: Event) {
@@ -459,7 +483,7 @@ export class SearchField extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues) {
-    if (changed.has('historyKey') && changed.get('historyKey') !== undefined) this.loadHistory()
+    if (changed.has('historyKey') && changed.get('historyKey') !== undefined) this.loadHistory(true)
     if (this.lastSearch === undefined) this.lastSearch = this.value
   }
 
@@ -521,10 +545,16 @@ export class SearchField extends LitElement {
     const matches = this.recentMatches
     const open = this.open
     return html`<c2-overlay popover="manual" fit-anchor .anchor=${this.field ?? undefined} .open=${open}>
-      <div class="panel" @pointerdown=${(event: Event) => event.preventDefault()}>
+      <div
+        class="panel"
+        @pointerdown=${(event: Event) => event.preventDefault()}
+        @focusin=${this.handleFocusin}
+        @focusout=${this.handleFocusout}
+        @keydown=${this.handlePanelKeydown}
+      >
         <div class="panel-header">
           <span id="recent-label">${this.recentLabel}</span>
-          <button class="panel-action" type="button" tabindex="-1" @click=${() => this.clearRecent()}>Clear</button>
+          <button class="panel-action" type="button" aria-label="Clear recent searches" @click=${this.handleClearRecentClick}>Clear</button>
         </div>
         <div id="recent-list" class="list" role="listbox" aria-labelledby="recent-label">
           ${matches.map(
@@ -556,7 +586,7 @@ export class SearchField extends LitElement {
   override render() {
     const hasRecent = this.recentMatches.length > 0 || !!this.historyKey || this.recent.length > 0
     const open = this.open
-    const name = this.ariaLabel || (this.placeholder ? undefined : 'Search')
+    const name = this.ariaLabel || this.placeholder || 'Search'
     const shortcuts = this.shortcut && !isServer ? [ariaKeyShortcuts(this.shortcutParts.composed), ...this.shortcutParts.bare].filter(Boolean).join(' ') : ''
     return html`<div class="field" @click=${this.handleFieldClick}>
         ${this.renderLeadingIcon()}

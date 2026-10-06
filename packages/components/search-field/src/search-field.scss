@@ -46,6 +46,7 @@
     header--font-size: 12px,
     header--font-weight: 500,
     header-action--color: rgb(2, 101, 220),
+    header-action__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
 
     option--min-height: 32px,
     option--padding: 6px 8px,
@@ -195,7 +196,8 @@
     color: css.cssVar(clear-icon__hover--color);
   }
 
-  svg {
+  svg,
+  ::slotted(*) {
     width: 100%;
     height: 100%;
   }
@@ -263,6 +265,12 @@ c2-overlay {
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: css.cssVar(header-action__focus--outline);
+    outline-offset: 2px;
   }
 }
 

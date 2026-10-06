@@ -9,7 +9,7 @@ import { SearchField } from '@c2n/components/search-field'
 
 ## Presets
 
-The box is one set of variables (`--c2-search-field--border`, `--background`, `--border-radius`, `--min-height`), with `__hover` and `__focus` states on top. The `__shortcut` variables style the key hint, and the `__panel` and `__option` variables the recent-searches list.
+The box is one set of variables (`--c2-search-field--border`, `--c2-search-field--background`, `--c2-search-field--border-radius`, `--c2-search-field--min-height`), with `--c2-search-field__hover--*` and `--c2-search-field__focus--*` states on top. The `--c2-search-field__shortcut--*` variables style the key hint, and the `--c2-search-field__panel--*` and `--c2-search-field__option--*` variables the recent-searches list.
 
 <GalleryGrid>
 
@@ -39,7 +39,7 @@ The box is one set of variables (`--c2-search-field--border`, `--background`, `-
     --c2-search-field--min-height: 40px;
     --c2-search-field--padding: 8px 16px;
     --c2-search-field--border-radius: 999px;
-    --c2-search-field__focus--outline: 2px solid rgba(2, 101, 220, 0.4);
+    --c2-search-field__focus--outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
     --c2-search-field__panel--border-radius: 14px;
     --c2-search-field__option--border-radius: 8px;
   }

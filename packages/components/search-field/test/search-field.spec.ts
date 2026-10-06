@@ -55,10 +55,29 @@ test('the clear button and Escape empty the field and search for nothing', async
   await expect(page.locator('main')).toHaveAttribute('data-log', 'clear;input;change;')
   expect(await events(page)).toEqual([{ value: '', trigger: 'clear' }])
 
+  // Escape clears a query that was searched.
   await page.keyboard.type('x')
+  await expect
+    .poll(() => events(page))
+    .toEqual([
+      { value: '', trigger: 'clear' },
+      { value: 'x', trigger: 'input' },
+    ])
   await page.keyboard.press('Escape')
   await expect(input).toHaveValue('')
-  await expect.poll(() => events(page)).toEqual([{ value: '', trigger: 'clear' }])
+  await expect
+    .poll(() => events(page))
+    .toEqual([
+      { value: '', trigger: 'clear' },
+      { value: 'x', trigger: 'input' },
+      { value: '', trigger: 'clear' },
+    ])
+
+  // Clearing a query whose search never ran leaves the last search (empty) standing: no duplicate event.
+  await page.keyboard.type('y')
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(400)
+  expect(await events(page)).toHaveLength(3)
 })
 
 test('a shortcut focuses the field and shows a hint while it is empty and unfocused', async ({ page, renderScenario }) => {
@@ -148,10 +167,56 @@ test('history-key records committed searches, persists them and clears them', as
   await renderScenario('<c2-search-field history-key="issues"></c2-search-field>')
   await page.getByRole('combobox', { name: 'Search' }).click()
   await expect(page.getByRole('option')).toHaveText(['three', 'two'])
-  await page.getByRole('button', { name: 'Clear', exact: true }).click()
+  await page.getByRole('button', { name: 'Clear recent searches' }).click()
   await expect(page.getByRole('option')).toHaveCount(0)
   await expect(page.getByRole('combobox', { name: 'Search' })).toHaveAttribute('aria-expanded', 'false')
   expect(await page.evaluate(() => localStorage.getItem('c2n-search-history:issues'))).toBeNull()
+})
+
+test('the recent-searches Clear button is reachable from the keyboard', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-search-field recent="label:bug;is:open"></c2-search-field>')
+  const input = page.getByRole('combobox', { name: 'Search' })
+  await input.click()
+  await page.keyboard.press('Tab')
+  const clear = page.getByRole('button', { name: 'Clear recent searches' })
+  await expect(clear).toBeFocused()
+  // Focus on the button keeps the panel open.
+  await expect(page.getByRole('option')).toHaveCount(2)
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('option')).toHaveCount(0)
+  // With no recent searches left the field is a plain searchbox again.
+  await expect(page.getByRole('searchbox', { name: 'Search' })).toBeFocused()
+})
+
+test('switching history-key loads that key and never carries over the previous list', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/search-field/test/scenarios.html')
+  await page.evaluate(() => {
+    localStorage.setItem('c2n-search-history:a', '["from a"]')
+    localStorage.removeItem('c2n-search-history:b')
+  })
+  await renderScenario('<c2-search-field history-key="a" recent="seed"></c2-search-field>')
+  const host = page.locator('c2-search-field')
+  await expect(host).toHaveJSProperty('recent', ['from a'])
+  await props(host, { historyKey: 'b' })
+  await expect(host).toHaveJSProperty('recent', [])
+  await props(host, { historyKey: 'a' })
+  await expect(host).toHaveJSProperty('recent', ['from a'])
+})
+
+test('form reset lets the same query be searched again', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-search-field name="q" debounce="0"></c2-search-field></form>')
+  const host = page.locator('c2-search-field')
+  await watch(host, 'search')
+  const input = page.getByRole('searchbox', { name: 'Search' })
+  await input.click()
+  await page.keyboard.type('a')
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect(input).toHaveValue('')
+  await page.keyboard.type('a')
+  expect(await events(page)).toEqual([
+    { value: 'a', trigger: 'input' },
+    { value: 'a', trigger: 'input' },
+  ])
 })
 
 test('submits the query with its form and resets to the authored value', async ({ page, renderScenario }) => {
