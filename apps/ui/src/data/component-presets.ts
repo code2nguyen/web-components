@@ -739,6 +739,45 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-chip': {
+    html: `<c2-chip selectable selected removable>Status: Active</c2-chip>`,
+    presets: [
+      {
+        name: 'Solid choice',
+        description: 'Borderless tinted pills that turn solid when selected, without a check mark, for a category switcher.',
+        css: {
+          '--c2-chip__container--border': '1px solid transparent',
+          '--c2-chip__container--background-color': '#f4f4f5',
+          '--c2-chip__container__hover--border': '1px solid transparent',
+          '--c2-chip__container__selected--background-color': '#18181b',
+          '--c2-chip__container__selected--color': '#ffffff',
+          '--c2-chip__selected-icon--display': 'none',
+        },
+      },
+      {
+        name: 'Square tag',
+        description: 'A small, square-cornered blue tag for labels and topics.',
+        css: {
+          '--c2-chip__container--height': '24px',
+          '--c2-chip__container--border-radius': '4px',
+          '--c2-chip__container--font-size': '12px',
+          '--c2-chip__container--border': '1px solid #bfdbfe',
+          '--c2-chip__container--background-color': '#eff6ff',
+          '--c2-chip__container--color': '#1d4ed8',
+        },
+      },
+      {
+        name: 'Filter',
+        description: 'An 8px-radius filter chip outlined in the accent colour while active, for a filter bar above a table.',
+        css: {
+          '--c2-chip__container--height': '32px',
+          '--c2-chip__container--border-radius': '8px',
+          '--c2-chip__container--font-size': '12px',
+          '--c2-chip__container__selected--border': '1px solid rgb(2, 101, 220)',
+        },
+      },
+    ],
+  },
   'c2-search-field': {
     html: `<c2-search-field placeholder="Search" shortcut="/" style="width: 240px"></c2-search-field>`,
     presets: [

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-chip</title>
+    <script type="module" src="/src/chip.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .solid {
+        --c2-chip__container--border: 1px solid transparent;
+        --c2-chip__container--background-color: #f4f4f5;
+        --c2-chip__container__hover--border: 1px solid transparent;
+        --c2-chip__container__selected--background-color: #18181b;
+        --c2-chip__container__selected--color: #ffffff;
+        --c2-chip__selected-icon--display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Plain</h3>
+    <section>
+      <c2-chip>Design</c2-chip>
+      <c2-chip>
+        <svg slot="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /></svg>
+        With prefix
+      </c2-chip>
+    </section>
+
+    <h3>Selectable</h3>
+    <section id="selectable">
+      <c2-chip selectable selected value="open">Open</c2-chip>
+      <c2-chip selectable value="progress">In progress</c2-chip>
+      <c2-chip selectable value="done">Done</c2-chip>
+      <c2-chip selectable disabled>Disabled</c2-chip>
+    </section>
+
+    <h3>Removable</h3>
+    <section id="removable">
+      <c2-chip removable value="status">Status: Active</c2-chip>
+      <c2-chip removable value="owner">Owner: me</c2-chip>
+      <c2-chip selectable selected removable value="label">Label: bug</c2-chip>
+    </section>
+
+    <h3>Themed</h3>
+    <section>
+      <c2-chip class="solid" selectable selected>All</c2-chip>
+      <c2-chip class="solid" selectable>Music</c2-chip>
+      <c2-chip class="solid" selectable>Podcasts</c2-chip>
+    </section>
+
+    <pre id="log"></pre>
+    <script type="module">
+      const log = document.querySelector('#log')
+      document.addEventListener('change', (event) => (log.textContent = `change ${event.target.value}: ${event.target.selected}\n` + log.textContent))
+      document.querySelector('#removable').addEventListener('remove', (event) => {
+        log.textContent = `remove ${event.detail.value}\n` + log.textContent
+        event.target.remove()
+      })
+    </script>
+  </body>
+</html>

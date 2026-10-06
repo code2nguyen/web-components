@@ -1,5 +1,5 @@
 {
-  "total": 1138796,
+  "total": 1141369,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -36,6 +36,7 @@
     "chart/sparkline": 30822,
     "chat-input": 3880,
     "chat-message-list": 3481,
+    "chip": 2573,
     "chat-message": 1709,
     "chatbot": 7122,
     "checkbox": 3103,

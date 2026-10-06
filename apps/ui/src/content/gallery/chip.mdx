@@ -1,0 +1,124 @@
+---
+description: 'Ready-made looks for c2-chip: filter pills, a solid choice set, square tags, a dashed add-filter chip and people chips. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Chip } from '@c2n/components/chip'
+import { Avatar } from '@c2n/components/avatar'
+
+## Presets
+
+The pill is one set of `--c2-chip__container--*` variables (border, background, colour, radius, height, padding), with `__hover` and `__selected` states on top. `--c2-chip__icon--*` sizes the prefix and the check mark, and `--c2-chip__remove-button--*` styles the cross.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-chip selectable selected>Open</c2-chip>
+<c2-chip selectable>Closed</c2-chip>
+<c2-chip removable>Status: Active</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=Solid choice
+<style>
+  .solid {
+    --c2-chip__container--border: 1px solid transparent;
+    --c2-chip__container--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chip__container__hover--border: 1px solid transparent;
+    --c2-chip__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chip__container__selected--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-chip__container__selected--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-chip__selected-icon--display: none;
+  }
+</style>
+<c2-chip class="solid" selectable selected>All</c2-chip>
+<c2-chip class="solid" selectable>Music</c2-chip>
+<c2-chip class="solid" selectable>Podcasts</c2-chip>
+<c2-chip class="solid" selectable>Audiobooks</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=Square tag
+<style>
+  .tag {
+    --c2-chip__container--height: 24px;
+    --c2-chip__container--padding-left: 8px;
+    --c2-chip__container--padding-right: 8px;
+    --c2-chip__container--border-radius: 4px;
+    --c2-chip__container--font-size: 12px;
+    --c2-chip__container--border: 1px solid light-dark(#bfdbfe, #1e3a5f);
+    --c2-chip__container--background-color: light-dark(#eff6ff, #14243a);
+    --c2-chip__container--color: light-dark(#1d4ed8, #8ab4f8);
+    --c2-chip__remove-button--size: 16px;
+    --c2-chip__remove-button--color: light-dark(#1d4ed8, #8ab4f8);
+    --c2-chip__remove-button__hover--color: light-dark(#1d4ed8, #8ab4f8);
+  }
+</style>
+<c2-chip class="tag" removable>frontend</c2-chip>
+<c2-chip class="tag" removable>accessibility</c2-chip>
+<c2-chip class="tag" removable>good first issue</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=Filter bar
+<style>
+  .filter {
+    --c2-chip__container--height: 32px;
+    --c2-chip__container--border-radius: 8px;
+    --c2-chip__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chip__container--font-size: 12px;
+    --c2-chip__container__selected--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+  }
+  .add-filter {
+    --c2-chip__container--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chip__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-chip class="filter" selectable selected removable>Status is Active</c2-chip>
+<c2-chip class="filter" selectable selected removable>Owner is me</c2-chip>
+<c2-chip class="filter add-filter" selectable>+ Add filter</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=People
+<style>
+  .person {
+    --c2-chip__container--height: 32px;
+    --c2-chip__container--padding-left: 4px;
+    --c2-chip__container--padding-right: 10px;
+    --c2-chip__icon--size: 24px;
+    --c2-avatar--size: 24px;
+    --c2-avatar--font-size: 11px;
+  }
+</style>
+<c2-chip class="person" removable><c2-avatar slot="prefix" name="Ada Lovelace" auto-color></c2-avatar>Ada Lovelace</c2-chip>
+<c2-chip class="person" removable><c2-avatar slot="prefix" name="Grace Hopper" auto-color></c2-avatar>Grace Hopper</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=Soft tones
+<style>
+  .soft {
+    --c2-chip__container--border: 1px solid transparent;
+    --c2-chip__container--font-size: 12px;
+    --c2-chip__container--height: 26px;
+  }
+  .soft.green {
+    --c2-chip__container--background-color: light-dark(#dcfce7, #10301c);
+    --c2-chip__container--color: light-dark(#166534, #6fdc96);
+    --c2-chip__container__hover--background-color: light-dark(#bbf7d0, #143d24);
+    --c2-chip__container__hover--border: 1px solid transparent;
+    --c2-chip__container__selected--background-color: #16a34a;
+    --c2-chip__container__selected--color: #ffffff;
+  }
+  .soft.amber {
+    --c2-chip__container--background-color: light-dark(#fef3c7, #3a2a08);
+    --c2-chip__container--color: light-dark(#92400e, #f5b85a);
+    --c2-chip__container__hover--background-color: light-dark(#fde68a, #47340c);
+    --c2-chip__container__hover--border: 1px solid transparent;
+    --c2-chip__container__selected--background-color: #d97706;
+    --c2-chip__container__selected--color: #ffffff;
+  }
+</style>
+<c2-chip class="soft green" selectable selected>Healthy</c2-chip>
+<c2-chip class="soft amber" selectable>Degraded</c2-chip>
+```
+
+</GalleryGrid>
