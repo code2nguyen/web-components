@@ -101,6 +101,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
+- **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.
 - **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
 - **Shortcut** — `c2-shortcut` · `@c2n/components/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble.

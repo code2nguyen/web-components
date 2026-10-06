@@ -26,6 +26,7 @@
         "c2-page-editor": true,
         "c2-radio-group": true,
         "c2-rate": true,
+        "c2-search-field": true,
         "c2-select": true,
         "c2-slider": true,
         "c2-tag-input": true,

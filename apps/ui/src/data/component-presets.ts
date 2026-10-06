@@ -739,6 +739,33 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-search-field': {
+    html: `<c2-search-field placeholder="Search" shortcut="/" style="width: 240px"></c2-search-field>`,
+    presets: [
+      {
+        name: 'Pill',
+        description: 'Fully rounded and a little taller, with a focus ring, for a hero or storefront search.',
+        css: {
+          '--c2-search-field--min-height': '40px',
+          '--c2-search-field--padding': '8px 16px',
+          '--c2-search-field--border-radius': '999px',
+          '--c2-search-field__focus--outline': '2px solid rgba(2, 101, 220, 0.4)',
+        },
+      },
+      {
+        name: 'Command bar',
+        description: 'A compact, tinted header field that turns white on focus, with the shortcut hint on a white key.',
+        css: {
+          '--c2-search-field--min-height': '32px',
+          '--c2-search-field--padding': '4px 6px 4px 10px',
+          '--c2-search-field--background': '#f4f4f5',
+          '--c2-search-field--border': '1px solid #e4e4e7',
+          '--c2-search-field__focus--background': '#ffffff',
+          '--c2-search-field__shortcut--background': '#ffffff',
+        },
+      },
+    ],
+  },
   'c2-inline-edit': {
     html: `<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>`,
     presets: [

@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'search-field': `<c2-search-field placeholder="Search issues" shortcut="/" style="width:220px"></c2-search-field>`,
   'inline-edit': `<div class="preview-row"><c2-inline-edit label="Page title" value="Q4 launch plan" style="--c2-inline-edit--font-size:16px;--c2-inline-edit--font-weight:600;--c2-inline-edit__edit-icon--opacity:1"></c2-inline-edit></div>`,
   kanban: `<c2-kanban editable aria-label="Sprint board" style="--c2-kanban--gap:6px;--c2-kanban-column--width:116px;--c2-kanban-column--padding:5px;--c2-kanban-column--gap:5px;--c2-kanban-column__cards--gap:5px;--c2-kanban-column__card--padding:6px 8px;--c2-kanban-column__card--font-size:11px;--c2-kanban-column__label--font-size:12px;--c2-kanban-column__count--font-size:11px;--c2-kanban-column__empty--padding:8px 4px;--c2-kanban-column__empty--font-size:12px" items='[{"id":"1","column":"todo","title":"Search empty state"},{"id":"2","column":"todo","title":"Date input focus"},{"id":"3","column":"doing","title":"Tree drag handles"}]'><c2-kanban-column column-id="todo" label="To do"></c2-kanban-column><c2-kanban-column column-id="doing" label="Doing" limit="1"></c2-kanban-column></c2-kanban>`,
   gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
