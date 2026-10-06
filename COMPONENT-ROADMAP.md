@@ -50,7 +50,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 99 remain (20 P1): `c2-inline-edit` (#16) shipped in v1.0.3. Numbering is for reference only. Build order is in the delivery plan below.
 
 ### A. Forms and input (24)
 
