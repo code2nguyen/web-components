@@ -1278,3 +1278,13 @@ test('has no detectable accessibility violations with swipe actions revealed', a
   await expect(page.locator('c2-reorder-list').getByRole('button', { name: 'Archive' })).toBeVisible()
   await accessible(page)
 })
+
+test('a child that moves into or out of the placeholder slot later stops or starts being an item', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  expect(await visualIds(host)).toEqual(['first', 'second', 'third'])
+  await page.locator('#second').evaluate((item) => item.setAttribute('slot', 'placeholder'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'third'])
+  await page.locator('#second').evaluate((item) => item.removeAttribute('slot'))
+  await expect.poll(() => visualIds(host)).toEqual(['first', 'second', 'third'])
+})

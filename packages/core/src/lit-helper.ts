@@ -141,7 +141,8 @@ class AssignSlotDirective extends Directive {
   }
 
   override update(part: ElementPart, [nodes]: [readonly (Element | Text)[]]) {
-    const slot = part.element as HTMLSlotElement
+    const slot = part.element
+    if (!(slot instanceof HTMLSlotElement)) throw new Error('assignSlot() must be placed on a <slot> element.')
     // A new template instance is still a detached fragment here, and an assignment made before the slot is in the
     // shadow tree does not take effect; Lit inserts the fragment before the microtask runs.
     if (slot.getRootNode() instanceof ShadowRoot) assignNodes(slot, nodes)

@@ -421,7 +421,18 @@ export class ReorderList extends LitElement {
 
   private observeChildren(): void {
     this.childListObserver?.disconnect()
-    this.childListObserver = new MutationObserver(() => {
+    this.childListObserver = new MutationObserver((records) => {
+      // A child moving into or out of the `placeholder`/`dragging-item` slot changes which slot it belongs in, which
+      // manual assignment does not pick up by itself. Item slot names the list writes itself (declarative shadow
+      // DOM fallback) never involve those two slots and are ignored, so they cannot feed back into this observer.
+      const changesItems = (record: MutationRecord) => {
+        if (record.type === 'childList') return record.target === this
+        const previous = record.oldValue ?? ''
+        const current = (record.target as Element).slot
+        return record.target.parentNode === this && previous !== current && (SPECIAL_SLOTS.has(previous) || SPECIAL_SLOTS.has(current))
+      }
+      if (!records.some(changesItems)) return
+      this.requestUpdate()
       const activeItem = this.session?.item ?? null
       const previousIndex = activeItem ? (this.session?.candidateIndex ?? 0) : 0
       if (this.session) this.cancelSession('Items changed. Reordering canceled.')
@@ -432,7 +443,8 @@ export class ReorderList extends LitElement {
         this.requestUpdate()
       }
     })
-    this.childListObserver.observe(this, { childList: true })
+    // Attribute records on children need `subtree`; the filter above keeps only the list's own children.
+    this.childListObserver.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'], attributeOldValue: true })
   }
 
   private reconcileAuthoredOrder(): void {

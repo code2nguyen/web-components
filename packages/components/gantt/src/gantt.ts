@@ -797,7 +797,7 @@ export class Gantt extends LitElement {
 
   /**
    * Shows the tooltip and puts it under its row (above when the viewport has no room below), starting a little into
-   * the bar and kept inside the visible part of the timeline. Fixed coordinates: the popover lives in the top layer.
+   * the bar and kept inside the visible part of the timeline and the viewport. Fixed coordinates: the popover lives in the top layer.
    */
   #placeTooltip() {
     // Hover and keyboard focus are the only ways in, so no tooltip state means nothing to query.
@@ -827,7 +827,10 @@ export class Gantt extends LitElement {
     const minLeft = Math.max(TOOLTIP_GAP, Math.min(view.left + listWidth + TOOLTIP_GAP, maxLeft))
     const left = Math.max(minLeft, Math.min(bar.left + Math.min(bar.width, 40), maxLeft))
     const roomBelow = innerHeight - row.bottom
-    const top = roomBelow >= height + TOOLTIP_GAP || roomBelow >= row.top ? row.bottom + TOOLTIP_GAP : row.top - height - TOOLTIP_GAP
+    const preferredTop = roomBelow >= height + TOOLTIP_GAP || roomBelow >= row.top ? row.bottom + TOOLTIP_GAP : row.top - height - TOOLTIP_GAP
+    // Kept inside the viewport like the horizontal position: a row scrolled (partly) out of view, or one with no room
+    // on either side, would otherwise carry the tooltip off-screen.
+    const top = Math.max(TOOLTIP_GAP, Math.min(preferredTop, innerHeight - height - TOOLTIP_GAP))
     tip.style.left = `${Math.round(left)}px`
     tip.style.top = `${Math.round(top)}px`
   }
