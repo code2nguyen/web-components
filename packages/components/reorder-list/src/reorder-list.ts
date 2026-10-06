@@ -452,7 +452,7 @@ export class ReorderList extends LitElement {
 
   /** Children the author put in the `placeholder` or `dragging-item` slot, which manual assignment does not route. */
   private getSpecialChildren(name: string): Element[] {
-    return Array.from(this.children).filter((child) => child.slot === name)
+    return Array.from(this.children ?? []).filter((child) => child.slot === name)
   }
 
   private getAuthoredItems(): HTMLElement[] {
