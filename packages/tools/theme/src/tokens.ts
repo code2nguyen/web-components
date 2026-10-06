@@ -30,24 +30,24 @@ function token(name: string, category: TokenCategory, light: string | null, desc
 
 export const tokens: TokenDef[] = [
   // Colour roles
-  token('color-primary', 'color', '#0265dc', 'Accent colour: filled buttons, selected states, focused borders, links.', '#5aa3ff'),
-  token('color-primary-hover', 'color', '#0154b8', 'Accent colour on hover.', '#7bb6ff'),
-  token('color-primary-active', 'color', '#01469a', 'Accent colour while pressed.', '#9cc9ff'),
-  token('color-on-primary', 'color', '#ffffff', 'Text and icons drawn on the accent colour.', '#032a5c'),
-  token('color-primary-container', 'color', '#edf1fe', 'Soft accent surface, e.g. a selected list item.', '#0f2d5c'),
-  token('color-primary-glow', 'color', 'rgba(2, 101, 220, 0.2)', 'Accent tint for luminous borders and decorative glows.', 'rgba(90, 163, 255, 0.28)'),
-  token('color-surface', 'color', '#ffffff', 'Default surface of inputs, lists, cards, dialogs.', '#18181b'),
-  token('color-surface-container-low', 'color', '#fafafa', 'Slightly raised surface: side navigation, read-only fields, subtle hover.', '#1f1f23'),
-  token('color-surface-container', 'color', '#f4f4f5', 'Hover surface for rows and icon buttons.', '#27272a'),
-  token('color-on-surface', 'color', '#18181b', 'Primary text colour.', '#f4f4f5'),
-  token('color-on-surface-variant', 'color', '#71717a', 'Secondary text, placeholders, icons, supporting text.', '#a1a1aa'),
-  token('color-outline', 'color', '#d4d4d8', 'Resting border colour of inputs, cards and lists.', '#3f3f46'),
-  token('color-outline-variant', 'color', '#e4e4e7', 'Hairline dividers and light borders.', '#27272a'),
-  token('color-outline-strong', 'color', '#a1a1aa', 'Border colour on hover.', '#52525b'),
+  token('color-primary', 'color', '#0265dc', 'Accent colour: filled buttons, selected states, focused borders, links.', '#6ea8ff'),
+  token('color-primary-hover', 'color', '#0154b8', 'Accent colour on hover.', '#8cbaff'),
+  token('color-primary-active', 'color', '#01469a', 'Accent colour while pressed.', '#aacdff'),
+  token('color-on-primary', 'color', '#ffffff', 'Text and icons drawn on the accent colour.', '#04224f'),
+  token('color-primary-container', 'color', '#edf1fe', 'Soft accent surface, e.g. a selected list item.', '#16306a'),
+  token('color-primary-glow', 'color', 'rgba(2, 101, 220, 0.2)', 'Accent tint for luminous borders and decorative glows.', 'rgba(110, 168, 255, 0.3)'),
+  token('color-surface', 'color', '#ffffff', 'Default surface of inputs, lists, cards, dialogs.', '#121a2e'),
+  token('color-surface-container-low', 'color', '#fafafa', 'Slightly raised surface: side navigation, read-only fields, subtle hover.', '#161f37'),
+  token('color-surface-container', 'color', '#f4f4f5', 'Hover surface for rows and icon buttons.', '#1a2440'),
+  token('color-on-surface', 'color', '#18181b', 'Primary text colour.', '#e8ecf8'),
+  token('color-on-surface-variant', 'color', '#71717a', 'Secondary text, placeholders, icons, supporting text.', '#9aa6c4'),
+  token('color-outline', 'color', '#d4d4d8', 'Resting border colour of inputs, cards and lists.', '#2a3654'),
+  token('color-outline-variant', 'color', '#e4e4e7', 'Hairline dividers and light borders.', '#1e2943'),
+  token('color-outline-strong', 'color', '#a1a1aa', 'Border colour on hover.', '#3b4a70'),
   token('color-error', 'color', '#dc2626', 'Error borders, error text, required indicators.', '#f87171'),
-  token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(0, 0, 0, 0.6)'),
-  token('color-inverse-surface', 'color', '#18181b', 'High-contrast surface, e.g. tooltips.', '#f4f4f5'),
-  token('color-on-inverse-surface', 'color', '#fafafa', 'Text drawn on the inverse surface.', '#18181b'),
+  token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(3, 6, 18, 0.65)'),
+  token('color-inverse-surface', 'color', '#18181b', 'High-contrast surface, e.g. tooltips.', '#e8ecf8'),
+  token('color-on-inverse-surface', 'color', '#fafafa', 'Text drawn on the inverse surface.', '#121a2e'),
   // A dark block that stays dark in both themes (a terminal, a dark sidebar, an outgoing chat bubble): unlike the
   // inverse surface it does not flip, so it carries no dark value; a brand recolours it once for both themes.
   token('color-dark-surface', 'color', '#18181b', 'Surface of a block that is dark in both themes: terminals, dark sidebars, dark bubbles.'),
@@ -79,7 +79,7 @@ export const tokens: TokenDef[] = [
   token('border-width', 'border', '1px', 'Width of every themed border.'),
   token('border', 'border', null, 'Complete resting border shorthand. Unset by default: it falls back to `border-width solid color-outline`.'),
   // Interaction
-  token('focus-ring', 'focus', '2px solid rgba(2, 101, 220, 0.4)', 'Focus-visible outline of every component.', '2px solid rgba(90, 163, 255, 0.5)'),
+  token('focus-ring', 'focus', '2px solid rgba(2, 101, 220, 0.4)', 'Focus-visible outline of every component.', '2px solid rgba(110, 168, 255, 0.55)'),
   token('disabled-opacity', 'disabled', '0.38', 'Opacity of disabled components.'),
   token('motion-scale', 'motion', '1', 'Multiplier applied to every transition and animation duration (0 disables motion).'),
   // Elevation
@@ -96,14 +96,14 @@ export const tokens: TokenDef[] = [
   // Slots 1-4 are the Okabe-Ito core and stay distinguishable under protanopia, deuteranopia and tritanopia;
   // 5-7 add hue and lightness separation, and slot 8 is neutral grey, which no colour deficiency collapses
   // into a chromatic slot. Past four series, label the marks directly rather than relying on hue alone.
-  token('chart-series-1', 'chart', '#0265dc', 'First categorical series. Matches the accent, so a single-series chart reads as brand.', '#5aa3ff'),
+  token('chart-series-1', 'chart', '#0265dc', 'First categorical series. Matches the accent, so a single-series chart reads as brand.', '#6ea8ff'),
   token('chart-series-2', 'chart', '#ea580c', 'Second categorical series: orange, the Okabe-Ito counterpart to the blue.', '#fb923c'),
   token('chart-series-3', 'chart', '#0f766e', 'Third categorical series: teal.', '#2dd4bf'),
   token('chart-series-4', 'chart', '#db2777', 'Fourth categorical series: pink.', '#f472b6'),
   token('chart-series-5', 'chart', '#a16207', 'Fifth categorical series: gold, dark enough not to collapse into the orange.', '#fbbf24'),
   token('chart-series-6', 'chart', '#7c3aed', 'Sixth categorical series: violet.', '#a78bfa'),
   token('chart-series-7', 'chart', '#0891b2', 'Seventh categorical series: cyan.', '#22d3ee'),
-  token('chart-series-8', 'chart', '#52525b', 'Eighth categorical series: neutral grey, for an "other" or residual bucket.', '#a1a1aa'),
+  token('chart-series-8', 'chart', '#52525b', 'Eighth categorical series: neutral grey, for an "other" or residual bucket.', '#9aa6c4'),
   token(
     'chart-positive',
     'chart',

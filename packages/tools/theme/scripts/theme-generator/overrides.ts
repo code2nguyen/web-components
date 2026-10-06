@@ -585,7 +585,7 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
   // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
   // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
-  // dimmed rules, brighter inks) under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there. under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
   // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
   '--c2-notepad__sheet--background': {
     token: 'color-surface',
@@ -595,8 +595,16 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, #2f4fb0)',
   },
-  '--c2-notepad__rule--color': { token: 'color-surface', value: 'color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff))' },
-  '--c2-notepad__margin--color': { token: 'color-surface', value: 'color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__rule--color': {
+    token: 'color-surface',
+    value:
+      'light-dark(color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, #8fb0dc 22%, var(--c2-theme--color-surface, #ffffff)))',
+  },
+  '--c2-notepad__margin--color': {
+    token: 'color-surface',
+    value:
+      'light-dark(color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, #d9534f 32%, var(--c2-theme--color-surface, #ffffff)))',
+  },
   '--c2-notepad__ink-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #3b5bdb 70%, var(--c2-theme--color-on-surface, #18181b))' },
   '--c2-notepad__ink-red--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #e03131 70%, var(--c2-theme--color-on-surface, #18181b))' },
   '--c2-notepad__ink-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #2f9e44 70%, var(--c2-theme--color-on-surface, #18181b))' },

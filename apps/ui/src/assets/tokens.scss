@@ -56,36 +56,36 @@
   color-scheme: dark;
   // Categorical series of charts and the todo list's pens: @c2n/theme's dark ramp, lighter so it reads on the dark
   // surface. Light mode keeps the component defaults (the fallbacks in c2-theme.scss).
-  --site-chart-series-1: #5aa3ff;
+  --site-chart-series-1: #6ea8ff;
   --site-chart-series-2: #fb923c;
   --site-chart-series-3: #2dd4bf;
   --site-chart-series-4: #f472b6;
   --site-chart-series-5: #fbbf24;
   --site-chart-series-6: #a78bfa;
   --site-chart-series-7: #22d3ee;
-  --site-chart-series-8: #a1a1aa;
+  --site-chart-series-8: #9aa6c4;
   --site-chart-positive: #4ade80;
   --site-chart-negative: #f87171;
-  --site-color-primary-glow: rgba(96, 165, 250, 0.28);
+  --site-color-primary-glow: rgba(110, 168, 255, 0.3);
 
-  --site-color-surface: #09090b;
-  --site-color-surface-container-1: #101012;
-  --site-color-surface-container-2: #151518;
-  --site-color-surface-container-3: #1b1b1f;
-  --site-color-surface-container-4: #222226;
-  --site-color-surface-container-5: #2a2a2f;
-  --site-color-on-surface: #f4f4f5;
-  --site-color-on-surface-variant: #a1a1aa;
-  --site-color-on-surface-muted: #8e8e97;
+  --site-color-surface: #0b1020;
+  --site-color-surface-container-1: #0f1528;
+  --site-color-surface-container-2: #131a30;
+  --site-color-surface-container-3: #172038;
+  --site-color-surface-container-4: #1c2642;
+  --site-color-surface-container-5: #222d4c;
+  --site-color-on-surface: #e8ecf8;
+  --site-color-on-surface-variant: #9aa6c4;
+  --site-color-on-surface-muted: #8792b3;
 
-  --site-color-primary: #60a5fa;
-  --site-color-on-primary: #0b1a3a;
-  --site-color-primary-container: #172a61;
+  --site-color-primary: #6ea8ff;
+  --site-color-on-primary: #04224f;
+  --site-color-primary-container: #16306a;
   --site-color-on-primary-container: #dbeafe;
-  --site-color-primary-soft: rgba(96, 165, 250, 0.12);
+  --site-color-primary-soft: rgba(110, 168, 255, 0.12);
 
-  --site-color-secondary: #60a5fa;
-  --site-color-on-secondary: #0b1a3a;
+  --site-color-secondary: #6ea8ff;
+  --site-color-on-secondary: #04224f;
   --site-color-secondary-container: #1e3a8a;
   --site-color-on-secondary-container: #dbeafe;
 
@@ -99,20 +99,20 @@
   --site-color-warning-container: #78350f;
   --site-color-on-warning-container: #fef3c7;
 
-  --site-color-outline: #3f3f46;
-  --site-color-outline-variant: #27272a;
+  --site-color-outline: #2a3654;
+  --site-color-outline-variant: #1c2642;
 
   --site-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
   --site-elevation-2: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4);
   --site-elevation-3: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.5);
 
-  --site-color-scrim: rgba(0, 0, 0, 0.6);
-  --site-canvas-dot: rgba(244, 244, 245, 0.12);
+  --site-color-scrim: rgba(3, 6, 18, 0.65);
+  --site-canvas-dot: rgba(232, 236, 248, 0.1);
 
-  --mio-theme-color-code-comment-color: #71717a;
-  --mio-theme-color-iframe-background: #09090b;
-  --mio-theme-color-utility-list-hover: rgba(244, 244, 245, 0.06);
-  --mio-theme-color-utility-list-active: rgba(244, 244, 245, 0.1);
+  --mio-theme-color-code-comment-color: #6b7799;
+  --mio-theme-color-iframe-background: #0b1020;
+  --mio-theme-color-utility-list-hover: rgba(232, 236, 248, 0.06);
+  --mio-theme-color-utility-list-active: rgba(232, 236, 248, 0.1);
 }
 
 :root {
