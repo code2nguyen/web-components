@@ -34,15 +34,43 @@ function json(value: unknown) {
 
 /**
  * `json()` for a result whose `items` may be long: drops trailing items until the document fits, rather than cutting
- * the text (which leaves JSON no client can parse), and says how many there were.
+ * the text (which leaves JSON no client can parse), and says how many there were. An array in `rest` (validate_markup's
+ * `elements`) is shortened the same way, the longer list first, and reported under `truncatedLists`.
  */
 export function jsonList<T>(key: string, items: T[], rest: Record<string, unknown> = {}, max = JSON_MAX_CHARS) {
-  let kept = items
-  const render = () =>
-    JSON.stringify({ [key]: kept, ...rest, ...(kept.length < items.length ? { truncated: true, total: items.length, shown: kept.length } : {}) }, null, 2)
+  const lists: Record<string, unknown[]> = { [key]: items }
+  for (const [name, value] of Object.entries(rest)) if (Array.isArray(value)) lists[name] = value
+  const kept: Record<string, unknown[]> = { ...lists }
+  const render = () => {
+    const cut = Object.keys(lists).filter((name) => name !== key && kept[name].length < lists[name].length)
+    return JSON.stringify(
+      {
+        [key]: kept[key],
+        ...rest,
+        ...Object.fromEntries(
+          Object.keys(lists)
+            .filter((name) => name !== key)
+            .map((name) => [name, kept[name]]),
+        ),
+        ...(kept[key].length < items.length ? { truncated: true, total: items.length, shown: kept[key].length } : {}),
+        ...(cut.length
+          ? { truncated: true, truncatedLists: Object.fromEntries(cut.map((name) => [name, { total: lists[name].length, shown: kept[name].length }])) }
+          : {}),
+      },
+      null,
+      2,
+    )
+  }
   let out = render()
-  while (out.length > max && kept.length) {
-    kept = kept.slice(0, Math.floor((kept.length * max * 0.9) / out.length))
+  while (out.length > max) {
+    // Shorten whichever list takes the most room.
+    const [name] =
+      Object.entries(kept)
+        .filter(([, list]) => list.length)
+        .map(([name, list]) => [name, JSON.stringify(list).length] as const)
+        .sort((a, b) => b[1] - a[1])[0] ?? []
+    if (!name) break
+    kept[name] = kept[name].slice(0, Math.floor((kept[name].length * max * 0.9) / out.length))
     out = render()
   }
   return { content: [{ type: 'text' as const, text: out }] }

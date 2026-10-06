@@ -169,16 +169,31 @@ export function withInstalledApi(registry: Registry): Registry {
       for (const element of component.elements) if (!installed.has(element.tag) && tagIndex[element.tag] === id) delete tagIndex[element.tag]
       // An element the installed version added: one the package's manifest declares and the registry does not know.
       // Ownership comes from the manifest, not the tag, since a package may hold several families (`c2-line-chart`,
-      // `c2-chart-series`); of the pages documenting one package, the one representing it takes the new tags.
-      const representative = (registry.packageIndex[component.package] ?? id) === id
+      // `c2-chart-series`); of the pages documenting one package, the new tag goes to the one it extends.
       for (const [tag, api] of installed) {
-        if (!representative || own.has(tag) || tagIndex[tag] || !info.owned?.has(tag) || !component.elements.length) continue
+        if (own.has(tag) || tagIndex[tag] || !info.owned?.has(tag) || pageForNewTag(registry, component.package, tag) !== id) continue
         // The package entry registers every element of the package; one element's own module may not.
-        elements.push({ ...api, tag, modulePath: component.install.umbrella ?? component.elements[0].modulePath, description: '' })
+        elements.push({ ...api, tag, modulePath: component.install.umbrella ?? component.elements[0]?.modulePath ?? component.package, description: '' })
         tagIndex[tag] = id
       }
       return [id, { ...component, elements: elements.length ? elements : component.elements }]
     }),
   )
   return { ...registry, components, tagIndex }
+}
+
+/**
+ * The page of `pkg` a tag its installed version added belongs to: the page with an element whose tag is the longest
+ * prefix of it (`c2-bar-chart-foo` extends `c2-bar-chart`), else the page representing the package.
+ */
+function pageForNewTag(registry: Registry, pkg: string, tag: string): string | undefined {
+  const pages = Object.values(registry.components).filter((c) => c.package === pkg && !c.tagPattern)
+  let best: { id: string; length: number } | undefined
+  for (const page of pages) {
+    for (const element of page.elements) {
+      if (tag.startsWith(`${element.tag}-`) && element.tag.length > (best?.length ?? 0)) best = { id: page.id, length: element.tag.length }
+    }
+  }
+  const representative = registry.packageIndex[pkg]
+  return best?.id ?? (pages.some((p) => p.id === representative) ? representative : pages[0]?.id)
 }

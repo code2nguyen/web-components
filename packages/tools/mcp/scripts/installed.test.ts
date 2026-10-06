@@ -115,3 +115,26 @@ test('through the umbrella, a package owns only the tags of its own modules in t
     false,
   )
 })
+
+test('a new tag extending one page family goes to that page, not to the package representative', () => {
+  const root = project(
+    { '@c2n/chart': '*' },
+    {
+      '@c2n/chart': {
+        modules: [{ path: 'src/chart.ts', tags: ['c2-line-chart', 'c2-chart-series', 'c2-bar-chart', 'c2-bar-chart-stack', 'c2-line-chart-marker'] }],
+      },
+    },
+  )
+  const result = withProject(root, () => withInstalledApi(registry))
+  assert.equal(result.tagIndex['c2-bar-chart-stack'], 'bar-chart')
+  assert.equal(result.tagIndex['c2-line-chart-marker'], 'line-chart')
+  assert.deepEqual(
+    result.components['bar-chart'].elements.map((e) => e.tag),
+    ['c2-bar-chart', 'c2-bar-chart-stack'],
+  )
+  assert.equal(result.components['bar-chart'].elements[1].modulePath, '@c2n/components/chart')
+  assert.equal(
+    result.components['line-chart'].elements.some((e) => e.tag === 'c2-bar-chart-stack'),
+    false,
+  )
+})

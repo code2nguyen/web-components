@@ -339,7 +339,12 @@ function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed
       i = stop - 1
     }
   }
-  const scriptComments = (from: number, to: number) => {
+  /**
+   * Blanks the comments of the script between `from` and `to`. With `expression`, `from` is just after a `{` and the
+   * scan stops at its matching `}`, returning the index after it.
+   */
+  const scriptComments = (from: number, to: number, expression = false): number => {
+    let depth = 0
     for (let i = from; i < to; i++) {
       const c = source[i]
       if (c === '"' || c === "'") {
@@ -355,8 +360,10 @@ function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed
         const stop = end < 0 || end + 2 > to ? to : end + 2
         blank(i, stop)
         i = stop - 1
-      }
+      } else if (expression && c === '{') depth++
+      else if (expression && c === '}' && depth-- === 0) return i + 1
     }
+    return to
   }
   if (kind === 'css') blockComments('/*', '*/')
   else if (kind === 'script') scriptComments(0, source.length)
@@ -366,7 +373,15 @@ function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed
     if (kind === 'mixed') {
       const frontmatter = /^---\r?\n[\s\S]*?\n---/.exec(source)
       if (frontmatter) scriptComments(3, frontmatter[0].length - 3)
-      for (const m of source.matchAll(/\{\s*(\/\*[\s\S]*?\*\/)\s*\}/g)) blank(m.index + m[0].indexOf('/*'), m.index + m[0].indexOf('/*') + m[1].length)
+      // Expressions in the markup (`{/* note */}`, `{ /* <button> */ value }`, Vue's `{{ … }}`), outside the `<script>`
+      // and `<style>` blocks, the frontmatter and the HTML comments already blanked.
+      const skipped = [...source.matchAll(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/g)].map((m) => [m.index, m.index + m[0].length])
+      if (frontmatter) skipped.push([0, frontmatter[0].length])
+      for (let i = 0; i < source.length; i++) {
+        const block = skipped.find(([from, to]) => i >= from && i < to)
+        if (block) i = block[1] - 1
+        else if (source[i] === '{' && out[i] === '{') i = scriptComments(i + 1, source.length, true) - 1
+      }
     }
   }
   // `/* */` inside a `<style>` block or a Lit `css` template is CSS, whichever kind of file holds it.
@@ -556,7 +571,10 @@ function ignoredLines(source: string, masked: string, starts: number[]): Set<num
     const opener = /(<!--|\/\*|\/\/)/.exec(source.slice(lineStart, m.index))
     const inComment = masked.slice(m.index, m.index + 10) !== 'c2n-ignore'
     if (!opener && !inComment) continue
-    // The comment around the marker: the nearest opener not closed before it, up to its closer on any later line.
+    // The comment around the marker: an opener not closed before it, up to its closer on any later line. When the
+    // masking blanked the marker, the opener is the earliest blanked one, since an opener inside a comment (the `//`
+    // of a URL in `/* … */`) is text; otherwise it is the nearest one on the marker's line.
+    const blanked = (index: number) => masked[index] !== source[index]
     const comment = [
       { opener: '<!--', closer: '-->' },
       { opener: '/*', closer: '*/' },
@@ -564,18 +582,17 @@ function ignoredLines(source: string, masked: string, starts: number[]): Set<num
     ]
       .map(({ opener, closer }) => ({ open: source.lastIndexOf(opener, m.index), closer }))
       .filter(({ open, closer }) => open >= 0 && (closer === '\n' ? open >= lineStart : !source.slice(open, m.index).includes(closer)))
-      .sort((x, y) => y.open - x.open)[0]
+      .filter(({ open }) => !inComment || blanked(open))
+      .sort((x, y) => (inComment ? x.open - y.open : y.open - x.open))[0]
     const open = comment?.open ?? m.index
     const found = comment ? source.indexOf(comment.closer, m.index) : -1
     const close = found < 0 ? (comment?.closer === '\n' ? source.length : m.index) : comment?.closer === '\n' ? found : found + (comment?.closer.length ?? 0)
-    const first = position(starts, open).line
+    // The marker covers its own line through the end of the comment, not the code before a comment opened on an earlier line.
     const last = position(starts, close).line
-    for (let l = Math.min(first, line); l <= Math.max(last, line); l++) ignored.add(l)
+    for (let l = line; l <= Math.max(last, line); l++) ignored.add(l)
     // A comment on lines of its own covers the next line; one after (or before) an element covers only its own lines.
-    const around = (source.slice(starts[first - 1], Math.max(open, starts[first - 1])) + source.slice(close, starts[last] ?? source.length)).replace(
-      /\{\s*\}/g,
-      '',
-    )
+    const before = position(starts, open).line === line ? source.slice(lineStart, Math.max(open, lineStart)) : ''
+    const around = (before + source.slice(close, starts[last] ?? source.length)).replace(/\{\s*\}/g, '')
     if (!/<(?!!--)[a-zA-Z]/.test(around)) ignored.add(last + 1)
   }
   return ignored

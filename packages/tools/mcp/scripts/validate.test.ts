@@ -252,6 +252,14 @@ test('skips CSS comments in a <style> block and a css template', () => {
 test('a c2n-ignore on a continuation line of a multi-line comment counts', () => {
   assert.deepEqual(rules('<!--\n  deliberate: c2n-ignore\n-->\n<button>a</button>\n<button>b</button>'), ['5:native-element'])
   assert.deepEqual(rules('/*\n * c2n-ignore\n */\nconst a = html`<button>a</button>`\nconst b = html`<button>b</button>`', 'a.ts'), ['5:native-element'])
+
+  // The marker covers its own line onward, not code before a comment that opened on an earlier line.
+  assert.deepEqual(rules('<button>a</button> <!--\n  c2n-ignore\n-->\n<button>b</button>'), ['1:native-element'])
+  // A `//` inside the enclosing block comment does not end it early.
+  assert.deepEqual(rules('/* see https://example.com c2n-ignore\n */\nconst a = html`<button>a</button>`\nconst b = html`<button>b</button>`', 'a.ts'), [
+    '4:native-element',
+  ])
+  assert.deepEqual(rules('<!-- https://example.com c2n-ignore\n-->\n<button>a</button>\n<button>b</button>'), ['4:native-element'])
 })
 
 test('masks script comments in Vue, Svelte, Astro and MDX, and keeps HTML comments masked', () => {
@@ -264,6 +272,17 @@ test('masks script comments in Vue, Svelte, Astro and MDX, and keeps HTML commen
   assert.deepEqual(rules('{/* <c2-buton varient="x"> */}\n<button>z</button>', 'a.mdx'), ['2:native-element'])
   // Prose with `//` or `/*` in markup is not a comment.
   assert.deepEqual(rules('See https://example.com and src/**/*.ts <button>z</button>', 'a.svelte'), ['1:native-element'])
+  assert.deepEqual(rules('<script>// <c2-buton></script><button>z</button>', 'a.svelte'), ['1:native-element'])
+})
+
+test('masks comments inside markup expressions, next to code', () => {
+  assert.deepEqual(rules('<p>{ /* <button> */ value }</p>\n<button>z</button>', 'a.svelte'), ['2:native-element'])
+  assert.deepEqual(rules('{items.map((i) => /* <c2-buton> */ i)}\n{a // <button>\n}', 'a.mdx'), [])
+  assert.deepEqual(rules('<p>{{ value /* <button> */ }}</p>', 'a.vue'), [])
+  // A string in the expression is not a comment, nor is markup after the expression closes.
+  assert.deepEqual(rules('{ "/*" } <button>z</button> { "*/" }', 'a.svelte'), ['1:native-element'])
+  // `//` in a `<style>` block is CSS, not a script comment.
+  assert.deepEqual(rules('<style>.a { background: url(https://x.test/a.png); --c2-buttn--x: 1px }</style>', 'a.svelte'), ['1:unknown-css-variable'])
 })
 
 test('reads an uppercase STYLE attribute as the inline style', () => {
@@ -284,4 +303,22 @@ test('a long JSON result drops findings rather than cutting the document', () =>
   assert.equal(parsed.total, 2000)
   assert.equal(parsed.shown, parsed.findings.length)
   assert.equal(JSON.parse(jsonList('findings', findings.slice(0, 2)).content[0].text).truncated, undefined)
+})
+
+test('a long JSON result also shortens a long elements list, and says so', () => {
+  const findings = [{ line: 1, message: 'x' }]
+  const elements = Array.from({ length: 2000 }, (_, i) => ({ tag: `c2-el-${i}`, modulePath: `@c2n/components/el-${i}` }))
+  const text = jsonList('findings', findings, { elements }, 10_000).content[0].text
+  assert.ok(text.length <= 10_000)
+  const parsed = JSON.parse(text) as {
+    findings: unknown[]
+    elements: unknown[]
+    truncated: boolean
+    total?: number
+    truncatedLists: Record<string, { total: number; shown: number }>
+  }
+  assert.equal(parsed.findings.length, 1)
+  assert.equal(parsed.total, undefined)
+  assert.equal(parsed.truncated, true)
+  assert.deepEqual(parsed.truncatedLists.elements, { total: 2000, shown: parsed.elements.length })
 })
