@@ -118,3 +118,14 @@ test('tone selects the colour pair, and the background variable overrides it', a
   await host.evaluate((element) => element.style.setProperty('--c2-indicator--background', 'rgb(1, 2, 3)'))
   await expect(indicator(host)).toHaveCSS('background-color', 'rgb(1, 2, 3)')
 })
+
+test('a negative or non-numeric count hides the indicator instead of showing it verbatim or as a dot', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-indicator count="-3" accessible-label="{count} unread"><span class="target">Inbox</span></c2-indicator>')
+  const host = page.locator('c2-indicator')
+  await expect(indicator(host)).toBeHidden()
+  await expect(host.locator('.visually-hidden')).toHaveCount(0)
+  await props(host, { count: Number.NaN })
+  await expect(indicator(host)).toBeHidden()
+  await props(host, { count: 2 })
+  await expect(indicator(host)).toHaveText('2')
+})

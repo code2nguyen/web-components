@@ -136,6 +136,8 @@ slot[name='label'][hidden] {
   inset: 0;
   border-radius: inherit;
   background: inherit;
+  // Behind the count or label: the indicator is a stacking context, so -1 still paints above its own background.
+  z-index: -1;
   animation: c2-indicator-pulse css.cssVar(pulse--animation-duration) cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -235,6 +237,6 @@ $_half-x-neg: calc(-50% * var(--_dir));
   }
 
   .c2-indicator.is-pulse::after {
-    animation: none;
+    display: none;
   }
 }

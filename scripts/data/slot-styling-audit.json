@@ -1058,7 +1058,20 @@
       "tag": "c2-indicator",
       "slot": "label",
       "decision": "variables",
-      "variables": ["--c2-indicator__icon--size"],
+      "variables": [
+        "--c2-indicator__icon--size",
+        "--c2-indicator--color",
+        "--c2-indicator__neutral--color",
+        "--c2-indicator__primary--color",
+        "--c2-indicator__success--color",
+        "--c2-indicator__warning--color",
+        "--c2-indicator__danger--color",
+        "--c2-indicator__info--color",
+        "--c2-indicator--font-family",
+        "--c2-indicator--font-size",
+        "--c2-indicator--font-weight",
+        "--c2-indicator--line-height"
+      ],
       "reason": "Slotted text inherits the indicator's tone colour and typography variables; a slotted SVG icon is sized by the icon size variable."
     },
     {

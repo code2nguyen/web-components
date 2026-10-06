@@ -368,9 +368,10 @@ export const overrides: Record<string, Override> = {
   '--c2-badge__info--color': { exclude: 'status colour' },
   // Indicator tones are solid fills chosen against their text, readable on a light and a dark page alike. Only the
   // primary pair follows the theme (accent + on-primary flip together); the error token lightens in a dark theme,
-  // where white text on it falls below 3:1, and the warning text must stay dark on amber.
+  // where white text on it falls below 3:1, and the warning text must stay dark on amber. The saturated status fills
+  // take `color-on-fill`; the neutral grey is not one, so its pair stays literal.
   '--c2-indicator__neutral--background': { exclude: 'solid status fill' },
-  '--c2-indicator__neutral--color': { token: 'color-on-fill' },
+  '--c2-indicator__neutral--color': { exclude: 'white text on a fixed neutral fill' },
   '--c2-indicator__success--background': { exclude: 'solid status fill' },
   '--c2-indicator__success--color': { token: 'color-on-fill' },
   '--c2-indicator__warning--background': { exclude: 'solid status fill' },

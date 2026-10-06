@@ -1290,7 +1290,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
   'c2-indicator': {
     html: `<c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>`,
     presets: [
-      { name: 'Round target', css: { '--c2-indicator--offset-x': '14.6%', '--c2-indicator--offset-y': '14.6%' } },
+      { name: 'No ring', css: { '--c2-indicator--border': 'none' } },
       {
         name: 'Squared counter',
         css: {

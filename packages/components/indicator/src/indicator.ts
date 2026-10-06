@@ -101,15 +101,23 @@ export class Indicator extends LitElement {
 
   private readonly slotPresence = new SlotPresenceController(this, ['label'])
 
-  /** Text shown for `count`, clamped at `max`. Empty without a count. */
-  get displayCount(): string {
-    if (this.count === undefined || Number.isNaN(this.count)) return ''
-    return this.count > this.max ? `${this.max}+` : String(this.count)
+  /** Whether `count` holds a number the indicator can display: finite and not negative. */
+  private get validCount(): boolean {
+    return this.count !== undefined && Number.isFinite(this.count) && this.count >= 0
   }
 
-  /** Whether the indicator is currently shown. */
+  /** Text shown for `count`, clamped at `max`. Empty without a valid count. */
+  get displayCount(): string {
+    if (!this.validCount) return ''
+    const count = this.count as number
+    return count > this.max ? `${this.max}+` : String(count)
+  }
+
+  /** Whether the indicator is currently shown. A negative or non-numeric `count` hides it, as `0` does without `show-zero`. */
   get shown(): boolean {
     if (this.invisible) return false
+    if (this.count === undefined) return true
+    if (!this.validCount) return false
     return this.count !== 0 || this.showZero
   }
 
@@ -117,8 +125,9 @@ export class Indicator extends LitElement {
     return this.displayCount !== ''
   }
 
+  // Only known label content turns the dot into a pill: on the server the slot is `unknown`, and a dot is the common case.
   private get isDot(): boolean {
-    return !this.hasCount && !this.slotPresence.has('label')
+    return !this.hasCount && this.slotPresence.state('label') !== 'present'
   }
 
   override render() {
