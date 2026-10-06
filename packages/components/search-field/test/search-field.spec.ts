@@ -182,6 +182,14 @@ test('the recent-searches Clear button is reachable from the keyboard', async ({
   await expect(clear).toBeFocused()
   // Focus on the button keeps the panel open.
   await expect(page.getByRole('option')).toHaveCount(2)
+  // Escape there closes the panel and returns to the field.
+  await page.keyboard.press('Escape')
+  await expect(input).toBeFocused()
+  await expect(input).toHaveAttribute('aria-expanded', 'false')
+  await page.keyboard.press('ArrowDown')
+  await expect(input).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Tab')
+  await expect(clear).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('option')).toHaveCount(0)
   // With no recent searches left the field is a plain searchbox again.

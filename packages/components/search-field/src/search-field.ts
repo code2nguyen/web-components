@@ -462,8 +462,9 @@ export class SearchField extends LitElement {
   private handlePanelKeydown(event: KeyboardEvent) {
     if (event.key !== 'Escape') return
     event.preventDefault()
-    this.dismissed = true
+    // Focusing the input runs handleFocusin, which reopens the panel: dismiss after it.
     this.input?.focus()
+    this.dismissed = true
   }
 
   private handleClearRecentClick() {
