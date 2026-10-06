@@ -17,6 +17,22 @@
     </style>
     <script type="module">
       import '../src/breadcrumb.ts'
+      import { html, render } from 'lit'
+      import { assignSlot } from '@c2n/core/lit-helper.js'
+      // Renders `assignSlot()` on an element that is not a <slot>, inside a manual-assignment shadow root.
+      window.__assignSlotOnNonSlot = () => {
+        const host = document.createElement('div')
+        document.body.append(host)
+        const root = host.attachShadow({ mode: 'open', slotAssignment: 'manual' })
+        try {
+          render(html`<div ${assignSlot([])}></div>`, root)
+          return 'no error'
+        } catch (error) {
+          return error instanceof Error ? error.message : String(error)
+        } finally {
+          host.remove()
+        }
+      }
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

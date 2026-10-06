@@ -11,7 +11,7 @@ if (args[0] === 'validate') {
   process.exitCode = await runValidate(args.slice(1))
 } else if (args.includes('--help') || args.includes('-h')) {
   console.log(
-    'c2n-mcp — c2n web-component documentation and generation tools over stdio\n\nUsage: c2n-mcp [--help] [--version]\n       c2n-mcp validate [paths…] [--strict] [--format json] [--hook]',
+    'c2n-mcp — c2n web-component documentation and generation tools over stdio\n\nUsage: c2n-mcp [--help] [--version]\n       c2n-mcp validate [paths…] [--strict] [--format json|text] [--hook]',
   )
 } else if (args.includes('--version') || args.includes('-v')) {
   const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string }

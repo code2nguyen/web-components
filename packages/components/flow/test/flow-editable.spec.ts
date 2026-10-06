@@ -816,6 +816,39 @@ test.describe('actions', () => {
     await expect(node(page, 'new-4')).toHaveCount(0)
   })
 
+  test('dragNewNode(): canvas beside the toolbar, in its band along the edge, still takes a drop', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      const button = element.querySelector('button')!
+      button.addEventListener('pointerdown', (event) => element.dragNewNode(event))
+    })
+    const ghost = page.locator('c2-flow .ghost')
+    const button = await center(page.getByRole('button', { name: 'Add node' }))
+    const stage = (await page.locator('c2-flow .stage').boundingBox())!
+    const toolbar = (await page.getByRole('button', { name: 'Fit' }).boundingBox())!
+    // Level with the buttons, well to the right of the last one: inside the toolbar's strip, outside its panel.
+    const drop = { x: stage.x + stage.width - 60, y: button.y }
+    expect(drop.x).toBeGreaterThan(toolbar.x + toolbar.width + 40)
+
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(drop.x, drop.y, { steps: 8 })
+    await expect(ghost).toBeVisible()
+    await page.mouse.up()
+    expect(await recorded(page, 'node-add')).toHaveLength(1)
+    await expect(node(page, 'new-1')).toBeVisible()
+
+    // Released over the panel itself, away from the button, it still cancels.
+    const fit = await center(page.getByRole('button', { name: 'Fit' }))
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(fit.x, fit.y, { steps: 8 })
+    await expect(ghost).toHaveCount(0)
+    await page.mouse.up()
+    expect(await recorded(page, 'node-add')).toHaveLength(1)
+  })
+
   test('addNode() from the toolbar goes beside the node the keyboard was on, even though the button took focus', async ({ page, renderScenario }) => {
     await renderScenario(withActions('editable'))
     await wire(page)
@@ -832,12 +865,31 @@ test.describe('actions', () => {
     expect(positions['new-1'].x).toBe(positions.review.x)
     expect(positions['new-1'].y).toBeGreaterThan(positions.review.y)
 
-    // Once focus has left the flow, the next add goes to the middle of the view again.
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
-    await page.locator('body').click({ position: { x: 2, y: 2 } })
+    // Pan the nodes up out of the middle, so the middle of the view is empty canvas: a node placed there stays put
+    // instead of being pushed aside by the overlap check, by a distance that depends on the browser's text metrics.
+    const view = (await page.locator('c2-flow .stage').boundingBox())!
+    await page.mouse.move(view.x + 24, view.y + view.height - 24)
+    await page.mouse.down()
+    await page.mouse.move(view.x + 24, view.y + view.height * 0.4, { steps: 8 })
+    await page.mouse.up()
+    // The added node is selected, and `addNode()` connects after a selection: a click on empty canvas clears it.
+    await page.mouse.click(view.x + 24, view.y + view.height - 24)
+    await expect(host(page)).toHaveJSProperty('selected', null)
+    // Focus leaves the flow for a control outside it (the added node had taken it): the next add goes to the middle
+    // of the view again. A click on bare page does not move focus in every browser, so use a focusable target.
+    await page.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<button id="outside">Outside</button>'))
+    await page.locator('#outside').click()
+    await expect(page.locator('#outside')).toBeFocused()
+    expect(await host(page).evaluate((element: Flow) => element.shadowRoot!.activeElement)).toBeNull()
     await page.getByRole('button', { name: 'Add node' }).click()
     await expect(node(page, 'new-2')).toBeVisible()
-    expect((await layout(page))['new-2'].x).not.toBe(positions.review.x)
+    const added = await center(node(page, 'new-2'))
+    const review = await center(node(page, 'review'))
+    const middle = { x: view.x + view.width / 2, y: view.y + view.height / 2 }
+    expect(Math.abs(added.x - middle.x)).toBeLessThan(view.width / 8)
+    expect(Math.abs(added.y - middle.y)).toBeLessThan(view.height / 8)
+    // Beside `review` would be just below it, now near the top of the view.
+    expect(added.y - review.y).toBeGreaterThan(view.height / 4)
   })
 
   test('no-double-click-add: double-clicking empty canvas adds nothing, N and addNode() still do', async ({ page, renderScenario }) => {

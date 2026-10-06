@@ -66,3 +66,30 @@ test('a child that gains slot="separator" later becomes the separator', async ({
   await expect(page.locator('c2-breadcrumb [part="separator"]')).toHaveCount(3)
   await expect(page.locator('c2-breadcrumb [part="separator"]').first()).toHaveText('/')
 })
+test('a mutation inside an item does not reassign the trail', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb>${items}</c2-breadcrumb>`)
+  const calls = await page.locator('c2-breadcrumb').evaluate(async (element) => {
+    let count = 0
+    const trail = element as unknown as { assignItems(): void }
+    const original = trail.assignItems.bind(trail)
+    trail.assignItems = () => {
+      count++
+      original()
+    }
+    const item = element.querySelector('c2-link-button')!
+    item.append(document.createElement('span'))
+    item.setAttribute('data-x', '1')
+    item.firstElementChild?.setAttribute('slot', 'icon')
+    await new Promise((resolve) => setTimeout(resolve))
+    const inner = count
+    element.append(document.createElement('c2-link-button'))
+    await new Promise((resolve) => setTimeout(resolve))
+    return { inner, direct: count }
+  })
+  expect(calls).toEqual({ inner: 0, direct: 1 })
+})
+test('assignSlot() on an element that is not a <slot> throws its documented error', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-breadcrumb>${items}</c2-breadcrumb>`)
+  const message = await page.evaluate(() => (window as unknown as { __assignSlotOnNonSlot(): string }).__assignSlotOnNonSlot())
+  expect(message).toBe('assignSlot() must be placed on a <slot> element.')
+})

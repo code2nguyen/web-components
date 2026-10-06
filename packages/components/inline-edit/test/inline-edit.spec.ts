@@ -300,3 +300,136 @@ test('a slotted c2-select commits on pick and the read view shows the option lab
   await expect(host).toHaveJSProperty('value', 'doing')
   await expect(host).not.toHaveState('editing')
 })
+
+test('a disabled property leaves the value out of the form and skips required validation', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-inline-edit label="Project name" name="project" required></c2-inline-edit></form>')
+  const host = page.locator('c2-inline-edit')
+  const read = () => page.locator('form').evaluate((form) => [new FormData(form as HTMLFormElement).has('project'), (form as HTMLFormElement).checkValidity()])
+  expect(await read()).toEqual([true, false])
+  await props(host, { disabled: true })
+  expect(await read()).toEqual([false, true])
+})
+
+test('removing its own disabled attribute inside a disabled fieldset keeps it disabled', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><fieldset disabled>${field('name="project" disabled')}</fieldset></form>`)
+  const host = page.locator('c2-inline-edit')
+  await host.evaluate((element) => element.removeAttribute('disabled'))
+  await expect(host).toHaveState('disabled')
+  await expect(page.getByRole('button', { name: 'Project name: Apollo' })).toBeDisabled()
+})
+
+test('disabling a refused draft clears the invalid state', async ({ page, renderScenario }) => {
+  await renderScenario(field('required'))
+  const host = page.locator('c2-inline-edit')
+  await page.getByRole('button', { name: 'Project name: Apollo' }).click()
+  await page.keyboard.press('Backspace')
+  await page.keyboard.press('Enter')
+  await expect(host).toHaveState('invalid')
+  await props(host, { disabled: true })
+  await expect(host).not.toHaveState('editing')
+  await expect(host).not.toHaveState('invalid')
+})
+
+test('activation="none" opens from edit() and returns focus to the read view', async ({ page, renderScenario }) => {
+  await renderScenario(field('activation="none"'))
+  const host = page.locator('c2-inline-edit')
+  await host.evaluate((element) => (element as HTMLElement & { edit(): boolean }).edit())
+  await expect(page.getByRole('textbox', { name: 'Project name' })).toBeFocused()
+  await page.keyboard.type('Gemini')
+  await page.keyboard.press('Enter')
+  await expect(host.locator('.display')).toBeFocused()
+  await expect(host).toHaveJSProperty('value', 'Gemini')
+})
+
+test('rendered with editing set, a slotted editor shows the value and focus stays put', async ({ page, renderScenario }) => {
+  await renderScenario(`<a href="#">Before</a><c2-inline-edit label="Priority" value="high" editing>
+    <select slot="editor" aria-label="Priority"><option value="low">Low</option><option value="high">High</option></select>
+  </c2-inline-edit>`)
+  await page.getByRole('link', { name: 'Before' }).focus()
+  const select = page.getByRole('combobox', { name: 'Priority' })
+  await expect(select).toHaveValue('high')
+  await expect(page.getByRole('link', { name: 'Before' })).toBeFocused()
+  await select.selectOption('low')
+  await expect(page.getByRole('button', { name: 'Priority: Low' })).toBeVisible()
+})
+
+test('a slotted editor whose change does not bubble still commits', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-inline-edit label="Size" value="s"><span slot="editor" aria-label="Size"></span></c2-inline-edit>`)
+  const host = page.locator('c2-inline-edit')
+  await page.getByRole('button', { name: 'Size: s' }).click()
+  await host.evaluate((element) => {
+    const editor = element.querySelector('[slot="editor"]') as HTMLElement & { value: string }
+    editor.value = 'xl'
+    editor.dispatchEvent(new Event('change'))
+  })
+  await expect(page.getByRole('button', { name: 'Size: xl' })).toBeVisible()
+  await expect(host).toHaveJSProperty('value', 'xl')
+})
+
+test('opening and closing the editor does not fire focusout on the host', async ({ page, renderScenario }) => {
+  await renderScenario(`${field()}<c2-inline-edit label="Priority" value="low">
+    <select slot="editor" aria-label="Priority"><option value="low">Low</option><option value="high">High</option></select>
+  </c2-inline-edit><a href="#">Outside</a>`)
+  const log = page.locator('main')
+  await page.locator('main').evaluate((main) => {
+    main.dataset.log = ''
+    for (const host of main.querySelectorAll('c2-inline-edit')) host.addEventListener('focusout', () => (main.dataset.log += `${host.getAttribute('label')};`))
+  })
+  await page.getByRole('button', { name: 'Project name: Apollo' }).click()
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Project name: Apollo' })).toBeFocused()
+  await expect(log).toHaveAttribute('data-log', '')
+  // Moving to the next inline edit is leaving the first one.
+  await page.getByRole('button', { name: 'Priority: Low' }).click()
+  await expect(page.getByRole('combobox', { name: 'Priority' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Priority: Low' })).toBeFocused()
+  await expect(log).toHaveAttribute('data-log', 'Project name;')
+  await page.getByRole('link', { name: 'Outside' }).focus()
+  await expect(log).toHaveAttribute('data-log', 'Project name;Priority;')
+})
+
+test('formatValue returning undefined falls back to the default text', async ({ page, renderScenario }) => {
+  await renderScenario(field())
+  await page.locator('c2-inline-edit').evaluate(async (element) => {
+    const host = element as HTMLElement & { formatValue?: (value: string) => string | undefined; updateComplete: Promise<boolean> }
+    host.formatValue = () => undefined
+    await host.updateComplete
+  })
+  await expect(page.getByRole('button', { name: 'Project name: Apollo' })).toHaveText('Apollo')
+})
+
+test('a multiline field grows with its text', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-inline-edit label="Notes" value="One" multiline></c2-inline-edit>')
+  await page.getByRole('button', { name: 'Notes: One' }).click()
+  const textarea = page.getByRole('textbox', { name: 'Notes' })
+  const before = (await textarea.boundingBox())!.height
+  await page.keyboard.press('End')
+  await page.keyboard.type('\nTwo\nThree')
+  await expect.poll(async () => (await textarea.boundingBox())!.height).toBeGreaterThan(before * 2)
+  expect(await textarea.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)).toBe(true)
+})
+
+test('without field-sizing, a multiline field regrows when its width shrinks while editing', async ({ page, renderScenario }) => {
+  // Firefox and Safari size the textarea from script; make Chromium take that path too.
+  await page.addInitScript(() => {
+    const supports = CSS.supports.bind(CSS)
+    CSS.supports = ((...args: [string, string?]) => (args[0] === 'field-sizing' ? false : supports(...(args as [string, string])))) as typeof CSS.supports
+  })
+  const text = 'A sentence long enough to wrap onto several lines once its container gets narrow'
+  await renderScenario(
+    `<div id="box" style="width: 640px"><c2-inline-edit style="display: block" label="Notes" value="${text}" multiline></c2-inline-edit></div>`,
+  )
+  await page.getByRole('button', { name: `Notes: ${text}` }).click()
+  const textarea = page.getByRole('textbox', { name: 'Notes' })
+  // Turn off the native sizing so only the script fallback sets the height.
+  await textarea.evaluate((element) => element.style.setProperty('field-sizing', 'fixed'))
+  const fits = () => textarea.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)
+  await expect.poll(fits).toBe(true)
+  const before = (await textarea.boundingBox())!.height
+  await page.locator('#box').evaluate((box) => ((box as HTMLElement).style.width = '120px'))
+  await expect.poll(async () => (await textarea.boundingBox())!.height).toBeGreaterThan(before * 2)
+  await expect.poll(fits).toBe(true)
+})

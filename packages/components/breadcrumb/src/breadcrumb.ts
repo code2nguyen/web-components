@@ -92,9 +92,11 @@ export class Breadcrumb extends LitElement {
       this.separatorNodes = [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
       this.assignItems()
       // `slot` changes too: a child that gains or loses `slot="separator"` changes which slot it belongs in, which
-      // manual assignment does not pick up by itself.
+      // manual assignment does not pick up by itself. Attribute records on children need `subtree`, so filter the
+      // records to the trail's own children: a mutation inside an item does not change the item list.
       this.observer ??= new MutationObserver((records) => {
-        if (records.some((record) => record.type === 'childList' || record.target.parentElement === this)) this.assignItems()
+        const affectsItems = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
+        if (records.some(affectsItems)) this.assignItems()
       })
       this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {

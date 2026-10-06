@@ -453,6 +453,8 @@ export class Flow extends LitElement {
       this.internals.role = 'group'
       this.internals.ariaRoleDescription = 'flow diagram'
     }
+    // On the host, not the stage: focus can also leave from the slotted toolbar, which the stage never hears about.
+    this.addEventListener('focusout', this.handleHostFocusOut)
   }
 
   override connectedCallback() {
@@ -1054,13 +1056,15 @@ export class Flow extends LitElement {
   /**
    * Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas or over
    * the actions toolbar: a press that wanders a few pixels and is released back on the add button is that button's
-   * click, not a drop under the toolbar as well.
+   * click, not a drop under the toolbar as well. The toolbar is the visible panel (the slot's box), not the `.actions`
+   * strip that positions it along the whole edge: canvas beside the panel still takes a drop.
    */
   private dropPoint(clientX: number, clientY: number): FlowPoint | null {
     const inside = (rect: DOMRect | undefined) => !!rect && clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
     if (!inside(this.stage?.getBoundingClientRect())) return null
     const actions = this.renderRoot.querySelector<HTMLElement>('.actions')
-    if (actions && !actions.hidden && inside(actions.getBoundingClientRect())) return null
+    const panel = actions?.querySelector('slot')
+    if (actions && !actions.hidden && panel && inside(panel.getBoundingClientRect())) return null
     return this.centred(this.toCanvas(clientX, clientY))
   }
 
@@ -1412,10 +1416,17 @@ export class Flow extends LitElement {
     // A keyboard connection lasts while focus stays in the flow.
     if (this.connection?.keyboard && !(next && this.renderRoot.contains(next))) this.cancelConnection()
     if (next && (this.card?.contains(next) || this.contains(next))) return
-    // Focus left the flow (its toolbar counts as inside): a later addNode() no longer goes beside that node.
-    if (!(next && this.renderRoot.contains(next))) this.lastFocusedId = null
     this.highlightId = null
     this.scheduleCardClose()
+  }
+
+  /**
+   * Focus left the flow altogether, from a node or from the toolbar (which counts as inside): a later `addNode()` no
+   * longer goes beside the node it was last on. A target in the shadow root is retargeted to the host here.
+   */
+  private handleHostFocusOut = (event: FocusEvent) => {
+    const next = event.relatedTarget as Node | null
+    if (!(next && (next === this || this.contains(next) || this.renderRoot.contains(next)))) this.lastFocusedId = null
   }
 
   // ---------------------------------------------------------------------------------------------------------------
