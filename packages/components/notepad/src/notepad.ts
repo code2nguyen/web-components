@@ -45,6 +45,8 @@ export type NotepadPad = 'notebook' | 'legal' | 'sticky' | 'index-card'
 export type NotepadPaper = 'lined' | 'grid' | 'dot' | 'blank'
 /** Colour of the page; `default` is `--c2-notepad__sheet--background`. */
 export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink' | 'night'
+/** Side of the "Paper" and "Tear off" buttons the `actions` slot sits on. */
+export type NotepadActionsPlacement = 'start' | 'end'
 export const PADS: readonly NotepadPad[] = ['notebook', 'legal', 'sticky', 'index-card']
 export const PAPERS: readonly NotepadPaper[] = ['lined', 'grid', 'dot', 'blank']
 export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink', 'night']
@@ -245,7 +247,7 @@ class TaskView implements NodeView {
  * @slot header - Printed heading at the top of the sheet, e.g. a title or a date.
  * @slot margin - Content placed in the left margin column, such as a badge or a doodle.
  * @slot toolbar - Extra buttons appended to the selection toolbar.
- * @slot actions - Buttons at the top of the sheet, in the row of the "Paper" and "Tear off" buttons and before them, e.g. a delete or a share button for the note. A slotted `c2-icon-button` is shrunk to the height of that row.
+ * @slot actions - Buttons at the top of the sheet, in the row of the "Paper" and "Tear off" buttons, e.g. a delete or a share button for the note. `actions-placement` puts them before (default) or after those buttons. A slotted `c2-icon-button` is shrunk to the height of that row.
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the notepad loses focus after its value changed, and after a page is torn off.
  * @event {CustomEvent<NotepadFormat>} format-change - Fired when the formatting at the selection changes. Does not bubble.
@@ -374,6 +376,8 @@ export class Notepad extends LitElement {
   @property({ converter: jsonPropertyConverter }) highlights?: NotepadColor[]
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
+  /** Side of the "Paper" and "Tear off" buttons the `actions` slot sits on: `start` (before them, the default) or `end` (after them). The keyboard order follows. */
+  @property({ attribute: 'actions-placement' }) actionsPlacement: NotepadActionsPlacement = 'start'
 
   @state() private format: NotepadFormat = emptyFormat()
   @state() private disabledByForm = false
@@ -1386,6 +1390,30 @@ export class Notepad extends LitElement {
     const hasEmphasis = ['bold', 'italic', 'underline', 'strike'].some((mark) => allowed.has(mark as NotepadMark))
     const showError = this.error && !!this.errorText
     const colorVars = this.colorVars()
+    const paperButton = this.paperPicker
+      ? html`<button
+          class="paper-button"
+          part="paper-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded=${String(this.paperMenuOpen)}
+          ?disabled=${this.disabled || this.disabledByForm}
+          @click=${this.handlePaperButtonClick}
+          @pointerenter=${this.handlePaperHover}
+          @pointerleave=${this.handlePaperHover}
+        >
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+            <rect x="2" y="1" width="8" height="10" rx="1" />
+            <path d="M4 4h4M4 6h4M4 8h3" />
+          </svg>
+          Paper
+        </button>`
+      : nothing
+    const tearButton = this.tearable
+      ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>Tear off</button>`
+      : nothing
+    // The slot stays put and the built-in buttons move around it: a re-created slot would report its stale assignment.
+    const builtIns = html`${paperButton}${tearButton}`
     return html`
       <div
         class="pad ${this.disabledByForm ? 'form-disabled' : ''} ${this.pointerFocus ? 'pointer-focus' : ''}"
@@ -1402,37 +1430,11 @@ export class Notepad extends LitElement {
           <div class="top">
             <div class="header" ?hidden=${!this.slotPresence.has('header')}><slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
             <div class="controls ${this.paperMenuOpen ? 'open' : ''}">
+              ${this.actionsPlacement === 'end' ? builtIns : nothing}
               <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
                 <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
               </div>
-              ${
-                this.paperPicker
-                  ? html`<button
-                      class="paper-button"
-                      part="paper-button"
-                      type="button"
-                      aria-haspopup="dialog"
-                      aria-expanded=${String(this.paperMenuOpen)}
-                      ?disabled=${this.disabled || this.disabledByForm}
-                      @click=${this.handlePaperButtonClick}
-                      @pointerenter=${this.handlePaperHover}
-                      @pointerleave=${this.handlePaperHover}
-                    >
-                      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
-                        <rect x="2" y="1" width="8" height="10" rx="1" />
-                        <path d="M4 4h4M4 6h4M4 8h3" />
-                      </svg>
-                      Paper
-                    </button>`
-                  : nothing
-              }
-              ${
-                this.tearable
-                  ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>
-                      Tear off
-                    </button>`
-                  : nothing
-              }
+              ${this.actionsPlacement === 'end' ? nothing : builtIns}
             </div>
           </div>
           <div class="margin"><slot name="margin"></slot></div>
