@@ -95,11 +95,11 @@ const mobileNavItems = [
           <FeatherSearchIcon client:load />
         </SiteIconButton>
         <ThemeToggle />
-        <LinkButton client:load class="site-header__github" href={repoUrl} external aria-label="GitHub repository">
+        <LinkButton client:load class="site-header__icon-link site-header__github" href={repoUrl} external aria-label="GitHub repository">
           <FeatherGithubIcon client:load slot="prefix-icon" />
           <c2-tooltip>GitHub repository</c2-tooltip>
         </LinkButton>
-        <LinkButton client:load class="site-header__github site-header__discord" href={discordUrl} external aria-label="Discord community">
+        <LinkButton client:load class="site-header__icon-link site-header__discord" href={discordUrl} external aria-label="Discord community">
           <PhosphorDiscordLogoIcon client:load slot="prefix-icon" />
           <c2-tooltip>Join the c2n-webcomponents Discord</c2-tooltip>
         </LinkButton>
@@ -129,6 +129,7 @@ const mobileNavItems = [
           <span>© {new Date().getFullYear()} code2nguyen · MIT licensed</span>
           <span class="site-footer__links">
             <a href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
+            <a href={discordUrl} target="_blank" rel="noreferrer">Discord</a>
             <a href="https://www.npmjs.com/org/c2n" target="_blank" rel="noreferrer">npm</a>
             <a href={`${base}/changelog/`}>Changelog</a>
             <a href={`${base}/llms.txt`}>llms.txt</a>
@@ -210,7 +211,7 @@ const mobileNavItems = [
           --c2-navigation-menu-item__hover--background: var(--site-color-surface-container-2);
           --c2-navigation-menu-item__current--color: var(--site-color-primary);
         }
-        :global(.site-header__github) {
+        :global(.site-header__icon-link) {
           --c2-link-button__container--padding-top: 9px;
           --c2-link-button__container--padding-right: 9px;
           --c2-link-button__container--padding-bottom: 9px;
@@ -222,6 +223,8 @@ const mobileNavItems = [
           --c2-link-button__container__hover--background-color: var(--site-color-surface-container-3);
           --c2-link-button__container__hover--text-decoration: none;
           --c2-link-button__icon--size: 16px;
+        }
+        :global(.site-header__discord) {
           --c2-phosphor-icon--size: 16px;
         }
 
@@ -351,7 +354,8 @@ const mobileNavItems = [
           padding: 1px 6px;
           font-size: 10px;
         }
-        :global(.site-header__github) {
+        // Both stay reachable on phones through the footer links.
+        :global(.site-header__icon-link) {
           display: none;
         }
       }
