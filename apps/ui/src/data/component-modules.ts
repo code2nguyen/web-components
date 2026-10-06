@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/components/inline-edit'
 import '@c2n/components/kanban'
 import '@c2n/components/gantt'
 import '@c2n/components/working-indicator'

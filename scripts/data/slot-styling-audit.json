@@ -1049,6 +1049,44 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-inline-edit",
+      "slot": "cancel-icon",
+      "decision": "variables",
+      "variables": ["--c2-inline-edit__control__icon--size", "--c2-inline-edit__control--color", "--c2-inline-edit__control__hover--color"],
+      "reason": "The cancel button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "edit-icon",
+      "decision": "variables",
+      "variables": [
+        "--c2-inline-edit__edit-icon--size",
+        "--c2-inline-edit__edit-icon--color",
+        "--c2-inline-edit__edit-icon--opacity",
+        "--c2-inline-edit__edit-icon__hover--opacity"
+      ],
+      "reason": "The read view sizes, colours and fades the slotted pencil and its SVG fallback through the edit-icon variables."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "editor",
+      "decision": "assigned-content",
+      "reason": "The editor slot projects a consumer-owned control that draws its own box; style it through its own class or public contract."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "preview",
+      "decision": "assigned-content",
+      "reason": "The preview slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-inline-edit",
+      "slot": "save-icon",
+      "decision": "variables",
+      "variables": ["--c2-inline-edit__control__icon--size", "--c2-inline-edit__control--color", "--c2-inline-edit__control__hover--color"],
+      "reason": "The save button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
+    },
+    {
       "tag": "c2-kanban",
       "slot": "",
       "decision": "assigned-content",

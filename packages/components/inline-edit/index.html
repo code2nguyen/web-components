@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-inline-edit</title>
+    <script type="module" src="/src/inline-edit.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font: 14px system-ui;
+        color: #18181b;
+        display: grid;
+        gap: 16px;
+        justify-items: start;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .cell {
+        width: 240px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-inline-edit class="title" label="Page title" placeholder="Untitled" value="Q4 launch plan"></c2-inline-edit>
+    <c2-inline-edit class="cell" label="Owner" placeholder="Add an owner"></c2-inline-edit>
+    <c2-inline-edit class="cell" label="Priority" value="high">
+      <select slot="editor" aria-label="Priority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+    </c2-inline-edit>
+    <c2-inline-edit class="cell" label="Notes" value="Ship behind a flag, then ramp." multiline controls></c2-inline-edit>
+    <c2-inline-edit class="cell" label="Name" value="Double-click me" activation="dblclick"></c2-inline-edit>
+    <c2-inline-edit label="Read-only" value="Read-only" readonly></c2-inline-edit>
+    <c2-inline-edit label="Disabled" value="Disabled" disabled></c2-inline-edit>
+  </body>
+</html>

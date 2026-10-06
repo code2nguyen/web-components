@@ -739,6 +739,32 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-inline-edit': {
+    html: `<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>`,
+    presets: [
+      {
+        name: 'Page title',
+        description: 'Large bold text with a roomier box, for a document or record title.',
+        css: {
+          '--c2-inline-edit--font-size': '24px',
+          '--c2-inline-edit--font-weight': '700',
+          '--c2-inline-edit--line-height': '32px',
+          '--c2-inline-edit--padding-inline': '8px',
+          '--c2-inline-edit--border-radius': '8px',
+          '--c2-inline-edit__edit-icon--size': '18px',
+        },
+      },
+      {
+        name: 'Visible pencil',
+        description: 'The pencil always shows in the accent colour, so the text reads as editable at rest.',
+        css: {
+          '--c2-inline-edit__edit-icon--opacity': '1',
+          '--c2-inline-edit__edit-icon--color': '#0265dc',
+          '--c2-inline-edit__hover--background': '#edf1fe',
+        },
+      },
+    ],
+  },
   'c2-text-field': {
     html: `<c2-text-field placeholder="Your email" style="width: 220px"></c2-text-field>`,
     presets: [

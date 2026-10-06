@@ -328,6 +328,10 @@
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
     },
+    "./inline-edit": {
+      "types": "./dist/inline-edit.d.ts",
+      "default": "./dist/inline-edit.js"
+    },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
@@ -754,6 +758,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/inline-edit": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",
