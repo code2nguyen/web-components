@@ -291,6 +291,14 @@ jobs:
           else
             echo "Version PR already exists: $pr_url"
           fi
+          # Keep cubic's automatic review off the version PR (cubic.yaml also ignores release/* head branches).
+          # Best effort: a missing label permission must not fail a release that has already published.
+          if gh label create skip-review --color ededed --description "Skip cubic's automatic AI review" --force &&
+            gh pr edit "$RELEASE_BRANCH" --add-label skip-review; then
+            echo "Labelled the version PR skip-review."
+          else
+            echo "::warning::Could not add the skip-review label to the version PR."
+          fi
 
       - name: Push release tag
         if: ${{ !inputs.dry_run }}
