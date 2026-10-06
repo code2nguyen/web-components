@@ -20,7 +20,7 @@ export interface ListItemEventMap {
  * that control, not to the row around it.
  */
 const INTERACTIVE_SELECTOR =
-  'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="menuitem"], [role="tab"], [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-checkbox, c2-switch, c2-text-field'
+  'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"], [role="tab"], [role="combobox"], [tabindex]:not([tabindex="-1"])'
 
 /**
  * Whether `event` started on an interactive element placed inside `row` (a delete button in the `suffix-icon` slot, a
@@ -30,8 +30,9 @@ const INTERACTIVE_SELECTOR =
 export function isFromInteractiveContent(event: Event, row: Element): boolean {
   for (const node of event.composedPath()) {
     if (node === row) return false
-    // Only the author's light-DOM content counts: the row's own shadow `<a>` (an `href` row) is the row itself.
-    if (node instanceof Element && row.contains(node) && node.matches(INTERACTIVE_SELECTOR)) return true
+    // The row's own shadow tree (the `<a>` of an `href` row) is the row itself. Everything else before the row is the
+    // author's content, including the shadow trees of nested components (the native control inside `c2-select`).
+    if (node instanceof Element && node.getRootNode() !== row.shadowRoot && node.matches(INTERACTIVE_SELECTOR)) return true
   }
   return false
 }
@@ -211,7 +212,8 @@ export class ListItem extends LitElement {
   }
 
   private blockDisabledClick = (event: Event) => {
-    if (!this.disabled) return
+    // A control inside a disabled row is the author's to disable; only the row's own click is blocked.
+    if (!this.disabled || isFromInteractiveContent(event, this)) return
     event.preventDefault()
     event.stopImmediatePropagation()
   }
