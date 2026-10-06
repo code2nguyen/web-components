@@ -116,6 +116,10 @@
   opacity: css.cssVar(edit-icon--opacity);
   transition: opacity 120ms ease;
 
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
   svg,
   ::slotted(*) {
     width: css.cssVar(edit-icon--size);
@@ -185,6 +189,7 @@
   }
 }
 
+// Grows with its text: `field-sizing` where supported, a height set from script elsewhere.
 textarea.field {
   resize: none;
   overflow: hidden;

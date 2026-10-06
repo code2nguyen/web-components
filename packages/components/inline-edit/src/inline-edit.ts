@@ -11,6 +11,9 @@ import styles from './inline-edit.scss?inline'
 /** How the read view enters edit mode: a single click, a double click, or only through {@link InlineEdit.edit}. */
 export type InlineEditActivation = 'click' | 'dblclick' | 'none'
 
+/** Turns a committed value into the read view's text; `undefined` keeps the default text. */
+export type InlineEditFormatValue = (value: string) => string | undefined
+
 /** What losing focus does while editing: keep the draft, throw it away, or stay in edit mode. */
 export type InlineEditBlurAction = 'commit' | 'cancel' | 'none'
 
@@ -38,6 +41,9 @@ export interface InlineEdit {
 /** A control slotted as `editor`: anything with a `value` (`c2-select`, `c2-number-input`, a native `<select>`, …). */
 type EditorElement = HTMLElement & { value?: unknown }
 
+/** Browsers without `field-sizing` (Firefox and Safari at the time of writing) get the textarea's height from script. */
+const supportsFieldSizing = !isServer && typeof CSS !== 'undefined' && CSS.supports('field-sizing', 'content')
+
 /**
  * Text that turns into a field when clicked: the edit-in-place pattern of Notion titles, Airtable cells and Linear
  * issue fields. The read view is a button showing the value (or the `placeholder`), with a pencil on hover. Clicking it,
@@ -46,7 +52,8 @@ type EditorElement = HTMLElement & { value?: unknown }
  * field commits by default (`blur-action`), and `controls` adds save and cancel buttons.
  *
  * Any control can replace the built-in input through the `editor` slot: put a `c2-select`, a `c2-number-input` or a
- * native `<select>` there. Its `value` is set from the inline edit when editing starts, its `change` event commits,
+ * native `<select>` there. Its `value` is set from the inline edit when editing starts, its `change` event commits
+ * (bubbling or not: it is heard on the control itself),
  * and the read view shows the label of the option whose `value` matches (or `formatValue`). A slotted control's own
  * `input` and `change` events stay inside the inline edit; the host fires its own once the value is committed.
  *
@@ -61,7 +68,7 @@ type EditorElement = HTMLElement & { value?: unknown }
  *
  * @tag c2-inline-edit
  *
- * @slot editor - A control used instead of the built-in input while editing. It must expose `value` and fire `change` when a choice is made, and carry its own accessible name (`aria-label`): `label` names only the built-in field and the read view. It gets `aria-invalid` while a `required` draft is refused.
+ * @slot editor - A control used instead of the built-in input while editing. It must expose `value` and fire `change` on itself when a choice is made (it need not bubble), and carry its own accessible name (`aria-label`): `label` names only the built-in field and the read view. It gets `aria-invalid` while a `required` draft is refused.
  * @slot preview - Content shown in the read view instead of the value text, e.g. a badge. Update it yourself on `change`.
  * @slot edit-icon - Replaces the pencil shown next to the value on hover and focus.
  * @slot save-icon - Replaces the check mark of the save button (`controls`).
@@ -131,9 +138,9 @@ export class InlineEdit extends LitElement {
 
   /**
    * Turns the value into the read view's text, e.g. a currency or a date. Without it, the read view shows the label
-   * of the matching option in a slotted `editor`, or else the value itself.
+   * of the matching option in a slotted `editor`, or else the value itself. Returning `undefined` falls back to that.
    */
-  @property({ attribute: false }) formatValue?: (value: string) => string
+  @property({ attribute: false }) formatValue?: InlineEditFormatValue
 
   // Behaviour
 
@@ -168,7 +175,11 @@ export class InlineEdit extends LitElement {
   /** Disables editing and dims the element. */
   @property({ type: Boolean }) disabled = false
 
-  /** Whether the editor is open. Settable: `true` opens it with the committed value, `false` closes it without committing. No events fire. */
+  /**
+   * Whether the editor is open. Settable: `true` opens it with the committed value and focuses it, `false` closes it
+   * without committing. No events fire. An element that renders with `editing` already set opens without taking
+   * focus; call `focus()` to move it there.
+   */
   @property({ type: Boolean }) editing = false
 
   @state() private draft = ''
@@ -184,6 +195,12 @@ export class InlineEdit extends LitElement {
 
   /** The value as it stood when the element was created or last reset by its form. */
   private defaultValue: string | null = null
+
+  /** The slotted editor whose `input` and `change` this element listens to. */
+  private listenedEditor: EditorElement | null = null
+
+  /** True while a render swaps the read view and the editor, so focus leaving a removed node is not reported. */
+  private swapping = false
 
   constructor() {
     super()
@@ -232,7 +249,9 @@ export class InlineEdit extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    // The platform's combined state (own `disabled` attribute or a disabled fieldset): kept whole, so removing the
+    // attribute inside a disabled fieldset still leaves the element disabled.
+    this.disabledByForm = disabled
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -293,6 +312,17 @@ export class InlineEdit extends LitElement {
     this.syncSlots()
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.listenEditor(null)
+  }
+
+  protected override createRenderRoot() {
+    const root = super.createRenderRoot()
+    root.addEventListener('focusout', this.handleInnerFocusout)
+    return root
+  }
+
   private get interactive() {
     return !this.disabled && !this.disabledByForm && !this.readOnly
   }
@@ -339,13 +369,29 @@ export class InlineEdit extends LitElement {
   }
 
   private syncSlots() {
-    this.hasEditor = this.slottedEditor !== null
+    const editor = this.slottedEditor
+    this.listenEditor(editor)
+    this.hasEditor = editor !== null
+  }
+
+  /**
+   * Listens on the slotted control itself rather than on its slot, so a `change` that does not bubble is still heard
+   * and the control's own events stop before they reach the host.
+   */
+  private listenEditor(editor: EditorElement | null) {
+    if (editor === this.listenedEditor) return
+    this.listenedEditor?.removeEventListener('input', this.stopEvent)
+    this.listenedEditor?.removeEventListener('change', this.handleEditorChange)
+    editor?.addEventListener('input', this.stopEvent)
+    editor?.addEventListener('change', this.handleEditorChange)
+    this.listenedEditor = editor
   }
 
   /** The text the read view shows for the committed value. */
   private get displayText(): string {
     if (this.value === '') return ''
-    if (this.formatValue) return this.formatValue(this.value)
+    const formatted = this.formatValue?.(this.value)
+    if (formatted !== undefined) return formatted
     const editor = this.slottedEditor
     if (editor) {
       for (const option of editor.querySelectorAll<HTMLElement & { value?: unknown }>('[value], option')) {
@@ -400,6 +446,16 @@ export class InlineEdit extends LitElement {
     this.commit()
   }
 
+  /**
+   * Focus moving inside the element (read view to editor, editor to read view) is not focus leaving it: the read view
+   * or the field being removed by a mode switch, or a move between the slotted editor and the shadow tree, stops here
+   * so `focusout` listeners on the host (a form library marking the control touched) only see the user leave.
+   */
+  private handleInnerFocusout = (event: Event) => {
+    const next = (event as FocusEvent).relatedTarget as Node | null
+    if (this.swapping || (next && (this.contains(next) || this.shadowRoot?.contains(next)))) event.stopPropagation()
+  }
+
   private handleFocusout = (event: FocusEvent) => {
     if (!this.editing || this.blurAction === 'none') return
     // The read view losing focus as the editor replaces it is not the user leaving.
@@ -428,9 +484,19 @@ export class InlineEdit extends LitElement {
     this.cancel()
   }
 
+  private autosize() {
+    const field = this.field
+    if (supportsFieldSizing || !(field instanceof HTMLTextAreaElement)) return
+    field.style.height = 'auto'
+    field.style.height = `${field.scrollHeight}px`
+  }
+
   protected override willUpdate(changed: PropertyValues<this>): void {
     // Disabling, making read-only or disabling the fieldset closes an open editor without committing.
-    if (this.editing && !this.interactive) this.editing = false
+    if (this.editing && !this.interactive) {
+      this.editing = false
+      this.invalid = false
+    }
     if (changed.has('editing') && this.editing && !changed.get('editing')) {
       // Every way into edit mode (`edit()`, a click, the property) starts from the committed value.
       this.draft = this.value
@@ -438,9 +504,20 @@ export class InlineEdit extends LitElement {
     }
   }
 
+  protected override update(changed: PropertyValues): void {
+    this.swapping = changed.has('editing')
+    try {
+      super.update(changed)
+    } finally {
+      this.swapping = false
+    }
+  }
+
   protected override updated(changed: PropertyValues): void {
-    this.internals.setFormValue(this.value)
-    if (this.required && this.value.trim() === '') {
+    // A disabled control is left out of its form and barred from validation, whichever way it was disabled.
+    const disabled = this.disabled || this.disabledByForm
+    this.internals.setFormValue(disabled ? null : this.value)
+    if (!disabled && this.required && this.value.trim() === '') {
       this.internals.setValidity({ valueMissing: true }, 'Please fill in this field.', this.display ?? undefined)
     } else {
       this.internals.setValidity({})
@@ -465,22 +542,27 @@ export class InlineEdit extends LitElement {
       empty: this.value === '',
       invalid: this.invalid,
       'read-only': this.readOnly,
-      disabled: this.disabled || this.disabledByForm,
+      disabled,
     }
     for (const [name, on] of Object.entries(states)) {
       if (on) this.internals.states.add(name)
       else this.internals.states.delete(name)
     }
 
-    if (changed.has('editing') && this.editing && changed.get('editing') !== undefined) {
+    if (this.editing && this.multiline) this.autosize()
+
+    if (changed.has('editing') && this.editing && !changed.get('editing')) {
+      // Rendered with `editing` already set: the editor shows the committed value, but focus is not taken on load.
+      const initial = changed.get('editing') === undefined
       const editor = this.hasEditor ? this.slottedEditor : null
       if (editor) {
         this.writeEditorValue(editor)
+        if (initial) return
         Promise.resolve((editor as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete).then(() => editor.focus())
         return
       }
       const field = this.field
-      if (!field) return
+      if (!field || initial) return
       field.focus()
       if (this.selectOnEdit) field.select()
       else field.setSelectionRange(field.value.length, field.value.length)
@@ -494,7 +576,13 @@ export class InlineEdit extends LitElement {
     >`
     const disabled = this.disabled || this.disabledByForm
     if (this.readOnly || this.activation === 'none') {
-      return html`<span class="display static" aria-label=${ifDefined(this.label ? `${this.label}: ${text || this.placeholder}` : undefined)}>${content}</span>`
+      // With `activation="none"` the read view takes focus from script only, so focus can come back to it after an edit.
+      return html`<span
+        class="display static"
+        tabindex=${ifDefined(this.readOnly ? undefined : -1)}
+        aria-label=${ifDefined(this.label ? `${this.label}: ${text || this.placeholder}` : undefined)}
+        >${content}</span
+      >`
     }
     return html`<button
       class="display"
@@ -568,7 +656,7 @@ export class InlineEdit extends LitElement {
   }
 
   override render() {
-    const editorSlot = html`<slot name="editor" @slotchange=${this.syncSlots} @input=${this.stopEvent} @change=${this.handleEditorChange}></slot>`
+    const editorSlot = html`<slot name="editor" @slotchange=${this.syncSlots}></slot>`
     if (!this.editing) {
       // The slot stays rendered (hidden) so `slotchange` keeps `hasEditor` current and option labels stay readable.
       return html`${this.renderDisplay()}<span class="editor-host" hidden>${editorSlot}</span>`

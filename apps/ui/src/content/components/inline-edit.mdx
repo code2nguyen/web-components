@@ -1,6 +1,6 @@
 ---
 title: 'Inline Edit'
-description: 'Text that turns into a field on click: Enter commits, Escape cancels, and any control with a value can be the editor.'
+description: 'Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.'
 category: 'Inputs'
 ---
 
@@ -15,7 +15,7 @@ import { ListItem } from '@c2n/components/list-item'
 
 `value` is always the committed value. Every commit that changes it fires a cancelable `edit-commit` event first, with `detail.value` and `detail.previousValue`. Call `preventDefault()` to reject the draft and keep the field open, for validation or a failed save. Then `value` updates and `input` and `change` fire. Typing fires nothing on the host. The element is form-associated: `name` submits the committed value, `required` refuses an empty draft, and form reset restores the authored `value`.
 
-To edit with another control, slot it as `editor`: a `c2-select`, a `c2-number-input`, a native `<select>`, anything with a `value` that fires `change`. Give it its own `aria-label`: `label` names only the built-in field and the read view. The inline edit sets the control's value when editing starts and commits on its `change`. The read view shows the label of the option whose `value` matches, so a select shows "In progress" rather than `doing`. Use `formatValue` for any other display, or the `preview` slot for rich content such as a badge.
+To edit with another control, slot it as `editor`: a `c2-select`, a `c2-number-input`, a native `<select>`, anything with a `value` that fires `change` on itself (it need not bubble). Give it its own `aria-label`: `label` names only the built-in field and the read view. The inline edit sets the control's value when editing starts and commits on its `change`. The read view shows the label of the option whose `value` matches, so a select shows "In progress" rather than `doing`. Use `formatValue` for any other display, or the `preview` slot for rich content such as a badge.
 
 The element inherits its font, so it fits a heading or a table cell as is. It sizes to its text: give the host a `width` (or `display: block`) to make it fill a column.
 
