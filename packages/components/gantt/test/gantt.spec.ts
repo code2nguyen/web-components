@@ -306,6 +306,54 @@ test('hovering a bar shows the tooltip and fires task-hover', async ({ page, ren
   expect(events.map((event) => event.id)).toEqual(['vis', null])
 })
 
+test('a clicked bar keeps its tooltip whole, outside the chart frame', async ({ page, renderScenario }) => {
+  // Four rows: the tooltip under the last one has no room inside the chart, which used to cut it off.
+  await renderScenario(dataChart())
+  await pointerClick(page.locator('c2-gantt .milestone[data-id="review"]'))
+  const tooltip = page.locator('c2-gantt .tooltip')
+  await expect(tooltip).toContainText('Design review')
+  await expect(tooltip).toBeInViewport({ ratio: 1 })
+  expect(await tooltip.evaluate((element) => element.matches(':popover-open'))).toBe(true)
+  const chart = (await page.locator('c2-gantt').boundingBox())!
+  const tip = (await tooltip.boundingBox())!
+  expect(tip.y + tip.height).toBeGreaterThan(chart.y + chart.height)
+  // It stays up after the click: the selection and the row focus that follow it do not take it away.
+  await expect(rowOf(page, 'review')).toBeFocused()
+  await expect(rowOf(page, 'review')).toHaveAttribute('aria-selected', 'true')
+  await expect(tooltip).toBeVisible()
+})
+
+test('in a timeline narrower than the tooltip, the tooltip overlaps the list instead of overflowing the chart', async ({ page, renderScenario }) => {
+  // 500px with the 260px list leaves ~240px of timeline for a 240px tooltip.
+  await renderScenario(dataChart('layout="split" style="width: 500px"'))
+  await barOf(page, 'vis').hover()
+  const tooltip = page.locator('c2-gantt .tooltip')
+  await expect(tooltip).toContainText('Visual design')
+  const chart = (await page.locator('c2-gantt').boundingBox())!
+  const tip = (await tooltip.boundingBox())!
+  expect(tip.x + tip.width).toBeLessThanOrEqual(chart.x + chart.width)
+})
+
+test('bars scrolled under the task list stay behind it', async ({ page, renderScenario }) => {
+  // The day scale in a 600px box: wide enough to keep the list, narrow enough to scroll.
+  await renderScenario(dataChart('scale="day" style="width: 600px"'))
+  // Scroll the bar's start 60px under the list, so it runs beneath the list's duration cell.
+  await page.locator('c2-gantt').evaluate((element) => {
+    const bar = element.shadowRoot!.querySelector<HTMLElement>('.bar[data-id="ia"]')!
+    element.shadowRoot!.querySelector<HTMLElement>('.scroller')!.scrollLeft = bar.offsetLeft + 60
+  })
+  await expect.poll(() => page.locator('c2-gantt .scroller').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+  const cell = rowOf(page, 'ia').locator('.cell-days')
+  const box = (await cell.boundingBox())!
+  const topmost = await page
+    .locator('c2-gantt')
+    .evaluate(
+      (element, [x, y]) => element.shadowRoot!.elementFromPoint(x, y)?.closest('.row, [data-id]')?.className,
+      [box.x + box.width / 2, box.y + box.height / 2],
+    )
+  expect(topmost).toContain('row')
+})
+
 test('renderTooltip replaces the tooltip contents', async ({ page, renderScenario }) => {
   await renderScenario(dataChart())
   await page.locator('c2-gantt').evaluate((element) => {

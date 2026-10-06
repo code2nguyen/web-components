@@ -64,7 +64,8 @@ const COMPACT_BELOW = 560
 /** Height of the label line above each bar in the compact layout; matches `--_label-line` in the stylesheet. */
 const LABEL_LINE = 16
 const MILESTONE_HALF = 7
-const TOOLTIP_WIDTH = 240
+/** Gap between the tooltip and its row, and between the tooltip and the edges it is kept inside. */
+const TOOLTIP_GAP = 4
 
 const chevron = html`<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
   <path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -261,6 +262,7 @@ export class Gantt extends LitElement {
   #observer?: MutationObserver
   #resizeObserver?: ResizeObserver
   #measureFrame = 0
+  #tooltipFrame = 0
   /**
    * Upgrading over server-rendered markup. The server cannot read the task children, so it rendered an empty frame;
    * the first client render must match it or Lit's hydration throws, and the timeline fills in on the update after.
@@ -282,6 +284,9 @@ export class Gantt extends LitElement {
       this.#measureFrame = requestAnimationFrame(() => this.#measure())
     })
     this.#resizeObserver.observe(this)
+    // Scroll events do not cross the shadow boundary, so the chart's own scroller repositions through its listener.
+    addEventListener('scroll', this.#schedulePlaceTooltip, { capture: true, passive: true })
+    addEventListener('resize', this.#schedulePlaceTooltip, { passive: true })
   }
 
   override disconnectedCallback(): void {
@@ -290,6 +295,9 @@ export class Gantt extends LitElement {
     this.#resizeObserver?.disconnect()
     cancelAnimationFrame(this.#measureFrame)
     this.#probeObserved = false
+    cancelAnimationFrame(this.#tooltipFrame)
+    removeEventListener('scroll', this.#schedulePlaceTooltip, { capture: true })
+    removeEventListener('resize', this.#schedulePlaceTooltip)
     super.disconnectedCallback()
   }
 
@@ -327,6 +335,7 @@ export class Gantt extends LitElement {
     // Measuring happens in the ResizeObserver callback, which runs after layout and outside this update; reading
     // and setting state here would schedule a second update every time.
     this.#observeProbe()
+    this.#placeTooltip()
     if (!this.#initialScroll && this.#model.rows.length && !this.loading) {
       this.#initialScroll = true
       this.#scrollToDay(this.selected ? this.#model.byId.get(this.selected)?.start : this.#todayDay())
@@ -695,80 +704,80 @@ export class Gantt extends LitElement {
     const tipId = this.hoverId ?? (this.keyboardFocus ? this.focusId : null)
 
     return html`<div
-      class="timeline"
-      aria-hidden="true"
-      style=${styleMap({ width: `${width}px`, height: `${height}px` })}
-      @click=${this.#onTimelineClick}
-      @pointerover=${this.#onTimelineOver}
-      @pointerleave=${this.#onTimelineLeave}
-    >
-      ${ticks.weekend.map((day) => html`<div class="weekend" style=${styleMap({ left: `${x(day)}px`, width: `${column}px` })}></div>`)}
-      ${ticks.minor.map((tick) => html`<div class="line" style=${styleMap({ left: `${x(tick.start)}px` })}></div>`)}
-      ${repeat(
-        rows,
-        (row) => row.id,
-        (row) => {
-          const left = x(row.start)
-          const barWidth = this.#days(row) * column
-          const toneClass = row.tone !== undefined && row.tone !== 'primary' ? `tone-${row.tone}` : ''
-          const selected = row.id === this.selected
-          let mark: TemplateResult
-          let beside: TemplateResult | typeof nothing = nothing
-          if (row.group) {
-            mark = html`<div class="summary" part="summary" data-id=${row.id} style=${styleMap({ left: `${left}px`, width: `${barWidth}px` })}></div>`
-            if (this.hideList && !compact) beside = html`<div class="outside" style=${styleMap({ left: `${left + barWidth + 8}px` })}>${row.label}</div>`
-          } else if (row.milestone) {
-            const at = left + column / 2
-            mark = html`<div
-              class=${classMap({ milestone: true, selected, [toneClass]: !!toneClass })}
-              part="milestone"
-              data-id=${row.id}
-              style=${styleMap({ left: `${at}px` })}
-            ></div>`
-            if (!compact) {
-              const text = `${row.label} · ${shortDate(row.start)}`
-              const pos = at + 14 + text.length * charWidth > width ? { right: `${width - at + 14}px` } : { left: `${at + 14}px` }
-              beside = html`<div class="outside" style=${styleMap(pos)}>${text}</div>`
-            }
-          } else {
-            const fits = !compact && row.label.length * charWidth + 18 <= barWidth
-            mark = html`<div
-              class=${classMap({ bar: true, selected, hover: row.id === this.hoverId, [toneClass]: !!toneClass })}
-              part="bar"
-              data-id=${row.id}
-              style=${styleMap({ left: `${left}px`, width: `${barWidth}px` })}
-            >
-              <div class="progress" part="progress" style=${styleMap({ width: `${Math.round(row.progress * 100)}%` })}></div>
-              ${fits ? html`<span class="bar-label">${row.label}</span>` : nothing}
-            </div>`
-            if (!fits && !compact) {
-              const after = left + barWidth + 8
-              const pos = after + row.label.length * charWidth > width ? { right: `${width - left + 8}px` } : { left: `${after}px` }
-              beside = html`<div class="outside" style=${styleMap(pos)}>${row.label}</div>`
-            }
-          }
-          const above = compact
-            ? html`<div
-                class="above"
-                style=${styleMap({ left: `${Math.max(4, Math.min(left, width - 180))}px`, maxWidth: `${Math.max(60, width - Math.max(4, Math.min(left, width - 180)) - 4)}px` })}
+        class="timeline"
+        aria-hidden="true"
+        style=${styleMap({ width: `${width}px`, height: `${height}px` })}
+        @click=${this.#onTimelineClick}
+        @pointerover=${this.#onTimelineOver}
+        @pointerleave=${this.#onTimelineLeave}
+      >
+        ${ticks.weekend.map((day) => html`<div class="weekend" style=${styleMap({ left: `${x(day)}px`, width: `${column}px` })}></div>`)}
+        ${ticks.minor.map((tick) => html`<div class="line" style=${styleMap({ left: `${x(tick.start)}px` })}></div>`)}
+        ${repeat(
+          rows,
+          (row) => row.id,
+          (row) => {
+            const left = x(row.start)
+            const barWidth = this.#days(row) * column
+            const toneClass = row.tone !== undefined && row.tone !== 'primary' ? `tone-${row.tone}` : ''
+            const selected = row.id === this.selected
+            let mark: TemplateResult
+            let beside: TemplateResult | typeof nothing = nothing
+            if (row.group) {
+              mark = html`<div class="summary" part="summary" data-id=${row.id} style=${styleMap({ left: `${left}px`, width: `${barWidth}px` })}></div>`
+              if (this.hideList && !compact) beside = html`<div class="outside" style=${styleMap({ left: `${left + barWidth + 8}px` })}>${row.label}</div>`
+            } else if (row.milestone) {
+              const at = left + column / 2
+              mark = html`<div
+                class=${classMap({ milestone: true, selected, [toneClass]: !!toneClass })}
+                part="milestone"
+                data-id=${row.id}
+                style=${styleMap({ left: `${at}px` })}
+              ></div>`
+              if (!compact) {
+                const text = `${row.label} · ${shortDate(row.start)}`
+                const pos = at + 14 + text.length * charWidth > width ? { right: `${width - at + 14}px` } : { left: `${at + 14}px` }
+                beside = html`<div class="outside" style=${styleMap(pos)}>${text}</div>`
+              }
+            } else {
+              const fits = !compact && row.label.length * charWidth + 18 <= barWidth
+              mark = html`<div
+                class=${classMap({ bar: true, selected, hover: row.id === this.hoverId, [toneClass]: !!toneClass })}
+                part="bar"
+                data-id=${row.id}
+                style=${styleMap({ left: `${left}px`, width: `${barWidth}px` })}
               >
-                ${row.label}<span class="dates">${row.milestone ? shortDate(row.start) : `${shortDate(row.start)} – ${shortDate(row.end)}`}</span>
+                <div class="progress" part="progress" style=${styleMap({ width: `${Math.round(row.progress * 100)}%` })}></div>
+                ${fits ? html`<span class="bar-label">${row.label}</span>` : nothing}
               </div>`
+              if (!fits && !compact) {
+                const after = left + barWidth + 8
+                const pos = after + row.label.length * charWidth > width ? { right: `${width - left + 8}px` } : { left: `${after}px` }
+                beside = html`<div class="outside" style=${styleMap(pos)}>${row.label}</div>`
+              }
+            }
+            const above = compact
+              ? html`<div
+                  class="above"
+                  style=${styleMap({ left: `${Math.max(4, Math.min(left, width - 180))}px`, maxWidth: `${Math.max(60, width - Math.max(4, Math.min(left, width - 180)) - 4)}px` })}
+                >
+                  ${row.label}<span class="dates">${row.milestone ? shortDate(row.start) : `${shortDate(row.start)} – ${shortDate(row.end)}`}</span>
+                </div>`
+              : nothing
+            return html`<div class=${classMap({ track: true, selected, hover: row.id === this.hoverId })}>${above}${mark}${beside}</div>`
+          },
+        )}
+        <svg class="links" width=${width} height=${height}>${links}</svg>
+        ${
+          today !== null && today >= range.start && today <= range.end
+            ? html`<div class="today" part="today" style=${styleMap({ left: `${x(today) + column / 2}px` })}></div>`
             : nothing
-          return html`<div class=${classMap({ track: true, selected, hover: row.id === this.hoverId })}>${above}${mark}${beside}</div>`
-        },
-      )}
-      <svg class="links" width=${width} height=${height}>${links}</svg>
-      ${
-        today !== null && today >= range.start && today <= range.end
-          ? html`<div class="today" part="today" style=${styleMap({ left: `${x(today) + column / 2}px` })}></div>`
-          : nothing
-      }
-      ${tipId && index.has(tipId) ? this.#renderTooltipFor(this.#model.byId.get(tipId)!, index.get(tipId)!, x, width, height) : nothing}
-    </div>`
+        }
+      </div>
+      ${tipId && index.has(tipId) ? this.#renderTooltipFor(this.#model.byId.get(tipId)!) : nothing}`
   }
 
-  #renderTooltipFor(row: GanttRow, i: number, x: (day: number) => number, width: number, height: number) {
+  #renderTooltipFor(row: GanttRow) {
     const context: GanttTooltipContext = {
       id: row.id,
       task: row.task,
@@ -782,12 +791,51 @@ export class Gantt extends LitElement {
     }
     const content = this.renderTooltip ? this.renderTooltip(context) : this.#defaultTooltip(row)
     if (content === null || content === undefined || content === nothing) return nothing
-    const rowHeight = this.#rowHeight
-    const left = Math.max(4, Math.min(x(row.start) + Math.min(this.#days(row) * this.#column, 40), width - TOOLTIP_WIDTH - 4))
-    const below = (i + 1) * rowHeight
-    const flip = below + 120 > height && i * rowHeight > 120
-    const position = flip ? { left: `${left}px`, bottom: `${height - i * rowHeight + 4}px` } : { left: `${left}px`, top: `${below + 2}px` }
-    return html`<div class="tooltip" part="tooltip" style=${styleMap(position)}>${content}</div>`
+    // A top-layer popover, so neither the chart's scroller nor its rounded frame clips it; `#placeTooltip` positions it.
+    return html`<div class="tooltip" part="tooltip" popover="manual" data-for=${row.id}>${content}</div>`
+  }
+
+  /**
+   * Shows the tooltip and puts it under its row (above when the viewport has no room below), starting a little into
+   * the bar and kept inside the visible part of the timeline. Fixed coordinates: the popover lives in the top layer.
+   */
+  #placeTooltip() {
+    // Hover and keyboard focus are the only ways in, so no tooltip state means nothing to query.
+    if (isServer || !(this.hoverId ?? (this.keyboardFocus ? this.focusId : null))) return
+    const tip = this.renderRoot.querySelector<HTMLElement>('.tooltip')
+    const id = tip?.dataset.for
+    const mark = id ? this.renderRoot.querySelector<HTMLElement>(`.timeline [data-id="${CSS.escape(id)}"]`) : null
+    const track = mark?.closest<HTMLElement>('.track')
+    const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
+    // Without the popover API the tooltip stays hidden by the stylesheet, and `:popover-open` would not even parse.
+    if (!tip || !mark || !track || !scroller || typeof tip.showPopover !== 'function') return
+    if (!tip.matches(':popover-open')) {
+      try {
+        tip.showPopover()
+      } catch {
+        return
+      }
+    }
+    const bar = mark.getBoundingClientRect()
+    const row = track.getBoundingClientRect()
+    const view = scroller.getBoundingClientRect()
+    const list = this.renderRoot.querySelector<HTMLElement>('.list')
+    const listWidth = this.hideList || this.#compact ? 0 : (list?.offsetWidth ?? 0)
+    const { width, height } = tip.getBoundingClientRect()
+    const maxLeft = Math.min(innerWidth, view.left + scroller.clientWidth) - width - TOOLTIP_GAP
+    // When the visible timeline is narrower than the tooltip, it overlaps the list rather than run past the right edge.
+    const minLeft = Math.max(TOOLTIP_GAP, Math.min(view.left + listWidth + TOOLTIP_GAP, maxLeft))
+    const left = Math.max(minLeft, Math.min(bar.left + Math.min(bar.width, 40), maxLeft))
+    const roomBelow = innerHeight - row.bottom
+    const top = roomBelow >= height + TOOLTIP_GAP || roomBelow >= row.top ? row.bottom + TOOLTIP_GAP : row.top - height - TOOLTIP_GAP
+    tip.style.left = `${Math.round(left)}px`
+    tip.style.top = `${Math.round(top)}px`
+  }
+
+  /** Scroll and resize fire in bursts; one placement per frame is enough. */
+  #schedulePlaceTooltip = () => {
+    cancelAnimationFrame(this.#tooltipFrame)
+    this.#tooltipFrame = requestAnimationFrame(() => this.#placeTooltip())
   }
 
   #defaultTooltip(row: GanttRow) {
@@ -852,7 +900,7 @@ export class Gantt extends LitElement {
       const rows = this.#visible()
       const range = this.#range()
       const width = (range.end - range.start + 1) * this.#column
-      body = html`<div class="scroller" part="scroller">
+      body = html`<div class="scroller" part="scroller" @scroll=${this.#schedulePlaceTooltip}>
         <div class="content" style=${styleMap({ width: `calc(var(--_list) + ${width}px)` })}>
           <div class="head" aria-hidden="true">
             <div class="corner">

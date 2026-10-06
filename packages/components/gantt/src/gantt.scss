@@ -290,6 +290,9 @@
 /* ---- timeline ---- */
 .timeline {
   position: relative;
+  // Its own stacking context: the bars' z-indexes then order them among themselves only, and the sticky list and
+  // header always paint over the part of the timeline scrolled underneath them.
+  z-index: 0;
   flex: 0 0 auto;
   overflow: hidden;
 }
@@ -468,18 +471,27 @@
   background: css.cssVar(today--color);
 }
 
+// A top-layer popover placed with fixed coordinates by the component; these reset the UA popover box.
 .tooltip {
-  position: absolute;
-  z-index: 4;
+  position: fixed;
+  inset: auto;
   box-sizing: border-box;
   width: css.cssVar(tooltip--width);
+  height: auto;
+  margin: 0;
+  overflow: visible;
   padding: 10px 12px;
+  // Shown only as an open popover, so a browser without the popover API shows no tooltip rather than a stray box.
+  display: none;
   background: css.cssVar(tooltip--background);
   color: css.cssVar(tooltip--color);
   border: css.cssVar(tooltip--border);
   border-radius: css.cssVar(tooltip--border-radius);
   box-shadow: css.cssVar(tooltip--box-shadow);
   pointer-events: none;
+}
+.tooltip:popover-open {
+  display: block;
 }
 .tooltip-title {
   font-weight: css.cssVar(header__major--font-weight);
