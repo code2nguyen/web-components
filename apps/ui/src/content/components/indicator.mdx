@@ -1,0 +1,103 @@
+---
+title: 'Indicator'
+description: 'Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Indicator } from '@c2n/components/indicator'
+import { Avatar } from '@c2n/components/avatar'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+
+`c2-indicator` wraps any element and pins a solid marker to it: an unread count on an inbox button, a presence dot on an avatar, a "new" flag on a tab. Without a `count` and with nothing in the `label` slot it is a dot; a `count` is clamped at `max` (`99+`) and a count of `0` hides it unless `show-zero` is set. `position` picks one of eight spots in logical terms, so `top-end` follows the writing direction, and `invisible` scales the marker out once its notifications are read. Six `tone`s carry meaning, each a background/text variable pair.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/indicator'
+```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/indicator
+<style>
+  .round {
+    --c2-indicator--offset-x: 14.6%;
+    --c2-indicator--offset-y: 14.6%;
+  }
+  .avatar {
+    --c2-avatar--size: 40px;
+  }
+  .box {
+    display: inline-block;
+    width: 72px;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px dashed var(--c2-theme--color-outline, #bcbcc6);
+  }
+  .label-icon {
+    --c2-indicator__icon--size: 10px;
+  }
+</style>
+<div data-label="Counts">
+  <c2-indicator count="3" accessible-label="{count} unread notifications" class="round">
+    <c2-icon-button aria-label="Notifications"><c2-feather-bell></c2-feather-bell></c2-icon-button>
+  </c2-indicator>
+  <c2-indicator count="42" accessible-label="{count} unread messages" class="round">
+    <c2-icon-button aria-label="Messages"><c2-feather-mail></c2-feather-mail></c2-icon-button>
+  </c2-indicator>
+  <c2-indicator count="240" accessible-label="More than 99 tasks">
+    <c2-button>Tasks</c2-button>
+  </c2-indicator>
+  <c2-indicator count="0" show-zero tone="neutral">
+    <c2-button>Drafts</c2-button>
+  </c2-indicator>
+</div>
+<div data-label="Dot, pulse and tones">
+  <c2-indicator tone="success" position="bottom-end" class="round" accessible-label="Online">
+    <c2-avatar class="avatar" name="Ada Lovelace" initial-count="2"></c2-avatar>
+  </c2-indicator>
+  <c2-indicator tone="warning" position="bottom-end" class="round" accessible-label="Away">
+    <c2-avatar class="avatar" name="Grace Hopper" initial-count="2"></c2-avatar>
+  </c2-indicator>
+  <c2-indicator tone="danger" pulse class="round" accessible-label="Recording">
+    <c2-avatar class="avatar" name="Alan Turing" initial-count="2"></c2-avatar>
+  </c2-indicator>
+  <c2-indicator tone="primary" accessible-label="New">
+    <c2-button>Changelog</c2-button>
+  </c2-indicator>
+</div>
+<div data-label="Label slot">
+  <c2-indicator tone="primary" accessible-label="New feature">
+    <c2-button>Reports</c2-button>
+    <span slot="label">New</span>
+  </c2-indicator>
+  <c2-indicator tone="success" class="round label-icon" accessible-label="Verified">
+    <c2-avatar class="avatar" name="Linus Torvalds" initial-count="2"></c2-avatar>
+    <svg slot="label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  </c2-indicator>
+</div>
+<div data-label="Positions">
+  <c2-indicator position="top-start"><span class="box"></span></c2-indicator>
+  <c2-indicator position="top-center"><span class="box"></span></c2-indicator>
+  <c2-indicator position="top-end"><span class="box"></span></c2-indicator>
+  <c2-indicator position="middle-start"><span class="box"></span></c2-indicator>
+  <c2-indicator position="middle-end"><span class="box"></span></c2-indicator>
+  <c2-indicator position="bottom-start"><span class="box"></span></c2-indicator>
+  <c2-indicator position="bottom-center"><span class="box"></span></c2-indicator>
+  <c2-indicator position="bottom-end"><span class="box"></span></c2-indicator>
+</div>
+```
+
+The wrapped element keeps its own role and focus; the marker ignores the pointer, so a click on it reaches the element underneath. A bare `3` read after a button means little, so give `accessible-label` a phrase such as `{count} unread messages`: `{count}` becomes the displayed count and the phrase replaces the visible marker in the accessibility tree. A dot has no text, so without `accessible-label` it is not announced at all.
+
+The marker is centred on the edge or corner of the wrapped element's box, which suits buttons and cards. For a round target such as an avatar or icon button, set `--c2-indicator--offset-x` and `--c2-indicator--offset-y` to `14.6%` to move it onto the circle. `--c2-indicator--border` draws a ring in the page background colour; set it to `none` on a coloured surface.
+
+`c2-badge` can also pin a count to a corner through its `anchor` slot. Reach for `c2-badge` when the mark is a tinted label in its own right, and for `c2-indicator` when it is a solid notification marker on another element, needs a centre or middle position, or has to follow a right-to-left layout.

@@ -366,6 +366,19 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-badge__info--color': { exclude: 'status colour' },
+  // Indicator tones are solid fills chosen against their text, readable on a light and a dark page alike. Only the
+  // primary pair follows the theme (accent + on-primary flip together); the error token lightens in a dark theme,
+  // where white text on it falls below 3:1, and the warning text must stay dark on amber.
+  '--c2-indicator__neutral--background': { exclude: 'solid status fill' },
+  '--c2-indicator__neutral--color': { token: 'color-on-fill' },
+  '--c2-indicator__success--background': { exclude: 'solid status fill' },
+  '--c2-indicator__success--color': { token: 'color-on-fill' },
+  '--c2-indicator__warning--background': { exclude: 'solid status fill' },
+  '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
+  '--c2-indicator__danger--background': { exclude: 'solid status fill' },
+  '--c2-indicator__danger--color': { token: 'color-on-fill' },
+  '--c2-indicator__info--background': { exclude: 'solid status fill' },
+  '--c2-indicator__info--color': { token: 'color-on-fill' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },

@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import indicator from '@c2n/indicator/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
@@ -105,6 +106,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    indicator,
     chip,
     searchField,
     inlineEdit,

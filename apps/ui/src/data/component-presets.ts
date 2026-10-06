@@ -1287,6 +1287,23 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Counter', attributes: { tone: 'danger', count: '120' } },
     ],
   },
+  'c2-indicator': {
+    html: `<c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>`,
+    presets: [
+      { name: 'Round target', css: { '--c2-indicator--offset-x': '14.6%', '--c2-indicator--offset-y': '14.6%' } },
+      {
+        name: 'Squared counter',
+        css: {
+          '--c2-indicator--height': '16px',
+          '--c2-indicator--min-width': '16px',
+          '--c2-indicator--border-radius': '4px',
+          '--c2-indicator--font-size': '11px',
+          '--c2-indicator--border': 'none',
+        },
+      },
+      { name: 'Primary pulse', attributes: { tone: 'primary', pulse: '' } },
+    ],
+  },
   'c2-avatar': {
     html: `<c2-avatar name="Elisa Jasmin" initial-count="2"></c2-avatar>`,
     presets: [

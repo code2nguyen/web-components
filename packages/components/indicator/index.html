@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-indicator</title>
+    <script type="module" src="/src/indicator.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 32px;
+        margin-bottom: 32px;
+      }
+      .box {
+        display: inline-block;
+        width: 72px;
+        height: 48px;
+        border: 1px dashed #bcbcc6;
+        border-radius: 8px;
+      }
+      .avatar {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #edf1fe;
+        color: #0265dc;
+        font-weight: 600;
+      }
+      .round {
+        --c2-indicator--offset-x: 14.6%;
+        --c2-indicator--offset-y: 14.6%;
+      }
+      .squared {
+        --c2-indicator--border-radius: 4px;
+        --c2-indicator--border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Counts</h2>
+    <section>
+      <c2-indicator count="3" accessible-label="{count} unread messages"><button>Inbox</button></c2-indicator>
+      <c2-indicator count="240"><button>Tasks</button></c2-indicator>
+      <c2-indicator count="0"><button>Hidden at zero</button></c2-indicator>
+      <c2-indicator count="0" show-zero tone="neutral"><button>Shown at zero</button></c2-indicator>
+      <c2-indicator count="12" class="squared" tone="primary"><button>Squared</button></c2-indicator>
+    </section>
+
+    <h2>Dots</h2>
+    <section>
+      <c2-indicator class="round" tone="success" position="bottom-end" accessible-label="Online"><span class="avatar">AL</span></c2-indicator>
+      <c2-indicator class="round" tone="warning" position="bottom-end" accessible-label="Away"><span class="avatar">GH</span></c2-indicator>
+      <c2-indicator class="round" pulse accessible-label="Recording"><span class="avatar">AT</span></c2-indicator>
+      <c2-indicator id="toggle" count="5"
+        ><button onclick="this.parentElement.invisible = !this.parentElement.invisible">Toggle invisible</button></c2-indicator
+      >
+    </section>
+
+    <h2>Label slot</h2>
+    <section>
+      <c2-indicator tone="primary" position="top-center"><button>Reports</button><span slot="label">New</span></c2-indicator>
+      <c2-indicator tone="success" class="round"
+        ><span class="avatar">LT</span
+        ><svg slot="label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline></svg
+      ></c2-indicator>
+    </section>
+
+    <h2>Positions</h2>
+    <section>
+      <c2-indicator position="top-start"><span class="box"></span></c2-indicator>
+      <c2-indicator position="top-center"><span class="box"></span></c2-indicator>
+      <c2-indicator position="top-end"><span class="box"></span></c2-indicator>
+      <c2-indicator position="middle-start"><span class="box"></span></c2-indicator>
+      <c2-indicator position="middle-end"><span class="box"></span></c2-indicator>
+      <c2-indicator position="bottom-start"><span class="box"></span></c2-indicator>
+      <c2-indicator position="bottom-center"><span class="box"></span></c2-indicator>
+      <c2-indicator position="bottom-end"><span class="box"></span></c2-indicator>
+    </section>
+
+    <h2>Right to left</h2>
+    <section dir="rtl">
+      <c2-indicator count="3"><button>صندوق</button></c2-indicator>
+      <c2-indicator position="middle-start"><span class="box"></span></c2-indicator>
+    </section>
+  </body>
+</html>

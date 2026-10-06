@@ -1049,6 +1049,19 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-indicator",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer-owned target; it keeps its own styles and the indicator is drawn over it."
+    },
+    {
+      "tag": "c2-indicator",
+      "slot": "label",
+      "decision": "variables",
+      "variables": ["--c2-indicator__icon--size"],
+      "reason": "Slotted text inherits the indicator's tone colour and typography variables; a slotted SVG icon is sized by the icon size variable."
+    },
+    {
       "tag": "c2-inline-edit",
       "slot": "cancel-icon",
       "decision": "variables",

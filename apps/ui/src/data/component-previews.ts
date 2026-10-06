@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  indicator: `<div class="preview-row">
+  <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
+  <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>
+  <c2-indicator tone="primary" pulse accessible-label="New"><c2-button>Changelog</c2-button></c2-indicator>
+</div>`,
   chip: `<div class="preview-row">
   <c2-chip selectable selected>Open</c2-chip>
   <c2-chip selectable>Closed</c2-chip>
