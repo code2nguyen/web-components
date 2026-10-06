@@ -4,7 +4,7 @@
     "c2n": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@c2n/mcp@1.0.2"]
+      "args": ["-y", "@c2n/mcp@1.0.3"]
     }
   }
 }

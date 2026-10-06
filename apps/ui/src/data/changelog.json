@@ -2,6 +2,150 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.3",
+      "date": "2026-10-06",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["inline-edit"],
+              "text": "Add c2-inline-edit, click-to-edit text with any control as the editor",
+              "hash": "22223c6"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Add validate_markup and the c2n-mcp validate CLI and hook",
+              "hash": "252c2b8"
+            },
+            {
+              "scopes": ["skill"],
+              "text": "Make agents use c2-* elements instead of native HTML by default",
+              "hash": "6243645"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "DragNewNode() drags a new node onto the canvas from a toolbar button",
+              "hash": "ce024d2"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "No-double-click-add, and addNode() places the node where it is easy to see",
+              "hash": "673a841"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["mcp"],
+              "text": "Read TYPE and SLOT case-insensitively, and reject onDblClick in JSX",
+              "hash": "6477b8c"
+            },
+            {
+              "scopes": ["inline-edit"],
+              "text": "Address review: keep vetoed blur drafts, close on disable, reflect name",
+              "hash": "cd077b9"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Check on* handlers and tighten validate_markup's exemptions",
+              "hash": "d1c2980"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Address second review of validate_markup",
+              "hash": "39126f8"
+            },
+            {
+              "scopes": ["breadcrumb"],
+              "text": "Follow slot changes on existing children under manual assignment",
+              "hash": "25843fc"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Hide the tooltip without popover support, batch its placement",
+              "hash": "b767f3e"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "A new-node drag released over the toolbar drops nothing",
+              "hash": "45a03ba"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "AddNode() from the toolbar goes beside the node the keyboard was on",
+              "hash": "6fbac4e"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Address review of validate_markup",
+              "hash": "3d822b3"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Keep the tooltip whole and the task list above scrolled bars",
+              "hash": "104d0b2"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Do not flag border-radius on a c2 host, and check .mdx files",
+              "hash": "40a4d8b"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Assign item slots by hand instead of writing slot on children",
+              "hash": "d8bc79c"
+            },
+            {
+              "scopes": ["skill"],
+              "text": "Limit the c2-table default to data grids and cover AGENTS.md re-install",
+              "hash": "57af24d"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "One pair of arrows on a narrow dated planner",
+              "hash": "b756f13"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Use the non-expiring Discord invite",
+              "hash": "d85471c"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Set the Discord invite link",
+              "hash": "3e88130"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Link the c2n-webcomponents Discord from the site header",
+              "hash": "e13bab8"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Tone instead of variant on c2-badge, no size on c2-button in the table gallery",
+              "hash": "8a0c810"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Replace no-op c2 attributes and slots found by c2n-mcp validate",
+              "hash": "4df79c8"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.2",
       "date": "2026-10-05",
       "sections": [

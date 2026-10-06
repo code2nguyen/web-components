@@ -1,6 +1,6 @@
 {
   "name": "@c2n/phosphor-icons",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "main": "dist/index.js",
   "sideEffects": true,
