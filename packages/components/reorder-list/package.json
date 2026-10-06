@@ -64,5 +64,6 @@
   },
   "devDependencies": {
     "@c2n/config": "*"
-  }
+  },
+  "customElements": "custom-elements.json"
 }

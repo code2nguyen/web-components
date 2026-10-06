@@ -516,6 +516,16 @@ export const overrides: Record<string, Override> = {
   '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
   '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
   '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
+  // Its borders, focus ring and drop placeholder follow the outline and brand colour, as masonry's do.
+  '--c2-reorder-list--container-border-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list--divider-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list__item__focus--outline-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list__placeholder--border-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list--placeholder-background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 8%, transparent)',
+  },
+  '--c2-reorder-list__dragging-item--box-shadow': { token: 'shadow-md' },
   // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
   // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
   // swipe actions are semantic colours that stay put.
