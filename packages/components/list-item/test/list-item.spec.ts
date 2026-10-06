@@ -136,3 +136,20 @@ test('an author-written role on the host wins and decides the state it implies',
   await expect(item).toHaveHostAria('aria-selected', 'false')
   await expect(item).toHaveHostAria('aria-pressed', null)
 })
+
+test('a button inside the row keeps its own click and keys, and does not toggle the row', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list-item value="a">Draft<button slot="suffix-icon" class="delete">Delete</button></c2-list-item>')
+  const item = page.locator('c2-list-item')
+  // A listener on the document (event delegation, React's root listener) must see the button as the target.
+  await page.evaluate(() => {
+    const seen: string[] = []
+    ;(window as unknown as { seen: string[] }).seen = seen
+    document.addEventListener('click', (event) => seen.push((event.target as Element).className || (event.target as Element).localName))
+  })
+  await page.locator('.delete').click()
+  await page.locator('.delete').press('Enter')
+  expect(await page.evaluate(() => (window as unknown as { seen: string[] }).seen)).toEqual(['delete', 'delete'])
+  await expect(item).toHaveJSProperty('selected', false)
+  await item.click({ position: { x: 4, y: 4 } })
+  await expect(item).toHaveJSProperty('selected', true)
+})

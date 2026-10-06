@@ -15,6 +15,27 @@ export interface ListItemEventMap {
   click: MouseEvent
 }
 
+/**
+ * Elements that act on their own when clicked or keyed. A click or key press that starts inside one of them belongs to
+ * that control, not to the row around it.
+ */
+const INTERACTIVE_SELECTOR =
+  'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="menuitem"], [role="tab"], [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-checkbox, c2-switch, c2-text-field'
+
+/**
+ * Whether `event` started on an interactive element placed inside `row` (a delete button in the `suffix-icon` slot, a
+ * checkbox, a text field…) rather than on the row itself. The row and the parent list leave such events alone: the
+ * click is neither turned into a row click nor a selection, and Enter / Space reach the control.
+ */
+export function isFromInteractiveContent(event: Event, row: Element): boolean {
+  for (const node of event.composedPath()) {
+    if (node === row) return false
+    // Only the author's light-DOM content counts: the row's own shadow `<a>` (an `href` row) is the row itself.
+    if (node instanceof Element && row.contains(node) && node.matches(INTERACTIVE_SELECTOR)) return true
+  }
+  return false
+}
+
 export interface ListItem {
   addEventListener: TypedAddEventListener<ListItem, ListItemEventMap>
   removeEventListener: TypedRemoveEventListener<ListItem, ListItemEventMap>
@@ -26,6 +47,9 @@ export interface ListItem {
  * only reports clicks. The default slot is the primary text, `description` a second, muted line, `prefix-icon` and
  * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by
  * `--c2-list-item__icon--size` — anything else in them, a shortcut hint or a badge, keeps its own size.
+ * Interactive content placed in a row (a delete button in `suffix-icon`, a checkbox in `prefix-icon`) keeps its own
+ * events: clicking it neither selects the row nor fires the row's `click`, the original event bubbles on with the
+ * control as its `target`, and Enter / Space activate the control instead of the row.
  * With `href` the row is a link. In a multiple-selection list, adjacent selected rows lose the corner radius between
  * them (the list sets `joinedBefore` / `joinedAfter`, exposed as `:state(joined-before)` / `:state(joined-after)`) so a run of
  * selected rows reads as one block.
@@ -200,6 +224,8 @@ export class ListItem extends LitElement {
   }
 
   private handleClick = (event: Event) => {
+    // A button (or other control) inside the row owns its click: let it bubble untouched, with its own target.
+    if (isFromInteractiveContent(event, this)) return
     if (this.disabled) {
       event.preventDefault()
       event.stopPropagation()
@@ -214,7 +240,7 @@ export class ListItem extends LitElement {
 
   private handleKeydown = (event: KeyboardEvent) => {
     // Inside a list the list owns the keyboard.
-    if (this.applyContext || this.disabled) return
+    if (this.applyContext || this.disabled || isFromInteractiveContent(event, this)) return
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       if (this.href) this.renderRoot.querySelector('a')?.click()
