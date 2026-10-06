@@ -350,6 +350,8 @@ function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed
       if (c === '"' || c === "'") {
         while (++i < to && source[i] !== c && source[i] !== '\n') if (source[i] === '\\') i++
       } else if (c === '`') i = skipTemplate(source, i)
+      else if (c === '/' && source[i + 1] !== '/' && source[i + 1] !== '*' && operandExpected(source, from, i)) i = skipRegex(source, i, to)
+      else if (c === '<' && /[A-Za-z>]/.test(source[i + 1] ?? '') && operandExpected(source, from, i)) i = jsxElement(i, to) - 1
       else if (c === '/' && source[i + 1] === '/') {
         const end = source.indexOf('\n', i)
         const stop = end < 0 || end > to ? to : end
@@ -362,6 +364,33 @@ function maskComments(source: string, kind: 'css' | 'script' | 'markup' | 'mixed
         i = stop - 1
       } else if (expression && c === '{') depth++
       else if (expression && c === '}' && depth-- === 0) return i + 1
+    }
+    return to
+  }
+  /**
+   * Skips a JSX element (or fragment) starting at `from`: its text is rendered, not script, so a `//` in it
+   * (`<p>https://…</p>`) is no comment. Expressions in its attributes and children are scanned again. Returns the index
+   * after the element.
+   */
+  const jsxElement = (from: number, to: number): number => {
+    let depth = 0
+    for (let i = from; i < to; i++) {
+      const c = source[i]
+      if (c === '{') i = scriptComments(i + 1, to, true) - 1
+      else if (c !== '<') continue
+      else if (source[i + 1] === '/') {
+        i = source.indexOf('>', i)
+        if (i < 0) return to
+        if (--depth === 0) return i + 1
+      } else {
+        // An opening tag: attribute values may hold `>` in strings or `{…}`.
+        for (i++; i < to && source[i] !== '>'; i++) {
+          if (source[i] === '"' || source[i] === "'") i = Math.max(i, source.indexOf(source[i], i + 1))
+          else if (source[i] === '{') i = scriptComments(i + 1, to, true) - 1
+        }
+        if (source[i - 1] !== '/') depth++
+        else if (depth === 0) return i + 1
+      }
     }
     return to
   }
@@ -508,6 +537,32 @@ function skipBalanced(source: string, start: number, open: string, close: string
     else if (c === close && --depth === 0) return i + 1
   }
   return source.length
+}
+
+/**
+ * Whether the script at `at` starts an operand (a regex literal, a JSX element) rather than continuing one (a division,
+ * a comparison): the last significant character since `from` is an operator or an opening bracket, or there is none.
+ */
+function operandExpected(source: string, from: number, at: number): boolean {
+  let i = at - 1
+  while (i >= from && /\s/.test(source[i])) i--
+  if (i < from) return true
+  if (/[(,=:[!&|?{};+\-*%~^<>]/.test(source[i])) return true
+  return /\b(return|typeof|case|in|of|yield|await|void|delete)$/.test(source.slice(Math.max(from, i - 6), i + 1))
+}
+
+/** The index of the closing `/` of the regex literal opening at `start`, honouring escapes and character classes. */
+function skipRegex(source: string, start: number, to: number): number {
+  let inClass = false
+  for (let i = start + 1; i < to; i++) {
+    const c = source[i]
+    if (c === '\\') i++
+    else if (c === '\n') return i - 1
+    else if (c === '[') inClass = true
+    else if (c === ']') inClass = false
+    else if (c === '/' && !inClass) return i
+  }
+  return to
 }
 
 function skipTemplate(source: string, start: number): number {

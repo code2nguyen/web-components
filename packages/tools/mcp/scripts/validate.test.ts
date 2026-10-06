@@ -281,6 +281,13 @@ test('masks comments inside markup expressions, next to code', () => {
   assert.deepEqual(rules('<p>{{ value /* <button> */ }}</p>', 'a.vue'), [])
   // A string in the expression is not a comment, nor is markup after the expression closes.
   assert.deepEqual(rules('{ "/*" } <button>z</button> { "*/" }', 'a.svelte'), ['1:native-element'])
+  // A `}` escaped in a regex literal does not close the expression early.
+  assert.deepEqual(rules('<p>{ /\\}/.test(value) /* <button> */ }</p>', 'a.svelte'), [])
+  // JSX text inside an expression is rendered, so its `//` is no comment and the markup after it is still checked.
+  assert.deepEqual(rules('{<p>https://example.com</p>} <button>z</button>', 'a.mdx'), ['1:native-element'])
+  assert.deepEqual(rules('const a = <p>https://example.com</p>; const b = <button>z</button>', 'a.tsx'), ['1:native-element'])
+  // Division and comparison are not regexes or JSX.
+  assert.deepEqual(rules('{ a / b /* <button> */ }{ a < b /* <button> */ }', 'a.svelte'), [])
   // `//` in a `<style>` block is CSS, not a script comment.
   assert.deepEqual(rules('<style>.a { background: url(https://x.test/a.png); --c2-buttn--x: 1px }</style>', 'a.svelte'), ['1:unknown-css-variable'])
 })
