@@ -865,9 +865,6 @@ test.describe('actions', () => {
     expect(positions['new-1'].x).toBe(positions.review.x)
     expect(positions['new-1'].y).toBeGreaterThan(positions.review.y)
 
-    // Once focus has left the flow from the toolbar button, the next add goes to the middle of the view again.
-    await page.locator('body').click({ position: { x: 2, y: 2 } })
-    await expect(page.getByRole('button', { name: 'Add node' })).not.toBeFocused()
     // Pan the nodes up out of the middle, so the middle of the view is empty canvas: a node placed there stays put
     // instead of being pushed aside by the overlap check, by a distance that depends on the browser's text metrics.
     const view = (await page.locator('c2-flow .stage').boundingBox())!
@@ -875,6 +872,15 @@ test.describe('actions', () => {
     await page.mouse.down()
     await page.mouse.move(view.x + 24, view.y + view.height * 0.4, { steps: 8 })
     await page.mouse.up()
+    // The added node is selected, and `addNode()` connects after a selection: a click on empty canvas clears it.
+    await page.mouse.click(view.x + 24, view.y + view.height - 24)
+    await expect(host(page)).toHaveJSProperty('selected', null)
+    // Focus leaves the flow for a control outside it (the added node had taken it): the next add goes to the middle
+    // of the view again. A click on bare page does not move focus in every browser, so use a focusable target.
+    await page.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<button id="outside">Outside</button>'))
+    await page.locator('#outside').click()
+    await expect(page.locator('#outside')).toBeFocused()
+    expect(await host(page).evaluate((element: Flow) => element.shadowRoot!.activeElement)).toBeNull()
     await page.getByRole('button', { name: 'Add node' }).click()
     await expect(node(page, 'new-2')).toBeVisible()
     const added = await center(node(page, 'new-2'))
