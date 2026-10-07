@@ -2,6 +2,7 @@ import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { GroupItemSizeController } from '@c2n/core/controllers/group-item-size.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './badge.scss?inline'
 
@@ -94,6 +95,12 @@ export class Badge extends LitElement {
   @property({ reflect: true }) overlap: BadgeOverlap = 'rectangular'
 
   private readonly slotPresence = new SlotPresenceController(this, ['anchor'])
+
+  constructor() {
+    super()
+    // Reports this element's size to an enclosing c2-chip-group, which decides how many items fit.
+    new GroupItemSizeController(this)
+  }
 
   /** Text shown for `count`, clamped at `max`. */
   get displayCount(): string {

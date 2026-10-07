@@ -52,6 +52,10 @@
       "types": "./dist/controllers/breakpoints-observer.d.ts",
       "default": "./dist/controllers/breakpoints-observer.js"
     },
+    "./controllers/group-item-size.js": {
+      "types": "./dist/controllers/group-item-size.d.ts",
+      "default": "./dist/controllers/group-item-size.js"
+    },
     "./controllers/virtual-scroll.js": {
       "types": "./dist/controllers/virtual-scroll.d.ts",
       "default": "./dist/controllers/virtual-scroll.js"
