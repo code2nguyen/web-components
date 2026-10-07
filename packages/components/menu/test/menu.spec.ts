@@ -515,3 +515,18 @@ test('the arrow keys move along a row with Left and Right, and between lines wit
   await expect(row(page, 'green')).toHaveJSProperty('checked', true)
   await expect(row(page, 'red')).toHaveJSProperty('checked', false)
 })
+
+test('in a menu that is one row, ArrowUp and ArrowDown step through its choices', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-menu aria-label="Colour">${trigger}<c2-menu-row aria-label="Colour">${swatch('red', 'Red')}${swatch('green', 'Green')}${swatch('blue', 'Blue')}</c2-menu-row></c2-menu>`,
+  )
+  await page.getByRole('button', { name: 'Actions' }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'red')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'green')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'blue')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(row(page, 'green')).toBeFocused()
+})

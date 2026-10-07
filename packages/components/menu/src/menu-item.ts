@@ -150,6 +150,12 @@ export class MenuItem extends LitElement {
   /** Private: set by the parent menu on every row while any sibling is checkable, so the labels line up. */
   @property({ type: Boolean, attribute: 'reserve-indicator' }) reserveIndicator = false
 
+  override connectedCallback() {
+    super.connectedCallback()
+    // Moved into or out of a c2-menu-row: its look and its name follow.
+    this.requestUpdate()
+  }
+
   /** Whether the row sits in a `c2-menu-row`: a small choice showing only its icon. */
   get compact(): boolean {
     return this.parentElement?.localName === 'c2-menu-row'
@@ -219,6 +225,11 @@ export class MenuItem extends LitElement {
     )
   }
 
+  /** The label's text changed: a choice in a row is named by it. */
+  private handleLabelChange = () => {
+    if (this.compact) this.syncAria()
+  }
+
   private handleClick = (event: Event) => {
     if (this.disabled) {
       event.preventDefault()
@@ -273,7 +284,7 @@ export class MenuItem extends LitElement {
       ${this.renderIndicator()}
       <slot name="prefix-icon"></slot>
       <div class="content">
-        <div class="text" ?data-hidden=${this.compact}><slot>${this.label ?? this.value}</slot></div>
+        <div class="text" ?data-hidden=${this.compact}><slot @slotchange=${this.handleLabelChange}>${this.label ?? this.value}</slot></div>
         <div class="description" ?hidden=${!this.hasDescription}>
           <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>

@@ -7,7 +7,7 @@ import styles from './menu-row.scss?inline'
  * side and show only their `prefix-icon`; the label (`label`, or the slotted text) becomes their accessible name, and a
  * checked one is ringed instead of ticked.
  *
- * The menu treats the row as one line: ArrowLeft and ArrowRight move along it, ArrowUp and ArrowDown leave it for the
+ * The row is one line, never wrapped, and the menu treats it so: ArrowLeft and ArrowRight move along it, ArrowUp and ArrowDown leave it for the
  * line above or below. Its items take part in the menu's radio groups, typeahead and `menu-select` like any row, and do
  * not reserve the check-mark column of the menu's other rows.
  *

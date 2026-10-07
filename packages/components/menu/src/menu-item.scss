@@ -243,6 +243,12 @@
   background: css.cssVar(compact__checked--background);
 }
 
+// The checked choice still shows where the keyboard is: its ring, over the focus highlight.
+:host(:state(compact)[checked]:focus-visible) .c2-menu-item,
+:host(:state(compact)[checked]) .c2-menu-item:hover {
+  background: css.cssVar(hover--background, background);
+}
+
 .text[data-hidden] {
   position: absolute;
   width: 1px;

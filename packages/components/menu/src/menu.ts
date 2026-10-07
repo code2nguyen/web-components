@@ -188,11 +188,18 @@ export class Menu extends LitElement {
     const count = enabled.length
     if (!count) return undefined
     const row = this.rowOf(enabled[index])
+    const wrap = (i: number) => (((i + step) % count) + count) % count
     let next = index
+    let left = false
     for (let i = 0; i < count; i++) {
-      next = (((next + step) % count) + count) % count
-      if (!row || this.rowOf(enabled[next]) !== row) break
+      next = wrap(next)
+      if (!row || this.rowOf(enabled[next]) !== row) {
+        left = true
+        break
+      }
     }
+    // A menu that is one row and nothing else: there is no line to go to, so the keys step through its choices.
+    if (!left) return enabled[wrap(index)]
     const target = enabled[index < 0 ? (step === 1 ? 0 : count - 1) : next]
     const targetRow = this.rowOf(target)
     return targetRow ? (enabled.find((item) => this.rowOf(item) === targetRow) ?? target) : target
