@@ -410,6 +410,16 @@ export const overrides: Record<string, Override> = {
   '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
+  // JSON viewer: the token colours are syntax hues, so each gets a dark-mode pair readable on the dark surface; the
+  // font stays monospace and the search highlight is a translucent hue that tints either surface.
+  '--c2-json-viewer--font-family': { exclude: 'monospace font, not the UI font' },
+  '--c2-json-viewer__key--color': { token: 'color-on-surface', value: 'light-dark(#6f42c1, #c297ff)' },
+  '--c2-json-viewer__string--color': { token: 'color-on-surface', value: 'light-dark(#116329, #7ee787)' },
+  '--c2-json-viewer__number--color': { token: 'color-on-surface', value: 'light-dark(#0550ae, #79c0ff)' },
+  '--c2-json-viewer__boolean--color': { token: 'color-on-surface', value: 'light-dark(#b35900, #ffa657)' },
+  '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
+  '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },

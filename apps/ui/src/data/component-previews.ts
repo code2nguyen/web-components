@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'json-viewer': `<c2-json-viewer style="width: 100%; --c2-json-viewer--max-height: 180px" data='{"id":"ord_8421","paid":true,"total":129.5,"coupon":null,"items":[{"sku":"KB-01","qty":1}]}'></c2-json-viewer>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
   <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>

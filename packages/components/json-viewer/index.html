@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-json-viewer</title>
+    <script type="module" src="/src/json-viewer.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 640px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .terminal {
+        --c2-json-viewer--background-color: #0b1220;
+        --c2-json-viewer--color: #d3deee;
+        --c2-json-viewer--border: 1px solid #263449;
+        --c2-json-viewer__row__hover--background-color: #16233a;
+        --c2-json-viewer__key--color: #c4a7ff;
+        --c2-json-viewer__string--color: #8ee6a8;
+        --c2-json-viewer__number--color: #8ecbff;
+        --c2-json-viewer__boolean--color: #ffb86b;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Default</h3>
+    <c2-json-viewer
+      label="Order"
+      data='{"id":"ord_8421","status":"paid","total":129.5,"gift":false,"coupon":null,"customer":{"name":"Ada Lovelace","first name":"Ada"},"items":[{"sku":"KB-01","qty":1},{"sku":"MS-07","qty":2}]}'
+    ></c2-json-viewer>
+
+    <h3>Search</h3>
+    <input id="query" placeholder="Search" value="sku" />
+    <label><input id="filter" type="checkbox" /> filter</label>
+    <c2-json-viewer id="searchable" label="Searchable"></c2-json-viewer>
+    <output id="matches"></output>
+
+    <h3>Paging, pointer paths, terminal look</h3>
+    <c2-json-viewer id="paged" class="terminal" page-size="5" path-format="pointer"></c2-json-viewer>
+
+    <h3>Empty</h3>
+    <c2-json-viewer><span slot="empty">Nothing loaded yet</span></c2-json-viewer>
+
+    <script type="module">
+      const searchable = document.querySelector('#searchable')
+      searchable.data = {
+        orders: Array.from({ length: 12 }, (_, i) => ({ id: `ord_${8400 + i}`, items: [{ sku: `SKU-${i}`, qty: i % 3 }] })),
+      }
+      const update = async () => {
+        searchable.search = document.querySelector('#query').value
+        searchable.filter = document.querySelector('#filter').checked
+        await searchable.updateComplete
+        document.querySelector('#matches').textContent = `${searchable.searchMatches.length} matches`
+      }
+      document.querySelector('#query').addEventListener('input', update)
+      document.querySelector('#filter').addEventListener('change', update)
+      update()
+
+      const paged = document.querySelector('#paged')
+      paged.data = { values: Array.from({ length: 23 }, (_, i) => i * i) }
+      paged.addEventListener('copied', (event) => console.log(event.detail))
+    </script>
+  </body>
+</html>

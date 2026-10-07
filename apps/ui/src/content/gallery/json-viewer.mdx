@@ -1,0 +1,78 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { JsonViewer } from '@c2n/components/json-viewer'
+
+## Presets
+
+Looks for `c2-json-viewer`. The token colours (`__key--color`, `__string--color`, `__number--color`, …) and the row
+variables (`__row--min-height`, `__row--indent`) do most of the work. Open any card in the studio to start from it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-json-viewer data='{"name":"Ada","age":36,"admin":true,"manager":null,"roles":["admin","editor"],"address":{"city":"London"}}'></c2-json-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .json-terminal {
+    --c2-json-viewer--background-color: #0b1220;
+    --c2-json-viewer--color: #d3deee;
+    --c2-json-viewer--border: 1px solid #263449;
+    --c2-json-viewer--border-radius: 12px;
+    --c2-json-viewer--padding: 10px;
+    --c2-json-viewer__row__hover--background-color: #16233a;
+    --c2-json-viewer__row__focus--outline: 2px solid #5aa3ff;
+    --c2-json-viewer__twisty--color: #7d8fab;
+    --c2-json-viewer__key--color: #c4a7ff;
+    --c2-json-viewer__index--color: #7d8fab;
+    --c2-json-viewer__string--color: #8ee6a8;
+    --c2-json-viewer__number--color: #8ecbff;
+    --c2-json-viewer__boolean--color: #ffb86b;
+    --c2-json-viewer__null--color: #7d8fab;
+    --c2-json-viewer__summary--color: #7d8fab;
+    --c2-json-viewer__action--color: #9cb5da;
+    --c2-json-viewer__action__hover--background-color: #263449;
+  }
+</style>
+<c2-json-viewer
+  class="json-terminal"
+  data='{"level":"error","service":"checkout","latency_ms":412,"retry":true,"trace":{"id":"9f2c41","spans":3},"tags":["payments","eu-west-1"]}'
+></c2-json-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .json-compact {
+    --c2-json-viewer--border: none;
+    --c2-json-viewer--padding: 0px;
+    --c2-json-viewer--font-size: 11px;
+    --c2-json-viewer--line-height: 1.4;
+    --c2-json-viewer__row--min-height: 20px;
+    --c2-json-viewer__row--indent: 12px;
+    --c2-json-viewer__row--padding-inline: 2px;
+  }
+</style>
+<c2-json-viewer
+  class="json-compact"
+  expand-depth="3"
+  data='{"request":{"method":"POST","path":"/v1/orders","headers":{"content-type":"application/json"}},"response":{"status":201,"ms":38}}'
+></c2-json-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Search highlight
+<style>
+  .json-search {
+    --c2-json-viewer__match--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-json-viewer__match--color: light-dark(#7e22ce, #a76cdc);
+  }
+</style>
+<c2-json-viewer
+  class="json-search"
+  search="eu"
+  data='{"regions":[{"id":"eu-west-1","primary":true},{"id":"us-east-1","primary":false}],"failover":"eu-central-1","users":1204}'
+></c2-json-viewer>
+```
+
+</GalleryGrid>

@@ -1,5 +1,5 @@
 {
-  "total": 1146255,
+  "total": 1153390,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -70,6 +70,7 @@
     "index": 750720,
     "indicator": 2443,
     "inline-edit": 5120,
+    "json-viewer": 7135,
     "kanban": 9590,
     "kanban/kanban-column": 3408,
     "kbd": 1061,

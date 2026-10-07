@@ -340,6 +340,10 @@
       "types": "./dist/inline-edit.d.ts",
       "default": "./dist/inline-edit.js"
     },
+    "./json-viewer": {
+      "types": "./dist/json-viewer.d.ts",
+      "default": "./dist/json-viewer.js"
+    },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
@@ -777,6 +781,7 @@
     "@c2n/icon-button": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",
