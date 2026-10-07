@@ -55,6 +55,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/description-list:build",
         "../../components/indicator:build",
         "../../components/chip:build",
         "../../components/search-field:build",

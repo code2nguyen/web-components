@@ -288,6 +288,14 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./description-list": {
+      "types": "./dist/description-list.d.ts",
+      "default": "./dist/description-list.js"
+    },
+    "./description-list/description-item": {
+      "types": "./dist/description-list/description-item.d.ts",
+      "default": "./dist/description-list/description-item.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
@@ -768,6 +776,7 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/flow": "*",
     "@c2n/gantt": "*",

@@ -739,6 +739,46 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-description-list': {
+    html: `<c2-description-list aria-label="Customer" style="width: 420px"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
+    presets: [
+      {
+        name: 'Side-by-side ledger',
+        description: 'One column with each label beside its value and a hairline under every row, for a payment or invoice summary.',
+        css: {
+          '--c2-description-list__grid--columns': '1',
+          '--c2-description-list__grid--row-gap': '0px',
+          '--c2-description-item__label--width': '140px',
+          '--c2-description-item__value--min-width': '140px',
+          '--c2-description-item__container--padding': '10px 0',
+          '--c2-description-item__container--border-bottom': '1px solid #e4e4e7',
+        },
+      },
+      {
+        name: 'Bordered card',
+        description: 'The pairs inside an 8px-radius card with padding, for a detail panel next to other cards.',
+        css: {
+          '--c2-description-list__container--padding': '20px',
+          '--c2-description-list__container--border': '1px solid #e4e4e7',
+          '--c2-description-list__container--border-radius': '8px',
+          '--c2-description-list__grid--min-column-width': '160px',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Smaller type and tighter gaps in two columns, for a summary in a side panel or a hover card.',
+        css: {
+          '--c2-description-list__grid--columns': '2',
+          '--c2-description-list__grid--min-column-width': '120px',
+          '--c2-description-list__grid--column-gap': '16px',
+          '--c2-description-list__grid--row-gap': '10px',
+          '--c2-description-item__container--row-gap': '2px',
+          '--c2-description-item__label--font-size': '12px',
+          '--c2-description-item__value--font-size': '13px',
+        },
+      },
+    ],
+  },
   'c2-chip': {
     html: `<c2-chip selectable selected removable>Status: Active</c2-chip>`,
     presets: [

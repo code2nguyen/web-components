@@ -1,0 +1,91 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-description-list,
+  $theme: (
+    grid--columns: 3,
+    grid--min-column-width: 200px,
+    grid--column-gap: 24px,
+    grid--row-gap: 16px,
+
+    container--padding: 0px,
+    container--border: none,
+    container--border-radius: 0px,
+    container--background-color: transparent,
+    container--font-family: inherit,
+
+    header--gap: 12px,
+    header--margin-bottom: 16px,
+    header--padding: 0px,
+    header--border-bottom: none,
+    header--color: #18181b,
+    header--font-size: 16px,
+    header--font-weight: 600,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.c2-description-list {
+  box-sizing: border-box;
+  padding: css.cssVar(container--padding);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  font-family: css.cssVar(container--font-family);
+}
+
+.header {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: css.cssVar(header--gap);
+  margin-bottom: css.cssVar(header--margin-bottom);
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(header--border-bottom);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.heading {
+  min-width: 0;
+}
+
+// A slotted heading element brings its own margins; the header row owns the spacing.
+.heading ::slotted(*) {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.grid {
+  // As many columns as fit at the minimum width, but never more than the column count: the track is at least the
+  // width that `columns` equal columns would get, so a wide list stops adding columns there.
+  $columns: css.cssVar(grid--columns);
+  $gap: css.cssVar(grid--column-gap);
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, max(#{css.cssVar(grid--min-column-width)}, calc((100% - (#{$columns} - 1) * #{$gap}) / #{$columns}))), 1fr)
+  );
+  column-gap: $gap;
+  row-gap: css.cssVar(grid--row-gap);
+}

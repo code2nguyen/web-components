@@ -1,0 +1,150 @@
+---
+description: 'Ready-made looks for c2-description-list: a detail-page grid, a bordered card, a side-by-side ledger, a striped table, a compact summary and a highlighted stats strip. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DescriptionList, DescriptionItem } from '@c2n/components/description-list'
+import { Badge } from '@c2n/components/badge'
+
+## Presets
+
+`--c2-description-list__grid--*` decides the columns: the most there may be, the narrowest one may get, and the gaps. `--c2-description-item__label--width` switches a label from above its value to beside it, and the `__container`, `__label` and `__value` parts of the item carry the dividers, padding and type. Set item variables on the list and every item picks them up.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .dl-default {
+    width: 100%;
+  }
+</style>
+<c2-description-list class="dl-default" aria-label="Customer">
+  <c2-description-item label="Name">Ada Lovelace</c2-description-item>
+  <c2-description-item label="Email">ada@example.com</c2-description-item>
+  <c2-description-item label="Plan">Business</c2-description-item>
+  <c2-description-item label="Phone"></c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Bordered card
+<style>
+  .dl-card {
+    width: 100%;
+    --c2-description-list__grid--min-column-width: 160px;
+    --c2-description-list__container--padding: 20px;
+    --c2-description-list__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-list__container--border-radius: 8px;
+    --c2-description-list__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-description-list__header--padding: 0 0 12px;
+    --c2-description-list__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .dl-card .wide {
+    --c2-description-item--grid-column: 1 / -1;
+  }
+</style>
+<c2-description-list class="dl-card" aria-label="Billing details">
+  <span slot="heading">Billing details</span>
+  <c2-description-item label="Company">Analytical Engines Ltd</c2-description-item>
+  <c2-description-item label="VAT number">GB 123 4567 89</c2-description-item>
+  <c2-description-item class="wide" label="Address">12 St James's Square, London SW1Y 4JH</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Side-by-side ledger
+<style>
+  .dl-ledger {
+    width: 100%;
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__label--width: 140px;
+    --c2-description-item__value--min-width: 140px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<c2-description-list class="dl-ledger" aria-label="Payment">
+  <c2-description-item label="Amount">€1,240.00</c2-description-item>
+  <c2-description-item label="Status"><c2-badge tone="success">Succeeded</c2-badge></c2-description-item>
+  <c2-description-item label="Payment method">Visa •••• 4242</c2-description-item>
+  <c2-description-item label="Descriptor">ACME*SUBSCRIPTION</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Striped table
+<style>
+  .dl-table {
+    width: 100%;
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-list__container--border-radius: 6px;
+    --c2-description-item__label--width: 120px;
+    --c2-description-item__value--min-width: 120px;
+    --c2-description-item__container--padding: 10px 14px;
+    --c2-description-item__label--font-weight: 500;
+    --c2-description-item__value--font-weight: 400;
+  }
+  .dl-table c2-description-item:nth-child(odd) {
+    --c2-description-item__container--background-color: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+</style>
+<c2-description-list class="dl-table" aria-label="Deployment">
+  <c2-description-item label="Environment">Production</c2-description-item>
+  <c2-description-item label="Branch">main</c2-description-item>
+  <c2-description-item label="Commit">9f2c1ab</c2-description-item>
+  <c2-description-item label="Duration">1m 42s</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Compact summary
+<style>
+  .dl-compact {
+    width: 100%;
+    --c2-description-list__grid--columns: 2;
+    --c2-description-list__grid--min-column-width: 120px;
+    --c2-description-list__grid--column-gap: 16px;
+    --c2-description-list__grid--row-gap: 10px;
+    --c2-description-item__container--row-gap: 2px;
+    --c2-description-item__label--font-size: 12px;
+    --c2-description-item__label--line-height: 16px;
+    --c2-description-item__value--font-size: 13px;
+    --c2-description-item__value--line-height: 18px;
+  }
+</style>
+<c2-description-list class="dl-compact" aria-label="Order">
+  <c2-description-item label="Order">#10482</c2-description-item>
+  <c2-description-item label="Placed">Sep 12</c2-description-item>
+  <c2-description-item label="Items">3</c2-description-item>
+  <c2-description-item label="Total">€86.40</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Stats strip
+<style>
+  .dl-stats {
+    width: 100%;
+    --c2-description-list__grid--min-column-width: 110px;
+    --c2-description-list__grid--column-gap: 12px;
+    --c2-description-item__container--padding: 12px 14px;
+    --c2-description-item__container--background-color: light-dark(#eff6ff, #14243a);
+    --c2-description-item__label--font-size: 12px;
+    --c2-description-item__label--color: light-dark(#1d4ed8, #7fb0ff);
+    --c2-description-item__value--font-size: 20px;
+    --c2-description-item__value--line-height: 28px;
+    --c2-description-item__value--font-weight: 600;
+  }
+  .dl-stats c2-description-item {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+</style>
+<c2-description-list class="dl-stats" aria-label="Usage this month">
+  <c2-description-item label="Requests">1.2M</c2-description-item>
+  <c2-description-item label="Errors">0.04%</c2-description-item>
+  <c2-description-item label="p95 latency">182 ms</c2-description-item>
+</c2-description-list>
+```
+
+</GalleryGrid>

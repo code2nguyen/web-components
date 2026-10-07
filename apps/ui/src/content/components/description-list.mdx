@@ -1,0 +1,59 @@
+---
+title: 'Description List'
+description: 'Read-only label and value pairs for a detail page, in columns that wrap with the available width.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DescriptionList, DescriptionItem } from '@c2n/components/description-list'
+import { Badge } from '@c2n/components/badge'
+
+`c2-description-list` is the Descriptions of antd and the DescriptionList of Polaris: the block of label and value pairs at the top of an order, a customer or a deployment page. Each pair is a `c2-description-item` with a `label` attribute (or a `label` slot for markup) and its value as content, which can be text, a badge, a link or anything else. An item with no value shows `empty-text` (a dash by default) so a missing field reads as missing, not as a layout glitch, and an `actions` slot puts a copy or edit button after the value. The list itself takes a `heading` and `actions` slot for a title row.
+
+The layout is CSS only. The items flow into as many columns as fit, never more than `--c2-description-list__grid--columns` (3) and never narrower than `--c2-description-list__grid--min-column-width` (200px), so the same markup is three columns on a wide page and one on a phone without a media query. `--c2-description-item--grid-column: 1 / -1` lets an item such as an address span the row. Labels sit above their values by default; set `--c2-description-item__label--width` to a length to put them beside the value instead, and the value still drops under its label when the item gets narrower than the label plus `--c2-description-item__value--min-width`. Item variables set on the list reach every item.
+
+The list is exposed as a `list` and each item as a `listitem` holding a `term` and its `definition`. Give the list an `aria-label` when a page has several.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/description-list'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/description-list
+<style>
+  .side-by-side {
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__label--width: 160px;
+    --c2-description-item__value--min-width: 160px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .usage-list {
+    width: 100%;
+  }
+</style>
+<div data-label="Columns">
+  <c2-description-list class="usage-list" aria-label="Customer">
+    <c2-description-item label="Name">Ada Lovelace</c2-description-item>
+    <c2-description-item label="Email">ada@example.com</c2-description-item>
+    <c2-description-item label="Plan"><c2-badge tone="primary">Business</c2-badge></c2-description-item>
+    <c2-description-item label="Phone"></c2-description-item>
+    <c2-description-item label="Customer since">March 4, 2024</c2-description-item>
+    <c2-description-item label="Customer ID">cus_9s6XKzkNRiz8i3</c2-description-item>
+  </c2-description-list>
+</div>
+<div data-label="Label beside value">
+  <c2-description-list class="usage-list side-by-side" aria-label="Payment">
+    <c2-description-item label="Amount">€1,240.00</c2-description-item>
+    <c2-description-item label="Status"><c2-badge tone="success">Succeeded</c2-badge></c2-description-item>
+    <c2-description-item label="Payment method">Visa •••• 4242</c2-description-item>
+    <c2-description-item label="Description" empty-text="No description"></c2-description-item>
+  </c2-description-list>
+</div>
+```
