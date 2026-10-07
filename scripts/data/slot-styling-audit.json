@@ -1825,6 +1825,20 @@
       "reason": "The selected mark sizes, colours and shows or hides the slotted icon and its check fallback through the icon variables."
     },
     {
+      "tag": "c2-chip-part",
+      "slot": "",
+      "decision": "part",
+      "parts": ["part"],
+      "reason": "The part region (the button of an interactive part, the wrapper of a plain one) owns the text slot's component-side presentation; the text takes the container colour and font-weight variables."
+    },
+    {
+      "tag": "c2-chip-part",
+      "slot": "prefix",
+      "decision": "variables",
+      "variables": ["--c2-chip-part__icon--size"],
+      "reason": "The prefix box sizes a slotted SVG through the icon variable; a dot or an avatar keeps its own size."
+    },
+    {
       "tag": "c2-qr-code",
       "slot": "center",
       "decision": "assigned-content",

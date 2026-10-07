@@ -38,7 +38,7 @@ export type ChipPartPopup = '' | 'menu' | 'listbox' | 'dialog' | 'tree' | 'grid'
  *
  * @event {CustomEvent<ChipPartClickDetail>} part-click - An interactive part was clicked, or activated with Enter or Space. `detail.name` is the part's `name`; the event target is the part, to anchor a popover on. Bubbles.
  *
- * @csspart part - The `<button>` of an interactive part, or the wrapper of a plain one.
+ * @csspart part - The `<button>` of an interactive part, or the wrapper of a plain one. It contains the default slot (the text) after the prefix slot.
  *
  * @cssproperty {padding} [--c2-chip-part__container--padding-left=8px]
  * @cssproperty {padding} [--c2-chip-part__container--padding-right=8px]
