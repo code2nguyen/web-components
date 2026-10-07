@@ -419,6 +419,145 @@ test('moves a tile with a real pointer drag and reports one commit', async ({ pa
   expect((await page.evaluate(() => window.masonryEvents[0])).inputMethod).toBe('mouse')
 })
 
+test('a move-handle element replaces the built-in handle and moves by keyboard', async ({ page, scenario }) => {
+  await scenario('own-handle')
+  const item = page.locator('c2-masonry-item').first()
+  await expect(item.locator('[part="move-handle"]')).toHaveCount(0)
+  await expect(item.locator('[part="resize-handle"]')).toHaveCount(1)
+  const grip = page.locator('#grip-1')
+  await grip.focus()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#changes')).toHaveText('1')
+  const event = await page.evaluate(() => window.masonryEvents[0])
+  expect(event.action).toBe('move')
+  expect(event.layout.items.map((entry) => entry.id)).toEqual(['tile-2', 'tile-1', 'tile-3'])
+  expect(await grip.evaluate((element) => element.getAttributeNames().sort())).toEqual(['aria-label', 'id', 'style', 'type'])
+})
+
+test('a move-handle element moves its tile with a pointer drag', async ({ page, scenario }) => {
+  await scenario('own-handle')
+  const start = await page.locator('#grip-1').boundingBox()
+  const target = await page.locator('c2-masonry-item').nth(1).boundingBox()
+  if (!start || !target) throw new Error('Expected a visible grip and target')
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 6 })
+  await page.mouse.up()
+  await expect(page.locator('#changes')).toHaveText('1')
+  const event = await page.evaluate(() => window.masonryEvents[0])
+  expect(event.inputMethod).toBe('mouse')
+  expect(event.layout.items[0].id).not.toBe('tile-1')
+})
+
+test('a press elsewhere in a tile with a move-handle does not move it', async ({ page, scenario }) => {
+  await scenario('own-handle')
+  const heading = await page.locator('c2-masonry-item').first().locator('h2').boundingBox()
+  const target = await page.locator('c2-masonry-item').nth(1).boundingBox()
+  if (!heading || !target) throw new Error('Expected a visible heading and target')
+  await page.mouse.move(heading.x + 4, heading.y + 4)
+  await page.mouse.down()
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 6 })
+  await page.mouse.up()
+  await expect(page.locator('#changes')).toHaveText('0')
+})
+
+test('pinned tiles come first, in their own order, whatever order they are authored in', async ({ page, scenario }) => {
+  await scenario('pinned')
+  const order = () =>
+    page
+      .locator('c2-masonry')
+      .evaluate((element) =>
+        [...element.shadowRoot!.querySelectorAll<HTMLElement>('.tile[data-item-id]')]
+          .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+          .map((tile) => tile.dataset.itemId),
+      )
+  await expect.poll(order).toEqual(['tile-2', 'tile-4', 'tile-1', 'tile-3'])
+})
+
+const moveByKeyboard = async (page: Page, id: string, key: string) => {
+  await page.locator(`c2-masonry-item[item-id="${id}"] [part="move-handle"]`).focus()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press(key)
+  await page.keyboard.press('Enter')
+}
+
+test('a tile moved to the start lands after the pinned tiles', async ({ page, scenario }) => {
+  await scenario('pinned')
+  await moveByKeyboard(page, 'tile-3', 'Home')
+  await expect(page.locator('#changes')).toHaveText('1')
+  expect((await page.evaluate(() => window.masonryEvents[0])).layout.items.map((item) => item.id)).toEqual(['tile-2', 'tile-4', 'tile-3', 'tile-1'])
+})
+
+test('a pinned tile moved to the end stays among the pinned tiles', async ({ page, scenario }) => {
+  await scenario('pinned')
+  await moveByKeyboard(page, 'tile-2', 'End')
+  await expect(page.locator('#changes')).toHaveText('1')
+  expect((await page.evaluate(() => window.masonryEvents[0])).layout.items.map((item) => item.id)).toEqual(['tile-4', 'tile-2', 'tile-1', 'tile-3'])
+})
+
+test('a tile dragged onto a pinned tile lands after the pinned tiles', async ({ page, scenario }) => {
+  await scenario('pinned')
+  const handle = await page.locator('c2-masonry-item[item-id="tile-3"] [part="move-handle"]').boundingBox()
+  const target = await page.locator('c2-masonry-item[item-id="tile-2"]').boundingBox()
+  if (!handle || !target) throw new Error('Expected a move handle and a pinned tile')
+  await page.locator('c2-masonry-item[item-id="tile-3"]').hover()
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(target.x + 10, target.y + 10, { steps: 6 })
+  await page.mouse.up()
+  const events = await page.evaluate(() => window.masonryEvents)
+  // The drop moved it, once, and to just after the pinned tiles.
+  expect(events).toHaveLength(1)
+  expect(events[0].layout.items.slice(0, 3).map((item) => item.id)).toEqual(['tile-2', 'tile-4', 'tile-3'])
+})
+
+test('slotted actions sit in the top-right corner, after the move handle, and show on hover', async ({ page, scenario }) => {
+  await scenario('actions-editing')
+  const item = page.locator('c2-masonry-item').first()
+  const actions = item.locator('[part="actions"]')
+  await expect(actions).toHaveCSS('opacity', '0')
+  await item.hover()
+  await expect(actions).toHaveCSS('opacity', '1')
+  const tile = await item.boundingBox()
+  const move = await item.locator('[part="move-handle"]').boundingBox()
+  const menu = await page.locator('#menu-1').boundingBox()
+  if (!tile || !move || !menu) throw new Error('Expected a tile, its move handle and its menu button')
+  expect(move.x + move.width).toBeLessThanOrEqual(menu.x)
+  expect(tile.x + tile.width - (menu.x + menu.width)).toBeCloseTo(4, 0)
+  expect(move.y - tile.y).toBeCloseTo(4, 0)
+  await expect(page.locator('#menu-1')).toHaveAttribute('slot', 'actions')
+})
+
+test('slotted actions work outside edit mode, and pressing one never moves the tile', async ({ page, scenario }) => {
+  await scenario('actions')
+  const item = page.locator('c2-masonry-item').first()
+  await expect(item.locator('[part="move-handle"]')).toHaveCount(0)
+  await item.hover()
+  await page.locator('#menu-1').click()
+  await expect(page.locator('#menu-clicks')).toHaveText('1')
+
+  await scenario('actions-editing')
+  const menu = await page.locator('#menu-1').boundingBox()
+  const target = await page.locator('c2-masonry-item').nth(1).boundingBox()
+  if (!menu || !target) throw new Error('Expected a visible menu button and target')
+  await page.locator('c2-masonry-item').first().hover()
+  await page.mouse.move(menu.x + menu.width / 2, menu.y + menu.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 6 })
+  await page.mouse.up()
+  await expect(page.locator('#changes')).toHaveText('0')
+})
+
+test('--c2-masonry-item__actions--opacity keeps the actions visible', async ({ page, scenario }) => {
+  await scenario('actions')
+  const item = page.locator('c2-masonry-item').first()
+  await item.evaluate((element) => (element as HTMLElement).style.setProperty('--c2-masonry-item__actions--opacity', '1'))
+  await expect(item.locator('[part="actions"]')).toHaveCSS('opacity', '1')
+  await expect(page.locator('#menu-1')).toBeVisible()
+})
+
 test('resizes with a pointer and ignores a no-op press', async ({ page, scenario }) => {
   await scenario('editing')
   const handle = page.locator('c2-masonry-item').first().locator('[part="resize-handle"]')
@@ -675,4 +814,20 @@ test.describe('trusted touch and pen gestures', () => {
       }
     }
   }
+})
+
+test('pinning a tile after it was placed moves it into the pinned group', async ({ page, scenario }) => {
+  await scenario('pinned')
+  const order = () =>
+    page
+      .locator('c2-masonry-item')
+      .evaluateAll((items: Element[]) =>
+        [...items]
+          .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+          .map((item) => item.getAttribute('item-id')),
+      )
+  const before = await order()
+  expect(before.slice(0, 2).sort()).toEqual(['tile-2', 'tile-4'])
+  await page.locator('c2-masonry-item[item-id="tile-3"]').evaluate((item) => ((item as HTMLElement & { pinned: boolean }).pinned = true))
+  await expect.poll(async () => (await order()).slice(0, 3).sort()).toEqual(['tile-2', 'tile-3', 'tile-4'])
 })

@@ -7,10 +7,12 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { Overlay, Placement } from '@c2n/overlay'
 import styles from './menu.scss?inline'
 import { MenuItem } from './menu-item'
+import { MenuRow } from './menu-row'
 import type { MenuSelectEventDetail } from './menu-item'
 
 import '@c2n/overlay'
 import './menu-item'
+import './menu-row'
 
 export type { Placement }
 export type { MenuItemType, MenuSelectEventDetail } from './menu-item'
@@ -49,7 +51,7 @@ export interface Menu {
  *
  * @tag c2-menu
  *
- * @slot default - The rows: `c2-menu-item` elements, plus `<hr>` separators and `<h1>`–`<h6>` group headings.
+ * @slot default - The rows: `c2-menu-item` elements, plus `<hr>` separators, `<h1>`–`<h6>` group headings and `c2-menu-row` lines of small choices.
  * @slot trigger - The element that opens the menu. Omit it and point `anchor` at an element elsewhere on the page.
  *
  * @event {CustomEvent<MenuSelectEventDetail>} menu-select - Bubbles from the activated row: `detail.value`, `detail.checked` and `detail.data` of that row.
@@ -94,6 +96,7 @@ export interface Menu {
  * @internalcomponent c2-overlay
  *
  * @slotcomponent c2-menu-item
+ * @slotcomponent c2-menu-row
  */
 @customElement('c2-menu')
 export class Menu extends LitElement {
@@ -165,11 +168,41 @@ export class Menu extends LitElement {
   /** Open state at the pointerdown that started the current press on the trigger, see `handleTriggerPointerDown`. */
   private openBeforePress: boolean | undefined = undefined
 
-  /** Slotted rows, in DOM order (separators and headings excluded). */
+  /** Slotted rows, in DOM order (separators and headings excluded), with the choices of each `c2-menu-row`. */
   get items(): MenuItem[] {
     return (this.itemSlot?.assignedElements({ flatten: true }) ?? [])
-      .map((element) => (element instanceof MenuItem ? element : element.firstElementChild))
+      .flatMap((element) => (element instanceof MenuRow ? [...element.children] : [element instanceof MenuItem ? element : element.firstElementChild]))
       .filter((element): element is MenuItem => element instanceof MenuItem)
+  }
+
+  /** The `c2-menu-row` a row sits in, if any. */
+  private rowOf(item: MenuItem | undefined): MenuRow | null {
+    return item?.parentElement instanceof MenuRow ? item.parentElement : null
+  }
+
+  /**
+   * The row ArrowDown (`step` 1) or ArrowUp (`step` -1) goes to: the next one along that is not in the same
+   * `c2-menu-row`, and on entering a row from below, its first choice. Wraps round like a plain list.
+   */
+  private lineStep(enabled: MenuItem[], index: number, step: 1 | -1): MenuItem | undefined {
+    const count = enabled.length
+    if (!count) return undefined
+    const row = this.rowOf(enabled[index])
+    const wrap = (i: number) => (((i + step) % count) + count) % count
+    let next = index
+    let left = false
+    for (let i = 0; i < count; i++) {
+      next = wrap(next)
+      if (!row || this.rowOf(enabled[next]) !== row) {
+        left = true
+        break
+      }
+    }
+    // A menu that is one row and nothing else: there is no line to go to, so the keys step through its choices.
+    if (!left) return enabled[wrap(index)]
+    const target = enabled[index < 0 ? (step === 1 ? 0 : count - 1) : next]
+    const targetRow = this.rowOf(target)
+    return targetRow ? (enabled.find((item) => this.rowOf(item) === targetRow) ?? target) : target
   }
 
   private get enabledItems(): MenuItem[] {
@@ -273,7 +306,8 @@ export class Menu extends LitElement {
     const enabled = this.enabledItems
     if (!this.focusedItem || !enabled.includes(this.focusedItem)) this.focusedItem = enabled[0]
 
-    const checkable = items.some((item) => item.type !== 'item')
+    // The choices of a c2-menu-row are ringed, not ticked: they never push the other labels along.
+    const checkable = items.some((item) => item.type !== 'item' && !this.rowOf(item))
     for (const item of items) {
       item.reserveIndicator = checkable
       item.tabIndex = item === this.focusedItem ? 0 : -1
@@ -375,12 +409,12 @@ export class Menu extends LitElement {
       case 'ArrowDown':
         event.preventDefault()
         event.stopPropagation()
-        this.focusItem(enabled[index + 1] ?? enabled[0])
+        this.focusItem(this.lineStep(enabled, index, 1))
         return
       case 'ArrowUp':
         event.preventDefault()
         event.stopPropagation()
-        this.focusItem(index > 0 ? enabled[index - 1] : enabled[enabled.length - 1])
+        this.focusItem(this.lineStep(enabled, index, -1))
         return
       case 'Home':
         event.preventDefault()
@@ -393,6 +427,13 @@ export class Menu extends LitElement {
         this.focusItem(enabled[enabled.length - 1])
         return
       case 'ArrowRight':
+        if (this.rowOf(current) && !current?.hasSubmenu) {
+          event.preventDefault()
+          event.stopPropagation()
+          const next = enabled[index + 1]
+          if (next && this.rowOf(next) === this.rowOf(current)) this.focusItem(next)
+          return
+        }
         if (current?.hasSubmenu) {
           event.preventDefault()
           event.stopPropagation()
@@ -400,6 +441,12 @@ export class Menu extends LitElement {
         }
         return
       case 'ArrowLeft':
+        if (this.rowOf(current) && index > 0 && this.rowOf(enabled[index - 1]) === this.rowOf(current)) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.focusItem(enabled[index - 1])
+          return
+        }
         if (this.ownerItem) {
           event.preventDefault()
           event.stopPropagation()

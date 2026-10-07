@@ -45,6 +45,8 @@ export type NotepadPad = 'notebook' | 'legal' | 'sticky' | 'index-card'
 export type NotepadPaper = 'lined' | 'grid' | 'dot' | 'blank'
 /** Colour of the page; `default` is `--c2-notepad__sheet--background`. */
 export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink' | 'night'
+/** Side of the "Paper" and "Tear off" buttons the `actions` slot sits on. */
+export type NotepadActionsPlacement = 'start' | 'end'
 export const PADS: readonly NotepadPad[] = ['notebook', 'legal', 'sticky', 'index-card']
 export const PAPERS: readonly NotepadPaper[] = ['lined', 'grid', 'dot', 'blank']
 export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink', 'night']
@@ -245,7 +247,7 @@ class TaskView implements NodeView {
  * @slot header - Printed heading at the top of the sheet, e.g. a title or a date.
  * @slot margin - Content placed in the left margin column, such as a badge or a doodle.
  * @slot toolbar - Extra buttons appended to the selection toolbar.
- * @slot actions - Buttons at the top of the sheet, in the row of the "Paper" and "Tear off" buttons and before them, e.g. a delete or a share button for the note. A slotted `c2-icon-button` is shrunk to the height of that row.
+ * @slot actions - Buttons at the top of the sheet, in the row of the "Paper" and "Tear off" buttons, e.g. a delete or a share button for the note. `actions-placement` puts them before (default) or after those buttons. A slotted `c2-icon-button` is shrunk to the height of that row.
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the notepad loses focus after its value changed, and after a page is torn off.
  * @event {CustomEvent<NotepadFormat>} format-change - Fired when the formatting at the selection changes. Does not bubble.
@@ -283,10 +285,14 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__header--color=#7a8494]
  * @cssproperty {font-size} [--c2-notepad__header--font-size=12px]
  * @cssproperty {display} [--c2-notepad__spiral--display=block] - Spiral binding; none to remove it.
+ * @cssproperty {color} [--c2-notepad__spiral--color=#9aa0a8] - Colour of the spiral binding's flat coils.
  * @cssproperty {display} [--c2-notepad__glue--display=none] - Glued top binding of a legal pad; block to show it.
  * @cssproperty {color} [--c2-notepad__glue--background=#3f444b]
  * @cssproperty {angle} [--c2-notepad__sheet--rotate=0deg] - Tilt of the sheet. A sticky note leans by a random angle (1°–4° either way, picked again each time the pad becomes a sticky note) unless this is set; 0deg keeps it straight.
  * @cssproperty {pixel} [--c2-notepad__top--padding-top=20px] - Space above the header row, which clears the spiral binding.
+ * @cssproperty {pixel} [--c2-notepad__pad--padding-top=12px] - Space above the sheet, where the spiral's coils stand. The legal pad, the sticky note and the index card, which have no spiral, set it to 0, so their sheet starts at the top of the element; set it to 0 too when you hide the spiral of a notebook.
+ * @cssproperty {pixel} [--c2-notepad__pad--padding-bottom=0px] - Space under the sheet. A `tearable` pad sets it to 8px, where the sheets underneath show; set it to 0 with `--c2-notepad__stack--display: none`.
+ * @cssproperty {display} [--c2-notepad__stack--display=block] - Sheets drawn under the page of a `tearable` pad; none to show the page alone.
  * @cssproperty {opacity} [--c2-notepad__controls--opacity=1] - Opacity of the "Paper" button, the "Tear off" button and the `actions` slot while the notepad is neither hovered nor focused. Set it to 0 to show them only on the note being pointed at or written in (on a touch screen, once the writer taps into it), and while the paper picker is open.
  * @cssproperty {color} [--c2-notepad__ink-blue--color=#2848b8]
  * @cssproperty {color} [--c2-notepad__ink-black--color=#18181b]
@@ -296,8 +302,8 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__highlight-green--background=rgba(110, 220, 120, 0.4)]
  * @cssproperty {color} [--c2-notepad__highlight-pink--background=rgba(255, 120, 170, 0.38)]
  * @cssproperty {number} [--c2-notepad__task__checked--opacity=0.55] - Opacity of a ticked checklist item.
- * @cssproperty {color} [--c2-notepad__toolbar--background=#efe6cc] - The washi tape of the selection toolbar.
- * @cssproperty {color} [--c2-notepad__toolbar--color=#2c2a26]
+ * @cssproperty {color} [--c2-notepad__toolbar--background] - The washi tape of the selection toolbar and the paper picker. Unset, it is cut from the page's paper, a shade towards its ink, so it follows the paper colour; set it for one tape on every paper.
+ * @cssproperty {color} [--c2-notepad__toolbar--color] - Text and icons on the tape. Unset, the page's ink.
  * @cssproperty {color} [--c2-notepad__toolbar__button__active--background=rgba(60, 50, 30, 0.14)]
  * @cssproperty {color} [--c2-notepad__perforation--color=#b9bfc8] - Perforated line of a tearable pad.
  * @cssproperty {color} [--c2-notepad__paper-yellow--background=#fcf0bf] - Sheet colour for `paper-color="yellow"`.
@@ -374,6 +380,8 @@ export class Notepad extends LitElement {
   @property({ converter: jsonPropertyConverter }) highlights?: NotepadColor[]
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
+  /** Side of the "Paper" and "Tear off" buttons the `actions` slot sits on: `start` (before them, the default) or `end` (after them). The keyboard order follows. */
+  @property({ attribute: 'actions-placement' }) actionsPlacement: NotepadActionsPlacement = 'start'
 
   @state() private format: NotepadFormat = emptyFormat()
   @state() private disabledByForm = false
@@ -1386,6 +1394,30 @@ export class Notepad extends LitElement {
     const hasEmphasis = ['bold', 'italic', 'underline', 'strike'].some((mark) => allowed.has(mark as NotepadMark))
     const showError = this.error && !!this.errorText
     const colorVars = this.colorVars()
+    const paperButton = this.paperPicker
+      ? html`<button
+          class="paper-button"
+          part="paper-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded=${String(this.paperMenuOpen)}
+          ?disabled=${this.disabled || this.disabledByForm}
+          @click=${this.handlePaperButtonClick}
+          @pointerenter=${this.handlePaperHover}
+          @pointerleave=${this.handlePaperHover}
+        >
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+            <rect x="2" y="1" width="8" height="10" rx="1" />
+            <path d="M4 4h4M4 6h4M4 8h3" />
+          </svg>
+          Paper
+        </button>`
+      : nothing
+    const tearButton = this.tearable
+      ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>Tear off</button>`
+      : nothing
+    // The slot stays put and the built-in buttons move around it: a re-created slot would report its stale assignment.
+    const builtIns = html`${paperButton}${tearButton}`
     return html`
       <div
         class="pad ${this.disabledByForm ? 'form-disabled' : ''} ${this.pointerFocus ? 'pointer-focus' : ''}"
@@ -1402,37 +1434,11 @@ export class Notepad extends LitElement {
           <div class="top">
             <div class="header" ?hidden=${!this.slotPresence.has('header')}><slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
             <div class="controls ${this.paperMenuOpen ? 'open' : ''}">
+              ${this.actionsPlacement === 'end' ? builtIns : nothing}
               <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
                 <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
               </div>
-              ${
-                this.paperPicker
-                  ? html`<button
-                      class="paper-button"
-                      part="paper-button"
-                      type="button"
-                      aria-haspopup="dialog"
-                      aria-expanded=${String(this.paperMenuOpen)}
-                      ?disabled=${this.disabled || this.disabledByForm}
-                      @click=${this.handlePaperButtonClick}
-                      @pointerenter=${this.handlePaperHover}
-                      @pointerleave=${this.handlePaperHover}
-                    >
-                      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
-                        <rect x="2" y="1" width="8" height="10" rx="1" />
-                        <path d="M4 4h4M4 6h4M4 8h3" />
-                      </svg>
-                      Paper
-                    </button>`
-                  : nothing
-              }
-              ${
-                this.tearable
-                  ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>
-                      Tear off
-                    </button>`
-                  : nothing
-              }
+              ${this.actionsPlacement === 'end' ? nothing : builtIns}
             </div>
           </div>
           <div class="margin"><slot name="margin"></slot></div>

@@ -246,6 +246,7 @@
     width: css.cssVar(remove-icon--size);
     height: css.cssVar(remove-icon--size);
     --c2-feather-icon--size: #{css.cssVar(remove-icon--size)};
+    --c2-phosphor-icon--size: #{css.cssVar(remove-icon--size)};
     --c2-mat-icon--font-size: #{css.cssVar(remove-icon--size)};
   }
 }
@@ -276,6 +277,7 @@
   flex: none;
   color: css.cssVar(icon--color);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 

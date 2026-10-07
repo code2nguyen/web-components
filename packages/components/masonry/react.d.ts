@@ -34,6 +34,7 @@ declare module 'react' {
         'cols-sm'?: Attribute
         'cols-md'?: Attribute
         'cols-lg'?: Attribute
+        'move-handle'?: Attribute
       }
     }
   }

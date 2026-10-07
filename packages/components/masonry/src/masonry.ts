@@ -10,6 +10,8 @@ import {
   normalizeAuthoredTiles,
   rangeForWidth,
   reconcileSnapshot,
+  pinnedFirst,
+  moveRange,
   resolveColumns,
   validateSnapshot,
   MASONRY_COLUMN_COUNT,
@@ -159,13 +161,18 @@ export class Masonry extends LitElement {
       childList: true,
       attributes: true,
       subtree: true,
-      attributeFilter: ['item-id', 'rows', 'cols', 'cols-xs', 'cols-sm', 'cols-md', 'cols-lg'],
+      attributeFilter: ['item-id', 'rows', 'cols', 'cols-xs', 'cols-sm', 'cols-md', 'cols-lg', 'pinned'],
     })
+    // `pinned` set as a property changes no attribute: the tile says so itself.
+    this.addEventListener('c2-masonry-item-pinned', this.onItemPinned)
     this.scheduleSync()
   }
 
+  private readonly onItemPinned = () => this.scheduleSync()
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    this.removeEventListener('c2-masonry-item-pinned', this.onItemPinned)
     this.cancelSession()
     this.removeEventListener('pointerdown', this.onPointerDown)
     this.removeEventListener('pointermove', this.onPointerMove)
@@ -250,7 +257,7 @@ export class Masonry extends LitElement {
     if (width <= 0) return
     const { range, columns } = rangeForWidth(width)
     const items = Array.from(this.children).filter((child): child is MasonryItem => child.localName === 'c2-masonry-item')
-    const signatures = items.map((item) => JSON.stringify([item.itemId, item.rows, item.cols, item.colsXs, item.colsSm, item.colsMd, item.colsLg]))
+    const signatures = items.map((item) => JSON.stringify([item.itemId, item.rows, item.cols, item.colsXs, item.colsSm, item.colsMd, item.colsLg, item.pinned]))
     const authoredChanged =
       items.length !== this.authoredElements.length ||
       items.some((item, index) => item !== this.authoredElements[index] || signatures[index] !== this.authoredValues[index])
@@ -331,6 +338,8 @@ export class Masonry extends LitElement {
       else if (validateSnapshot(this.layout)) this.committed = reconcileSnapshot(authoredSnapshot, this.layout)
       else this.reportError({ reason: 'invalid-layout' })
     }
+    // Pinned tiles lead, whatever order the authored tiles, the stored layout or the application's snapshot gave.
+    this.committed = pinnedFirst(this.committed, (id) => this.isPinned(id))
     if (this.session && (!this.editable || !this.canEdit || range !== this.activeRange || !this.itemById.has(this.session.itemId))) this.cancelSession()
     this.activeRange = range
     this.columnCount = columns
@@ -383,9 +392,12 @@ export class Masonry extends LitElement {
 
   private controlFromEvent(event: Event): { control: HTMLElement; item: MasonryItem; action: MasonryAction } | undefined {
     const path = event.composedPath()
-    const control = path.find((node): node is HTMLElement => node instanceof HTMLElement && !!node.dataset.masonryAction)
     const item = path.find((node): node is MasonryItem => node instanceof HTMLElement && node.localName === 'c2-masonry-item')
-    const action = control?.dataset.masonryAction
+    // A tile's own `move-handle` element is found by its id, between the event target and the tile: nothing is written
+    // on the application's element.
+    const isOwnHandle = (node: EventTarget) => !!item?.moveHandle && node instanceof HTMLElement && node.id === item.moveHandle
+    const control = path.find((node): node is HTMLElement => node instanceof HTMLElement && (!!node.dataset.masonryAction || isOwnHandle(node)))
+    const action = control && isOwnHandle(control) ? 'move' : control?.dataset.masonryAction
     if (!control || !item || (action !== 'move' && action !== 'resize')) return undefined
     return { control, item, action }
   }
@@ -528,13 +540,19 @@ export class Masonry extends LitElement {
     }
   }
 
+  private isPinned(id: string): boolean {
+    return this.itemById.get(id)?.pinned ?? false
+  }
+
   private moveCandidate(targetIndex: number): void {
     if (!this.session) return
     const candidate = cloneSnapshot(this.session.original)
     const from = candidate.items.findIndex((item) => item.id === this.session?.itemId)
     if (from < 0) return
     const [item] = candidate.items.splice(from, 1)
-    candidate.items.splice(Math.max(0, Math.min(candidate.items.length, targetIndex)), 0, item)
+    // A pinned tile stays among the pinned ones, any other after them.
+    const [min, max] = moveRange(candidate.items, this.isPinned(item.id), (id) => this.isPinned(id))
+    candidate.items.splice(Math.max(min, Math.min(max, targetIndex)), 0, item)
     this.session.candidate = candidate
     this.statusMessage = `${this.itemById.get(item.id)?.label || item.id}: position ${candidate.items.findIndex((entry) => entry.id === item.id) + 1} of ${candidate.items.length}.`
     this.draw()

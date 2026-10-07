@@ -1,0 +1,25 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-menu-row,
+  $theme: (
+    gap: 4px,
+    padding: 2px 4px 6px,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.row {
+  display: flex;
+  // One line, as the arrow keys see it: ArrowUp and ArrowDown leave the row, so it never wraps onto a second line.
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+}

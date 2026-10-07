@@ -3,3 +3,4 @@
 
 export * from '@c2n/menu'
 export * from '@c2n/menu/menu-item.js'
+export * from '@c2n/menu/menu-row.js'

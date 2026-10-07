@@ -193,7 +193,7 @@ The colours are still CSS variables: `--c2-notepad__paper-yellow--background` an
 
 ## Actions on the note
 
-Buttons slotted into `actions` sit in the row of the "Paper" and "Tear off" buttons, on their left: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). A `c2-icon-button` there is shrunk to a 24px button with a 14px icon to match that row; set its own `--c2-icon-button__state-layer--size` and `--c2-icon-button__icon--width`/`--height` to change that. The buttons keep their own events.
+Buttons slotted into `actions` sit in the row of the "Paper" and "Tear off" buttons, on their left: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). A `c2-icon-button` there is shrunk to a 24px button with a 14px icon to match that row; set its own `--c2-icon-button__state-layer--size` and `--c2-icon-button__icon--width`/`--height` to change that. The buttons keep their own events. Set `actions-placement="end"` to put them on the right of the "Paper" and "Tear off" buttons instead; the keyboard order follows.
 
 On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
 
@@ -222,6 +222,11 @@ Hover the notes of the second row, or tab into one, to see its controls.
   <c2-notepad class="note-with-actions" paper-picker label="Groceries" value="- [ ] Oat milk
 - [ ] Sourdough">
     <c2-icon-button class="note-action" slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+<div data-label="Actions at the end">
+  <c2-notepad class="note-with-actions" paper-picker actions-placement="end" label="Ideas" value="Rooftop garden">
     <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
 </div>

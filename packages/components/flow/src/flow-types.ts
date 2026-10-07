@@ -34,6 +34,12 @@ export interface FlowSize {
   height: number
 }
 
+/**
+ * Outline of a node: a rounded rectangle (`rect`, the default), a `pill`, a `diamond` (a decision), a `circle`, a
+ * `note` with a folded corner, or a `slanted` parallelogram (an input or output).
+ */
+export type FlowNodeShape = 'rect' | 'pill' | 'diamond' | 'circle' | 'note' | 'slanted'
+
 /** One step of the flow. */
 export interface FlowNode<T = unknown> {
   /** Stable identity. Edges, the saved layout and the `node:<id>` slot refer to it. */
@@ -55,6 +61,17 @@ export interface FlowNode<T = unknown> {
    * `node-add` event where the user asked for it.
    */
   position?: FlowPoint
+  /** Outline of the node; `rect` when unset. The text is centred in a `diamond` and a `circle`, and may wrap there. */
+  shape?: FlowNodeShape
+  /** Fill of this node, any CSS colour, over `--c2-flow__node--background-color`. */
+  background?: string
+  /** Text colour of this node, any CSS colour, over `--c2-flow__node--color`. */
+  color?: string
+  /**
+   * Shown before the label in the default body: a Lit template, a DOM node (such as an icon element) or a string
+   * (an emoji). Decorative: the label names the node.
+   */
+  icon?: unknown
   /** Anything else the application needs in its render functions. */
   data?: T
 }
