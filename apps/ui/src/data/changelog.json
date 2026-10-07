@@ -2,6 +2,110 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.5",
+      "date": "2026-10-07",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "A node's shape, its own colours and an icon",
+              "hash": "d07b331"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "C2-menu-row, a line of small choices such as swatches, walked with the arrow keys",
+              "hash": "46cc332"
+            },
+            {
+              "scopes": [],
+              "text": "Icon slots size Phosphor icons as they size Feather ones",
+              "hash": "1081584"
+            },
+            {
+              "scopes": ["toast"],
+              "text": "Action-placement=\"end\" puts the action in line with the message",
+              "hash": "ffc5b31"
+            },
+            {
+              "scopes": ["masonry"],
+              "text": "Pinned tiles stay first, an actions slot beside the move handle, and a move-handle element of the app's own",
+              "hash": "7b763a9"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Cool navy dark palette and fainter notepad rules on dark paper",
+              "hash": "e55dd48"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Add actions-placement to put the actions slot after the Paper and Tear off buttons",
+              "hash": "77e789c"
+            },
+            {
+              "scopes": ["masonry"],
+              "text": "Resize columns and rows together from a tile's bottom-right corner",
+              "hash": "491bc80"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "A drawn node's connection cue wins over its status colour, and its focus ring has its own variables",
+              "hash": "71297f7"
+            },
+            {
+              "scopes": [],
+              "text": "Review follow-ups on details, toast, masonry and overlay",
+              "hash": "14bec95"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Diamond labels stay inside the shape, drawn shapes take the status colours and a focus ring on their outline, and edges meet a slanted node's sides",
+              "hash": "b51b3ad"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "A menu that is one row steps through it, rows never wrap, the checked choice shows keyboard focus, and a moved or relabelled choice keeps its name",
+              "hash": "c6e89dc"
+            },
+            {
+              "scopes": ["overlay"],
+              "text": "Reposition on the next frame after the first placement, so a growing surface never loops its ResizeObserver",
+              "hash": "acf26d2"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "The toolbar takes the paper's colour, and the caret stays the height of the writing",
+              "hash": "80fd6f7"
+            },
+            {
+              "scopes": ["details"],
+              "text": "Content that arrives while opening slides open without a jump",
+              "hash": "fde69c7"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Restore the zinc dark palette",
+              "hash": "e7bea59"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.4",
       "date": "2026-10-06",
       "sections": [
