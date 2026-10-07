@@ -96,6 +96,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/truncate:build",
         "./packages/components/indicator:build",
         "./packages/components/chip:build",
         "./packages/components/search-field:build",

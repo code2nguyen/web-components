@@ -1,0 +1,79 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-truncate,
+  $theme: (
+    content--line-clamp: 3,
+    content--color: inherit,
+    content--font-size: inherit,
+    content--line-height: inherit,
+
+    toggle--margin-top: 4px,
+    toggle--padding: 0,
+    toggle--color: variables.$color-blue,
+    toggle--background-color: transparent,
+    toggle--font-size: 14px,
+    toggle--font-weight: 500,
+    toggle--border-radius: 4px,
+    toggle--text-decoration: none,
+    toggle__hover--color: null,
+    toggle__hover--text-decoration: underline,
+    toggle__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    toggle__focus--outline-offset: 2px,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-truncate__content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: css.cssVar(content--line-clamp);
+  line-clamp: css.cssVar(content--line-clamp);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: css.cssVar(content--color);
+  font-size: css.cssVar(content--font-size);
+  line-height: css.cssVar(content--line-height);
+}
+
+:host([expanded]) .c2-truncate__content:not(.is-measuring) {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: none;
+  overflow: visible;
+}
+
+.c2-truncate__toggle {
+  display: inline-block;
+  margin: css.cssVar(toggle--margin-top) 0 0;
+  padding: css.cssVar(toggle--padding);
+  border: none;
+  border-radius: css.cssVar(toggle--border-radius);
+  background-color: css.cssVar(toggle--background-color);
+  color: css.cssVar(toggle--color);
+  font: inherit;
+  font-size: css.cssVar(toggle--font-size);
+  font-weight: css.cssVar(toggle--font-weight);
+  text-decoration: css.cssVar(toggle--text-decoration);
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: animation.standard(color);
+}
+
+.c2-truncate__toggle:hover {
+  color: css.cssVar(toggle__hover--color, toggle--color);
+  text-decoration: css.cssVar(toggle__hover--text-decoration);
+}
+
+.c2-truncate__toggle:focus-visible {
+  outline: css.cssVar(toggle__focus--outline);
+  outline-offset: css.cssVar(toggle__focus--outline-offset);
+}

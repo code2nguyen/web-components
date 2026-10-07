@@ -2682,6 +2682,13 @@
       "reason": "The toggle-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-truncate",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The content region owns the clamp, colour and typography of the projected text through its part and --c2-truncate__content--* variables."
+    },
+    {
       "tag": "c2-upload",
       "slot": "action",
       "decision": "part",
