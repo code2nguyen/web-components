@@ -13,6 +13,7 @@ import styles from './masonry-item.scss?inline'
  * the move handle, while the tile is hovered or has focus (see `--c2-masonry-item__actions--opacity`), and work whether
  * or not the container is `editable`. Put them on the item itself, beside its content, so a tile whose content is one
  * link can still carry a menu.
+ * @event {Event} c2-masonry-item-pinned - Internal: `pinned` changed after the tile was placed, so the parent `c2-masonry` lays the tiles out again. Bubbles.
  * @csspart content - Keyboard-reachable scrolling region containing the application content.
  * @csspart controls - Group of edit-only move and resize controls.
  * @csspart actions - Top-right corner holding the move handle and the `actions` slot.

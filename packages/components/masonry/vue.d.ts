@@ -35,6 +35,7 @@ declare module 'vue' {
         'cols-md'?: unknown
         'cols-lg'?: unknown
         'move-handle'?: unknown
+        onC2MasonryItemPinned?: (event: EventOf<MasonryItem, 'c2-masonry-item-pinned'>) => void
       }
     >
   }
