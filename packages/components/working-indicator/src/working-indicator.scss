@@ -92,13 +92,15 @@
   display: flex;
   flex-direction: column;
   height: 1000%;
-  animation: c2-working-indicator-glyph css.cssVar(indicator--animation-duration) steps(10) infinite;
+  // Ten frames: at the shared cycle length each would last 120ms, which reads as a flicker.
+  animation: c2-working-indicator-glyph calc(#{css.cssVar(indicator--animation-duration)} * 2) steps(10) infinite;
 
   > span {
     display: grid;
     place-items: center;
     flex: 1 1 0;
     font-size: calc(#{css.cssVar(indicator--size)} * 0.9);
+    font-variant-emoji: text;
     line-height: 1;
   }
 }
