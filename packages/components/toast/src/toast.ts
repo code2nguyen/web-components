@@ -10,7 +10,7 @@ import regionStyles from './toast-region.scss?inline'
 
 export type ToastAnimation = 'none' | 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'scale'
 
-export type { ToastOptions, ToastRecord, ToastVariant, ToastDismissReason } from './toast-controller.js'
+export type { ToastOptions, ToastRecord, ToastVariant, ToastDismissReason, ToastActionPlacement } from './toast-controller.js'
 
 /** Events fired by {@link Toast}, keyed for `addEventListener`. */
 export interface ToastEventMap {
@@ -63,6 +63,8 @@ export interface Toast {
  * @cssproperty {color} [--c2-toast__icon__warning--color=#a16207]
  * @cssproperty {color} [--c2-toast__icon__error--color=#dc2626]
  * @cssproperty {color} [--c2-toast__action--color=#2563eb]
+ * @cssproperty {font-weight} [--c2-toast__action--font-weight=inherit] - Weight of the action label.
+ * @cssproperty {text-decoration} [--c2-toast__action--text-decoration=underline] - Underline of the action label below the message; an action at the end of the line has none, being a button there.
  * @cssproperty {color} [--c2-toast__close--color=#71717a]
  * @cssproperty {color} [--c2-toast__close__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-toast__button__focus--outline=2px solid #476ef9]
@@ -86,6 +88,11 @@ export class Toast extends LitElement {
   @property({ type: Boolean }) dismissible = false
   /** Label for the optional action button. */
   @property({ attribute: 'action-label' }) actionLabel = ''
+  /**
+   * Where the action sits: `below` the message (default), or at the `end` of the message's line, before the dismiss
+   * button, for a short action such as Undo that belongs with the message.
+   */
+  @property({ attribute: 'action-placement', reflect: true }) actionPlacement: 'below' | 'end' = 'below'
   /** Accessible name of the dismiss button. */
   @property({ attribute: 'close-label' }) closeLabel = 'Dismiss notification'
   /** Set by a region to prevent duplicate announcements. */
@@ -102,6 +109,12 @@ export class Toast extends LitElement {
       event.stopPropagation()
       this.dismiss()
     }
+  }
+
+  private renderAction() {
+    return html`<slot name="action"
+      >${this.actionLabel ? html`<button type="button" class="action" part="action" @click=${() => this.dispatchEvent(new CustomEvent('toast-action', { bubbles: true, composed: true }))}>${this.actionLabel}</button>` : nothing}</slot
+    >`
   }
 
   private renderIcon() {
@@ -123,10 +136,9 @@ export class Toast extends LitElement {
       <div class="content">
         ${this.heading ? html`<div class="heading" part="heading">${this.heading}</div>` : nothing}
         <div part="message"><slot>${this.message}</slot></div>
-        <slot name="action"
-          >${this.actionLabel ? html`<button type="button" class="action" part="action" @click=${() => this.dispatchEvent(new CustomEvent('toast-action', { bubbles: true, composed: true }))}>${this.actionLabel}</button>` : nothing}</slot
-        >
+        ${this.actionPlacement === 'end' ? nothing : this.renderAction()}
       </div>
+      ${this.actionPlacement === 'end' ? html`<div class="action-end">${this.renderAction()}</div>` : nothing}
       ${
         this.dismissible
           ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel} @click=${this.dismiss}>
@@ -381,6 +393,7 @@ export class ToastRegion extends LitElement {
               .showProgress=${item.duration > 0 && (item.showProgress ?? this.showProgress)}
               .dismissible=${item.dismissible}
               .actionLabel=${item.actionLabel}
+              .actionPlacement=${item.actionPlacement}
               @toast-close=${(event: Event) => {
                 event.stopPropagation()
                 this.dismiss(item.id, 'close')
