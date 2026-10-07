@@ -1797,6 +1797,12 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-chip-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's chips and badges; style them through their own public contract. The group only owns the gap and the overflow indicator."
+    },
+    {
       "tag": "c2-chip",
       "slot": "",
       "decision": "part",
