@@ -76,6 +76,8 @@ export class Overlay extends LitElement {
   @property() anchor: string | HTMLElement | undefined = undefined
 
   private cleanupPosition: (() => void) | null = null
+  /** A repositioning waiting for the next frame. */
+  private positionFrame = 0
   private positioningStyleObserver: MutationObserver | null = null
   private positioningStyleValues = ''
 
@@ -133,7 +135,22 @@ export class Overlay extends LitElement {
     this.stopPositioning()
     const anchor = this.anchorElement
     if (!anchor) return
-    this.cleanupPosition = autoUpdate(anchor, this, () => this.updatePosition(anchor))
+    // Placed at once when it opens; after that, a change Floating UI reports (it watches both elements' sizes) is
+    // followed on the next frame. Placing it changes the room it has, and content that wraps (a row with a line of
+    // description) then changes its size again: answered in the same observer callback, that is a resize loop.
+    let placed = false
+    this.cleanupPosition = autoUpdate(anchor, this, () => {
+      if (!placed) {
+        placed = true
+        void this.updatePosition(anchor)
+        return
+      }
+      if (this.positionFrame) return
+      this.positionFrame = requestAnimationFrame(() => {
+        this.positionFrame = 0
+        void this.updatePosition(anchor)
+      })
+    })
     // Floating UI observes layout, but an edit to a positioning variable (an inline style, a class) need not resize
     // either element. Positioning writes the host's own style too, so only a change in the variables repositions.
     const positioningValues = () => {
@@ -153,6 +170,8 @@ export class Overlay extends LitElement {
   private stopPositioning() {
     this.cleanupPosition?.()
     this.cleanupPosition = null
+    cancelAnimationFrame(this.positionFrame)
+    this.positionFrame = 0
     this.positioningStyleObserver?.disconnect()
     this.positioningStyleObserver = null
   }
