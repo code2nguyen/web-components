@@ -1,5 +1,5 @@
 {
-  "total": 1150642,
+  "total": 1157441,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -58,6 +58,7 @@
     "date-input": 3162,
     "date-selector": 4776,
     "details": 3967,
+    "filter-builder": 68415,
     "flow": 58951,
     "gantt": 14928,
     "gantt/gantt-task": 1506,
@@ -68,7 +69,7 @@
     "header": 1257,
     "hover-card": 12315,
     "icon-button": 16353,
-    "index": 750720,
+    "index": 785274,
     "indicator": 2443,
     "inline-edit": 5120,
     "kanban": 9590,
@@ -85,6 +86,7 @@
     "mat-icon": 825,
     "menu": 20853,
     "menu/menu-item": 3505,
+    "menu/menu-row": 1097,
     "modal": 2969,
     "month-planner": 11188,
     "navigation-menu": 24847,
