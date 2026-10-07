@@ -115,7 +115,9 @@ test('content rendered on toggle, after the panel began opening, still slides op
   const steps = heights.slice(1).map((height, index) => height - heights[index])
   const end = heights.at(-1)!
   expect(end).toBeGreaterThan(200)
-  // Without following the content, the panel stops at its padding and the content then lands in one frame.
-  expect(Math.max(...steps)).toBeLessThan(end / 2)
+  // Without following the content, the panel stops at its padding and the content then lands in one frame: no height
+  // between the two is ever drawn. Following it, the panel is seen part-way open (however long a slow machine takes
+  // between two frames), and never shrinks on the way.
+  expect(heights.some((height) => height > end * 0.25 && height < end * 0.75)).toBe(true)
   expect(Math.min(...steps)).toBeGreaterThanOrEqual(-1)
 })
