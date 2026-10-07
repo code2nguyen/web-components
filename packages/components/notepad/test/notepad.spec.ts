@@ -489,6 +489,59 @@ test('a variable set on the element wins over the pad preset', async ({ page, re
   await expect(page.locator('c2-notepad .spiral')).toBeHidden()
 })
 
+test('only a pad with a spiral keeps room for it above the sheet', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ['notebook', 'legal', 'sticky', 'index-card']
+      .map((pad) => `<c2-notepad label="${pad}" pad="${pad}" tearable style="--c2-notepad__sheet--rotate: 0deg"></c2-notepad>`)
+      .join('') + '<c2-notepad label="bare" tearable style="--c2-notepad__spiral--display: none; --c2-notepad__pad--padding-top: 0px"></c2-notepad>',
+  )
+  const offsets = await page.locator('c2-notepad').evaluateAll((hosts) =>
+    hosts.map((host) => {
+      const top = host.getBoundingClientRect().top
+      const sheet = host.shadowRoot!.querySelector('.sheet')!.getBoundingClientRect().top
+      const stack = host.shadowRoot!.querySelector('.stack')!.getBoundingClientRect().top
+      return [host.getAttribute('label'), Math.round(sheet - top), Math.round(stack - top)]
+    }),
+  )
+  // The legal pad's glued top, 18px less its 3px overlap, sits above its sheet.
+  expect(offsets).toEqual([
+    ['notebook', 12, 12],
+    ['legal', 15, 0],
+    ['sticky', 0, 0],
+    ['index-card', 0, 0],
+    ['bare', 0, 0],
+  ])
+})
+
+test('the sheets under a tearable pad stay inside the element, so a scrolling container does not scroll', async ({ page, renderScenario }) => {
+  await renderScenario(
+    [320, 800].map((width) => `<div class="box" style="width:${width}px;overflow:auto"><c2-notepad label="w${width}" tearable></c2-notepad></div>`).join(''),
+  )
+  await expect(page.locator('c2-notepad .stack').first()).toBeVisible()
+  const overflow = await page
+    .locator('.box')
+    .evaluateAll((boxes) => boxes.map((box) => [box.scrollWidth - box.clientWidth, box.scrollHeight - box.clientHeight]))
+  expect(overflow).toEqual([
+    [0, 0],
+    [0, 0],
+  ])
+})
+
+test('a tearable pad can show its page alone, without the sheets underneath or room for them', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-notepad label="stack" tearable></c2-notepad><c2-notepad label="alone" tearable style="--c2-notepad__stack--display: none; --c2-notepad__pad--padding-bottom: 0px"></c2-notepad>',
+  )
+  const below = (label: string) =>
+    page.locator(`c2-notepad[label="${label}"]`).evaluate((host) => {
+      const sheet = host.shadowRoot!.querySelector('.sheet')!.getBoundingClientRect()
+      return Math.round(host.getBoundingClientRect().bottom - sheet.bottom)
+    })
+  expect(await below('stack')).toBe(8)
+  await expect(page.locator('c2-notepad[label="stack"] .stack')).toBeVisible()
+  expect(await below('alone')).toBe(0)
+  await expect(page.locator('c2-notepad[label="alone"] .stack')).toBeHidden()
+})
+
 test('the toolbar and the paper card follow the page when it scrolls', async ({ page, renderScenario }) => {
   await renderScenario('<div style="height:300px"></div><c2-notepad label="Notes" paper-picker></c2-notepad><div style="height:2000px"></div>')
   await surface(page).click()
@@ -636,4 +689,36 @@ test.describe('on a touch screen', () => {
     await surface(page).tap()
     await expect.poll(opacity).toBe('1')
   })
+})
+test('the tape of the toolbar is cut from the paper it sits on, unless its colour is set', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" value="pick up the dry cleaning"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  await surface(page).click()
+  await page.keyboard.press('End')
+  await selectBack(page, 8)
+  await expect(toolbar(page)).toBeVisible()
+  const tape = () => toolbar(page).evaluate((element) => getComputedStyle(element, '::before').backgroundColor)
+
+  const cream = await tape()
+  await host.evaluate((element) => element.setAttribute('paper-color', 'night'))
+  await expect.poll(tape).not.toBe(cream)
+  const night = await tape()
+  // Dark tape on night paper: its red, green and blue are all low.
+  const channels = await page.evaluate((colour) => {
+    const probe = document.createElement('div')
+    probe.style.color = colour
+    document.body.append(probe)
+    const canvas = document.createElement('canvas').getContext('2d')!
+    canvas.fillStyle = getComputedStyle(probe).color
+    canvas.fillRect(0, 0, 1, 1)
+    probe.remove()
+    return [...canvas.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+  }, night)
+  expect(Math.max(...channels)).toBeLessThan(110)
+  // A shade off the page, so it still reads as tape.
+  const sheet = await host.evaluate((element) => getComputedStyle(element.shadowRoot!.querySelector('.sheet')!).backgroundColor)
+  expect(sheet).not.toBe(night)
+
+  await host.evaluate((element) => element.style.setProperty('--c2-notepad__toolbar--background', 'rgb(200, 30, 30)'))
+  await expect.poll(tape).toBe('rgb(200, 30, 30)')
 })

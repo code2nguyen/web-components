@@ -285,10 +285,14 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__header--color=#7a8494]
  * @cssproperty {font-size} [--c2-notepad__header--font-size=12px]
  * @cssproperty {display} [--c2-notepad__spiral--display=block] - Spiral binding; none to remove it.
+ * @cssproperty {color} [--c2-notepad__spiral--color=#9aa0a8] - Colour of the spiral binding's flat coils.
  * @cssproperty {display} [--c2-notepad__glue--display=none] - Glued top binding of a legal pad; block to show it.
  * @cssproperty {color} [--c2-notepad__glue--background=#3f444b]
  * @cssproperty {angle} [--c2-notepad__sheet--rotate=0deg] - Tilt of the sheet. A sticky note leans by a random angle (1°–4° either way, picked again each time the pad becomes a sticky note) unless this is set; 0deg keeps it straight.
  * @cssproperty {pixel} [--c2-notepad__top--padding-top=20px] - Space above the header row, which clears the spiral binding.
+ * @cssproperty {pixel} [--c2-notepad__pad--padding-top=12px] - Space above the sheet, where the spiral's coils stand. The legal pad, the sticky note and the index card, which have no spiral, set it to 0, so their sheet starts at the top of the element; set it to 0 too when you hide the spiral of a notebook.
+ * @cssproperty {pixel} [--c2-notepad__pad--padding-bottom=0px] - Space under the sheet. A `tearable` pad sets it to 8px, where the sheets underneath show; set it to 0 with `--c2-notepad__stack--display: none`.
+ * @cssproperty {display} [--c2-notepad__stack--display=block] - Sheets drawn under the page of a `tearable` pad; none to show the page alone.
  * @cssproperty {opacity} [--c2-notepad__controls--opacity=1] - Opacity of the "Paper" button, the "Tear off" button and the `actions` slot while the notepad is neither hovered nor focused. Set it to 0 to show them only on the note being pointed at or written in (on a touch screen, once the writer taps into it), and while the paper picker is open.
  * @cssproperty {color} [--c2-notepad__ink-blue--color=#2848b8]
  * @cssproperty {color} [--c2-notepad__ink-black--color=#18181b]
@@ -298,8 +302,8 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__highlight-green--background=rgba(110, 220, 120, 0.4)]
  * @cssproperty {color} [--c2-notepad__highlight-pink--background=rgba(255, 120, 170, 0.38)]
  * @cssproperty {number} [--c2-notepad__task__checked--opacity=0.55] - Opacity of a ticked checklist item.
- * @cssproperty {color} [--c2-notepad__toolbar--background=#efe6cc] - The washi tape of the selection toolbar.
- * @cssproperty {color} [--c2-notepad__toolbar--color=#2c2a26]
+ * @cssproperty {color} [--c2-notepad__toolbar--background] - The washi tape of the selection toolbar and the paper picker. Unset, it is cut from the page's paper, a shade towards its ink, so it follows the paper colour; set it for one tape on every paper.
+ * @cssproperty {color} [--c2-notepad__toolbar--color] - Text and icons on the tape. Unset, the page's ink.
  * @cssproperty {color} [--c2-notepad__toolbar__button__active--background=rgba(60, 50, 30, 0.14)]
  * @cssproperty {color} [--c2-notepad__perforation--color=#b9bfc8] - Perforated line of a tearable pad.
  * @cssproperty {color} [--c2-notepad__paper-yellow--background=#fcf0bf] - Sheet colour for `paper-color="yellow"`.

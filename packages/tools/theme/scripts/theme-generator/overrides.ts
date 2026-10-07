@@ -612,16 +612,15 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__placeholder--color': { token: 'color-on-surface-variant' },
   '--c2-notepad__header--color': { token: 'color-on-surface-variant' },
   '--c2-notepad__perforation--color': { token: 'color-outline-strong' },
+  '--c2-notepad__spiral--color': { token: 'color-outline-strong' },
   '--c2-notepad__selection--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
-  // The washi tape is a little of its kraft hue on the surface: cream on light paper, dark kraft under a dark theme.
-  '--c2-notepad__toolbar--background': {
-    token: 'color-surface',
-    value: 'color-mix(in srgb, #c9b98f 30%, var(--c2-theme--color-surface, #ffffff))',
-  },
-  '--c2-notepad__toolbar--color': { token: 'color-on-surface' },
+  // The washi tape follows each page's paper colour and ink (its unset default); a theme value would fix one tape on
+  // every paper.
+  '--c2-notepad__toolbar--background': { exclude: 'follows the paper colour of each page' },
+  '--c2-notepad__toolbar--color': { exclude: 'follows the ink of each page' },
   '--c2-notepad__toolbar__button__active--background': {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 14%, transparent)',
