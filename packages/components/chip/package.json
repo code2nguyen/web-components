@@ -9,6 +9,10 @@
       "types": "./types/src/chip.d.ts",
       "default": "./dist/chip.js"
     },
+    "./chip-part.js": {
+      "types": "./types/src/chip-part.d.ts",
+      "default": "./dist/chip-part.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
