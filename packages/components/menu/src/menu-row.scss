@@ -1,0 +1,24 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-menu-row,
+  $theme: (
+    gap: 4px,
+    padding: 2px 4px 6px,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+}

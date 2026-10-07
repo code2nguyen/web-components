@@ -99,6 +99,13 @@ export interface MenuItem {
  * @cssproperty {pixel} [--c2-menu-item__focus--outline-offset=-2px]
  *
  * @cssproperty {opacity} [--c2-menu-item__disabled--opacity=0.38]
+ *
+ * @cssproperty {pixel} [--c2-menu-item__compact--size=28px] - Width and height of a choice in a `c2-menu-row`.
+ * @cssproperty {border-radius} [--c2-menu-item__compact--border-radius=6px]
+ * @cssproperty {pixel} [--c2-menu-item__compact__icon--size=18px] - Size of the icon of a choice in a `c2-menu-row`.
+ * @cssproperty {outline} [--c2-menu-item__compact__checked--outline=2px solid #18181b] - The ring round the checked choice of a `c2-menu-row`.
+ * @cssproperty {pixel} [--c2-menu-item__compact__checked--outline-offset=-2px]
+ * @cssproperty {color} [--c2-menu-item__compact__checked--background=transparent]
  */
 @customElement('c2-menu-item')
 export class MenuItem extends LitElement {
@@ -142,6 +149,11 @@ export class MenuItem extends LitElement {
 
   /** Private: set by the parent menu on every row while any sibling is checkable, so the labels line up. */
   @property({ type: Boolean, attribute: 'reserve-indicator' }) reserveIndicator = false
+
+  /** Whether the row sits in a `c2-menu-row`: a small choice showing only its icon. */
+  get compact(): boolean {
+    return this.parentElement?.localName === 'c2-menu-row'
+  }
 
   private readonly slotPresence = new SlotPresenceController(this, ['description', 'submenu'])
 
@@ -232,6 +244,11 @@ export class MenuItem extends LitElement {
     this.internals.ariaHasPopup = this.hasSubmenu ? 'menu' : null
     this.internals.ariaExpanded = this.hasSubmenu ? String(this.expanded) : null
     this.internals.ariaDisabled = this.disabled ? 'true' : null
+    // A choice in a row shows only its icon: its label is its name.
+    const compact = this.compact
+    this.internals.ariaLabel = compact ? this.displayText || null : null
+    if (compact) this.internals.states.add('compact')
+    else this.internals.states.delete('compact')
 
     // The menu assigns the roving tabindex; a disabled row is never a tab stop.
     if (this.disabled) this.tabIndex = -1
@@ -239,7 +256,7 @@ export class MenuItem extends LitElement {
   }
 
   private renderIndicator() {
-    if (this.type === 'item' && !this.reserveIndicator) return nothing
+    if (this.compact || (this.type === 'item' && !this.reserveIndicator)) return nothing
     const glyph =
       this.type === 'radio'
         ? svg`<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"></circle></svg>`
@@ -256,7 +273,7 @@ export class MenuItem extends LitElement {
       ${this.renderIndicator()}
       <slot name="prefix-icon"></slot>
       <div class="content">
-        <div class="text"><slot>${this.label ?? this.value}</slot></div>
+        <div class="text" ?data-hidden=${this.compact}><slot>${this.label ?? this.value}</slot></div>
         <div class="description" ?hidden=${!this.hasDescription}>
           <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>

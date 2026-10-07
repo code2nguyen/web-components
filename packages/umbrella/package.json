@@ -396,6 +396,10 @@
       "types": "./dist/menu/menu-item.d.ts",
       "default": "./dist/menu/menu-item.js"
     },
+    "./menu/menu-row": {
+      "types": "./dist/menu/menu-row.d.ts",
+      "default": "./dist/menu/menu-row.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"

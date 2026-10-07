@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/menu.ts', 'src/menu-item.ts'],
+      entry: ['src/menu.ts', 'src/menu-item.ts', 'src/menu-row.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/menu.ts', 'src/menu-item.ts'],
+      files: ['src/menu.ts', 'src/menu-item.ts', 'src/menu-row.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

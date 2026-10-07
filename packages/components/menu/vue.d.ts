@@ -11,6 +11,7 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Menu } from '@c2n/menu'
 import type { MenuItem } from '@c2n/menu/menu-item.js'
+import type { MenuRow } from '@c2n/menu/menu-row.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -37,6 +38,7 @@ declare module 'vue' {
         onCheckedChange?: (event: EventOf<MenuItem, 'checked-change'>) => void
       }
     >
+    'c2-menu-row': DefineComponent<C2Props<MenuRow>>
   }
 }
 
