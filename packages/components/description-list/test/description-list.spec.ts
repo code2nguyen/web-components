@@ -171,7 +171,39 @@ for (const name of ['groups', 'groups-wrapped'])
     await expect(price.first().locator('[part="caption"]')).toHaveClass(/is-hidden/)
   })
 
-for (const name of ['default', 'header', 'rich-label', 'groups']) {
+test('the column names are bold by default and stacked captions are too', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('groups')
+  await expect(page.locator('c2-description-list [part="value-header"]')).toHaveCSS('font-weight', '600')
+  await page.setViewportSize({ width: 360, height: 800 })
+  const caption = page.locator('c2-description-value').first().locator('[part="caption"]')
+  await expect(caption).toBeVisible()
+  await expect(caption).toHaveCSS('font-weight', '600')
+})
+
+test('the header row can be removed while stacked values keep their column names', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('groups-no-header')
+  await expect(page.locator('c2-description-list [part="value-header"]')).toBeHidden()
+  const values = page.locator('c2-description-value')
+  await expect.poll(async () => (await values.nth(2).boundingBox())!.y).toBe((await values.first().boundingBox())!.y)
+  await page.setViewportSize({ width: 360, height: 800 })
+  await expect(values.nth(1).locator('[part="caption"]')).toBeVisible()
+  await expect(values.nth(1).locator('[part="caption"]')).toHaveText('Pro')
+})
+
+test('stacked values can drop their column names', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 360, height: 800 })
+  await scenario('groups-no-caption')
+  const values = page.locator('c2-description-value')
+  await expect.poll(async () => (await values.nth(1).boundingBox())!.y > (await values.first().boundingBox())!.y).toBe(true)
+  await expect(values.first().locator('[part="caption"]')).toBeHidden()
+  const content = await values.first().locator('[part="content"]').boundingBox()
+  const value = await values.first().boundingBox()
+  expect(Math.round(content!.x)).toBe(Math.round(value!.x))
+})
+
+for (const name of ['default', 'header', 'rich-label', 'groups', 'groups-no-header']) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
     const results = await new AxeBuilder({ page }).include('main').analyze()

@@ -1,10 +1,11 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-description-value,
   $theme: (
+    caption--display: block,
     caption--width: 40%,
     caption--color: #71717a,
     caption--font-size: 12px,
-    caption--font-weight: 400,
+    caption--font-weight: 600,
   )
 );
 
@@ -28,6 +29,7 @@
 }
 
 .caption {
+  display: css.cssVar(caption--display);
   flex: 0 0 css.cssVar(caption--width);
   min-width: 0;
   color: css.cssVar(caption--color);

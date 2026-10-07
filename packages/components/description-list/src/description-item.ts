@@ -95,6 +95,7 @@ export class DescriptionItem extends LitElement {
   // Whether the value columns wrapped is a layout fact, so it is read after layout rather than predicted in CSS.
   private groupObserver?: ResizeObserver
   private observedGroup: Element | null = null
+  private syncFrame = 0
 
   override connectedCallback() {
     super.connectedCallback()
@@ -114,6 +115,7 @@ export class DescriptionItem extends LitElement {
     super.disconnectedCallback()
     this.valueObserver?.disconnect()
     this.groupObserver?.disconnect()
+    cancelAnimationFrame(this.syncFrame)
   }
 
   protected override updated() {
@@ -144,7 +146,12 @@ export class DescriptionItem extends LitElement {
     this.groupObserver?.disconnect()
     this.observedGroup = group
     if (!group) return
-    this.groupObserver ??= new ResizeObserver(() => this.syncValues())
+    // Showing the captions resizes the row being observed, so apply it on the next frame rather than inside the
+    // callback, which the browser reports as a ResizeObserver loop.
+    this.groupObserver ??= new ResizeObserver(() => {
+      cancelAnimationFrame(this.syncFrame)
+      this.syncFrame = requestAnimationFrame(() => this.syncValues())
+    })
     this.groupObserver.observe(group)
   }
 

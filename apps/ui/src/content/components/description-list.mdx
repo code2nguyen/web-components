@@ -16,6 +16,8 @@ The layout is CSS only. The items flow into as many columns as fit, never more t
 
 A label can also have several values: give the item one `c2-description-value` per value, such as a feature's price in each plan or a metric this month and last. The values line up in equal columns across the items, `value-labels` on the list names the columns (separated by `;`) and `label-heading` heads the label column. The layout adapts with no breakpoint to set. When the label and the columns no longer fit side by side, the columns move under the label. When the columns themselves no longer fit, each one narrower than `--c2-description-item__value-column--min-width` (120px), every value takes a row of its own and shows its column name, and the header row hides. Narrow the window to see the rows below change.
 
+The column names are yours to style: `--c2-description-list__value-header--*` sets the header row (bold 14px in the on-surface colour by default) and `--c2-description-value__caption--*` the names beside stacked values. To drop them, set `--c2-description-list__value-header--display: none` to remove the header row while stacked values keep their names, set `--c2-description-value__caption--display: none` to show stacked values without names, or leave `value-labels` out for neither.
+
 The list is exposed as a `list` and each item as a `listitem` holding a `term` and its `definition`, or one `definition` per `c2-description-value`, each read with its column name. Give the list an `aria-label` when a page has several.
 
 ## Import

@@ -22,7 +22,8 @@ export { DescriptionItem, DescriptionValue } from './description-item.js'
  * label plus `--c2-description-item__value--min-width`. Set the item variables on the list and every item inherits them.
  *
  * Items with several values (`c2-description-value` children) line up in columns; `value-labels` names those
- * columns in a header row and `label-heading` heads the label column. The header hides itself when the values stack,
+ * columns in a header row and `label-heading` heads the label column. Style the row through `--c2-description-list__value-header--*`
+ * (or the `value-header` part), or hide it with `--c2-description-list__value-header--display: none`. The header hides itself when the values stack,
  * and each value then shows its column name. A list with value columns lays its items out in a single column.
  *
  * The list is exposed as a `list` and every item as a `listitem` holding a `term` and its `definition`.
@@ -64,9 +65,10 @@ export { DescriptionItem, DescriptionValue } from './description-item.js'
  * @cssproperty {pixel} [--c2-description-list__header--font-size=16px]
  * @cssproperty {font-weight} [--c2-description-list__header--font-weight=600]
  *
- * @cssproperty {color} [--c2-description-list__value-header--color=#71717a]
- * @cssproperty {pixel} [--c2-description-list__value-header--font-size=12px]
- * @cssproperty {font-weight} [--c2-description-list__value-header--font-weight=500]
+ * @cssproperty {display} [--c2-description-list__value-header--display=flex] - `none` removes the row of column names; stacked values still show theirs.
+ * @cssproperty {color} [--c2-description-list__value-header--color=#18181b]
+ * @cssproperty {pixel} [--c2-description-list__value-header--font-size=14px]
+ * @cssproperty {font-weight} [--c2-description-list__value-header--font-weight=600]
  * @cssproperty {padding} [--c2-description-list__value-header--padding-bottom=8px]
  * @cssproperty {border} [--c2-description-list__value-header--border-bottom=1px solid #e4e4e7]
  * @cssproperty {pixel} [--c2-description-list__value-header--margin-bottom=0px]
@@ -93,6 +95,7 @@ export class DescriptionList extends LitElement {
 
   private headerObserver?: ResizeObserver
   private observedHeader: Element | null = null
+  private headerFrame = 0
 
   override connectedCallback() {
     super.connectedCallback()
@@ -103,6 +106,7 @@ export class DescriptionList extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.headerObserver?.disconnect()
+    cancelAnimationFrame(this.headerFrame)
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -123,8 +127,11 @@ export class DescriptionList extends LitElement {
     if (!cells) return
     // The header collapses its height but keeps its width while hidden, so it keeps measuring the same wrap as the items.
     this.headerObserver ??= new ResizeObserver(() => {
-      const tops = [...(this.observedHeader?.children ?? [])].map((cell) => Math.round(cell.getBoundingClientRect().top))
-      this.valuesStacked = tops.some((top) => top !== tops[0])
+      cancelAnimationFrame(this.headerFrame)
+      this.headerFrame = requestAnimationFrame(() => {
+        const tops = [...(this.observedHeader?.children ?? [])].map((cell) => Math.round(cell.getBoundingClientRect().top))
+        this.valuesStacked = tops.some((top) => top !== tops[0])
+      })
     })
     this.headerObserver.observe(cells)
   }

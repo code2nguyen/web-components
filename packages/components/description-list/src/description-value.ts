@@ -16,10 +16,11 @@ import styles from './description-value.scss?inline'
  * @csspart caption - The column name before the value. It is shown only while the values are stacked, and visually hidden otherwise.
  * @csspart content - The wrapper around the default slot, which holds the value.
  *
+ * @cssproperty {display} [--c2-description-value__caption--display=block] - `none` removes the column name, for screen readers too, so the stacked values show alone.
  * @cssproperty {pixel} [--c2-description-value__caption--width=40%] - Width of the caption beside a stacked value.
  * @cssproperty {color} [--c2-description-value__caption--color=#71717a]
  * @cssproperty {pixel} [--c2-description-value__caption--font-size=12px]
- * @cssproperty {font-weight} [--c2-description-value__caption--font-weight=400]
+ * @cssproperty {font-weight} [--c2-description-value__caption--font-weight=600]
  */
 @customElement('c2-description-value')
 export class DescriptionValue extends LitElement {
