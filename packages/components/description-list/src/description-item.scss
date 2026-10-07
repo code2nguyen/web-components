@@ -22,6 +22,10 @@
     value--line-height: 20px,
     value--overflow-wrap: anywhere,
 
+    value-column--min-width: 120px,
+    value-column--gap: 16px,
+    value-column--row-gap: 6px,
+
     empty--color: #71717a,
 
     actions--gap: 4px,
@@ -73,6 +77,23 @@
   font-weight: css.cssVar(value--font-weight);
   line-height: css.cssVar(value--line-height);
   overflow-wrap: css.cssVar(value--overflow-wrap);
+}
+
+// Several values: equal columns while each can be at least the minimum width, otherwise one value per row. The
+// threshold is the width all the columns need; above it the basis goes negative (clamped to 0) and the columns share
+// the row equally, below it the basis is huge and every value takes a row of its own. Never a 2 + 1 split, and every
+// item of a list switches at the same width, so the columns stay aligned.
+.value.is-group {
+  --_threshold: calc(var(--_count) * #{css.cssVar(value-column--min-width)} + (var(--_count) - 1) * #{css.cssVar(value-column--gap)});
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: css.cssVar(value-column--gap);
+  row-gap: css.cssVar(value-column--row-gap);
+  min-width: min(100%, var(--_threshold));
+  // Read by `c2-description-value` as its flex basis rather than set through `::slotted`, which misses a value that a
+  // framework wrapped in an element of its own (an Astro island): the wrapper is `display: contents`, so the value
+  // is still a flex item of this row, and the percentage still resolves against it.
+  --_value-basis: calc((var(--_threshold) - 100%) * 999);
 }
 
 .empty {

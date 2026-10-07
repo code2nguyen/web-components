@@ -111,7 +111,67 @@ test('labels beside values work in two columns, which fold to one when narrow', 
   await expect.poll(() => columnCount(items)).toBe(1)
 })
 
-for (const name of ['default', 'header', 'rich-label']) {
+for (const name of ['groups', 'groups-wrapped'])
+  test(`several values line up in columns under the value-labels header: ${name}`, async ({ page, scenario }) => {
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await scenario(name)
+    const value = page.locator('c2-description-value')
+    await expect(value.first()).toHaveHostAria('role', 'definition')
+    await expect(page.locator('c2-description-item').first().locator('[part="value"]')).toHaveAttribute('role', 'none')
+    const header = page.locator('c2-description-list [part="value-header"]')
+    await expect(header).toBeVisible()
+    await expect(header).toContainText('Feature')
+    const cells = header.locator('.value-header__cell')
+    await expect(cells).toHaveText(['Starter', 'Pro', 'Enterprise'])
+    const price = page.locator('c2-description-item[label="Price"] c2-description-value')
+    const seats = page.locator('c2-description-item[label="Seats"] c2-description-value')
+    const label = await page.locator('c2-description-item[label="Price"] [part="label"]').boundingBox()
+    for (let column = 0; column < 3; column++) {
+      const cell = (await cells.nth(column).boundingBox())!
+      const first = (await price.nth(column).boundingBox())!
+      const second = (await seats.nth(column).boundingBox())!
+      expect(Math.round(first.x)).toBe(Math.round(cell.x))
+      expect(Math.round(second.x)).toBe(Math.round(cell.x))
+      expect(Math.round(first.width)).toBe(Math.round(cell.width))
+      expect(Math.round(first.y)).toBe(Math.round(label!.y))
+    }
+    // The column name is read with each value but only shown when the values stack.
+    const caption = price.first().locator('[part="caption"]')
+    await expect(caption).toHaveText('Starter')
+    expect((await caption.boundingBox())!.width).toBeLessThanOrEqual(1)
+  })
+
+for (const name of ['groups', 'groups-wrapped'])
+  test(`value columns move under the label, then stack with captions, as the width shrinks: ${name}`, async ({ page, scenario }) => {
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await scenario(name)
+    const price = page.locator('c2-description-item[label="Price"] c2-description-value')
+    const label = page.locator('c2-description-item[label="Price"] [part="label"]')
+    const header = page.locator('c2-description-list [part="value-header"]')
+    const top = async (locator: Locator) => Math.round((await locator.boundingBox())!.y)
+
+    // 450px: too narrow for the 160px label beside three 120px columns, wide enough for the columns.
+    await page.setViewportSize({ width: 498, height: 800 })
+    await expect.poll(async () => (await top(price.first())) > (await top(label))).toBe(true)
+    expect(await top(price.nth(2))).toBe(await top(price.first()))
+    await expect(header).toBeVisible()
+    await expect(price.first().locator('[part="caption"]')).toHaveClass(/is-hidden/)
+
+    // 312px: the columns no longer fit, so every value takes a row and names its column.
+    await page.setViewportSize({ width: 360, height: 800 })
+    await expect.poll(async () => (await top(price.nth(1))) > (await top(price.first()))).toBe(true)
+    await expect(price.first().locator('[part="caption"]')).not.toHaveClass(/is-hidden/)
+    await expect(price.nth(1).locator('[part="caption"]')).toBeVisible()
+    await expect(price.nth(1).locator('[part="caption"]')).toHaveText('Pro')
+    await expect(header).toBeHidden()
+
+    // And back.
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect(header).toBeVisible()
+    await expect(price.first().locator('[part="caption"]')).toHaveClass(/is-hidden/)
+  })
+
+for (const name of ['default', 'header', 'rich-label', 'groups']) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
     const results = await new AxeBuilder({ page }).include('main').analyze()

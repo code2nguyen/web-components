@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { DescriptionItem } from '@c2n/description-list/description-item.js'
 import type { DescriptionList } from '@c2n/description-list'
+import type { DescriptionValue } from '@c2n/description-list/description-value.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -21,7 +22,13 @@ declare module 'vue' {
         'empty-text'?: unknown
       }
     >
-    'c2-description-list': DefineComponent<C2Props<DescriptionList>>
+    'c2-description-list': DefineComponent<
+      C2Props<DescriptionList> & {
+        'value-labels'?: unknown
+        'label-heading'?: unknown
+      }
+    >
+    'c2-description-value': DefineComponent<C2Props<DescriptionValue>>
   }
 }
 

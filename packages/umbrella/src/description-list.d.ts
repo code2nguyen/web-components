@@ -3,3 +3,4 @@
 
 export * from '@c2n/description-list'
 export * from '@c2n/description-list/description-item.js'
+export * from '@c2n/description-list/description-value.js'

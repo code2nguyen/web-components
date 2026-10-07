@@ -888,6 +888,13 @@
       "reason": "The label (term) region owns the label slot and its fallback text from the label attribute."
     },
     {
+      "tag": "c2-description-value",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The content wrapper owns the default slot beside the caption; the value inherits the item's value type and colour."
+    },
+    {
       "tag": "c2-description-list",
       "slot": "",
       "decision": "assigned-content",

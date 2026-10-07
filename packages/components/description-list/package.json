@@ -13,6 +13,10 @@
       "types": "./types/src/description-item.d.ts",
       "default": "./dist/description-item.js"
     },
+    "./description-value.js": {
+      "types": "./types/src/description-value.d.ts",
+      "default": "./dist/description-value.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

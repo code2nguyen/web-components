@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { DescriptionItem } from '@c2n/description-list/description-item.js'
 import type { DescriptionList } from '@c2n/description-list'
+import type { DescriptionValue } from '@c2n/description-list/description-value.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -27,7 +28,12 @@ declare module 'react' {
       'c2-description-item': C2Props<DescriptionItem> & {
         'empty-text'?: Attribute
       }
-      'c2-description-list': C2Props<DescriptionList>
+      'c2-description-list': Omit<C2Props<DescriptionList>, 'valueLabels'> & {
+        'value-labels'?: Attribute
+        'label-heading'?: Attribute
+        valueLabels?: DescriptionList['valueLabels'] | string
+      }
+      'c2-description-value': C2Props<DescriptionValue>
     }
   }
 }

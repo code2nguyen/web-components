@@ -296,6 +296,10 @@
       "types": "./dist/description-list/description-item.d.ts",
       "default": "./dist/description-list/description-item.js"
     },
+    "./description-list/description-value": {
+      "types": "./dist/description-list/description-value.d.ts",
+      "default": "./dist/description-list/description-value.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"

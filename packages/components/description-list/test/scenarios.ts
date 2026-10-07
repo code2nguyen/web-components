@@ -22,6 +22,15 @@ const markup: Record<string, string> = {
   </c2-description-list>`,
   horizontal: `<c2-description-list class="horizontal" aria-label="Customer" style="--c2-description-list__grid--columns: 1">${items}</c2-description-list>`,
   'two-column-horizontal': `<c2-description-list class="horizontal" aria-label="Customer" style="--c2-description-list__grid--columns: 2; --c2-description-list__grid--min-column-width: 340px">${items}</c2-description-list>`,
+  groups: `<c2-description-list aria-label="Plans" value-labels="Starter;Pro;Enterprise" label-heading="Feature" style="--c2-description-item__label--width: 160px">
+    <c2-description-item label="Price"><c2-description-value>€0</c2-description-value><c2-description-value>€20</c2-description-value><c2-description-value>Custom</c2-description-value></c2-description-item>
+    <c2-description-item label="Seats"><c2-description-value>1</c2-description-value><c2-description-value>10</c2-description-value><c2-description-value>Unlimited</c2-description-value></c2-description-item>
+  </c2-description-list>`,
+  // A framework that wraps each element (Astro islands, a Vue fragment host) puts a `display: contents` element between the item and its values.
+  'groups-wrapped': `<c2-description-list aria-label="Plans" value-labels="Starter;Pro;Enterprise" label-heading="Feature" style="--c2-description-item__label--width: 160px">
+    <span class="island"><c2-description-item label="Price"><span class="island"><c2-description-value>€0</c2-description-value></span><span class="island"><c2-description-value>€20</c2-description-value></span><span class="island"><c2-description-value>Custom</c2-description-value></span></c2-description-item></span>
+    <span class="island"><c2-description-item label="Seats"><span class="island"><c2-description-value>1</c2-description-value></span><span class="island"><c2-description-value>10</c2-description-value></span><span class="island"><c2-description-value>Unlimited</c2-description-value></span></c2-description-item></span>
+  </c2-description-list>`,
   'rich-label': `<c2-description-list aria-label="Customer">
     <c2-description-item label="Plain"><span slot="label">Status <abbr title="Updated hourly">*</abbr></span><strong>Active</strong>
       <button slot="actions" type="button">Copy</button>
@@ -34,6 +43,8 @@ const markup: Record<string, string> = {
 main.innerHTML = markup[scenario] ?? markup.default
 
 await Promise.all(
-  [...document.querySelectorAll<HTMLElement & { updateComplete: Promise<boolean> }>('c2-description-list, c2-description-item')].map((el) => el.updateComplete),
+  [...document.querySelectorAll<HTMLElement & { updateComplete: Promise<boolean> }>('c2-description-list, c2-description-item, c2-description-value')].map(
+    (el) => el.updateComplete,
+  ),
 )
 main.dataset.ready = 'true'

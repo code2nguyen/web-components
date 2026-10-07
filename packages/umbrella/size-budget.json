@@ -1,5 +1,5 @@
 {
-  "total": 1151036,
+  "total": 1157028,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -56,8 +56,9 @@
     "dashboard/dash-card": 6809,
     "date-input": 3162,
     "date-selector": 4776,
-    "description-list": 2937,
-    "description-list/description-item": 1844,
+    "description-list": 5759,
+    "description-list/description-item": 3621,
+    "description-list/description-value": 1393,
     "details": 3967,
     "flow": 58951,
     "gantt": 14928,

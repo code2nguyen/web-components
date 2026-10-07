@@ -19,6 +19,13 @@
     header--color: #18181b,
     header--font-size: 16px,
     header--font-weight: 600,
+
+    value-header--color: #71717a,
+    value-header--font-size: 12px,
+    value-header--font-weight: 500,
+    value-header--padding-bottom: 8px,
+    value-header--border-bottom: 1px solid #e4e4e7,
+    value-header--margin-bottom: 0px,
   )
 );
 
@@ -88,4 +95,61 @@
   );
   column-gap: $gap;
   row-gap: css.cssVar(grid--row-gap);
+}
+
+// Value columns stack per item, so the items take one column each.
+.has-value-columns .grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// The column names mirror an item's layout with the item's own variables (set on the list, they reach both), so the
+// header wraps at the same widths as every item and its cells sit over the value columns.
+.value-header {
+  $threshold: calc(
+    var(--_count) * var(--c2-description-item__value-column--min-width, 120px) + (var(--_count) - 1) * var(--c2-description-item__value-column--gap, 16px)
+  );
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: var(--c2-description-item__container--column-gap, 16px);
+  padding: var(--c2-description-item__container--padding, 0px);
+  padding-bottom: css.cssVar(value-header--padding-bottom);
+  margin-bottom: css.cssVar(value-header--margin-bottom);
+  border-bottom: css.cssVar(value-header--border-bottom);
+  color: css.cssVar(value-header--color);
+  font-size: css.cssVar(value-header--font-size);
+  font-weight: css.cssVar(value-header--font-weight);
+
+  .value-header__label {
+    flex: 0 0 var(--c2-description-item__label--width, 100%);
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .value-header__values {
+    --_threshold: #{$threshold};
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    column-gap: var(--c2-description-item__value-column--gap, 16px);
+    min-width: min(100%, var(--_threshold));
+  }
+
+  .value-header__cell {
+    flex: 1 1 calc((var(--_threshold) - 100%) * 999);
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+// Stacked values carry their own captions. The header keeps its width so it goes on measuring the same wrap.
+.value-header.is-stacked {
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+  overflow: hidden;
+  visibility: hidden;
 }

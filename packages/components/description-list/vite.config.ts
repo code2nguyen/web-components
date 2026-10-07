@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/description-list.ts', 'src/description-item.ts'],
+      entry: ['src/description-list.ts', 'src/description-item.ts', 'src/description-value.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/description-list.ts', 'src/description-item.ts'],
+      files: ['src/description-list.ts', 'src/description-item.ts', 'src/description-value.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

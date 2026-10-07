@@ -1,18 +1,18 @@
 ---
-description: 'Ready-made looks for c2-description-list: a detail-page grid, a bordered card, a side-by-side ledger, a two-column ledger, a striped table, a compact summary and a highlighted stats strip. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-description-list: a detail-page grid, a bordered card, a side-by-side ledger, a two-column ledger, a plan comparison, a month-over-month report, a striped table, a compact summary and a highlighted stats strip. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { DescriptionList, DescriptionItem } from '@c2n/components/description-list'
+import { DescriptionList, DescriptionItem, DescriptionValue } from '@c2n/components/description-list'
 import { Badge } from '@c2n/components/badge'
 
 ## Presets
 
-`--c2-description-list__grid--*` decides the columns: the most there may be, the narrowest one may get, and the gaps. `--c2-description-item__label--width` switches a label from above its value to beside it, and the `__container`, `__label` and `__value` parts of the item carry the dividers, padding and type. Set item variables on the list and every item picks them up.
+`--c2-description-list__grid--*` decides the columns: the most there may be, the narrowest one may get, and the gaps. `--c2-description-item__label--width` switches a label from above its value to beside it, and the `__container`, `__label` and `__value` parts of the item carry the dividers, padding and type. Set item variables on the list and every item picks them up. Items with several `c2-description-value` children line up in columns named by `value-labels`; `--c2-description-item__value-column--*` sizes them, and below the minimum column width the values stack with their column names.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -94,6 +94,84 @@ import { Badge } from '@c2n/components/badge'
   <c2-description-item label="Placed">Sep 12</c2-description-item>
   <c2-description-item label="Carrier">DHL</c2-description-item>
   <c2-description-item label="Total">€86.40</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Plan comparison
+<style>
+  .dl-plans {
+    width: 100%;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__value-header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-description-list__value-header--font-size: 14px;
+    --c2-description-list__value-header--font-weight: 600;
+    --c2-description-list__value-header--padding-bottom: 12px;
+    --c2-description-item__label--width: 140px;
+    --c2-description-item__container--padding: 12px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-item__value--font-weight: 400;
+  }
+</style>
+<c2-description-list class="dl-plans" aria-label="Plans" value-labels="Starter;Pro;Enterprise">
+  <c2-description-item label="Price">
+    <c2-description-value>€0</c2-description-value>
+    <c2-description-value>€20 / month</c2-description-value>
+    <c2-description-value>Custom</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Seats">
+    <c2-description-value>1</c2-description-value>
+    <c2-description-value>10</c2-description-value>
+    <c2-description-value>Unlimited</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Storage">
+    <c2-description-value>5 GB</c2-description-value>
+    <c2-description-value>100 GB</c2-description-value>
+    <c2-description-value>2 TB</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Support">
+    <c2-description-value>Community</c2-description-value>
+    <c2-description-value>Email</c2-description-value>
+    <c2-description-value>24/7 phone</c2-description-value>
+  </c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Month over month
+<style>
+  .dl-mom {
+    width: 100%;
+    --c2-description-list__container--padding: 16px 20px;
+    --c2-description-list__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-list__container--border-radius: 8px;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__value-header--border-bottom: none;
+    --c2-description-item__label--width: 160px;
+    --c2-description-item__container--padding: 8px 0;
+    --c2-description-item__value-column--min-width: 96px;
+  }
+  .dl-mom .up {
+    color: light-dark(#15803d, #4ade80);
+  }
+  .dl-mom .down {
+    color: light-dark(#b91c1c, #f87171);
+  }
+</style>
+<c2-description-list class="dl-mom" aria-label="Revenue" value-labels="September;August;Change" label-heading="Metric">
+  <c2-description-item label="Revenue">
+    <c2-description-value>€48,200</c2-description-value>
+    <c2-description-value>€44,900</c2-description-value>
+    <c2-description-value class="up">+7.3%</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="New customers">
+    <c2-description-value>312</c2-description-value>
+    <c2-description-value>298</c2-description-value>
+    <c2-description-value class="up">+4.7%</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Churn">
+    <c2-description-value>2.1%</c2-description-value>
+    <c2-description-value>1.8%</c2-description-value>
+    <c2-description-value class="down">+0.3 pt</c2-description-value>
+  </c2-description-item>
 </c2-description-list>
 ```
 
