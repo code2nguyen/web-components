@@ -1,0 +1,75 @@
+---
+description: 'Ready-made looks for c2-chip-group: the default +N pill, a solid count and a text link indicator. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ChipGroup } from '@c2n/components/chip-group'
+import { Chip } from '@c2n/components/chip'
+import { Badge } from '@c2n/components/badge'
+
+## Presets
+
+The group itself only owns the gap and the `+N` indicator: `--c2-chip-group__overflow--*` sets its pill (height, padding, border, background, colour, type) and the `__hover`/`__focus` states apply when it is an `expandable` button. Style the items through their own `c2-chip` and `c2-badge` variables.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-group {
+    width: 260px;
+  }
+</style>
+<c2-chip-group class="default-group" aria-label="Topics">
+  <c2-chip>Design</c2-chip>
+  <c2-chip>Engineering</c2-chip>
+  <c2-chip>Product</c2-chip>
+  <c2-chip>Marketing</c2-chip>
+</c2-chip-group>
+```
+
+```html tag=MdxCodeBlock,label=Solid count
+<style>
+  .solid-count {
+    width: 240px;
+    --c2-chip-group--gap: 4px;
+    --c2-chip-group__overflow--height: 20px;
+    --c2-chip-group__overflow--min-width: 20px;
+    --c2-chip-group__overflow--padding-left: 6px;
+    --c2-chip-group__overflow--padding-right: 6px;
+    --c2-chip-group__overflow--border: 1px solid transparent;
+    --c2-chip-group__overflow--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-chip-group__overflow--color: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-chip-group class="solid-count" aria-label="Labels">
+  <c2-badge tone="primary">frontend</c2-badge>
+  <c2-badge tone="success">ready</c2-badge>
+  <c2-badge tone="warning">needs review</c2-badge>
+  <c2-badge tone="danger">bug</c2-badge>
+  <c2-badge tone="info">docs</c2-badge>
+</c2-chip-group>
+```
+
+```html tag=MdxCodeBlock,label=Text link
+<style>
+  .text-link {
+    width: 260px;
+    --c2-chip-group__overflow--border: 1px solid transparent;
+    --c2-chip-group__overflow--background-color: transparent;
+    --c2-chip-group__overflow--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-chip-group__overflow--font-size: 14px;
+    --c2-chip-group__overflow__hover--border: 1px solid transparent;
+    --c2-chip-group__overflow__hover--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-chip-group class="text-link" expandable aria-label="Filters">
+  <c2-chip removable>Status: Active</c2-chip>
+  <c2-chip removable>Owner: me</c2-chip>
+  <c2-chip removable>Priority: High</c2-chip>
+  <c2-chip removable>Due: This week</c2-chip>
+</c2-chip-group>
+```
+
+</GalleryGrid>

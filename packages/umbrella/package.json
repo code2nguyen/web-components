@@ -224,6 +224,10 @@
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"
     },
+    "./chip-group": {
+      "types": "./dist/chip-group.d.ts",
+      "default": "./dist/chip-group.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"
@@ -755,6 +759,7 @@
     "@c2n/chatbot": "*",
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
+    "@c2n/chip-group": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
