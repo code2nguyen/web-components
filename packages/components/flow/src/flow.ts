@@ -343,6 +343,8 @@ interface Connection {
  * @cssproperty {pixel} [--c2-flow__shape__diamond--min-height=88px] - A diamond's least height, so its middle has room for the label.
  * @cssproperty {pixel} [--c2-flow__shape__circle--size=128px] - Width and height of a circle node.
  * @cssproperty {pixel} [--c2-flow__shape__note--fold-size=14px] - Size of a note's folded corner.
+ * @cssproperty {color} [--c2-flow__shape__focus--color=rgba(2, 101, 220, 0.6)] - Focus ring of a diamond, circle or slanted node, drawn along its outline in place of `--c2-flow__node__focus--outline`.
+ * @cssproperty {pixel} [--c2-flow__shape__focus--width=2px] - How much wider than the outline that ring is.
  */
 @customElement('c2-flow')
 export class Flow extends LitElement {

@@ -115,6 +115,8 @@
     shape__diamond--min-height: 88px,
     shape__circle--size: 128px,
     shape__note--fold-size: 14px,
+    shape__focus--color: rgba(2, 101, 220, 0.6),
+    shape__focus--width: 2px,
   )
 );
 
@@ -454,11 +456,6 @@
   stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
 }
 
-.node.is-drawn.is-connect-target .shape {
-  stroke: css.cssVar(node__connect-target--border-color);
-  stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
-}
-
 .node.is-drawn.status--running .shape {
   stroke: color-mix(in srgb, #{css.cssVar(running--color)} 55%, transparent);
 }
@@ -472,14 +469,21 @@
   stroke: css.cssVar(node__selected--border-color);
 }
 
-// The focus ring follows the outline rather than the box round it.
+// As on a box, the connection target's cue wins over a status colour; a selected node keeps the selected colour.
+.node.is-drawn.is-connect-target .shape {
+  stroke: css.cssVar(node__connect-target--border-color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
+}
+
+// The focus ring follows the outline rather than the box round it. An outline (the node's focus variable) cannot
+// be drawn along an SVG shape, so the ring has its own colour and width.
 .node.is-drawn:focus-visible {
   outline: none;
 }
 
 .node.is-drawn:focus-visible .shape {
-  stroke: css.cssVar(node__selected--border-color);
-  stroke-width: calc(#{css.cssVar(shape--border-width)} + 2px);
+  stroke: css.cssVar(shape__focus--color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + #{css.cssVar(shape__focus--width)});
 }
 
 .node.is-drawn.is-dragging .shape {
