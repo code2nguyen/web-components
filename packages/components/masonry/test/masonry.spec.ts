@@ -821,9 +821,9 @@ test('pinning a tile after it was placed moves it into the pinned group', async 
   const order = () =>
     page
       .locator('c2-masonry-item')
-      .evaluateAll((items) =>
-        items
-          .toSorted((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+      .evaluateAll((items: Element[]) =>
+        [...items]
+          .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left)
           .map((item) => item.getAttribute('item-id')),
       )
   const before = await order()
