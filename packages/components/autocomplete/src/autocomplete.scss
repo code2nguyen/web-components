@@ -22,9 +22,9 @@
     panel--border-radius: 8px,
     panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
     panel--max-height: 320px,
-    // Read by the component (a threshold, not a style): below it the header and footer are hidden.
-    panel--chrome-min-height: 240px,
     list--padding: 4px,
+    // Read by the component, not by a rule: the header and footer give way before the list gets shorter than this.
+    list--min-height: 96px,
     header--background: transparent,
     header--color: #71717a,
     header--padding: 10px 12px,

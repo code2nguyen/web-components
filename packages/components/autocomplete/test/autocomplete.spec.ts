@@ -210,3 +210,22 @@ test('hides the header and footer when the panel has little room, and shows them
   await expect(header).toBeVisible()
   await expect(footer).toBeVisible()
 })
+
+test('a short list keeps the header and footer in a space a full list would not', async ({ page, renderScenario }) => {
+  await page.setViewportSize({ width: 400, height: 240 })
+  await renderScenario(`<c2-autocomplete aria-label="People" suggestions='["Ada","Alan","Grace"]'>
+    <span slot="header">People</span>
+    <span slot="footer">Invite</span>
+  </c2-autocomplete>`)
+  const host = page.locator('c2-autocomplete')
+  const input = page.getByRole('combobox', { name: 'People' })
+
+  await input.fill('a')
+  await expect(options(page)).toHaveCount(3)
+  await expect(host.locator('.panel-header')).toBeHidden()
+
+  await input.fill('gr')
+  await expect(options(page)).toHaveCount(1)
+  await expect(host.locator('.panel-header')).toBeVisible()
+  await expect(host.locator('.panel-footer')).toBeVisible()
+})

@@ -56,8 +56,8 @@ export interface Autocomplete {
   removeEventListener: TypedRemoveEventListener<Autocomplete, AutocompleteEventMap>
 }
 
-/** Default of `--c2-autocomplete__panel--chrome-min-height`. */
-const PANEL_CHROME_MIN_HEIGHT = 240
+/** Default of `--c2-autocomplete__list--min-height`. */
+const LIST_MIN_HEIGHT = 96
 const IMPLICIT_LABEL_FIELDS = ['label', 'name', 'title', 'value']
 let autocompleteId = 0
 
@@ -107,9 +107,9 @@ let autocompleteId = 0
  * @cssproperty {border-radius} [--c2-autocomplete__panel--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-autocomplete__panel--box-shadow=0 12px 32px rgba(24, 24, 27, 0.14)]
  * @cssproperty {pixel} [--c2-autocomplete__panel--max-height=320px]
- * @cssproperty {pixel} [--c2-autocomplete__panel--chrome-min-height=240px] - Below this much room for the panel (a phone
- * with its keyboard open), the header and footer slots are hidden so the suggestions keep the space.
  * @cssproperty {padding} [--c2-autocomplete__list--padding=4px]
+ * @cssproperty {pixel} [--c2-autocomplete__list--min-height=96px] - Room the suggestions keep (or their own height, if
+ * shorter). When the panel cannot fit that plus the header and footer (a phone with its keyboard open), those two hide.
  * @cssproperty {color} [--c2-autocomplete__header--background=transparent]
  * @cssproperty {color} [--c2-autocomplete__header--color=#71717a]
  * @cssproperty {padding} [--c2-autocomplete__header--padding=10px 12px]
@@ -238,6 +238,8 @@ export class Autocomplete extends LitElement {
   @state() private disabledByForm = false
   /** The panel has too little room for its header and footer; only the list is shown. */
   @state() private compactPanel = false
+  /** Height of the header and footer, measured while they are shown (hidden, they measure 0). */
+  private panelChromeHeight = 0
   private readonly slotPresence = new SlotPresenceController(this, ['header', 'footer'])
   private panelSpaceObserver: MutationObserver | null = null
 
@@ -609,9 +611,20 @@ export class Autocomplete extends LitElement {
   }
 
   private readonly measurePanelSpace = () => {
+    const root = this.renderRoot
     const available = parseFloat(this.overlay?.style.getPropertyValue('--c2-overlay--available-height') ?? '')
-    const threshold = parseFloat(getComputedStyle(this).getPropertyValue('--c2-autocomplete__panel--chrome-min-height'))
-    this.compactPanel = Number.isFinite(available) && available < (Number.isFinite(threshold) ? threshold : PANEL_CHROME_MIN_HEIGHT)
+    const list = root.querySelector<HTMLElement>('.list')
+    if (!Number.isFinite(available) || !list) {
+      this.compactPanel = false
+      return
+    }
+    if (!this.compactPanel) {
+      this.panelChromeHeight = ['.panel-header', '.panel-footer'].reduce((sum, part) => sum + (root.querySelector<HTMLElement>(part)?.offsetHeight ?? 0), 0)
+    }
+    // A short list (one row, the loading or empty message) only needs its own height.
+    const minHeight = parseFloat(getComputedStyle(this).getPropertyValue('--c2-autocomplete__list--min-height'))
+    const listNeeds = Math.min(Number.isFinite(minHeight) ? minHeight : LIST_MIN_HEIGHT, list.scrollHeight)
+    this.compactPanel = this.panelChromeHeight > 0 && this.panelChromeHeight + listNeeds > available
   }
 
   private renderHighlighted(text: string) {
@@ -660,6 +673,8 @@ export class Autocomplete extends LitElement {
   }
 
   protected override updated(changed: PropertyValues) {
+    // New results change how much room the list needs, which need not move the overlay.
+    if (this.panelSpaceObserver && (changed.has('results') || changed.has('loading') || changed.has('loadError'))) this.measurePanelSpace()
     if (changed.has('dataSource')) {
       this.cancelPendingRequest()
       this.cachedDataSource = undefined
