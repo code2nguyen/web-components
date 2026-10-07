@@ -585,7 +585,7 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
   // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
   // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
-  // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there. under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
   // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
   '--c2-notepad__sheet--background': {
     token: 'color-surface',
