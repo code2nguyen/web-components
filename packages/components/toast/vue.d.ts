@@ -23,6 +23,7 @@ declare module 'vue' {
         'no-icon'?: unknown
         'show-progress'?: unknown
         'action-label'?: unknown
+        'action-placement'?: unknown
         'close-label'?: unknown
         onToastClose?: (event: EventOf<Toast, 'toast-close'>) => void
         onToastAction?: (event: EventOf<Toast, 'toast-action'>) => void

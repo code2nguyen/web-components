@@ -27,6 +27,7 @@ declare module 'react' {
         'no-icon'?: Attribute
         'show-progress'?: Attribute
         'action-label'?: Attribute
+        'action-placement'?: Attribute
         'close-label'?: Attribute
       }
       'c2-toast-region': C2Props<ToastRegion> & {

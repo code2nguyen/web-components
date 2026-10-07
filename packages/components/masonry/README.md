@@ -91,7 +91,7 @@ interface MasonryLayoutSnapshot {
 
 `layout-change` detail is `{ layout, itemId, action: 'move' | 'resize', inputMethod: 'mouse' | 'touch' | 'pen' | 'keyboard' }`. `layout-error` detail is `{ reason: 'missing-id' | 'duplicate-id' | 'invalid-span' | 'invalid-layout', itemId? }`. Both are nonbubbling, noncancelable `CustomEvent`s on `c2-masonry`.
 
-The container accepts direct tile children in its default slot. Each tile accepts application content in its default slot and an optional `move-icon` with a built-in SVG fallback. Hovering a tile reveals its move handle and highlights the right and bottom resize borders. Resizing has no icon: drag the right border for columns or the bottom border for rows, or focus the bottom border and use arrow keys. Keyboard focus also reveals the controls. Exposed parts: container `grid`, `placeholder`; tile `content`, `controls`, `move-handle`, `resize-handle`, `resize-edge`.
+The container accepts direct tile children in its default slot. Each tile accepts application content in its default slot and an optional `move-icon` with a built-in SVG fallback. Hovering a tile reveals its move handle and highlights the right and bottom resize borders. Resizing has no icon: drag the right border for columns, the bottom border for rows, or the bottom-right corner for both at once, or focus the bottom border and use arrow keys. Keyboard focus also reveals the controls. Exposed parts: container `grid`, `placeholder`; tile `content`, `controls`, `move-handle`, `resize-handle`, `resize-edge`, `resize-corner`.
 
 ## Styling
 

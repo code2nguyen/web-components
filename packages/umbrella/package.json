@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -396,6 +396,10 @@
       "types": "./dist/menu/menu-item.d.ts",
       "default": "./dist/menu/menu-item.js"
     },
+    "./menu/menu-row": {
+      "types": "./dist/menu/menu-row.d.ts",
+      "default": "./dist/menu/menu-row.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
@@ -639,10 +643,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.4",
-    "@c2n/phosphor-icons": "1.0.4",
-    "@c2n/task-icons": "1.0.4",
-    "@c2n/theme": "1.0.4",
+    "@c2n/core": "1.0.5",
+    "@c2n/phosphor-icons": "1.0.5",
+    "@c2n/task-icons": "1.0.5",
+    "@c2n/theme": "1.0.5",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",

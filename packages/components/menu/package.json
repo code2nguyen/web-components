@@ -13,6 +13,10 @@
       "types": "./types/src/menu-item.d.ts",
       "default": "./dist/menu-item.js"
     },
+    "./menu-row.js": {
+      "types": "./types/src/menu-row.d.ts",
+      "default": "./dist/menu-row.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

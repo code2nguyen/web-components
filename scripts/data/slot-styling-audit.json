@@ -1316,6 +1316,12 @@
     },
     {
       "tag": "c2-masonry-item",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects application-owned buttons, such as a menu trigger; style them through their own class or public contract."
+    },
+    {
+      "tag": "c2-masonry-item",
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects application-owned card content; style that content through its own classes or public contract."
@@ -1379,6 +1385,12 @@
       "slot": "suffix-icon",
       "decision": "assigned-content",
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-row",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned c2-menu-item choices, styled through the menu item's documented variables."
     },
     {
       "tag": "c2-modal",

@@ -449,3 +449,84 @@ test('upgrading writes no attribute on the menus or their rows', async ({ page, 
   const placement = await nested.evaluate((el) => (el.shadowRoot?.querySelector('c2-overlay') as HTMLElement & { placement?: string }).placement)
   expect(placement).toBe('right-start')
 })
+
+const swatch = (value: string, label: string, checked = false) =>
+  `<c2-menu-item type="radio" name="color" value="${value}" label="${label}"${checked ? ' checked' : ''}><span slot="prefix-icon" class="dot"></span></c2-menu-item>`
+
+const withRows = `<c2-menu aria-label="Box">
+  ${trigger}
+  <h6>Colour</h6>
+  <c2-menu-row aria-label="Colour">${swatch('red', 'Red', true)}${swatch('green', 'Green')}${swatch('blue', 'Blue')}</c2-menu-row>
+  <h6>Size</h6>
+  <c2-menu-row aria-label="Size">${swatch('s', 'Small').replaceAll('color', 'size')}${swatch('l', 'Large').replaceAll('color', 'size')}</c2-menu-row>
+  <hr />
+  <c2-menu-item value="delete">Delete</c2-menu-item>
+</c2-menu>`
+
+test('a c2-menu-row lays its choices side by side, named by their label, ringed when checked', async ({ page, renderScenario }) => {
+  await renderScenario(withRows)
+  await page.getByRole('button', { name: 'Actions' }).click()
+  const colours = page.locator('c2-menu-row').first()
+  await expect(colours).toBeVisible()
+  await expect(colours).toHaveHostAria('role', 'group')
+  await expect(colours).toHaveAttribute('aria-label', 'Colour')
+
+  const [red, green] = [await row(page, 'red').boundingBox(), await row(page, 'green').boundingBox()]
+  expect(Math.abs(red!.y - green!.y)).toBeLessThan(1)
+  expect(green!.x).toBeGreaterThan(red!.x + red!.width - 1)
+
+  await expect(row(page, 'green')).toHaveHostAria('label', 'Green')
+  await expect(row(page, 'green')).toHaveHostAria('role', 'menuitemradio')
+  // The label is the name, not text on screen; the checked choice has a ring, not a tick.
+  await expect(row(page, 'green').locator('.text')).toHaveCSS('clip-path', 'inset(50%)')
+  await expect(row(page, 'red').locator('.indicator')).toHaveCount(0)
+  await expect(row(page, 'red').locator('.c2-menu-item')).not.toHaveCSS('outline-style', 'none')
+  // Radio choices in a row do not push the labels of the plain rows along.
+  await expect(row(page, 'delete').locator('.indicator')).toHaveCount(0)
+})
+
+test('the arrow keys move along a row with Left and Right, and between lines with Up and Down', async ({ page, renderScenario }) => {
+  await renderScenario(withRows)
+  const host = page.locator('c2-menu')
+  await watch(host, 'menu-select')
+  await page.getByRole('button', { name: 'Actions' }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'red')).toBeFocused()
+
+  await page.keyboard.press('ArrowRight')
+  await expect(row(page, 'green')).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await expect(row(page, 'blue')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 's')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'delete')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(row(page, 's')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(row(page, 'red')).toBeFocused()
+  await page.keyboard.press('ArrowLeft')
+  await expect(row(page, 'red')).toBeFocused()
+
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Enter')
+  await expect(host).toHaveAttribute('data-events', '[{"value":"green","checked":true}]')
+  await expect(row(page, 'green')).toHaveJSProperty('checked', true)
+  await expect(row(page, 'red')).toHaveJSProperty('checked', false)
+})
+
+test('in a menu that is one row, ArrowUp and ArrowDown step through its choices', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-menu aria-label="Colour">${trigger}<c2-menu-row aria-label="Colour">${swatch('red', 'Red')}${swatch('green', 'Green')}${swatch('blue', 'Blue')}</c2-menu-row></c2-menu>`,
+  )
+  await page.getByRole('button', { name: 'Actions' }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'red')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'green')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'blue')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(row(page, 'green')).toBeFocused()
+})

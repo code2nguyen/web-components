@@ -3,6 +3,33 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.5](https://github.com/code2nguyen/web-components/releases/tag/v1.0.5) — 2026-10-07
+
+### Features
+
+- **flow:** A node's shape, its own colours and an icon ([d07b331](https://github.com/code2nguyen/web-components/commit/d07b331))
+- **menu:** C2-menu-row, a line of small choices such as swatches, walked with the arrow keys ([46cc332](https://github.com/code2nguyen/web-components/commit/46cc332))
+- Icon slots size Phosphor icons as they size Feather ones ([1081584](https://github.com/code2nguyen/web-components/commit/1081584))
+- **toast:** Action-placement="end" puts the action in line with the message ([ffc5b31](https://github.com/code2nguyen/web-components/commit/ffc5b31))
+- **masonry:** Pinned tiles stay first, an actions slot beside the move handle, and a move-handle element of the app's own ([7b763a9](https://github.com/code2nguyen/web-components/commit/7b763a9))
+- **theme:** Cool navy dark palette and fainter notepad rules on dark paper ([e55dd48](https://github.com/code2nguyen/web-components/commit/e55dd48))
+- **notepad:** Add actions-placement to put the actions slot after the Paper and Tear off buttons ([77e789c](https://github.com/code2nguyen/web-components/commit/77e789c))
+- **masonry:** Resize columns and rows together from a tile's bottom-right corner ([491bc80](https://github.com/code2nguyen/web-components/commit/491bc80))
+
+### Fixes
+
+- **flow:** A drawn node's connection cue wins over its status colour, and its focus ring has its own variables ([71297f7](https://github.com/code2nguyen/web-components/commit/71297f7))
+- Review follow-ups on details, toast, masonry and overlay ([14bec95](https://github.com/code2nguyen/web-components/commit/14bec95))
+- **flow:** Diamond labels stay inside the shape, drawn shapes take the status colours and a focus ring on their outline, and edges meet a slanted node's sides ([b51b3ad](https://github.com/code2nguyen/web-components/commit/b51b3ad))
+- **menu:** A menu that is one row steps through it, rows never wrap, the checked choice shows keyboard focus, and a moved or relabelled choice keeps its name ([c6e89dc](https://github.com/code2nguyen/web-components/commit/c6e89dc))
+- **overlay:** Reposition on the next frame after the first placement, so a growing surface never loops its ResizeObserver ([acf26d2](https://github.com/code2nguyen/web-components/commit/acf26d2))
+- **notepad:** The toolbar takes the paper's colour, and the caret stays the height of the writing ([80fd6f7](https://github.com/code2nguyen/web-components/commit/80fd6f7))
+- **details:** Content that arrives while opening slides open without a jump ([fde69c7](https://github.com/code2nguyen/web-components/commit/fde69c7))
+
+### Improvements
+
+- **theme:** Restore the zinc dark palette ([e7bea59](https://github.com/code2nguyen/web-components/commit/e7bea59))
+
 ## [1.0.4](https://github.com/code2nguyen/web-components/releases/tag/v1.0.4) — 2026-10-06
 
 ### Features

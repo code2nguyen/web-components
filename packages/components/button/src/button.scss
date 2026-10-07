@@ -124,8 +124,9 @@
   width: css.cssVar(icon--size);
   height: css.cssVar(icon--size);
   color: css.cssVar(icon--color, container--color);
-  // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
+  // Size the icon components of this library to the slot: Feather and Phosphor icons and Material icon ligatures.
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
@@ -140,6 +141,7 @@
   height: css.cssVar(running-icon--size);
   color: css.cssVar(running-icon--color, container--color);
   --c2-feather-icon--size: #{css.cssVar(running-icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(running-icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(running-icon--size)};
   animation: c2-button-spin css.cssVar(running-icon--animation-duration) linear infinite;
 }

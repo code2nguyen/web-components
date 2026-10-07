@@ -146,6 +146,7 @@ $_travel: calc(#{css.cssVar(track--width)} - #{css.cssVar(thumb--size)} - 2 * #{
   opacity: 1;
   transition: opacity $_duration $_easing;
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 
   ::slotted(*) {

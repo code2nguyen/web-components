@@ -121,6 +121,7 @@
   height: css.cssVar(icon--size);
   color: css.cssVar(icon--color);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 

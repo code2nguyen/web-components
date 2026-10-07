@@ -9,6 +9,8 @@
     controls--gap: 4px,
     controls--background: transparent,
     handle--size: 32px,
+    actions--gap: 4px,
+    actions--opacity: 0,
     resize-handle--size: 8px,
     resize-edge__hover--color: rgb(37 99 235 / 35%),
     handle--icon-size: 16px,
@@ -80,30 +82,50 @@ $_resize-hit-size: var(--_resize-hit-size, #{css.cssVar(resize-handle--size)});
   opacity: 1;
 }
 
-.controls [part='move-handle'] {
+// The top-right corner: the move handle, then the slotted actions. It sits above the content and the resize edges, and
+// shows while the tile is hovered, focused or dragged.
+.actions {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: css.cssVar(controls--gap);
   right: css.cssVar(controls--gap);
-  opacity: 0;
-  pointer-events: auto;
-  cursor: move;
-}
-
-.controls [part='move-handle'] svg,
-.controls [part='move-handle'] slot,
-.controls [part='move-handle'] slot::slotted(*) {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  opacity: css.cssVar(actions--opacity);
   pointer-events: none;
 }
 
-:host([data-dragging]) .controls [part='move-handle'] {
-  cursor: grabbing;
+// A touch screen has no hover to reveal them: there they always show.
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
 }
 
-:host(:hover) .controls [part='move-handle'],
-:host(:focus-within) .controls [part='move-handle'],
-:host([data-dragging]) .controls [part='move-handle'] {
+:host(:hover) .actions,
+:host(:focus-within) .actions,
+:host([data-dragging]) .actions {
   opacity: 1;
+}
+
+.actions > button,
+.actions ::slotted(*) {
+  pointer-events: auto;
+}
+
+[part='move-handle'] {
+  cursor: move;
+}
+
+[part='move-handle'] svg,
+[part='move-handle'] slot,
+[part='move-handle'] slot::slotted(*) {
+  pointer-events: none;
+}
+
+:host([data-dragging]) [part='move-handle'] {
+  cursor: grabbing;
 }
 
 .resize-edge {
@@ -133,6 +155,16 @@ $_resize-hit-size: var(--_resize-hit-size, #{css.cssVar(resize-handle--size)});
   cursor: ew-resize;
 }
 
+.resize-edge--corner {
+  // Same layer as the edges, after them in the DOM so it wins where they meet; the move handle still sits above.
+  right: 0;
+  bottom: 0;
+  // A little wider than the edges so the diagonal is easy to grab, without reaching the move handle in the top corner.
+  width: calc(#{$_resize-hit-size} + 8px);
+  height: calc(#{$_resize-hit-size} + 8px);
+  cursor: nwse-resize;
+}
+
 .controls [part='resize-handle'] {
   width: auto;
   border-radius: 0;
@@ -153,7 +185,7 @@ button {
   touch-action: none;
 }
 
-.controls [part='move-handle']:hover {
+[part='move-handle']:hover {
   background: css.cssVar(handle__hover--background);
 }
 

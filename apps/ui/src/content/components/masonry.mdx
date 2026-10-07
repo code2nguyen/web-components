@@ -201,7 +201,40 @@ import '@c2n/components/masonry'
 
 Every tile needs a unique, nonempty `item-id` for editing. The `editable` attribute exposes a move button and border resize targets; interacting with the tile's interior content never starts a drag. Hover a tile to reveal its move button and highlight its right and bottom resize borders. Keyboard focus reveals the controls too. Focus the move button or bottom resize border, press Enter or Space, use arrow keys (Home/End also move a tile to the extremes), then Enter/Space to commit or Escape to cancel. The live status announces the candidate. Pointer drag supports mouse, touch, and pen; reduced-motion preference removes decorative movement.
 
-The Conversion tile above replaces the built-in move artwork with an SVG in its `move-icon` slot; Incidents uses the default grip. Place the slot on a direct child of `c2-masonry-item`. The item's unnamed slot holds card content, while the container's unnamed slot accepts items. There is no resize icon: drag the highlighted right border to change column span or the bottom border to change row span. The cursor indicates the available direction. Masonry repacks the tiles after a resize; it does not pin the opposite edge or scale the card content. Keyboard users can Tab to the bottom border's focus outline and use arrow keys in edit mode. The available slots are listed under each element on the API tab.
+The Conversion tile above replaces the built-in move artwork with an SVG in its `move-icon` slot; Incidents uses the default grip. Place the slot on a direct child of `c2-masonry-item`. The item's unnamed slot holds card content, while the container's unnamed slot accepts items. There is no resize icon: drag the highlighted right border to change column span, the bottom border to change row span, or the bottom-right corner to change both at once. The cursor indicates the available direction. Masonry repacks the tiles after a resize; it does not pin the opposite edge or scale the card content. Keyboard users can Tab to the bottom border's focus outline and use arrow keys in edit mode. The available slots are listed under each element on the API tab.
+
+To put the move control inside the tile's own content instead, such as a button in a card's header next to its other actions, give the item `move-handle` with that element's `id`. The built-in move button is then not drawn, and pressing the element (or Enter or Space on it) starts a move as the built-in one does; the resize borders stay. The element is yours: give it an accessible name, `touch-action: none` so a touch drag moves the tile rather than scrolling, and hide it outside edit mode if it should not show there. The example uses `c2-icon-button`, so it also imports `@c2n/components/icon-button`; a native `<button>` works as well.
+
+```html
+<c2-masonry editable>
+  <c2-masonry-item item-id="groceries" label="Groceries" move-handle="move-groceries">
+    <header>
+      <h3>Groceries</h3>
+      <c2-icon-button id="move-groceries" aria-label="Move Groceries" style="touch-action: none"><svg viewBox="0 0 16 16" aria-hidden="true">…</svg></c2-icon-button>
+    </header>
+  </c2-masonry-item>
+</c2-masonry>
+```
+
+A tile can also carry its own buttons, such as a menu, in its top-right corner: put them on the item with `slot="actions"`, beside its content. They come after the move handle and show with it, while the tile is hovered or has focus, and they work whether or not the container is `editable`. A tile whose content is one link can then still have a menu, since the menu sits next to the link rather than inside it. Set `--c2-masonry-item__actions--opacity: 1` to keep them always visible, and `--c2-masonry-item__actions--gap` for the space between them.
+
+```html
+<c2-masonry editable>
+  <c2-masonry-item item-id="roadmap" label="Roadmap">
+    <a href="/pages/roadmap">Roadmap</a>
+    <c2-icon-button slot="actions" aria-label="Roadmap options"><svg viewBox="0 0 16 16" aria-hidden="true">…</svg></c2-icon-button>
+  </c2-masonry-item>
+</c2-masonry>
+```
+
+Give an item `pinned` to keep it in a group at the start of the container, such as the notes a user pinned: pinned tiles always come before the others, each group in its own order, whatever order they are authored, stored or assigned in. A move keeps a pinned tile among the pinned ones and any other tile after them, by pointer and by keyboard (Home takes an unpinned tile to just after the pinned group). The attribute changes nothing about the look, so show the pin in the tile.
+
+```html
+<c2-masonry editable>
+  <c2-masonry-item item-id="wifi" label="Wi-Fi" pinned>…</c2-masonry-item>
+  <c2-masonry-item item-id="groceries" label="Groceries">…</c2-masonry-item>
+</c2-masonry>
+```
 
 Committed edits save to `localStorage` and restore automatically by default. Give the container a stable `id` to keep its default storage key stable, or set `storage-key="operations-layout"` to choose the exact key. Use `save-layout="false"` to disable storage; the repository's Boolean converter recognizes the literal `"false"`. A completed user edit still sends one nonbubbling `layout-change` from the container. Its `detail.layout` has `version: 1` and an ordered `items` array of `{ id, rows, columns: { xs, sm, md, lg } }`; it stores no coordinates. Applications can also assign a snapshot through the property-only `layout` input, which takes precedence over stored data:
 
