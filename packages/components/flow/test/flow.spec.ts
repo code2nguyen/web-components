@@ -647,5 +647,5 @@ test('a node takes its shape, its own colours and an icon before its label', asy
   await expect(node(page, 'odd')).toHaveClass(/^(?!.*shape--)/)
   await host(page).evaluate((element: Flow) => element.fitView())
   await page.waitForTimeout(400)
-  await host(page).screenshot({ path: 'test-results/flow-shapes.png' })
+  await host(page).screenshot({ path: test.info().outputPath('flow-shapes.png') })
 })

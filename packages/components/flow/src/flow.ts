@@ -92,7 +92,8 @@ const SHAPES = new Set<FlowNodeShape>(['rect', 'pill', 'diamond', 'circle', 'not
 const OUTLINES: Partial<Record<FlowNodeShape, unknown>> = {
   diamond: svg`<polygon points="50,0.5 99.5,50 50,99.5 0.5,50" vector-effect="non-scaling-stroke"></polygon>`,
   circle: svg`<ellipse cx="50" cy="50" rx="49.5" ry="49.5" vector-effect="non-scaling-stroke"></ellipse>`,
-  slanted: svg`<polygon points="9,0.5 99.5,0.5 91,99.5 0.5,99.5" vector-effect="non-scaling-stroke"></polygon>`,
+  // Its sides lean out past the box at the corners, so their middles, where the edges arrive, are the box's sides.
+  slanted: svg`<polygon points="5,0.5 105,0.5 95,99.5 -5,99.5" vector-effect="non-scaling-stroke"></polygon>`,
 }
 /** Two presses this close in time (ms) and space (px) on the same thing are a double click, or a double tap. */
 const DOUBLE_TAP_TIME = 500

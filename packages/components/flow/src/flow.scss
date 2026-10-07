@@ -459,20 +459,44 @@
   stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
 }
 
+.node.is-drawn.status--running .shape {
+  stroke: color-mix(in srgb, #{css.cssVar(running--color)} 55%, transparent);
+}
+
+.node.is-drawn.status--error .shape {
+  stroke: color-mix(in srgb, #{css.cssVar(error--color)} 60%, transparent);
+}
+
+.node.is-drawn.is-selected.status--running .shape,
+.node.is-drawn.is-selected.status--error .shape {
+  stroke: css.cssVar(node__selected--border-color);
+}
+
+// The focus ring follows the outline rather than the box round it.
+.node.is-drawn:focus-visible {
+  outline: none;
+}
+
+.node.is-drawn:focus-visible .shape {
+  stroke: css.cssVar(node__selected--border-color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + 2px);
+}
+
 .node.is-drawn.is-dragging .shape {
   filter: drop-shadow(0 8px 14px rgba(24, 24, 27, 0.18));
 }
 
 .node.shape--slanted {
-  padding-left: calc(#{css.cssVar(node--padding-left)} + 12px);
-  padding-right: calc(#{css.cssVar(node--padding-right)} + 12px);
+  padding-left: calc(#{css.cssVar(node--padding-left)} + 6px);
+  padding-right: calc(#{css.cssVar(node--padding-right)} + 6px);
 }
 
 .node.shape--diamond {
   display: flex;
   align-items: center;
   min-height: css.cssVar(shape__diamond--min-height);
-  padding: 14px 22%;
+  // The middle half of the width: two lines there stay inside the diamond, which narrows towards its points.
+  padding: 14px 25%;
 }
 
 .node.shape--circle {
@@ -483,7 +507,8 @@
   padding: 18px;
 }
 
-// A diamond and a circle centre their text and let it wrap: their middle is where the room is.
+// A diamond and a circle centre their text and let it wrap: their middle is where the room is. Three lines fit a
+// circle; a diamond takes two (below).
 .node:is(.shape--diamond, .shape--circle) {
   .body {
     flex: 1;
@@ -504,6 +529,11 @@
     -webkit-line-clamp: 3;
     line-clamp: 3;
   }
+}
+
+.node.shape--diamond .label {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .node-icon {
