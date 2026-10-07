@@ -125,6 +125,8 @@ export class Details extends LitElement {
   @state() private closing = false
 
   private contentAnimations: Animation[] = []
+  /** Watches the body while the panel opens, so content rendered on `toggle` (after the animation began) is followed. */
+  private openingObserver: ResizeObserver | undefined
 
   @consume({ context: accordionContext, subscribe: true })
   private accordion: AccordionContext | undefined
@@ -151,6 +153,8 @@ export class Details extends LitElement {
   }
 
   private cancelContentAnimations() {
+    this.openingObserver?.disconnect()
+    this.openingObserver = undefined
     for (const animation of this.contentAnimations) animation.cancel()
     this.contentAnimations = []
     if (this.contentElement) this.contentElement.style.overflow = ''
@@ -159,7 +163,9 @@ export class Details extends LitElement {
   /**
    * Slides the content between collapsed and its natural height, fading the body along the way. Duration and easing
    * come from the `transition-*` values the stylesheet puts on the content element, so `--c2-details--transition-duration`
-   * and `prefers-reduced-motion` both apply. Reversing mid-flight starts from the current rendered height.
+   * and `prefers-reduced-motion` both apply. Reversing mid-flight starts from the current rendered height. Content that
+   * grows while the panel opens (rendered by the app on `toggle`, an image loading) moves the target: the height
+   * carries on from where it is to the new one, in the time left.
    */
   private animateContent(open: boolean) {
     const content = this.contentElement
@@ -179,21 +185,44 @@ export class Details extends LitElement {
       return
     }
 
-    const to = open ? content.scrollHeight : 0
+    let to = open ? content.scrollHeight : 0
     content.style.overflow = 'hidden'
-    const height = content.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration, easing })
     const fade = body.animate([{ opacity: fromOpacity }, { opacity: open ? 1 : 0 }], { duration, easing })
-    this.contentAnimations = [height, fade]
+    const slide = (start: number, end: number, time: number) => {
+      const height = content.animate([{ height: `${start}px` }, { height: `${end}px` }], { duration: time, easing })
+      this.contentAnimations = [height, fade]
+      height.finished
+        .then(() => {
+          this.openingObserver?.disconnect()
+          this.openingObserver = undefined
+          this.contentAnimations = []
+          content.style.overflow = ''
+          if (!open) this.closing = false
+        })
+        .catch(() => {
+          // Cancelled by a newer toggle or retargeted; whoever cancelled it owns the cleanup.
+        })
+      return height
+    }
+    let height = slide(from, to, duration)
 
-    height.finished
-      .then(() => {
-        this.contentAnimations = []
-        content.style.overflow = ''
-        if (!open) this.closing = false
+    if (open && typeof ResizeObserver === 'function') {
+      this.openingObserver = new ResizeObserver(() => {
+        const target = content.scrollHeight
+        if (Math.abs(target - to) < 1) return
+        const remaining = duration - Number(height.currentTime ?? 0)
+        const current = content.getBoundingClientRect().height
+        to = target
+        height.cancel()
+        if (remaining > 16) {
+          height = slide(current, target, remaining)
+        } else {
+          // Next to done: settle at the natural height.
+          this.cancelContentAnimations()
+        }
       })
-      .catch(() => {
-        // Cancelled by a newer toggle; that toggle owns the cleanup.
-      })
+      this.openingObserver.observe(body)
+    }
   }
 
   private handleSlotChange(event: Event) {

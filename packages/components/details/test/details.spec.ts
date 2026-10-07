@@ -91,3 +91,30 @@ test('the border shorthand reaches every side, with and without @c2n/theme, and 
   const themed = '2px rgb(7, 8, 9)'
   await expectSides({ top: themed, right: themed, bottom: themed, left: themed })
 })
+test('content rendered on toggle, after the panel began opening, still slides open without a jump', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Lazy" style="--c2-details--transition-duration: 400ms"></c2-details>')
+  const heights = await page.locator('c2-details').evaluate(async (host) => {
+    // As an app does: the content is rendered only once the panel says it opened.
+    host.addEventListener('toggle', () => {
+      const block = document.createElement('div')
+      block.style.height = '200px'
+      block.textContent = 'Rendered on open'
+      host.append(block)
+    })
+    const content = host.shadowRoot!.querySelector<HTMLElement>('.c2-details-content')!
+    host.shadowRoot!.querySelector<HTMLElement>('summary')!.click()
+    const seen: number[] = []
+    const until = performance.now() + 600
+    while (performance.now() < until) {
+      await new Promise(requestAnimationFrame)
+      seen.push(content.getBoundingClientRect().height)
+    }
+    return seen
+  })
+  const steps = heights.slice(1).map((height, index) => height - heights[index])
+  const end = heights.at(-1)!
+  expect(end).toBeGreaterThan(200)
+  // Without following the content, the panel stops at its padding and the content then lands in one frame.
+  expect(Math.max(...steps)).toBeLessThan(end / 2)
+  expect(Math.min(...steps)).toBeGreaterThanOrEqual(-1)
+})
