@@ -142,8 +142,17 @@ function asAttributeName(name) {
 // These are structural/data children whose parent packages register them. Keeping them as plain custom
 // elements avoids a nested Astro hydration boundary that can make a parent initialize before its definitions.
 const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
+// Tags that stay plain only as direct children of a given parent, because they are islands of their own elsewhere.
+// `c2-chip-group` reads the size its chips and badges report, which only reaches it from a direct child.
+const NESTED_CHILDREN_OF = new Map([['c2-chip-group', new Set(['c2-chip', 'c2-badge'])]])
 
-function changeComponentName(vnode, uid, componentName, markup) {
+function isNestedChild(tag, parentTag) {
+  return NESTED_CHILD_TAGS.has(tag) || !!NESTED_CHILDREN_OF.get(parentTag)?.has(tag)
+}
+
+function changeComponentName(vnode, uid, componentName, markup, parentTag) {
+  const tag = vnode.name
+  const nested = isNestedChild(tag, parentTag)
   let mainComponent = componentName && vnode.name == componentName ? vnode : null
   const classAttributeIndex = vnode.attributes?.findIndex((item) => item.name == 'class')
   if (classAttributeIndex > -1) {
@@ -153,10 +162,10 @@ function changeComponentName(vnode, uid, componentName, markup) {
   // A nested child is still rendered by Astro's Lit renderer on the server, which assigns any attribute whose name is a
   // property as that property; a non-reflected one (`c2-chart-series`'s `field`) then never reaches the HTML. So its
   // attributes are handed over capitalized as well, even though it does not become an island.
-  if (NESTED_CHILD_TAGS.has(vnode.name)) {
+  if (nested) {
     for (const attribute of vnode.attributes ?? []) attribute.name = asAttributeName(attribute.name)
   }
-  if (vnode.name?.startsWith('c2-') && !NESTED_CHILD_TAGS.has(vnode.name)) {
+  if (vnode.name?.startsWith('c2-') && !nested) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
     for (const attribute of vnode.attributes) attribute.name = asAttributeName(attribute.name)
@@ -185,7 +194,7 @@ function changeComponentName(vnode, uid, componentName, markup) {
   }
   if (vnode.children) {
     for (const item of vnode.children) {
-      const hostNode = changeComponentName(item, uid, componentName, markup)
+      const hostNode = changeComponentName(item, uid, componentName, markup, tag)
       if (!mainComponent && hostNode) {
         mainComponent = hostNode
       }

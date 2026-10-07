@@ -51,7 +51,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../chip:build",
+        "../badge:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -63,12 +65,12 @@
     }
   },
   "dependencies": {
+    "@c2n/badge": "*",
+    "@c2n/chip": "*",
     "@c2n/core": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/badge": "*",
-    "@c2n/chip": "*",
     "@c2n/config": "*"
   },
   "customElements": "custom-elements.json"

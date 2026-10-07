@@ -1,6 +1,4 @@
 import '../src/chip-group'
-import '../../chip/src/chip'
-import '../../badge/src/badge'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!

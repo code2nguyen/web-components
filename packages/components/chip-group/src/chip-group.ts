@@ -4,6 +4,9 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { GROUP_ITEM_SIZE_EVENT, groupItemOf, markGroupItemConsumer } from '@c2n/core/controllers/group-item-size.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { state } from 'lit/decorators.js'
+// The group lays out chips and badges: register them, so markup that only loads the group still upgrades its items.
+import '@c2n/chip'
+import '@c2n/badge'
 import styles from './chip-group.scss?inline'
 
 /** Events fired by {@link ChipGroup}, keyed for `addEventListener`. */
