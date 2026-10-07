@@ -5,6 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { getFieldValue } from '@c2n/core/data-helper.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
@@ -55,6 +56,8 @@ export interface Autocomplete {
   removeEventListener: TypedRemoveEventListener<Autocomplete, AutocompleteEventMap>
 }
 
+/** Default of `--c2-autocomplete__panel--chrome-min-height`. */
+const PANEL_CHROME_MIN_HEIGHT = 240
 const IMPLICIT_LABEL_FIELDS = ['label', 'name', 'title', 'value']
 let autocompleteId = 0
 
@@ -104,6 +107,8 @@ let autocompleteId = 0
  * @cssproperty {border-radius} [--c2-autocomplete__panel--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-autocomplete__panel--box-shadow=0 12px 32px rgba(24, 24, 27, 0.14)]
  * @cssproperty {pixel} [--c2-autocomplete__panel--max-height=320px]
+ * @cssproperty {pixel} [--c2-autocomplete__panel--chrome-min-height=240px] - Below this much room for the panel (a phone
+ * with its keyboard open), the header and footer slots are hidden so the suggestions keep the space.
  * @cssproperty {padding} [--c2-autocomplete__list--padding=4px]
  * @cssproperty {color} [--c2-autocomplete__header--background=transparent]
  * @cssproperty {color} [--c2-autocomplete__header--color=#71717a]
@@ -231,7 +236,10 @@ export class Autocomplete extends LitElement {
   @state() private focused = false
   @state() private activeIndex = -1
   @state() private disabledByForm = false
+  /** The panel has too little room for its header and footer; only the list is shown. */
+  @state() private compactPanel = false
   private readonly slotPresence = new SlotPresenceController(this, ['header', 'footer'])
+  private panelSpaceObserver: MutationObserver | null = null
 
   @query('.input') private input?: HTMLInputElement
   @query('c2-overlay') private overlay?: Overlay
@@ -253,6 +261,7 @@ export class Autocomplete extends LitElement {
     this.ownerDocument.removeEventListener('focusin', this.handleDocumentFocusIn, true)
     this.ownerDocument.removeEventListener('keydown', this.handleDocumentKeydown, true)
     this.cancelPendingRequest()
+    this.stopWatchingPanelSpace()
   }
 
   formResetCallback() {
@@ -579,6 +588,30 @@ export class Autocomplete extends LitElement {
   private handleOverlayToggle = (event: Event) => {
     this.open = (event as ToggleEvent).newState === 'open'
     if (!this.open) this.activeIndex = -1
+    if (this.open) this.watchPanelSpace()
+    else this.stopWatchingPanelSpace()
+  }
+
+  // The overlay writes the room left on its side as `--c2-overlay--available-height` each time it positions itself
+  // (on open, scroll, resize, and when a mobile keyboard shrinks the viewport), so its style attribute is the signal.
+  private watchPanelSpace() {
+    const overlay = this.overlay
+    if (!overlay || this.panelSpaceObserver) return
+    this.panelSpaceObserver = new MutationObserver(this.measurePanelSpace)
+    this.panelSpaceObserver.observe(overlay, { attributes: true, attributeFilter: ['style'] })
+    this.measurePanelSpace()
+  }
+
+  private stopWatchingPanelSpace() {
+    this.panelSpaceObserver?.disconnect()
+    this.panelSpaceObserver = null
+    this.compactPanel = false
+  }
+
+  private readonly measurePanelSpace = () => {
+    const available = parseFloat(this.overlay?.style.getPropertyValue('--c2-overlay--available-height') ?? '')
+    const threshold = parseFloat(getComputedStyle(this).getPropertyValue('--c2-autocomplete__panel--chrome-min-height'))
+    this.compactPanel = Number.isFinite(available) && available < (Number.isFinite(threshold) ? threshold : PANEL_CHROME_MIN_HEIGHT)
   }
 
   private renderHighlighted(text: string) {
@@ -688,7 +721,7 @@ export class Autocomplete extends LitElement {
         .open=${this.open}
         @toggle=${this.handleOverlayToggle}
       >
-        <div class="panel">
+        <div class=${classMap({ panel: true, 'panel--compact': this.compactPanel })}>
           <header class="panel-header" ?hidden=${!this.slotPresence.has('header')}>
             <slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </header>
