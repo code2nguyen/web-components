@@ -1,3 +1,6 @@
+/** Prefix of the id of a "show more" line, followed by the pointer of its branch. */
+export const MORE_PREFIX = 'more:'
+
 /** One step of a path: an object key or an array index. */
 export type JsonPathSegment = string | number
 
@@ -38,7 +41,8 @@ export interface FlattenOptions {
   visible?: Set<string>
 }
 
-const IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+// JSONPath (RFC 9535) shorthand names: a letter or `_`, then letters, digits or `_`. Anything else is bracketed.
+const IDENTIFIER = /^[A-Za-z_]\w*$/
 
 export function kindOf(value: unknown): JsonValueKind {
   if (value === null) return 'null'
@@ -161,7 +165,7 @@ export function flatten(root: unknown, options: FlattenOptions, sortKeys = false
   const rows: JsonRow[] = []
   const rootKind = kindOf(root)
   if (!isBranch(rootKind)) {
-    if (root === undefined) return rows
+    if (root === undefined || (options.visible && !options.visible.has(''))) return rows
     rows.push({ id: '', index: 0, parent: undefined, key: undefined, value: root, kind: rootKind, level: 1, size: 0, expanded: false, posinset: 1, setsize: 1 })
     return rows
   }
@@ -195,7 +199,8 @@ export function flatten(root: unknown, options: FlattenOptions, sortKeys = false
     }
     if (shown < count) {
       rows.push({
-        id: `${parentId}/#more`,
+        // Not a pointer (those are empty or start with `/`), so no key can collide with it.
+        id: `${MORE_PREFIX}${parentId}`,
         index: rows.length,
         parent,
         key: undefined,

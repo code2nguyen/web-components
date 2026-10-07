@@ -47,9 +47,6 @@
 :host {
   display: block;
   box-sizing: border-box;
-  overflow: auto;
-  max-height: css.cssVar(max-height);
-  padding: css.cssVar(padding);
   background-color: css.cssVar(background-color);
   color: css.cssVar(color);
   font-family: css.cssVar(font-family);
@@ -61,6 +58,17 @@
 
 :host([hidden]) {
   display: none;
+}
+
+// The scroll container is inside the shadow root rather than the host, so it can carry `tabindex="-1"`.
+.scroller {
+  display: block;
+  box-sizing: border-box;
+  max-height: css.cssVar(max-height);
+  padding: css.cssVar(padding);
+  overflow: auto;
+  border-radius: inherit;
+  outline: none;
 }
 
 .tree {
@@ -113,6 +121,10 @@
 
   svg {
     transition: transform 120ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 }
 

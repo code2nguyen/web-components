@@ -41,4 +41,4 @@ viewer.addEventListener('copied', (event) => console.log(event.detail.kind, even
 
 Only the lines in view are rendered, so very large documents stay fast; each line is one row high and long values are truncated (full text in the tooltip and in "copy value"). Treat `data` as immutable: assign a new value instead of mutating it, since each object's keys are cached.
 
-Every colour, size and spacing is a `--c2-json-viewer…` CSS custom property; see the API page of the docs.
+See the API page of the docs for the available `--c2-json-viewer…` CSS custom properties.

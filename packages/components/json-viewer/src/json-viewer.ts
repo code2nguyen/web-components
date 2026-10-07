@@ -12,6 +12,7 @@ import {
   isBranch,
   kindOf,
   leafText,
+  MORE_PREFIX,
   pathOf,
   search,
   type JsonPathFormat,
@@ -29,6 +30,11 @@ const COPIED_DURATION = 1200
 const OVERSCAN = 12
 /** Lines rendered before the viewer has measured where it is (and on the server). */
 const INITIAL_WINDOW = 60
+/**
+ * Tallest the line box is allowed to be. Firefox stops an element at about 17.9M px, so beyond this the scroll space is
+ * compressed: a pixel of scroll moves more than a pixel of lines, and every line stays reachable.
+ */
+const SCROLL_HEIGHT_LIMIT = 15_000_000
 /** Longest text put in a truncated value's tooltip. */
 const TITLE_LIMIT = 2000
 /** Values longer than this get a tooltip, since a line never wraps. */
@@ -181,8 +187,13 @@ export class JsonViewer extends LitElement {
   @state() private rowHeight = 24
   @state() private windowStart = 0
   @state() private windowEnd = INITIAL_WINDOW
+  /** Where the first windowed line is drawn, in pixels from the top of the line box. */
+  @state() private windowOffset = 0
+  /** Height of the visible part of the line box, from the last window update. */
+  private viewportHeight = 0
 
   @query('.tree') private treeElement?: HTMLElement
+  @query('.scroller') private scrollerElement?: HTMLElement
 
   private searchResult: SearchResult | undefined
   private matchSet = new Set<string>()
@@ -200,16 +211,24 @@ export class JsonViewer extends LitElement {
     return (this.searchResult?.matches ?? []).map((id) => formatPath(this.segmentsOf(id), this.pathFormat))
   }
 
+  /** `page-size` as a positive whole number, so a zero, negative or fractional value still pages forward. */
+  private get pageStep(): number {
+    const size = Math.floor(this.pageSize)
+    return size >= 1 ? size : 100
+  }
+
   /** Opens every branch. */
   expandAll() {
     this.openDepth = Number.POSITIVE_INFINITY
     this.overrides = new Map()
+    this.searchOverrides = new Map()
   }
 
   /** Closes every branch, leaving the top-level entries. */
   collapseAll() {
     this.openDepth = 1
     this.overrides = new Map()
+    this.searchOverrides = new Map()
   }
 
   override connectedCallback() {
@@ -253,7 +272,7 @@ export class JsonViewer extends LitElement {
       this.data,
       {
         isExpanded: (id, level) => this.isExpanded(id, level),
-        limit: (id) => Math.max(this.pages.get(id) ?? this.pageSize, (this.searchResult?.deepest.get(id) ?? -1) + 1),
+        limit: (id) => Math.max(this.pages.get(id) ?? this.pageStep, (this.searchResult?.deepest.get(id) ?? -1) + 1),
         visible: this.visible,
       },
       this.sortKeys,
@@ -285,21 +304,51 @@ export class JsonViewer extends LitElement {
     if (!this.frame) this.frame = requestAnimationFrame(this.updateWindow)
   }
 
-  /** Works out which lines intersect both the viewport and the host's own scroll box. */
+  /** Height of the line box: every line, until that outgrows {@link SCROLL_HEIGHT_LIMIT}. */
+  private get boxHeight(): number {
+    return Math.min(this.rows.length * this.rowHeight, SCROLL_HEIGHT_LIMIT)
+  }
+
+  /**
+   * Which line (fractional) sits at scroll offset `y`. The scroll range maps onto the line range, so the top shows the
+   * first line and the bottom the last; without compression this is simply `y / rowHeight`.
+   */
+  private lineAt(y: number, viewport: number): number {
+    const range = this.boxHeight - viewport
+    const lines = this.rows.length * this.rowHeight - viewport
+    return range > 0 && lines > 0 ? (y * lines) / (range * this.rowHeight) : y / this.rowHeight
+  }
+
+  /** The inverse of {@link lineAt}: the scroll offset at which `line` is the first one shown. */
+  private offsetOf(line: number, viewport: number): number {
+    const range = this.boxHeight - viewport
+    const lines = this.rows.length * this.rowHeight - viewport
+    return range > 0 && lines > 0 ? (line * this.rowHeight * range) / lines : line * this.rowHeight
+  }
+
+  /** Works out which lines intersect both the viewport and the viewer's own scroll box. */
   private updateWindow = () => {
     this.frame = 0
     const tree = this.treeElement
-    if (!tree) return
+    const scroller = this.scrollerElement
+    if (!tree || !scroller) return
     const box = tree.getBoundingClientRect()
-    const host = this.getBoundingClientRect()
-    const top = Math.max(0, host.top)
-    const bottom = Math.min(window.innerHeight, host.bottom)
+    const clip = scroller.getBoundingClientRect()
+    const top = Math.max(0, clip.top)
+    const bottom = Math.min(window.innerHeight, clip.bottom)
     // Off screen: keep the current lines until it scrolls back into view.
     if (bottom <= top) return
-    const start = Math.max(0, Math.floor((top - box.top) / this.rowHeight) - OVERSCAN)
-    const end = Math.min(this.rows.length, Math.ceil((bottom - box.top) / this.rowHeight) + OVERSCAN)
+    const viewport = Math.min(clip.height, bottom - top)
+    const y = top - box.top
+    const first = this.lineAt(y, viewport)
+    const start = Math.max(0, Math.floor(first) - OVERSCAN)
+    const end = Math.min(this.rows.length, Math.ceil(first + viewport / this.rowHeight) + OVERSCAN)
+    // The window is drawn so that line `first` lands exactly at `y`; lines then scroll 1:1 until the next update.
+    const offset = Math.max(0, Math.round(y - (first - start) * this.rowHeight))
+    this.viewportHeight = viewport
     if (start !== this.windowStart) this.windowStart = start
     if (end !== this.windowEnd) this.windowEnd = end
+    if (offset !== this.windowOffset) this.windowOffset = offset
   }
 
   private isExpanded(id: string, level: number): boolean {
@@ -335,29 +384,35 @@ export class JsonViewer extends LitElement {
     if (focused >= 0 && focused < start) indices.unshift(focused)
     else if (focused >= end && focused < this.rows.length) indices.push(focused)
     const h = this.rowHeight
+    // Before the first measurement (and on the server) the window starts at the top, where the offset is 0.
+    const before = start === this.windowStart ? this.windowOffset : Math.round(this.offsetOf(start, this.viewportHeight))
+    const after = Math.max(0, this.boxHeight - before - (end - start) * h)
+    // The scroller lives in the shadow root, with `tabindex="-1"`: Firefox makes any scroll container a tab stop, and
+    // the host must not become one (nor carry an attribute the author did not write).
     return html`
-      <div
-        class="tree"
-        part="tree"
-        role="tree"
-        aria-label=${this.label}
-        style="padding-top: ${start * h}px; padding-bottom: ${(this.rows.length - end) * h}px"
-        @keydown=${this.onKeydown}
-        @click=${this.onClick}
-        @focusin=${this.onFocusin}
-      >
-        ${repeat(
-          indices,
-          (index) => this.rows[index].id,
-          (index) => this.renderRow(this.rows[index], index, index < start || index >= end),
-        )}
+      <div class="scroller" part="tree" tabindex="-1" @scroll=${this.scheduleWindow}>
+        <div
+          class="tree"
+          role="tree"
+          aria-label=${this.label}
+          style="padding-top: ${before}px; padding-bottom: ${after}px"
+          @keydown=${this.onKeydown}
+          @click=${this.onClick}
+          @focusin=${this.onFocusin}
+        >
+          ${repeat(
+            indices,
+            (index) => this.rows[index].id,
+            (index) => this.renderRow(this.rows[index], index, index < start || index >= end),
+          )}
+        </div>
       </div>
     `
   }
 
   private renderRow(row: JsonRow, index: number, pinned: boolean): TemplateResult {
     const matched = this.matchSet.has(row.id)
-    const style = pinned ? `--level: ${row.level}; transform: translateY(${index * this.rowHeight}px)` : `--level: ${row.level}`
+    const style = pinned ? `--level: ${row.level}; transform: translateY(${Math.round(this.offsetOf(index, this.viewportHeight))}px)` : `--level: ${row.level}`
     const branch = isBranch(row.kind)
     const focused = row.id === this.focusedId
     if (row.more !== undefined) {
@@ -374,7 +429,7 @@ export class JsonViewer extends LitElement {
         style=${style}
       >
         <span class="twisty" aria-hidden="true"></span>
-        <span class="more-label">Show ${Math.min(row.more, this.pageSize)} more of ${row.more}</span>
+        <span class="more-label">Show ${Math.min(row.more, this.pageStep)} more of ${row.more}</span>
       </div>`
     }
     const copied = this.copied?.id === row.id ? this.copied.kind : undefined
@@ -501,7 +556,7 @@ export class JsonViewer extends LitElement {
     const index = this.focusedIndex
     const row = this.rows[index]
     if (!row) return
-    const page = Math.max(1, Math.floor(this.clientHeight / this.rowHeight) - 1)
+    const page = Math.max(1, Math.floor((this.scrollerElement?.clientHeight ?? 0) / this.rowHeight) - 1)
     const branch = isBranch(row.kind) && row.size > 0
     const modifier = event.ctrlKey || event.metaKey
     let target: JsonRow | undefined
@@ -572,9 +627,14 @@ export class JsonViewer extends LitElement {
 
   private activate(row: JsonRow) {
     if (row.more !== undefined) {
-      const parentId = row.id.slice(0, -'/#more'.length)
+      const parentId = row.id.slice(MORE_PREFIX.length)
       const shown = row.setsize - 1
-      this.pages = new Map(this.pages).set(parentId, shown + this.pageSize)
+      this.pages = new Map(this.pages).set(parentId, shown + this.pageStep)
+      // The "show more" line is replaced by the first line it revealed; move focus there rather than losing it.
+      void this.updateComplete.then(() => {
+        const next = this.rows[row.index]
+        if (next) void this.focusRow(next)
+      })
       return
     }
     if (isBranch(row.kind) && row.size > 0) this.toggle(row, !row.expanded)

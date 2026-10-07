@@ -191,3 +191,48 @@ test('takes its width from its content in a shrink-to-fit container', async ({ p
   expect(width).toBeGreaterThan(150)
   await expect(line(page, 'first name')).toContainText('"Ada"')
 })
+
+test('a key with characters JSONPath shorthand does not allow is written in brackets', async ({ page, renderScenario }) => {
+  await renderScenario(viewer('', { cash$tag: 1, _ok: 2 }))
+  await clipboard(page)
+  await line(page, 'cash\\$tag').focus()
+  await page.keyboard.press('p')
+  await expect(page.locator('html')).toHaveAttribute('data-clipboard', '$["cash$tag"]')
+  await line(page, '_ok').focus()
+  await page.keyboard.press('p')
+  await expect(page.locator('html')).toHaveAttribute('data-clipboard', '$._ok')
+})
+
+test('a real "#more" key does not collide with the show-more line', async ({ page, renderScenario }) => {
+  await renderScenario(viewer('page-size="2"', { a: 1, '#more': 2, b: 3, c: 4 }))
+  await expect(line(page, '#more')).toContainText('2')
+  await page.getByRole('treeitem', { name: 'Show 2 more of 2' }).click()
+  await expect(line(page, 'c')).toContainText('4')
+  await expect(page.getByRole('treeitem')).toHaveCount(4)
+})
+
+test('page-size below one still pages forward', async ({ page, renderScenario }) => {
+  await renderScenario(viewer('page-size="0" style="--c2-json-viewer--max-height: 300px"', { items: Array.from({ length: 150 }, (_, i) => i) }))
+  await line(page, 'items').focus()
+  await page.keyboard.press('End')
+  const more = page.getByRole('treeitem', { name: 'Show 50 more of 50' })
+  await expect(more).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(line(page, '100')).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(line(page, '149')).toBeFocused()
+})
+
+test('a filtered primitive root that does not match shows no line', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-json-viewer data="42" search="7" filter></c2-json-viewer>')
+  await expect(page.getByRole('treeitem')).toHaveCount(0)
+  await expect(page.locator('c2-json-viewer').locator('.empty')).toHaveText('No match')
+})
+
+test('expandAll reopens branches closed during a search', async ({ page, renderScenario }) => {
+  await renderScenario(viewer('search="city"'))
+  await line(page, 'address').click()
+  await expect(line(page, 'city')).toHaveCount(0)
+  await page.locator('c2-json-viewer').evaluate((element) => (element as HTMLElement & { expandAll(): void }).expandAll())
+  await expect(line(page, 'city')).toBeVisible()
+})

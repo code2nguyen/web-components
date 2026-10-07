@@ -1909,6 +1909,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         css: {
           '--c2-json-viewer--background-color': '#0b1220',
           '--c2-json-viewer--color': '#d3deee',
+          '--c2-json-viewer__row__focus--outline': '2px solid #5aa3ff',
           '--c2-json-viewer--border': '1px solid #263449',
           '--c2-json-viewer--border-radius': '12px',
           '--c2-json-viewer__row__hover--background-color': '#16233a',

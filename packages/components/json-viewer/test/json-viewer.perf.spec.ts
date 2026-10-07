@@ -21,13 +21,29 @@ test('a million-item array renders as many lines as a hundred-item one', async (
   await load(page, 'Array.from({ length: 1000000 }, (_, i) => i)')
   await expect(lines(page).first()).toBeVisible()
   expect(await lines(page).count()).toBeLessThanOrEqual(Math.max(small, DOM_LINE_LIMIT))
-  // The scroll height still stands for every line, so the scrollbar is honest.
-  expect(
-    await page
-      .locator('c2-json-viewer')
-      .locator('.tree')
-      .evaluate((tree) => tree.getBoundingClientRect().height),
-  ).toBe(1000000 * 24)
+  // 24M px of lines is past what Firefox lets an element be (about 17.9M px), so the scroll space is compressed and the
+  // last line must still be reachable.
+  const viewer = page.locator('c2-json-viewer')
+  expect(await viewer.locator('.tree').evaluate((tree) => tree.getBoundingClientRect().height)).toBeLessThanOrEqual(15_100_000)
+  await viewer.evaluate((element) => {
+    const scroller = element.shadowRoot!.querySelector('.scroller')!
+    scroller.scrollTop = scroller.scrollHeight
+  })
+  await expect(lines(page).filter({ has: page.locator('[part="key"]', { hasText: /^999999$/ }) })).toBeInViewport()
+  expect(await lines(page).count()).toBeLessThanOrEqual(DOM_LINE_LIMIT)
+  await viewer.evaluate((element) => {
+    const scroller = element.shadowRoot!.querySelector('.scroller')!
+    scroller.scrollTop = scroller.scrollHeight / 2
+  })
+  // Halfway down the scroll range shows the middle of the document: read the line under the top of the scroll box.
+  const topLine = () =>
+    viewer.evaluate((element) => {
+      const box = element.shadowRoot!.querySelector('.scroller')!.getBoundingClientRect()
+      const line = element.shadowRoot!.elementFromPoint(box.left + 40, box.top + 12)?.closest('[role="treeitem"]')
+      return Number(line?.querySelector('[part="key"]')?.textContent)
+    })
+  await expect.poll(topLine).toBeGreaterThan(490000)
+  expect(await topLine()).toBeLessThan(510000)
 })
 
 test('expanding a million-node document keeps the rendered lines bounded', async ({ page, renderScenario }) => {
@@ -49,7 +65,7 @@ test('scrolling and End reach the last line while the rendered lines stay bounde
   expect(await lines(page).count()).toBeLessThanOrEqual(DOM_LINE_LIMIT + 1)
   await page.keyboard.press('Home')
   await expect(lines(page).first()).toBeFocused()
-  await page.locator('c2-json-viewer').evaluate((element) => (element.scrollTop = 24 * 50000))
+  await page.locator('c2-json-viewer').evaluate((element) => (element.shadowRoot!.querySelector('.scroller')!.scrollTop = 24 * 50000))
   await expect(lines(page).filter({ has: page.locator('[part="key"]', { hasText: /^50000$/ }) })).toBeInViewport()
   expect(await lines(page).count()).toBeLessThanOrEqual(DOM_LINE_LIMIT + 1)
 })
