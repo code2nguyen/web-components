@@ -5,6 +5,12 @@
  */
 export const componentPreviews: Record<string, string> = {
   truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
+  'chip-group': `<c2-chip-group style="width: 220px" aria-label="Topics">
+  <c2-chip>Design</c2-chip>
+  <c2-chip>Engineering</c2-chip>
+  <c2-chip>Product</c2-chip>
+  <c2-chip>Marketing</c2-chip>
+</c2-chip-group>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
   <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>

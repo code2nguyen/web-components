@@ -1,0 +1,59 @@
+---
+title: 'Chip Group'
+description: 'A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ChipGroup } from '@c2n/components/chip-group'
+import { Chip } from '@c2n/components/chip'
+import { Badge } from '@c2n/components/badge'
+
+`c2-chip-group` lays out `c2-chip`s or `c2-badge`s on one row that never wraps. The group does not measure its children: every chip and badge reports its own size to the group it sits in, and the group adds those sizes (plus the gap) up against its width to decide how many it can show. The rest collapse into a `+N` indicator whose accessible name is "N more" (`more-label` changes the word). The row is recomputed when the group is resized, when an item's label changes and when items are added or removed. `max` caps the count whatever the space, and `expandable` turns the indicator into a button that reveals every item on wrapped rows, with a "Show less" button (`collapse-label`) to fold it again.
+
+Collapsed items stay in the DOM, invisible and out of the accessibility tree; `hiddenItems` lists them and `overflow-change` reports the counts, for a tooltip or a popover. The group is a block that fills its container: in a flex row give it `flex: 1` and `min-width: 0`. Any other element child is measured by the group itself; a custom element can join the protocol with `GroupItemSizeController` from `@c2n/core/controllers/group-item-size.js`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chip-group'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chip-group
+<style>
+  .chip-group-demo {
+    width: 280px;
+  }
+</style>
+<div data-label="Chips">
+  <c2-chip-group class="chip-group-demo" aria-label="Topics">
+    <c2-chip>Design</c2-chip>
+    <c2-chip>Engineering</c2-chip>
+    <c2-chip>Product</c2-chip>
+    <c2-chip>Marketing</c2-chip>
+    <c2-chip>Finance</c2-chip>
+  </c2-chip-group>
+</div>
+<div data-label="Badges, expandable">
+  <c2-chip-group class="chip-group-demo" expandable aria-label="Labels">
+    <c2-badge tone="primary">frontend</c2-badge>
+    <c2-badge tone="success">ready</c2-badge>
+    <c2-badge tone="warning">needs review</c2-badge>
+    <c2-badge tone="danger">bug</c2-badge>
+    <c2-badge tone="info">docs</c2-badge>
+    <c2-badge>good first issue</c2-badge>
+  </c2-chip-group>
+</div>
+<div data-label="Max 2">
+  <c2-chip-group class="chip-group-demo" max="2" aria-label="Assignees">
+    <c2-chip>Ada</c2-chip>
+    <c2-chip>Grace</c2-chip>
+    <c2-chip>Linus</c2-chip>
+    <c2-chip>Margaret</c2-chip>
+  </c2-chip-group>
+</div>
+```
