@@ -4,6 +4,12 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'chip-group': `<c2-chip-group style="width: 220px" aria-label="Topics">
+  <c2-chip>Design</c2-chip>
+  <c2-chip>Engineering</c2-chip>
+  <c2-chip>Product</c2-chip>
+  <c2-chip>Marketing</c2-chip>
+</c2-chip-group>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>

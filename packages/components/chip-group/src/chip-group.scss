@@ -1,0 +1,112 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chip-group,
+  $theme: (
+    gap: 6px,
+    align-items: center,
+
+    overflow--height: 28px,
+    overflow--min-width: 28px,
+    overflow--padding-left: 8px,
+    overflow--padding-right: 8px,
+    overflow--border-radius: 999px,
+    overflow--border: 1px solid #e4e4e7,
+    overflow--background-color: #f4f4f5,
+    overflow--color: #52525b,
+    overflow--font-family: inherit,
+    overflow--font-size: 12px,
+    overflow--font-weight: 500,
+
+    overflow__hover--border: 1px solid #a1a1aa,
+    overflow__hover--color: #18181b,
+    overflow__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    overflow__focus--outline-offset: 2px,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// Zero-height block whose width is the room the items have.
+.sizer {
+  height: 0;
+}
+
+// One row that never wraps; the component moves what does not fit into the measure layer below.
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: css.cssVar(align-items);
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+:host([expanded]) .row {
+  flex-wrap: wrap;
+}
+
+// Items keep their natural width: the fit calculation adds up the sizes they report.
+::slotted(*) {
+  flex: none;
+}
+
+// Collapsed items stay laid out at their natural width, invisible and inert, so they keep reporting their size and
+// can come back as soon as there is room. The 0×0 clip keeps them from widening the page.
+.measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.measure-row {
+  display: flex;
+  width: max-content;
+  gap: css.cssVar(gap);
+}
+
+.indicator {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: css.cssVar(overflow--height);
+  min-width: css.cssVar(overflow--min-width);
+  margin: 0;
+  padding: 0 css.cssVar(overflow--padding-right) 0 css.cssVar(overflow--padding-left);
+  border: css.cssVar(overflow--border);
+  border-radius: css.cssVar(overflow--border-radius);
+  background-color: css.cssVar(overflow--background-color);
+  color: css.cssVar(overflow--color);
+  font-family: css.cssVar(overflow--font-family);
+  font-size: css.cssVar(overflow--font-size);
+  font-weight: css.cssVar(overflow--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+button.indicator {
+  cursor: pointer;
+
+  &:hover {
+    border: css.cssVar(overflow__hover--border);
+    color: css.cssVar(overflow__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(overflow__focus--outline);
+    outline-offset: css.cssVar(overflow__focus--outline-offset);
+  }
+}

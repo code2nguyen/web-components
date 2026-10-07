@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import chipGroup from '@c2n/chip-group/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
@@ -107,6 +108,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    chipGroup,
     descriptionList,
     indicator,
     chip,
