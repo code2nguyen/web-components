@@ -1,4 +1,5 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -37,6 +38,7 @@ export interface Toast {
  * @csspart heading - The optional notification heading.
  * @csspart message - Container for the notification message.
  * @csspart action - Button region containing the optional assigned `action` slot.
+ * @csspart action-end - With `action-placement="end"`, the region at the end of the message's line that holds the action.
  * @csspart close - The dismiss button.
  * @csspart progress - The countdown track shown while progress is enabled.
  * @csspart progress-bar - The remaining-time fill inside the countdown track.
@@ -111,8 +113,15 @@ export class Toast extends LitElement {
     }
   }
 
+  /** Whether something is slotted into `action`: without it or `actionLabel`, the end region takes no room. */
+  @state() private hasActionSlot = false
+
+  private handleActionSlotChange(event: Event) {
+    this.hasActionSlot = (event.target as HTMLSlotElement).assignedNodes({ flatten: false }).length > 0
+  }
+
   private renderAction() {
-    return html`<slot name="action"
+    return html`<slot name="action" @slotchange=${this.handleActionSlotChange}
       >${this.actionLabel ? html`<button type="button" class="action" part="action" @click=${() => this.dispatchEvent(new CustomEvent('toast-action', { bubbles: true, composed: true }))}>${this.actionLabel}</button>` : nothing}</slot
     >`
   }
@@ -138,7 +147,7 @@ export class Toast extends LitElement {
         <div part="message"><slot>${this.message}</slot></div>
         ${this.actionPlacement === 'end' ? nothing : this.renderAction()}
       </div>
-      ${this.actionPlacement === 'end' ? html`<div class="action-end">${this.renderAction()}</div>` : nothing}
+      ${this.actionPlacement === 'end' ? html`<div class="action-end" part="action-end" ?hidden=${!this.actionLabel && !this.hasActionSlot}>${this.renderAction()}</div>` : nothing}
       ${
         this.dismissible
           ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel} @click=${this.dismiss}>

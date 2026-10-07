@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import styles from './masonry-item.scss?inline'
@@ -85,6 +85,13 @@ export class MasonryItem extends LitElement {
    * pinned note; nothing about the look changes, so show the pin in the tile itself.
    */
   @property({ type: Boolean }) pinned = false
+
+  protected override updated(changed: PropertyValues<this>): void {
+    // A tile pinned or unpinned after it was placed moves to its group: the container lays the tiles out again.
+    if (changed.has('pinned') && changed.get('pinned') !== undefined) {
+      this.dispatchEvent(new Event('c2-masonry-item-pinned', { bubbles: true }))
+    }
+  }
 
   /** @internal Edit-mode state supplied only by the parent masonry container. */
   @property({ attribute: false }) editing = false

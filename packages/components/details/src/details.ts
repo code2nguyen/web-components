@@ -205,16 +205,19 @@ export class Details extends LitElement {
       return height
     }
     let height = slide(from, to, duration)
+    // The time the slide has left, whatever animation draws it now: each retarget starts one of its own at 0.
+    let budget = duration
 
     if (open && typeof ResizeObserver === 'function') {
       this.openingObserver = new ResizeObserver(() => {
         const target = content.scrollHeight
         if (Math.abs(target - to) < 1) return
-        const remaining = duration - Number(height.currentTime ?? 0)
+        const remaining = budget - Number(height.currentTime ?? 0)
         const current = content.getBoundingClientRect().height
         to = target
         height.cancel()
         if (remaining > 16) {
+          budget = remaining
           height = slide(current, target, remaining)
         } else {
           // Next to done: settle at the natural height.

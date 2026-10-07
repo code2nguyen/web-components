@@ -161,13 +161,18 @@ export class Masonry extends LitElement {
       childList: true,
       attributes: true,
       subtree: true,
-      attributeFilter: ['item-id', 'rows', 'cols', 'cols-xs', 'cols-sm', 'cols-md', 'cols-lg'],
+      attributeFilter: ['item-id', 'rows', 'cols', 'cols-xs', 'cols-sm', 'cols-md', 'cols-lg', 'pinned'],
     })
+    // `pinned` set as a property changes no attribute: the tile says so itself.
+    this.addEventListener('c2-masonry-item-pinned', this.onItemPinned)
     this.scheduleSync()
   }
 
+  private readonly onItemPinned = () => this.scheduleSync()
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    this.removeEventListener('c2-masonry-item-pinned', this.onItemPinned)
     this.cancelSession()
     this.removeEventListener('pointerdown', this.onPointerDown)
     this.removeEventListener('pointermove', this.onPointerMove)

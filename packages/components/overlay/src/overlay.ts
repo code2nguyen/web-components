@@ -78,6 +78,8 @@ export class Overlay extends LitElement {
   private cleanupPosition: (() => void) | null = null
   /** A repositioning waiting for the next frame. */
   private positionFrame = 0
+  /** Bumped when positioning starts or stops: a computation begun before then no longer applies. */
+  private positionGeneration = 0
   private positioningStyleObserver: MutationObserver | null = null
   private positioningStyleValues = ''
 
@@ -133,6 +135,7 @@ export class Overlay extends LitElement {
 
   private startPositioning() {
     this.stopPositioning()
+    this.positionGeneration++
     const anchor = this.anchorElement
     if (!anchor) return
     // Placed at once when it opens; after that, a change Floating UI reports (it watches both elements' sizes) is
@@ -168,6 +171,7 @@ export class Overlay extends LitElement {
   }
 
   private stopPositioning() {
+    this.positionGeneration++
     this.cleanupPosition?.()
     this.cleanupPosition = null
     cancelAnimationFrame(this.positionFrame)
@@ -177,6 +181,7 @@ export class Overlay extends LitElement {
   }
 
   private async updatePosition(anchor: HTMLElement) {
+    const generation = this.positionGeneration
     const mainAxis = Number.isFinite(this.offset) ? this.offset! : this.readPixels('--c2-overlay--offset-y', 8)
     const crossAxis = Number.isFinite(this.crossOffset) ? this.crossOffset! : this.readPixels('--c2-overlay--offset-x', 0)
     const padding = this.readPixels('--c2-overlay--viewport-padding', 8)
@@ -186,7 +191,7 @@ export class Overlay extends LitElement {
     if (!this.freeWidth && !this.fitTarget) this.style.minWidth = `${anchor.offsetWidth}px`
     else this.style.removeProperty('min-width')
 
-    const { x, y, placement } = await computePosition(anchor, this, {
+    const result = computePosition(anchor, this, {
       placement: this.placement,
       middleware: [
         offset({ mainAxis, crossAxis }),
@@ -195,12 +200,16 @@ export class Overlay extends LitElement {
         size({
           padding,
           apply: ({ availableHeight, availableWidth }) => {
+            if (generation !== this.positionGeneration) return
             this.style.setProperty('--c2-overlay--available-height', `${Math.max(0, Math.floor(availableHeight))}px`)
             this.style.setProperty('--c2-overlay--available-width', `${Math.max(0, Math.floor(availableWidth))}px`)
           },
         }),
       ],
     })
+    const { x, y, placement } = await result
+    // Closed, or started again with new options, while this was being computed: a newer placement owns the styles.
+    if (generation !== this.positionGeneration) return
     this.style.left = `${x}px`
     this.style.top = `${y}px`
     this.setAttribute('current-placement', placement)

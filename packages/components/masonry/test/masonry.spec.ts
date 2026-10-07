@@ -508,7 +508,9 @@ test('a tile dragged onto a pinned tile lands after the pinned tiles', async ({ 
   await page.mouse.move(target.x + 10, target.y + 10, { steps: 6 })
   await page.mouse.up()
   const events = await page.evaluate(() => window.masonryEvents)
-  for (const event of events) expect(event.layout.items.slice(0, 2).map((item) => item.id)).toEqual(['tile-2', 'tile-4'])
+  // The drop moved it, once, and to just after the pinned tiles.
+  expect(events).toHaveLength(1)
+  expect(events[0].layout.items.slice(0, 3).map((item) => item.id)).toEqual(['tile-2', 'tile-4', 'tile-3'])
 })
 
 test('slotted actions sit in the top-right corner, after the move handle, and show on hover', async ({ page, scenario }) => {
@@ -812,4 +814,20 @@ test.describe('trusted touch and pen gestures', () => {
       }
     }
   }
+})
+
+test('pinning a tile after it was placed moves it into the pinned group', async ({ page, scenario }) => {
+  await scenario('pinned')
+  const order = () =>
+    page
+      .locator('c2-masonry-item')
+      .evaluateAll((items) =>
+        items
+          .toSorted((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+          .map((item) => item.getAttribute('item-id')),
+      )
+  const before = await order()
+  expect(before.slice(0, 2).sort()).toEqual(['tile-2', 'tile-4'])
+  await page.locator('c2-masonry-item[item-id="tile-3"]').evaluate((item) => ((item as HTMLElement & { pinned: boolean }).pinned = true))
+  await expect.poll(async () => (await order()).slice(0, 3).sort()).toEqual(['tile-2', 'tile-3', 'tile-4'])
 })

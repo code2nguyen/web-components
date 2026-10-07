@@ -96,6 +96,13 @@ $_resize-hit-size: var(--_resize-hit-size, #{css.cssVar(resize-handle--size)});
   pointer-events: none;
 }
 
+// A touch screen has no hover to reveal them: there they always show.
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
+}
+
 :host(:hover) .actions,
 :host(:focus-within) .actions,
 :host([data-dragging]) .actions {

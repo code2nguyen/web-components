@@ -102,8 +102,9 @@ test('content rendered on toggle, after the panel began opening, still slides op
       host.append(block)
     })
     const content = host.shadowRoot!.querySelector<HTMLElement>('.c2-details-content')!
+    // From the closed height, so an open that jumps straight to its end fails the steps below.
+    const seen: number[] = [content.getBoundingClientRect().height]
     host.shadowRoot!.querySelector<HTMLElement>('summary')!.click()
-    const seen: number[] = []
     const until = performance.now() + 600
     while (performance.now() < until) {
       await new Promise(requestAnimationFrame)

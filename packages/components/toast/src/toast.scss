@@ -169,6 +169,10 @@ button {
 .action-end {
   flex: none;
   display: flex;
+
+  &[hidden] {
+    display: none;
+  }
 }
 :host([action-placement='end']) .action {
   padding: 4px 8px;

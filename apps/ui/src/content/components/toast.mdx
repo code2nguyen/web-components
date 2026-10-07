@@ -120,7 +120,7 @@ Activating an action emits `toast-action` with `{ id, toast }`, then dismisses t
 The action sits under the message by default. For a short action that belongs with a one-line message, such as Undo, set `action-placement="end"` on a card or pass `actionPlacement: 'end'` to `show()`: the action becomes a button at the end of the message's line, before the dismiss button, and the row centres on that line. `--c2-toast__action--font-weight` and `--c2-toast__action--text-decoration` style its label.
 
 ```ts tag=CodeBlock
-region.show({ message: '“Groceries” is pinned to the board', actionLabel: 'Undo', actionPlacement: 'end', duration: 6000 })
+region.show({ message: 'Note archived', actionLabel: 'Undo', actionPlacement: 'end', duration: 6000 })
 ```
 
 Standalone cards have no timer. Add `dismissible` to allow closing, and listen for `toast-close` or `toast-action`. The `icon`, `close-icon`, default message, and `action` slots allow custom content. A custom action slot owns its own event handling.
