@@ -162,6 +162,7 @@
     height: 100%;
     // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
     --c2-feather-icon--size: #{css.cssVar(icon--size)};
+    --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
     --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   }
 }

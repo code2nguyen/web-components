@@ -125,6 +125,7 @@
 
 .send-button {
   --c2-feather-icon--size: #{css.cssVar(send-icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(send-icon--size)};
 
   all: unset;
   box-sizing: border-box;

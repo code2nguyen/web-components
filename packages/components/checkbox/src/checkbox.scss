@@ -146,6 +146,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   height: css.cssVar(checkmark--size);
   color: css.cssVar(checkmark--color);
   --c2-feather-icon--size: #{css.cssVar(checkmark--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(checkmark--size)};
   --c2-mat-icon--font-size: #{css.cssVar(checkmark--size)};
 }
 
@@ -156,6 +157,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   transform: scaleX(0) rotate(0deg);
   transition: animation.standard-deceleration(opacity), animation.standard-deceleration(transform);
   --c2-feather-icon--size: #{css.cssVar(mixedmark--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(mixedmark--size)};
   --c2-mat-icon--font-size: #{css.cssVar(mixedmark--size)};
 }
 
@@ -164,6 +166,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   height: css.cssVar(uncheckmark--size);
   color: css.cssVar(uncheckmark--color);
   --c2-feather-icon--size: #{css.cssVar(uncheckmark--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(uncheckmark--size)};
   --c2-mat-icon--font-size: #{css.cssVar(uncheckmark--size)};
 }
 
