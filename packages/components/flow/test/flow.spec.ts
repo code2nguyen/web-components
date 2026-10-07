@@ -614,3 +614,38 @@ test.describe('status marker', () => {
     await expect(page.locator('c2-flow .card .status')).toBeVisible()
   })
 })
+
+test('a node takes its shape, its own colours and an icon before its label', async ({ page, renderScenario }) => {
+  const shaped: FlowNode[] = [
+    { id: 'start', label: 'Start', shape: 'pill', background: 'rgb(207, 227, 196)' },
+    { id: 'ask', label: 'Weather ok?', shape: 'diamond', background: 'rgb(245, 224, 138)', color: 'rgb(43, 36, 16)' },
+    { id: 'round', label: 'Loop', shape: 'circle' },
+    { id: 'memo', label: 'Bus at 22:00', shape: 'note' },
+    { id: 'input', label: 'Tickets', shape: 'slanted', icon: '☀' },
+    { id: 'odd', label: 'Unknown', shape: 'star' as never },
+  ]
+  await renderScenario(
+    flow({
+      nodes: shaped,
+      edges: [
+        { source: 'start', target: 'ask' },
+        { source: 'ask', target: 'round' },
+      ],
+    }),
+  )
+  await expect(node(page, 'start')).toHaveCSS('background-color', 'rgb(207, 227, 196)')
+  await expect(node(page, 'ask')).toHaveCSS('color', 'rgb(43, 36, 16)')
+  // A diamond is drawn behind a transparent node, in the node's own fill; its label is centred.
+  await expect(node(page, 'ask')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(node(page, 'ask').locator('svg.shape polygon')).toHaveCSS('fill', 'rgb(245, 224, 138)')
+  await expect(node(page, 'ask').locator('.body')).toHaveCSS('justify-content', 'center')
+  const circle = (await node(page, 'round').boundingBox())!
+  expect(Math.abs(circle.width - circle.height)).toBeLessThan(1)
+  await expect(node(page, 'input').locator('.node-icon')).toHaveText('☀')
+  await expect(node(page, 'input').locator('.node-icon')).toHaveAttribute('aria-hidden', 'true')
+  // An unknown shape is a plain box.
+  await expect(node(page, 'odd')).toHaveClass(/^(?!.*shape--)/)
+  await host(page).evaluate((element: Flow) => element.fitView())
+  await page.waitForTimeout(400)
+  await host(page).screenshot({ path: 'test-results/flow-shapes.png' })
+})
