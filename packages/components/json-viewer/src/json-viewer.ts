@@ -1,5 +1,5 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { state } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues, type TemplateResult } from 'lit'
+import { query, state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -12,6 +12,7 @@ import {
   isBranch,
   kindOf,
   leafText,
+  pathOf,
   search,
   type JsonPathFormat,
   type JsonPathSegment,
@@ -24,6 +25,14 @@ export type { JsonPathFormat, JsonPathSegment, JsonValueKind } from './json-mode
 export { formatPath } from './json-model.js'
 
 const COPIED_DURATION = 1200
+/** Lines rendered above and below the visible ones, so a fast scroll does not show blank space. */
+const OVERSCAN = 12
+/** Lines rendered before the viewer has measured where it is (and on the server). */
+const INITIAL_WINDOW = 60
+/** Longest text put in a truncated value's tooltip. */
+const TITLE_LIMIT = 2000
+/** Values longer than this get a tooltip, since a line never wraps. */
+const TITLE_THRESHOLD = 60
 
 export interface JsonViewerCopiedEventDetail {
   /** What reached the clipboard. */
@@ -71,13 +80,18 @@ export interface JsonViewer {
  * way to each match; `filter` also hides the lines that lead to no match. The viewer has no search box of its
  * own, so pair it with `c2-search-field`. `searchMatches` lists the paths that matched.
  *
+ * Only the lines in view are rendered, so a document with hundreds of thousands of visible lines scrolls like a short
+ * one; each line is one row high and a long value is cut off with an ellipsis (its full text is in the tooltip and in
+ * "copy value"). Treat `data` as immutable: assign a new value rather than mutating the current one, since the viewer
+ * caches each object's keys.
+ *
  * Paths are written as JSONPath (`$.user.roles[0]`) or, with `path-format="pointer"`, as JSON Pointer
  * (`/user/roles/0`). A circular reference shows as `[Circular]` rather than recursing.
  *
  * ### Keyboard
  *
  * Arrow Up and Down walk the lines. Arrow Right opens a branch, then moves to its first child; Arrow Left closes
- * it, then moves to its parent. Home and End jump to the ends, Enter and Space toggle a branch (or reveal the
+ * it, then moves to its parent. Page Up and Page Down move a screen at a time, Home and End jump to the ends, Enter and Space toggle a branch (or reveal the
  * rest of a long one), `*` opens every sibling. `C` (or Ctrl/Cmd + C) copies the focused line's value, `P` its path.
  *
  * @tag c2-json-viewer
@@ -102,7 +116,7 @@ export interface JsonViewer {
  * @cssproperty {border-radius} [--c2-json-viewer--border-radius=8px] - Corner radius of the viewer.
  * @cssproperty {padding} [--c2-json-viewer--padding=6px] - Space around the lines.
  * @cssproperty {pixel} --c2-json-viewer--max-height - Height at which the viewer starts scrolling.
- * @cssproperty {pixel} [--c2-json-viewer__row--min-height=24px] - Minimum height of a line.
+ * @cssproperty {pixel} [--c2-json-viewer__row--height=24px] - Height of every line. Lines never wrap, which is what lets the viewer render only the ones in view.
  * @cssproperty {padding} [--c2-json-viewer__row--padding-inline=6px] - Horizontal space inside a line.
  * @cssproperty {pixel} [--c2-json-viewer__row--indent=16px] - Indentation per level of depth.
  * @cssproperty {border-radius} [--c2-json-viewer__row--border-radius=4px] - Corner radius of a hovered or focused line.
@@ -163,10 +177,23 @@ export class JsonViewer extends LitElement {
   @state() private focusedId: string | undefined
   @state() private copied: { id: string; kind: 'path' | 'value' } | undefined
 
+  /** Measured from a rendered line, so a themed `--c2-json-viewer__row--height` or font size is honoured. */
+  @state() private rowHeight = 24
+  @state() private windowStart = 0
+  @state() private windowEnd = INITIAL_WINDOW
+
+  @query('.tree') private treeElement?: HTMLElement
+
   private searchResult: SearchResult | undefined
+  private matchSet = new Set<string>()
   private visible: Set<string> | undefined
   private rows: JsonRow[] = []
+  /** Index of the focused line in `rows`, kept with `focusedId`. */
+  private focusedIndex = -1
+  private rowsChanged = false
   private copiedTimer: ReturnType<typeof setTimeout> | undefined
+  private frame = 0
+  private resizeObserver: ResizeObserver | undefined
 
   /** Paths of the nodes matching `search`, in document order, written in `path-format`. */
   get searchMatches(): string[] {
@@ -185,9 +212,24 @@ export class JsonViewer extends LitElement {
     this.overrides = new Map()
   }
 
+  override connectedCallback() {
+    super.connectedCallback()
+    if (isServer) return
+    // Capture catches the scroll of any ancestor (and of the host itself), since scroll events do not bubble.
+    window.addEventListener('scroll', this.scheduleWindow, { capture: true, passive: true })
+    window.addEventListener('resize', this.scheduleWindow, { passive: true })
+    this.resizeObserver ??= new ResizeObserver(this.scheduleWindow)
+    this.resizeObserver.observe(this)
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
     clearTimeout(this.copiedTimer)
+    cancelAnimationFrame(this.frame)
+    this.frame = 0
+    window.removeEventListener('scroll', this.scheduleWindow, { capture: true })
+    window.removeEventListener('resize', this.scheduleWindow)
+    this.resizeObserver?.disconnect()
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
@@ -200,8 +242,13 @@ export class JsonViewer extends LitElement {
       const query = this.search.trim()
       this.searchOverrides = new Map()
       this.searchResult = query ? search(this.data, query, this.sortKeys) : undefined
+      this.matchSet = new Set(this.searchResult?.matches)
       this.visible = this.searchResult && this.filter ? filterVisible(this.data, this.searchResult, this.sortKeys) : undefined
     }
+    // Focus, copy feedback and scrolling change none of the lines, so they skip the flatten.
+    const structural = ['data', 'expandDepth', 'search', 'filter', 'sortKeys', 'pageSize', 'overrides', 'searchOverrides', 'openDepth', 'pages']
+    this.rowsChanged = structural.some((key) => changed.has(key as keyof JsonViewer))
+    if (!this.rowsChanged) return
     this.rows = flatten(
       this.data,
       {
@@ -211,7 +258,48 @@ export class JsonViewer extends LitElement {
       },
       this.sortKeys,
     )
-    if (!this.rows.some((row) => row.id === this.focusedId)) this.focusedId = this.rows[0]?.id
+    // One scan per structural change; a map from id to index would cost more than the flatten itself.
+    this.focusedIndex = this.focusedId === undefined ? -1 : this.rows.findIndex((row) => row.id === this.focusedId)
+    if (this.focusedIndex === -1) {
+      this.focusedIndex = this.rows.length ? 0 : -1
+      this.focusedId = this.rows[0]?.id
+    }
+  }
+
+  private setFocused(row: JsonRow) {
+    this.focusedId = row.id
+    this.focusedIndex = row.index
+  }
+
+  protected override updated() {
+    const line = this.treeElement?.querySelector<HTMLElement>('.row')
+    const height = line?.offsetHeight
+    if (height && height !== this.rowHeight) this.rowHeight = height
+    if (this.rowsChanged) {
+      this.rowsChanged = false
+      this.scheduleWindow()
+    }
+  }
+
+  private scheduleWindow = () => {
+    if (!this.frame) this.frame = requestAnimationFrame(this.updateWindow)
+  }
+
+  /** Works out which lines intersect both the viewport and the host's own scroll box. */
+  private updateWindow = () => {
+    this.frame = 0
+    const tree = this.treeElement
+    if (!tree) return
+    const box = tree.getBoundingClientRect()
+    const host = this.getBoundingClientRect()
+    const top = Math.max(0, host.top)
+    const bottom = Math.min(window.innerHeight, host.bottom)
+    // Off screen: keep the current lines until it scrolls back into view.
+    if (bottom <= top) return
+    const start = Math.max(0, Math.floor((top - box.top) / this.rowHeight) - OVERSCAN)
+    const end = Math.min(this.rows.length, Math.ceil((bottom - box.top) / this.rowHeight) + OVERSCAN)
+    if (start !== this.windowStart) this.windowStart = start
+    if (end !== this.windowEnd) this.windowEnd = end
   }
 
   private isExpanded(id: string, level: number): boolean {
@@ -231,36 +319,59 @@ export class JsonViewer extends LitElement {
     if (isBranch(rootKind) && this.rows.length === 0 && !this.searchResult) {
       return html`<div class="empty" part="tree">${rootKind === 'array' ? '[]' : '{}'}</div>`
     }
-    const matches = new Set(this.searchResult?.matches)
+    if (this.rows.length === 0) {
+      return html`<div class="tree" part="tree" role="tree" aria-label=${this.label}><div class="empty" role="none">No match</div></div>`
+    }
+    // The window's lines sit in normal flow between padding standing for the lines above and below, so the viewer
+    // still takes its width from its content. The focused line is rendered too wherever it is, so keyboard focus
+    // survives scrolling it out of view; outside the window it is placed absolutely.
+    const end = Math.min(this.windowEnd, this.rows.length)
+    const start = Math.min(this.windowStart, end)
+    const indices: number[] = []
+    for (let i = start; i < end; i++) indices.push(i)
+    // Kept in document order: if it were appended, `repeat` would move its node once the window reaches it, and
+    // moving a focused node drops focus.
+    const focused = this.focusedIndex
+    if (focused >= 0 && focused < start) indices.unshift(focused)
+    else if (focused >= end && focused < this.rows.length) indices.push(focused)
+    const h = this.rowHeight
     return html`
-      <div class="tree" part="tree" role="tree" aria-label=${this.label} @keydown=${this.onKeydown} @click=${this.onClick} @focusin=${this.onFocusin}>
-        ${
-          this.rows.length === 0
-            ? html`<div class="empty" role="none">No match</div>`
-            : repeat(
-                this.rows,
-                (row) => row.id,
-                (row) => this.renderRow(row, matches.has(row.id)),
-              )
-        }
+      <div
+        class="tree"
+        part="tree"
+        role="tree"
+        aria-label=${this.label}
+        style="padding-top: ${start * h}px; padding-bottom: ${(this.rows.length - end) * h}px"
+        @keydown=${this.onKeydown}
+        @click=${this.onClick}
+        @focusin=${this.onFocusin}
+      >
+        ${repeat(
+          indices,
+          (index) => this.rows[index].id,
+          (index) => this.renderRow(this.rows[index], index, index < start || index >= end),
+        )}
       </div>
     `
   }
 
-  private renderRow(row: JsonRow, matched: boolean): TemplateResult {
+  private renderRow(row: JsonRow, index: number, pinned: boolean): TemplateResult {
+    const matched = this.matchSet.has(row.id)
+    const style = pinned ? `--level: ${row.level}; transform: translateY(${index * this.rowHeight}px)` : `--level: ${row.level}`
     const branch = isBranch(row.kind)
     const focused = row.id === this.focusedId
     if (row.more !== undefined) {
       return html`<div
-        class="row more"
+        class="row more ${pinned ? 'pinned' : ''}"
         part="row"
         role="treeitem"
         data-id=${row.id}
+        data-index=${index}
         aria-level=${row.level}
         aria-posinset=${row.posinset}
         aria-setsize=${row.setsize}
         tabindex=${focused ? 0 : -1}
-        style="--level: ${row.level}"
+        style=${style}
       >
         <span class="twisty" aria-hidden="true"></span>
         <span class="more-label">Show ${Math.min(row.more, this.pageSize)} more of ${row.more}</span>
@@ -268,17 +379,18 @@ export class JsonViewer extends LitElement {
     }
     const copied = this.copied?.id === row.id ? this.copied.kind : undefined
     return html`<div
-      class="row ${matched ? 'matched' : ''}"
+      class="row ${matched ? 'matched' : ''} ${pinned ? 'pinned' : ''}"
       part="row"
       role="treeitem"
       data-id=${row.id}
+      data-index=${index}
       aria-level=${row.level}
       aria-posinset=${row.posinset}
       aria-setsize=${row.setsize}
       aria-expanded=${branch && row.size > 0 ? String(row.expanded) : nothing}
       aria-keyshortcuts="C P"
       tabindex=${focused ? 0 : -1}
-      style="--level: ${row.level}"
+      style=${style}
     >
       <span class="twisty ${branch && row.size > 0 ? 'branch' : ''}" aria-hidden="true">
         ${
@@ -311,10 +423,12 @@ export class JsonViewer extends LitElement {
           >${open}${row.expanded ? nothing : html`…${close}`} <span class="count">${row.size} ${unit}</span></span
         >`
       }
-      case 'string':
-        return html`<span class="value string" part="value">"${this.highlight(leafText(row.value, row.kind))}"</span>`
-      default:
-        return html`<span class="value ${row.kind}" part="value">${this.highlight(leafText(row.value, row.kind))}</span>`
+      default: {
+        const text = leafText(row.value, row.kind)
+        const title = text.length > TITLE_THRESHOLD ? text.slice(0, TITLE_LIMIT) : nothing
+        if (row.kind === 'string') return html`<span class="value string" part="value" title=${title}>"${this.highlight(text)}"</span>`
+        return html`<span class="value ${row.kind}" part="value" title=${title}>${this.highlight(text)}</span>`
+      }
     }
   }
 
@@ -362,18 +476,19 @@ export class JsonViewer extends LitElement {
 
   private rowOf(event: Event): JsonRow | undefined {
     const element = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.dataset.id !== undefined)
-    return element ? this.rows.find((row) => row.id === element.dataset.id) : undefined
+    const row = element ? this.rows[Number(element.dataset.index)] : undefined
+    return row?.id === element?.dataset.id ? row : undefined
   }
 
   private onFocusin = (event: FocusEvent) => {
     const row = this.rowOf(event)
-    if (row) this.focusedId = row.id
+    if (row) this.setFocused(row)
   }
 
   private onClick = (event: MouseEvent) => {
     const row = this.rowOf(event)
     if (!row) return
-    this.focusedId = row.id
+    this.setFocused(row)
     const action = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.dataset.action !== undefined)?.dataset.action
     if (action === 'path' || action === 'value') {
       void this.copy(row, action)
@@ -383,9 +498,10 @@ export class JsonViewer extends LitElement {
   }
 
   private onKeydown = (event: KeyboardEvent) => {
-    const index = this.rows.findIndex((row) => row.id === this.focusedId)
+    const index = this.focusedIndex
     const row = this.rows[index]
     if (!row) return
+    const page = Math.max(1, Math.floor(this.clientHeight / this.rowHeight) - 1)
     const branch = isBranch(row.kind) && row.size > 0
     const modifier = event.ctrlKey || event.metaKey
     let target: JsonRow | undefined
@@ -395,6 +511,12 @@ export class JsonViewer extends LitElement {
         break
       case 'ArrowUp':
         target = this.rows[index - 1]
+        break
+      case 'PageDown':
+        target = this.rows[Math.min(this.rows.length - 1, index + page)]
+        break
+      case 'PageUp':
+        target = this.rows[Math.max(0, index - page)]
         break
       case 'Home':
         target = this.rows[0]
@@ -432,19 +554,17 @@ export class JsonViewer extends LitElement {
         return
     }
     event.preventDefault()
-    if (target) void this.focusRow(target.id)
+    if (target) void this.focusRow(target)
   }
 
   private parentOf(index: number): JsonRow | undefined {
-    const level = this.rows[index].level
-    for (let i = index - 1; i >= 0; i--) if (this.rows[i].level < level) return this.rows[i]
-    return undefined
+    return this.rows[index].parent
   }
 
   private siblingsOf(index: number): JsonRow[] {
     const level = this.rows[index].level
     const parent = this.parentOf(index)
-    const start = parent ? this.rows.indexOf(parent) + 1 : 0
+    const start = parent ? parent.index + 1 : 0
     const siblings: JsonRow[] = []
     for (let i = start; i < this.rows.length && this.rows[i].level >= level; i++) if (this.rows[i].level === level) siblings.push(this.rows[i])
     return siblings
@@ -465,19 +585,22 @@ export class JsonViewer extends LitElement {
     else this.overrides = new Map(this.overrides).set(row.id, expanded)
     this.dispatchEvent(
       new CustomEvent<JsonViewerExpansionChangeEventDetail>('expansion-change', {
-        detail: { path: formatPath(row.path, this.pathFormat), segments: [...row.path], expanded },
+        detail: { path: formatPath(pathOf(row), this.pathFormat), segments: pathOf(row), expanded },
       }),
     )
   }
 
-  private async focusRow(id: string) {
-    this.focusedId = id
+  private async focusRow(row: JsonRow) {
+    this.setFocused(row)
     await this.updateComplete
-    this.renderRoot.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`)?.focus()
+    const line = this.renderRoot.querySelector<HTMLElement>(`[data-id="${CSS.escape(row.id)}"]`)
+    line?.focus({ preventScroll: true })
+    line?.scrollIntoView({ block: 'nearest' })
   }
 
   private async copy(row: JsonRow, kind: 'path' | 'value') {
-    const text = kind === 'path' ? formatPath(row.path, this.pathFormat) : copyText(row.value)
+    const path = pathOf(row)
+    const text = kind === 'path' ? formatPath(path, this.pathFormat) : copyText(row.value)
     try {
       if (!navigator.clipboard) throw new Error('Clipboard API unavailable')
       await navigator.clipboard.writeText(text)
@@ -488,7 +611,7 @@ export class JsonViewer extends LitElement {
     this.copied = { id: row.id, kind }
     clearTimeout(this.copiedTimer)
     this.copiedTimer = setTimeout(() => (this.copied = undefined), COPIED_DURATION)
-    this.dispatchEvent(new CustomEvent<JsonViewerCopiedEventDetail>('copied', { detail: { text, kind, path: [...row.path] }, bubbles: true, composed: true }))
+    this.dispatchEvent(new CustomEvent<JsonViewerCopiedEventDetail>('copied', { detail: { text, kind, path }, bubbles: true, composed: true }))
   }
 
   private segmentsOf(id: string): JsonPathSegment[] {

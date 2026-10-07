@@ -18,6 +18,11 @@ than `page-size` children shows a "show more" line instead of rendering them all
 the lines that lead nowhere. The viewer has no search box of its own, so pair it with `c2-search-field`. The tree is
 keyboard-driven: arrows walk and open lines, `C` copies the focused value and `P` its path.
 
+Large documents are fine: only the lines in view are rendered, so a million-item array or a fully expanded tree
+with a million nodes scrolls like a short one. Each line is one row high (`--c2-json-viewer__row--height`) and a long
+value ends with an ellipsis; its full text is in the tooltip and in "copy value". Assign a new value to `data`
+rather than mutating the current one.
+
 ## Import
 
 ```typescript tag=CodeBlock

@@ -37,6 +37,8 @@ viewer.addEventListener('copied', (event) => console.log(event.detail.kind, even
 - `label`: accessible name of the tree (default `JSON`).
 - `expandAll()`, `collapseAll()`; read-only `searchMatches`.
 - Events: `copied` (`{ text, kind: 'path' | 'value', path }`), `copy-error`, `expansion-change` (`{ path, segments, expanded }`, does not bubble).
-- Keyboard: arrows walk/open/close, Home/End, Enter/Space toggle, `*` opens all siblings, `C` (or Ctrl/Cmd + C) copies the focused value, `P` its path.
+- Keyboard: arrows walk/open/close, Page Up/Down, Home/End, Enter/Space toggle, `*` opens all siblings, `C` (or Ctrl/Cmd + C) copies the focused value, `P` its path.
+
+Only the lines in view are rendered, so very large documents stay fast; each line is one row high and long values are truncated (full text in the tooltip and in "copy value"). Treat `data` as immutable: assign a new value instead of mutating it, since each object's keys are cached.
 
 Every colour, size and spacing is a `--c2-json-viewer…` CSS custom property; see the API page of the docs.

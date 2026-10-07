@@ -17,7 +17,7 @@
     padding: 6px,
     max-height: null,
 
-    row--min-height: 24px,
+    row--height: 24px,
     row--padding-inline: 6px,
     row--indent: 16px,
     row--border-radius: 4px,
@@ -64,23 +64,32 @@
 }
 
 .tree {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
   outline: none;
 }
 
+// Every line has the same height, so only the lines in view need to exist: the tree's padding stands for the rest.
 .row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5ch;
   box-sizing: border-box;
-  min-height: css.cssVar(row--min-height);
-  padding-block: 2px;
+  height: css.cssVar(row--height);
+  white-space: nowrap;
   padding-inline-start: calc(css.cssVar(row--padding-inline) + (var(--level, 1) - 1) * css.cssVar(row--indent));
   padding-inline-end: css.cssVar(row--padding-inline);
   border-radius: css.cssVar(row--border-radius);
   cursor: default;
   outline: none;
+
+  // The focused line, kept rendered while it is scrolled outside the window.
+  &.pinned {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
 
   &:hover {
     background-color: css.cssVar(row__hover--background-color);
@@ -117,6 +126,9 @@
 
 .key {
   flex: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: css.cssVar(key--color);
 
   &.index {
@@ -131,8 +143,8 @@
 
 .value {
   min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .string {

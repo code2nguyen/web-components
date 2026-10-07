@@ -184,3 +184,10 @@ test('sort-keys orders object keys alphabetically', async ({ page, renderScenari
   await renderScenario(viewer('sort-keys', { b: 1, c: 2, a: 3 }))
   await expect(page.locator('[part="key"]')).toHaveText(['a', 'b', 'c'])
 })
+
+test('takes its width from its content in a shrink-to-fit container', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="display: inline-flex">${viewer()}</div>`)
+  const width = await page.locator('c2-json-viewer').evaluate((element) => element.getBoundingClientRect().width)
+  expect(width).toBeGreaterThan(150)
+  await expect(line(page, 'first name')).toContainText('"Ada"')
+})

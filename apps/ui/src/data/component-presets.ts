@@ -1926,7 +1926,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-json-viewer--border': 'none',
           '--c2-json-viewer--padding': '0px',
           '--c2-json-viewer--font-size': '11px',
-          '--c2-json-viewer__row--min-height': '20px',
+          '--c2-json-viewer__row--height': '20px',
           '--c2-json-viewer__row--indent': '12px',
         },
         attributes: { 'expand-depth': '3' },

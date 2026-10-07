@@ -10,7 +10,10 @@ export type JsonValueKind = 'object' | 'array' | 'string' | 'number' | 'boolean'
 export interface JsonRow {
   /** JSON Pointer of the node: unique, used as the row's identity. */
   id: string
-  path: JsonPathSegment[]
+  /** Position of the line in the list `flatten` returned. */
+  index: number
+  /** The line of the enclosing branch, `undefined` at the top level. Read the full path with {@link pathOf}. */
+  parent: JsonRow | undefined
   /** Key in the parent, `undefined` for the root. */
   key: JsonPathSegment | undefined
   value: unknown
@@ -59,19 +62,52 @@ export function isBranch(kind: JsonValueKind): boolean {
   return kind === 'object' || kind === 'array'
 }
 
-/** The children of an object or array as `[key, value]` pairs, in order. */
-export function entriesOf(value: unknown, sortKeys = false): [JsonPathSegment, unknown][] {
-  if (Array.isArray(value)) return value.map((item, index) => [index, item])
-  if (value !== null && typeof value === 'object') {
-    const keys = Object.keys(value)
-    if (sortKeys) keys.sort((a, b) => a.localeCompare(b))
-    return keys.map((key) => [key, (value as Record<string, unknown>)[key]])
+// Keys are read once per object and kept for as long as the object lives: re-rendering a branch with 50k keys must not
+// call `Object.keys` (or sort them) again. This is why `data` is treated as immutable — replace it, don't mutate it.
+const keyCache = new WeakMap<object, string[]>()
+const sortedKeyCache = new WeakMap<object, string[]>()
+
+function keysOf(value: object, sortKeys: boolean): string[] {
+  const cache = sortKeys ? sortedKeyCache : keyCache
+  let keys = cache.get(value)
+  if (!keys) {
+    keys = sortKeys ? [...keysOf(value, false)].sort((a, b) => a.localeCompare(b)) : Object.keys(value)
+    cache.set(value, keys)
   }
-  return []
+  return keys
+}
+
+/** How many children an object or array has, without building them. */
+export function sizeOf(value: unknown): number {
+  if (Array.isArray(value)) return value.length
+  if (value !== null && typeof value === 'object') return keysOf(value, false).length
+  return 0
+}
+
+/** The keys of an object's children in display order, or `undefined` for an array (its keys are its indexes). */
+export function childKeys(value: unknown, sortKeys = false): string[] | undefined {
+  return Array.isArray(value) ? undefined : keysOf(value as object, sortKeys)
+}
+
+/** The `index`-th child of an object or array as a `[key, value]` pair; `keys` comes from {@link childKeys}. */
+export function childAt(value: unknown, index: number, keys: string[] | undefined): [JsonPathSegment, unknown] {
+  if (!keys) return [index, (value as unknown[])[index]]
+  const key = keys[index]
+  return [key, (value as Record<string, unknown>)[key]]
+}
+
+/** The path of a line, from the top level down. */
+export function pathOf(row: JsonRow | undefined): JsonPathSegment[] {
+  const path: JsonPathSegment[] = []
+  for (let node = row; node; node = node.parent) if (node.key !== undefined) path.push(node.key)
+  return path.reverse()
 }
 
 function escapePointer(segment: JsonPathSegment): string {
-  return String(segment).replace(/~/g, '~0').replace(/\//g, '~1')
+  if (typeof segment === 'number') return String(segment)
+  // Most keys need no escaping; skipping the two replaces matters across a million lines.
+  if (!segment.includes('~') && !segment.includes('/')) return segment
+  return segment.replace(/~/g, '~0').replace(/\//g, '~1')
 }
 
 export function pointerOf(path: readonly JsonPathSegment[]): string {
@@ -116,41 +152,52 @@ export function copyText(value: unknown): string {
   }
 }
 
-/** The visible lines of `root` for the current expansion. The root of an object or array is not a line itself. */
+/**
+ * The visible lines of `root` for the current expansion. The root of an object or array is not a line itself.
+ * Cost is proportional to the lines returned, not to the size of the document: a collapsed branch is never walked and
+ * a long one is only read up to its page limit.
+ */
 export function flatten(root: unknown, options: FlattenOptions, sortKeys = false): JsonRow[] {
   const rows: JsonRow[] = []
   const rootKind = kindOf(root)
   if (!isBranch(rootKind)) {
     if (root === undefined) return rows
-    rows.push({ id: '', path: [], key: undefined, value: root, kind: rootKind, level: 1, size: 0, expanded: false, posinset: 1, setsize: 1 })
+    rows.push({ id: '', index: 0, parent: undefined, key: undefined, value: root, kind: rootKind, level: 1, size: 0, expanded: false, posinset: 1, setsize: 1 })
     return rows
   }
   const ancestors = new Set<unknown>([root])
-  const walk = (parent: unknown, parentPath: JsonPathSegment[], parentId: string, level: number) => {
-    let entries = entriesOf(parent, sortKeys)
-    if (options.visible) entries = entries.filter(([key]) => options.visible!.has(`${parentId}/${escapePointer(key)}`))
-    const limit = Math.min(entries.length, Math.max(1, options.limit(parentId)))
-    const shown = entries.length > limit ? limit : entries.length
-    const setsize = shown < entries.length ? shown + 1 : shown
+  const walk = (value: unknown, parent: JsonRow | undefined, parentId: string, level: number) => {
+    const total = sizeOf(value)
+    const keys = childKeys(value, sortKeys)
+    // Filtering has to look at every child to know which survive; the unfiltered walk only reads the ones it shows.
+    let children: number[] | undefined
+    if (options.visible) {
+      children = []
+      for (let i = 0; i < total; i++) if (options.visible.has(`${parentId}/${escapePointer(childAt(value, i, keys)[0])}`)) children.push(i)
+    }
+    const count = children ? children.length : total
+    const shown = Math.min(count, Math.max(1, options.limit(parentId)))
+    const setsize = shown < count ? shown + 1 : shown
     for (let index = 0; index < shown; index++) {
-      const [key, value] = entries[index]
-      const path = [...parentPath, key]
+      const [key, child] = childAt(value, children ? children[index] : index, keys)
       const id = `${parentId}/${escapePointer(key)}`
-      let kind = kindOf(value)
-      if (isBranch(kind) && ancestors.has(value)) kind = 'circular'
-      const size = isBranch(kind) ? entriesOf(value).length : 0
-      const expanded = isBranch(kind) && size > 0 && options.isExpanded(id, level)
-      rows.push({ id, path, key, value, kind, level, size, expanded, posinset: index + 1, setsize })
+      let kind = kindOf(child)
+      if (isBranch(kind) && ancestors.has(child)) kind = 'circular'
+      const size = isBranch(kind) ? sizeOf(child) : 0
+      const expanded = size > 0 && options.isExpanded(id, level)
+      const row: JsonRow = { id, index: rows.length, parent, key, value: child, kind, level, size, expanded, posinset: index + 1, setsize }
+      rows.push(row)
       if (expanded) {
-        ancestors.add(value)
-        walk(value, path, id, level + 1)
-        ancestors.delete(value)
+        ancestors.add(child)
+        walk(child, row, id, level + 1)
+        ancestors.delete(child)
       }
     }
-    if (shown < entries.length) {
+    if (shown < count) {
       rows.push({
         id: `${parentId}/#more`,
-        path: parentPath,
+        index: rows.length,
+        parent,
         key: undefined,
         value: undefined,
         kind: 'other',
@@ -159,11 +206,11 @@ export function flatten(root: unknown, options: FlattenOptions, sortKeys = false
         expanded: false,
         posinset: setsize,
         setsize,
-        more: entries.length - shown,
+        more: count - shown,
       })
     }
   }
-  walk(root, [], '', 1)
+  walk(root, undefined, '', 1)
   return rows
 }
 
@@ -182,29 +229,38 @@ export function search(root: unknown, query: string, sortKeys = false): SearchRe
   const needle = query.toLowerCase()
   if (!needle) return result
   const ancestors = new Set<unknown>()
-  const visit = (value: unknown, key: JsonPathSegment | undefined, id: string): boolean => {
+  // The pointer is built from this stack only for nodes that match or lead to a match, not for every node visited.
+  const segments: string[] = []
+  const pointer = () => (segments.length ? `/${segments.join('/')}` : '')
+  const visit = (value: unknown, key: JsonPathSegment | undefined): boolean => {
     let kind = kindOf(value)
     if (isBranch(kind) && ancestors.has(value)) kind = 'circular'
     const keyHit = key !== undefined && String(key).toLowerCase().includes(needle)
     const valueHit = !isBranch(kind) && value !== undefined && leafText(value, kind).toLowerCase().includes(needle)
     const hit = keyHit || valueHit
     // Pushed before the children are visited, so the matches come out in document order.
-    if (hit && (key !== undefined || !isBranch(kind))) result.matches.push(id)
+    if (hit && (key !== undefined || !isBranch(kind))) result.matches.push(pointer())
     let found = hit
+    let id: string | undefined
     if (isBranch(kind)) {
       ancestors.add(value)
-      entriesOf(value, sortKeys).forEach(([childKey, child], index) => {
-        if (visit(child, childKey, `${id}/${escapePointer(childKey)}`)) {
+      const keys = childKeys(value, sortKeys)
+      for (let index = 0, size = sizeOf(value); index < size; index++) {
+        const [childKey, child] = childAt(value, index, keys)
+        segments.push(escapePointer(childKey))
+        const childFound = visit(child, childKey)
+        segments.pop()
+        if (childFound) {
           found = true
-          result.deepest.set(id, index)
+          result.deepest.set((id ??= pointer()), index)
         }
-      })
+      }
       ancestors.delete(value)
     }
-    if (found) result.revealed.add(id)
+    if (found) result.revealed.add(id ?? pointer())
     return found
   }
-  visit(root, undefined, '')
+  visit(root, undefined)
   return result
 }
 
@@ -216,7 +272,9 @@ export function filterVisible(root: unknown, result: SearchResult, sortKeys = fa
   const addAll = (value: unknown, id: string) => {
     if (!isBranch(kindOf(value)) || ancestors.has(value)) return
     ancestors.add(value)
-    for (const [key, child] of entriesOf(value, sortKeys)) {
+    const keys = childKeys(value, sortKeys)
+    for (let index = 0, size = sizeOf(value); index < size; index++) {
+      const [key, child] = childAt(value, index, keys)
       const childId = `${id}/${escapePointer(key)}`
       visible.add(childId)
       addAll(child, childId)
@@ -227,7 +285,9 @@ export function filterVisible(root: unknown, result: SearchResult, sortKeys = fa
     if (matched.has(id)) return addAll(value, id)
     if (!isBranch(kindOf(value)) || ancestors.has(value)) return
     ancestors.add(value)
-    for (const [key, child] of entriesOf(value, sortKeys)) {
+    const keys = childKeys(value, sortKeys)
+    for (let index = 0, size = sizeOf(value); index < size; index++) {
+      const [key, child] = childAt(value, index, keys)
       const childId = `${id}/${escapePointer(key)}`
       if (visible.has(childId)) visit(child, childId)
     }
