@@ -13,6 +13,8 @@ const markup: Record<string, string> = {
   'selectable-removable': `<c2-chip id="subject" selectable removable value="design">Design</c2-chip>`,
   disabled: `<c2-chip id="subject" selectable removable disabled value="design">Design</c2-chip>`,
   'removable-label': `<c2-chip id="subject" removable><span slot="prefix" aria-hidden="true">#</span>Design</c2-chip>`,
+  'comment-markers': `<c2-chip id="subject" removable><!--?lit$123$-->Design<!--?--></c2-chip>
+  <c2-chip removable value="status"><!--?lit$123$--><c2-chip-part name="field"><!--?lit$123$-->Status</c2-chip-part><!--?--><c2-chip-part name="value" interactive>Active</c2-chip-part></c2-chip>`,
   'remove-label': `<c2-chip id="subject" removable remove-label="Clear filter">Status: Active</c2-chip>`,
   parts: `<c2-chip id="subject" removable value="status">
     <c2-chip-part name="field">Status</c2-chip-part>

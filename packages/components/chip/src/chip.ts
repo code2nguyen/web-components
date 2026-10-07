@@ -29,12 +29,15 @@ export interface Chip {
 
 /** Text of the default slot only: an icon's text in a named slot is not part of the label, nor is a part's prefix. */
 function labelText(parent: Node): string {
-  return [...parent.childNodes]
-    .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
-    .map((node) => (node instanceof Element && node.localName === 'c2-chip-part' ? ` ${labelText(node)} ` : (node.textContent ?? '')))
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return (
+    [...parent.childNodes]
+      // Comments are skipped: a framework's markers (Lit's `<!--?lit$…$-->`) are not label text.
+      .filter((node) => node.nodeType === Node.TEXT_NODE || (node instanceof Element && !node.hasAttribute('slot')))
+      .map((node) => (node instanceof Element && node.localName === 'c2-chip-part' ? ` ${labelText(node)} ` : (node.textContent ?? '')))
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
 }
 
 /**

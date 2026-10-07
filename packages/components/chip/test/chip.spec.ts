@@ -220,3 +220,9 @@ test('a chip with parts is not a toggle even when selectable', async ({ page, sc
   await page.getByRole('button', { name: 'Active', exact: true }).click()
   await expect(page.getByRole('status')).toHaveText('part:value')
 })
+
+test('framework comment markers stay out of the remove button name', async ({ page, scenario }) => {
+  await scenario('comment-markers')
+  await expect(page.getByRole('button', { name: 'Remove Design', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Remove Status Active', exact: true })).toBeVisible()
+})
