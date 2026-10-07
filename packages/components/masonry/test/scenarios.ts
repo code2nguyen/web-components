@@ -20,6 +20,21 @@ if (scenario === 'empty') {
   main.querySelector<HTMLButtonElement>('#content-button')!.addEventListener('click', () => {
     main.querySelector('output')!.textContent = String(Number(main.querySelector('output')!.textContent) + 1)
   })
+} else if (scenario === 'own-handle') {
+  const own = (index: number) =>
+    `<c2-masonry-item item-id="tile-${index}" label="Tile ${index}" rows="6" cols="2" move-handle="grip-${index}"><article><header><button type="button" id="grip-${index}" aria-label="Move Tile ${index}" style="touch-action: none">Grip</button><h2>Tile ${index}</h2></header></article></c2-masonry-item>`
+  main.innerHTML = `<c2-masonry id="subject" editable>${[1, 2, 3].map(own).join('')}</c2-masonry><output id="changes">0</output>`
+} else if (scenario === 'pinned') {
+  const tile = (index: number, pinned: boolean) =>
+    `<c2-masonry-item item-id="tile-${index}" label="Tile ${index}" rows="5" cols="2" ${pinned ? 'pinned' : ''}><article><h2>Tile ${index}</h2></article></c2-masonry-item>`
+  main.innerHTML = `<c2-masonry id="subject" editable>${[1, 2, 3, 4].map((index) => tile(index, index % 2 === 0)).join('')}</c2-masonry><output id="changes">0</output>`
+} else if (scenario === 'actions' || scenario === 'actions-editing') {
+  const withActions = (index: number) =>
+    `<c2-masonry-item item-id="tile-${index}" label="Tile ${index}" rows="6" cols="2"><a href="#tile-${index}"><h2>Tile ${index}</h2></a><button type="button" slot="actions" id="menu-${index}" aria-label="Tile ${index} options">⋮</button></c2-masonry-item>`
+  main.innerHTML = `<c2-masonry id="subject" ${scenario === 'actions-editing' ? 'editable' : ''}>${[1, 2, 3].map(withActions).join('')}</c2-masonry><output id="changes">0</output><output id="menu-clicks">0</output>`
+  main.querySelector<HTMLButtonElement>('#menu-1')!.addEventListener('click', () => {
+    main.querySelector('#menu-clicks')!.textContent = String(Number(main.querySelector('#menu-clicks')!.textContent) + 1)
+  })
 } else {
   const count = scenario === 'small' || scenario === 'editing' ? 3 : 12
   const editable = scenario === 'editing' || scenario === 'editing-long'

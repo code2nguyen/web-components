@@ -34,6 +34,7 @@ declare module 'vue' {
         'cols-sm'?: unknown
         'cols-md'?: unknown
         'cols-lg'?: unknown
+        'move-handle'?: unknown
       }
     >
   }

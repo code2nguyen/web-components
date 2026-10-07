@@ -9,8 +9,13 @@ import styles from './masonry-item.scss?inline'
  * @tag c2-masonry-item
  * @slot default - Application-owned tile content.
  * @slot move-icon - Optional move-handle icon; an inline grip is provided by default.
+ * @slot actions - Buttons for the tile, such as a menu, in its top-right corner after the move handle. They show with
+ * the move handle, while the tile is hovered or has focus (see `--c2-masonry-item__actions--opacity`), and work whether
+ * or not the container is `editable`. Put them on the item itself, beside its content, so a tile whose content is one
+ * link can still carry a menu.
  * @csspart content - Keyboard-reachable scrolling region containing the application content.
  * @csspart controls - Group of edit-only move and resize controls.
+ * @csspart actions - Top-right corner holding the move handle and the `actions` slot.
  * @csspart move-handle - Button that starts a move operation.
  * @csspart resize-handle - Keyboard-reachable bottom edge that starts a resize operation.
  * @csspart resize-edge - Pointer resize target on the right edge.
@@ -23,6 +28,8 @@ import styles from './masonry-item.scss?inline'
  * @cssproperty {pixel} [--c2-masonry-item__controls--gap=4px] - Move-handle inset from the top and right borders.
  * @cssproperty {color} [--c2-masonry-item__controls--background=transparent] - Surface behind the move-handle corner.
  * @cssproperty {pixel} [--c2-masonry-item__handle--size=32px] - Move-handle hit target size.
+ * @cssproperty {pixel} [--c2-masonry-item__actions--gap=4px] - Space between the move handle and the slotted actions.
+ * @cssproperty {opacity} [--c2-masonry-item__actions--opacity=0] - Opacity of the actions while the tile is neither hovered nor focused; 1 keeps them always visible.
  * @cssproperty {pixel} [--c2-masonry-item__resize-handle--size=8px] - Invisible resize-edge hit-zone depth.
  * @cssproperty {color} [--c2-masonry-item__resize-edge__hover--color=rgb(37 99 235 / 35%)] - Right and bottom border color while the tile is hovered or focused.
  * @cssproperty {pixel} [--c2-masonry-item__handle--icon-size=16px] - Built-in move icon size.
@@ -62,20 +69,44 @@ export class MasonryItem extends LitElement {
   /** Optional positive column span for containers at least 1280 px wide. */
   @property({ type: Number, attribute: 'cols-lg', reflect: true }) colsLg?: number
 
+  /**
+   * Id of an element inside the tile that moves it, in place of the built-in move handle, which is then not drawn: a
+   * button in the tile's own header, for example. Pressing it, or Enter or Space on it, starts a move exactly as on
+   * the built-in handle. The element is the application's: label it ("Move Groceries"), show it only while the
+   * container is `editable` if it should not show otherwise, and give it `touch-action: none` so a touch drag moves the
+   * tile instead of scrolling the page. The resize edges stay as they are.
+   */
+  @property({ type: String, attribute: 'move-handle' }) moveHandle?: string
+
+  /**
+   * Keeps the tile in the group at the start of the container: pinned tiles always come before the others, in their
+   * own order. A move keeps a pinned tile among the pinned ones and any other tile after them, and a pinned tile
+   * authored or restored after an unpinned one is placed before it. Pin a tile the application keeps in view, such as a
+   * pinned note; nothing about the look changes, so show the pin in the tile itself.
+   */
+  @property({ type: Boolean }) pinned = false
+
   /** @internal Edit-mode state supplied only by the parent masonry container. */
   @property({ attribute: false }) editing = false
 
   override render() {
     const label = this.label || this.getAttribute('aria-label') || this.itemId || 'Tile'
     return html`
-      ${
-        this.editing
-          ? html`<div part="controls" class="controls">
-              <button type="button" part="move-handle" data-masonry-action="move" aria-label=${`Move ${label}`} aria-describedby="edit-instructions">
+      <div part="actions" class="actions">
+        ${
+          this.editing && !this.moveHandle
+            ? html`<button type="button" part="move-handle" data-masonry-action="move" aria-label=${`Move ${label}`} aria-describedby="edit-instructions">
                 <slot name="move-icon"
                   ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3h1M10 3h1M5 8h1M10 8h1M5 13h1M10 13h1" /></svg
                 ></slot>
-              </button>
+              </button>`
+            : null
+        }
+        <slot name="actions"></slot>
+      </div>
+      ${
+        this.editing
+          ? html`<div part="controls" class="controls">
               <div part="resize-edge" class="resize-edge resize-edge--right" data-masonry-action="resize" data-masonry-edge="right"></div>
               <button
                 type="button"
