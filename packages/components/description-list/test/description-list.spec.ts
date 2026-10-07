@@ -26,9 +26,10 @@ test('an empty value shows a dash until it gets content', async ({ page, scenari
   await scenario()
   const phone = page.locator('c2-description-item[label="Phone"]')
   await expect(phone.locator('[part="empty"]')).toHaveText('—')
-  await expect(page.locator('c2-description-item[label="Name"] [part="empty"]')).toHaveCount(0)
+  await expect(phone.locator('[part="empty"]')).toBeVisible()
+  await expect(page.locator('c2-description-item[label="Name"] [part="empty"]')).toBeHidden()
   await phone.evaluate((item) => (item.textContent = '+44 20 7946 0000'))
-  await expect(phone.locator('[part="empty"]')).toHaveCount(0)
+  await expect(phone.locator('[part="empty"]')).toBeHidden()
   await expect(phone).toContainText('+44 20 7946 0000')
   // A framework that rewrites the text node in place fires no slotchange.
   await phone.evaluate((item) => (item.firstChild!.textContent = ' '))
@@ -38,7 +39,7 @@ test('an empty value shows a dash until it gets content', async ({ page, scenari
 test('empty-text replaces the dash, and an empty string shows nothing', async ({ page, scenario }) => {
   await scenario('rich-label')
   await expect(page.locator('c2-description-item[label="Empty"] [part="empty"]')).toHaveText('Not set')
-  await expect(page.locator('c2-description-item[label="Blank"] [part="empty"]')).toHaveCount(0)
+  await expect(page.locator('c2-description-item[label="Blank"] [part="empty"]')).toBeHidden()
 })
 
 test('the label slot replaces the label attribute, and actions sit after the value', async ({ page, scenario }) => {
@@ -47,7 +48,7 @@ test('the label slot replaces the label attribute, and actions sit after the val
   // The slotted label is shown and the attribute's fallback text is not.
   await expect(item.getByText('Status')).toBeVisible()
   expect(await item.locator('[part="label"] slot').evaluate((slot: HTMLSlotElement) => slot.assignedElements().length)).toBe(1)
-  await expect(item.locator('[part="empty"]')).toHaveCount(0)
+  await expect(item.locator('[part="empty"]')).toBeHidden()
   const copy = page.getByRole('button', { name: 'Copy' })
   await expect(copy).toBeVisible()
   const value = await item.locator('strong').boundingBox()

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, isServer, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -59,7 +59,11 @@ export class DescriptionItem extends LitElement {
   /** Text shown while the value is empty. An empty string shows nothing. */
   @property({ attribute: 'empty-text' }) emptyText = '—'
 
-  /** Whether the default slot holds an element or non-blank text. Unknown until the light DOM is read, which counts as filled. */
+  /**
+   * Whether the default slot holds an element or non-blank text. The server cannot see the light DOM, so it renders
+   * every item as filled; a client that adopts that server markup keeps the same value until hydration is done, then
+   * reads the real one, or Lit reports a hydration mismatch.
+   */
   @state() private hasValue = true
 
   private readonly slotPresence = new SlotPresenceController(this, ['actions'])
@@ -70,7 +74,9 @@ export class DescriptionItem extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.internals.role = 'listitem'
-    this.hasValue = this.readHasValue()
+    if (isServer) return
+    if (this.hasUpdated || !this.shadowRoot?.hasChildNodes()) this.hasValue = this.readHasValue()
+    else void this.updateComplete.then(() => (this.hasValue = this.readHasValue()))
     this.valueObserver ??= new MutationObserver(() => (this.hasValue = this.readHasValue()))
     this.valueObserver.observe(this, { childList: true, characterData: true, subtree: true })
   }
@@ -100,7 +106,7 @@ export class DescriptionItem extends LitElement {
         </div>
         <div class="value" part="value" role="definition">
           <slot @slotchange=${this.handleValueSlotChange}></slot>
-          ${showEmpty ? html`<span class="empty" part="empty">${this.emptyText}</span>` : nothing}
+          <span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText}</span>
         </div>
         <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
           <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
