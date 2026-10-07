@@ -63,5 +63,9 @@ chips.addEventListener('remove', (event) => {
   }
 })
 
-await Promise.all([...document.querySelectorAll('c2-chip, c2-chip-part')].map((chip) => chip.updateComplete))
+await Promise.all(
+  [...document.querySelectorAll<HTMLElementTagNameMap['c2-chip'] | HTMLElementTagNameMap['c2-chip-part']>('c2-chip, c2-chip-part')].map(
+    (chip) => chip.updateComplete,
+  ),
+)
 main.dataset.ready = 'true'
