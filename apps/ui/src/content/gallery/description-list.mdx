@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-description-list: a detail-page grid, a bordered card, a side-by-side ledger, a striped table, a compact summary and a highlighted stats strip. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-description-list: a detail-page grid, a bordered card, a side-by-side ledger, a two-column ledger, a striped table, a compact summary and a highlighted stats strip. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -69,6 +69,31 @@ import { Badge } from '@c2n/components/badge'
   <c2-description-item label="Status"><c2-badge tone="success">Succeeded</c2-badge></c2-description-item>
   <c2-description-item label="Payment method">Visa •••• 4242</c2-description-item>
   <c2-description-item label="Descriptor">ACME*SUBSCRIPTION</c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Two-column ledger
+<style>
+  .dl-two-column {
+    width: 100%;
+    --c2-description-list__grid--columns: 2;
+    --c2-description-list__grid--min-column-width: 100px;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__grid--column-gap: 16px;
+    --c2-description-item__container--column-gap: 8px;
+    --c2-description-item__label--width: 52px;
+    --c2-description-item__value--min-width: 40px;
+    --c2-description-item__container--padding: 8px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-item__label--font-size: 13px;
+    --c2-description-item__value--font-size: 13px;
+  }
+</style>
+<c2-description-list class="dl-two-column" aria-label="Order">
+  <c2-description-item label="Order">#10482</c2-description-item>
+  <c2-description-item label="Placed">Sep 12</c2-description-item>
+  <c2-description-item label="Carrier">DHL</c2-description-item>
+  <c2-description-item label="Total">€86.40</c2-description-item>
 </c2-description-list>
 ```
 

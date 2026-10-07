@@ -21,6 +21,7 @@ const markup: Record<string, string> = {
     <c2-description-item id="wide" label="Address" style="--c2-description-item--grid-column: 1 / -1">12 St James's Square, London</c2-description-item>
   </c2-description-list>`,
   horizontal: `<c2-description-list class="horizontal" aria-label="Customer" style="--c2-description-list__grid--columns: 1">${items}</c2-description-list>`,
+  'two-column-horizontal': `<c2-description-list class="horizontal" aria-label="Customer" style="--c2-description-list__grid--columns: 2; --c2-description-list__grid--min-column-width: 340px">${items}</c2-description-list>`,
   'rich-label': `<c2-description-list aria-label="Customer">
     <c2-description-item label="Plain"><span slot="label">Status <abbr title="Updated hourly">*</abbr></span><strong>Active</strong>
       <button slot="actions" type="button">Copy</button>

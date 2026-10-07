@@ -755,6 +755,18 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         },
       },
       {
+        name: 'Two-column ledger',
+        description: 'Labels beside their values in two columns with a hairline under every pair, for an order or account summary.',
+        css: {
+          '--c2-description-list__grid--columns': '2',
+          '--c2-description-list__grid--row-gap': '0px',
+          '--c2-description-item__label--width': '100px',
+          '--c2-description-item__value--min-width': '80px',
+          '--c2-description-item__container--padding': '8px 0',
+          '--c2-description-item__container--border-bottom': '1px solid #e4e4e7',
+        },
+      },
+      {
         name: 'Bordered card',
         description: 'The pairs inside an 8px-radius card with padding, for a detail panel next to other cards.',
         css: {

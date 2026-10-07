@@ -97,6 +97,20 @@ test('a label width puts the label beside its value, which wraps under it when n
   await expect.poll(async () => (await value())!.y > (await label())!.y).toBe(true)
 })
 
+test('labels beside values work in two columns, which fold to one when narrow', async ({ page, scenario }) => {
+  const items = page.locator('c2-description-item')
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('two-column-horizontal')
+  expect(await columnCount(items)).toBe(2)
+  const first = items.first()
+  const label = await first.locator('[part="label"]').boundingBox()
+  const value = await first.locator('[part="value"]').boundingBox()
+  expect(Math.round(value!.y)).toBe(Math.round(label!.y))
+  expect(value!.x).toBeGreaterThan(label!.x + label!.width)
+  await page.setViewportSize({ width: 600, height: 800 })
+  await expect.poll(() => columnCount(items)).toBe(1)
+})
+
 for (const name of ['default', 'header', 'rich-label']) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
