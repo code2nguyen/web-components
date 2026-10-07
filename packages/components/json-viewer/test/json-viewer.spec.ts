@@ -50,7 +50,9 @@ test('clicking a branch toggles it and reports the change', async ({ page, rende
 })
 
 test('arrow keys walk, open and close the lines', async ({ page, renderScenario, tab }) => {
-  await renderScenario(viewer())
+  await renderScenario(`<button>Before</button>${viewer()}<button>After</button>`)
+  await tab()
+  await expect(page.getByRole('button', { name: 'Before' })).toBeFocused()
   await tab()
   await expect(line(page, 'name')).toBeFocused()
   await expect(line(page, 'name')).toHaveAttribute('tabindex', '0')
@@ -73,8 +75,15 @@ test('arrow keys walk, open and close the lines', async ({ page, renderScenario,
   await expect(line(page, 'name')).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(line(page, 'name')).toBeFocused()
+  // The viewer is a single tab stop: the focused line, and nothing else inside it (in Firefox a scroll container
+  // would otherwise be one too).
+  await page.keyboard.press('ArrowDown')
   await tab()
-  await expect(page.locator('c2-json-viewer')).not.toBeFocused()
+  await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
+  await tab(true)
+  await expect(line(page, 'age')).toBeFocused()
+  await tab(true)
+  await expect(page.getByRole('button', { name: 'Before' })).toBeFocused()
 })
 
 test('copies a path from the line button and a value from the keyboard', async ({ page, renderScenario }) => {
