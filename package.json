@@ -96,6 +96,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/truncate:build",
         "./packages/components/chip-group:build",
         "./packages/components/description-list:build",
         "./packages/components/indicator:build",

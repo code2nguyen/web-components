@@ -103,7 +103,7 @@ export interface TableColumnConfig {
   header?: string
   /** Grid track for the column: `1fr`, `160px`, `minmax(120px, 1fr)`… Defaults to `1fr`. */
   width?: string
-  /** Lower bound in pixels while resizing. Defaults to 64. */
+  /** Lower bound in pixels: the floor of a flexible (`fr`) track, and while resizing. Defaults to 64. */
   minWidth?: number
   align?: ColumnAlign
   sortable?: boolean

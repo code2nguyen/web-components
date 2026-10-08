@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Chip } from '@c2n/chip'
+import type { ChipPart } from '@c2n/chip/chip-part.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -23,6 +24,11 @@ declare module 'vue' {
         'remove-label'?: unknown
         onRemove?: (event: EventOf<Chip, 'remove'>) => void
         onChange?: (event: EventOf<Chip, 'change'>) => void
+      }
+    >
+    'c2-chip-part': DefineComponent<
+      C2Props<ChipPart> & {
+        onPartClick?: (event: EventOf<ChipPart, 'part-click'>) => void
       }
     >
   }

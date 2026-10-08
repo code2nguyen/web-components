@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   'chip-group': `<c2-chip-group style="width: 220px" aria-label="Topics">
   <c2-chip>Design</c2-chip>
   <c2-chip>Engineering</c2-chip>

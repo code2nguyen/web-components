@@ -50,7 +50,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 96 remain (18 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29) and `c2-description-list` (#26) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 95 remain (17 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26) and `c2-truncate` (#33) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
 ### A. Forms and input (24)
 
@@ -81,7 +81,7 @@ Domain patterns with no design-system home come from the products that made them
 | 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
 | 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
 
-### B. Data display (20)
+### B. Data display (19)
 
 | #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
 | --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
@@ -89,7 +89,6 @@ Domain patterns with no design-system home come from the products that made them
 | 30  | `c2-relative-time`  | "3 min ago" that updates itself, locale-aware, full date on hover           | Web Awesome relative-time, GitHub relative-time-element                          | P1       | Proposed |
 | 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
 | 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
-| 33  | `c2-truncate`       | Clamp to N lines with "Show more" and a full-text tooltip                   | Carbon truncated text, Polaris Truncate, Mantine Spoiler                         | P1       | Proposed |
 | 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |
 | 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)            | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
 | 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes                       | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
@@ -298,7 +297,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 164 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator` and `c2-description-list`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 163 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list` and `c2-truncate`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |
