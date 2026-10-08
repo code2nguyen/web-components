@@ -38,12 +38,12 @@ if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.
   }
 </style>
 <div data-label="Confirm">
-  <c2-button onclick="this.nextElementSibling.show()">Publish changes</c2-button>
-  <c2-confirm-dialog heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish"></c2-confirm-dialog>
+  <c2-button onclick="document.getElementById('cd-1').show()">Publish changes</c2-button>
+  <c2-confirm-dialog id="cd-1" heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish"></c2-confirm-dialog>
 </div>
 <div data-label="Destructive">
-  <c2-button class="cd-danger" onclick="this.nextElementSibling.show()">Delete workspace</c2-button>
-  <c2-confirm-dialog destructive heading="Delete workspace?" confirm-label="Delete workspace">
+  <c2-button class="cd-danger" onclick="document.getElementById('cd-2').show()">Delete workspace</c2-button>
+  <c2-confirm-dialog id="cd-2" destructive heading="Delete workspace?" confirm-label="Delete workspace">
     <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"></path>
     </svg>
@@ -51,6 +51,6 @@ if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.
   </c2-confirm-dialog>
 </div>
 <div data-label="Async action">
-  <c2-button onclick="const d = this.nextElementSibling; d.confirmAction = () => new Promise((r) => setTimeout(r, 1500)); d.show()">Revoke API key</c2-button>
-  <c2-confirm-dialog destructive heading="Revoke this key?" message="Requests signed with it fail immediately." confirm-label="Revoke"></c2-confirm-dialog>
+  <c2-button onclick="const d = document.getElementById('cd-3'); d.confirmAction = () => new Promise((r) => setTimeout(r, 1500)); d.show()">Revoke API key</c2-button>
+  <c2-confirm-dialog id="cd-3" destructive heading="Revoke this key?" message="Requests signed with it fail immediately." confirm-label="Revoke"></c2-confirm-dialog>
 </div>

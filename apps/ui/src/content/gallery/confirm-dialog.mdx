@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-confirm-dialog: destructive, icon heading, centred alert, stacked actions, frosted and a soft warning. Open a card, then the dialog, to see it.'
+description: 'Ready-made looks for c2-confirm-dialog: destructive, icon heading, centred alert, frosted and a soft warning. Open a card, then the dialog, to see it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -15,13 +15,13 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish"></c2-confirm-dialog>
+<c2-button onclick="document.getElementById('cdg-1').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-1" heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish"></c2-confirm-dialog>
 ```
 
 ```html tag=MdxCodeBlock,label=Destructive
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog destructive heading="Delete repository?" message="The repository, its issues and its pull requests are removed for everyone." confirm-label="Delete"></c2-confirm-dialog>
+<c2-button onclick="document.getElementById('cdg-2').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-2" destructive heading="Delete repository?" message="The repository, its issues and its pull requests are removed for everyone." confirm-label="Delete"></c2-confirm-dialog>
 ```
 
 ```html tag=MdxCodeBlock,label=Icon heading
@@ -31,8 +31,8 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
     --c2-confirm-dialog__heading--gap: 10px;
   }
 </style>
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog class="icon-heading" destructive heading="Remove member?" message="Ana Ng loses access to every project in this workspace." confirm-label="Remove">
+<c2-button onclick="document.getElementById('cdg-3').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-3" class="icon-heading" destructive heading="Remove member?" message="Ana Ng loses access to every project in this workspace." confirm-label="Remove">
   <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 11h-6"></path>
   </svg>
@@ -57,8 +57,8 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
     text-align: center;
   }
 </style>
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog class="centred" heading="Turn on notifications?" message="We only send updates for projects you follow." confirm-label="Turn on" cancel-label="Not now"></c2-confirm-dialog>
+<c2-button onclick="document.getElementById('cdg-4').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-4" class="centred" heading="Turn on notifications?" message="We only send updates for projects you follow." confirm-label="Turn on" cancel-label="Not now"></c2-confirm-dialog>
 ```
 
 ```html tag=MdxCodeBlock,label=Frosted
@@ -71,8 +71,8 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
     --c2-confirm-dialog__cancel-button--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog class="frosted" heading="Sign out of all devices?" message="You will need to sign in again on your phone and laptop." confirm-label="Sign out"></c2-confirm-dialog>
+<c2-button onclick="document.getElementById('cdg-5').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-5" class="frosted" heading="Sign out of all devices?" message="You will need to sign in again on your phone and laptop." confirm-label="Sign out"></c2-confirm-dialog>
 ```
 
 ```html tag=MdxCodeBlock,label=Soft warning
@@ -87,8 +87,8 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
     --c2-modal__body--padding-top: 16px;
   }
 </style>
-<c2-button onclick="this.nextElementSibling.show()">Open</c2-button>
-<c2-confirm-dialog class="soft-warning" heading="Leave without saving?" message="Your edits to this page have not been saved yet." confirm-label="Leave" cancel-label="Keep editing">
+<c2-button onclick="document.getElementById('cdg-6').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-6" class="soft-warning" heading="Leave without saving?" message="Your edits to this page have not been saved yet." confirm-label="Leave" cancel-label="Keep editing">
   <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="10"></circle>
     <path d="M12 8v4M12 16h.01"></path>
