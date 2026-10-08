@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@c2n/filter-builder": "*",
+    "@c2n/truncate": "*",
     "@c2n/chip-group": "*",
     "@c2n/indicator": "*",
     "@c2n/chip": "*",

@@ -1,0 +1,47 @@
+---
+title: 'Truncate'
+description: 'Clamps text to a number of lines, with an optional Show more button.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Truncate } from '@c2n/components/truncate'
+
+`c2-truncate` clamps its text to a number of lines and ends it with an ellipsis. The line count is the CSS variable `--c2-truncate__content--line-clamp` (3 by default, `1` for a single line), so it can change per breakpoint. The element measures whether the text really overflows, and only then does `expandable` add a Show more / Show less button (`more-label` and `less-label` rename it, `expanded` opens it from code). Text that fits is left alone. The full text always stays in the accessibility tree. Whether the text is clamped is the read-only `truncated` property, the `truncation-change` event and the `:state(truncated)` custom state.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/truncate'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/truncate
+<style>
+  .usage-truncate {
+    display: block;
+    max-width: 360px;
+  }
+  .usage-truncate.one-line {
+    --c2-truncate__content--line-clamp: 1;
+  }
+  .usage-truncate.two-lines {
+    --c2-truncate__content--line-clamp: 2;
+  }
+</style>
+<div data-label="Show more">
+  <c2-truncate class="usage-truncate" expandable>Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend, and the team expects the new pricing to lift average contract value in the second half.</c2-truncate>
+</div>
+<div data-label="One line">
+  <c2-truncate class="usage-truncate one-line" expandable>Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend, and the team expects the new pricing to lift average contract value in the second half.</c2-truncate>
+</div>
+<div data-label="Two lines, custom labels">
+  <c2-truncate class="usage-truncate two-lines" expandable more-label="Read more" less-label="Read less">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend, and the team expects the new pricing to lift average contract value in the second half.</c2-truncate>
+</div>
+<div data-label="Text that fits">
+  <c2-truncate class="usage-truncate" expandable>Short notes are left alone: no ellipsis, no button.</c2-truncate>
+</div>
+```

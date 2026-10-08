@@ -55,6 +55,10 @@ export type TableVirtualMode = 'auto' | 'always' | 'never'
 
 /** Field of the synthetic checkbox column, so it can live in the same render pipeline as the real columns. */
 const SELECTION_FIELD = '__c2-selection'
+/** Floor of a flexible track and of a column being resized, unless the column sets `minWidth`. */
+const DEFAULT_MIN_WIDTH = 64
+/** A plain flexible track such as `1fr` or `2.5fr`. */
+const FLEX_TRACK = /^\s*\d*\.?\d+fr\s*$/
 
 interface PinPlacement {
   side: ColumnPin
@@ -1740,7 +1744,12 @@ export class Table extends LitElement {
     return columns
       .map((column) => {
         const override = this.widthOverrides[columnKey(column)]
-        return override ? `${override}px` : column.width || '1fr'
+        if (override) return `${override}px`
+        const width = column.width || '1fr'
+        // A bare `fr` track is `minmax(auto, Nfr)`, and a cell's `auto` minimum is 0 (cells clip), so on a narrow
+        // screen the fixed tracks take everything and the flexible column collapses. Floor it at `minWidth`;
+        // the viewport then scrolls sideways instead.
+        return FLEX_TRACK.test(width) ? `minmax(${column.minWidth ?? DEFAULT_MIN_WIDTH}px, ${width.trim()})` : width
       })
       .join(' ')
   }
@@ -2491,7 +2500,7 @@ export class Table extends LitElement {
     if (!headerCell) return
     const startWidth = headerCell.getBoundingClientRect().width
     const startX = event.clientX
-    const minWidth = column.minWidth ?? 64
+    const minWidth = column.minWidth ?? DEFAULT_MIN_WIDTH
     let width = Math.round(startWidth)
 
     const move = (moveEvent: PointerEvent) => {
