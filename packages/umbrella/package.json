@@ -296,9 +296,25 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./description-list": {
+      "types": "./dist/description-list.d.ts",
+      "default": "./dist/description-list.js"
+    },
+    "./description-list/description-item": {
+      "types": "./dist/description-list/description-item.d.ts",
+      "default": "./dist/description-list/description-item.js"
+    },
+    "./description-list/description-value": {
+      "types": "./dist/description-list/description-value.d.ts",
+      "default": "./dist/description-list/description-value.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
+    },
+    "./filter-builder": {
+      "types": "./dist/filter-builder.d.ts",
+      "default": "./dist/filter-builder.js"
     },
     "./flow": {
       "types": "./dist/flow.d.ts",
@@ -347,6 +363,10 @@
     "./inline-edit": {
       "types": "./dist/inline-edit.d.ts",
       "default": "./dist/inline-edit.js"
+    },
+    "./json-viewer": {
+      "types": "./dist/json-viewer.d.ts",
+      "default": "./dist/json-viewer.js"
     },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
@@ -781,7 +801,9 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",
@@ -790,6 +812,7 @@
     "@c2n/icon-button": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",

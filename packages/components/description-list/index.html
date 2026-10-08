@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-description-list</title>
+    <script type="module" src="/src/description-list.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 40px;
+        max-width: 960px;
+      }
+      .horizontal {
+        --c2-description-list__grid--columns: 1;
+        --c2-description-list__grid--row-gap: 0px;
+        --c2-description-item__label--width: 180px;
+        --c2-description-item__value--min-width: 180px;
+        --c2-description-item__container--padding: 12px 0;
+        --c2-description-item__container--border-bottom: 1px solid #e4e4e7;
+      }
+      .card {
+        --c2-description-list__container--padding: 20px;
+        --c2-description-list__container--border: 1px solid #e4e4e7;
+        --c2-description-list__container--border-radius: 8px;
+        --c2-description-list__header--padding: 0 0 12px;
+        --c2-description-list__header--border-bottom: 1px solid #e4e4e7;
+      }
+      .wide {
+        --c2-description-item--grid-column: 1 / -1;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-description-list aria-label="Customer">
+      <c2-description-item label="Name">Ada Lovelace</c2-description-item>
+      <c2-description-item label="Email">ada@example.com</c2-description-item>
+      <c2-description-item label="Plan">Business</c2-description-item>
+      <c2-description-item label="Phone"></c2-description-item>
+      <c2-description-item label="Customer since">March 4, 2024</c2-description-item>
+      <c2-description-item label="Customer ID">cus_9s6XKzkNRiz8i3</c2-description-item>
+    </c2-description-list>
+
+    <c2-description-list class="horizontal" aria-label="Payment">
+      <c2-description-item label="Amount">€1,240.00</c2-description-item>
+      <c2-description-item label="Status">Succeeded</c2-description-item>
+      <c2-description-item label="Payment method">Visa •••• 4242</c2-description-item>
+      <c2-description-item label="Statement descriptor">ACME*SUBSCRIPTION</c2-description-item>
+    </c2-description-list>
+
+    <c2-description-list class="card" aria-label="Billing details">
+      <span slot="heading">Billing details</span>
+      <button slot="actions" type="button">Edit</button>
+      <c2-description-item label="Company">Analytical Engines Ltd</c2-description-item>
+      <c2-description-item label="VAT number">GB 123 4567 89</c2-description-item>
+      <c2-description-item label="Billing email">billing@example.com</c2-description-item>
+      <c2-description-item class="wide" label="Address">12 St James's Square, London SW1Y 4JH, United Kingdom</c2-description-item>
+    </c2-description-list>
+  </body>
+</html>

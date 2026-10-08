@@ -1,0 +1,53 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-description-value,
+  $theme: (
+    caption--display: block,
+    caption--width: 40%,
+    caption--color: #71717a,
+    caption--font-size: 12px,
+    caption--font-weight: 600,
+  )
+);
+
+:host {
+  display: block;
+  // Set by the owning item's value row: equal columns above the minimum width, one row per value below it.
+  flex: 1 1 var(--_value-basis, auto);
+  min-width: 0;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-description-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+}
+
+.caption {
+  display: css.cssVar(caption--display);
+  flex: 0 0 css.cssVar(caption--width);
+  min-width: 0;
+  color: css.cssVar(caption--color);
+  font-size: css.cssVar(caption--font-size);
+  font-weight: css.cssVar(caption--font-weight);
+}
+
+// Hidden from sight only: assistive technology still reads the column name with the value.
+.caption.is-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.content {
+  flex: 1 1 0;
+  min-width: 0;
+}

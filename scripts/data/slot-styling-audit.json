@@ -868,6 +868,53 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-description-item",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer-owned value; the value part sets its inherited type and colour, and the assigned node keeps its own styles."
+    },
+    {
+      "tag": "c2-description-item",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-description-item",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The label (term) region owns the label slot and its fallback text from the label attribute."
+    },
+    {
+      "tag": "c2-description-value",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The content wrapper owns the default slot beside the caption; the value inherits the item's value type and colour."
+    },
+    {
+      "tag": "c2-description-list",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the c2-description-item children, which are styled through their own variables."
+    },
+    {
+      "tag": "c2-description-list",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header row owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-description-list",
+      "slot": "heading",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header row owns the heading slot's component-side presentation."
+    },
+    {
       "tag": "c2-details",
       "slot": "",
       "decision": "part",
@@ -1111,6 +1158,12 @@
       "decision": "variables",
       "variables": ["--c2-inline-edit__control__icon--size", "--c2-inline-edit__control--color", "--c2-inline-edit__control__hover--color"],
       "reason": "The save button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
+    },
+    {
+      "tag": "c2-json-viewer",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-kanban",
@@ -1843,6 +1896,12 @@
       "decision": "variables",
       "variables": ["--c2-chip-part__icon--size"],
       "reason": "The prefix box sizes a slotted SVG through the icon variable; a dot or an avatar keeps its own size."
+    },
+    {
+      "tag": "c2-filter-builder",
+      "slot": "end",
+      "decision": "assigned-content",
+      "reason": "The end slot projects consumer-owned light DOM, such as a search field, at the end of the bar; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-qr-code",

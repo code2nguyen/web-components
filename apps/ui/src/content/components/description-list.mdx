@@ -1,0 +1,108 @@
+---
+title: 'Description List'
+description: 'Read-only label and value pairs for a detail page, in columns that wrap with the available width.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DescriptionList, DescriptionItem, DescriptionValue } from '@c2n/components/description-list'
+import { Badge } from '@c2n/components/badge'
+
+`c2-description-list` is the Descriptions of antd and the DescriptionList of Polaris: the block of label and value pairs at the top of an order, a customer or a deployment page. Each pair is a `c2-description-item` with a `label` attribute (or a `label` slot for markup) and its value as content, which can be text, a badge, a link or anything else. An item with no value shows `empty-text` (a dash by default) so a missing field reads as missing, not as a layout glitch, and an `actions` slot puts a copy or edit button after the value. The list itself takes a `heading` and `actions` slot for a title row.
+
+The layout is CSS only. The items flow into as many columns as fit, never more than `--c2-description-list__grid--columns` (3) and never narrower than `--c2-description-list__grid--min-column-width` (200px), so the same markup is three columns on a wide page and one on a phone without a media query. `--c2-description-item--grid-column: 1 / -1` lets an item such as an address span the row. Labels sit above their values by default; set `--c2-description-item__label--width` to a length to put them beside the value instead, and the value still drops under its label when the item gets narrower than the label plus `--c2-description-item__value--min-width`. The two settings are independent, so labels beside values work in any number of columns: two columns of side-by-side pairs is `--c2-description-list__grid--columns: 2` plus a label width. Item variables set on the list reach every item.
+
+A label can also have several values: give the item one `c2-description-value` per value, such as a feature's price in each plan or a metric this month and last. The values line up in equal columns across the items, `value-labels` on the list names the columns (separated by `;`) and `label-heading` heads the label column. The layout adapts with no breakpoint to set. When the label and the columns no longer fit side by side, the columns move under the label. When the columns themselves no longer fit, each one narrower than `--c2-description-item__value-column--min-width` (120px), every value takes a row of its own and shows its column name, and the header row hides. Narrow the window to see the rows below change.
+
+The column names are yours to style: `--c2-description-list__value-header--*` sets the header row (bold 14px in the on-surface colour by default) and `--c2-description-value__caption--*` the names beside stacked values. To drop them, set `--c2-description-list__value-header--display: none` to remove the header row while stacked values keep their names, set `--c2-description-value__caption--display: none` to show stacked values without names, or leave `value-labels` out for neither.
+
+The list is exposed as a `list` and each item as a `listitem` holding a `term` and its `definition`, or one `definition` per `c2-description-value`, each read with its column name. Give the list an `aria-label` when a page has several.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/description-list'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/description-list
+<style>
+  .side-by-side {
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__label--width: 160px;
+    --c2-description-item__value--min-width: 160px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .two-column-side-by-side {
+    --c2-description-list__grid--columns: 2;
+    --c2-description-list__grid--min-column-width: 260px;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__grid--column-gap: 32px;
+    --c2-description-item__label--width: 120px;
+    --c2-description-item__value--min-width: 120px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .grouped {
+    --c2-description-item__label--width: 120px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-list__grid--row-gap: 0px;
+  }
+  .usage-list {
+    width: 100%;
+  }
+</style>
+<div data-label="Columns">
+  <c2-description-list class="usage-list" aria-label="Customer">
+    <c2-description-item label="Name">Ada Lovelace</c2-description-item>
+    <c2-description-item label="Email">ada@example.com</c2-description-item>
+    <c2-description-item label="Plan"><c2-badge tone="primary">Business</c2-badge></c2-description-item>
+    <c2-description-item label="Phone"></c2-description-item>
+    <c2-description-item label="Customer since">March 4, 2024</c2-description-item>
+    <c2-description-item label="Customer ID">cus_9s6XKzkNRiz8i3</c2-description-item>
+  </c2-description-list>
+</div>
+<div data-label="Several values per label">
+  <c2-description-list class="usage-list grouped" aria-label="Plans" value-labels="Starter;Pro;Enterprise" label-heading="Feature">
+    <c2-description-item label="Price">
+      <c2-description-value>€0</c2-description-value>
+      <c2-description-value>€20 / month</c2-description-value>
+      <c2-description-value>Custom</c2-description-value>
+    </c2-description-item>
+    <c2-description-item label="Seats">
+      <c2-description-value>1</c2-description-value>
+      <c2-description-value>10</c2-description-value>
+      <c2-description-value>Unlimited</c2-description-value>
+    </c2-description-item>
+    <c2-description-item label="Support">
+      <c2-description-value>Community</c2-description-value>
+      <c2-description-value>Email</c2-description-value>
+      <c2-description-value><c2-badge tone="primary">24/7</c2-badge></c2-description-value>
+    </c2-description-item>
+  </c2-description-list>
+</div>
+<div data-label="Two columns, label beside value">
+  <c2-description-list class="usage-list two-column-side-by-side" aria-label="Order">
+    <c2-description-item label="Order">#10482</c2-description-item>
+    <c2-description-item label="Placed">Sep 12, 2026</c2-description-item>
+    <c2-description-item label="Customer">Ada Lovelace</c2-description-item>
+    <c2-description-item label="Status"><c2-badge tone="primary">Shipped</c2-badge></c2-description-item>
+    <c2-description-item label="Carrier">DHL Express</c2-description-item>
+    <c2-description-item label="Tracking"></c2-description-item>
+  </c2-description-list>
+</div>
+<div data-label="Label beside value">
+  <c2-description-list class="usage-list side-by-side" aria-label="Payment">
+    <c2-description-item label="Amount">€1,240.00</c2-description-item>
+    <c2-description-item label="Status"><c2-badge tone="success">Succeeded</c2-badge></c2-description-item>
+    <c2-description-item label="Payment method">Visa •••• 4242</c2-description-item>
+    <c2-description-item label="Description" empty-text="No description"></c2-description-item>
+  </c2-description-list>
+</div>
+```

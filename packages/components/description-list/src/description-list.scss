@@ -1,0 +1,156 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-description-list,
+  $theme: (
+    grid--columns: 3,
+    grid--min-column-width: 200px,
+    grid--column-gap: 24px,
+    grid--row-gap: 16px,
+
+    container--padding: 0px,
+    container--border: none,
+    container--border-radius: 0px,
+    container--background-color: transparent,
+    container--font-family: inherit,
+
+    header--gap: 12px,
+    header--margin-bottom: 16px,
+    header--padding: 0px,
+    header--border-bottom: none,
+    header--color: #18181b,
+    header--font-size: 16px,
+    header--font-weight: 600,
+
+    value-header--display: flex,
+    value-header--color: #18181b,
+    value-header--font-size: 14px,
+    value-header--font-weight: 600,
+    value-header--padding-bottom: 8px,
+    value-header--border-bottom: 1px solid #e4e4e7,
+    value-header--margin-bottom: 0px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.c2-description-list {
+  box-sizing: border-box;
+  padding: css.cssVar(container--padding);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  font-family: css.cssVar(container--font-family);
+}
+
+.header {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: css.cssVar(header--gap);
+  margin-bottom: css.cssVar(header--margin-bottom);
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(header--border-bottom);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.heading {
+  min-width: 0;
+}
+
+// A slotted heading element brings its own margins; the header row owns the spacing.
+.heading ::slotted(*) {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.grid {
+  // As many columns as fit at the minimum width, but never more than the column count: the track is at least the
+  // width that `columns` equal columns would get, so a wide list stops adding columns there.
+  $columns: css.cssVar(grid--columns);
+  $gap: css.cssVar(grid--column-gap);
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, max(#{css.cssVar(grid--min-column-width)}, calc((100% - (#{$columns} - 1) * #{$gap}) / #{$columns}))), 1fr)
+  );
+  column-gap: $gap;
+  row-gap: css.cssVar(grid--row-gap);
+}
+
+// Value columns stack per item, so the items take one column each.
+.has-value-columns .grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// The column names mirror an item's layout with the item's own variables (set on the list, they reach both), so the
+// header wraps at the same widths as every item and its cells sit over the value columns.
+.value-header {
+  $threshold: calc(
+    var(--_count) * var(--c2-description-item__value-column--min-width, 120px) + (var(--_count) - 1) * var(--c2-description-item__value-column--gap, 16px)
+  );
+  box-sizing: border-box;
+  display: css.cssVar(value-header--display);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: var(--c2-description-item__container--column-gap, 16px);
+  padding: var(--c2-description-item__container--padding, 0px);
+  padding-bottom: css.cssVar(value-header--padding-bottom);
+  margin-bottom: css.cssVar(value-header--margin-bottom);
+  border-bottom: css.cssVar(value-header--border-bottom);
+  color: css.cssVar(value-header--color);
+  font-size: css.cssVar(value-header--font-size);
+  font-weight: css.cssVar(value-header--font-weight);
+
+  .value-header__label {
+    flex: 0 0 var(--c2-description-item__label--width, 100%);
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .value-header__values {
+    --_threshold: #{$threshold};
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    column-gap: var(--c2-description-item__value-column--gap, 16px);
+    min-width: min(100%, var(--_threshold));
+  }
+
+  .value-header__cell {
+    flex: 1 1 calc((var(--_threshold) - 100%) * 999);
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+// Stacked values carry their own captions. The header keeps its width so it goes on measuring the same wrap.
+.value-header.is-stacked {
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+  overflow: hidden;
+  visibility: hidden;
+}
