@@ -96,6 +96,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/query-input:build",
         "./packages/components/json-viewer:build",
         "./packages/components/filter-builder:build",
         "./packages/components/truncate:build",

@@ -480,6 +480,10 @@
       "types": "./dist/qr-code.d.ts",
       "default": "./dist/qr-code.js"
     },
+    "./query-input": {
+      "types": "./dist/query-input.d.ts",
+      "default": "./dist/query-input.js"
+    },
     "./questionnaire": {
       "types": "./dist/questionnaire.d.ts",
       "default": "./dist/questionnaire.js"
@@ -835,6 +839,7 @@
     "@c2n/pagination": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
+    "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",

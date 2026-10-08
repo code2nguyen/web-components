@@ -1,0 +1,77 @@
+---
+description: 'Ready-made looks for c2-query-input: a monospace log-explorer bar, terms drawn as chips, and a quiet toolbar filter. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { QueryInput } from '@c2n/components/query-input'
+
+## Presets
+
+The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--background`, `--c2-query-input--border-radius`, `--c2-query-input--font-family`), with `__hover--*` and `__focus--*` states on top. The syntax colours are `--c2-query-input__key--*`, `__value--*`, `__comparator--color`, `__operator--color`, `__negation--color` and `__invalid--color`; key and value also take a background, which is how the chips card draws its terms. The suggestions list follows `--c2-query-input__panel--*` and `--c2-query-input__option--*`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-query-input value="service:web -status:>=500 env:prod" aria-label="Query"></c2-query-input>
+```
+
+```html tag=MdxCodeBlock,label=Log explorer
+<style>
+  .log-explorer {
+    width: 320px;
+    --c2-query-input--font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --c2-query-input--font-size: 12px;
+    --c2-query-input--min-height: 32px;
+    --c2-query-input--border-radius: 4px;
+    --c2-query-input--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-query-input__focus--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-query-input__key--color: light-dark(#632ca6, #b58bf0);
+    --c2-query-input__value--color: light-dark(#0f6b5c, #5fd3bc);
+  }
+</style>
+<c2-query-input
+  class="log-explorer"
+  value='service:checkout @http.status_code:>=500 -env:staging "connection reset"'
+  fields='[{"key":"service","values":["checkout","web","api"]},{"key":"@http.status_code","label":"Status code"},{"key":"env","values":["prod","staging"]}]'
+  aria-label="Log query"
+></c2-query-input>
+```
+
+```html tag=MdxCodeBlock,label=Term chips
+<style>
+  .term-chips {
+    width: 320px;
+    --c2-query-input--min-height: 40px;
+    --c2-query-input--border-radius: 8px;
+    --c2-query-input__key--color: light-dark(#1d4ed8, #93b4f7);
+    --c2-query-input__key--background: light-dark(#dbeafe, #172554);
+    --c2-query-input__value--color: light-dark(#1e3a8a, #c3d4fb);
+    --c2-query-input__value--background: light-dark(#eff6ff, #1e2a4a);
+    --c2-query-input__separator--color: light-dark(#1d4ed8, #93b4f7);
+  }
+</style>
+<c2-query-input class="term-chips" value="is:open label:bug author:ana" aria-label="Issue query"></c2-query-input>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar filter
+<style>
+  .toolbar-filter {
+    width: 320px;
+    --c2-query-input--min-height: 32px;
+    --c2-query-input--padding: 4px 2px;
+    --c2-query-input--border-radius: 0;
+    --c2-query-input--background: transparent;
+    --c2-query-input--border: 0 solid transparent;
+    --c2-query-input__hover--border: 0 solid transparent;
+    --c2-query-input__focus--border: 0 solid transparent;
+    --c2-query-input__key--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-query-input__value--color: var(--c2-theme--color-on-surface, #18181b);
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-query-input class="toolbar-filter" placeholder="Filter: assignee:me priority:high" aria-label="Filter"></c2-query-input>
+```
+
+</GalleryGrid>

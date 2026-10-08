@@ -1,0 +1,51 @@
+---
+title: 'Query Input'
+description: 'A one-line key:value query field with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { QueryInput } from '@c2n/components/query-input'
+
+`c2-query-input` is the search bar of a log explorer or an issue tracker: one line of `key:value` terms such as `service:web -status:>=500 "timed out"`, coloured as it is typed. Keys, values, comparators (`>`, `>=`, `<`, `<=`), the boolean operators `AND`, `OR` and `NOT`, negations (`-` or `!` before a term), parentheses and quoted phrases each get their own colour.
+
+`fields` lists what the query can filter on, as JSON (`[{"key":"service","values":["web","api"]}]`) or as an array property. The field then suggests keys while a word is typed and, right after `key:`, that key's `values`, which may be plain strings or `{ value, label, description }` objects. The arrow keys move through the suggestions, **Enter** or **Tab** inserts one, and a value containing spaces is quoted for you. With `fields` set, a key that is not one of them is underlined, as is an unterminated quote, and the host matches `:state(invalid)`. For values fetched on demand, listen for `suggest`: it reports the `kind`, `key` and `prefix` the caret is completing whenever they change, so you can update that field's `values`.
+
+**Enter** with no suggestion active fires `search` with the query and its parsed `terms` (`key`, `value`, `negated`, `comparator`, `quoted`); **Escape** closes the suggestions, then clears the field. `search` does not bubble, so listen on the element. `input` and `change` are re-dispatched from the inner input, and the element is form-associated through `name`. The tokenizer and parser behind it, `tokenizeQuery` and `parseQuery`, are exported for use on the server.
+
+The colours are drawn under a transparent input, so the token variables change colours, backgrounds and underlines only: anything that changes the width of a character would move the caret off its letter. Give the host a `width` and the field fills it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/query-input'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/query-input
+<style>
+  .query {
+    width: 420px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Highlighting">
+  <c2-query-input class="query" value='service:web -status:>=500 (env:prod OR env:staging) "timed out"' aria-label="Log query"></c2-query-input>
+</div>
+<div data-label="Suggestions">
+  <c2-query-input
+    class="query"
+    placeholder="Filter issues, e.g. is:open label:bug"
+    fields='[{"key":"is","label":"State","values":["open","closed","draft"]},{"key":"label","label":"Label","values":["bug","docs","enhancement","good first issue"]},{"key":"author","label":"Author","values":["ana","ben","carla"]},{"key":"sort","label":"Sort","values":[{"value":"updated","description":"Recently updated"},{"value":"created","description":"Newest"},{"value":"comments","description":"Most commented"}]}]'
+  ></c2-query-input>
+</div>
+<div data-label="Unknown key">
+  <c2-query-input class="query" value="is:open priority:high" fields='[{"key":"is"},{"key":"label"}]' aria-label="Issue query"></c2-query-input>
+</div>
+<div data-label="Disabled">
+  <c2-query-input class="query" value="env:prod" disabled aria-label="Disabled query"></c2-query-input>
+</div>
+```

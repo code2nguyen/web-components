@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-query-input</title>
+    <script type="module" src="/src/query-input.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-query-input {
+        width: 520px;
+      }
+      .mono {
+        --c2-query-input--font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        --c2-query-input--font-size: 12px;
+      }
+      pre {
+        margin: 0;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-query-input value='service:web -status:>=500 (env:prod OR env:staging) "timed out"' aria-label="Highlighting"></c2-query-input>
+
+    <c2-query-input
+      id="suggest"
+      placeholder="Try is:open label:bug"
+      fields='[{"key":"is","label":"State","values":["open","closed"]},{"key":"label","label":"Label","values":["bug","docs","good first issue"]},{"key":"author","values":["ana","ben"]}]'
+    ></c2-query-input>
+    <pre id="terms"></pre>
+
+    <c2-query-input class="mono" value="host:a1 service:web" fields='[{"key":"service"}]' aria-label="Unknown key"></c2-query-input>
+
+    <c2-query-input value="env:prod" disabled aria-label="Disabled"></c2-query-input>
+
+    <script type="module">
+      const field = document.querySelector('#suggest')
+      field.addEventListener('search', (event) => (document.querySelector('#terms').textContent = JSON.stringify(event.detail.terms, null, 2)))
+    </script>
+  </body>
+</html>

@@ -1,0 +1,332 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-query-input,
+  $theme: (
+    min-height: 36px,
+    padding: 6px 10px,
+    gap: 8px,
+    color: #18181b,
+    background: #ffffff,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    font-size: 14px,
+    font-family: null,
+    placeholder--color: #71717a,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--background: null,
+    focus--outline: none,
+    disabled--opacity: variables.$disabled-content-opacity,
+    selection--background: rgba(2, 101, 220, 0.2),
+
+    icon--size: 16px,
+    icon--color: #71717a,
+    clear-icon--color: #a1a1aa,
+    clear-icon__hover--color: #18181b,
+
+    key--color: #0550ae,
+    key--background: null,
+    separator--color: #71717a,
+    comparator--color: #b35900,
+    value--color: #116329,
+    value--background: null,
+    text--color: null,
+    operator--color: #6f42c1,
+    negation--color: #cf222e,
+    paren--color: #71717a,
+    invalid--color: #cf222e,
+
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
+    panel--max-height: 320px,
+    panel--padding: 4px,
+    panel--offset: 6px,
+
+    header--padding: 6px 8px,
+    header--color: #71717a,
+    header--font-size: 12px,
+    header--font-weight: 500,
+
+    option--min-height: 32px,
+    option--padding: 6px 8px,
+    option--gap: 8px,
+    option--border-radius: 4px,
+    option--color: #18181b,
+    option__active--background: #f4f4f5,
+    option-description--color: #71717a,
+    option-description--font-size: 12px,
+    highlight--font-weight: 600,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(min-height);
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  transition: animation.standard(border), animation.standard(outline);
+  cursor: text;
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &:focus-within {
+    background: css.cssVar(focus--background, background);
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+:host(:state(disabled)) .field {
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+  pointer-events: none;
+}
+
+// The input and the highlight layer share one grid cell and the same text metrics: the input's own text is
+// transparent, so the coloured copy underneath shows through and the caret and selection stay native.
+.editor {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  line-height: 20px;
+}
+
+.highlight,
+.input {
+  grid-area: 1 / 1;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: normal;
+  line-height: inherit;
+  white-space: pre;
+}
+
+.highlight {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.highlight-text {
+  display: inline-block;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  color: transparent;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  caret-color: css.cssVar(color);
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+
+  &::selection {
+    color: transparent;
+    background: css.cssVar(selection--background);
+  }
+}
+
+.token {
+  &.key {
+    color: css.cssVar(key--color);
+    background: css.cssVar(key--background);
+  }
+
+  &.separator {
+    color: css.cssVar(separator--color);
+    background: css.cssVar(key--background);
+  }
+
+  &.comparator {
+    color: css.cssVar(comparator--color);
+    background: css.cssVar(value--background);
+  }
+
+  &.value {
+    color: css.cssVar(value--color);
+    background: css.cssVar(value--background);
+  }
+
+  &.text {
+    color: css.cssVar(text--color, color);
+  }
+
+  &.operator {
+    color: css.cssVar(operator--color);
+  }
+
+  &.negation {
+    color: css.cssVar(negation--color);
+  }
+
+  &.paren {
+    color: css.cssVar(paren--color);
+  }
+
+  &.invalid {
+    text-decoration: underline wavy css.cssVar(invalid--color);
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+  }
+}
+
+.icon,
+.clear,
+::slotted([slot='suffix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  color: css.cssVar(icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+::slotted([slot='search-icon']),
+::slotted([slot='suffix-icon']),
+::slotted([slot='clear-icon']) {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+::slotted([slot='suffix-icon']) {
+  color: css.cssVar(icon--color);
+}
+
+.clear {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: css.cssVar(clear-icon--color);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(clear-icon__hover--color);
+  }
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+c2-overlay {
+  --c2-overlay--offset-y: #{css.cssVar(panel--offset)};
+}
+
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  overflow: auto;
+  max-height: min(css.cssVar(panel--max-height), var(--c2-overlay--available-height, #{css.cssVar(panel--max-height)}));
+  flex-direction: column;
+  padding: css.cssVar(panel--padding);
+  color: css.cssVar(option--color);
+  background: css.cssVar(panel--background);
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  box-shadow: css.cssVar(panel--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.panel-header {
+  padding: css.cssVar(header--padding);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.option {
+  display: flex;
+  box-sizing: border-box;
+  min-height: css.cssVar(option--min-height);
+  align-items: center;
+  gap: css.cssVar(option--gap);
+  padding: css.cssVar(option--padding);
+  border-radius: css.cssVar(option--border-radius);
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    background: css.cssVar(option__active--background);
+  }
+
+  &.key .option-label {
+    color: css.cssVar(key--color);
+  }
+
+  &.value .option-label {
+    color: css.cssVar(value--color);
+  }
+}
+
+.option-label,
+.option-description {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-label {
+  flex: none;
+  max-width: 60%;
+}
+
+.option-description {
+  flex: 1;
+  color: css.cssVar(option-description--color);
+  font-size: css.cssVar(option-description--font-size);
+  text-align: end;
+}
+
+mark {
+  color: inherit;
+  background: transparent;
+  font-weight: css.cssVar(highlight--font-weight);
+}
