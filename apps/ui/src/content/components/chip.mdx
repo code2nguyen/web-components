@@ -28,14 +28,14 @@ import '@c2n/components/chip'
 
 ```html tag=UsageBlock,package=@c2n/chip
 <style>
-  c2-chip-part.muted {
+  .muted {
     --c2-chip-part__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
-  c2-chip-part.person {
+  .person-part {
     --c2-avatar--size: 18px;
     --c2-avatar--font-size: 9px;
   }
-  c2-chip.person {
+  .person {
     --c2-chip__container--padding-left: 4px;
     --c2-chip__icon--size: 20px;
     --c2-avatar--size: 20px;
@@ -66,7 +66,7 @@ import '@c2n/components/chip'
   <c2-chip removable value="assignee">
     <c2-chip-part name="field" class="muted">Assignee</c2-chip-part>
     <c2-chip-part name="operator" interactive haspopup="listbox" class="muted">is</c2-chip-part>
-    <c2-chip-part name="value" interactive haspopup="listbox" class="person"><c2-avatar slot="prefix" name="Ada Lovelace"></c2-avatar>Ada Lovelace</c2-chip-part>
+    <c2-chip-part name="value" interactive haspopup="listbox" class="person-part"><c2-avatar slot="prefix" name="Ada Lovelace"></c2-avatar>Ada Lovelace</c2-chip-part>
   </c2-chip>
 </div>
 <div data-label="Disabled">
