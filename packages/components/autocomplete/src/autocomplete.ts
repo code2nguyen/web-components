@@ -83,7 +83,7 @@ let autocompleteId = 0
  * @slot error - Replaces the remote-source error message inside the list.
  *
  * @event {CustomEvent<{ query: string }>} query-change - Fired on every user edit, before local filtering or a remote request.
- * @event {CustomEvent<AutocompleteSelectEventDetail>} suggestion-select - Fired after a row is chosen. The detail contains the selected key, original item and visible index.
+ * @event {CustomEvent<AutocompleteSelectEventDetail>} suggestion-select - Fired after a row is chosen. The detail contains the selected key (the label when there is no `itemKey`), original item and visible index.
  * @event {InputEvent} input - Re-dispatched from the inner input on every edit; also fired after a suggestion replaces the value.
  * @event {Event} change - Fired after the typed value is committed or a suggestion replaces it.
  *
@@ -173,7 +173,7 @@ export class Autocomplete extends LitElement {
   /** Local items to search. An array in the property, JSON in the attribute; items may have any structure. */
   @property({ converter: jsonPropertyConverter }) suggestions: unknown[] = []
 
-  /** Field used as a result's stable value. An empty value falls back to a primitive item or its index. */
+  /** Field used as a result's stable value. An empty value falls back to a primitive item, then to the row's label. */
   @property({ type: String, attribute: 'item-key' }) itemKey = ''
 
   /** Field used as primary row text. Defaults to `label`, `name`, `title` or `value`. */
@@ -397,6 +397,16 @@ export class Autocomplete extends LitElement {
     return String(index)
   }
 
+  /**
+   * The value a selection reports and, in `replace` mode, writes into the input. Without `itemKey` an object row's
+   * list key is its index, which means nothing to the user, so its label stands in.
+   */
+  private selectionValueOf(item: unknown, index: number): string {
+    const key = this.keyOf(item, index)
+    if (this.itemKey || item === null || typeof item !== 'object') return key
+    return this.labelOf(item) || key
+  }
+
   private labelOf(item: unknown): string {
     if (this.labelField) return this.textOf(getFieldValue(item, this.labelField))
     if (item === null || typeof item !== 'object') return this.textOf(item)
@@ -555,7 +565,7 @@ export class Autocomplete extends LitElement {
 
   private selectItem(item: unknown, index: number) {
     if (this.isDisabled(item)) return
-    const value = this.keyOf(item, index)
+    const value = this.selectionValueOf(item, index)
     const replaceValue = this.selectionBehavior !== 'preserve'
     if (replaceValue) this.value = value
     this.selectedItem = item

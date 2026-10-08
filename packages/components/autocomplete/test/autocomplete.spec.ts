@@ -52,6 +52,23 @@ test('keeps suggestions open when the input is clicked with an existing query', 
   await expect(input).toHaveAttribute('aria-expanded', 'false')
 })
 
+test('replaces the input with the label of an object row that has no item key', async ({ page, scenario }) => {
+  await scenario('local')
+  const host = page.locator('c2-autocomplete')
+  await host.evaluate((element) => {
+    const autocomplete = element as Autocomplete
+    autocomplete.itemKey = ''
+    autocomplete.labelField = ''
+    autocomplete.descriptionField = ''
+    autocomplete.suggestions = [{ label: 'Paris' }, { label: 'Parma' }]
+  })
+
+  await page.getByRole('combobox').fill('par')
+  await options(page).filter({ hasText: 'Parma' }).click()
+  await expect(host).toHaveJSProperty('value', 'Parma')
+  await expect(host).toHaveAttribute('data-selected', /"value":"Parma","item":\{"label":"Parma"\},"index":1/)
+})
+
 test('preserves the query and reuses its results when selection behavior is preserve', async ({ page, scenario }) => {
   await scenario('preserve')
   const host = page.locator('c2-autocomplete')
