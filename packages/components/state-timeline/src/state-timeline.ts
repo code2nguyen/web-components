@@ -85,6 +85,7 @@ interface Cell {
  * @csspart tooltip - The tooltip.
  * @csspart empty - Region wrapping the `empty` slot, shown only while there are no series.
  *
+ * @cssproperty {pixel} [--c2-state-timeline--width=100%] - Width of the timeline; it fills its container by default.
  * @cssproperty {color} [--c2-state-timeline--background=#ffffff] - Surface of the timeline; segment tints are mixed against it.
  * @cssproperty {color} [--c2-state-timeline--color=#18181b] - Text colour.
  * @cssproperty {font-family} [--c2-state-timeline--font-family=inherit] - Font of every text.

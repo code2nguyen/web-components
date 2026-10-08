@@ -1,6 +1,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-state-timeline,
   $theme: (
+    width: 100%,
     background: #ffffff,
     color: #18181b,
     font-family: inherit,
@@ -54,6 +55,9 @@
 :host {
   display: block;
   box-sizing: border-box;
+  // A timeline has no intrinsic width (its segments are percentages), so it fills its container by default rather
+  // than shrinking to nothing in a centring flex or grid parent.
+  width: css.cssVar(width);
   min-width: 0;
   font-family: css.cssVar(font-family);
   font-size: css.cssVar(font-size);
@@ -147,7 +151,7 @@
   text-overflow: ellipsis;
 }
 // A label that would show only an ellipsis says nothing; the tooltip and the accessible name still carry the state.
-@container (max-width: 36px) {
+@container (max-width: 64px) {
   .segment-label {
     display: none;
   }
