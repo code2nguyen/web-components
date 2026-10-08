@@ -38,6 +38,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
+- **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
@@ -52,6 +53,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
+- **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
 - **Virtual List** — `c2-virtual-list` · `@c2n/components/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
 ## Editors & viewers
@@ -90,7 +92,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
-- **Chip** — `c2-chip` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
+- **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.

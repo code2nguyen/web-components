@@ -3,6 +3,8 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/components/truncate'
+import '@c2n/components/chip-group'
 import '@c2n/components/indicator'
 import '@c2n/components/chip'
 import '@c2n/components/search-field'

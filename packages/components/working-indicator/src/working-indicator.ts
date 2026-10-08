@@ -12,8 +12,11 @@ export type WorkingIndicatorEffect = 'shimmer' | 'wave' | 'pulse' | 'fill' | 'no
 export type WorkingIndicatorEllipsis = 'fade' | 'bounce' | 'static' | 'none'
 export type WorkingIndicatorState = 'running' | 'paused' | 'done' | 'error'
 
-/** Characters the `glyph` indicator steps through, out and back, so the loop has no visible seam. */
-const GLYPHS = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢']
+/**
+ * Characters the `glyph` indicator steps through, out and back, so the loop has no visible seam.
+ * None of them has an emoji presentation: `✳` (U+2733) drew as a green square on iOS.
+ */
+const GLYPHS = ['·', '✢', '✷', '✶', '✻', '✽', '✻', '✶', '✷', '✢']
 
 /** Keyframes whose iterations advance `messages` (the fade, and its still twin under reduced motion). Other animations bubble the same event. */
 const ROTATE_ANIMATIONS = new Set(['c2-working-indicator-rotate', 'c2-working-indicator-hold'])
@@ -58,7 +61,7 @@ export function formatElapsed(totalSeconds: number): string {
  * @cssproperty {font-weight} [--c2-working-indicator--font-weight=500]
  * @cssproperty {color} [--c2-working-indicator__indicator--color=#0265dc] - Colour of the running indicator.
  * @cssproperty {pixel} [--c2-working-indicator__indicator--size=16px] - Width and height of the indicator box.
- * @cssproperty {time} [--c2-working-indicator__indicator--animation-duration=1.2s] - One indicator cycle.
+ * @cssproperty {time} [--c2-working-indicator__indicator--animation-duration=1.2s] - One indicator cycle; the `glyph` takes twice as long, so each of its ten frames shows for a fifth of it.
  * @cssproperty {color} [--c2-working-indicator__label--color=#71717a] - Resting colour of the label.
  * @cssproperty {color} [--c2-working-indicator__label--highlight-color=#18181b] - Shimmer band, wave crest and filled part of the label.
  * @cssproperty {time} [--c2-working-indicator__label--animation-duration=2s] - One shimmer, wave, pulse or fill cycle.

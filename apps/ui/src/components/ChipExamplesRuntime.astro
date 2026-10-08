@@ -1,0 +1,31 @@
+---
+/**
+ * Plays the application's part in the chip examples. `c2-chip` never removes itself: it fires `remove` and leaves the
+ * list to its owner, so this drops the chip and moves focus to its neighbour, as the Usage section describes.
+ */
+---
+
+<script>
+  import type { Chip } from '@c2n/components/chip'
+
+  // An example chip may be wrapped in an Astro island; the island is the item to remove.
+  const itemOf = (chip: Element) => (chip.parentElement?.localName === 'astro-island' ? chip.parentElement : chip)
+  const chipIn = (item: Element | null) => (item?.localName === 'c2-chip' ? item : item?.querySelector(':scope > c2-chip')) as Chip | null
+
+  function neighbour(item: Element): Chip | null {
+    for (let next = item.nextElementSibling; next; next = next.nextElementSibling) if (chipIn(next)) return chipIn(next)
+    for (let previous = item.previousElementSibling; previous; previous = previous.previousElementSibling) if (chipIn(previous)) return chipIn(previous)
+    return null
+  }
+
+  document.addEventListener('remove', (event) => {
+    const chip = event.target
+    // Astro inlines this small script once per include, so a page can run it twice; the second listener finds the chip gone.
+    if (!(chip instanceof HTMLElement) || chip.localName !== 'c2-chip' || !chip.isConnected) return
+    const item = itemOf(chip)
+    const hadFocus = chip.matches(':focus-within')
+    const next = neighbour(item)
+    item.remove()
+    if (hadFocus) next?.focus()
+  })
+</script>

@@ -136,7 +136,7 @@ test('an application removing chips in the remove handler keeps keyboard flow', 
   await expect(page.getByRole('status')).toHaveText('remove:design remove:research')
 })
 
-for (const state of ['default', 'prefix', 'selectable', 'selected', 'removable', 'selectable-removable', 'disabled']) {
+for (const state of ['default', 'prefix', 'selectable', 'selected', 'removable', 'selectable-removable', 'disabled', 'parts']) {
   test(`${state} has no axe violations`, async ({ page, scenario }) => {
     await scenario(state)
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
@@ -155,4 +155,74 @@ test('the remove name and fallback value follow label text changes and ignore ic
   await expect(remove).toBeVisible()
   await remove.click()
   await expect(page.getByRole('status')).toHaveText('remove:Research')
+})
+
+test('interactive parts are buttons that fire part-click with their name', async ({ page, scenario }) => {
+  await scenario('parts')
+  await expect(page.locator('c2-chip-part[name="field"] button')).toHaveCount(0)
+  const operator = page.getByRole('button', { name: 'is any of', exact: true })
+  await expect(operator).toHaveAttribute('aria-haspopup', 'listbox')
+  await operator.click()
+  await page.getByRole('button', { name: 'Status values: Active, Paused' }).click()
+  await expect(page.getByRole('status')).toHaveText('part:operator part:value')
+})
+
+test('Enter and Space activate a part, and arrows move between parts and the remove button', async ({ page, scenario, tab }) => {
+  await scenario('parts')
+  await page.getByRole('button', { name: 'Before' }).focus()
+  await tab()
+  const operator = page.getByRole('button', { name: 'is any of', exact: true })
+  const value = page.getByRole('button', { name: 'Status values: Active, Paused' })
+  const remove = page.getByRole('button', { name: 'Remove Status is any of Active, Paused' })
+  await expect(operator).toBeFocused()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowRight')
+  await expect(value).toBeFocused()
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowRight')
+  await expect(remove).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(remove).toBeFocused()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await expect(operator).toBeFocused()
+  await expect(page.getByRole('status')).toHaveText('part:operator part:value')
+})
+
+test('Backspace on a part removes the chip', async ({ page, scenario }) => {
+  await scenario('parts')
+  await page.getByRole('button', { name: 'is any of', exact: true }).focus()
+  await page.keyboard.press('Backspace')
+  await expect(page.getByRole('status')).toHaveText('remove:status')
+})
+
+test('arrows skip a disabled part, which fires nothing', async ({ page, scenario }) => {
+  await scenario('parts-disabled-part')
+  await page.getByRole('button', { name: 'Status', exact: true }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('button', { name: 'Active', exact: true })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'is', exact: true })).toBeDisabled()
+})
+
+test('parts sit side by side with a divider before all but the first', async ({ page, scenario }) => {
+  await scenario('parts')
+  const parts = page.locator('c2-chip-part')
+  await expect(parts.nth(0)).toHaveCSS('border-left-style', 'none')
+  await expect(parts.nth(1)).toHaveCSS('border-left-style', 'solid')
+  const [first, second] = await Promise.all([parts.nth(0).boundingBox(), parts.nth(1).boundingBox()])
+  expect(Math.abs(first!.y - second!.y)).toBeLessThan(1)
+  expect(second!.x).toBeGreaterThanOrEqual(first!.x + first!.width - 1)
+})
+
+test('a chip with parts is not a toggle even when selectable', async ({ page, scenario }) => {
+  await scenario('parts-selectable')
+  await expect(page.locator('c2-chip [aria-pressed]')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Active', exact: true }).click()
+  await expect(page.getByRole('status')).toHaveText('part:value')
+})
+
+test('framework comment markers stay out of the remove button name', async ({ page, scenario }) => {
+  await scenario('comment-markers')
+  await expect(page.getByRole('button', { name: 'Remove Design', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Remove Status Active', exact: true })).toBeVisible()
 })

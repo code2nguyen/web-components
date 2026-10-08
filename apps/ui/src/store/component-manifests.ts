@@ -1,4 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import truncate from '@c2n/truncate/custom-elements.json'
+import chipGroup from '@c2n/chip-group/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
@@ -106,6 +108,8 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    truncate,
+    chipGroup,
     indicator,
     chip,
     searchField,

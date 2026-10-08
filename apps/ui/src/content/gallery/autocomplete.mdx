@@ -11,7 +11,7 @@ import { Autocomplete } from '@c2n/components/autocomplete'
 
 ## Use cases
 
-These examples exercise different capabilities instead of repeating the same dataset with another colour: custom Lit renderers, actionable header and footer slots, remote loading, disabled rows, field mapping, and both selection behaviours.
+These examples exercise different capabilities instead of repeating the same dataset with another colour: custom Lit renderers, actionable header and footer slots on the teammate picker, remote loading, disabled rows, field mapping, and both selection behaviours.
 
 <GalleryGrid min="340">
 
@@ -68,23 +68,6 @@ These examples exercise different capabilities instead of repeating the same dat
     --c2-autocomplete__focus--outline: 3px solid rgba(245, 158, 11, 0.2);
     --c2-autocomplete__highlight--color: light-dark(#b45309, #ca8b5c);
     --c2-autocomplete__option__active--background: light-dark(#fffbeb, #352f18);
-    --c2-autocomplete__header--background: light-dark(#fffbeb, #352f18);
-    --c2-autocomplete__header--color: light-dark(#92400e, #fcd34d);
-  }
-  .catalog-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .catalog-header button {
-    border: 1px solid #f59e0b;
-    border-radius: 6px;
-    padding: 4px 8px;
-    color: #92400e;
-    background: var(--c2-theme--color-surface, #ffffff);
-    font: inherit;
-    cursor: pointer;
   }
 </style>
 <c2-autocomplete
@@ -100,10 +83,8 @@ These examples exercise different capabilities instead of repeating the same dat
   debounce="250"
   show-empty
 >
-  <div slot="header" class="catalog-header"><strong>Product catalog</strong><button type="button" data-scan-product>Scan barcode</button></div>
   <span slot="loading">Checking live inventory…</span>
   <span slot="empty">No products match this search.</span>
-  <span slot="footer" data-example-status>Inventory comes from an asynchronous data source</span>
 </c2-autocomplete>
 ```
 
@@ -115,18 +96,6 @@ These examples exercise different capabilities instead of repeating the same dat
     --c2-autocomplete__option__active--background: light-dark(#eef2ff, #151c36);
     --c2-autocomplete__option__active--color: light-dark(#312e81, #8987b5);
     --c2-autocomplete__panel--box-shadow: 0 24px 70px rgba(30, 41, 59, 0.2);
-  }
-  .command-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .command-header button {
-    border: 0;
-    color: #4f46e5;
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
   }
 </style>
 <c2-autocomplete
@@ -141,9 +110,7 @@ These examples exercise different capabilities instead of repeating the same dat
   description-field="section"
   suggestions='[{"id":"new-file","label":"Create a new file","section":"File","shortcut":"⌘N"},{"id":"switch-theme","label":"Switch colour theme","section":"Appearance","shortcut":"⌘⇧L"},{"id":"open-settings","label":"Open workspace settings","section":"Settings","shortcut":"⌘,"},{"id":"invite","label":"Invite a collaborator","section":"Team","shortcut":"⌘I"}]'
 >
-  <div slot="header" class="command-header"><strong>Quick actions</strong><button type="button" data-clear-commands>Clear recent</button></div>
   <span slot="empty">No recent commands. Start typing to search all actions.</span>
-  <span slot="footer" data-example-status>Enter runs the highlighted command without replacing the query</span>
 </c2-autocomplete>
 ```
 

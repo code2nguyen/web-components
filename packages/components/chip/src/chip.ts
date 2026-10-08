@@ -2,10 +2,15 @@ import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { GroupItemSizeController } from '@c2n/core/controllers/group-item-size.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './chip.scss?inline'
+import './chip-part.js'
+
+export { ChipPart } from './chip-part.js'
+export type { ChipPartClickDetail, ChipPartEventMap, ChipPartPopup } from './chip-part.js'
 
 /** Events fired by {@link Chip}, keyed for `addEventListener`. */
 export interface ChipEventMap {
@@ -23,6 +28,19 @@ export interface Chip {
   removeEventListener: TypedRemoveEventListener<Chip, ChipEventMap>
 }
 
+/** Text of the default slot only: an icon's text in a named slot is not part of the label, nor is a part's prefix. */
+function labelText(parent: Node): string {
+  return (
+    [...parent.childNodes]
+      // Comments are skipped: a framework's markers (Lit's `<!--?lit$…$-->`) are not label text.
+      .filter((node) => node.nodeType === Node.TEXT_NODE || (node instanceof Element && !node.hasAttribute('slot')))
+      .map((node) => (node instanceof Element && node.localName === 'c2-chip-part' ? ` ${labelText(node)} ` : (node.textContent ?? '')))
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
+}
+
 /**
  * Compact pill for a filter, a choice or an entered value: the chip of Material, Mantine and antd. A plain chip is a
  * read-only label. `selectable` turns it into a toggle button (`aria-pressed`) that flips `selected` on click, Enter
@@ -31,9 +49,22 @@ export interface Chip {
  * drops it from its own list in the `remove` handler, so framework-rendered lists stay in sync. `c2-badge` stays the
  * non-interactive status label; use a chip when people pick or dismiss it.
  *
+ * A chip can also read as a sentence made of `c2-chip-part` children (`Status | is any of | Active`), each of which can
+ * be its own button: that is the filter chip of Linear and Airtable. Left and Right arrows then move between the
+ * interactive parts and the remove button, and Backspace or Delete on a part fires `remove`. Importing the chip
+ * registers `c2-chip-part` too. A chip with parts is never a toggle, even with `selectable`.
+ *
+ * ```html
+ * <c2-chip removable>
+ *   <c2-chip-part name="field">Status</c2-chip-part>
+ *   <c2-chip-part name="operator" interactive>is any of</c2-chip-part>
+ *   <c2-chip-part name="value" interactive>Active, Paused</c2-chip-part>
+ * </c2-chip>
+ * ```
+ *
  * @tag c2-chip
  *
- * @slot - Chip label.
+ * @slot - Chip label, or two or more `c2-chip-part` segments.
  * @slot prefix - Icon or avatar shown before the label.
  * @slot selected-icon - Mark shown before the label while a selectable chip is selected. Defaults to a check mark.
  * @slot remove-icon - Icon of the remove button. Defaults to a cross.
@@ -107,7 +138,16 @@ export class Chip extends LitElement {
 
   @state() private text = ''
 
+  /** Whether the default slot holds `c2-chip-part` segments. */
+  @state() private hasParts = false
+
   private readonly slotPresence = new SlotPresenceController(this, ['prefix'])
+
+  constructor() {
+    super()
+    // Reports this element's size to an enclosing c2-chip-group, which decides how many items fit.
+    new GroupItemSizeController(this)
+  }
 
   // A framework that patches the text of an existing label node fires no slotchange, so watch the light DOM.
   private labelObserver?: MutationObserver
@@ -115,7 +155,11 @@ export class Chip extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.text = this.readText()
-    this.labelObserver ??= new MutationObserver(() => (this.text = this.readText()))
+    this.hasParts = this.readHasParts()
+    this.labelObserver ??= new MutationObserver(() => {
+      this.text = this.readText()
+      this.hasParts = this.readHasParts()
+    })
     this.labelObserver.observe(this, { childList: true, characterData: true, subtree: true })
   }
 
@@ -124,18 +168,43 @@ export class Chip extends LitElement {
     this.labelObserver?.disconnect()
   }
 
-  /** The text of the default slot only: an icon's text in a named slot is not part of the label. */
   private readText(): string {
-    return [...this.childNodes]
-      .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
-      .map((node) => node.textContent ?? '')
-      .join('')
-      .replace(/\s+/g, ' ')
-      .trim()
+    return labelText(this)
+  }
+
+  private readHasParts(): boolean {
+    return [...this.children].some((child) => child.localName === 'c2-chip-part' && !child.hasAttribute('slot'))
   }
 
   private handleSlotChange = () => {
     this.text = this.readText()
+    this.hasParts = this.readHasParts()
+  }
+
+  /** The interactive parts and the remove button, in visual order: the stops of the arrow keys. */
+  private focusStops(): HTMLElement[] {
+    const parts = [...this.querySelectorAll<HTMLElementTagNameMap['c2-chip-part']>(':scope > c2-chip-part[interactive]:not([disabled])')]
+    const remove = this.renderRoot.querySelector<HTMLButtonElement>('.remove:not(:disabled)')
+    return remove ? [...parts, remove] : parts
+  }
+
+  private handlePartKeyDown = (event: KeyboardEvent) => {
+    if (!this.hasParts || this.disabled) return
+    const stops = this.focusStops()
+    const active = this.shadowRoot?.activeElement?.classList.contains('remove')
+      ? this.shadowRoot.activeElement
+      : (event.target as Element).closest('c2-chip-part')
+    const index = stops.indexOf(active as HTMLElement)
+    if (index < 0) return
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      const next = stops[index + (event.key === 'ArrowRight' ? 1 : -1)]
+      if (!next) return
+      event.preventDefault()
+      next.focus()
+    } else if ((event.key === 'Backspace' || event.key === 'Delete') && this.removable && stops[index].localName === 'c2-chip-part') {
+      event.preventDefault()
+      this.requestRemove()
+    }
   }
 
   private handleToggle = () => {
@@ -165,7 +234,7 @@ export class Chip extends LitElement {
   private renderContent() {
     return html`
       ${
-        this.selectable && this.selected
+        this.selectable && this.selected && !this.hasParts
           ? html`<span class="icon selected-icon" aria-hidden="true">
               <slot name="selected-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -181,11 +250,18 @@ export class Chip extends LitElement {
   }
 
   override render() {
-    const classes = { 'c2-chip': true, 'is-selectable': this.selectable, 'is-selected': this.selectable && this.selected, 'is-disabled': this.disabled }
+    const selectable = this.selectable && !this.hasParts
+    const classes = {
+      'c2-chip': true,
+      'is-selectable': selectable,
+      'is-selected': selectable && this.selected,
+      'is-disabled': this.disabled,
+      'has-parts': this.hasParts,
+    }
     return html`
-      <span class=${classMap(classes)} part="chip">
+      <span class=${classMap(classes)} part="chip" @keydown=${this.handlePartKeyDown}>
         ${
-          this.selectable
+          selectable
             ? html`<button
                 class="action"
                 part="action"

@@ -224,6 +224,14 @@
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"
     },
+    "./chip/chip-part": {
+      "types": "./dist/chip/chip-part.d.ts",
+      "default": "./dist/chip/chip-part.js"
+    },
+    "./chip-group": {
+      "types": "./dist/chip-group.d.ts",
+      "default": "./dist/chip-group.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"
@@ -604,6 +612,10 @@
       "types": "./dist/tree/tree-item.d.ts",
       "default": "./dist/tree/tree-item.js"
     },
+    "./truncate": {
+      "types": "./dist/truncate.d.ts",
+      "default": "./dist/truncate.js"
+    },
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
@@ -755,6 +767,7 @@
     "@c2n/chatbot": "*",
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
+    "@c2n/chip-group": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
@@ -829,6 +842,7 @@
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
     "@c2n/tree": "*",
+    "@c2n/truncate": "*",
     "@c2n/upload": "*",
     "@c2n/virtual-list": "*",
     "@c2n/week-planner": "*",

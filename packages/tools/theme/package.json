@@ -55,6 +55,8 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/truncate:build",
+        "../../components/chip-group:build",
         "../../components/indicator:build",
         "../../components/chip:build",
         "../../components/search-field:build",

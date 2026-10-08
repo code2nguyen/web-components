@@ -46,25 +46,25 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
 <div data-label="Paged rows">
   <c2-table client:only="lit" class="grid" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800},{"id":"5","name":"Barbara Liskov","team":"Research","score":69100},{"id":"6","name":"Katherine Johnson","team":"Flight","score":58400},{"id":"7","name":"Margaret Hamilton","team":"Flight","score":54300}]'>
     <c2-pagination slot="footer" variant="compact" page-size="3" page-size-options="3,5"></c2-pagination>
-    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
     <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
     <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
   </c2-table>
 </div>
 <div data-label="Sortable columns">
   <c2-table client:only="lit" class="grid" sortable stripe row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'>
-    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
     <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
     <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
     <c2-table-column field="joined" header="Joined" width="130px" format="date"></c2-table-column>
   </c2-table>
 </div>
 <div data-label="Columns as data">
-  <c2-table client:only="lit" class="grid" sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr"},{"field":"team","header":"Team","width":"1fr"},{"field":"score","header":"Score","width":"110px","align":"end","format":"number"},{"field":"joined","header":"Joined","width":"130px","format":"date"}]' rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'></c2-table>
+  <c2-table client:only="lit" class="grid" sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr","minWidth":140},{"field":"team","header":"Team","width":"1fr"},{"field":"score","header":"Score","width":"110px","align":"end","format":"number"},{"field":"joined","header":"Joined","width":"130px","format":"date"}]' rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'></c2-table>
 </div>
 <div data-label="Selection">
   <c2-table client:only="lit" class="grid" selection="multiple" checkbox-selection sortable row-key="id" value="2;3" rows='[{"id":"1","name":"Ada Lovelace","status":"active","score":128000},{"id":"2","name":"Grace Hopper","status":"invited","score":96500},{"id":"3","name":"Alan Turing","status":"active","score":87200},{"id":"4","name":"Katherine Johnson","status":"active","score":143000},{"id":"5","name":"Radia Perlman","status":"invited","score":74800}]'>
-    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
     <c2-table-column field="status" header="Status" width="120px"></c2-table-column>
     <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
   </c2-table>
@@ -80,7 +80,7 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
 </div>
 <div data-label="Totals">
   <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240}]'>
-    <c2-table-column field="task" header="Task" width="2fr" summary-label="Total" summary-span="2"></c2-table-column>
+    <c2-table-column field="task" header="Task" width="2fr" min-width="140" summary-label="Total" summary-span="2"></c2-table-column>
     <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
     <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
     <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
@@ -88,7 +88,7 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
 </div>
 <div data-label="Grouped">
   <c2-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
-    <c2-table-column field="task" header="Task" width="2fr"></c2-table-column>
+    <c2-table-column field="task" header="Task" width="2fr" min-width="140"></c2-table-column>
     <c2-table-column field="team" header="Team" hidden></c2-table-column>
     <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
     <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
@@ -96,7 +96,7 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
 </div>
 <div data-label="Empty">
   <c2-table client:only="lit" class="compact" empty-message="No rows match this filter">
-    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
     <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
   </c2-table>
 </div>
@@ -109,7 +109,7 @@ authored — a user-configurable grid, a response that decides its own shape, or
 them in state. It is a JSON attribute as well as a property, so the row above has no script behind it:
 
 ```html tag=CodeBlock
-<c2-table sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr"}]' rows="..."></c2-table>
+<c2-table sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr","minWidth":140}]' rows="..."></c2-table>
 ```
 
 From script the array can carry the things an attribute cannot — `renderCell`, `renderHeader` and `comparator`:

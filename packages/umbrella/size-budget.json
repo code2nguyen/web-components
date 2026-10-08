@@ -1,5 +1,5 @@
 {
-  "total": 1146255,
+  "total": 1150642,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -39,7 +39,9 @@
     "chat-message": 1709,
     "chatbot": 7122,
     "checkbox": 3103,
-    "chip": 2573,
+    "chip-group": 8459,
+    "chip": 5075,
+    "chip/chip-part": 1885,
     "code-editor": 7734,
     "code-viewer": 6630,
     "color-area": 9547,
@@ -136,6 +138,7 @@
     "tooltip": 14849,
     "tree": 15626,
     "tree/tree-item": 9221,
+    "truncate": 2160,
     "upload": 13304,
     "virtual-list": 17467,
     "vue": 1773,

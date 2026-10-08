@@ -17,6 +17,8 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/truncate": "*",
+    "@c2n/chip-group": "*",
     "@c2n/indicator": "*",
     "@c2n/chip": "*",
     "@c2n/search-field": "*",
