@@ -1,0 +1,48 @@
+---
+title: 'Trace Waterfall'
+description: 'Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TraceWaterfall } from '@c2n/components/trace-waterfall'
+
+`c2-trace-waterfall` draws one distributed trace the way Sentry, Datadog APM and Grafana Tempo do: the spans as a
+tree on the left, and on the right a bar per span, offset by when it started and as long as it lasted, all on one time
+axis. Bars are coloured by `service` (one series colour per service, in order of appearance) and a span with
+`status: "error"` is drawn in the error colour with a marker before its name.
+
+Hand it the spans through `spans`, as a property or a JSON attribute. Each span needs an `id`, a `name`, a `start`
+and a `duration` or an `end`; `parentId` hangs it below another span. Times may be absolute or relative, since the
+axis starts at the earliest span, and `time-unit` says what they are in: `ns` reads OpenTelemetry's
+`startTimeUnixNano` directly, even as a numeric string. A span whose parent is missing is drawn as a root, so a
+partial trace still renders.
+
+Clicking a span selects it and fires `selection-change` with the span as you gave it, which is how an app opens its
+details next to the waterfall. `search` highlights the spans whose name or service contains the text, dims the rest
+and opens the spans above each match; pair it with `c2-search-field`. The tree is keyboard-driven: arrows walk, open
+and close spans and Enter selects.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/trace-waterfall'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/trace-waterfall
+<style>
+  .trace-demo {
+    width: 100%;
+  }
+</style>
+<div data-label="Default">
+  <c2-trace-waterfall class="trace-demo" label="Checkout trace" selected="b3" spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'></c2-trace-waterfall>
+</div>
+<div data-label="Search">
+  <c2-trace-waterfall class="trace-demo" label="Checkout trace, searched" search="postgres" spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'></c2-trace-waterfall>
+</div>
+```

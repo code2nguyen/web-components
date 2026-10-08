@@ -1,0 +1,268 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-trace-waterfall,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-family: inherit,
+    font-size: 12px,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    max-height: none,
+    header--background: #fafafa,
+    header--color: #71717a,
+    header--height: 32px,
+    name--width: 280px,
+    name--border-right: 1px solid #e4e4e7,
+    name--indent: 16px,
+    service--color: #71717a,
+    twisty--color: #71717a,
+    row--height: 28px,
+    row--border-bottom: 1px solid #f4f4f5,
+    row__hover--background: #f4f4f5,
+    row__selected--background: #edf1fe,
+    row__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    row__dimmed--opacity: 0.45,
+    grid-line--color: #f4f4f5,
+    timeline--padding-inline: 12px,
+    bar--height: 12px,
+    bar--min-width: 2px,
+    bar--border-radius: 4px,
+    bar__error--background: #dc2626,
+    error--color: #dc2626,
+    duration--color: #71717a,
+    match--background: rgba(250, 204, 21, 0.4),
+    series-1--color: #0265dc,
+    series-2--color: #ea580c,
+    series-3--color: #0f766e,
+    series-4--color: #db2777,
+    series-5--color: #a16207,
+    series-6--color: #7c3aed,
+    series-7--color: #0891b2,
+    series-8--color: #52525b,
+    empty--color: #71717a,
+    empty--padding: 32px 16px,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  color: css.cssVar(color);
+}
+
+.waterfall,
+.empty {
+  box-sizing: border-box;
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+.waterfall {
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+}
+
+.empty {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}
+
+.header,
+.row {
+  display: grid;
+  grid-template-columns: css.cssVar(name--width) minmax(160px, 1fr);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: css.cssVar(header--height);
+  background: css.cssVar(header--background);
+  color: css.cssVar(header--color);
+  border-bottom: css.cssVar(border);
+  font-variant-numeric: tabular-nums;
+}
+
+.name-header {
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
+  border-right: css.cssVar(name--border-right);
+}
+
+.axis {
+  position: relative;
+  margin-inline: css.cssVar(timeline--padding-inline);
+}
+
+.tick {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--at) * 100%);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+
+  &.first {
+    transform: translate(0, -50%);
+  }
+
+  &.last {
+    transform: translate(-100%, -50%);
+  }
+}
+
+.row {
+  height: css.cssVar(row--height);
+  box-sizing: border-box;
+  border-bottom: css.cssVar(row--border-bottom);
+  cursor: pointer;
+  outline: none;
+  // Off-screen rows skip layout and paint, so a trace of a few thousand spans stays cheap to scroll.
+  content-visibility: auto;
+  contain-intrinsic-size: auto css.cssVar(row--height);
+
+  &:hover {
+    background: css.cssVar(row__hover--background);
+  }
+
+  &.selected {
+    background: css.cssVar(row__selected--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(row__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &.dimmed > * {
+    opacity: css.cssVar(row__dimmed--opacity);
+  }
+}
+
+@for $i from 1 through 8 {
+  .series-#{$i} {
+    --series: #{css.cssVar(series-#{$i}--color)};
+  }
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding-inline-start: calc((var(--level) - 1) * #{css.cssVar(name--indent)} + 4px);
+  padding-inline-end: 8px;
+  border-right: css.cssVar(name--border-right);
+}
+
+.twisty {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: css.cssVar(twisty--color);
+
+  svg {
+    transition: transform 120ms ease;
+  }
+}
+
+.row[aria-expanded='true'] .twisty svg {
+  transform: rotate(90deg);
+}
+
+.error-mark {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: css.cssVar(error--color);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service {
+  flex: none;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: css.cssVar(service--color);
+}
+
+mark {
+  background: css.cssVar(match--background);
+  color: inherit;
+  border-radius: 2px;
+}
+
+.timeline {
+  position: relative;
+  min-width: 0;
+  padding-inline: css.cssVar(timeline--padding-inline);
+}
+
+.track {
+  position: relative;
+  height: 100%;
+  // One line at each axis label: 0, ¼, ½, ¾ and the end.
+  background-image: linear-gradient(to right, css.cssVar(grid-line--color) 1px, transparent 1px);
+  background-size: 25% 100%;
+  background-repeat: repeat-x;
+  box-shadow: inset -1px 0 0 css.cssVar(grid-line--color);
+}
+
+.bar {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--start) * 100%);
+  width: calc(var(--width) * 100%);
+  min-width: css.cssVar(bar--min-width);
+  height: css.cssVar(bar--height);
+  transform: translateY(-50%);
+  border-radius: css.cssVar(bar--border-radius);
+  background: var(--series);
+}
+
+.row.error .bar {
+  background: css.cssVar(bar__error--background);
+}
+
+.duration {
+  position: absolute;
+  top: 50%;
+  left: calc((var(--start) + var(--width)) * 100%);
+  padding-inline-start: 6px;
+  transform: translateY(-50%);
+  color: css.cssVar(duration--color);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &.before {
+    left: auto;
+    right: calc((1 - var(--start)) * 100%);
+    padding-inline: 0 6px;
+  }
+}
+
+// Read by assistive technology with the duration; the bar already shows it.
+.offset {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

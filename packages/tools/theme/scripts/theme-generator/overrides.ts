@@ -245,6 +245,23 @@ export const overrides: Record<string, Override> = {
   '--c2-gantt__series-6--color': { token: 'chart-series-6' },
   '--c2-gantt__series-7--color': { token: 'chart-series-7' },
   '--c2-gantt__series-8--color': { token: 'chart-series-8' },
+  // A trace waterfall colours each service with the same categorical palette, so its bars match a chart of the same services.
+  '--c2-trace-waterfall__series-1--color': { token: 'chart-series-1' },
+  '--c2-trace-waterfall__series-2--color': { token: 'chart-series-2' },
+  '--c2-trace-waterfall__series-3--color': { token: 'chart-series-3' },
+  '--c2-trace-waterfall__series-4--color': { token: 'chart-series-4' },
+  '--c2-trace-waterfall__series-5--color': { token: 'chart-series-5' },
+  '--c2-trace-waterfall__series-6--color': { token: 'chart-series-6' },
+  '--c2-trace-waterfall__series-7--color': { token: 'chart-series-7' },
+  '--c2-trace-waterfall__series-8--color': { token: 'chart-series-8' },
+  '--c2-trace-waterfall__bar__error--background': { token: 'color-error' },
+  // Row dividers and axis lines are fainter than a hairline border: the surface-container grey.
+  '--c2-trace-waterfall__grid-line--color': { token: 'color-surface-container' },
+  '--c2-trace-waterfall__row--border-bottom': {
+    token: 'color-surface-container',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-surface-container, #f4f4f5)',
+  },
+  '--c2-trace-waterfall__match--background': { exclude: 'translucent highlighter hue' },
   // Dependency arrows are structure, drawn at the strength of a resting control border rather than as text.
   '--c2-gantt__link--color': { token: 'color-outline-strong' },
   '--c2-gantt__tooltip--box-shadow': { token: 'shadow-md' },

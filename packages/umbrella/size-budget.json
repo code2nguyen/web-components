@@ -1,5 +1,5 @@
 {
-  "total": 1175349,
+  "total": 1188417,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -73,7 +73,7 @@
     "header": 1257,
     "hover-card": 12315,
     "icon-button": 16353,
-    "index": 785274,
+    "index": 791808,
     "indicator": 2443,
     "inline-edit": 5120,
     "json-viewer": 7135,
@@ -142,6 +142,7 @@
     "toast": 6352,
     "todo-list": 53171,
     "tooltip": 14849,
+    "trace-waterfall": 6534,
     "tree": 15626,
     "tree/tree-item": 9221,
     "truncate": 2160,

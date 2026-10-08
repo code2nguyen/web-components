@@ -624,6 +624,10 @@
       "types": "./dist/tooltip.d.ts",
       "default": "./dist/tooltip.js"
     },
+    "./trace-waterfall": {
+      "types": "./dist/trace-waterfall.d.ts",
+      "default": "./dist/trace-waterfall.js"
+    },
     "./tree": {
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
@@ -864,6 +868,7 @@
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
+    "@c2n/trace-waterfall": "*",
     "@c2n/tree": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
