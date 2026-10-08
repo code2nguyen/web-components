@@ -472,6 +472,10 @@
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
     },
+    "./phone-input": {
+      "types": "./dist/phone-input.d.ts",
+      "default": "./dist/phone-input.js"
+    },
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
@@ -833,6 +837,7 @@
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
+    "@c2n/phone-input": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
     "@c2n/questionnaire": "*",

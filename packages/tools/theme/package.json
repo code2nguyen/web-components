@@ -55,6 +55,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/phone-input:build",
         "../../components/json-viewer:build",
         "../../components/filter-builder:build",
         "../../components/truncate:build",

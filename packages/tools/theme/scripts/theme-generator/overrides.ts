@@ -453,6 +453,7 @@ export const overrides: Record<string, Override> = {
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-phone-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },

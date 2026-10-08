@@ -897,6 +897,34 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-phone-input': {
+    html: `<c2-phone-input country="US" style="width: 300px"></c2-phone-input>`,
+    presets: [
+      {
+        name: 'Sign-up',
+        description: 'Taller with 16px text and a soft focus ring, for a sign-up or checkout form on mobile.',
+        css: {
+          '--c2-phone-input--min-height': '44px',
+          '--c2-phone-input--border-radius': '8px',
+          '--c2-phone-input--font-size': '16px',
+          '--c2-phone-input__input--padding': '0 12px',
+          '--c2-phone-input__focus--outline': '3px solid rgba(2, 101, 220, 0.2)',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded with no line after the country button.',
+        css: {
+          '--c2-phone-input--min-height': '40px',
+          '--c2-phone-input--border-radius': '999px',
+          '--c2-phone-input__country--padding': '0 8px 0 14px',
+          '--c2-phone-input__country__hover--background': 'transparent',
+          '--c2-phone-input__divider--border': '0 solid transparent',
+          '--c2-phone-input__input--padding': '0 16px 0 4px',
+        },
+      },
+    ],
+  },
   'c2-inline-edit': {
     html: `<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>`,
     presets: [
