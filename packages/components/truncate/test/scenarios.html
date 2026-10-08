@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Truncate test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      c2-truncate {
+        width: 320px;
+      }
+      c2-truncate.single {
+        --c2-truncate__content--line-clamp: 1;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Truncate scenario"></main>
+  </body>
+</html>

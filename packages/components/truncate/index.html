@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-truncate</title>
+    <script type="module" src="/src/truncate.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+        padding: 24px;
+        display: grid;
+        gap: 32px;
+        max-width: 420px;
+      }
+      h2 {
+        font-size: 13px;
+        color: #71717a;
+        margin: 0 0 8px;
+      }
+      .one-line {
+        --c2-truncate__content--line-clamp: 1;
+      }
+      .pill {
+        --c2-truncate__content--line-clamp: 2;
+        --c2-truncate__toggle--margin-top: 8px;
+        --c2-truncate__toggle--padding: 4px 10px;
+        --c2-truncate__toggle--font-size: 12px;
+        --c2-truncate__toggle--border-radius: 999px;
+        --c2-truncate__toggle--background-color: #eef2ff;
+        --c2-truncate__toggle--color: #4338ca;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Expandable (3 lines)</h2>
+      <c2-truncate expandable>
+        Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross
+        margin held at 72% despite higher infrastructure spend, and the team expects the new pricing to lift average contract value in the second half once the
+        migration of legacy plans is complete.
+      </c2-truncate>
+    </section>
+    <section>
+      <h2>One line</h2>
+      <c2-truncate class="one-line" expandable
+        >billing-service: retry budget exhausted after 5 attempts while calling payments.charge (timeout 30s)</c2-truncate
+      >
+    </section>
+    <section>
+      <h2>Themed toggle, custom labels</h2>
+      <c2-truncate class="pill" expandable more-label="Full changelog" less-label="Collapse">
+        Version 4.2 adds saved filters to every report, a keyboard shortcut palette and CSV export for invoices. Dashboards load about 40% faster thanks to
+        cached queries, and the mobile app now supports dark mode.
+      </c2-truncate>
+    </section>
+    <section>
+      <h2>Fits — nothing happens</h2>
+      <c2-truncate expandable>Short notes are left alone.</c2-truncate>
+    </section>
+  </body>
+</html>

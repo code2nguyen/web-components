@@ -1,0 +1,73 @@
+---
+description: 'Ready-made looks for c2-truncate: review excerpts, single-line table cells and release notes. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Truncate } from '@c2n/components/truncate'
+
+## Presets
+
+The line count is `--c2-truncate__content--line-clamp`; the `--c2-truncate__toggle--*` variables style the button.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .truncate-default {
+    max-width: 320px;
+  }
+</style>
+<c2-truncate class="truncate-default" expandable>Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend, and the team expects the new pricing to lift average contract value in the second half.</c2-truncate>
+```
+
+```html tag=MdxCodeBlock,label=Review excerpt
+<style>
+  .truncate-review {
+    max-width: 320px;
+    --c2-truncate__content--line-clamp: 2;
+    --c2-truncate__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff));
+    --c2-truncate__content--font-size: 14px;
+    --c2-truncate__content--line-height: 1.6;
+    --c2-truncate__toggle--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-truncate__toggle--font-size: 13px;
+    --c2-truncate__toggle--font-weight: 600;
+    --c2-truncate__toggle--text-decoration: underline;
+  }
+</style>
+<c2-truncate class="truncate-review" expandable more-label="Read more" less-label="Read less">Arrived two days early and the setup took under ten minutes. The battery lasts a full week of commuting, the app is clear, and support answered my question about firmware updates within the hour. My only complaint is the charging cable, which is a little short.</c2-truncate>
+```
+
+```html tag=MdxCodeBlock,label=Table cell
+<style>
+  .truncate-cell {
+    max-width: 220px;
+    --c2-truncate__content--line-clamp: 1;
+    --c2-truncate__content--font-size: 14px;
+    --c2-truncate__toggle--font-size: 12px;
+  }
+</style>
+<c2-truncate class="truncate-cell" expandable more-label="Show all" less-label="Hide">billing-service: retry budget exhausted after 5 attempts while calling payments.charge (timeout 30s)</c2-truncate>
+```
+
+```html tag=MdxCodeBlock,label=Release notes
+<style>
+  .truncate-notes {
+    max-width: 340px;
+    --c2-truncate__content--line-clamp: 4;
+    --c2-truncate__content--font-size: 14px;
+    --c2-truncate__content--line-height: 1.5;
+    --c2-truncate__toggle--margin-top: 8px;
+    --c2-truncate__toggle--padding: 4px 10px;
+    --c2-truncate__toggle--font-size: 12px;
+    --c2-truncate__toggle--border-radius: 999px;
+    --c2-truncate__toggle--background-color: light-dark(#eef2ff, #1e2340);
+    --c2-truncate__toggle--color: light-dark(#4338ca, #a5b4fc);
+    --c2-truncate__toggle__hover--text-decoration: none;
+  }
+</style>
+<c2-truncate class="truncate-notes" expandable more-label="Full changelog" less-label="Collapse">Version 4.2 adds saved filters to every report, a keyboard shortcut palette and CSV export for invoices. Dashboards load about 40% faster thanks to cached queries, and the mobile app now supports dark mode. We also fixed a time-zone bug in scheduled exports, an issue where long project names overlapped the sidebar, and several accessibility problems in the date picker reported by customers.</c2-truncate>
+```
+
+</GalleryGrid>
