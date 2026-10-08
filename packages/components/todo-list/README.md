@@ -39,6 +39,10 @@ the tasks in `localStorage` too, and `readonly` for a list that can be read but 
 `task-add`, `task-remove`, `task-archive`, `task-restore`, `task-change` and `task-reorder` report each change;
 `tasks-change` carries the whole new list, and `look-change` the viewer's customization.
 
+With `heading-editable` the heading is renamed in place (a `c2-inline-edit`; `editHeading()` opens it from script)
+and `heading-change` reports the new heading. Controls in the `actions` slot sit in the header, before the palette
+button or, with `actions-placement="end"`, after it.
+
 Every visual detail is a CSS custom property (`--c2-todo-list__accent--color`, `--c2-todo-list__pen-blue--color`,
 `--c2-todo-list__highlight-yellow--color`, …); see the API page of the documentation for the full list. A look the
 viewer chooses in the panel wins over them until they press **Reset**.

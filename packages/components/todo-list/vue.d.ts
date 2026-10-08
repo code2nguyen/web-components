@@ -20,6 +20,9 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-todo-list': DefineComponent<
       C2Props<TodoList> & {
+        'heading-editable'?: unknown
+        'heading-placeholder'?: unknown
+        'actions-placement'?: unknown
         'heading-level'?: unknown
         'storage-key'?: unknown
         'persist-tasks'?: unknown
@@ -32,6 +35,7 @@ declare module 'vue' {
         onTaskArchive?: (event: EventOf<TodoList, 'task-archive'>) => void
         onTaskRestore?: (event: EventOf<TodoList, 'task-restore'>) => void
         onTaskChange?: (event: EventOf<TodoList, 'task-change'>) => void
+        onHeadingChange?: (event: EventOf<TodoList, 'heading-change'>) => void
       }
     >
   }

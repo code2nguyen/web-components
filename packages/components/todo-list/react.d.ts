@@ -24,6 +24,9 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-todo-list': Omit<C2Props<TodoList>, 'tasks' | 'pens' | 'highlights' | 'backgrounds' | 'palettes'> & {
+        'heading-editable'?: Attribute
+        'heading-placeholder'?: Attribute
+        'actions-placement'?: Attribute
         'heading-level'?: Attribute
         'storage-key'?: Attribute
         'persist-tasks'?: Attribute

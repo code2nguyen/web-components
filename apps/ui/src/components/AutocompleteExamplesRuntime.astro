@@ -44,9 +44,25 @@
 
   const initialized = new WeakSet<Autocomplete>()
 
+  /**
+   * Reports what an example did. The footer status is only visible while the panel is open, and a selection closes it
+   * (with `selection-behavior="preserve"` the input does not change either), so the message is also written to a line
+   * below the field; without it, choosing a row looked like nothing happened.
+   */
   function setStatus(field: Autocomplete, message: string) {
     const status = field.querySelector<HTMLElement>('[data-example-status]')
     if (status) status.textContent = message
+    // The field sits in a `display: contents` island; the line goes after it so a re-rendered island cannot drop it.
+    const anchor = field.closest('astro-island') ?? field
+    let result = anchor.nextElementSibling
+    if (!(result instanceof HTMLElement) || !result.matches('[data-example-result]')) {
+      result = document.createElement('p')
+      result.className = 'autocomplete-example-result'
+      result.setAttribute('data-example-result', '')
+      result.setAttribute('aria-live', 'polite')
+      anchor.after(result)
+    }
+    result.textContent = message
   }
 
   function onSelection(field: Autocomplete, callback: (detail: AutocompleteSelectEventDetail) => void) {
@@ -142,3 +158,13 @@
   observer.observe(document.documentElement, { childList: true, subtree: true })
   document.addEventListener('astro:page-load', setup)
 </script>
+
+<style is:global>
+  .autocomplete-example-result {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--site-color-on-surface-muted);
+  }
+</style>

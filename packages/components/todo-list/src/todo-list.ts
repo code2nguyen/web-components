@@ -10,6 +10,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import '@c2n/reorder-list'
 import '@c2n/tabs'
 import '@c2n/progress'
+import '@c2n/inline-edit'
+import type { InlineEdit } from '@c2n/inline-edit'
 import type { ReorderEventDetail, ReorderSwipeAction, ReorderSwipeActionEventDetail } from '@c2n/reorder-list'
 import '@c2n/task-icons'
 import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type TaskIconName, type TaskIconCategory } from '@c2n/task-icons/task-icon-names.js'
@@ -186,6 +188,14 @@ export interface TodoLookChangeEventDetail {
   look: TodoListLook
 }
 
+export interface TodoHeadingChangeEventDetail {
+  /** The new heading, trimmed. */
+  heading: string
+}
+
+/** Where the `actions` slot sits in the header: before the built-in customize button, or after it. */
+export type TodoActionsPlacement = 'start' | 'end'
+
 /** Events fired by {@link TodoList}, keyed for `addEventListener`. */
 export interface TodoListEventMap {
   'task-toggle': CustomEvent<TodoTaskEventDetail>
@@ -197,12 +207,16 @@ export interface TodoListEventMap {
   'task-reorder': CustomEvent<TodoTaskReorderEventDetail>
   'tasks-change': CustomEvent<TodoTasksChangeEventDetail>
   'look-change': CustomEvent<TodoLookChangeEventDetail>
+  'heading-change': CustomEvent<TodoHeadingChangeEventDetail>
 }
 
 export interface TodoList {
   addEventListener: TypedAddEventListener<TodoList, TodoListEventMap>
   removeEventListener: TypedRemoveEventListener<TodoList, TodoListEventMap>
 }
+
+/** The inline edit's own events are composed: they stay inside the list, which reports `heading-change`. */
+const stopEvent = (event: Event) => event.stopPropagation()
 
 type TaskEventFactory = (detail: TodoTaskEventDetail) => CustomEvent<TodoTaskEventDetail>
 type MenuAction = 'edit' | 'icon' | 'drop' | 'archive' | 'delete'
@@ -559,12 +573,16 @@ interface Toast {
  * mark, the density and the progress style. `look.pen` still sets the accent from script. With
  * `storage-key` those choices are remembered in `localStorage`.
  *
+ * With `heading-editable`, the heading is a `c2-inline-edit`: click it (or call `editHeading()`) to rename the list,
+ * Enter or leaving the field saves, Escape cancels, and `heading-change` reports the new heading. The icon suggested
+ * from the heading follows the new name.
+ *
  * The swipe actions are drawn by the inner `c2-reorder-list`: recolour them with its
  * `--c2-reorder-list__swipe-action__{warning,danger,success}--background-color` variables, set on this element.
  *
  * @tag c2-todo-list
  *
- * @slot actions - Extra controls at the end of the header, before the customize button.
+ * @slot actions - Extra controls at the end of the header. `actions-placement` puts them before (default) or after the customize button.
  * @slot empty - Content shown when the list has no tasks at all. Defaults to a short sentence.
  *
  * @event {CustomEvent<TodoTaskEventDetail>} task-toggle - A task was checked or unchecked. `detail.task` is the updated task.
@@ -576,6 +594,7 @@ interface Toast {
  * @event {CustomEvent<TodoTaskReorderEventDetail>} task-reorder - A task was dragged, or moved with the keyboard, to a new position.
  * @event {CustomEvent<TodoTasksChangeEventDetail>} tasks-change - Fired after every change to the tasks with the new list, for two-way binding.
  * @event {CustomEvent<TodoLookChangeEventDetail>} look-change - The viewer changed the look in the customize panel, or reset it.
+ * @event {CustomEvent<TodoHeadingChangeEventDetail>} heading-change - The viewer renamed the list (`heading-editable`). `heading` is already updated.
  *
  * @cssproperty {color} [--c2-todo-list__container--background-color=#ffffff] - Background of the list.
  * @cssproperty {color} [--c2-todo-list__container--color=#18181b] - Text colour of the heading and tasks.
@@ -634,6 +653,18 @@ export class TodoList extends LitElement {
 
   /** Title of the list. */
   @property() heading = ''
+
+  /**
+   * The heading can be renamed in place: it becomes a `c2-inline-edit`, shown even while empty (with
+   * `heading-placeholder`). Ignored while `readonly`.
+   */
+  @property({ type: Boolean, attribute: 'heading-editable' }) headingEditable = false
+
+  /** What an editable heading shows while it is empty. */
+  @property({ attribute: 'heading-placeholder' }) headingPlaceholder = 'Untitled list'
+
+  /** Where the `actions` slot sits: before the customize button (`start`) or after it (`end`). */
+  @property({ attribute: 'actions-placement' }) actionsPlacement: TodoActionsPlacement = 'start'
 
   /** Heading level (1-6) the title is announced with. */
   @property({ type: Number, attribute: 'heading-level' }) headingLevel = 2
@@ -1303,15 +1334,11 @@ export class TodoList extends LitElement {
         }
         ${icon && !ring ? html`<span class="list-icon" aria-hidden="true">${renderTaskIcon(icon)}</span>` : nothing}
         <div class="titles">
-          ${
-            this.heading
-              ? html`<div class="heading" role="heading" aria-level=${Math.min(6, Math.max(1, Math.round(this.headingLevel) || 2))}>${this.heading}</div>`
-              : nothing
-          }
+          ${this.renderHeading()}
           <p class="meta" aria-live="polite">${meta}</p>
         </div>
         <div class="actions">
-          <slot name="actions"></slot>
+          ${this.actionsPlacement === 'end' ? nothing : html`<slot name="actions"></slot>`}
           ${
             this.customizable
               ? html`<button
@@ -1331,9 +1358,56 @@ export class TodoList extends LitElement {
                 </button>`
               : nothing
           }
+          ${this.actionsPlacement === 'end' ? html`<slot name="actions"></slot>` : nothing}
         </div>
       </header>
     `
+  }
+
+  /** The heading: plain text, or with `heading-editable` an inline edit that renames the list. */
+  private renderHeading() {
+    const level = Math.min(6, Math.max(1, Math.round(this.headingLevel) || 2))
+    if (this.headingEditable && !this.readonly) {
+      return html`<div class="heading" role="heading" aria-level=${level}>
+        <c2-inline-edit
+          class="heading-edit"
+          label="List title"
+          maxlength="200"
+          .value=${this.heading}
+          placeholder=${this.headingPlaceholder}
+          @edit-start=${stopEvent}
+          @edit-commit=${stopEvent}
+          @edit-cancel=${stopEvent}
+          @input=${stopEvent}
+          @change=${this.handleHeadingChange}
+        ></c2-inline-edit>
+      </div>`
+    }
+    return this.heading ? html`<div class="heading" role="heading" aria-level=${level}>${this.heading}</div>` : nothing
+  }
+
+  /** The inline edit committed a new heading. Its own `change` stays inside: the list reports `heading-change`. */
+  private handleHeadingChange = (event: Event) => {
+    event.stopPropagation()
+    const field = event.currentTarget as InlineEdit
+    const heading = field.value.trim()
+    field.value = heading
+    if (heading === this.heading) return
+    this.heading = heading
+    this.dispatchEvent(new CustomEvent<TodoHeadingChangeEventDetail>('heading-change', { detail: { heading } }))
+  }
+
+  /**
+   * Opens the heading's editor with its text selected, as a click on it does (a list that was just created, a Rename
+   * command). Returns `false` when the heading cannot be edited: `heading-editable` is off or the list is `readonly`.
+   */
+  async editHeading(): Promise<boolean> {
+    if (!this.headingEditable || this.readonly) return false
+    await this.updateComplete
+    const field = this.renderRoot.querySelector<InlineEdit>('.heading-edit')
+    if (!field) return false
+    await field.updateComplete
+    return field.edit()
   }
 
   /**
