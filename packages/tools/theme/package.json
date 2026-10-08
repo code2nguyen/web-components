@@ -55,6 +55,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/password-field:build",
         "../../components/search-field:build",
         "../../components/inline-edit:build",
         "../../components/kanban:build",

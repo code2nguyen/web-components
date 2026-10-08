@@ -96,6 +96,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/password-field:build",
         "./packages/components/search-field:build",
         "./packages/components/inline-edit:build",
         "./packages/components/kanban:build",

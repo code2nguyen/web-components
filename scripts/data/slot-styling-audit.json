@@ -1602,6 +1602,33 @@
       "reason": "The previous-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-password-field",
+      "slot": "hide-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__toggle--color", "--c2-password-field__toggle__hover--color"],
+      "reason": "The toggle sizes the slotted icon and its crossed-eye fallback through the icon size, and colours it through the toggle colour variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "prefix-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__icon--color"],
+      "reason": "The field sizes and colours the slotted prefix icon through the icon variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "show-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__toggle--color", "--c2-password-field__toggle__hover--color"],
+      "reason": "The toggle sizes the slotted icon and its eye fallback through the icon size, and colours it through the toggle colour variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-pie-chart",
       "slot": "actions",
       "decision": "part",

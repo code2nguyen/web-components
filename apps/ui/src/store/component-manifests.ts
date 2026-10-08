@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import passwordField from '@c2n/password-field/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
@@ -104,6 +105,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    passwordField,
     searchField,
     inlineEdit,
     kanban,

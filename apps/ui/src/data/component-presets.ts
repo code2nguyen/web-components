@@ -766,6 +766,36 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-password-field': {
+    html: `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width: 260px"></c2-password-field>`,
+    presets: [
+      {
+        name: 'Pill',
+        description: 'Fully rounded and a little taller, with a round toggle and a focus ring, for a sign-in card.',
+        css: {
+          '--c2-password-field--min-height': '40px',
+          '--c2-password-field--padding': '8px 8px 8px 18px',
+          '--c2-password-field--border-radius': '999px',
+          '--c2-password-field__toggle--size': '28px',
+          '--c2-password-field__toggle--border-radius': '999px',
+          '--c2-password-field__focus--outline': '2px solid rgba(2, 101, 220, 0.4)',
+        },
+      },
+      {
+        name: 'Bold meter',
+        description: 'A filled field with a thicker, more spaced strength meter and a semibold strength label.',
+        css: {
+          '--c2-password-field--background': '#f4f4f5',
+          '--c2-password-field--border': '1px solid transparent',
+          '--c2-password-field--border-radius': '8px',
+          '--c2-password-field__focus--background': '#ffffff',
+          '--c2-password-field__meter--height': '6px',
+          '--c2-password-field__meter--gap': '6px',
+          '--c2-password-field__meter-label--font-weight': '600',
+        },
+      },
+    ],
+  },
   'c2-inline-edit': {
     html: `<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>`,
     presets: [
