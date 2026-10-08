@@ -81,12 +81,11 @@ Domain patterns with no design-system home come from the products that made them
 | 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
 | 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
 
-### B. Data display (18)
+### B. Data display (17)
 
 | #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
 | --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
 | 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building         | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 30  | `c2-relative-time`  | "3 min ago" that updates itself, locale-aware, full date on hover           | Web Awesome relative-time, GitHub relative-time-element                          | P1       | Proposed |
 | 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
 | 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
 | 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |
@@ -296,11 +295,11 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 162 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate` and `c2-json-viewer`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 161 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-relative-time`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |
-| 1    | Foundations (P1)     | 23         | `c2-form-field` wraps every existing input      |
+| 1    | Foundations (P1)     | 22         | `c2-form-field` wraps every existing input      |
 | 2    | Business apps (P2)   | 50         | Blocks collection opens (forms, settings pages) |
 | 3    | Data, media, AI (P2) | 42         | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
 | 4    | Specialized (P3)     | 50         | —                                               |

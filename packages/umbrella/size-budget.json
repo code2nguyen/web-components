@@ -1,5 +1,5 @@
 {
-  "total": 1175349,
+  "total": 1177608,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -111,6 +111,7 @@
     "radio/radio": 4493,
     "rate": 2987,
     "react": 1777,
+    "relative-time": 2259,
     "reorder-list": 12543,
     "search-field": 18657,
     "select": 25250,

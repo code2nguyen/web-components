@@ -2062,6 +2062,12 @@
       "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-relative-time",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot only projects the consumer's fallback text (\"Never\") while no valid date is set; it inherits the host's --c2-relative-time--* typography and is otherwise styled by the consumer."
+    },
+    {
       "tag": "c2-reorder-list",
       "slot": "",
       "decision": "part",

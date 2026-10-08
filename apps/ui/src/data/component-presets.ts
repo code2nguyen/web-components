@@ -598,6 +598,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-relative-time': {
+    html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for feed and card metadata',
+        css: {
+          '--c2-relative-time--color': '#71717a',
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'short' },
+      },
+      {
+        name: 'Emphasis',
+        description: 'Bold phrase that stands out in a sentence',
+        css: {
+          '--c2-relative-time--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow format for tight table cells',
+        css: {
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'narrow' },
+      },
+    ],
+  },
   'c2-truncate': {
     html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
     presets: [

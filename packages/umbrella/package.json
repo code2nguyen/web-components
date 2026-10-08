@@ -500,6 +500,10 @@
       "types": "./dist/rate.d.ts",
       "default": "./dist/rate.js"
     },
+    "./relative-time": {
+      "types": "./dist/relative-time.d.ts",
+      "default": "./dist/relative-time.js"
+    },
     "./reorder-list": {
       "types": "./dist/reorder-list.d.ts",
       "default": "./dist/reorder-list.js"
@@ -838,6 +842,7 @@
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
