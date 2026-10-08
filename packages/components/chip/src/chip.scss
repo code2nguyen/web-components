@@ -193,3 +193,29 @@ button.action:disabled {
   width: 70%;
   height: 70%;
 }
+
+// Parts draw their own padding and dividers edge to edge, and clip their hover backgrounds to the pill.
+.c2-chip.has-parts {
+  gap: 0;
+  padding-left: 0;
+  overflow: hidden;
+}
+
+.c2-chip.has-parts:not(:has(.remove)) {
+  padding-right: 0;
+}
+
+.c2-chip.has-parts .action,
+.c2-chip.has-parts .label {
+  gap: 0;
+  height: 100%;
+}
+
+.c2-chip.has-parts .label {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.c2-chip.has-parts .remove {
+  margin-left: 4px;
+}

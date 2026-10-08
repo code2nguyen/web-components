@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Chip } from '@c2n/chip'
+import type { ChipPart } from '@c2n/chip/chip-part.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -26,6 +27,7 @@ declare module 'react' {
       'c2-chip': C2Props<Chip> & {
         'remove-label'?: Attribute
       }
+      'c2-chip-part': C2Props<ChipPart>
     }
   }
 }

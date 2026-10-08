@@ -4,6 +4,7 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/components/json-viewer'
+import '@c2n/components/truncate'
 import '@c2n/components/chip-group'
 import '@c2n/components/indicator'
 import '@c2n/components/chip'

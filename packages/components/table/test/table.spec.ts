@@ -997,3 +997,25 @@ test('in a selectable table, a click and Enter still fire row-activate as well a
   await expect.poll(async () => JSON.parse((await host.getAttribute('data-events')) ?? '[]').length).toBe(2)
   await expect(host).toHaveJSProperty('value', [])
 })
+
+test('a flexible column keeps its min-width when fixed columns fill a narrow table, which scrolls instead', async ({ page, renderScenario }) => {
+  await renderScenario(
+    table(
+      '',
+      `<c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="120px" align="end" format="number"></c2-table-column>`,
+    ).replace('width:520px', 'width:240px'),
+  )
+  const layout = await page.locator('c2-table').evaluate((element) => {
+    const headers = [...element.shadowRoot!.querySelectorAll<HTMLElement>('.row--header > *')]
+    const viewport = element.shadowRoot!.querySelector<HTMLElement>('.viewport')!
+    return {
+      widths: headers.map((header) => Math.round(header.getBoundingClientRect().width)),
+      scrolls: viewport.scrollWidth > viewport.clientWidth,
+    }
+  })
+  expect(layout.widths[0]).toBeGreaterThanOrEqual(140)
+  expect(layout.widths[1]).toBeGreaterThanOrEqual(64)
+  expect(layout.scrolls).toBe(true)
+})

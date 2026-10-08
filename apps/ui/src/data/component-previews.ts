@@ -5,6 +5,7 @@
  */
 export const componentPreviews: Record<string, string> = {
   'json-viewer': `<c2-json-viewer style="width: 100%; --c2-json-viewer--max-height: 180px" data='{"id":"ord_8421","paid":true,"total":129.5,"coupon":null,"items":[{"sku":"KB-01","qty":1}]}'></c2-json-viewer>`,
+  truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   'chip-group': `<c2-chip-group style="width: 220px" aria-label="Topics">
   <c2-chip>Design</c2-chip>
   <c2-chip>Engineering</c2-chip>

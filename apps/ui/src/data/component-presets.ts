@@ -598,6 +598,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-truncate': {
+    html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
+    presets: [
+      {
+        name: 'Excerpt',
+        description: 'Two quiet lines and an underlined Read more',
+        css: {
+          '--c2-truncate__content--line-clamp': '2',
+          '--c2-truncate__content--font-size': '14px',
+          '--c2-truncate__toggle--color': '#18181b',
+          '--c2-truncate__toggle--font-weight': '600',
+          '--c2-truncate__toggle--text-decoration': 'underline',
+        },
+        attributes: { 'more-label': 'Read more', 'less-label': 'Read less' },
+      },
+      {
+        name: 'Single line',
+        description: 'One line, for a table cell or a list row',
+        css: {
+          '--c2-truncate__content--line-clamp': '1',
+        },
+      },
+      {
+        name: 'Pill button',
+        description: 'Four lines and a tinted pill toggle',
+        css: {
+          '--c2-truncate__content--line-clamp': '4',
+          '--c2-truncate__toggle--margin-top': '8px',
+          '--c2-truncate__toggle--padding': '4px 10px',
+          '--c2-truncate__toggle--font-size': '12px',
+          '--c2-truncate__toggle--border-radius': '999px',
+          '--c2-truncate__toggle--background-color': '#eef2ff',
+          '--c2-truncate__toggle--color': '#4338ca',
+        },
+      },
+    ],
+  },
   'c2-label': {
     html: `<c2-label required>Email address</c2-label>`,
     presets: [

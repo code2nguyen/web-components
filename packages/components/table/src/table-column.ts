@@ -52,7 +52,7 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Grid track for the column: `1fr`, `160px`, `minmax(120px, 1fr)`… */
   @property({ type: String }) width = '1fr'
 
-  /** Lower bound in pixels while the column is resized. */
+  /** Lower bound in pixels: the floor of a flexible (`fr`) track on a narrow table, and while the column is resized. */
   @property({ type: Number, attribute: 'min-width' }) minWidth = 64
 
   /** Horizontal alignment of the header and the cells. */
