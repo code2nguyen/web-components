@@ -48,6 +48,16 @@
 
     state-layer__hover__unselected--color: null,
     state-layer__hover__selected--color: null,
+
+    field--gap: 4px,
+    label--color: inherit,
+    label--font-size: inherit,
+    label--font-weight: inherit,
+    label--line-height: inherit,
+    label__disabled--opacity: variables.$disabled-content-opacity,
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 1.4,
   )
 );
 
@@ -72,9 +82,75 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   display: none;
 }
 
-// The touch target and the hover layer share one size: the host box is exactly the state layer.
+// The row: the box's touch target, then the optional label and description. Without text it is just the box.
+.c2-checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  cursor: pointer;
+
+  &.has-text {
+    gap: css.cssVar(field--gap);
+  }
+
+  &.has-description {
+    align-items: flex-start;
+  }
+
+  &:has(.c2-checkbox-input:disabled) {
+    cursor: default;
+  }
+}
+
+.c2-checkbox-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-checkbox-field:has(.c2-checkbox-input:disabled) .c2-checkbox-text {
+  opacity: css.cssVar(label__disabled--opacity);
+}
+
+.c2-checkbox-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// With a description the row aligns to the top; keep the label centred on the box's touch square.
+.has-description .c2-checkbox-label:not([hidden]) {
+  display: flex;
+  align-items: center;
+  min-height: css.cssVar(state-layer--size);
+}
+
+.c2-checkbox-description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+  // The label row already fills the touch square; pull the description up under the text.
+  margin-top: calc((1.5em - #{css.cssVar(state-layer--size)}) / 2 + 2px);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The touch target and the hover layer share one size: the box is exactly the state layer.
 .c2-checkbox {
   display: inline-flex;
+  flex: none;
   position: relative;
   line-height: 0;
   white-space: nowrap;

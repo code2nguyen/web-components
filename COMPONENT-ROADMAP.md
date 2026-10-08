@@ -50,16 +50,15 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 93 remain (16 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33), `c2-json-viewer` (#38) and `c2-confirm-dialog` (#71) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 92 remain (15 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-checkbox-group` (#4), `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33), `c2-json-viewer` (#38) and `c2-confirm-dialog` (#71) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
-### A. Forms and input (24)
+### A. Forms and input (23)
 
 | #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
 | 1   | `c2-form`             | Validation across fields, submit handling, error summary, dirty tracking                            | antd Form, Carbon form, Polaris Form                                            | P1       | Proposed |
 | 2   | `c2-form-field`       | Label, hint, error and counter wrapper around any control, with `aria-describedby` wired up         | Ark/Chakra field, Polaris Labelled, Vaadin FormItem                             | P1       | Proposed |
 | 3   | `c2-fieldset`         | Grouped controls with a legend and a disabled state that cascades                                   | Ark/Chakra fieldset, PrimeVue fieldset                                          | P2       | Proposed |
-| 4   | `c2-checkbox-group`   | Form-associated group of checkboxes with one value array (the counterpart of `c2-radio-group`)      | Web Awesome, Vaadin, PrimeVue checkbox group                                    | P1       | Proposed |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
 | 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Accept   |
 | 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Proposed |
@@ -138,7 +137,7 @@ These join `@c2n/chart`, which already ships 14 chart elements (line, area, bar,
 | 69  | `c2-master-detail`     | List and detail side by side, stacked with a back step on mobile                                          | Vaadin MasterDetailLayout; Gmail, Outlook                          | P2       | Proposed |
 | 70  | `c2-swipe-actions`     | Swipe a list row to reveal actions                                                                        | iOS Mail, Gmail mobile                                             | P3       | Proposed |
 
-### E. Overlays and feedback (9)
+### E. Overlays and feedback (8)
 
 These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which already exist.
 
@@ -295,7 +294,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 161 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-confirm-dialog`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and the shipped `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 160 still to build (168 less `c2-inline-edit`, `c2-checkbox-group`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-confirm-dialog`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and the shipped `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |

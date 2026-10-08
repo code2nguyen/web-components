@@ -212,6 +212,12 @@ greet('world')"></c2-code-editor>`,
   <c2-checkbox></c2-checkbox>
   <c2-checkbox checked disabled></c2-checkbox>
 </div>`,
+  'checkbox-group': `<c2-checkbox-group value="email;push" style="width:200px">
+  <span slot="label">Notify me by</span>
+  <c2-checkbox value="email">Email</c2-checkbox>
+  <c2-checkbox value="sms">SMS</c2-checkbox>
+  <c2-checkbox value="push">Push</c2-checkbox>
+</c2-checkbox-group>`,
   'code-viewer': `<c2-code-viewer style="width:240px" language="ts" line-numbers code="const greet = (name: string) =>\n  \`Hello, \${name}!\`"></c2-code-viewer>`,
   'color-area': `<c2-color-area hue="210" saturation="0.8" value="0.9" style="width:200px;height:100px"></c2-color-area>`,
   'color-select': `<div class="preview-row">
