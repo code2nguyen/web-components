@@ -9,6 +9,14 @@
       "types": "./types/src/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./checkbox.js": {
+      "types": "./types/src/checkbox.d.ts",
+      "default": "./dist/checkbox.js"
+    },
+    "./checkbox-group.js": {
+      "types": "./types/src/checkbox-group.d.ts",
+      "default": "./dist/checkbox-group.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -30,6 +38,7 @@
   ],
   "keywords": [
     "checkbox",
+    "checkbox group",
     "web component",
     "lit"
   ],

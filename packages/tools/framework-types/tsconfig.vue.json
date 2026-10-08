@@ -16,6 +16,7 @@
         "c2-button-group": true,
         "c2-cascader": true,
         "c2-chat-input": true,
+        "c2-checkbox-group": true,
         "c2-code-editor": true,
         "c2-date-input": true,
         "c2-inline-edit": true,
