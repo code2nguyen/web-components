@@ -786,7 +786,87 @@ test('draws the bar and hero progress styles', async ({ page, scenario }) => {
   await expect(list.locator('.progress-hero .ring-value')).toHaveText('33%')
 })
 
-for (const name of ['default', 'groceries', 'plain'] as const) {
+test('an editable heading renames the list, and the icon follows the new name', async ({ page, scenario }) => {
+  await scenario('editable')
+  const list = page.locator('c2-todo-list')
+  const heading = list.getByRole('heading', { name: 'Groceries' })
+  await expect(heading).toBeVisible()
+  await expect(list.locator('.ring-value c2-task-icon-cart')).toBeAttached()
+
+  // Nor do its input and change events: the list reports heading-change.
+  await list.evaluate((element) => {
+    for (const type of ['input', 'change']) element.addEventListener(type, () => (element.dataset.leaked = type))
+  })
+  await heading.locator('c2-inline-edit').click()
+  const field = list.getByRole('textbox', { name: 'List title' })
+  await expect(field).toBeFocused()
+  await field.fill('  Trip to Lisbon  ')
+  await field.press('Enter')
+
+  await expect(list.getByRole('heading', { name: 'Trip to Lisbon' })).toBeVisible()
+  await expect(list).toHaveJSProperty('heading', 'Trip to Lisbon')
+  await expect(list.locator('.ring-value c2-task-icon-cart')).toHaveCount(0)
+  await expect(list.locator('.ring-value .icon')).toBeAttached()
+  await expect(list).toHaveAttribute('data-events', 'heading-change')
+  await expect(list).not.toHaveAttribute('data-leaked')
+  // The tasks are untouched.
+  await expect(list.locator('.task')).toHaveCount(9)
+})
+
+test('Escape keeps the heading; an empty heading shows its placeholder', async ({ page, scenario }) => {
+  await scenario('editable')
+  const list = page.locator('c2-todo-list')
+  await list.locator('.heading-edit').click()
+  const field = list.getByRole('textbox', { name: 'List title' })
+  await field.fill('Something else')
+  await field.press('Escape')
+  await expect(list).toHaveJSProperty('heading', 'Groceries')
+  await expect(list).not.toHaveAttribute('data-events')
+
+  await scenario('untitled')
+  await expect(list.locator('.heading-edit')).toContainText('Untitled list')
+  await list.evaluate((element: TodoList) => (element.headingPlaceholder = 'Name this list'))
+  await expect(list.locator('.heading-edit')).toContainText('Name this list')
+})
+
+test('editHeading() opens the heading editor; it does nothing when the heading is not editable', async ({ page, scenario }) => {
+  await scenario('untitled')
+  const list = page.locator('c2-todo-list')
+  expect(await list.evaluate((element: TodoList) => element.editHeading())).toBe(true)
+  await expect(list.getByRole('textbox', { name: 'List title' })).toBeFocused()
+  await page.keyboard.type('Weekend')
+  await page.keyboard.press('Enter')
+  await expect(list).toHaveJSProperty('heading', 'Weekend')
+
+  await list.evaluate((element: TodoList) => (element.readonly = true))
+  await expect(list.locator('.heading-edit')).toHaveCount(0)
+  await expect(list.getByRole('heading', { name: 'Weekend' })).toBeVisible()
+  expect(await list.evaluate((element: TodoList) => element.editHeading())).toBe(false)
+
+  await scenario()
+  expect(await list.evaluate((element: TodoList) => element.editHeading())).toBe(false)
+  await expect(list.locator('.heading-edit')).toHaveCount(0)
+})
+
+test('actions-placement puts the actions slot before or after the customize button', async ({ page, scenario }) => {
+  const order = () =>
+    page.locator('c2-todo-list .actions').evaluate((actions) => [...actions.children].map((child) => (child.localName === 'slot' ? 'slot' : child.className)))
+
+  await scenario('actions-start')
+  await expect(page.locator('#extra')).toBeVisible()
+  expect(await order()).toEqual(['slot', 'customize'])
+  const start = await page.locator('#extra').boundingBox()
+  const button = await page.locator('c2-todo-list .customize').boundingBox()
+  expect(start!.x).toBeLessThan(button!.x)
+
+  await scenario('actions-end')
+  expect(await order()).toEqual(['customize', 'slot'])
+  const end = await page.locator('#extra').boundingBox()
+  const after = await page.locator('c2-todo-list .customize').boundingBox()
+  expect(end!.x).toBeGreaterThan(after!.x)
+})
+
+for (const name of ['default', 'groceries', 'plain', 'editable', 'untitled'] as const) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
     await accessible(page)
