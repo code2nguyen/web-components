@@ -4,7 +4,7 @@
   $prefix: c2-query-input,
   $theme: (
     min-height: 36px,
-    padding: 6px 10px,
+    padding: 4px 10px,
     gap: 8px,
     color: #18181b,
     background: #ffffff,
@@ -25,12 +25,15 @@
     clear-icon--color: #a1a1aa,
     clear-icon__hover--color: #18181b,
 
+    word-spacing: 4px,
+    term--background: #f4f4f5,
+    term__negated--background: rgba(207, 34, 46, 0.1),
+    term--border-radius: 4px,
+    term--outset: 2px,
     key--color: #0550ae,
-    key--background: null,
     separator--color: #71717a,
     comparator--color: #b35900,
     value--color: #116329,
-    value--background: null,
     text--color: null,
     operator--color: #6f42c1,
     negation--color: #cf222e,
@@ -117,15 +120,18 @@
   line-height: 20px;
 }
 
+// Both layers get the same padding (room for the chip ring at the edges) and word spacing (room between chips).
 .highlight,
 .input {
+  box-sizing: border-box;
   grid-area: 1 / 1;
-  padding: 0;
+  padding: css.cssVar(term--outset);
   margin: 0;
   font: inherit;
   letter-spacing: normal;
   line-height: inherit;
   white-space: pre;
+  word-spacing: css.cssVar(word-spacing);
 }
 
 .highlight {
@@ -150,6 +156,7 @@
   &::placeholder {
     color: css.cssVar(placeholder--color);
     opacity: 1;
+    word-spacing: normal;
   }
 
   &::selection {
@@ -158,25 +165,33 @@
   }
 }
 
+// A ring of the chip's own colour pads it without taking any width, so the text keeps the input's metrics.
+.term {
+  background: css.cssVar(term--background);
+  border-radius: css.cssVar(term--border-radius);
+  box-shadow: 0 0 0 css.cssVar(term--outset) css.cssVar(term--background);
+
+  &.negated {
+    background: css.cssVar(term__negated--background);
+    box-shadow: 0 0 0 css.cssVar(term--outset) css.cssVar(term__negated--background);
+  }
+}
+
 .token {
   &.key {
     color: css.cssVar(key--color);
-    background: css.cssVar(key--background);
   }
 
   &.separator {
     color: css.cssVar(separator--color);
-    background: css.cssVar(key--background);
   }
 
   &.comparator {
     color: css.cssVar(comparator--color);
-    background: css.cssVar(value--background);
   }
 
   &.value {
     color: css.cssVar(value--color);
-    background: css.cssVar(value--background);
   }
 
   &.text {
@@ -191,7 +206,9 @@
     color: css.cssVar(negation--color);
   }
 
+  // Positioned so it paints above the ring of a chip that touches it: `(env:prod)`.
   &.paren {
+    position: relative;
     color: css.cssVar(paren--color);
   }
 

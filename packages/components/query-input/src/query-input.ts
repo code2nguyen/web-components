@@ -96,8 +96,10 @@ interface Suggestion {
  * `change` are re-dispatched from the inner input, and the element is form-associated (`name`). The host exposes
  * `:state(focus-within)`, `:state(expanded)`, `:state(invalid)` and `:state(disabled)`.
  *
- * The highlighting is drawn under a transparent input, so the colour variables may change colours, backgrounds and
- * decorations only: anything that changes the width of a character (font weight, padding) would misalign the caret.
+ * Each `key:value` term is drawn as a chip (`--c2-query-input__term--*`); free text, operators and parentheses stay
+ * plain. The highlighting is drawn under a transparent input, so the chips and colours change colours, backgrounds,
+ * rings and decorations only: anything that changes the width of a character (font weight, padding) would misalign the
+ * caret. The chip's room comes from `--c2-query-input--word-spacing`, which the input shares.
  *
  * @tag c2-query-input
  *
@@ -112,7 +114,7 @@ interface Suggestion {
  * @event {Event} clear - Fired when the clear button or Escape emptied the field, before `input`, `change` and `search`.
  *
  * @cssproperty {pixel} [--c2-query-input--min-height=36px]
- * @cssproperty {padding} [--c2-query-input--padding=6px 10px]
+ * @cssproperty {padding} [--c2-query-input--padding=4px 10px]
  * @cssproperty {pixel} [--c2-query-input--gap=8px] - Space between the icons and the query.
  * @cssproperty {color} [--c2-query-input--color=#18181b] - Colour of free text and of the caret.
  * @cssproperty {color} [--c2-query-input--background=#ffffff]
@@ -133,12 +135,15 @@ interface Suggestion {
  * @cssproperty {color} [--c2-query-input__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-query-input__clear-icon__hover--color=#18181b]
  *
+ * @cssproperty {color} [--c2-query-input__term--background=#f4f4f5] - The chip drawn behind each `key:value` term.
+ * @cssproperty {color} [--c2-query-input__term__negated--background=rgba(207, 34, 46, 0.1)] - The chip of a negated term (`-key:value`).
+ * @cssproperty {border-radius} [--c2-query-input__term--border-radius=4px]
+ * @cssproperty {pixel} [--c2-query-input__term--outset=2px] - How far the chip reaches around its text. Drawn as a ring, so it never moves the caret; keep it at most half of `word-spacing` plus a space.
+ * @cssproperty {pixel} [--c2-query-input--word-spacing=4px] - Extra space between words, which leaves room between the chips. Applied to the input as well, so the caret stays on its letter.
  * @cssproperty {color} [--c2-query-input__key--color=#0550ae] - The field name before the colon.
- * @cssproperty {color} --c2-query-input__key--background
  * @cssproperty {color} [--c2-query-input__separator--color=#71717a] - The colon between key and value.
  * @cssproperty {color} [--c2-query-input__comparator--color=#b35900] - `>`, `>=`, `<`, `<=` and `=` before a value.
  * @cssproperty {color} [--c2-query-input__value--color=#116329] - The value of a `key:value` term.
- * @cssproperty {color} --c2-query-input__value--background
  * @cssproperty {color} --c2-query-input__text--color - Free text and quoted phrases; inherits the field colour.
  * @cssproperty {color} [--c2-query-input__operator--color=#6f42c1] - `AND`, `OR` and `NOT`.
  * @cssproperty {color} [--c2-query-input__negation--color=#cf222e] - The `-` or `!` that negates a term.
@@ -405,8 +410,10 @@ export class QueryInput extends LitElement {
     if (!input) return
     const caret = input.selectionStart ?? input.value.length
     if (caret !== this.caret) {
+      // Moving the caret into another term reopens the list for whatever it now completes.
       this.caret = caret
       this.activeIndex = -1
+      this.dismissed = false
     }
     this.syncScroll()
   }
@@ -525,10 +532,27 @@ export class QueryInput extends LitElement {
     return html`${text.slice(0, index)}<mark>${text.slice(index, index + prefix.length)}</mark>${text.slice(index + prefix.length)}`
   }
 
+  private renderToken(token: QueryToken) {
+    return token.type === 'whitespace' ? token.text : html`<span class="token ${token.type} ${this.isInvalid(token) ? 'invalid' : ''}">${token.text}</span>`
+  }
+
+  /** The query as coloured tokens, each `key:value` term (with its negation) wrapped in one chip. */
   private renderTokens() {
-    return this.tokens.map((token) =>
-      token.type === 'whitespace' ? token.text : html`<span class="token ${token.type} ${this.isInvalid(token) ? 'invalid' : ''}">${token.text}</span>`,
-    )
+    const tokens = this.tokens
+    const parts: unknown[] = []
+    for (let index = 0; index < tokens.length; index++) {
+      const start = tokens[index].type === 'negation' && tokens[index + 1]?.type === 'key' ? index + 1 : index
+      if (tokens[start].type !== 'key') {
+        parts.push(this.renderToken(tokens[index]))
+        continue
+      }
+      let end = start + 1
+      while (tokens[end + 1] && ['separator', 'comparator', 'value'].includes(tokens[end + 1].type) && tokens[end + 1].key === tokens[start].key) end++
+      const negated = start > index
+      parts.push(html`<span class="term ${negated ? 'negated' : ''}">${tokens.slice(index, end + 1).map((token) => this.renderToken(token))}</span>`)
+      index = end
+    }
+    return parts
   }
 
   private renderClearButton() {

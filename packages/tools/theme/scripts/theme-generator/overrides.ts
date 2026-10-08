@@ -461,6 +461,7 @@ export const overrides: Record<string, Override> = {
   '--c2-query-input__negation--color': { token: 'color-error' },
   '--c2-query-input__invalid--color': { token: 'color-error' },
   '--c2-query-input__selection--background': { exclude: 'translucent accent wash works on any surface' },
+  '--c2-query-input__term__negated--background': { exclude: 'translucent error wash works on any surface' },
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },

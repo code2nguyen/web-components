@@ -26,6 +26,28 @@ test('colours each part of the query and keeps the highlight in step with the te
   await expect(page.getByRole('textbox', { name: 'Search query' })).toBeVisible()
 })
 
+test('draws each key:value term, with its negation, as one chip', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-query-input value='service:web -status:>=500 timeout OR env:' aria-label="Query"></c2-query-input>`)
+  const host = page.locator('c2-query-input')
+  await expect(host.locator('.term')).toHaveText(['service:web', '-status:>=500', 'env:'])
+  await expect(host.locator('.term.negated')).toHaveText(['-status:>=500'])
+  // Free text and operators stay plain.
+  await expect(host.locator('.term .token.text, .term .token.operator')).toHaveCount(0)
+  // The chips take no width: on a query wider than the field, the coloured copy is exactly as wide as the input's
+  // text (word spacing included), so the caret stays on its letter all the way along.
+  await host.evaluate((element: HTMLElement & { value: string }) => (element.value = 'service:web -status:>=500 env:prod '.repeat(4)))
+  const widths = await host.evaluate((element) => {
+    const root = element.shadowRoot!
+    const input = root.querySelector('input')!
+    const style = getComputedStyle(input)
+    return {
+      input: input.scrollWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      text: root.querySelector<HTMLElement>('.highlight-text')!.getBoundingClientRect().width,
+    }
+  })
+  expect(Math.abs(widths.input - widths.text)).toBeLessThanOrEqual(2)
+})
+
 test('Enter runs the query with its parsed terms', async ({ page, renderScenario }) => {
   await renderScenario('<c2-query-input placeholder="Filter logs"></c2-query-input>')
   const host = page.locator('c2-query-input')
@@ -76,6 +98,26 @@ test('suggests keys, then the values of the chosen key', async ({ page, renderSc
   await expect(input).toHaveAttribute('aria-expanded', 'false')
   await page.keyboard.type('se')
   await expect(options(page).locator('.option-label')).toHaveText(['service'])
+})
+
+test('the value list follows the key under the caret', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-query-input fields='${FIELDS}' value="env:prod service:" aria-label="Query"></c2-query-input>`)
+  const input = page.getByRole('combobox', { name: 'Query' })
+  await input.click()
+  await page.keyboard.press('End')
+  await expect(page.locator('#suggestions-label')).toHaveText('Service')
+  await expect(options(page).locator('.option-label')).toHaveText(['web', 'api', 'billing worker'])
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect(input).toHaveValue('env:prod service:web ')
+  await expect(input).toHaveAttribute('aria-expanded', 'false')
+  // Back into the first term's value: the list reopens with env's values, filtered by what is left of the caret.
+  await page.keyboard.press('Home')
+  for (let step = 0; step < 'env:p'.length; step++) await page.keyboard.press('ArrowRight')
+  await expect(input).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.locator('#suggestions-label')).toHaveText('env')
+  await expect(options(page).locator('.option-label')).toHaveText(['prod'])
 })
 
 test('a value with spaces is quoted, and a click picks a suggestion', async ({ page, renderScenario }) => {
