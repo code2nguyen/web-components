@@ -1845,6 +1845,12 @@
       "reason": "The prefix box sizes a slotted SVG through the icon variable; a dot or an avatar keeps its own size."
     },
     {
+      "tag": "c2-filter-builder",
+      "slot": "end",
+      "decision": "assigned-content",
+      "reason": "The end slot projects consumer-owned light DOM, such as a search field, at the end of the bar; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-qr-code",
       "slot": "center",
       "decision": "assigned-content",

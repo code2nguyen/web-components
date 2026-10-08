@@ -1,0 +1,330 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-filter-builder,
+  $theme: (
+    gap: 6px,
+    chip--height: 28px,
+    chip--border: 1px solid #d4d4d8,
+    chip--border-radius: 999px,
+    chip--background-color: #ffffff,
+    chip--font-size: 14px,
+    chip__draft--border: 1px dashed #a1a1aa,
+    field--color: #71717a,
+    operator--color: #71717a,
+    value--color: #18181b,
+    value--font-weight: 500,
+    icon--size: 16px,
+    dot--size: 8px,
+    avatar--size: 18px,
+    add-button--border: 1px dashed #a1a1aa,
+    add-button--color: #71717a,
+    add-button--border-radius: 999px,
+    clear-button--color: #71717a,
+    popover--width: 280px,
+    popover--background-color: #ffffff,
+    popover--border: 1px solid #e4e4e7,
+    popover--border-radius: 8px,
+    popover--box-shadow: (
+      0 10px 30px rgba(24, 24, 27, 0.12),
+      0 2px 6px rgba(24, 24, 27, 0.08),
+    ),
+    popover--max-height: 360px,
+    muted--color: #71717a,
+    check--color: #0265dc,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+.chips {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+.bar.is-compact .chips {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bar.is-compact .chips::-webkit-scrollbar {
+  display: none;
+}
+
+// ---- chips -------------------------------------------------------------------------------------------------------
+
+.chip {
+  flex: none;
+  --c2-chip__container--height: #{css.cssVar(chip--height)};
+  --c2-chip__container--border: #{css.cssVar(chip--border)};
+  --c2-chip__container--border-radius: #{css.cssVar(chip--border-radius)};
+  --c2-chip__container--background-color: #{css.cssVar(chip--background-color)};
+  --c2-chip__container--font-size: #{css.cssVar(chip--font-size)};
+  --c2-chip__container--font-weight: 400;
+  --c2-chip__icon--size: #{css.cssVar(icon--size)};
+  --c2-chip-part__icon--size: #{css.cssVar(icon--size)};
+}
+
+.chip.draft {
+  --c2-chip__container--border: #{css.cssVar(chip__draft--border)};
+}
+
+.field {
+  --c2-chip-part__container--color: #{css.cssVar(field--color)};
+}
+
+.operator {
+  --c2-chip-part__container--color: #{css.cssVar(operator--color)};
+}
+
+.value {
+  --c2-chip-part__container--color: #{css.cssVar(value--color)};
+  --c2-chip-part__container--font-weight: #{css.cssVar(value--font-weight)};
+}
+
+.chip.draft .value {
+  --c2-chip-part__container--color: #{css.cssVar(muted--color)};
+}
+
+.visuals {
+  display: inline-flex;
+  align-items: center;
+}
+
+.visuals > * + * {
+  margin-left: calc(#{css.cssVar(dot--size)} / -3);
+}
+
+.visuals > .avatar + .avatar {
+  margin-left: calc(#{css.cssVar(avatar--size)} / -3);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+}
+
+.dot {
+  display: inline-block;
+  flex: none;
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border-radius: 50%;
+  background-color: var(--dot-color, currentColor);
+  box-shadow: 0 0 0 1.5px css.cssVar(chip--background-color);
+}
+
+.avatar {
+  flex: none;
+  --c2-avatar--size: #{css.cssVar(avatar--size)};
+  --c2-avatar--width: #{css.cssVar(avatar--size)};
+  --c2-avatar--height: #{css.cssVar(avatar--size)};
+  --c2-avatar--font-size: calc(#{css.cssVar(avatar--size)} * 0.45);
+}
+
+// ---- buttons -----------------------------------------------------------------------------------------------------
+
+.add,
+.clear,
+.filters-button {
+  flex: none;
+  --c2-button__container--height: #{css.cssVar(chip--height)};
+  --c2-button__container--font-size: #{css.cssVar(chip--font-size)};
+  --c2-button__container--padding-left: 10px;
+  --c2-button__container--padding-right: 10px;
+  --c2-button__container--gap: 4px;
+  --c2-button__icon--size: #{css.cssVar(icon--size)};
+}
+
+.add {
+  --c2-button__container--border: #{css.cssVar(add-button--border)};
+  --c2-button__container--border-radius: #{css.cssVar(add-button--border-radius)};
+  --c2-button__container--color: #{css.cssVar(add-button--color)};
+  --c2-button__container--background-color: transparent;
+}
+
+.clear {
+  --c2-button__container--border: 1px solid transparent;
+  --c2-button__container--color: #{css.cssVar(clear-button--color)};
+  --c2-button__container--background-color: transparent;
+}
+
+.count-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background-color: css.cssVar(check--color);
+  color: #ffffff;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+// ---- popover -----------------------------------------------------------------------------------------------------
+
+.popover {
+  box-sizing: border-box;
+  width: min(#{css.cssVar(popover--width)}, calc(100vw - 16px));
+  overflow: hidden;
+  border: css.cssVar(popover--border);
+  border-radius: css.cssVar(popover--border-radius);
+  background-color: css.cssVar(popover--background-color);
+  box-shadow: css.cssVar(popover--box-shadow);
+}
+
+.popover:empty {
+  display: none;
+}
+
+.command {
+  --c2-command--width: 100%;
+  --c2-command--max-height: min(#{css.cssVar(popover--max-height)}, var(--c2-overlay--available-height, 100vh));
+  --c2-command--border-top: none;
+  --c2-command--border-right: none;
+  --c2-command--border-bottom: none;
+  --c2-command--border-left: none;
+  --c2-command--box-shadow: none;
+  --c2-command--background: transparent;
+}
+
+.operators,
+.units {
+  display: block;
+  padding: 4px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.relative .presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.relative .custom {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.relative .custom c2-number-input {
+  width: 96px;
+  flex: none;
+}
+
+.relative .units {
+  flex: 1;
+  padding: 0;
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.check {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: css.cssVar(check--color);
+  visibility: hidden;
+}
+
+.check.is-selected {
+  visibility: visible;
+}
+
+.check svg {
+  width: 100%;
+  height: 100%;
+}
+
+.meta {
+  color: css.cssVar(muted--color);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// ---- compact sheet -----------------------------------------------------------------------------------------------
+
+.sheet {
+  --c2-sheet--size: auto;
+}
+
+.sheet-rules {
+  display: block;
+}
+
+.sheet .add {
+  margin-top: 8px;
+}
+
+.sheet-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sheet-editor .operators {
+  padding: 0;
+}
+
+.back {
+  align-self: flex-start;
+  --c2-button__container--border: 1px solid transparent;
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--padding-left: 4px;
+}
+
+.row-remove {
+  --c2-button__container--height: 28px;
+  --c2-button__container--padding-left: 8px;
+  --c2-button__container--padding-right: 8px;
+  --c2-button__container--border: 1px solid transparent;
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: #{css.cssVar(muted--color)};
+}
+
+.sheet-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}

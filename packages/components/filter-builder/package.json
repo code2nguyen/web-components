@@ -1,0 +1,96 @@
+{
+  "name": "@c2n/filter-builder",
+  "version": "1.0.5",
+  "private": true,
+  "type": "module",
+  "main": "dist/filter-builder.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/filter-builder.d.ts",
+      "default": "./dist/filter-builder.js"
+    },
+    "./filter-types.js": {
+      "types": "./types/src/filter-types.d.ts",
+      "default": "./dist/filter-types.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "filter-builder",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../avatar:build",
+        "../button:build",
+        "../chip:build",
+        "../command:build",
+        "../date-input:build",
+        "../list:build",
+        "../list-item:build",
+        "../number-input:build",
+        "../overlay:build",
+        "../sheet:build",
+        "../text-field:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/avatar": "*",
+    "@c2n/button": "*",
+    "@c2n/chip": "*",
+    "@c2n/command": "*",
+    "@c2n/core": "*",
+    "@c2n/date-input": "*",
+    "@c2n/list": "*",
+    "@c2n/list-item": "*",
+    "@c2n/number-input": "*",
+    "@c2n/overlay": "*",
+    "@c2n/sheet": "*",
+    "@c2n/text-field": "*",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

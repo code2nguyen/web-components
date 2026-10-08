@@ -171,7 +171,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 | #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision |
 | --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Proposed |
+| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Accept   |
 | 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                             | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
 | 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed |
 | 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed |
