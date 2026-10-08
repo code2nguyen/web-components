@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Checkbox } from '@c2n/checkbox'
+import type { CheckboxGroup } from '@c2n/checkbox/checkbox-group.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -24,6 +25,13 @@ declare module 'vue' {
         'aria-labelledby'?: unknown
         'aria-describedby'?: unknown
         onChange?: (event: EventOf<Checkbox, 'change'>) => void
+      }
+    >
+    'c2-checkbox-group': DefineComponent<
+      C2Props<CheckboxGroup> & {
+        'aria-label'?: unknown
+        onInput?: (event: EventOf<CheckboxGroup, 'input'>) => void
+        onChange?: (event: EventOf<CheckboxGroup, 'change'>) => void
       }
     >
   }

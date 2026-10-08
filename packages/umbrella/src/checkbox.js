@@ -2,3 +2,5 @@
 // Every module of @c2n/checkbox. Importing this registers each of its elements.
 
 export * from '@c2n/checkbox'
+export * from '@c2n/checkbox/checkbox-group.js'
+export * from '@c2n/checkbox/checkbox.js'

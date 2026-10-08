@@ -2,6 +2,7 @@
 title: 'Checkbox'
 description: 'Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.'
 category: 'Inputs'
+apiTags: ['c2-checkbox']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -14,7 +15,7 @@ import { MatIcon } from '@c2n/components/mat-icon'
 import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
 import { FeatherHeartIcon as FeatherHeart } from '@c2n/feather-icons/icons/heart.js'
 
-`c2-checkbox` wraps a native `<input type="checkbox">`, so `checked`, `indeterminate`, `disabled`, `name`, `value`, `required` and the `change` event behave like the built-in control. It contributes its value to `FormData` only while checked and follows form reset, disabled fieldsets and native required validation. The visible box sits centred in a square touch target whose size is `--c2-checkbox__state-layer--size`; that same square is the hover layer, transparent by default. Set a `state-layer__hover__*--color` to tint it, or shrink it to the box size for a compact inline checkbox. Keyboard focus draws a ring around the box. The three marks are slots that take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` ligature.
+`c2-checkbox` wraps a native `<input type="checkbox">`, so `checked`, `indeterminate`, `disabled`, `name`, `value`, `required` and the `change` event behave like the built-in control. It contributes its value to `FormData` only while checked and follows form reset, disabled fieldsets and native required validation. The visible box sits centred in a square touch target whose size is `--c2-checkbox__state-layer--size`; that same square is the hover layer, transparent by default. Set a `state-layer__hover__*--color` to tint it, or shrink it to the box size for a compact inline checkbox. Keyboard focus draws a ring around the box. The three marks are slots that take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` ligature. Text in the default slot becomes the label beside the box (clicking it toggles the checkbox, and it names it for assistive technology), with an optional `description` slot underneath; a checkbox without text stays the bare box. To collect several checkboxes into one value array, put them in a [`c2-checkbox-group`](../checkbox-group).
 
 ## Import
 
@@ -53,6 +54,10 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
+<div data-label="Label">
+  <c2-checkbox checked>Remember me</c2-checkbox>
+  <c2-checkbox>Email me updates<span slot="description">At most once a week</span></c2-checkbox>
+</div>
 <div data-label="States">
   <span class="field"><c2-checkbox></c2-checkbox> Unchecked</span>
   <span class="field"><c2-checkbox indeterminate></c2-checkbox> Indeterminate</span>
