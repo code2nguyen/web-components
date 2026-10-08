@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-key-value-editor</title>
+    <script type="module" src="/src/key-value-editor.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .compact {
+        --c2-key-value-editor--row-gap: 4px;
+        --c2-key-value-editor__header--display: none;
+        --c2-key-value-editor__field--height: 28px;
+        --c2-key-value-editor__button--size: 28px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Empty — paste a .env into the key field</h2>
+      <c2-key-value-editor label="Environment variables">
+        <span slot="hint">Tip: paste a .env file into a key field to add several variables at once.</span>
+      </c2-key-value-editor>
+    </section>
+
+    <section>
+      <h2>Masked values</h2>
+      <c2-key-value-editor
+        label="Secrets"
+        masked
+        entries='[{"key":"DATABASE_URL","value":"postgres://app:secret@db:5432/app"},{"key":"STRIPE_SECRET_KEY","value":"sk_live_51H"},{"key":"NODE_ENV","value":"production","masked":false}]'
+      ></c2-key-value-editor>
+    </section>
+
+    <section>
+      <h2>Key pattern and duplicates</h2>
+      <c2-key-value-editor
+        label="Build variables"
+        key-pattern="[A-Z_][A-Z0-9_]*"
+        entries='[{"key":"API_URL","value":"https://api.example.com"},{"key":"API_URL","value":"https://staging.example.com"},{"key":"lower-case","value":"1"}]'
+      ></c2-key-value-editor>
+    </section>
+
+    <section>
+      <h2>Read-only, compact</h2>
+      <c2-key-value-editor class="compact" readonly entries='[{"key":"REGION","value":"eu-west-1"},{"key":"LOG_LEVEL","value":"info"}]'></c2-key-value-editor>
+    </section>
+
+    <section>
+      <h2>In a form</h2>
+      <form id="form">
+        <c2-key-value-editor name="env" required></c2-key-value-editor>
+        <button>Submit</button>
+        <pre id="out"></pre>
+      </form>
+      <script>
+        document.getElementById('form').addEventListener('submit', (event) => {
+          event.preventDefault()
+          document.getElementById('out').textContent = new FormData(event.target).get('env')
+        })
+      </script>
+    </section>
+  </body>
+</html>

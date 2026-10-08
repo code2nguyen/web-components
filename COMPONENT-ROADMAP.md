@@ -199,9 +199,9 @@ These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat
 
 ## 68 more from real apps
 
-Researching 90 products found 68 more primitives that no design system above ships as a component, numbered 101 to 168: 4 P1, 42 P2 and 22 P3. The products were Linear, Slack, Stripe, Datadog, ChatGPT, Spotify, Zendesk and others. Each row was seen in at least two products. The source is the help, changelog or teardown page the pattern was checked against on 2026-10-04.
+Researching 90 products found 68 more primitives that no design system above ships as a component, numbered 101 to 168: 4 P1, 42 P2 and 22 P3. `c2-key-value-editor` (#105) is built, so its row is removed. The products were Linear, Slack, Stripe, Datadog, ChatGPT, Spotify, Zendesk and others. Each row was seen in at least two products. The source is the help, changelog or teardown page the pattern was checked against on 2026-10-04.
 
-### J. Developer and data tools (13)
+### J. Developer and data tools (12)
 
 | #   | Component              | What it does                                                                   | Seen in                                                                       | Source                                                                                                                | Priority | Decision |
 | --- | ---------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------- | -------- |
@@ -209,7 +209,6 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 102 | `c2-distribution-bar`  | One 100% stacked bar of a breakdown, with legend and hover shares              | Sentry tags, GitHub language bar, Monday.com battery, Linear project progress | [Sentry](https://docs.sentry.io/product/issues/issue-details/)                                                        | P1       | Proposed |
 | 103 | `c2-query-input`       | One-line `key:value` search with token highlighting and value autocomplete     | Datadog, GitHub, Sentry, Grafana Loki                                         | [Datadog](https://docs.datadoghq.com/logs/explorer/search/)                                                           | P2       | Proposed |
 | 104 | `c2-facet-list`        | Sidebar of attribute values with counts and include/exclude toggles            | Datadog, Sentry, Metabase, Kibana                                             | [Datadog](https://docs.datadoghq.com/logs/explorer/facets/)                                                           | P2       | Proposed |
-| 105 | `c2-key-value-editor`  | Editable KEY=value rows; pasting a `.env` splits it into rows; masked values   | Vercel, Netlify, Supabase, Postman                                            | [Vercel](https://vercel.com/changelog/bulk-upload-now-available-for-environment-variables)                            | P2       | Proposed |
 | 106 | `c2-uptime-bar`        | One tick per day coloured by status, uptime % and hover detail                 | Atlassian Statuspage, GitHub and Vercel status pages                          | [Statuspage](https://support.atlassian.com/statuspage/docs/display-historical-uptime-of-components/)                  | P2       | Proposed |
 | 107 | `c2-check-list`        | CI checks grouped by result, failing first, with duration and re-run           | GitHub merge box, GitLab, Vercel                                              | [GitHub](https://github.blog/changelog/2025-03-04-improved-pull-request-merge-experience-is-now-generally-available/) | P2       | Proposed |
 | 108 | `c2-trace-waterfall`   | Span tree with offset duration bars on one time axis                           | Sentry, Datadog APM, Grafana Tempo                                            | [Sentry](https://docs.sentry.io/concepts/key-terms/tracing/trace-view/)                                               | P2       | Proposed |
@@ -296,7 +295,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 162 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate` and `c2-json-viewer`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 161 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-key-value-editor`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |

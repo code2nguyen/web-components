@@ -1199,6 +1199,47 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-key-value-editor",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned controls next to the add button; style them through their own class or public contract."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "add-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__add--color"],
+      "reason": "The add button sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the add colour."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "hide-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The reveal toggle sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "hint",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__hint--color", "--c2-key-value-editor__hint--font-size"],
+      "reason": "The hint slot passes its colour and font size on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "remove-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The remove button sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "show-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The reveal toggle sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
       "tag": "c2-label",
       "slot": "default",
       "decision": "assigned-content",

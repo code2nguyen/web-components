@@ -1,0 +1,105 @@
+---
+description: 'Ready-made looks for c2-key-value-editor: environment variables, HTTP headers, a compact settings list and a bordered panel. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { KeyValueEditor } from '@c2n/components/key-value-editor'
+
+## Presets
+
+The key and value columns share one grid with the headers, so `--c2-key-value-editor--key-width` and `--value-width` resize both. The `__field` variables style every input and `__header--display: none` drops the column headers.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-key-value-editor label="Environment variables" entries='[{"key":"API_URL","value":"https://api.example.com"},{"key":"LOG_LEVEL","value":"info"}]'></c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=Secrets
+<style>
+  .secrets {
+    width: 100%;
+    --c2-key-value-editor--key-width: minmax(0, 1fr);
+    --c2-key-value-editor--value-width: minmax(0, 1fr);
+    --c2-key-value-editor__field--border-radius: 8px;
+    --c2-key-value-editor__field--height: 36px;
+    --c2-key-value-editor__button--size: 36px;
+    --c2-key-value-editor__button--border-radius: 8px;
+  }
+</style>
+<c2-key-value-editor
+  class="secrets"
+  label="Secrets"
+  masked
+  entries='[{"key":"DATABASE_URL","value":"postgres://app:secret@db/app"},{"key":"STRIPE_SECRET_KEY","value":"sk_live_51Hx"}]'
+></c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=HTTP headers
+<style>
+  .headers {
+    width: 100%;
+    --c2-key-value-editor__field--font-family: inherit;
+    --c2-key-value-editor__field--font-size: 13px;
+    --c2-key-value-editor__field--border-radius: 4px;
+    --c2-key-value-editor__field--height: 30px;
+    --c2-key-value-editor__button--size: 30px;
+  }
+</style>
+<c2-key-value-editor
+  class="headers"
+  label="Headers"
+  key-label="Header"
+  key-placeholder="Header"
+  value-placeholder="Value"
+  add-label="Add header"
+  entries='[{"key":"Content-Type","value":"application/json"},{"key":"Authorization","value":"Bearer eyJhbGciOi","masked":true}]'
+></c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 100%;
+    --c2-key-value-editor--row-gap: 4px;
+    --c2-key-value-editor--column-gap: 4px;
+    --c2-key-value-editor__header--display: none;
+    --c2-key-value-editor__field--height: 26px;
+    --c2-key-value-editor__field--font-size: 12px;
+    --c2-key-value-editor__field--border-radius: 4px;
+    --c2-key-value-editor__button--size: 26px;
+    --c2-key-value-editor__button__icon--size: 14px;
+  }
+</style>
+<c2-key-value-editor class="compact" label="Labels" entries='[{"key":"team","value":"payments"},{"key":"tier","value":"gold"},{"key":"region","value":"eu"}]'></c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=Borderless fields
+<style>
+  .borderless {
+    width: 100%;
+    --c2-key-value-editor__field--border: 1px solid transparent;
+    --c2-key-value-editor__field__hover--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-key-value-editor__field--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-key-value-editor class="borderless" label="Variables" entries='[{"key":"FEATURE_FLAGS","value":"beta,search"},{"key":"CACHE_TTL","value":"3600"}]'></c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=Accent add button
+<style>
+  .accent {
+    width: 100%;
+    --c2-key-value-editor__add--color: light-dark(#7e22ce, #a76cdc);
+    --c2-key-value-editor__field__focus--border: 1px solid #9333ea;
+    --c2-key-value-editor__header--font-weight: 600;
+  }
+</style>
+<c2-key-value-editor class="accent" label="Variables" add-label="New variable" entries='[{"key":"APP_NAME","value":"Orbit"}]'>
+  <span slot="hint">Paste a .env file into a key field to import it.</span>
+</c2-key-value-editor>
+```
+
+</GalleryGrid>

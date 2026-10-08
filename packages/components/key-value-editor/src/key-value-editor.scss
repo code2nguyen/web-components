@@ -1,0 +1,236 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-key-value-editor,
+  $theme: (
+    row-gap: 8px,
+    column-gap: 8px,
+    key-width: minmax(0, 2fr),
+    value-width: minmax(0, 3fr),
+    color: #18181b,
+    font-size: 14px,
+    font-family: null,
+
+    header--display: grid,
+    header--color: #71717a,
+    header--font-size: 12px,
+    header--font-weight: 500,
+
+    field--height: 32px,
+    field--padding-inline: 8px,
+    field--border: 1px solid #bcbcc6,
+    field__hover--border: 1px solid #a1a1aa,
+    field__focus--border: 1px solid #476ef9,
+    field__error--border: 1px solid #dc2626,
+    field__read-only--border: 1px solid #e4e4e7,
+    field--border-radius: 6px,
+    field--background: #ffffff,
+    field--color: #18181b,
+    field__placeholder--color: #71717a,
+    field--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    field--font-size: 13px,
+
+    error--color: #dc2626,
+    error--font-size: 12px,
+
+    button--size: 32px,
+    button__icon--size: 16px,
+    button--border-radius: 6px,
+    button--color: #71717a,
+    button__hover--color: #18181b,
+    button__hover--background: #f4f4f5,
+    button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    add--color: rgb(2, 101, 220),
+    add--font-weight: 500,
+
+    hint--color: #71717a,
+    hint--font-size: 12px,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+}
+
+:host(:state(disabled)) {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(row-gap);
+}
+
+/* Header and rows share one track list so the columns line up; the last track holds the remove button. */
+.header,
+.row {
+  grid-template-columns: css.cssVar(key-width) css.cssVar(value-width) css.cssVar(button--size);
+  column-gap: css.cssVar(column-gap);
+}
+
+.read-only .header,
+.read-only .row {
+  grid-template-columns: css.cssVar(key-width) css.cssVar(value-width);
+}
+
+.header {
+  display: css.cssVar(header--display);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(row-gap);
+}
+
+.row {
+  display: grid;
+  align-items: center;
+  row-gap: 4px;
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  height: css.cssVar(field--height);
+  margin: 0;
+  padding-inline: css.cssVar(field--padding-inline);
+  border: css.cssVar(field--border);
+  border-radius: css.cssVar(field--border-radius);
+  background: css.cssVar(field--background);
+  color: css.cssVar(field--color);
+  font-family: css.cssVar(field--font-family);
+  font-size: css.cssVar(field--font-size);
+  outline: none;
+
+  &::placeholder {
+    color: css.cssVar(field__placeholder--color);
+    opacity: 1;
+  }
+
+  &:hover:not(:disabled, [readonly]) {
+    border: css.cssVar(field__hover--border);
+  }
+
+  &:focus-visible,
+  &:focus:not([readonly]) {
+    border: css.cssVar(field__focus--border);
+  }
+
+  &[readonly] {
+    border: css.cssVar(field__read-only--border);
+  }
+
+  &[aria-invalid='true'] {
+    border: css.cssVar(field__error--border);
+  }
+}
+
+.value-box {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.masked .value {
+  padding-inline-end: calc(#{css.cssVar(button--size)} - 4px);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(button--border-radius);
+  background: transparent;
+  color: css.cssVar(button--color);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(button__hover--background);
+    color: css.cssVar(button__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: 0;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(button__icon--size);
+    height: css.cssVar(button__icon--size);
+  }
+}
+
+.remove {
+  width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+}
+
+.reveal {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-end: 4px;
+  width: calc(#{css.cssVar(button--size)} - 8px);
+}
+
+.error {
+  grid-column: 1 / -1;
+  color: css.cssVar(error--color);
+  font-size: css.cssVar(error--font-size);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(column-gap);
+}
+
+.add {
+  gap: 6px;
+  height: css.cssVar(button--size);
+  padding-inline: 8px;
+  margin-inline-start: -8px;
+  color: css.cssVar(add--color);
+  font-weight: css.cssVar(add--font-weight);
+
+  &:hover:not(:disabled) {
+    color: css.cssVar(add--color);
+  }
+}
+
+.hint {
+  display: block;
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}

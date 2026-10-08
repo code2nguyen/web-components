@@ -442,6 +442,7 @@ export const overrides: Record<string, Override> = {
   '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
+  '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
