@@ -1,0 +1,102 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Indicator } from '@c2n/components/indicator'
+import { Avatar } from '@c2n/components/avatar'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+
+## Presets
+
+Curated looks for `c2-indicator`. Open any card in the studio to start from it. The tone pairs (`--c2-indicator__danger--background` and `--color`, …) recolour a tone everywhere, `--c2-indicator--offset-x`/`-y` place the marker on a round target, and the size, ring and typography variables turn it from a dot into a counter or a tag.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-indicator count="3" accessible-label="{count} unread">
+  <c2-button>Inbox</c2-button>
+</c2-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Presence
+<style>
+  .presence {
+    --c2-indicator--offset-x: 14.6%;
+    --c2-indicator--offset-y: 14.6%;
+    --c2-indicator__dot--size: 12px;
+    --c2-avatar--size: 48px;
+  }
+</style>
+<c2-indicator class="presence" tone="success" position="bottom-end" accessible-label="Online">
+  <c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar>
+</c2-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Live pulse
+<style>
+  .live {
+    --c2-indicator--offset-x: 14.6%;
+    --c2-indicator--offset-y: 14.6%;
+    --c2-indicator__pulse--animation-duration: 1.2s;
+  }
+</style>
+<c2-indicator class="live" pulse accessible-label="New activity">
+  <c2-icon-button aria-label="Notifications"><c2-feather-bell></c2-feather-bell></c2-icon-button>
+</c2-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Squared counter
+<style>
+  .squared {
+    --c2-indicator--height: 16px;
+    --c2-indicator--min-width: 16px;
+    --c2-indicator--padding-left: 4px;
+    --c2-indicator--padding-right: 4px;
+    --c2-indicator--border-radius: 4px;
+    --c2-indicator--font-size: 11px;
+    --c2-indicator--border: none;
+    --c2-indicator--offset-x: 6px;
+    --c2-indicator--offset-y: 4px;
+  }
+</style>
+<c2-indicator class="squared" tone="primary" count="128" max="99" accessible-label="More than 99 open issues">
+  <c2-button>Issues</c2-button>
+</c2-indicator>
+```
+
+```html tag=MdxCodeBlock,label=New tag
+<style>
+  .new-tag {
+    --c2-indicator--height: 16px;
+    --c2-indicator--font-size: 10px;
+    --c2-indicator--font-weight: 600;
+    --c2-indicator__primary--background: #7c3aed;
+  }
+</style>
+<c2-indicator class="new-tag" tone="primary" position="top-center" accessible-label="New feature">
+  <c2-button>Automations</c2-button>
+  <span slot="label">NEW</span>
+</c2-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Verified
+<style>
+  .verified {
+    --c2-indicator--height: 16px;
+    --c2-indicator--min-width: 16px;
+    --c2-indicator--padding-left: 0px;
+    --c2-indicator--padding-right: 0px;
+    --c2-indicator--offset-x: 14.6%;
+    --c2-indicator--offset-y: 14.6%;
+    --c2-indicator__icon--size: 10px;
+    --c2-avatar--size: 48px;
+  }
+</style>
+<c2-indicator class="verified" tone="info" position="bottom-end" accessible-label="Verified account">
+  <c2-avatar name="Grace Hopper" initial-count="2"></c2-avatar>
+  <svg slot="label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</c2-indicator>
+```
+
+</GalleryGrid>

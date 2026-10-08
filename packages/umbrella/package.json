@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -220,6 +220,22 @@
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./checkbox/checkbox-group": {
+      "types": "./dist/checkbox/checkbox-group.d.ts",
+      "default": "./dist/checkbox/checkbox-group.js"
+    },
+    "./chip": {
+      "types": "./dist/chip.d.ts",
+      "default": "./dist/chip.js"
+    },
+    "./chip/chip-part": {
+      "types": "./dist/chip/chip-part.d.ts",
+      "default": "./dist/chip/chip-part.js"
+    },
+    "./chip-group": {
+      "types": "./dist/chip-group.d.ts",
+      "default": "./dist/chip-group.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"
@@ -284,9 +300,25 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./description-list": {
+      "types": "./dist/description-list.d.ts",
+      "default": "./dist/description-list.js"
+    },
+    "./description-list/description-item": {
+      "types": "./dist/description-list/description-item.d.ts",
+      "default": "./dist/description-list/description-item.js"
+    },
+    "./description-list/description-value": {
+      "types": "./dist/description-list/description-value.d.ts",
+      "default": "./dist/description-list/description-value.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
+    },
+    "./filter-builder": {
+      "types": "./dist/filter-builder.d.ts",
+      "default": "./dist/filter-builder.js"
     },
     "./flow": {
       "types": "./dist/flow.d.ts",
@@ -328,9 +360,17 @@
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
     },
+    "./indicator": {
+      "types": "./dist/indicator.d.ts",
+      "default": "./dist/indicator.js"
+    },
     "./inline-edit": {
       "types": "./dist/inline-edit.d.ts",
       "default": "./dist/inline-edit.js"
+    },
+    "./json-viewer": {
+      "types": "./dist/json-viewer.d.ts",
+      "default": "./dist/json-viewer.js"
     },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
@@ -387,6 +427,10 @@
     "./menu/menu-item": {
       "types": "./dist/menu/menu-item.d.ts",
       "default": "./dist/menu/menu-item.js"
+    },
+    "./menu/menu-row": {
+      "types": "./dist/menu/menu-row.d.ts",
+      "default": "./dist/menu/menu-row.js"
     },
     "./modal": {
       "types": "./dist/modal.d.ts",
@@ -596,6 +640,10 @@
       "types": "./dist/tree/tree-item.d.ts",
       "default": "./dist/tree/tree-item.js"
     },
+    "./truncate": {
+      "types": "./dist/truncate.d.ts",
+      "default": "./dist/truncate.js"
+    },
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
@@ -635,10 +683,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.3",
-    "@c2n/phosphor-icons": "1.0.3",
-    "@c2n/task-icons": "1.0.3",
-    "@c2n/theme": "1.0.3",
+    "@c2n/core": "1.0.6",
+    "@c2n/phosphor-icons": "1.0.6",
+    "@c2n/task-icons": "1.0.6",
+    "@c2n/theme": "1.0.6",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -746,6 +794,8 @@
     "@c2n/chat-message-list": "*",
     "@c2n/chatbot": "*",
     "@c2n/checkbox": "*",
+    "@c2n/chip": "*",
+    "@c2n/chip-group": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
@@ -759,14 +809,18 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/label": "*",
@@ -820,6 +874,7 @@
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
     "@c2n/tree": "*",
+    "@c2n/truncate": "*",
     "@c2n/upload": "*",
     "@c2n/virtual-list": "*",
     "@c2n/week-planner": "*",

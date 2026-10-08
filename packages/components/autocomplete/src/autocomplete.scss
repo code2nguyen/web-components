@@ -23,6 +23,8 @@
     panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
     panel--max-height: 320px,
     list--padding: 4px,
+    // Read by the component, not by a rule: the header and footer give way before the list gets shorter than this.
+    list--min-height: 96px,
     header--background: transparent,
     header--color: #71717a,
     header--padding: 10px 12px,
@@ -122,6 +124,7 @@
 ::slotted([slot='prefix-icon']),
 ::slotted([slot='suffix-icon']) {
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
@@ -161,7 +164,8 @@ c2-overlay {
 .panel-footer {
   flex: none;
 
-  &[hidden] {
+  &[hidden],
+  .panel--compact > & {
     display: none;
   }
 }

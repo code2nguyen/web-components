@@ -55,7 +55,7 @@ All events originate on `c2-masonry`, do not bubble, and are not cancelable. Lis
 
 ## Editing contract
 
-When `editable` is false, no built-in edit control is shown. In edit mode, each valid tile has a named move control and resize targets on its right and bottom borders. Hovering the tile reveals the move control and highlights those borders; keyboard focus reveals them too. Right-border drags change column span; bottom-border drags change row span. Edge cursors reveal the pointer interaction, while a focus outline exposes the bottom-border keyboard resize control. Pointer press on a control or edge starts an armed gesture, movement starts a preview, and release commits only a changed candidate. `pointercancel` or lost capture cancels. Touch action is restricted on handles and edge hit zones only, leaving interior tile content scrollable.
+When `editable` is false, no built-in edit control is shown. In edit mode, each valid tile has a named move control and resize targets on its right and bottom borders. Hovering the tile reveals the move control and highlights those borders; keyboard focus reveals them too. Right-border drags change column span; bottom-border drags change row span; bottom-right-corner drags change both together. Edge cursors reveal the pointer interaction, while a focus outline exposes the bottom-border keyboard resize control. Pointer press on a control or edge starts an armed gesture, movement starts a preview, and release commits only a changed candidate. `pointercancel` or lost capture cancels. Touch action is restricted on handles and edge hit zones only, leaving interior tile content scrollable.
 
 With a focused move control, Enter or Space starts a keyboard session, Left/Up moves the candidate toward the previous order position, Right/Down toward the next, Home/End to the first/last position, Enter or Space commits, and Escape cancels. With a focused resize control, Enter or Space starts a session; Left/Right decrease/increase the active range's column span and Up/Down decrease/increase the shared row span, by one cell per keypress. Enter or Space commits; Escape cancels. At a boundary, the candidate stays valid and no-op completion emits no event. The preview exposes the target area before commit.
 
@@ -65,14 +65,14 @@ The nearest eligible vertical scroll container scrolls while a pointer drag is h
 
 ## Slots and styling parts
 
-| Element           | Slot / part                                                                | Purpose                                                         |
-| ----------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `c2-masonry`      | default slot                                                               | Direct masonry items.                                           |
-| `c2-masonry`      | `grid` part                                                                | Packed grid region.                                             |
-| `c2-masonry`      | `placeholder` part                                                         | Candidate destination during editing.                           |
-| `c2-masonry-item` | default slot                                                               | Arbitrary application content in the scrollable content region. |
-| `c2-masonry-item` | `move-icon` slot                                                           | Optional consumer move icon with built-in SVG fallback.         |
-| `c2-masonry-item` | `content`, `controls`, `move-handle`, `resize-handle`, `resize-edge` parts | Stable internal regions for styling beyond variable values.     |
+| Element           | Slot / part                                                                                 | Purpose                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `c2-masonry`      | default slot                                                                                | Direct masonry items.                                           |
+| `c2-masonry`      | `grid` part                                                                                 | Packed grid region.                                             |
+| `c2-masonry`      | `placeholder` part                                                                          | Candidate destination during editing.                           |
+| `c2-masonry-item` | default slot                                                                                | Arbitrary application content in the scrollable content region. |
+| `c2-masonry-item` | `move-icon` slot                                                                            | Optional consumer move icon with built-in SVG fallback.         |
+| `c2-masonry-item` | `content`, `controls`, `move-handle`, `resize-handle`, `resize-edge`, `resize-corner` parts | Stable internal regions for styling beyond variable values.     |
 
 The content region retains the declared tile height and uses internal scrolling when content exceeds it. It is keyboard reachable when it overflows and has an accessible name derived from the tile label. The application owns the styling and semantics of slotted content.
 

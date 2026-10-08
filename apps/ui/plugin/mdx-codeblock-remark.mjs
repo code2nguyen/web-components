@@ -69,9 +69,77 @@ function extractStyle(code, uid) {
   let style = result ? result[1] : ''
   return style
     ? `<style>
-  ${style.replace(/\s*([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/g, `.${uid}$1$2`)}
+  ${scopeCss(style, `[data-uid="${uid}"]`)}
   </style>`
     : ''
+}
+
+// Scopes a fence's stylesheet to its example frame (the `[data-uid]` figure or usage section) by prefixing every
+// selector with the frame as an ancestor, so a selector may start with a tag (`c2-chip.person`, `kbd`) as well as a
+// class. Rules inside `@media`/`@supports`/`@container`/`@layer` are scoped too; `@keyframes`, `@font-face` and other
+// at-rules are left as written. Comments are dropped.
+export function scopeCss(css, scope) {
+  css = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  let output = ''
+  let index = 0
+  while (index < css.length) {
+    const open = css.indexOf('{', index)
+    const semicolon = css.indexOf(';', index)
+    // A statement at-rule (`@import …;`) before the next block.
+    if (semicolon > -1 && (open === -1 || semicolon < open)) {
+      output += css.slice(index, semicolon + 1)
+      index = semicolon + 1
+      continue
+    }
+    if (open === -1) {
+      output += css.slice(index)
+      break
+    }
+    const close = matchingBrace(css, open)
+    const prelude = css.slice(index, open)
+    const body = css.slice(open + 1, close)
+    const leading = prelude.match(/^\s*/)[0]
+    const selector = prelude.trim()
+    if (/^@(media|supports|container|layer|document)\b/i.test(selector)) {
+      output += `${leading}${selector} {${scopeCss(body, scope)}}`
+    } else if (selector.startsWith('@')) {
+      output += `${leading}${selector} {${body}}`
+    } else {
+      const scoped = splitSelectors(selector)
+        .map((part) => (/^(:root|html|body)\b/.test(part) ? part : `${scope} ${part}`))
+        .join(', ')
+      output += `${leading}${scoped} {${body}}`
+    }
+    index = close + 1
+  }
+  return output
+}
+
+function matchingBrace(css, open) {
+  let depth = 0
+  for (let i = open; i < css.length; i++) {
+    if (css[i] === '{') depth++
+    else if (css[i] === '}' && --depth === 0) return i
+  }
+  return css.length
+}
+
+// Splits a selector list on its top-level commas, leaving those inside `:is()`/`:where()`/`:not()` alone.
+function splitSelectors(selector) {
+  const parts = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < selector.length; i++) {
+    const char = selector[i]
+    if (char === '(' || char === '[') depth++
+    else if (char === ')' || char === ']') depth--
+    else if (char === ',' && depth === 0) {
+      parts.push(selector.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  parts.push(selector.slice(start).trim())
+  return parts.filter(Boolean)
 }
 
 function compileComponentCode(code, uid, componentName) {
@@ -142,8 +210,17 @@ function asAttributeName(name) {
 // These are structural/data children whose parent packages register them. Keeping them as plain custom
 // elements avoids a nested Astro hydration boundary that can make a parent initialize before its definitions.
 const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
+// Tags that stay plain only as direct children of a given parent, because they are islands of their own elsewhere.
+// `c2-chip-group` reads the size its chips and badges report, which only reaches it from a direct child.
+const NESTED_CHILDREN_OF = new Map([['c2-chip-group', new Set(['c2-chip', 'c2-badge'])]])
 
-function changeComponentName(vnode, uid, componentName, markup) {
+function isNestedChild(tag, parentTag) {
+  return NESTED_CHILD_TAGS.has(tag) || !!NESTED_CHILDREN_OF.get(parentTag)?.has(tag)
+}
+
+function changeComponentName(vnode, uid, componentName, markup, parentTag) {
+  const tag = vnode.name
+  const nested = isNestedChild(tag, parentTag)
   let mainComponent = componentName && vnode.name == componentName ? vnode : null
   const classAttributeIndex = vnode.attributes?.findIndex((item) => item.name == 'class')
   if (classAttributeIndex > -1) {
@@ -153,10 +230,10 @@ function changeComponentName(vnode, uid, componentName, markup) {
   // A nested child is still rendered by Astro's Lit renderer on the server, which assigns any attribute whose name is a
   // property as that property; a non-reflected one (`c2-chart-series`'s `field`) then never reaches the HTML. So its
   // attributes are handed over capitalized as well, even though it does not become an island.
-  if (NESTED_CHILD_TAGS.has(vnode.name)) {
+  if (nested) {
     for (const attribute of vnode.attributes ?? []) attribute.name = asAttributeName(attribute.name)
   }
-  if (vnode.name?.startsWith('c2-') && !NESTED_CHILD_TAGS.has(vnode.name)) {
+  if (vnode.name?.startsWith('c2-') && !nested) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
     for (const attribute of vnode.attributes) attribute.name = asAttributeName(attribute.name)
@@ -185,7 +262,7 @@ function changeComponentName(vnode, uid, componentName, markup) {
   }
   if (vnode.children) {
     for (const item of vnode.children) {
-      const hostNode = changeComponentName(item, uid, componentName, markup)
+      const hostNode = changeComponentName(item, uid, componentName, markup, tag)
       if (!mainComponent && hostNode) {
         mainComponent = hostNode
       }

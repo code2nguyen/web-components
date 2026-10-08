@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -51,6 +51,10 @@
     "./controllers/breakpoints-observer.js": {
       "types": "./dist/controllers/breakpoints-observer.d.ts",
       "default": "./dist/controllers/breakpoints-observer.js"
+    },
+    "./controllers/group-item-size.js": {
+      "types": "./dist/controllers/group-item-size.d.ts",
+      "default": "./dist/controllers/group-item-size.js"
     },
     "./controllers/virtual-scroll.js": {
       "types": "./dist/controllers/virtual-scroll.d.ts",

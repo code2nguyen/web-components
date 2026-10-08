@@ -32,10 +32,14 @@
     header--color: #7a8494,
     header--font-size: 12px,
     spiral--display: block,
+    spiral--color: #9aa0a8,
     glue--display: none,
     glue--background: #3f444b,
     sheet--rotate: 0deg,
     top--padding-top: 20px,
+    pad--padding-top: 12px,
+    pad--padding-bottom: 0px,
+    stack--display: block,
     controls--opacity: 1,
     ink-blue--color: #2848b8,
     ink-black--color: #18181b,
@@ -45,8 +49,6 @@
     highlight-green--background: rgba(110, 220, 120, 0.4),
     highlight-pink--background: rgba(255, 120, 170, 0.38),
     task__checked--opacity: 0.55,
-    toolbar--background: #efe6cc,
-    toolbar--color: #2c2a26,
     toolbar__button__active--background: rgba(60, 50, 30, 0.14),
     perforation--color: #b9bfc8,
     paper-yellow--background: #fcf0bf,
@@ -90,6 +92,7 @@
   --_pad-paper: #{css.cssVar(pad-legal--background)};
   --c2-notepad__spiral--display: none;
   --c2-notepad__glue--display: block;
+  --c2-notepad__pad--padding-top: 0px;
   --c2-notepad__top--padding-top: 10px;
   --c2-notepad__rule--spacing: 30px;
   --c2-notepad__margin--inset: 60px;
@@ -99,6 +102,7 @@
 :host([pad='sticky']) {
   --_pad-paper: #{css.cssVar(pad-sticky--background)};
   --c2-notepad__spiral--display: none;
+  --c2-notepad__pad--padding-top: 0px;
   --c2-notepad__top--padding-top: 8px;
   --c2-notepad__margin--inset: 4px;
   --c2-notepad__rule--spacing: 30px;
@@ -112,6 +116,7 @@
 :host([pad='index-card']) {
   --_pad-paper: #{css.cssVar(pad-index-card--background)};
   --c2-notepad__spiral--display: none;
+  --c2-notepad__pad--padding-top: 0px;
   --c2-notepad__top--padding-top: 10px;
   --c2-notepad__margin--inset: 4px;
   --c2-notepad__rule--spacing: 26px;
@@ -172,6 +177,12 @@
   --_paper: #{css.cssVar(paper-night--background)};
   --_ink: #{css.cssVar(paper-night--color)};
 }
+// The washi tape of the toolbar and the paper picker is cut from the page's own paper, a shade towards its ink, so it
+// belongs to the note it sits on: cream on cream, dark on night paper, pink on pink. A colour set on the variables wins.
+:host {
+  --_tape: var(--c2-notepad__toolbar--background, color-mix(in srgb, var(--_ink) 12%, var(--_paper)));
+  --_tape-ink: var(--c2-notepad__toolbar--color, var(--_ink));
+}
 // On night paper the inks would be dark on dark: each mark takes its night variant, lifted towards white (the default
 // black ink becomes the paper's ink).
 :host([paper-color='night']) .writing span[data-ink] {
@@ -195,13 +206,16 @@
   --_margin-c: transparent;
 }
 
+:host([tearable]) {
+  // Room under the page for the sheets beneath it.
+  --c2-notepad__pad--padding-bottom: 8px;
+}
 .pad {
   position: relative;
-  // Lets the stack and the spiral draw outside the sheet without being clipped by the host.
-  padding-block-start: 12px;
-}
-:host([tearable]) .pad {
-  padding-block-end: 8px;
+  // Room above the sheet for the spiral's coils, so they are not clipped by the host. The pads without a spiral set it
+  // to 0, so their sheet starts at the top of the element, level with whatever sits beside it.
+  padding-block-start: css.cssVar(pad--padding-top);
+  padding-block-end: css.cssVar(pad--padding-bottom);
 }
 
 .sheet {
@@ -209,6 +223,9 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
+  // The rules and the margin are drawn on the writing surface: clip them to the sheet's rounded corners (a sticky
+  // note's 18px curl). The toolbar and the paper card are top-layer popovers, which no clip reaches.
+  overflow: clip;
   background: var(--_paper);
   rotate: css.cssVar(sheet--rotate);
   border-radius: css.cssVar(sheet--border-radius);
@@ -234,6 +251,8 @@
 
 // ---- bindings ---------------------------------------------------------------------------------------------------
 
+// Flat coils: a rounded bar every 24px, in one colour, running down into its punched hole. The shape is a mask, so the
+// colour is a plain variable a theme can set.
 .spiral {
   display: css.cssVar(spiral--display);
   position: absolute;
@@ -241,10 +260,10 @@
   height: 26px;
   z-index: 3;
   pointer-events: none;
-  background-image: linear-gradient(90deg, transparent 8px, #6d737b 8px, #e9ecef 11px, #8b929a 13px, #50565d 16px, transparent 16px);
-  background-size: 24px 100%;
-  background-repeat: space no-repeat;
-  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.25));
+  background-color: css.cssVar(spiral--color);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='26'%3E%3Crect x='10' y='1' width='4' height='21' rx='2'/%3E%3C/svg%3E");
+  mask-size: 24px 100%;
+  mask-repeat: space no-repeat;
 }
 // Punched holes under the coils, on the same spacing so each coil goes through one.
 .holes {
@@ -269,30 +288,35 @@
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
 }
 
-// Sheets under the top one, for a pad that can be torn.
+// Sheets under the top one, for a pad that can be torn: the size of the page, nudged and tilted so their edges show
+// in the room under it. Clipped to the element, so a tilt never spills past it into a scrollbar or a clipped wedge in
+// the container. Each sheet down is a shade darker, which keeps them apart on dark paper too, where a shadow does not
+// show.
 .stack {
   display: none;
   position: absolute;
-  inset: 12px 0 0;
+  inset: css.cssVar(pad--padding-top) 0 0;
+  overflow: hidden;
   pointer-events: none;
   &::before,
   &::after {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: 0 0 css.cssVar(pad--padding-bottom);
     border-radius: css.cssVar(sheet--border-radius);
-    background: var(--_paper);
     box-shadow: 0 1px 2px rgba(24, 24, 27, 0.12);
   }
   &::before {
+    background: color-mix(in srgb, var(--_paper) 86%, #000000);
     transform: translate(3px, 5px) rotate(0.7deg);
   }
   &::after {
+    background: color-mix(in srgb, var(--_paper) 93%, #000000);
     transform: translate(-2px, 3px) rotate(-0.5deg);
   }
 }
 :host([tearable]) .stack {
-  display: block;
+  display: css.cssVar(stack--display);
 }
 
 // ---- header, perforation, margin ----------------------------------------------------------------------------------
@@ -424,6 +448,9 @@
   overflow-y: auto;
   margin: 0;
   padding: 0 16px var(--_rule) calc(var(--_inset) + 12px);
+  // No rule in the last 4px of the sheet, where it would read as a border along the bottom edge.
+  border-block-end: 4px solid transparent;
+  background-clip: padding-box;
   outline: none;
   color: var(--_ink);
   caret-color: currentColor;
@@ -519,10 +546,13 @@
   }
   mark {
     color: inherit;
-    padding-inline: 1px;
-    border-radius: 2px;
-    // A marker stroke: it sits on the lower part of the letters rather than filling the whole line box.
-    background: linear-gradient(transparent 22%, var(--_highlight) 22% 88%, transparent 88%);
+    // A marker stroke, a little wider than the words: it runs 0.15em past each end (the negative margin keeps the text
+    // where it was) and from just under the baseline to just over the capitals, with softly rounded ends. In em, so it
+    // fits any font size; the bundled face's box reaches 0.92em up and 0.12em down, so the top 0.12em stays clear.
+    margin-inline: -0.15em;
+    padding: 0 0.15em 0.04em;
+    border-radius: 0.3em;
+    background: linear-gradient(transparent 0.12em, var(--_highlight) 0.12em);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
@@ -662,9 +692,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, #{css.cssVar(toolbar--background)} 93%, #ffffff) 9px 12px),
-    #{css.cssVar(toolbar--background)};
+  background: repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, var(--_tape) 93%, #ffffff) 9px 12px), var(--_tape);
   clip-path: polygon(
     0 8%,
     3px 0,
@@ -701,7 +729,7 @@
   border: 0;
   overflow: visible;
   background: none;
-  color: css.cssVar(toolbar--color);
+  color: var(--_tape-ink);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
   rotate: -0.6deg;
   font-family: css.cssVar(writing--font-family);
@@ -756,7 +784,7 @@
     border-radius: 50%;
     background: var(--_swatch);
     box-shadow:
-      0 0 0 2px css.cssVar(toolbar--background),
+      0 0 0 2px var(--_tape),
       0 0 0 3px rgba(0, 0, 0, 0.2);
   }
   .ink.default {
@@ -805,12 +833,12 @@
   }
   &:hover > span {
     box-shadow:
-      0 0 0 2px #{css.cssVar(toolbar--background)},
+      0 0 0 2px var(--_tape),
       0 0 0 3.5px color-mix(in srgb, currentColor 45%, transparent);
   }
   &[aria-pressed='true'] > span {
     box-shadow:
-      0 0 0 2px #{css.cssVar(toolbar--background)},
+      0 0 0 2px var(--_tape),
       0 0 0 3.5px currentColor;
   }
 }
@@ -845,7 +873,7 @@
   border: 0;
   overflow: visible;
   background: none;
-  color: css.cssVar(toolbar--color);
+  color: var(--_tape-ink);
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22));
   rotate: 0.6deg;
   &::before {
@@ -886,12 +914,12 @@
     // The choice itself shows the state: a ring round the selected one, a fainter ring under the pointer.
     &:hover > span:first-child {
       box-shadow:
-        0 0 0 2px #{css.cssVar(toolbar--background)},
+        0 0 0 2px var(--_tape),
         0 0 0 3.5px color-mix(in srgb, currentColor 45%, transparent);
     }
     &[aria-checked='true'] > span:first-child {
       box-shadow:
-        0 0 0 2px #{css.cssVar(toolbar--background)},
+        0 0 0 2px var(--_tape),
         0 0 0 3.5px currentColor;
     }
     &:focus-visible {
@@ -1035,7 +1063,7 @@
     width: 16px;
     height: 9px;
     translate: -50% 0;
-    background: css.cssVar(toolbar--background);
+    background: var(--_tape);
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
   &[data-side='top']::after {

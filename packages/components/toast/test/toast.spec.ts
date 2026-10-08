@@ -34,3 +34,23 @@ test('a timed toast dismisses using the browser clock', async ({ page, renderSce
   await page.clock.fastForward(1100)
   await expect(page.getByText('Temporary', { exact: true })).not.toBeVisible()
 })
+test('an action placed at the end sits on the message line, before the dismiss button', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-toast-region inline animation-duration="0"></c2-toast-region>')
+  const region = page.locator('c2-toast-region')
+  await region.evaluate((el) => {
+    const target = el as HTMLElement & { show(options: object): string }
+    target.show({ id: 'pin', message: 'Pinned to the board', duration: 0, dismissible: true, actionLabel: 'Undo', actionPlacement: 'end' })
+  })
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
+  const message = await region.locator('[part="message"]').boundingBox()
+  const undo = await page.getByRole('button', { name: 'Undo' }).boundingBox()
+  const close = await page.getByRole('button', { name: 'Dismiss notification' }).boundingBox()
+  if (!message || !undo || !close) throw new Error('Expected a message, its action and the dismiss button')
+  expect(Math.abs(undo.y + undo.height / 2 - (message.y + message.height / 2))).toBeLessThan(3)
+  expect(undo.x).toBeGreaterThan(message.x + message.width)
+  expect(undo.x + undo.width).toBeLessThanOrEqual(close.x)
+  await expect(page.getByRole('button', { name: 'Undo' })).toHaveCSS('text-decoration-line', 'none')
+  await watch(region, 'toast-action')
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(region).not.toHaveAttribute('data-events', '[]')
+})

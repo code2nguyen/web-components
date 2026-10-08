@@ -136,6 +136,19 @@ export function validateSnapshot(value: unknown): value is MasonryLayoutSnapshot
   return true
 }
 
+/** The snapshot with the pinned tiles first, each group in its own order; the same snapshot when they already are. */
+export function pinnedFirst(snapshot: MasonryLayoutSnapshot, isPinned: (id: string) => boolean): MasonryLayoutSnapshot {
+  const pinned = snapshot.items.filter((item) => isPinned(item.id))
+  if (snapshot.items.slice(0, pinned.length).every((item) => isPinned(item.id))) return snapshot
+  return { version: 1, items: [...pinned, ...snapshot.items.filter((item) => !isPinned(item.id))] }
+}
+
+/** The index range a moving tile may take in the order without it: within the pinned group, or after it. */
+export function moveRange(others: readonly MasonryLayoutItem[], movingPinned: boolean, isPinned: (id: string) => boolean): [number, number] {
+  const pinnedCount = others.filter((item) => isPinned(item.id)).length
+  return movingPinned ? [0, pinnedCount] : [pinnedCount, others.length]
+}
+
 /** Copy a snapshot so application-owned objects cannot be mutated by an edit session. */
 export function cloneSnapshot(snapshot: MasonryLayoutSnapshot): MasonryLayoutSnapshot {
   return { version: 1, items: snapshot.items.map((item) => ({ id: item.id, rows: item.rows, columns: { ...item.columns } })) }

@@ -101,6 +101,11 @@ body {
   white-space: nowrap;
 }
 
+.inbox__status {
+  --c2-indicator--offset-x: 14.6%;
+  --c2-indicator--offset-y: 14.6%;
+}
+
 .inbox__marks {
   display: flex;
   align-items: center;
@@ -241,19 +246,13 @@ body {
 
 /* ---- details sheet -------------------------------------------------------------------------------- */
 
+/* One column with each label beside its value; the value drops under its label on a narrow sheet. */
 .details {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px 16px;
-  margin: 0;
-}
-
-.details dt {
-  color: var(--c2-theme--color-on-surface-variant, #71717a);
-}
-
-.details dd {
-  margin: 0;
+  --c2-description-list__grid--columns: 1;
+  --c2-description-list__grid--row-gap: 8px;
+  --c2-description-item__label--width: 88px;
+  --c2-description-item__value--min-width: 140px;
+  --c2-description-item__value--font-weight: 400;
 }
 
 .ghost {

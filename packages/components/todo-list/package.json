@@ -54,6 +54,7 @@
         "../../core:build",
         "../reorder-list:build",
         "../tabs:build",
+        "../inline-edit:build",
         "../progress:build",
         "../../icons/task-icons:build"
       ],
@@ -68,6 +69,7 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/inline-edit": "*",
     "@c2n/progress": "*",
     "@c2n/reorder-list": "*",
     "@c2n/tabs": "*",

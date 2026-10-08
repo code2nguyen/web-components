@@ -5,6 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { getFieldValue } from '@c2n/core/data-helper.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
@@ -55,6 +56,8 @@ export interface Autocomplete {
   removeEventListener: TypedRemoveEventListener<Autocomplete, AutocompleteEventMap>
 }
 
+/** Default of `--c2-autocomplete__list--min-height`. */
+const LIST_MIN_HEIGHT = 96
 const IMPLICIT_LABEL_FIELDS = ['label', 'name', 'title', 'value']
 let autocompleteId = 0
 
@@ -80,7 +83,7 @@ let autocompleteId = 0
  * @slot error - Replaces the remote-source error message inside the list.
  *
  * @event {CustomEvent<{ query: string }>} query-change - Fired on every user edit, before local filtering or a remote request.
- * @event {CustomEvent<AutocompleteSelectEventDetail>} suggestion-select - Fired after a row is chosen. The detail contains the selected key, original item and visible index.
+ * @event {CustomEvent<AutocompleteSelectEventDetail>} suggestion-select - Fired after a row is chosen. The detail contains the selected key (the label when there is no `itemKey`), original item and visible index.
  * @event {InputEvent} input - Re-dispatched from the inner input on every edit; also fired after a suggestion replaces the value.
  * @event {Event} change - Fired after the typed value is committed or a suggestion replaces it.
  *
@@ -105,6 +108,8 @@ let autocompleteId = 0
  * @cssproperty {box-shadow} [--c2-autocomplete__panel--box-shadow=0 12px 32px rgba(24, 24, 27, 0.14)]
  * @cssproperty {pixel} [--c2-autocomplete__panel--max-height=320px]
  * @cssproperty {padding} [--c2-autocomplete__list--padding=4px]
+ * @cssproperty {pixel} [--c2-autocomplete__list--min-height=96px] - Room the suggestions keep (or their own height, if
+ * shorter). When the panel cannot fit that plus the header and footer (a phone with its keyboard open), those two hide.
  * @cssproperty {color} [--c2-autocomplete__header--background=transparent]
  * @cssproperty {color} [--c2-autocomplete__header--color=#71717a]
  * @cssproperty {padding} [--c2-autocomplete__header--padding=10px 12px]
@@ -168,7 +173,7 @@ export class Autocomplete extends LitElement {
   /** Local items to search. An array in the property, JSON in the attribute; items may have any structure. */
   @property({ converter: jsonPropertyConverter }) suggestions: unknown[] = []
 
-  /** Field used as a result's stable value. An empty value falls back to a primitive item or its index. */
+  /** Field used as a result's stable value. An empty value falls back to a primitive item, then to the row's label. */
   @property({ type: String, attribute: 'item-key' }) itemKey = ''
 
   /** Field used as primary row text. Defaults to `label`, `name`, `title` or `value`. */
@@ -231,7 +236,12 @@ export class Autocomplete extends LitElement {
   @state() private focused = false
   @state() private activeIndex = -1
   @state() private disabledByForm = false
+  /** The panel has too little room for its header and footer; only the list is shown. */
+  @state() private compactPanel = false
+  /** Height of the header and footer, measured while they are shown (hidden, they measure 0). */
+  private panelChromeHeight = 0
   private readonly slotPresence = new SlotPresenceController(this, ['header', 'footer'])
+  private panelSpaceObserver: MutationObserver | null = null
 
   @query('.input') private input?: HTMLInputElement
   @query('c2-overlay') private overlay?: Overlay
@@ -253,6 +263,7 @@ export class Autocomplete extends LitElement {
     this.ownerDocument.removeEventListener('focusin', this.handleDocumentFocusIn, true)
     this.ownerDocument.removeEventListener('keydown', this.handleDocumentKeydown, true)
     this.cancelPendingRequest()
+    this.stopWatchingPanelSpace()
   }
 
   formResetCallback() {
@@ -384,6 +395,16 @@ export class Autocomplete extends LitElement {
     if (fieldValue !== undefined && fieldValue !== null) return String(fieldValue)
     if (item === null || typeof item !== 'object') return this.textOf(item)
     return String(index)
+  }
+
+  /**
+   * The value a selection reports and, in `replace` mode, writes into the input. Without `itemKey` an object row's
+   * list key is its index, which means nothing to the user, so its label stands in.
+   */
+  private selectionValueOf(item: unknown, index: number): string {
+    const key = this.keyOf(item, index)
+    if (this.itemKey || item === null || typeof item !== 'object') return key
+    return this.labelOf(item) || key
   }
 
   private labelOf(item: unknown): string {
@@ -544,7 +565,7 @@ export class Autocomplete extends LitElement {
 
   private selectItem(item: unknown, index: number) {
     if (this.isDisabled(item)) return
-    const value = this.keyOf(item, index)
+    const value = this.selectionValueOf(item, index)
     const replaceValue = this.selectionBehavior !== 'preserve'
     if (replaceValue) this.value = value
     this.selectedItem = item
@@ -579,6 +600,41 @@ export class Autocomplete extends LitElement {
   private handleOverlayToggle = (event: Event) => {
     this.open = (event as ToggleEvent).newState === 'open'
     if (!this.open) this.activeIndex = -1
+    if (this.open) this.watchPanelSpace()
+    else this.stopWatchingPanelSpace()
+  }
+
+  // The overlay writes the room left on its side as `--c2-overlay--available-height` each time it positions itself
+  // (on open, scroll, resize, and when a mobile keyboard shrinks the viewport), so its style attribute is the signal.
+  private watchPanelSpace() {
+    const overlay = this.overlay
+    if (!overlay || this.panelSpaceObserver) return
+    this.panelSpaceObserver = new MutationObserver(this.measurePanelSpace)
+    this.panelSpaceObserver.observe(overlay, { attributes: true, attributeFilter: ['style'] })
+    this.measurePanelSpace()
+  }
+
+  private stopWatchingPanelSpace() {
+    this.panelSpaceObserver?.disconnect()
+    this.panelSpaceObserver = null
+    this.compactPanel = false
+  }
+
+  private readonly measurePanelSpace = () => {
+    const root = this.renderRoot
+    const available = parseFloat(this.overlay?.style.getPropertyValue('--c2-overlay--available-height') ?? '')
+    const list = root.querySelector<HTMLElement>('.list')
+    if (!Number.isFinite(available) || !list) {
+      this.compactPanel = false
+      return
+    }
+    if (!this.compactPanel) {
+      this.panelChromeHeight = ['.panel-header', '.panel-footer'].reduce((sum, part) => sum + (root.querySelector<HTMLElement>(part)?.offsetHeight ?? 0), 0)
+    }
+    // A short list (one row, the loading or empty message) only needs its own height.
+    const minHeight = parseFloat(getComputedStyle(this).getPropertyValue('--c2-autocomplete__list--min-height'))
+    const listNeeds = Math.min(Number.isFinite(minHeight) ? minHeight : LIST_MIN_HEIGHT, list.scrollHeight)
+    this.compactPanel = this.panelChromeHeight > 0 && this.panelChromeHeight + listNeeds > available
   }
 
   private renderHighlighted(text: string) {
@@ -627,6 +683,8 @@ export class Autocomplete extends LitElement {
   }
 
   protected override updated(changed: PropertyValues) {
+    // New results change how much room the list needs, which need not move the overlay.
+    if (this.panelSpaceObserver && (changed.has('results') || changed.has('loading') || changed.has('loadError'))) this.measurePanelSpace()
     if (changed.has('dataSource')) {
       this.cancelPendingRequest()
       this.cachedDataSource = undefined
@@ -688,7 +746,7 @@ export class Autocomplete extends LitElement {
         .open=${this.open}
         @toggle=${this.handleOverlayToggle}
       >
-        <div class="panel">
+        <div class=${classMap({ panel: true, 'panel--compact': this.compactPanel })}>
           <header class="panel-header" ?hidden=${!this.slotPresence.has('header')}>
             <slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </header>

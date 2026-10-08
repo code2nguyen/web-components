@@ -91,3 +91,33 @@ test('the border shorthand reaches every side, with and without @c2n/theme, and 
   const themed = '2px rgb(7, 8, 9)'
   await expectSides({ top: themed, right: themed, bottom: themed, left: themed })
 })
+test('content rendered on toggle, after the panel began opening, still slides open without a jump', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Lazy" style="--c2-details--transition-duration: 400ms"></c2-details>')
+  const heights = await page.locator('c2-details').evaluate(async (host) => {
+    // As an app does: the content is rendered only once the panel says it opened.
+    host.addEventListener('toggle', () => {
+      const block = document.createElement('div')
+      block.style.height = '200px'
+      block.textContent = 'Rendered on open'
+      host.append(block)
+    })
+    const content = host.shadowRoot!.querySelector<HTMLElement>('.c2-details-content')!
+    // From the closed height, so an open that jumps straight to its end fails the steps below.
+    const seen: number[] = [content.getBoundingClientRect().height]
+    host.shadowRoot!.querySelector<HTMLElement>('summary')!.click()
+    const until = performance.now() + 600
+    while (performance.now() < until) {
+      await new Promise(requestAnimationFrame)
+      seen.push(content.getBoundingClientRect().height)
+    }
+    return seen
+  })
+  const steps = heights.slice(1).map((height, index) => height - heights[index])
+  const end = heights.at(-1)!
+  expect(end).toBeGreaterThan(200)
+  // Without following the content, the panel stops at its padding and the content then lands in one frame: no height
+  // between the two is ever drawn. Following it, the panel is seen part-way open (however long a slow machine takes
+  // between two frames), and never shrinks on the way.
+  expect(heights.some((height) => height > end * 0.25 && height < end * 0.75)).toBe(true)
+  expect(Math.min(...steps)).toBeGreaterThanOrEqual(-1)
+})

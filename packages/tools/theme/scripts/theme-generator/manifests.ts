@@ -90,10 +90,11 @@ export function discoverPackages(): DiscoveredPackage[] {
     const pkgJsonPath = join(dir, 'package.json')
     if (!existsSync(pkgJsonPath)) continue
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { name: string; customElements?: string }
-    if (!pkg.customElements || EXCLUDED_PACKAGES.has(pkg.name)) continue
-    const manifestPath = join(dir, pkg.customElements)
+    if (EXCLUDED_PACKAGES.has(pkg.name)) continue
+    // Same default as the MCP registry and the contract scripts, so a package that forgot the field is still themed.
+    const manifestPath = join(dir, pkg.customElements ?? 'custom-elements.json')
     if (!existsSync(manifestPath)) {
-      console.warn(`[theme-generator] ${pkg.name}: ${pkg.customElements} missing, build the package first`)
+      if (pkg.customElements) console.warn(`[theme-generator] ${pkg.name}: ${pkg.customElements} missing, build the package first`)
       continue
     }
     result.push({ name: pkg.name, dir, manifestPath })

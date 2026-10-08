@@ -23,6 +23,8 @@
     icon__warning--color: #a16207,
     icon__error--color: #dc2626,
     action--color: #2563eb,
+    action--font-weight: inherit,
+    action--text-decoration: underline,
     close--color: #71717a,
     close__hover--background: #f4f4f5,
     button__focus--outline: 2px solid #476ef9,
@@ -62,6 +64,7 @@
 .icon {
   align-self: css.cssVar(icon--align-self);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   display: inline-flex;
   flex: none;
@@ -76,21 +79,25 @@
 }
 :host([variant='info']) .icon {
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   color: css.cssVar(icon__info--color);
 }
 :host([variant='success']) .icon {
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   color: css.cssVar(icon__success--color);
 }
 :host([variant='warning']) .icon {
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   color: css.cssVar(icon__warning--color);
 }
 :host([variant='error']) .icon {
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   color: css.cssVar(icon__error--color);
 }
@@ -108,8 +115,9 @@ button {
 .action {
   display: block;
   color: css.cssVar(action--color);
+  font-weight: css.cssVar(action--font-weight);
   padding: 4px 0;
-  text-decoration: underline;
+  text-decoration: css.cssVar(action--text-decoration);
 }
 .close {
   flex: none;
@@ -151,4 +159,23 @@ button {
 }
 :host(:dir(rtl)) .progress__bar {
   transform-origin: right;
+}
+
+// At the end of the message's line, a button rather than a link: no underline, a little room around. The row centres
+// so the message, the action and the dismiss button share one line.
+:host([action-placement='end']) .toast {
+  align-items: center;
+}
+.action-end {
+  flex: none;
+  display: flex;
+
+  &[hidden] {
+    display: none;
+  }
+}
+:host([action-placement='end']) .action {
+  padding: 4px 8px;
+  margin-block: -4px;
+  text-decoration: none;
 }

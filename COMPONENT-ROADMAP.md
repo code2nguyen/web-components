@@ -50,16 +50,15 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 99 remain (20 P1): `c2-inline-edit` (#16) shipped in v1.0.3. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 93 remain (16 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-checkbox-group` (#4), `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33) and `c2-json-viewer` (#38) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
-### A. Forms and input (24)
+### A. Forms and input (23)
 
 | #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
 | 1   | `c2-form`             | Validation across fields, submit handling, error summary, dirty tracking                            | antd Form, Carbon form, Polaris Form                                            | P1       | Proposed |
 | 2   | `c2-form-field`       | Label, hint, error and counter wrapper around any control, with `aria-describedby` wired up         | Ark/Chakra field, Polaris Labelled, Vaadin FormItem                             | P1       | Proposed |
 | 3   | `c2-fieldset`         | Grouped controls with a legend and a disabled state that cascades                                   | Ark/Chakra fieldset, PrimeVue fieldset                                          | P2       | Proposed |
-| 4   | `c2-checkbox-group`   | Form-associated group of checkboxes with one value array (the counterpart of `c2-radio-group`)      | Web Awesome, Vaadin, PrimeVue checkbox group                                    | P1       | Proposed |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
 | 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Accept   |
 | 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Accept   |
@@ -81,33 +80,28 @@ Domain patterns with no design-system home come from the products that made them
 | 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
 | 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
 
-### B. Data display (23)
+### B. Data display (18)
 
-| #   | Component             | What it adds                                                                      | Real-world model                                                                     | Priority | Decision |
-| --- | --------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- | -------- |
-| 26  | `c2-description-list` | Read-only key/value pairs for detail pages, in columns that wrap responsively     | antd Descriptions, Polaris DescriptionList, Chakra data list, Carbon structured list | P1       | Proposed |
-| 27  | `c2-chip`             | Selectable or dismissible chip for filters and choices (`c2-badge` stays a label) | Material chips, Mantine Chip/Pill, antd and Carbon Tag                               | P1       | Proposed |
-| 28  | `c2-status-light`     | Coloured dot plus label for states such as Live, Failed or Building               | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments     | P1       | Proposed |
-| 29  | `c2-indicator`        | Dot or count pinned to the corner of any element                                  | Mantine Indicator, PrimeVue OverlayBadge, Fluent counter badge                       | P2       | Proposed |
-| 30  | `c2-relative-time`    | "3 min ago" that updates itself, locale-aware, full date on hover                 | Web Awesome relative-time, GitHub relative-time-element                              | P1       | Proposed |
-| 31  | `c2-format-number`    | Locale number, currency, percent, compact and byte formatting                     | Web Awesome format-number/format-bytes, Mantine NumberFormatter                      | P1       | Proposed |
-| 32  | `c2-format-date`      | Locale and time-zone-aware date display                                           | Web Awesome format-date                                                              | P2       | Proposed |
-| 33  | `c2-truncate`         | Clamp to N lines with "Show more" and a full-text tooltip                         | Carbon truncated text, Polaris Truncate, Mantine Spoiler                             | P1       | Proposed |
-| 34  | `c2-highlight`        | Highlight the parts of a text that match a query                                  | Mantine Highlight, Ark highlight                                                     | P3       | Proposed |
-| 35  | `c2-meter`            | Value inside a known range, or several segments (storage, quota)                  | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                        | P2       | Proposed |
-| 36  | `c2-countdown`        | Countdown or stopwatch with an event when it finishes                             | Ark timer, antd Statistic.Countdown                                                  | P2       | Proposed |
-| 37  | `c2-rolling-number`   | Digits that roll when a value changes                                             | Mantine RollingNumber; Robinhood tickers                                             | P3       | Proposed |
-| 38  | `c2-json-viewer`      | Collapsible, searchable JSON tree with copy-path                                  | Ark JSON tree view; Postman, Chrome DevTools                                         | P2       | Proposed |
-| 39  | `c2-diff-viewer`      | Side-by-side or unified text diff                                                 | GitHub and GitLab diffs                                                              | P2       | Proposed |
-| 40  | `c2-markdown`         | Safe markdown renderer that handles streaming, for chat answers and READMEs       | Web Awesome markdown, Vaadin Markdown                                                | P2       | Proposed |
-| 41  | `c2-image`            | Lazy loading, placeholder, fallback and click-to-preview                          | antd Image                                                                           | P2       | Proposed |
-| 42  | `c2-image-viewer`     | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip                  | PrimeVue Galleria, antd Image preview group                                          | P2       | Proposed |
-| 43  | `c2-image-compare`    | Before/after slider                                                               | Web Awesome comparison, PrimeVue ImageCompare                                        | P3       | Proposed |
-| 44  | `c2-video-player`     | Themed controls, captions, chapters                                               | Loom, YouTube                                                                        | P3       | Proposed |
-| 45  | `c2-audio-player`     | Waveform playback for voice notes and recordings                                  | Slack clips, WhatsApp voice notes                                                    | P3       | Proposed |
-| 46  | `c2-pdf-viewer`       | Paged PDF preview with zoom and search                                            | DocuSign, Gmail attachment preview                                                   | P3       | Proposed |
-| 47  | `c2-org-chart`        | Hierarchy as connected cards that expand and collapse                             | PrimeVue OrganizationChart; Rippling, BambooHR                                       | P3       | Proposed |
-| 48  | `c2-marquee`          | Continuous scrolling strip, pauses on hover                                       | Chakra, Mantine and Ark marquee; stock ticker tapes                                  | P3       | Proposed |
+| #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
+| --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
+| 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building         | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
+| 30  | `c2-relative-time`  | "3 min ago" that updates itself, locale-aware, full date on hover           | Web Awesome relative-time, GitHub relative-time-element                          | P1       | Proposed |
+| 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
+| 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
+| 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |
+| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)            | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
+| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes                       | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                                       | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed |
+| 39  | `c2-diff-viewer`    | Side-by-side or unified text diff                                           | GitHub and GitLab diffs                                                          | P2       | Proposed |
+| 40  | `c2-markdown`       | Safe markdown renderer that handles streaming, for chat answers and READMEs | Web Awesome markdown, Vaadin Markdown                                            | P2       | Proposed |
+| 41  | `c2-image`          | Lazy loading, placeholder, fallback and click-to-preview                    | antd Image                                                                       | P2       | Proposed |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip            | PrimeVue Galleria, antd Image preview group                                      | P2       | Proposed |
+| 43  | `c2-image-compare`  | Before/after slider                                                         | Web Awesome comparison, PrimeVue ImageCompare                                    | P3       | Proposed |
+| 44  | `c2-video-player`   | Themed controls, captions, chapters                                         | Loom, YouTube                                                                    | P3       | Proposed |
+| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                            | Slack clips, WhatsApp voice notes                                                | P3       | Proposed |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                                      | DocuSign, Gmail attachment preview                                               | P3       | Proposed |
+| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse                       | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
+| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                                 | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
 
 ### C. Charts (8)
 
@@ -174,7 +168,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 | #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision |
 | --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Proposed |
+| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Accept   |
 | 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                             | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
 | 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed |
 | 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed |
@@ -301,13 +295,13 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 168 ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, `c2-chip` powers `c2-filter-builder`, and `c2-confirm-dialog` backs destructive actions everywhere.
+The 162 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate` and `c2-json-viewer`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |
-| 1    | Foundations (P1)     | 25         | `c2-form-field` wraps every existing input      |
+| 1    | Foundations (P1)     | 23         | `c2-form-field` wraps every existing input      |
 | 2    | Business apps (P2)   | 50         | Blocks collection opens (forms, settings pages) |
-| 3    | Data, media, AI (P2) | 43         | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
+| 3    | Data, media, AI (P2) | 42         | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
 | 4    | Specialized (P3)     | 50         | —                                               |
 
 Each gate has to pass before the next wave starts. No calendar dates are set yet.

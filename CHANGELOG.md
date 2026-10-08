@@ -3,6 +3,102 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.6](https://github.com/code2nguyen/web-components/releases/tag/v1.0.6) — 2026-10-08
+
+### Features
+
+- **todo-list:** Editable heading and actions-placement ([f0c979a](https://github.com/code2nguyen/web-components/commit/f0c979a))
+- **filter-builder:** Add c2-filter-builder ([4087141](https://github.com/code2nguyen/web-components/commit/4087141))
+- **description-list:** Bold column names that can be restyled or removed ([7b7b942](https://github.com/code2nguyen/web-components/commit/7b7b942))
+- **truncate:** Add c2-truncate, text clamped to N lines with a Show more button ([a26ebca](https://github.com/code2nguyen/web-components/commit/a26ebca))
+- **description-list:** Several values per label, aligned in columns that stack on small screens ([da431fd](https://github.com/code2nguyen/web-components/commit/da431fd))
+- **chip-group:** Add c2-chip-group, a row of chips or badges that collapses overflow into +N ([ca766ce](https://github.com/code2nguyen/web-components/commit/ca766ce))
+- **chip:** Add c2-chip-part for chips made of interactive segments ([6bfc0ad](https://github.com/code2nguyen/web-components/commit/6bfc0ad))
+- **json-viewer:** Add c2-json-viewer, a collapsible, searchable JSON tree with copy-path ([4d63d3c](https://github.com/code2nguyen/web-components/commit/4d63d3c))
+- **description-list:** Add c2-description-list, read-only label and value pairs for detail pages ([a183ea2](https://github.com/code2nguyen/web-components/commit/a183ea2))
+
+### Fixes
+
+- **autocomplete:** Fill the input with the row's label, not its index, when there is no item-key ([3b7b916](https://github.com/code2nguyen/web-components/commit/3b7b916))
+- **autocomplete:** Hide the header and footer only when the list would drop below its minimum ([88a7097](https://github.com/code2nguyen/web-components/commit/88a7097))
+- **autocomplete:** Hide the header and footer when the panel has little room ([a4578c3](https://github.com/code2nguyen/web-components/commit/a4578c3))
+- **json-viewer:** Address review findings and Firefox failures ([748fc36](https://github.com/code2nguyen/web-components/commit/748fc36))
+- **table:** Give flexible columns a minimum width ([955d886](https://github.com/code2nguyen/web-components/commit/955d886))
+- **chip-group:** Register chip and badge, and keep them direct children on the docs site ([3d951a2](https://github.com/code2nguyen/web-components/commit/3d951a2))
+- **chip:** Keep framework comment markers out of the remove button name ([0675843](https://github.com/code2nguyen/web-components/commit/0675843))
+- **description-list:** Render the empty dash the same on the server and the client ([6a70a91](https://github.com/code2nguyen/web-components/commit/6a70a91))
+- **working-indicator:** Keep the glyph off iOS emoji and slow its frames ([5363090](https://github.com/code2nguyen/web-components/commit/5363090))
+
+### Performance
+
+- **json-viewer:** Render only the lines in view so large documents stay fast ([1109f8d](https://github.com/code2nguyen/web-components/commit/1109f8d))
+
+### Docs site & examples
+
+- **ui:** Show the autocomplete examples' selection below the field ([94ede91](https://github.com/code2nguyen/web-components/commit/94ede91))
+- **ui:** Scope example styles by frame so tag-led selectors apply ([de420c3](https://github.com/code2nguyen/web-components/commit/de420c3))
+- **ui:** Scope chip usage styles so the avatar prefix is sized ([129392b](https://github.com/code2nguyen/web-components/commit/129392b))
+- **ui:** Remove a chip in the chip examples when its remove button is clicked ([2b6ea3b](https://github.com/code2nguyen/web-components/commit/2b6ea3b))
+
+## [1.0.5](https://github.com/code2nguyen/web-components/releases/tag/v1.0.5) — 2026-10-07
+
+### Features
+
+- **flow:** A node's shape, its own colours and an icon ([d07b331](https://github.com/code2nguyen/web-components/commit/d07b331))
+- **menu:** C2-menu-row, a line of small choices such as swatches, walked with the arrow keys ([46cc332](https://github.com/code2nguyen/web-components/commit/46cc332))
+- Icon slots size Phosphor icons as they size Feather ones ([1081584](https://github.com/code2nguyen/web-components/commit/1081584))
+- **toast:** Action-placement="end" puts the action in line with the message ([ffc5b31](https://github.com/code2nguyen/web-components/commit/ffc5b31))
+- **masonry:** Pinned tiles stay first, an actions slot beside the move handle, and a move-handle element of the app's own ([7b763a9](https://github.com/code2nguyen/web-components/commit/7b763a9))
+- **theme:** Cool navy dark palette and fainter notepad rules on dark paper ([e55dd48](https://github.com/code2nguyen/web-components/commit/e55dd48))
+- **notepad:** Add actions-placement to put the actions slot after the Paper and Tear off buttons ([77e789c](https://github.com/code2nguyen/web-components/commit/77e789c))
+- **masonry:** Resize columns and rows together from a tile's bottom-right corner ([491bc80](https://github.com/code2nguyen/web-components/commit/491bc80))
+
+### Fixes
+
+- **flow:** A drawn node's connection cue wins over its status colour, and its focus ring has its own variables ([71297f7](https://github.com/code2nguyen/web-components/commit/71297f7))
+- Review follow-ups on details, toast, masonry and overlay ([14bec95](https://github.com/code2nguyen/web-components/commit/14bec95))
+- **flow:** Diamond labels stay inside the shape, drawn shapes take the status colours and a focus ring on their outline, and edges meet a slanted node's sides ([b51b3ad](https://github.com/code2nguyen/web-components/commit/b51b3ad))
+- **menu:** A menu that is one row steps through it, rows never wrap, the checked choice shows keyboard focus, and a moved or relabelled choice keeps its name ([c6e89dc](https://github.com/code2nguyen/web-components/commit/c6e89dc))
+- **overlay:** Reposition on the next frame after the first placement, so a growing surface never loops its ResizeObserver ([acf26d2](https://github.com/code2nguyen/web-components/commit/acf26d2))
+- **notepad:** The toolbar takes the paper's colour, and the caret stays the height of the writing ([80fd6f7](https://github.com/code2nguyen/web-components/commit/80fd6f7))
+- **details:** Content that arrives while opening slides open without a jump ([fde69c7](https://github.com/code2nguyen/web-components/commit/fde69c7))
+
+### Improvements
+
+- **theme:** Restore the zinc dark palette ([e7bea59](https://github.com/code2nguyen/web-components/commit/e7bea59))
+
+## [1.0.4](https://github.com/code2nguyen/web-components/releases/tag/v1.0.4) — 2026-10-06
+
+### Features
+
+- **indicator:** Add c2-indicator, a dot or count pinned to an edge of any element ([c510627](https://github.com/code2nguyen/web-components/commit/c510627))
+- **chip:** Add c2-chip, a selectable and removable chip for filters and choices ([b6c13a1](https://github.com/code2nguyen/web-components/commit/b6c13a1))
+- **search-field:** Add c2-search-field, a search box with debounce, clear, shortcut hint and recent searches ([723b679](https://github.com/code2nguyen/web-components/commit/723b679))
+
+### Fixes
+
+- **indicator:** Keep the pulse behind the text, hide invalid counts, dot on the server ([6efab77](https://github.com/code2nguyen/web-components/commit/6efab77))
+- **list-item:** Recognise menu item checkbox/radio and input widget roles as row content ([862ff18](https://github.com/code2nguyen/web-components/commit/862ff18))
+- **list-item:** Count nested component controls and keep keyboard activation in disabled rows ([9fb0d49](https://github.com/code2nguyen/web-components/commit/9fb0d49))
+- **list-item:** Let controls inside a row keep their own click and key events ([3a92bb7](https://github.com/code2nguyen/web-components/commit/3a92bb7))
+- **chip:** Keep the label text current and free of icon text, compose change ([9700da9](https://github.com/code2nguyen/web-components/commit/9700da9))
+- **reorder-list:** Theme the list in dark mode ([ed008c9](https://github.com/code2nguyen/web-components/commit/ed008c9))
+- **inline-edit, flow:** Resize the fallback field outside the ResizeObserver callback, test the middle placement on empty canvas ([9ea8665](https://github.com/code2nguyen/web-components/commit/9ea8665))
+- **mcp:** Skip regex literals and JSX elements when masking comments in expressions ([ae7bbd8](https://github.com/code2nguyen/web-components/commit/ae7bbd8))
+- **inline-edit, reorder-list:** Regrow the fallback field on width changes, keep focus when the focused item leaves the list ([3f3726a](https://github.com/code2nguyen/web-components/commit/3f3726a))
+- **mcp:** Budget every JSON list, mask comments inside expressions, anchor c2n-ignore ranges, file new tags under their family ([9e7eaf5](https://github.com/code2nguyen/web-components/commit/9e7eaf5))
+- **search-field:** Escape on the recent-searches Clear button closes the panel ([9c01cfa](https://github.com/code2nguyen/web-components/commit/9c01cfa))
+- **search-field:** Address review: keyboard-reachable Clear, history-key switch, reset dedupe ([e9452ba](https://github.com/code2nguyen/web-components/commit/e9452ba))
+- **components:** Tighten slot observers in breadcrumb and reorder-list, guard assignSlot, clamp the gantt tooltip ([70392fb](https://github.com/code2nguyen/web-components/commit/70392fb))
+- **inline-edit:** Address release review: disabled form state, non-bubbling editor change, focus and multiline fallbacks ([3380f07](https://github.com/code2nguyen/web-components/commit/3380f07))
+- **reorder-list:** Read slotted children safely while server rendering ([8ad28cd](https://github.com/code2nguyen/web-components/commit/8ad28cd))
+- **mcp:** Address release review of validate_markup, installed-tag discovery and the skill installer ([8470830](https://github.com/code2nguyen/web-components/commit/8470830))
+- **flow:** Forget the last focused node when focus leaves from the toolbar, and only the visible toolbar refuses a drop ([f849fc7](https://github.com/code2nguyen/web-components/commit/f849fc7))
+
+### Docs site & examples
+
+- **ui:** Mark the current example nav link with selected, give Discord its own header class and a footer link ([41e05e5](https://github.com/code2nguyen/web-components/commit/41e05e5))
+
 ## [1.0.3](https://github.com/code2nguyen/web-components/releases/tag/v1.0.3) — 2026-10-06
 
 ### Features

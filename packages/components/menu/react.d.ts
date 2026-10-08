@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Menu } from '@c2n/menu'
 import type { MenuItem } from '@c2n/menu/menu-item.js'
+import type { MenuRow } from '@c2n/menu/menu-row.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -34,6 +35,7 @@ declare module 'react' {
         'keep-open'?: Attribute
         'reserve-indicator'?: Attribute
       }
+      'c2-menu-row': C2Props<MenuRow>
     }
   }
 }

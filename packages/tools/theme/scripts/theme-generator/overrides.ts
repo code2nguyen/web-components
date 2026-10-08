@@ -158,6 +158,15 @@ export const overrides: Record<string, Override> = {
   '--c2-qr-code__background--color': { token: 'color-surface' },
   '--c2-qr-code__center--size': { exclude: 'center mark constrained by QR scan geometry' },
   '--c2-qr-code__center--padding': { exclude: 'center mark quiet spacing' },
+  // The filter builder's dashed add button and draft chip keep their style while following the strong outline colour.
+  '--c2-filter-builder__add-button--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline-strong, #a1a1aa)',
+  },
+  '--c2-filter-builder__chip__draft--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline-strong, #a1a1aa)',
+  },
   // Upload measurements belong to the drop-zone composition; dashed borders keep their style while following theme colours.
   '--c2-upload--width': { exclude: 'responsive upload width' },
   '--c2-upload__dropzone--padding': { exclude: 'drop-zone spacing' },
@@ -366,6 +375,20 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-badge__info--color': { exclude: 'status colour' },
+  // Indicator tones are solid fills chosen against their text, readable on a light and a dark page alike. Only the
+  // primary pair follows the theme (accent + on-primary flip together); the error token lightens in a dark theme,
+  // where white text on it falls below 3:1, and the warning text must stay dark on amber. The saturated status fills
+  // take `color-on-fill`; the neutral grey is not one, so its pair stays literal.
+  '--c2-indicator__neutral--background': { exclude: 'solid status fill' },
+  '--c2-indicator__neutral--color': { exclude: 'white text on a fixed neutral fill' },
+  '--c2-indicator__success--background': { exclude: 'solid status fill' },
+  '--c2-indicator__success--color': { token: 'color-on-fill' },
+  '--c2-indicator__warning--background': { exclude: 'solid status fill' },
+  '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
+  '--c2-indicator__danger--background': { exclude: 'solid status fill' },
+  '--c2-indicator__danger--color': { token: 'color-on-fill' },
+  '--c2-indicator__info--background': { exclude: 'solid status fill' },
+  '--c2-indicator__info--color': { token: 'color-on-fill' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },
@@ -396,6 +419,29 @@ export const overrides: Record<string, Override> = {
   '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
+  // JSON viewer: the token colours are syntax hues, so each gets a dark-mode pair readable on the dark surface, mixed
+  // with the text colour so a theme's ink still tints them; the font stays monospace and the search highlight is a
+  // translucent hue that tints either surface.
+  '--c2-json-viewer--font-family': { exclude: 'monospace font, not the UI font' },
+  '--c2-json-viewer__key--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#6f42c1, #c297ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-json-viewer__string--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#116329, #7ee787) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-json-viewer__number--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-json-viewer__boolean--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
+  '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -409,6 +455,7 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-chip__remove-button__hover--background-color': { exclude: 'translucent wash works on any chip background' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
@@ -523,6 +570,16 @@ export const overrides: Record<string, Override> = {
   '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
   '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
   '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
+  // Its borders, focus ring and drop placeholder follow the outline and brand colour, as masonry's do.
+  '--c2-reorder-list--container-border-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list--divider-color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-reorder-list__item__focus--outline-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list__placeholder--border-color': { token: 'color-primary', value: 'var(--c2-theme--color-primary, #2563eb)' },
+  '--c2-reorder-list--placeholder-background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 8%, transparent)',
+  },
+  '--c2-reorder-list__dragging-item--box-shadow': { token: 'shadow-md' },
   // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
   // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
   // swipe actions are semantic colours that stay put.
@@ -567,7 +624,7 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
   // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
   // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
-  // dimmed rules, brighter inks) under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
   // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
   '--c2-notepad__sheet--background': {
     token: 'color-surface',
@@ -577,8 +634,16 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, #2f4fb0)',
   },
-  '--c2-notepad__rule--color': { token: 'color-surface', value: 'color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff))' },
-  '--c2-notepad__margin--color': { token: 'color-surface', value: 'color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__rule--color': {
+    token: 'color-surface',
+    value:
+      'light-dark(color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, #8fb0dc 22%, var(--c2-theme--color-surface, #ffffff)))',
+  },
+  '--c2-notepad__margin--color': {
+    token: 'color-surface',
+    value:
+      'light-dark(color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, #d9534f 32%, var(--c2-theme--color-surface, #ffffff)))',
+  },
   '--c2-notepad__ink-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #3b5bdb 70%, var(--c2-theme--color-on-surface, #18181b))' },
   '--c2-notepad__ink-red--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #e03131 70%, var(--c2-theme--color-on-surface, #18181b))' },
   '--c2-notepad__ink-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #2f9e44 70%, var(--c2-theme--color-on-surface, #18181b))' },
@@ -586,16 +651,15 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__placeholder--color': { token: 'color-on-surface-variant' },
   '--c2-notepad__header--color': { token: 'color-on-surface-variant' },
   '--c2-notepad__perforation--color': { token: 'color-outline-strong' },
+  '--c2-notepad__spiral--color': { token: 'color-outline-strong' },
   '--c2-notepad__selection--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
-  // The washi tape is a little of its kraft hue on the surface: cream on light paper, dark kraft under a dark theme.
-  '--c2-notepad__toolbar--background': {
-    token: 'color-surface',
-    value: 'color-mix(in srgb, #c9b98f 30%, var(--c2-theme--color-surface, #ffffff))',
-  },
-  '--c2-notepad__toolbar--color': { token: 'color-on-surface' },
+  // The washi tape follows each page's paper colour and ink (its unset default); a theme value would fix one tape on
+  // every paper.
+  '--c2-notepad__toolbar--background': { exclude: 'follows the paper colour of each page' },
+  '--c2-notepad__toolbar--color': { exclude: 'follows the ink of each page' },
   '--c2-notepad__toolbar__button__active--background': {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 14%, transparent)',

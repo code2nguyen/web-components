@@ -1,0 +1,60 @@
+---
+description: 'Looks for c2-filter-builder: the default pill bar, square chips, soft filled chips and a dense bar. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FilterBuilder } from '@c2n/components/filter-builder'
+
+## Presets
+
+Most of the look comes from the chip variables (`--c2-filter-builder__chip--*`), the colours of the three parts (`__field--color`, `__operator--color`, `__value--color`) and the add button (`__add-button--*`).
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-filter-builder fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>
+```
+
+```html tag=MdxCodeBlock,label=Square chips
+<style>
+  .square {
+    --c2-filter-builder__chip--border-radius: 6px;
+    --c2-filter-builder__add-button--border-radius: 6px;
+    --c2-filter-builder__add-button--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-filter-builder__value--font-weight: 600;
+  }
+</style>
+<c2-filter-builder class="square" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft {
+    --c2-filter-builder__chip--border: 1px solid transparent;
+    --c2-filter-builder__chip--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-filter-builder__field--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-filter-builder__operator--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-filter-builder__value--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-filter-builder__add-button--border: 1px solid transparent;
+    --c2-filter-builder__add-button--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-filter-builder class="soft" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>
+```
+
+```html tag=MdxCodeBlock,label=Dense
+<style>
+  .dense {
+    --c2-filter-builder--gap: 4px;
+    --c2-filter-builder__chip--height: 24px;
+    --c2-filter-builder__chip--font-size: 12px;
+    --c2-filter-builder__icon--size: 14px;
+    --c2-filter-builder__dot--size: 6px;
+  }
+</style>
+<c2-filter-builder class="dense" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>
+```
+
+</GalleryGrid>

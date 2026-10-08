@@ -120,3 +120,28 @@ test('flush padding and joined rows are custom states, never classes or attribut
   expect(await unauthored()).toEqual([])
   await expect(host).not.toHaveAttribute('class')
 })
+
+test('a delete button inside a row handles its own click and Enter without selecting the row', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-list aria-label="Drafts"><c2-list-item value="a">Apple<button slot="suffix-icon" class="delete">Delete</button></c2-list-item><c2-list-item value="b">Banana</c2-list-item></c2-list>',
+  )
+  const host = page.locator('c2-list')
+  await watch(host, 'selection-change')
+  await page.evaluate(() => {
+    const deleted: string[] = []
+    ;(window as unknown as { deleted: string[] }).deleted = deleted
+    // Delegated on the list, the way an app wires one handler for every row.
+    document.querySelector('c2-list')!.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest('.delete')
+      if (button) deleted.push(button.closest('c2-list-item')!.value)
+    })
+  })
+  await page.locator('.delete').click()
+  await page.locator('.delete').press('Enter')
+  await page.locator('.delete').press('Space')
+  expect(await page.evaluate(() => (window as unknown as { deleted: string[] }).deleted)).toEqual(['a', 'a', 'a'])
+  await expect(host).toHaveJSProperty('value', [])
+  await expect(host).toHaveAttribute('data-events', '[]')
+  await option(page, 'Banana').click()
+  await expect(host).toHaveJSProperty('value', ['b'])
+})

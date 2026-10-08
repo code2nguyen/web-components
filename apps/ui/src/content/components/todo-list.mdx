@@ -8,6 +8,8 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { TodoList, todoListIcons } from '@c2n/components/todo-list'
+import { IconButton } from '@c2n/components/icon-button'
+import { FeatherShare2Icon as FeatherShare_2 } from '@c2n/feather-icons/icons/share-2.js'
 
 `c2-todo-list` is a task list that feels like a paper one. Tasks are plain text. Checking one draws an ink tick (or a
 cross) and a pen stroke through the text, and a task you drop gets a red ✗. A progress ring beside the heading fills
@@ -107,6 +109,48 @@ same set in the customize panel. The names are exported as `todoListIcons`:
 
 ```html tag=CodeBlock
 <c2-todo-list heading="Lisbon trip" icon="travel"></c2-todo-list>
+```
+
+## Heading and header actions
+
+Add `heading-editable` and the heading becomes a [`c2-inline-edit`](../inline-edit): click it to rename the list,
+Enter (or leaving the field) saves and Escape cancels. The list then fires `heading-change` with the trimmed
+`detail.heading`, and the icon suggested from the heading follows the new name. An editable heading shows even while it
+is empty, as `heading-placeholder` (“Untitled list” by default), and `editHeading()` opens it from script: a list that
+was just created can ask for its name at once. `readonly` turns it back into plain text.
+
+The `actions` slot puts your own controls in the header, such as a menu or a share button. They sit before the palette
+button by default; `actions-placement="end"` puts them after it.
+
+```html tag=UsageBlock,package=@c2n/todo-list
+<style>
+  .todo-header {
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+<div data-label="Editable heading, actions after the palette">
+  <c2-todo-list
+    class="todo-header"
+    heading="Lisbon trip"
+    heading-editable
+    customizable
+    actions-placement="end"
+    tasks='[{"label":"Book the flights","done":true},{"label":"Pastéis de Belém","icon":"cake"},{"label":"Tram 28","note":"Early, before the queue"}]'
+  >
+    <c2-icon-button slot="actions" aria-label="Share the list">
+      <c2-feather-share-2></c2-feather-share-2>
+    </c2-icon-button>
+  </c2-todo-list>
+</div>
+<div data-label="Untitled, ready to name">
+  <c2-todo-list class="todo-header" heading-editable heading-placeholder="Name this list"></c2-todo-list>
+</div>
+```
+
+```typescript tag=CodeBlock
+list.addEventListener('heading-change', (event) => save({ title: event.detail.heading }))
+await list.editHeading() // a new list asks for its name
 ```
 
 ## Tasks

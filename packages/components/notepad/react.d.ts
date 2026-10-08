@@ -30,6 +30,7 @@ declare module 'react' {
         'error-text'?: Attribute
         'paper-color'?: Attribute
         'paper-picker'?: Attribute
+        'actions-placement'?: Attribute
         inks?: Notepad['inks'] | string
         highlights?: Notepad['highlights'] | string
       }

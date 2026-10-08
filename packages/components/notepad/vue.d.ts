@@ -26,6 +26,7 @@ declare module 'vue' {
         'error-text'?: unknown
         'paper-color'?: unknown
         'paper-picker'?: unknown
+        'actions-placement'?: unknown
         onPageTear?: (event: EventOf<Notepad, 'page-tear'>) => void
         onChange?: (event: EventOf<Notepad, 'change'>) => void
         onInput?: (event: EventOf<Notepad, 'input'>) => void

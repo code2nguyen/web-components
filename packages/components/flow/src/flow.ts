@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
@@ -29,6 +30,7 @@ import type {
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
   FlowNodeEventDetail,
+  FlowNodeShape,
   FlowPoint,
   FlowRenderContext,
   FlowRenderer,
@@ -80,6 +82,19 @@ const NUDGE = 8
 const NUDGE_LARGE = 24
 const TWEEN_DURATION = 320
 const ESTIMATED_SIZE: FlowSize = { width: 200, height: 56 }
+
+const SHAPES = new Set<FlowNodeShape>(['rect', 'pill', 'diamond', 'circle', 'note', 'slanted'])
+
+/**
+ * The outlines CSS cannot draw with a border, in a 100×100 box stretched over the node; the stroke keeps its width
+ * however the box is stretched. A pill and a note are the node's own border.
+ */
+const OUTLINES: Partial<Record<FlowNodeShape, unknown>> = {
+  diamond: svg`<polygon points="50,0.5 99.5,50 50,99.5 0.5,50" vector-effect="non-scaling-stroke"></polygon>`,
+  circle: svg`<ellipse cx="50" cy="50" rx="49.5" ry="49.5" vector-effect="non-scaling-stroke"></ellipse>`,
+  // Its sides lean out past the box at the corners, so their middles, where the edges arrive, are the box's sides.
+  slanted: svg`<polygon points="5,0.5 105,0.5 95,99.5 -5,99.5" vector-effect="non-scaling-stroke"></polygon>`,
+}
 /** Two presses this close in time (ms) and space (px) on the same thing are a double click, or a double tap. */
 const DOUBLE_TAP_TIME = 500
 const DOUBLE_TAP_DISTANCE = 8
@@ -157,6 +172,10 @@ interface Connection {
  * **Hover card.** Hovering or focusing a node opens a card next to it after `open-delay` milliseconds, with its
  * status, description and `details`. The pointer can move into the card, so it can hold links and buttons.
  * `renderCard`, or a `card:<id>` slot, replaces its content; `no-card` turns it off.
+ *
+ * **Shapes and colours.** A node's `shape` draws it as a pill, a diamond, a circle, a folded note or a slanted
+ * box instead of a rounded rectangle; `background` and `color` paint that one node, and `icon` puts an icon before its
+ * label. Edges still meet the middle of the incoming and outgoing sides, which is where each shape's outline is.
  *
  * **Custom nodes.** `renderNode` returns the body of each node (a Lit template, a DOM node or a string), or a
  * framework renders it into the `node:<id>` slot. Handles, dragging, edges and the card still come from the flow.
@@ -316,6 +335,16 @@ interface Connection {
  * @cssproperty {border} [--c2-flow__editor--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-flow__editor--border-radius=4px]
  * @cssproperty {outline} [--c2-flow__editor__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ *
+ * @cssproperty {pixel} [--c2-flow__icon--size=16px] - Size of a node's `icon`.
+ * @cssproperty {color} [--c2-flow__icon--color=currentColor] - Colour of a node's `icon`; the node's text colour by default.
+ * @cssproperty {color} [--c2-flow__shape--border-color=#bcbcc6] - Outline of a diamond, circle or slanted node, and the fold of a note.
+ * @cssproperty {pixel} [--c2-flow__shape--border-width=1px] - Width of that outline.
+ * @cssproperty {pixel} [--c2-flow__shape__diamond--min-height=88px] - A diamond's least height, so its middle has room for the label.
+ * @cssproperty {pixel} [--c2-flow__shape__circle--size=128px] - Width and height of a circle node.
+ * @cssproperty {pixel} [--c2-flow__shape__note--fold-size=14px] - Size of a note's folded corner.
+ * @cssproperty {color} [--c2-flow__shape__focus--color=rgba(2, 101, 220, 0.6)] - Focus ring of a diamond, circle or slanted node, drawn along its outline in place of `--c2-flow__node__focus--outline`.
+ * @cssproperty {pixel} [--c2-flow__shape__focus--width=2px] - How much wider than the outline that ring is.
  */
 @customElement('c2-flow')
 export class Flow extends LitElement {
@@ -1821,7 +1850,7 @@ export class Flow extends LitElement {
   private defaultNode(node: FlowNode) {
     const status = statusOf(node)
     return html`<div class="body">
-      ${this.icon(status)}
+      ${this.icon(status)} ${node.icon ? html`<span class="node-icon" aria-hidden="true">${node.icon}</span>` : nothing}
       <span class="text">
         ${node.id === this.editingId ? this.labelEditor(node, false) : html`<span class="label">${node.label}</span>`}
         ${node.description ? html`<span class="description">${node.description}</span>` : nothing}
@@ -1966,9 +1995,12 @@ export class Flow extends LitElement {
     const body = this.renderNode ? this.renderNode(context) : this.defaultNode(node)
     const connection = this.connection
     const editing = node.id === this.editingId
+    const shape = node.shape && node.shape !== 'rect' && SHAPES.has(node.shape) ? node.shape : null
     const classes = [
       'node',
       `status--${status}`,
+      shape ? `shape--${shape}` : '',
+      shape && OUTLINES[shape] ? 'is-drawn' : '',
       node.id === this.selected ? 'is-selected' : '',
       node.id === this.draggingId ? 'is-dragging' : '',
       connection?.source === node.id ? 'is-connect-source' : '',
@@ -1985,11 +2017,16 @@ export class Flow extends LitElement {
       tabindex=${node.id === this.focusId ? 0 : -1}
       aria-label=${`${node.label}, ${STATUS_LABELS[status].toLowerCase()}${node.meta ? `, ${node.meta}` : ''}`}
       aria-describedby=${relations ? `relations-${index}` : nothing}
-      style=${`transform: translate(${p.x}px, ${p.y}px)`}
+      style=${styleMap({
+        transform: `translate(${p.x}px, ${p.y}px)`,
+        '--_node-background': node.background || undefined,
+        '--_node-color': node.color || undefined,
+      })}
       @pointerenter=${this.handleNodeEnter}
       @pointerleave=${this.handleNodeLeave}
       @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { node })}
     >
+      ${shape && OUTLINES[shape] ? html`<svg class="shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${OUTLINES[shape]}</svg>` : nothing}
       <slot name=${`node:${node.id}`}>${body}</slot>
       ${editing && custom ? this.labelEditor(node, true) : nothing} ${hasIn ? html`<span class="handle handle--in"></span>` : nothing}
       ${this.editable ? html`<span class="connector" title="Drag to connect"></span>` : hasOut ? html`<span class="handle handle--out"></span>` : nothing}

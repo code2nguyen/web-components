@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-chip-group</title>
+    <script type="module" src="/src/chip-group.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      section {
+        margin-bottom: 32px;
+      }
+      .resizable {
+        resize: horizontal;
+        overflow: hidden;
+        width: 360px;
+        min-width: 60px;
+        padding: 8px;
+        border: 1px dashed #a1a1aa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Chips — drag the corner to resize</h3>
+      <div class="resizable">
+        <c2-chip-group aria-label="Topics">
+          <c2-chip>Design</c2-chip>
+          <c2-chip>Engineering</c2-chip>
+          <c2-chip>Product</c2-chip>
+          <c2-chip>Marketing</c2-chip>
+          <c2-chip>Customer success</c2-chip>
+          <c2-chip>Finance</c2-chip>
+        </c2-chip-group>
+      </div>
+    </section>
+
+    <section>
+      <h3>Badges, expandable</h3>
+      <div class="resizable">
+        <c2-chip-group expandable aria-label="Labels">
+          <c2-badge tone="primary">frontend</c2-badge>
+          <c2-badge tone="success">ready</c2-badge>
+          <c2-badge tone="warning">needs review</c2-badge>
+          <c2-badge tone="danger">bug</c2-badge>
+          <c2-badge tone="info">docs</c2-badge>
+          <c2-badge>good first issue</c2-badge>
+        </c2-chip-group>
+      </div>
+    </section>
+
+    <section>
+      <h3>max="2"</h3>
+      <c2-chip-group max="2" aria-label="Assignees">
+        <c2-chip removable>Alice</c2-chip>
+        <c2-chip removable>Bob</c2-chip>
+        <c2-chip removable>Carol</c2-chip>
+        <c2-chip removable>Dan</c2-chip>
+      </c2-chip-group>
+    </section>
+  </body>
+</html>

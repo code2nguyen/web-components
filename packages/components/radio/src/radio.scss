@@ -154,6 +154,7 @@
   transform: scale(0);
   transition: animation.standard-deceleration(transform);
   --c2-feather-icon--size: #{css.cssVar(dot--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(dot--size)};
   --c2-mat-icon--font-size: #{css.cssVar(dot--size)};
 
   ::slotted(*) {
@@ -181,6 +182,7 @@
   pointer-events: none;
   transition: animation.standard(color);
   --c2-feather-icon--size: #{css.cssVar(icon--size, control--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size, control--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size, control--size)};
 
   ::slotted(*) {

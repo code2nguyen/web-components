@@ -598,6 +598,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-truncate': {
+    html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
+    presets: [
+      {
+        name: 'Excerpt',
+        description: 'Two quiet lines and an underlined Read more',
+        css: {
+          '--c2-truncate__content--line-clamp': '2',
+          '--c2-truncate__content--font-size': '14px',
+          '--c2-truncate__toggle--color': '#18181b',
+          '--c2-truncate__toggle--font-weight': '600',
+          '--c2-truncate__toggle--text-decoration': 'underline',
+        },
+        attributes: { 'more-label': 'Read more', 'less-label': 'Read less' },
+      },
+      {
+        name: 'Single line',
+        description: 'One line, for a table cell or a list row',
+        css: {
+          '--c2-truncate__content--line-clamp': '1',
+        },
+      },
+      {
+        name: 'Pill button',
+        description: 'Four lines and a tinted pill toggle',
+        css: {
+          '--c2-truncate__content--line-clamp': '4',
+          '--c2-truncate__toggle--margin-top': '8px',
+          '--c2-truncate__toggle--padding': '4px 10px',
+          '--c2-truncate__toggle--font-size': '12px',
+          '--c2-truncate__toggle--border-radius': '999px',
+          '--c2-truncate__toggle--background-color': '#eef2ff',
+          '--c2-truncate__toggle--color': '#4338ca',
+        },
+      },
+    ],
+  },
   'c2-label': {
     html: `<c2-label required>Email address</c2-label>`,
     presets: [
@@ -735,6 +772,100 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-side-nav--background-color': '#eff6ff',
           '--c2-side-nav__divider--width': '3px',
           '--c2-side-nav__divider--color': '#2563eb',
+        },
+      },
+    ],
+  },
+  'c2-description-list': {
+    html: `<c2-description-list aria-label="Customer" style="width: 420px"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
+    presets: [
+      {
+        name: 'Side-by-side ledger',
+        description: 'One column with each label beside its value and a hairline under every row, for a payment or invoice summary.',
+        css: {
+          '--c2-description-list__grid--columns': '1',
+          '--c2-description-list__grid--row-gap': '0px',
+          '--c2-description-item__label--width': '140px',
+          '--c2-description-item__value--min-width': '140px',
+          '--c2-description-item__container--padding': '10px 0',
+          '--c2-description-item__container--border-bottom': '1px solid #e4e4e7',
+        },
+      },
+      {
+        name: 'Two-column ledger',
+        description: 'Labels beside their values in two columns with a hairline under every pair, for an order or account summary.',
+        css: {
+          '--c2-description-list__grid--columns': '2',
+          '--c2-description-list__grid--row-gap': '0px',
+          '--c2-description-item__label--width': '100px',
+          '--c2-description-item__value--min-width': '80px',
+          '--c2-description-item__container--padding': '8px 0',
+          '--c2-description-item__container--border-bottom': '1px solid #e4e4e7',
+        },
+      },
+      {
+        name: 'Bordered card',
+        description: 'The pairs inside an 8px-radius card with padding, for a detail panel next to other cards.',
+        css: {
+          '--c2-description-list__container--padding': '20px',
+          '--c2-description-list__container--border': '1px solid #e4e4e7',
+          '--c2-description-list__container--border-radius': '8px',
+          '--c2-description-list__grid--min-column-width': '160px',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Smaller type and tighter gaps in two columns, for a summary in a side panel or a hover card.',
+        css: {
+          '--c2-description-list__grid--columns': '2',
+          '--c2-description-list__grid--min-column-width': '120px',
+          '--c2-description-list__grid--column-gap': '16px',
+          '--c2-description-list__grid--row-gap': '10px',
+          '--c2-description-item__container--row-gap': '2px',
+          '--c2-description-item__label--font-size': '12px',
+          '--c2-description-item__value--font-size': '13px',
+        },
+      },
+    ],
+  },
+  'c2-chip': {
+    html: `<c2-chip selectable selected removable>Status: Active</c2-chip>`,
+    presets: [
+      {
+        name: 'Solid choice',
+        description: 'Borderless tinted pills that turn solid when selected, without a check mark, for a category switcher.',
+        css: {
+          '--c2-chip__container--border': '1px solid transparent',
+          '--c2-chip__container--background-color': '#f4f4f5',
+          '--c2-chip__container__hover--border': '1px solid transparent',
+          '--c2-chip__container__selected--background-color': '#18181b',
+          '--c2-chip__container__selected--color': '#ffffff',
+          '--c2-chip__selected-icon--display': 'none',
+        },
+      },
+      {
+        name: 'Square tag',
+        description: 'A small, square-cornered blue tag for labels and topics.',
+        css: {
+          '--c2-chip__container--height': '24px',
+          '--c2-chip__container--border-radius': '4px',
+          '--c2-chip__container--font-size': '12px',
+          '--c2-chip__container--border': '1px solid #bfdbfe',
+          '--c2-chip__container--background-color': '#eff6ff',
+          '--c2-chip__container--color': '#1d4ed8',
+          '--c2-chip__container__selected--border': '1px solid #bfdbfe',
+          '--c2-chip__container__selected--background-color': '#eff6ff',
+          '--c2-chip__container__selected--color': '#1d4ed8',
+        },
+      },
+      {
+        name: 'Filter',
+        description: 'An 8px-radius filter chip outlined in the accent colour while active, for a filter bar above a table.',
+        css: {
+          '--c2-chip__container--height': '32px',
+          '--c2-chip__container--border-radius': '8px',
+          '--c2-chip__container--font-size': '12px',
+          '--c2-chip__container__selected--border': '1px solid rgb(2, 101, 220)',
         },
       },
     ],
@@ -1273,6 +1404,23 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         },
       },
       { name: 'Counter', attributes: { tone: 'danger', count: '120' } },
+    ],
+  },
+  'c2-indicator': {
+    html: `<c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>`,
+    presets: [
+      { name: 'No ring', css: { '--c2-indicator--border': 'none' } },
+      {
+        name: 'Squared counter',
+        css: {
+          '--c2-indicator--height': '16px',
+          '--c2-indicator--min-width': '16px',
+          '--c2-indicator--border-radius': '4px',
+          '--c2-indicator--font-size': '11px',
+          '--c2-indicator--border': 'none',
+        },
+      },
+      { name: 'Primary pulse', attributes: { tone: 'primary', pulse: '' } },
     ],
   },
   'c2-avatar': {
@@ -1868,6 +2016,40 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-tabs__tab__selected--color': '#18181b',
           '--c2-tabs__tab--font-weight': '500',
         },
+      },
+    ],
+  },
+  'c2-json-viewer': {
+    html: `<c2-json-viewer style="width: 280px" data='{"name":"Ada","age":36,"admin":true,"manager":null,"roles":["admin","editor"]}'></c2-json-viewer>`,
+    presets: [
+      {
+        name: 'Terminal',
+        description: 'Dark block with bright token colours.',
+        css: {
+          '--c2-json-viewer--background-color': '#0b1220',
+          '--c2-json-viewer--color': '#d3deee',
+          '--c2-json-viewer__row__focus--outline': '2px solid #5aa3ff',
+          '--c2-json-viewer--border': '1px solid #263449',
+          '--c2-json-viewer--border-radius': '12px',
+          '--c2-json-viewer__row__hover--background-color': '#16233a',
+          '--c2-json-viewer__key--color': '#c4a7ff',
+          '--c2-json-viewer__string--color': '#8ee6a8',
+          '--c2-json-viewer__number--color': '#8ecbff',
+          '--c2-json-viewer__boolean--color': '#ffb86b',
+          '--c2-json-viewer__action__hover--background-color': '#263449',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Borderless, tighter rows and indentation.',
+        css: {
+          '--c2-json-viewer--border': 'none',
+          '--c2-json-viewer--padding': '0px',
+          '--c2-json-viewer--font-size': '11px',
+          '--c2-json-viewer__row--height': '20px',
+          '--c2-json-viewer__row--indent': '12px',
+        },
+        attributes: { 'expand-depth': '3' },
       },
     ],
   },

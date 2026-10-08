@@ -162,6 +162,7 @@
     height: css.cssVar(button__prefix-icon--height);
     color: css.cssVar(button__prefix-icon--color);
     --c2-feather-icon--size: #{css.cssVar(button__prefix-icon--width)};
+    --c2-phosphor-icon--size: #{css.cssVar(button__prefix-icon--width)};
     --c2-mat-icon--font-size: #{css.cssVar(button__prefix-icon--width)};
   }
 
@@ -172,6 +173,7 @@
     height: css.cssVar(button__suffix-icon--height);
     color: css.cssVar(button__suffix-icon--color);
     --c2-feather-icon--size: #{css.cssVar(button__suffix-icon--width)};
+    --c2-phosphor-icon--size: #{css.cssVar(button__suffix-icon--width)};
     --c2-mat-icon--font-size: #{css.cssVar(button__suffix-icon--width)};
   }
 

@@ -107,6 +107,16 @@
     editor--border: 1px solid #bcbcc6,
     editor--border-radius: 4px,
     editor__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+
+    icon--size: 16px,
+    icon--color: currentColor,
+    shape--border-color: #bcbcc6,
+    shape--border-width: 1px,
+    shape__diamond--min-height: 88px,
+    shape__circle--size: 128px,
+    shape__note--fold-size: 14px,
+    shape__focus--color: rgba(2, 101, 220, 0.6),
+    shape__focus--width: 2px,
   )
 );
 
@@ -313,7 +323,9 @@
 }
 
 .node {
-  --_cutout: #{css.cssVar(node--background-color)};
+  // A node's own `background` and `color` win over the variables.
+  --_node-bg: var(--_node-background, #{css.cssVar(node--background-color)});
+  --_cutout: var(--_node-bg);
   position: absolute;
   left: 0;
   top: 0;
@@ -323,8 +335,8 @@
   padding-right: css.cssVar(node--padding-right);
   padding-bottom: css.cssVar(node--padding-bottom);
   padding-left: css.cssVar(node--padding-left);
-  background-color: css.cssVar(node--background-color);
-  color: css.cssVar(node--color);
+  background-color: var(--_node-bg);
+  color: var(--_node-color, #{css.cssVar(node--color)});
   border: css.cssVar(node--border);
   border-radius: css.cssVar(node--border-radius);
   box-shadow: css.cssVar(node--box-shadow);
@@ -374,6 +386,174 @@
 .node.is-selected.status--running,
 .node.is-selected.status--error {
   border-color: css.cssVar(node__selected--border-color);
+}
+
+// ---- shapes: a pill and a note are the node's own border; a diamond, a circle and a slanted box an SVG behind it ----
+
+.node.shape--pill {
+  border-radius: 999px;
+  padding-left: calc(#{css.cssVar(node--padding-left)} + 6px);
+  padding-right: calc(#{css.cssVar(node--padding-right)} + 6px);
+}
+
+.node.shape--note {
+  border-radius: 2px;
+}
+
+// The folded corner: the canvas shows through above the fold, the flap below it is the paper, a shade darker.
+.node.shape--note::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  box-sizing: border-box;
+  width: css.cssVar(shape__note--fold-size);
+  height: css.cssVar(shape__note--fold-size);
+  border-left: 1px solid css.cssVar(shape--border-color);
+  border-bottom: 1px solid css.cssVar(shape--border-color);
+  border-bottom-left-radius: 2px;
+  background: linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--_node-bg) 82%, #000000) calc(50% - 0.5px),
+    css.cssVar(shape--border-color) calc(50% - 0.5px) calc(50% + 0.5px),
+    css.cssVar(background-color) calc(50% + 0.5px)
+  );
+  pointer-events: none;
+}
+
+.node.is-drawn,
+.node.is-drawn:hover,
+.node.is-drawn.is-selected,
+.node.is-drawn.is-dragging,
+.node.is-drawn.is-connect-target {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+// Behind the body: the node's transform makes it a stacking context, so -1 stays inside it.
+.shape {
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  overflow: visible;
+  pointer-events: none;
+  fill: var(--_node-bg);
+  stroke: css.cssVar(shape--border-color);
+  stroke-width: css.cssVar(shape--border-width);
+  filter: drop-shadow(0 1px 2px rgba(24, 24, 27, 0.08));
+  transition: stroke 150ms;
+}
+
+.node.is-drawn:hover .shape {
+  stroke: css.cssVar(node__hover--border-color);
+}
+
+.node.is-drawn.is-selected .shape {
+  stroke: css.cssVar(node__selected--border-color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
+}
+
+.node.is-drawn.status--running .shape {
+  stroke: color-mix(in srgb, #{css.cssVar(running--color)} 55%, transparent);
+}
+
+.node.is-drawn.status--error .shape {
+  stroke: color-mix(in srgb, #{css.cssVar(error--color)} 60%, transparent);
+}
+
+.node.is-drawn.is-selected.status--running .shape,
+.node.is-drawn.is-selected.status--error .shape {
+  stroke: css.cssVar(node__selected--border-color);
+}
+
+// As on a box, the connection target's cue wins over a status colour; a selected node keeps the selected colour.
+.node.is-drawn.is-connect-target .shape {
+  stroke: css.cssVar(node__connect-target--border-color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + 1px);
+}
+
+// The focus ring follows the outline rather than the box round it. An outline (the node's focus variable) cannot
+// be drawn along an SVG shape, so the ring has its own colour and width.
+.node.is-drawn:focus-visible {
+  outline: none;
+}
+
+.node.is-drawn:focus-visible .shape {
+  stroke: css.cssVar(shape__focus--color);
+  stroke-width: calc(#{css.cssVar(shape--border-width)} + #{css.cssVar(shape__focus--width)});
+}
+
+.node.is-drawn.is-dragging .shape {
+  filter: drop-shadow(0 8px 14px rgba(24, 24, 27, 0.18));
+}
+
+.node.shape--slanted {
+  padding-left: calc(#{css.cssVar(node--padding-left)} + 6px);
+  padding-right: calc(#{css.cssVar(node--padding-right)} + 6px);
+}
+
+.node.shape--diamond {
+  display: flex;
+  align-items: center;
+  min-height: css.cssVar(shape__diamond--min-height);
+  // The middle half of the width: two lines there stay inside the diamond, which narrows towards its points.
+  padding: 14px 25%;
+}
+
+.node.shape--circle {
+  display: flex;
+  align-items: center;
+  width: css.cssVar(shape__circle--size);
+  height: css.cssVar(shape__circle--size);
+  padding: 18px;
+}
+
+// A diamond and a circle centre their text and let it wrap: their middle is where the room is. Three lines fit a
+// circle; a diamond takes two (below).
+.node:is(.shape--diamond, .shape--circle) {
+  .body {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .text {
+    flex: 0 1 auto;
+  }
+
+  .label {
+    display: -webkit-box;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+.node.shape--diamond .label {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.node-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  margin-top: 1px;
+  color: css.cssVar(icon--color);
+  font-size: css.cssVar(icon--size);
+  line-height: 1;
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
 .handle {

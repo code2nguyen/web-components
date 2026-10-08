@@ -22,7 +22,7 @@ The entry also registers `c2-overlay`, `c2-list` and `c2-list-item`, which it re
 
 ## Usage
 
-The examples below are real application patterns rather than visual variants. The teammate picker combines field mapping, a custom renderer, actionable header/footer slots and `selection-behavior="preserve"`. The catalog search uses an asynchronous `dataSource`, cancellable requests and custom loading/empty content.
+The examples below are real application patterns rather than visual variants. The teammate picker combines field mapping, a custom renderer, actionable header/footer slots and `selection-behavior="preserve"`. The catalog search uses an asynchronous `dataSource`, cancellable requests and custom loading/empty content, with no header or footer. When the panel cannot fit the header, the footer and `--c2-autocomplete__list--min-height` (96px, about two rows) of suggestions, such as on a phone with the keyboard open, the header and footer are hidden so the suggestions keep the space.
 
 ```html tag=UsageBlock,package=@c2n/autocomplete
 <style>
@@ -94,10 +94,8 @@ The examples below are real application patterns rather than visual variants. Th
     debounce="250"
     show-empty
   >
-    <div slot="header"><strong>Product catalog</strong><button type="button" data-scan-product>Scan barcode</button></div>
     <span slot="loading">Checking live inventory…</span>
     <span slot="empty">No products match this search.</span>
-    <span slot="footer" data-example-status>Inventory comes from an asynchronous data source</span>
   </c2-autocomplete>
 </div>
 ```
@@ -131,7 +129,7 @@ catalog.renderItem = ({ item }) => html`
 `
 ```
 
-`selection-behavior="replace"` is the default: choosing a suggestion replaces the input with its key and fires `input`, `change` and `suggestion-select`. Use `selection-behavior="preserve"` for command palettes or search results: choosing a row fires only `suggestion-select`, keeps the query unchanged and lets the same result list reopen when the input is clicked again.
+`selection-behavior="replace"` is the default: choosing a suggestion replaces the input with its key (its label when there is no `item-key`) and fires `input`, `change` and `suggestion-select`. Use `selection-behavior="preserve"` for command palettes or search results: choosing a row fires only `suggestion-select`, keeps the query unchanged and lets the same result list reopen when the input is clicked again.
 
 For remote data, assign a function to `dataSource`. The component debounces calls and aborts the previous signal whenever the query changes. Reopening an unchanged query reuses its last successful results immediately; call `load()` when you need to force a refresh:
 

@@ -133,6 +133,7 @@ $_duration: css.cssVar(transition-duration);
   line-height: 0;
   // Icons handed in through the slots size themselves from these, like everywhere else in the library.
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 
   svg {

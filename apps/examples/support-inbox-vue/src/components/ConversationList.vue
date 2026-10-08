@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ListEventMap } from '@c2n/components/list'
-import { STATUS_TONE, type Conversation } from '../data/conversations'
+import { STATUS_LABEL, STATUS_TONE, type Conversation } from '../data/conversations'
 
 defineProps<{ conversations: Conversation[]; activeId: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
@@ -29,7 +29,17 @@ function handleSelection(event: ListEventMap['selection-change']) {
        `required` keeps one row selected: clicking the open conversation does not close it. -->
   <c2-list class="inbox__list" required :value.prop="[activeId]" aria-label="Conversations" @selection-change="handleSelection">
     <c2-list-item v-for="conversation in conversations" :key="conversation.id" :value="conversation.id">
-      <c2-avatar slot="prefix-icon" auto-color :name="conversation.customer" />
+      <!-- The status rides on the avatar as a dot. `accessible-label` names it, since a dot has no text of its own;
+           the offsets move it from the bounding-box corner onto the round avatar. -->
+      <c2-indicator
+        slot="prefix-icon"
+        class="inbox__status"
+        position="bottom-end"
+        :tone="STATUS_TONE[conversation.status]"
+        :accessible-label="STATUS_LABEL[conversation.status]"
+      >
+        <c2-avatar auto-color :name="conversation.customer" />
+      </c2-indicator>
       <span class="inbox__row">
         <span class="inbox__customer">{{ conversation.customer }}</span>
         <span class="inbox__time">{{ conversation.updated }}</span>
@@ -37,7 +47,6 @@ function handleSelection(event: ListEventMap['selection-change']) {
       <span slot="description" class="inbox__subject">{{ conversation.subject }}</span>
       <span slot="suffix-icon" class="inbox__marks">
         <c2-badge v-if="conversation.unread" :count="conversation.unread" tone="primary" />
-        <c2-badge :tone="STATUS_TONE[conversation.status]" dot />
       </span>
     </c2-list-item>
 

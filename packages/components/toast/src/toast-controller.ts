@@ -1,5 +1,7 @@
 export type ToastVariant = 'neutral' | 'info' | 'success' | 'warning' | 'error'
 export type ToastDismissReason = 'timeout' | 'close' | 'action' | 'programmatic' | 'clear'
+/** Where the action button sits: on its own line under the message, or at the end of the message's line. */
+export type ToastActionPlacement = 'below' | 'end'
 
 export interface ToastOptions {
   /** Reusing an ID updates the existing toast instead of adding a duplicate. */
@@ -15,6 +17,8 @@ export interface ToastOptions {
   /** Overrides the region countdown-bar setting for this toast. */
   showProgress?: boolean
   actionLabel?: string
+  /** `below` (default) puts the action under the message; `end` at the end of its line, before the dismiss button. */
+  actionPlacement?: ToastActionPlacement
 }
 
 export interface ToastRecord {
@@ -27,6 +31,7 @@ export interface ToastRecord {
   noIcon: boolean
   showProgress?: boolean
   actionLabel: string
+  actionPlacement: ToastActionPlacement
 }
 
 interface Entry {
@@ -102,6 +107,7 @@ export class ToastController {
         noIcon: options.noIcon ?? false,
         showProgress: options.showProgress,
         actionLabel: options.actionLabel ?? '',
+        actionPlacement: options.actionPlacement ?? 'below',
       },
       remaining: duration,
       started: 0,

@@ -50,6 +50,13 @@
     focus--outline-offset: -2px,
 
     disabled--opacity: variables.$disabled-content-opacity,
+
+    compact--size: 28px,
+    compact--border-radius: 6px,
+    compact__icon--size: 18px,
+    compact__checked--outline: 2px solid #18181b,
+    compact__checked--outline-offset: -2px,
+    compact__checked--background: transparent,
   )
 );
 
@@ -148,6 +155,7 @@
   height: css.cssVar(icon--size);
   color: css.cssVar(icon--color);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
@@ -200,4 +208,52 @@
   pointer-events: none;
   cursor: default;
   opacity: css.cssVar(disabled--opacity);
+}
+
+// A choice in a c2-menu-row: a square showing only its icon, ringed when checked. The label stays as its name.
+:host(:state(compact)) {
+  display: inline-block;
+
+  .c2-menu-item {
+    justify-content: center;
+    width: css.cssVar(compact--size);
+    height: css.cssVar(compact--size);
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    border-radius: css.cssVar(compact--border-radius);
+  }
+
+  .content {
+    flex: none;
+  }
+
+  ::slotted([slot='prefix-icon']) {
+    width: css.cssVar(compact__icon--size);
+    height: css.cssVar(compact__icon--size);
+    --c2-feather-icon--size: #{css.cssVar(compact__icon--size)};
+    --c2-phosphor-icon--size: #{css.cssVar(compact__icon--size)};
+    --c2-mat-icon--font-size: #{css.cssVar(compact__icon--size)};
+  }
+}
+
+:host(:state(compact)[checked]) .c2-menu-item {
+  outline: css.cssVar(compact__checked--outline);
+  outline-offset: css.cssVar(compact__checked--outline-offset);
+  background: css.cssVar(compact__checked--background);
+}
+
+// The checked choice still shows where the keyboard is: its ring, over the focus highlight.
+:host(:state(compact)[checked]:focus-visible) .c2-menu-item,
+:host(:state(compact)[checked]) .c2-menu-item:hover {
+  background: css.cssVar(hover--background, background);
+}
+
+.text[data-hidden] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -1,0 +1,221 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chip,
+  $theme: (
+    container--height: 28px,
+    container--padding-left: 10px,
+    container--padding-right: 10px,
+    container--gap: 6px,
+    container--border-radius: 999px,
+    container--border: 1px solid #bcbcc6,
+    container--background-color: #ffffff,
+    container--color: #18181b,
+    container--font-family: inherit,
+    container--font-size: 14px,
+    container--font-weight: 500,
+
+    container__hover--border: 1px solid #a1a1aa,
+    container__hover--background-color: #f4f4f5,
+
+    container__selected--border: 1px solid transparent,
+    container__selected--background-color: #edf1fe,
+    container__selected--color: #0265dc,
+    container__selected__hover--background-color: null,
+
+    container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    container__focus--outline-offset: 2px,
+
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: null,
+    selected-icon--display: inline-flex,
+
+    remove-button--size: 18px,
+    remove-button--margin-right: -4px,
+    remove-button--border-radius: 999px,
+    remove-button--color: #71717a,
+    remove-button__hover--background-color: rgba(24, 24, 27, 0.08),
+    remove-button__hover--color: #18181b,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-chip {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
+  max-width: 100%;
+  height: css.cssVar(container--height);
+  padding-left: css.cssVar(container--padding-left);
+  padding-right: css.cssVar(container--padding-right);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  color: css.cssVar(container--color);
+  font-family: css.cssVar(container--font-family);
+  font-size: css.cssVar(container--font-size);
+  font-weight: css.cssVar(container--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.c2-chip.is-selectable:not(.is-disabled):hover {
+  border: css.cssVar(container__hover--border);
+  background-color: css.cssVar(container__hover--background-color);
+}
+
+.c2-chip.is-selected {
+  border: css.cssVar(container__selected--border);
+  background-color: css.cssVar(container__selected--background-color);
+  color: css.cssVar(container__selected--color);
+}
+
+.c2-chip.is-selected:not(.is-disabled):hover {
+  border: css.cssVar(container__selected--border);
+  background-color: css.cssVar(container__selected__hover--background-color, container__selected--background-color);
+}
+
+// The pill carries the focus ring of its toggle, so the outline follows the rounded shape rather than the label.
+.c2-chip:has(.action:focus-visible) {
+  outline: css.cssVar(container__focus--outline);
+  outline-offset: css.cssVar(container__focus--outline-offset);
+}
+
+.c2-chip.is-disabled {
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+.action {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
+  min-width: 0;
+  height: 100%;
+}
+
+button.action {
+  cursor: pointer;
+  // Stretch the hit area over the side padding so the whole pill toggles.
+  margin-left: calc(-1 * #{css.cssVar(container--padding-left)});
+  padding-left: css.cssVar(container--padding-left);
+}
+
+.c2-chip.is-selectable:not(:has(.remove)) button.action {
+  margin-right: calc(-1 * #{css.cssVar(container--padding-right)});
+  padding-right: css.cssVar(container--padding-right);
+}
+
+button.action:disabled {
+  cursor: default;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: css.cssVar(icon--color, container--color);
+}
+
+.c2-chip.is-selected .icon {
+  color: css.cssVar(icon--color, container__selected--color);
+}
+
+.icon[hidden] {
+  display: none;
+}
+
+.selected-icon {
+  display: css.cssVar(selected-icon--display);
+}
+
+.icon svg,
+.icon ::slotted(*) {
+  display: block;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.remove {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(remove-button--size);
+  height: css.cssVar(remove-button--size);
+  margin-right: css.cssVar(remove-button--margin-right);
+  border-radius: css.cssVar(remove-button--border-radius);
+  color: css.cssVar(remove-button--color);
+  cursor: pointer;
+}
+
+.remove:hover:not(:disabled) {
+  background-color: css.cssVar(remove-button__hover--background-color);
+  color: css.cssVar(remove-button__hover--color);
+}
+
+.remove:focus-visible {
+  outline: css.cssVar(container__focus--outline);
+}
+
+.remove:disabled {
+  cursor: default;
+}
+
+.remove svg,
+.remove ::slotted(*) {
+  display: block;
+  width: 70%;
+  height: 70%;
+}
+
+// Parts draw their own padding and dividers edge to edge, and clip their hover backgrounds to the pill.
+.c2-chip.has-parts {
+  gap: 0;
+  padding-left: 0;
+  overflow: hidden;
+}
+
+.c2-chip.has-parts:not(:has(.remove)) {
+  padding-right: 0;
+}
+
+.c2-chip.has-parts .action,
+.c2-chip.has-parts .label {
+  gap: 0;
+  height: 100%;
+}
+
+.c2-chip.has-parts .label {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.c2-chip.has-parts .remove {
+  margin-left: 4px;
+}
