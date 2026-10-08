@@ -100,6 +100,7 @@
         "./packages/components/filter-builder:build",
         "./packages/components/truncate:build",
         "./packages/components/chip-group:build",
+        "./packages/components/description-list:build",
         "./packages/components/indicator:build",
         "./packages/components/chip:build",
         "./packages/components/search-field:build",

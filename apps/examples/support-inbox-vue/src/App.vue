@@ -132,18 +132,13 @@ onMounted(() => {
          state honest when the sheet closes itself. -->
     <c2-sheet :open="detailsOpen" side="right" @close="detailsOpen = false">
       <span slot="title">Customer</span>
-      <dl v-if="active" class="details">
-        <dt>Name</dt>
-        <dd>{{ active.customer }}</dd>
-        <dt>Email</dt>
-        <dd>{{ active.email }}</dd>
-        <dt>Plan</dt>
-        <dd>{{ active.plan }}</dd>
-        <dt>Status</dt>
-        <dd>{{ STATUS_LABEL[active.status] }}</dd>
-        <dt>Messages</dt>
-        <dd>{{ active.messages.length }}</dd>
-      </dl>
+      <c2-description-list v-if="active" class="details" aria-label="Customer">
+        <c2-description-item label="Name">{{ active.customer }}</c2-description-item>
+        <c2-description-item label="Email">{{ active.email }}</c2-description-item>
+        <c2-description-item label="Plan">{{ active.plan }}</c2-description-item>
+        <c2-description-item label="Status">{{ STATUS_LABEL[active.status] }}</c2-description-item>
+        <c2-description-item label="Messages">{{ active.messages.length }}</c2-description-item>
+      </c2-description-list>
       <c2-button slot="footer" class="ghost" @click="detailsOpen = false">Close</c2-button>
     </c2-sheet>
   </div>

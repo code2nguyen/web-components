@@ -21,6 +21,7 @@
     "@c2n/filter-builder": "*",
     "@c2n/truncate": "*",
     "@c2n/chip-group": "*",
+    "@c2n/description-list": "*",
     "@c2n/indicator": "*",
     "@c2n/chip": "*",
     "@c2n/search-field": "*",

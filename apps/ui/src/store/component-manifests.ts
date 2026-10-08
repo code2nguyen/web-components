@@ -3,6 +3,7 @@ import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
+import descriptionList from '@c2n/description-list/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
@@ -114,6 +115,7 @@ export const componentManifests = (function () {
     filterBuilder,
     truncate,
     chipGroup,
+    descriptionList,
     indicator,
     chip,
     searchField,

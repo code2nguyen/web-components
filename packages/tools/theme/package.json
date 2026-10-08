@@ -59,6 +59,7 @@
         "../../components/filter-builder:build",
         "../../components/truncate:build",
         "../../components/chip-group:build",
+        "../../components/description-list:build",
         "../../components/indicator:build",
         "../../components/chip:build",
         "../../components/search-field:build",
