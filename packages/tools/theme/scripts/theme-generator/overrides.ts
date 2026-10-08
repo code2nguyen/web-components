@@ -752,4 +752,8 @@ export const overrides: Record<string, Override> = {
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
   '--c2-month-planner__handle--color': { token: 'color-on-fill' },
+  // Popconfirm: the warning sign keeps its amber across brand themes (there is no warning token), and OK while pending
+  // dims like any disabled control.
+  '--c2-popconfirm__icon--color': { exclude: 'semantic warning colour' },
+  '--c2-popconfirm__confirm__pending--opacity': { token: 'disabled-opacity' },
 }

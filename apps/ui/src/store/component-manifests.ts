@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
@@ -111,6 +112,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    popconfirm,
     jsonViewer,
     filterBuilder,
     truncate,

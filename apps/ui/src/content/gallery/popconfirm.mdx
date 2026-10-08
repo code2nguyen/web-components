@@ -1,0 +1,88 @@
+---
+description: 'Ready-made looks for c2-popconfirm: destructive, compact, rounded and centred. Click a trigger to open it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Popconfirm } from '@c2n/components/popconfirm'
+
+## Presets
+
+Curated looks for `c2-popconfirm`. Click the trigger in a card to open it. The surface is styled through `--c2-popconfirm--*` (`background-color`, `border`, `border-radius`, `box-shadow`, `max-width` and the four `padding-*` variables). The buttons are styled through `--c2-popconfirm__confirm--*` and `--c2-popconfirm__cancel--*`, and the icon through `--c2-popconfirm__icon--*`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-popconfirm heading="Delete this task?" client:only="lit"><c2-button slot="trigger">Delete</c2-button>This cannot be undone.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Destructive
+<style>
+  .destructive-confirm {
+    --c2-popconfirm__icon--color: var(--c2-theme--color-error, #dc2626);
+    --c2-popconfirm__confirm--background-color: var(--c2-theme--color-error, #dc2626);
+    --c2-popconfirm__confirm__hover--background-color: #b91c1c;
+  }
+</style>
+<c2-popconfirm class="destructive-confirm" heading="Revoke this API key?" confirm-label="Revoke" client:only="lit"><c2-button slot="trigger">Revoke key</c2-button>Apps using it stop working at once.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact-confirm {
+    --c2-popconfirm--padding-top: 8px;
+    --c2-popconfirm--padding-right: 10px;
+    --c2-popconfirm--padding-bottom: 8px;
+    --c2-popconfirm--padding-left: 10px;
+    --c2-popconfirm--border-radius: 6px;
+    --c2-popconfirm__icon--display: none;
+    --c2-popconfirm__heading--font-size: 12px;
+    --c2-popconfirm__actions--margin-top: 8px;
+    --c2-popconfirm__actions--gap: 4px;
+    --c2-popconfirm__button--height: 24px;
+    --c2-popconfirm__button--padding-left: 8px;
+    --c2-popconfirm__button--padding-right: 8px;
+    --c2-popconfirm__button--font-size: 12px;
+  }
+</style>
+<c2-popconfirm class="compact-confirm" heading="Remove from list?" confirm-label="Remove" cancel-label="Keep" placement="bottom" client:only="lit"><c2-button slot="trigger">Remove</c2-button></c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Rounded
+<style>
+  .rounded-confirm {
+    --c2-popconfirm--border-radius: 14px;
+    --c2-popconfirm--padding-top: 16px;
+    --c2-popconfirm--padding-right: 20px;
+    --c2-popconfirm--padding-bottom: 16px;
+    --c2-popconfirm--padding-left: 20px;
+    --c2-popconfirm--box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    --c2-popconfirm__button--border-radius: 999px;
+    --c2-popconfirm__button--padding-left: 16px;
+    --c2-popconfirm__button--padding-right: 16px;
+    --c2-popconfirm__icon--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-popconfirm class="rounded-confirm" heading="Publish the post?" confirm-label="Publish" cancel-label="Not yet" client:only="lit"><c2-button slot="trigger">Publish</c2-button>Subscribers get an email right away.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Centred actions
+<style>
+  .centred-confirm {
+    --c2-popconfirm--max-width: 240px;
+    --c2-popconfirm__actions--justify-content: stretch;
+    --c2-popconfirm__icon--display: none;
+  }
+  .centred-confirm::part(heading) {
+    text-align: center;
+  }
+  .centred-confirm::part(cancel),
+  .centred-confirm::part(confirm) {
+    flex: 1;
+  }
+</style>
+<c2-popconfirm class="centred-confirm" heading="Sign out of every device?" confirm-label="Sign out" placement="bottom" client:only="lit"><c2-button slot="trigger">Sign out everywhere</c2-button></c2-popconfirm>
+```
+
+</GalleryGrid>

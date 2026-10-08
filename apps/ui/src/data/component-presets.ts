@@ -2330,6 +2330,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-popconfirm': {
+    html: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
+    presets: [
+      {
+        name: 'Destructive',
+        css: {
+          '--c2-popconfirm__icon--color': '#dc2626',
+          '--c2-popconfirm__confirm--background-color': '#dc2626',
+          '--c2-popconfirm__confirm__hover--background-color': '#b91c1c',
+        },
+      },
+      {
+        name: 'Compact',
+        css: {
+          '--c2-popconfirm--padding-top': '8px',
+          '--c2-popconfirm--padding-right': '10px',
+          '--c2-popconfirm--padding-bottom': '8px',
+          '--c2-popconfirm--padding-left': '10px',
+          '--c2-popconfirm__icon--display': 'none',
+          '--c2-popconfirm__actions--margin-top': '8px',
+          '--c2-popconfirm__button--height': '24px',
+          '--c2-popconfirm__button--font-size': '12px',
+        },
+        attributes: { placement: 'bottom' },
+      },
+      {
+        name: 'Rounded',
+        css: {
+          '--c2-popconfirm--border-radius': '14px',
+          '--c2-popconfirm--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
+          '--c2-popconfirm__button--border-radius': '999px',
+        },
+      },
+    ],
+  },
   'c2-tooltip': {
     html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
     presets: [
