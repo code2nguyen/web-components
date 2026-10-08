@@ -26,6 +26,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/components/chart/radar-chart` — Compare several profiles across the same set of normalized indicators. Children: `c2-chart-series`, `c2-map-layer`.
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/scatter-chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`, `c2-map-layer`.
 - **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sparkline` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`, `c2-map-layer`.
+- **State Timeline** — `c2-state-timeline` · `@c2n/components/state-timeline` — One band per series, coloured by the discrete state it was in over time: service health, CI runs, host power.
 
 ## Chat
 

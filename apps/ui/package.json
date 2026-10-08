@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/state-timeline": "*",
     "@c2n/json-viewer": "*",
     "@c2n/filter-builder": "*",
     "@c2n/truncate": "*",

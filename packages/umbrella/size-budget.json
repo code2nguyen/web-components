@@ -1,5 +1,5 @@
 {
-  "total": 1175349,
+  "total": 1184435,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -123,6 +123,7 @@
     "spinner": 2061,
     "split-panel": 3362,
     "stat": 1402,
+    "state-timeline": 9086,
     "status-panel": 2740,
     "steps": 11616,
     "steps/step": 7976,

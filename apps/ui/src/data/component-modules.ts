@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/components/state-timeline'
 import '@c2n/components/json-viewer'
 import '@c2n/components/filter-builder'
 import '@c2n/components/truncate'

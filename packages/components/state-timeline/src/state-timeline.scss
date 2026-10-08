@@ -1,0 +1,298 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-state-timeline,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-family: inherit,
+    font-size: 12px,
+    gap: 8px,
+    label--width: 120px,
+    label--color: #18181b,
+    label--font-weight: 500,
+    row--height: 28px,
+    row--gap: 6px,
+    track--background: #f4f4f5,
+    track--border-radius: 4px,
+    segment--gap: 2px,
+    segment--border-radius: 4px,
+    segment--background-mix: 32%,
+    segment--color: #18181b,
+    segment--font-weight: 500,
+    segment__hover--background-mix: 52%,
+    segment__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    segment__empty--border: 1px dashed #bcbcc6,
+    axis--color: #71717a,
+    axis--border-top: 1px solid #e4e4e7,
+    legend--color: #71717a,
+    legend__swatch--size: 10px,
+    legend__swatch--border-radius: 999px,
+    tooltip--background: #ffffff,
+    tooltip--color: #18181b,
+    tooltip--muted-color: #71717a,
+    tooltip--border: 1px solid #d4d4d8,
+    tooltip--border-radius: 8px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--width: 220px,
+    tone-primary--color: rgb(2, 101, 220),
+    tone-success--color: #15803d,
+    tone-warning--color: #a16207,
+    tone-danger--color: #dc2626,
+    tone-neutral--color: #71717a,
+    series-1--color: #0265dc,
+    series-2--color: #ea580c,
+    series-3--color: #0f766e,
+    series-4--color: #db2777,
+    series-5--color: #a16207,
+    series-6--color: #7c3aed,
+    series-7--color: #0891b2,
+    series-8--color: #52525b,
+    empty--color: #71717a,
+    empty--padding: 32px 16px,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  color: css.cssVar(color);
+}
+
+.frame {
+  --_surface: #{css.cssVar(background)};
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  background: var(--_surface);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(row--gap);
+}
+
+.row,
+.axis {
+  display: grid;
+  grid-template-columns: css.cssVar(label--width) minmax(0, 1fr);
+  align-items: center;
+}
+
+.label {
+  overflow: hidden;
+  padding-right: 8px;
+  color: css.cssVar(label--color);
+  font-weight: css.cssVar(label--font-weight);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.track {
+  position: relative;
+  height: css.cssVar(row--height);
+  background: css.cssVar(track--background);
+  border-radius: css.cssVar(track--border-radius);
+}
+
+/* ---- segments ---- */
+.segment {
+  --_tone: #{css.cssVar(tone-neutral--color)};
+  --_mix: #{css.cssVar(segment--background-mix)};
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  // The gap is carved out of each segment's right side, so a band's segments keep their exact start times.
+  border-right: calc(#{css.cssVar(segment--gap)} / 2) solid transparent;
+  border-left: calc(#{css.cssVar(segment--gap)} / 2) solid transparent;
+  background-clip: padding-box;
+  background-color: color-mix(in srgb, var(--_tone) var(--_mix), var(--_surface));
+  border-radius: css.cssVar(segment--border-radius);
+  color: css.cssVar(segment--color);
+  font-weight: css.cssVar(segment--font-weight);
+  outline: none;
+  cursor: default;
+  container-type: inline-size;
+}
+.segment.hovered,
+.segment:focus-visible {
+  --_mix: #{css.cssVar(segment__hover--background-mix)};
+}
+.segment:focus-visible {
+  z-index: 1;
+  outline: css.cssVar(segment__focus--outline);
+  outline-offset: 1px;
+}
+.segment.is-empty {
+  background: transparent;
+  outline-offset: 1px;
+}
+.segment.is-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: css.cssVar(segment__empty--border);
+  border-radius: inherit;
+}
+
+.segment-label {
+  overflow: hidden;
+  padding: 0 6px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+// A label that would show only an ellipsis says nothing; the tooltip and the accessible name still carry the state.
+@container (max-width: 36px) {
+  .segment-label {
+    display: none;
+  }
+}
+
+/* ---- tones ---- */
+@each $tone in primary, success, warning, danger, neutral {
+  .tone-#{$tone} {
+    --_tone: #{css.cssVar(tone-#{$tone}--color)};
+  }
+}
+@for $slot from 1 through 8 {
+  .tone-#{$slot} {
+    --_tone: #{css.cssVar(series-#{$slot}--color)};
+  }
+}
+
+/* ---- axis ---- */
+.axis-track {
+  position: relative;
+  height: 1.5em;
+  padding-top: 4px;
+  border-top: css.cssVar(axis--border-top);
+  color: css.cssVar(axis--color);
+  font-variant-numeric: tabular-nums;
+}
+.tick {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.tick::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  height: 4px;
+  border-left: css.cssVar(axis--border-top);
+}
+.tick.at-start {
+  transform: none;
+}
+.tick.at-start::before {
+  left: 0;
+}
+.tick.at-end {
+  transform: translateX(-100%);
+}
+.tick.at-end::before {
+  left: auto;
+  right: 0;
+}
+
+/* ---- legend ---- */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  padding-left: css.cssVar(label--width);
+  list-style: none;
+  color: css.cssVar(legend--color);
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+// Every swatch carries a tone class or `is-empty`, so it sets no `--_tone` of its own (which would outrank the tones above).
+.swatch {
+  flex: none;
+  width: css.cssVar(legend__swatch--size);
+  height: css.cssVar(legend__swatch--size);
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--_tone) #{css.cssVar(segment__hover--background-mix)}, var(--_surface, #ffffff));
+  border-radius: css.cssVar(legend__swatch--border-radius);
+}
+.swatch.is-empty {
+  background: transparent;
+  border: css.cssVar(segment__empty--border);
+}
+
+/* ---- tooltip ---- */
+// A top-layer popover placed with fixed coordinates by the component; these reset the UA popover box.
+.tooltip {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  width: css.cssVar(tooltip--width);
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  padding: 10px 12px;
+  // Shown only as an open popover, so a browser without the popover API shows no tooltip rather than a stray box.
+  display: none;
+  background: css.cssVar(tooltip--background);
+  color: css.cssVar(tooltip--color);
+  border: css.cssVar(tooltip--border);
+  border-radius: css.cssVar(tooltip--border-radius);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  pointer-events: none;
+}
+.tooltip:popover-open {
+  display: block;
+}
+.tooltip-title {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tooltip-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.tooltip dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 6px 0 0;
+}
+.tooltip dt {
+  color: css.cssVar(tooltip--muted-color);
+}
+.tooltip dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- states ---- */
+.empty {
+  display: grid;
+  place-items: center;
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}
+
+:host([hide-legend]) .legend,
+:host([hide-axis]) .axis {
+  display: none;
+}
