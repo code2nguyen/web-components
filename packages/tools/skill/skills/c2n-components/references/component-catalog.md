@@ -91,7 +91,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
-- **Chip** — `c2-chip` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
+- **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.

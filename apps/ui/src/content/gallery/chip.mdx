@@ -7,6 +7,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import ChipExamplesRuntime from '../../components/ChipExamplesRuntime.astro'
 
 import { Chip } from '@c2n/components/chip'
+import { ChipPart } from '@c2n/components/chip/chip-part'
 import { Avatar } from '@c2n/components/avatar'
 
 ## Presets
@@ -77,6 +78,39 @@ The pill is one set of `--c2-chip__container--*` variables (border, background, 
 <c2-chip class="filter" selectable selected removable>Status is Active</c2-chip>
 <c2-chip class="filter" selectable selected removable>Owner is me</c2-chip>
 <c2-chip class="filter add-filter" selectable>+ Add filter</c2-chip>
+```
+
+```html tag=MdxCodeBlock,label=Sentence filters
+<style>
+  .sentence {
+    --c2-chip__container--height: 30px;
+    --c2-chip__container--font-size: 13px;
+    --c2-chip__container--font-weight: 400;
+    --c2-chip__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+  .sentence .muted {
+    --c2-chip-part__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .sentence .strong {
+    --c2-chip-part__container--font-weight: 600;
+  }
+  .sentence .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0265dc;
+  }
+</style>
+<c2-chip class="sentence" removable>
+  <c2-chip-part class="muted" name="field">Status</c2-chip-part>
+  <c2-chip-part class="muted" name="operator" interactive haspopup="listbox">is</c2-chip-part>
+  <c2-chip-part class="strong" name="value" interactive haspopup="listbox"><span class="dot" slot="prefix"></span>In progress</c2-chip-part>
+</c2-chip>
+<c2-chip class="sentence" removable>
+  <c2-chip-part class="muted" name="field">Due</c2-chip-part>
+  <c2-chip-part class="muted" name="operator" interactive haspopup="listbox">before</c2-chip-part>
+  <c2-chip-part class="strong" name="value" interactive haspopup="dialog">Oct 31</c2-chip-part>
+</c2-chip>
 ```
 
 ```html tag=MdxCodeBlock,label=People

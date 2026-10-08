@@ -224,6 +224,10 @@
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"
     },
+    "./chip/chip-part": {
+      "types": "./dist/chip/chip-part.d.ts",
+      "default": "./dist/chip/chip-part.js"
+    },
     "./chip-group": {
       "types": "./dist/chip-group.d.ts",
       "default": "./dist/chip-group.js"

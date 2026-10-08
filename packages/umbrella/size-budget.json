@@ -1,5 +1,5 @@
 {
-  "total": 1146255,
+  "total": 1150642,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -40,7 +40,8 @@
     "chatbot": 7122,
     "checkbox": 3103,
     "chip-group": 8459,
-    "chip": 2573,
+    "chip": 5075,
+    "chip/chip-part": 1885,
     "code-editor": 7734,
     "code-viewer": 6630,
     "color-area": 9547,

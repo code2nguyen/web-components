@@ -9,9 +9,12 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import ChipExamplesRuntime from '../../components/ChipExamplesRuntime.astro'
 
 import { Chip } from '@c2n/components/chip'
+import { ChipPart } from '@c2n/components/chip/chip-part'
 import { Avatar } from '@c2n/components/avatar'
 
 `c2-chip` is the chip of Material, Mantine and antd: a small pill for a filter ("Status: Active"), a choice among a few options, or a value someone entered. On its own it is a read-only label. `selectable` makes it a toggle button: a click, **Enter** or **Space** flips `selected`, fires `change` and shows a check mark (the `selected-icon` slot replaces it, `--c2-chip__selected-icon--display: none` hides it). `removable` adds a remove button named "Remove" plus the chip's text (`remove-label` changes the first word); it fires `remove`, and so do **Backspace** and **Delete** on a focused selectable chip. `detail.value` is the chip's `value`, or its text when no value is set.
+
+A chip can also read as a sentence made of `c2-chip-part` children, the filter chip of Linear and Airtable: `Status | is any of | Active`. The chip draws the parts side by side with a divider between them. `interactive` turns a part into a button that fires `part-click` with the part's `name`. The event bubbles, so one listener on the chip opens the right editor for whichever part was clicked, anchored on `event.target`. `haspopup` and `expanded` describe that editor to assistive technology. **Left** and **Right** move between the interactive parts and the remove button, and **Backspace** or **Delete** on a part fires `remove`. Importing the chip registers `c2-chip-part` as well. A chip with parts is never a toggle.
 
 The chip never removes itself: drop it from your own list in the `remove` handler, and move focus to its neighbour, so a framework-rendered list stays in sync. The `prefix` slot takes an icon or a small avatar. `c2-badge` stays the non-interactive status label; use a chip when people pick or dismiss it.
 
@@ -25,7 +28,14 @@ import '@c2n/components/chip'
 
 ```html tag=UsageBlock,package=@c2n/chip
 <style>
-  .person {
+  c2-chip-part.muted {
+    --c2-chip-part__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  c2-chip-part.person {
+    --c2-avatar--size: 18px;
+    --c2-avatar--font-size: 9px;
+  }
+  c2-chip.person {
     --c2-chip__container--padding-left: 4px;
     --c2-chip__icon--size: 20px;
     --c2-avatar--size: 20px;
@@ -46,6 +56,18 @@ import '@c2n/components/chip'
   <c2-chip removable value="status">Status: Active</c2-chip>
   <c2-chip removable value="owner">Owner: me</c2-chip>
   <c2-chip class="person" removable value="ada"><c2-avatar slot="prefix" name="Ada Lovelace"></c2-avatar>Ada Lovelace</c2-chip>
+</div>
+<div data-label="Parts">
+  <c2-chip removable value="status">
+    <c2-chip-part name="field" class="muted">Status</c2-chip-part>
+    <c2-chip-part name="operator" interactive haspopup="listbox" class="muted">is any of</c2-chip-part>
+    <c2-chip-part name="value" interactive haspopup="listbox">In progress, In review</c2-chip-part>
+  </c2-chip>
+  <c2-chip removable value="assignee">
+    <c2-chip-part name="field" class="muted">Assignee</c2-chip-part>
+    <c2-chip-part name="operator" interactive haspopup="listbox" class="muted">is</c2-chip-part>
+    <c2-chip-part name="value" interactive haspopup="listbox" class="person"><c2-avatar slot="prefix" name="Ada Lovelace"></c2-avatar>Ada Lovelace</c2-chip-part>
+  </c2-chip>
 </div>
 <div data-label="Disabled">
   <c2-chip selectable selected disabled>Archived</c2-chip>

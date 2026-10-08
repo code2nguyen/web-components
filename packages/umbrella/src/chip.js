@@ -2,3 +2,4 @@
 // Every module of @c2n/chip. Importing this registers each of its elements.
 
 export * from '@c2n/chip'
+export * from '@c2n/chip/chip-part.js'
