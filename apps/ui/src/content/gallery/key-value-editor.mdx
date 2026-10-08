@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-key-value-editor: environment variables, HTTP headers, a compact settings list and a bordered panel. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-key-value-editor: environment variables, HTTP headers, a compact settings list, a read-only settings view and an accent add button. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -100,6 +100,25 @@ The key and value columns share one grid with the headers, so `--c2-key-value-ed
 <c2-key-value-editor class="accent" label="Variables" add-label="New variable" entries='[{"key":"APP_NAME","value":"Orbit"}]'>
   <span slot="hint">Paste a .env file into a key field to import it.</span>
 </c2-key-value-editor>
+```
+
+```html tag=MdxCodeBlock,label=Settings view
+<style>
+  .settings-view {
+    width: 100%;
+    --c2-key-value-editor__header--display: none;
+    --c2-key-value-editor__item--padding-block: 10px;
+    --c2-key-value-editor__item-key--font-weight: 600;
+    --c2-key-value-editor__item-value--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-key-value-editor
+  class="settings-view"
+  label="Production"
+  mode="view"
+  masked
+  entries='[{"key":"REGION","value":"eu-west-1","masked":false},{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"LOG_LEVEL","value":"info","masked":false}]'
+></c2-key-value-editor>
 ```
 
 </GalleryGrid>

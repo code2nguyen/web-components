@@ -49,8 +49,22 @@
     </section>
 
     <section>
-      <h2>Read-only, compact</h2>
-      <c2-key-value-editor class="compact" readonly entries='[{"key":"REGION","value":"eu-west-1"},{"key":"LOG_LEVEL","value":"info"}]'></c2-key-value-editor>
+      <h2>View mode, toggled by an actions button</h2>
+      <c2-key-value-editor id="toggle" mode="view" masked entries='[{"key":"REGION","value":"eu-west-1","masked":false},{"key":"API_TOKEN","value":"tok_123"}]'>
+        <button slot="actions" id="toggle-button">Edit</button>
+      </c2-key-value-editor>
+      <script>
+        document.getElementById('toggle-button').addEventListener('click', (event) => {
+          const editor = document.getElementById('toggle')
+          editor.mode = editor.mode === 'view' ? 'edit' : 'view'
+          event.target.textContent = editor.mode === 'view' ? 'Edit' : 'Done'
+        })
+      </script>
+    </section>
+
+    <section>
+      <h2>Locked keys, compact</h2>
+      <c2-key-value-editor class="compact" lock-keys entries='[{"key":"DATABASE_URL","value":""},{"key":"API_KEY","value":""}]'></c2-key-value-editor>
     </section>
 
     <section>

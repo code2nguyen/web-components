@@ -12,6 +12,9 @@ import styles from './key-value-editor.scss?inline'
 
 export { formatEnv, parseEnv, type KeyValueEntry } from './dotenv.js'
 
+/** `edit` shows fields to change the rows; `view` shows them as text. */
+export type KeyValueEditorMode = 'edit' | 'view'
+
 /** Why a row's key is refused: another row has it, or it does not match `key-pattern`. */
 export type KeyValueKeyError = 'duplicate' | 'pattern'
 
@@ -41,16 +44,21 @@ let nextRowId = 0
  * overrides it for that row. Keys that appear twice, or that do not match `key-pattern`, are marked invalid with a
  * message under the row.
  *
+ * `mode="view"` shows the rows as a list of text, without fields, add or remove buttons; masked values show as dots
+ * with the same toggle. In edit mode, `lock-keys` fixes every key so only values can change and rows cannot be added
+ * or removed (a pasted `.env` fills the rows whose keys match), and an entry's `lockKey` fixes one row that way.
+ *
  * `entries` holds the rows, blank ones included, and is replaced (never mutated) on every edit. With no entries one
  * blank row is shown, which joins `entries` once typed into. The element is form-associated: `name` submits the rows
  * as `.env` text (rows without a key are left out), and the form is invalid while a key is refused, or with
  * `required` while no row has a key. `toEnv()` returns the same text, and `parseEnv` / `formatEnv` are exported.
  *
- * The host exposes `:state(empty)`, `:state(invalid)`, `:state(read-only)` and `:state(disabled)`.
+ * The host exposes `:state(empty)`, `:state(invalid)`, `:state(view)` and `:state(disabled)`.
  *
  * @tag c2-key-value-editor
  *
  * @slot actions - Extra controls next to the add button, e.g. an "Import .env" button.
+ * @slot empty - Shown instead of the rows when there are none to show: in view mode, or with `lock-keys`. Defaults to "No variables".
  * @slot hint - Help text under the rows, e.g. "Paste a .env file into a key field to add several variables at once."
  * @slot add-icon - Replaces the plus of the add button.
  * @slot remove-icon - Replaces the cross of each row's remove button.
@@ -79,7 +87,8 @@ let nextRowId = 0
  * @cssproperty {border} [--c2-key-value-editor__field__hover--border=1px solid #a1a1aa]
  * @cssproperty {border} [--c2-key-value-editor__field__focus--border=1px solid #476ef9]
  * @cssproperty {border} [--c2-key-value-editor__field__error--border=1px solid #dc2626] - Border of a refused key.
- * @cssproperty {border} [--c2-key-value-editor__field__read-only--border=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-key-value-editor__field__locked--border=1px solid transparent] - Border of a locked key (`lock-keys` or an entry's `lockKey`). Transparent by default, so a locked key reads as a label aligned with the fields.
+ * @cssproperty {color} [--c2-key-value-editor__field__locked--background=transparent] - Background of a locked key.
  * @cssproperty {border-radius} [--c2-key-value-editor__field--border-radius=6px]
  * @cssproperty {color} [--c2-key-value-editor__field--background=#ffffff]
  * @cssproperty {color} [--c2-key-value-editor__field--color=#18181b]
@@ -100,6 +109,13 @@ let nextRowId = 0
  *
  * @cssproperty {color} [--c2-key-value-editor__add--color=rgb(2, 101, 220)] - Text of the add button.
  * @cssproperty {font-weight} [--c2-key-value-editor__add--font-weight=500]
+ *
+ * @cssproperty {pixel} [--c2-key-value-editor__item--padding-block=8px] - View mode: space above and below each row.
+ * @cssproperty {border} [--c2-key-value-editor__item--border-bottom=1px solid #e4e4e7] - View mode: the divider under each row.
+ * @cssproperty {font-weight} [--c2-key-value-editor__item-key--font-weight=500] - View mode: weight of the keys.
+ * @cssproperty {color} [--c2-key-value-editor__item-value--color=#18181b] - View mode: colour of the values.
+ *
+ * @cssproperty {color} [--c2-key-value-editor__empty--color=#71717a] - Text of the `empty` slot.
  *
  * @cssproperty {color} [--c2-key-value-editor__hint--color=#71717a]
  * @cssproperty {font-size} [--c2-key-value-editor__hint--font-size=12px]
@@ -159,14 +175,19 @@ export class KeyValueEditor extends LitElement {
   /** Makes the form invalid while no row has a key. */
   @property({ type: Boolean }) required = false
 
-  /** Shows the rows without editing: no add, remove or paste. Masked values can still be revealed. */
-  @property({ type: Boolean, attribute: 'readonly' }) readOnly = false
+  /** `edit` (default) shows fields; `view` shows the rows as text, without add or remove. Masked values can still be revealed. */
+  @property({ type: String }) mode: KeyValueEditorMode = 'edit'
+
+  /** Fixes every key in edit mode: only values can change, and rows cannot be added or removed. */
+  @property({ type: Boolean, attribute: 'lock-keys' }) lockKeys = false
 
   /** Disables every field and button and dims the element. */
   @property({ type: Boolean }) disabled = false
 
   @state() private disabledByForm = false
   @state() private revealed = new Set<number>()
+  @state() private hasActions = false
+  @state() private hasHint = false
 
   /** Stable row identity across edits, so focus and reveal state follow a row when another is removed. */
   private readonly rowIds = new WeakMap<KeyValueEntry, number>()
@@ -248,8 +269,16 @@ export class KeyValueEditor extends LitElement {
     return this.disabled || this.disabledByForm
   }
 
+  private get viewing() {
+    return this.mode === 'view'
+  }
+
   private get editable() {
-    return !this.isDisabled && !this.readOnly
+    return !this.isDisabled && !this.viewing
+  }
+
+  private isKeyLocked(entry: KeyValueEntry | undefined) {
+    return this.lockKeys || entry?.lockKey === true
   }
 
   /** `entries`, ignoring anything that is not an object with a key, so a malformed attribute renders nothing broken. */
@@ -257,10 +286,10 @@ export class KeyValueEditor extends LitElement {
     return Array.isArray(this.entries) ? this.entries.filter((entry) => entry && typeof entry === 'object') : []
   }
 
-  /** The rows on screen: the entries, or one blank row when there are none. */
+  /** The rows on screen: the entries, or one blank row to type into when there are none and rows can be added. */
   private get rows(): KeyValueEntry[] {
     const rows = this.realRows
-    return rows.length ? rows : [this.blankRow]
+    return rows.length || this.lockKeys ? rows : [this.blankRow]
   }
 
   private idOf(entry: KeyValueEntry): number {
@@ -319,9 +348,10 @@ export class KeyValueEditor extends LitElement {
     })
   }
 
+  /** Focuses a row's key field, or its value field when the key is locked. */
   private focusField(index: number, field: Field) {
     const row = this.renderRoot.querySelectorAll('.row')[index]
-    const input = row?.querySelector<HTMLInputElement>(`input.${field}`)
+    const input = row?.querySelector<HTMLInputElement>(`input.${field}`) ?? row?.querySelector<HTMLInputElement>('input.value')
     input?.focus()
     if (input && field === 'key') input.setSelectionRange(input.value.length, input.value.length)
   }
@@ -355,7 +385,7 @@ export class KeyValueEditor extends LitElement {
         return
       }
       if (index === this.rows.length - 1) {
-        await this.addEntry()
+        if (!this.lockKeys) await this.addEntry()
         return
       }
       this.focusField(index + 1, 'key')
@@ -380,14 +410,19 @@ export class KeyValueEditor extends LitElement {
     const pasted = parseEnv(text)
     // A value may well contain `=`; only several `KEY=value` lines in a value field are read as a file.
     if (!pasted || pasted.length === 0 || (field === 'value' && pasted.length < 2)) return
-    event.preventDefault()
 
     const rows = [...this.rows]
     const current = rows[index]
+    // The key being typed into is not a match for the pasted keys; the row whose value field it is, is.
+    const matchOf = (key: string) => rows.findIndex((row, at) => !(field === 'key' && at === index) && row.key.trim() === key)
+    // With every key locked, only matching rows change: a paste matching none is left to the field as text.
+    if (this.lockKeys && !pasted.some((entry) => matchOf(entry.key) !== -1)) return
+    event.preventDefault()
+
     const added: KeyValueEntry[] = []
     let lastIndex = -1
     for (const entry of pasted) {
-      const existing = rows.findIndex((row, at) => at !== index && row.key.trim() === entry.key)
+      const existing = matchOf(entry.key)
       if (existing !== -1) {
         const next = { ...rows[existing], value: entry.value }
         this.rowIds.set(next, this.idOf(rows[existing]))
@@ -397,7 +432,7 @@ export class KeyValueEditor extends LitElement {
         added.push(entry)
       }
     }
-    if (added.length) {
+    if (added.length && !this.lockKeys) {
       const blank = current !== undefined && current.key.trim() === '' && current.value === ''
       rows.splice(blank ? index : index + 1, blank ? 1 : 0, ...added)
       lastIndex = (blank ? index : index + 1) + added.length - 1
@@ -436,14 +471,15 @@ export class KeyValueEditor extends LitElement {
     this.internals.setFormValue(this.isDisabled ? null : formatEnv(rows))
 
     const firstError = errors.entries().next().value
-    if (this.isDisabled) {
+    if (this.isDisabled || this.viewing) {
+      // Nothing on screen can fix a refused key in view mode, so the form is not held up by one.
       this.internals.setValidity({})
     } else if (firstError) {
       const [index, error] = firstError
-      const anchor = this.renderRoot.querySelectorAll('.row')[index]?.querySelector<HTMLInputElement>('input.key') ?? undefined
+      const anchor = this.renderRoot.querySelectorAll('.row')[index]?.querySelector<HTMLInputElement>('input') ?? undefined
       this.internals.setValidity({ customError: true }, error === 'duplicate' ? this.duplicateMessage : this.patternMessage, anchor)
     } else if (this.required && !keyed) {
-      const anchor = this.renderRoot.querySelector<HTMLInputElement>('input.key') ?? undefined
+      const anchor = this.renderRoot.querySelector<HTMLElement>('input, .add') ?? undefined
       this.internals.setValidity({ valueMissing: true }, 'Please add at least one variable.', anchor)
     } else {
       this.internals.setValidity({})
@@ -452,13 +488,78 @@ export class KeyValueEditor extends LitElement {
     const states: Record<string, boolean> = {
       empty: !keyed,
       invalid: errors.size > 0,
-      'read-only': this.readOnly,
+      view: this.viewing,
       disabled: this.isDisabled,
     }
     for (const [name, on] of Object.entries(states)) {
       if (on) this.internals.states.add(name)
       else this.internals.states.delete(name)
     }
+  }
+
+  private renderRevealIcon(hidden: boolean) {
+    return hidden
+      ? html`<slot name="show-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </slot>`
+      : html`<slot name="hide-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+            ></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </slot>`
+  }
+
+  /** The show/hide toggle of a masked value, named after the key when it is known. */
+  private renderReveal(id: number, hidden: boolean, name: string) {
+    return html`<button
+      class="button reveal"
+      type="button"
+      aria-label="${hidden ? 'Show' : 'Hide'} ${name}"
+      aria-pressed=${hidden ? 'false' : 'true'}
+      ?disabled=${this.isDisabled}
+      @click=${() => this.toggleReveal(id)}
+    >
+      ${this.renderRevealIcon(hidden)}
+    </button>`
+  }
+
+  private handleSlotchange = (event: Event) => {
+    const slot = event.target as HTMLSlotElement
+    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || node.textContent?.trim())
+    if (slot.name === 'actions') this.hasActions = filled
+    else if (slot.name === 'hint') this.hasHint = filled
+  }
+
+  /** The add button (edit mode, keys not locked) and the `actions` slot; left out of the layout while both are absent. */
+  private renderFooter(withAdd: boolean) {
+    const actions = html`<slot name="actions" @slotchange=${this.handleSlotchange}></slot>`
+    if (!withAdd) return html`<div class="footer" ?hidden=${!this.hasActions}>${actions}</div>`
+    return html`<div class="footer">
+      <button class="button add" type="button" ?disabled=${this.isDisabled} @click=${this.handleAdd}>
+        <slot name="add-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </slot>
+        <span>${this.addLabel}</span>
+      </button>
+      ${actions}
+    </div>`
+  }
+
+  private renderHint() {
+    return html`<div class="hint" ?hidden=${!this.hasHint}><slot name="hint" @slotchange=${this.handleSlotchange}></slot></div>`
+  }
+
+  private renderEmpty() {
+    return html`<div class="empty"><slot name="empty">No variables</slot></div>`
   }
 
   private renderRow(entry: KeyValueEntry, index: number, error: KeyValueKeyError | undefined) {
@@ -469,75 +570,52 @@ export class KeyValueEditor extends LitElement {
     const errorId = `error-${id}`
     const key = String(entry.key ?? '')
     const value = String(entry.value ?? '')
+    const locked = this.isKeyLocked(entry)
+    // A fixed key names its value field; an editable one may still be blank, so the field is numbered instead.
+    const valueName = locked && key.trim() ? key.trim() : `${this.valueLabel} ${number}`
+    const keyCell = locked
+      ? html`<span class="key locked" aria-invalid=${error ? 'true' : nothing} aria-describedby=${ifDefined(error ? errorId : undefined)} title=${key}
+          >${key}</span
+        >`
+      : html`<input
+          class="key"
+          type="text"
+          aria-label="${this.keyLabel} ${number}"
+          aria-invalid=${error ? 'true' : nothing}
+          aria-describedby=${ifDefined(error ? errorId : undefined)}
+          placeholder=${this.keyPlaceholder || nothing}
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          ?disabled=${this.isDisabled}
+          .value=${live(key)}
+          @input=${(event: Event) => this.handleInput(event, index, 'key')}
+          @change=${this.handleChange}
+          @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, index, 'key')}
+          @paste=${(event: ClipboardEvent) => this.handlePaste(event, index, 'key')}
+        />`
     return html`<div class="row ${classMap({ invalid: error !== undefined, masked })}">
-      <input
-        class="key"
-        type="text"
-        aria-label="${this.keyLabel} ${number}"
-        aria-invalid=${error ? 'true' : nothing}
-        aria-describedby=${ifDefined(error ? errorId : undefined)}
-        placeholder=${this.keyPlaceholder || nothing}
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        ?disabled=${this.isDisabled}
-        ?readonly=${this.readOnly}
-        .value=${live(key)}
-        @input=${(event: Event) => this.handleInput(event, index, 'key')}
-        @change=${this.handleChange}
-        @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, index, 'key')}
-        @paste=${(event: ClipboardEvent) => this.handlePaste(event, index, 'key')}
-      />
+      ${keyCell}
       <span class="value-box">
         <input
           class="value"
           type=${hidden ? 'password' : 'text'}
-          aria-label="${this.valueLabel} ${number}"
+          aria-label=${valueName}
           placeholder=${this.valuePlaceholder || nothing}
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
           ?disabled=${this.isDisabled}
-          ?readonly=${this.readOnly}
           .value=${live(value)}
           @input=${(event: Event) => this.handleInput(event, index, 'value')}
           @change=${this.handleChange}
           @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, index, 'value')}
           @paste=${(event: ClipboardEvent) => this.handlePaste(event, index, 'value')}
         />
-        ${
-          masked
-            ? html`<button
-                class="button reveal"
-                type="button"
-                aria-label="${hidden ? 'Show' : 'Hide'} ${this.valueLabel.toLowerCase()} ${number}"
-                aria-pressed=${hidden ? 'false' : 'true'}
-                ?disabled=${this.isDisabled}
-                @click=${() => this.toggleReveal(id)}
-              >
-                ${
-                  hidden
-                    ? html`<slot name="show-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                      </slot>`
-                    : html`<slot name="hide-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path
-                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                          ></path>
-                          <line x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
-                      </slot>`
-                }
-              </button>`
-            : nothing
-        }
+        ${masked ? this.renderReveal(id, hidden, locked && key.trim() ? key.trim() : `${this.valueLabel.toLowerCase()} ${number}`) : nothing}
       </span>
       ${
-        this.readOnly
+        locked
           ? nothing
           : html`<button
               class="button remove"
@@ -558,43 +636,67 @@ export class KeyValueEditor extends LitElement {
     </div>`
   }
 
+  /** View mode: the keyed rows as a description list, values as text or dots. */
+  private renderView() {
+    const rows = this.realRows.filter((entry) => String(entry.key ?? '').trim() !== '')
+    if (rows.length === 0) return this.renderEmpty()
+    return html`<dl class="list">
+      ${repeat(
+        rows,
+        (entry) => this.idOf(entry),
+        (entry) => {
+          const id = this.idOf(entry)
+          const key = String(entry.key).trim()
+          const masked = this.isMasked(entry)
+          const hidden = masked && !this.revealed.has(id)
+          return html`<div class="item">
+            <dt class="item-key">${key}</dt>
+            <dd class="item-value">
+              ${
+                hidden
+                  ? html`<span class="dots" aria-hidden="true">••••••••</span><span class="visually-hidden">Hidden value</span>`
+                  : html`<span class="text">${String(entry.value ?? '')}</span>`
+              }
+              ${masked ? this.renderReveal(id, hidden, key) : nothing}
+            </dd>
+          </div>`
+        },
+      )}
+    </dl>`
+  }
+
   override render() {
     const rows = this.rows
     const errors = this.keyErrors(this.realRows)
+    const header = html`<div class="header" aria-hidden="true">
+      <span>${this.keyLabel}</span>
+      <span>${this.valueLabel}</span>
+    </div>`
+    if (this.viewing) {
+      return html`<div class="editor viewing" role="group" aria-label=${ifDefined(this.label || undefined)}>
+        ${this.realRows.some((entry) => String(entry.key ?? '').trim() !== '') ? header : nothing} ${this.renderView()} ${this.renderFooter(false)}
+        ${this.renderHint()}
+      </div>`
+    }
     return html`<div
-      class="editor ${classMap({ 'read-only': this.readOnly })}"
+      class="editor ${classMap({ 'lock-keys': this.lockKeys })}"
       role="group"
       aria-label=${ifDefined(this.label || undefined)}
       @focusin=${this.handleFocusin}
     >
-      <div class="header" aria-hidden="true">
-        <span>${this.keyLabel}</span>
-        <span>${this.valueLabel}</span>
-      </div>
-      <div class="rows">
-        ${repeat(
-          rows,
-          (entry) => this.idOf(entry),
-          (entry, index) => this.renderRow(entry, index, errors.get(index)),
-        )}
-      </div>
-      <div class="footer">
-        ${
-          this.readOnly
-            ? nothing
-            : html`<button class="button add" type="button" ?disabled=${this.isDisabled} @click=${this.handleAdd}>
-                <slot name="add-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </slot>
-                <span>${this.addLabel}</span>
-              </button>`
-        }
-        <slot name="actions"></slot>
-      </div>
-      <slot name="hint" class="hint"></slot>
+      ${rows.length ? header : nothing}
+      ${
+        rows.length
+          ? html`<div class="rows">
+              ${repeat(
+                rows,
+                (entry) => this.idOf(entry),
+                (entry, index) => this.renderRow(entry, index, errors.get(index)),
+              )}
+            </div>`
+          : this.renderEmpty()
+      }
+      ${this.renderFooter(!this.lockKeys)} ${this.renderHint()}
     </div>`
   }
 }

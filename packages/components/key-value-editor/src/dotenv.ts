@@ -4,6 +4,8 @@ export interface KeyValueEntry {
   value: string
   /** Masks this row's value whatever the editor's `masked` attribute says; `false` shows it in a masked editor. */
   masked?: boolean
+  /** Fixes this row's key: it shows as text, and the row cannot be removed. The value stays editable. */
+  lockKey?: boolean
 }
 
 /** A variable name as `.env` files write it: a letter or underscore, then letters, digits, `_`, `.` or `-`. */

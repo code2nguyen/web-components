@@ -11,7 +11,9 @@ import { KeyValueEditor } from '@c2n/components/key-value-editor'
 
 `c2-key-value-editor` is the environment-variable form of Vercel, Netlify and Supabase, and the header table of Postman. Each row has a key field, a value field and a remove button, and **Add another** appends a row. **Paste a `.env` file** into any key field and it splits into rows: comments and blank lines are skipped, `export` prefixes and quotes are read the way `dotenv` reads them, a key that already has a row has its value updated, and a blank row is filled rather than kept. Several `KEY=value` lines pasted into a value field split the same way, while a single one stays the value, since values often contain `=`.
 
-`masked` hides every value behind a password field with a show/hide toggle per row; an entry's own `"masked": false` (or `true`) overrides it for that row. Keys that appear twice, or that do not match `key-pattern` (a regular expression such as `[A-Z_][A-Z0-9_]*`), are marked invalid with a message under the row. From the keyboard, **Enter** moves from a key to its value and from a value to the next row, adding one after the last; **Backspace** in an empty row removes it.
+`masked` hides every value behind a password field with a show/hide toggle per row; an entry's own `"masked": false` (or `true`) overrides it for that row. Keys that appear twice, or that do not match `key-pattern` (a regular expression such as `[A-Z_][A-Z0-9_]*`), are marked invalid with a message under the row.
+
+`mode="view"` shows the rows as a list of text instead of fields: no add or remove buttons, rows without a key left out, and masked values shown as dots with the same show/hide toggle. Put an "Edit" button in the `actions` slot and switch `mode` to `edit` to make a settings panel that opens for editing. In edit mode, `lock-keys` fixes every key, so only the values can change and no row can be added or removed: a form for a known set of variables. A `.env` pasted into a value field then fills the rows whose keys match and ignores the rest. An entry's own `"lockKey": true` fixes just that row, for example a variable the platform sets next to the user's own. A locked key also names its value field, so a screen reader announces `DATABASE_URL` rather than "Value 1". With no rows to show (view mode, or `lock-keys` without entries) the `empty` slot appears, "No variables" by default. From the keyboard, **Enter** moves from a key to its value and from a value to the next row, adding one after the last; **Backspace** in an empty row removes it.
 
 `entries` holds the rows (`{ key, value, masked? }`), blank ones included, and is replaced on every edit: `input` fires on each keystroke and `change` when a field is left or rows are added, removed or pasted. With no entries one blank row is shown. The element is form-associated: `name` submits the rows as `.env` text (rows without a key are left out), the form is invalid while a key is refused, and `required` needs at least one keyed row. `toEnv()` returns the same text, and the module also exports `parseEnv(text)` and `formatEnv(entries)`.
 
@@ -51,8 +53,30 @@ import '@c2n/components/key-value-editor'
     entries='[{"key":"API_URL","value":"https://api.example.com"},{"key":"API_URL","value":"https://staging.example.com"},{"key":"api-key","value":"abc"}]'
   ></c2-key-value-editor>
 </div>
-<div data-label="Read-only">
-  <c2-key-value-editor class="kv" label="Runtime" readonly entries='[{"key":"REGION","value":"eu-west-1"},{"key":"LOG_LEVEL","value":"info"}]'></c2-key-value-editor>
+<div data-label="View mode">
+  <c2-key-value-editor
+    class="kv"
+    label="Runtime"
+    mode="view"
+    masked
+    entries='[{"key":"REGION","value":"eu-west-1","masked":false},{"key":"LOG_LEVEL","value":"info","masked":false},{"key":"SENTRY_DSN","value":"https://abc@o1.ingest.sentry.io/1"}]'
+  ></c2-key-value-editor>
+</div>
+<div data-label="Locked keys">
+  <c2-key-value-editor
+    class="kv"
+    label="Required variables"
+    lock-keys
+    masked
+    entries='[{"key":"DATABASE_URL","value":""},{"key":"STRIPE_SECRET_KEY","value":""},{"key":"NODE_ENV","value":"production","masked":false}]'
+  ></c2-key-value-editor>
+</div>
+<div data-label="One locked row">
+  <c2-key-value-editor
+    class="kv"
+    label="Variables"
+    entries='[{"key":"NODE_ENV","value":"production","lockKey":true},{"key":"FEATURE_FLAGS","value":"beta"}]'
+  ></c2-key-value-editor>
 </div>
 <div data-label="Disabled">
   <c2-key-value-editor class="kv" label="Locked" disabled entries='[{"key":"REGION","value":"eu-west-1"}]'></c2-key-value-editor>

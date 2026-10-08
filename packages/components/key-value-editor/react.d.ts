@@ -32,7 +32,7 @@ declare module 'react' {
         'duplicate-message'?: Attribute
         'pattern-message'?: Attribute
         'key-pattern'?: Attribute
-        readonly?: Attribute
+        'lock-keys'?: Attribute
         entries?: KeyValueEditor['entries'] | string
       }
     }

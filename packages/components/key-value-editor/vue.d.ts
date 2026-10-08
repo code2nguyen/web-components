@@ -28,7 +28,7 @@ declare module 'vue' {
         'duplicate-message'?: unknown
         'pattern-message'?: unknown
         'key-pattern'?: unknown
-        readonly?: unknown
+        'lock-keys'?: unknown
         onInput?: (event: EventOf<KeyValueEditor, 'input'>) => void
         onChange?: (event: EventOf<KeyValueEditor, 'change'>) => void
       }

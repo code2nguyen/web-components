@@ -1213,6 +1213,13 @@
     },
     {
       "tag": "c2-key-value-editor",
+      "slot": "empty",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__empty--color"],
+      "reason": "The empty slot passes its colour on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-key-value-editor",
       "slot": "hide-icon",
       "decision": "variables",
       "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],

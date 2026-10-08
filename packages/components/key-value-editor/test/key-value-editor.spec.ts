@@ -155,13 +155,77 @@ test('required is unmet until a row has a key', async ({ page, renderScenario })
   expect(await valid()).toBe(true)
 })
 
-test('read-only shows the rows without add, remove or editing', async ({ page, renderScenario }) => {
-  await renderScenario(editor(`readonly entries='[{"key":"REGION","value":"eu-west-1"}]'`))
+test('view mode lists the keyed rows as text, with masked values revealed on demand', async ({ page, renderScenario }) => {
+  await renderScenario(
+    editor(
+      `mode="view" masked entries='[{"key":"TOKEN","value":"s3cret"},{"key":"REGION","value":"eu-west-1","masked":false},{"key":"","value":"dropped"}]'`,
+      '<button slot="actions">Edit</button>',
+    ),
+  )
+  const host = page.locator('c2-key-value-editor')
+  await expect(host).toHaveState('view')
+  await expect(page.getByRole('textbox')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Add another' })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: 'Remove REGION' })).toHaveCount(0)
-  await expect(page.getByRole('textbox', { name: 'Value 1' })).not.toBeEditable()
-  await expect(page.locator('c2-key-value-editor')).toHaveState('read-only')
+  await expect(page.getByRole('term')).toHaveText(['TOKEN', 'REGION'])
+  await expect(page.getByRole('definition').nth(1)).toHaveText('eu-west-1')
+  await expect(page.getByRole('definition').first()).not.toContainText('s3cret')
+  await page.getByRole('button', { name: 'Show TOKEN' }).click()
+  await expect(page.getByRole('definition').first()).toContainText('s3cret')
+  await expect(page.getByRole('button', { name: 'Hide TOKEN' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible()
   await accessible(page)
+})
+
+test('view mode with no keyed rows shows the empty slot', async ({ page, renderScenario }) => {
+  await renderScenario(editor('mode="view"'))
+  await expect(page.locator('c2-key-value-editor')).toContainText('No variables')
+  await renderScenario(editor('mode="view"', '<span slot="empty">Nothing configured yet</span>'))
+  await expect(page.getByText('Nothing configured yet')).toBeVisible()
+})
+
+test('switching to edit mode turns the rows back into fields', async ({ page, renderScenario }) => {
+  await renderScenario(editor(`mode="view" entries='[{"key":"A","value":"1"}]'`))
+  await page.locator('c2-key-value-editor').evaluate((element) => element.setAttribute('mode', 'edit'))
+  await expect(page.getByRole('textbox', { name: 'Value 1' })).toHaveValue('1')
+})
+
+test('lock-keys shows keys as text, names each value field by its key, and allows no add or remove', async ({ page, renderScenario }) => {
+  await renderScenario(editor(`lock-keys entries='[{"key":"DATABASE_URL","value":""},{"key":"API_KEY","value":""}]'`))
+  const host = page.locator('c2-key-value-editor')
+  await expect(page.getByRole('textbox', { name: 'Key 1' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Add another' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Remove/ })).toHaveCount(0)
+  await page.getByRole('textbox', { name: 'DATABASE_URL' }).click()
+  await page.keyboard.type('postgres://db')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('textbox', { name: 'API_KEY' })).toBeFocused()
+  // Enter on the last row adds nothing when keys are locked.
+  await page.keyboard.press('Enter')
+  expect(await entries(host)).toEqual([
+    { key: 'DATABASE_URL', value: 'postgres://db' },
+    { key: 'API_KEY', value: '' },
+  ])
+  await accessible(page)
+})
+
+test('with lock-keys, a pasted .env fills the matching rows and drops the rest', async ({ page, renderScenario }) => {
+  await renderScenario(editor(`lock-keys entries='[{"key":"DATABASE_URL","value":""},{"key":"API_KEY","value":""}]'`))
+  const host = page.locator('c2-key-value-editor')
+  await page.getByRole('textbox', { name: 'DATABASE_URL' }).click()
+  await paste(page, 'DATABASE_URL=postgres://db\nAPI_KEY=abc\nUNKNOWN=1')
+  expect(await entries(host)).toEqual([
+    { key: 'DATABASE_URL', value: 'postgres://db' },
+    { key: 'API_KEY', value: 'abc' },
+  ])
+})
+
+test('an entry with lockKey keeps its key and cannot be removed, while other rows stay editable', async ({ page, renderScenario }) => {
+  await renderScenario(editor(`entries='[{"key":"NODE_ENV","value":"production","lockKey":true},{"key":"FEATURE","value":"on"}]'`))
+  await expect(page.getByRole('textbox', { name: 'NODE_ENV' })).toHaveValue('production')
+  await expect(page.getByRole('button', { name: 'Remove NODE_ENV' })).toHaveCount(0)
+  await expect(page.getByRole('textbox', { name: 'Key 2' })).toHaveValue('FEATURE')
+  await page.getByRole('button', { name: 'Remove FEATURE' }).click()
+  await expect(page.getByRole('textbox', { name: 'NODE_ENV' })).toBeFocused()
 })
 
 test('disabled turns off every control', async ({ page, renderScenario }) => {

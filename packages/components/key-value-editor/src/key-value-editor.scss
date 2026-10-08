@@ -21,7 +21,8 @@
     field__hover--border: 1px solid #a1a1aa,
     field__focus--border: 1px solid #476ef9,
     field__error--border: 1px solid #dc2626,
-    field__read-only--border: 1px solid #e4e4e7,
+    field__locked--border: 1px solid transparent,
+    field__locked--background: transparent,
     field--border-radius: 6px,
     field--background: #ffffff,
     field--color: #18181b,
@@ -47,6 +48,13 @@
     button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     add--color: rgb(2, 101, 220),
     add--font-weight: 500,
+
+    item--padding-block: 8px,
+    item--border-bottom: 1px solid #e4e4e7,
+    item-key--font-weight: 500,
+    item-value--color: #18181b,
+
+    empty--color: #71717a,
 
     hint--color: #71717a,
     hint--font-size: 12px,
@@ -86,8 +94,10 @@
   column-gap: css.cssVar(column-gap);
 }
 
-.read-only .header,
-.read-only .row {
+.lock-keys .header,
+.lock-keys .row,
+.viewing .header,
+.item {
   grid-template-columns: css.cssVar(key-width) css.cssVar(value-width);
 }
 
@@ -129,18 +139,35 @@ input {
     opacity: 1;
   }
 
-  &:hover:not(:disabled, [readonly]) {
+  &:hover:not(:disabled) {
     border: css.cssVar(field__hover--border);
   }
 
-  &:focus-visible,
-  &:focus:not([readonly]) {
+  &:focus {
     border: css.cssVar(field__focus--border);
   }
 
-  &[readonly] {
-    border: css.cssVar(field__read-only--border);
+  &[aria-invalid='true'] {
+    border: css.cssVar(field__error--border);
   }
+}
+
+/* A locked key keeps the field's box so the columns line up, as text that cannot be edited. */
+.key.locked {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: css.cssVar(field--height);
+  padding-inline: css.cssVar(field--padding-inline);
+  border: css.cssVar(field__locked--border);
+  border-radius: css.cssVar(field--border-radius);
+  background: css.cssVar(field__locked--background);
+  color: css.cssVar(field--color);
+  font-family: css.cssVar(field--font-family);
+  font-size: css.cssVar(field--font-size);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &[aria-invalid='true'] {
     border: css.cssVar(field__error--border);
@@ -229,8 +256,70 @@ input {
   }
 }
 
+[hidden] {
+  display: none !important;
+}
+
+/* View mode: a description list on the same column tracks as the header. */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.item {
+  display: grid;
+  align-items: center;
+  column-gap: css.cssVar(column-gap);
+  padding-block: css.cssVar(item--padding-block);
+  border-bottom: css.cssVar(item--border-bottom);
+  font-family: css.cssVar(field--font-family);
+  font-size: css.cssVar(field--font-size);
+}
+
+.item-key {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: css.cssVar(item-key--font-weight);
+}
+
+.item-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  color: css.cssVar(item-value--color);
+
+  .text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .reveal {
+    position: static;
+    flex: none;
+    width: calc(#{css.cssVar(button--size)} - 8px);
+    height: calc(#{css.cssVar(button--size)} - 8px);
+    margin-block: -4px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.empty {
+  color: css.cssVar(empty--color);
+}
+
 .hint {
-  display: block;
   color: css.cssVar(hint--color);
   font-size: css.cssVar(hint--font-size);
 }
