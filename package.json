@@ -97,6 +97,7 @@
     "build": {
       "dependencies": [
         "./packages/components/json-viewer:build",
+        "./packages/components/filter-builder:build",
         "./packages/components/truncate:build",
         "./packages/components/chip-group:build",
         "./packages/components/indicator:build",

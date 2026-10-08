@@ -56,6 +56,7 @@
       "dependencies": [
         "type-check",
         "../../components/json-viewer:build",
+        "../../components/filter-builder:build",
         "../../components/truncate:build",
         "../../components/chip-group:build",
         "../../components/indicator:build",

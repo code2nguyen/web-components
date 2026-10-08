@@ -300,6 +300,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./filter-builder": {
+      "types": "./dist/filter-builder.d.ts",
+      "default": "./dist/filter-builder.js"
+    },
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
@@ -786,6 +790,7 @@
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
     "@c2n/details": "*",
+    "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",

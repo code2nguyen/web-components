@@ -99,6 +99,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
 - **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range.
+- **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.

@@ -158,6 +158,15 @@ export const overrides: Record<string, Override> = {
   '--c2-qr-code__background--color': { token: 'color-surface' },
   '--c2-qr-code__center--size': { exclude: 'center mark constrained by QR scan geometry' },
   '--c2-qr-code__center--padding': { exclude: 'center mark quiet spacing' },
+  // The filter builder's dashed add button and draft chip keep their style while following the strong outline colour.
+  '--c2-filter-builder__add-button--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline-strong, #a1a1aa)',
+  },
+  '--c2-filter-builder__chip__draft--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline-strong, #a1a1aa)',
+  },
   // Upload measurements belong to the drop-zone composition; dashed borders keep their style while following theme colours.
   '--c2-upload--width': { exclude: 'responsive upload width' },
   '--c2-upload__dropzone--padding': { exclude: 'drop-zone spacing' },
