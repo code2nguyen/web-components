@@ -180,3 +180,10 @@ test('is accessible closed and open', async ({ page, renderScenario }) => {
   await countryButton(page).click()
   await accessible(page)
 })
+
+test('search puts countries whose name starts with the query first', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-phone-input country="US"></c2-phone-input>')
+  await countryButton(page).click()
+  await page.keyboard.type('ger')
+  await expect(page.getByRole('option')).toHaveText([/Germany/, /Algeria/, /Niger\b/, /Nigeria/])
+})

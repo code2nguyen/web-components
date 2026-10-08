@@ -105,7 +105,7 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  * @cssproperty {border} [--c2-phone-input__divider--border=1px solid #e4e4e7] - Line between the country button and the number.
  * @cssproperty {pixel} [--c2-phone-input__flag--font-size=18px]
  * @cssproperty {display} [--c2-phone-input__flag--display=inline] - `none` hides the flags (where the platform does not draw flag emoji, for instance).
- * @cssproperty {color} [--c2-phone-input__dial-code--color=#71717a]
+ * @cssproperty {color} [--c2-phone-input__dial-code--color=#52525b]
  * @cssproperty {pixel} [--c2-phone-input__icon--size=16px]
  * @cssproperty {color} [--c2-phone-input__icon--color=#71717a]
  *
@@ -377,12 +377,20 @@ export class PhoneInput extends LitElement {
     const digits = digitsOf(query)
     const fold = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase()
     const folded = fold(query)
-    // A search result list has no preferred section.
+    // A search result list has no preferred section; names that start with the query come first ("ger": Germany
+    // before Algeria), the rest keep their alphabetical order.
+    const rank = (country: PhoneCountry) => {
+      if (digits && /^\+?\d+$/.test(query)) return country.dialCode.startsWith(digits) ? 0 : -1
+      if (country.iso.toLocaleLowerCase() === query) return 0
+      const name = fold(this.countryName(country))
+      if (name.startsWith(folded)) return 0
+      if (name.split(/[\s-]+/).some((word) => word.startsWith(folded))) return 1
+      return name.includes(folded) ? 2 : -1
+    }
     return all
-      .filter(({ country }) => {
-        if (digits && /^\+?\d+$/.test(query)) return country.dialCode.startsWith(digits)
-        return fold(this.countryName(country)).includes(folded) || country.iso.toLocaleLowerCase() === query
-      })
+      .map((option) => ({ ...option, rank: rank(option.country) }))
+      .filter((option) => option.rank >= 0)
+      .sort((a, b) => a.rank - b.rank)
       .map(({ country }) => ({ country, preferred: false }))
   }
 
