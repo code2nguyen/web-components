@@ -155,6 +155,22 @@ svg {
   overflow-wrap: anywhere;
 }
 
+// An editable heading: the inline edit's read view and field take the heading's type and the list's own colours (the
+// look sets them on the container), and its padding hangs into the margin so the text lines up with the meta below.
+.heading-edit {
+  display: block;
+  margin-inline: -6px;
+  --c2-inline-edit--font-size: #{css.cssVar(heading--font-size)};
+  --c2-inline-edit--font-weight: #{css.cssVar(heading--font-weight)};
+  --c2-inline-edit--line-height: 1.3;
+  --c2-inline-edit__placeholder--color: #{$muted};
+  --c2-inline-edit__edit-icon--color: #{$muted};
+  --c2-inline-edit__hover--background: #{css.cssVar(chip--background-color)};
+  --c2-inline-edit__editor--background: #{css.cssVar(container--background-color)};
+  --c2-inline-edit__editor--border: 1px solid #{$accent};
+  --c2-inline-edit__focus--outline: #{css.cssVar(focus--outline)};
+}
+
 .meta {
   margin: 0;
   font-size: css.cssVar(meta--font-size);

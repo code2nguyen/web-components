@@ -52,12 +52,16 @@ const setups: Record<string, Setup> = {
   plain: { heading: 'Sunday', attributes: 'customizable icon="none"', tasks: plain },
   'all-done': { heading: 'Weekend', attributes: '', tasks: [{ id: 'a', label: 'Long run', done: true }] },
   empty: { heading: 'Weekend', attributes: '', tasks: [] },
+  editable: { heading: 'Groceries', attributes: 'customizable heading-editable', tasks: groceries },
+  untitled: { heading: '', attributes: 'customizable heading-editable', tasks: [] },
+  'actions-start': { heading: 'This week', attributes: 'customizable', tasks: week },
+  'actions-end': { heading: 'This week', attributes: 'customizable actions-placement="end"', tasks: week },
 }
 const setup = setups[scenario] ?? setups.default
 
 main.innerHTML = `<c2-todo-list id="subject" heading="${setup.heading}" ${setup.attributes}>${
   scenario === 'empty' ? '<span slot="empty">Nothing planned yet.</span>' : ''
-}</c2-todo-list>`
+}${scenario.startsWith('actions-') ? '<button slot="actions" id="extra" type="button">Share</button>' : ''}</c2-todo-list>`
 
 const subject = document.querySelector<TodoList>('#subject')!
 subject.tasks = setup.tasks
@@ -78,6 +82,10 @@ for (const type of [
   'task-reorder',
   'tasks-change',
   'look-change',
+  'heading-change',
+  // The heading's inline edit keeps its own events inside: neither may reach the list.
+  'edit-start',
+  'edit-commit',
 ] as const) {
   subject.addEventListener(type, () => {
     events.push(type)
