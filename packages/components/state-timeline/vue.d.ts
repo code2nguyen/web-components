@@ -22,6 +22,7 @@ declare module 'vue' {
       C2Props<StateTimeline> & {
         'hide-axis'?: unknown
         'hide-legend'?: unknown
+        'hide-summary'?: unknown
         'aria-label'?: unknown
         onSegmentClick?: (event: EventOf<StateTimeline, 'segment-click'>) => void
         onSegmentHover?: (event: EventOf<StateTimeline, 'segment-hover'>) => void

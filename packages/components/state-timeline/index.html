@@ -18,22 +18,20 @@
         font-size: 14px;
       }
       .solid {
-        --c2-state-timeline__segment--background-mix: 100%;
-        --c2-state-timeline__segment--color: #ffffff;
         --c2-state-timeline__segment--gap: 0px;
-        --c2-state-timeline__segment--border-radius: 0px;
       }
     </style>
   </head>
   <body>
     <section>
-      <h2>State changes, named states, a gap with no data</h2>
+      <h2>Baseline state, markers, a gap with no data</h2>
       <c2-state-timeline
         id="service"
         aria-label="Service health"
         start="2026-10-08T09:00:00Z"
         end="2026-10-08T12:00:00Z"
-        states='[{"value":"ok","label":"Operational","tone":"success"},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"}]'
+        markers='[{"time":"2026-10-08T10:15:00Z","label":"DB failover"}]'
+        states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"}]'
         series='[
           {"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},
           {"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},

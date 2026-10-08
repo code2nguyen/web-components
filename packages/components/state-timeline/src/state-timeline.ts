@@ -4,19 +4,30 @@ import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './state-timeline.scss?inline'
 import {
   axisTicks,
   buildModel,
+  durationStep,
   formatDuration,
+  momentFormatter,
+  placeMarkers,
   rangeFormatter,
+  segmentAt,
   segmentNear,
+  stackLabels,
+  stateTotals,
+  timeOutsideBaseline,
   type PlacedSegment,
+  type ResolvedState,
   type TimelineModel,
   type TimelineRow,
 } from './state-timeline-model.js'
 import type {
+  StateTimelineMarker,
+  StateTimelineMomentContext,
   StateTimelineSegmentContext,
   StateTimelineSegmentEventDetail,
   StateTimelineSegmentHoverEventDetail,
@@ -41,8 +52,8 @@ export interface StateTimeline {
 
 /** Track width assumed before the element has been measured, and on a server. */
 const DEFAULT_TRACK_WIDTH = 600
-/** Gap between the tooltip and its segment, and between the tooltip and the viewport edges. */
-const TOOLTIP_GAP = 6
+/** Gap between the tooltip and the time line. */
+const TOOLTIP_GAP = 12
 const NO_DATA = 'No data'
 
 /** Position of a segment: its row, and its place among the drawn segments of that row. */
@@ -51,73 +62,100 @@ interface Cell {
   position: number
 }
 
+/** The moment the time line and the tooltip show, and the segment that put it there. */
+interface Moment {
+  time: number
+  focus: Cell | null
+}
+
 /**
  * One band per series, coloured by the discrete state it was in over time: service health, deployment status, a
- * host's power state, a CI job's results. Hover or focus a segment for its state, times and duration.
+ * host's power state, a CI job's results. The normal state stays quiet so the exceptions stand out.
  *
  * `series` holds the bands, each a list of segments with a `start`, an optional `end` and a `state`. Segments
  * without an `end` last until the next one starts, so a list of state changes is enough; the last one runs to the
  * end of the timeline. `states` names the values and picks their colours (`tone`); a value it does not list is shown
  * as written, with the next free palette colour. A `null` state marks a stretch with no data.
  *
- * The visible range is `start`–`end`, or the span of the data when they are not set. Times are milliseconds, ISO
- * strings or `Date`s; the axis and the tooltip show them in the browser's time zone.
+ * Mark one state as the `baseline` (operational, passing, on): it is drawn as a pale wash with no text, every other
+ * state as a solid fill labelled where it fits, and each band ends with the time it spent outside the baseline. A dot
+ * before each band's label shows the state it is in at the end of the range, and the legend gives each state's total.
+ *
+ * Hovering draws a line through every band, and the tooltip lists what each one was doing at that moment. The
+ * visible range is `start`–`end`, or the span of the data; times are shown in the browser's time zone. `markers` pins
+ * events such as deploys above the bands.
  *
  * The timeline is a grid: one Tab stop, ← and → move between the segments of a band, ↑ and ↓ between bands, Home and
  * End jump to a band's ends, and Enter fires `segment-click`. Each segment's accessible name gives its band, state,
- * times and duration. A segment's state is written inside it when there is room.
+ * times and duration.
  *
  * @tag c2-state-timeline
  *
+ * @slot heading - Title shown at the start of the header row, before the legend.
  * @slot empty - Shown when there are no series. Defaults to "No data".
  *
  * @event {CustomEvent<StateTimelineSegmentEventDetail>} segment-click - Fired when a segment is clicked, or Enter or Space is pressed on it. Bubbles.
  * @event {CustomEvent<StateTimelineSegmentHoverEventDetail>} segment-hover - Fired when the pointer moves onto a segment, or off the segments (`segment: null`). Does not bubble.
  *
  * @csspart base - The timeline's frame.
- * @csspart row - One band: its label and its track.
- * @csspart label - A band's label.
+ * @csspart header - Row above the bands holding the `heading` slot and the legend.
+ * @csspart legend - The list of states with their total times.
+ * @csspart markers - Strip of event pins above the bands.
+ * @csspart marker - One event pin.
+ * @csspart row - One band: its label, its track and its summary.
+ * @csspart label - A band's label, with the dot of its current state.
  * @csspart track - The strip a band's segments are drawn on.
  * @csspart segment - One segment.
+ * @csspart summary - Time a band spent outside the baseline state.
  * @csspart axis - The time axis under the bands.
  * @csspart tick - One label of the time axis.
- * @csspart legend - The list of states under the axis.
+ * @csspart crosshair - The line marking the hovered or focused moment.
  * @csspart tooltip - The tooltip.
  * @csspart empty - Region wrapping the `empty` slot, shown only while there are no series.
  *
  * @cssproperty {pixel} [--c2-state-timeline--width=100%] - Width of the timeline; it fills its container by default.
- * @cssproperty {color} [--c2-state-timeline--background=#ffffff] - Surface of the timeline; segment tints are mixed against it.
+ * @cssproperty {color} [--c2-state-timeline--background=#ffffff] - Surface of the timeline; the baseline wash is mixed against it.
  * @cssproperty {color} [--c2-state-timeline--color=#18181b] - Text colour.
  * @cssproperty {font-family} [--c2-state-timeline--font-family=inherit] - Font of every text.
  * @cssproperty {font-size} [--c2-state-timeline--font-size=12px] - Size of every text.
- * @cssproperty {pixel} [--c2-state-timeline--gap=8px] - Space between the bands, the axis and the legend.
+ * @cssproperty {pixel} [--c2-state-timeline--gap=12px] - Space between the header, the bands and the axis.
+ * @cssproperty {font-weight} [--c2-state-timeline__heading--font-weight=600] - Weight of the `heading` slot's text.
  * @cssproperty {pixel} [--c2-state-timeline__label--width=120px] - Width of the label column; `0px` hides the labels.
  * @cssproperty {color} [--c2-state-timeline__label--color=#18181b] - Colour of the band labels.
  * @cssproperty {font-weight} [--c2-state-timeline__label--font-weight=500] - Weight of the band labels.
- * @cssproperty {pixel} [--c2-state-timeline__row--height=28px] - Height of a band.
- * @cssproperty {pixel} [--c2-state-timeline__row--gap=6px] - Space between two bands.
+ * @cssproperty {pixel} [--c2-state-timeline__summary--width=72px] - Width of the summary column. The column only shows when a state is the baseline.
+ * @cssproperty {color} [--c2-state-timeline__summary--color=#18181b] - Colour of the time outside the baseline.
+ * @cssproperty {pixel} [--c2-state-timeline__row--height=24px] - Height of a band.
+ * @cssproperty {pixel} [--c2-state-timeline__row--gap=8px] - Space between two bands.
+ * @cssproperty {border} [--c2-state-timeline__row--border-top=0px solid transparent] - Rule above each band; set it with a `0px` row gap for a table look.
  * @cssproperty {color} [--c2-state-timeline__track--background=#f4f4f5] - Strip behind a band's segments, visible where it has no data.
- * @cssproperty {border-radius} [--c2-state-timeline__track--border-radius=4px] - Rounding of the strip.
- * @cssproperty {pixel} [--c2-state-timeline__segment--gap=2px] - Space between two segments; `0px` draws a band as one continuous bar.
- * @cssproperty {border-radius} [--c2-state-timeline__segment--border-radius=4px] - Rounding of each segment.
- * @cssproperty {percentage} [--c2-state-timeline__segment--background-mix=32%] - Share of the state colour in a segment's fill; `100%` for solid fills.
- * @cssproperty {color} [--c2-state-timeline__segment--color=#18181b] - Colour of the state written inside a segment.
+ * @cssproperty {border-radius} [--c2-state-timeline__track--border-radius=4px] - Rounding of the strip and of the segments at its ends.
+ * @cssproperty {pixel} [--c2-state-timeline__segment--height=100%] - Height of a segment that is not the baseline, as a length or a share of the band.
+ * @cssproperty {pixel} [--c2-state-timeline__segment--gap=1px] - Space between two segments; `0px` joins them.
+ * @cssproperty {border-radius} [--c2-state-timeline__segment--border-radius=0px] - Rounding of each segment's inner ends.
+ * @cssproperty {percentage} [--c2-state-timeline__segment--background-mix=100%] - Share of the state colour in a segment that is not the baseline.
+ * @cssproperty {color} [--c2-state-timeline__segment--color=#ffffff] - Colour of the state written inside a segment.
  * @cssproperty {font-weight} [--c2-state-timeline__segment--font-weight=500] - Weight of the state written inside a segment.
- * @cssproperty {percentage} [--c2-state-timeline__segment__hover--background-mix=52%] - Share of the state colour in the fill of the hovered or focused segment.
  * @cssproperty {outline} [--c2-state-timeline__segment__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the active segment.
  * @cssproperty {border} [--c2-state-timeline__segment__empty--border=1px dashed #bcbcc6] - Outline of a stretch with no data.
+ * @cssproperty {color} [--c2-state-timeline__segment__baseline--color] - Colour of the baseline wash. Unset, the baseline state's own tone.
+ * @cssproperty {percentage} [--c2-state-timeline__segment__baseline--background-mix=24%] - Share of the colour in the baseline wash.
+ * @cssproperty {pixel} [--c2-state-timeline__segment__baseline--height=100%] - Height of a baseline segment; a few pixels draw it as a line.
  * @cssproperty {color} [--c2-state-timeline__axis--color=#71717a] - Colour of the axis labels.
  * @cssproperty {border} [--c2-state-timeline__axis--border-top=1px solid #e4e4e7] - Line above the axis labels.
+ * @cssproperty {color} [--c2-state-timeline__crosshair--color=#18181b] - Colour of the time line and of its time label.
+ * @cssproperty {color} [--c2-state-timeline__marker--color=#71717a] - Colour of the event pins' labels.
+ * @cssproperty {border} [--c2-state-timeline__marker--border-left=1px solid #bcbcc6] - Stem of an event pin.
  * @cssproperty {color} [--c2-state-timeline__legend--color=#71717a] - Colour of the legend labels.
- * @cssproperty {pixel} [--c2-state-timeline__legend__swatch--size=10px] - Size of a legend swatch.
- * @cssproperty {border-radius} [--c2-state-timeline__legend__swatch--border-radius=999px] - Rounding of a legend swatch.
+ * @cssproperty {pixel} [--c2-state-timeline__swatch--size=8px] - Size of the state dots in labels, the legend and the tooltip.
+ * @cssproperty {border-radius} [--c2-state-timeline__swatch--border-radius=999px] - Rounding of the state dots.
  * @cssproperty {color} [--c2-state-timeline__tooltip--background=#ffffff] - Fill of the tooltip.
  * @cssproperty {color} [--c2-state-timeline__tooltip--color=#18181b] - Text of the tooltip.
- * @cssproperty {color} [--c2-state-timeline__tooltip--muted-color=#71717a] - Field names of the tooltip.
+ * @cssproperty {color} [--c2-state-timeline__tooltip--muted-color=#71717a] - Secondary text of the tooltip.
  * @cssproperty {border} [--c2-state-timeline__tooltip--border=1px solid #d4d4d8] - Outline of the tooltip.
  * @cssproperty {border-radius} [--c2-state-timeline__tooltip--border-radius=8px] - Rounding of the tooltip.
  * @cssproperty {box-shadow} [--c2-state-timeline__tooltip--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)] - Shadow of the tooltip.
- * @cssproperty {pixel} [--c2-state-timeline__tooltip--width=220px] - Width of the tooltip.
+ * @cssproperty {pixel} [--c2-state-timeline__tooltip--width=280px] - Width of the tooltip.
  * @cssproperty {color} [--c2-state-timeline__tone-primary--color=rgb(2, 101, 220)] - `tone: 'primary'`.
  * @cssproperty {color} [--c2-state-timeline__tone-success--color=#15803d] - `tone: 'success'`.
  * @cssproperty {color} [--c2-state-timeline__tone-warning--color=#a16207] - `tone: 'warning'`.
@@ -146,10 +184,13 @@ export class StateTimeline extends LitElement {
   @property({ converter: jsonPropertyConverter }) series: StateTimelineSeries[] = []
 
   /**
-   * Labels and colours of the state values, in legend order. Values the data uses but this omits are added after them.
-   * The legend lists only the states some visible segment is in.
+   * Labels and colours of the state values, in legend order; mark the normal one `baseline`. Values the data uses but
+   * this omits are added after them. The legend lists only the states some visible segment is in.
    */
   @property({ converter: jsonPropertyConverter }) states: StateTimelineState[] = []
+
+  /** Events pinned above the bands, as `{ time, label }` objects. Those outside the visible range are left out. */
+  @property({ converter: jsonPropertyConverter }) markers: StateTimelineMarker[] = []
 
   /** First visible time: milliseconds or an ISO string. Defaults to the earliest time in the data. */
   @property() start?: StateTimelineTime
@@ -163,6 +204,9 @@ export class StateTimeline extends LitElement {
   /** Leaves the legend of states out. */
   @property({ type: Boolean, attribute: 'hide-legend', reflect: true }) hideLegend = false
 
+  /** Leaves out the column with each band's time outside the baseline state. */
+  @property({ type: Boolean, attribute: 'hide-summary', reflect: true }) hideSummary = false
+
   /** Language of the axis and tooltip times. Defaults to the page's `lang`, then the browser's. */
   @property() locale?: string
 
@@ -170,20 +214,22 @@ export class StateTimeline extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** Replaces the tooltip's contents. Return anything Lit renders, or `null` for no tooltip. Property only. */
-  @property({ attribute: false }) renderTooltip?: (context: StateTimelineSegmentContext) => unknown
+  @property({ attribute: false }) renderTooltip?: (context: StateTimelineMomentContext) => unknown
 
   @state() private trackWidth = DEFAULT_TRACK_WIDTH
   @state() private active: Cell = { row: 0, position: 0 }
-  @state() private hover: Cell | null = null
-  /** The tooltip follows the focus only while the keyboard is driving. */
+  @state() private pointer: Moment | null = null
+  /** The time line and tooltip follow the focus only while the keyboard is driving. */
   @state() private keyboardFocus = false
   @state() private focused = false
 
   #model: TimelineModel = buildModel([], [])
   #warnedInvalid = 0
+  #hovered: Cell | null = null
   #resizeObserver?: ResizeObserver
   #tooltipFrame = 0
   #focusAfterUpdate = false
+  readonly #slots = new SlotPresenceController(this, ['heading'])
 
   override connectedCallback(): void {
     super.connectedCallback()
@@ -211,7 +257,8 @@ export class StateTimeline extends LitElement {
       }
       this.#warnedInvalid = this.#model.invalid
       this.active = this.#clamp(this.active)
-      this.hover = null
+      this.pointer = null
+      this.#hovered = null
     }
     this.internals.ariaLabel = this.ariaLabel ?? 'State timeline'
   }
@@ -221,7 +268,7 @@ export class StateTimeline extends LitElement {
       this.#focusAfterUpdate = false
       this.#cellElement(this.active)?.focus()
     }
-    if (this.#tooltipCell) this.#placeTooltip()
+    if (this.#moment) this.#placeTooltip()
   }
 
   /** The bands as read from `series`: segments sorted, ends filled in and clipped to the visible range. */
@@ -235,7 +282,7 @@ export class StateTimeline extends LitElement {
   }
 
   #measure() {
-    const track = this.renderRoot.querySelector<HTMLElement>('.axis-track, .track')
+    const track = this.renderRoot.querySelector<HTMLElement>('.track')
     const width = track?.clientWidth ?? 0
     if (width > 0 && Math.abs(width - this.trackWidth) > 1) this.trackWidth = width
   }
@@ -244,6 +291,10 @@ export class StateTimeline extends LitElement {
     if (this.locale) return this.locale
     if (isServer) return 'en'
     return this.closest('[lang]')?.getAttribute('lang') || undefined
+  }
+
+  get #baseline(): ResolvedState | undefined {
+    return this.#model.states.find((entry) => entry.baseline)
   }
 
   /** The nearest cell that holds a segment, or the first one. */
@@ -291,6 +342,13 @@ export class StateTimeline extends LitElement {
     this.dispatchEvent(new CustomEvent<StateTimelineSegmentEventDetail>('segment-click', { detail, bubbles: true, composed: true }))
   }
 
+  #setHovered(cell: Cell | null) {
+    const same = cell && this.#hovered && cell.row === this.#hovered.row && cell.position === this.#hovered.position
+    if (same || (!cell && !this.#hovered)) return
+    this.#hovered = cell
+    this.dispatchEvent(new CustomEvent<StateTimelineSegmentHoverEventDetail>('segment-hover', { detail: { segment: cell ? this.#context(cell) : null } }))
+  }
+
   #onClick = (event: MouseEvent) => {
     const cell = this.#cellFrom(event)
     if (!cell) return
@@ -298,24 +356,25 @@ export class StateTimeline extends LitElement {
     this.#activate(cell)
   }
 
-  #onPointerOver = (event: PointerEvent) => {
+  /** The time under the pointer, read from the first track: every track spans the same range at the same x. */
+  #onPointerMove = (event: PointerEvent) => {
+    const track = this.renderRoot.querySelector<HTMLElement>('.track')
+    if (!track) return
+    const box = track.getBoundingClientRect()
+    const share = (event.clientX - box.left) / box.width
     const cell = this.#cellFrom(event)
-    if (!cell || (this.hover && this.hover.row === cell.row && this.hover.position === cell.position)) return
-    this.hover = cell
-    this.dispatchEvent(new CustomEvent<StateTimelineSegmentHoverEventDetail>('segment-hover', { detail: { segment: this.#context(cell) } }))
-  }
-
-  #onPointerOut = (event: PointerEvent) => {
-    if (!this.hover) return
-    const into = event.relatedTarget instanceof Node ? event.relatedTarget : null
-    const still = into && this.renderRoot.contains(into) && (into as Element).closest?.('.segment')
-    if (still) return
-    this.hover = null
-    this.dispatchEvent(new CustomEvent<StateTimelineSegmentHoverEventDetail>('segment-hover', { detail: { segment: null } }))
-  }
-
-  #onPointerDown = () => {
+    this.#setHovered(cell)
+    if (!(share >= 0 && share <= 1)) {
+      this.pointer = null
+      return
+    }
     this.keyboardFocus = false
+    this.pointer = { time: this.#model.start + share * (this.#model.end - this.#model.start), focus: cell }
+  }
+
+  #onPointerLeave = () => {
+    this.pointer = null
+    this.#setHovered(null)
   }
 
   #onFocusIn = (event: FocusEvent) => {
@@ -372,21 +431,36 @@ export class StateTimeline extends LitElement {
     }
     event.preventDefault()
     this.keyboardFocus = true
+    this.pointer = null
     this.active = next
     this.#focusAfterUpdate = true
   }
 
-  /** The segment whose tooltip is showing: the hovered one, else the focused one while the keyboard drives. */
-  get #tooltipCell(): Cell | null {
-    if (this.hover && this.#placed(this.hover)) return this.hover
-    return this.focused && this.keyboardFocus && this.#placed(this.active) ? this.active : null
+  /** The moment on show: under the pointer, else the middle of the focused segment while the keyboard drives. */
+  get #moment(): Moment | null {
+    if (this.pointer) return this.pointer
+    const placed = this.focused && this.keyboardFocus ? this.#placed(this.active) : undefined
+    return placed ? { time: (placed.from + placed.to) / 2, focus: this.active } : null
   }
 
+  #momentContext(moment: Moment): StateTimelineMomentContext {
+    return {
+      time: moment.time,
+      focus: moment.focus ? this.#context(moment.focus) : null,
+      rows: this.#model.rows.map((row, index) => {
+        const position = segmentAt(row, moment.time)
+        return { series: row.series, seriesIndex: row.index, segment: position < 0 ? null : this.#context({ row: index, position }) }
+      }),
+    }
+  }
+
+  /** Puts the tooltip beside the time line, on whichever side has room, level with the top of the bands. */
   #placeTooltip() {
-    const cell = this.#tooltipCell
+    const moment = this.#moment
     const tip = this.renderRoot.querySelector<HTMLElement>('.tooltip')
-    const mark = cell ? this.#cellElement(cell) : null
-    if (isServer || !tip || !mark || typeof tip.showPopover !== 'function') return
+    const track = this.renderRoot.querySelector<HTMLElement>('.track')
+    const rows = this.renderRoot.querySelector<HTMLElement>('.rows')
+    if (isServer || !moment || !tip || !track || !rows || typeof tip.showPopover !== 'function') return
     if (!tip.matches(':popover-open')) {
       try {
         tip.showPopover()
@@ -394,17 +468,18 @@ export class StateTimeline extends LitElement {
         return
       }
     }
-    const box = mark.getBoundingClientRect()
+    const box = track.getBoundingClientRect()
+    const x = box.left + (this.#percent(moment.time) / 100) * box.width
     const { width, height } = tip.getBoundingClientRect()
-    const left = Math.max(TOOLTIP_GAP, Math.min(box.left + box.width / 2 - width / 2, innerWidth - width - TOOLTIP_GAP))
-    const below = box.bottom + TOOLTIP_GAP
-    const top = innerHeight - below >= height + TOOLTIP_GAP || box.top < height + TOOLTIP_GAP ? below : box.top - height - TOOLTIP_GAP
+    const right = x + TOOLTIP_GAP
+    const left = right + width + 4 <= innerWidth ? right : Math.max(4, x - TOOLTIP_GAP - width)
+    const top = Math.max(4, Math.min(rows.getBoundingClientRect().top, innerHeight - height - 4))
     tip.style.left = `${Math.round(left)}px`
-    tip.style.top = `${Math.round(Math.max(TOOLTIP_GAP, Math.min(top, innerHeight - height - TOOLTIP_GAP)))}px`
+    tip.style.top = `${Math.round(top)}px`
   }
 
   #schedulePlaceTooltip = () => {
-    if (!this.#tooltipCell) return
+    if (!this.#moment) return
     cancelAnimationFrame(this.#tooltipFrame)
     this.#tooltipFrame = requestAnimationFrame(() => this.#placeTooltip())
   }
@@ -414,18 +489,26 @@ export class StateTimeline extends LitElement {
     return span > 0 ? ((time - this.#model.start) / span) * 100 : 0
   }
 
-  #toneClass(placed: PlacedSegment | { state: PlacedSegment['state'] }): string {
-    return placed.state ? `tone-${placed.state.tone}` : 'is-empty'
+  #tone(state: ResolvedState | null | undefined): string {
+    return state ? `tone-${state.tone}` : 'is-empty'
   }
 
   #renderSegment(row: TimelineRow, rowIndex: number, placed: PlacedSegment, position: number, format: Intl.DateTimeFormat) {
     const label = placed.state?.label ?? NO_DATA
     const active = rowIndex === this.active.row && position === this.active.position
-    const hovered = this.hover?.row === rowIndex && this.hover.position === position
+    const baseline = placed.state?.baseline ?? false
     const name = `${row.label ? `${row.label}: ` : ''}${label}, ${format.format(placed.start)} – ${format.format(placed.end)}, ${formatDuration(placed.end - placed.start)}`
     const left = this.#percent(placed.from)
+    const classes = {
+      segment: true,
+      [this.#tone(placed.state)]: true,
+      'is-baseline': baseline,
+      'at-start': placed.from <= this.#model.start,
+      'at-end': placed.to >= this.#model.end,
+      active,
+    }
     return html`<div
-      class=${classMap({ segment: true, [this.#toneClass(placed)]: true, active, hovered })}
+      class=${classMap(classes)}
       part="segment"
       role="gridcell"
       tabindex=${active ? 0 : -1}
@@ -434,58 +517,121 @@ export class StateTimeline extends LitElement {
       data-position=${position}
       style=${styleMap({ left: `${left}%`, width: `${this.#percent(placed.to) - left}%` })}
     >
-      <span class="segment-label" aria-hidden="true">${placed.state ? label : nothing}</span>
+      <span class="segment-label" aria-hidden="true">${placed.state && !baseline ? label : nothing}</span>
     </div>`
   }
 
-  #renderTooltip(format: Intl.DateTimeFormat) {
-    const cell = this.#tooltipCell
-    const context = cell ? this.#context(cell) : null
-    if (!cell || !context) return nothing
+  #renderRow(row: TimelineRow, rowIndex: number, format: Intl.DateTimeFormat, summary: boolean) {
+    const last = row.segments[row.segments.length - 1]
+    const outside = timeOutsideBaseline(row)
+    const outsideText = outside > 0 ? formatDuration(outside) : '—'
+    const baseline = this.#baseline
+    const spoken = [
+      last ? `now ${last.state?.label ?? NO_DATA}` : '',
+      summary && baseline ? `${outside > 0 ? outsideText : 'no time'} outside ${baseline.label}` : '',
+    ]
+      .filter(Boolean)
+      .join(', ')
+    return html`<div class="row" part="row" role="row">
+      <div class="label" part="label" role="rowheader" title=${row.label}>
+        ${last ? html`<span class=${classMap({ swatch: true, [this.#tone(last.state)]: true })} aria-hidden="true"></span>` : nothing}
+        <span class="label-text">${row.label}</span>${spoken ? html`<span class="visually-hidden">, ${spoken}</span>` : nothing}
+      </div>
+      <div class="track" part="track">${row.segments.map((placed, position) => this.#renderSegment(row, rowIndex, placed, position, format))}</div>
+      ${summary ? html`<div class="summary" part="summary" aria-hidden="true">${outsideText}</div>` : nothing}
+    </div>`
+  }
+
+  #renderTooltip(moment: Moment, format: Intl.DateTimeFormat) {
+    const context = this.#momentContext(moment)
+    const step = durationStep(this.#model.start, this.#model.end)
     const content = this.renderTooltip
       ? this.renderTooltip(context)
-      : html`<div class="tooltip-title">${context.series.label}</div>
-          <div class="tooltip-state"><span class=${classMap({ swatch: true, [this.#toneClass(this.#placed(cell)!)]: true })}></span>${context.label}</div>
-          <dl>
-            <dt>From</dt>
-            <dd>${format.format(context.start)}</dd>
-            <dt>To</dt>
-            <dd>${format.format(context.end)}</dd>
-            <dt>Duration</dt>
-            <dd>${formatDuration(context.duration)}</dd>
-          </dl>`
+      : html`<div class="tooltip-time">${format.format(context.time)}</div>
+          ${context.rows.map((entry, index) => {
+            const segment = entry.segment
+            const row = this.#model.rows[index]
+            const placed = segment ? row.segments[segmentAt(row, context.time)] : undefined
+            const exception = !placed?.state?.baseline
+            const left = segment ? segment.end - context.time : 0
+            return html`<div class=${classMap({ 'tooltip-row': true, 'is-exception': exception, 'is-focus': moment.focus?.row === index })}>
+              <span class=${classMap({ swatch: true, [this.#tone(placed?.state)]: true })}></span>
+              <span class="tooltip-name">${entry.series.label} · ${segment ? segment.label : NO_DATA}</span>
+              <span class="tooltip-left">${segment && left > 0 && exception ? `${formatDuration(left, step)} left` : ''}</span>
+            </div>`
+          })}
+          ${
+            context.focus
+              ? html`<div class="tooltip-focus">
+                  ${context.focus.series.label} · ${context.focus.label}: ${format.format(context.focus.start)} – ${format.format(context.focus.end)},
+                  ${formatDuration(context.focus.duration)}
+                </div>`
+              : nothing
+          }`
     if (content === null || content === undefined || content === nothing) return nothing
     // A top-layer popover, so no ancestor's overflow clips it; `#placeTooltip` positions it.
     return html`<div class="tooltip" part="tooltip" popover="manual" aria-hidden="true">${content}</div>`
   }
 
-  #renderAxis() {
+  #renderLegend() {
+    // Only the states that are on screen, in the order of `states` and then of appearance, each with its total time.
+    const totals = stateTotals(this.#model)
+    const states = this.#model.states.filter((entry) => totals.has(entry.key))
+    if (this.hideLegend || (!states.length && !totals.has(null))) return nothing
+    // The legend repeats what each segment's accessible name already says, so assistive technology skips it.
+    return html`<ul class="legend" part="legend" aria-hidden="true">
+      ${states.map(
+        (entry) =>
+          html`<li>
+            <span class=${classMap({ swatch: true, [`tone-${entry.tone}`]: true })}></span>${entry.label}
+            ${entry.baseline ? nothing : html`<b>${formatDuration(totals.get(entry.key)!)}</b>`}
+          </li>`,
+      )}
+      ${totals.has(null) ? html`<li><span class="swatch is-empty"></span>${NO_DATA} <b>${formatDuration(totals.get(null)!)}</b></li>` : nothing}
+    </ul>`
+  }
+
+  #renderMarkers() {
+    const markers = placeMarkers(this.markers, this.#model.start, this.#model.end)
+    if (!markers.length) return nothing
+    // Labels are measured by estimate (about 6.5px a character at the 12px default), which is enough to keep
+    // neighbours on separate levels without a layout pass.
+    const levels = stackLabels(markers.map((marker) => ({ x: (this.#percent(marker.time) / 100) * this.trackWidth, width: marker.label.length * 6.5 + 4 })))
+    const depth = Math.max(...levels) + 1
+    return html`<div class="lanes markers" part="markers" aria-hidden="true" style=${styleMap({ '--_levels': String(depth) })}>
+      <div></div>
+      <div class="lane">
+        ${markers.map((marker, index) => {
+          const left = this.#percent(marker.time)
+          return html`<span
+            class=${classMap({ marker: true, 'at-start': left < 8, 'at-end': left > 92 })}
+            part="marker"
+            style=${styleMap({ left: `${left}%`, '--_level': String(levels[index]) })}
+            >${marker.label}</span
+          >`
+        })}
+      </div>
+      <div></div>
+    </div>`
+  }
+
+  #renderAxis(moment: Moment | null) {
     if (this.hideAxis) return nothing
     const ticks = axisTicks(this.#model.start, this.#model.end, this.trackWidth, this.#locale)
-    return html`<div class="axis" part="axis" aria-hidden="true">
-      <div class="axis-spacer"></div>
-      <div class="axis-track">
+    const pill = moment ? momentFormatter(this.#model.start, this.#model.end, this.#locale).format(moment.time) : ''
+    return html`<div class="lanes axis" part="axis" aria-hidden="true">
+      <div></div>
+      <div class="lane axis-track">
         ${ticks.map((tick) => {
           const left = this.#percent(tick.time)
           return html`<span class=${classMap({ tick: true, 'at-start': left < 6, 'at-end': left > 94 })} part="tick" style=${styleMap({ left: `${left}%` })}
             >${tick.label}</span
           >`
         })}
+        ${moment ? html`<span class="crosshair-time" style=${styleMap({ left: `${this.#percent(moment.time)}%` })}>${pill}</span>` : nothing}
       </div>
+      <div></div>
     </div>`
-  }
-
-  #renderLegend() {
-    // Only the states that are on screen, in the order of `states` and then of appearance.
-    const used = new Set(this.#model.rows.flatMap((row) => row.segments.map((segment) => segment.state?.key ?? null)))
-    const states = this.#model.states.filter((entry) => used.has(entry.key))
-    const hasEmpty = used.has(null)
-    if (this.hideLegend || (!states.length && !hasEmpty)) return nothing
-    // The legend repeats what each segment's accessible name already says, so assistive technology skips it.
-    return html`<ul class="legend" part="legend" aria-hidden="true">
-      ${states.map((entry) => html`<li><span class=${classMap({ swatch: true, [`tone-${entry.tone}`]: true })}></span>${entry.label}</li>`)}
-      ${hasEmpty ? html`<li><span class="swatch is-empty"></span>${NO_DATA}</li>` : nothing}
-    </ul>`
   }
 
   override render() {
@@ -496,26 +642,39 @@ export class StateTimeline extends LitElement {
       </div>`
     }
     const format = rangeFormatter(this.#model.start, this.#model.end, this.#locale)
-    return html`<div class="frame" part="base">
-      <div
-        class="rows"
-        @click=${this.#onClick}
-        @keydown=${this.#onKeyDown}
-        @focusin=${this.#onFocusIn}
-        @focusout=${this.#onFocusOut}
-        @pointerover=${this.#onPointerOver}
-        @pointerout=${this.#onPointerOut}
-        @pointerdown=${this.#onPointerDown}
-      >
-        ${rows.map(
-          (row, rowIndex) =>
-            html`<div class="row" part="row" role="row">
-              <div class="label" part="label" role="rowheader" title=${row.label}>${row.label}</div>
-              <div class="track" part="track">${row.segments.map((placed, position) => this.#renderSegment(row, rowIndex, placed, position, format))}</div>
-            </div>`,
-        )}
+    const summary = !this.hideSummary && !!this.#baseline
+    const moment = this.#moment
+    const header = this.#slots.has('heading') || !this.hideLegend
+    return html`<div class=${classMap({ frame: true, 'has-summary': summary })} part="base">
+      <div class="header" part="header" ?hidden=${!header}>
+        <div class="heading"><slot name="heading" @slotchange=${this.#slots.handleSlotChange}></slot></div>
+        ${this.#renderLegend()}
       </div>
-      ${this.#renderAxis()} ${this.#renderLegend()} ${this.#renderTooltip(format)}
+      <div class="plot">
+        ${this.#renderMarkers()}
+        <div
+          class="rows"
+          @click=${this.#onClick}
+          @keydown=${this.#onKeyDown}
+          @focusin=${this.#onFocusIn}
+          @focusout=${this.#onFocusOut}
+          @pointermove=${this.#onPointerMove}
+          @pointerleave=${this.#onPointerLeave}
+        >
+          ${rows.map((row, rowIndex) => this.#renderRow(row, rowIndex, format, summary))}
+        </div>
+        ${this.#renderAxis(moment)}
+        ${
+          moment
+            ? html`<div class="lanes overlay" aria-hidden="true">
+                <div></div>
+                <div class="lane"><span class="crosshair" part="crosshair" style=${styleMap({ left: `${this.#percent(moment.time)}%` })}></span></div>
+                <div></div>
+              </div>`
+            : nothing
+        }
+      </div>
+      ${moment ? this.#renderTooltip(moment, format) : nothing}
     </div>`
   }
 }

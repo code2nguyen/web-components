@@ -2344,6 +2344,12 @@
       "reason": "The empty-state region owns the slot's component-side presentation."
     },
     {
+      "tag": "c2-state-timeline",
+      "slot": "heading",
+      "decision": "assigned-content",
+      "reason": "Consumer-owned title text for the header row; style the assigned node through its own class."
+    },
+    {
       "tag": "c2-status-panel",
       "slot": "actions",
       "decision": "part",

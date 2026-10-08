@@ -5,77 +5,82 @@ import { StateTimeline } from '@c2n/components/state-timeline'
 
 ## Presets
 
-Looks for status pages, incident reviews and build histories. A segment is filled with its state's colour mixed
-against the background by `__segment--background-mix` (`100%` for solid fills), and `__segment__hover--background-mix`
-deepens the hovered or focused one. `__segment--gap` and `__segment--border-radius` turn a continuous band into
-separate blocks, and `__row--height` with `__label--width` sets the density.
+Looks for status pages, incident reviews and build histories. The baseline state is a wash mixed by
+`__segment__baseline--background-mix` (recoloured with `__segment__baseline--color`), and the other states are solid
+fills of `__segment--height`. A short baseline height with a taller pill for the exceptions gives the minimal strip;
+`__segment--gap` and `__segment--border-radius` split a band into blocks, and `__row--height` with `__label--width`
+sets the density.
 
 <GalleryGrid min={9999}>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-state-timeline aria-label="Service health" series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success"},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
+<c2-state-timeline aria-label="Service health" markers='[{"time":"2026-10-08T10:05:00Z","label":"Deploy v2.3"},{"time":"2026-10-08T10:15:00Z","label":"DB failover"},{"time":"2026-10-08T11:20:00Z","label":"Index rebuild"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
 ```
 
-```html tag=MdxCodeBlock,label=Solid
+```html tag=MdxCodeBlock,label=Minimal strip
 <style>
-  .state-timeline-solid {
-    --c2-state-timeline__segment--background-mix: 100%;
-    --c2-state-timeline__segment__hover--background-mix: 82%;
-    --c2-state-timeline__segment--color: #ffffff;
+  .state-timeline-strip {
+    --c2-state-timeline--gap: 8px;
+    --c2-state-timeline__row--height: 32px;
+    --c2-state-timeline__row--gap: 0px;
+    --c2-state-timeline__row--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-state-timeline__track--background: transparent;
+    --c2-state-timeline__segment--height: 8px;
     --c2-state-timeline__segment--gap: 0px;
-    --c2-state-timeline__segment--border-radius: 0px;
-    --c2-state-timeline__track--border-radius: 0px;
-    --c2-state-timeline__row--gap: 2px;
+    --c2-state-timeline__segment--border-radius: 999px;
+    --c2-state-timeline__track--border-radius: 999px;
+    --c2-state-timeline__segment__baseline--height: 2px;
+    --c2-state-timeline__segment__baseline--background-mix: 100%;
+    --c2-state-timeline__segment__baseline--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-state-timeline__label--font-weight: 400;
   }
 </style>
-<c2-state-timeline class="state-timeline-solid" aria-label="Service health" series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success"},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
+<c2-state-timeline class="state-timeline-strip" aria-label="Service health" markers='[{"time":"2026-10-08T10:05:00Z","label":"Deploy v2.3"},{"time":"2026-10-08T10:15:00Z","label":"DB failover"},{"time":"2026-10-08T11:20:00Z","label":"Index rebuild"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
 ```
 
 ```html tag=MdxCodeBlock,label=Uptime bars
 <style>
   .state-timeline-uptime {
-    --c2-state-timeline__label--width: 0px;
+    --c2-state-timeline__label--width: 48px;
     --c2-state-timeline__row--height: 36px;
     --c2-state-timeline__track--background: transparent;
     --c2-state-timeline__segment--gap: 3px;
     --c2-state-timeline__segment--border-radius: 2px;
-    --c2-state-timeline__segment--background-mix: 100%;
-    --c2-state-timeline__segment__hover--background-mix: 70%;
+    --c2-state-timeline__track--border-radius: 2px;
+    --c2-state-timeline__segment__baseline--background-mix: 100%;
   }
 </style>
-<c2-state-timeline class="state-timeline-uptime" aria-label="API, last 30 days" hide-axis series='[{"label":"API","segments":[{"start":"2026-09-09T00:00:00Z","end":"2026-09-10T00:00:00Z","state":"ok"},{"start":"2026-09-10T00:00:00Z","end":"2026-09-11T00:00:00Z","state":"ok"},{"start":"2026-09-11T00:00:00Z","end":"2026-09-12T00:00:00Z","state":"ok"},{"start":"2026-09-12T00:00:00Z","end":"2026-09-13T00:00:00Z","state":"ok"},{"start":"2026-09-13T00:00:00Z","end":"2026-09-14T00:00:00Z","state":"ok"},{"start":"2026-09-14T00:00:00Z","end":"2026-09-15T00:00:00Z","state":"ok"},{"start":"2026-09-15T00:00:00Z","end":"2026-09-16T00:00:00Z","state":"ok"},{"start":"2026-09-16T00:00:00Z","end":"2026-09-17T00:00:00Z","state":"ok"},{"start":"2026-09-17T00:00:00Z","end":"2026-09-18T00:00:00Z","state":"ok"},{"start":"2026-09-18T00:00:00Z","end":"2026-09-19T00:00:00Z","state":"ok"},{"start":"2026-09-19T00:00:00Z","end":"2026-09-20T00:00:00Z","state":"ok"},{"start":"2026-09-20T00:00:00Z","end":"2026-09-21T00:00:00Z","state":"ok"},{"start":"2026-09-21T00:00:00Z","end":"2026-09-22T00:00:00Z","state":"degraded"},{"start":"2026-09-22T00:00:00Z","end":"2026-09-23T00:00:00Z","state":"ok"},{"start":"2026-09-23T00:00:00Z","end":"2026-09-24T00:00:00Z","state":"ok"},{"start":"2026-09-24T00:00:00Z","end":"2026-09-25T00:00:00Z","state":"ok"},{"start":"2026-09-25T00:00:00Z","end":"2026-09-26T00:00:00Z","state":"ok"},{"start":"2026-09-26T00:00:00Z","end":"2026-09-27T00:00:00Z","state":"ok"},{"start":"2026-09-27T00:00:00Z","end":"2026-09-28T00:00:00Z","state":"ok"},{"start":"2026-09-28T00:00:00Z","end":"2026-09-29T00:00:00Z","state":"down"},{"start":"2026-09-29T00:00:00Z","end":"2026-09-30T00:00:00Z","state":"degraded"},{"start":"2026-09-30T00:00:00Z","end":"2026-10-01T00:00:00Z","state":"ok"},{"start":"2026-10-01T00:00:00Z","end":"2026-10-02T00:00:00Z","state":"ok"},{"start":"2026-10-02T00:00:00Z","end":"2026-10-03T00:00:00Z","state":"ok"},{"start":"2026-10-03T00:00:00Z","end":"2026-10-04T00:00:00Z","state":"ok"},{"start":"2026-10-04T00:00:00Z","end":"2026-10-05T00:00:00Z","state":"ok"},{"start":"2026-10-05T00:00:00Z","end":"2026-10-06T00:00:00Z","state":"ok"},{"start":"2026-10-06T00:00:00Z","end":"2026-10-07T00:00:00Z","state":"degraded"},{"start":"2026-10-07T00:00:00Z","end":"2026-10-08T00:00:00Z","state":"ok"},{"start":"2026-10-08T00:00:00Z","end":"2026-10-09T00:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success"},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]'></c2-state-timeline>
+<c2-state-timeline class="state-timeline-uptime" aria-label="API, last 30 days" hide-axis series='[{"label":"API","segments":[{"start":"2026-09-09T00:00:00Z","end":"2026-09-10T00:00:00Z","state":"ok"},{"start":"2026-09-10T00:00:00Z","end":"2026-09-11T00:00:00Z","state":"ok"},{"start":"2026-09-11T00:00:00Z","end":"2026-09-12T00:00:00Z","state":"ok"},{"start":"2026-09-12T00:00:00Z","end":"2026-09-13T00:00:00Z","state":"ok"},{"start":"2026-09-13T00:00:00Z","end":"2026-09-14T00:00:00Z","state":"ok"},{"start":"2026-09-14T00:00:00Z","end":"2026-09-15T00:00:00Z","state":"ok"},{"start":"2026-09-15T00:00:00Z","end":"2026-09-16T00:00:00Z","state":"ok"},{"start":"2026-09-16T00:00:00Z","end":"2026-09-17T00:00:00Z","state":"ok"},{"start":"2026-09-17T00:00:00Z","end":"2026-09-18T00:00:00Z","state":"ok"},{"start":"2026-09-18T00:00:00Z","end":"2026-09-19T00:00:00Z","state":"ok"},{"start":"2026-09-19T00:00:00Z","end":"2026-09-20T00:00:00Z","state":"ok"},{"start":"2026-09-20T00:00:00Z","end":"2026-09-21T00:00:00Z","state":"ok"},{"start":"2026-09-21T00:00:00Z","end":"2026-09-22T00:00:00Z","state":"degraded"},{"start":"2026-09-22T00:00:00Z","end":"2026-09-23T00:00:00Z","state":"ok"},{"start":"2026-09-23T00:00:00Z","end":"2026-09-24T00:00:00Z","state":"ok"},{"start":"2026-09-24T00:00:00Z","end":"2026-09-25T00:00:00Z","state":"ok"},{"start":"2026-09-25T00:00:00Z","end":"2026-09-26T00:00:00Z","state":"ok"},{"start":"2026-09-26T00:00:00Z","end":"2026-09-27T00:00:00Z","state":"ok"},{"start":"2026-09-27T00:00:00Z","end":"2026-09-28T00:00:00Z","state":"ok"},{"start":"2026-09-28T00:00:00Z","end":"2026-09-29T00:00:00Z","state":"down"},{"start":"2026-09-29T00:00:00Z","end":"2026-09-30T00:00:00Z","state":"degraded"},{"start":"2026-09-30T00:00:00Z","end":"2026-10-01T00:00:00Z","state":"ok"},{"start":"2026-10-01T00:00:00Z","end":"2026-10-02T00:00:00Z","state":"ok"},{"start":"2026-10-02T00:00:00Z","end":"2026-10-03T00:00:00Z","state":"ok"},{"start":"2026-10-03T00:00:00Z","end":"2026-10-04T00:00:00Z","state":"ok"},{"start":"2026-10-04T00:00:00Z","end":"2026-10-05T00:00:00Z","state":"ok"},{"start":"2026-10-05T00:00:00Z","end":"2026-10-06T00:00:00Z","state":"ok"},{"start":"2026-10-06T00:00:00Z","end":"2026-10-07T00:00:00Z","state":"degraded"},{"start":"2026-10-07T00:00:00Z","end":"2026-10-08T00:00:00Z","state":"ok"},{"start":"2026-10-08T00:00:00Z","end":"2026-10-09T00:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]'></c2-state-timeline>
 ```
 
 ```html tag=MdxCodeBlock,label=CI runs
 <style>
   .state-timeline-ci {
     --c2-state-timeline__label--width: 96px;
-    --c2-state-timeline__row--height: 24px;
+    --c2-state-timeline__row--height: 20px;
     --c2-state-timeline__track--background: transparent;
-    --c2-state-timeline__segment--gap: 0px;
+    --c2-state-timeline__segment--gap: 4px;
     --c2-state-timeline__segment--border-radius: 999px;
-    --c2-state-timeline__segment--background-mix: 22%;
-    --c2-state-timeline__segment__hover--background-mix: 40%;
+    --c2-state-timeline__track--border-radius: 999px;
+    --c2-state-timeline__segment__baseline--background-mix: 30%;
     --c2-state-timeline__label--font-weight: 400;
   }
 </style>
-<c2-state-timeline class="state-timeline-ci" aria-label="CI runs by branch" series='[{"label":"main","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:08:00Z","state":"passed"},{"start":"2026-10-08T09:12:00Z","end":"2026-10-08T09:21:00Z","state":"passed"},{"start":"2026-10-08T09:27:00Z","end":"2026-10-08T09:34:00Z","state":"failed"},{"start":"2026-10-08T09:37:00Z","end":"2026-10-08T09:45:00Z","state":"passed"},{"start":"2026-10-08T09:50:00Z","end":"2026-10-08T09:59:00Z","state":"passed"},{"start":"2026-10-08T10:03:00Z","end":"2026-10-08T10:13:00Z","state":"running"}]},{"label":"release/1.0","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:12:00Z","state":"passed"},{"start":"2026-10-08T09:22:00Z","end":"2026-10-08T09:33:00Z","state":"cancelled"},{"start":"2026-10-08T09:42:00Z","end":"2026-10-08T09:54:00Z","state":"passed"}]},{"label":"feat/axis","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:06:00Z","state":"failed"},{"start":"2026-10-08T09:20:00Z","end":"2026-10-08T09:27:00Z","state":"failed"},{"start":"2026-10-08T09:36:00Z","end":"2026-10-08T09:44:00Z","state":"passed"}]}]' states='[{"value":"passed","label":"Passed","tone":"success"},{"value":"failed","label":"Failed","tone":"danger"},{"value":"running","label":"Running","tone":"primary"},{"value":"cancelled","label":"Cancelled","tone":"neutral"}]' end="2026-10-08T10:15:00Z"></c2-state-timeline>
+<c2-state-timeline class="state-timeline-ci" aria-label="CI runs by branch" series='[{"label":"main","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:08:00Z","state":"passed"},{"start":"2026-10-08T09:12:00Z","end":"2026-10-08T09:21:00Z","state":"passed"},{"start":"2026-10-08T09:27:00Z","end":"2026-10-08T09:34:00Z","state":"failed"},{"start":"2026-10-08T09:37:00Z","end":"2026-10-08T09:45:00Z","state":"passed"},{"start":"2026-10-08T09:50:00Z","end":"2026-10-08T09:59:00Z","state":"passed"},{"start":"2026-10-08T10:03:00Z","end":"2026-10-08T10:13:00Z","state":"running"}]},{"label":"release/1.0","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:12:00Z","state":"passed"},{"start":"2026-10-08T09:22:00Z","end":"2026-10-08T09:33:00Z","state":"cancelled"},{"start":"2026-10-08T09:42:00Z","end":"2026-10-08T09:54:00Z","state":"passed"}]},{"label":"feat/axis","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:06:00Z","state":"failed"},{"start":"2026-10-08T09:20:00Z","end":"2026-10-08T09:27:00Z","state":"failed"},{"start":"2026-10-08T09:36:00Z","end":"2026-10-08T09:44:00Z","state":"passed"}]}]' states='[{"value":"passed","label":"Passed","tone":"success","baseline":true},{"value":"failed","label":"Failed","tone":"danger"},{"value":"running","label":"Running","tone":"primary"},{"value":"cancelled","label":"Cancelled","tone":"neutral"}]' end="2026-10-08T10:15:00Z"></c2-state-timeline>
 ```
 
 ```html tag=MdxCodeBlock,label=Compact
 <style>
   .state-timeline-compact {
-    --c2-state-timeline__label--width: 72px;
+    --c2-state-timeline--gap: 8px;
+    --c2-state-timeline__label--width: 88px;
+    --c2-state-timeline__summary--width: 56px;
     --c2-state-timeline__row--height: 12px;
     --c2-state-timeline__row--gap: 4px;
-    --c2-state-timeline__segment--gap: 1px;
-    --c2-state-timeline__segment--border-radius: 2px;
-    --c2-state-timeline__segment--background-mix: 72%;
-    --c2-state-timeline__segment__hover--background-mix: 100%;
     --c2-state-timeline__track--border-radius: 2px;
   }
 </style>
-<c2-state-timeline class="state-timeline-compact" aria-label="Service health" hide-legend series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success"},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
+<c2-state-timeline class="state-timeline-compact" aria-label="Service health" hide-legend series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z"></c2-state-timeline>
 ```
 
 ```html tag=MdxCodeBlock,label=Palette
@@ -83,11 +88,11 @@ separate blocks, and `__row--height` with `__label--width` sets the density.
   .state-timeline-palette {
     --c2-state-timeline__row--height: 32px;
     --c2-state-timeline__row--gap: 8px;
-    --c2-state-timeline__segment--background-mix: 18%;
-    --c2-state-timeline__segment__hover--background-mix: 30%;
-    --c2-state-timeline__segment--border-radius: 8px;
-    --c2-state-timeline__track--border-radius: 8px;
-    --c2-state-timeline__legend__swatch--border-radius: 2px;
+    --c2-state-timeline__segment--gap: 3px;
+    --c2-state-timeline__segment--border-radius: 6px;
+    --c2-state-timeline__track--border-radius: 6px;
+    --c2-state-timeline__track--background: transparent;
+    --c2-state-timeline__swatch--border-radius: 2px;
   }
 </style>
 <c2-state-timeline class="state-timeline-palette" aria-label="Host power" series='[{"label":"web-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T02:30:00Z","state":"sleep"},{"start":"2026-10-08T06:00:00Z","state":"on"}]},{"label":"web-02","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T04:00:00Z","state":"off"},{"start":"2026-10-08T04:20:00Z","state":"on"}]},{"label":"batch-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"sleep"},{"start":"2026-10-08T01:00:00Z","state":"on"},{"start":"2026-10-08T05:00:00Z","state":"sleep"}]}]'></c2-state-timeline>

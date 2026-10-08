@@ -6,7 +6,7 @@ const scenario = new URLSearchParams(location.search).get('scenario') ?? 'defaul
 const main = document.querySelector('main')!
 
 const states: StateTimelineState[] = [
-  { value: 'ok', label: 'Operational', tone: 'success' },
+  { value: 'ok', label: 'Operational', tone: 'success', baseline: true },
   { value: 'degraded', label: 'Degraded', tone: 'warning' },
   { value: 'down', label: 'Outage', tone: 'danger' },
 ]
@@ -55,6 +55,7 @@ const changes: StateTimelineSeries[] = [
 main.innerHTML = `<button id="before">Before</button>
   <c2-state-timeline id="subject" locale="en-GB" aria-label="Service status">
     <span slot="empty">Nothing reported yet</span>
+    ${scenario === 'default' ? '<span slot="heading">Service health</span>' : ''}
   </c2-state-timeline>
   <button id="after">After</button>
   <output aria-label="Events"></output>`
@@ -75,13 +76,19 @@ if (scenario === 'default' || scenario === 'tooltip') {
   subject.series = series
   subject.states = states
   subject.end = '2026-10-08T12:00:00Z'
+  subject.markers = [
+    { time: '2026-10-08T10:15:00Z', label: 'DB failover' },
+    { time: '2026-10-08T10:20:00Z', label: 'Rollback' },
+  ]
 }
 if (scenario === 'auto') subject.series = changes
 if (scenario === 'attribute') {
   subject.setAttribute('series', JSON.stringify(changes))
   subject.setAttribute('states', JSON.stringify([{ value: 'failed', label: 'Failed', tone: 'danger' }]))
 }
-if (scenario === 'tooltip') subject.renderTooltip = (context) => html`<strong class="custom">${context.series.label} is ${context.label}</strong>`
+if (scenario === 'tooltip')
+  subject.renderTooltip = (context) =>
+    html`<strong class="custom">${context.focus?.series.label} is ${context.focus?.label}; ${context.rows.length} rows</strong>`
 
 await subject.updateComplete
 // The axis is measured on the first ResizeObserver delivery.

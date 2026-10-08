@@ -15,6 +15,17 @@ export interface StateTimelineState {
   label?: string
   /** Colour of the state. States without one take the next unused palette slot, in order of appearance. */
   tone?: StateTimelineTone
+  /**
+   * The normal state (operational, passing, on). It is drawn as a quiet wash with no text, while every other state is
+   * a solid, labelled fill, and each band's summary counts the time spent outside it. Mark at most one state.
+   */
+  baseline?: boolean
+}
+
+/** An event drawn as a pin above the bands: a deploy, a failover, an incident. */
+export interface StateTimelineMarker {
+  time: StateTimelineTime
+  label: string
 }
 
 /** One stretch of time during which a series held a single state. */
@@ -55,6 +66,22 @@ export interface StateTimelineSegmentContext {
   end: number
   /** `end - start`, in milliseconds. */
   duration: number
+}
+
+/** One band at a moment: its series and the segment holding that time, if any. */
+export interface StateTimelineMomentRow {
+  series: StateTimelineSeries
+  seriesIndex: number
+  segment: StateTimelineSegmentContext | null
+}
+
+/** What `renderTooltip` receives: one moment across every band. */
+export interface StateTimelineMomentContext {
+  /** The moment, in milliseconds. */
+  time: number
+  rows: StateTimelineMomentRow[]
+  /** The segment under the pointer or keyboard focus, when there is one. */
+  focus: StateTimelineSegmentContext | null
 }
 
 /** Detail of `segment-click`. */

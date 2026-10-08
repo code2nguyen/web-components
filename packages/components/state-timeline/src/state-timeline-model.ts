@@ -1,4 +1,11 @@
-import type { StateTimelineSegment, StateTimelineSeries, StateTimelineState, StateTimelineTime, StateTimelineTone } from './state-timeline-types.js'
+import type {
+  StateTimelineMarker,
+  StateTimelineSegment,
+  StateTimelineSeries,
+  StateTimelineState,
+  StateTimelineTime,
+  StateTimelineTone,
+} from './state-timeline-types.js'
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -10,6 +17,8 @@ export interface ResolvedState {
   key: string
   label: string
   tone: StateTimelineTone
+  /** The normal state, drawn quietly and left out of the time-outside-normal totals. */
+  baseline: boolean
 }
 
 /** A segment placed on the timeline. `start`/`end` are the real times, `from`/`to` the part inside the range. */
@@ -59,19 +68,21 @@ export function stateKey(value: unknown): string | null {
 
 function resolveStates(given: readonly StateTimelineState[], series: readonly StateTimelineSeries[]): Map<string, ResolvedState> {
   // Tone `0` stands for "not chosen yet" until the palette is handed out below.
-  const map = new Map<string, { key: string; label: string; tone: StateTimelineTone | 0 }>()
+  const map = new Map<string, { key: string; label: string; tone: StateTimelineTone | 0; baseline: boolean }>()
   const pending: string[] = []
   for (const state of given) {
     const key = stateKey(state?.value)
     if (key === null || map.has(key)) continue
-    map.set(key, { key, label: state.label ?? key, tone: state.tone ?? 0 })
+    // Only the first state marked as the baseline counts as one.
+    const baseline = state.baseline === true && ![...map.values()].some((entry) => entry.baseline)
+    map.set(key, { key, label: state.label ?? key, tone: state.tone ?? 0, baseline })
     if (state.tone === undefined) pending.push(key)
   }
   for (const row of series) {
     for (const segment of row?.segments ?? []) {
       const key = stateKey(segment?.state)
       if (key === null || map.has(key)) continue
-      map.set(key, { key, label: key, tone: 0 })
+      map.set(key, { key, label: key, tone: 0, baseline: false })
       pending.push(key)
     }
   }
@@ -252,10 +263,15 @@ export function rangeFormatter(start: number, end: number, locale?: string): Int
   return safeFormat(locale, options)
 }
 
-/** "2 d 3 h", "1 h 15 min", "45 s", "250 ms": the two largest non-zero units. */
-export function formatDuration(ms: number): string {
+/**
+ * "2 d 3 h", "1 h 15 min", "45 s", "250 ms": the two largest non-zero units, rounded to `step` milliseconds (one second
+ * by default). A positive duration shorter than the step reads "< 1 min" (or the step's unit).
+ */
+export function formatDuration(ms: number, step = SECOND): string {
   if (!(ms > 0)) return '0 s'
-  if (ms < SECOND) return `${Math.round(ms)} ms`
+  if (step <= SECOND && ms < SECOND) return `${Math.round(ms)} ms`
+  if (ms < step / 2) return step >= MINUTE ? '< 1 min' : '< 1 s'
+  if (step > SECOND) ms = Math.round(ms / step) * step
   const units: Array<[number, string]> = [
     [DAY, 'd'],
     [HOUR, 'h'],
@@ -291,4 +307,66 @@ export function segmentNear(row: TimelineRow, from: number, to: number): number 
     }
   })
   return best
+}
+
+/** Position of the segment of `row` holding `time`, or `-1` when no segment does. Ends are exclusive. */
+export function segmentAt(row: TimelineRow, time: number): number {
+  return row.segments.findIndex(
+    (segment) => time >= segment.from && (time < segment.to || (time === segment.to && segment === row.segments[row.segments.length - 1])),
+  )
+}
+
+/** Visible milliseconds spent in each state across all bands, keyed by the state's key (`null` for no data). */
+export function stateTotals(model: TimelineModel): Map<string | null, number> {
+  const totals = new Map<string | null, number>()
+  for (const row of model.rows) {
+    for (const segment of row.segments) {
+      const key = segment.state?.key ?? null
+      totals.set(key, (totals.get(key) ?? 0) + segment.to - segment.from)
+    }
+  }
+  return totals
+}
+
+/** Visible milliseconds a band spent outside the baseline state, no-data stretches included. */
+export function timeOutsideBaseline(row: TimelineRow): number {
+  return row.segments.reduce((sum, segment) => (segment.state?.baseline ? sum : sum + segment.to - segment.from), 0)
+}
+
+/** The markers inside the visible range, with their times read. */
+export function placeMarkers(markers: readonly StateTimelineMarker[], start: number, end: number): Array<{ time: number; label: string }> {
+  if (!Array.isArray(markers)) return []
+  return markers
+    .map((marker) => ({ time: toTime(marker?.time), label: String(marker?.label ?? '') }))
+    .filter((marker): marker is { time: number; label: string } => marker.time !== undefined && marker.time >= start && marker.time <= end)
+    .sort((a, b) => a.time - b.time)
+}
+
+/** Formats the moment on the crosshair: seconds below an hour of range, the date beyond a day. */
+export function momentFormatter(start: number, end: number, locale?: string): Intl.DateTimeFormat {
+  const span = end - start
+  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }
+  if (span < HOUR) options.second = '2-digit'
+  if (span > DAY) Object.assign(options, { month: 'short', day: 'numeric' })
+  return safeFormat(locale, options)
+}
+
+/** Rounding for durations measured from the pointer: whole minutes once the range spans an hour or more. */
+export function durationStep(start: number, end: number): number {
+  return end - start >= HOUR ? MINUTE : SECOND
+}
+
+/**
+ * Stacks marker labels into levels so neighbours do not overlap: each label goes on the lowest level whose previous
+ * label ends before it starts. `x` is the label's centre and `width` its estimated width, both in pixels.
+ */
+export function stackLabels(items: ReadonlyArray<{ x: number; width: number }>, levels = 3): number[] {
+  const ends: number[] = []
+  return items.map(({ x, width }) => {
+    const left = x - width / 2
+    let level = ends.findIndex((end) => end <= left)
+    if (level < 0) level = ends.length < levels ? ends.length : ends.indexOf(Math.min(...ends))
+    ends[level] = x + width / 2 + 8
+    return level
+  })
 }

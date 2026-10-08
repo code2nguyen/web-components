@@ -23,12 +23,14 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-state-timeline': Omit<C2Props<StateTimeline>, 'series' | 'states'> & {
+      'c2-state-timeline': Omit<C2Props<StateTimeline>, 'series' | 'states' | 'markers'> & {
         'hide-axis'?: Attribute
         'hide-legend'?: Attribute
+        'hide-summary'?: Attribute
         'aria-label'?: Attribute
         series?: StateTimeline['series'] | string
         states?: StateTimeline['states'] | string
+        markers?: StateTimeline['markers'] | string
       }
     }
   }

@@ -10,13 +10,13 @@ test.use({ timezoneId: 'UTC' })
 const segment = (subject: Locator, name: string | RegExp) => subject.getByRole('gridcell', { name })
 const width = async (locator: Locator) => (await locator.boundingBox())!.width
 
-test('draws one band per series, sized by time, with a legend and an axis', async ({ page, scenario }) => {
+test('draws one band per series, sized by time, with the baseline quiet and the exceptions labelled', async ({ page, scenario }) => {
   await scenario()
   const subject = page.locator('c2-state-timeline')
   baseExpect(await hostAria(subject, 'role')).toBe('grid')
   baseExpect(await hostAria(subject, 'aria-label')).toBe('Service status')
   await expect(subject.getByRole('row')).toHaveCount(3)
-  await expect(subject.getByRole('rowheader')).toHaveText(['API', 'Database', 'Worker'])
+  await expect(subject.locator('.label-text')).toHaveText(['API', 'Database', 'Worker'])
   await expect(subject.getByRole('gridcell')).toHaveCount(8)
 
   // A segment without an end lasts until the next one starts; the last one runs to `end`.
@@ -26,12 +26,27 @@ test('draws one band per series, sized by time, with a legend and an axis', asyn
   await expect(recovered).toBeVisible()
   baseExpect(Math.abs((await width(recovered)) / (await width(degraded)) - 3)).toBeLessThan(0.1)
 
-  // Wide segments write their state; a null state is an empty "No data" stretch.
-  await expect(recovered).toContainText('Operational')
+  // Exceptions write their state; the baseline does not, and a null state is an empty "No data" stretch.
+  await expect(degraded).toHaveText('Degraded')
+  await expect(recovered).toHaveText('')
   await expect(segment(subject, /^Worker: No data, 8 Oct, 11:00/)).toBeVisible()
-  await expect(subject.locator('[part="legend"] li')).toHaveText(['Operational', 'Degraded', 'Outage', 'No data'])
+  await expect(subject.locator('[part="legend"] li')).toHaveText(['Operational', 'Degraded 30 min', 'Outage 30 min', 'No data 1 h'])
+  await expect(subject.getByText('Service health')).toBeVisible()
   await expect(subject.locator('[part="tick"]').first()).toHaveText('09:00')
   await expect(subject.locator('[part="tick"]').last()).toHaveText('12:00')
+  // Markers too close to share a line are stacked rather than overlapped.
+  const markers = subject.locator('[part="marker"]')
+  await expect(markers).toHaveText(['DB failover', 'Rollback'])
+  const [failover, rollback] = [(await markers.nth(0).boundingBox())!, (await markers.nth(1).boundingBox())!]
+  baseExpect(failover.x + failover.width <= rollback.x || failover.y + failover.height <= rollback.y || rollback.y + rollback.height <= failover.y).toBe(true)
+})
+
+test('each band says what it is doing now and how long it spent outside the baseline', async ({ page, scenario }) => {
+  await scenario()
+  const subject = page.locator('c2-state-timeline')
+  await expect(subject.locator('[part="summary"]')).toHaveText(['30 min', '30 min', '1 h'])
+  await expect(subject.getByRole('rowheader', { name: /^API\s*, now Operational, 30 min outside Operational$/ })).toBeVisible()
+  await expect(subject.getByRole('rowheader', { name: /^Worker\s*, now No data, 1 h outside Operational$/ })).toBeVisible()
 })
 
 test('moves between segments and bands with the arrow keys behind a single tab stop', async ({ page, scenario, tab }) => {
@@ -67,18 +82,22 @@ test('moves between segments and bands with the arrow keys behind a single tab s
   await expect(segment(subject, /^API: Operational, 8 Oct, 09:00/)).toBeFocused()
 })
 
-test('hovering a segment shows its tooltip and reports it; leaving hides it', async ({ page, scenario }) => {
+test('hovering draws a time line and the tooltip lists every band at that moment', async ({ page, scenario }) => {
   await scenario()
   const subject = page.locator('c2-state-timeline')
   const tooltip = subject.locator('[part="tooltip"]')
   await expect(tooltip).toHaveCount(0)
-  await segment(subject, /^Database: Outage/).hover()
+  // 10:20, a third of the way into the outage, while the API is still degraded.
+  const outage = segment(subject, /^Database: Outage/)
+  const box = (await outage.boundingBox())!
+  await outage.hover({ position: { x: box.width / 6, y: box.height / 2 } })
+  await expect(subject.locator('[part="crosshair"]')).toBeVisible()
   await expect(tooltip).toBeVisible()
-  await expect(tooltip).toContainText('Database')
-  await expect(tooltip).toContainText('Outage')
-  await expect(tooltip).toContainText('30 min')
+  await expect(tooltip.locator('.tooltip-name')).toHaveText(['API · Degraded', 'Database · Outage', 'Worker · Operational'])
+  await expect(tooltip).toContainText('Database · Outage: 8 Oct, 10:15 – 8 Oct, 10:45, 30 min')
   await page.mouse.move(5, 5)
   await expect(tooltip).toHaveCount(0)
+  await expect(subject.locator('[part="crosshair"]')).toHaveCount(0)
   await expect(page.getByRole('status')).toHaveText('hover:Outage hover:none')
 })
 
@@ -92,7 +111,9 @@ test('without states or a range, it spans the data and colours each value on its
   await scenario('auto')
   const subject = page.locator('c2-state-timeline')
   await expect(subject.getByRole('gridcell')).toHaveCount(3)
-  await expect(subject.locator('[part="legend"] li')).toHaveText(['passed', 'failed'])
+  await expect(subject.locator('[part="legend"] li')).toHaveText(['passed 13 min', 'failed 4 min'])
+  // No baseline state, so no summary column.
+  await expect(subject.locator('[part="summary"]')).toHaveCount(0)
   const [passed, failed] = await subject
     .locator('[part="legend"] .swatch')
     .evaluateAll((swatches) => swatches.map((swatch) => getComputedStyle(swatch).backgroundColor))
@@ -108,7 +129,7 @@ test('reads series and states from JSON attributes', async ({ page, scenario }) 
   await scenario('attribute')
   const subject = page.locator('c2-state-timeline')
   await expect(segment(subject, /^Build: Failed/)).toBeVisible()
-  await expect(subject.locator('[part="legend"] li')).toHaveText(['Failed', 'passed'])
+  await expect(subject.locator('[part="legend"] li')).toHaveText(['Failed 4 min', 'passed 13 min'])
 })
 
 test('shows the empty slot when there is no series', async ({ page, scenario }) => {
@@ -122,7 +143,7 @@ test('renderTooltip replaces the tooltip contents', async ({ page, scenario }) =
   await scenario('tooltip')
   const subject = page.locator('c2-state-timeline')
   await segment(subject, /^API: Degraded/).hover()
-  await expect(subject.locator('[part="tooltip"] .custom')).toHaveText('API is Degraded')
+  await expect(subject.locator('[part="tooltip"] .custom')).toHaveText('API is Degraded; 3 rows')
 })
 
 test('has no detectable accessibility violations', async ({ page, scenario }) => {
