@@ -46,6 +46,8 @@
 
 :host {
   display: block;
+  // The timeline has no width of its own, so the waterfall fills its container rather than shrinking to its names.
+  inline-size: 100%;
   min-width: 0;
   font-family: css.cssVar(font-family);
   font-size: css.cssVar(font-size);
@@ -74,7 +76,8 @@
 .header,
 .row {
   display: grid;
-  grid-template-columns: css.cssVar(name--width) minmax(160px, 1fr);
+  // The name column gives way in a narrow waterfall so the timeline keeps at least 60% of the width.
+  grid-template-columns: min(#{css.cssVar(name--width)}, 40%) minmax(0, 1fr);
 }
 
 .header {
@@ -98,6 +101,14 @@
 .axis {
   position: relative;
   margin-inline: css.cssVar(timeline--padding-inline);
+  container-type: inline-size;
+}
+
+// Too narrow for five labels: keep the start and the end.
+@container (max-width: 280px) {
+  .tick:not(.first, .last) {
+    display: none;
+  }
 }
 
 .tick {
@@ -122,9 +133,6 @@
   border-bottom: css.cssVar(row--border-bottom);
   cursor: pointer;
   outline: none;
-  // Off-screen rows skip layout and paint, so a trace of a few thousand spans stays cheap to scroll.
-  content-visibility: auto;
-  contain-intrinsic-size: auto css.cssVar(row--height);
 
   &:hover {
     background: css.cssVar(row__hover--background);
@@ -187,15 +195,17 @@
 }
 
 .label {
-  min-width: 0;
+  flex: 0 1 auto;
+  min-width: 3em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .service {
-  flex: none;
-  max-width: 40%;
+  // Gives way long before the span name does.
+  flex: 0 100 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -254,6 +264,15 @@ mark {
     left: auto;
     right: calc((1 - var(--start)) * 100%);
     padding-inline: 0 6px;
+  }
+
+  &.inside {
+    left: auto;
+    right: calc((1 - var(--start) - var(--width)) * 100%);
+    margin-inline-end: 4px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: css.cssVar(background);
   }
 }
 

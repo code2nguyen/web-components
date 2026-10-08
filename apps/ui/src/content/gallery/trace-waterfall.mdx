@@ -9,7 +9,7 @@ Looks for `c2-trace-waterfall`. The series colours (`__series-1--color` … `__s
 sizes (`__row--height`, `__bar--height`) and the name column (`__name--width`) do most of the work. Open any card
 in the studio to start from it.
 
-<GalleryGrid>
+<GalleryGrid min="400">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-trace-waterfall spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'></c2-trace-waterfall>

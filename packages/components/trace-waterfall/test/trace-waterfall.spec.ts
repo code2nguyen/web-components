@@ -48,6 +48,10 @@ test('draws the span tree with every bar placed on one time axis', async ({ page
   const create = await box(page, 'orders.create', 'bar')
   expect((await box(page, 'orders.create', 'duration')).x).toBeLessThan(create.x)
   expect((await box(page, 'auth.verify', 'duration')).x).toBeGreaterThan((await box(page, 'auth.verify', 'bar')).x)
+  // A bar spanning the whole axis has no room on either side, so its label sits over its end, inside the timeline.
+  const rootLabel = await box(page, 'POST /checkout', 'duration')
+  expect(rootLabel.x + rootLabel.width).toBeLessThanOrEqual(root.x + root.width)
+  expect(rootLabel.x).toBeGreaterThan(root.x)
   await accessible(page)
 })
 

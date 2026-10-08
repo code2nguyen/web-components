@@ -23,7 +23,10 @@ export { formatDuration } from './trace-model.js'
 
 /** Number of series colours; services beyond it reuse them in order. */
 const SERIES = 8
-/** A bar ending past this share of the axis puts its duration label before it rather than after. */
+/**
+ * A bar ending past this share of the axis has no room for its duration label after it: the label goes before the bar,
+ * or inside it when the bar also starts near the beginning.
+ */
 const LABEL_FLIP = 0.75
 
 export interface TraceWaterfallSelectionChangeEventDetail {
@@ -104,7 +107,7 @@ export interface TraceWaterfall {
  * @cssproperty {color} [--c2-trace-waterfall__header--background=#fafafa] - Background of the header row.
  * @cssproperty {color} [--c2-trace-waterfall__header--color=#71717a] - Text colour of the header row and the axis labels.
  * @cssproperty {length} [--c2-trace-waterfall__header--height=32px] - Height of the header row.
- * @cssproperty {length} [--c2-trace-waterfall__name--width=280px] - Width of the name column.
+ * @cssproperty {length} [--c2-trace-waterfall__name--width=280px] - Width of the name column. It never takes more than 40% of the waterfall.
  * @cssproperty {border} [--c2-trace-waterfall__name--border-right=1px solid #e4e4e7] - Line between the name column and the timeline.
  * @cssproperty {length} [--c2-trace-waterfall__name--indent=16px] - Indentation per level of depth.
  * @cssproperty {color} [--c2-trace-waterfall__service--color=#71717a] - Colour of the service name after a span's name.
@@ -244,7 +247,7 @@ export class TraceWaterfall extends LitElement {
     const error = span.status === 'error'
     const start = this.share(node.offset)
     const width = this.model.total > 0 ? this.share(node.duration) : 1
-    const flip = start + width > LABEL_FLIP && start > 0.2
+    const placement = start + width <= LABEL_FLIP ? '' : start > 0.2 ? 'before' : 'inside'
     const series = (Math.max(0, node.serviceIndex) % SERIES) + 1
     const duration = formatDuration(node.duration)
     const matched = this.searchMatches.has(node.key)
@@ -287,7 +290,7 @@ export class TraceWaterfall extends LitElement {
       <div class="timeline">
         <div class="track">
           <span class="bar" part="bar" style="--start: ${start}; --width: ${width}"></span>
-          <span class="duration ${flip ? 'before' : ''}" part="duration" style="--start: ${start}; --width: ${width}"
+          <span class="duration ${placement}" part="duration" style="--start: ${start}; --width: ${width}"
             >${duration}<span class="offset"> at ${formatDuration(node.offset)}</span></span
           >
         </div>
