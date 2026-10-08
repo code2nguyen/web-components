@@ -187,3 +187,21 @@ test('search puts countries whose name starts with the query first', async ({ pa
   await page.keyboard.type('ger')
   await expect(page.getByRole('option')).toHaveText([/Germany/, /Algeria/, /Niger\b/, /Nigeria/])
 })
+
+test('a single allowed country is a fixed prefix with no picker', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-phone-input countries="VN"></c2-phone-input>')
+  const host = page.locator('c2-phone-input')
+  await expect(page.getByRole('button')).toHaveCount(0)
+  await expect(number(page)).toHaveAccessibleDescription('Vietnam (+84)')
+  await number(page).click()
+  await page.keyboard.type('0912345678')
+  await expect(number(page)).toHaveValue('0912 345 678')
+  await expect(host).toHaveJSProperty('value', '+84912345678')
+  // A number of another country cannot switch the country: it stays invalid and empty.
+  await number(page).fill('')
+  await page.keyboard.type('+33612345678')
+  await expect(host).toHaveJSProperty('country', 'VN')
+  await expect(host).toHaveJSProperty('value', '')
+  expect(await host.evaluate((element) => (element as HTMLElement & { validity: ValidityState }).validity.patternMismatch)).toBe(true)
+  await accessible(page)
+})

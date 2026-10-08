@@ -65,7 +65,8 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  *
  * `country` is the country selected when there is no value; without it, the region of `locale` (or the browser's
  * language) is used, then the United States. `countries` restricts the picker, `preferred-countries` lists a few at
- * the top. Country names come from `Intl.DisplayNames` in `locale`.
+ * the top. With a single country in `countries` the picker is replaced by a fixed flag and calling code, for a form
+ * that only accepts numbers of one country; a `+` number of another country is then reported as invalid. Country names come from `Intl.DisplayNames` in `locale`.
  *
  * The element is form-associated: the E.164 value is submitted under `name`. `required` reports an empty field, and a
  * number whose length the country's numbering plan does not allow is reported as invalid (`validity.patternMismatch`);
@@ -524,7 +525,7 @@ export class PhoneInput extends LitElement {
   // Country picker.
 
   private openPicker() {
-    if (this.effectiveDisabled || this.readonly || this.open) return
+    if (this.effectiveDisabled || this.readonly || this.open || this.allowedCountries.length === 1) return
     this.search = ''
     const index = this.options.findIndex(({ country }) => country === this.currentCountry)
     this.activeIndex = Math.max(0, index)
@@ -739,33 +740,44 @@ export class PhoneInput extends LitElement {
     const country = this.currentCountry
     const disabled = this.effectiveDisabled
     const countryName = this.countryName(country)
+    // A single allowed country is a fixed prefix: there is nothing to pick.
+    const fixed = this.allowedCountries.length === 1
     return html`<div class="field" @click=${this.handleFieldClick} @focusin=${this.handleFocusin} @focusout=${this.handleFocusout}>
-        <button
-          class="country"
-          type="button"
-          aria-haspopup="listbox"
-          aria-expanded=${this.open ? 'true' : 'false'}
-          aria-label=${`Country: ${countryName} (+${country.dialCode})`}
-          ?disabled=${disabled || this.readonly}
-          @click=${this.handleCountryClick}
-          @keydown=${this.handleCountryKeydown}
-        >
-          <span class="flag" aria-hidden="true">${flagEmoji(country.iso)}</span>
-          <span class="dial-code" aria-hidden="true">+${country.dialCode}</span>
-          <span class="icon chevron" aria-hidden="true">
-            <slot name="chevron-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </slot>
-          </span>
-        </button>
+        ${
+          fixed
+            ? html`<span id="country" class="country" data-fixed>
+                <span class="flag" aria-hidden="true">${flagEmoji(country.iso)}</span>
+                <span class="dial-code" aria-hidden="true">+${country.dialCode}</span>
+                <span class="visually-hidden">${`${countryName} (+${country.dialCode})`}</span>
+              </span>`
+            : html`<button
+                class="country"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded=${this.open ? 'true' : 'false'}
+                aria-label=${`Country: ${countryName} (+${country.dialCode})`}
+                ?disabled=${disabled || this.readonly}
+                @click=${this.handleCountryClick}
+                @keydown=${this.handleCountryKeydown}
+              >
+                <span class="flag" aria-hidden="true">${flagEmoji(country.iso)}</span>
+                <span class="dial-code" aria-hidden="true">+${country.dialCode}</span>
+                <span class="icon chevron" aria-hidden="true">
+                  <slot name="chevron-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </slot>
+                </span>
+              </button>`
+        }
         <input
           class="input"
           type="tel"
           inputmode="tel"
           autocomplete="tel"
           aria-label=${this.ariaLabel || 'Phone number'}
+          aria-describedby=${ifDefined(fixed ? 'country' : undefined)}
           aria-invalid=${!!this.significant && !this.valid && this.touched ? 'true' : nothing}
           placeholder=${this.placeholder || this.exampleNumber || nothing}
           .value=${live(this.formatted)}
