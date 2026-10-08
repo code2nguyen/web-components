@@ -50,7 +50,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 95 remain (17 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26) and `c2-truncate` (#33) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 94 remain (17 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33) and `c2-json-viewer` (#38) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
 ### A. Forms and input (24)
 
@@ -81,7 +81,7 @@ Domain patterns with no design-system home come from the products that made them
 | 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
 | 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
 
-### B. Data display (19)
+### B. Data display (18)
 
 | #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
 | --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
@@ -93,7 +93,6 @@ Domain patterns with no design-system home come from the products that made them
 | 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)            | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
 | 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes                       | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
 | 37  | `c2-rolling-number` | Digits that roll when a value changes                                       | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed |
-| 38  | `c2-json-viewer`    | Collapsible, searchable JSON tree with copy-path                            | Ark JSON tree view; Postman, Chrome DevTools                                     | P2       | Proposed |
 | 39  | `c2-diff-viewer`    | Side-by-side or unified text diff                                           | GitHub and GitLab diffs                                                          | P2       | Proposed |
 | 40  | `c2-markdown`       | Safe markdown renderer that handles streaming, for chat answers and READMEs | Web Awesome markdown, Vaadin Markdown                                            | P2       | Proposed |
 | 41  | `c2-image`          | Lazy loading, placeholder, fallback and click-to-preview                    | antd Image                                                                       | P2       | Proposed |
@@ -170,7 +169,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 | #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision |
 | --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Proposed |
+| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Accept   |
 | 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                             | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
 | 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed |
 | 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed |
@@ -297,7 +296,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 163 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list` and `c2-truncate`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 162 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate` and `c2-json-viewer`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |

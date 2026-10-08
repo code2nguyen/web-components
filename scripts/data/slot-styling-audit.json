@@ -1160,6 +1160,12 @@
       "reason": "The save button sizes the slotted icon and its SVG fallback through the control icon size, and colours it through the control colour variables."
     },
     {
+      "tag": "c2-json-viewer",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-kanban",
       "slot": "",
       "decision": "assigned-content",
@@ -1890,6 +1896,12 @@
       "decision": "variables",
       "variables": ["--c2-chip-part__icon--size"],
       "reason": "The prefix box sizes a slotted SVG through the icon variable; a dot or an avatar keeps its own size."
+    },
+    {
+      "tag": "c2-filter-builder",
+      "slot": "end",
+      "decision": "assigned-content",
+      "reason": "The end slot projects consumer-owned light DOM, such as a search field, at the end of the bar; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-qr-code",

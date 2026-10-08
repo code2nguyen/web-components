@@ -1989,6 +1989,40 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-json-viewer': {
+    html: `<c2-json-viewer style="width: 280px" data='{"name":"Ada","age":36,"admin":true,"manager":null,"roles":["admin","editor"]}'></c2-json-viewer>`,
+    presets: [
+      {
+        name: 'Terminal',
+        description: 'Dark block with bright token colours.',
+        css: {
+          '--c2-json-viewer--background-color': '#0b1220',
+          '--c2-json-viewer--color': '#d3deee',
+          '--c2-json-viewer__row__focus--outline': '2px solid #5aa3ff',
+          '--c2-json-viewer--border': '1px solid #263449',
+          '--c2-json-viewer--border-radius': '12px',
+          '--c2-json-viewer__row__hover--background-color': '#16233a',
+          '--c2-json-viewer__key--color': '#c4a7ff',
+          '--c2-json-viewer__string--color': '#8ee6a8',
+          '--c2-json-viewer__number--color': '#8ecbff',
+          '--c2-json-viewer__boolean--color': '#ffb86b',
+          '--c2-json-viewer__action__hover--background-color': '#263449',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Borderless, tighter rows and indentation.',
+        css: {
+          '--c2-json-viewer--border': 'none',
+          '--c2-json-viewer--padding': '0px',
+          '--c2-json-viewer--font-size': '11px',
+          '--c2-json-viewer__row--height': '20px',
+          '--c2-json-viewer__row--indent': '12px',
+        },
+        attributes: { 'expand-depth': '3' },
+      },
+    ],
+  },
   'c2-code-viewer': {
     html: `<c2-code-viewer style="width: 240px" language="ts" theme="github-light" code="const hello = (name) =>\\n  \`Hi, \${name}!\`"></c2-code-viewer>`,
     presets: [

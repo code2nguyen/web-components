@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-filter-builder</title>
+    <script type="module" src="/src/filter-builder.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 32px;
+      }
+      .narrow {
+        width: 340px;
+      }
+      .square {
+        --c2-filter-builder__chip--border-radius: 6px;
+        --c2-filter-builder__add-button--border-radius: 6px;
+      }
+      pre {
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h3>Empty</h3>
+      <c2-filter-builder
+        fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]'
+      ></c2-filter-builder>
+    </section>
+    <section>
+      <h3>Applied, with the tree it reports</h3>
+      <c2-filter-builder
+        id="applied"
+        fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]'
+        value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"field":"assignee","operator":"eq","value":"ana"},{"field":"due","operator":"last","value":{"amount":7,"unit":"day"}}]}'
+      ></c2-filter-builder>
+      <pre id="tree"></pre>
+    </section>
+    <section>
+      <h3>Narrow (compact layout)</h3>
+      <c2-filter-builder
+        class="narrow"
+        fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]'
+        value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"field":"assignee","operator":"eq","value":"ana"},{"field":"due","operator":"last","value":{"amount":7,"unit":"day"}}]}'
+      ></c2-filter-builder>
+    </section>
+    <section>
+      <h3>Square chips, disabled</h3>
+      <c2-filter-builder
+        class="square"
+        disabled
+        fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]'
+        value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'
+      ></c2-filter-builder>
+    </section>
+    <script type="module">
+      const applied = document.getElementById('applied')
+      const tree = document.getElementById('tree')
+      tree.textContent = JSON.stringify(applied.value, null, 2)
+      applied.addEventListener('filter-change', (event) => (tree.textContent = JSON.stringify(event.detail.value, null, 2)))
+    </script>
+  </body>
+</html>

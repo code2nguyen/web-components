@@ -1,0 +1,60 @@
+---
+title: 'Filter Builder'
+description: 'A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FilterBuilder } from '@c2n/components/filter-builder'
+
+`c2-filter-builder` is the filter bar of Linear, Airtable and Polaris IndexFilters. Each condition is a chip that reads as a sentence, `Status | is any of | In progress, In review`. Clicking the operator or the value opens its editor under that part. The **Filter** button opens a field picker, and typing in it also finds values, so "Ana" offers "Assignee is Ana Ng" in one step. Picking a field opens its value editor straight away. A condition with no value yet shows as a dashed chip and is dropped if its editor closes empty.
+
+The component filters nothing itself. `fields` describes what can be filtered: each field has an `id`, a `label` and a `type` (`enum`, `person`, `multi`, `text`, `number`, `date`, `boolean` or `custom`), and the type picks the operators and the editor. `value` is the filter tree, `{ op: 'and', rules: [{ field, operator, value }] }`. It holds option values only, never labels or colours, so you can store it as a saved view and send it to a server. Every change fires `filter-change` with the new tree. On `enum` and `person` fields the operator follows the number of values: one value is `is` (`eq`), several are `is any of` (`in`).
+
+How values look is data on each option: `color` draws a dot, `icon` names an icon element such as `c2-feather-flag`, `avatar` is a picture (`person` fields fall back to initials), and `description` and `count` add a second line and a number. For anything else, a field's `renderOption`, `renderValue` and `renderEditor` replace a row, the chip's value or the whole editor. `loadOptions(query, signal)` fetches options from a server as the user types, and `resolveOptions(values, signal)` labels the values of a saved tree. `labels` translates every piece of text. Below `compact-below` pixels (480 by default) the bar becomes a **Filters** button and a scrolling row of chips. The button opens a bottom sheet where each condition is edited in place.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/filter-builder'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/filter-builder
+<style>
+  .issues-filter {
+    width: 100%;
+  }
+  .issues-filter.narrow {
+    width: 340px;
+  }
+</style>
+<div data-label="Empty">
+  <c2-filter-builder class="issues-filter" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]'></c2-filter-builder>
+</div>
+<div data-label="Applied">
+  <c2-filter-builder class="issues-filter" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"field":"assignee","operator":"eq","value":"ana"},{"field":"due","operator":"last","value":{"amount":7,"unit":"day"}}]}'></c2-filter-builder>
+</div>
+<div data-label="Narrow">
+  <c2-filter-builder class="issues-filter narrow" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"field":"assignee","operator":"eq","value":"ana"},{"field":"due","operator":"last","value":{"amount":7,"unit":"day"}}]}'></c2-filter-builder>
+</div>
+<div data-label="Disabled">
+  <c2-filter-builder class="issues-filter" disabled fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>
+</div>
+```
+
+Listen to `filter-change` and apply the tree yourself:
+
+```typescript tag=CodeBlock
+const filters = document.querySelector('c2-filter-builder')!
+filters.fields = [
+  { id: 'status', label: 'Status', type: 'enum', options: [{ value: 'doing', label: 'In progress', color: '#0265dc' }] },
+  { id: 'assignee', label: 'Assignee', type: 'person', loadOptions: (query, signal) => api.people(query, { signal }) },
+]
+filters.addEventListener('filter-change', (event) => {
+  table.rows = applyMyFilter(allRows, event.detail.value)
+})
+```

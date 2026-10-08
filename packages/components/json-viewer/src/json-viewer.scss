@@ -1,0 +1,238 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-json-viewer,
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    font-size: 12px,
+    line-height: 1.6,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 6px,
+    max-height: null,
+
+    row--height: 24px,
+    row--padding-inline: 6px,
+    row--indent: 16px,
+    row--border-radius: 4px,
+    row__hover--background-color: #f4f4f5,
+    row__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    twisty--color: #71717a,
+    key--color: #6f42c1,
+    index--color: #71717a,
+    string--color: #116329,
+    number--color: #0550ae,
+    boolean--color: #b35900,
+    null--color: #71717a,
+    summary--color: #71717a,
+
+    match--background-color: rgba(250, 204, 21, 0.4),
+    match--color: null,
+
+    more--color: rgb(2, 101, 220),
+    action--color: #71717a,
+    action__hover--background-color: #e4e4e7,
+    action__copied--color: rgb(0, 122, 77),
+    empty--color: #71717a,
+    empty--padding: 18px,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// The scroll container is inside the shadow root rather than the host, so it can carry `tabindex="-1"`.
+.scroller {
+  display: block;
+  box-sizing: border-box;
+  max-height: css.cssVar(max-height);
+  padding: css.cssVar(padding);
+  overflow: auto;
+  border-radius: inherit;
+  outline: none;
+}
+
+.tree {
+  position: relative;
+  box-sizing: border-box;
+  outline: none;
+}
+
+// Every line has the same height, so only the lines in view need to exist: the tree's padding stands for the rest.
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+  box-sizing: border-box;
+  height: css.cssVar(row--height);
+  white-space: nowrap;
+  padding-inline-start: calc(css.cssVar(row--padding-inline) + (var(--level, 1) - 1) * css.cssVar(row--indent));
+  padding-inline-end: css.cssVar(row--padding-inline);
+  border-radius: css.cssVar(row--border-radius);
+  cursor: default;
+  outline: none;
+
+  // The focused line, kept rendered while it is scrolled outside the window.
+  &.pinned {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  &:hover {
+    background-color: css.cssVar(row__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(row__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.twisty {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  color: css.cssVar(twisty--color);
+
+  svg {
+    transition: transform 120ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}
+
+.row[aria-expanded='true'] .twisty svg {
+  transform: rotate(90deg);
+}
+
+.row[aria-expanded] {
+  cursor: pointer;
+}
+
+.key {
+  flex: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: css.cssVar(key--color);
+
+  &.index {
+    color: css.cssVar(index--color);
+  }
+}
+
+.colon {
+  flex: none;
+  margin-inline-start: -0.5ch;
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.string {
+  color: css.cssVar(string--color);
+}
+
+.number {
+  color: css.cssVar(number--color);
+}
+
+.boolean {
+  color: css.cssVar(boolean--color);
+}
+
+.null,
+.circular,
+.other {
+  color: css.cssVar(null--color);
+}
+
+.summary .count {
+  color: css.cssVar(summary--color);
+  font-style: italic;
+}
+
+mark {
+  border-radius: 2px;
+  background-color: css.cssVar(match--background-color);
+  color: css.cssVar(match--color);
+}
+
+.more {
+  cursor: pointer;
+  color: css.cssVar(more--color);
+
+  .more-label:hover {
+    text-decoration: underline;
+  }
+}
+
+.actions {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-inline-start: auto;
+  align-self: center;
+  visibility: hidden;
+}
+
+.row:hover .actions,
+.row:focus-visible .actions,
+.action.copied {
+  visibility: visible;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: css.cssVar(action--color);
+  cursor: pointer;
+
+  &:hover {
+    background-color: css.cssVar(action__hover--background-color);
+  }
+
+  &.copied {
+    color: css.cssVar(action__copied--color);
+  }
+}
+
+.empty {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}

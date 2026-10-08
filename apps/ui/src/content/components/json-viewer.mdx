@@ -1,0 +1,86 @@
+---
+title: 'JSON Viewer'
+description: 'Browse a JSON value as a collapsible tree, search it, and copy any path or value.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { JsonViewer } from '@c2n/components/json-viewer'
+
+`c2-json-viewer` shows any JSON value as a tree: a branch shows its size while closed, strings, numbers, booleans and
+`null` each get their own colour, and every line can copy its **path** (`$.order.items[0].sku`, or JSON Pointer with
+`path-format="pointer"`) or its **value**. `expand-depth` decides how many levels start open, and a branch with more
+than `page-size` children shows a "show more" line instead of rendering them all.
+
+`search` highlights every key and value containing the text and opens the branches leading to them; add `filter` to hide
+the lines that lead nowhere. The viewer has no search box of its own, so pair it with `c2-search-field`. The tree is
+keyboard-driven: arrows walk and open lines, `C` copies the focused value and `P` its path.
+
+Large documents are fine: only the lines in view are rendered, so a million-item array or a fully expanded tree
+with a million nodes scrolls like a short one. Each line is one row high (`--c2-json-viewer__row--height`) and a long
+value ends with an ellipsis; its full text is in the tooltip and in "copy value". Assign a new value to `data`
+rather than mutating the current one.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/json-viewer'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/json-viewer
+<style>
+  .json-demo {
+    width: 100%;
+    --c2-json-viewer--max-height: 260px;
+  }
+</style>
+<div data-label="Default">
+  <c2-json-viewer
+    class="json-demo"
+    label="Order"
+    data='{"id":"ord_8421","status":"paid","total":129.5,"gift":false,"coupon":null,"customer":{"name":"Ada Lovelace","email":"ada@example.com"},"items":[{"sku":"KB-01","qty":1,"price":89.5},{"sku":"MS-07","qty":2,"price":20}]}'
+  ></c2-json-viewer>
+</div>
+<div data-label="Collapsed, sorted keys">
+  <c2-json-viewer
+    class="json-demo"
+    label="Config"
+    expand-depth="1"
+    sort-keys
+    data='{"server":{"port":8080,"host":"0.0.0.0"},"logging":{"level":"info"},"features":["search","export"],"debug":false}'
+  ></c2-json-viewer>
+</div>
+<div data-label="Search with filter">
+  <c2-json-viewer
+    class="json-demo"
+    label="Team"
+    search="ada"
+    filter
+    data='{"team":[{"name":"Ada Lovelace","role":"engineer"},{"name":"Grace Hopper","role":"admiral"}],"lead":{"name":"Ada Lovelace"},"size":2}'
+  ></c2-json-viewer>
+</div>
+```
+
+Wire a search field to it, and read `searchMatches` for the paths that matched:
+
+```html tag=CodeBlock
+<c2-search-field label="Search JSON"></c2-search-field>
+<c2-json-viewer filter></c2-json-viewer>
+
+<script type="module">
+  import '@c2n/components/search-field'
+  import '@c2n/components/json-viewer'
+
+  const viewer = document.querySelector('c2-json-viewer')
+  viewer.data = await (await fetch('/api/order/8421')).json()
+
+  document.querySelector('c2-search-field').addEventListener('search', (event) => {
+    viewer.search = event.detail.value
+  })
+  viewer.addEventListener('copied', (event) => console.log(`Copied ${event.detail.kind}`, event.detail.text))
+</script>
+```
