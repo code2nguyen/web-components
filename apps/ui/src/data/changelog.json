@@ -2,6 +2,151 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.6",
+      "date": "2026-10-08",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["todo-list"],
+              "text": "Editable heading and actions-placement",
+              "hash": "f0c979a"
+            },
+            {
+              "scopes": ["filter-builder"],
+              "text": "Add c2-filter-builder",
+              "hash": "4087141"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Bold column names that can be restyled or removed",
+              "hash": "7b7b942"
+            },
+            {
+              "scopes": ["truncate"],
+              "text": "Add c2-truncate, text clamped to N lines with a Show more button",
+              "hash": "a26ebca"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Several values per label, aligned in columns that stack on small screens",
+              "hash": "da431fd"
+            },
+            {
+              "scopes": ["chip-group"],
+              "text": "Add c2-chip-group, a row of chips or badges that collapses overflow into +N",
+              "hash": "ca766ce"
+            },
+            {
+              "scopes": ["chip"],
+              "text": "Add c2-chip-part for chips made of interactive segments",
+              "hash": "6bfc0ad"
+            },
+            {
+              "scopes": ["json-viewer"],
+              "text": "Add c2-json-viewer, a collapsible, searchable JSON tree with copy-path",
+              "hash": "4d63d3c"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Add c2-description-list, read-only label and value pairs for detail pages",
+              "hash": "a183ea2"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["autocomplete"],
+              "text": "Fill the input with the row's label, not its index, when there is no item-key",
+              "hash": "3b7b916"
+            },
+            {
+              "scopes": ["autocomplete"],
+              "text": "Hide the header and footer only when the list would drop below its minimum",
+              "hash": "88a7097"
+            },
+            {
+              "scopes": ["autocomplete"],
+              "text": "Hide the header and footer when the panel has little room",
+              "hash": "a4578c3"
+            },
+            {
+              "scopes": ["json-viewer"],
+              "text": "Address review findings and Firefox failures",
+              "hash": "748fc36"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Give flexible columns a minimum width",
+              "hash": "955d886"
+            },
+            {
+              "scopes": ["chip-group"],
+              "text": "Register chip and badge, and keep them direct children on the docs site",
+              "hash": "3d951a2"
+            },
+            {
+              "scopes": ["chip"],
+              "text": "Keep framework comment markers out of the remove button name",
+              "hash": "0675843"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Render the empty dash the same on the server and the client",
+              "hash": "6a70a91"
+            },
+            {
+              "scopes": ["working-indicator"],
+              "text": "Keep the glyph off iOS emoji and slow its frames",
+              "hash": "5363090"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["json-viewer"],
+              "text": "Render only the lines in view so large documents stay fast",
+              "hash": "1109f8d"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Show the autocomplete examples' selection below the field",
+              "hash": "94ede91"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Scope example styles by frame so tag-led selectors apply",
+              "hash": "de420c3"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Scope chip usage styles so the avatar prefix is sized",
+              "hash": "129392b"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Remove a chip in the chip examples when its remove button is clicked",
+              "hash": "2b6ea3b"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.5",
       "date": "2026-10-07",
       "sections": [

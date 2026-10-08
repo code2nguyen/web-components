@@ -3,6 +3,43 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.6](https://github.com/code2nguyen/web-components/releases/tag/v1.0.6) — 2026-10-08
+
+### Features
+
+- **todo-list:** Editable heading and actions-placement ([f0c979a](https://github.com/code2nguyen/web-components/commit/f0c979a))
+- **filter-builder:** Add c2-filter-builder ([4087141](https://github.com/code2nguyen/web-components/commit/4087141))
+- **description-list:** Bold column names that can be restyled or removed ([7b7b942](https://github.com/code2nguyen/web-components/commit/7b7b942))
+- **truncate:** Add c2-truncate, text clamped to N lines with a Show more button ([a26ebca](https://github.com/code2nguyen/web-components/commit/a26ebca))
+- **description-list:** Several values per label, aligned in columns that stack on small screens ([da431fd](https://github.com/code2nguyen/web-components/commit/da431fd))
+- **chip-group:** Add c2-chip-group, a row of chips or badges that collapses overflow into +N ([ca766ce](https://github.com/code2nguyen/web-components/commit/ca766ce))
+- **chip:** Add c2-chip-part for chips made of interactive segments ([6bfc0ad](https://github.com/code2nguyen/web-components/commit/6bfc0ad))
+- **json-viewer:** Add c2-json-viewer, a collapsible, searchable JSON tree with copy-path ([4d63d3c](https://github.com/code2nguyen/web-components/commit/4d63d3c))
+- **description-list:** Add c2-description-list, read-only label and value pairs for detail pages ([a183ea2](https://github.com/code2nguyen/web-components/commit/a183ea2))
+
+### Fixes
+
+- **autocomplete:** Fill the input with the row's label, not its index, when there is no item-key ([3b7b916](https://github.com/code2nguyen/web-components/commit/3b7b916))
+- **autocomplete:** Hide the header and footer only when the list would drop below its minimum ([88a7097](https://github.com/code2nguyen/web-components/commit/88a7097))
+- **autocomplete:** Hide the header and footer when the panel has little room ([a4578c3](https://github.com/code2nguyen/web-components/commit/a4578c3))
+- **json-viewer:** Address review findings and Firefox failures ([748fc36](https://github.com/code2nguyen/web-components/commit/748fc36))
+- **table:** Give flexible columns a minimum width ([955d886](https://github.com/code2nguyen/web-components/commit/955d886))
+- **chip-group:** Register chip and badge, and keep them direct children on the docs site ([3d951a2](https://github.com/code2nguyen/web-components/commit/3d951a2))
+- **chip:** Keep framework comment markers out of the remove button name ([0675843](https://github.com/code2nguyen/web-components/commit/0675843))
+- **description-list:** Render the empty dash the same on the server and the client ([6a70a91](https://github.com/code2nguyen/web-components/commit/6a70a91))
+- **working-indicator:** Keep the glyph off iOS emoji and slow its frames ([5363090](https://github.com/code2nguyen/web-components/commit/5363090))
+
+### Performance
+
+- **json-viewer:** Render only the lines in view so large documents stay fast ([1109f8d](https://github.com/code2nguyen/web-components/commit/1109f8d))
+
+### Docs site & examples
+
+- **ui:** Show the autocomplete examples' selection below the field ([94ede91](https://github.com/code2nguyen/web-components/commit/94ede91))
+- **ui:** Scope example styles by frame so tag-led selectors apply ([de420c3](https://github.com/code2nguyen/web-components/commit/de420c3))
+- **ui:** Scope chip usage styles so the avatar prefix is sized ([129392b](https://github.com/code2nguyen/web-components/commit/129392b))
+- **ui:** Remove a chip in the chip examples when its remove button is clicked ([2b6ea3b](https://github.com/code2nguyen/web-components/commit/2b6ea3b))
+
 ## [1.0.5](https://github.com/code2nguyen/web-components/releases/tag/v1.0.5) — 2026-10-07
 
 ### Features
