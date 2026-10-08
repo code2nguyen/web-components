@@ -1,6 +1,6 @@
 # Popconfirm
 
-`c2-popconfirm` is a small "Are you sure?" popup anchored to the button that asked for it. It ships in the single `@c2n/components` package.
+`c2-popconfirm` is a small "Are you sure?" popup anchored to the button that asked for it, styled like `c2-tooltip`: a compact dark bubble with an arrow pointing at the trigger (`--c2-popconfirm__arrow--size: 0px` removes it). It ships in the single `@c2n/components` package.
 
 ```bash
 npm install @c2n/components

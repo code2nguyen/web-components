@@ -182,3 +182,29 @@ test('closed and open popups have no axe violations', async ({ page, renderScena
   await expect(panel(page)).toBeVisible()
   await accessible(page)
 })
+
+test('the arrow sits on the edge facing the trigger and points at its centre', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <div style="margin: 200px 0 0 240px">
+      <c2-popconfirm heading="Discard the draft and every attachment?" open><button slot="trigger">Discard</button></c2-popconfirm>
+    </div>`)
+  const arrow = page.locator('c2-popconfirm .arrow')
+  const trigger = (await page.getByRole('button', { name: 'Discard' }).boundingBox())!
+  await expect
+    .poll(async () => {
+      const box = (await arrow.boundingBox())!
+      return Math.abs(box.x + box.width / 2 - (trigger.x + trigger.width / 2))
+    })
+    .toBeLessThan(2)
+  const box = (await arrow.boundingBox())!
+  expect(box.y + box.height).toBeLessThanOrEqual(trigger.y)
+  expect(box.y + box.height).toBeGreaterThan(trigger.y - 12)
+})
+
+test('a zero arrow size removes the arrow', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<div style="margin-top: 200px"><c2-popconfirm heading="Sure?" open style="--c2-popconfirm__arrow--size: 0px"><button slot="trigger">Go</button></c2-popconfirm></div>',
+  )
+  await expect(panel(page)).toBeVisible()
+  expect((await page.locator('c2-popconfirm .arrow').boundingBox())?.width ?? 0).toBe(0)
+})

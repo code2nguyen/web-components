@@ -3,7 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { computePosition, autoUpdate, flip, shift, offset, type Placement } from '@floating-ui/dom'
+import { computePosition, autoUpdate, flip, shift, offset, arrow, type Placement } from '@floating-ui/dom'
 import styles from './popconfirm.scss?inline'
 
 export type { Placement }
@@ -27,9 +27,10 @@ export interface Popconfirm {
  * Cancel / OK pair. It asks for the one action that trigger stands for, so it suits a single destructive button; for a
  * decision that needs more room, or one not tied to a button, use `c2-modal`.
  *
- * The popup is a non-modal `alertdialog` in the top layer (`popover="manual"`), placed beside the trigger by floating-ui
- * and flipped when there is no room, so a scrolling or `overflow: hidden` ancestor never clips it. Opening it moves
- * focus to Cancel, the least destructive choice, so a stray Enter does not confirm.
+ * It looks like `c2-tooltip`: a compact dark bubble with an arrow pointing at the trigger, rather than a dialog. It is
+ * a non-modal `alertdialog` in the top layer (`popover="manual"`), placed beside the trigger by floating-ui and flipped
+ * when there is no room, so a scrolling or `overflow: hidden` ancestor never clips it. Opening it moves focus to
+ * Cancel, the least destructive choice, so a stray Enter does not confirm.
  *
  * Every opening a user starts ends in exactly one `confirm` or `cancel` event: OK fires `confirm`; Cancel, Escape, a
  * click outside and moving focus elsewhere fire `cancel`. `confirm` is cancelable: call `preventDefault()` to keep the
@@ -52,57 +53,61 @@ export interface Popconfirm {
  * @event {Event} hide - The popup closed.
  *
  * @csspart panel - The popup surface.
+ * @csspart arrow - The arrow pointing at the trigger.
  * @csspart confirm - The OK button.
  * @csspart cancel - The Cancel button.
  * @csspart heading - The text region wrapping the `heading` slot; it shows the `heading` attribute as fallback and is hidden when both are empty.
  * @csspart description - The text region wrapping the default slot; it is hidden while nothing is assigned to it.
  * @csspart icon - The icon region wrapping the `icon` slot: the warning sign by default, or the assigned icon.
  *
- * @cssproperty {background-color} [--c2-popconfirm--background-color=#ffffff]
- * @cssproperty {color} [--c2-popconfirm--color=#18181b]
- * @cssproperty {border} [--c2-popconfirm--border=1px solid #e4e4e7]
- * @cssproperty {border-radius} [--c2-popconfirm--border-radius=8px]
- * @cssproperty {box-shadow} [--c2-popconfirm--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
- * @cssproperty {font-size} [--c2-popconfirm--font-size=14px]
+ * @cssproperty {background-color} [--c2-popconfirm--background-color=#18181b]
+ * @cssproperty {color} [--c2-popconfirm--color=#fafafa]
+ * @cssproperty {border} --c2-popconfirm--border
+ * @cssproperty {border-radius} [--c2-popconfirm--border-radius=6px]
+ * @cssproperty {box-shadow} [--c2-popconfirm--box-shadow=0 4px 12px rgba(0, 0, 0, 0.15)]
+ * @cssproperty {font-size} [--c2-popconfirm--font-size=12px]
  * @cssproperty {font-family} --c2-popconfirm--font-family
- * @cssproperty {line-height} [--c2-popconfirm--line-height=1.5]
- * @cssproperty {padding} [--c2-popconfirm--padding-top=12px]
- * @cssproperty {padding} [--c2-popconfirm--padding-right=16px]
- * @cssproperty {padding} [--c2-popconfirm--padding-bottom=12px]
- * @cssproperty {padding} [--c2-popconfirm--padding-left=16px]
- * @cssproperty {pixel} [--c2-popconfirm--max-width=320px]
- * @cssproperty {pixel} [--c2-popconfirm--offset=8px] - Distance between the trigger and the popup.
- * @cssproperty {time} [--c2-popconfirm--transition-duration=150ms]
- * @cssproperty {transform} [--c2-popconfirm--enter-transform=scale(0.96)] - Start of the enter animation.
+ * @cssproperty {line-height} [--c2-popconfirm--line-height=1.4]
+ * @cssproperty {padding} [--c2-popconfirm--padding-top=8px]
+ * @cssproperty {padding} [--c2-popconfirm--padding-right=10px]
+ * @cssproperty {padding} [--c2-popconfirm--padding-bottom=8px]
+ * @cssproperty {padding} [--c2-popconfirm--padding-left=10px]
+ * @cssproperty {pixel} [--c2-popconfirm--max-width=280px]
+ * @cssproperty {pixel} [--c2-popconfirm--offset=6px] - Distance between the trigger and the tip of the arrow.
+ * @cssproperty {time} [--c2-popconfirm--transition-duration=120ms]
+ * @cssproperty {transform} [--c2-popconfirm--enter-transform=scale(0.92)] - Start of the enter animation.
+ *
+ * @cssproperty {pixel} [--c2-popconfirm__arrow--size=8px] - Side of the arrow square; `0px` hides it.
  *
  * @cssproperty {display} [--c2-popconfirm__icon--display=flex] - `none` hides the icon.
- * @cssproperty {pixel} [--c2-popconfirm__icon--size=18px]
- * @cssproperty {color} [--c2-popconfirm__icon--color=#d97706]
- * @cssproperty {pixel} [--c2-popconfirm__body--gap=8px] - Space between the icon and the text.
+ * @cssproperty {pixel} [--c2-popconfirm__icon--size=14px]
+ * @cssproperty {color} [--c2-popconfirm__icon--color=#fbbf24]
+ * @cssproperty {pixel} [--c2-popconfirm__body--gap=6px] - Space between the icon and the text.
  *
- * @cssproperty {color} [--c2-popconfirm__heading--color=#18181b]
- * @cssproperty {font-size} [--c2-popconfirm__heading--font-size=14px]
+ * @cssproperty {color} --c2-popconfirm__heading--color - Defaults to the bubble text colour.
+ * @cssproperty {font-size} [--c2-popconfirm__heading--font-size=12px]
  * @cssproperty {font-weight} [--c2-popconfirm__heading--font-weight=600]
- * @cssproperty {color} [--c2-popconfirm__description--color=#71717a]
- * @cssproperty {font-size} [--c2-popconfirm__description--font-size=14px]
+ * @cssproperty {color} --c2-popconfirm__description--color - Defaults to the bubble text colour.
+ * @cssproperty {font-size} [--c2-popconfirm__description--font-size=12px]
+ * @cssproperty {opacity} [--c2-popconfirm__description--opacity=0.72] - Softens the description against the heading.
  *
  * @cssproperty {justify-content} [--c2-popconfirm__actions--justify-content=flex-end]
- * @cssproperty {pixel} [--c2-popconfirm__actions--gap=8px]
- * @cssproperty {pixel} [--c2-popconfirm__actions--margin-top=12px]
+ * @cssproperty {pixel} [--c2-popconfirm__actions--gap=6px]
+ * @cssproperty {pixel} [--c2-popconfirm__actions--margin-top=8px]
  *
- * @cssproperty {pixel} [--c2-popconfirm__button--height=28px]
- * @cssproperty {padding} [--c2-popconfirm__button--padding-left=12px]
- * @cssproperty {padding} [--c2-popconfirm__button--padding-right=12px]
- * @cssproperty {border-radius} [--c2-popconfirm__button--border-radius=6px]
- * @cssproperty {font-size} [--c2-popconfirm__button--font-size=14px]
+ * @cssproperty {pixel} [--c2-popconfirm__button--height=24px]
+ * @cssproperty {padding} [--c2-popconfirm__button--padding-left=8px]
+ * @cssproperty {padding} [--c2-popconfirm__button--padding-right=8px]
+ * @cssproperty {border-radius} [--c2-popconfirm__button--border-radius=4px]
+ * @cssproperty {font-size} [--c2-popconfirm__button--font-size=12px]
  * @cssproperty {font-weight} [--c2-popconfirm__button--font-weight=500]
- * @cssproperty {outline} [--c2-popconfirm__button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {pixel} [--c2-popconfirm__button__focus--outline-offset=2px]
+ * @cssproperty {outline} [--c2-popconfirm__button__focus--outline=2px solid currentColor]
+ * @cssproperty {pixel} [--c2-popconfirm__button__focus--outline-offset=1px]
  *
- * @cssproperty {background-color} [--c2-popconfirm__cancel--background-color=#ffffff]
- * @cssproperty {color} [--c2-popconfirm__cancel--color=#18181b]
- * @cssproperty {border} [--c2-popconfirm__cancel--border=1px solid #d4d4d8]
- * @cssproperty {background-color} [--c2-popconfirm__cancel__hover--background-color=#f4f4f5]
+ * @cssproperty {background-color} [--c2-popconfirm__cancel--background-color=transparent]
+ * @cssproperty {color} --c2-popconfirm__cancel--color - Defaults to the bubble text colour.
+ * @cssproperty {border} [--c2-popconfirm__cancel--border=1px solid color-mix(in srgb, currentColor 32%, transparent)]
+ * @cssproperty {background-color} [--c2-popconfirm__cancel__hover--background-color=color-mix(in srgb, currentColor 14%, transparent)]
  *
  * @cssproperty {background-color} [--c2-popconfirm__confirm--background-color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-popconfirm__confirm--color=#ffffff]
@@ -140,6 +145,7 @@ export class Popconfirm extends LitElement {
 
   @query('.panel') private panel?: HTMLElement
   @query('.cancel') private cancelButton?: HTMLButtonElement
+  @query('.arrow') private arrowElement?: HTMLElement
 
   @state() private hasHeading = false
   @state() private hasDescription = false
@@ -241,7 +247,10 @@ export class Popconfirm extends LitElement {
     const anchor = this.trigger ?? this
     this.cleanupPosition = autoUpdate(anchor, panel, () => void this.updatePosition(panel))
     // Floating UI observes layout, but an edit to the offset (an inline style, a class) need not resize either element.
-    const offsetValue = () => getComputedStyle(this).getPropertyValue('--c2-popconfirm--offset')
+    const offsetValue = () => {
+      const style = getComputedStyle(this)
+      return `${style.getPropertyValue('--c2-popconfirm--offset')}|${style.getPropertyValue('--c2-popconfirm__arrow--size')}`
+    }
     this.offsetValue = offsetValue()
     this.offsetObserver = new MutationObserver(() => {
       const next = offsetValue()
@@ -260,14 +269,30 @@ export class Popconfirm extends LitElement {
   }
 
   private async updatePosition(panel: HTMLElement) {
-    const { x, y, placement } = await computePosition(this.trigger ?? this, panel, {
+    const arrowElement = this.arrowElement
+    const arrowSize = arrowElement ? this.readPixels('--c2-popconfirm__arrow--size', 8) : 0
+    const middleware = [offset(this.readPixels('--c2-popconfirm--offset', 6) + arrowSize / 2), flip({ padding: 8 }), shift({ padding: 8 })]
+    if (arrowElement && arrowSize > 0) middleware.push(arrow({ element: arrowElement, padding: 6 }))
+    const { x, y, placement, middlewareData } = await computePosition(this.trigger ?? this, panel, {
       placement: this.placement,
       strategy: 'fixed',
-      middleware: [offset(this.readPixels('--c2-popconfirm--offset', 8)), flip({ padding: 8 }), shift({ padding: 8 })],
+      middleware,
     })
     panel.style.left = `${x}px`
     panel.style.top = `${y}px`
     panel.dataset.placement = placement
+    if (arrowElement && middlewareData.arrow) {
+      const side = placement.split('-')[0] as 'top' | 'right' | 'bottom' | 'left'
+      const staticSide = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }[side]
+      const { x: ax, y: ay } = middlewareData.arrow
+      Object.assign(arrowElement.style, {
+        left: ax != null ? `${ax}px` : '',
+        top: ay != null ? `${ay}px` : '',
+        right: '',
+        bottom: '',
+        [staticSide]: `${-arrowSize / 2}px`,
+      })
+    }
   }
 
   private show() {
@@ -328,6 +353,7 @@ export class Popconfirm extends LitElement {
         aria-describedby=${labelled && this.hasDescription ? 'description' : nothing}
         @keydown=${this.handleKeydown}
       >
+        <span class="arrow" part="arrow"></span>
         <div class="body">
           <span class="icon" part="icon" aria-hidden="true">
             <slot name="icon">

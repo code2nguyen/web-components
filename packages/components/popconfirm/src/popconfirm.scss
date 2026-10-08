@@ -2,56 +2,59 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-popconfirm,
   $theme: (
-    background-color: #ffffff,
-    color: #18181b,
-    border: 1px solid #e4e4e7,
-    border-radius: 8px,
-    box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
-    font-size: 14px,
+    background-color: #18181b,
+    color: #fafafa,
+    border: null,
+    border-radius: 6px,
+    box-shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    font-size: 12px,
     font-family: null,
-    line-height: 1.5,
-    padding-top: 12px,
-    padding-right: 16px,
-    padding-bottom: 12px,
-    padding-left: 16px,
-    max-width: 320px,
-    offset: 8px,
-    transition-duration: 150ms,
-    enter-transform: scale(0.96),
+    line-height: 1.4,
+    padding-top: 8px,
+    padding-right: 10px,
+    padding-bottom: 8px,
+    padding-left: 10px,
+    max-width: 280px,
+    offset: 6px,
+    transition-duration: 120ms,
+    enter-transform: scale(0.92),
+
+    arrow--size: 8px,
 
     icon--display: flex,
-    icon--size: 18px,
-    icon--color: #d97706,
-    body--gap: 8px,
+    icon--size: 14px,
+    icon--color: #fbbf24,
+    body--gap: 6px,
 
-    heading--color: #18181b,
-    heading--font-size: 14px,
+    heading--color: null,
+    heading--font-size: 12px,
     heading--font-weight: 600,
-    description--color: #71717a,
-    description--font-size: 14px,
+    description--color: null,
+    description--font-size: 12px,
+    description--opacity: 0.72,
 
     actions--justify-content: flex-end,
-    actions--gap: 8px,
-    actions--margin-top: 12px,
+    actions--gap: 6px,
+    actions--margin-top: 8px,
 
-    button--height: 28px,
-    button--padding-left: 12px,
-    button--padding-right: 12px,
-    button--border-radius: 6px,
-    button--font-size: 14px,
+    button--height: 24px,
+    button--padding-left: 8px,
+    button--padding-right: 8px,
+    button--border-radius: 4px,
+    button--font-size: 12px,
     button--font-weight: 500,
-    button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
-    button__focus--outline-offset: 2px,
+    button__focus--outline: 2px solid currentColor,
+    button__focus--outline-offset: 1px,
 
-    cancel--background-color: #ffffff,
-    cancel--color: #18181b,
-    cancel--border: 1px solid #d4d4d8,
-    cancel__hover--background-color: #f4f4f5,
+    cancel--background-color: transparent,
+    cancel--color: null,
+    cancel--border: '1px solid color-mix(in srgb, currentColor 32%, transparent)',
+    cancel__hover--background-color: 'color-mix(in srgb, currentColor 14%, transparent)',
 
-    confirm--background-color: rgb(2, 101, 220),
+    confirm--background-color: 'rgb(2, 101, 220)',
     confirm--color: #ffffff,
     confirm--border: 1px solid transparent,
-    confirm__hover--background-color: rgb(1, 84, 184),
+    confirm__hover--background-color: 'rgb(1, 84, 184)',
     confirm__pending--opacity: 0.38,
   )
 );
@@ -75,6 +78,7 @@
   box-sizing: border-box;
   width: max-content;
   max-width: min(#{css.cssVar(max-width)}, calc(100vw - 16px));
+  font-weight: 400;
 
   padding-top: css.cssVar(padding-top);
   padding-right: css.cssVar(padding-right);
@@ -161,6 +165,33 @@
 .description {
   color: css.cssVar(description--color);
   font-size: css.cssVar(description--font-size);
+  opacity: css.cssVar(description--opacity);
+}
+
+// A rotated square sharing the bubble's background and border; floating-ui positions it along the edge facing the
+// trigger. The clip keeps only the two outer edges, so a border never shows through the bubble.
+.arrow {
+  position: absolute;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  background: css.cssVar(background-color);
+  border: css.cssVar(border);
+  box-sizing: border-box;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.panel[data-placement^='top'] .arrow {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.panel[data-placement^='bottom'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.panel[data-placement^='left'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.panel[data-placement^='right'] .arrow {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
 
 [hidden] {
