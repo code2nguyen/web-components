@@ -272,6 +272,10 @@
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
     },
+    "./confirm-dialog": {
+      "types": "./dist/confirm-dialog.d.ts",
+      "default": "./dist/confirm-dialog.js"
+    },
     "./context-menu": {
       "types": "./dist/context-menu.d.ts",
       "default": "./dist/context-menu.js"
@@ -796,6 +800,7 @@
     "@c2n/command": "*",
     "@c2n/comparison-bar": "*",
     "@c2n/config": "*",
+    "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
     "@c2n/dashboard": "*",

@@ -1,5 +1,5 @@
 {
-  "total": 1175349,
+  "total": 1183621,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -149,6 +149,7 @@
     "virtual-list": 17467,
     "vue": 1773,
     "week-planner": 37562,
-    "working-indicator": 4979
+    "working-indicator": 4979,
+    "confirm-dialog": 8272
   }
 }

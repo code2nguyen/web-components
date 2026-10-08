@@ -305,6 +305,10 @@ greet('world')"></c2-code-editor>`,
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
+  'confirm-dialog': `<div class="preview-row">
+  <c2-button onclick="this.nextElementSibling.show()" style="--c2-button__container--background-color:#dc2626;--c2-button__container__hover--background-color:#b91c1c">Delete project</c2-button>
+  <c2-confirm-dialog destructive heading="Delete project?" message="This cannot be undone." confirm-label="Delete"></c2-confirm-dialog>
+</div>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">
     Products

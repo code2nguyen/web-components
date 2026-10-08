@@ -1,0 +1,56 @@
+---
+title: 'Confirm Dialog'
+description: 'Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ConfirmDialog } from '@c2n/components/confirm-dialog'
+import { Button } from '@c2n/components/button'
+
+`c2-confirm-dialog` puts a question between the user and an action. `await dialog.show()` resolves `true` when they confirm and `false` when they cancel, press Escape or the dialog is closed by code, so the calling code reads top to bottom. Set the text with `heading`, `message`, `confirm-label` and `cancel-label`, or fill the `heading`, default and `icon` slots. `destructive` paints the confirm button in the error colour and puts the initial focus on Cancel, so a reflexive Enter never deletes anything. Hand it a `confirmAction` to run the work from the dialog: the confirm button spins until the promise settles, and a rejection keeps the dialog open (firing `confirm-error`) for a retry. It is a `c2-modal` announced as an `alertdialog`: a backdrop click does not dismiss it, and the frame takes the `--c2-modal…` variables.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/confirm-dialog'
+```
+
+No markup is needed for a one-off question: the `confirm()` helper mounts a temporary dialog and removes it once answered.
+
+```typescript tag=CodeBlock
+import { confirm } from '@c2n/components/confirm-dialog'
+
+if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.', confirmLabel: 'Delete', destructive: true })) {
+  await deleteProject()
+}
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/confirm-dialog
+<style>
+  .cd-danger {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+</style>
+<div data-label="Confirm">
+  <c2-button onclick="this.nextElementSibling.show()">Publish changes</c2-button>
+  <c2-confirm-dialog heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish"></c2-confirm-dialog>
+</div>
+<div data-label="Destructive">
+  <c2-button class="cd-danger" onclick="this.nextElementSibling.show()">Delete workspace</c2-button>
+  <c2-confirm-dialog destructive heading="Delete workspace?" confirm-label="Delete workspace">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"></path>
+    </svg>
+    This removes all 12 projects and their members. This action cannot be undone.
+  </c2-confirm-dialog>
+</div>
+<div data-label="Async action">
+  <c2-button onclick="const d = this.nextElementSibling; d.confirmAction = () => new Promise((r) => setTimeout(r, 1500)); d.show()">Revoke API key</c2-button>
+  <c2-confirm-dialog destructive heading="Revoke this key?" message="Requests signed with it fail immediately." confirm-label="Revoke"></c2-confirm-dialog>
+</div>

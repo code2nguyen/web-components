@@ -50,7 +50,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 94 remain (17 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33) and `c2-json-viewer` (#38) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 93 remain (16 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33), `c2-json-viewer` (#38) and `c2-confirm-dialog` (#71) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
 ### A. Forms and input (24)
 
@@ -144,7 +144,6 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 | #   | Component                | What it adds                                                               | Real-world model                                                      | Priority | Decision |
 | --- | ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------- | -------- |
-| 71  | `c2-confirm-dialog`      | Promise-based confirm (`await confirm({...})`) with a destructive variant  | Vaadin ConfirmDialog, PrimeVue ConfirmDialog                          | P1       | Proposed |
 | 72  | `c2-popconfirm`          | Small "Are you sure?" popup anchored to the button that triggered it       | antd Popconfirm, PrimeVue ConfirmPopup                                | P1       | Proposed |
 | 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                            | P2       | Proposed |
 | 74  | `c2-tour`                | Step-by-step onboarding with spotlight, anchored steps and progress        | antd Tour, Ark tour, Carbon and Spectrum coachmark; Intercom, Appcues | P2       | Proposed |
@@ -296,7 +295,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 162 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate` and `c2-json-viewer`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+The 161 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-confirm-dialog`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and the shipped `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
 | Wave | Scope                | Components | Gate before the next wave                       |
 | ---- | -------------------- | ---------- | ----------------------------------------------- |

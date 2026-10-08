@@ -744,6 +744,27 @@
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-confirm-dialog",
+      "slot": "",
+      "decision": "part",
+      "parts": ["message"],
+      "reason": "The message region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-confirm-dialog",
+      "slot": "heading",
+      "decision": "part",
+      "parts": ["heading"],
+      "reason": "The heading row owns the heading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-confirm-dialog",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-confirm-dialog__icon--size", "--c2-confirm-dialog__icon--color", "--c2-confirm-dialog__icon__destructive--color"],
+      "reason": "The icon is sized and coloured through its documented variables."
+    },
+    {
       "tag": "c2-context-menu",
       "slot": "default",
       "decision": "assigned-content",

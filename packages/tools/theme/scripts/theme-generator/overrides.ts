@@ -752,4 +752,12 @@ export const overrides: Record<string, Override> = {
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
   '--c2-month-planner__handle--color': { token: 'color-on-fill' },
+  // Confirm dialog: the destructive confirm button is a solid red fill, like the indicator's danger tone. The error
+  // token lightens in a dark theme, where white text on it falls below 3:1, so the fill and its states stay fixed and
+  // only the text takes `color-on-fill`. Its focus ring matches the red fill instead of the accent focus ring.
+  '--c2-confirm-dialog__confirm-button__destructive--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive--color': { token: 'color-on-fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__hover--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__active--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__focus--outline': { exclude: 'focus ring matches the destructive fill' },
 }
