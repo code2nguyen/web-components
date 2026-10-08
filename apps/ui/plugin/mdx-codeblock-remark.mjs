@@ -69,9 +69,77 @@ function extractStyle(code, uid) {
   let style = result ? result[1] : ''
   return style
     ? `<style>
-  ${style.replace(/\s*([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/g, `.${uid}$1$2`)}
+  ${scopeCss(style, `[data-uid="${uid}"]`)}
   </style>`
     : ''
+}
+
+// Scopes a fence's stylesheet to its example frame (the `[data-uid]` figure or usage section) by prefixing every
+// selector with the frame as an ancestor, so a selector may start with a tag (`c2-chip.person`, `kbd`) as well as a
+// class. Rules inside `@media`/`@supports`/`@container`/`@layer` are scoped too; `@keyframes`, `@font-face` and other
+// at-rules are left as written. Comments are dropped.
+export function scopeCss(css, scope) {
+  css = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  let output = ''
+  let index = 0
+  while (index < css.length) {
+    const open = css.indexOf('{', index)
+    const semicolon = css.indexOf(';', index)
+    // A statement at-rule (`@import …;`) before the next block.
+    if (semicolon > -1 && (open === -1 || semicolon < open)) {
+      output += css.slice(index, semicolon + 1)
+      index = semicolon + 1
+      continue
+    }
+    if (open === -1) {
+      output += css.slice(index)
+      break
+    }
+    const close = matchingBrace(css, open)
+    const prelude = css.slice(index, open)
+    const body = css.slice(open + 1, close)
+    const leading = prelude.match(/^\s*/)[0]
+    const selector = prelude.trim()
+    if (/^@(media|supports|container|layer|document)\b/i.test(selector)) {
+      output += `${leading}${selector} {${scopeCss(body, scope)}}`
+    } else if (selector.startsWith('@')) {
+      output += `${leading}${selector} {${body}}`
+    } else {
+      const scoped = splitSelectors(selector)
+        .map((part) => (/^(:root|html|body)\b/.test(part) ? part : `${scope} ${part}`))
+        .join(', ')
+      output += `${leading}${scoped} {${body}}`
+    }
+    index = close + 1
+  }
+  return output
+}
+
+function matchingBrace(css, open) {
+  let depth = 0
+  for (let i = open; i < css.length; i++) {
+    if (css[i] === '{') depth++
+    else if (css[i] === '}' && --depth === 0) return i
+  }
+  return css.length
+}
+
+// Splits a selector list on its top-level commas, leaving those inside `:is()`/`:where()`/`:not()` alone.
+function splitSelectors(selector) {
+  const parts = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < selector.length; i++) {
+    const char = selector[i]
+    if (char === '(' || char === '[') depth++
+    else if (char === ')' || char === ']') depth--
+    else if (char === ',' && depth === 0) {
+      parts.push(selector.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  parts.push(selector.slice(start).trim())
+  return parts.filter(Boolean)
 }
 
 function compileComponentCode(code, uid, componentName) {
