@@ -136,7 +136,7 @@ export class DescriptionItem extends LitElement {
   /** Content of the default slot only: a label or an action in a named slot is not a value. */
   private readHasValue(): boolean {
     return [...this.childNodes].some((node) =>
-      node instanceof Element ? !node.hasAttribute('slot') : node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').trim() !== '',
+      node instanceof Element ? (node.getAttribute('slot') ?? '') === '' : node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').trim() !== '',
     )
   }
 
