@@ -1,5 +1,5 @@
 {
-  "total": 1193161,
+  "total": 1199337,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -104,6 +104,7 @@
     "overlay": 12727,
     "page-editor": 37139,
     "pagination": 32625,
+    "password-field": 6176,
     "progress": 2809,
     "qr-code": 7925,
     "questionnaire": 4827,
