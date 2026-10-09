@@ -62,6 +62,7 @@
         "../../components/description-list:build",
         "../../components/indicator:build",
         "../../components/chip:build",
+        "../../components/password-field:build",
         "../../components/search-field:build",
         "../../components/inline-edit:build",
         "../../components/kanban:build",

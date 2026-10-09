@@ -476,6 +476,10 @@
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
     },
+    "./password-field": {
+      "types": "./dist/password-field.d.ts",
+      "default": "./dist/password-field.js"
+    },
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
@@ -837,6 +841,7 @@
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
+    "@c2n/password-field": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
     "@c2n/questionnaire": "*",
