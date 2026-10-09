@@ -1252,6 +1252,54 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-key-value-editor",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned controls next to the add button; style them through their own class or public contract."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "add-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__add--color"],
+      "reason": "The add button sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the add colour."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "empty",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__empty--color"],
+      "reason": "The empty slot passes its colour on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "hide-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The reveal toggle sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "hint",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__hint--color", "--c2-key-value-editor__hint--font-size"],
+      "reason": "The hint slot passes its colour and font size on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "remove-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The remove button sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
+      "tag": "c2-key-value-editor",
+      "slot": "show-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The reveal toggle sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
       "tag": "c2-label",
       "slot": "default",
       "decision": "assigned-content",
@@ -1835,6 +1883,33 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-popconfirm",
+      "slot": "",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The description region owns the colour and size of the projected text through its part and --c2-popconfirm__description--* variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "heading",
+      "decision": "part",
+      "parts": ["heading"],
+      "reason": "The heading region owns the colour, size and weight of the projected question through its part and --c2-popconfirm__heading--* variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-popconfirm__icon--display", "--c2-popconfirm__icon--size", "--c2-popconfirm__icon--color"],
+      "reason": "The icon region sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-progress",
       "slot": "",
       "decision": "assigned-content",
@@ -2175,6 +2250,12 @@
       "slot": "label",
       "decision": "assigned-content",
       "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-relative-time",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot only projects the consumer's fallback text (\"Never\") while no valid date is set; it inherits the host's --c2-relative-time--* typography and is otherwise styled by the consumer."
     },
     {
       "tag": "c2-reorder-list",

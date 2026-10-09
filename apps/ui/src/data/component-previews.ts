@@ -189,6 +189,7 @@ greet('world')"></c2-code-editor>`,
   <c2-kbd>Ctrl + Shift + P</c2-kbd>
   <c2-kbd>Esc</c2-kbd>
 </div>`,
+  'key-value-editor': `<c2-key-value-editor masked style="width: 100%; --c2-key-value-editor__header--display: none; --c2-key-value-editor__field--height: 28px; --c2-key-value-editor__button--size: 28px; --c2-key-value-editor__field--font-size: 12px" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
   label: `<div class="preview-row">
   <c2-label for="preview-label-input">Email</c2-label>
   <c2-text-field id="preview-label-input" placeholder="you@example.com" style="width:170px"></c2-text-field>
@@ -272,6 +273,7 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
 </div>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+  popconfirm: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
   progress: `<div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;width:240px">
   <div style="display:grid;gap:12px">
     <c2-progress value="72" show-value>Uploading</c2-progress>
@@ -290,6 +292,7 @@ greet('world')"></c2-code-editor>`,
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
+  'relative-time': `<div class="preview-row"><span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span><span>Renews <c2-relative-time format="short" date="2027-03-01T00:00:00Z"></c2-relative-time></span></div>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>
   <div data-reorder-key="test" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Run tests</div>

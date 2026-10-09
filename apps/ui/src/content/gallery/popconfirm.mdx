@@ -1,0 +1,82 @@
+---
+description: 'Ready-made looks for c2-popconfirm: destructive, light card, no arrow, inline and roomy bubbles. Click a trigger to open it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Popconfirm } from '@c2n/components/popconfirm'
+
+## Presets
+
+Curated looks for `c2-popconfirm`. Click the trigger in a card to open it. The bubble is styled like `c2-tooltip`, through `--c2-popconfirm--*` (`background-color`, `color`, `border`, `border-radius`, `box-shadow`, `max-width` and the four `padding-*` variables). `--c2-popconfirm__arrow--size` sizes the arrow (`0px` removes it), `--c2-popconfirm__confirm--*` and `--c2-popconfirm__cancel--*` style the buttons, and `--c2-popconfirm__icon--*` the icon.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-popconfirm heading="Delete this task?" client:only="lit"><c2-button slot="trigger">Delete</c2-button>This cannot be undone.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Destructive
+<style>
+  .destructive-confirm {
+    --c2-popconfirm__icon--color: #f87171;
+    --c2-popconfirm__confirm--background-color: #dc2626;
+    --c2-popconfirm__confirm--color: #ffffff;
+    --c2-popconfirm__confirm__hover--background-color: #b91c1c;
+  }
+</style>
+<c2-popconfirm class="destructive-confirm" heading="Revoke this API key?" confirm-label="Revoke" client:only="lit"><c2-button slot="trigger">Revoke key</c2-button>Apps using it stop working at once.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Light card
+<style>
+  .light-confirm {
+    --c2-popconfirm--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-popconfirm--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-popconfirm--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-popconfirm--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08);
+    --c2-popconfirm__icon--color: #d97706;
+  }
+</style>
+<c2-popconfirm class="light-confirm" heading="Archive the project?" confirm-label="Archive" placement="bottom" client:only="lit"><c2-button slot="trigger">Archive</c2-button>You can restore it from Settings.</c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Inline, no arrow
+<style>
+  .inline-confirm {
+    --c2-popconfirm__arrow--size: 0px;
+    --c2-popconfirm--offset: 4px;
+    --c2-popconfirm__icon--display: none;
+    --c2-popconfirm__actions--margin-top: 6px;
+  }
+</style>
+<c2-popconfirm class="inline-confirm" heading="Remove from list?" confirm-label="Remove" cancel-label="Keep" placement="right" client:only="lit"><c2-button slot="trigger">Remove</c2-button></c2-popconfirm>
+```
+
+```html tag=MdxCodeBlock,label=Roomy
+<style>
+  .roomy-confirm {
+    --c2-popconfirm--max-width: 300px;
+    --c2-popconfirm--border-radius: 8px;
+    --c2-popconfirm--padding-top: 12px;
+    --c2-popconfirm--padding-right: 14px;
+    --c2-popconfirm--padding-bottom: 12px;
+    --c2-popconfirm--padding-left: 14px;
+    --c2-popconfirm--font-size: 14px;
+    --c2-popconfirm__arrow--size: 10px;
+    --c2-popconfirm__icon--size: 16px;
+    --c2-popconfirm__heading--font-size: 14px;
+    --c2-popconfirm__description--font-size: 13px;
+    --c2-popconfirm__actions--margin-top: 12px;
+    --c2-popconfirm__button--height: 28px;
+    --c2-popconfirm__button--padding-left: 12px;
+    --c2-popconfirm__button--padding-right: 12px;
+    --c2-popconfirm__button--border-radius: 999px;
+    --c2-popconfirm__button--font-size: 13px;
+  }
+</style>
+<c2-popconfirm class="roomy-confirm" heading="Publish the post?" confirm-label="Publish" cancel-label="Not yet" client:only="lit"><c2-button slot="trigger">Publish</c2-button>Subscribers get an email right away.</c2-popconfirm>
+```
+
+</GalleryGrid>

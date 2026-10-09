@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-popconfirm</title>
+    <script type="module" src="/src/popconfirm.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+        padding: 160px 24px 24px;
+        display: grid;
+        gap: 32px;
+      }
+      h2 {
+        font-size: 13px;
+        color: #71717a;
+        margin: 0 0 8px;
+        font-weight: 500;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+      }
+      .destructive {
+        --c2-popconfirm__icon--color: #f87171;
+        --c2-popconfirm__confirm--background-color: #dc2626;
+        --c2-popconfirm__confirm--color: #ffffff;
+        --c2-popconfirm__confirm__hover--background-color: #b91c1c;
+      }
+      .clip {
+        overflow: hidden;
+        width: 160px;
+        height: 48px;
+        border: 1px dashed #a1a1aa;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Default</h2>
+      <c2-popconfirm heading="Delete this task?" confirm-label="Delete">
+        <button slot="trigger">Delete task</button>
+        This cannot be undone.
+      </c2-popconfirm>
+    </section>
+
+    <section>
+      <h2>Destructive, heading slot</h2>
+      <c2-popconfirm class="destructive" confirm-label="Revoke">
+        <button slot="trigger">Revoke key</button>
+        <strong slot="heading">Revoke <code>sk_live_42</code>?</strong>
+        Apps using it stop working at once.
+      </c2-popconfirm>
+    </section>
+
+    <section>
+      <h2>Placements</h2>
+      <div class="row">
+        <c2-popconfirm heading="Sure?" placement="top"><button slot="trigger">Top</button></c2-popconfirm>
+        <c2-popconfirm heading="Sure?" placement="bottom"><button slot="trigger">Bottom</button></c2-popconfirm>
+        <c2-popconfirm heading="Sure?" placement="left"><button slot="trigger">Left</button></c2-popconfirm>
+        <c2-popconfirm heading="Sure?" placement="right"><button slot="trigger">Right</button></c2-popconfirm>
+      </div>
+    </section>
+
+    <section>
+      <h2>Async confirm (pending for 1.5 s)</h2>
+      <c2-popconfirm id="async" heading="Archive 128 rows?" confirm-label="Archive">
+        <button slot="trigger">Archive</button>
+      </c2-popconfirm>
+      <script type="module">
+        const popconfirm = document.querySelector('#async')
+        popconfirm.addEventListener('confirm', (event) => {
+          event.preventDefault()
+          popconfirm.pending = true
+          setTimeout(() => Object.assign(popconfirm, { pending: false, open: false }), 1500)
+        })
+      </script>
+    </section>
+
+    <section>
+      <h2>Inside overflow: hidden</h2>
+      <div class="clip">
+        <c2-popconfirm heading="Escapes the clipping box?"><button slot="trigger">Open</button></c2-popconfirm>
+      </div>
+    </section>
+
+    <section>
+      <h2>Disabled</h2>
+      <c2-popconfirm heading="Never shown" disabled><button slot="trigger">Disabled popconfirm</button></c2-popconfirm>
+    </section>
+  </body>
+</html>

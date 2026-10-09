@@ -48,6 +48,7 @@ import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
+import keyValueEditor from '@c2n/key-value-editor/custom-elements.json'
 import label from '@c2n/label/custom-elements.json'
 import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
@@ -69,12 +70,14 @@ import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
 import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
+import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
@@ -164,6 +167,7 @@ export const componentManifests = (function () {
     jsonViewer,
     kanban,
     kbd,
+    keyValueEditor,
     label,
     linkButton,
     list,
@@ -185,12 +189,14 @@ export const componentManifests = (function () {
     passwordField,
     phoneInput,
     phosphorIcons,
+    popconfirm,
     progress,
     qrCode,
     queryInput,
     questionnaire,
     radio,
     rate,
+    relativeTime,
     reorderList,
     searchField,
     select,

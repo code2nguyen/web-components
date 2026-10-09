@@ -389,6 +389,10 @@
       "types": "./dist/kbd.d.ts",
       "default": "./dist/kbd.js"
     },
+    "./key-value-editor": {
+      "types": "./dist/key-value-editor.d.ts",
+      "default": "./dist/key-value-editor.js"
+    },
     "./label": {
       "types": "./dist/label.d.ts",
       "default": "./dist/label.js"
@@ -489,6 +493,10 @@
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
     },
+    "./popconfirm": {
+      "types": "./dist/popconfirm.d.ts",
+      "default": "./dist/popconfirm.js"
+    },
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
@@ -520,6 +528,10 @@
     "./rate": {
       "types": "./dist/rate.d.ts",
       "default": "./dist/rate.js"
+    },
+    "./relative-time": {
+      "types": "./dist/relative-time.d.ts",
+      "default": "./dist/relative-time.js"
     },
     "./reorder-list": {
       "types": "./dist/reorder-list.d.ts",
@@ -837,6 +849,7 @@
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
+    "@c2n/key-value-editor": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",
@@ -857,12 +870,14 @@
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
     "@c2n/phone-input": "*",
+    "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
     "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",

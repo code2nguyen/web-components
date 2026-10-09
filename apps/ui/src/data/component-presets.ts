@@ -598,6 +598,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-relative-time': {
+    html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for feed and card metadata',
+        css: {
+          '--c2-relative-time--color': '#71717a',
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'short' },
+      },
+      {
+        name: 'Emphasis',
+        description: 'Bold phrase that stands out in a sentence',
+        css: {
+          '--c2-relative-time--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow format for tight table cells',
+        css: {
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'narrow' },
+      },
+    ],
+  },
   'c2-truncate': {
     html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
     presets: [
@@ -1012,6 +1041,36 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-inline-edit__edit-icon--opacity': '1',
           '--c2-inline-edit__edit-icon--color': '#0265dc',
           '--c2-inline-edit__hover--background': '#edf1fe',
+        },
+      },
+    ],
+  },
+  'c2-key-value-editor': {
+    html: `<c2-key-value-editor label="Environment variables" masked style="width: 100%" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
+    presets: [
+      {
+        name: 'Compact',
+        description: 'Tighter rows without column headers, for a settings panel or a sidebar.',
+        css: {
+          '--c2-key-value-editor--row-gap': '4px',
+          '--c2-key-value-editor--column-gap': '4px',
+          '--c2-key-value-editor__header--display': 'none',
+          '--c2-key-value-editor__field--height': '26px',
+          '--c2-key-value-editor__field--font-size': '12px',
+          '--c2-key-value-editor__button--size': '26px',
+          '--c2-key-value-editor__button__icon--size': '14px',
+        },
+      },
+      {
+        name: 'Even columns',
+        description: 'Key and value columns of equal width with taller, rounder fields.',
+        css: {
+          '--c2-key-value-editor--key-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor--value-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor__field--height': '36px',
+          '--c2-key-value-editor__field--border-radius': '8px',
+          '--c2-key-value-editor__button--size': '36px',
+          '--c2-key-value-editor__button--border-radius': '8px',
         },
       },
     ],
@@ -2453,6 +2512,38 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-hover-card--width': '280px',
           '--c2-hover-card--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
         },
+      },
+    ],
+  },
+  'c2-popconfirm': {
+    html: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
+    presets: [
+      {
+        name: 'Destructive',
+        css: {
+          '--c2-popconfirm__icon--color': '#f87171',
+          '--c2-popconfirm__confirm--background-color': '#dc2626',
+          '--c2-popconfirm__confirm--color': '#ffffff',
+          '--c2-popconfirm__confirm__hover--background-color': '#b91c1c',
+        },
+      },
+      {
+        name: 'Light card',
+        css: {
+          '--c2-popconfirm--background-color': '#ffffff',
+          '--c2-popconfirm--color': '#18181b',
+          '--c2-popconfirm--border': '1px solid #e4e4e7',
+          '--c2-popconfirm--box-shadow': '0 8px 24px rgba(24, 24, 27, 0.08)',
+          '--c2-popconfirm__icon--color': '#d97706',
+        },
+      },
+      {
+        name: 'No arrow',
+        css: {
+          '--c2-popconfirm__arrow--size': '0px',
+          '--c2-popconfirm--offset': '4px',
+        },
+        attributes: { placement: 'bottom' },
       },
     ],
   },

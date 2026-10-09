@@ -465,6 +465,7 @@ export const overrides: Record<string, Override> = {
   '--c2-query-input__filter__negated--background': { exclude: 'translucent error wash works on any surface' },
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
+  '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -784,6 +785,15 @@ export const overrides: Record<string, Override> = {
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
   '--c2-month-planner__handle--color': { token: 'color-on-fill' },
+  // Popconfirm is a tooltip-style bubble on the inverse surface. The warning sign keeps its amber across brand themes
+  // (there is no warning token), and OK while pending dims like any disabled control.
+  '--c2-popconfirm--background-color': { token: 'color-inverse-surface' },
+  '--c2-popconfirm--color': { token: 'color-on-inverse-surface' },
+  '--c2-popconfirm__confirm--color': onPrimary,
+  '--c2-popconfirm__cancel--border': { exclude: 'derived from the bubble text colour' },
+  '--c2-popconfirm__cancel__hover--background-color': { exclude: 'derived from the bubble text colour' },
+  '--c2-popconfirm__icon--color': { exclude: 'semantic warning colour' },
+  '--c2-popconfirm__confirm__pending--opacity': { token: 'disabled-opacity' },
   // Confirm dialog: the destructive confirm button is a solid red fill, like the indicator's danger tone. The error
   // token lightens in a dark theme, where white text on it falls below 3:1, so the fill and its states stay fixed and
   // only the text takes `color-on-fill`. Its focus ring matches the red fill instead of the accent focus ring.
