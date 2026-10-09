@@ -2220,6 +2220,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-trace-waterfall': {
+    html: `<c2-trace-waterfall style="width: 100%" spans='[{"id":"a","name":"GET /orders","service":"web","start":0,"duration":240},{"id":"b","parentId":"a","name":"auth.verify","service":"auth","start":8,"duration":30},{"id":"c","parentId":"a","name":"SELECT orders","service":"postgres","start":44,"duration":150},{"id":"d","parentId":"a","name":"render","service":"web","start":198,"duration":36,"status":"error"}]'></c2-trace-waterfall>`,
+    presets: [
+      {
+        name: 'Compact',
+        description: 'Borderless, short rows and thin pill bars.',
+        css: {
+          '--c2-trace-waterfall--border': 'none',
+          '--c2-trace-waterfall__name--width': '180px',
+          '--c2-trace-waterfall__row--height': '22px',
+          '--c2-trace-waterfall__row--border-bottom': 'none',
+          '--c2-trace-waterfall__bar--height': '6px',
+          '--c2-trace-waterfall__bar--border-radius': '999px',
+        },
+      },
+      {
+        name: 'Console',
+        description: 'Dark block with bright series colours.',
+        css: {
+          '--c2-trace-waterfall--background': '#0b1220',
+          '--c2-trace-waterfall--color': '#d3deee',
+          '--c2-trace-waterfall--border': '1px solid #263449',
+          '--c2-trace-waterfall__header--background': '#101a2c',
+          '--c2-trace-waterfall__header--color': '#7d8fab',
+          '--c2-trace-waterfall__name--border-right': '1px solid #263449',
+          '--c2-trace-waterfall__row--border-bottom': '1px solid #16233a',
+          '--c2-trace-waterfall__row__hover--background': '#16233a',
+          '--c2-trace-waterfall__grid-line--color': '#16233a',
+          '--c2-trace-waterfall__series-1--color': '#5aa3ff',
+          '--c2-trace-waterfall__series-2--color': '#fb923c',
+          '--c2-trace-waterfall__series-3--color': '#2dd4bf',
+        },
+      },
+    ],
+  },
   'c2-code-viewer': {
     html: `<c2-code-viewer style="width: 240px" language="ts" theme="github-light" code="const hello = (name) =>\\n  \`Hi, \${name}!\`"></c2-code-viewer>`,
     presets: [

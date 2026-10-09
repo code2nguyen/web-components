@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-trace-waterfall</title>
+    <script type="module" src="/src/trace-waterfall.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 960px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .compact {
+        --c2-trace-waterfall__row--height: 22px;
+        --c2-trace-waterfall__bar--height: 8px;
+        --c2-trace-waterfall__name--width: 200px;
+        --c2-trace-waterfall--max-height: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Default</h3>
+    <c2-trace-waterfall
+      id="checkout"
+      label="Checkout trace"
+      spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'
+    ></c2-trace-waterfall>
+    <output id="selection">Click a span</output>
+
+    <h3>Search</h3>
+    <input id="query" aria-label="Search spans" placeholder="Search spans" value="postgres" />
+    <c2-trace-waterfall
+      id="searchable"
+      label="Searchable trace"
+      search="postgres"
+      spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'
+    ></c2-trace-waterfall>
+
+    <h3>Compact, scrolling</h3>
+    <c2-trace-waterfall
+      class="compact"
+      label="Compact trace"
+      spans='[{"id":"a1","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b1","parentId":"a1","name":"auth.verify","service":"auth","start":6,"duration":38},{"id":"b2","parentId":"a1","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c1","parentId":"b2","name":"SELECT cart_items","service":"postgres","start":56,"duration":71},{"id":"c2","parentId":"b2","name":"GET pricing","service":"cache","start":132,"duration":4},{"id":"b3","parentId":"a1","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"c3","parentId":"b3","name":"POST stripe /v1/charges","service":"payments","start":196,"duration":488,"status":"error"},{"id":"b4","parentId":"a1","name":"orders.create","service":"orders","start":702,"duration":118},{"id":"c4","parentId":"b4","name":"INSERT orders","service":"postgres","start":716,"duration":42},{"id":"c5","parentId":"b4","name":"publish order.created","service":"kafka","start":764,"duration":9}]'
+    ></c2-trace-waterfall>
+
+    <h3>Empty</h3>
+    <c2-trace-waterfall label="Empty trace"></c2-trace-waterfall>
+
+    <script type="module">
+      const checkout = document.querySelector('#checkout')
+      checkout.addEventListener('selection-change', (event) => {
+        document.querySelector('#selection').textContent = JSON.stringify(event.detail.span)
+      })
+      document.querySelector('#query').addEventListener('input', (event) => {
+        document.querySelector('#searchable').search = event.target.value
+      })
+    </script>
+  </body>
+</html>

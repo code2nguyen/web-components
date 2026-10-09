@@ -129,6 +129,7 @@
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
+    "@c2n/trace-waterfall": "*",
     "@c2n/tree": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
