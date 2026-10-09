@@ -48,6 +48,7 @@ import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
+import keyValueEditor from '@c2n/key-value-editor/custom-elements.json'
 import label from '@c2n/label/custom-elements.json'
 import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
@@ -164,6 +165,7 @@ export const componentManifests = (function () {
     jsonViewer,
     kanban,
     kbd,
+    keyValueEditor,
     label,
     linkButton,
     list,

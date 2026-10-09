@@ -389,6 +389,10 @@
       "types": "./dist/kbd.d.ts",
       "default": "./dist/kbd.js"
     },
+    "./key-value-editor": {
+      "types": "./dist/key-value-editor.d.ts",
+      "default": "./dist/key-value-editor.js"
+    },
     "./label": {
       "types": "./dist/label.d.ts",
       "default": "./dist/label.js"
@@ -837,6 +841,7 @@
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
+    "@c2n/key-value-editor": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",

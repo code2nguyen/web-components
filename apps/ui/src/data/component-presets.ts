@@ -1010,6 +1010,36 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-key-value-editor': {
+    html: `<c2-key-value-editor label="Environment variables" masked style="width: 100%" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
+    presets: [
+      {
+        name: 'Compact',
+        description: 'Tighter rows without column headers, for a settings panel or a sidebar.',
+        css: {
+          '--c2-key-value-editor--row-gap': '4px',
+          '--c2-key-value-editor--column-gap': '4px',
+          '--c2-key-value-editor__header--display': 'none',
+          '--c2-key-value-editor__field--height': '26px',
+          '--c2-key-value-editor__field--font-size': '12px',
+          '--c2-key-value-editor__button--size': '26px',
+          '--c2-key-value-editor__button__icon--size': '14px',
+        },
+      },
+      {
+        name: 'Even columns',
+        description: 'Key and value columns of equal width with taller, rounder fields.',
+        css: {
+          '--c2-key-value-editor--key-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor--value-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor__field--height': '36px',
+          '--c2-key-value-editor__field--border-radius': '8px',
+          '--c2-key-value-editor__button--size': '36px',
+          '--c2-key-value-editor__button--border-radius': '8px',
+        },
+      },
+    ],
+  },
   'c2-text-field': {
     html: `<c2-text-field placeholder="Your email" style="width: 220px"></c2-text-field>`,
     presets: [

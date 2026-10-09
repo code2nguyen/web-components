@@ -189,6 +189,7 @@ greet('world')"></c2-code-editor>`,
   <c2-kbd>Ctrl + Shift + P</c2-kbd>
   <c2-kbd>Esc</c2-kbd>
 </div>`,
+  'key-value-editor': `<c2-key-value-editor masked style="width: 100%; --c2-key-value-editor__header--display: none; --c2-key-value-editor__field--height: 28px; --c2-key-value-editor__button--size: 28px; --c2-key-value-editor__field--font-size: 12px" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
   label: `<div class="preview-row">
   <c2-label for="preview-label-input">Email</c2-label>
   <c2-text-field id="preview-label-input" placeholder="you@example.com" style="width:170px"></c2-text-field>

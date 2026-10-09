@@ -102,6 +102,7 @@
         "../../components/json-viewer:build",
         "../../components/kanban:build",
         "../../components/kbd:build",
+        "../../components/key-value-editor:build",
         "../../components/label:build",
         "../../components/link-button:build",
         "../../components/list-item:build",

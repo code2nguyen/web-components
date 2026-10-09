@@ -145,6 +145,7 @@
         "./packages/components/json-viewer:build",
         "./packages/components/kanban:build",
         "./packages/components/kbd:build",
+        "./packages/components/key-value-editor:build",
         "./packages/components/label:build",
         "./packages/components/link-button:build",
         "./packages/components/list-item:build",
