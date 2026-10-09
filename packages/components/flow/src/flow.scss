@@ -567,24 +567,26 @@
   pointer-events: none;
 }
 
-.direction--lr .handle {
+.handle--left,
+.handle--right {
   top: 50%;
   transform: translateY(-50%);
 }
-.direction--lr .handle--in {
-  left: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
-}
-.direction--lr .handle--out {
-  right: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
-}
-.direction--tb .handle {
+.handle--top,
+.handle--bottom {
   left: 50%;
   transform: translateX(-50%);
 }
-.direction--tb .handle--in {
+.handle--left {
+  left: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.handle--right {
+  right: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.handle--top {
   top: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
 }
-.direction--tb .handle--out {
+.handle--bottom {
   bottom: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
 }
 
@@ -856,16 +858,33 @@
   opacity: 0;
 }
 
-.direction--lr .connector {
-  top: 50%;
-  right: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
-  transform: translateY(-50%);
+// The handle of the target side a connection would arrive by.
+.stage.is-connecting .node.is-connect-target .connector.is-connect-side {
+  opacity: 1;
 }
 
-.direction--tb .connector {
+// One handle in the middle of each side.
+.connector--left,
+.connector--right {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.connector--top,
+.connector--bottom {
   left: 50%;
-  bottom: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
   transform: translateX(-50%);
+}
+.connector--left {
+  left: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+}
+.connector--right {
+  right: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+}
+.connector--top {
+  top: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+}
+.connector--bottom {
+  bottom: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
 }
 
 .label-editor {

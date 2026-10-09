@@ -12,8 +12,11 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 ```
 
 - **Data:** `nodes` (`id`, `label`, `status`, `description`, `meta`, `details`, `position`, `data`) and `edges` (`source`,
-  `target`), as properties or JSON attributes. Statuses: `pending`, `current`, `running`, `success`, `warning`,
+  `target`, `label`, `sourceSide`, `targetSide`), as properties or JSON attributes. Statuses: `pending`, `current`, `running`, `success`, `warning`,
   `error`, `skipped`. Edges take their style from the statuses at both ends.
+- **Sides:** an edge runs from the outgoing side of the `direction` to the incoming one, unless it names a `sourceSide`
+  or `targetSide` (`top`, `right`, `bottom`, `left`): it then leaves and arrives perpendicular to those sides, in
+  either `edge-type`. A side left out keeps its default; the auto layout ignores sides.
 - **Layout:** layered auto layout along `direction` (`LR` or `TB`); cycles are allowed and drawn as back edges.
   Dragging (or Alt+arrow) makes a custom layout, saved with the direction under `storage-key`. A saved layout is
   merged into a changed graph: kept nodes stay, new ones are placed next to their neighbours. `getLayout()`,
@@ -30,9 +33,11 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 - **Custom nodes:** `renderNode(context)` returns a Lit template, a node or a string; or render into the `node:<id>` slot.
 - **Editing:** `editable` lets the user draw the diagram, and the app applies each change (the flow never edits
   `nodes`/`edges` itself). Double-click empty canvas or press `N` → `node-add { position, source? }`; double-click a
-  node, F2, or Enter on the selected node → inline editor → `node-edit { id, label }`; drag a node's handle onto
-  another node → `edge-add { source, target }` (no self-loops, no duplicates), onto empty canvas → `node-add` with
-  `source`; `C` then arrows/Tab and Enter connects from the keyboard; Delete/Backspace → `node-delete { id }`, or
+  node, F2, or Enter on the selected node → inline editor → `node-edit { id, label }`; drag one of the four handles
+  on a node's sides onto another node → `edge-add { source, target, sourceSide, targetSide }` (the target side is the
+  handle dropped on, else the side nearest the pointer; no self-loops, no duplicates), onto empty canvas → `node-add`
+  with `source`, `sourceSide` and `targetSide`; `C` then arrows/Tab and Enter connects from the keyboard, outgoing
+  side to incoming side; Delete/Backspace → `node-delete { id }`, or
   `edge-delete { source, target }` for an edge selected by a click or `E`. Give the new node `position` to put it
   where the user asked; in an editable flow the other nodes never move when the graph changes. `editLabel(id)`
   opens the editor from script.

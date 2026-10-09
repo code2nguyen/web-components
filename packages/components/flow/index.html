@@ -47,5 +47,28 @@
       nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]'
       edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'
     ></c2-flow>
+
+    <h2>Editable, edges between sides (drag any of a node's four handles)</h2>
+    <c2-flow
+      id="sides"
+      editable
+      style="--c2-flow--height: 300px"
+      nodes='[{"id":"write","label":"Write","position":{"x":0,"y":0}},{"id":"review","label":"Review","position":{"x":280,"y":0}},{"id":"fix","label":"Fix","position":{"x":280,"y":130}},{"id":"ship","label":"Ship","position":{"x":560,"y":0}}]'
+      edges='[{"source":"write","target":"review"},{"source":"review","target":"fix","sourceSide":"bottom","targetSide":"top","label":"changes"},{"source":"fix","target":"write","sourceSide":"left","targetSide":"bottom"},{"source":"review","target":"ship","label":"approved"}]'
+    ></c2-flow>
+    <script type="module">
+      const flow = document.querySelector('#sides')
+      let next = 1
+      flow.addEventListener('edge-add', ({ detail }) => (flow.edges = [...flow.edges, detail]))
+      flow.addEventListener(
+        'edge-delete',
+        ({ detail }) => (flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)),
+      )
+      flow.addEventListener('node-add', ({ detail }) => {
+        const id = `new-${next++}`
+        flow.nodes = [...flow.nodes, { id, label: `New ${next - 1}`, position: detail.position }]
+        if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id, sourceSide: detail.sourceSide, targetSide: detail.targetSide }]
+      })
+    </script>
   </body>
 </html>

@@ -11,13 +11,14 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
-import { edgeRoute } from './flow-geometry.js'
+import { FLOW_SIDES, defaultSides, nearestSide, oppositeSide, routeBetween, sidePoint, type EdgeRoute } from './flow-geometry.js'
 import { MENU_ICONS, STATUS_ICONS, STATUS_LABELS } from './flow-icons.js'
 import type {
   FlowActionsPlacement,
   FlowContextMenuRenderer,
   FlowDirection,
   FlowEdge,
+  FlowEdgeAddDetail,
   FlowEdgeEditDetail,
   FlowEdgeEventDetail,
   FlowEdgeType,
@@ -35,6 +36,7 @@ import type {
   FlowRenderContext,
   FlowRenderer,
   FlowSelectionChangeDetail,
+  FlowSide,
   FlowSize,
   FlowStatus,
 } from './flow-types.js'
@@ -56,7 +58,7 @@ export interface FlowEventMap {
   'node-add': CustomEvent<FlowNodeAddDetail>
   'node-edit': CustomEvent<FlowNodeEditDetail>
   'node-delete': CustomEvent<FlowNodeDeleteDetail>
-  'edge-add': CustomEvent<FlowEdgeEventDetail>
+  'edge-add': CustomEvent<FlowEdgeAddDetail>
   'edge-delete': CustomEvent<FlowEdgeEventDetail>
   'edge-edit': CustomEvent<FlowEdgeEditDetail>
 }
@@ -137,12 +139,18 @@ const plainKey = (event: KeyboardEvent, key: string) => !event.ctrlKey && !event
 /** A connection being drawn from `source`: by the pointer (`point` follows it) or by the keyboard (`target` is chosen). */
 interface Connection {
   source: string
+  /** The side of `source` it leaves by: the handle the drag started on, or the outgoing side for the keyboard. */
+  sourceSide: FlowSide
   /** Pointer position in canvas pixels; `null` while the keyboard chooses. */
   point: FlowPoint | null
   /** The node under the pointer, or the keyboard's candidate. */
   target: string | null
+  /** The side of `target` it would arrive by; `null` without a target. */
+  targetSide: FlowSide | null
   keyboard: boolean
 }
+
+const isSide = (value: unknown): value is FlowSide => typeof value === 'string' && (FLOW_SIDES as readonly string[]).includes(value)
 
 /**
  * A pipeline or dependency graph drawn as nodes and smooth edges on a pannable, zoomable canvas, in the spirit of
@@ -155,6 +163,11 @@ interface Connection {
  *
  * **Status marker.** The default node body starts with a marker for its status. A plain diagram, where the status
  * means nothing, hides it with `--c2-flow__marker--display: none`; the label then starts flush with the padding.
+ *
+ * **Sides.** An edge leaves its source by the outgoing side of the `direction` and arrives by the incoming side,
+ * unless it names a `sourceSide` or `targetSide` (`top`, `right`, `bottom`, `left`): it then runs from the middle of
+ * that side, leaving and arriving perpendicular to it, in either edge type. The dots where edges meet a node sit on
+ * the sides they use. The auto layout does not read the sides.
  *
  * **Layout.** Nodes are placed by a built-in layered layout: one column (`direction="LR"`) or row (`"TB"`) per
  * dependency depth, siblings ordered to reduce crossings. Cycles are allowed; the edges that close them are routed
@@ -176,7 +189,7 @@ interface Connection {
  *
  * **Shapes and colours.** A node's `shape` draws it as a pill, a diamond, a circle, a folded note or a slanted
  * box instead of a rounded rectangle; `background` and `color` paint that one node, and `icon` puts an icon before its
- * label. Edges still meet the middle of the incoming and outgoing sides, which is where each shape's outline is.
+ * label. Edges still meet the middle of a side, which is where each shape's outline is.
  *
  * **Custom nodes.** `renderNode` returns the body of each node (a Lit template, a DOM node or a string), or a
  * framework renders it into the `node:<id>` slot. Handles, dragging, edges and the card still come from the flow.
@@ -198,10 +211,13 @@ interface Connection {
  *   an inline field opens over the label. Enter or leaving the field commits (`node-edit`), Escape cancels. A node
  *   drawn by `renderNode` or a `node:<id>` slot gets the field over its whole body and the same event, but must
  *   render `label` itself to show the change. `editLabel(id)` opens the field from script, e.g. on a new node.
- * - *Connect*: drag the handle on a node's outgoing side. Released on another node it fires `edge-add` (never a
- *   self-loop or a duplicate); released on empty canvas it fires `node-add` with `source`, for a connected new node.
- *   From the keyboard, `C` on the focused node starts a connection, the arrow keys or Tab choose the target, Enter
- *   connects and Escape cancels.
+ * - *Connect*: a hovered, focused or selected node shows a handle in the middle of each of its four sides; drag one.
+ *   Released on another node it fires `edge-add` (never a self-loop or a duplicate) with the `sourceSide` it was
+ *   dragged from and the `targetSide` it arrives by: the handle it was dropped on, else the side of the target nearest
+ *   the pointer. Store both on the edge and it is drawn between those sides. Released on empty canvas it fires
+ *   `node-add` with `source` and `sourceSide`, for a connected new node. From the keyboard, `C` on the focused node
+ *   starts a connection, the arrow keys or Tab choose the target, Enter connects and Escape cancels; it connects the
+ *   outgoing side of the `direction` to the incoming one (`right` to `left` in `LR`, `bottom` to `top` in `TB`).
  * - *Label an edge*: double-click an edge or its label, press Enter or F2 on the selected edge, or choose **Edit
  *   label** in its menu: the same inline field opens halfway along the edge. Enter or leaving the field commits
  *   (`edge-edit`, with an empty `label` when the user cleared it), Escape cancels. `editEdgeLabel()` opens it from script.
@@ -229,10 +245,10 @@ interface Connection {
  * @event {CustomEvent<FlowSelectionChangeDetail>} selection-change - The selected node changed through the user. `detail.selected` is its id, or `null`. Does not bubble.
  * @event {CustomEvent<FlowLayoutChangeDetail>} layout-change - The user moved a node, switched direction or went back to auto layout, or `setLayout()` was called. Does not bubble.
  * @event {CustomEvent<FlowMenuSelectDetail>} flow-menu-select - A context-menu row added by `renderContextMenu` was activated, with the node it was opened on. Does not bubble.
- * @event {CustomEvent<FlowNodeAddDetail>} node-add - `editable` only: the user asked for a node at `detail.position` (canvas pixels, the node's top-left corner), connected from `detail.source` when it came from a connection dropped on empty canvas. Append it to `nodes`. Does not bubble.
+ * @event {CustomEvent<FlowNodeAddDetail>} node-add - `editable` only: the user asked for a node at `detail.position` (canvas pixels, the node's top-left corner), connected from `detail.source` (by its side `detail.sourceSide`, into the new node's `detail.targetSide`) when it came from a connection dropped on empty canvas. Append it to `nodes`. Does not bubble.
  * @event {CustomEvent<FlowNodeEditDetail>} node-edit - `editable` only: the user renamed node `detail.id` to `detail.label` with the inline editor. Does not bubble.
  * @event {CustomEvent<FlowNodeDeleteDetail>} node-delete - `editable` only: the user asked to delete node `detail.id`. Does not bubble.
- * @event {CustomEvent<FlowEdgeEventDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`. Never a self-loop or an existing edge. Does not bubble.
+ * @event {CustomEvent<FlowEdgeAddDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`, from side `detail.sourceSide` of the source to side `detail.targetSide` of the target. Never a self-loop or an existing edge. Does not bubble.
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
  * @event {CustomEvent<FlowEdgeEditDetail>} edge-edit - `editable` only: the user changed the label of the edge from `detail.source` to `detail.target` to `detail.label` with the inline editor; an empty `label` removes it. Does not bubble.
  *
@@ -281,7 +297,7 @@ interface Connection {
  * @cssproperty {font-weight} [--c2-flow__label--font-weight=500]
  * @cssproperty {font-size} [--c2-flow__description--font-size=12px] - Size of the description and the meta value.
  * @cssproperty {color} [--c2-flow__description--color=#71717a]
- * @cssproperty {pixel} [--c2-flow__handle--size=7px] - Diameter of the dots on a node's incoming and outgoing sides.
+ * @cssproperty {pixel} [--c2-flow__handle--size=7px] - Diameter of the dots on the sides of a node that edges leave or arrive by.
  * @cssproperty {color} [--c2-flow__handle--background-color=#ffffff]
  * @cssproperty {color} [--c2-flow__handle--border-color=#a1a1aa]
  * @cssproperty {color} [--c2-flow__edge--color=#d4d4d8] - Edge between steps that have not run yet.
@@ -320,7 +336,7 @@ interface Connection {
  * @cssproperty {color} [--c2-flow__card__term--color=#71717a] - Labels of the card's detail rows.
  * @cssproperty {time} [--c2-flow__card--transition-duration=150ms]
  * @cssproperty {outline} [--c2-flow__canvas__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the empty canvas of an `editable` flow, the one place that takes focus when there is no node.
- * @cssproperty {pixel} [--c2-flow__connector--size=12px] - Diameter of the connection handle an `editable` flow shows on a hovered, focused or selected node.
+ * @cssproperty {pixel} [--c2-flow__connector--size=12px] - Diameter of the connection handles an `editable` flow shows in the middle of each side of a hovered, focused or selected node.
  * @cssproperty {color} [--c2-flow__connector--background-color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-flow__connector--border-color=#ffffff]
  * @cssproperty {color} [--c2-flow__node__connect-target--border-color=rgb(2, 101, 220)] - Border of the node a connection would be made to.
@@ -465,7 +481,7 @@ export class Flow extends LitElement {
   private menuEdge: FlowEdge | null = null
   private menuPoint: FlowPoint | null = null
   /** A press on a node's connection handle, until it moves far enough to become a connection. */
-  private connectDrag: { source: string; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
+  private connectDrag: { source: string; side: FlowSide; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
   private lastTap: { target: string; time: number; x: number; y: number } | null = null
   /** The position each node's own `position` field was last applied with, so an unchanged value does not undo a drag. */
   private appliedPositions = new Map<string, string>()
@@ -731,6 +747,15 @@ export class Flow extends LitElement {
       if (this.direction === 'LR') y1 += 36
       else x1 += 36
     }
+    // And for the edges between chosen sides, which can run out past the nodes.
+    this.edges.forEach((edge, index) => {
+      const bounds = this.sidedEdge(edge) ? this.routeOf(edge, index, positions)?.bounds : undefined
+      if (!bounds) return
+      x0 = Math.min(x0, bounds.x)
+      y0 = Math.min(y0, bounds.y)
+      x1 = Math.max(x1, bounds.x + bounds.width)
+      y1 = Math.max(y1, bounds.y + bounds.height)
+    })
     const minZoom = this.resolvedFitMinZoom()
     const fit = Math.min(1, (width - FIT_PADDING * 2) / (x1 - x0), (height - FIT_PADDING * 2) / (y1 - y0))
     const zoom = Math.max(minZoom, fit)
@@ -863,6 +888,36 @@ export class Flow extends LitElement {
     return null
   }
 
+  /** The rectangle node `id` takes, in canvas pixels. */
+  private rectOf(id: string, positions: Map<string, FlowPoint> = this.positions) {
+    const p = positions.get(id)
+    return p ? { ...p, ...this.sizeOf(id) } : null
+  }
+
+  /**
+   * Where a connection from `source` dragged to `point` would arrive: the node whose side handle is under the point
+   * (handles reach past the node's box), else the topmost node under the point, by its side nearest the point. Ties
+   * go to the incoming side of the direction.
+   */
+  private dropTarget(point: FlowPoint, source: string): { target: string | null; side: FlowSide | null } {
+    // The handle's visible radius plus the 6px of hit area round it (`.connector::before`).
+    const reach = this.readPixels('--c2-flow__connector--size', 12) / 2 + 6
+    for (let i = this.nodes.length - 1; i >= 0; i--) {
+      const id = this.nodes[i].id
+      const rect = id === source ? null : this.rectOf(id)
+      if (!rect) continue
+      for (const side of FLOW_SIDES) {
+        const handle = sidePoint(rect, side)
+        if (Math.hypot(point.x - handle.x, point.y - handle.y) <= reach) return { target: id, side }
+      }
+    }
+    const target = this.nodeAt(point)
+    const rect = target === null ? null : this.rectOf(target)
+    if (target === null || !rect) return { target: null, side: null }
+    const incoming = defaultSides(this.direction).target
+    return { target, side: nearestSide(rect, point, [incoming, ...FLOW_SIDES.filter((side) => side !== incoming)]) }
+  }
+
   /** A second press on the same thing, soon after and close to the first: a double click, or a double tap. */
   private isDoubleTap(target: string, event: PointerEvent) {
     const last = this.lastTap
@@ -876,8 +931,10 @@ export class Flow extends LitElement {
   private handlePointerDown = (event: PointerEvent) => {
     if (event.button !== 0 || !this.stage || this.fromPart(event, 'label-editor')) return
     const id = this.nodeIdFromEvent(event)
-    if (this.editable && id && this.fromPart(event, 'connector')) {
-      this.connectDrag = { source: id, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
+    const connector = this.editable && id ? (this.fromPart(event, 'connector') as HTMLElement | null) : null
+    if (id && connector) {
+      const side = isSide(connector.dataset.side) ? connector.dataset.side : defaultSides(this.direction).source
+      this.connectDrag = { source: id, side, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
     } else if (id) {
       // A locked flow still tracks the press on a node, so it can tell a click from a pan.
       this.drag = { id, startX: event.clientX, startY: event.clientY, origin: { ...this.positions.get(id)! }, moved: false, pointerId: event.pointerId }
@@ -890,14 +947,15 @@ export class Flow extends LitElement {
 
   private handlePointerMove = (event: PointerEvent) => {
     if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
-      const { source, startX, startY } = this.connectDrag
+      const { source, side, startX, startY } = this.connectDrag
       if (!this.connectDrag.moved && Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD) return
       if (!this.connectDrag.moved) {
         this.connectDrag.moved = true
         this.hideCard(true)
       }
       const point = this.toCanvas(event.clientX, event.clientY)
-      this.connection = { source, point, target: this.nodeAt(point), keyboard: false }
+      const { target, side: targetSide } = this.dropTarget(point, source)
+      this.connection = { source, sourceSide: side, point, target, targetSide, keyboard: false }
     } else if (this.drag && event.pointerId === this.drag.pointerId) {
       const dx = event.clientX - this.drag.startX
       const dy = event.clientY - this.drag.startY
@@ -934,7 +992,7 @@ export class Flow extends LitElement {
       this.connection = null
       if (!moved) {
         if (released) this.select(source, true)
-      } else if (released && connection?.point) this.finishConnection(source, connection.target, connection.point)
+      } else if (released && connection?.point) this.finishConnection(connection)
     }
     if (this.drag && event.pointerId === this.drag.pointerId) {
       const { id, moved } = this.drag
@@ -953,6 +1011,10 @@ export class Flow extends LitElement {
       if (!moved && released) {
         if (edge) {
           this.selectEdge(edge)
+          // Delete and F2 act on the selected edge from wherever focus is in the flow; when it is outside (a click on an
+          // edge, unlike one on a node, focuses nothing), the canvas takes it while the edge is selected, so they
+          // reach the flow at all.
+          if (!(this.renderRoot as ShadowRoot).activeElement) void this.updateComplete.then(() => this.stage?.focus({ preventScroll: true }))
           const selected = this.edgeByKey(edge)
           if (selected && this.isDoubleTap(`edge:${edge}`, event)) void this.editEdgeLabel(selected.source, selected.target)
         } else {
@@ -1028,10 +1090,11 @@ export class Flow extends LitElement {
     return { x: point.x - size.width / 2, y: point.y - size.height / 2 }
   }
 
-  /** Top-left corner for a node dropped at `point` at the end of a connection: its incoming side on the point. */
-  private incomingAt(point: FlowPoint): FlowPoint {
+  /** Top-left corner for a node dropped at `point` at the end of a connection: the middle of its side `side` on the point. */
+  private sideAt(point: FlowPoint, side: FlowSide): FlowPoint {
     const size = this.typicalSize()
-    return this.direction === 'LR' ? { x: point.x, y: point.y - size.height / 2 } : { x: point.x - size.width / 2, y: point.y }
+    const offset = sidePoint({ x: 0, y: 0, ...size }, side)
+    return { x: point.x - offset.x, y: point.y - offset.y }
   }
 
   /** A spot near `start` that no node covers, for the nodes the keyboard asks for. */
@@ -1041,10 +1104,14 @@ export class Flow extends LitElement {
     return avoidOverlap(id, start, [...this.positions.keys()], this.positions, (key) => (key === id ? size : this.sizeOf(key)), this.layoutOptions())
   }
 
-  private requestNode(position: FlowPoint, source?: string, fromKeyboard = false) {
+  private requestNode(position: FlowPoint, source?: string, fromKeyboard = false, sides?: { source: FlowSide; target: FlowSide }) {
     if (fromKeyboard) this.focusAdded = new Set(this.byId.keys())
     const detail: FlowNodeAddDetail = { position: { x: Math.round(position.x), y: Math.round(position.y) } }
     if (source !== undefined) detail.source = source
+    if (source !== undefined && sides) {
+      detail.sourceSide = sides.source
+      detail.targetSide = sides.target
+    }
     this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
   }
 
@@ -1178,14 +1245,19 @@ export class Flow extends LitElement {
     this.viewTouched = true
   }
 
-  /** Ends a connection: an edge to `target`, or a new connected node at `point` when there is no target. */
-  private finishConnection(source: string, target: string | null, point: FlowPoint | null) {
+  /**
+   * Ends a connection: an edge to its target, or a new connected node at its point when there is no target, placed
+   * with the side facing the source (opposite the source side) on the point.
+   */
+  private finishConnection({ source, sourceSide, target, targetSide, point }: Connection) {
     if (target === null) {
-      if (point) this.requestNode(this.incomingAt(point), source)
+      const side = oppositeSide(sourceSide)
+      if (point) this.requestNode(this.sideAt(point, side), source, false, { source: sourceSide, target: side })
       return
     }
     if (!this.canConnect(source, target)) return
-    this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-add', { detail: { source, target } }))
+    const detail: FlowEdgeAddDetail = { source, target, sourceSide, targetSide: targetSide ?? defaultSides(this.direction).target }
+    this.dispatchEvent(new CustomEvent<FlowEdgeAddDetail>('edge-add', { detail }))
   }
 
   private cancelConnection() {
@@ -1213,7 +1285,8 @@ export class Flow extends LitElement {
     const main = this.direction === 'LR' ? 'x' : 'y'
     const from = this.positions.get(source)![main]
     const target = targets.find((id) => this.positions.get(id)![main] > from) ?? targets[0]
-    this.connection = { source, point: null, target, keyboard: true }
+    const sides = defaultSides(this.direction)
+    this.connection = { source, sourceSide: sides.source, point: null, target, targetSide: sides.target, keyboard: true }
     this.announce(`Connect ${this.labelOf(source)} to ${this.labelOf(target)}. Arrow keys or Tab choose another node, Enter connects, Escape cancels.`)
   }
 
@@ -1231,7 +1304,7 @@ export class Flow extends LitElement {
       event.preventDefault()
       this.connection = null
       if (this.canConnect(connection.source, connection.target)) {
-        this.finishConnection(connection.source, connection.target, null)
+        this.finishConnection({ ...connection, point: null })
         this.announce(`Connected ${this.labelOf(connection.source)} to ${this.labelOf(connection.target)}.`)
       }
     } else if (event.key === 'Escape') {
@@ -1915,9 +1988,8 @@ export class Flow extends LitElement {
     </div>`
   }
 
-  /** An arrowhead at the end of an edge, pointing along the main axis into the target. */
-  private arrow(classes: string, end: FlowPoint) {
-    const angle = this.direction === 'TB' ? 90 : 0
+  /** An arrowhead at the end of an edge, pointing into the target through the side the edge arrives by. */
+  private arrow(classes: string, end: FlowPoint, angle: number) {
     return html`<span
       class=${`arrow ${classes}`}
       style=${`transform: translate(${end.x}px, ${end.y}px) rotate(${angle}deg) translate(var(--_arrow-offset), -50%)`}
@@ -1930,13 +2002,9 @@ export class Flow extends LitElement {
     const marks: unknown[] = []
     let editor: unknown = nothing
     this.edges.forEach((edge, index) => {
-      const a = this.positions.get(edge.source)
-      const b = this.positions.get(edge.target)
-      if (!a || !b) return
-      const sa = this.sizeOf(edge.source)
-      const sb = this.sizeOf(edge.target)
-      const back = this.graph.backEdges.has(index)
-      const route = edgeRoute({ ...a, ...sa }, { ...b, ...sb }, this.direction, this.edgeType, back)
+      const route = this.routeOf(edge, index)
+      if (!route) return
+      const back = this.graph.backEdges.has(index) && !this.sidedEdge(edge)
       const edgeClass = edgeState(statusOf(this.byId.get(edge.source)!), statusOf(this.byId.get(edge.target)!))
       const on = highlight !== null && (edge.source === highlight || edge.target === highlight)
       const key = edgeKey(edge.source, edge.target)
@@ -1954,7 +2022,7 @@ export class Flow extends LitElement {
       }
       // The arrowhead and the label take the edge's colour from a `mark--<state>` class of their own.
       const classes = `mark--${edgeClass}${states}`
-      marks.push(this.arrow(classes, route.end))
+      marks.push(this.arrow(classes, route.end, route.angle))
       const label = edge.label?.trim()
       if (key === this.editingEdge) editor = this.edgeLabelEditor(edge, route.mid)
       else if (label) {
@@ -1972,7 +2040,7 @@ export class Flow extends LitElement {
     const draft = this.draftRoute()
     if (draft) {
       paths.push(svg`<path class="edge edge--draft" d=${draft.d}></path>`)
-      marks.push(this.arrow('mark--draft', draft.end))
+      marks.push(this.arrow('mark--draft', draft.end, draft.angle))
     }
     const dim = highlight !== null && this.byId.has(highlight)
     return html`<svg class="edges${dim ? ' has-highlight' : ''}" aria-hidden="true">${paths}</svg>
@@ -1993,16 +2061,67 @@ export class Flow extends LitElement {
     />`
   }
 
-  /** The route of the edge following the pointer, or pointing at the keyboard's candidate, while a connection is made. */
+  /** The sides edge `edge` leaves and arrives by: its own, else the defaults of the direction. */
+  private sidesOf(edge: FlowEdge): { source: FlowSide; target: FlowSide } {
+    const defaults = defaultSides(this.direction)
+    return { source: isSide(edge.sourceSide) ? edge.sourceSide : defaults.source, target: isSide(edge.targetSide) ? edge.targetSide : defaults.target }
+  }
+
+  /** Whether edge `edge` uses a side other than the default, so it is routed between sides rather than along the axis. */
+  private sidedEdge(edge: FlowEdge) {
+    const defaults = defaultSides(this.direction)
+    const sides = this.sidesOf(edge)
+    return sides.source !== defaults.source || sides.target !== defaults.target
+  }
+
+  /** The route of edge `edge` (number `index` of `edges`), with the nodes at `positions`; null when an end is missing. */
+  private routeOf(edge: FlowEdge, index: number, positions: Map<string, FlowPoint> = this.positions): EdgeRoute | null {
+    const a = this.rectOf(edge.source, positions)
+    const b = this.rectOf(edge.target, positions)
+    if (!a || !b) return null
+    const sides = this.sidesOf(edge)
+    return routeBetween(a, b, this.direction, this.edgeType, this.graph.backEdges.has(index), sides.source, sides.target)
+  }
+
+  /**
+   * The route of the edge following the pointer, or pointing at the keyboard's candidate, while a connection is made.
+   * It leaves by the connection's side; over no target, it ends on the pointer, arriving as an edge from the default
+   * side does (along the axis) or, from any other side, through the side of the pointer facing back to the source.
+   */
   private draftRoute() {
     const connection = this.connection
-    const a = connection && this.positions.get(connection.source)
+    const a = connection && this.rectOf(connection.source)
     if (!connection || !a) return null
     const target = this.canConnect(connection.source, connection.target) ? connection.target : null
-    const b = target === null ? null : this.positions.get(target)
-    const end = b ? { ...b, ...this.sizeOf(target!) } : connection.point ? { ...connection.point, width: 0, height: 0 } : null
-    if (!end) return null
-    return edgeRoute({ ...a, ...this.sizeOf(connection.source) }, end, this.direction, this.edgeType, false)
+    const b = target === null ? null : this.rectOf(target)
+    const defaults = defaultSides(this.direction)
+    if (b) return routeBetween(a, b, this.direction, this.edgeType, false, connection.sourceSide, connection.targetSide ?? defaults.target)
+    const point = connection.point
+    if (!point) return null
+    const end = { ...point, width: 0, height: 0 }
+    if (connection.sourceSide === defaults.source) return routeBetween(a, end, this.direction, this.edgeType, false)
+    const start = sidePoint(a, connection.sourceSide)
+    const [dx, dy] = [start.x - point.x, start.y - point.y]
+    const facing: FlowSide = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'top' : 'bottom'
+    return routeBetween(a, end, this.direction, this.edgeType, false, connection.sourceSide, facing)
+  }
+
+  /** The sides of each node that edges leave (`out`) or arrive (`in`) by, keyed by node id. */
+  private edgeEnds() {
+    const ends = new Map<string, Map<FlowSide, { in: boolean; out: boolean }>>()
+    const mark = (id: string, side: FlowSide, way: 'in' | 'out') => {
+      let sides = ends.get(id)
+      if (!sides) ends.set(id, (sides = new Map()))
+      const entry = sides.get(side) ?? { in: false, out: false }
+      entry[way] = true
+      sides.set(side, entry)
+    }
+    for (const edge of this.edges) {
+      const sides = this.sidesOf(edge)
+      mark(edge.source, sides.source, 'out')
+      mark(edge.target, sides.target, 'in')
+    }
+    return ends
   }
 
   /** "After Idea." or, when an edge has a label, "Before Book the night bus, yes; Walk home, no." */
@@ -2013,7 +2132,7 @@ export class Flow extends LitElement {
     return `${word} ${parts.join(labels.some(Boolean) ? '; ' : ', ')}.`
   }
 
-  private renderNodeElement(node: FlowNode, index: number) {
+  private renderNodeElement(node: FlowNode, index: number, ends: Map<string, Map<FlowSide, { in: boolean; out: boolean }>>) {
     const status = statusOf(node)
     const p = this.positions.get(node.id) ?? { x: 0, y: 0 }
     const before = this.graph.predecessors.get(node.id) ?? []
@@ -2036,8 +2155,13 @@ export class Flow extends LitElement {
       connection?.source === node.id ? 'is-connect-source' : '',
       connection && connection.target === node.id && this.canConnect(connection.source, node.id) ? 'is-connect-target' : '',
     ]
-    const hasIn = this.edges.some((edge) => edge.target === node.id)
-    const hasOut = this.edges.some((edge) => edge.source === node.id)
+    const sides = ends.get(node.id)
+    // A dot on every side an edge leaves or arrives by; one side can take both.
+    const handles = FLOW_SIDES.flatMap((side) => {
+      const end = sides?.get(side)
+      return end ? [html`<span class=${`handle handle--${side}${end.in ? ' handle--in' : ''}${end.out ? ' handle--out' : ''}`}></span>`] : []
+    })
+    const connectSide = connection && !connection.keyboard && connection.target === node.id ? connection.targetSide : null
     // A node drawn by the application has no label of ours to swap: the editor covers its whole body instead.
     const custom = !!this.renderNode || !!this.querySelector(`:scope > [slot="node:${CSS.escape(node.id)}"]`)
     return html`<div
@@ -2058,8 +2182,19 @@ export class Flow extends LitElement {
     >
       ${shape && OUTLINES[shape] ? html`<svg class="shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${OUTLINES[shape]}</svg>` : nothing}
       <slot name=${`node:${node.id}`}>${body}</slot>
-      ${editing && custom ? this.labelEditor(node, true) : nothing} ${hasIn ? html`<span class="handle handle--in"></span>` : nothing}
-      ${this.editable ? html`<span class="connector" title="Drag to connect"></span>` : hasOut ? html`<span class="handle handle--out"></span>` : nothing}
+      ${editing && custom ? this.labelEditor(node, true) : nothing} ${handles}
+      ${
+        this.editable
+          ? FLOW_SIDES.map(
+              (side) =>
+                html`<span
+                  class=${`connector connector--${side}${side === connectSide ? ' is-connect-side' : ''}`}
+                  data-side=${side}
+                  title="Drag to connect"
+                ></span>`,
+            )
+          : nothing
+      }
       ${relations ? html`<span id=${`relations-${index}`} class="visually-hidden">${relations}</span>` : nothing}
     </div>`
   }
@@ -2136,6 +2271,7 @@ export class Flow extends LitElement {
     ]
     // With no node to focus, the empty canvas of an editable flow takes focus, so `N` and Enter can add the first one.
     const emptyCanvas = this.editable && !this.nodes.length
+    const ends = this.edgeEnds()
     return html`
       <c2-context-menu
         menu-label="Flow"
@@ -2147,7 +2283,7 @@ export class Flow extends LitElement {
         <div
           class=${stageClasses.filter(Boolean).join(' ')}
           style=${`--_zoom: ${this.zoom}; background-position: ${this.tx}px ${this.ty}px`}
-          tabindex=${emptyCanvas ? 0 : nothing}
+          tabindex=${emptyCanvas ? 0 : this.selectedEdge !== null ? -1 : nothing}
           role=${emptyCanvas ? 'group' : nothing}
           aria-label=${emptyCanvas ? 'Empty flow' : nothing}
           aria-describedby=${emptyCanvas ? 'empty-hint' : nothing}
@@ -2166,7 +2302,7 @@ export class Flow extends LitElement {
             ${repeat(
               this.nodes,
               (node) => node.id,
-              (node, index) => this.renderNodeElement(node, index),
+              (node, index) => this.renderNodeElement(node, index, ends),
             )}
             ${this.ghost ? this.renderGhost(this.ghost) : nothing}
           </div>
