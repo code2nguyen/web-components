@@ -102,8 +102,6 @@
   border-radius: css.cssVar(border-radius);
   font-family: css.cssVar(font-family);
   font-size: css.cssVar(font-size);
-  flex-wrap: wrap;
-  row-gap: css.cssVar(filter--gap);
   transition: animation.standard(border), animation.standard(outline);
   cursor: text;
 
@@ -125,13 +123,25 @@
   pointer-events: none;
 }
 
+// The chips and the text wrap inside their own row, so the icon and the clear button keep their place.
+.content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(filter--gap);
+}
+
 // The input and the highlight layer share one grid cell and the same text metrics: the input's own text is
 // transparent, so the coloured copy underneath shows through and the caret and selection stay native.
 .editor {
   position: relative;
   display: grid;
-  min-width: 8em;
-  flex: 1;
+  // A 4em basis, not the input's own ~20-character width, so an empty field sits beside the last chip.
+  min-width: 4em;
+  flex: 1 1 4em;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   line-height: 20px;
 }

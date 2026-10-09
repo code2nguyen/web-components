@@ -813,42 +813,44 @@ export class QueryInput extends LitElement {
             </svg>
           </slot>
         </span>
-        ${repeat(
-          this.chips,
-          // Keyed by text (and occurrence), so removing a chip removes its element rather than relabelling a neighbour.
-          (chip, index) => `${chip.text}#${this.chips.slice(0, index).filter((other) => other.text === chip.text).length}`,
-          (chip, index) => this.renderFilter(chip, index),
-        )}
-        <span class="editor">
-          <span class="highlight" aria-hidden="true"><span class="highlight-text">${this.renderTokens()}</span></span>
-          <input
-            class="input"
-            type="text"
-            role=${ifDefined(hasFields ? 'combobox' : undefined)}
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            enterkeyhint="search"
-            aria-label=${name}
-            aria-autocomplete=${ifDefined(hasFields ? 'list' : undefined)}
-            aria-controls=${ifDefined(hasFields ? 'suggestions' : undefined)}
-            aria-expanded=${ifDefined(hasFields ? String(open) : undefined)}
-            aria-activedescendant=${ifDefined(open && this.activeIndex >= 0 ? `suggestion-${this.activeIndex}` : undefined)}
-            aria-invalid=${this.invalid ? 'true' : nothing}
-            name=${ifDefined(this.name || undefined)}
-            placeholder=${this.chips.length ? nothing : this.placeholder || nothing}
-            .value=${live(this.draft)}
-            ?disabled=${this.effectiveDisabled}
-            @input=${this.handleInput}
-            @change=${(event: Event) => redispatchEvent(this, event)}
-            @keydown=${this.handleKeydown}
-            @keyup=${this.readCaret}
-            @pointerup=${this.readCaret}
-            @select=${this.readCaret}
-            @scroll=${this.syncScroll}
-            @focusin=${this.handleFocusin}
-            @focusout=${this.handleFocusout}
-          />
+        <span class="content">
+          ${repeat(
+            this.chips,
+            // Keyed by text (and occurrence), so removing a chip removes its element rather than relabelling a neighbour.
+            (chip, index) => `${chip.text}#${this.chips.slice(0, index).filter((other) => other.text === chip.text).length}`,
+            (chip, index) => this.renderFilter(chip, index),
+          )}
+          <span class="editor">
+            <span class="highlight" aria-hidden="true"><span class="highlight-text">${this.renderTokens()}</span></span>
+            <input
+              class="input"
+              type="text"
+              role=${ifDefined(hasFields ? 'combobox' : undefined)}
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              enterkeyhint="search"
+              aria-label=${name}
+              aria-autocomplete=${ifDefined(hasFields ? 'list' : undefined)}
+              aria-controls=${ifDefined(hasFields ? 'suggestions' : undefined)}
+              aria-expanded=${ifDefined(hasFields ? String(open) : undefined)}
+              aria-activedescendant=${ifDefined(open && this.activeIndex >= 0 ? `suggestion-${this.activeIndex}` : undefined)}
+              aria-invalid=${this.invalid ? 'true' : nothing}
+              name=${ifDefined(this.name || undefined)}
+              placeholder=${this.chips.length ? nothing : this.placeholder || nothing}
+              .value=${live(this.draft)}
+              ?disabled=${this.effectiveDisabled}
+              @input=${this.handleInput}
+              @change=${(event: Event) => redispatchEvent(this, event)}
+              @keydown=${this.handleKeydown}
+              @keyup=${this.readCaret}
+              @pointerup=${this.readCaret}
+              @select=${this.readCaret}
+              @scroll=${this.syncScroll}
+              @focusin=${this.handleFocusin}
+              @focusout=${this.handleFocusout}
+            />
+          </span>
         </span>
         ${this.renderClearButton()}
         <slot name="suffix-icon"></slot>
