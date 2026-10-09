@@ -2,6 +2,165 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.7",
+      "date": "2026-10-09",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Edges attach to the side of a node they were drawn from",
+              "hash": "714a307"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Fit-min-zoom keeps a fitted flow readable",
+              "hash": "80663e7"
+            },
+            {
+              "scopes": ["masonry"],
+              "text": "Min-rows and min-cols bound how small a user can resize a tile",
+              "hash": "a76ec6c"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Show key:value filters as c2-chip elements that switch off and on or are removed",
+              "hash": "6ae81ab"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "Add --c2-phone-input__country--display to hide the country prefix",
+              "hash": "bf5cf93"
+            },
+            {
+              "scopes": ["state-timeline"],
+              "text": "Quiet baseline, row summaries and a shared time line",
+              "hash": "8422ffa"
+            },
+            {
+              "scopes": ["popconfirm"],
+              "text": "Style c2-popconfirm as a tooltip bubble with an arrow",
+              "hash": "55579b6"
+            },
+            {
+              "scopes": ["key-value-editor"],
+              "text": "Add view mode and locked keys",
+              "hash": "6395686"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Draw key:value terms as chips; reopen suggestions when the caret moves",
+              "hash": "655efd7"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "A single allowed country is a fixed prefix with no picker",
+              "hash": "76324c7"
+            },
+            {
+              "scopes": ["confirm-dialog"],
+              "text": "Add c2-confirm-dialog with a promise-based confirm()",
+              "hash": "7e2a0d7"
+            },
+            {
+              "scopes": ["state-timeline"],
+              "text": "Add c2-state-timeline",
+              "hash": "49a13a4"
+            },
+            {
+              "scopes": ["popconfirm"],
+              "text": "Add c2-popconfirm, an \"Are you sure?\" popup anchored to its trigger",
+              "hash": "1f60cfd"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Add c2-query-input, a key:value query field with highlighting and suggestions",
+              "hash": "fe7c0a5"
+            },
+            {
+              "scopes": ["trace-waterfall"],
+              "text": "Add c2-trace-waterfall, a span tree with offset duration bars on one time axis",
+              "hash": "bcb8081"
+            },
+            {
+              "scopes": ["key-value-editor"],
+              "text": "Add c2-key-value-editor",
+              "hash": "ef13328"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "Add c2-phone-input, a phone field with a country picker and an E.164 value",
+              "hash": "ee63d69"
+            },
+            {
+              "scopes": ["relative-time"],
+              "text": "Add c2-relative-time",
+              "hash": "24028dc"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Add c2-password-field, a password input with reveal toggle, strength meter and requirements checklist",
+              "hash": "a90a06f"
+            },
+            {
+              "scopes": ["checkbox"],
+              "text": "Add c2-checkbox-group",
+              "hash": "78b67b9"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Delete removes an edge selected by a click when focus was outside the flow",
+              "hash": "d2a3e7a"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Keep the icon and clear button in place while the chips wrap",
+              "hash": "a425221"
+            },
+            {
+              "scopes": ["trace-waterfall"],
+              "text": "Fit narrow containers and keep every duration label readable",
+              "hash": "d014f28"
+            },
+            {
+              "scopes": ["state-timeline"],
+              "text": "Fill the container and drop labels from narrow segments",
+              "hash": "7150ba2"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "Fit narrow columns, rank name-prefix search matches first, darken the calling code",
+              "hash": "63e3746"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Open the confirm-dialog examples by id, since each c2-* in an MDX fence is its own island",
+              "hash": "8fea850"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Alias the share-2 icon import as FeatherShare_2 in the todo-list docs",
+              "hash": "0a69d86"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.6",
       "date": "2026-10-08",
       "sections": [
