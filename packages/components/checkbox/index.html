@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-checkbox</title>
     <script type="module" src="/src/checkbox.ts"></script>
+    <script type="module" src="/src/checkbox-group.ts"></script>
     <style>
       body {
         padding: 24px;
@@ -90,6 +91,27 @@
     </div>
 
     <div class="row">
+      <c2-checkbox>Label text</c2-checkbox>
+      <c2-checkbox checked>With description<span slot="description">Supporting text under the label</span></c2-checkbox>
+    </div>
+
+    <div class="row">
+      <c2-checkbox-group id="group" name="channels" value="email;push">
+        <span slot="label">Notify me by</span>
+        <span slot="description">Pick any number of channels.</span>
+        <c2-checkbox value="email">Email</c2-checkbox>
+        <c2-checkbox value="sms" disabled>SMS (unavailable)</c2-checkbox>
+        <c2-checkbox value="push">Push notification</c2-checkbox>
+      </c2-checkbox-group>
+      <c2-checkbox-group orientation="horizontal" aria-label="Days" disabled value="mon">
+        <c2-checkbox value="mon">Mon</c2-checkbox>
+        <c2-checkbox value="tue">Tue</c2-checkbox>
+        <c2-checkbox value="wed">Wed</c2-checkbox>
+      </c2-checkbox-group>
+      <span id="group-log">Toggle an option to log the group value</span>
+    </div>
+
+    <div class="row">
       <c2-checkbox id="events"></c2-checkbox>
       <span id="log">Toggle to log change events</span>
     </div>
@@ -98,6 +120,8 @@
       const cb = document.getElementById('events')
       const log = document.getElementById('log')
       cb.addEventListener('change', () => (log.textContent = `change → checked=${cb.checked}`))
+      const group = document.getElementById('group')
+      group.addEventListener('change', (event) => (document.getElementById('group-log').textContent = `change → ${JSON.stringify(event.detail.value)}`))
     </script>
   </body>
 </html>

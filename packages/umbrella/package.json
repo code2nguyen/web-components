@@ -27,7 +27,8 @@
     "type-check": "wireit",
     "prepack": "npm run build",
     "size": "wireit",
-    "size:update": "npm run build && node scripts/check-size.ts --update"
+    "size:update": "npm run build && node scripts/check-size.ts --update",
+    "size:add": "npm run build && node scripts/check-size.ts --add"
   },
   "wireit": {
     "build": {
@@ -220,6 +221,10 @@
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./checkbox/checkbox-group": {
+      "types": "./dist/checkbox/checkbox-group.d.ts",
+      "default": "./dist/checkbox/checkbox-group.js"
+    },
     "./chip": {
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"
@@ -271,6 +276,10 @@
     "./comparison-bar": {
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
+    },
+    "./confirm-dialog": {
+      "types": "./dist/confirm-dialog.d.ts",
+      "default": "./dist/confirm-dialog.js"
     },
     "./context-menu": {
       "types": "./dist/context-menu.d.ts",
@@ -471,6 +480,10 @@
     "./pagination": {
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
+    },
+    "./password-field": {
+      "types": "./dist/password-field.d.ts",
+      "default": "./dist/password-field.js"
     },
     "./phone-input": {
       "types": "./dist/phone-input.d.ts",
@@ -800,6 +813,7 @@
     "@c2n/command": "*",
     "@c2n/comparison-bar": "*",
     "@c2n/config": "*",
+    "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
     "@c2n/dashboard": "*",
@@ -837,6 +851,7 @@
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
+    "@c2n/password-field": "*",
     "@c2n/phone-input": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",

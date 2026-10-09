@@ -1,12 +1,35 @@
-import { NodePlopAPI } from 'plop'
-import { readFileSync } from 'node:fs'
+import type { ActionConfig, NodePlopAPI } from 'plop'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { insertIntoJson, insertIntoText, registries } from './sorted-lists.js'
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const { version: packageVersion } = JSON.parse(readFileSync(resolve(repositoryRoot, 'lerna.json'), 'utf8')) as { version: string }
 
+type Registry = keyof typeof registries
+type RegisterConfig = { registry: Registry; template?: string; key?: string; value?: unknown }
+// plop types its built-in actions only; a custom type rides on the base config.
+const register = (config: RegisterConfig) => ({ type: 'register', ...config }) as ActionConfig
+
 export default function (plop: NodePlopAPI) {
+  // Adds an entry to one of the registries every new component joins, at its alphabetical place, so two component PRs
+  // open at once touch different lines (see sorted-lists.ts). `template` is the line of a source list or the string of
+  // a JSON array; a JSON object such as `dependencies` takes `key` and `value` instead.
+  plop.setActionType('register', (answers, config) => {
+    const { registry, template, key, value } = config as unknown as RegisterConfig
+    const target = registries[registry]
+    const file = resolve(repositoryRoot, target.file)
+    const text = readFileSync(file, 'utf8')
+    const render = (source: string) => plop.renderString(source, answers)
+    const next =
+      'list' in target
+        ? insertIntoText(text, target.list, render(template!))
+        : insertIntoJson(text, target.path, key === undefined ? render(template!) : [render(key), value])
+    writeFileSync(file, next)
+    return `${target.file}: ${registry}`
+  })
+
   plop.setGenerator('example', {
     description: 'generate a plain HTML example application',
     prompts: [
@@ -22,12 +45,7 @@ export default function (plop: NodePlopAPI) {
         templateFiles: 'files/example/**/*.*',
         skipIfExists: true,
       },
-      {
-        type: 'append',
-        path: '../../package.json',
-        pattern: /"examples:build": \{\n\s*"dependencies": \[/,
-        template: '        "./apps/examples/{{ dashCase name }}:build",',
-      },
+      register({ registry: 'examplesBuild', template: './apps/examples/{{ dashCase name }}:build' }),
     ],
   })
 
@@ -61,41 +79,15 @@ export default function (plop: NodePlopAPI) {
       // collection (see the caveat in the new-component skill).
       const actions = isNpmPackage
         ? [
-            {
-              type: 'append',
-              path: '../../apps/ui/src/store/component-manifests.ts',
-              pattern: /\n/,
-              separator: '',
-              template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json'\n",
-            },
-            {
-              type: 'append',
-              path: '../../apps/ui/src/store/component-manifests.ts',
-              pattern: /const normalizedManifests: ComponentManifests = \[/,
-              template: '    {{ camelCase name }},',
-            },
-            {
-              // Without this the app resolves the package only by workspace hoisting, and `npm run ui:build`
-              // fails on a clean install with "failed to resolve import @c2n/<name>/custom-elements.json".
-              type: 'append',
-              path: '../../apps/ui/package.json',
-              pattern: /"dependencies": \{/,
-              template: '    "@c2n/{{ dashCase name }}": "*",',
-            },
-            {
-              // Registers the element for pages that render markup as plain HTML instead of hydrating islands.
-              type: 'append',
-              path: '../../apps/ui/src/data/component-modules.ts',
-              pattern: /^ \*\/$/m,
-              template: "import '@c2n/components/{{ dashCase name }}'",
-            },
-            {
-              type: 'append',
-              path: '../../apps/ui/src/data/component-previews.ts',
-              pattern: /export const componentPreviews: Record<string, string> = \{/,
-              // Quoted because a dash-cased id is not a bare identifier; prettier drops the quotes when it can.
-              template: "  '{{ dashCase name }}': `<c2-{{ dashCase name }}></c2-{{ dashCase name }}>`,",
-            },
+            register({ registry: 'manifestImports', template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json'" }),
+            register({ registry: 'normalizedManifests', template: '    {{ camelCase name }},' }),
+            // Without this the app resolves the package only by workspace hoisting, and `npm run ui:build`
+            // fails on a clean install with "failed to resolve import @c2n/<name>/custom-elements.json".
+            register({ registry: 'uiDependencies', key: '@c2n/{{ dashCase name }}', value: '*' }),
+            // Registers the element for pages that render markup as plain HTML instead of hydrating islands.
+            register({ registry: 'componentModules', template: "import '@c2n/components/{{ dashCase name }}'" }),
+            // Quoted because a dash-cased id is not a bare identifier; prettier drops the quotes when it can.
+            register({ registry: 'componentPreviews', template: "  '{{ dashCase name }}': `<c2-{{ dashCase name }}></c2-{{ dashCase name }}>`," }),
             {
               type: 'add',
               path: '../../apps/ui/src/content/gallery/{{dashCase name}}.mdx',
@@ -127,19 +119,9 @@ export default function (plop: NodePlopAPI) {
           skipIfExists: true,
         },
 
-        {
-          type: 'append',
-          path: '../../package.json',
-          pattern: /build.*\n?.*dependencies": \[/,
-          template: `        "./${packages}/{{ dashCase name }}:build",`,
-        },
-        {
-          // @c2n/theme reads every component manifest, so its build must run after the new component's build.
-          type: 'append',
-          path: '../../packages/tools/theme/package.json',
-          pattern: /"dependencies": \[\n\s*"type-check",/,
-          template: `        "${isNpmPackage ? '../../components' : '../../../open-packages'}/{{ dashCase name }}:build",`,
-        },
+        register({ registry: 'rootBuild', template: `./${packages}/{{ dashCase name }}:build` }),
+        // @c2n/theme reads every component manifest, so its build must run after the new component's build.
+        register({ registry: 'themeBuild', template: `${isNpmPackage ? '../../components' : '../../../open-packages'}/{{ dashCase name }}:build` }),
       ]
     },
   })
