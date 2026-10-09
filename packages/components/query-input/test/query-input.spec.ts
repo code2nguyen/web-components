@@ -333,11 +333,11 @@ test('the in-text highlight keeps the input metrics and scrolls with a long quer
   const widths = await host.evaluate((element) => {
     const root = element.shadowRoot!
     const field = root.querySelector('input')!
-    const style = getComputedStyle(field)
-    return {
-      input: field.scrollWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
-      text: root.querySelector<HTMLElement>('.highlight-text')!.getBoundingClientRect().width,
-    }
+    // Measured without padding: Chromium counts an input's padding in scrollWidth and Firefox does not.
+    field.style.padding = '0'
+    const input = field.scrollWidth
+    field.style.padding = ''
+    return { input, text: root.querySelector<HTMLElement>('.highlight-text')!.getBoundingClientRect().width }
   })
   expect(Math.abs(widths.input - widths.text)).toBeLessThanOrEqual(2)
   const offsets = () =>
