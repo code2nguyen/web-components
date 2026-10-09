@@ -2480,6 +2480,38 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-popconfirm': {
+    html: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
+    presets: [
+      {
+        name: 'Destructive',
+        css: {
+          '--c2-popconfirm__icon--color': '#f87171',
+          '--c2-popconfirm__confirm--background-color': '#dc2626',
+          '--c2-popconfirm__confirm--color': '#ffffff',
+          '--c2-popconfirm__confirm__hover--background-color': '#b91c1c',
+        },
+      },
+      {
+        name: 'Light card',
+        css: {
+          '--c2-popconfirm--background-color': '#ffffff',
+          '--c2-popconfirm--color': '#18181b',
+          '--c2-popconfirm--border': '1px solid #e4e4e7',
+          '--c2-popconfirm--box-shadow': '0 8px 24px rgba(24, 24, 27, 0.08)',
+          '--c2-popconfirm__icon--color': '#d97706',
+        },
+      },
+      {
+        name: 'No arrow',
+        css: {
+          '--c2-popconfirm__arrow--size': '0px',
+          '--c2-popconfirm--offset': '4px',
+        },
+        attributes: { placement: 'bottom' },
+      },
+    ],
+  },
   'c2-tooltip': {
     html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
     presets: [

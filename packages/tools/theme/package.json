@@ -123,6 +123,7 @@
         "../../components/pagination:build",
         "../../components/password-field:build",
         "../../components/phone-input:build",
+        "../../components/popconfirm:build",
         "../../components/progress:build",
         "../../components/qr-code:build",
         "../../components/questionnaire:build",

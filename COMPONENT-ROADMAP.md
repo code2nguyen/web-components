@@ -141,7 +141,6 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 | #   | Component                | What it adds                                                               | Real-world model                                                      | Priority | Decision |
 | --- | ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------- | -------- |
-| 72  | `c2-popconfirm`          | Small "Are you sure?" popup anchored to the button that triggered it       | antd Popconfirm, PrimeVue ConfirmPopup                                | P1       | Proposed |
 | 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                            | P2       | Proposed |
 | 74  | `c2-tour`                | Step-by-step onboarding with spotlight, anchored steps and progress        | antd Tour, Ark tour, Carbon and Spectrum coachmark; Intercom, Appcues | P2       | Proposed |
 | 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications         | P2       | Proposed |

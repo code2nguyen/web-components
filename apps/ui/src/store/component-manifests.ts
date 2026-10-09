@@ -70,6 +70,7 @@ import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
@@ -187,6 +188,7 @@ export const componentManifests = (function () {
     passwordField,
     phoneInput,
     phosphorIcons,
+    popconfirm,
     progress,
     qrCode,
     questionnaire,

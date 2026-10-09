@@ -273,6 +273,7 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
 </div>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+  popconfirm: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
   progress: `<div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;width:240px">
   <div style="display:grid;gap:12px">
     <c2-progress value="72" show-value>Uploading</c2-progress>

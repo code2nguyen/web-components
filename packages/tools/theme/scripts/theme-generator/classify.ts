@@ -81,6 +81,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-phone-input',
   'c2-tooltip',
   'c2-hover-card',
+  'c2-popconfirm',
   'c2-select',
   'c2-overlay',
   'c2-color-select',

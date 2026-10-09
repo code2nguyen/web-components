@@ -92,6 +92,7 @@
     "@c2n/password-field": "*",
     "@c2n/phone-input": "*",
     "@c2n/phosphor-icons": "*",
+    "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
     "@c2n/questionnaire": "*",

@@ -493,6 +493,10 @@
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
     },
+    "./popconfirm": {
+      "types": "./dist/popconfirm.d.ts",
+      "default": "./dist/popconfirm.js"
+    },
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
@@ -862,6 +866,7 @@
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
     "@c2n/phone-input": "*",
+    "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
     "@c2n/questionnaire": "*",

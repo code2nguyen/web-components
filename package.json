@@ -166,6 +166,7 @@
         "./packages/components/pagination:build",
         "./packages/components/password-field:build",
         "./packages/components/phone-input:build",
+        "./packages/components/popconfirm:build",
         "./packages/components/progress:build",
         "./packages/components/qr-code:build",
         "./packages/components/questionnaire:build",

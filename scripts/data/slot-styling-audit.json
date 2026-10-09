@@ -1883,6 +1883,33 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-popconfirm",
+      "slot": "",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The description region owns the colour and size of the projected text through its part and --c2-popconfirm__description--* variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "heading",
+      "decision": "part",
+      "parts": ["heading"],
+      "reason": "The heading region owns the colour, size and weight of the projected question through its part and --c2-popconfirm__heading--* variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-popconfirm__icon--display", "--c2-popconfirm__icon--size", "--c2-popconfirm__icon--color"],
+      "reason": "The icon region sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-popconfirm",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-progress",
       "slot": "",
       "decision": "assigned-content",

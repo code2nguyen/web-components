@@ -1,0 +1,262 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-popconfirm,
+  $theme: (
+    background-color: #18181b,
+    color: #fafafa,
+    border: null,
+    border-radius: 6px,
+    box-shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    font-size: 12px,
+    font-family: null,
+    line-height: 1.4,
+    padding-top: 8px,
+    padding-right: 10px,
+    padding-bottom: 8px,
+    padding-left: 10px,
+    max-width: 280px,
+    offset: 6px,
+    transition-duration: 120ms,
+    enter-transform: scale(0.92),
+
+    arrow--size: 8px,
+
+    icon--display: flex,
+    icon--size: 14px,
+    icon--color: #fbbf24,
+    body--gap: 6px,
+
+    heading--color: null,
+    heading--font-size: 12px,
+    heading--font-weight: 600,
+    description--color: null,
+    description--font-size: 12px,
+    description--opacity: 0.72,
+
+    actions--justify-content: flex-end,
+    actions--gap: 6px,
+    actions--margin-top: 8px,
+
+    button--height: 24px,
+    button--padding-left: 8px,
+    button--padding-right: 8px,
+    button--border-radius: 4px,
+    button--font-size: 12px,
+    button--font-weight: 500,
+    button__focus--outline: 2px solid currentColor,
+    button__focus--outline-offset: 1px,
+
+    cancel--background-color: transparent,
+    cancel--color: null,
+    cancel--border: '1px solid color-mix(in srgb, currentColor 32%, transparent)',
+    cancel__hover--background-color: 'color-mix(in srgb, currentColor 14%, transparent)',
+
+    confirm--background-color: 'rgb(2, 101, 220)',
+    confirm--color: #ffffff,
+    confirm--border: 1px solid transparent,
+    confirm__hover--background-color: 'rgb(1, 84, 184)',
+    confirm__pending--opacity: 0.38,
+  )
+);
+
+:host {
+  display: inline-block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// Popover in the top layer, placed by floating-ui with `position: fixed`.
+.panel {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(#{css.cssVar(max-width)}, calc(100vw - 16px));
+  font-weight: 400;
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background-color);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  text-align: left;
+  overflow-wrap: break-word;
+
+  opacity: 0;
+  transform: css.cssVar(enter-transform);
+  transform-origin: bottom center;
+  transition:
+    opacity css.cssVar(transition-duration) animation.$standard-easing,
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
+}
+
+.panel:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .panel:popover-open {
+    opacity: 0;
+    transform: css.cssVar(enter-transform);
+  }
+}
+
+.panel[data-placement^='bottom'] {
+  transform-origin: top center;
+}
+.panel[data-placement^='left'] {
+  transform-origin: center right;
+}
+.panel[data-placement^='right'] {
+  transform-origin: center left;
+}
+
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(body--gap);
+}
+
+.icon {
+  display: css.cssVar(icon--display);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  // One line of heading text tall, so the icon sits on the heading's first line.
+  height: calc(#{css.cssVar(heading--font-size)} * #{css.cssVar(line-height)});
+  color: css.cssVar(icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.heading {
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+}
+
+.description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  opacity: css.cssVar(description--opacity);
+}
+
+// A rotated square sharing the bubble's background and border; floating-ui positions it along the edge facing the
+// trigger. The clip keeps only the two outer edges, so a border never shows through the bubble.
+.arrow {
+  position: absolute;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  background: css.cssVar(background-color);
+  border: css.cssVar(border);
+  box-sizing: border-box;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.panel[data-placement^='top'] .arrow {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.panel[data-placement^='bottom'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.panel[data-placement^='left'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.panel[data-placement^='right'] .arrow {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+[hidden] {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: css.cssVar(actions--justify-content);
+  gap: css.cssVar(actions--gap);
+  margin-top: css.cssVar(actions--margin-top);
+}
+
+.button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: css.cssVar(button--height);
+  padding-left: css.cssVar(button--padding-left);
+  padding-right: css.cssVar(button--padding-right);
+  border-radius: css.cssVar(button--border-radius);
+  font-family: inherit;
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color css.cssVar(transition-duration) animation.$standard-easing;
+
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+}
+
+.cancel {
+  border: css.cssVar(cancel--border);
+  background: css.cssVar(cancel--background-color);
+  color: css.cssVar(cancel--color);
+
+  &:hover {
+    background: css.cssVar(cancel__hover--background-color);
+  }
+}
+
+.confirm {
+  border: css.cssVar(confirm--border);
+  background: css.cssVar(confirm--background-color);
+  color: css.cssVar(confirm--color);
+
+  &:hover {
+    background: css.cssVar(confirm__hover--background-color);
+  }
+
+  &[aria-busy='true'] {
+    opacity: css.cssVar(confirm__pending--opacity);
+    cursor: progress;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .button {
+    transition: none;
+  }
+}
