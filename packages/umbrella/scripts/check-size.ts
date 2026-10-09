@@ -8,6 +8,8 @@
  * `size-budget.json`. `lazy` budgets the rest of `dist/`: the chunks only a dynamic `import()` reaches (map outlines,
  * editor languages), which no entry's closure counts. `index` re-exports every entry, so adding a component grows
  * `index` and its own entry but never `lazy`; that keeps the budget free of a line every component PR would edit.
+ * For the same reason `index` itself is recorded but never checked: it is the union of every other entry, so an
+ * accident shows in the entry it happens to, and its own baseline would trip after a few new components.
  * A budget may grow by GROWTH_RATIO plus GROWTH_SLACK bytes before the check fails. A new entry with no budget yet is
  * reported, not failed.
  *
@@ -110,6 +112,7 @@ const added: string[] = []
 const rows: string[] = []
 for (const [name, size] of Object.entries(current.entries)) {
   const baseline = budget.entries[name]
+  if (name === 'index') continue
   if (baseline === undefined) {
     added.push(`${name} (${kb(size)})`)
     continue
