@@ -18,6 +18,7 @@
     invalid--border: 1px solid #dc2626,
     disabled--opacity: variables.$disabled-content-opacity,
 
+    country--display: inline-flex,
     country--padding: 0 8px 0 10px,
     country--gap: 6px,
     country--color: #18181b,
@@ -102,7 +103,7 @@
 }
 
 .country {
-  display: inline-flex;
+  display: css.cssVar(country--display);
   flex: none;
   align-items: center;
   gap: css.cssVar(country--gap);

@@ -97,6 +97,7 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  * @cssproperty {border} [--c2-phone-input__invalid--border=1px solid #dc2626] - Border while the typed number is not possible for the country, once the field lost focus.
  * @cssproperty {opacity} [--c2-phone-input__disabled--opacity=0.38]
  *
+ * @cssproperty {display} [--c2-phone-input__country--display=inline-flex] - `none` hides the country button, or the fixed prefix of a single allowed country, leaving only the number field.
  * @cssproperty {padding} [--c2-phone-input__country--padding=0 8px 0 10px]
  * @cssproperty {pixel} [--c2-phone-input__country--gap=6px] - Space between the flag, the calling code and the chevron.
  * @cssproperty {color} [--c2-phone-input__country--color=#18181b]
@@ -745,10 +746,10 @@ export class PhoneInput extends LitElement {
     return html`<div class="field" @click=${this.handleFieldClick} @focusin=${this.handleFocusin} @focusout=${this.handleFocusout}>
         ${
           fixed
-            ? html`<span id="country" class="country" data-fixed>
+            ? html`<span class="country" data-fixed>
                 <span class="flag" aria-hidden="true">${flagEmoji(country.iso)}</span>
                 <span class="dial-code" aria-hidden="true">+${country.dialCode}</span>
-                <span class="visually-hidden">${`${countryName} (+${country.dialCode})`}</span>
+                <span id="country" class="visually-hidden">${`${countryName} (+${country.dialCode})`}</span>
               </span>`
             : html`<button
                 class="country"

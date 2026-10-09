@@ -205,3 +205,14 @@ test('a single allowed country is a fixed prefix with no picker', async ({ page,
   expect(await host.evaluate((element) => (element as HTMLElement & { validity: ValidityState }).validity.patternMismatch)).toBe(true)
   await accessible(page)
 })
+
+test('--c2-phone-input__country--display: none leaves only the number field', async ({ page, renderScenario }) => {
+  await renderScenario('<style>.bare { --c2-phone-input__country--display: none }</style><c2-phone-input class="bare" countries="VN"></c2-phone-input>')
+  const host = page.locator('c2-phone-input')
+  await expect(host.locator('.country')).toBeHidden()
+  // The hidden prefix still describes the field, and the number is still read as Vietnamese.
+  await expect(number(page)).toHaveAccessibleDescription('Vietnam (+84)')
+  await number(page).click()
+  await page.keyboard.type('0912345678')
+  await expect(host).toHaveJSProperty('value', '+84912345678')
+})
