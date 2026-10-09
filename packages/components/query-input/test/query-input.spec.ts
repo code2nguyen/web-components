@@ -1,5 +1,6 @@
 import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { QueryInput } from '../src/query-input'
 
 const FIELDS = JSON.stringify([
   { key: 'service', label: 'Service', values: ['web', 'api', 'billing worker'] },
@@ -178,6 +179,32 @@ test('the value list follows the key under the caret', async ({ page, renderScen
   await expect(chips(page)).toHaveCount(0)
 })
 
+test('a key-less field offers its values after a bare colon, and its chip shows the value alone', async ({ page, renderScenario }) => {
+  const fields = JSON.stringify([{ key: '', label: 'Saved search', values: ['errors', 'slow requests'] }, ...JSON.parse(FIELDS)])
+  await renderScenario(`<c2-query-input fields='${fields}' value="-:errors" aria-label="Query"></c2-query-input>`)
+  const host = page.locator('c2-query-input')
+  const input = page.getByRole('combobox', { name: 'Query' })
+  await expect(chips(page)).toHaveText(['-errors'])
+  await expect(host).toHaveJSProperty('terms', [{ key: '', value: 'errors', negated: true, quoted: false, start: 0, end: 8 }])
+
+  await input.click()
+  // The key-less field is not one of the keys.
+  await expect(options(page).locator('.option-label')).toHaveText(['service', 'status', 'env'])
+  await page.keyboard.type(':')
+  await expect(page.locator('#suggestions-label')).toHaveText('Saved search')
+  await expect(options(page).locator('.option-label')).toHaveText(['errors', 'slow requests'])
+  await page.keyboard.type('sl')
+  await page.keyboard.press('Tab')
+  await expect(chips(page)).toHaveText(['-errors', '"slow requests"'])
+  await expect(host).toHaveJSProperty('value', '-:errors :"slow requests"')
+  await expect(host).not.toHaveState('invalid')
+
+  // Without a key-less field, a leading colon stays free text.
+  await host.evaluate((element: QueryInput) => (element.fields = [{ key: 'env' }]))
+  await expect(chips(page)).toHaveCount(0)
+  await expect(host).toHaveJSProperty('value', '-:errors :"slow requests"')
+})
+
 test('a value with spaces is quoted, and a click picks a suggestion', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-query-input fields='${FIELDS}' aria-label="Query"></c2-query-input>`)
   const input = page.getByRole('combobox', { name: 'Query' })
@@ -306,11 +333,11 @@ test('the in-text highlight keeps the input metrics and scrolls with a long quer
   const widths = await host.evaluate((element) => {
     const root = element.shadowRoot!
     const field = root.querySelector('input')!
-    const style = getComputedStyle(field)
-    return {
-      input: field.scrollWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
-      text: root.querySelector<HTMLElement>('.highlight-text')!.getBoundingClientRect().width,
-    }
+    // Measured without padding: Chromium counts an input's padding in scrollWidth and Firefox does not.
+    field.style.padding = '0'
+    const input = field.scrollWidth
+    field.style.padding = ''
+    return { input, text: root.querySelector<HTMLElement>('.highlight-text')!.getBoundingClientRect().width }
   })
   expect(Math.abs(widths.input - widths.text)).toBeLessThanOrEqual(2)
   const offsets = () =>
