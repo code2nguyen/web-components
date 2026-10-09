@@ -3,6 +3,44 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.7](https://github.com/code2nguyen/web-components/releases/tag/v1.0.7) — 2026-10-09
+
+### Features
+
+- **flow:** Edges attach to the side of a node they were drawn from ([714a307](https://github.com/code2nguyen/web-components/commit/714a307))
+- **flow:** Fit-min-zoom keeps a fitted flow readable ([80663e7](https://github.com/code2nguyen/web-components/commit/80663e7))
+- **masonry:** Min-rows and min-cols bound how small a user can resize a tile ([a76ec6c](https://github.com/code2nguyen/web-components/commit/a76ec6c))
+- **query-input:** Show key:value filters as c2-chip elements that switch off and on or are removed ([6ae81ab](https://github.com/code2nguyen/web-components/commit/6ae81ab))
+- **phone-input:** Add --c2-phone-input__country--display to hide the country prefix ([bf5cf93](https://github.com/code2nguyen/web-components/commit/bf5cf93))
+- **state-timeline:** Quiet baseline, row summaries and a shared time line ([8422ffa](https://github.com/code2nguyen/web-components/commit/8422ffa))
+- **popconfirm:** Style c2-popconfirm as a tooltip bubble with an arrow ([55579b6](https://github.com/code2nguyen/web-components/commit/55579b6))
+- **key-value-editor:** Add view mode and locked keys ([6395686](https://github.com/code2nguyen/web-components/commit/6395686))
+- **query-input:** Draw key:value terms as chips; reopen suggestions when the caret moves ([655efd7](https://github.com/code2nguyen/web-components/commit/655efd7))
+- **phone-input:** A single allowed country is a fixed prefix with no picker ([76324c7](https://github.com/code2nguyen/web-components/commit/76324c7))
+- **confirm-dialog:** Add c2-confirm-dialog with a promise-based confirm() ([7e2a0d7](https://github.com/code2nguyen/web-components/commit/7e2a0d7))
+- **state-timeline:** Add c2-state-timeline ([49a13a4](https://github.com/code2nguyen/web-components/commit/49a13a4))
+- **popconfirm:** Add c2-popconfirm, an "Are you sure?" popup anchored to its trigger ([1f60cfd](https://github.com/code2nguyen/web-components/commit/1f60cfd))
+- **query-input:** Add c2-query-input, a key:value query field with highlighting and suggestions ([fe7c0a5](https://github.com/code2nguyen/web-components/commit/fe7c0a5))
+- **trace-waterfall:** Add c2-trace-waterfall, a span tree with offset duration bars on one time axis ([bcb8081](https://github.com/code2nguyen/web-components/commit/bcb8081))
+- **key-value-editor:** Add c2-key-value-editor ([ef13328](https://github.com/code2nguyen/web-components/commit/ef13328))
+- **phone-input:** Add c2-phone-input, a phone field with a country picker and an E.164 value ([ee63d69](https://github.com/code2nguyen/web-components/commit/ee63d69))
+- **relative-time:** Add c2-relative-time ([24028dc](https://github.com/code2nguyen/web-components/commit/24028dc))
+- **password-field:** Add c2-password-field, a password input with reveal toggle, strength meter and requirements checklist ([a90a06f](https://github.com/code2nguyen/web-components/commit/a90a06f))
+- **checkbox:** Add c2-checkbox-group ([78b67b9](https://github.com/code2nguyen/web-components/commit/78b67b9))
+
+### Fixes
+
+- **flow:** Delete removes an edge selected by a click when focus was outside the flow ([d2a3e7a](https://github.com/code2nguyen/web-components/commit/d2a3e7a))
+- **query-input:** Keep the icon and clear button in place while the chips wrap ([a425221](https://github.com/code2nguyen/web-components/commit/a425221))
+- **trace-waterfall:** Fit narrow containers and keep every duration label readable ([d014f28](https://github.com/code2nguyen/web-components/commit/d014f28))
+- **state-timeline:** Fill the container and drop labels from narrow segments ([7150ba2](https://github.com/code2nguyen/web-components/commit/7150ba2))
+- **phone-input:** Fit narrow columns, rank name-prefix search matches first, darken the calling code ([63e3746](https://github.com/code2nguyen/web-components/commit/63e3746))
+
+### Docs site & examples
+
+- **ui:** Open the confirm-dialog examples by id, since each c2-* in an MDX fence is its own island ([8fea850](https://github.com/code2nguyen/web-components/commit/8fea850))
+- **ui:** Alias the share-2 icon import as FeatherShare_2 in the todo-list docs ([0a69d86](https://github.com/code2nguyen/web-components/commit/0a69d86))
+
 ## [1.0.6](https://github.com/code2nguyen/web-components/releases/tag/v1.0.6) — 2026-10-08
 
 ### Features
