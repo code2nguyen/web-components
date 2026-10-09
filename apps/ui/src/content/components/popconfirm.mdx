@@ -1,0 +1,47 @@
+---
+title: 'Popconfirm'
+description: 'A small "Are you sure?" popup anchored to the button that asked for it.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Popconfirm } from '@c2n/components/popconfirm'
+
+`c2-popconfirm` asks for confirmation right next to the button that needs it: delete a row, revoke a key, discard a draft. Put the button in the `trigger` slot. Clicking it opens a popup with the question (`heading`, or the `heading` slot), an optional description in the default slot, and a Cancel / OK pair (`cancel-label`, `confirm-label`). Focus moves to Cancel, the least destructive choice. It looks like `c2-tooltip` rather than a dialog: a compact dark bubble with an arrow pointing at the trigger (`--c2-popconfirm__arrow--size: 0px` removes it). The popup is a non-modal `alertdialog` in the top layer, so no `overflow: hidden` ancestor clips it. It prefers `placement` (default `top`) and flips when there is no room.
+
+Every opening ends in exactly one event. OK fires `confirm`. Cancel, Escape, a click outside and focus moving away fire `cancel`. `confirm` is cancelable: call `preventDefault()` to keep the popup open while the action runs, set `pending` to show OK as busy, then set `open` to `false` when it finishes. For a decision that needs more room, or one not tied to a button, use `c2-confirm-dialog`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/popconfirm'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/popconfirm
+<style>
+  .usage-popconfirm.destructive {
+    --c2-popconfirm__icon--color: #f87171;
+    --c2-popconfirm__confirm--background-color: #dc2626;
+    --c2-popconfirm__confirm--color: #ffffff;
+    --c2-popconfirm__confirm__hover--background-color: #b91c1c;
+  }
+  .usage-popconfirm.plain {
+    --c2-popconfirm__icon--display: none;
+  }
+</style>
+<div data-label="Delete">
+  <c2-popconfirm class="usage-popconfirm destructive" heading="Delete this task?" confirm-label="Delete" client:only="lit"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>
+</div>
+<div data-label="Placements">
+  <c2-popconfirm heading="Archive the project?" placement="bottom" client:only="lit"><c2-button slot="trigger">Bottom</c2-button></c2-popconfirm>
+  <c2-popconfirm heading="Archive the project?" placement="left" client:only="lit"><c2-button slot="trigger">Left</c2-button></c2-popconfirm>
+  <c2-popconfirm heading="Archive the project?" placement="right" client:only="lit"><c2-button slot="trigger">Right</c2-button></c2-popconfirm>
+</div>
+<div data-label="No icon, custom labels">
+  <c2-popconfirm class="usage-popconfirm plain" heading="Leave without saving?" confirm-label="Leave" cancel-label="Stay" client:only="lit"><c2-button slot="trigger">Close editor</c2-button>Your changes to this page will be lost.</c2-popconfirm>
+</div>
+```

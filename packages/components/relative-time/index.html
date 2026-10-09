@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-relative-time</title>
+    <script type="module" src="/src/relative-time.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 12px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .muted {
+        --c2-relative-time--color: #71717a;
+        --c2-relative-time--font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Deployed <c2-relative-time id="seconds"></c2-relative-time></p>
+    <p>Edited <c2-relative-time id="minutes"></c2-relative-time></p>
+    <p>Renews <c2-relative-time id="future"></c2-relative-time></p>
+    <p>Short: <c2-relative-time id="short" format="short"></c2-relative-time></p>
+    <p>Always numeric: <c2-relative-time id="numeric" numeric="always"></c2-relative-time></p>
+    <p lang="fr">Français : <c2-relative-time id="french"></c2-relative-time></p>
+    <p class="muted">Updated <c2-relative-time id="muted"></c2-relative-time></p>
+    <p>Last login: <c2-relative-time>Never</c2-relative-time></p>
+    <script type="module">
+      const now = Date.now()
+      const set = (id, offset) => (document.getElementById(id).date = new Date(now + offset))
+      set('seconds', -5_000)
+      set('minutes', -3 * 60_000)
+      set('future', 2 * 86_400_000)
+      set('short', -5 * 3_600_000)
+      set('numeric', -86_400_000)
+      set('french', -86_400_000)
+      set('muted', -40 * 86_400_000)
+    </script>
+  </body>
+</html>

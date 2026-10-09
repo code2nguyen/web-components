@@ -265,6 +265,16 @@ export const overrides: Record<string, Override> = {
   // Dependency arrows are structure, drawn at the strength of a resting control border rather than as text.
   '--c2-gantt__link--color': { token: 'color-outline-strong' },
   '--c2-gantt__tooltip--box-shadow': { token: 'shadow-md' },
+  // A state timeline's numeric tones and automatic colours are slots of the chart palette too.
+  '--c2-state-timeline__series-1--color': { token: 'chart-series-1' },
+  '--c2-state-timeline__series-2--color': { token: 'chart-series-2' },
+  '--c2-state-timeline__series-3--color': { token: 'chart-series-3' },
+  '--c2-state-timeline__series-4--color': { token: 'chart-series-4' },
+  '--c2-state-timeline__series-5--color': { token: 'chart-series-5' },
+  '--c2-state-timeline__series-6--color': { token: 'chart-series-6' },
+  '--c2-state-timeline__series-7--color': { token: 'chart-series-7' },
+  '--c2-state-timeline__series-8--color': { token: 'chart-series-8' },
+  '--c2-state-timeline__tooltip--box-shadow': { token: 'shadow-md' },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
@@ -457,8 +467,32 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  // Query input: the token colours are syntax hues like the JSON viewer's, paired the same way; negations and unknown
+  // keys are the error colour, and the selection is a translucent accent wash over either surface.
+  '--c2-query-input__key--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__value--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#116329, #7ee787) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__comparator--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__operator--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#6f42c1, #c297ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__negation--color': { token: 'color-error' },
+  '--c2-query-input__invalid--color': { token: 'color-error' },
+  '--c2-query-input__selection--background': { exclude: 'translucent accent wash works on any surface' },
+  '--c2-query-input__term__negated--background': { exclude: 'translucent error wash works on any surface' },
+  '--c2-query-input__filter__negated--background': { exclude: 'translucent error wash works on any surface' },
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
+  '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -476,6 +510,8 @@ export const overrides: Record<string, Override> = {
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-query-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-phone-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-password-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
@@ -776,4 +812,21 @@ export const overrides: Record<string, Override> = {
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
   '--c2-month-planner__handle--color': { token: 'color-on-fill' },
+  // Popconfirm is a tooltip-style bubble on the inverse surface. The warning sign keeps its amber across brand themes
+  // (there is no warning token), and OK while pending dims like any disabled control.
+  '--c2-popconfirm--background-color': { token: 'color-inverse-surface' },
+  '--c2-popconfirm--color': { token: 'color-on-inverse-surface' },
+  '--c2-popconfirm__confirm--color': onPrimary,
+  '--c2-popconfirm__cancel--border': { exclude: 'derived from the bubble text colour' },
+  '--c2-popconfirm__cancel__hover--background-color': { exclude: 'derived from the bubble text colour' },
+  '--c2-popconfirm__icon--color': { exclude: 'semantic warning colour' },
+  '--c2-popconfirm__confirm__pending--opacity': { token: 'disabled-opacity' },
+  // Confirm dialog: the destructive confirm button is a solid red fill, like the indicator's danger tone. The error
+  // token lightens in a dark theme, where white text on it falls below 3:1, so the fill and its states stay fixed and
+  // only the text takes `color-on-fill`. Its focus ring matches the red fill instead of the accent focus ring.
+  '--c2-confirm-dialog__confirm-button__destructive--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive--color': { token: 'color-on-fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__hover--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__active--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__focus--outline': { exclude: 'focus ring matches the destructive fill' },
 }

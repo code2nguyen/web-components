@@ -1,0 +1,452 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-state-timeline,
+  $theme: (
+    width: 100%,
+    background: #ffffff,
+    color: #18181b,
+    font-family: inherit,
+    font-size: 12px,
+    gap: 12px,
+    heading--font-weight: 600,
+    label--width: 120px,
+    label--color: #18181b,
+    label--font-weight: 500,
+    summary--width: 72px,
+    summary--color: #18181b,
+    row--height: 24px,
+    row--gap: 8px,
+    row--border-top: 0px solid transparent,
+    track--background: #f4f4f5,
+    track--border-radius: 4px,
+    segment--height: 100%,
+    segment--gap: 1px,
+    segment--border-radius: 0px,
+    segment--background-mix: 100%,
+    segment--color: #ffffff,
+    segment--font-weight: 500,
+    segment__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    segment__empty--border: 1px dashed #bcbcc6,
+    segment__baseline--background-mix: 24%,
+    segment__baseline--height: 100%,
+    axis--color: #71717a,
+    axis--border-top: 1px solid #e4e4e7,
+    crosshair--color: #18181b,
+    marker--color: #71717a,
+    marker--border-left: 1px solid #bcbcc6,
+    legend--color: #71717a,
+    swatch--size: 8px,
+    swatch--border-radius: 999px,
+    tooltip--background: #ffffff,
+    tooltip--color: #18181b,
+    tooltip--muted-color: #71717a,
+    tooltip--border: 1px solid #d4d4d8,
+    tooltip--border-radius: 8px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--width: 280px,
+    tone-primary--color: rgb(2, 101, 220),
+    tone-success--color: #15803d,
+    tone-warning--color: #a16207,
+    tone-danger--color: #dc2626,
+    tone-neutral--color: #71717a,
+    series-1--color: #0265dc,
+    series-2--color: #ea580c,
+    series-3--color: #0f766e,
+    series-4--color: #db2777,
+    series-5--color: #a16207,
+    series-6--color: #7c3aed,
+    series-7--color: #0891b2,
+    series-8--color: #52525b,
+    empty--color: #71717a,
+    empty--padding: 32px 16px,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  // A timeline has no intrinsic width (its segments are percentages), so it fills its container by default rather
+  // than shrinking to nothing in a centring flex or grid parent.
+  width: css.cssVar(width);
+  min-width: 0;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  color: css.cssVar(color);
+}
+
+.frame {
+  --_surface: #{css.cssVar(background)};
+  --_label: #{css.cssVar(label--width)};
+  --_summary: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  background: var(--_surface);
+}
+.frame.has-summary {
+  --_summary: #{css.cssVar(summary--width)};
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- header: heading slot and legend ---- */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+}
+.header[hidden] {
+  display: none;
+}
+.heading {
+  font-weight: css.cssVar(heading--font-weight);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+  color: css.cssVar(legend--color);
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.legend b {
+  color: css.cssVar(color);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- plot: every lane shares the label | track | summary columns ---- */
+.plot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row,
+.lanes {
+  display: grid;
+  grid-template-columns: var(--_label) minmax(0, 1fr) var(--_summary);
+  align-items: center;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(row--gap);
+}
+.row {
+  border-top: css.cssVar(row--border-top);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  padding-right: 12px;
+  color: css.cssVar(label--color);
+  font-weight: css.cssVar(label--font-weight);
+}
+.label-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.summary {
+  overflow: hidden;
+  padding-left: 12px;
+  color: css.cssVar(summary--color);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.track {
+  position: relative;
+  height: css.cssVar(row--height);
+  background: css.cssVar(track--background);
+  border-radius: css.cssVar(track--border-radius);
+}
+
+/* ---- segments ---- */
+.segment {
+  --_tone: #{css.cssVar(tone-neutral--color)};
+  position: absolute;
+  top: 50%;
+  height: css.cssVar(segment--height);
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  // The gap is carved out of both sides of each segment, so the segments keep their exact start and end times.
+  border-right: calc(#{css.cssVar(segment--gap)} / 2) solid transparent;
+  border-left: calc(#{css.cssVar(segment--gap)} / 2) solid transparent;
+  background-clip: padding-box;
+  background-color: color-mix(in srgb, var(--_tone) #{css.cssVar(segment--background-mix)}, var(--_surface));
+  border-radius: css.cssVar(segment--border-radius);
+  color: css.cssVar(segment--color);
+  font-weight: css.cssVar(segment--font-weight);
+  outline: none;
+  cursor: default;
+  container-type: size;
+}
+// The ends of the band round like the track, and carry no gap against its edges.
+.segment.at-start {
+  border-left-width: 0;
+  border-top-left-radius: css.cssVar(track--border-radius);
+  border-bottom-left-radius: css.cssVar(track--border-radius);
+}
+.segment.at-end {
+  border-right-width: 0;
+  border-top-right-radius: css.cssVar(track--border-radius);
+  border-bottom-right-radius: css.cssVar(track--border-radius);
+}
+.segment.is-baseline {
+  height: css.cssVar(segment__baseline--height);
+  background-color: color-mix(
+    in srgb,
+    var(--c2-state-timeline__segment__baseline--color, var(--_tone)) #{css.cssVar(segment__baseline--background-mix)},
+    var(--_surface)
+  );
+}
+.segment:focus-visible {
+  z-index: 1;
+  outline: css.cssVar(segment__focus--outline);
+  outline-offset: 1px;
+}
+.segment.is-empty {
+  background: transparent;
+}
+.segment.is-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: css.cssVar(segment__empty--border);
+  border-radius: inherit;
+}
+
+.segment-label {
+  overflow: hidden;
+  padding: 0 6px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+// A label that would show only an ellipsis, or not fit the height, says nothing; the tooltip and the accessible name
+// still carry the state.
+@container (max-width: 64px) or (max-height: 15px) {
+  .segment-label {
+    display: none;
+  }
+}
+
+/* ---- tones ---- */
+@each $tone in primary, success, warning, danger, neutral {
+  .tone-#{$tone} {
+    --_tone: #{css.cssVar(tone-#{$tone}--color)};
+  }
+}
+@for $slot from 1 through 8 {
+  .tone-#{$slot} {
+    --_tone: #{css.cssVar(series-#{$slot}--color)};
+  }
+}
+
+.swatch {
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(swatch--size);
+  height: css.cssVar(swatch--size);
+  background: var(--_tone);
+  border-radius: css.cssVar(swatch--border-radius);
+}
+.swatch.is-empty {
+  background: transparent;
+  border: css.cssVar(segment__empty--border);
+}
+
+/* ---- markers ---- */
+.lane {
+  position: relative;
+  min-width: 0;
+}
+.markers .lane {
+  height: calc(var(--_levels, 1) * 22px);
+}
+// Each level lifts a label 22px; its stem grows to still reach the bands.
+.marker {
+  position: absolute;
+  bottom: calc(var(--_level, 0) * 22px);
+  padding-bottom: 7px;
+  transform: translateX(-50%);
+  color: css.cssVar(marker--color);
+  white-space: nowrap;
+}
+.marker::after {
+  content: '';
+  position: absolute;
+  bottom: calc(var(--_level, 0) * -22px);
+  left: 50%;
+  height: calc(5px + var(--_level, 0) * 22px);
+  border-left: css.cssVar(marker--border-left);
+}
+.marker.at-start {
+  transform: none;
+}
+.marker.at-start::after {
+  left: 0;
+}
+.marker.at-end {
+  transform: translateX(-100%);
+}
+.marker.at-end::after {
+  left: auto;
+  right: 0;
+}
+
+/* ---- axis ---- */
+.axis-track {
+  height: 1.6em;
+  padding-top: 4px;
+  border-top: css.cssVar(axis--border-top);
+  color: css.cssVar(axis--color);
+  font-variant-numeric: tabular-nums;
+}
+.tick {
+  position: absolute;
+  top: 5px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.tick::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  height: 4px;
+  border-left: css.cssVar(axis--border-top);
+}
+.tick.at-start {
+  transform: none;
+}
+.tick.at-start::before {
+  left: 0;
+}
+.tick.at-end {
+  transform: translateX(-100%);
+}
+.tick.at-end::before {
+  left: auto;
+  right: 0;
+}
+
+/* ---- crosshair ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  align-items: stretch;
+  pointer-events: none;
+}
+.crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  border-left: 1px dashed css.cssVar(crosshair--color);
+}
+.crosshair-time {
+  position: absolute;
+  top: 3px;
+  z-index: 3;
+  padding: 1px 6px;
+  transform: translateX(-50%);
+  background: css.cssVar(crosshair--color);
+  color: var(--_surface);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ---- tooltip ---- */
+// A top-layer popover placed with fixed coordinates by the component; these reset the UA popover box.
+.tooltip {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  width: css.cssVar(tooltip--width);
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  padding: 10px 12px;
+  // Shown only as an open popover, so a browser without the popover API shows no tooltip rather than a stray box.
+  display: none;
+  background: css.cssVar(tooltip--background);
+  color: css.cssVar(tooltip--color);
+  border: css.cssVar(tooltip--border);
+  border-radius: css.cssVar(tooltip--border-radius);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.tooltip:popover-open {
+  display: grid;
+  gap: 4px;
+}
+.tooltip-time {
+  margin-bottom: 2px;
+  color: css.cssVar(tooltip--muted-color);
+}
+.tooltip-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.tooltip-row.is-focus {
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+.tooltip-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tooltip-row.is-exception .tooltip-name {
+  font-weight: 600;
+}
+.tooltip-left {
+  color: css.cssVar(tooltip--muted-color);
+  white-space: nowrap;
+}
+.tooltip-focus {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: css.cssVar(tooltip--border);
+  color: css.cssVar(tooltip--muted-color);
+}
+
+/* ---- states ---- */
+.empty {
+  display: grid;
+  place-items: center;
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}

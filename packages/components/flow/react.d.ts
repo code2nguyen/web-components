@@ -28,6 +28,7 @@ declare module 'react' {
         'storage-key'?: Attribute
         'no-double-click-add'?: Attribute
         'actions-placement'?: Attribute
+        'fit-min-zoom'?: Attribute
         'no-card'?: Attribute
         'no-context-menu'?: Attribute
         'open-delay'?: Attribute

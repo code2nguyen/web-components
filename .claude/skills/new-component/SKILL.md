@@ -42,7 +42,9 @@ npm install                                     # link the new workspace into no
 `npm install` afterwards is not optional: it creates the `node_modules/@c2n/<name>` workspace symlink. Without it
 `npm run ui:build` fails with `failed to resolve import "@c2n/<name>/custom-elements.json"`.
 
-Verify with `git status --short` that exactly those files changed (`scripts/generator/plopfile.js` is git-ignored and rebuilt by `pregenerate`, so it never shows up).
+Each registry entry lands at its alphabetical place (`scripts/generator/sorted-lists.ts`), so a component PR does not conflict with another one open at the same time; keep it there if you touch those lists by hand.
+
+Verify with `git status --short` that exactly those files changed (`scripts/generator/plopfile.js` and `sorted-lists.js` are git-ignored and rebuilt by `pregenerate`, so they never show up).
 
 ## 3. Implement the component
 
@@ -87,6 +89,7 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 npm run build -w packages/components/<name>   # type-check + vite build; regenerates custom-elements.json (commit it)
 npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
+npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 npm run lint && npm run format:check          # or: npm run fix
 npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
 npm test                                      # the new package's Playwright suite
@@ -103,6 +106,7 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - the package stays private (`"private": true`): it ships only inside `@c2n/components`; `npm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
+- `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
 - `npm run build:tools` run; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - `apps/ui/src/store/component-manifests.ts` import + entry

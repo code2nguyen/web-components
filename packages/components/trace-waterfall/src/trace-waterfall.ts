@@ -19,7 +19,6 @@ import {
 import styles from './trace-waterfall.scss?inline'
 
 export type { TraceSpan, TraceSpanStatus, TraceTimeUnit } from './trace-model.js'
-export { formatDuration } from './trace-model.js'
 
 /** Number of series colours; services beyond it reuse them in order. */
 const SERIES = 8
