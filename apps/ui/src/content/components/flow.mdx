@@ -30,7 +30,7 @@ The entry also registers `c2-context-menu` and `c2-menu`, which it renders inter
 
 ## Usage
 
-Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the last one is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag a node's handle to connect it, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the sixth places its nodes itself and runs edges between chosen sides (see [Sides](#sides)); the last one is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag one of the four handles on a node's sides to connect it from that side, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
 
 ```html tag=UsageBlock,package=@c2n/flow
 <style>
@@ -91,6 +91,11 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
     <c2-flow client:only="lit" class="short diagram" aria-label="Getting home" nodes='[{"id":"missed","label":"Missed the last train?"},{"id":"bus","label":"Book the night bus"},{"id":"walk","label":"Walk to the station"},{"id":"home","label":"Home"}]' edges='[{"source":"missed","target":"bus","label":"yes"},{"source":"missed","target":"walk","label":"no"},{"source":"bus","target":"home"},{"source":"walk","target":"home"}]'></c2-flow>
   </div>
 </div>
+<div data-label="Sides">
+  <div class="demo">
+    <c2-flow client:only="lit" class="short diagram" aria-label="Review loop" nodes='[{"id":"write","label":"Write","position":{"x":0,"y":0}},{"id":"review","label":"Review","position":{"x":280,"y":0}},{"id":"fix","label":"Fix","position":{"x":280,"y":130}},{"id":"ship","label":"Ship","position":{"x":560,"y":0}}]' edges='[{"source":"write","target":"review"},{"source":"review","target":"fix","sourceSide":"bottom","targetSide":"top","label":"changes"},{"source":"fix","target":"write","sourceSide":"left","targetSide":"bottom"},{"source":"review","target":"ship","label":"approved"}]'></c2-flow>
+  </div>
+</div>
 <div data-label="Editable">
   <div class="demo">
     <c2-flow client:only="lit" data-flow-demo="editable" editable actions-placement="left" class="short" aria-label="Flow note" nodes='[{"id":"idea","label":"Idea"},{"id":"outline","label":"Outline"},{"id":"draft","label":"First draft"}]' edges='[{"source":"idea","target":"outline","label":"worth it"},{"source":"outline","target":"draft"}]'>
@@ -107,17 +112,19 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
 
 With `editable` the user draws the diagram. The flow stays controlled, like a form field with a `value`: it never changes `nodes` or `edges` itself, it fires an event and your application applies the change (and can refuse it, or save it first). None of the events bubble.
 
-| Gesture                                                          | Keyboard                                                                                               | Event                                   |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| Double-click empty canvas, or **Add node** in the canvas menu    | `N` (beside the focused node, else in the middle of the view), or Enter on the canvas of an empty flow | `node-add` `{ position }`               |
-| Drag a node's handle and release on empty canvas                 | `N` on the selected node                                                                               | `node-add` `{ position, source }`       |
-| Drag a node's handle onto another node                           | `C`, then the arrow keys or Tab to choose, Enter to connect, Escape to cancel                          | `edge-add` `{ source, target }`         |
-| Double-click a node, or **Rename** in its menu                   | F2, or Enter on the selected node; Enter commits, Escape cancels                                       | `node-edit` `{ id, label }`             |
-| Double-click an edge or its label, or **Edit label** in its menu | F2 or Enter on the selected edge; Enter commits, Escape cancels                                        | `edge-edit` `{ source, target, label }` |
-| **Delete** in a node's menu                                      | Delete or Backspace on the focused node                                                                | `node-delete` `{ id }`                  |
-| Click an edge, then Delete; or **Delete** in its menu            | `E` on a node selects its edges in turn, then Delete                                                   | `edge-delete` `{ source, target }`      |
+| Gesture                                                          | Keyboard                                                                                               | Event                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Double-click empty canvas, or **Add node** in the canvas menu    | `N` (beside the focused node, else in the middle of the view), or Enter on the canvas of an empty flow | `node-add` `{ position }`                                 |
+| Drag a node's side handle and release on empty canvas            | `N` on the selected node                                                                               | `node-add` `{ position, source, sourceSide, targetSide }` |
+| Drag a node's side handle onto another node                      | `C`, then the arrow keys or Tab to choose, Enter to connect, Escape to cancel                          | `edge-add` `{ source, target, sourceSide, targetSide }`   |
+| Double-click a node, or **Rename** in its menu                   | F2, or Enter on the selected node; Enter commits, Escape cancels                                       | `node-edit` `{ id, label }`                               |
+| Double-click an edge or its label, or **Edit label** in its menu | F2 or Enter on the selected edge; Enter commits, Escape cancels                                        | `edge-edit` `{ source, target, label }`                   |
+| **Delete** in a node's menu                                      | Delete or Backspace on the focused node                                                                | `node-delete` `{ id }`                                    |
+| Click an edge, then Delete; or **Delete** in its menu            | `E` on a node selects its edges in turn, then Delete                                                   | `edge-delete` `{ source, target }`                        |
 
 `edge-add` never names a self-loop or an edge that already exists. `position` is in canvas pixels, the top-left corner of the new node: give it to the node as its `position` and the flow puts it there. While the flow is editable, a change to the graph never moves the nodes that are already on the canvas: their positions are pinned as a custom layout, saved under `storage-key` and reported by `layout-change` with the reason `edit`. A node the keyboard or `addNode()` asked for is selected and focused once you add it, and the view pans to show it when it landed out of sight.
+
+An editable node shows a handle in the middle of each of its four sides while it is hovered, focused or selected, and a connection leaves by the side whose handle was dragged. Released on a node, it arrives by the handle it was dropped on, or else by the side of that node nearest the pointer; the handle of that side lights up while the connection is drawn. `edge-add` reports both as `sourceSide` and `targetSide` (`top`, `right`, `bottom` or `left`): add them to the edge and it is drawn between those sides. Dropped on empty canvas, `node-add` carries `sourceSide` and the new node's `targetSide`, the side facing back to the source, which `position` puts on the drop point. A connection made with the keyboard (`C`) goes from the outgoing side of the `direction` to the incoming one: `right` to `left` in `LR`, `bottom` to `top` in `TB`.
 
 `no-double-click-add` turns off adding a node by double-clicking (or double-tapping) empty canvas, for an editor whose toolbar has an add button: a double-click on the canvas then never drops a node where the user only meant to deselect. **Add node** in the canvas menu, `N` and `addNode()` still add one.
 
@@ -134,7 +141,7 @@ let next = 1
 flow.addEventListener('node-add', async ({ detail }) => {
   const id = `note-${next++}`
   flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]
-  if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id }]
+  if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id, sourceSide: detail.sourceSide, targetSide: detail.targetSide }]
   await flow.updateComplete
   flow.editLabel(id) // let the user name it straight away
 })
@@ -146,7 +153,7 @@ flow.addEventListener('node-delete', ({ detail }) => {
   flow.edges = flow.edges.filter((edge) => edge.source !== detail.id && edge.target !== detail.id)
 })
 flow.addEventListener('edge-add', ({ detail }) => {
-  flow.edges = [...flow.edges, detail]
+  flow.edges = [...flow.edges, detail] // source, target, sourceSide, targetSide
 })
 flow.addEventListener('edge-delete', ({ detail }) => {
   flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
@@ -194,6 +201,17 @@ c2-flow.diagram {
 }
 ```
 
+## Sides
+
+An edge leaves its source by the outgoing side of the `direction` and arrives by the incoming side (right to left in `LR`, bottom to top in `TB`), and an edge closing a cycle loops round the outside of the nodes. Give it a `sourceSide` or a `targetSide` (`top`, `right`, `bottom` or `left`) and it runs from the middle of that side instead, leaving and arriving perpendicular to it, with either `edge-type`: a side left out keeps its default. A `step` edge goes round both nodes rather than through them, and so does a `bezier` edge whose curve would cut through one, for example into the far side of a node behind its source. The dots where edges meet a node, its arrowhead and its label follow. The auto layout does not read the sides, so give the nodes a `position` when the sides only make sense in a layout of your own.
+
+```html tag=CodeBlock
+<c2-flow
+  nodes='[{"id":"review","label":"Review","position":{"x":280,"y":0}},{"id":"fix","label":"Fix","position":{"x":280,"y":130}}, …]'
+  edges='[{"source":"review","target":"fix","sourceSide":"bottom","targetSide":"top","label":"changes"}, …]'
+></c2-flow>
+```
+
 ## Custom nodes and cards
 
 `renderNode` returns the body of every node and `renderCard` the content of its hover card, as a Lit template, a DOM node or a string. Handles, dragging, edges and positioning stay with the flow. A framework that renders its own markup can use the `node:<id>` and `card:<id>` slots instead.
@@ -231,5 +249,11 @@ flow.addEventListener('flow-menu-select', ({ detail }) => {
 ## Layout
 
 The saved layout is a plain object of positions keyed by node id. `getLayout()` returns the current one and `setLayout()` applies one (merged like a restored layout), so it can live on a server instead of in `localStorage`; `layout-change` fires whenever the user changes it. `resetLayout()` goes back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` drive the view from your own controls.
+
+Fitting scales the whole graph into the box, never above 100%; it happens on the first render, on `fitView()`, and when the box is resized or the data changes before the user has panned or zoomed. `fit-min-zoom` (0.25 to 1, default 0.25) is the least zoom it may choose, for a small preview whose labels must stay readable: a flow too large for its box at that zoom shows its start instead of its middle, the first step at the left edge (`direction="LR"`) or the top edge (`"TB"`), centred across when it fits that way. Changing it refits an untouched view. Zooming by hand still goes from 25% to 200%.
+
+```html tag=CodeBlock
+<c2-flow class="preview" locked no-context-menu no-card fit-min-zoom="0.6"></c2-flow>
+```
 
 A node can also carry its own `position`. The flow places it there instead of where the auto layout would, unless the user has already moved it (a saved or dragged position wins over the one the node first arrived with); changing the value later moves the node. Nodes without one still follow the auto layout, placed next to their neighbours.

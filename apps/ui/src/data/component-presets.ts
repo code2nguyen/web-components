@@ -598,6 +598,80 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-relative-time': {
+    html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for feed and card metadata',
+        css: {
+          '--c2-relative-time--color': '#71717a',
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'short' },
+      },
+      {
+        name: 'Emphasis',
+        description: 'Bold phrase that stands out in a sentence',
+        css: {
+          '--c2-relative-time--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow format for tight table cells',
+        css: {
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'narrow' },
+      },
+    ],
+  },
+  'c2-state-timeline': {
+    html: `<c2-state-timeline style="width: 100%" aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
+    presets: [
+      {
+        name: 'Minimal strip',
+        description: 'A hairline for the normal state and thin pills for the exceptions, with rules between bands',
+        css: {
+          '--c2-state-timeline__row--height': '32px',
+          '--c2-state-timeline__row--gap': '0px',
+          '--c2-state-timeline__row--border-top': '1px solid #e4e4e7',
+          '--c2-state-timeline__track--background': 'transparent',
+          '--c2-state-timeline__track--border-radius': '999px',
+          '--c2-state-timeline__segment--height': '8px',
+          '--c2-state-timeline__segment--gap': '0px',
+          '--c2-state-timeline__segment--border-radius': '999px',
+          '--c2-state-timeline__segment__baseline--height': '2px',
+          '--c2-state-timeline__segment__baseline--background-mix': '100%',
+          '--c2-state-timeline__segment__baseline--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Thin bands for a dashboard tile, legend hidden',
+        css: {
+          '--c2-state-timeline__label--width': '88px',
+          '--c2-state-timeline__summary--width': '56px',
+          '--c2-state-timeline__row--height': '12px',
+          '--c2-state-timeline__row--gap': '4px',
+          '--c2-state-timeline__track--border-radius': '2px',
+        },
+        attributes: { 'hide-legend': '' },
+      },
+      {
+        name: 'Blocks',
+        description: 'Separated, rounded blocks on a bare track',
+        css: {
+          '--c2-state-timeline__track--background': 'transparent',
+          '--c2-state-timeline__segment--gap': '4px',
+          '--c2-state-timeline__segment--border-radius': '6px',
+          '--c2-state-timeline__track--border-radius': '6px',
+          '--c2-state-timeline__segment__baseline--background-mix': '30%',
+        },
+      },
+    ],
+  },
   'c2-truncate': {
     html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
     presets: [
@@ -897,6 +971,99 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-query-input': {
+    html: `<c2-query-input value='service:web -status:>=500 "timed out"' aria-label="Query" style="width: 320px"></c2-query-input>`,
+    presets: [
+      {
+        name: 'Log explorer',
+        description: 'Monospace and compact on a tinted bar, with violet keys and teal values, for a logs or traces search.',
+        css: {
+          '--c2-query-input--font-family': 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+          '--c2-query-input--font-size': '12px',
+          '--c2-query-input--min-height': '32px',
+          '--c2-query-input--border-radius': '4px',
+          '--c2-query-input--background': '#f4f4f5',
+          '--c2-query-input__focus--background': '#ffffff',
+          '--c2-query-input__key--color': '#632ca6',
+          '--c2-query-input__value--color': '#0f6b5c',
+        },
+      },
+      {
+        name: 'Blue chips',
+        description: 'Pill-shaped blue chips, for a filter bar that reads as a row of tags.',
+        css: {
+          '--c2-query-input--min-height': '40px',
+          '--c2-query-input--border-radius': '8px',
+          '--c2-query-input__filter--border-radius': '999px',
+          '--c2-query-input__filter--background': '#dbeafe',
+          '--c2-query-input__filter__hover--background': '#bfdbfe',
+          '--c2-query-input__term--border-radius': '999px',
+          '--c2-query-input__term--background': '#dbeafe',
+          '--c2-query-input__key--color': '#1d4ed8',
+          '--c2-query-input__separator--color': '#1d4ed8',
+          '--c2-query-input__value--color': '#1e3a8a',
+        },
+      },
+    ],
+  },
+  'c2-password-field': {
+    html: `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width: 260px"></c2-password-field>`,
+    presets: [
+      {
+        name: 'Pill',
+        description: 'Fully rounded and a little taller, with a round toggle and a focus ring, for a sign-in card.',
+        css: {
+          '--c2-password-field--min-height': '40px',
+          '--c2-password-field--padding': '8px 8px 8px 18px',
+          '--c2-password-field--border-radius': '999px',
+          '--c2-password-field__toggle--size': '28px',
+          '--c2-password-field__toggle--border-radius': '999px',
+          '--c2-password-field__focus--outline': '2px solid rgba(2, 101, 220, 0.4)',
+        },
+      },
+      {
+        name: 'Bold meter',
+        description: 'A filled field with a thicker, more spaced strength meter and a semibold strength label.',
+        css: {
+          '--c2-password-field--background': '#f4f4f5',
+          '--c2-password-field--border': '1px solid transparent',
+          '--c2-password-field--border-radius': '8px',
+          '--c2-password-field__focus--background': '#ffffff',
+          '--c2-password-field__meter--height': '6px',
+          '--c2-password-field__meter--gap': '6px',
+          '--c2-password-field__meter-label--font-weight': '600',
+        },
+      },
+    ],
+  },
+  'c2-phone-input': {
+    html: `<c2-phone-input country="US" style="width: 300px"></c2-phone-input>`,
+    presets: [
+      {
+        name: 'Sign-up',
+        description: 'Taller with 16px text and a soft focus ring, for a sign-up or checkout form on mobile.',
+        css: {
+          '--c2-phone-input--min-height': '44px',
+          '--c2-phone-input--border-radius': '8px',
+          '--c2-phone-input--font-size': '16px',
+          '--c2-phone-input__input--padding': '0 12px',
+          '--c2-phone-input__focus--outline': '3px solid rgba(2, 101, 220, 0.2)',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded with no line after the country button.',
+        css: {
+          '--c2-phone-input--min-height': '40px',
+          '--c2-phone-input--border-radius': '999px',
+          '--c2-phone-input__country--padding': '0 8px 0 14px',
+          '--c2-phone-input__country__hover--background': 'transparent',
+          '--c2-phone-input__divider--border': '0 solid transparent',
+          '--c2-phone-input__input--padding': '0 16px 0 4px',
+        },
+      },
+    ],
+  },
   'c2-inline-edit': {
     html: `<c2-inline-edit label="Project name" value="Apollo"></c2-inline-edit>`,
     presets: [
@@ -919,6 +1086,36 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-inline-edit__edit-icon--opacity': '1',
           '--c2-inline-edit__edit-icon--color': '#0265dc',
           '--c2-inline-edit__hover--background': '#edf1fe',
+        },
+      },
+    ],
+  },
+  'c2-key-value-editor': {
+    html: `<c2-key-value-editor label="Environment variables" masked style="width: 100%" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
+    presets: [
+      {
+        name: 'Compact',
+        description: 'Tighter rows without column headers, for a settings panel or a sidebar.',
+        css: {
+          '--c2-key-value-editor--row-gap': '4px',
+          '--c2-key-value-editor--column-gap': '4px',
+          '--c2-key-value-editor__header--display': 'none',
+          '--c2-key-value-editor__field--height': '26px',
+          '--c2-key-value-editor__field--font-size': '12px',
+          '--c2-key-value-editor__button--size': '26px',
+          '--c2-key-value-editor__button__icon--size': '14px',
+        },
+      },
+      {
+        name: 'Even columns',
+        description: 'Key and value columns of equal width with taller, rounder fields.',
+        css: {
+          '--c2-key-value-editor--key-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor--value-width': 'minmax(0, 1fr)',
+          '--c2-key-value-editor__field--height': '36px',
+          '--c2-key-value-editor__field--border-radius': '8px',
+          '--c2-key-value-editor__button--size': '36px',
+          '--c2-key-value-editor__button--border-radius': '8px',
         },
       },
     ],
@@ -2023,6 +2220,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-trace-waterfall': {
+    html: `<c2-trace-waterfall style="width: 100%" spans='[{"id":"a","name":"GET /orders","service":"web","start":0,"duration":240},{"id":"b","parentId":"a","name":"auth.verify","service":"auth","start":8,"duration":30},{"id":"c","parentId":"a","name":"SELECT orders","service":"postgres","start":44,"duration":150},{"id":"d","parentId":"a","name":"render","service":"web","start":198,"duration":36,"status":"error"}]'></c2-trace-waterfall>`,
+    presets: [
+      {
+        name: 'Compact',
+        description: 'Borderless, short rows and thin pill bars.',
+        css: {
+          '--c2-trace-waterfall--border': 'none',
+          '--c2-trace-waterfall__name--width': '180px',
+          '--c2-trace-waterfall__row--height': '22px',
+          '--c2-trace-waterfall__row--border-bottom': 'none',
+          '--c2-trace-waterfall__bar--height': '6px',
+          '--c2-trace-waterfall__bar--border-radius': '999px',
+        },
+      },
+      {
+        name: 'Console',
+        description: 'Dark block with bright series colours.',
+        css: {
+          '--c2-trace-waterfall--background': '#0b1220',
+          '--c2-trace-waterfall--color': '#d3deee',
+          '--c2-trace-waterfall--border': '1px solid #263449',
+          '--c2-trace-waterfall__header--background': '#101a2c',
+          '--c2-trace-waterfall__header--color': '#7d8fab',
+          '--c2-trace-waterfall__name--border-right': '1px solid #263449',
+          '--c2-trace-waterfall__row--border-bottom': '1px solid #16233a',
+          '--c2-trace-waterfall__row__hover--background': '#16233a',
+          '--c2-trace-waterfall__grid-line--color': '#16233a',
+          '--c2-trace-waterfall__series-1--color': '#5aa3ff',
+          '--c2-trace-waterfall__series-2--color': '#fb923c',
+          '--c2-trace-waterfall__series-3--color': '#2dd4bf',
+        },
+      },
+    ],
+  },
   'c2-code-viewer': {
     html: `<c2-code-viewer style="width: 240px" language="ts" theme="github-light" code="const hello = (name) =>\\n  \`Hi, \${name}!\`"></c2-code-viewer>`,
     presets: [
@@ -2249,6 +2481,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-confirm-dialog': {
+    html: `<c2-confirm-dialog open heading="Delete repository?" message="The repository, its issues and its pull requests are removed for everyone." confirm-label="Delete"></c2-confirm-dialog>`,
+    presets: [
+      {
+        name: 'Destructive',
+        description: 'Error-coloured confirm button, focus starts on Cancel.',
+        attributes: { destructive: 'true' },
+      },
+      {
+        name: 'Centred alert',
+        description: 'Narrow and rounder, actions centred.',
+        css: {
+          '--c2-confirm-dialog--width': '340px',
+          '--c2-modal--border-top-left-radius': '18px',
+          '--c2-modal--border-top-right-radius': '18px',
+          '--c2-modal--border-bottom-left-radius': '18px',
+          '--c2-modal--border-bottom-right-radius': '18px',
+          '--c2-modal__footer--justify-content': 'center',
+        },
+      },
+      {
+        name: 'Soft warning',
+        description: 'Amber confirm button and a warning rule under the heading.',
+        css: {
+          '--c2-confirm-dialog__icon--color': '#d97706',
+          '--c2-confirm-dialog__confirm-button--background-color': '#b45309',
+          '--c2-confirm-dialog__confirm-button__hover--background-color': '#92400e',
+          '--c2-modal__header--border-bottom': '3px solid #f59e0b',
+          '--c2-modal__header--padding-bottom': '14px',
+        },
+      },
+    ],
+  },
   'c2-modal': {
     html: `<c2-modal><h2 slot="title" style="margin: 0">Invite your team</h2><p style="margin: 0">Share the link below with your teammates.</p><c2-button slot="footer">Copy link</c2-button></c2-modal>`,
     presets: [
@@ -2327,6 +2592,38 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-hover-card--width': '280px',
           '--c2-hover-card--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
         },
+      },
+    ],
+  },
+  'c2-popconfirm': {
+    html: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
+    presets: [
+      {
+        name: 'Destructive',
+        css: {
+          '--c2-popconfirm__icon--color': '#f87171',
+          '--c2-popconfirm__confirm--background-color': '#dc2626',
+          '--c2-popconfirm__confirm--color': '#ffffff',
+          '--c2-popconfirm__confirm__hover--background-color': '#b91c1c',
+        },
+      },
+      {
+        name: 'Light card',
+        css: {
+          '--c2-popconfirm--background-color': '#ffffff',
+          '--c2-popconfirm--color': '#18181b',
+          '--c2-popconfirm--border': '1px solid #e4e4e7',
+          '--c2-popconfirm--box-shadow': '0 8px 24px rgba(24, 24, 27, 0.08)',
+          '--c2-popconfirm__icon--color': '#d97706',
+        },
+      },
+      {
+        name: 'No arrow',
+        css: {
+          '--c2-popconfirm__arrow--size': '0px',
+          '--c2-popconfirm--offset': '4px',
+        },
+        attributes: { placement: 'bottom' },
       },
     ],
   },

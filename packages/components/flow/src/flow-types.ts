@@ -21,6 +21,9 @@ export type FlowDirection = 'LR' | 'TB'
 /** Edge of the canvas the `actions` toolbar sits on. */
 export type FlowActionsPlacement = 'top' | 'right' | 'bottom' | 'left'
 
+/** A side of a node, where an edge leaves or arrives. */
+export type FlowSide = 'top' | 'right' | 'bottom' | 'left'
+
 /** How an edge is drawn: a smooth curve, or orthogonal segments with rounded corners. */
 export type FlowEdgeType = 'bezier' | 'step'
 
@@ -85,6 +88,17 @@ export interface FlowEdge {
    * the relations of both nodes. In an `editable` flow the user edits it in place (`edge-edit`).
    */
   label?: string
+  /**
+   * The side of the source node the edge leaves by. Unset, it is the outgoing side of the `direction` (`right` in
+   * `LR`, `bottom` in `TB`). An `editable` flow reports the side the user drew the edge from in `edge-add`.
+   */
+  sourceSide?: FlowSide
+  /**
+   * The side of the target node the edge arrives by. Unset, it is the incoming side of the `direction` (`left` in
+   * `LR`, `top` in `TB`). An edge with neither side set is routed exactly as before, back edges looping round the
+   * outside of the nodes; one with a side set runs from the middle of one side to the middle of the other.
+   */
+  targetSide?: FlowSide
 }
 
 /** Positions keyed by node id, in canvas pixels (the top-left corner of each node). */
@@ -167,6 +181,13 @@ export interface FlowNodeAddDetail {
   position: FlowPoint
   /** Set when the node was asked for by dropping a connection on empty canvas: the node the connection started from. */
   source?: string
+  /** Set with `source`: the side of `source` the connection was drawn from, for the new edge's `sourceSide`. */
+  sourceSide?: FlowSide
+  /**
+   * Set with `source`: the side of the new node that `position` puts on the drop point, facing the source (the side
+   * opposite `sourceSide`), for the new edge's `targetSide`.
+   */
+  targetSide?: FlowSide
 }
 
 /** `node-edit`: the user renamed a node with the inline editor. Update the node's `label`. */
@@ -182,12 +203,29 @@ export interface FlowNodeDeleteDetail {
 }
 
 /**
- * `edge-add` and `edge-delete`: the user connected two nodes, or asked to delete an edge. `edge-add` never names the
- * same node twice nor a pair that is already connected.
+ * `edge-delete`: the user asked to delete the edge from `source` to `target`. Also the base of `edge-add`, which never
+ * names the same node twice nor a pair that is already connected.
  */
 export interface FlowEdgeEventDetail {
   source: string
   target: string
+}
+
+/**
+ * `edge-add`: the user connected `source` to `target`. Add an edge with these four fields to `edges`; the sides make
+ * it leave and arrive where the user drew it.
+ */
+export interface FlowEdgeAddDetail extends FlowEdgeEventDetail {
+  /**
+   * The side of `source` whose handle the connection was dragged from; for a keyboard connection (`C`), the
+   * outgoing side of the `direction`.
+   */
+  sourceSide: FlowSide
+  /**
+   * The side of `target` it arrives by: the handle it was dropped on, else the side of the target nearest the
+   * pointer; for a keyboard connection, the incoming side of the `direction`.
+   */
+  targetSide: FlowSide
 }
 
 /**

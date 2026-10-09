@@ -1,0 +1,101 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-confirm-dialog,
+  $theme: (
+    width: 'min(420px, calc(100vw - 32px))',
+    heading--gap: 12px,
+    icon--size: 24px,
+    icon--color: rgb(2, 101, 220),
+    icon__destructive--color: #dc2626,
+    message--color: #71717a,
+
+    cancel-button--border: 1px solid #bcbcc6,
+    cancel-button--background-color: #ffffff,
+    cancel-button--color: #18181b,
+    cancel-button__hover--background-color: #f4f4f5,
+    cancel-button__hover--border: 1px solid #a1a1aa,
+
+    confirm-button--background-color: rgb(2, 101, 220),
+    confirm-button--color: #ffffff,
+    confirm-button__hover--background-color: rgb(1, 84, 184),
+    confirm-button__active--background-color: rgb(1, 70, 154),
+
+    confirm-button__destructive--background-color: #dc2626,
+    confirm-button__destructive--color: #ffffff,
+    confirm-button__destructive__hover--background-color: #b91c1c,
+    confirm-button__destructive__active--background-color: #991b1b,
+    confirm-button__destructive__focus--outline: 2px solid rgba(220, 38, 38, 0.4),
+  )
+);
+
+:host {
+  display: contents;
+}
+
+.c2-confirm-dialog {
+  --c2-modal--width: #{css.cssVar(width)};
+}
+
+.c2-confirm-dialog__heading {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(heading--gap);
+  min-width: 0;
+
+  ::slotted([slot='icon']) {
+    flex: none;
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+    color: css.cssVar(icon--color);
+  }
+}
+
+:host([destructive]) .c2-confirm-dialog__heading ::slotted([slot='icon']) {
+  color: css.cssVar(icon__destructive--color);
+}
+
+.c2-confirm-dialog__heading-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  ::slotted(*) {
+    margin: 0;
+    font: inherit;
+  }
+}
+
+.c2-confirm-dialog__message {
+  color: css.cssVar(message--color);
+  overflow-wrap: anywhere;
+
+  ::slotted(p) {
+    margin: 0;
+  }
+
+  ::slotted(p + p) {
+    margin-top: 8px;
+  }
+}
+
+.c2-confirm-dialog__cancel {
+  --c2-button__container--border: #{css.cssVar(cancel-button--border)};
+  --c2-button__container--background-color: #{css.cssVar(cancel-button--background-color)};
+  --c2-button__container--color: #{css.cssVar(cancel-button--color)};
+  --c2-button__container__hover--background-color: #{css.cssVar(cancel-button__hover--background-color)};
+  --c2-button__container__hover--border: #{css.cssVar(cancel-button__hover--border)};
+  --c2-button__container__active--background-color: #{css.cssVar(cancel-button__hover--background-color)};
+}
+
+.c2-confirm-dialog__confirm {
+  --c2-button__container--background-color: #{css.cssVar(confirm-button--background-color)};
+  --c2-button__container--color: #{css.cssVar(confirm-button--color)};
+  --c2-button__container__hover--background-color: #{css.cssVar(confirm-button__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(confirm-button__active--background-color)};
+}
+
+:host([destructive]) .c2-confirm-dialog__confirm {
+  --c2-button__container--background-color: #{css.cssVar(confirm-button__destructive--background-color)};
+  --c2-button__container--color: #{css.cssVar(confirm-button__destructive--color)};
+  --c2-button__container__hover--background-color: #{css.cssVar(confirm-button__destructive__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(confirm-button__destructive__active--background-color)};
+  --c2-button__container__focus--outline: #{css.cssVar(confirm-button__destructive__focus--outline)};
+}

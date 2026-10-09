@@ -1,0 +1,123 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { RelativeTime } from '@c2n/components/relative-time'
+
+## Presets
+
+Curated looks for `c2-relative-time`. Open any card in the studio to start from it. The phrase inherits the surrounding text, so colour, size and weight do most of the work; `format` decides how much room it takes.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>
+```
+
+```html tag=MdxCodeBlock,label=Feed meta
+<style>
+  .feed-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .feed-meta strong {
+    font-weight: 600;
+  }
+  .feed-meta c2-relative-time {
+    --c2-relative-time--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-relative-time--font-size: 12px;
+  }
+</style>
+<div class="feed-meta">
+  <strong>Ana Ng</strong>
+  <span>commented</span>
+  <c2-relative-time format="short" date="2026-09-30T14:20:00Z"></c2-relative-time>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Status pill
+<style>
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: light-dark(#dcfce7, #0f2e1b);
+    color: light-dark(#15803d, #4ade80);
+  }
+  .status-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #16a34a;
+  }
+  .status-pill c2-relative-time {
+    --c2-relative-time--font-weight: 600;
+  }
+</style>
+<span class="status-pill">Deployed <c2-relative-time format="narrow" date="2026-09-30T14:20:00Z"></c2-relative-time></span>
+```
+
+```html tag=MdxCodeBlock,label=Due date
+<style>
+  .due-date {
+    display: grid;
+    gap: 2px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .due-date c2-relative-time {
+    --c2-relative-time--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-relative-time--font-size: 20px;
+    --c2-relative-time--font-weight: 600;
+  }
+</style>
+<div class="due-date">
+  <span>Trial ends</span>
+  <c2-relative-time numeric="always" date="2027-03-01T00:00:00Z"></c2-relative-time>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Inline sentence
+<style>
+  .inline-sentence {
+    max-width: 280px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .inline-sentence c2-relative-time {
+    --c2-relative-time--font-weight: 600;
+  }
+</style>
+<p class="inline-sentence">Your last backup finished <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>. The next one runs <c2-relative-time date="2027-03-01T00:00:00Z"></c2-relative-time>.</p>
+```
+
+```html tag=MdxCodeBlock,label=Multilingual
+<style>
+  .multilingual {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .multilingual c2-relative-time {
+    --c2-relative-time--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div class="multilingual">
+  <span>en</span><c2-relative-time locale="en" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <span>fr</span><c2-relative-time locale="fr" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <span>es</span><c2-relative-time locale="es" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <span>ja</span><c2-relative-time locale="ja" date="2026-09-30T14:20:00Z"></c2-relative-time>
+</div>
+```
+
+</GalleryGrid>

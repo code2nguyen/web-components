@@ -93,10 +93,10 @@ async function emptyCanvas(page: Page) {
   return { x: stage.x + stage.width / 2, y: stage.y + stage.height - 40 }
 }
 
-/** Presses on a node's connection handle and drags to `to`, in steps so the live edge follows. */
+/** Presses on the connection handle on a node's outgoing side (`right`, in these `LR` flows) and drags to `to`, in steps so the live edge follows. */
 async function connect(page: Page, from: string, to: { x: number; y: number }, release = true) {
   await node(page, from).hover()
-  const handle = node(page, from).locator('.connector')
+  const handle = node(page, from).locator('.connector--right')
   await expect(handle).toHaveCSS('opacity', '1')
   const start = await center(handle)
   await page.mouse.move(start.x, start.y)
@@ -311,7 +311,10 @@ test.describe('editable', () => {
     await expect(node(page, 'review')).toHaveClass(/is-connect-target/)
     await page.mouse.up()
     await expect(page.locator('c2-flow .edge--draft')).toHaveCount(0)
-    expect((await recorded(page, 'edge-add')).map((r) => r.detail)).toEqual([{ source: 'idea', target: 'review' }])
+    // Dropped in the middle of the node: it arrives by the side nearest the pointer.
+    expect((await recorded(page, 'edge-add')).map((r) => ({ source: r.detail.source, target: r.detail.target, sourceSide: r.detail.sourceSide }))).toEqual([
+      { source: 'idea', target: 'review', sourceSide: 'right' },
+    ])
     await expect(page.locator('c2-flow .edge')).toHaveCount(4)
 
     // Already connected: no duplicate, and the node is not offered as a target.
@@ -364,7 +367,7 @@ test.describe('editable', () => {
     await expect(node(page, 'publish')).toHaveClass(/is-connect-target/)
     await expect(node(page, 'idea')).toBeFocused()
     await page.keyboard.press('Enter')
-    expect((await recorded(page, 'edge-add')).map((r) => r.detail)).toEqual([{ source: 'idea', target: 'publish' }])
+    expect((await recorded(page, 'edge-add')).map((r) => r.detail)).toEqual([{ source: 'idea', target: 'publish', sourceSide: 'right', targetSide: 'left' }])
     await expect(page.locator('c2-flow .edge--draft')).toHaveCount(0)
 
     await page.keyboard.press('c')
@@ -389,6 +392,31 @@ test.describe('editable', () => {
 
     await page.keyboard.press('Backspace')
     expect((await recorded(page, 'node-delete')).map((r) => r.detail.id)).toEqual(['review', 'draft'])
+  })
+
+  test('a click on an edge with focus outside the flow lets Delete and Backspace remove it', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    await wire(page)
+    const clickEdge = async (from: string, to: string) => {
+      const a = (await node(page, from).boundingBox())!
+      const b = (await node(page, to).boundingBox())!
+      await page.mouse.click((a.x + a.width + b.x) / 2, (a.y + a.height / 2 + b.y + b.height / 2) / 2)
+    }
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await clickEdge('draft', 'review')
+    await expect(page.locator('c2-flow .edge.is-selected')).toHaveCount(1)
+    await page.keyboard.press('Delete')
+    expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([{ source: 'draft', target: 'review' }])
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await clickEdge('review', 'publish')
+    await page.keyboard.press('Backspace')
+    expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([
+      { source: 'draft', target: 'review' },
+      { source: 'review', target: 'publish' },
+    ])
+    expect(await recorded(page, 'node-delete')).toEqual([])
+    // The canvas only took focus for the selected edge: it is not in the tab order once the edge is gone.
+    await expect(page.locator('c2-flow .stage')).not.toHaveAttribute('tabindex', /.*/)
   })
 
   test('a click selects an edge, E steps through a node’s edges, Delete fires edge-delete and Escape deselects', async ({ page, renderScenario }) => {
@@ -576,7 +604,9 @@ test.describe('editable', () => {
     // The colours ease in.
     await expect.poll(colours).toEqual(['rgb(2, 101, 220)', 'rgb(2, 101, 220)', 'rgb(2, 101, 220)'])
 
-    await connect(page, 'idea', await center(node(page, 'publish')), false)
+    // Over the handle on the incoming side of the target: the live edge arrives there.
+    const publish = (await node(page, 'publish').boundingBox())!
+    await connect(page, 'idea', { x: publish.x + 2, y: publish.y + publish.height / 2 }, false)
     const draft = () =>
       host(page).evaluate((element) => {
         const root = element.shadowRoot!
@@ -591,9 +621,10 @@ test.describe('editable', () => {
     await expect(page.locator('c2-flow .arrow.mark--draft')).toHaveCount(0)
   })
 
-  test('connection handles show on hover and selection, on the side the flow runs to', async ({ page, renderScenario }) => {
+  test('connection handles show on hover and selection, one on the side the flow runs to', async ({ page, renderScenario }) => {
     await renderScenario(flow({ attributes: 'editable direction="TB"' }))
-    const handle = node(page, 'draft').locator('.connector')
+    await expect(node(page, 'draft').locator('.connector')).toHaveCount(4)
+    const handle = node(page, 'draft').locator('.connector--bottom')
     await expect(handle).toHaveCSS('opacity', '0')
     await node(page, 'draft').hover()
     await expect(handle).toHaveCSS('opacity', '1')

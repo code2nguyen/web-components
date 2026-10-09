@@ -42,7 +42,7 @@ function wireEditable(flow: Flow, say: (text: string) => void) {
   flow.addEventListener('node-add', async ({ detail }) => {
     const id = `note-${next++}`
     flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]
-    if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id }]
+    if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id, sourceSide: detail.sourceSide, targetSide: detail.targetSide }]
     say(`node-add${detail.source ? ` after ${detail.source}` : ''} at ${detail.position.x}, ${detail.position.y}`)
     await flow.updateComplete
     void flow.editLabel(id)
@@ -57,8 +57,8 @@ function wireEditable(flow: Flow, say: (text: string) => void) {
     say(`node-delete: ${detail.id}`)
   })
   flow.addEventListener('edge-add', ({ detail }) => {
-    flow.edges = [...flow.edges, { source: detail.source, target: detail.target }]
-    say(`edge-add: ${detail.source} → ${detail.target}`)
+    flow.edges = [...flow.edges, { source: detail.source, target: detail.target, sourceSide: detail.sourceSide, targetSide: detail.targetSide }]
+    say(`edge-add: ${detail.source} (${detail.sourceSide}) → ${detail.target} (${detail.targetSide})`)
   })
   flow.addEventListener('edge-delete', ({ detail }) => {
     flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)

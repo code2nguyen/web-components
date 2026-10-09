@@ -88,6 +88,8 @@ interface MasonryLayoutSnapshot {
 | `c2-masonry-item` | `rows`                                                                                 | `10`        | Positive integer row span for all ranges.                                 |
 | `c2-masonry-item` | `cols`                                                                                 | `3`         | Positive integer base column span.                                        |
 | `c2-masonry-item` | `colsXs` / `cols-xs`, `colsSm` / `cols-sm`, `colsMd` / `cols-md`, `colsLg` / `cols-lg` | absent      | Optional positive integer overrides by container-width range.             |
+| `c2-masonry-item` | `minRows` / `min-rows`                                                                 | `1`         | Smallest row span a user resize reaches; invalid values count as 1.       |
+| `c2-masonry-item` | `minCols` / `min-cols`                                                                 | `1`         | Smallest column span a user resize reaches, capped per range.             |
 
 `layout-change` detail is `{ layout, itemId, action: 'move' | 'resize', inputMethod: 'mouse' | 'touch' | 'pen' | 'keyboard' }`. `layout-error` detail is `{ reason: 'missing-id' | 'duplicate-id' | 'invalid-span' | 'invalid-layout', itemId? }`. Both are nonbubbling, noncancelable `CustomEvent`s on `c2-masonry`.
 
