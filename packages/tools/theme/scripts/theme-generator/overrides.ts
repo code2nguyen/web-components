@@ -440,6 +440,29 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  // Query input: the token colours are syntax hues like the JSON viewer's, paired the same way; negations and unknown
+  // keys are the error colour, and the selection is a translucent accent wash over either surface.
+  '--c2-query-input__key--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__value--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#116329, #7ee787) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__comparator--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__operator--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#6f42c1, #c297ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-query-input__negation--color': { token: 'color-error' },
+  '--c2-query-input__invalid--color': { token: 'color-error' },
+  '--c2-query-input__selection--background': { exclude: 'translucent accent wash works on any surface' },
+  '--c2-query-input__term__negated--background': { exclude: 'translucent error wash works on any surface' },
+  '--c2-query-input__filter__negated--background': { exclude: 'translucent error wash works on any surface' },
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
@@ -460,6 +483,7 @@ export const overrides: Record<string, Override> = {
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-query-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-phone-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-password-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },

@@ -926,6 +926,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-query-input': {
+    html: `<c2-query-input value='service:web -status:>=500 "timed out"' aria-label="Query" style="width: 320px"></c2-query-input>`,
+    presets: [
+      {
+        name: 'Log explorer',
+        description: 'Monospace and compact on a tinted bar, with violet keys and teal values, for a logs or traces search.',
+        css: {
+          '--c2-query-input--font-family': 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+          '--c2-query-input--font-size': '12px',
+          '--c2-query-input--min-height': '32px',
+          '--c2-query-input--border-radius': '4px',
+          '--c2-query-input--background': '#f4f4f5',
+          '--c2-query-input__focus--background': '#ffffff',
+          '--c2-query-input__key--color': '#632ca6',
+          '--c2-query-input__value--color': '#0f6b5c',
+        },
+      },
+      {
+        name: 'Blue chips',
+        description: 'Pill-shaped blue chips, for a filter bar that reads as a row of tags.',
+        css: {
+          '--c2-query-input--min-height': '40px',
+          '--c2-query-input--border-radius': '8px',
+          '--c2-query-input__filter--border-radius': '999px',
+          '--c2-query-input__filter--background': '#dbeafe',
+          '--c2-query-input__filter__hover--background': '#bfdbfe',
+          '--c2-query-input__term--border-radius': '999px',
+          '--c2-query-input__term--background': '#dbeafe',
+          '--c2-query-input__key--color': '#1d4ed8',
+          '--c2-query-input__separator--color': '#1d4ed8',
+          '--c2-query-input__value--color': '#1e3a8a',
+        },
+      },
+    ],
+  },
   'c2-password-field': {
     html: `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width: 260px"></c2-password-field>`,
     presets: [

@@ -126,6 +126,7 @@
         "../../components/popconfirm:build",
         "../../components/progress:build",
         "../../components/qr-code:build",
+        "../../components/query-input:build",
         "../../components/questionnaire:build",
         "../../components/radio:build",
         "../../components/rate:build",

@@ -2079,6 +2079,27 @@
       "reason": "The center slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-query-input",
+      "slot": "clear-icon",
+      "decision": "variables",
+      "variables": ["--c2-query-input__icon--size", "--c2-query-input__clear-icon--color", "--c2-query-input__clear-icon__hover--color"],
+      "reason": "The clear button sizes the slotted icon and its SVG fallback through the icon size, and colours it through the clear-icon colour variables."
+    },
+    {
+      "tag": "c2-query-input",
+      "slot": "search-icon",
+      "decision": "variables",
+      "variables": ["--c2-query-input__icon--size", "--c2-query-input__icon--color"],
+      "reason": "The leading icon box sizes and colours the slotted icon and its magnifier fallback through the icon variables."
+    },
+    {
+      "tag": "c2-query-input",
+      "slot": "suffix-icon",
+      "decision": "variables",
+      "variables": ["--c2-query-input__icon--size", "--c2-query-input__icon--color"],
+      "reason": "The field sizes and colours the slotted suffix icon through the icon variables."
+    },
+    {
       "tag": "c2-questionnaire",
       "slot": "empty",
       "decision": "assigned-content",

@@ -27,6 +27,7 @@
         "c2-page-editor": true,
         "c2-password-field": true,
         "c2-phone-input": true,
+        "c2-query-input": true,
         "c2-radio-group": true,
         "c2-rate": true,
         "c2-search-field": true,

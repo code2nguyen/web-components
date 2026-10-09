@@ -169,6 +169,7 @@
         "./packages/components/popconfirm:build",
         "./packages/components/progress:build",
         "./packages/components/qr-code:build",
+        "./packages/components/query-input:build",
         "./packages/components/questionnaire:build",
         "./packages/components/radio:build",
         "./packages/components/rate:build",

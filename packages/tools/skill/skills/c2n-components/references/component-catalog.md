@@ -112,6 +112,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
 - **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
+- **Query Input** — `c2-query-input` · `@c2n/components/query-input` — A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
