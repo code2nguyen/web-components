@@ -186,6 +186,7 @@
         "./packages/components/spinner:build",
         "./packages/components/split-panel:build",
         "./packages/components/stat:build",
+        "./packages/components/state-timeline:build",
         "./packages/components/status-panel:build",
         "./packages/components/steps:build",
         "./packages/components/switch:build",

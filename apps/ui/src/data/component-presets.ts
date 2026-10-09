@@ -627,6 +627,51 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-state-timeline': {
+    html: `<c2-state-timeline style="width: 100%" aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
+    presets: [
+      {
+        name: 'Minimal strip',
+        description: 'A hairline for the normal state and thin pills for the exceptions, with rules between bands',
+        css: {
+          '--c2-state-timeline__row--height': '32px',
+          '--c2-state-timeline__row--gap': '0px',
+          '--c2-state-timeline__row--border-top': '1px solid #e4e4e7',
+          '--c2-state-timeline__track--background': 'transparent',
+          '--c2-state-timeline__track--border-radius': '999px',
+          '--c2-state-timeline__segment--height': '8px',
+          '--c2-state-timeline__segment--gap': '0px',
+          '--c2-state-timeline__segment--border-radius': '999px',
+          '--c2-state-timeline__segment__baseline--height': '2px',
+          '--c2-state-timeline__segment__baseline--background-mix': '100%',
+          '--c2-state-timeline__segment__baseline--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Thin bands for a dashboard tile, legend hidden',
+        css: {
+          '--c2-state-timeline__label--width': '88px',
+          '--c2-state-timeline__summary--width': '56px',
+          '--c2-state-timeline__row--height': '12px',
+          '--c2-state-timeline__row--gap': '4px',
+          '--c2-state-timeline__track--border-radius': '2px',
+        },
+        attributes: { 'hide-legend': '' },
+      },
+      {
+        name: 'Blocks',
+        description: 'Separated, rounded blocks on a bare track',
+        css: {
+          '--c2-state-timeline__track--background': 'transparent',
+          '--c2-state-timeline__segment--gap': '4px',
+          '--c2-state-timeline__segment--border-radius': '6px',
+          '--c2-state-timeline__track--border-radius': '6px',
+          '--c2-state-timeline__segment__baseline--background-mix': '30%',
+        },
+      },
+    ],
+  },
   'c2-truncate': {
     html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
     presets: [

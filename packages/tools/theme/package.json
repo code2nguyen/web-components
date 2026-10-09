@@ -143,6 +143,7 @@
         "../../components/spinner:build",
         "../../components/split-panel:build",
         "../../components/stat:build",
+        "../../components/state-timeline:build",
         "../../components/status-panel:build",
         "../../components/steps:build",
         "../../components/switch:build",

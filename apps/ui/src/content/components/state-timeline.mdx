@@ -1,0 +1,51 @@
+---
+title: 'State Timeline'
+description: 'One band per series, coloured by the discrete state it was in over time: service health, CI runs, host power.'
+category: 'Chart'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { StateTimeline } from '@c2n/components/state-timeline'
+
+`c2-state-timeline` shows how a set of things changed state over time, one band per thing: which services were
+degraded during an incident, which branches failed their builds, when hosts slept. Set `series` to an array (or a JSON
+attribute) of bands, each a `label` and a list of segments with a `start`, an optional `end` and a `state`. A segment
+without an `end` lasts until the next one starts, so a log of state changes is enough; the last one runs to the end of
+the timeline. `states` names the values and picks their colours with a `tone` (`success`, `warning`, `danger`,
+`primary`, `neutral`, or a chart palette slot `1` to `8`); values it does not list are shown as written, each with the
+next free palette colour. Mark the normal state `baseline: true`: it becomes a pale, unlabelled wash, every other state
+a solid labelled fill, and each band ends with the time it spent outside it. A `null` state marks a stretch with no
+data. The dot before each label is the band's current state, and the legend gives each state's total time. The visible range is `start`–`end`, or the span
+of the data, and times are shown in the reader's time zone. `markers` pins deploys and incidents above the bands, and the
+`heading` slot titles the header row. Hovering draws a line through every band and the tooltip lists what each was
+doing at that moment; the timeline is one Tab stop, the arrow keys move between segments and bands, and Enter fires
+`segment-click`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/state-timeline'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/state-timeline
+<style>
+  .state-timeline-demo {
+    width: min(720px, 100%);
+  }
+</style>
+<div data-label="Service health">
+  <c2-state-timeline class="state-timeline-demo" aria-label="Service health" markers='[{"time":"2026-10-08T10:05:00Z","label":"Deploy v2.3"},{"time":"2026-10-08T10:15:00Z","label":"DB failover"},{"time":"2026-10-08T11:20:00Z","label":"Index rebuild"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]},{"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}]' states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z">
+    <span slot="heading">Service health · last 3 hours</span>
+  </c2-state-timeline>
+</div>
+<div data-label="CI runs">
+  <c2-state-timeline class="state-timeline-demo" aria-label="CI runs by branch" series='[{"label":"main","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:08:00Z","state":"passed"},{"start":"2026-10-08T09:12:00Z","end":"2026-10-08T09:21:00Z","state":"passed"},{"start":"2026-10-08T09:27:00Z","end":"2026-10-08T09:34:00Z","state":"failed"},{"start":"2026-10-08T09:37:00Z","end":"2026-10-08T09:45:00Z","state":"passed"},{"start":"2026-10-08T09:50:00Z","end":"2026-10-08T09:59:00Z","state":"passed"},{"start":"2026-10-08T10:03:00Z","end":"2026-10-08T10:13:00Z","state":"running"}]},{"label":"release/1.0","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:12:00Z","state":"passed"},{"start":"2026-10-08T09:22:00Z","end":"2026-10-08T09:33:00Z","state":"cancelled"},{"start":"2026-10-08T09:42:00Z","end":"2026-10-08T09:54:00Z","state":"passed"}]},{"label":"feat/axis","segments":[{"start":"2026-10-08T09:00:00Z","end":"2026-10-08T09:06:00Z","state":"failed"},{"start":"2026-10-08T09:20:00Z","end":"2026-10-08T09:27:00Z","state":"failed"},{"start":"2026-10-08T09:36:00Z","end":"2026-10-08T09:44:00Z","state":"passed"}]}]' states='[{"value":"passed","label":"Passed","tone":"success","baseline":true},{"value":"failed","label":"Failed","tone":"danger"},{"value":"running","label":"Running","tone":"primary"},{"value":"cancelled","label":"Cancelled","tone":"neutral"}]' end="2026-10-08T10:15:00Z"></c2-state-timeline>
+</div>
+<div data-label="Automatic colours">
+  <c2-state-timeline class="state-timeline-demo" aria-label="Host power" series='[{"label":"web-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T02:30:00Z","state":"sleep"},{"start":"2026-10-08T06:00:00Z","state":"on"}]},{"label":"web-02","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T04:00:00Z","state":"off"},{"start":"2026-10-08T04:20:00Z","state":"on"}]},{"label":"batch-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"sleep"},{"start":"2026-10-08T01:00:00Z","state":"on"},{"start":"2026-10-08T05:00:00Z","state":"sleep"}]}]'></c2-state-timeline>
+</div>
+```

@@ -248,6 +248,16 @@ export const overrides: Record<string, Override> = {
   // Dependency arrows are structure, drawn at the strength of a resting control border rather than as text.
   '--c2-gantt__link--color': { token: 'color-outline-strong' },
   '--c2-gantt__tooltip--box-shadow': { token: 'shadow-md' },
+  // A state timeline's numeric tones and automatic colours are slots of the chart palette too.
+  '--c2-state-timeline__series-1--color': { token: 'chart-series-1' },
+  '--c2-state-timeline__series-2--color': { token: 'chart-series-2' },
+  '--c2-state-timeline__series-3--color': { token: 'chart-series-3' },
+  '--c2-state-timeline__series-4--color': { token: 'chart-series-4' },
+  '--c2-state-timeline__series-5--color': { token: 'chart-series-5' },
+  '--c2-state-timeline__series-6--color': { token: 'chart-series-6' },
+  '--c2-state-timeline__series-7--color': { token: 'chart-series-7' },
+  '--c2-state-timeline__series-8--color': { token: 'chart-series-8' },
+  '--c2-state-timeline__tooltip--box-shadow': { token: 'shadow-md' },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },

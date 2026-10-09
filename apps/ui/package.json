@@ -112,6 +112,7 @@
     "@c2n/spinner": "*",
     "@c2n/split-panel": "*",
     "@c2n/stat": "*",
+    "@c2n/state-timeline": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/switch": "*",

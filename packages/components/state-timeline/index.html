@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-state-timeline</title>
+    <script type="module" src="/src/state-timeline.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 760px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .solid {
+        --c2-state-timeline__segment--gap: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Baseline state, markers, a gap with no data</h2>
+      <c2-state-timeline
+        id="service"
+        aria-label="Service health"
+        start="2026-10-08T09:00:00Z"
+        end="2026-10-08T12:00:00Z"
+        markers='[{"time":"2026-10-08T10:15:00Z","label":"DB failover"}]'
+        states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"}]'
+        series='[
+          {"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},
+          {"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},
+          {"label":"Webhooks","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T09:40:00Z","state":null},{"start":"2026-10-08T10:00:00Z","state":"ok"}]}
+        ]'
+      ></c2-state-timeline>
+    </section>
+    <section>
+      <h2>Automatic colours, solid fills</h2>
+      <c2-state-timeline
+        class="solid"
+        aria-label="Host power"
+        series='[
+          {"label":"web-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T02:30:00Z","state":"sleep"},{"start":"2026-10-08T06:00:00Z","state":"on"}]},
+          {"label":"web-02","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T04:00:00Z","state":"off"},{"start":"2026-10-08T04:20:00Z","state":"on"}]}
+        ]'
+        end="2026-10-08T08:00:00Z"
+      ></c2-state-timeline>
+    </section>
+    <section>
+      <h2>Empty</h2>
+      <c2-state-timeline aria-label="Nothing yet"><span slot="empty">No checks have run yet</span></c2-state-timeline>
+    </section>
+    <output id="log"></output>
+    <script type="module">
+      document.querySelector('#service').addEventListener('segment-click', (event) => {
+        document.querySelector('#log').textContent = `${event.detail.series.label}: ${event.detail.label}`
+      })
+    </script>
+  </body>
+</html>
