@@ -96,6 +96,7 @@
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",

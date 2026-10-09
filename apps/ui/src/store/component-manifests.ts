@@ -74,6 +74,7 @@ import qrCode from '@c2n/qr-code/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
+import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
@@ -189,6 +190,7 @@ export const componentManifests = (function () {
     questionnaire,
     radio,
     rate,
+    relativeTime,
     reorderList,
     searchField,
     select,

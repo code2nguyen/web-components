@@ -84,7 +84,6 @@ Domain patterns with no design-system home come from the products that made them
 | #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
 | --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
 | 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building         | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 30  | `c2-relative-time`  | "3 min ago" that updates itself, locale-aware, full date on hover           | Web Awesome relative-time, GitHub relative-time-element                          | P1       | Proposed |
 | 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
 | 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
 | 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |

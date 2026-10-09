@@ -289,6 +289,7 @@ greet('world')"></c2-code-editor>`,
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
+  'relative-time': `<div class="preview-row"><span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span><span>Renews <c2-relative-time format="short" date="2027-03-01T00:00:00Z"></c2-relative-time></span></div>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>
   <div data-reorder-key="test" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Run tests</div>

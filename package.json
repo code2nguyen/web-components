@@ -170,6 +170,7 @@
         "./packages/components/questionnaire:build",
         "./packages/components/radio:build",
         "./packages/components/rate:build",
+        "./packages/components/relative-time:build",
         "./packages/components/reorder-list:build",
         "./packages/components/search-field:build",
         "./packages/components/select:build",

@@ -127,6 +127,7 @@
         "../../components/questionnaire:build",
         "../../components/radio:build",
         "../../components/rate:build",
+        "../../components/relative-time:build",
         "../../components/reorder-list:build",
         "../../components/search-field:build",
         "../../components/select:build",
