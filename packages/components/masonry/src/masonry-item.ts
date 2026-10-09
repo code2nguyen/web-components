@@ -71,6 +71,20 @@ export class MasonryItem extends LitElement {
   @property({ type: Number, attribute: 'cols-lg', reflect: true }) colsLg?: number
 
   /**
+   * Smallest row span a user resize, by pointer or keyboard, can reach: a positive integer, otherwise 1. It only stops
+   * the tile shrinking while it is resized. An authored `rows` or a restored layout below it is left as it is, and such
+   * a tile cannot be resized smaller than it already is.
+   */
+  @property({ type: Number, attribute: 'min-rows' }) minRows = 1
+
+  /**
+   * Smallest column span a user resize, by pointer or keyboard, can reach in any size range: a positive integer,
+   * otherwise 1. It is capped at the range's column count (xs 1, sm 6, md 9, lg 12), so on xs it is always 1. Like
+   * `min-rows`, it never rewrites an authored or restored span below it.
+   */
+  @property({ type: Number, attribute: 'min-cols' }) minCols = 1
+
+  /**
    * Id of an element inside the tile that moves it, in place of the built-in move handle, which is then not drawn: a
    * button in the tile's own header, for example. Pressing it, or Enter or Space on it, starts a move exactly as on
    * the built-in handle. The element is the application's: label it ("Move Groceries"), show it only while the

@@ -25,6 +25,7 @@ import '@c2n/components/text-field'
 import '@c2n/components/textarea'
 import '@c2n/components/icon-button'
 import '@c2n/components/button'
+import { confirm } from '@c2n/components/confirm-dialog'
 import '@c2n/components/badge'
 import '@c2n/components/tabs/tab'
 import '@c2n/components/tabs'
@@ -860,8 +861,14 @@ export class ComponentConfigurationPanel extends LitElement {
                     preset.name,
                     new Date(preset.savedAt).toLocaleDateString(),
                     presetToConfig(preset),
-                    () => {
-                      this.savedPresets = deletePreset(tag, preset.name)
+                    async () => {
+                      const confirmed = await confirm({
+                        heading: `Delete “${preset.name}”?`,
+                        message: `This saved variant of ${tag} is removed from this browser. Export it first to keep a copy.`,
+                        confirmLabel: 'Delete',
+                        destructive: true,
+                      })
+                      if (confirmed) this.savedPresets = deletePreset(tag, preset.name)
                     },
                     (next) => this.handleRename(preset.name, next),
                   ),

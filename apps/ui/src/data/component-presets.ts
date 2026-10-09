@@ -598,6 +598,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-relative-time': {
+    html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for feed and card metadata',
+        css: {
+          '--c2-relative-time--color': '#71717a',
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'short' },
+      },
+      {
+        name: 'Emphasis',
+        description: 'Bold phrase that stands out in a sentence',
+        css: {
+          '--c2-relative-time--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow format for tight table cells',
+        css: {
+          '--c2-relative-time--font-size': '12px',
+        },
+        attributes: { format: 'narrow' },
+      },
+    ],
+  },
   'c2-truncate': {
     html: `<c2-truncate expandable style="max-width: 320px">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third quarter in a row. Gross margin held at 72% despite higher infrastructure spend.</c2-truncate>`,
     presets: [
@@ -893,6 +922,64 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-search-field--border': '1px solid #e4e4e7',
           '--c2-search-field__focus--background': '#ffffff',
           '--c2-search-field__shortcut--background': '#ffffff',
+        },
+      },
+    ],
+  },
+  'c2-password-field': {
+    html: `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width: 260px"></c2-password-field>`,
+    presets: [
+      {
+        name: 'Pill',
+        description: 'Fully rounded and a little taller, with a round toggle and a focus ring, for a sign-in card.',
+        css: {
+          '--c2-password-field--min-height': '40px',
+          '--c2-password-field--padding': '8px 8px 8px 18px',
+          '--c2-password-field--border-radius': '999px',
+          '--c2-password-field__toggle--size': '28px',
+          '--c2-password-field__toggle--border-radius': '999px',
+          '--c2-password-field__focus--outline': '2px solid rgba(2, 101, 220, 0.4)',
+        },
+      },
+      {
+        name: 'Bold meter',
+        description: 'A filled field with a thicker, more spaced strength meter and a semibold strength label.',
+        css: {
+          '--c2-password-field--background': '#f4f4f5',
+          '--c2-password-field--border': '1px solid transparent',
+          '--c2-password-field--border-radius': '8px',
+          '--c2-password-field__focus--background': '#ffffff',
+          '--c2-password-field__meter--height': '6px',
+          '--c2-password-field__meter--gap': '6px',
+          '--c2-password-field__meter-label--font-weight': '600',
+        },
+      },
+    ],
+  },
+  'c2-phone-input': {
+    html: `<c2-phone-input country="US" style="width: 300px"></c2-phone-input>`,
+    presets: [
+      {
+        name: 'Sign-up',
+        description: 'Taller with 16px text and a soft focus ring, for a sign-up or checkout form on mobile.',
+        css: {
+          '--c2-phone-input--min-height': '44px',
+          '--c2-phone-input--border-radius': '8px',
+          '--c2-phone-input--font-size': '16px',
+          '--c2-phone-input__input--padding': '0 12px',
+          '--c2-phone-input__focus--outline': '3px solid rgba(2, 101, 220, 0.2)',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded with no line after the country button.',
+        css: {
+          '--c2-phone-input--min-height': '40px',
+          '--c2-phone-input--border-radius': '999px',
+          '--c2-phone-input__country--padding': '0 8px 0 14px',
+          '--c2-phone-input__country__hover--background': 'transparent',
+          '--c2-phone-input__divider--border': '0 solid transparent',
+          '--c2-phone-input__input--padding': '0 16px 0 4px',
         },
       },
     ],
@@ -2275,6 +2362,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-navigation-menu-link--border-top-right-radius': '10px',
           '--c2-navigation-menu-link--border-bottom-left-radius': '10px',
           '--c2-navigation-menu-link--border-bottom-right-radius': '10px',
+        },
+      },
+    ],
+  },
+  'c2-confirm-dialog': {
+    html: `<c2-confirm-dialog open heading="Delete repository?" message="The repository, its issues and its pull requests are removed for everyone." confirm-label="Delete"></c2-confirm-dialog>`,
+    presets: [
+      {
+        name: 'Destructive',
+        description: 'Error-coloured confirm button, focus starts on Cancel.',
+        attributes: { destructive: 'true' },
+      },
+      {
+        name: 'Centred alert',
+        description: 'Narrow and rounder, actions centred.',
+        css: {
+          '--c2-confirm-dialog--width': '340px',
+          '--c2-modal--border-top-left-radius': '18px',
+          '--c2-modal--border-top-right-radius': '18px',
+          '--c2-modal--border-bottom-left-radius': '18px',
+          '--c2-modal--border-bottom-right-radius': '18px',
+          '--c2-modal__footer--justify-content': 'center',
+        },
+      },
+      {
+        name: 'Soft warning',
+        description: 'Amber confirm button and a warning rule under the heading.',
+        css: {
+          '--c2-confirm-dialog__icon--color': '#d97706',
+          '--c2-confirm-dialog__confirm-button--background-color': '#b45309',
+          '--c2-confirm-dialog__confirm-button__hover--background-color': '#92400e',
+          '--c2-modal__header--border-bottom': '3px solid #f59e0b',
+          '--c2-modal__header--padding-bottom': '14px',
         },
       },
     ],

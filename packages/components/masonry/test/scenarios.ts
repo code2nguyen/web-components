@@ -35,6 +35,15 @@ if (scenario === 'empty') {
   main.querySelector<HTMLButtonElement>('#menu-1')!.addEventListener('click', () => {
     main.querySelector('#menu-clicks')!.textContent = String(Number(main.querySelector('#menu-clicks')!.textContent) + 1)
   })
+} else if (scenario === 'min-spans') {
+  // Floors: tile-1 by its minimums, tile-2 authored below them, tile-3/4 invalid values, tile-5 a min-cols above every range.
+  main.innerHTML = `<div class="width-control"><c2-masonry id="subject" editable>
+    <c2-masonry-item item-id="tile-1" label="Tile 1" rows="10" cols="4" min-rows="6" min-cols="3"><article><h2>Tile 1</h2></article></c2-masonry-item>
+    <c2-masonry-item item-id="tile-2" label="Tile 2" rows="3" cols="1" min-rows="6" min-cols="3"><article><h2>Tile 2</h2></article></c2-masonry-item>
+    <c2-masonry-item item-id="tile-3" label="Tile 3" rows="3" cols="2" min-rows="abc" min-cols="0"><article><h2>Tile 3</h2></article></c2-masonry-item>
+    <c2-masonry-item item-id="tile-4" label="Tile 4" rows="3" cols="2" min-rows="-2" min-cols="1.5"><article><h2>Tile 4</h2></article></c2-masonry-item>
+    <c2-masonry-item item-id="tile-5" label="Tile 5" rows="4" cols="6" cols-md="9" min-cols="20"><article><h2>Tile 5</h2></article></c2-masonry-item>
+  </c2-masonry></div><output id="changes">0</output>`
 } else {
   const count = scenario === 'small' || scenario === 'editing' ? 3 : 12
   const editable = scenario === 'editing' || scenario === 'editing-long'

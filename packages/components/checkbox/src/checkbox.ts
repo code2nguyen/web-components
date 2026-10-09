@@ -4,8 +4,9 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { classMap } from 'lit/directives/class-map.js'
 import styles from './checkbox.scss?inline'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 
 /** Events fired by {@link Checkbox}, keyed for `addEventListener`. */
 export interface CheckboxEventMap {
@@ -20,10 +21,14 @@ export interface Checkbox {
 /**
  * A checkbox with native `<input type="checkbox">` behaviour. The visible box sits centred in a square touch target
  * (`state-layer--size`) that doubles as the hover layer; that layer is transparent unless a
- * `state-layer__hover__*--color` is set, so the default look is quiet.
+ * `state-layer__hover__*--color` is set, so the default look is quiet. Text in the default slot becomes the
+ * checkbox's label (clicking it toggles the box), with an optional `description` underneath; without either the
+ * element is the bare box. Put several in a `c2-checkbox-group` for one value array.
  *
  * @tag c2-checkbox
  *
+ * @slot - Label text beside the box. Clicking it toggles the checkbox, and it names the checkbox for assistive technology.
+ * @slot description - Supporting text shown under the label.
  * @slot checkmark - Icon shown when checked: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`. Defaults to a check.
  * @slot mixedmark - Icon shown when indeterminate. Defaults to a dash.
  * @slot uncheckmark - Icon shown when unchecked. Empty by default.
@@ -33,6 +38,8 @@ export interface Checkbox {
  * @csspart checkmark - Wrapper containing the `checkmark` slot or fallback mark while checked.
  * @csspart mixedmark - Wrapper containing the `mixedmark` slot or fallback mark while indeterminate.
  * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
+ * @csspart label - Region containing the default slot (the label text).
+ * @csspart description - Region containing the `description` slot below the label.
  *
  * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
  * @cssproperty {pixel} [--c2-checkbox__container--width=18px]
@@ -76,6 +83,16 @@ export interface Checkbox {
  * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-bottom-right-radius=6px]
  * @cssproperty {color} --c2-checkbox__state-layer__hover__unselected--color
  * @cssproperty {color} --c2-checkbox__state-layer__hover__selected--color
+ *
+ * @cssproperty {pixel} [--c2-checkbox__field--gap=4px] - Space between the box's touch target and the label.
+ * @cssproperty {color} [--c2-checkbox__label--color=inherit]
+ * @cssproperty {font-size} [--c2-checkbox__label--font-size=inherit]
+ * @cssproperty {font-weight} [--c2-checkbox__label--font-weight=inherit]
+ * @cssproperty {line-height} [--c2-checkbox__label--line-height=inherit]
+ * @cssproperty {opacity} [--c2-checkbox__label__disabled--opacity=0.38]
+ * @cssproperty {color} [--c2-checkbox__description--color=#71717a]
+ * @cssproperty {font-size} [--c2-checkbox__description--font-size=12px]
+ * @cssproperty {line-height} [--c2-checkbox__description--line-height=1.4]
  */
 @customElement('c2-checkbox')
 export class Checkbox extends LitElement {
@@ -116,6 +133,11 @@ export class Checkbox extends LitElement {
   /** Id of the element that describes the checkbox. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
+
+  /** Set by a containing `c2-checkbox-group` while the whole group is disabled; the checkbox's own `disabled` is kept. */
+  @property({ type: Boolean, attribute: false }) groupDisabled = false
+
+  private readonly slotPresence = new SlotPresenceController(this, ['', 'description'])
 
   /** The containing form, when this control is associated with one. */
   get form() {
@@ -167,46 +189,58 @@ export class Checkbox extends LitElement {
 
   override render() {
     const ariaChecked = this.indeterminate ? 'mixed' : undefined
+    const hasLabel = this.slotPresence.has('')
+    const hasDescription = this.slotPresence.has('description')
+    // The whole row is a <label>, so clicking the text toggles the inner input and names it. Both text regions are
+    // hidden while their slots are empty, which leaves a bare checkbox exactly the size of its touch target.
     return html`
-      <div class="c2-checkbox">
-        <input
-          class="c2-checkbox-input"
-          type="checkbox"
-          name="${ifDefined(this.name)}"
-          aria-checked="${ifDefined(ariaChecked)}"
-          aria-label="${ifDefined(this.ariaLabel)}"
-          aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
-          aria-describedby="${ifDefined(this.ariaDescribedBy)}"
-          ?disabled="${this.effectiveDisabled}"
-          ?required="${this.required}"
-          .value="${this.value}"
-          .indeterminate="${this.indeterminate}"
-          ?checked="${this.checked}"
-          @change="${this.handleChange}"
-        />
-        <div class="c2-checkbox__background">
-          <!-- Each mark slot sits in its own positioned wrapper, so any slotted content (an inline SVG, a c2-feather-*
+      <label class=${classMap({ 'c2-checkbox-field': true, 'has-text': hasLabel || hasDescription, 'has-description': hasDescription })}>
+        <div class="c2-checkbox">
+          <input
+            class="c2-checkbox-input"
+            type="checkbox"
+            name="${ifDefined(this.name)}"
+            aria-checked="${ifDefined(ariaChecked)}"
+            aria-label="${ifDefined(this.ariaLabel)}"
+            aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
+            aria-describedby="${ifDefined(this.ariaDescribedBy)}"
+            ?disabled="${this.effectiveDisabled}"
+            ?required="${this.required}"
+            .value="${this.value}"
+            .indeterminate="${this.indeterminate}"
+            ?checked="${this.checked}"
+            @change="${this.handleChange}"
+          />
+          <div class="c2-checkbox__background">
+            <!-- Each mark slot sits in its own positioned wrapper, so any slotted content (an inline SVG, a c2-feather-*
                icon, a c2-mat-icon, or a framework wrapper around them) is centred, sized and faded as one unit. -->
-          <span class="c2-checkbox__mark c2-checkbox__mark--check" part="checkmark">
-            <slot name="checkmark">
-              <svg viewBox="0 0 24 24">
-                <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-              </svg>
-            </slot>
-          </span>
-          <span class="c2-checkbox__mark c2-checkbox__mark--mixed" part="mixedmark">
-            <slot name="mixedmark">
-              <svg viewBox="0 0 24 24">
-                <path fill="currentColor" d="M19 13H5v-2h14v2z" />
-              </svg>
-            </slot>
-          </span>
-          <span class="c2-checkbox__mark c2-checkbox__mark--uncheck" part="uncheckmark">
-            <slot name="uncheckmark"></slot>
-          </span>
+            <span class="c2-checkbox__mark c2-checkbox__mark--check" part="checkmark">
+              <slot name="checkmark">
+                <svg viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                </svg>
+              </slot>
+            </span>
+            <span class="c2-checkbox__mark c2-checkbox__mark--mixed" part="mixedmark">
+              <slot name="mixedmark">
+                <svg viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M19 13H5v-2h14v2z" />
+                </svg>
+              </slot>
+            </span>
+            <span class="c2-checkbox__mark c2-checkbox__mark--uncheck" part="uncheckmark">
+              <slot name="uncheckmark"></slot>
+            </span>
+          </div>
+          <div class="c2-checkbox-state-layer"></div>
         </div>
-        <div class="c2-checkbox-state-layer"></div>
-      </div>
+        <span class="c2-checkbox-text" ?hidden=${!hasLabel && !hasDescription}>
+          <span class="c2-checkbox-label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
+          <span class="c2-checkbox-description" part="description" ?hidden=${!hasDescription}>
+            <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+          </span>
+        </span>
+      </label>
     `
   }
 
@@ -230,7 +264,7 @@ export class Checkbox extends LitElement {
   }
 
   private get effectiveDisabled() {
-    return this.disabled || this.disabledByForm
+    return this.disabled || this.disabledByForm || this.groupDisabled
   }
 
   protected handleChange(event: Event) {

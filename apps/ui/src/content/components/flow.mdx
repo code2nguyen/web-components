@@ -232,4 +232,10 @@ flow.addEventListener('flow-menu-select', ({ detail }) => {
 
 The saved layout is a plain object of positions keyed by node id. `getLayout()` returns the current one and `setLayout()` applies one (merged like a restored layout), so it can live on a server instead of in `localStorage`; `layout-change` fires whenever the user changes it. `resetLayout()` goes back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` drive the view from your own controls.
 
+Fitting scales the whole graph into the box, never above 100%; it happens on the first render, on `fitView()`, and when the box is resized or the data changes before the user has panned or zoomed. `fit-min-zoom` (0.25 to 1, default 0.25) is the least zoom it may choose, for a small preview whose labels must stay readable: a flow too large for its box at that zoom shows its start instead of its middle, the first step at the left edge (`direction="LR"`) or the top edge (`"TB"`), centred across when it fits that way. Changing it refits an untouched view. Zooming by hand still goes from 25% to 200%.
+
+```html tag=CodeBlock
+<c2-flow class="preview" locked no-context-menu no-card fit-min-zoom="0.6"></c2-flow>
+```
+
 A node can also carry its own `position`. The flow places it there instead of where the auto layout would, unless the user has already moved it (a saved or dragged position wins over the one the node first arrived with); changing the value later moves the node. Nodes without one still follow the auto layout, placed next to their neighbours.

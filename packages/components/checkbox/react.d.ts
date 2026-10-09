@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Checkbox } from '@c2n/checkbox'
+import type { CheckboxGroup } from '@c2n/checkbox/checkbox-group.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -27,6 +28,10 @@ declare module 'react' {
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'aria-describedby'?: Attribute
+      }
+      'c2-checkbox-group': Omit<C2Props<CheckboxGroup>, 'value'> & {
+        'aria-label'?: Attribute
+        value?: CheckboxGroup['value'] | string
       }
     }
   }

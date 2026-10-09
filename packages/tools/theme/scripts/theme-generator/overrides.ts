@@ -447,6 +447,12 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__copied--color': { exclude: 'success status colour' },
+  // The strength meter ramps red → amber → lime → green and a met requirement ticks green: status hues, not brand roles.
+  '--c2-password-field__meter--background': { token: 'color-outline-variant' },
+  '--c2-password-field__meter__fair--color': { exclude: 'strength status colour' },
+  '--c2-password-field__meter__good--color': { exclude: 'strength status colour' },
+  '--c2-password-field__meter__strong--color': { exclude: 'strength status colour' },
+  '--c2-password-field__requirement-icon__met--color': { exclude: 'success status colour' },
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
@@ -454,6 +460,8 @@ export const overrides: Record<string, Override> = {
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-search-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-phone-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-password-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
   '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
@@ -753,4 +761,12 @@ export const overrides: Record<string, Override> = {
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
   '--c2-month-planner__handle--color': { token: 'color-on-fill' },
+  // Confirm dialog: the destructive confirm button is a solid red fill, like the indicator's danger tone. The error
+  // token lightens in a dark theme, where white text on it falls below 3:1, so the fill and its states stay fixed and
+  // only the text takes `color-on-fill`. Its focus ring matches the red fill instead of the accent focus ring.
+  '--c2-confirm-dialog__confirm-button__destructive--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive--color': { token: 'color-on-fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__hover--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__active--background-color': { exclude: 'solid destructive fill' },
+  '--c2-confirm-dialog__confirm-button__destructive__focus--outline': { exclude: 'focus ring matches the destructive fill' },
 }

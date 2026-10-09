@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-phone-input</title>
+    <script type="module" src="/src/phone-input.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-phone-input {
+        width: 300px;
+      }
+      .pill {
+        --c2-phone-input--border-radius: 999px;
+        --c2-phone-input__divider--border: 0 solid transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-phone-input country="US"></c2-phone-input>
+    <c2-phone-input value="+33612345678" preferred-countries="FR;BE;CH"></c2-phone-input>
+    <c2-phone-input countries="GB;IE;IM;JE;GG"></c2-phone-input>
+    <c2-phone-input country="FR" value="06 12 34" required></c2-phone-input>
+    <c2-phone-input class="pill" value="+4915123456789"></c2-phone-input>
+    <c2-phone-input value="+819012345678" disabled></c2-phone-input>
+  </body>
+</html>
