@@ -1011,6 +1011,10 @@ export class Flow extends LitElement {
       if (!moved && released) {
         if (edge) {
           this.selectEdge(edge)
+          // Delete and F2 act on the selected edge from wherever focus is in the flow; when it is outside (a click on an
+          // edge, unlike one on a node, focuses nothing), the canvas takes it while the edge is selected, so they
+          // reach the flow at all.
+          if (!(this.renderRoot as ShadowRoot).activeElement) void this.updateComplete.then(() => this.stage?.focus({ preventScroll: true }))
           const selected = this.edgeByKey(edge)
           if (selected && this.isDoubleTap(`edge:${edge}`, event)) void this.editEdgeLabel(selected.source, selected.target)
         } else {
@@ -2279,7 +2283,7 @@ export class Flow extends LitElement {
         <div
           class=${stageClasses.filter(Boolean).join(' ')}
           style=${`--_zoom: ${this.zoom}; background-position: ${this.tx}px ${this.ty}px`}
-          tabindex=${emptyCanvas ? 0 : nothing}
+          tabindex=${emptyCanvas ? 0 : this.selectedEdge !== null ? -1 : nothing}
           role=${emptyCanvas ? 'group' : nothing}
           aria-label=${emptyCanvas ? 'Empty flow' : nothing}
           aria-describedby=${emptyCanvas ? 'empty-hint' : nothing}

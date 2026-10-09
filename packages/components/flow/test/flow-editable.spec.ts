@@ -394,6 +394,31 @@ test.describe('editable', () => {
     expect((await recorded(page, 'node-delete')).map((r) => r.detail.id)).toEqual(['review', 'draft'])
   })
 
+  test('a click on an edge with focus outside the flow lets Delete and Backspace remove it', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    await wire(page)
+    const clickEdge = async (from: string, to: string) => {
+      const a = (await node(page, from).boundingBox())!
+      const b = (await node(page, to).boundingBox())!
+      await page.mouse.click((a.x + a.width + b.x) / 2, (a.y + a.height / 2 + b.y + b.height / 2) / 2)
+    }
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await clickEdge('draft', 'review')
+    await expect(page.locator('c2-flow .edge.is-selected')).toHaveCount(1)
+    await page.keyboard.press('Delete')
+    expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([{ source: 'draft', target: 'review' }])
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await clickEdge('review', 'publish')
+    await page.keyboard.press('Backspace')
+    expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([
+      { source: 'draft', target: 'review' },
+      { source: 'review', target: 'publish' },
+    ])
+    expect(await recorded(page, 'node-delete')).toEqual([])
+    // The canvas only took focus for the selected edge: it is not in the tab order once the edge is gone.
+    await expect(page.locator('c2-flow .stage')).not.toHaveAttribute('tabindex', /.*/)
+  })
+
   test('a click selects an edge, E steps through a node’s edges, Delete fires edge-delete and Escape deselects', async ({ page, renderScenario }) => {
     await renderScenario(flow())
     await wire(page)
