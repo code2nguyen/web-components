@@ -25,6 +25,7 @@
     "@c2n/description-list": "*",
     "@c2n/indicator": "*",
     "@c2n/chip": "*",
+    "@c2n/password-field": "*",
     "@c2n/search-field": "*",
     "@c2n/inline-edit": "*",
     "@astrojs/lit": "^4.3.0",

@@ -104,6 +104,7 @@
         "./packages/components/description-list:build",
         "./packages/components/indicator:build",
         "./packages/components/chip:build",
+        "./packages/components/password-field:build",
         "./packages/components/search-field:build",
         "./packages/components/inline-edit:build",
         "./packages/components/kanban:build",
