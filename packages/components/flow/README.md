@@ -18,6 +18,10 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
   Dragging (or Alt+arrow) makes a custom layout, saved with the direction under `storage-key`. A saved layout is
   merged into a changed graph: kept nodes stay, new ones are placed next to their neighbours. `getLayout()`,
   `setLayout()`, `resetLayout()`; `locked` turns dragging off.
+- **View:** fitting (first render, `fitView()`, a resize or new data before the user pans or zooms) scales the graph
+  to the box, never above 100% nor below `fit-min-zoom` (default 0.25, held to 0.25–1). A flow too large at that
+  zoom shows its start: the first rank at the left (`LR`) or top (`TB`) edge, centred across when it fits. Zooming by
+  hand still goes from 25% to 200%.
 - **Context menu:** right-click, long-press or Shift+F10 for zoom in / out, fit view, direction, auto layout and lock
   layout, plus **Show details** on a node. `renderContextMenu({ node, defaultItems })` replaces or extends the rows;
   added rows fire `flow-menu-select`. `no-context-menu` turns it off.

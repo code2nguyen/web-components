@@ -31,18 +31,20 @@ The default storage key is `c2-masonry:<pathname>:<element-id>`, falling back to
 
 ## Item API: `c2-masonry-item`
 
-| Property                      | Attribute | Default | Meaning                                                                                             |
-| ----------------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------- |
-| `itemId: string \| undefined` | `item-id` | absent  | Stable unique persistence identity. Every tile needs one before layout editing is available.        |
-| `label: string \| undefined`  | `label`   | absent  | Human-readable name used by controls and announcements; falls back to `aria-label`, then `item-id`. |
-| `rows: number`                | `rows`    | `10`    | Positive integer row span, shared across ranges.                                                    |
-| `cols: number`                | `cols`    | `3`     | Positive integer base column span for ranges without an override.                                   |
-| `colsXs: number \| undefined` | `cols-xs` | absent  | `xs` column-span override.                                                                          |
-| `colsSm: number \| undefined` | `cols-sm` | absent  | `sm` column-span override.                                                                          |
-| `colsMd: number \| undefined` | `cols-md` | absent  | `md` column-span override.                                                                          |
-| `colsLg: number \| undefined` | `cols-lg` | absent  | `lg` column-span override.                                                                          |
+| Property                      | Attribute  | Default | Meaning                                                                                             |
+| ----------------------------- | ---------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `itemId: string \| undefined` | `item-id`  | absent  | Stable unique persistence identity. Every tile needs one before layout editing is available.        |
+| `label: string \| undefined`  | `label`    | absent  | Human-readable name used by controls and announcements; falls back to `aria-label`, then `item-id`. |
+| `rows: number`                | `rows`     | `10`    | Positive integer row span, shared across ranges.                                                    |
+| `cols: number`                | `cols`     | `3`     | Positive integer base column span for ranges without an override.                                   |
+| `colsXs: number \| undefined` | `cols-xs`  | absent  | `xs` column-span override.                                                                          |
+| `colsSm: number \| undefined` | `cols-sm`  | absent  | `sm` column-span override.                                                                          |
+| `colsMd: number \| undefined` | `cols-md`  | absent  | `md` column-span override.                                                                          |
+| `colsLg: number \| undefined` | `cols-lg`  | absent  | `lg` column-span override.                                                                          |
+| `minRows: number`             | `min-rows` | `1`     | Smallest row span a pointer or keyboard resize can reach.                                           |
+| `minCols: number`             | `min-cols` | `1`     | Smallest column span a resize can reach in any range, capped at that range's column count.          |
 
-Invalid numeric attributes use their default or base fallback and raise `layout-error`. Missing and duplicated `item-id` values keep every tile visible and scrollable, but disable edit controls for the whole layout until corrected. Edit controls never become drag handles for slotted buttons, links, inputs, or other interactive content.
+Invalid numeric attributes use their default or base fallback and raise `layout-error`. `min-rows` and `min-cols` are the exception: anything but a positive integer counts as 1 without an error, since they never change the layout itself. They only bound user resizes: an authored or restored span below them is kept, and that tile cannot be resized smaller than it was when the edit began. Missing and duplicated `item-id` values keep every tile visible and scrollable, but disable edit controls for the whole layout until corrected. Edit controls never become drag handles for slotted buttons, links, inputs, or other interactive content.
 
 ## Events
 

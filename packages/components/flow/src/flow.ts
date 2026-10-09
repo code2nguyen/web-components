@@ -74,6 +74,7 @@ interface StoredLayout {
 
 const STORAGE_VERSION = 1
 const MIN_ZOOM = 0.25
+const DEFAULT_FIT_MIN_ZOOM = MIN_ZOOM
 const MAX_ZOOM = 2
 const ZOOM_STEP = 1.2
 const FIT_PADDING = 24
@@ -381,6 +382,14 @@ export class Flow extends LitElement {
   /** Edge of the canvas the `actions` toolbar sits on: `top` or `bottom` lay the buttons out in a row, `left` or `right` in a column (and the arrow keys follow). */
   @property({ attribute: 'actions-placement' }) actionsPlacement: FlowActionsPlacement = 'top'
 
+  /**
+   * Least zoom fitting the view may choose (`fitView()`, the first render, a resize or new data while the user has
+   * not panned or zoomed), from 0.25 to 1. A flow too large for its box at this zoom shows its start instead of its
+   * middle: the first rank sits at the left edge (`LR`) or the top edge (`TB`), centred across if it fits that way.
+   * Raise it for a small preview whose labels must stay readable. Zooming by hand still goes down to 25%.
+   */
+  @property({ type: Number, attribute: 'fit-min-zoom' }) fitMinZoom = DEFAULT_FIT_MIN_ZOOM
+
   /** Turns off moving nodes; panning, zooming, selection and the hover card still work. */
   @property({ type: Boolean }) locked = false
 
@@ -510,7 +519,10 @@ export class Flow extends LitElement {
   // ---------------------------------------------------------------------------------------------------------------
   // Public API
 
-  /** Scales and centres the view so every node is visible, never above 100%. */
+  /**
+   * Scales and centres the view so every node is visible, never above 100% nor below `fit-min-zoom`. A flow that
+   * does not fit at `fit-min-zoom` is aligned to its start instead.
+   */
   fitView(): void {
     const view = this.fitFor(this.positions)
     if (!view) return
@@ -719,8 +731,24 @@ export class Flow extends LitElement {
       if (this.direction === 'LR') y1 += 36
       else x1 += 36
     }
-    const zoom = Math.max(MIN_ZOOM, Math.min(1, (width - FIT_PADDING * 2) / (x1 - x0), (height - FIT_PADDING * 2) / (y1 - y0)))
-    return { zoom, tx: (width - (x1 - x0) * zoom) / 2 - x0 * zoom, ty: (height - (y1 - y0) * zoom) / 2 - y0 * zoom }
+    const minZoom = this.resolvedFitMinZoom()
+    const fit = Math.min(1, (width - FIT_PADDING * 2) / (x1 - x0), (height - FIT_PADDING * 2) / (y1 - y0))
+    const zoom = Math.max(minZoom, fit)
+    const centre = { tx: (width - (x1 - x0) * zoom) / 2 - x0 * zoom, ty: (height - (y1 - y0) * zoom) / 2 - y0 * zoom }
+    // The default keeps the view centred even when 25% is too small to fit, as it always was.
+    if (minZoom === DEFAULT_FIT_MIN_ZOOM || fit >= minZoom) return { zoom, ...centre }
+    // Too large for the box at the least zoom: show where the flow starts, centred across if it fits that way.
+    const start = { tx: FIT_PADDING - x0 * zoom, ty: FIT_PADDING - y0 * zoom }
+    const fitsX = (x1 - x0) * zoom <= width - FIT_PADDING * 2
+    const fitsY = (y1 - y0) * zoom <= height - FIT_PADDING * 2
+    return this.direction === 'LR' ? { zoom, tx: start.tx, ty: fitsY ? centre.ty : start.ty } : { zoom, tx: fitsX ? centre.tx : start.tx, ty: start.ty }
+  }
+
+  /** `fitMinZoom` held to [0.25, 1]; anything but a finite number counts as the default. */
+  private resolvedFitMinZoom() {
+    const value = Number(this.fitMinZoom)
+    if (this.fitMinZoom === null || this.fitMinZoom === undefined || !Number.isFinite(value)) return DEFAULT_FIT_MIN_ZOOM
+    return Math.min(1, Math.max(MIN_ZOOM, value))
   }
 
   private zoomAround(factor: number, cx?: number, cy?: number) {
@@ -1769,6 +1797,8 @@ export class Flow extends LitElement {
         this.viewTouched = true
       } else this.fitted = false
     } else if (applied.size) this.relayout()
+    // A new least zoom refits a view the user has not panned or zoomed.
+    if (changed.has('fitMinZoom') && this.hasUpdated && !this.viewTouched) this.fitted = false
   }
 
   /** Pins every node at the position it is drawn at, except those whose `position` was just applied. */

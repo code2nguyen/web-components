@@ -2,7 +2,7 @@
 
 Candidate primitives for c2n, researched on 2026-10-04: 100 patterns that production design systems ship and c2n lacks, and 68 more seen in real products. Nothing here is decided. Each row starts as **Proposed**; set the Decision cell to **Accept**, **Reject** or **Later** as you validate it, and add a short reason when you reject one.
 
-An accepted item is built with `npm run generate` (see the `new-component` skill) and removed from this file once it ships. Components with an open PR are not listed.
+An accepted item is built with `npm run generate` (see the `new-component` skill) and its row is deleted once it ships; the changelog records what shipped. Components with an open PR are not listed. Keep running totals out of this file: a count of what remains is a line every component PR edits, so two open PRs conflict on it.
 
 ## Summary
 
@@ -50,21 +50,19 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 93 remain (16 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33), `c2-json-viewer` (#38) and `c2-popconfirm` (#72) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains, 21 P1, 51 P2 and 28 P3 when researched. Shipped rows are removed, so the tables hold only what is still to build. Numbering is for reference only. Build order is in the delivery plan below.
 
-### A. Forms and input (24)
+### A. Forms and input
 
 | #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
 | 1   | `c2-form`             | Validation across fields, submit handling, error summary, dirty tracking                            | antd Form, Carbon form, Polaris Form                                            | P1       | Proposed |
 | 2   | `c2-form-field`       | Label, hint, error and counter wrapper around any control, with `aria-describedby` wired up         | Ark/Chakra field, Polaris Labelled, Vaadin FormItem                             | P1       | Proposed |
 | 3   | `c2-fieldset`         | Grouped controls with a legend and a disabled state that cascades                                   | Ark/Chakra fieldset, PrimeVue fieldset                                          | P2       | Proposed |
-| 4   | `c2-checkbox-group`   | Form-associated group of checkboxes with one value array (the counterpart of `c2-radio-group`)      | Web Awesome, Vaadin, PrimeVue checkbox group                                    | P1       | Proposed |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
 | 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Accept   |
-| 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Proposed |
+| 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Accept   |
 | 8   | `c2-mask-input`       | Pattern masks (IBAN, tax ID, postcode)                                                              | Mantine MaskInput, PrimeVue inputmask                                           | P2       | Proposed |
-| 9   | `c2-phone-input`      | Country picker, flag, E.164 value                                                                   | Stripe and Twilio sign-up flows                                                 | P2       | Proposed |
 | 10  | `c2-money-input`      | Currency code, locale grouping, minor units as an integer value                                     | Stripe dashboard, Polaris money fields                                          | P1       | Proposed |
 | 11  | `c2-date-time-picker` | Date and time in one popup with time zone                                                           | Mantine DateTimePicker, Vaadin DateTimePicker                                   | P2       | Proposed |
 | 12  | `c2-month-picker`     | Month or year granularity (billing periods, card expiry)                                            | Mantine MonthPicker / YearPicker                                                | P2       | Proposed |
@@ -81,12 +79,11 @@ Domain patterns with no design-system home come from the products that made them
 | 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
 | 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
 
-### B. Data display (18)
+### B. Data display
 
 | #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
 | --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
 | 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building         | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 30  | `c2-relative-time`  | "3 min ago" that updates itself, locale-aware, full date on hover           | Web Awesome relative-time, GitHub relative-time-element                          | P1       | Proposed |
 | 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
 | 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
 | 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |
@@ -104,7 +101,7 @@ Domain patterns with no design-system home come from the products that made them
 | 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse                       | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
 | 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                                 | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
 
-### C. Charts (8)
+### C. Charts
 
 These join `@c2n/chart`, which already ships 14 chart elements (line, area, bar, pie, scatter, bubble, radar, gauge, pyramid, candlestick, butterfly, overlap, map, sparkline). Each needs only a new series type on the existing engine.
 
@@ -119,7 +116,7 @@ These join `@c2n/chart`, which already ships 14 chart elements (line, area, bar,
 | 55  | `c2-bullet-chart`     | One measure against a target and qualitative bands                         | KPI scorecards                                 | P3       | Proposed |
 | 56  | `c2-depth-chart`      | Cumulative bid and ask volume around the mid price                         | Binance, Coinbase Advanced                     | P3       | Proposed |
 
-### D. Navigation and layout (14)
+### D. Navigation and layout
 
 | #   | Component              | What it adds                                                                                              | Real-world model                                                   | Priority | Decision |
 | --- | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | -------- |
@@ -138,13 +135,12 @@ These join `@c2n/chart`, which already ships 14 chart elements (line, area, bar,
 | 69  | `c2-master-detail`     | List and detail side by side, stacked with a back step on mobile                                          | Vaadin MasterDetailLayout; Gmail, Outlook                          | P2       | Proposed |
 | 70  | `c2-swipe-actions`     | Swipe a list row to reveal actions                                                                        | iOS Mail, Gmail mobile                                             | P3       | Proposed |
 
-### E. Overlays and feedback (9)
+### E. Overlays and feedback
 
 These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which already exist.
 
 | #   | Component                | What it adds                                                               | Real-world model                                                      | Priority | Decision |
 | --- | ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------- | -------- |
-| 71  | `c2-confirm-dialog`      | Promise-based confirm (`await confirm({...})`) with a destructive variant  | Vaadin ConfirmDialog, PrimeVue ConfirmDialog                          | P1       | Proposed |
 | 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                            | P2       | Proposed |
 | 74  | `c2-tour`                | Step-by-step onboarding with spotlight, anchored steps and progress        | antd Tour, Ark tour, Carbon and Spectrum coachmark; Intercom, Appcues | P2       | Proposed |
 | 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications         | P2       | Proposed |
@@ -153,7 +149,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings             | P2       | Proposed |
 | 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                        | P3       | Proposed |
 
-### F. Collaboration (6)
+### F. Collaboration
 
 | #   | Component           | What it adds                                                  | Real-world model                                                              | Priority | Decision |
 | --- | ------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | -------- |
@@ -164,7 +160,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | 84  | `c2-poll`           | Vote and see live results                                     | Slack and Microsoft Teams polls                                               | P3       | Proposed |
 | 85  | `c2-audio-recorder` | Record, preview and send a voice clip                         | Slack clips, WhatsApp                                                         | P3       | Proposed |
 
-### G. Business apps (8)
+### G. Business apps
 
 | #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision |
 | --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
@@ -177,7 +173,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                            | XMind, Miro mind map                            | P3       | Proposed |
 | 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                   | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
 
-### H. AI interfaces (4)
+### H. AI interfaces
 
 These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat-message-list`, `c2-chatbot`) and the open working-indicator PR.
 
@@ -188,7 +184,7 @@ These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat
 | 96  | `c2-streaming-text` | Smooth reveal of tokens as they arrive, with a cursor                | ChatGPT, Claude                                         | P2       | Proposed |
 | 97  | `c2-web-preview`    | Sandboxed iframe with URL bar, reload and device sizes               | v0, Bolt                                                | P3       | Proposed |
 
-### I. Utilities (3)
+### I. Utilities
 
 | #   | Component            | What it adds                                                           | Real-world model                  | Priority | Decision |
 | --- | -------------------- | ---------------------------------------------------------------------- | --------------------------------- | -------- | -------- |
@@ -200,7 +196,7 @@ These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat
 
 Researching 90 products found 68 more primitives that no design system above ships as a component, numbered 101 to 168: 4 P1, 42 P2 and 22 P3. The products were Linear, Slack, Stripe, Datadog, ChatGPT, Spotify, Zendesk and others. Each row was seen in at least two products. The source is the help, changelog or teardown page the pattern was checked against on 2026-10-04.
 
-### J. Developer and data tools (13)
+### J. Developer and data tools
 
 | #   | Component              | What it does                                                                   | Seen in                                                                       | Source                                                                                                                | Priority | Decision |
 | --- | ---------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------- | -------- |
@@ -208,7 +204,6 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 102 | `c2-distribution-bar`  | One 100% stacked bar of a breakdown, with legend and hover shares              | Sentry tags, GitHub language bar, Monday.com battery, Linear project progress | [Sentry](https://docs.sentry.io/product/issues/issue-details/)                                                        | P1       | Proposed |
 | 103 | `c2-query-input`       | One-line `key:value` search with token highlighting and value autocomplete     | Datadog, GitHub, Sentry, Grafana Loki                                         | [Datadog](https://docs.datadoghq.com/logs/explorer/search/)                                                           | P2       | Proposed |
 | 104 | `c2-facet-list`        | Sidebar of attribute values with counts and include/exclude toggles            | Datadog, Sentry, Metabase, Kibana                                             | [Datadog](https://docs.datadoghq.com/logs/explorer/facets/)                                                           | P2       | Proposed |
-| 105 | `c2-key-value-editor`  | Editable KEY=value rows; pasting a `.env` splits it into rows; masked values   | Vercel, Netlify, Supabase, Postman                                            | [Vercel](https://vercel.com/changelog/bulk-upload-now-available-for-environment-variables)                            | P2       | Proposed |
 | 106 | `c2-uptime-bar`        | One tick per day coloured by status, uptime % and hover detail                 | Atlassian Statuspage, GitHub and Vercel status pages                          | [Statuspage](https://support.atlassian.com/statuspage/docs/display-historical-uptime-of-components/)                  | P2       | Proposed |
 | 107 | `c2-check-list`        | CI checks grouped by result, failing first, with duration and re-run           | GitHub merge box, GitLab, Vercel                                              | [GitHub](https://github.blog/changelog/2025-03-04-improved-pull-request-merge-experience-is-now-generally-available/) | P2       | Proposed |
 | 108 | `c2-trace-waterfall`   | Span tree with offset duration bars on one time axis                           | Sentry, Datadog APM, Grafana Tempo                                            | [Sentry](https://docs.sentry.io/concepts/key-terms/tracing/trace-view/)                                               | P2       | Proposed |
@@ -218,7 +213,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 112 | `c2-commit-graph`      | Commit rows with branch and merge lanes and ref labels                         | GitLab, GitKraken, Bitbucket                                                  | [GitLab](https://docs.gitlab.com/user/project/repository/)                                                            | P3       | Proposed |
 | 113 | `c2-schema-diagram`    | Table cards with typed columns, keys and relation edges                        | Supabase, Snowflake, ChartDB                                                  | [Basedash](https://www.basedash.com/tools/supabase-schema-visualizer)                                                 | P3       | Proposed |
 
-### K. Work management (7)
+### K. Work management
 
 | #   | Component           | What it does                                                                 | Seen in                           | Source                                                                                      | Priority | Decision |
 | --- | ------------------- | ---------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------- | -------- | -------- |
@@ -230,7 +225,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 119 | `c2-time-tracker`   | Start/stop pill with live elapsed time and logged total                      | ClickUp, Jira, Height             | [ClickUp](https://help.clickup.com/hc/en-us/articles/6304106812823-Track-time-on-tasks)     | P2       | Proposed |
 | 120 | `c2-date-range-bar` | Compact start–end cell filled to the elapsed share                           | Monday.com, ClickUp               | [Monday.com](https://support.monday.com/hc/en-us/articles/115005333969-The-Timeline-Column) | P3       | Proposed |
 
-### L. Communication and media (19)
+### L. Communication and media
 
 | #   | Component               | What it does                                                             | Seen in                                                              | Source                                                                                                                                                    | Priority | Decision |
 | --- | ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- |
@@ -254,7 +249,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 138 | `c2-story-progress`     | Segmented auto-advancing bars; tap to step, hold to pause                | Instagram, Snapchat, WhatsApp                                        | [DEV](https://dev.to/dev48v/i-rebuilt-instagram-stories-segmented-progress-bars-4bil)                                                                     | P3       | Proposed |
 | 139 | `c2-follow-button`      | Follow/Subscribed toggle with count and a notification-level menu        | YouTube, LinkedIn, Strava, Instagram                                 | [YouTube](https://support.google.com/youtube/answer/9336507?hl=en)                                                                                        | P3       | Proposed |
 
-### M. Commerce, fintech and CRM (18)
+### M. Commerce, fintech and CRM
 
 | #   | Component               | What it does                                                                      | Seen in                                   | Source                                                                                                                         | Priority | Decision |
 | --- | ----------------------- | --------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- |
@@ -277,7 +272,7 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 156 | `c2-streak`             | Day count with a week strip of completed days                                     | Duolingo, Strava, LinkedIn Learning       | [Medium teardown](https://medium.com/@salamprem49/duolingo-streak-system-detailed-breakdown-design-flow-886f591c953f)          | P3       | Proposed |
 | 157 | `c2-achievement-badge`  | Badge art with tier and progress to the next tier                                 | Duolingo, Strava, Salesforce Trailhead    | [Duolingo wiki](https://duolingo.fandom.com/wiki/Achievements)                                                                 | P3       | Proposed |
 
-### N. AI interfaces (11)
+### N. AI interfaces
 
 | #   | Component              | What it does                                                              | Seen in                                   | Source                                                                                                                                        | Priority | Decision |
 | --- | ---------------------- | ------------------------------------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- |
@@ -295,14 +290,14 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 ## Delivery plan
 
-The 161 still to build (168 less `c2-inline-edit`, `c2-chip`, `c2-indicator`, `c2-description-list`, `c2-truncate`, `c2-json-viewer` and `c2-popconfirm`) ship in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
+Everything still listed ships in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` wraps every input in waves 2 and 4, and `c2-confirm-dialog` (built) backs destructive actions everywhere. `c2-filter-builder` builds on the shipped `c2-chip`.
 
-| Wave | Scope                | Components | Gate before the next wave                       |
-| ---- | -------------------- | ---------- | ----------------------------------------------- |
-| 1    | Foundations (P1)     | 23         | `c2-form-field` wraps every existing input      |
-| 2    | Business apps (P2)   | 50         | Blocks collection opens (forms, settings pages) |
-| 3    | Data, media, AI (P2) | 42         | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
-| 4    | Specialized (P3)     | 50         | —                                               |
+| Wave | Scope                | Planned | Gate before the next wave                       |
+| ---- | -------------------- | ------- | ----------------------------------------------- |
+| 1    | Foundations (P1)     | 23      | `c2-form-field` wraps every existing input      |
+| 2    | Business apps (P2)   | 50      | Blocks collection opens (forms, settings pages) |
+| 3    | Data, media, AI (P2) | 42      | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
+| 4    | Specialized (P3)     | 50      | —                                               |
 
 Each gate has to pass before the next wave starts. No calendar dates are set yet.
 

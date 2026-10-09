@@ -25,7 +25,7 @@ export interface Popconfirm {
  * Small "Are you sure?" popup anchored to the button that asked for it: delete a row, revoke a key, discard a draft.
  * The trigger goes in the `trigger` slot; clicking it opens the popup with a heading, an optional description and a
  * Cancel / OK pair. It asks for the one action that trigger stands for, so it suits a single destructive button; for a
- * decision that needs more room, or one not tied to a button, use `c2-modal`.
+ * decision that needs more room, or one not tied to a button, use `c2-confirm-dialog`.
  *
  * It looks like `c2-tooltip`: a compact dark bubble with an arrow pointing at the trigger, rather than a dialog. It is
  * a non-modal `alertdialog` in the top layer (`popover="manual"`), placed beside the trigger by floating-ui and flipped

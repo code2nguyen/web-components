@@ -1,0 +1,87 @@
+---
+description: 'Ready-made looks for c2-phone-input: a large sign-up field, a pill, a compact field and a filled field without flags. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PhoneInput } from '@c2n/components/phone-input'
+
+## Presets
+
+The box is one set of variables (`--c2-phone-input--border`, `--c2-phone-input--background`, `--c2-phone-input--border-radius`, `--c2-phone-input--min-height`) with `__hover--*`, `__focus--*` and `__invalid--border` on top. The `--c2-phone-input__country--*` variables style the country button and `__divider--border` the line after it; `__flag--display: none` leaves only the calling code, and `__country--display: none` hides the button altogether (with a single country in `countries`). The `__panel--*`, `__search--*` and `__option--*` variables style the country list.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-phone-input country="US"></c2-phone-input>
+```
+
+```html tag=MdxCodeBlock,label=Sign-up
+<style>
+  .sign-up {
+    width: 260px;
+    --c2-phone-input--min-height: 44px;
+    --c2-phone-input--border-radius: 8px;
+    --c2-phone-input--font-size: 16px;
+    --c2-phone-input__country--padding: 0 10px 0 12px;
+    --c2-phone-input__input--padding: 0 12px;
+    --c2-phone-input__focus--outline: 3px solid rgba(2, 101, 220, 0.2);
+  }
+</style>
+<c2-phone-input class="sign-up" country="GB"></c2-phone-input>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    width: 250px;
+    --c2-phone-input--min-height: 40px;
+    --c2-phone-input--border-radius: 999px;
+    --c2-phone-input__country--padding: 0 8px 0 14px;
+    --c2-phone-input__country__hover--background: transparent;
+    --c2-phone-input__divider--border: 0 solid transparent;
+    --c2-phone-input__input--padding: 0 16px 0 4px;
+    --c2-phone-input__panel--border-radius: 14px;
+  }
+</style>
+<c2-phone-input class="pill" value="+4915123456789"></c2-phone-input>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 220px;
+    --c2-phone-input--min-height: 28px;
+    --c2-phone-input--border-radius: 4px;
+    --c2-phone-input--font-size: 12px;
+    --c2-phone-input__country--padding: 0 6px;
+    --c2-phone-input__country--gap: 4px;
+    --c2-phone-input__flag--font-size: 14px;
+    --c2-phone-input__icon--size: 12px;
+    --c2-phone-input__input--padding: 0 8px;
+    --c2-phone-input__option--min-height: 28px;
+    --c2-phone-input__panel--width: 260px;
+  }
+</style>
+<c2-phone-input class="compact" country="FR"></c2-phone-input>
+```
+
+```html tag=MdxCodeBlock,label=Filled, no flags
+<style>
+  .filled {
+    width: 240px;
+    --c2-phone-input--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-phone-input--border: 1px solid transparent;
+    --c2-phone-input__hover--border: 1px solid transparent;
+    --c2-phone-input__focus--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-phone-input__flag--display: none;
+    --c2-phone-input__country--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-phone-input__dial-code--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-phone-input__divider--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-phone-input class="filled" country="JP"></c2-phone-input>
+```
+
+</GalleryGrid>
