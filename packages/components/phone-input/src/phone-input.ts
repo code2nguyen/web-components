@@ -531,8 +531,10 @@ export class PhoneInput extends LitElement {
     const index = this.options.findIndex(({ country }) => country === this.currentCountry)
     this.activeIndex = Math.max(0, index)
     this.open = true
+    // The overlay is placed asynchronously, so it may still sit at its old or initial spot here: focusing or
+    // scrolling it into view would scroll the page to that spot.
     this.updateComplete.then(() => {
-      this.searchInput?.focus()
+      this.searchInput?.focus({ preventScroll: true })
       this.scrollActiveIntoView()
     })
   }
@@ -615,8 +617,15 @@ export class PhoneInput extends LitElement {
     }
   }
 
+  /** Scrolls the country list only: `scrollIntoView` would scroll every ancestor, the page included. */
   private scrollActiveIntoView() {
-    this.renderRoot.querySelector(`#country-${this.activeIndex}`)?.scrollIntoView({ block: 'nearest' })
+    const list = this.renderRoot.querySelector<HTMLElement>('.list')
+    const option = this.renderRoot.querySelector<HTMLElement>(`#country-${this.activeIndex}`)
+    if (!list || !option) return
+    // Layout offsets, not client rects: the overlay opens with a scale transition that shrinks the rects.
+    const top = option.offsetParent === list ? option.offsetTop : option.offsetTop - list.offsetTop - list.clientTop
+    if (top < list.scrollTop) list.scrollTop = top
+    else if (top + option.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = top + option.offsetHeight - list.clientHeight
   }
 
   private handleFocusin() {
