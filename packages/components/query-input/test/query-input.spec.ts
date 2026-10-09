@@ -1,5 +1,6 @@
 import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { QueryInput } from '../src/query-input'
 
 const FIELDS = JSON.stringify([
   { key: 'service', label: 'Service', values: ['web', 'api', 'billing worker'] },
@@ -199,7 +200,7 @@ test('a key-less field offers its values after a bare colon, and its chip shows 
   await expect(host).not.toHaveState('invalid')
 
   // Without a key-less field, a leading colon stays free text.
-  await host.evaluate((element) => (element.fields = [{ key: 'env' }]))
+  await host.evaluate((element: QueryInput) => (element.fields = [{ key: 'env' }]))
   await expect(chips(page)).toHaveCount(0)
   await expect(host).toHaveJSProperty('value', '-:errors :"slow requests"')
 })
