@@ -89,6 +89,7 @@
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
+    "@c2n/phone-input": "*",
     "@c2n/phosphor-icons": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",

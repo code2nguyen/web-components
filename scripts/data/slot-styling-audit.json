@@ -1773,6 +1773,20 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-phone-input",
+      "slot": "chevron-icon",
+      "decision": "variables",
+      "variables": ["--c2-phone-input__icon--size", "--c2-phone-input__icon--color"],
+      "reason": "The country button's chevron box sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-phone-input",
+      "slot": "search-icon",
+      "decision": "variables",
+      "variables": ["--c2-phone-input__icon--size", "--c2-phone-input__icon--color"],
+      "reason": "The country search field's icon box sizes and colours the slotted icon and its magnifier fallback through the icon variables."
+    },
+    {
       "tag": "c2-pie-chart",
       "slot": "actions",
       "decision": "part",

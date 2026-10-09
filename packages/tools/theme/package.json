@@ -121,6 +121,7 @@
         "../../components/page-editor:build",
         "../../components/pagination:build",
         "../../components/password-field:build",
+        "../../components/phone-input:build",
         "../../components/progress:build",
         "../../components/qr-code:build",
         "../../components/questionnaire:build",

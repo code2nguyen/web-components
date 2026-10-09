@@ -67,6 +67,7 @@ import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
+import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
@@ -181,6 +182,7 @@ export const componentManifests = (function () {
     pageEditor,
     pagination,
     passwordField,
+    phoneInput,
     phosphorIcons,
     progress,
     qrCode,

@@ -1,0 +1,303 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-phone-input,
+  $theme: (
+    min-height: 36px,
+    color: #18181b,
+    background: #ffffff,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    font-size: 14px,
+    font-family: null,
+    placeholder--color: #71717a,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--background: null,
+    focus--outline: none,
+    invalid--border: 1px solid #dc2626,
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    country--display: inline-flex,
+    country--padding: 0 8px 0 10px,
+    country--gap: 6px,
+    country--color: #18181b,
+    country--background: transparent,
+    country__hover--background: #f4f4f5,
+    country__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    divider--border: 1px solid #e4e4e7,
+    flag--font-size: 18px,
+    flag--display: inline,
+    dial-code--color: #52525b,
+    icon--size: 16px,
+    icon--color: #71717a,
+
+    input--padding: 0 10px,
+
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
+    panel--width: 300px,
+    panel--max-height: 320px,
+    panel--padding: 4px,
+    panel--offset: 6px,
+
+    search--padding: 6px 8px,
+    search--border: 1px solid #e4e4e7,
+
+    option--min-height: 32px,
+    option--padding: 6px 8px,
+    option--gap: 8px,
+    option--border-radius: 4px,
+    option--color: #18181b,
+    option-code--color: #52525b,
+    option__active--background: #f4f4f5,
+    option__selected--font-weight: 600,
+    empty--color: #71717a,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(min-height);
+  align-items: stretch;
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  transition: animation.standard(border), animation.standard(outline);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &:focus-within {
+    background: css.cssVar(focus--background, background);
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+:host(:state(invalid)) .field {
+  border: css.cssVar(invalid--border);
+}
+
+:host(:state(disabled)) .field {
+  opacity: css.cssVar(disabled--opacity);
+  pointer-events: none;
+}
+
+.country {
+  display: css.cssVar(country--display);
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(country--gap);
+  padding: css.cssVar(country--padding);
+  margin: 0;
+  color: css.cssVar(country--color);
+  background: css.cssVar(country--background);
+  border: 0;
+  border-inline-end: css.cssVar(divider--border);
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+  font: inherit;
+  line-height: 20px;
+  cursor: pointer;
+  transition: animation.standard(background);
+
+  &:hover:not(:disabled, [data-fixed]) {
+    background: css.cssVar(country__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(country__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled,
+  &[data-fixed] {
+    cursor: default;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:host(:state(open)) .chevron {
+  transform: rotate(180deg);
+}
+
+.flag {
+  display: css.cssVar(flag--display);
+  font-size: css.cssVar(flag--font-size);
+  line-height: 1;
+}
+
+.dial-code {
+  color: css.cssVar(dial-code--color);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon {
+  display: grid;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: none;
+  place-items: center;
+  color: css.cssVar(icon--color);
+  transition: animation.standard(transform);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+::slotted([slot='chevron-icon']),
+::slotted([slot='search-icon']) {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.input {
+  // A modest intrinsic width (a native input asks for ~20 characters), so a bare field fits a narrow column.
+  width: 14ch;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: css.cssVar(input--padding);
+  margin: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+  appearance: none;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+c2-overlay {
+  --c2-overlay--offset-y: #{css.cssVar(panel--offset)};
+}
+
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: css.cssVar(panel--width);
+  max-width: calc(100vw - 16px);
+  max-height: min(css.cssVar(panel--max-height), var(--c2-overlay--available-height, #{css.cssVar(panel--max-height)}));
+  flex-direction: column;
+  color: css.cssVar(option--color);
+  background: css.cssVar(panel--background);
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  box-shadow: css.cssVar(panel--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(option--gap);
+  padding: css.cssVar(search--padding);
+  border-bottom: css.cssVar(search--border);
+}
+
+.search-input {
+  min-width: 0;
+  flex: 1;
+  padding: 4px 0;
+  margin: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+.list {
+  overflow: auto;
+  flex: 1;
+  padding: css.cssVar(panel--padding);
+  overscroll-behavior: contain;
+}
+
+.option {
+  display: flex;
+  box-sizing: border-box;
+  min-height: css.cssVar(option--min-height);
+  align-items: center;
+  gap: css.cssVar(option--gap);
+  padding: css.cssVar(option--padding);
+  border-radius: css.cssVar(option--border-radius);
+  cursor: pointer;
+
+  &[data-active] {
+    background: css.cssVar(option__active--background);
+  }
+
+  &[aria-selected='true'] .option-name {
+    font-weight: css.cssVar(option__selected--font-weight);
+  }
+}
+
+.option-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-code {
+  flex: none;
+  color: css.cssVar(option-code--color);
+  font-variant-numeric: tabular-nums;
+}
+
+.separator {
+  height: 0;
+  margin: 4px 0;
+  border-top: css.cssVar(search--border);
+}
+
+.empty {
+  padding: css.cssVar(option--padding);
+  color: css.cssVar(empty--color);
+}
