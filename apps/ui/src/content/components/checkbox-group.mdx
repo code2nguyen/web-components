@@ -1,0 +1,72 @@
+---
+title: 'Checkbox group'
+description: 'Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule.'
+category: 'Inputs'
+package: '@c2n/checkbox'
+tag: 'c2-checkbox-group'
+apiTags: ['c2-checkbox-group', 'c2-checkbox']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Checkbox, CheckboxGroup } from '@c2n/components/checkbox'
+
+`c2-checkbox-group` turns several `c2-checkbox` options into one form-associated control, the multi-select counterpart of `c2-radio-group`. Its `value` is the array of checked option values in document order; its `name` submits each of them to `FormData`; `disabled` disables every option while keeping the ones disabled on their own; and `required` means at least one option is checked. Each option keeps its native behaviour and stays its own tab stop, so Tab moves between options and Space toggles them. Options can sit anywhere inside the group, including in wrapper elements.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/checkbox'
+```
+
+Importing `@c2n/components/checkbox` registers both `c2-checkbox-group` and `c2-checkbox`. For the group alone, `import '@c2n/components/checkbox/checkbox-group'` registers it and its options.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/checkbox
+<div data-label="Group">
+  <c2-checkbox-group client:only="lit" name="channels" value="email;push">
+    <span slot="label">Notify me by</span>
+    <c2-checkbox value="email">Email</c2-checkbox>
+    <c2-checkbox value="sms">SMS</c2-checkbox>
+    <c2-checkbox value="push">Push notification</c2-checkbox>
+  </c2-checkbox-group>
+</div>
+<div data-label="Horizontal">
+  <c2-checkbox-group client:only="lit" value="mon;wed;fri" orientation="horizontal" aria-label="Days" style="--c2-checkbox-group--gap: 12px">
+    <c2-checkbox value="mon">Mon</c2-checkbox>
+    <c2-checkbox value="tue">Tue</c2-checkbox>
+    <c2-checkbox value="wed">Wed</c2-checkbox>
+    <c2-checkbox value="thu">Thu</c2-checkbox>
+    <c2-checkbox value="fri">Fri</c2-checkbox>
+  </c2-checkbox-group>
+</div>
+<div data-label="Descriptions">
+  <c2-checkbox-group client:only="lit" value="digest" style="width: 300px">
+    <span slot="label">Email</span>
+    <span slot="description">Choose what lands in your inbox.</span>
+    <c2-checkbox value="digest">Weekly digest<span slot="description">A summary of activity every Monday</span></c2-checkbox>
+    <c2-checkbox value="mentions">Mentions<span slot="description">When someone @mentions you</span></c2-checkbox>
+    <c2-checkbox value="product">Product updates<span slot="description">New features, at most once a month</span></c2-checkbox>
+  </c2-checkbox-group>
+</div>
+<div data-label="Disabled">
+  <c2-checkbox-group client:only="lit" value="read" orientation="horizontal" aria-label="Permissions">
+    <c2-checkbox value="read" disabled>Read (always on)</c2-checkbox>
+    <c2-checkbox value="write">Write</c2-checkbox>
+    <c2-checkbox value="admin" disabled>Admin</c2-checkbox>
+  </c2-checkbox-group>
+  <c2-checkbox-group client:only="lit" value="a" orientation="horizontal" disabled>
+    <span slot="label">Whole group disabled</span>
+    <c2-checkbox value="a">One</c2-checkbox>
+    <c2-checkbox value="b">Two</c2-checkbox>
+  </c2-checkbox-group>
+</div>
+```
+
+Set the group's `value` to check options from code: an array from script (`group.value = ['email', 'sms']`) or `;`-separated values in markup (`value="email;sms"`). Without a `value`, options written with `checked` are adopted as the starting value. Listen for `change` on the group (`detail.value` is the new array) or `input`; the options' own events stop at the group, so a listener above it hears exactly one of each per toggle. Neither fires for programmatic changes.
+
+Give the group a `name` and every checked value is appended to `FormData(form)` under it; leave the options themselves unnamed. `required`, fieldset disabling, `form.reset()`, `checkValidity()`, `reportValidity()` and `setCustomValidity()` follow the native form contract. The `label` slot names the group for assistive technology (`aria-label` works too), and the text inside each `c2-checkbox` labels that option: clicking it toggles the box.
+
+Theme the options through the `--c2-checkbox__*` variables (set them on the group and every option inherits them) and the group heading and spacing through `--c2-checkbox-group__*`; `--c2-checkbox-group--align-items: stretch` lets card-style options fill the width.

@@ -1,0 +1,79 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Checkbox, CheckboxGroup } from '@c2n/components/checkbox'
+
+## Presets
+
+Curated looks for `c2-checkbox-group`. Variables set on the group inherit into every `c2-checkbox`, so one class themes the whole set.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-checkbox-group client:only="lit" value="email;push">
+  <span slot="label">Notify me by</span>
+  <c2-checkbox value="email">Email</c2-checkbox>
+  <c2-checkbox value="sms">SMS</c2-checkbox>
+  <c2-checkbox value="push">Push notification</c2-checkbox>
+</c2-checkbox-group>
+```
+
+```html tag=MdxCodeBlock,label=Monochrome
+<style>
+  .mono {
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-checkbox__container--border-top: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-right: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-bottom: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-left: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox-group__label--font-weight: 600;
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="mono" value="design;docs">
+  <span slot="label">Areas</span>
+  <c2-checkbox value="design">Design</c2-checkbox>
+  <c2-checkbox value="engineering">Engineering</c2-checkbox>
+  <c2-checkbox value="docs">Documentation</c2-checkbox>
+</c2-checkbox-group>
+```
+
+```html tag=MdxCodeBlock,label=Settings list
+<style>
+  .settings {
+    width: 300px;
+    --c2-checkbox-group--gap: 12px;
+    --c2-checkbox-group__label--font-size: 12px;
+    --c2-checkbox-group__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-checkbox-group__header--margin-bottom: 12px;
+    --c2-checkbox__label--font-weight: 500;
+    --c2-checkbox__field--gap: 8px;
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="settings" value="digest">
+  <span slot="label">EMAIL</span>
+  <c2-checkbox value="digest">Weekly digest<span slot="description">A summary of activity every Monday</span></c2-checkbox>
+  <c2-checkbox value="mentions">Mentions<span slot="description">When someone @mentions you</span></c2-checkbox>
+  <c2-checkbox value="product">Product updates<span slot="description">New features, at most once a month</span></c2-checkbox>
+</c2-checkbox-group>
+```
+
+```html tag=MdxCodeBlock,label=Filter chips row
+<style>
+  .filters {
+    --c2-checkbox-group--gap: 16px;
+    --c2-checkbox__state-layer--size: 24px;
+    --c2-checkbox__container--height: 16px;
+    --c2-checkbox__container--width: 16px;
+    --c2-checkbox__checkmark--size: 11px;
+    --c2-checkbox__label--font-size: 14px;
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="filters" orientation="horizontal" aria-label="Status" value="open;review">
+  <c2-checkbox value="open">Open</c2-checkbox>
+  <c2-checkbox value="review">In review</c2-checkbox>
+  <c2-checkbox value="done">Done</c2-checkbox>
+</c2-checkbox-group>
+```
+
+</GalleryGrid>

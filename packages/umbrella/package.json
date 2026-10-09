@@ -27,7 +27,8 @@
     "type-check": "wireit",
     "prepack": "npm run build",
     "size": "wireit",
-    "size:update": "npm run build && node scripts/check-size.ts --update"
+    "size:update": "npm run build && node scripts/check-size.ts --update",
+    "size:add": "npm run build && node scripts/check-size.ts --add"
   },
   "wireit": {
     "build": {
@@ -220,6 +221,10 @@
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./checkbox/checkbox-group": {
+      "types": "./dist/checkbox/checkbox-group.d.ts",
+      "default": "./dist/checkbox/checkbox-group.js"
+    },
     "./chip": {
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"
@@ -271,6 +276,10 @@
     "./comparison-bar": {
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
+    },
+    "./confirm-dialog": {
+      "types": "./dist/confirm-dialog.d.ts",
+      "default": "./dist/confirm-dialog.js"
     },
     "./context-menu": {
       "types": "./dist/context-menu.d.ts",
@@ -380,6 +389,10 @@
       "types": "./dist/kbd.d.ts",
       "default": "./dist/kbd.js"
     },
+    "./key-value-editor": {
+      "types": "./dist/key-value-editor.d.ts",
+      "default": "./dist/key-value-editor.js"
+    },
     "./label": {
       "types": "./dist/label.d.ts",
       "default": "./dist/label.js"
@@ -472,6 +485,18 @@
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
     },
+    "./password-field": {
+      "types": "./dist/password-field.d.ts",
+      "default": "./dist/password-field.js"
+    },
+    "./phone-input": {
+      "types": "./dist/phone-input.d.ts",
+      "default": "./dist/phone-input.js"
+    },
+    "./popconfirm": {
+      "types": "./dist/popconfirm.d.ts",
+      "default": "./dist/popconfirm.js"
+    },
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
@@ -479,6 +504,10 @@
     "./qr-code": {
       "types": "./dist/qr-code.d.ts",
       "default": "./dist/qr-code.js"
+    },
+    "./query-input": {
+      "types": "./dist/query-input.d.ts",
+      "default": "./dist/query-input.js"
     },
     "./questionnaire": {
       "types": "./dist/questionnaire.d.ts",
@@ -499,6 +528,10 @@
     "./rate": {
       "types": "./dist/rate.d.ts",
       "default": "./dist/rate.js"
+    },
+    "./relative-time": {
+      "types": "./dist/relative-time.d.ts",
+      "default": "./dist/relative-time.js"
     },
     "./reorder-list": {
       "types": "./dist/reorder-list.d.ts",
@@ -800,6 +833,7 @@
     "@c2n/command": "*",
     "@c2n/comparison-bar": "*",
     "@c2n/config": "*",
+    "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
     "@c2n/dashboard": "*",
@@ -819,6 +853,7 @@
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
+    "@c2n/key-value-editor": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",
@@ -837,11 +872,16 @@
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
+    "@c2n/password-field": "*",
+    "@c2n/phone-input": "*",
+    "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
+    "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",

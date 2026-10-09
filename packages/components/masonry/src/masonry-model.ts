@@ -23,6 +23,20 @@ export function resolveColumns(
   return Math.max(1, Math.min(requested, columns))
 }
 
+/** A tile's `min-rows`/`min-cols` as a span floor: a positive integer, otherwise 1. */
+export function resolveMinSpan(value: number | undefined): number {
+  return value !== undefined && Number.isInteger(value) && value > 0 ? value : 1
+}
+
+/**
+ * Clamp a user-resized span between a floor of `min` and `max`. A span already below `min` (authored or restored that
+ * way) is never pushed up: its floor is then its span when the edit began, so the tile cannot shrink further.
+ */
+export function clampResizedSpan(next: number, original: number, min: number, max = Number.POSITIVE_INFINITY): number {
+  const floor = Math.max(1, Math.min(min, max, original))
+  return Math.max(floor, Math.min(max, next))
+}
+
 export interface MasonryColumns {
   xs: number
   sm: number

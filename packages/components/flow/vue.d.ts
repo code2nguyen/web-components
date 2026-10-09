@@ -24,6 +24,7 @@ declare module 'vue' {
         'storage-key'?: unknown
         'no-double-click-add'?: unknown
         'actions-placement'?: unknown
+        'fit-min-zoom'?: unknown
         'no-card'?: unknown
         'no-context-menu'?: unknown
         'open-delay'?: unknown

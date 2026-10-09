@@ -113,6 +113,12 @@ export class Modal extends LitElement {
   /** Hide the built-in × button. */
   @property({ type: Boolean, reflect: true, attribute: 'hide-close' }) hideClose = false
 
+  /**
+   * Announce the dialog as an `alertdialog` described by its body: for a short message that interrupts the user and
+   * needs an answer, such as a confirmation.
+   */
+  @property({ type: Boolean }) alert = false
+
   /** Leave the page scrollable while the dialog is open. */
   @property({ type: Boolean, attribute: 'no-scroll-lock' }) noScrollLock = false
 
@@ -197,6 +203,8 @@ export class Modal extends LitElement {
     return html`
       <dialog
         class="c2-modal"
+        role=${this.alert ? 'alertdialog' : nothing}
+        aria-describedby=${this.alert ? 'body' : nothing}
         aria-labelledby=${hasTitle ? 'title' : nothing}
         aria-label=${!hasTitle && this.label ? this.label : nothing}
         @close=${this.handleDialogClose}
@@ -218,7 +226,7 @@ export class Modal extends LitElement {
                   </button>`
             }
           </header>
-          <div part="body" class="c2-modal__body"><slot></slot></div>
+          <div part="body" class="c2-modal__body" id="body"><slot></slot></div>
           <footer part="footer" class="c2-modal__footer" ?hidden=${!hasFooter}><slot name="footer" @slotchange=${this.handleSlotChange}></slot></footer>
         </div>
       </dialog>

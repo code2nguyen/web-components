@@ -227,6 +227,14 @@ A tile can also carry its own buttons, such as a menu, in its top-right corner: 
 </c2-masonry>
 ```
 
+Give an item `min-rows` and `min-cols` to set the smallest size a user can resize it to, such as a card whose content needs room: the tile stops shrinking at that size while it is dragged, and the arrow keys stop there too (the live status says the smallest size was reached). Both default to 1, and anything other than a positive integer counts as 1. `min-cols` applies in every range, capped at the range's column count, so below 600 px it is always 1. The minimums only limit resizing: a `rows`, `cols` or restored layout below them is left as it is, and that tile just cannot be resized smaller.
+
+```html
+<c2-masonry editable>
+  <c2-masonry-item item-id="calendar" label="Calendar" rows="24" cols="4" min-rows="16" min-cols="3">…</c2-masonry-item>
+</c2-masonry>
+```
+
 Give an item `pinned` to keep it in a group at the start of the container, such as the notes a user pinned: pinned tiles always come before the others, each group in its own order, whatever order they are authored, stored or assigned in. A move keeps a pinned tile among the pinned ones and any other tile after them, by pointer and by keyboard (Home takes an unpinned tile to just after the pinned group). The attribute changes nothing about the look, so show the pin in the tile.
 
 ```html

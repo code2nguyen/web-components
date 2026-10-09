@@ -1,0 +1,47 @@
+---
+title: 'Relative Time'
+description: 'Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RelativeTime } from '@c2n/components/relative-time'
+
+`c2-relative-time` phrases a moment relative to now with `Intl.RelativeTimeFormat`: the largest unit that fits ("42 seconds ago", "in 3 hours", "yesterday", "2 weeks ago"), rounded to the nearest unit. It redraws exactly when the rounded value changes, so a feed full of timestamps stays current without polling; `no-update` draws it once. `date` takes an ISO 8601 string or a millisecond timestamp in markup and a `Date` from script. `format` sets the length (`long`, `short`, `narrow`), `numeric="always"` keeps a number where `auto` says "yesterday" or "now", and `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The phrase sits in a `<time>` element whose `datetime` is the exact instant and whose hover title is the full date and time. Until `date` holds a valid date, the default slot shows instead, for a fallback such as "Never".
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/relative-time'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/relative-time
+<style>
+  .meta {
+    --c2-relative-time--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-relative-time--font-size: 12px;
+  }
+</style>
+<div data-label="Past and future">
+  <span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span>
+  <span>Renews <c2-relative-time date="2027-03-01T00:00:00Z"></c2-relative-time></span>
+</div>
+<div data-label="Format">
+  <c2-relative-time date="2025-06-12T09:00:00Z"></c2-relative-time>
+  <c2-relative-time format="short" date="2025-06-12T09:00:00Z"></c2-relative-time>
+  <c2-relative-time format="narrow" date="2025-06-12T09:00:00Z"></c2-relative-time>
+</div>
+<div data-label="Locale">
+  <c2-relative-time locale="fr" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <c2-relative-time locale="de" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <c2-relative-time locale="ja" date="2026-09-30T14:20:00Z"></c2-relative-time>
+</div>
+<div data-label="Fallback">
+  <span>Last login: <c2-relative-time>Never</c2-relative-time></span>
+  <span class="meta">Updated <c2-relative-time date="2026-01-05T08:00:00Z"></c2-relative-time></span>
+</div>
+```
