@@ -6,6 +6,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { packMasonry } from './masonry-pack'
 import {
+  clampResizedSpan,
   cloneSnapshot,
   normalizeAuthoredTiles,
   rangeForWidth,
@@ -13,6 +14,7 @@ import {
   pinnedFirst,
   moveRange,
   resolveColumns,
+  resolveMinSpan,
   validateSnapshot,
   MASONRY_COLUMN_COUNT,
 } from './masonry-model'
@@ -533,9 +535,7 @@ export class Masonry extends LitElement {
       const base = this.session.original.items.find((item) => item.id === this.session?.itemId)
       const current = this.session.candidate.items.find((item) => item.id === this.session?.itemId)
       if (!base || !current) return
-      current.columns[this.activeRange] = Math.max(1, Math.min(MASONRY_COLUMN_COUNT[this.activeRange], current.columns[this.activeRange] + columnDelta))
-      current.rows = Math.max(1, current.rows + rowDelta)
-      this.statusMessage = `${target.item.label || target.item.itemId}: ${current.columns[this.activeRange]} columns, ${current.rows} rows.`
+      this.applyResize(current, base, current.columns[this.activeRange] + columnDelta, current.rows + rowDelta)
       this.draw()
     }
   }
@@ -562,12 +562,25 @@ export class Masonry extends LitElement {
     if (!this.session) return
     const candidate = cloneSnapshot(this.session.original)
     const item = candidate.items.find((entry) => entry.id === this.session?.itemId)
-    if (!item) return
-    item.columns[this.activeRange] = Math.max(1, Math.min(MASONRY_COLUMN_COUNT[this.activeRange], item.columns[this.activeRange] + columnDelta))
-    item.rows = Math.max(1, item.rows + rowDelta)
+    const original = this.session.original.items.find((entry) => entry.id === this.session?.itemId)
+    if (!item || !original) return
+    this.applyResize(item, original, original.columns[this.activeRange] + columnDelta, original.rows + rowDelta)
     this.session.candidate = candidate
-    this.statusMessage = `${this.itemById.get(item.id)?.label || item.id}: ${item.columns[this.activeRange]} columns, ${item.rows} rows.`
     this.draw()
+  }
+
+  /**
+   * Set a resize candidate's spans for the active range, kept within the tile's `min-cols`/`min-rows` and the range's
+   * column count, and announce them. `original` is the tile when the edit began: a span already below its minimum is
+   * not pushed up, only kept from shrinking further.
+   */
+  private applyResize(item: MasonryLayoutItem, original: MasonryLayoutItem, columns: number, rows: number): void {
+    const element = this.itemById.get(item.id)
+    const range = this.activeRange
+    item.columns[range] = clampResizedSpan(columns, original.columns[range], resolveMinSpan(element?.minCols), MASONRY_COLUMN_COUNT[range])
+    item.rows = clampResizedSpan(rows, original.rows, resolveMinSpan(element?.minRows))
+    const atMinimum = columns < item.columns[range] || rows < item.rows
+    this.statusMessage = `${element?.label || item.id}: ${item.columns[range]} columns, ${item.rows} rows.${atMinimum ? ' Smallest size reached.' : ''}`
   }
 
   private commitSession(): void {
