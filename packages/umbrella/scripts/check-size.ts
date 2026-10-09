@@ -4,12 +4,16 @@
  * module duplicated across chunks. Each shows up as a jump in what an entry costs to load.
  *
  * For every entry in `dist/` it measures the entry plus every chunk it reaches through static imports (what a page
- * pays to import it; dynamic `import()`s are lazy and left out), gzipped, and compares that and the whole `dist/` with
- * the committed `size-budget.json`. An entry may grow by GROWTH_RATIO plus GROWTH_SLACK bytes before the check fails.
- * A new entry with no budget yet is reported, not failed.
+ * pays to import it; dynamic `import()`s are lazy and left out), gzipped, and compares it with the committed
+ * `size-budget.json`. `lazy` budgets the rest of `dist/`: the chunks only a dynamic `import()` reaches (map outlines,
+ * editor languages), which no entry's closure counts. `index` re-exports every entry, so adding a component grows
+ * `index` and its own entry but never `lazy`; that keeps the budget free of a line every component PR would edit.
+ * A budget may grow by GROWTH_RATIO plus GROWTH_SLACK bytes before the check fails. A new entry with no budget yet is
+ * reported, not failed.
  *
  *   node scripts/check-size.ts            check against the budget
- *   node scripts/check-size.ts --update   rewrite the budget from the current build (commit it with the change)
+ *   node scripts/check-size.ts --add      record the entries that have no budget yet, leaving the others alone
+ *   node scripts/check-size.ts --update   rewrite the whole budget from the current build (commit it with the change)
  *
  * Plain node on Node 24 type stripping, so keep this to erasable TypeScript syntax only.
  */
@@ -19,7 +23,7 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 
 interface Budget {
-  total: number
+  lazy: number
   entries: Record<string, number>
 }
 
@@ -30,6 +34,7 @@ const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(packageDir, 'dist')
 const budgetFile = join(packageDir, 'size-budget.json')
 const update = process.argv.includes('--update')
+const add = process.argv.includes('--add')
 
 if (!existsSync(distDir)) throw new Error('dist/ is missing: run `npm run build -w packages/umbrella` first')
 
@@ -67,21 +72,37 @@ function closureSize(entry: string): number {
   return [...seen].reduce((sum, file) => sum + sizeOf(file), 0)
 }
 
-const current: Budget = {
-  total: jsFiles.filter((file) => !file.startsWith('types/')).reduce((sum, file) => sum + sizeOf(file), 0),
-  entries: Object.fromEntries(entries.map((entry) => [entry.slice(0, -'.js'.length), closureSize(entry)])),
-}
+const total = jsFiles.filter((file) => !file.startsWith('types/')).reduce((sum, file) => sum + sizeOf(file), 0)
+const currentEntries = Object.fromEntries(entries.map((entry) => [entry.slice(0, -'.js'.length), closureSize(entry)]))
+if (currentEntries.index === undefined) throw new Error('dist/index.js is missing: the lazy budget is measured against it')
+const current: Budget = { lazy: total - currentEntries.index, entries: currentEntries }
 
 const kb = (bytes: number) => `${(bytes / 1024).toFixed(1)} kB`
+const write = (budget: Budget) => writeFileSync(budgetFile, `${JSON.stringify(budget, null, 2)}\n`)
 
 if (update) {
-  writeFileSync(budgetFile, `${JSON.stringify(current, null, 2)}\n`)
-  console.log(`[@c2n/components] size budget written: ${entries.length} entries, ${kb(current.total)} gzipped in total`)
+  write(current)
+  console.log(`[@c2n/components] size budget written: ${entries.length} entries, ${kb(current.lazy)} lazy, ${kb(total)} gzipped in total`)
   process.exit(0)
 }
 
 if (!existsSync(budgetFile)) throw new Error('size-budget.json is missing: run `node scripts/check-size.ts --update`')
 const budget = JSON.parse(readFileSync(budgetFile, 'utf8')) as Budget
+
+if (add) {
+  const missing = Object.keys(current.entries).filter((name) => budget.entries[name] === undefined)
+  const merged = { ...budget.entries, ...Object.fromEntries(missing.map((name) => [name, current.entries[name]])) }
+  write({
+    lazy: budget.lazy,
+    entries: Object.fromEntries(
+      Object.keys(merged)
+        .sort()
+        .map((name) => [name, merged[name]]),
+    ),
+  })
+  console.log(`[@c2n/components] size budget: ${missing.length > 0 ? `added ${missing.join(', ')}` : 'no new entries'}`)
+  process.exit(0)
+}
 const allowed = (baseline: number) => Math.round(baseline * (1 + GROWTH_RATIO) + GROWTH_SLACK)
 
 const failures: string[] = []
@@ -96,14 +117,16 @@ for (const [name, size] of Object.entries(current.entries)) {
   if (size > allowed(baseline)) failures.push(`${name}: ${kb(size)}, budget ${kb(baseline)} (+${Math.round((size / baseline - 1) * 100)}%)`)
   if (size !== baseline) rows.push(`| ${name} | ${kb(baseline)} | ${kb(size)} | ${size > baseline ? '+' : ''}${kb(size - baseline)} |`)
 }
-if (current.total > allowed(budget.total)) failures.push(`whole bundle: ${kb(current.total)}, budget ${kb(budget.total)}`)
+if (current.lazy > allowed(budget.lazy)) failures.push(`lazy chunks: ${kb(current.lazy)}, budget ${kb(budget.lazy)}`)
 
 const largest = Object.entries(current.entries)
   .sort(([, a], [, b]) => b - a)
   .slice(0, 5)
   .map(([name, size]) => `${name} ${kb(size)}`)
-console.log(`[@c2n/components] ${entries.length} entries, ${kb(current.total)} gzipped in total (budget ${kb(budget.total)}). Largest: ${largest.join(', ')}`)
-if (added.length > 0) console.log(`New entries without a budget (run with --update to record them): ${added.join(', ')}`)
+console.log(
+  `[@c2n/components] ${entries.length} entries, ${kb(total)} gzipped in total, ${kb(current.lazy)} lazy (budget ${kb(budget.lazy)}). Largest: ${largest.join(', ')}`,
+)
+if (added.length > 0) console.log(`New entries without a budget (run \`npm run size:add -w packages/umbrella\` to record them): ${added.join(', ')}`)
 
 if (process.env.GITHUB_STEP_SUMMARY && rows.length > 0) {
   const table = ['### @c2n/components bundle size', '', '| Entry | Budget | Now | Change |', '| --- | ---: | ---: | ---: |', ...rows, ''].join('\n')

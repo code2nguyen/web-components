@@ -1,0 +1,56 @@
+---
+title: 'Phone Input'
+description: 'A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PhoneInput } from '@c2n/components/phone-input'
+
+`c2-phone-input` is the phone field of the Stripe and Twilio sign-up flows: a country button (flag and calling code) next to the national number. The user types the number the way it is written in their country, `06 12 34 56 78` or `(415) 555-0132`, and the field groups the digits as they type. `value` is always the number in **E.164**, `+33612345678`, the format SMS and voice APIs expect: the trunk prefix (the leading `0` in France, `1` in the US) is dropped and spaces, dashes and brackets never reach it.
+
+Typing or pasting a number that starts with `+` picks its country from the calling code, and from the area code where several countries share one (`+1 242` is the Bahamas, `+44 1534` Jersey). Setting `value` works the same way, so a stored `+447400123456` opens on the United Kingdom whatever `country` says; a value without `+` is read as a national number of the selected country.
+
+`country` (an ISO code such as `FR`) is the country while there is no value. Without it, the field uses the region of `locale` or of the browser's language, then the United States. `countries` limits the picker to a list and `preferred-countries` pins a few at the top; both take ISO codes separated by semicolons or commas. With a single country in `countries` there is nothing to pick: the button becomes a fixed flag and calling code, and a number of another country typed with `+` stays invalid. Use it for a form that only accepts numbers of one country, and set `--c2-phone-input__country--display: none` to hide the prefix too and show the number field alone (the field is still described by the country for screen readers). Country names come from `Intl.DisplayNames` in `locale`, and the picker searches them, the ISO code and the calling code (`+49`). The placeholder is an example number of the selected country unless you set one.
+
+The element is form-associated: `name` submits the E.164 number with its form, `required` rejects an empty field, and a number whose length the country's numbering plan does not allow sets `validity.patternMismatch` and, once the field has lost focus, `:state(invalid)` with a red border. `valid`, `dialCode` and `nationalNumber` give the same facts from script. `input` and `change` are re-dispatched from the number field, and also fire when picking a country changes the value; `country-change` does not bubble, so listen on the element. The check is on length only: the field knows each country's lengths, not which ranges are allocated, so confirm a number by sending it a code before you trust it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/phone-input'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/phone-input
+<style>
+  .phone {
+    width: 300px;
+  }
+  .number-only {
+    --c2-phone-input__country--display: none;
+  }
+</style>
+<div data-label="Default">
+  <c2-phone-input class="phone" country="US"></c2-phone-input>
+  <c2-phone-input class="phone" value="+33612345678"></c2-phone-input>
+</div>
+<div data-label="Preferred and allowed countries">
+  <c2-phone-input class="phone" country="DE" preferred-countries="DE;AT;CH"></c2-phone-input>
+  <c2-phone-input class="phone" countries="GB;IE;IM;JE;GG"></c2-phone-input>
+</div>
+<div data-label="Single country">
+  <c2-phone-input class="phone" countries="VN"></c2-phone-input>
+  <c2-phone-input class="phone number-only" countries="VN"></c2-phone-input>
+</div>
+<div data-label="Validation">
+  <c2-phone-input class="phone" country="FR" value="06 12 34" required></c2-phone-input>
+</div>
+<div data-label="States">
+  <c2-phone-input class="phone" value="+14155550132" readonly></c2-phone-input>
+  <c2-phone-input class="phone" value="+819012345678" disabled></c2-phone-input>
+</div>
+```

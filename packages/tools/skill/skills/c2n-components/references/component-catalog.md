@@ -69,6 +69,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Feedback
 
 - **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
+- **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.
 - **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Modal** — `c2-modal` · `@c2n/components/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
@@ -93,7 +94,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
-- **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
+- **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer. Children: `c2-checkbox`.
+- **Checkbox group** — `c2-checkbox-group, c2-checkbox` · `@c2n/components/checkbox/checkbox-group` — Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule. Children: `c2-checkbox`.
 - **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
@@ -105,6 +107,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
+- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
+- **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
 - **Query Input** — `c2-query-input` · `@c2n/components/query-input` — A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
