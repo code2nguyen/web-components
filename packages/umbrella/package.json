@@ -27,7 +27,8 @@
     "type-check": "wireit",
     "prepack": "npm run build",
     "size": "wireit",
-    "size:update": "npm run build && node scripts/check-size.ts --update"
+    "size:update": "npm run build && node scripts/check-size.ts --update",
+    "size:add": "npm run build && node scripts/check-size.ts --add"
   },
   "wireit": {
     "build": {
@@ -275,6 +276,10 @@
     "./comparison-bar": {
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
+    },
+    "./confirm-dialog": {
+      "types": "./dist/confirm-dialog.d.ts",
+      "default": "./dist/confirm-dialog.js"
     },
     "./context-menu": {
       "types": "./dist/context-menu.d.ts",
@@ -804,6 +809,7 @@
     "@c2n/command": "*",
     "@c2n/comparison-bar": "*",
     "@c2n/config": "*",
+    "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
     "@c2n/dashboard": "*",

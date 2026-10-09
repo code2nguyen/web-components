@@ -58,3 +58,10 @@ test('public parts style title, body and conditional footer regions', async ({ p
   await expect(host.locator('.c2-modal__body')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
   await expect(host.locator('.c2-modal__footer')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
 })
+
+test('alert announces an alertdialog described by its body', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-modal open alert><h2 slot="title">Discard draft?</h2><p>Your edits will be lost.</p></c2-modal>')
+  const dialog = page.getByRole('alertdialog', { name: 'Discard draft?' })
+  await expect(dialog).toBeVisible()
+  await expect(dialog).toHaveAccessibleDescription('Your edits will be lost.')
+})
