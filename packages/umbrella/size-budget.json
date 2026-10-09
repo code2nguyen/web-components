@@ -1,5 +1,5 @@
 {
-  "total": 1188417,
+  "total": 1197957,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -38,7 +38,8 @@
     "chat-message-list": 3481,
     "chat-message": 1709,
     "chatbot": 7122,
-    "checkbox": 3103,
+    "checkbox": 6373,
+    "checkbox/checkbox-group": 6270,
     "chip-group": 8459,
     "chip": 5075,
     "chip/chip-part": 1885,

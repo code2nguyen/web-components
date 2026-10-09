@@ -50,16 +50,15 @@ Domain patterns with no design-system home come from the products that made them
 
 ## The 100 primitives
 
-100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 94 remain (17 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33) and `c2-json-viewer` (#38) are built. Numbering is for reference only. Build order is in the delivery plan below.
+100 components in 9 domains: 21 P1, 51 P2 and 28 P3. Shipped rows are removed, so 93 remain (16 P1): `c2-inline-edit` (#16) shipped in v1.0.3, and `c2-checkbox-group` (#4), `c2-chip` (#27), `c2-indicator` (#29), `c2-description-list` (#26), `c2-truncate` (#33) and `c2-json-viewer` (#38) are built. Numbering is for reference only. Build order is in the delivery plan below.
 
-### A. Forms and input (24)
+### A. Forms and input (23)
 
 | #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
 | 1   | `c2-form`             | Validation across fields, submit handling, error summary, dirty tracking                            | antd Form, Carbon form, Polaris Form                                            | P1       | Proposed |
 | 2   | `c2-form-field`       | Label, hint, error and counter wrapper around any control, with `aria-describedby` wired up         | Ark/Chakra field, Polaris Labelled, Vaadin FormItem                             | P1       | Proposed |
 | 3   | `c2-fieldset`         | Grouped controls with a legend and a disabled state that cascades                                   | Ark/Chakra fieldset, PrimeVue fieldset                                          | P2       | Proposed |
-| 4   | `c2-checkbox-group`   | Form-associated group of checkboxes with one value array (the counterpart of `c2-radio-group`)      | Web Awesome, Vaadin, PrimeVue checkbox group                                    | P1       | Proposed |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
 | 6   | `c2-search-field`     | Debounced query, clear, shortcut hint, recent searches                                              | Carbon search, Spectrum search; GitHub, Linear                                  | P1       | Accept   |
 | 7   | `c2-password-field`   | Reveal toggle, strength meter, rules checklist                                                      | Ark/Carbon password input, PrimeVue password                                    | P2       | Proposed |

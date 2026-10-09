@@ -220,6 +220,10 @@
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
     },
+    "./checkbox/checkbox-group": {
+      "types": "./dist/checkbox/checkbox-group.d.ts",
+      "default": "./dist/checkbox/checkbox-group.js"
+    },
     "./chip": {
       "types": "./dist/chip.d.ts",
       "default": "./dist/chip.js"

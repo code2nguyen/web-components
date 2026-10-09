@@ -588,10 +588,24 @@
     },
     {
       "tag": "c2-checkbox",
+      "slot": "",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-checkbox",
       "slot": "checkmark",
       "decision": "part",
       "parts": ["checkmark"],
       "reason": "The semantic checkmark region owns the checkmark slot's component-side presentation."
+    },
+    {
+      "tag": "c2-checkbox",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The semantic description region owns the description slot's component-side presentation."
     },
     {
       "tag": "c2-checkbox",
@@ -606,6 +620,24 @@
       "decision": "part",
       "parts": ["uncheckmark"],
       "reason": "The semantic uncheckmark region owns the uncheckmark slot's component-side presentation."
+    },
+    {
+      "tag": "c2-checkbox-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-checkbox-group",
+      "slot": "description",
+      "decision": "assigned-content",
+      "reason": "The description slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-checkbox-group",
+      "slot": "label",
+      "decision": "assigned-content",
+      "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-code-editor",
