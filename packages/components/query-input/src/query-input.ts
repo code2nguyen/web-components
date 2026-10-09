@@ -2,12 +2,24 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { query, state } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
+import { repeat } from 'lit/directives/repeat.js'
 import { jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/overlay'
-import { parseQuery, quoteQueryValue, tokenizeQuery, unquoteQueryValue, type QueryTerm, type QueryToken } from './query-syntax.js'
+import '@c2n/chip'
+import type { Chip } from '@c2n/chip'
+import {
+  parseQuery,
+  quoteQueryValue,
+  splitQueryFilters,
+  tokenizeQuery,
+  unquoteQueryValue,
+  type QueryFilter,
+  type QueryTerm,
+  type QueryToken,
+} from './query-syntax.js'
 import styles from './query-input.scss?inline'
 
 export * from './query-syntax.js'
@@ -43,13 +55,21 @@ export interface QueryInputSuggestDetail {
   prefix: string
 }
 
+/** A `key:value` term shown as a chip, and whether it currently takes part in the query. */
+export interface QueryInputFilter extends QueryFilter {
+  /** Off when the chip was switched off: it stays in the field but is left out of `value`. */
+  active: boolean
+}
+
 export interface QueryInputSearchDetail {
-  /** The query, as typed. */
+  /** The query to run: the active chips, then the text. */
   value: string
-  /** The terms of the query, in order. */
+  /** The terms of `value`, in order. */
   terms: QueryTerm[]
-  /** `submit` on Enter, `clear` when the field was emptied. */
-  trigger: 'submit' | 'clear'
+  /** Every chip, switched off ones included. */
+  filters: QueryInputFilter[]
+  /** `submit` on Enter, `clear` when the field was emptied, `toggle` or `remove` when a chip was switched or removed. */
+  trigger: 'submit' | 'clear' | 'toggle' | 'remove'
 }
 
 /** Events fired by {@link QueryInput}, keyed for `addEventListener`. */
@@ -80,8 +100,17 @@ interface Suggestion {
 }
 
 /**
- * A one-line query field in the `key:value` syntax of Datadog, GitHub and Sentry: `service:web -status:>=500 "timed out"`.
- * The query is coloured as it is typed (keys, values, comparators, `AND`/`OR`/`NOT`, negations, free text), and the
+ * A query field in the `key:value` syntax of Datadog, GitHub and Sentry: `service:web -status:>=500 "timed out"`.
+ *
+ * Each `key:value` term that stands on its own becomes a `c2-chip` in front of the text: click it (or press Enter or
+ * Space on it) to switch it off and on, and use its cross (or Backspace / Delete) to remove it. A switched-off chip
+ * stays in the field, struck through, but is left out of `value`, the form value and `search`; `filters` lists every
+ * chip with its `active` flag. A term becomes a chip when its value is picked from the suggestions, when Enter runs the
+ * query, when focus leaves the field, and when `value` is set. Terms joined by `AND`/`OR`, after `NOT` or inside
+ * parentheses stay text, since they cannot be switched off alone. **Backspace** at the start of the text puts the last
+ * chip back into the text for editing, and **ArrowLeft** there moves to the chips.
+ *
+ * The text is coloured as it is typed (keys, values, comparators, `AND`/`OR`/`NOT`, negations, free text), and the
  * fields listed in `fields` are offered as the caret moves: their keys while a word is typed, and their `values` right
  * after `key:`. Arrow keys move through the suggestions, **Enter** or **Tab** inserts one, and **Enter** with none
  * active runs the query: `search` fires with the query and its parsed `terms`. **Escape** closes the suggestions, then
@@ -96,10 +125,10 @@ interface Suggestion {
  * `change` are re-dispatched from the inner input, and the element is form-associated (`name`). The host exposes
  * `:state(focus-within)`, `:state(expanded)`, `:state(invalid)` and `:state(disabled)`.
  *
- * Each `key:value` term is drawn as a chip (`--c2-query-input__term--*`); free text, operators and parentheses stay
- * plain. The highlighting is drawn under a transparent input, so the chips and colours change colours, backgrounds,
- * rings and decorations only: anything that changes the width of a character (font weight, padding) would misalign the
- * caret. The chip's room comes from `--c2-query-input--word-spacing`, which the input shares.
+ * Chips are styled with `--c2-query-input__filter--*`. A term still being typed is drawn on a lighter chip inside the
+ * text (`--c2-query-input__term--*`); that highlighting sits under a transparent input, so it changes colours,
+ * backgrounds, rings and decorations only: anything that changes the width of a character would misalign the caret.
+ * Its room comes from `--c2-query-input--word-spacing`, which the input shares.
  *
  * @tag c2-query-input
  *
@@ -107,9 +136,9 @@ interface Suggestion {
  * @slot clear-icon - Replaces the cross of the clear button.
  * @slot suffix-icon - Icon or control at the end of the field, after the clear button (a help link, a run button).
  *
- * @event {Event} input - Re-dispatched from the inner input on every keystroke; also fired when a suggestion or the clear button changes the value.
- * @event {Event} change - Re-dispatched from the inner input when the value is committed; also fired when a suggestion or the clear button changes the value.
- * @event {CustomEvent<QueryInputSearchDetail>} search - The query to run, with its parsed `terms`: on Enter, and with an empty value when cleared. Does not bubble; listen on the element.
+ * @event {Event} input - Re-dispatched from the inner input on every keystroke; also fired when a suggestion, a chip or the clear button changes the value.
+ * @event {Event} change - Re-dispatched from the inner input when the value is committed; also fired when a suggestion, a chip or the clear button changes the value.
+ * @event {CustomEvent<QueryInputSearchDetail>} search - The query to run, with its parsed `terms` and every chip in `filters`: on Enter, when a chip is switched or removed, and with an empty value when cleared. Does not bubble; listen on the element.
  * @event {CustomEvent<QueryInputSuggestDetail>} suggest - The key or value the caret is completing changed: `kind`, `key` and `prefix`. Update `fields` in response to suggest values fetched on demand. Does not bubble.
  * @event {Event} clear - Fired when the clear button or Escape emptied the field, before `input`, `change` and `search`.
  *
@@ -135,8 +164,21 @@ interface Suggestion {
  * @cssproperty {color} [--c2-query-input__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-query-input__clear-icon__hover--color=#18181b]
  *
- * @cssproperty {color} [--c2-query-input__term--background=#f4f4f5] - The chip drawn behind each `key:value` term.
- * @cssproperty {color} [--c2-query-input__term__negated--background=rgba(207, 34, 46, 0.1)] - The chip of a negated term (`-key:value`).
+ * @cssproperty {pixel} [--c2-query-input__filter--height=24px] - Height of a `key:value` chip.
+ * @cssproperty {padding} [--c2-query-input__filter--padding-inline=8px]
+ * @cssproperty {border-radius} [--c2-query-input__filter--border-radius=4px]
+ * @cssproperty {border} [--c2-query-input__filter--border=1px solid transparent]
+ * @cssproperty {color} [--c2-query-input__filter--background=#f4f4f5]
+ * @cssproperty {color} [--c2-query-input__filter__hover--background=#e4e4e7]
+ * @cssproperty {color} [--c2-query-input__filter__negated--background=rgba(207, 34, 46, 0.1)] - Chip of a negated term (`-key:value`).
+ * @cssproperty {border} [--c2-query-input__filter__inactive--border=1px dashed #bcbcc6] - Chip switched off.
+ * @cssproperty {color} [--c2-query-input__filter__inactive--background=transparent]
+ * @cssproperty {color} [--c2-query-input__filter__inactive--color=#71717a] - Text of a chip switched off, which is also struck through.
+ * @cssproperty {border} [--c2-query-input__filter__invalid--border=1px solid #cf222e] - Chip whose key is not one of `fields`.
+ * @cssproperty {outline} [--c2-query-input__filter__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {pixel} [--c2-query-input__filter--gap=4px] - Space between the chips and the text.
+ * @cssproperty {color} [--c2-query-input__term--background=#f4f4f5] - The chip drawn behind a `key:value` term still in the text.
+ * @cssproperty {color} [--c2-query-input__term__negated--background=rgba(207, 34, 46, 0.1)] - The same, for a negated term (`-key:value`).
  * @cssproperty {border-radius} [--c2-query-input__term--border-radius=4px]
  * @cssproperty {pixel} [--c2-query-input__term--outset=2px] - How far the chip reaches around its text. Drawn as a ring, so it never moves the caret; keep it at most half of `word-spacing` plus a space.
  * @cssproperty {pixel} [--c2-query-input--word-spacing=4px] - Extra space between words, which leaves room between the chips. Applied to the input as well, so the caret stays on its letter.
@@ -205,6 +247,10 @@ export class QueryInput extends LitElement {
   /** Heading of the suggestions while a key is typed. */
   @property({ attribute: 'fields-label' }) fieldsLabel = 'Fields'
 
+  /** The `key:value` chips in front of the text. */
+  @state() private chips: QueryInputFilter[] = []
+  /** The text after the chips: the inner input's value. */
+  @state() private draft = ''
   @state() private focused = false
   @state() private dismissed = false
   @state() private activeIndex = -1
@@ -212,6 +258,8 @@ export class QueryInput extends LitElement {
   @state() private disabledByForm = false
   private dirty = false
   private lastSuggest = ''
+  /** The last `value` this element composed from its chips and text; any other value was set from outside. */
+  private composed = ''
 
   @query('.input') private readonly input?: HTMLInputElement | null
   @query('.field') private readonly field?: HTMLElement | null
@@ -230,6 +278,11 @@ export class QueryInput extends LitElement {
   /** The terms of the current query. */
   get terms(): QueryTerm[] {
     return parseQuery(this.value)
+  }
+
+  /** Every `key:value` chip, in order, with whether it is switched on. */
+  get filters(): QueryInputFilter[] {
+    return this.chips.map((chip) => ({ ...chip }))
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
@@ -253,8 +306,8 @@ export class QueryInput extends LitElement {
 
   /** Empties the field as the clear button does: fires `clear`, `input`, `change` and `search`. */
   clear() {
-    if (!this.value) return
-    this.value = ''
+    if (!this.value && !this.chips.length && !this.draft) return
+    this.setParts([], '')
     this.caret = 0
     this.dirty = true
     this.activeIndex = -1
@@ -266,7 +319,10 @@ export class QueryInput extends LitElement {
 
   formResetCallback() {
     this.dirty = false
+    // Rebuilt from the attribute even when the text matches, so switched-off chips come back on.
+    this.composed = '\u0000'
     this.value = this.getAttribute('value') ?? ''
+    this.requestUpdate('value', '\u0000')
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -286,21 +342,48 @@ export class QueryInput extends LitElement {
   }
 
   private get tokens(): QueryToken[] {
-    return tokenizeQuery(this.value)
+    return tokenizeQuery(this.draft)
+  }
+
+  /** Replaces the chips and the text, and recomposes `value` from them. */
+  private setParts(chips: QueryInputFilter[], draft: string) {
+    this.chips = chips
+    this.draft = draft
+    this.composed = [...chips.filter((chip) => chip.active).map((chip) => chip.text), draft.trim()].filter(Boolean).join(' ')
+    this.value = this.composed
+  }
+
+  /**
+   * Turns the standalone terms of the text into chips (those `accept` takes), keeping the caret on the same character.
+   * Returns the caret's new offset.
+   */
+  private commitFilters(accept?: (start: number, end: number) => boolean, caret = this.caret) {
+    const split = splitQueryFilters(this.draft, caret, accept)
+    if (!split.filters.length) return caret
+    this.setParts([...this.chips, ...split.filters.map((filter) => ({ ...filter, active: true }))], split.rest)
+    return split.caret
+  }
+
+  private isInvalidKey(key: string) {
+    const fields = this.fieldList
+    return fields.length > 0 && !fields.some((field) => field.key === key)
+  }
+
+  private get invalid() {
+    return this.chips.some((chip) => this.isInvalidKey(chip.key)) || this.tokens.some((token) => this.isInvalid(token))
   }
 
   /** Whether a token is marked invalid: an unknown key while `fields` is set, or an unterminated quote. */
   private isInvalid(token: QueryToken) {
     if (token.unterminated) return true
-    const fields = this.fieldList
-    return token.type === 'key' && fields.length > 0 && !fields.some((field) => field.key === token.text)
+    return token.type === 'key' && this.isInvalidKey(token.text)
   }
 
   /** What the caret is completing, or `undefined` where nothing is suggested (inside a quoted phrase, on an operator). */
   private completionAt(caret: number): Completion | undefined {
     const tokens = this.tokens
     const token = tokens.find((candidate) => candidate.type !== 'whitespace' && candidate.start < caret && caret <= candidate.end)
-    const keyCompletion = (from: number, to: number): Completion => ({ kind: 'key', key: null, prefix: this.value.slice(from, caret), from, to })
+    const keyCompletion = (from: number, to: number): Completion => ({ kind: 'key', key: null, prefix: this.draft.slice(from, caret), from, to })
     if (!token || token.type === 'paren') {
       const next = tokens.find((candidate) => candidate.start === caret && candidate.type !== 'whitespace' && candidate.type !== 'paren')
       // Right before a word: completing it would split it, so suggest nothing.
@@ -361,7 +444,68 @@ export class QueryInput extends LitElement {
   }
 
   private emitSearch(trigger: QueryInputSearchDetail['trigger']) {
-    this.dispatchEvent(new CustomEvent<QueryInputSearchDetail>('search', { detail: { value: this.value, terms: parseQuery(this.value), trigger } }))
+    this.dispatchEvent(
+      new CustomEvent<QueryInputSearchDetail>('search', { detail: { value: this.value, terms: parseQuery(this.value), filters: this.filters, trigger } }),
+    )
+  }
+
+  private emitValueEvents() {
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
+  }
+
+  private toggleFilter(index: number, active: boolean) {
+    const chips = this.chips.map((chip, at) => (at === index ? { ...chip, active } : chip))
+    this.dirty = true
+    this.setParts(chips, this.draft)
+    this.emitValueEvents()
+    this.emitSearch('toggle')
+  }
+
+  private async removeFilter(index: number) {
+    this.dirty = true
+    this.setParts(
+      this.chips.filter((_chip, at) => at !== index),
+      this.draft,
+    )
+    this.emitValueEvents()
+    this.emitSearch('remove')
+    await this.updateComplete
+    // Keep keyboard focus in the field: on the chip that took this one's place, or the text.
+    const chips = this.chipElements
+    ;(chips[Math.min(index, chips.length - 1)] ?? this.input)?.focus()
+  }
+
+  /** Puts the last chip back at the start of the text, caret after it, for editing. */
+  private async editLastFilter() {
+    const chip = this.chips[this.chips.length - 1]
+    if (!chip) return
+    this.dirty = true
+    this.setParts(this.chips.slice(0, -1), this.draft ? `${chip.text} ${this.draft}` : chip.text)
+    if (!chip.active) this.emitValueEvents()
+    await this.updateComplete
+    this.input?.focus()
+    this.input?.setSelectionRange(chip.text.length, chip.text.length)
+    this.caret = chip.text.length
+    this.dismissed = false
+  }
+
+  private get chipElements(): Chip[] {
+    return [...this.renderRoot.querySelectorAll<Chip>('c2-chip.filter')]
+  }
+
+  private handleChipKeydown(event: KeyboardEvent, index: number) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    event.preventDefault()
+    const next = index + (event.key === 'ArrowRight' ? 1 : -1)
+    if (next < 0) return
+    const chip = this.chipElements[next]
+    if (chip) {
+      chip.focus()
+      return
+    }
+    this.input?.focus()
+    this.input?.setSelectionRange(0, 0)
   }
 
   /** Fires `suggest` when the key or value the caret is completing changed. */
@@ -378,8 +522,8 @@ export class QueryInput extends LitElement {
   private async pick(suggestion: Suggestion) {
     const completion = this.completion
     if (!completion) return
-    const before = this.value.slice(0, completion.from)
-    let after = this.value.slice(completion.to)
+    const before = this.draft.slice(0, completion.from)
+    let after = this.draft.slice(completion.to)
     let insert: string
     let caret: number
     if (completion.kind === 'key') {
@@ -391,13 +535,16 @@ export class QueryInput extends LitElement {
       if (!/^\s/.test(after)) after = ` ${after}`
       caret = before.length + insert.length + 1
     }
-    this.value = before + insert + after
+    this.setParts(this.chips, before + insert + after)
     this.dirty = true
     this.activeIndex = -1
-    // After a value the term is complete: close the list until the user types again.
-    this.dismissed = completion.kind === 'value'
-    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
+    // After a value the term is complete: it becomes a chip when it stands on its own, and the list closes until the
+    // user types again.
+    if (completion.kind === 'value') {
+      this.dismissed = true
+      caret = this.commitFilters((start, end) => start <= completion.from && completion.from <= end, caret)
+    }
+    this.emitValueEvents()
     await this.updateComplete
     this.input?.focus()
     this.input?.setSelectionRange(caret, caret)
@@ -428,7 +575,7 @@ export class QueryInput extends LitElement {
   private handleInput(event: Event) {
     const input = event.target as HTMLInputElement
     this.dirty = true
-    this.value = input.value
+    this.setParts(this.chips, input.value)
     this.caret = input.selectionStart ?? input.value.length
     this.dismissed = false
     this.activeIndex = -1
@@ -468,7 +615,17 @@ export class QueryInput extends LitElement {
         }
         this.dismissed = true
         this.activeIndex = -1
+        this.commitText()
         this.emitSearch('submit')
+        return
+      }
+      case 'Backspace':
+      case 'ArrowLeft': {
+        const input = this.input
+        if (!input || input.selectionStart !== 0 || input.selectionEnd !== 0 || !this.chips.length) return
+        event.preventDefault()
+        if (event.key === 'Backspace') void this.editLastFilter()
+        else this.chipElements[this.chipElements.length - 1]?.focus()
         return
       }
       case 'Escape': {
@@ -476,7 +633,7 @@ export class QueryInput extends LitElement {
           event.preventDefault()
           this.dismissed = true
           this.activeIndex = -1
-        } else if (this.value) {
+        } else if (this.value || this.draft || this.chips.length) {
           event.preventDefault()
           this.clear()
         }
@@ -494,10 +651,21 @@ export class QueryInput extends LitElement {
   private handleFocusout() {
     this.focused = false
     this.activeIndex = -1
+    this.commitText()
+  }
+
+  /** Turns every standalone term of the text into a chip, keeping the text's caret in place. */
+  private commitText() {
+    const input = this.input
+    const caret = this.commitFilters(undefined, input?.selectionStart ?? this.draft.length)
+    this.caret = Math.min(caret, this.draft.length)
+    if (input && this.focused) void this.updateComplete.then(() => input.setSelectionRange(this.caret, this.caret))
   }
 
   private handleFieldClick(event: Event) {
     if (event.target === this.input || this.effectiveDisabled) return
+    // A click on a chip toggles or removes it; it does not move focus to the text.
+    if (event.composedPath().some((node) => node instanceof Element && node.localName === 'c2-chip')) return
     this.input?.focus()
   }
 
@@ -507,11 +675,22 @@ export class QueryInput extends LitElement {
     this.input?.focus()
   }
 
+  protected override willUpdate(changed: PropertyValues) {
+    // A value set from outside (attribute, property, form reset) is split into chips and text again.
+    if (changed.has('value') && this.value !== this.composed) {
+      const split = splitQueryFilters(this.value)
+      this.setParts(
+        split.filters.map((filter) => ({ ...filter, active: true })),
+        split.rest.trim(),
+      )
+    }
+  }
+
   protected override updated(changed: PropertyValues) {
     const states: Record<string, boolean> = {
       'focus-within': this.focused,
       expanded: this.open,
-      invalid: this.tokens.some((token) => this.isInvalid(token)),
+      invalid: this.invalid,
       disabled: this.effectiveDisabled,
     }
     for (const [name, on] of Object.entries(states)) {
@@ -519,7 +698,7 @@ export class QueryInput extends LitElement {
       else this.internals.states.delete(name)
     }
     this.internals.setFormValue(this.effectiveDisabled ? null : this.value, this.value)
-    if (changed.has('value')) this.syncScroll()
+    if (changed.has('draft')) this.syncScroll()
     if (changed.has('activeIndex') && this.activeIndex >= 0) {
       this.renderRoot.querySelector(`#suggestion-${this.activeIndex}`)?.scrollIntoView({ block: 'nearest' })
     }
@@ -555,8 +734,34 @@ export class QueryInput extends LitElement {
     return parts
   }
 
+  private renderFilter(chip: QueryInputFilter, index: number) {
+    const comparator = chip.comparator ?? ''
+    const classes = ['filter', chip.active ? '' : 'inactive', chip.negated ? 'negated' : '', this.isInvalidKey(chip.key) ? 'invalid' : ''].join(' ')
+    return html`<c2-chip
+      class=${classes}
+      selectable
+      removable
+      remove-label="Remove filter"
+      .selected=${chip.active}
+      ?disabled=${this.effectiveDisabled}
+      @change=${(event: Event) => {
+        event.stopPropagation()
+        this.toggleFilter(index, (event.target as Chip).selected)
+      }}
+      @remove=${(event: Event) => {
+        event.stopPropagation()
+        void this.removeFilter(index)
+      }}
+      @keydown=${(event: KeyboardEvent) => this.handleChipKeydown(event, index)}
+      >${chip.negated ? html`<span class="filter-negation">-</span>` : nothing}<span class="filter-key">${chip.key}</span
+      ><span class="filter-separator">:</span>${comparator ? html`<span class="filter-comparator">${comparator}</span>` : nothing}<span class="filter-value"
+        >${chip.quoted ? `"${chip.value}"` : chip.value}</span
+      ></c2-chip
+    >`
+  }
+
   private renderClearButton() {
-    if (!this.value || this.effectiveDisabled) return nothing
+    if ((!this.value && !this.draft && !this.chips.length) || this.effectiveDisabled) return nothing
     return html`<button class="clear" type="button" aria-label="Clear query" tabindex="-1" @click=${this.handleClearClick}>
       <slot name="clear-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -608,6 +813,12 @@ export class QueryInput extends LitElement {
             </svg>
           </slot>
         </span>
+        ${repeat(
+          this.chips,
+          // Keyed by text (and occurrence), so removing a chip removes its element rather than relabelling a neighbour.
+          (chip, index) => `${chip.text}#${this.chips.slice(0, index).filter((other) => other.text === chip.text).length}`,
+          (chip, index) => this.renderFilter(chip, index),
+        )}
         <span class="editor">
           <span class="highlight" aria-hidden="true"><span class="highlight-text">${this.renderTokens()}</span></span>
           <input
@@ -623,10 +834,10 @@ export class QueryInput extends LitElement {
             aria-controls=${ifDefined(hasFields ? 'suggestions' : undefined)}
             aria-expanded=${ifDefined(hasFields ? String(open) : undefined)}
             aria-activedescendant=${ifDefined(open && this.activeIndex >= 0 ? `suggestion-${this.activeIndex}` : undefined)}
-            aria-invalid=${this.tokens.some((token) => this.isInvalid(token)) ? 'true' : nothing}
+            aria-invalid=${this.invalid ? 'true' : nothing}
             name=${ifDefined(this.name || undefined)}
-            placeholder=${this.placeholder || nothing}
-            .value=${live(this.value)}
+            placeholder=${this.chips.length ? nothing : this.placeholder || nothing}
+            .value=${live(this.draft)}
             ?disabled=${this.effectiveDisabled}
             @input=${this.handleInput}
             @change=${(event: Event) => redispatchEvent(this, event)}

@@ -25,6 +25,20 @@
     clear-icon--color: #a1a1aa,
     clear-icon__hover--color: #18181b,
 
+    filter--height: 24px,
+    filter--padding-inline: 8px,
+    filter--border-radius: 4px,
+    filter--border: 1px solid transparent,
+    filter--background: #f4f4f5,
+    filter__hover--background: #e4e4e7,
+    filter__negated--background: rgba(207, 34, 46, 0.1),
+    filter__inactive--border: 1px dashed #bcbcc6,
+    filter__inactive--background: transparent,
+    filter__inactive--color: #71717a,
+    filter__invalid--border: 1px solid #cf222e,
+    filter__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    filter--gap: 4px,
+
     word-spacing: 4px,
     term--background: #f4f4f5,
     term__negated--background: rgba(207, 34, 46, 0.1),
@@ -88,6 +102,8 @@
   border-radius: css.cssVar(border-radius);
   font-family: css.cssVar(font-family);
   font-size: css.cssVar(font-size);
+  flex-wrap: wrap;
+  row-gap: css.cssVar(filter--gap);
   transition: animation.standard(border), animation.standard(outline);
   cursor: text;
 
@@ -114,7 +130,7 @@
 .editor {
   position: relative;
   display: grid;
-  min-width: 0;
+  min-width: 8em;
   flex: 1;
   overflow: hidden;
   line-height: 20px;
@@ -163,6 +179,85 @@
     color: transparent;
     background: css.cssVar(selection--background);
   }
+}
+
+// The chips switch the c2-chip variables to the query's own: on (selected) is the filled chip, off is the dashed one.
+.filter {
+  --c2-chip__container--height: #{css.cssVar(filter--height)};
+  --c2-chip__container--padding-left: #{css.cssVar(filter--padding-inline)};
+  --c2-chip__container--padding-right: #{css.cssVar(filter--padding-inline)};
+  --c2-chip__container--gap: 4px;
+  --c2-chip__container--border-radius: #{css.cssVar(filter--border-radius)};
+  --c2-chip__container--font-family: inherit;
+  --c2-chip__container--font-size: #{css.cssVar(font-size)};
+  --c2-chip__container--font-weight: 400;
+  --c2-chip__selected-icon--display: none;
+  --c2-chip__container__selected--border: #{css.cssVar(filter--border)};
+  --c2-chip__container__selected--background-color: #{css.cssVar(filter--background)};
+  --c2-chip__container__selected--color: #{css.cssVar(color)};
+  --c2-chip__container__selected__hover--background-color: #{css.cssVar(filter__hover--background)};
+  --c2-chip__container--border: #{css.cssVar(filter__inactive--border)};
+  --c2-chip__container--background-color: #{css.cssVar(filter__inactive--background)};
+  --c2-chip__container--color: #{css.cssVar(filter__inactive--color)};
+  --c2-chip__container__hover--border: #{css.cssVar(filter__inactive--border)};
+  --c2-chip__container__hover--background-color: #{css.cssVar(filter__hover--background)};
+  --c2-chip__container__focus--outline: #{css.cssVar(filter__focus--outline)};
+  --c2-chip__container__focus--outline-offset: 1px;
+  --c2-chip__remove-button--size: 16px;
+  --c2-chip__remove-button--margin-right: -4px;
+
+  flex: none;
+  max-width: 100%;
+  white-space: nowrap;
+
+  &.negated {
+    --c2-chip__container__selected--background-color: #{css.cssVar(filter__negated--background)};
+  }
+
+  &.invalid {
+    --c2-chip__container__selected--border: #{css.cssVar(filter__invalid--border)};
+    --c2-chip__container--border: #{css.cssVar(filter__invalid--border)};
+    --c2-chip__container__hover--border: #{css.cssVar(filter__invalid--border)};
+  }
+}
+
+.filter-key {
+  color: css.cssVar(key--color);
+}
+
+.filter-separator {
+  color: css.cssVar(separator--color);
+}
+
+.filter-comparator {
+  color: css.cssVar(comparator--color);
+}
+
+.filter-value {
+  color: css.cssVar(value--color);
+}
+
+.filter-negation {
+  color: css.cssVar(negation--color);
+}
+
+// Switched off: everything in the chip takes the muted colour and is struck through.
+.filter.inactive {
+  text-decoration: line-through;
+
+  .filter-key,
+  .filter-separator,
+  .filter-comparator,
+  .filter-value,
+  .filter-negation {
+    color: inherit;
+  }
+}
+
+.filter.invalid .filter-key {
+  text-decoration: underline wavy css.cssVar(invalid--color);
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
 }
 
 // A ring of the chip's own colour pads it without taking any width, so the text keeps the input's metrics.

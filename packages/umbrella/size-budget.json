@@ -1,5 +1,5 @@
 {
-  "total": 1196038,
+  "total": 1203803,
   "entries": {
     "accordion": 5182,
     "attachment": 5425,
@@ -105,7 +105,7 @@
     "pagination": 32625,
     "progress": 2809,
     "qr-code": 7925,
-    "query-input": 20689,
+    "query-input": 28454,
     "questionnaire": 4827,
     "radio": 8401,
     "radio/radio-group": 8280,

@@ -222,3 +222,88 @@ export function parseQuery(query: string): QueryTerm[] {
   }
   return terms
 }
+
+/** A `key:value` term that stands on its own in a query, as `c2-query-input` shows it on a chip. */
+export interface QueryFilter {
+  /** The term's source text, negation and quotes included: `-status:>=500`, `service:"billing worker"`. */
+  text: string
+  key: string
+  /** The value with its quotes removed. */
+  value: string
+  comparator?: QueryComparator
+  negated: boolean
+  quoted: boolean
+}
+
+export interface QueryFilterSplit {
+  /** The standalone terms, in order. */
+  filters: QueryFilter[]
+  /** The query with those terms (and the space after each) removed. */
+  rest: string
+  /** The given caret offset, mapped into `rest`. */
+  caret: number
+}
+
+/**
+ * Separates the `key:value` terms that stand on their own (and so can be toggled or removed independently) from the
+ * rest of a query. A term stays in `rest` when it has no value yet, its quote is unterminated, it sits inside
+ * parentheses, it is joined to a neighbour by `AND` or `OR`, or it follows `NOT`. `accept` can narrow the terms taken
+ * further, by their offsets in the query.
+ */
+export function splitQueryFilters(query: string, caret = query.length, accept: (start: number, end: number) => boolean = () => true): QueryFilterSplit {
+  const tokens = tokenizeQuery(query)
+  const significant = (from: number, step: 1 | -1) => {
+    for (let index = from; index >= 0 && index < tokens.length; index += step) if (tokens[index].type !== 'whitespace') return tokens[index]
+    return undefined
+  }
+  const filters: QueryFilter[] = []
+  const skipped = new Set<number>()
+  let depth = 0
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index]
+    if (token.type === 'paren') depth += token.text === '(' ? 1 : -1
+    const keyIndex = token.type === 'negation' && tokens[index + 1]?.type === 'key' ? index + 1 : index
+    if (tokens[keyIndex].type !== 'key' || depth > 0) continue
+    let last = keyIndex + 1
+    if (tokens[last + 1]?.type === 'comparator') last++
+    const valueToken = tokens[last + 1]?.type === 'value' ? tokens[last + 1] : undefined
+    if (!valueToken || valueToken.unterminated) {
+      index = last
+      continue
+    }
+    last++
+    const before = significant(index - 1, -1)
+    const after = significant(last + 1, 1)
+    // AND, OR or NOT before it, or AND/OR after it, ties the term to its neighbour.
+    const joined = before?.type === 'operator' || (after?.type === 'operator' && after.text !== 'NOT')
+    const start = token.start
+    const end = valueToken.end
+    if (joined || !accept(start, end)) {
+      index = last
+      continue
+    }
+    const comparator = tokens[keyIndex + 2]?.type === 'comparator' ? (tokens[keyIndex + 2].text as QueryComparator) : undefined
+    filters.push({
+      text: query.slice(start, end),
+      key: tokens[keyIndex].text,
+      value: unquoteQueryValue(valueToken.text),
+      ...(comparator ? { comparator } : {}),
+      negated: keyIndex > index,
+      quoted: valueToken.text.startsWith('"'),
+    })
+    for (let skip = index; skip <= last; skip++) skipped.add(skip)
+    if (tokens[last + 1]?.type === 'whitespace') skipped.add(last + 1)
+    index = last
+  }
+  let rest = ''
+  let removedBefore = 0
+  tokens.forEach((token, index) => {
+    if (!skipped.has(index)) {
+      rest += token.text
+      return
+    }
+    if (token.end <= caret) removedBefore += token.text.length
+    else if (token.start < caret) removedBefore += caret - token.start
+  })
+  return { filters, rest, caret: Math.max(0, caret - removedBefore) }
+}

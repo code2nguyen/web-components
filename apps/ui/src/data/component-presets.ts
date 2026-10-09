@@ -916,13 +916,14 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
       {
         name: 'Blue chips',
-        description: 'Pill-shaped blue chips with a little more room around each term.',
+        description: 'Pill-shaped blue chips, for a filter bar that reads as a row of tags.',
         css: {
           '--c2-query-input--min-height': '40px',
           '--c2-query-input--border-radius': '8px',
+          '--c2-query-input__filter--border-radius': '999px',
+          '--c2-query-input__filter--background': '#dbeafe',
+          '--c2-query-input__filter__hover--background': '#bfdbfe',
           '--c2-query-input__term--border-radius': '999px',
-          '--c2-query-input__term--outset': '3px',
-          '--c2-query-input--word-spacing': '6px',
           '--c2-query-input__term--background': '#dbeafe',
           '--c2-query-input__key--color': '#1d4ed8',
           '--c2-query-input__separator--color': '#1d4ed8',

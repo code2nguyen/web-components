@@ -1,6 +1,6 @@
 ---
 title: 'Query Input'
-description: 'A one-line key:value query field with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.'
+description: 'A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.'
 category: 'Inputs'
 ---
 
@@ -9,13 +9,15 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { QueryInput } from '@c2n/components/query-input'
 
-`c2-query-input` is the search bar of a log explorer or an issue tracker: one line of `key:value` terms such as `service:web -status:>=500 "timed out"`, coloured as it is typed. Keys, values, comparators (`>`, `>=`, `<`, `<=`), the boolean operators `AND`, `OR` and `NOT`, negations (`-` or `!` before a term), parentheses and quoted phrases each get their own colour.
+`c2-query-input` is the search bar of a log explorer or an issue tracker: `key:value` terms such as `service:web -status:>=500 "timed out"`. Each term that stands on its own is a `c2-chip` in front of the text. **Click** a chip (or press Enter or Space on it) to switch it off: it stays in the field, struck through and dashed, but drops out of the query until you switch it back on. Its **cross** (or Backspace / Delete on the chip) removes it. **Backspace** at the start of the text puts the last chip back into the text for editing, and **ArrowLeft** there walks the chips.
+
+A term becomes a chip when you pick its value from the suggestions, when **Enter** runs the query, when focus leaves the field, and when `value` is set. Terms joined by `AND` or `OR`, after `NOT`, or inside parentheses stay text, since they cannot be switched off alone. The text is coloured as it is typed: keys, values, comparators (`>`, `>=`, `<`, `<=`), the boolean operators, negations (`-` or `!` before a term), parentheses and quoted phrases each get their own colour.
 
 `fields` lists what the query can filter on, as JSON (`[{"key":"service","values":["web","api"]}]`) or as an array property. The field then suggests keys while a word is typed and, right after `key:`, that key's `values`; move the caret into another term's value and the list switches to that key's values, which may be plain strings or `{ value, label, description }` objects. The arrow keys move through the suggestions, **Enter** or **Tab** inserts one, and a value containing spaces is quoted for you. With `fields` set, a key that is not one of them is underlined, as is an unterminated quote, and the host matches `:state(invalid)`. For values fetched on demand, listen for `suggest`: it reports the `kind`, `key` and `prefix` the caret is completing whenever they change, so you can update that field's `values`.
 
-**Enter** with no suggestion active fires `search` with the query and its parsed `terms` (`key`, `value`, `negated`, `comparator`, `quoted`); **Escape** closes the suggestions, then clears the field. `search` does not bubble, so listen on the element. `input` and `change` are re-dispatched from the inner input, and the element is form-associated through `name`. The tokenizer and parser behind it, `tokenizeQuery` and `parseQuery`, are exported for use on the server.
+**Enter** with no suggestion active fires `search` with the query and its parsed `terms` (`key`, `value`, `negated`, `comparator`, `quoted`); switching or removing a chip fires it too, with `trigger` set to `toggle` or `remove`. `value`, the form value and `search` hold the active chips, then the text; `filters` (on the element and in the event) lists every chip with its `active` flag. **Escape** closes the suggestions, then clears the field. `search` does not bubble, so listen on the element. `input` and `change` fire on every change, and the element is form-associated through `name`. The tokenizer, parser and chip splitter behind it, `tokenizeQuery`, `parseQuery` and `splitQueryFilters`, are exported for use on the server.
 
-Each `key:value` term, with its negation, sits on a chip (`--c2-query-input__term--background`, `--c2-query-input__term__negated--background`, `--c2-query-input__term--border-radius`), while free text and operators stay plain. Everything is drawn under a transparent input, so the caret, selection and typing stay native. That is also why a chip is padded with a ring (`--c2-query-input__term--outset`) rather than real padding, and why the room between chips comes from `--c2-query-input--word-spacing`, which the input shares: anything that changed the width of a character would move the caret off its letter. Give the host a `width` and the field fills it.
+The chips take the `--c2-query-input__filter--*` variables (`__filter--background`, `__filter__negated--background`, `__filter__inactive--border`, …). A term still being typed sits on a lighter chip drawn under the transparent input (`--c2-query-input__term--*`), so typing and the caret stay native; that chip is padded with a ring and spaced with `--c2-query-input--word-spacing`, which the input shares, because anything that changed the width of a character would move the caret off its letter. Give the host a `width` and the field fills it; the chips wrap onto more lines when they need to.
 
 ## Import
 
@@ -32,7 +34,7 @@ import '@c2n/components/query-input'
     max-width: 100%;
   }
 </style>
-<div data-label="Highlighting">
+<div data-label="Chips and text">
   <c2-query-input class="query" value='service:web -status:>=500 (env:prod OR env:staging) "timed out"' aria-label="Log query"></c2-query-input>
 </div>
 <div data-label="Suggestions">

@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-query-input: a monospace log-explorer bar, pill-shaped blue chips, and a quiet toolbar filter with plain text terms. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-query-input: a monospace log-explorer bar, pill-shaped blue chips you can switch off and remove, and a quiet toolbar filter with plain text terms. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -9,7 +9,7 @@ import { QueryInput } from '@c2n/components/query-input'
 
 ## Presets
 
-The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--background`, `--c2-query-input--border-radius`, `--c2-query-input--font-family`), with `__hover--*` and `__focus--*` states on top. The syntax colours are `--c2-query-input__key--*`, `__value--*`, `__comparator--color`, `__operator--color`, `__negation--color` and `__invalid--color`; each `key:value` term sits on a chip styled by `--c2-query-input__term--*` (background, radius, outset), and `--c2-query-input--word-spacing` leaves room between chips. The suggestions list follows `--c2-query-input__panel--*` and `--c2-query-input__option--*`.
+The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--background`, `--c2-query-input--border-radius`, `--c2-query-input--font-family`), with `__hover--*` and `__focus--*` states on top. The syntax colours are `--c2-query-input__key--*`, `__value--*`, `__comparator--color`, `__operator--color`, `__negation--color` and `__invalid--color`; the `key:value` chips are styled by `--c2-query-input__filter--*` (background, border, radius, and the `__negated`, `__inactive` and `__invalid` states), and a term still being typed by `--c2-query-input__term--*`. The suggestions list follows `--c2-query-input__panel--*` and `--c2-query-input__option--*`.
 
 <GalleryGrid>
 
@@ -45,9 +45,10 @@ The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--
     width: 320px;
     --c2-query-input--min-height: 40px;
     --c2-query-input--border-radius: 8px;
+    --c2-query-input__filter--border-radius: 999px;
+    --c2-query-input__filter--background: light-dark(#dbeafe, #172554);
+    --c2-query-input__filter__hover--background: light-dark(#bfdbfe, #1e3a8a);
     --c2-query-input__term--border-radius: 999px;
-    --c2-query-input__term--outset: 3px;
-    --c2-query-input--word-spacing: 6px;
     --c2-query-input__term--background: light-dark(#dbeafe, #172554);
     --c2-query-input__key--color: light-dark(#1d4ed8, #93b4f7);
     --c2-query-input__separator--color: light-dark(#1d4ed8, #93b4f7);
@@ -71,12 +72,14 @@ The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--
     --c2-query-input__term--background: transparent;
     --c2-query-input__term__negated--background: transparent;
     --c2-query-input--word-spacing: 0px;
+    --c2-query-input__filter--background: transparent;
+    --c2-query-input__filter--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
     --c2-query-input__key--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-query-input__value--color: var(--c2-theme--color-on-surface, #18181b);
     box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
-<c2-query-input class="toolbar-filter" placeholder="Filter: assignee:me priority:high" aria-label="Filter"></c2-query-input>
+<c2-query-input class="toolbar-filter" value="assignee:me" placeholder="Filter: assignee:me priority:high" aria-label="Filter"></c2-query-input>
 ```
 
 </GalleryGrid>
