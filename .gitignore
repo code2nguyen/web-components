@@ -16,6 +16,7 @@
 .vscode/
 .idea/
 scripts/generator/plopfile.js
+scripts/generator/sorted-lists.js
 scripts/generator/tsconfig.tsbuildinfo
 **/tsconfig.node.tsbuildinfo
 **/.wireit

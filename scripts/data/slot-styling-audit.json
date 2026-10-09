@@ -776,6 +776,27 @@
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-confirm-dialog",
+      "slot": "",
+      "decision": "part",
+      "parts": ["message"],
+      "reason": "The message region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-confirm-dialog",
+      "slot": "heading",
+      "decision": "part",
+      "parts": ["heading"],
+      "reason": "The heading row owns the heading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-confirm-dialog",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-confirm-dialog__icon--size", "--c2-confirm-dialog__icon--color", "--c2-confirm-dialog__icon__destructive--color"],
+      "reason": "The icon is sized and coloured through its documented variables."
+    },
+    {
       "tag": "c2-context-menu",
       "slot": "default",
       "decision": "assigned-content",
@@ -1723,6 +1744,47 @@
       "slot": "previous-icon",
       "decision": "assigned-content",
       "reason": "The previous-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "hide-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__toggle--color", "--c2-password-field__toggle__hover--color"],
+      "reason": "The toggle sizes the slotted icon and its crossed-eye fallback through the icon size, and colours it through the toggle colour variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "prefix-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__icon--color"],
+      "reason": "The field sizes and colours the slotted prefix icon through the icon variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "show-icon",
+      "decision": "variables",
+      "variables": ["--c2-password-field__icon--size", "--c2-password-field__toggle--color", "--c2-password-field__toggle__hover--color"],
+      "reason": "The toggle sizes the slotted icon and its eye fallback through the icon size, and colours it through the toggle colour variables."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-phone-input",
+      "slot": "chevron-icon",
+      "decision": "variables",
+      "variables": ["--c2-phone-input__icon--size", "--c2-phone-input__icon--color"],
+      "reason": "The country button's chevron box sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-phone-input",
+      "slot": "search-icon",
+      "decision": "variables",
+      "variables": ["--c2-phone-input__icon--size", "--c2-phone-input__icon--color"],
+      "reason": "The country search field's icon box sizes and colours the slotted icon and its magnifier fallback through the icon variables."
     },
     {
       "tag": "c2-pie-chart",

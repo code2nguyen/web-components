@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-password-field</title>
+    <script type="module" src="/src/password-field.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 360px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-password-field {
+        width: 100%;
+      }
+      .brand {
+        --c2-password-field--border-radius: 999px;
+        --c2-password-field__focus--border: 1px solid #7c3aed;
+        --c2-password-field__meter__strong--color: #7c3aed;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h3>Sign in</h3>
+      <c2-password-field placeholder="Password" name="password"></c2-password-field>
+    </section>
+    <section>
+      <h3>New password: meter and requirements</h3>
+      <c2-password-field
+        placeholder="New password"
+        autocomplete="new-password"
+        meter
+        requirements="length;lowercase;uppercase;number;symbol"
+        minlength="10"
+      ></c2-password-field>
+    </section>
+    <section>
+      <h3>Error</h3>
+      <c2-password-field value="secret" error error-text="Incorrect password."></c2-password-field>
+    </section>
+    <section>
+      <h3>Disabled, no toggle</h3>
+      <c2-password-field value="secret" disabled hide-toggle></c2-password-field>
+    </section>
+    <section>
+      <h3>Themed</h3>
+      <c2-password-field class="brand" placeholder="Passphrase" autocomplete="new-password" meter help="Four or more words work well."></c2-password-field>
+    </section>
+  </body>
+</html>

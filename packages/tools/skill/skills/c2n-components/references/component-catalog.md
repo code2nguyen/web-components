@@ -70,6 +70,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Feedback
 
 - **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
+- **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.
 - **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Modal** — `c2-modal` · `@c2n/components/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
@@ -107,6 +108,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
+- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
+- **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
