@@ -27,7 +27,8 @@
     "type-check": "wireit",
     "prepack": "npm run build",
     "size": "wireit",
-    "size:update": "npm run build && node scripts/check-size.ts --update"
+    "size:update": "npm run build && node scripts/check-size.ts --update",
+    "size:add": "npm run build && node scripts/check-size.ts --add"
   },
   "wireit": {
     "build": {
