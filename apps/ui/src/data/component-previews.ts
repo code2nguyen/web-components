@@ -225,6 +225,7 @@ greet('world')"></c2-code-editor>`,
   <c2-mat-icon>settings</c2-mat-icon>
   <c2-mat-icon>search</c2-mat-icon>
 </div>`,
+  math: `<c2-math style="--c2-math--font-size:1.5em" display value="x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"></c2-math>`,
   menu: `<c2-menu aria-label="Row actions">
   <c2-button slot="trigger">Actions</c2-button>
   <c2-menu-item value="edit"><c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>Edit</c2-menu-item>

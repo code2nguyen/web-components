@@ -57,6 +57,7 @@ import logViewer from '@c2n/log-viewer/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
+import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
@@ -179,6 +180,7 @@ export const componentManifests = (function () {
     marker,
     masonry,
     matIcon,
+    math,
     menu,
     mermaid,
     modal,

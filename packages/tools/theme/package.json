@@ -111,6 +111,7 @@
         "../../components/marker:build",
         "../../components/masonry:build",
         "../../components/mat-icon:build",
+        "../../components/math:build",
         "../../components/menu:build",
         "../../components/mermaid:build",
         "../../components/modal:build",

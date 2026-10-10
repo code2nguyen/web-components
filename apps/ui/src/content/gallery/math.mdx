@@ -1,0 +1,81 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MathFormula as Math } from '@c2n/components/math'
+
+## Presets
+
+Looks for `c2-math`. The formula follows the text colour and scales with `--c2-math--font-size`. `--c2-math--font-family` picks the math font. The error state has its own colour variables.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-math value="e^{i\pi} + 1 = 0"></c2-math>
+```
+
+```html tag=MdxCodeBlock,label=Large display
+<style>
+  .math-large {
+    --c2-math--font-size: 1.8em;
+    --c2-math__display--margin: 8px 0;
+  }
+</style>
+<c2-math class="math-large" display value="\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}"></c2-math>
+```
+
+```html tag=MdxCodeBlock,label=Left-aligned derivation
+<style>
+  .math-left {
+    --c2-math__display--text-align: left;
+    --c2-math__display--margin: 0;
+  }
+</style>
+<c2-math class="math-left" display value="\begin{aligned} f(x) &= (x+1)^2 \\ &= x^2 + 2x + 1 \end{aligned}"></c2-math>
+```
+
+```html tag=MdxCodeBlock,label=Callout card
+<style>
+  .math-card {
+    display: grid;
+    gap: 8px;
+    max-width: 320px;
+    padding: 14px 16px;
+    border: 1px solid light-dark(#bfdbfe, #1e3a5f);
+    border-radius: 8px;
+    background: light-dark(#eff6ff, #14243b);
+    color: light-dark(#1d4ed8, #7aa7f5);
+    font-size: 13px;
+  }
+  .math-card c2-math {
+    --c2-math--font-size: 1.3em;
+    --c2-math__display--margin: 0;
+  }
+</style>
+<div class="math-card">
+  <strong>Compound interest</strong>
+  <c2-math display value="A = P\left(1 + \frac{r}{n}\right)^{nt}"></c2-math>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Serif font
+<style>
+  .math-serif {
+    --c2-math--font-family: 'STIX Two Math', 'Latin Modern Math', math;
+    --c2-math--font-size: 1.4em;
+  }
+</style>
+<c2-math class="math-serif" value="\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}"></c2-math>
+```
+
+```html tag=MdxCodeBlock,label=Quiet error
+<style>
+  .math-error {
+    --c2-math__error--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-math__error--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-math__error--border-radius: 6px;
+  }
+</style>
+<c2-math class="math-error" value="\frac{a}{"></c2-math>
+```
+
+</GalleryGrid>

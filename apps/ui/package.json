@@ -79,6 +79,7 @@
     "@c2n/marker": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
+    "@c2n/math": "*",
     "@c2n/menu": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",

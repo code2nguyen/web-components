@@ -154,6 +154,7 @@
         "./packages/components/marker:build",
         "./packages/components/masonry:build",
         "./packages/components/mat-icon:build",
+        "./packages/components/math:build",
         "./packages/components/menu:build",
         "./packages/components/mermaid:build",
         "./packages/components/modal:build",
