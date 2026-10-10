@@ -80,7 +80,8 @@ test('renders CommonMark and GFM blocks from a script source', async ({ page, re
 })
 
 test('raw HTML is shown as code and never interpreted', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-markdown></c2-markdown>')
+  // Plain code blocks keep the block's text in this shadow root: a c2-code-viewer, which may load mid-test, holds it in its own.
+  await renderScenario('<c2-markdown code="plain"></c2-markdown>')
   const element = md(page)
   await setValue(
     element,
@@ -91,6 +92,7 @@ test('raw HTML is shown as code and never interpreted', async ({ page, renderSce
   expect(text).toContain('<img src=x onerror="alert(1)">')
   expect(text).toContain('<script>alert(1)</script>')
   expect(await count(element, 'code.raw-html')).toBeGreaterThan(0)
+  expect(await count(element, 'pre.raw-html-block')).toBe(3)
 })
 
 test('dangerous URLs never reach an href or src', async ({ page, renderScenario }) => {
