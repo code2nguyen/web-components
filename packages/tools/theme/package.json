@@ -113,6 +113,7 @@
         "../../components/masonry:build",
         "../../components/mat-icon:build",
         "../../components/menu:build",
+        "../../components/mermaid:build",
         "../../components/modal:build",
         "../../components/month-planner:build",
         "../../components/navigation-menu:build",

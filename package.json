@@ -156,6 +156,7 @@
         "./packages/components/masonry:build",
         "./packages/components/mat-icon:build",
         "./packages/components/menu:build",
+        "./packages/components/mermaid:build",
         "./packages/components/modal:build",
         "./packages/components/month-planner:build",
         "./packages/components/navigation-menu:build",

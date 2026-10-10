@@ -81,6 +81,7 @@
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/menu": "*",
+    "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
