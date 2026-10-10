@@ -56,9 +56,10 @@ const brokenIcon = html`<svg
   <path d="m16 17 5 5m0-5-5 5" />
 </svg>`
 
+/** The host of an absolute URL. A relative one is the page's own site, and resolving it on the server is impossible. */
 function hostOf(src: string): string {
   try {
-    return new URL(src, document.baseURI).host
+    return new URL(src).host
   } catch {
     return ''
   }

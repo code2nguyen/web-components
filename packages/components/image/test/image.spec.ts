@@ -65,6 +65,12 @@ test('loading="click" makes no request until the reader activates it', async ({ 
   expect(served.requests).toContain('/chart.png')
 })
 
+test('the click-to-load placeholder names the host of an absolute URL only, so server and client render alike', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-image loading="click" src="/chart.png" alt="Local chart"></c2-image>')
+  await expect(page.getByRole('button', { name: /Load image/ })).toBeVisible()
+  expect(await page.locator('c2-image').evaluate((element) => element.shadowRoot!.querySelector('.host'))).toBeNull()
+})
+
 test('cancelling load-request keeps the image blocked; rewriting src loads the new URL', async ({ page, renderScenario }) => {
   const served = await images(page)
   await renderScenario(`<c2-image id="cancel" loading="click" src="https://img.test/a.png" alt="Blocked"></c2-image>
