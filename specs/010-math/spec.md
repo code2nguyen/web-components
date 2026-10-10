@@ -49,7 +49,7 @@ Behaviour:
 
 - **Copy.** When a selection lies entirely inside one formula, `copy` puts the TeX in `text/plain` and the MathML in `text/html`, as Wikipedia does. Pasting into a chat or an editor then keeps the formula.
 - **Overflow.** A display formula wider than its container scrolls horizontally. The scroller becomes focusable (`tabindex="0"`) only when it overflows.
-- **SSR.** The server emits the TeX source in a styled `<code>`. The client renders MathML on upgrade. Temml's `renderToString` would work on the server, but it is a string, and the no-`innerHTML` rule wins. This is an open question below.
+- **SSR.** The server emits the TeX source in a styled `<code>`. The client renders MathML on upgrade. Temml's `renderToString` would work on the server, but it is a string, and the no-`innerHTML` rule wins. This was decided on 2026-10-10 (see below).
 
 ## Theming
 
@@ -71,6 +71,6 @@ Native MathML is exposed to VoiceOver, NVDA (with MathCAT) and JAWS. The element
 - Copy puts the TeX in `text/plain`.
 - `display` changes the MathML `display` attribute. An overflowing display formula is scrollable and focusable.
 
-## Open question
+## Decision (2026-10-10)
 
-- Should SSR render real MathML? The two ways are `renderToString` through `unsafeHTML` on the server only (Temml escapes text and `trust` is off), or a token-to-template port. I recommend the code fallback for v1.
+- SSR renders the TeX source in a styled `<code>`, and the client upgrades it to MathML. Real MathML on the server (`renderToString` through `unsafeHTML`, or a token-to-template port) can come later if it is needed.
