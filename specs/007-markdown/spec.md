@@ -6,13 +6,13 @@
 
 ## Decisions (2026-10-10)
 
-| #   | Question                              | Decision                                                                                                                                                                                                                                                                                                                  |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Images                                | **Load by default**, and chat apps opt into click-to-load. Image behaviour lives in a separate component, **`c2-image`** (#41, [spec](../009-image/spec.md)). Every markdown image renders as one.                                                                                                                        |
-| 2   | Raw HTML in the source                | **Shown as code**, never interpreted. An HTML block becomes a code block in `html` and an inline tag becomes inline code. There is no sanitiser and no option to turn interpretation on.                                                                                                                                  |
-| 3   | Math and Mermaid                      | **In v1, as separate components built first**: **`c2-math`** ([spec](../010-math/spec.md)) and **`c2-mermaid`** ([spec](../011-mermaid/spec.md)). Neither had a roadmap row, so both are proposed as new rows. Markdown loads each lazily.                                                                                |
-| 4   | Caret                                 | **CSS variables only.** There is no caret attribute. `--c2-markdown__caret--content: none` hides it.                                                                                                                                                                                                                      |
-| —   | Relation to `c2-streaming-text` (#96) | Both components reveal text through **one shared pacing controller** in `@c2n/core`, with the same `streaming` / `reveal` / `append` API and the same caret variables, so a page mixing them reads identically. `c2-streaming-text` handles plain text and `c2-markdown` handles formatted text. Neither wraps the other. |
+| #   | Question                              | Decision                                                                                                                                                                                                                                                                                                                      |
+| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Images                                | **Load by default**, and chat apps opt into click-to-load. Image behaviour lives in a separate component, **`c2-image`** (#41, [spec](../009-image/spec.md)). Every markdown image renders as one.                                                                                                                            |
+| 2   | Raw HTML in the source                | **Shown as code**, never interpreted. An HTML block becomes a code block in `html` and an inline tag becomes inline code. There is no sanitiser and no option to turn interpretation on.                                                                                                                                      |
+| 3   | Math and Mermaid                      | **In v1, as separate components built first**: **`c2-math`** ([spec](../010-math/spec.md)) and **`c2-mermaid`** ([spec](../011-mermaid/spec.md)). Neither had a roadmap row, so both are proposed as new rows. Markdown loads each lazily.                                                                                    |
+| 4   | Caret                                 | **CSS variables only.** There is no caret attribute. `--c2-markdown__caret--content: none` hides it.                                                                                                                                                                                                                          |
+| —   | Relation to `c2-streaming-text` (#96) | Both components reveal text through **one shared pacing controller** in `@c2n/core`, with the same `streaming` / `reveal` / `appendText` API and the same caret variables, so a page mixing them reads identically. `c2-streaming-text` handles plain text and `c2-markdown` handles formatted text. Neither wraps the other. |
 
 ## Build order
 
@@ -72,7 +72,7 @@ No prior-art web component is both safe by default and built for streaming (rese
 
 ```ts
 const md = document.querySelector('c2-markdown')!
-for await (const chunk of stream) md.append(chunk)
+for await (const chunk of stream) md.appendText(chunk)
 md.streaming = false
 md.addEventListener('reveal-end', () => showActions(), { once: true })
 ```
@@ -100,7 +100,7 @@ Behavioural options are attributes and everything visual is a CSS variable. Attr
 
 ### Methods and getters
 
-- `append(chunk)` and `clear()` behave as on `c2-streaming-text`.
+- `appendText(chunk)` and `clear()` behave as on `c2-streaming-text`.
 - `text` returns the source.
 
 ### Events
@@ -121,7 +121,7 @@ Events are declared in a `MarkdownEventMap` with `TypedAddEventListener`.
 ## Architecture
 
 ```
-append(chunk) ──► StreamRevealController (@c2n/core) ──► revealed source (on a grapheme boundary)
+appendText(chunk) ──► StreamRevealController (@c2n/core) ──► revealed source (on a grapheme boundary)
                                                                 │  one pass per animation frame
                                                                 ▼
 lex     marked.lexer(source, { gfm, breaks, extensions: [mathBlock, mathInline] }) → block tokens, each with .raw
