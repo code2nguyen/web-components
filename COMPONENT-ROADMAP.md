@@ -81,25 +81,27 @@ Domain patterns with no design-system home come from the products that made them
 
 ### B. Data display
 
-| #   | Component           | What it adds                                                                | Real-world model                                                                 | Priority | Decision |
-| --- | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
-| 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building         | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting               | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed |
-| 32  | `c2-format-date`    | Locale and time-zone-aware date display                                     | Web Awesome format-date                                                          | P2       | Proposed |
-| 34  | `c2-highlight`      | Highlight the parts of a text that match a query                            | Mantine Highlight, Ark highlight                                                 | P3       | Proposed |
-| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)            | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
-| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes                       | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
-| 37  | `c2-rolling-number` | Digits that roll when a value changes                                       | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed |
-| 39  | `c2-diff-viewer`    | Side-by-side or unified text diff                                           | GitHub and GitLab diffs                                                          | P2       | Proposed |
-| 40  | `c2-markdown`       | Safe markdown renderer that handles streaming, for chat answers and READMEs | Web Awesome markdown, Vaadin Markdown                                            | P2       | Proposed |
-| 41  | `c2-image`          | Lazy loading, placeholder, fallback and click-to-preview                    | antd Image                                                                       | P2       | Proposed |
-| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip            | PrimeVue Galleria, antd Image preview group                                      | P2       | Proposed |
-| 43  | `c2-image-compare`  | Before/after slider                                                         | Web Awesome comparison, PrimeVue ImageCompare                                    | P3       | Proposed |
-| 44  | `c2-video-player`   | Themed controls, captions, chapters                                         | Loom, YouTube                                                                    | P3       | Proposed |
-| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                            | Slack clips, WhatsApp voice notes                                                | P3       | Proposed |
-| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                                      | DocuSign, Gmail attachment preview                                               | P3       | Proposed |
-| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse                       | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
-| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                                 | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
+| #   | Component           | What it adds                                                                   | Real-world model                                                                 | Priority | Decision                                                    |
+| --- | ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------- |
+| 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building            | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed                                                    |
+| 31  | `c2-format-number`  | Locale number, currency, percent, compact and byte formatting                  | Web Awesome format-number/format-bytes, Mantine NumberFormatter                  | P1       | Proposed                                                    |
+| 32  | `c2-format-date`    | Locale and time-zone-aware date display                                        | Web Awesome format-date                                                          | P2       | Proposed                                                    |
+| 34  | `c2-highlight`      | Highlight the parts of a text that match a query                               | Mantine Highlight, Ark highlight                                                 | P3       | Proposed                                                    |
+| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)               | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed                                                    |
+| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes                          | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed                                                    |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                                          | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed                                                    |
+| 39  | `c2-diff-viewer`    | Side-by-side or unified text diff                                              | GitHub and GitLab diffs                                                          | P2       | Proposed                                                    |
+| 40  | `c2-markdown`       | Safe markdown renderer that handles streaming, for chat answers and READMEs    | Web Awesome markdown, Vaadin Markdown                                            | P2       | Accept: [spec](specs/007-markdown/spec.md)                  |
+| 41  | `c2-image`          | Lazy loading, placeholder, fallback and click-to-preview                       | antd Image                                                                       | P2       | Accept: [spec](specs/009-image/spec.md), needed by markdown |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip               | PrimeVue Galleria, antd Image preview group                                      | P2       | Proposed                                                    |
+| 43  | `c2-image-compare`  | Before/after slider                                                            | Web Awesome comparison, PrimeVue ImageCompare                                    | P3       | Proposed                                                    |
+| 169 | `c2-math`           | TeX formulas rendered as native MathML (Temml); used by `c2-markdown`          | GitHub, Notion and ChatGPT math; Wikipedia                                       | P2       | Accept: [spec](specs/010-math/spec.md)                      |
+| 170 | `c2-mermaid`        | Mermaid text diagrams, themed from tokens and sandboxed; used by `c2-markdown` | GitHub, GitLab and Notion mermaid blocks                                         | P2       | Accept: [spec](specs/011-mermaid/spec.md)                   |
+| 44  | `c2-video-player`   | Themed controls, captions, chapters                                            | Loom, YouTube                                                                    | P3       | Proposed                                                    |
+| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                               | Slack clips, WhatsApp voice notes                                                | P3       | Proposed                                                    |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                                         | DocuSign, Gmail attachment preview                                               | P3       | Proposed                                                    |
+| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse                          | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed                                                    |
+| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                                    | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed                                                    |
 
 ### C. Charts
 
@@ -177,12 +179,12 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat-message-list`, `c2-chatbot`) and the open working-indicator PR.
 
-| #   | Component           | What it adds                                                         | Real-world model                                        | Priority | Decision |
-| --- | ------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | -------- | -------- |
-| 94  | `c2-tool-call`      | Collapsible card for an agent step: tool name, input, status, output | Claude and ChatGPT agent steps, Vercel AI Elements Tool | P2       | Proposed |
-| 95  | `c2-citation`       | Numbered inline source marker with a hover preview of the source     | Perplexity, ChatGPT search                              | P2       | Proposed |
-| 96  | `c2-streaming-text` | Smooth reveal of tokens as they arrive, with a cursor                | ChatGPT, Claude                                         | P2       | Proposed |
-| 97  | `c2-web-preview`    | Sandboxed iframe with URL bar, reload and device sizes               | v0, Bolt                                                | P3       | Proposed |
+| #   | Component           | What it adds                                                         | Real-world model                                        | Priority | Decision                                                                      |
+| --- | ------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| 94  | `c2-tool-call`      | Collapsible card for an agent step: tool name, input, status, output | Claude and ChatGPT agent steps, Vercel AI Elements Tool | P2       | Proposed                                                                      |
+| 95  | `c2-citation`       | Numbered inline source marker with a hover preview of the source     | Perplexity, ChatGPT search                              | P2       | Proposed                                                                      |
+| 96  | `c2-streaming-text` | Smooth reveal of tokens as they arrive, with a cursor                | ChatGPT, Claude                                         | P2       | Accept: [spec](specs/008-streaming-text/spec.md), shares pacing with markdown |
+| 97  | `c2-web-preview`    | Sandboxed iframe with URL bar, reload and device sizes               | v0, Bolt                                                | P3       | Proposed                                                                      |
 
 ### I. Utilities
 
