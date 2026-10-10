@@ -77,6 +77,7 @@
     "@c2n/list": "*",
     "@c2n/list-item": "*",
     "@c2n/log-viewer": "*",
+    "@c2n/markdown": "*",
     "@c2n/marker": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",

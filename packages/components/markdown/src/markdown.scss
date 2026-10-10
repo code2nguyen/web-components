@@ -1,0 +1,333 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-markdown,
+  $theme: (
+    color: inherit,
+    font-family: inherit,
+    font-size: 14px,
+    line-height: 1.6,
+    block-gap: 12px,
+    heading--color: inherit,
+    heading--font-weight: 600,
+    heading--line-height: 1.3,
+    heading--margin-top: 24px,
+    h1--font-size: 24px,
+    h2--font-size: 20px,
+    h3--font-size: 17px,
+    h4--font-size: 15px,
+    h5--font-size: 14px,
+    h6--font-size: 13px,
+    link--color: rgb(2, 101, 220),
+    link__hover--color: rgb(1, 84, 184),
+    link--text-decoration: underline,
+    link__pending--color: #71717a,
+    link__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    code--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    code--font-size: 0.9em,
+    code--color: #18181b,
+    code--background: #f4f4f5,
+    code--border-radius: 4px,
+    code--padding: 1px 5px,
+    raw-html--color: #71717a,
+    raw-html--background: #f4f4f5,
+    code-block--background: #fafafa,
+    code-block--border: 1px solid #e4e4e7,
+    code-block--border-radius: 8px,
+    code-block--padding: 12px 16px,
+    code-block--font-size: 13px,
+    blockquote--border-left: 3px solid #e4e4e7,
+    blockquote--color: #71717a,
+    blockquote--padding-left: 12px,
+    list--padding-left: 24px,
+    list--item-gap: 4px,
+    list__marker--color: #71717a,
+    task--border: 1px solid #bcbcc6,
+    task__checked--background: rgb(2, 101, 220),
+    task__checked--color: #ffffff,
+    table--border: 1px solid #e4e4e7,
+    table__header--background: #fafafa,
+    table__header--font-weight: 600,
+    table__cell--padding: 6px 12px,
+    table__row__striped--background: transparent,
+    hr--border-top: 1px solid #e4e4e7,
+    image--border-radius: 8px,
+    image--max-width: 100%,
+    caret--content: '▍',
+    caret--color: rgb(2, 101, 220),
+    caret--margin-left: 1px,
+    caret--blink-duration: 1s,
+    block--enter-duration: 150ms,
+    reveal--max-lag: 600ms,
+    reveal--flush-duration: 300ms,
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+  overflow-wrap: break-word;
+}
+
+/* The pacing timings are read back from here by the script, with their defaults applied. */
+.body {
+  --_max-lag: #{css.cssVar(reveal--max-lag)};
+  --_flush-duration: #{css.cssVar(reveal--flush-duration)};
+  display: flow-root;
+}
+
+.block {
+  margin-block: 0 css.cssVar(block-gap);
+}
+
+.block:last-child {
+  margin-bottom: 0;
+}
+
+:host(:state(streaming)) .block {
+  animation: c2-markdown-enter css.cssVar(block--enter-duration) ease-out both;
+}
+
+/* Headings */
+.heading {
+  position: relative;
+  color: css.cssVar(heading--color);
+  font-weight: css.cssVar(heading--font-weight);
+  line-height: css.cssVar(heading--line-height);
+}
+
+.block + .heading {
+  margin-top: css.cssVar(heading--margin-top);
+}
+
+h1 {
+  font-size: css.cssVar(h1--font-size);
+}
+h2 {
+  font-size: css.cssVar(h2--font-size);
+}
+h3 {
+  font-size: css.cssVar(h3--font-size);
+}
+h4 {
+  font-size: css.cssVar(h4--font-size);
+}
+h5 {
+  font-size: css.cssVar(h5--font-size);
+}
+h6 {
+  font-size: css.cssVar(h6--font-size);
+}
+
+.anchor {
+  margin-left: 6px;
+  color: css.cssVar(link__pending--color);
+  text-decoration: none;
+  opacity: 0;
+}
+
+.heading:hover .anchor {
+  opacity: 1;
+}
+
+/* Inline */
+.paragraph {
+  margin-top: 0;
+}
+
+.link {
+  color: css.cssVar(link--color);
+  text-decoration: css.cssVar(link--text-decoration);
+  text-underline-offset: 2px;
+}
+
+a.link:hover {
+  color: css.cssVar(link__hover--color);
+}
+
+a.link:focus-visible {
+  border-radius: 2px;
+  outline: css.cssVar(link__focus--outline);
+  outline-offset: 2px;
+}
+
+.link--pending,
+.link--blocked {
+  color: css.cssVar(link__pending--color);
+}
+
+.code,
+.raw-html,
+.math-source {
+  padding: css.cssVar(code--padding);
+  border-radius: css.cssVar(code--border-radius);
+  background: css.cssVar(code--background);
+  color: css.cssVar(code--color);
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+}
+
+.raw-html {
+  background: css.cssVar(raw-html--background);
+  color: css.cssVar(raw-html--color);
+}
+
+/* Blocks */
+.code-block--plain {
+  overflow-x: auto;
+  padding: css.cssVar(code-block--padding);
+  border: css.cssVar(code-block--border);
+  border-radius: css.cssVar(code-block--border-radius);
+  background: css.cssVar(code-block--background);
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code-block--font-size);
+  line-height: 1.6;
+}
+
+.code-block--plain code {
+  font: inherit;
+}
+
+c2-code-viewer.code-block,
+c2-mermaid.diagram,
+c2-math.math-block {
+  display: block;
+}
+
+.blockquote {
+  margin-inline: 0;
+  padding-left: css.cssVar(blockquote--padding-left);
+  border-left: css.cssVar(blockquote--border-left);
+  color: css.cssVar(blockquote--color);
+}
+
+.blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.list {
+  padding-left: css.cssVar(list--padding-left);
+}
+
+.list li + li {
+  margin-top: css.cssVar(list--item-gap);
+}
+
+.list li::marker {
+  color: css.cssVar(list__marker--color);
+}
+
+.list .list,
+.list .paragraph {
+  margin-block: css.cssVar(list--item-gap) 0;
+}
+
+.list--tasks {
+  padding-left: 4px;
+  list-style: none;
+}
+
+.task-box {
+  display: inline-flex;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin-right: 8px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.15em;
+  border: css.cssVar(task--border);
+  border-radius: 4px;
+}
+
+.task-box--checked {
+  border-color: css.cssVar(task__checked--background);
+  background: css.cssVar(task__checked--background);
+  color: css.cssVar(task__checked--color);
+}
+
+.task-box svg {
+  width: 100%;
+  height: 100%;
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: css.cssVar(table__cell--padding);
+  border: css.cssVar(table--border);
+  text-align: left;
+}
+
+.table th {
+  background: css.cssVar(table__header--background);
+  font-weight: css.cssVar(table__header--font-weight);
+}
+
+.table tbody tr:nth-child(even) {
+  background: css.cssVar(table__row__striped--background);
+}
+
+.table .align-center {
+  text-align: center;
+}
+
+.table .align-right {
+  text-align: right;
+}
+
+.rule {
+  border: 0;
+  border-top: css.cssVar(hr--border-top);
+}
+
+.image {
+  --c2-image--border-radius: #{css.cssVar(image--border-radius)};
+  max-width: css.cssVar(image--max-width);
+}
+
+/* Streaming */
+.caret::after {
+  content: css.cssVar(caret--content);
+  margin-left: css.cssVar(caret--margin-left);
+  color: css.cssVar(caret--color);
+  animation: c2-markdown-blink css.cssVar(caret--blink-duration) steps(1) infinite;
+}
+
+.code-block--pending {
+  opacity: 0.85;
+}
+
+@keyframes c2-markdown-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes c2-markdown-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(:state(streaming)) .block,
+  .caret::after {
+    animation: none;
+  }
+}

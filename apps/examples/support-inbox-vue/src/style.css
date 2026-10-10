@@ -211,6 +211,18 @@ body {
 .thread__message--agent {
   --c2-chat-message__message--background: var(--c2-theme--color-primary, #0265dc);
   --c2-chat-message__message--color: var(--c2-theme--color-on-primary, #ffffff);
+  /* Markdown inside the filled bubble: links and inline code take the bubble's text colour. */
+  --c2-markdown__link--color: currentColor;
+  --c2-markdown__link__hover--color: currentColor;
+  --c2-markdown__code--color: currentColor;
+  --c2-markdown__code--background: color-mix(in srgb, currentColor 18%, transparent);
+  --c2-markdown__list__marker--color: currentColor;
+}
+
+.thread__message-copy {
+  --c2-markdown--font-size: inherit;
+  --c2-markdown--line-height: inherit;
+  --c2-markdown--block-gap: 6px;
 }
 
 /* Public parts live inside the component's shadow root. Keep this host selector global: Vue's scoped

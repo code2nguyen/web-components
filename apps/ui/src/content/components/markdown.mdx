@@ -1,0 +1,110 @@
+---
+title: 'Markdown'
+description: 'Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/components/button'
+import { Markdown } from '@c2n/components/markdown'
+
+`c2-markdown` renders CommonMark and GitHub-flavoured markdown (tables, task lists, strikethrough, autolinks) plus TeX math and Mermaid diagrams, for model answers streaming in and for static documents alike.
+
+**Safe by construction.**
+
+- The output is built from the parser's tokens as templates from a fixed list of elements. No markdown ever reaches `innerHTML`.
+- Raw HTML in the source is shown as code, never run.
+- Links and images keep only `http(s)` and relative URLs; links also allow `mailto:` and `tel:`. An optional `urlTransform` hook runs after that check, and can proxy a URL or drop it.
+- Images render as [`c2-image`](/web-components/components/image). `image-policy="click"` makes each one wait for a click, except those from `image-origins`. That closes the image-URL channel a prompt injection uses to leak data out of a chat.
+
+**Streaming.** Call `appendText(chunk)` while `streaming` is set.
+
+- The text appears at a steady pace, with the same pacing as [`c2-streaming-text`](/web-components/components/streaming-text).
+- Only the block still growing re-renders, so a reader's selection survives.
+- The unfinished end is repaired as it grows: `**bold` already renders bold, a half-typed link shows only its label, an unfinished image is held back, and an open code fence stays plain code until it closes.
+- `reveal-end` fires once the stream has ended and the display has caught up.
+
+**Built from other c2 components.** Closed code fences render through [`c2-code-viewer`](/web-components/components/code-viewer), `mermaid` fences through [`c2-mermaid`](/web-components/components/mermaid), and `$…$`, `$$…$$`, `\(…\)` and `\[…\]` through [`c2-math`](/web-components/components/math). Each one loads on first use. `math="bracket"` turns off the dollar forms for text full of prices; prices such as `$5 and $10` stay text anyway.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/markdown'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/markdown
+<style>
+  .markdown-demo {
+    display: grid;
+    gap: 12px;
+    width: 560px;
+    max-width: 100%;
+  }
+  .markdown-demo__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .markdown-demo__replay {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .markdown-static {
+    width: 560px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Streamed model answer">
+  <div class="markdown-demo" data-markdown-demo-box>
+    <c2-markdown data-markdown-demo="answer" breaks></c2-markdown>
+    <div class="markdown-demo__actions"><c2-button class="markdown-demo__replay" data-markdown-action="replay">Replay</c2-button></div>
+  </div>
+</div>
+<div data-label="Static document">
+  <c2-markdown class="markdown-static" heading-offset="2" value="### Install
+
+Run `npm install @c2n/components`, then import what you use:
+
+- [x] Buttons and forms
+- [x] Tables and charts
+- [ ] Your own variants
+
+> Raw HTML such as <b>this</b> is shown as code, never run."></c2-markdown>
+</div>
+<div data-label="Untrusted images wait for a click">
+  <c2-markdown class="markdown-static" image-policy="click" value="The assistant attached a chart:
+
+![Revenue by month](/web-components/images/image-chart.svg)"></c2-markdown>
+</div>
+```
+
+Stream an answer from any reader: fetch, server-sent events or an AI SDK.
+
+```ts tag=CodeBlock
+const answer = document.querySelector('c2-markdown')!
+answer.streaming = true
+for await (const chunk of response.body!.pipeThrough(new TextDecoderStream())) answer.appendText(chunk)
+answer.streaming = false
+answer.addEventListener('reveal-end', () => showActions(), { once: true })
+```
+
+Route internal links yourself, or proxy every URL:
+
+```ts tag=CodeBlock
+answer.addEventListener('link-click', (event) => {
+  if (!event.detail.external) {
+    event.preventDefault()
+    router.navigate(event.detail.href)
+  }
+})
+answer.urlTransform = (url, kind) => (kind === 'image' ? `/image-proxy?url=${encodeURIComponent(url)}` : url)
+```

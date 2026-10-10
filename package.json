@@ -152,6 +152,7 @@
         "./packages/components/list-item:build",
         "./packages/components/list:build",
         "./packages/components/log-viewer:build",
+        "./packages/components/markdown:build",
         "./packages/components/marker:build",
         "./packages/components/masonry:build",
         "./packages/components/mat-icon:build",

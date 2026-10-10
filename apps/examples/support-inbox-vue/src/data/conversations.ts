@@ -86,7 +86,7 @@ export const CONVERSATIONS: Conversation[] = [
         id: 'm2',
         from: 'agent',
         author: 'You',
-        body: 'Confirmed, the second charge was a retry after a timeout. I refunded it — could you check your statement tomorrow?',
+        body: '**Confirmed** — the second charge was a retry after a timeout.\n\n- Refunded `INV-2291-B` just now\n- It shows on your statement within 1–2 days\n\nCould you check tomorrow?',
         at: 'Tue 17:05',
       },
     ],
