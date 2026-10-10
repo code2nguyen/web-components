@@ -86,7 +86,7 @@ md.addEventListener('reveal-end', () => showActions(), { once: true })
 | `value`          | `value`           | `string \| undefined`                              | —          | Markdown source. When unset, the slotted `<script type="text/markdown">` is read, with indentation stripped. A new value that starts with the old one takes the append path.                                              |
 | `streaming`      | `streaming`       | `boolean`                                          | `false`    | Same meaning as on `c2-streaming-text`: shows the caret, sets `aria-busy`, heals the tail and defers code, math and diagram rendering of the open block. `false` flushes the backlog and does one final, unhealed render. |
 | `reveal`         | `reveal`          | `'smooth' \| 'instant'`                            | `'smooth'` | Same meaning as on `c2-streaming-text`: whether the display may lag behind the data. `prefers-reduced-motion` forces `instant`.                                                                                           |
-| `imagePolicy`    | `image-policy`    | `'load' \| 'click'`                                | `'load'`   | Decision 1. `click` renders every image as `<c2-image load="click">`, except for origins listed in `image-origins`.                                                                                                       |
+| `imagePolicy`    | `image-policy`    | `'load' \| 'click'`                                | `'load'`   | Decision 1. `click` renders every image as `<c2-image loading="click">`, except for origins listed in `image-origins`.                                                                                                    |
 | `imageOrigins`   | `image-origins`   | `string[]` (space-separated attribute)             | `[]`       | Origins that load without a click under `image-policy="click"`                                                                                                                                                            |
 | `urlTransform`   | —                 | `(url, kind: 'link' \| 'image') => string \| null` | —          | Runs after the protocol check. Rewrite a URL to a proxy, or return `null` to drop it: a link becomes its text, an image becomes its alt text.                                                                             |
 | `math`           | `math`            | `'dollar' \| 'bracket' \| 'off'`                   | `'dollar'` | Math delimiters. `dollar` accepts `$…$`, `$$…$$`, `\(…\)` and `\[…\]`. `bracket` accepts only the backslash forms, for finance text full of prices. `off` leaves math as text.                                            |
@@ -181,7 +181,7 @@ A pure function `(token, ctx) => TemplateResult`. Its allowlist:
 | `html` (inline), `tag`                         | **Decision 2**: `<code part="raw-html">`                                                                              |
 | `strong`, `em`, `del`, `codespan`              | The native element                                                                                                    |
 | `link`                                         | `<a>` with a checked `href`. External links get `target="_blank" rel="noopener noreferrer nofollow"`.                 |
-| `image`                                        | `<c2-image src alt referrerpolicy="no-referrer" load=…>` (decision 1)                                                 |
+| `image`                                        | `<c2-image src alt referrerpolicy="no-referrer" loading=…>` (decision 1)                                              |
 | `text`, `escape`                               | Text binding                                                                                                          |
 | anything else                                  | Its `raw`, as text                                                                                                    |
 
@@ -193,7 +193,7 @@ Text only ever goes through `${}` bindings.
   - Links: `http:`, `https:`, `mailto:`, `tel:`, relative URLs and `#fragment`s.
   - Images: `http:`, `https:` and relative URLs.
 
-  `javascript:`, `vbscript:`, `data:`, `file:` and `blob:` are rejected, including entity- or whitespace-obfuscated forms. Next, `urlTransform` runs. For images, `image-policy` and `image-origins` then pick `load="lazy"` or `load="click"` on the `c2-image`.
+  `javascript:`, `vbscript:`, `data:`, `file:` and `blob:` are rejected, including entity- or whitespace-obfuscated forms. Next, `urlTransform` runs. For images, `image-policy` and `image-origins` then pick `loading="lazy"` or `loading="click"` on the `c2-image`.
 
 - **Raw HTML** is never parsed into DOM (decision 2). It is displayed as code, so there is no sanitiser to keep up to date and nothing for DOMPurify to do.
 - **Image exfiltration**: `image-policy="click"` plus `c2-image`'s zero-request blocked state. While streaming, an incomplete image is never rendered. The docs page's "Rendering AI output" section recommends `image-policy="click"` for model output, and warns that an open redirect on an allowed origin defeats `image-origins`.

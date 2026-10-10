@@ -15,7 +15,7 @@ The last state is a privacy feature. An image URL written by an LLM is a known d
 1. Lazy loading by default, with the space reserved from `width`/`height` so the layout does not jump.
 2. A placeholder while loading (shimmer or blurred preview) and a smooth fade to the image.
 3. A fallback on error: the alt text plus an icon, or the author's own slot.
-4. `load="click"`: a placeholder showing the alt text and the image's host name, which loads only on activation. No request of any kind is made before that, not even a DNS prefetch.
+4. `loading="click"`: a placeholder showing the alt text and the image's host name, which loads only on activation. No request of any kind is made before that, not even a DNS prefetch.
 5. Optional click-to-preview: the image opens fullscreen in a `c2-modal`.
 6. Server rendering emits a real `<img>`, so the image works before JavaScript runs.
 
@@ -25,26 +25,26 @@ The last state is a privacy feature. An image URL written by an LLM is a known d
 <c2-image src="/team.jpg" alt="The team at the offsite" width="1200" height="800" preview></c2-image>
 
 <!-- untrusted origin, e.g. inside a chat answer -->
-<c2-image load="click" src="https://example.com/chart.png" alt="Revenue chart"></c2-image>
+<c2-image loading="click" src="https://example.com/chart.png" alt="Revenue chart"></c2-image>
 ```
 
 ## Public API
 
-| Property          | Attribute         | Type                           | Default  | Purpose                                                                                                                                                                  |
-| ----------------- | ----------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src`             | `src`             | `string`                       | —        | Image URL                                                                                                                                                                |
-| `srcset`, `sizes` | `srcset`, `sizes` | `string`                       | —        | Passed to the inner `<img>`                                                                                                                                              |
-| `alt`             | `alt`             | `string`                       | `''`     | The alternative text. It is also the label for the placeholder and the fallback.                                                                                         |
-| `width`, `height` | `width`, `height` | `number`                       | —        | Intrinsic size: reserves the aspect ratio, as on a native `<img>`. This is image data, not styling. The displayed size is CSS.                                           |
-| `load`            | `load`            | `'lazy' \| 'eager' \| 'click'` | `'lazy'` | When to fetch. `click` makes no request until activation.                                                                                                                |
-| `placeholderSrc`  | `placeholder-src` | `string`                       | —        | A tiny low-quality preview (data URI or URL), blurred while the full image loads. Under `load="click"` it is ignored unless it is a `data:` URI, which makes no request. |
-| `referrerPolicy`  | `referrerpolicy`  | `ReferrerPolicy`               | —        | Passed through. `c2-markdown` sets `no-referrer`.                                                                                                                        |
-| `crossOrigin`     | `crossorigin`     | `string`                       | —        | Passed through                                                                                                                                                           |
-| `preview`         | `preview`         | `boolean`                      | `false`  | Clicking the loaded image opens it fullscreen.                                                                                                                           |
+| Property          | Attribute         | Type                           | Default  | Purpose                                                                                                                                                                              |
+| ----------------- | ----------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src`             | `src`             | `string`                       | —        | Image URL                                                                                                                                                                            |
+| `srcset`, `sizes` | `srcset`, `sizes` | `string`                       | —        | Passed to the inner `<img>`                                                                                                                                                          |
+| `alt`             | `alt`             | `string`                       | `''`     | The alternative text. It is also the label for the placeholder and the fallback.                                                                                                     |
+| `width`, `height` | `width`, `height` | `number`                       | —        | Intrinsic size: reserves the aspect ratio, as on a native `<img>`. This is image data, not styling. The displayed size is CSS.                                                       |
+| `loading`         | `loading`         | `'lazy' \| 'eager' \| 'click'` | `'lazy'` | When to fetch. Named like native `<img loading>`, plus `click`, which makes no request until activation. (The first draft called it `load`, which clashed with the `load()` method.) |
+| `placeholderSrc`  | `placeholder-src` | `string`                       | —        | A tiny low-quality preview (data URI or URL), blurred while the full image loads. Under `loading="click"` it is ignored unless it is a `data:` URI, which makes no request.          |
+| `referrerPolicy`  | `referrerpolicy`  | `ReferrerPolicy`               | —        | Passed through. `c2-markdown` sets `no-referrer`.                                                                                                                                    |
+| `crossOrigin`     | `crossorigin`     | `string`                       | —        | Passed through                                                                                                                                                                       |
+| `preview`         | `preview`         | `boolean`                      | `false`  | Clicking the loaded image opens it fullscreen.                                                                                                                                       |
 
 Methods:
 
-- `load()` triggers the fetch under `load="click"`.
+- `load()` triggers the fetch under `loading="click"`.
 - The `complete` getter reports whether the image has loaded.
 
 Events:
@@ -67,7 +67,7 @@ Parts: `image`, `placeholder`, `fallback`, `load-button`.
 ## States and rendering
 
 ```
-          ┌────────── load="click" ──────────┐
+          ┌────────── loading="click" ──────────┐
           ▼                                  │ activate (load-request not cancelled)
      [blocked] ─────────────────────────────►┤
                                              ▼
@@ -89,10 +89,10 @@ Semantics: the inner `<img>` carries `alt`. In the blocked and error states, the
 
 ## Test plan
 
-- `load="click"`: a route intercept counts **zero** requests to the image host until activation, then exactly one.
+- `loading="click"`: a route intercept counts **zero** requests to the image host until activation, then exactly one.
 - Cancelling `load-request` keeps the image blocked. Rewriting `src` inside the handler loads the new URL.
 - Error: the fallback shows with the alt text, and `error` is re-dispatched.
 - Lazy: an image below the fold is not requested until it is scrolled near.
 - No layout shift: the box keeps the same size from placeholder to loaded image when `width` and `height` are set.
 - `preview`: Enter on the focused image opens the modal and Escape closes it. Cancelling `preview-open` stops it.
-- SSR output contains a plain `<img>` (lazy or eager) and no `<img>` when `load="click"`.
+- SSR output contains a plain `<img>` (lazy or eager) and no `<img>` when `loading="click"`.
