@@ -3,7 +3,8 @@ import type { Markdown } from '@c2n/components/markdown'
 /**
  * Streams a canned assistant answer into every `c2-markdown[data-markdown-demo]` the way a model sends one: chunks of
  * a few characters to a few words with irregular pauses, so the docs show the healing (bold, links, the code fence)
- * and the steady reveal. A `[data-markdown-action="replay"]` button in the same `[data-markdown-demo-box]` restarts it.
+ * and the steady reveal. A `[data-markdown-action="replay"]` button in the same `[data-markdown-demo-box]` restarts it. Doc pages load this
+ * through `StreamingExamples.astro`, the landing page through `component-modules.ts`.
  */
 const answers: Record<string, string> = {
   preview: '**Checkout is slow** since the 14:02 deploy:\n\n- retries without backoff\n- a synchronous [risk check](https://example.com)',
@@ -56,10 +57,6 @@ function play(element: Markdown): void {
 function wire(element: Markdown): void {
   if (element.dataset.markdownWired) return
   element.dataset.markdownWired = 'true'
-  element
-    .closest('[data-markdown-demo-box]')
-    ?.querySelector('[data-markdown-action="replay"]')
-    ?.addEventListener('click', () => play(element))
   const observer = new IntersectionObserver(([entry]) => {
     if (!entry?.isIntersecting) return
     observer.disconnect()
@@ -72,4 +69,10 @@ void customElements.whenDefined('c2-markdown').then(() => {
   const scan = () => document.querySelectorAll<Markdown>('c2-markdown[data-markdown-demo]').forEach(wire)
   scan()
   document.addEventListener('astro:page-load', scan)
+  // One listener for every Replay button: it works whichever of the button and the element hydrates first.
+  document.addEventListener('click', (event) => {
+    const button = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.dataset.markdownAction === 'replay')
+    const element = button?.closest('[data-markdown-demo-box]')?.querySelector<Markdown>('c2-markdown[data-markdown-demo]')
+    if (element) play(element)
+  })
 })

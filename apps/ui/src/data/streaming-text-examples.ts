@@ -3,7 +3,8 @@ import type { StreamingText } from '@c2n/components/streaming-text'
 /**
  * Replays a canned answer into every `c2-streaming-text[data-streaming-text-demo]` the way a model streams one: chunks
  * of one to a dozen words separated by irregular pauses, so the docs show the element smoothing a bursty stream.
- * A `[data-streaming-action="replay"]` button in the same `[data-streaming-demo]` container starts it again.
+ * A `[data-streaming-action="replay"]` button in the same `[data-streaming-demo]` container starts it again. Doc
+ * pages load this through `StreamingExamples.astro`, the landing page through `component-modules.ts`.
  */
 const answers: Record<string, string> = {
   answer:
@@ -38,8 +39,6 @@ function play(element: StreamingText): void {
 function wire(element: StreamingText): void {
   if (element.dataset.streamingWired) return
   element.dataset.streamingWired = 'true'
-  const container = element.closest('[data-streaming-demo]')
-  container?.querySelector('[data-streaming-action="replay"]')?.addEventListener('click', () => play(element))
   const observer = new IntersectionObserver(([entry]) => {
     if (!entry?.isIntersecting) return
     observer.disconnect()
@@ -52,4 +51,10 @@ void customElements.whenDefined('c2-streaming-text').then(() => {
   const scan = () => document.querySelectorAll<StreamingText>('c2-streaming-text[data-streaming-text-demo]').forEach(wire)
   scan()
   document.addEventListener('astro:page-load', scan)
+  // One listener for every Replay button: it works whichever of the button and the element hydrates first.
+  document.addEventListener('click', (event) => {
+    const button = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.dataset.streamingAction === 'replay')
+    const element = button?.closest('[data-streaming-demo]')?.querySelector<StreamingText>('c2-streaming-text[data-streaming-text-demo]')
+    if (element) play(element)
+  })
 })

@@ -6,9 +6,12 @@ category: 'Chat'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import StreamingExamples from '../../components/StreamingExamples.astro'
 
 import { Button } from '@c2n/components/button'
 import { StreamingText } from '@c2n/components/streaming-text'
+
+<StreamingExamples />
 
 Model output arrives in bursts: nothing for a few hundred milliseconds, then a dozen words at once. `c2-streaming-text` buffers the stream and releases it word by word at the rate that keeps the display at most `--c2-streaming-text__reveal--max-lag` (600 ms) behind what has been received. Released words fade in, then merge back into a single text node, so a long answer stays cheap and text stays selectable while it grows. Feed it with `appendText(chunk)` (or by setting `value` to the text so far) while `streaming` is set. Setting `streaming` back to false releases the rest within `--c2-streaming-text__reveal--flush-duration` and fires `reveal-end` once the display has caught up, which is the moment to show the message actions. `reveal="instant"` prints each chunk as it arrives, `segment="grapheme"` gives a per-character look, and `prefers-reduced-motion` always prints chunks as they arrive. The caret is a CSS variable (`--c2-streaming-text__caret--content`, `none` hides it). For formatted answers, use `c2-markdown`, which shares the same pacing.
 
