@@ -441,6 +441,10 @@
       "types": "./dist/menu/menu-row.d.ts",
       "default": "./dist/menu/menu-row.js"
     },
+    "./mermaid": {
+      "types": "./dist/mermaid.d.ts",
+      "default": "./dist/mermaid.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
@@ -735,6 +739,7 @@
     "@upsetjs/venn.js": "2.0.0",
     "d3-geo": "3.1.1",
     "lit": "3.3.3",
+    "mermaid": "12.1.0",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
     "prosemirror-inputrules": "^1.5.1",
@@ -871,6 +876,7 @@
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/menu": "*",
+    "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",

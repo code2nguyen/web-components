@@ -1,0 +1,70 @@
+---
+title: 'Mermaid'
+description: 'Mermaid text diagrams drawn in your theme colours, loaded on demand and safe for untrusted sources.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Mermaid } from '@c2n/components/mermaid'
+
+`c2-mermaid` draws a [Mermaid](https://mermaid.js.org) diagram (flowchart, sequence, class, state, ER, gantt, pie and the rest) from its text source. Put the source in `value`, or in a `<script type="text/mermaid">` child so the browser leaves it alone.
+
+**Colours.** They come from the element's `--c2-mermaid…` variables, which map onto the `@c2n/theme` tokens, so diagrams follow light and dark mode. A diagram re-renders whenever one of those colours changes, whether from a theme switch or an override on one element.
+
+**Loading.** Mermaid itself is large, so it loads with the first diagram on the page, not with the element. Until then, and on the server, the source shows as code.
+
+**Untrusted sources.** Diagrams written by a model or a user are safe to render:
+
+- Mermaid runs at `securityLevel: 'strict'` with plain-text labels, and a diagram's `%%{init}%%` directive cannot change those settings or the theme.
+- The SVG is parsed and stripped of scripts, embedded HTML, event handlers, links and external `url()` and `href` references before it is shown.
+
+A source that does not parse keeps its text, shows the message and fires `mermaid-error`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/mermaid'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/mermaid
+<style>
+  .mermaid-demo {
+    width: 520px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Flowchart">
+  <c2-mermaid class="mermaid-demo" value="flowchart LR
+  Cart[Cart] --> Checkout{Payment ok?}
+  Checkout -- yes --> Paid([Order paid])
+  Checkout -- no --> Retry[Retry card]
+  Retry --> Checkout"></c2-mermaid>
+</div>
+<div data-label="Sequence">
+  <c2-mermaid class="mermaid-demo" value="sequenceDiagram
+  participant App
+  participant API
+  App->>API: POST /orders
+  API-->>App: 201 Created
+  App->>API: GET /orders/42
+  API-->>App: 200 OK"></c2-mermaid>
+</div>
+<div data-label="Parse error">
+  <c2-mermaid class="mermaid-demo" value="flowchart LR
+  A --> --> B"></c2-mermaid>
+</div>
+```
+
+Export the drawn diagram:
+
+```ts tag=CodeBlock
+const diagram = document.querySelector('c2-mermaid')!
+diagram.addEventListener('mermaid-render', () => {
+  const markup = new XMLSerializer().serializeToString(diagram.svgElement!)
+  download(new Blob([markup], { type: 'image/svg+xml' }), 'diagram.svg')
+})
+```
