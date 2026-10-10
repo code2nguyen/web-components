@@ -597,6 +597,10 @@
       "types": "./dist/steps/step.d.ts",
       "default": "./dist/steps/step.js"
     },
+    "./streaming-text": {
+      "types": "./dist/streaming-text.d.ts",
+      "default": "./dist/streaming-text.js"
+    },
     "./switch": {
       "types": "./dist/switch.d.ts",
       "default": "./dist/switch.js"
@@ -901,6 +905,7 @@
     "@c2n/state-timeline": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
     "@c2n/tabs": "*",

@@ -146,6 +146,7 @@
         "../../components/state-timeline:build",
         "../../components/status-panel:build",
         "../../components/steps:build",
+        "../../components/streaming-text:build",
         "../../components/switch:build",
         "../../components/table:build",
         "../../components/tabs:build",
