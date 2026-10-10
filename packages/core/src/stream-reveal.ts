@@ -3,6 +3,9 @@ import type { ReactiveController, ReactiveControllerHost } from 'lit'
 /** Unit the text is released in: whole words (with the spacing and punctuation after them) or single graphemes. */
 export type RevealSegment = 'word' | 'grapheme'
 
+/** Whether the display may trail the received text (`smooth`) or shows each chunk as it arrives (`instant`). */
+export type RevealMode = 'smooth' | 'instant'
+
 export interface StreamRevealOptions {
   /** Longest the display may trail the received text while streaming, in milliseconds. */
   maxLag?: number
