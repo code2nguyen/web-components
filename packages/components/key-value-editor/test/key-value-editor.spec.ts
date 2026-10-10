@@ -14,8 +14,9 @@ async function paste(page: Page, text: string) {
     const transfer = new DataTransfer()
     transfer.setData('text/plain', data)
     const event = new ClipboardEvent('paste', { clipboardData: transfer, bubbles: true, cancelable: true, composed: true })
-    // Some engines drop `clipboardData` from the constructor; define it so the event carries the text either way.
-    if (!event.clipboardData) Object.defineProperty(event, 'clipboardData', { value: transfer })
+    // Engines differ on the constructor's `clipboardData`: some drop it, and Firefox hands back a copy whose
+    // `getData` is empty for an untrusted event. Define it on the event itself so it carries the text everywhere.
+    Object.defineProperty(event, 'clipboardData', { value: transfer })
     // An untrusted paste has no default action, so play the browser's part when the component lets it through.
     if (target?.dispatchEvent(event) && target instanceof HTMLInputElement) {
       target.setRangeText(data.replace(/\r?\n/g, ''), target.selectionStart ?? 0, target.selectionEnd ?? 0, 'end')
