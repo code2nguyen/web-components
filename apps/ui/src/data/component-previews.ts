@@ -367,6 +367,7 @@ greet('world')"></c2-code-editor>`,
   </c2-step>
   <c2-step status="pending" label="ship"></c2-step>
 </c2-steps>`,
+  'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>
   <c2-switch></c2-switch>

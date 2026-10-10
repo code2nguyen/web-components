@@ -118,6 +118,7 @@
     "@c2n/state-timeline": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/symbols": "*",
     "@c2n/tabs": "*",

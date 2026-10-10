@@ -192,6 +192,7 @@
         "./packages/components/state-timeline:build",
         "./packages/components/status-panel:build",
         "./packages/components/steps:build",
+        "./packages/components/streaming-text:build",
         "./packages/components/switch:build",
         "./packages/components/table:build",
         "./packages/components/tabs:build",
