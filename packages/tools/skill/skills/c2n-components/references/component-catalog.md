@@ -50,6 +50,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **Marker** — `c2-marker` · `@c2n/components/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
+- **Math** — `c2-math` · `@c2n/components/math` — TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.

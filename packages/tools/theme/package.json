@@ -112,6 +112,7 @@
         "../../components/marker:build",
         "../../components/masonry:build",
         "../../components/mat-icon:build",
+        "../../components/math:build",
         "../../components/menu:build",
         "../../components/modal:build",
         "../../components/month-planner:build",

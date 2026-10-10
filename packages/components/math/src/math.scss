@@ -1,0 +1,66 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-math,
+  $theme: (
+    font-family: (
+      'Cambria Math',
+      'STIX Two Math',
+      'STIXTwoMath-Regular',
+      'NotoSansMath-Regular',
+      math,
+    ),
+    font-size: 1.1em,
+    color: inherit,
+    display--margin: 12px 0,
+    display--text-align: center,
+    error--color: rgb(211, 21, 16),
+    error--background: rgba(211, 21, 16, 0.08),
+    error--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    error--font-size: 0.9em,
+    error--border-radius: 4px,
+    scroller__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: inline;
+  color: css.cssVar(color);
+}
+
+:host([display]) {
+  display: block;
+  margin: css.cssVar(display--margin);
+  text-align: css.cssVar(display--text-align);
+}
+
+math {
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+:host([display]) .scroller {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scroller:focus-visible {
+  outline: css.cssVar(scroller__focus--outline);
+  outline-offset: 2px;
+}
+
+.error {
+  padding: 0 4px;
+  border-radius: css.cssVar(error--border-radius);
+  background: css.cssVar(error--background);
+  color: css.cssVar(error--color);
+  font-family: css.cssVar(error--font-family);
+  font-size: css.cssVar(error--font-size);
+  white-space: pre-wrap;
+}

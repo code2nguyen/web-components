@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-math</title>
+    <script type="module" src="/src/math.ts"></script>
+    <style>
+      body {
+        max-width: 640px;
+        padding: 24px;
+        font:
+          16px/1.7 system-ui,
+          sans-serif;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>Inline: <c2-math value="A = \pi r^2"></c2-math> and <c2-math>x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}</c2-math>.</p>
+    <c2-math display>
+      <script type="math/tex">
+        \begin{aligned} A &= \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \\ \det A &= -2 \end{aligned}
+      </script>
+    </c2-math>
+    <c2-math display value="\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}"></c2-math>
+    <p>Error: <c2-math value="\frac{1}{"></c2-math> · Rejected: <c2-math value="\href{javascript:alert(1)}{x}"></c2-math></p>
+  </body>
+</html>
