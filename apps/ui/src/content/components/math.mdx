@@ -1,0 +1,63 @@
+---
+title: 'Math'
+description: 'TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { MathFormula as Math } from '@c2n/components/math'
+
+`c2-math` turns TeX into **MathML** with [Temml](https://temml.org). The browser lays the formula out with the system math font and exposes it to screen readers as math, so there are no font files or layout CSS to ship. Put the TeX in `value` or in the element's text; wrap it in a `<script type="math/tex">` so the browser does not parse it. Add `display` for a centred block formula. A display formula wider than its container scrolls instead of overflowing.
+
+The input is treated as untrusted, so the component is safe for model output:
+
+- Commands that would produce links, images, classes, ids or styles (`\href`, `\url`, `\includegraphics`, `\style`, `\class`) are rejected.
+- Macro expansion and sizes are capped.
+- The MathML is built as DOM nodes, never parsed from a string.
+
+A formula that does not parse shows its source in the error style and fires `math-error`. Copying a whole formula puts its TeX on the clipboard as text and its MathML as HTML. Set page-wide macros once with `configureMath({ macros })`, or per element with the `macros` property.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/math'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/math
+<style>
+  .math-prose {
+    margin: 0;
+    max-width: 460px;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .math-block {
+    width: 460px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Inline">
+  <p class="math-prose">A circle of radius <c2-math value="r"></c2-math> has area <c2-math value="A = \pi r^2"></c2-math>, and the roots of <c2-math value="ax^2 + bx + c"></c2-math> are <c2-math value="x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"></c2-math>.</p>
+</div>
+<div data-label="Display">
+  <c2-math class="math-block" display value="\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}"></c2-math>
+</div>
+<div data-label="Matrix and alignment">
+  <c2-math class="math-block" display value="\begin{aligned} A &= \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \\ \det A &= 1 \cdot 4 - 2 \cdot 3 = -2 \end{aligned}"></c2-math>
+</div>
+<div data-label="Parse error">
+  <c2-math value="\frac{1}{"></c2-math>
+</div>
+```
+
+Page-wide macros:
+
+```ts tag=CodeBlock
+import { configureMath } from '@c2n/components/math'
+
+configureMath({ macros: { '\\RR': '\\mathbb{R}', '\\E': '\\operatorname{\\mathbb{E}}' } })
+```

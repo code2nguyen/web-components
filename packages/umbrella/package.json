@@ -429,6 +429,10 @@
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
     },
+    "./math": {
+      "types": "./dist/math.d.ts",
+      "default": "./dist/math.js"
+    },
     "./menu": {
       "types": "./dist/menu.d.ts",
       "default": "./dist/menu.js"
@@ -740,6 +744,7 @@
     "prosemirror-transform": "^1.12.2",
     "prosemirror-view": "^1.42.6",
     "shiki": "4.4.3",
+    "temml": "0.14.0",
     "topojson-client": "3.1.0",
     "uqr": "^0.1.3"
   },
@@ -866,6 +871,7 @@
     "@c2n/marker": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
+    "@c2n/math": "*",
     "@c2n/menu": "*",
     "@c2n/modal": "*",
     "@c2n/month-planner": "*",
