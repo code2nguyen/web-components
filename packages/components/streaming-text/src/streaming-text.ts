@@ -3,13 +3,10 @@ import { classMap } from 'lit/directives/class-map.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { DEFAULT_FLUSH_DURATION, DEFAULT_MAX_LAG, StreamRevealController, parseCssTime, type RevealSegment } from '@c2n/core/stream-reveal.js'
+import { DEFAULT_FLUSH_DURATION, DEFAULT_MAX_LAG, StreamRevealController, parseCssTime, type RevealMode, type RevealSegment } from '@c2n/core/stream-reveal.js'
 import styles from './streaming-text.scss?inline'
 
-export type { RevealSegment } from '@c2n/core/stream-reveal.js'
-
-/** Whether the display may trail the received text (`smooth`) or prints each chunk as it arrives (`instant`). */
-export type RevealMode = 'smooth' | 'instant'
+export type { RevealMode, RevealSegment } from '@c2n/core/stream-reveal.js'
 
 /** Events fired by {@link StreamingText}, keyed for `addEventListener`. */
 export interface StreamingTextEventMap {
