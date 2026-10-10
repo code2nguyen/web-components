@@ -60,8 +60,11 @@ function send() {
           <span slot="title">{{ message.author }}</span>
           <span slot="header-time">{{ message.at }}</span>
           <!-- This node belongs to Vue's light DOM, so its scoped class works normally. The global
-               `::part(content)` rule styles the component-owned region around it independently. -->
-          <p slot="message" class="thread__message-copy">{{ message.body }}</p>
+               `::part(content)` rule styles the component-owned region around it independently.
+               Message bodies are markdown: `:value` lands as a property (the element is registered first),
+               `breaks` keeps single newlines, and `image-policy="click"` keeps an image URL in a customer's
+               message from loading until the agent asks for it. -->
+          <c2-markdown slot="message" class="thread__message-copy" :value="message.body" breaks code="plain" image-policy="click" />
         </c2-chat-message>
       </li>
     </ol>

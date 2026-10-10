@@ -1,0 +1,81 @@
+---
+title: 'Streaming Text'
+description: 'Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/components/button'
+import { StreamingText } from '@c2n/components/streaming-text'
+
+Model output arrives in bursts: nothing for a few hundred milliseconds, then a dozen words at once. `c2-streaming-text` buffers the stream and releases it word by word at the rate that keeps the display at most `--c2-streaming-text__reveal--max-lag` (600 ms) behind what has been received. Released words fade in, then merge back into a single text node, so a long answer stays cheap and text stays selectable while it grows. Feed it with `appendText(chunk)` (or by setting `value` to the text so far) while `streaming` is set. Setting `streaming` back to false releases the rest within `--c2-streaming-text__reveal--flush-duration` and fires `reveal-end` once the display has caught up, which is the moment to show the message actions. `reveal="instant"` prints each chunk as it arrives, `segment="grapheme"` gives a per-character look, and `prefers-reduced-motion` always prints chunks as they arrive. The caret is a CSS variable (`--c2-streaming-text__caret--content`, `none` hides it). For formatted answers, use `c2-markdown`, which shares the same pacing.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/streaming-text'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/streaming-text
+<style>
+  .stream-demo {
+    display: grid;
+    gap: 12px;
+    width: 460px;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .stream-demo__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .stream-demo__replay {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .stream-dot {
+    --c2-streaming-text__caret--content: '●';
+    --c2-streaming-text__caret--margin-left: 4px;
+    --c2-streaming-text__caret--blink-duration: 0.8s;
+  }
+</style>
+<div data-label="Simulated model answer · bursty chunks">
+  <div class="stream-demo" data-streaming-demo>
+    <c2-streaming-text data-streaming-text-demo="answer"></c2-streaming-text>
+    <div class="stream-demo__actions"><c2-button class="stream-demo__replay" data-streaming-action="replay">Replay</c2-button></div>
+  </div>
+</div>
+<div data-label="Per character · segment=grapheme">
+  <div class="stream-demo" data-streaming-demo>
+    <c2-streaming-text class="stream-dot" segment="grapheme" data-streaming-text-demo="summary"></c2-streaming-text>
+    <div class="stream-demo__actions"><c2-button class="stream-demo__replay" data-streaming-action="replay">Replay</c2-button></div>
+  </div>
+</div>
+<div data-label="CJK · word segmentation">
+  <div class="stream-demo" data-streaming-demo>
+    <c2-streaming-text data-streaming-text-demo="cjk"></c2-streaming-text>
+    <div class="stream-demo__actions"><c2-button class="stream-demo__replay" data-streaming-action="replay">Replay</c2-button></div>
+  </div>
+</div>
+```
+
+Feed it from any stream reader: fetch, server-sent events or an AI SDK.
+
+```ts tag=CodeBlock
+const output = document.querySelector('c2-streaming-text')!
+output.streaming = true
+for await (const chunk of response.body!.pipeThrough(new TextDecoderStream())) output.appendText(chunk)
+output.streaming = false
+output.addEventListener('reveal-end', () => showActions(), { once: true })
+```

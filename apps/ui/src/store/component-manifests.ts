@@ -43,6 +43,7 @@ import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
+import image from '@c2n/image/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
@@ -54,10 +55,13 @@ import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
 import list from '@c2n/list/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
+import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
+import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
+import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
@@ -93,6 +97,7 @@ import stat from '@c2n/stat/custom-elements.json'
 import stateTimeline from '@c2n/state-timeline/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
+import streamingText from '@c2n/streaming-text/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
@@ -164,6 +169,7 @@ export const componentManifests = (function () {
     header,
     hoverCard,
     iconButton,
+    image,
     indicator,
     inlineEdit,
     jsonViewer,
@@ -175,10 +181,13 @@ export const componentManifests = (function () {
     list,
     listItem,
     logViewer,
+    markdown,
     marker,
     masonry,
     matIcon,
+    math,
     menu,
+    mermaid,
     modal,
     monthPlanner,
     navigationMenu,
@@ -214,6 +223,7 @@ export const componentManifests = (function () {
     stateTimeline,
     statusPanel,
     steps,
+    streamingText,
     switchManifest,
     symbols,
     table,

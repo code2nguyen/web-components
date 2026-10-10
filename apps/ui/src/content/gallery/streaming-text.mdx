@@ -1,0 +1,111 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { StreamingText } from '@c2n/components/streaming-text'
+
+## Presets
+
+Looks for `c2-streaming-text` while it streams. The caret variables (`--c2-streaming-text__caret--content`, `--color`, `--blink-duration`) and the typography variables do most of the work; the pacing variables (`--c2-streaming-text__reveal--max-lag`, `--flush-duration`) change how far the text may trail the stream.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-streaming-text streaming value="Revenue grew 12% quarter over quarter, driven mostly by the enterprise plan."></c2-streaming-text>
+```
+
+```html tag=MdxCodeBlock,label=Thinking status
+<style>
+  .stream-thinking {
+    --c2-streaming-text--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-streaming-text--font-size: 13px;
+    --c2-streaming-text__caret--content: '●';
+    --c2-streaming-text__caret--margin-left: 6px;
+    --c2-streaming-text__caret--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-streaming-text__caret--blink-duration: 0.8s;
+  }
+</style>
+<c2-streaming-text class="stream-thinking" streaming value="Searching 3 sources"></c2-streaming-text>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .stream-terminal {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: #0b1220;
+    --c2-streaming-text--color: #d1fae5;
+    --c2-streaming-text--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --c2-streaming-text--font-size: 12px;
+    --c2-streaming-text--line-height: 1.7;
+    --c2-streaming-text__caret--content: '_';
+    --c2-streaming-text__caret--color: #34d399;
+    --c2-streaming-text__caret--margin-left: 0;
+  }
+</style>
+<div class="stream-terminal">
+  <c2-streaming-text streaming value="Resolved 412 packages in 1.8s
+Building @c2n/components
+✓ 52 entries, 0 warnings"></c2-streaming-text>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Summary card
+<style>
+  .stream-card {
+    display: grid;
+    gap: 6px;
+    max-width: 320px;
+    padding: 14px 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .stream-card__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: light-dark(#7e22ce, #a76cdc);
+  }
+  .stream-card c2-streaming-text {
+    --c2-streaming-text--font-size: 14px;
+    --c2-streaming-text--line-height: 1.55;
+    --c2-streaming-text--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-streaming-text__caret--color: light-dark(#7e22ce, #a76cdc);
+  }
+</style>
+<div class="stream-card">
+  <span class="stream-card__label">AI summary</span>
+  <c2-streaming-text streaming value="Three tickets mention the same checkout timeout. All started after the 14:02 deploy"></c2-streaming-text>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Headline
+<style>
+  .stream-headline {
+    max-width: 360px;
+    --c2-streaming-text--font-size: 24px;
+    --c2-streaming-text--line-height: 1.25;
+    --c2-streaming-text--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-streaming-text__caret--content: '|';
+    --c2-streaming-text__caret--margin-left: 2px;
+    --c2-streaming-text__caret--blink-duration: 1.2s;
+  }
+</style>
+<c2-streaming-text class="stream-headline" streaming value="Your workspace is almost ready"></c2-streaming-text>
+```
+
+```html tag=MdxCodeBlock,label=Slow and calm
+<style>
+  .stream-calm {
+    max-width: 320px;
+    --c2-streaming-text--font-size: 15px;
+    --c2-streaming-text--line-height: 1.7;
+    --c2-streaming-text--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-streaming-text__caret--content: none;
+    --c2-streaming-text__segment--enter-duration: 600ms;
+    --c2-streaming-text__reveal--max-lag: 1500ms;
+  }
+</style>
+<c2-streaming-text class="stream-calm" streaming value="Take a breath. The plan below covers the next three weeks."></c2-streaming-text>
+```
+
+</GalleryGrid>

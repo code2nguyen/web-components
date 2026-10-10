@@ -1,0 +1,80 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Image } from '@c2n/components/image'
+
+## Presets
+
+Looks for `c2-image`. The box is styled through `--c2-image--width`, `--aspect-ratio`, `--object-fit` and `--border-radius`. The placeholder, the fallback and the click-to-load button each have their own colour variables.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-image src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image>
+```
+
+```html tag=MdxCodeBlock,label=Rounded thumbnail
+<style>
+  .image-thumb {
+    --c2-image--width: 220px;
+    --c2-image--aspect-ratio: 1;
+    --c2-image--border-radius: 14px;
+  }
+</style>
+<c2-image class="image-thumb" preview src="/web-components/images/image-workspace.svg" alt="Desk with a laptop and a plant" width="800" height="600"></c2-image>
+```
+
+```html tag=MdxCodeBlock,label=Circle
+<style>
+  .image-circle {
+    --c2-image--width: 120px;
+    --c2-image--aspect-ratio: 1;
+    --c2-image--border-radius: 999px;
+  }
+</style>
+<c2-image class="image-circle" src="/web-components/images/image-mountains.svg" alt="Profile picture" width="800" height="600"></c2-image>
+```
+
+```html tag=MdxCodeBlock,label=Chat attachment
+<style>
+  .image-chat {
+    --c2-image--width: 260px;
+    --c2-image--border-radius: 14px;
+    --c2-image__placeholder--background: light-dark(#eff6ff, #14243b);
+    --c2-image__load-button--border: 1px solid light-dark(#bfdbfe, #1e3a5f);
+    --c2-image__load-button--color: light-dark(#1d4ed8, #7aa7f5);
+    --c2-image__load-button__hover--background: light-dark(#dbeafe, #1a3150);
+    --c2-image__placeholder--color: light-dark(#1d4ed8, #7aa7f5);
+  }
+</style>
+<c2-image class="image-chat" loading="click" src="/web-components/images/image-chart.svg" alt="Chart the assistant generated" width="640" height="400"></c2-image>
+```
+
+```html tag=MdxCodeBlock,label=Quiet fallback
+<style>
+  .image-fallback {
+    --c2-image--width: 260px;
+    --c2-image--border-radius: 8px;
+    --c2-image__fallback--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-image__fallback--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-image__icon--size: 28px;
+  }
+</style>
+<c2-image class="image-fallback" src="/web-components/images/not-found.png" alt="Product photo unavailable" width="800" height="600"></c2-image>
+```
+
+```html tag=MdxCodeBlock,label=Contained figure
+<style>
+  .image-contain {
+    --c2-image--width: 300px;
+    --c2-image--aspect-ratio: 16 / 9;
+    --c2-image--object-fit: contain;
+    --c2-image--border-radius: 8px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+</style>
+<c2-image class="image-contain" preview src="/web-components/images/image-chart.svg" alt="Revenue by month" width="640" height="400"></c2-image>
+```
+
+</GalleryGrid>

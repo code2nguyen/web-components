@@ -1,0 +1,108 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-mermaid,
+  $theme: (
+    font-family: inherit,
+    font-size: 14px,
+    background: transparent,
+    padding: 0,
+    border: 0 solid transparent,
+    border-radius: 0,
+    node--background: #edf1fe,
+    node--color: #18181b,
+    node--border-color: rgb(2, 101, 220),
+    secondary--background: #f4f4f5,
+    tertiary--background: #ffffff,
+    edge--color: #71717a,
+    note--background: #fef9c3,
+    source--color: #71717a,
+    source--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    source--font-size: 12px,
+    error--color: rgb(211, 21, 16),
+    diagram__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+/*
+ * Mermaid needs concrete colours: the probe carries each theme variable on a colour property, the script reads them
+ * back resolved (light-dark() and var() chains included), and a colour change transitions, which re-renders.
+ */
+.probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  border-style: solid;
+  border-width: 0;
+  outline-style: solid;
+  outline-width: 0;
+  text-decoration-line: underline;
+  pointer-events: none;
+  color: css.cssVar(node--color);
+  background-color: css.cssVar(node--background);
+  border-top-color: css.cssVar(node--border-color);
+  border-right-color: css.cssVar(secondary--background);
+  border-bottom-color: css.cssVar(tertiary--background);
+  border-left-color: css.cssVar(edge--color);
+  outline-color: css.cssVar(note--background);
+  text-decoration-color: css.cssVar(background);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  transition:
+    color 1ms,
+    background-color 1ms,
+    border-color 1ms,
+    outline-color 1ms,
+    text-decoration-color 1ms;
+}
+
+.diagram {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+.diagram[hidden] {
+  display: none;
+}
+
+.diagram:focus-visible {
+  outline: css.cssVar(diagram__focus--outline);
+  outline-offset: 2px;
+}
+
+.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.source {
+  margin: 0;
+  color: css.cssVar(source--color);
+  font-family: css.cssVar(source--font-family);
+  font-size: css.cssVar(source--font-size);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.error {
+  margin: 8px 0 0;
+  color: css.cssVar(error--color);
+  font-size: 12px;
+}

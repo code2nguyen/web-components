@@ -1,0 +1,104 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Markdown } from '@c2n/components/markdown'
+
+## Presets
+
+Looks for `c2-markdown`. Typography (`--c2-markdown--font-size`, `--line-height`, `--block-gap`), headings, links, inline code, tables and blockquotes each have their own variables. Code blocks, math and diagrams keep their own components' variables, which also work when set on this element.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-markdown value="## Summary
+
+Revenue grew **12%**, driven by the *enterprise* plan. See the [full report](https://example.com).
+
+- Churn fell to `2.1%`
+- Expansion covers acquisition"></c2-markdown>
+```
+
+```html tag=MdxCodeBlock,label=Compact chat answer
+<style>
+  .markdown-chat {
+    max-width: 360px;
+    --c2-markdown--font-size: 13px;
+    --c2-markdown--line-height: 1.5;
+    --c2-markdown--block-gap: 8px;
+    --c2-markdown__h3--font-size: 14px;
+    --c2-markdown__heading--margin-top: 12px;
+  }
+</style>
+<c2-markdown class="markdown-chat" value="### Next steps
+
+1. Roll back the payments client.
+2. Add jittered backoff.
+
+That should bring p95 back under **200 ms**."></c2-markdown>
+```
+
+```html tag=MdxCodeBlock,label=Editorial
+<style>
+  .markdown-editorial {
+    max-width: 420px;
+    --c2-markdown--font-family: Georgia, 'Times New Roman', serif;
+    --c2-markdown--font-size: 16px;
+    --c2-markdown--line-height: 1.7;
+    --c2-markdown__heading--font-weight: 500;
+    --c2-markdown__h2--font-size: 26px;
+    --c2-markdown__blockquote--border-left: 3px solid light-dark(#c084fc, #9a5fd1);
+    --c2-markdown__blockquote--color: light-dark(#7e22ce, #b98ae6);
+  }
+</style>
+<c2-markdown class="markdown-editorial" value="## On small tools
+
+> Make each program do one thing well.
+
+The rule holds for components too."></c2-markdown>
+```
+
+```html tag=MdxCodeBlock,label=Data table
+<style>
+  .markdown-table {
+    max-width: 420px;
+    --c2-markdown__table__header--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-markdown__table__row__striped--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-markdown__table__cell--padding: 8px 14px;
+  }
+</style>
+<c2-markdown class="markdown-table" value="| Region | Orders | Revenue |
+| :--- | ---: | ---: |
+| Europe | 1,284 | €212k |
+| Americas | 2,019 | $340k |
+| Asia | 865 | ¥18.2m |"></c2-markdown>
+```
+
+```html tag=MdxCodeBlock,label=Quiet links and code
+<style>
+  .markdown-quiet {
+    max-width: 380px;
+    --c2-markdown__link--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-markdown__link--text-decoration: underline dotted;
+    --c2-markdown__code--background: transparent;
+    --c2-markdown__code--padding: 0;
+    --c2-markdown__code--color: light-dark(#be185d, #e66aa7);
+  }
+</style>
+<c2-markdown class="markdown-quiet" value="Set `--c2-theme--color-primary` once; every component follows. Read the [theming guide](https://example.com) for the full list."></c2-markdown>
+```
+
+```html tag=MdxCodeBlock,label=Task list
+<style>
+  .markdown-tasks {
+    max-width: 320px;
+    --c2-markdown__task__checked--background: #16a34a;
+    --c2-markdown__list--item-gap: 8px;
+  }
+</style>
+<c2-markdown class="markdown-tasks" value="- [x] Design specs
+- [x] Streaming text
+- [ ] Markdown renderer
+- [ ] Release"></c2-markdown>
+```
+
+</GalleryGrid>

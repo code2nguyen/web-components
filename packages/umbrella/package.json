@@ -365,6 +365,10 @@
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
     },
+    "./image": {
+      "types": "./dist/image.d.ts",
+      "default": "./dist/image.js"
+    },
     "./indicator": {
       "types": "./dist/indicator.d.ts",
       "default": "./dist/indicator.js"
@@ -413,6 +417,10 @@
       "types": "./dist/log-viewer.d.ts",
       "default": "./dist/log-viewer.js"
     },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "default": "./dist/markdown.js"
+    },
     "./marker": {
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
@@ -429,6 +437,10 @@
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
     },
+    "./math": {
+      "types": "./dist/math.d.ts",
+      "default": "./dist/math.js"
+    },
     "./menu": {
       "types": "./dist/menu.d.ts",
       "default": "./dist/menu.js"
@@ -440,6 +452,10 @@
     "./menu/menu-row": {
       "types": "./dist/menu/menu-row.d.ts",
       "default": "./dist/menu/menu-row.js"
+    },
+    "./mermaid": {
+      "types": "./dist/mermaid.d.ts",
+      "default": "./dist/mermaid.js"
     },
     "./modal": {
       "types": "./dist/modal.d.ts",
@@ -597,6 +613,10 @@
       "types": "./dist/steps/step.d.ts",
       "default": "./dist/steps/step.js"
     },
+    "./streaming-text": {
+      "types": "./dist/streaming-text.d.ts",
+      "default": "./dist/streaming-text.js"
+    },
     "./switch": {
       "types": "./dist/switch.d.ts",
       "default": "./dist/switch.js"
@@ -731,6 +751,8 @@
     "@upsetjs/venn.js": "2.0.0",
     "d3-geo": "3.1.1",
     "lit": "3.3.3",
+    "marked": "18.1.0",
+    "mermaid": "12.1.0",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
     "prosemirror-inputrules": "^1.5.1",
@@ -740,6 +762,7 @@
     "prosemirror-transform": "^1.12.2",
     "prosemirror-view": "^1.42.6",
     "shiki": "4.4.3",
+    "temml": "0.14.0",
     "topojson-client": "3.1.0",
     "uqr": "^0.1.3"
   },
@@ -852,6 +875,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
     "@c2n/json-viewer": "*",
@@ -863,10 +887,13 @@
     "@c2n/list": "*",
     "@c2n/list-item": "*",
     "@c2n/log-viewer": "*",
+    "@c2n/markdown": "*",
     "@c2n/marker": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
+    "@c2n/math": "*",
     "@c2n/menu": "*",
+    "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
@@ -901,6 +928,7 @@
     "@c2n/state-timeline": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
     "@c2n/tabs": "*",

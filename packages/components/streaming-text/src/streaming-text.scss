@@ -1,0 +1,75 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-streaming-text,
+  $theme: (
+    color: inherit,
+    font-family: inherit,
+    font-size: inherit,
+    line-height: inherit,
+    white-space: pre-wrap,
+    caret--content: '▍',
+    caret--color: rgb(2, 101, 220),
+    caret--margin-left: 1px,
+    caret--blink-duration: 1s,
+    segment--enter-duration: 150ms,
+    reveal--max-lag: 600ms,
+    reveal--flush-duration: 300ms,
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+}
+
+.text {
+  white-space: css.cssVar(white-space);
+  overflow-wrap: anywhere;
+}
+
+/* The timings drive the pacing script, which reads them back from here with their defaults applied. */
+.live {
+  --_max-lag: #{css.cssVar(reveal--max-lag)};
+  --_flush-duration: #{css.cssVar(reveal--flush-duration)};
+  --_enter-duration: #{css.cssVar(segment--enter-duration)};
+}
+
+.enter {
+  animation: c2-streaming-text-enter css.cssVar(segment--enter-duration) ease-out both;
+}
+
+.caret {
+  display: none;
+}
+
+.caret--active {
+  display: inline;
+}
+
+.caret--active::after {
+  content: css.cssVar(caret--content);
+  margin-left: css.cssVar(caret--margin-left);
+  color: css.cssVar(caret--color);
+  animation: c2-streaming-text-blink css.cssVar(caret--blink-duration) steps(1) infinite;
+}
+
+@keyframes c2-streaming-text-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes c2-streaming-text-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .caret--active::after {
+    animation: none;
+  }
+}

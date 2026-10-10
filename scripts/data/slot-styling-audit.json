@@ -3112,6 +3112,27 @@
       "decision": "part",
       "parts": ["meta"],
       "reason": "The meta container owns the supporting text's colour and size."
+    },
+    {
+      "tag": "c2-image",
+      "slot": "fallback",
+      "decision": "part",
+      "parts": ["fallback"],
+      "reason": "The error surface owns the fallback slot's component-side presentation."
+    },
+    {
+      "tag": "c2-image",
+      "slot": "load-label",
+      "decision": "part",
+      "parts": ["load-button"],
+      "reason": "The click-to-load button owns the load-label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-image",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["placeholder"],
+      "reason": "The loading surface owns the placeholder slot's component-side presentation."
     }
   ]
 }

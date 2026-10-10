@@ -63,6 +63,10 @@
     "./locale-helper.js": {
       "types": "./dist/locale-helper.d.ts",
       "default": "./dist/locale-helper.js"
+    },
+    "./stream-reveal.js": {
+      "types": "./dist/stream-reveal.d.ts",
+      "default": "./dist/stream-reveal.js"
     }
   },
   "files": [

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-streaming-text</title>
+    <script type="module" src="/src/streaming-text.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 560px;
+        padding: 24px;
+        font:
+          15px/1.6 system-ui,
+          sans-serif;
+      }
+      .dot {
+        --c2-streaming-text__caret--content: '●';
+        --c2-streaming-text__caret--margin-left: 6px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="replay">Replay</button>
+    <c2-streaming-text id="words" streaming></c2-streaming-text>
+    <c2-streaming-text id="chars" class="dot" segment="grapheme" streaming></c2-streaming-text>
+    <c2-streaming-text id="instant" reveal="instant" streaming></c2-streaming-text>
+    <c2-streaming-text value="A static value renders whole, with no caret."></c2-streaming-text>
+
+    <script type="module">
+      const text =
+        'Revenue grew 12% quarter over quarter, driven mostly by the enterprise plan. Churn fell to 2.1% after the onboarding changes shipped in May, and expansion revenue now covers new-logo acquisition costs.'
+      const targets = ['words', 'chars', 'instant'].map((id) => document.getElementById(id))
+      function play() {
+        for (const element of targets) {
+          element.clear()
+          element.streaming = true
+        }
+        const parts = text.split(/(?<=\s)/u)
+        let index = 0
+        const next = () => {
+          if (index >= parts.length) {
+            for (const element of targets) element.streaming = false
+            return
+          }
+          const size = 1 + Math.floor(Math.random() * 12)
+          const chunk = parts.slice(index, index + size).join('')
+          for (const element of targets) element.appendText(chunk)
+          index += size
+          setTimeout(next, 40 + Math.random() * 360)
+        }
+        setTimeout(next, 300)
+      }
+      document.getElementById('replay').addEventListener('click', play)
+      targets[0].addEventListener('reveal-end', () => console.log('reveal-end'))
+      play()
+    </script>
+  </body>
+</html>

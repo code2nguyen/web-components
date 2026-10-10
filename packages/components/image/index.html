@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-image</title>
+    <script type="module" src="/src/image.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-image {
+        --c2-image--width: 260px;
+        --c2-image--border-radius: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-image preview src="../../../apps/ui/public/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image>
+    <c2-image loading="click" src="../../../apps/ui/public/images/image-chart.svg" alt="Revenue chart" width="640" height="400"></c2-image>
+    <c2-image src="missing.png" alt="A missing photo" width="800" height="600"></c2-image>
+    <c2-image alt="No source yet" width="800" height="600"></c2-image>
+  </body>
+</html>
