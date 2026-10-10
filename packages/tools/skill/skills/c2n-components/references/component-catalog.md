@@ -33,6 +33,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chat Input** — `c2-chat-input` · `@c2n/components/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
 - **Chat Message** — `c2-chat-message` · `@c2n/components/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
 - **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
+- **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.
 - **Streaming Text** — `c2-streaming-text` · `@c2n/components/streaming-text` — Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.
 
 ## Data display

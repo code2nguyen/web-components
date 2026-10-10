@@ -417,6 +417,10 @@
       "types": "./dist/log-viewer.d.ts",
       "default": "./dist/log-viewer.js"
     },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "default": "./dist/markdown.js"
+    },
     "./marker": {
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
@@ -747,6 +751,7 @@
     "@upsetjs/venn.js": "2.0.0",
     "d3-geo": "3.1.1",
     "lit": "3.3.3",
+    "marked": "18.1.0",
     "mermaid": "12.1.0",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
@@ -882,6 +887,7 @@
     "@c2n/list": "*",
     "@c2n/list-item": "*",
     "@c2n/log-viewer": "*",
+    "@c2n/markdown": "*",
     "@c2n/marker": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",

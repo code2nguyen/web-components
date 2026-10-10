@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-markdown</title>
+    <script type="module" src="/src/markdown.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 680px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="replay">Replay stream</button>
+    <c2-markdown id="stream" streaming breaks image-policy="click"></c2-markdown>
+    <c2-markdown heading-anchors>
+      <script type="text/markdown">
+        # Static document
+
+        Text with **bold**, `code`, $x^2$ and a [link](#static-document).
+
+        | A   |   B |
+        | --- | --: |
+        | 1   |   2 |
+
+        <b>raw html</b> is shown as code.
+      </script>
+    </c2-markdown>
+
+    <script type="module">
+      const text =
+        '## Streaming\n\nSome **bold** text, a [link](https://example.com) and code:\n\n```js\nconsole.log("hello")\n```\n\n- one\n- two\n\n$$\n\\int_0^1 x\\,dx = \\tfrac12\n$$\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\n![chart](https://picsum.photos/200)'
+      const element = document.getElementById('stream')
+      function play() {
+        element.clear()
+        element.streaming = true
+        let index = 0
+        const next = () => {
+          if (index >= text.length) return (element.streaming = false)
+          const size = 2 + Math.floor(Math.random() * 20)
+          element.appendText(text.slice(index, index + size))
+          index += size
+          setTimeout(next, 40 + Math.random() * 250)
+        }
+        setTimeout(next, 300)
+      }
+      document.getElementById('replay').addEventListener('click', play)
+      play()
+    </script>
+  </body>
+</html>

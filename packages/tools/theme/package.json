@@ -109,6 +109,7 @@
         "../../components/list-item:build",
         "../../components/list:build",
         "../../components/log-viewer:build",
+        "../../components/markdown:build",
         "../../components/marker:build",
         "../../components/masonry:build",
         "../../components/mat-icon:build",
