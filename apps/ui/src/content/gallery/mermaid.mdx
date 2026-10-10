@@ -1,0 +1,72 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Mermaid } from '@c2n/components/mermaid'
+
+## Presets
+
+Looks for `c2-mermaid`. The node, edge, secondary, tertiary and note colours are passed to Mermaid's theme. The box (`--c2-mermaid--padding`, `--border`, `--border-radius`) frames the diagram.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-mermaid value="flowchart LR
+  A[Draft] --> B[Review] --> C[Published]"></c2-mermaid>
+```
+
+```html tag=MdxCodeBlock,label=Framed card
+<style>
+  .mermaid-card {
+    --c2-mermaid--padding: 16px;
+    --c2-mermaid--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-mermaid--border-radius: 8px;
+    --c2-mermaid--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-mermaid class="mermaid-card" value="sequenceDiagram
+  User->>App: Sign in
+  App-->>User: Session"></c2-mermaid>
+```
+
+```html tag=MdxCodeBlock,label=Purple accents
+<style>
+  .mermaid-purple {
+    --c2-mermaid__node--background: light-dark(#f3e8ff, #26153c);
+    --c2-mermaid__node--border-color: #9333ea;
+    --c2-mermaid__node--color: light-dark(#7e22ce, #a76cdc);
+    --c2-mermaid__edge--color: light-dark(#a855f7, #ac5df7);
+  }
+</style>
+<c2-mermaid class="mermaid-purple" value="flowchart TD
+  Idea --> Prototype --> Test
+  Test -->|learn| Idea"></c2-mermaid>
+```
+
+```html tag=MdxCodeBlock,label=State machine
+<c2-mermaid value="stateDiagram-v2
+  [*] --> Pending
+  Pending --> Paid: charge ok
+  Pending --> Failed: declined
+  Failed --> Pending: retry
+  Paid --> [*]"></c2-mermaid>
+```
+
+```html tag=MdxCodeBlock,label=Pie
+<style>
+  .mermaid-pie {
+    --c2-mermaid--font-size: 13px;
+  }
+</style>
+<c2-mermaid class="mermaid-pie" value="pie title Traffic sources
+  &quot;Search&quot; : 48
+  &quot;Direct&quot; : 31
+  &quot;Referral&quot; : 21"></c2-mermaid>
+```
+
+```html tag=MdxCodeBlock,label=Entity relationship
+<c2-mermaid value="erDiagram
+  CUSTOMER ||--o{ ORDER : places
+  ORDER ||--|{ LINE_ITEM : contains"></c2-mermaid>
+```
+
+</GalleryGrid>

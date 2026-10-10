@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-mermaid</title>
+    <script type="module" src="/src/mermaid.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .purple {
+        --c2-mermaid__node--background: #f3e8ff;
+        --c2-mermaid__node--border-color: #9333ea;
+        --c2-mermaid__edge--color: #a855f7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-mermaid>
+      <script type="text/mermaid">
+        flowchart LR
+          Cart --> Checkout{Payment ok?}
+          Checkout -- yes --> Paid([Order paid])
+          Checkout -- no --> Retry --> Checkout
+      </script>
+    </c2-mermaid>
+    <c2-mermaid class="purple">
+      <script type="text/mermaid">
+        sequenceDiagram
+          App->>API: POST /orders
+          API-->>App: 201 Created
+      </script>
+    </c2-mermaid>
+    <c2-mermaid value="flowchart LR&#10;  A --> --> B"></c2-mermaid>
+  </body>
+</html>

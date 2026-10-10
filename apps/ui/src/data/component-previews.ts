@@ -232,6 +232,9 @@ greet('world')"></c2-code-editor>`,
   <hr />
   <c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
 </c2-menu>`,
+  mermaid: `<c2-mermaid style="width:260px;--c2-mermaid--font-size:12px" value="flowchart LR
+  Cart --> Pay{Paid?}
+  Pay -- yes --> Ship"></c2-mermaid>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>
