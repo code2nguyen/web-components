@@ -97,6 +97,7 @@
         "../../components/header:build",
         "../../components/hover-card:build",
         "../../components/icon-button:build",
+        "../../components/image:build",
         "../../components/indicator:build",
         "../../components/inline-edit:build",
         "../../components/json-viewer:build",

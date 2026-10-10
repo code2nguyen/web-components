@@ -1,0 +1,50 @@
+---
+title: 'Image'
+description: 'Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Image } from '@c2n/components/image'
+
+`c2-image` wraps the states every app re-implements around an `<img>`. While the image loads, it shows a shimmer, or a blurred `placeholder-src`, then fades to the image. If the image fails, it shows a fallback with the alternative text. `preview` opens the loaded image full screen in a `c2-modal`. `width` and `height` reserve the box before the image arrives, as on a native `<img>`, so nothing shifts when it loads.
+
+**Click-to-load.** `loading="click"` makes **no request at all** until the reader activates the placeholder, which shows the alternative text and the image's host. Use it for any image whose URL you did not choose, such as an LLM answer or user content: a prompt injection can make a model write an image URL that carries data out, and the browser sends it the moment the image renders. Activation fires a cancelable `load-request`, so an app can confirm first or point `src` at a proxy.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/image'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/image
+<style>
+  .image-demo {
+    --c2-image--border-radius: 8px;
+    width: 280px;
+  }
+</style>
+<div data-label="Lazy, with preview">
+  <c2-image class="image-demo" preview src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image>
+</div>
+<div data-label="Click-to-load (untrusted URL)">
+  <c2-image class="image-demo" loading="click" src="/web-components/images/image-chart.svg" alt="Revenue by month, bar chart" width="640" height="400"></c2-image>
+</div>
+<div data-label="Error fallback">
+  <c2-image class="image-demo" src="/web-components/images/not-found.png" alt="Team photo from the offsite" width="800" height="600"></c2-image>
+</div>
+```
+
+Route a click-to-load request through your own proxy, or ask first:
+
+```ts tag=CodeBlock
+image.addEventListener('load-request', (event) => {
+  const { src } = event.detail
+  if (!confirm(`Load an image from ${new URL(src).host}?`)) event.preventDefault()
+  else image.src = `/image-proxy?url=${encodeURIComponent(src)}`
+})
+```
