@@ -365,6 +365,10 @@
       "types": "./dist/icon-button.d.ts",
       "default": "./dist/icon-button.js"
     },
+    "./image": {
+      "types": "./dist/image.d.ts",
+      "default": "./dist/image.js"
+    },
     "./indicator": {
       "types": "./dist/indicator.d.ts",
       "default": "./dist/indicator.js"
@@ -856,6 +860,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
     "@c2n/json-viewer": "*",

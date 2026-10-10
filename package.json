@@ -140,6 +140,7 @@
         "./packages/components/header:build",
         "./packages/components/hover-card:build",
         "./packages/components/icon-button:build",
+        "./packages/components/image:build",
         "./packages/components/indicator:build",
         "./packages/components/inline-edit:build",
         "./packages/components/json-viewer:build",

@@ -65,6 +65,12 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline',
     value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
   },
+  // The click-to-load placeholder keeps its dashed outline while following the theme outline and surface.
+  '--c2-image__load-button--border': {
+    token: 'color-outline',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  '--c2-image__load-button__hover--background': { token: 'color-surface-container' },
   // Masonry defaults have no outer rounding; the edit preview and elevation follow the active brand theme.
   '--c2-masonry--border-radius': { exclude: 'square outer layout by default' },
   '--c2-masonry-item--border-radius': { exclude: 'square tile by default' },
