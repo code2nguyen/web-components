@@ -65,6 +65,7 @@
     "@c2n/header": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
+    "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
     "@c2n/json-viewer": "*",

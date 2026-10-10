@@ -1,0 +1,216 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-image,
+  $theme: (
+    width: auto,
+    aspect-ratio: auto,
+    object-fit: cover,
+    border-radius: 0,
+    enter--duration: 200ms,
+    placeholder--background: #fafafa,
+    placeholder--color: #71717a,
+    placeholder--font-size: 12px,
+    placeholder--min-height: 120px,
+    placeholder--min-width: 200px,
+    shimmer--color: rgba(255, 255, 255, 0.6),
+    shimmer--duration: 1.2s,
+    blur--radius: 16px,
+    icon--size: 20px,
+    fallback--background: #fafafa,
+    fallback--color: #71717a,
+    load-button--border: 1px dashed #bcbcc6,
+    load-button--color: #18181b,
+    load-button__hover--background: #e4e4e7,
+    load-button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    preview--width: min(1080px, calc(100vw - 32px)),
+    preview__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.frame {
+  position: relative;
+  box-sizing: border-box;
+  width: css.cssVar(width, --_intrinsic-width);
+  max-width: 100%;
+  aspect-ratio: css.cssVar(aspect-ratio, --_intrinsic-ratio);
+  overflow: hidden;
+  border-radius: css.cssVar(border-radius);
+  outline: none;
+}
+
+.frame--loading:not(.frame--sized),
+.frame--blocked:not(.frame--sized),
+.frame--error:not(.frame--sized) {
+  min-width: css.cssVar(placeholder--min-width);
+  min-height: css.cssVar(placeholder--min-height);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: css.cssVar(object-fit);
+  opacity: 0;
+  transition: opacity css.cssVar(enter--duration) ease-out;
+}
+
+.frame--sized .image {
+  height: 100%;
+}
+
+.frame--loaded .image {
+  opacity: 1;
+}
+
+.frame--loading .image {
+  position: absolute;
+  inset: 0;
+}
+
+.frame--error .image {
+  display: none;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: css.cssVar(placeholder--background);
+}
+
+.lqip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(css.cssVar(blur--radius));
+  transform: scale(1.1);
+}
+
+.shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, css.cssVar(shimmer--color) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: c2-image-shimmer css.cssVar(shimmer--duration) ease-in-out infinite;
+}
+
+.icon {
+  display: inline-flex;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: none;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.fallback,
+.load-button {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: css.cssVar(placeholder--font-size);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.fallback {
+  background: css.cssVar(fallback--background);
+  color: css.cssVar(fallback--color);
+}
+
+.load-button {
+  width: 100%;
+  margin: 0;
+  border: css.cssVar(load-button--border);
+  border-radius: inherit;
+  background: css.cssVar(placeholder--background);
+  color: css.cssVar(load-button--color);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.load-button:hover {
+  background: css.cssVar(load-button__hover--background);
+}
+
+.load-button:focus-visible {
+  outline: css.cssVar(load-button__focus--outline);
+  outline-offset: -2px;
+}
+
+.load-label {
+  font-weight: 500;
+}
+
+.host,
+.alt {
+  color: css.cssVar(placeholder--color);
+}
+
+.alt {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.preview-trigger {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: zoom-in;
+}
+
+.preview-trigger:focus-visible {
+  outline: css.cssVar(preview__focus--outline);
+  outline-offset: -2px;
+}
+
+.preview {
+  --c2-modal--width: #{css.cssVar(preview--width)};
+}
+
+.preview-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 160px);
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+@keyframes c2-image-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+  .image {
+    transition: none;
+  }
+}
