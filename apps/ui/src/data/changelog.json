@@ -2,6 +2,85 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.8",
+      "date": "2026-10-10",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["markdown"],
+              "text": "Add c2-markdown, a safe markdown renderer that streams",
+              "hash": "7af032a"
+            },
+            {
+              "scopes": ["mermaid"],
+              "text": "Add c2-mermaid, themed and sandboxed Mermaid diagrams",
+              "hash": "7dc060e"
+            },
+            {
+              "scopes": ["math"],
+              "text": "Add c2-math, TeX rendered as native MathML with Temml",
+              "hash": "cc28f16"
+            },
+            {
+              "scopes": ["image"],
+              "text": "Add c2-image with placeholder, fallback, click-to-load and preview",
+              "hash": "2e6cd8e"
+            },
+            {
+              "scopes": ["streaming-text"],
+              "text": "Add c2-streaming-text and the shared stream-reveal controller",
+              "hash": "13de7cc"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Add a key-less field offered after a bare colon",
+              "hash": "41213cf"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["image"],
+              "text": "Name the host of an absolute URL only, so a server-rendered click-to-load image hydrates",
+              "hash": "d03335d"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "Keep the page from scrolling when the country picker opens",
+              "hash": "badc0cd"
+            },
+            {
+              "scopes": ["umbrella"],
+              "text": "Stop checking the index entry against a fixed size budget",
+              "hash": "5a58d00"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Load the streaming-text and markdown demo scripts on their docs pages",
+              "hash": "8590347"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the GitHub link in the header on small screens",
+              "hash": "8b14cba"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.7",
       "date": "2026-10-09",
       "sections": [

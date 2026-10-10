@@ -3,6 +3,28 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.8](https://github.com/code2nguyen/web-components/releases/tag/v1.0.8) — 2026-10-10
+
+### Features
+
+- **markdown:** Add c2-markdown, a safe markdown renderer that streams ([7af032a](https://github.com/code2nguyen/web-components/commit/7af032a))
+- **mermaid:** Add c2-mermaid, themed and sandboxed Mermaid diagrams ([7dc060e](https://github.com/code2nguyen/web-components/commit/7dc060e))
+- **math:** Add c2-math, TeX rendered as native MathML with Temml ([cc28f16](https://github.com/code2nguyen/web-components/commit/cc28f16))
+- **image:** Add c2-image with placeholder, fallback, click-to-load and preview ([2e6cd8e](https://github.com/code2nguyen/web-components/commit/2e6cd8e))
+- **streaming-text:** Add c2-streaming-text and the shared stream-reveal controller ([13de7cc](https://github.com/code2nguyen/web-components/commit/13de7cc))
+- **query-input:** Add a key-less field offered after a bare colon ([41213cf](https://github.com/code2nguyen/web-components/commit/41213cf))
+
+### Fixes
+
+- **image:** Name the host of an absolute URL only, so a server-rendered click-to-load image hydrates ([d03335d](https://github.com/code2nguyen/web-components/commit/d03335d))
+- **phone-input:** Keep the page from scrolling when the country picker opens ([badc0cd](https://github.com/code2nguyen/web-components/commit/badc0cd))
+- **umbrella:** Stop checking the index entry against a fixed size budget ([5a58d00](https://github.com/code2nguyen/web-components/commit/5a58d00))
+
+### Docs site & examples
+
+- **ui:** Load the streaming-text and markdown demo scripts on their docs pages ([8590347](https://github.com/code2nguyen/web-components/commit/8590347))
+- **ui:** Keep the GitHub link in the header on small screens ([8b14cba](https://github.com/code2nguyen/web-components/commit/8b14cba))
+
 ## [1.0.7](https://github.com/code2nguyen/web-components/releases/tag/v1.0.7) — 2026-10-09
 
 ### Features
