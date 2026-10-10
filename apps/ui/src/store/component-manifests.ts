@@ -59,6 +59,7 @@ import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
+import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
@@ -181,6 +182,7 @@ export const componentManifests = (function () {
     matIcon,
     math,
     menu,
+    mermaid,
     modal,
     monthPlanner,
     navigationMenu,
