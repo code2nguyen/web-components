@@ -94,13 +94,16 @@ test('a failed image shows the fallback with its alternative text and re-dispatc
   await accessible(page)
 })
 
-test('a lazy image below the fold is requested only when scrolled near', async ({ page, renderScenario }) => {
+test('lazy images defer to the browser, eager ones load at once', async ({ page, renderScenario }) => {
   const served = await images(page)
-  await renderScenario('<div style="height: 8000px"></div><c2-image src="https://img.test/below.png" alt="Below the fold" width="200" height="150"></c2-image>')
-  await page.waitForTimeout(300)
-  expect(served.requests).toEqual([])
-  await page.locator('c2-image').scrollIntoViewIfNeeded()
-  await expect.poll(() => served.requests).toEqual(['/below.png'])
+  // When a lazy image is fetched is each engine's own heuristic (WebKit starts far earlier than Chromium), so assert
+  // what the component controls: the native loading hint, and that an eager image is requested straight away.
+  await renderScenario(`<c2-image id="lazy" src="https://img.test/lazy.png" alt="Lazy" width="200" height="150"></c2-image>
+    <c2-image id="eager" loading="eager" src="https://img.test/eager.png" alt="Eager" width="200" height="150"></c2-image>`)
+  const loadingOf = (selector: string) => page.locator(selector).evaluate((element) => element.shadowRoot!.querySelector('img.image')!.getAttribute('loading'))
+  expect(await loadingOf('#lazy')).toBe('lazy')
+  expect(await loadingOf('#eager')).toBe('eager')
+  await expect.poll(() => served.requests).toContain('/eager.png')
 })
 
 test('width and height reserve the box, so loading does not shift the layout', async ({ page, renderScenario }) => {
