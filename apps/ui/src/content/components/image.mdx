@@ -11,7 +11,7 @@ import { Image } from '@c2n/components/image'
 
 `c2-image` wraps the states every app re-implements around an `<img>`. While the image loads, it shows a shimmer, or a blurred `placeholder-src`, then fades to the image. If the image fails, it shows a fallback with the alternative text. `preview` opens the loaded image full screen in a `c2-modal`. `width` and `height` reserve the box before the image arrives, as on a native `<img>`, so nothing shifts when it loads.
 
-**Click-to-load.** `loading="click"` makes **no request at all** until the reader activates the placeholder, which shows the alternative text and the image's host. Use it for any image whose URL you did not choose, such as an LLM answer or user content: a prompt injection can make a model write an image URL that carries data out, and the browser sends it the moment the image renders. Activation fires a cancelable `load-request`, so an app can confirm first or point `src` at a proxy.
+**Click-to-load.** `loading="click"` makes **no request at all** until the reader activates the placeholder, which shows the alternative text and, for an absolute URL, the image's host. Use it for any image whose URL you did not choose, such as an LLM answer or user content: a prompt injection can make a model write an image URL that carries data out, and the browser sends it the moment the image renders. Activation fires a cancelable `load-request`, so an app can confirm first or point `src` at a proxy.
 
 ## Import
 
