@@ -6,8 +6,14 @@
  * - `status:>=500`, `duration:<2s` carry a comparator (`>`, `>=`, `<`, `<=`, `=`) before the value.
  * - `"connection reset"` and `message:"timed out"` quote a phrase; `\"` escapes a quote inside it.
  * - `AND`, `OR` and `NOT` (upper case) are boolean operators, and `(` `)` group terms.
+ * - With the `keyless` option, `:web` (a colon at the start of a word) is a term on the key-less field: its key is `''`.
  * - Anything else is free text.
  */
+
+export interface QuerySyntaxOptions {
+  /** Read a word starting with a colon (`:web`, `-:web`) as a term on the key-less field `''` rather than free text. */
+  keyless?: boolean
+}
 
 /** What a token is. `whitespace` tokens are kept so the tokens of a query always concatenate back to it. */
 export type QueryTokenType = 'whitespace' | 'negation' | 'key' | 'separator' | 'comparator' | 'value' | 'text' | 'operator' | 'paren'
@@ -29,7 +35,7 @@ export interface QueryToken {
 export type QueryComparator = '>' | '>=' | '<' | '<=' | '='
 
 export interface QueryTerm {
-  /** The field, or `null` for free text. */
+  /** The field, `''` for the key-less field (`:web`), or `null` for free text. */
   key: string | null
   /** The value with its quotes removed and escapes resolved. Empty for a key typed without a value yet. */
   value: string
@@ -73,8 +79,11 @@ function readBare(query: string, start: number): number {
   return index
 }
 
-/** Splits a query into tokens. Joining every token's `text` gives back the query exactly. */
-export function tokenizeQuery(query: string): QueryToken[] {
+/**
+ * Splits a query into tokens. Joining every token's `text` gives back the query exactly. A key-less term (`keyless`)
+ * has an empty `key` token before its separator.
+ */
+export function tokenizeQuery(query: string, options: QuerySyntaxOptions = {}): QueryToken[] {
   const tokens: QueryToken[] = []
   const push = (type: QueryTokenType, start: number, end: number, extra: Partial<QueryToken> = {}) => {
     tokens.push({ type, text: query.slice(start, end), start, end, ...extra })
@@ -110,7 +119,9 @@ export function tokenizeQuery(query: string): QueryToken[] {
     let colon = index
     while (colon < query.length && !isBoundary(query[colon]) && query[colon] !== ':' && query[colon] !== '"') colon++
     const word = query.slice(index, colon)
-    if (query[colon] === ':' && KEY_PATTERN.test(word)) {
+    // A colon opening a word (not glued to a quoted phrase before it) starts a term on the key-less field.
+    const keyless = options.keyless === true && word === '' && (index === 0 || isBoundary(query[index - 1]) || tokens[tokens.length - 1]?.type === 'negation')
+    if (query[colon] === ':' && (keyless || KEY_PATTERN.test(word))) {
       push('key', index, colon, { key: word })
       push('separator', colon, colon + 1, { key: word })
       let cursor = colon + 1
@@ -156,8 +167,8 @@ export function quoteQueryValue(value: string): string {
  * Reads the terms of a query, in order. Boolean operators and parentheses are not represented: the terms are what a
  * flat filter needs (every field and value the user wrote), and `NOT` negates the term right after it.
  */
-export function parseQuery(query: string): QueryTerm[] {
-  const tokens = tokenizeQuery(query)
+export function parseQuery(query: string, options: QuerySyntaxOptions = {}): QueryTerm[] {
+  const tokens = tokenizeQuery(query, options)
   const terms: QueryTerm[] = []
   let negated = false
   let negationStart: number | undefined
@@ -227,6 +238,7 @@ export function parseQuery(query: string): QueryTerm[] {
 export interface QueryFilter {
   /** The term's source text, negation and quotes included: `-status:>=500`, `service:"billing worker"`. */
   text: string
+  /** The field, `''` for a term on the key-less field (`:web`). */
   key: string
   /** The value with its quotes removed. */
   value: string
@@ -250,8 +262,13 @@ export interface QueryFilterSplit {
  * parentheses, it is joined to a neighbour by `AND` or `OR`, or it follows `NOT`. `accept` can narrow the terms taken
  * further, by their offsets in the query.
  */
-export function splitQueryFilters(query: string, caret = query.length, accept: (start: number, end: number) => boolean = () => true): QueryFilterSplit {
-  const tokens = tokenizeQuery(query)
+export function splitQueryFilters(
+  query: string,
+  caret = query.length,
+  accept: (start: number, end: number) => boolean = () => true,
+  options: QuerySyntaxOptions = {},
+): QueryFilterSplit {
+  const tokens = tokenizeQuery(query, options)
   const significant = (from: number, step: 1 | -1) => {
     for (let index = from; index >= 0 && index < tokens.length; index += step) if (tokens[index].type !== 'whitespace') return tokens[index]
     return undefined

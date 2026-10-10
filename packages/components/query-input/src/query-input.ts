@@ -36,7 +36,10 @@ export interface QueryFieldValue {
 
 /** A field the query can filter on: offered as a key, and its `values` offered after the colon. */
 export interface QueryField {
-  /** The key written before the colon, e.g. `service` or `@http.status_code`. */
+  /**
+   * The key written before the colon, e.g. `service` or `@http.status_code`. An empty key (`''`) is the key-less field:
+   * typing `:` offers its `values`, and its chips show the value alone.
+   */
   key: string
   /** Shown next to the key in the suggestions. */
   label?: string
@@ -49,7 +52,7 @@ export interface QueryField {
 /** What the caret is completing: a key, or the value of `key`. */
 export interface QueryInputSuggestDetail {
   kind: 'key' | 'value'
-  /** The field whose value is being typed, or `null` while a key is typed. */
+  /** The field whose value is being typed (`''` for the key-less field), or `null` while a key is typed. */
   key: string | null
   /** The part of the key or value before the caret, unquoted. */
   prefix: string
@@ -120,6 +123,9 @@ interface Suggestion {
  * `fields` set, a key that is not one of them is underlined as unknown, as is an unterminated quote, and the host
  * matches `:state(invalid)`. Values that must be fetched can follow the `suggest` event, which reports the key and
  * prefix the caret is completing whenever they change: update that field's `values` in response.
+ *
+ * A field whose `key` is `''` is the key-less field: a colon at the start of a word (`:web`) is a term on it, so typing
+ * `:` offers its values, and its chip shows the value without key or colon. It is not listed among the keys.
  *
  * The syntax helpers behind it, `tokenizeQuery` and `parseQuery`, are exported for use on the server. `input` and
  * `change` are re-dispatched from the inner input, and the element is form-associated (`name`). The host exposes
@@ -258,6 +264,7 @@ export class QueryInput extends LitElement {
   @state() private disabledByForm = false
   private dirty = false
   private lastSuggest = ''
+  private wasKeyless = false
   /** The last `value` this element composed from its chips and text; any other value was set from outside. */
   private composed = ''
 
@@ -277,7 +284,7 @@ export class QueryInput extends LitElement {
 
   /** The terms of the current query. */
   get terms(): QueryTerm[] {
-    return parseQuery(this.value)
+    return parseQuery(this.value, this.syntax)
   }
 
   /** Every `key:value` chip, in order, with whether it is switched on. */
@@ -341,8 +348,17 @@ export class QueryInput extends LitElement {
     return Array.isArray(this.fields) ? this.fields : []
   }
 
+  /** Whether a field has the empty key, so `:value` is read as a term on it. */
+  private get keyless() {
+    return this.fieldList.some((field) => field.key === '')
+  }
+
+  private get syntax() {
+    return { keyless: this.keyless }
+  }
+
   private get tokens(): QueryToken[] {
-    return tokenizeQuery(this.draft)
+    return tokenizeQuery(this.draft, this.syntax)
   }
 
   /** Replaces the chips and the text, and recomposes `value` from them. */
@@ -358,7 +374,7 @@ export class QueryInput extends LitElement {
    * Returns the caret's new offset.
    */
   private commitFilters(accept?: (start: number, end: number) => boolean, caret = this.caret) {
-    const split = splitQueryFilters(this.draft, caret, accept)
+    const split = splitQueryFilters(this.draft, caret, accept, this.syntax)
     if (!split.filters.length) return caret
     this.setParts([...this.chips, ...split.filters.map((filter) => ({ ...filter, active: true }))], split.rest)
     return split.caret
@@ -427,6 +443,7 @@ export class QueryInput extends LitElement {
     const limit = Math.max(0, this.suggestionLimit)
     if (completion.kind === 'key') {
       return this.fieldList
+        .filter((field) => field.key !== '')
         .filter((field) => !prefix || field.key.toLocaleLowerCase().includes(prefix) || field.label?.toLocaleLowerCase().includes(prefix))
         .slice(0, limit)
         .map((field) => ({ insert: field.key, label: field.key, description: field.label ?? field.description }))
@@ -445,7 +462,9 @@ export class QueryInput extends LitElement {
 
   private emitSearch(trigger: QueryInputSearchDetail['trigger']) {
     this.dispatchEvent(
-      new CustomEvent<QueryInputSearchDetail>('search', { detail: { value: this.value, terms: parseQuery(this.value), filters: this.filters, trigger } }),
+      new CustomEvent<QueryInputSearchDetail>('search', {
+        detail: { value: this.value, terms: parseQuery(this.value, this.syntax), filters: this.filters, trigger },
+      }),
     )
   }
 
@@ -676,9 +695,12 @@ export class QueryInput extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues) {
-    // A value set from outside (attribute, property, form reset) is split into chips and text again.
-    if (changed.has('value') && this.value !== this.composed) {
-      const split = splitQueryFilters(this.value)
+    // A value set from outside (attribute, property, form reset) is split into chips and text again, as it is when a
+    // key-less field comes or goes, since that changes what `:value` reads as.
+    const keylessChanged = changed.has('fields') && this.keyless !== this.wasKeyless
+    this.wasKeyless = this.keyless
+    if ((changed.has('value') && this.value !== this.composed) || keylessChanged) {
+      const split = splitQueryFilters(this.value, this.value.length, undefined, this.syntax)
       this.setParts(
         split.filters.map((filter) => ({ ...filter, active: true })),
         split.rest.trim(),
@@ -753,8 +775,9 @@ export class QueryInput extends LitElement {
         void this.removeFilter(index)
       }}
       @keydown=${(event: KeyboardEvent) => this.handleChipKeydown(event, index)}
-      >${chip.negated ? html`<span class="filter-negation">-</span>` : nothing}<span class="filter-key">${chip.key}</span
-      ><span class="filter-separator">:</span>${comparator ? html`<span class="filter-comparator">${comparator}</span>` : nothing}<span class="filter-value"
+      >${chip.negated ? html`<span class="filter-negation">-</span>` : nothing}${
+        chip.key ? html`<span class="filter-key">${chip.key}</span><span class="filter-separator">:</span>` : nothing
+      }${comparator ? html`<span class="filter-comparator">${comparator}</span>` : nothing}<span class="filter-value"
         >${chip.quoted ? `"${chip.value}"` : chip.value}</span
       ></c2-chip
     >`

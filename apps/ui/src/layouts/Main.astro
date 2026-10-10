@@ -348,14 +348,14 @@ const mobileNavItems = [
         .site-header__wordmark-muted {
           display: none;
         }
-        // Keep the release badge on phones (the wordmark suffix and GitHub link make room for it), just tighter.
+        // Keep the release badge on phones (the wordmark suffix and Discord link make room for it), just tighter.
         .site-header__version {
           margin-right: 4px;
           padding: 1px 6px;
           font-size: 10px;
         }
-        // Both stay reachable on phones through the footer links.
-        :global(.site-header__icon-link) {
+        // GitHub stays in the header on phones; Discord stays reachable through the footer links.
+        :global(.site-header__discord) {
           display: none;
         }
       }

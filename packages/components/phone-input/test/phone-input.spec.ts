@@ -216,3 +216,21 @@ test('--c2-phone-input__country--display: none leaves only the number field', as
   await page.keyboard.type('0912345678')
   await expect(host).toHaveJSProperty('value', '+84912345678')
 })
+
+test('opening the picker does not scroll the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div style="height: 1500px"></div><c2-phone-input country="US"></c2-phone-input><div style="height: 3000px"></div>')
+  await page.locator('c2-phone-input').scrollIntoViewIfNeeded()
+  const before = await page.evaluate(() => window.scrollY)
+  for (let round = 0; round < 2; round++) {
+    await countryButton(page).click()
+    await expect(page.getByRole('combobox', { name: 'Search countries' })).toBeFocused()
+    expect(await page.evaluate(() => window.scrollY)).toBe(before)
+    await page.keyboard.press('Escape')
+  }
+})
+
+test('the picker scrolls its list to the selected country', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-phone-input country="ZW"></c2-phone-input>')
+  await countryButton(page).click()
+  await expect(page.getByRole('option', { name: /Zimbabwe/ })).toBeInViewport()
+})
