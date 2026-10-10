@@ -33,7 +33,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chat Input** — `c2-chat-input` · `@c2n/components/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
 - **Chat Message** — `c2-chat-message` · `@c2n/components/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
 - **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
-- **Streaming Text** — `c2-streaming-text` · `@c2n/components/streaming-text` — Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.
 
 ## Data display
 
@@ -44,13 +43,12 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
-- **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **Marker** — `c2-marker` · `@c2n/components/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
-- **Math** — `c2-math` · `@c2n/components/math` — TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.
+- **Mermaid** — `c2-mermaid` · `@c2n/components/mermaid` — Mermaid text diagrams drawn in your theme colours, loaded on demand and safe for untrusted sources.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
