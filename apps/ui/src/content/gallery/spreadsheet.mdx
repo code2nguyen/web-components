@@ -8,14 +8,14 @@ import { Spreadsheet } from '@c2n/components/spreadsheet'
 Looks for `c2-spreadsheet`. The cell variables (`__cell--height`, `__cell--padding`, `__cell--border-color`), the
 header colours and the active-cell outline do most of the work. Open any card in the studio to start from it.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-spreadsheet
   label="Quote"
   rows="5"
-  columns='[{"label":"Item","width":140},{"label":"Qty","width":64,"format":"number"},{"label":"Price","width":96,"format":"currency"},{"label":"Total","width":104,"format":"currency"}]'
-  data='[["Design","8","120","=B1*C1"],["Build","24","95","=B2*C2"],["Total","","","=SUM(D1:D2)"]]'
+  columns='[{"label":"Item","width":110},{"label":"Hrs","width":64,"format":"number"},{"label":"Cost","width":110,"format":"currency"}]'
+  data='[["Design",8,"=B1*120"],["Build",24,"=B2*95"],["Total","=SUM(B1:B2)","=SUM(C1:C2)"]]'
 ></c2-spreadsheet>
 ```
 
@@ -25,7 +25,7 @@ header colours and the active-cell outline do most of the work. Open any card in
     --c2-spreadsheet--font-size: 12px;
     --c2-spreadsheet__cell--height: 24px;
     --c2-spreadsheet__cell--padding: 0 6px;
-    --c2-spreadsheet__cell--width: 84px;
+    --c2-spreadsheet__cell--width: 72px;
     --c2-spreadsheet__row-header--width: 32px;
     --c2-spreadsheet__header--font-size: 11px;
     --c2-spreadsheet--border-radius: 4px;
@@ -64,8 +64,8 @@ header colours and the active-cell outline do most of the work. Open any card in
   label="Household ledger"
   rows="6"
   summary
-  columns='[{"label":"Month","width":96},{"label":"Income","format":"currency"},{"label":"Spent","format":"currency"},{"label":"Saved","format":"currency"}]'
-  data='[["July",4200,3610,"=B1-C1"],["August",4200,3980,"=B2-C2"],["September",4350,3720,"=B3-C3"],["Total","=SUM(B1:B3)","=SUM(C1:C3)","=SUM(D1:D3)"]]'
+  columns='[{"label":"Month","width":80},{"label":"In","width":72,"format":"number"},{"label":"Out","width":72,"format":"number"},{"label":"Kept","width":72,"format":"number"}]'
+  data='[["July",4200,3610,"=B1-C1"],["August",4200,3980,"=B2-C2"],["Sept",4350,3720,"=B3-C3"],["Total","=SUM(B1:B3)","=SUM(C1:C3)","=SUM(D1:D3)"]]'
 ></c2-spreadsheet>
 ```
 
@@ -85,7 +85,7 @@ header colours and the active-cell outline do most of the work. Open any card in
   label="Pay split"
   rows="5"
   formula-bar
-  columns='[{"label":"Person","width":110},{"label":"Share","format":"percent"},{"label":"Amount","format":"currency"}]'
+  columns='[{"label":"Person","width":110},{"label":"Share","width":80,"format":"percent"},{"label":"Amount","width":100,"format":"currency"}]'
   data='[["Ana","40%","=B1*$C$5"],["Ben","35%","=B2*$C$5"],["Chi","25%","=B3*$C$5"],[],["Pot","=SUM(B1:B3)",2400]]'
 ></c2-spreadsheet>
 ```

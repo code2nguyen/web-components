@@ -159,6 +159,12 @@
   scroll-padding-left: css.cssVar(row-header--width);
 }
 
+// The grid is wider than its scroller when it scrolls sideways, so the focus ring goes around the whole frame.
+.spreadsheet:has(.grid:focus-visible) {
+  outline: css.cssVar(grid__focus--outline);
+  outline-offset: 2px;
+}
+
 .grid {
   --_cell-width: #{css.cssVar(cell--width)};
   --_row-header-width: #{css.cssVar(row-header--width)};
@@ -170,10 +176,6 @@
   user-select: none;
   -webkit-user-select: none;
 
-  &:focus-visible {
-    outline: css.cssVar(grid__focus--outline);
-    outline-offset: -2px;
-  }
 }
 
 .row {
