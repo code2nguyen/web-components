@@ -10,25 +10,5 @@ const en = {
   open: 'Open time picker',
 }
 
-const fr: typeof en = {
-  hours: 'Heures',
-  minutes: 'Minutes',
-  seconds: 'Secondes',
-  period: 'AM/PM',
-  now: 'Maintenant',
-  done: 'Terminé',
-  open: 'Ouvrir le sélecteur d’heure',
-}
-
-const vi: typeof en = {
-  hours: 'Giờ',
-  minutes: 'Phút',
-  seconds: 'Giây',
-  period: 'SA/CH',
-  now: 'Bây giờ',
-  done: 'Xong',
-  open: 'Mở bộ chọn giờ',
-}
-
-/** The time input's interface text: English, French and Vietnamese, picked from the nearest `lang`. */
-export const timeInputMessages = defineMessages('time-input', en, { fr, vi })
+/** The time input's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const timeInputMessages = defineMessages('time-input', en)

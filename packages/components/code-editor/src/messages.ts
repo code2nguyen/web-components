@@ -34,72 +34,8 @@ const en = {
   selectionDeleted: 'Selection deleted',
 }
 
-const fr: typeof en = {
-  codeEditor: 'Éditeur de code',
-  valueMissing: 'Veuillez saisir du code.',
-  find: 'Rechercher',
-  replace: 'Remplacer',
-  next: 'suivant',
-  previous: 'précédent',
-  all: 'tout',
-  matchCase: 'respecter la casse',
-  regexp: 'regex',
-  byWord: 'mot entier',
-  replaceOne: 'remplacer',
-  replaceAll: 'tout remplacer',
-  close: 'fermer',
-  currentMatch: 'occurrence actuelle',
-  onLine: 'à la ligne',
-  replacedMatches: '$ occurrences remplacées',
-  replacedMatchOnLine: 'occurrence remplacée à la ligne $',
-  goToLine: 'Aller à la ligne',
-  go: 'aller',
-  foldLine: 'Replier la ligne',
-  unfoldLine: 'Déplier la ligne',
-  foldedCode: 'code replié',
-  unfold: 'déplier',
-  foldedLines: 'Lignes repliées',
-  unfoldedLines: 'Lignes dépliées',
-  to: 'à',
-  controlCharacter: 'Caractère de contrôle',
-  completions: 'Suggestions',
-  selectionDeleted: 'Sélection supprimée',
-}
-
-const vi: typeof en = {
-  codeEditor: 'Trình soạn thảo mã',
-  valueMissing: 'Vui lòng nhập mã.',
-  find: 'Tìm',
-  replace: 'Thay thế',
-  next: 'tiếp',
-  previous: 'trước',
-  all: 'tất cả',
-  matchCase: 'phân biệt hoa thường',
-  regexp: 'biểu thức chính quy',
-  byWord: 'nguyên từ',
-  replaceOne: 'thay thế',
-  replaceAll: 'thay thế tất cả',
-  close: 'đóng',
-  currentMatch: 'kết quả hiện tại',
-  onLine: 'ở dòng',
-  replacedMatches: 'đã thay thế $ kết quả',
-  replacedMatchOnLine: 'đã thay thế kết quả ở dòng $',
-  goToLine: 'Đi tới dòng',
-  go: 'đi',
-  foldLine: 'Thu gọn dòng',
-  unfoldLine: 'Mở rộng dòng',
-  foldedCode: 'mã đã thu gọn',
-  unfold: 'mở rộng',
-  foldedLines: 'Đã thu gọn các dòng',
-  unfoldedLines: 'Đã mở rộng các dòng',
-  to: 'đến',
-  controlCharacter: 'Ký tự điều khiển',
-  completions: 'Gợi ý',
-  selectionDeleted: 'Đã xóa vùng chọn',
-}
-
-/** The code editor's interface text: English, French and Vietnamese, picked from the nearest `lang`. */
-export const codeEditorMessages = defineMessages('code-editor', en, { fr, vi })
+/** The code editor's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const codeEditorMessages = defineMessages('code-editor', en)
 
 /** The messages that are CodeMirror phrases: CodeMirror looks each up by its English text, `en[key]`. */
 export const CODEMIRROR_PHRASES = Object.keys(en).filter((key) => key !== 'codeEditor' && key !== 'valueMissing') as Array<keyof typeof en>

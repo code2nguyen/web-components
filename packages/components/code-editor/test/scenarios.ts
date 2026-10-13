@@ -1,3 +1,5 @@
+// The app's languages: French and Vietnamese, added as an app would.
+import './translations.js'
 import '../src/code-editor'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'

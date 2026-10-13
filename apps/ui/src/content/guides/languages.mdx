@@ -1,0 +1,63 @@
+---
+title: 'Languages'
+description: 'Components show their text in English; add your app’s languages as one JSON object, picked by the nearest lang.'
+order: 12
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+
+The text a component shows itself (a Close button’s name, “2 of 6 done”, a placeholder, a menu) is in English. Your app adds the other languages it speaks, and each component shows the one its nearest `lang` attribute asks for: its own, an ancestor’s, or `<html lang>`. Change `lang` and every component on the page follows at once, without a reload.
+
+A message your app does not translate stays in English, so a translation can start small and grow. The text you pass to a component yourself (a `label`, a `placeholder`, the tasks of a list) is yours and never translated.
+
+## Add your languages
+
+Call `addTranslations` once, before or after the components load, with your languages by tag, then by component name (the tag without `c2-`):
+
+```typescript tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    modal: { close: 'Fermer' },
+    'todo-list': {
+      addTask: 'Ajouter une tâche',
+      done: '{0} sur {1} terminées',
+      urgent: { one: '{0} urgente', other: '{0} urgentes' },
+    },
+  },
+  vi: {
+    modal: { close: 'Đóng' },
+  },
+})
+
+document.documentElement.lang = 'fr'
+```
+
+The object is plain JSON, so it can live in one file per language and be fetched when the language is picked. Calling `addTranslations` again adds to what it was given, or overrides it, message by message.
+
+## Message forms
+
+Each component’s **API** tab lists its messages under **Text and languages**: the key, the English text and the values it carries.
+
+- **Text**: `"Fermer"`.
+- **Values**: `{0}`, `{1}`… stand for the message’s values, in the order the table lists them: `"{0} sur {1} terminées"`.
+- **Plurals**: an object picked by the first value’s plural category in that language (`zero`, `one`, `two`, `few`, `many`, `other`, as `Intl.PluralRules` gives them), or by the exact number (`"0"`): `{ "0": "Rien d’urgent", "one": "{0} urgente", "other": "{0} urgentes" }`.
+- **Choices by name**: when the first value is a name, an object picked by it, `other` for the rest: `{ "work": "Travail", "groceries": "Courses", "other": "{0}" }`.
+- From script, a message can also be a function of its values: `done: (closed, total) => …`.
+
+## Regions and fallbacks
+
+A component looks for the exact tag first, then its language, then English: `lang="fr-CA"` uses `fr-ca` messages when you give them, else `fr`, else English. Dates, times and numbers follow the same `lang` through `Intl`.
+
+The week and month planners carry their own labels in French, German, Spanish, Italian, Portuguese, Dutch and Vietnamese. Translations you add for them win over those.
+
+## One component, one language
+
+`addMessages` translates or rewords one component in one language, typed against its messages:
+
+```typescript tag=CodeBlock
+import { addMessages } from '@c2n/core/localize.js'
+
+addMessages('modal', 'en', { close: 'Dismiss' })
+```

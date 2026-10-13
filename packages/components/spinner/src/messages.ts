@@ -4,13 +4,5 @@ const en = {
   label: 'Loading',
 }
 
-const fr: typeof en = {
-  label: 'Chargement',
-}
-
-const vi: typeof en = {
-  label: 'Đang tải',
-}
-
-/** The spinner's interface text: English, French and Vietnamese, picked from the nearest `lang`. */
-export const spinnerMessages = defineMessages('spinner', en, { fr, vi })
+/** The spinner's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const spinnerMessages = defineMessages('spinner', en)

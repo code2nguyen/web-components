@@ -4,13 +4,5 @@ const en = {
   close: 'Close',
 }
 
-const fr: typeof en = {
-  close: 'Fermer',
-}
-
-const vi: typeof en = {
-  close: 'Đóng',
-}
-
-/** The sheet's interface text: English, French and Vietnamese, picked from the nearest `lang`. */
-export const sheetMessages = defineMessages('sheet', en, { fr, vi })
+/** The sheet's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const sheetMessages = defineMessages('sheet', en)

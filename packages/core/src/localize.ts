@@ -9,6 +9,25 @@ export type Messages = { [key: string]: string | ((...args: never[]) => string) 
 /** The arguments a message takes: none for a string, the function's own for a function. */
 export type MessageArgs<V> = V extends (...args: infer A) => string ? A : []
 
+/**
+ * A translated message, in a form JSON can hold:
+ * - a string, where `{0}`, `{1}`… stand for the message's arguments: `"{0} sur {1} terminées"`;
+ * - an object picked by the first argument: for a number its plural category in the language (`zero`, `one`, `two`,
+ *   `few`, `many`, `other`) or the exact number (`"0"`), for a string that key; `other` when nothing matches.
+ *   `{ "one": "{0} urgente", "other": "{0} urgentes" }`, `{ "work": "Travail", "other": "{0}" }`;
+ * - or, from script, a function of the arguments, as the English messages are.
+ */
+export type TranslatedMessage = string | { readonly [choice: string]: string } | ((...args: never[]) => string)
+
+/** A component's messages in one language: any of them, each falling back to English when missing. */
+export type TranslatedMessages<M extends Messages = Messages> = { readonly [K in keyof M]?: TranslatedMessage }
+
+/**
+ * Translations for many components at once, by language then component: what `addTranslations` takes, and what a
+ * JSON file can hold. `{ "fr": { "todo-list": { "addTask": "Ajouter" }, "modal": { "close": "Fermer" } } }`
+ */
+export type Translations = { readonly [locale: string]: { readonly [component: string]: TranslatedMessages } }
+
 /** A component's messages in every language it ships, registered under the component's name. */
 export interface MessageCatalog<M extends Messages> {
   readonly name: string
@@ -16,21 +35,26 @@ export interface MessageCatalog<M extends Messages> {
 }
 
 /** The languages each catalog has, by catalog name then lowercase BCP 47 tag; English is the catalog's own `en`. */
-const translations = new Map<string, Map<string, Partial<Messages>>>()
+const translations = new Map<string, Map<string, TranslatedMessages>>()
 const catalogs = new Map<string, MessageCatalog<Messages>>()
 
 /**
- * Registers a component's messages: the English ones, which every other language falls back to message by message,
- * and the translations it ships (`{ fr, vi }`). Type each translation as `typeof en` so a missing message fails the
- * build. Defining a name twice (two copies of a package) keeps the first.
+ * Registers a component's messages in English, which every other language falls back to message by message. A
+ * component ships English only: the app adds its languages with `addTranslations` or `addMessages`. (`shipped` is for
+ * the few components that carried languages before, the planners; translations added later still win over them.)
+ * Defining a name twice (two copies of a package) keeps the first.
  */
 export function defineMessages<M extends Messages>(name: string, en: M, shipped: Record<string, M> = {}): MessageCatalog<M> {
   const existing = catalogs.get(name)
   if (existing) return existing as unknown as MessageCatalog<M>
   const catalog: MessageCatalog<M> = { name, en }
   catalogs.set(name, catalog as unknown as MessageCatalog<Messages>)
-  const byLocale = new Map<string, Partial<Messages>>()
-  for (const [locale, messages] of Object.entries(shipped)) byLocale.set(locale.toLowerCase(), messages)
+  // Translations added before the component loaded (an app registering its languages first) keep winning.
+  const byLocale = translations.get(name) ?? new Map<string, TranslatedMessages>()
+  for (const [locale, messages] of Object.entries(shipped)) {
+    const key = locale.toLowerCase()
+    byLocale.set(key, { ...messages, ...byLocale.get(key) })
+  }
   translations.set(name, byLocale)
   return catalog
 }
@@ -40,18 +64,46 @@ export function defineMessages<M extends Messages>(name: string, en: M, shipped:
  * does not ship, or the wording of an app. Only the messages given change; the others keep the shipped text, then the
  * English. Components showing that catalog redraw.
  */
-export function addMessages<M extends Messages>(catalog: MessageCatalog<M> | string, locale: string, messages: Partial<M>): void {
+export function addMessages<M extends Messages>(catalog: MessageCatalog<M> | string, locale: string, messages: TranslatedMessages<M>): void {
   const name = typeof catalog === 'string' ? catalog : catalog.name
+  store(name, locale, messages)
+  for (const controller of controllers) {
+    if (controller.catalogName === name) controller.refresh(true)
+  }
+}
+
+/**
+ * Adds the app's languages for any number of components at once, by language then component name (the tag without
+ * `c2-`), as a JSON file can hold them: `addTranslations({ fr: { 'todo-list': { addTask: 'Ajouter' } } })`. A
+ * component shows the language of its nearest `lang`, message by message, and English for any message not given.
+ * Calling it again adds to, or overrides, what was given before. Components already on the page redraw.
+ */
+export function addTranslations(languages: Translations): void {
+  const names = new Set<string>()
+  for (const [locale, components] of Object.entries(languages)) {
+    for (const [name, messages] of Object.entries(components)) {
+      store(name, locale, messages)
+      names.add(name)
+    }
+  }
+  for (const controller of controllers) {
+    if (names.has(controller.catalogName)) controller.refresh(true)
+  }
+}
+
+function store(name: string, locale: string, messages: TranslatedMessages): void {
   let byLocale = translations.get(name)
   if (!byLocale) {
     byLocale = new Map()
     translations.set(name, byLocale)
   }
   const key = locale.toLowerCase()
-  byLocale.set(key, { ...byLocale.get(key), ...(messages as Partial<Messages>) })
-  for (const controller of controllers) {
-    if (controller.catalogName === name) controller.refresh(true)
-  }
+  byLocale.set(key, { ...byLocale.get(key), ...messages })
+}
+
+/** A component's English messages, by its name or catalog: what there is to translate, for the docs and translators. */
+export function englishMessages(catalog: MessageCatalog<Messages> | string): Messages | undefined {
+  return typeof catalog === 'string' ? catalogs.get(catalog)?.en : catalog.en
 }
 
 /** The languages a component's text is shipped in, besides English, plus any added with `addMessages`. */
@@ -73,8 +125,42 @@ export function formatMessage<M extends Messages, K extends keyof M & string>(
   const byLocale = translations.get(catalog.name)
   const tag = locale.toLowerCase()
   const language = tag.split('-')[0]
-  const message = (byLocale?.get(tag)?.[key] ?? byLocale?.get(language)?.[key] ?? catalog.en[key]) as M[K]
-  return typeof message === 'function' ? (message as (...values: unknown[]) => string)(...args) : (message as string)
+  const translated = byLocale?.get(tag)?.[key] ?? byLocale?.get(language)?.[key]
+  const message = translated ?? catalog.en[key]
+  return render(message as TranslatedMessage, locale, args as unknown[])
+}
+
+const pluralRules = new Map<string, Intl.PluralRules>()
+
+/** A message as text: a function called, a choice picked by the first argument, `{n}` filled in. */
+function render(message: TranslatedMessage, locale: string, args: unknown[]): string {
+  if (typeof message === 'function') return (message as (...values: unknown[]) => string)(...args)
+  let text: string | undefined
+  if (typeof message === 'string') {
+    text = message
+  } else {
+    const [first] = args
+    let choice: string | undefined
+    if (typeof first === 'number') {
+      choice = message[String(first)]
+      if (choice === undefined) {
+        let rules = pluralRules.get(locale)
+        if (!rules) {
+          try {
+            rules = new Intl.PluralRules(locale)
+          } catch {
+            rules = new Intl.PluralRules('en')
+          }
+          pluralRules.set(locale, rules)
+        }
+        choice = message[rules.select(first)]
+      }
+    } else if (first !== undefined) {
+      choice = message[String(first)]
+    }
+    text = choice ?? message.other ?? ''
+  }
+  return text.replace(/\{(\d+)\}/g, (whole, index: string) => (Number(index) < args.length ? String(args[Number(index)]) : whole))
 }
 
 /**
@@ -115,11 +201,13 @@ export class LocaleController implements ReactiveController {
   locale = 'en'
   readonly catalogName: string = ''
 
-  constructor(
-    protected readonly host: ReactiveControllerHost & Element,
-    /** The component's own locale setting, which wins over `lang` when it is set. */
-    private readonly explicit: () => string | null | undefined = () => undefined,
-  ) {
+  protected readonly host: ReactiveControllerHost & Element
+  /** The component's own locale setting, which wins over `lang` when it is set. */
+  private readonly explicit: () => string | null | undefined
+
+  constructor(host: ReactiveControllerHost & Element, explicit: () => string | null | undefined = () => undefined) {
+    this.host = host
+    this.explicit = explicit
     host.addController(this)
   }
 
@@ -155,12 +243,11 @@ export class LocaleController implements ReactiveController {
 export class LocalizeController<M extends Messages> extends LocaleController {
   override readonly catalogName: string
 
-  constructor(
-    host: ReactiveControllerHost & Element,
-    private readonly catalog: MessageCatalog<M>,
-    explicit?: () => string | null | undefined,
-  ) {
+  private readonly catalog: MessageCatalog<M>
+
+  constructor(host: ReactiveControllerHost & Element, catalog: MessageCatalog<M>, explicit?: () => string | null | undefined) {
     super(host, explicit)
+    this.catalog = catalog
     this.catalogName = catalog.name
   }
 
