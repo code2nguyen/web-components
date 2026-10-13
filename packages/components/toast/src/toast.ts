@@ -98,7 +98,7 @@ export class Toast extends LitElement {
    * button, for a short action such as Undo that belongs with the message.
    */
   @property({ attribute: 'action-placement', reflect: true }) actionPlacement: 'below' | 'end' = 'below'
-  /** Accessible name of the dismiss button. Defaults to "Dismiss notification" in the nearest `lang` (English, French, Vietnamese). */
+  /** Accessible name of the dismiss button. Defaults to "Dismiss notification" in the nearest `lang` (English, or a language the app adds). */
   @property({ attribute: 'close-label' }) closeLabel = ''
   /** Set by a region to prevent duplicate announcements. */
   @property({ type: Boolean }) managed = false
@@ -197,7 +197,7 @@ export class ToastRegion extends LitElement {
   @property({ reflect: true }) position: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' = 'bottom-right'
   /** Maximum visible notifications; the rest wait without running their timers. */
   @property({ type: Number, attribute: 'max-visible' }) maxVisible = 3
-  /** Accessible region name. Defaults to "Notifications" in the nearest `lang` (English, French, Vietnamese). */
+  /** Accessible region name. Defaults to "Notifications" in the nearest `lang` (English, or a language the app adds). */
   @property() label = ''
   /** Inline layout for embedded notification stacks. */
   @property({ type: Boolean, reflect: true }) inline = false

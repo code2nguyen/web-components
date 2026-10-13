@@ -89,7 +89,7 @@ export class Switch extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
-  /** The built-in validation message in the nearest `lang` (English, French, Vietnamese). */
+  /** The built-in validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, switchMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false

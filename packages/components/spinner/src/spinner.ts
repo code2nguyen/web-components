@@ -43,7 +43,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 export class Spinner extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** The default name in the nearest `lang` (English, French, Vietnamese). */
+  /** The default name in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, spinnerMessages)
 
   /** Progress between `0` and `max`. Leave unset for an indeterminate spinner. */
@@ -52,7 +52,7 @@ export class Spinner extends LitElement {
   /** Value that fills the whole ring. */
   @property({ type: Number }) max = 100
 
-  /** Accessible name when nothing is slotted. Defaults to "Loading" in the nearest `lang` (English, French, Vietnamese). */
+  /** Accessible name when nothing is slotted. Defaults to "Loading" in the nearest `lang` (English, or a language the app adds). */
   @property() label = ''
 
   private readonly slotPresence = new SlotPresenceController(this, [''])

@@ -135,7 +135,7 @@ export class TextField extends LitElement {
   static override styles: CSSResult | CSSResult[] = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
-  /** The clear button's label in the nearest `lang` (English, French, Vietnamese). */
+  /** The clear button's label in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, textFieldMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false

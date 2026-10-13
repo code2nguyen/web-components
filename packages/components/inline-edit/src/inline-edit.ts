@@ -123,7 +123,7 @@ export class InlineEdit extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
-  /** The display's name, the save and cancel buttons' labels and the validation message in the nearest `lang` (English, French, Vietnamese). */
+  /** The display's name, the save and cancel buttons' labels and the validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, inlineEditMessages)
 
   // Data

@@ -129,7 +129,7 @@ export class Select extends LitElement {
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
   private readonly internals = this.attachInternals()
-  /** The built-in validation message in the nearest `lang` (English, French, Vietnamese). */
+  /** The built-in validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, selectMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false

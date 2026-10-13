@@ -159,7 +159,7 @@ export class Carousel extends LitElement {
   /** Milliseconds each slide stays on show while `autoplay` rotates. */
   @property({ type: Number }) interval = 5000
 
-  /** The built-in labels in the nearest `lang` (English, French, Vietnamese); a label set below wins. */
+  /** The built-in labels in the nearest `lang` (English, or a language the app adds); a label set below wins. */
   private readonly msg = new LocalizeController(this, carouselMessages)
 
   /** Accessible name of the carousel region. Defaults to "Carousel" in the nearest `lang`. */

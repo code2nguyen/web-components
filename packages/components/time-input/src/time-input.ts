@@ -148,7 +148,7 @@ export class TimeInput extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
-  /** The picker's labels in the nearest `lang` (English, French, Vietnamese), and that language for `Intl`; a `lang` change redraws. */
+  /** The picker's labels in the nearest `lang` (English, or a language the app adds), and that language for `Intl`; a `lang` change redraws. */
   private readonly msg = new LocalizeController(this, timeInputMessages)
   private customValidityMessage = ''
   private defaultValue = ''

@@ -48,7 +48,7 @@ import styles from './masonry-item.scss?inline'
 export class MasonryItem extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** The edit controls' labels and instructions in the nearest `lang` (English, French, Vietnamese). */
+  /** The edit controls' labels and instructions in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, masonryMessages)
 
   /** Stable identity used for editing and application snapshots. */

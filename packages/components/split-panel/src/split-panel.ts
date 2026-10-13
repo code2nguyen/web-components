@@ -74,7 +74,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 export class SplitPanel extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** The divider's default name in the nearest `lang` (English, French, Vietnamese). */
+  /** The divider's default name in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, splitPanelMessages)
 
   @query('.container') private container!: HTMLElement
@@ -104,7 +104,7 @@ export class SplitPanel extends LitElement {
   /** Locks the divider: no dragging, no keyboard, not focusable. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
-  /** Accessible name of the divider. Defaults to "Resize panels" in the nearest `lang` (English, French, Vietnamese). */
+  /** Accessible name of the divider. Defaults to "Resize panels" in the nearest `lang` (English, or a language the app adds). */
   @property() label = ''
 
   private resizeObserver?: ResizeObserver

@@ -90,7 +90,7 @@ interface PointerSession {
 export class Masonry extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** The live-region announcements in the nearest `lang` (English, French, Vietnamese). */
+  /** The live-region announcements in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, masonryMessages)
 
   // Tiles pick their item by hand instead of writing `slot` on it: an attribute written on a child while the page

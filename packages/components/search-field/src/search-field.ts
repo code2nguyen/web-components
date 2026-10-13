@@ -136,7 +136,7 @@ export class SearchField extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
-  /** The built-in labels in the nearest `lang` (English, French, Vietnamese). */
+  /** The built-in labels in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, searchFieldMessages)
 
   /** The query. Setting the attribute after the user has typed no longer updates it, like a native input. */
@@ -175,7 +175,7 @@ export class SearchField extends LitElement {
   /** Most recent searches shown, and kept under `history-key`. */
   @property({ type: Number, attribute: 'recent-limit' }) recentLimit = 5
 
-  /** Heading of the recent-searches panel. Defaults to "Recent searches" in the nearest `lang` (English, French, Vietnamese). */
+  /** Heading of the recent-searches panel. Defaults to "Recent searches" in the nearest `lang` (English, or a language the app adds). */
   @property({ attribute: 'recent-label' }) recentLabel = ''
 
   @state() private focused = false

@@ -100,10 +100,10 @@ export interface Modal {
 export class Modal extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** Open state. Setting it shows or closes the dialog. */
-  /** The close button's label in the nearest `lang` (English, French, Vietnamese). */
+  /** The close button's label, in the nearest `lang`. */
   private readonly msg = new LocalizeController(this, modalMessages)
 
+  /** Open state. Setting it shows or closes the dialog. */
   @property({ type: Boolean, reflect: true }) open = false
 
   /** Accessible name when there is no `title` slot. */

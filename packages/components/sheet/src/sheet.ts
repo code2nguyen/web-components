@@ -103,7 +103,7 @@ export interface Sheet {
 export class Sheet extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** The close button's label in the nearest `lang` (English, French, Vietnamese). */
+  /** The close button's label in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, sheetMessages)
 
   /** Open state. Setting it shows or closes the sheet. */

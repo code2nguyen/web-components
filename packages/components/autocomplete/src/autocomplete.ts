@@ -148,7 +148,7 @@ export class Autocomplete extends LitElement {
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
   private readonly internals = this.attachInternals()
-  /** The built-in status text, labels and validation message in the nearest `lang` (English, French, Vietnamese). */
+  /** The built-in status text, labels and validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, autocompleteMessages)
   private readonly uid = ++autocompleteId
   private defaultValue = ''
