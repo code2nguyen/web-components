@@ -9,14 +9,26 @@ const host = (page: Page) => page.locator('c2-spreadsheet')
 const cell = (page: Page, ref: string) => page.locator(`c2-spreadsheet #cell-${ref}`)
 const grid = (page: Page) => page.locator('c2-spreadsheet [role="grid"]')
 
-/** Dispatches a clipboard event on the grid, as the browser does for Ctrl/⌘+C, X and V, and returns the copied text. */
+/**
+ * Dispatches a clipboard event on the grid, as the browser does for Ctrl/⌘+C, X and V, and returns the copied text.
+ *
+ * Engines build a synthetic event's `clipboardData` differently: Chromium and WebKit use the `clipboardData` passed in,
+ * while Firefox ignores it and creates its own, filled from its non-standard `dataType` and `data` init fields. Passing
+ * both and reading back through `event.clipboardData` works in all three.
+ */
 async function clipboardEvent(locator: Locator, type: 'copy' | 'cut' | 'paste', text = ''): Promise<string> {
   return locator.evaluate(
     (element, [eventType, pasted]) => {
       const data = new DataTransfer()
-      if (eventType === 'paste') data.setData('text/plain', pasted)
-      element.dispatchEvent(new ClipboardEvent(eventType, { clipboardData: data, bubbles: true, composed: true, cancelable: true }))
-      return data.getData('text/plain')
+      const init: ClipboardEventInit & { dataType?: string; data?: string } = { clipboardData: data, bubbles: true, composed: true, cancelable: true }
+      if (eventType === 'paste') {
+        data.setData('text/plain', pasted)
+        init.dataType = 'text/plain'
+        init.data = pasted
+      }
+      const event = new ClipboardEvent(eventType, init)
+      element.dispatchEvent(event)
+      return (event.clipboardData ?? data).getData('text/plain')
     },
     [type, text] as const,
   )
