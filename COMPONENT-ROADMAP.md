@@ -164,16 +164,16 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 ### G. Business apps
 
-| #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision |
-| --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Accept   |
-| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                             | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
-| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed |
-| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed |
-| 90  | `c2-order-book`       | Live bids and asks with depth bars and grouping                                                          | Binance, Coinbase Advanced                      | P2       | Proposed |
-| 91  | `c2-spreadsheet`      | Editable cell grid with formulas, fill handle and copy/paste ranges                                      | Airtable, Google Sheets                         | P3       | Proposed |
-| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                            | XMind, Miro mind map                            | P3       | Proposed |
-| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                   | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
+| #   | Component             | What it adds                                                                                             | Real-world model                                | Priority | Decision                                                                     |
+| --- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| 86  | `c2-filter-builder`   | Filter chips ("Status is Active"), an add-filter menu, AND/OR groups, saved views; pairs with `c2-table` | Polaris IndexFilters; Linear, Jira, Airtable    | P1       | Accept                                                                       |
+| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                             | Google Calendar, FullCalendar resource timeline | P2       | Proposed                                                                     |
+| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed                                                                     |
+| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed                                                                     |
+| 90  | `c2-order-book`       | Live bids and asks with depth bars and grouping                                                          | Binance, Coinbase Advanced                      | P2       | Proposed                                                                     |
+| 91  | `c2-spreadsheet`      | Editable cell grid with formulas, fill handle and copy/paste ranges                                      | Airtable, Google Sheets                         | P3       | Accept: [spec](specs/012-spreadsheet/spec.md), formula engine built in-house |
+| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                            | XMind, Miro mind map                            | P3       | Proposed                                                                     |
+| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                   | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed                                                                     |
 
 ### H. AI interfaces
 
