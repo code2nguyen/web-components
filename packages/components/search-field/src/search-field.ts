@@ -8,6 +8,8 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ariaKeyShortcuts, formatShortcut, isEditableTarget, registerShortcuts } from '@c2n/core/shortcut-helper.js'
 import '@c2n/overlay'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { searchFieldMessages } from './messages'
 import styles from './search-field.scss?inline'
 
 /** What started a `search` event. */
@@ -134,6 +136,8 @@ export class SearchField extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The built-in labels in the nearest `lang` (English, French, Vietnamese). */
+  private readonly msg = new LocalizeController(this, searchFieldMessages)
 
   /** The query. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
@@ -171,8 +175,8 @@ export class SearchField extends LitElement {
   /** Most recent searches shown, and kept under `history-key`. */
   @property({ type: Number, attribute: 'recent-limit' }) recentLimit = 5
 
-  /** Heading of the recent-searches panel. */
-  @property({ attribute: 'recent-label' }) recentLabel = 'Recent searches'
+  /** Heading of the recent-searches panel. Defaults to "Recent searches" in the nearest `lang` (English, French, Vietnamese). */
+  @property({ attribute: 'recent-label' }) recentLabel = ''
 
   @state() private focused = false
   @state() private dismissed = false
@@ -526,7 +530,7 @@ export class SearchField extends LitElement {
 
   private renderClearButton() {
     if (!this.value || this.effectiveDisabled) return nothing
-    return html`<button class="clear" type="button" aria-label="Clear search" tabindex="-1" @click=${this.handleClearClick}>
+    return html`<button class="clear" type="button" aria-label=${this.msg.t('clearSearch')} tabindex="-1" @click=${this.handleClearClick}>
       <slot name="clear-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -554,8 +558,10 @@ export class SearchField extends LitElement {
         @keydown=${this.handlePanelKeydown}
       >
         <div class="panel-header">
-          <span id="recent-label">${this.recentLabel}</span>
-          <button class="panel-action" type="button" aria-label="Clear recent searches" @click=${this.handleClearRecentClick}>Clear</button>
+          <span id="recent-label">${this.recentLabel || this.msg.t('recent')}</span>
+          <button class="panel-action" type="button" aria-label=${this.msg.t('clearRecent')} @click=${this.handleClearRecentClick}>
+            ${this.msg.t('clear')}
+          </button>
         </div>
         <div id="recent-list" class="list" role="listbox" aria-labelledby="recent-label">
           ${matches.map(
@@ -587,7 +593,7 @@ export class SearchField extends LitElement {
   override render() {
     const hasRecent = this.recentMatches.length > 0 || !!this.historyKey || this.recent.length > 0
     const open = this.open
-    const name = this.ariaLabel || this.placeholder || 'Search'
+    const name = this.ariaLabel || this.placeholder || this.msg.t('search')
     const shortcuts = this.shortcut && !isServer ? [ariaKeyShortcuts(this.shortcutParts.composed), ...this.shortcutParts.bare].filter(Boolean).join(' ') : ''
     return html`<div class="field" @click=${this.handleFieldClick}>
         ${this.renderLeadingIcon()}

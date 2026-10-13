@@ -56,12 +56,15 @@ const setups: Record<string, Setup> = {
   untitled: { heading: '', attributes: 'customizable heading-editable', tasks: [] },
   'actions-start': { heading: 'This week', attributes: 'customizable', tasks: week },
   'actions-end': { heading: 'This week', attributes: 'customizable actions-placement="end"', tasks: week },
+  // Rendered inside `<div lang="fr">`, for the localization test.
+  lang: { heading: 'This week', attributes: 'customizable', tasks: week },
 }
 const setup = setups[scenario] ?? setups.default
 
-main.innerHTML = `<c2-todo-list id="subject" heading="${setup.heading}" ${setup.attributes}>${
+const listMarkup = `<c2-todo-list id="subject" heading="${setup.heading}" ${setup.attributes}>${
   scenario === 'empty' ? '<span slot="empty">Nothing planned yet.</span>' : ''
 }${scenario.startsWith('actions-') ? '<button slot="actions" id="extra" type="button">Share</button>' : ''}</c2-todo-list>`
+main.innerHTML = scenario === 'lang' ? `<div lang="fr">${listMarkup}</div>` : listMarkup
 
 const subject = document.querySelector<TodoList>('#subject')!
 subject.tasks = setup.tasks

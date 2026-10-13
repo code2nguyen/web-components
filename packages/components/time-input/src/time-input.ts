@@ -8,6 +8,8 @@ import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import type { Overlay } from '@c2n/overlay'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { timeInputMessages } from './messages'
 import styles from './time-input.scss?inline'
 
 import '@c2n/overlay'
@@ -146,6 +148,8 @@ export class TimeInput extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The picker's labels in the nearest `lang` (English, French, Vietnamese), and that language for `Intl`; a `lang` change redraws. */
+  private readonly msg = new LocalizeController(this, timeInputMessages)
   private customValidityMessage = ''
   private defaultValue = ''
   private defaultCaptured = false
@@ -299,7 +303,7 @@ export class TimeInput extends LitElement {
   }
   /** The nearest `lang`, which the native field's 12/24-hour display follows too. */
   private get locale() {
-    return this.closest('[lang]')?.getAttribute('lang') || undefined
+    return this.msg.locale
   }
   private get twelveHour() {
     return new Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions().hour12 === true
@@ -529,15 +533,15 @@ export class TimeInput extends LitElement {
           this.pickerOpen
             ? html`${this.renderReadout(current)}
                 <div class="columns">
-                  ${this.renderColumn('hour', 'Hours', current)}
+                  ${this.renderColumn('hour', this.msg.t('hours'), current)}
                   <span class="separator" aria-hidden="true">:</span>
-                  ${this.renderColumn('minute', 'Minutes', current)}
-                  ${this.showSeconds ? html`<span class="separator" aria-hidden="true">:</span>${this.renderColumn('second', 'Seconds', current)}` : nothing}
-                  ${this.twelveHour ? this.renderColumn('period', 'AM/PM', current) : nothing}
+                  ${this.renderColumn('minute', this.msg.t('minutes'), current)}
+                  ${this.showSeconds ? html`<span class="separator" aria-hidden="true">:</span>${this.renderColumn('second', this.msg.t('seconds'), current)}` : nothing}
+                  ${this.twelveHour ? this.renderColumn('period', this.msg.t('period'), current) : nothing}
                 </div>
                 <div class="actions">
-                  <button type="button" class="action" @click=${this.pickNow}>Now</button>
-                  <button type="button" class="action primary" @click=${this.hidePicker}>Done</button>
+                  <button type="button" class="action" @click=${this.pickNow}>${this.msg.t('now')}</button>
+                  <button type="button" class="action primary" @click=${this.hidePicker}>${this.msg.t('done')}</button>
                 </div>`
             : nothing
         }
@@ -607,7 +611,7 @@ export class TimeInput extends LitElement {
           class="clock-button"
           type="button"
           tabindex="-1"
-          aria-label="Open time picker"
+          aria-label=${this.msg.t('open')}
           aria-haspopup="dialog"
           aria-expanded=${this.pickerOpen ? 'true' : 'false'}
           popovertarget=${this.effectiveDisabled || this.readOnly ? nothing : 'picker'}

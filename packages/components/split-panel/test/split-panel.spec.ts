@@ -147,3 +147,14 @@ for (const state of ['default', 'vertical', 'disabled']) {
     expect(results.violations).toEqual([])
   })
 }
+
+test('the divider is named in the nearest lang and follows a lang change', async ({ page, scenario }) => {
+  await scenario()
+  const main = page.locator('main')
+  await main.evaluate((el) => el.setAttribute('lang', 'fr'))
+  await expect(page.getByRole('separator', { name: 'Redimensionner les panneaux', exact: true })).toBeVisible()
+  await main.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('separator', { name: 'Đổi kích thước bảng', exact: true })).toBeVisible()
+  await main.evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('separator', { name: 'Resize panels', exact: true })).toBeVisible()
+})

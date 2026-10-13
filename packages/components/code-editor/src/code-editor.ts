@@ -7,7 +7,9 @@ import { live } from 'lit/directives/live.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { createEditor, type EditorHandle, type LanguageLoader } from './engine.js'
+import { CODEMIRROR_PHRASES, codeEditorMessages } from './messages'
 import styles from './code-editor.scss?inline'
 
 export { BUILT_IN_LANGUAGES } from './engine.js'
@@ -124,6 +126,9 @@ export class CodeEditor extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, codeEditorMessages)
+  /** The language the editor's own text (name, CodeMirror's panels) was last set in. */
+  private editorLocale = ''
 
   /** The source code. Assigning it replaces the document without losing scroll position or undo history. */
   @property() value = ''
@@ -143,7 +148,7 @@ export class CodeEditor extends LitElement {
   /** Label above the editor, when the `label` slot is empty. */
   @property() label = ''
 
-  /** Accessible name when nothing visible labels the editor. */
+  /** Accessible name when nothing visible labels the editor. Without either, the editor is named "Code editor" in the page's language. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** Text shown while the document is empty. */
@@ -230,7 +235,12 @@ export class CodeEditor extends LitElement {
 
   /** What labels the editable element. CodeMirror's content node is the `textbox`, so the name has to land there. */
   private get accessibleName(): string {
-    return this.label || this.ariaLabel || 'Code editor'
+    return this.label || this.ariaLabel || this.msg.t('codeEditor')
+  }
+
+  /** CodeMirror's interface text in the editor's language, keyed by its English phrase. */
+  private phrases(): Record<string, string> {
+    return Object.fromEntries(CODEMIRROR_PHRASES.map((key) => [codeEditorMessages.en[key], this.msg.t(key)]))
   }
 
   override disconnectedCallback() {
@@ -281,6 +291,7 @@ export class CodeEditor extends LitElement {
     const options = this.editorOptions()
     const editor = await createEditor({
       ...options,
+      phrases: this.phrases(),
       parent: this.surface,
       root: this.renderRoot as ShadowRoot,
       onInput: (value) => this.handleEditorInput(value),
@@ -314,6 +325,7 @@ export class CodeEditor extends LitElement {
       tabSize: this.tabSize,
       placeholder: this.placeholder,
       label: this.accessibleName,
+      locale: this.msg.locale,
     }
   }
 
@@ -328,6 +340,8 @@ export class CodeEditor extends LitElement {
     if (now.tabSize !== mounted.tabSize) editor.setTabSize(now.tabSize)
     if (now.placeholder !== mounted.placeholder) editor.setPlaceholder(now.placeholder)
     if (now.label !== mounted.label) editor.setLabel(now.label)
+    if (now.locale !== mounted.locale) editor.setPhrases(this.phrases())
+    this.editorLocale = now.locale
   }
 
   protected override updated(changed: PropertyValues) {
@@ -341,12 +355,18 @@ export class CodeEditor extends LitElement {
       if (changed.has('autocomplete')) editor.setAutocomplete(this.autocomplete)
       if (changed.has('tabSize')) editor.setTabSize(this.tabSize)
       if (changed.has('placeholder')) editor.setPlaceholder(this.placeholder)
-      if (changed.has('label') || changed.has('ariaLabel')) editor.setLabel(this.accessibleName)
+      // The language changed: the default name and CodeMirror's panels follow it without a remount.
+      const relocalized = this.msg.locale !== this.editorLocale
+      if (relocalized) {
+        this.editorLocale = this.msg.locale
+        editor.setPhrases(this.phrases())
+      }
+      if (changed.has('label') || changed.has('ariaLabel') || relocalized) editor.setLabel(this.accessibleName)
     }
     this.internals.setFormValue(this.value, this.value)
     const missing = this.required && !this.value
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? 'Please enter some code.' : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     this.internals.setValidity(flags, message, this.surface)
   }
 

@@ -137,3 +137,12 @@ test('a bare host stays without a class attribute through every state', async ({
   await props(host, { error: true, readOnly: true, disabled: true })
   await expect(host).not.toHaveAttribute('class')
 })
+
+test('the clear button is named in the nearest lang and follows a lang change', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-text-field aria-label="Recherche" value="requête" clearable></c2-text-field></div>')
+  await expect(page.getByRole('button', { name: 'Effacer', exact: true })).toBeAttached()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('button', { name: 'Xóa', exact: true })).toBeAttached()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('button', { name: 'Clear', exact: true })).toBeAttached()
+})

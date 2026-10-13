@@ -6,6 +6,8 @@ import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { inlineEditMessages } from './messages'
 import styles from './inline-edit.scss?inline'
 
 /** How the read view enters edit mode: a single click, a double click, or only through {@link InlineEdit.edit}. */
@@ -121,6 +123,8 @@ export class InlineEdit extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The display's name, the save and cancel buttons' labels and the validation message in the nearest `lang` (English, French, Vietnamese). */
+  private readonly msg = new LocalizeController(this, inlineEditMessages)
 
   // Data
 
@@ -551,7 +555,7 @@ export class InlineEdit extends LitElement {
     // A disabled control is left out of its form and barred from validation, whichever way it was disabled.
     this.internals.setFormValue(this.isDisabled ? null : this.value)
     if (!this.isDisabled && this.required && this.value.trim() === '') {
-      this.internals.setValidity({ valueMissing: true }, 'Please fill in this field.', this.display ?? undefined)
+      this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), this.display ?? undefined)
     } else {
       this.internals.setValidity({})
     }
@@ -613,7 +617,7 @@ export class InlineEdit extends LitElement {
       return html`<span
         class="display static"
         tabindex=${ifDefined(this.readOnly ? undefined : -1)}
-        aria-label=${ifDefined(this.label ? `${this.label}: ${text || this.placeholder}` : undefined)}
+        aria-label=${ifDefined(this.label ? this.msg.t('display', this.label, text || this.placeholder) : undefined)}
         >${content}</span
       >`
     }
@@ -621,7 +625,7 @@ export class InlineEdit extends LitElement {
       class="display"
       type="button"
       ?disabled=${this.isDisabled}
-      aria-label=${ifDefined(this.label ? `${this.label}: ${text || this.placeholder}` : undefined)}
+      aria-label=${ifDefined(this.label ? this.msg.t('display', this.label, text || this.placeholder) : undefined)}
       @click=${this.handleDisplayClick}
       @dblclick=${this.handleDisplayDblclick}
     >
@@ -670,14 +674,14 @@ export class InlineEdit extends LitElement {
   private renderControls() {
     if (!this.controls) return nothing
     return html`<span class="controls">
-      <button class="control save" type="button" aria-label="Save" @pointerdown=${this.keepFocus} @click=${this.handleSave}>
+      <button class="control save" type="button" aria-label=${this.msg.t('save')} @pointerdown=${this.keepFocus} @click=${this.handleSave}>
         <slot name="save-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
         </slot>
       </button>
-      <button class="control cancel" type="button" aria-label="Cancel" @pointerdown=${this.keepFocus} @click=${this.handleCancel}>
+      <button class="control cancel" type="button" aria-label=${this.msg.t('cancel')} @pointerdown=${this.keepFocus} @click=${this.handleCancel}>
         <slot name="cancel-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>

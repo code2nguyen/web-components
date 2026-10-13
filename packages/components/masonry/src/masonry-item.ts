@@ -1,6 +1,8 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { masonryMessages } from './messages'
 import styles from './masonry-item.scss?inline'
 
 /**
@@ -45,6 +47,9 @@ import styles from './masonry-item.scss?inline'
 @customElement('c2-masonry-item')
 export class MasonryItem extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  /** The edit controls' labels and instructions in the nearest `lang` (English, French, Vietnamese). */
+  private readonly msg = new LocalizeController(this, masonryMessages)
 
   /** Stable identity used for editing and application snapshots. */
   @property({ type: String, attribute: 'item-id', reflect: true }) itemId?: string
@@ -112,12 +117,18 @@ export class MasonryItem extends LitElement {
   @property({ attribute: false }) editing = false
 
   override render() {
-    const label = this.label || this.getAttribute('aria-label') || this.itemId || 'Tile'
+    const label = this.label || this.getAttribute('aria-label') || this.itemId || this.msg.t('tile')
     return html`
       <div part="actions" class="actions">
         ${
           this.editing && !this.moveHandle
-            ? html`<button type="button" part="move-handle" data-masonry-action="move" aria-label=${`Move ${label}`} aria-describedby="edit-instructions">
+            ? html`<button
+                type="button"
+                part="move-handle"
+                data-masonry-action="move"
+                aria-label=${this.msg.t('move', label)}
+                aria-describedby="edit-instructions"
+              >
                 <slot name="move-icon"
                   ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3h1M10 3h1M5 8h1M10 8h1M5 13h1M10 13h1" /></svg
                 ></slot>
@@ -136,15 +147,15 @@ export class MasonryItem extends LitElement {
                 class="resize-edge resize-edge--bottom"
                 data-masonry-action="resize"
                 data-masonry-edge="bottom"
-                aria-label=${`Resize ${label}`}
+                aria-label=${this.msg.t('resize', label)}
                 aria-describedby="edit-instructions"
               ></button>
               <div part="resize-corner" class="resize-edge resize-edge--corner" data-masonry-action="resize" data-masonry-edge="corner"></div>
-              <span id="edit-instructions" class="sr-only">Press Enter or Space, use arrow keys, then press Enter to save or Escape to cancel.</span>
+              <span id="edit-instructions" class="sr-only">${this.msg.t('instructions')}</span>
             </div>`
           : null
       }
-      <div part="content" class="content" tabindex="0" role="region" aria-label=${`${label} content`}><slot></slot></div>
+      <div part="content" class="content" tabindex="0" role="region" aria-label=${this.msg.t('content', label)}><slot></slot></div>
     `
   }
 }

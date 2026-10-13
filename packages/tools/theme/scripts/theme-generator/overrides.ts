@@ -758,6 +758,7 @@ export const overrides: Record<string, Override> = {
     value: '0 0 0 2px color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 25%, transparent)',
   },
   '--c2-page-editor__quote--border-left': { exclude: 'follows the text colour' },
+  '--c2-page-editor__link--color': { exclude: 'follows the text colour, underlined' },
   '--c2-page-editor__code--font-family': { exclude: 'monospace code face' },
   '--c2-page-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
   '--c2-page-editor__color-gray--color': { exclude: 'named hue, mixed with the text colour inside the component' },

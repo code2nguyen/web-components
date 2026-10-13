@@ -17,6 +17,9 @@
     </style>
     <script type="module">
       import '../src/modal.ts'
+      import { addMessages } from '@c2n/core/localize.js'
+      // For the localization scenario: an app adding its own wording.
+      window.addMessages = addMessages
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

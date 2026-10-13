@@ -28,7 +28,17 @@ if (localeWeek) {
 }
 if (scenario === 'french' || scenario === 'browser-locale') subject.removeAttribute('week-start')
 if (scenario === 'french' || scenario === 'browser-locale') subject.alternateWeeks = true
-if (scenario === 'browser-locale') subject.removeAttribute('locale')
+if (scenario === 'browser-locale') {
+  subject.removeAttribute('locale')
+  // The page's own `lang` would otherwise win over the browser's language.
+  document.documentElement.removeAttribute('lang')
+}
+// No `locale`: the planner follows the nearest `lang`, here French until a test changes it.
+if (scenario === 'lang') {
+  subject.removeAttribute('locale')
+  subject.removeAttribute('week-start')
+  main.setAttribute('lang', 'fr')
+}
 if (scenario === 'every-week') subject.events = subject.events.filter((event) => !event.weeks)
 // Container widths: 360px shows one day, 560px three.
 if (scenario === 'narrow') subject.style.width = '360px'

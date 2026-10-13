@@ -160,7 +160,7 @@ test('the slash menu filters as you type and inserts the chosen block', async ({
   await expect(host(page)).toHaveJSProperty('value', '```\nnpm test\n```')
 
   // Escape keeps what was typed.
-  await page.keyboard.press('Control+Enter')
+  await page.keyboard.press('ControlOrMeta+Enter')
   await page.keyboard.type('/zzzz')
   await expect(slashMenu(page)).toBeHidden()
   await page.keyboard.press('Enter')
@@ -372,4 +372,42 @@ test('code tokens take their colour from the --c2-page-editor__syntax-*--color v
   await expect(keyword).toHaveCSS('color', red)
   await host(page).evaluate((element) => element.style.setProperty('--c2-page-editor__syntax-keyword--color', 'rgb(0, 0, 255)'))
   await expect(keyword).not.toHaveCSS('color', red)
+})
+
+test('the interface follows the nearest lang, including placeholders and code blocks already drawn', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-page-editor label="Notes"></c2-page-editor></div>`)
+  const content = page$(page)
+  const lang = (value: string) => page.locator('div[lang]').evaluate((el, value) => el.setAttribute('lang', value), value)
+  await content.click()
+  await expect(content.locator('[data-placeholder]')).toHaveAttribute('data-placeholder', 'Tapez « / » pour les commandes')
+  await page.keyboard.type('/')
+  const frenchMenu = page.getByRole('listbox', { name: 'Insérer un bloc' })
+  await expect(frenchMenu.getByRole('option', { name: /Titre 1/ })).toBeVisible()
+  // The menu matches the names in the page's language, and still the English ones.
+  await page.keyboard.type('sépa')
+  await expect(frenchMenu.getByRole('option').first()).toHaveText(/Séparateur/)
+  await page.keyboard.press('Escape')
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Backspace')
+
+  // The placeholder already on screen follows a language switch.
+  await lang('vi')
+  await expect(content.locator('[data-placeholder]')).toHaveAttribute('data-placeholder', 'Gõ “/” để mở lệnh')
+  await page.keyboard.type('/tieu')
+  await expect(page.getByRole('listbox', { name: 'Chèn khối' }).getByRole('option').first()).toHaveText(/Tiêu đề 1/)
+  await page.keyboard.press('Escape')
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Backspace')
+  await page.keyboard.type('```js ')
+  await expect(content.locator('.code-copy')).toHaveAttribute('aria-label', 'Sao chép mã')
+  await expect(content.locator('.code-language')).toHaveAttribute('aria-label', 'Ngôn ngữ: JavaScript')
+  await page.keyboard.press('ControlOrMeta+Enter')
+  await page.keyboard.type('xin chao')
+  await selectBack(page, 4)
+  await expect(page.getByRole('toolbar', { name: 'Định dạng' }).getByRole('button', { name: 'Đậm' })).toBeVisible()
+
+  // A language the component does not ship falls back to English, in the code block drawn before the switch too.
+  await lang('de')
+  await expect(toolbar(page).getByRole('button', { name: 'Bold' })).toBeVisible()
+  await expect(content.locator('.code-copy')).toHaveAttribute('aria-label', 'Copy code')
+  await expect(content.locator('.code-language')).toHaveAttribute('aria-label', 'Language: JavaScript')
+  await expect(content.locator('.code-hint')).toContainText('leave the block')
 })

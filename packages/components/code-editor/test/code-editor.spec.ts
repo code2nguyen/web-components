@@ -197,3 +197,30 @@ test('a value, language and option set while the engine loads reach the editor',
   // Applying the late state is not user input.
   await expect(page.getByRole('status', { name: 'Events' })).toHaveText('0 0')
 })
+
+test('the default name, the validation message and CodeMirror panels follow the nearest lang', async ({ page, scenario }) => {
+  await scenario('lang')
+  const subject = page.locator('c2-code-editor')
+  const validation = () => subject.evaluate((el: HTMLElementTagNameMap['c2-code-editor']) => el.validationMessage)
+  await expect(content(page)).toHaveAttribute('aria-label', 'Éditeur de code')
+  expect(await validation()).toBe('Veuillez saisir du code.')
+  // CodeMirror's own text comes from the same catalog.
+  await content(page).click()
+  await page.keyboard.press('ControlOrMeta+f')
+  await expect(page.locator('.cm-search input[name="search"]')).toHaveAttribute('placeholder', 'Rechercher')
+  await page.keyboard.press('Escape')
+
+  // The language switched on a mounted editor: no remount, the name and the message follow.
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(content(page)).toHaveAttribute('aria-label', 'Trình soạn thảo mã')
+  expect(await validation()).toBe('Vui lòng nhập mã.')
+  await content(page).click()
+  await page.keyboard.press('ControlOrMeta+f')
+  await expect(page.locator('.cm-search input[name="search"]')).toHaveAttribute('placeholder', 'Tìm')
+  await page.keyboard.press('Escape')
+
+  // A language the component does not ship falls back to English.
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(content(page)).toHaveAttribute('aria-label', 'Code editor')
+  expect(await validation()).toBe('Please enter some code.')
+})

@@ -265,3 +265,17 @@ test('has no axe violations closed and open', async ({ page, renderScenario }) =
   await expect(page.getByRole('listbox')).toBeVisible()
   await accessible(page)
 })
+
+test('the built-in labels follow the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-search-field recent="label:bug;is:open"></c2-search-field></div>')
+  const input = page.getByRole('combobox', { name: 'Rechercher', exact: true })
+  await input.click()
+  await expect(page.getByRole('listbox', { name: 'Recherches récentes', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Effacer les recherches récentes', exact: true })).toHaveText('Effacer')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('listbox', { name: 'Tìm kiếm gần đây', exact: true })).toBeVisible()
+  await expect(page.getByRole('combobox', { name: 'Tìm kiếm', exact: true })).toBeAttached()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('listbox', { name: 'Recent searches', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Clear recent searches', exact: true })).toHaveText('Clear')
+})

@@ -54,3 +54,18 @@ test('an action placed at the end sits on the message line, before the dismiss b
   await page.getByRole('button', { name: 'Undo' }).click()
   await expect(region).not.toHaveAttribute('data-events', '[]')
 })
+
+test('the dismiss button and the region are named in the nearest lang and follow a lang change', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-toast-region inline animation-duration="0"></c2-toast-region></div>')
+  await page.locator('c2-toast-region').evaluate((el) => {
+    const target = el as HTMLElement & { show(options: { message: string; duration: number; dismissible: boolean }): string }
+    target.show({ message: 'Enregistré', duration: 0, dismissible: true })
+  })
+  await expect(page.getByRole('button', { name: 'Fermer la notification', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Notifications', exact: true })).toBeAttached()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('button', { name: 'Đóng thông báo', exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Thông báo', exact: true })).toBeAttached()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('button', { name: 'Dismiss notification', exact: true })).toBeVisible()
+})

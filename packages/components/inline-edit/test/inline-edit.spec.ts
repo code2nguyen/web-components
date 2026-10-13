@@ -433,3 +433,18 @@ test('without field-sizing, a multiline field regrows when its width shrinks whi
   await expect.poll(async () => (await textarea.boundingBox())!.height).toBeGreaterThan(before * 2)
   await expect.poll(fits).toBe(true)
 })
+
+test('the built-in labels and validation message follow the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-inline-edit label="Projet" value="Apollo" controls required></c2-inline-edit></div>')
+  const host = page.locator('c2-inline-edit')
+  await page.getByRole('button', { name: 'Projet : Apollo', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Enregistrer', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Annuler', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await host.evaluate((el) => ((el as HTMLElement & { value: string }).value = ''))
+  await expect(host).toHaveJSProperty('validationMessage', 'Veuillez renseigner ce champ.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Vui lòng điền vào trường này.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Please fill in this field.')
+})

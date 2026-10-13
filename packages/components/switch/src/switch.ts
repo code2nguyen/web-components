@@ -6,6 +6,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { switchMessages } from './messages'
 import styles from './switch.scss?inline'
 
 /** Events fired by {@link Switch}, keyed for `addEventListener`. */
@@ -87,6 +89,8 @@ export class Switch extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The built-in validation message in the nearest `lang` (English, French, Vietnamese). */
+  private readonly msg = new LocalizeController(this, switchMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false
   private defaultChecked = false
@@ -211,7 +215,7 @@ export class Switch extends LitElement {
     this.internals.setFormValue(this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked')
     const missing = this.required && !this.checked
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? 'Please turn on this switch.' : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     this.internals.setValidity(flags, message, this.formElement)
   }
 

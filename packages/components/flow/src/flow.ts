@@ -6,13 +6,15 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { ariaKeyShortcuts, isApplePlatform, matchesStroke, parseShortcut } from '@c2n/core/shortcut-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
 import { FLOW_SIDES, defaultSides, nearestSide, oppositeSide, routeBetween, sidePoint, type EdgeRoute } from './flow-geometry.js'
-import { MENU_ICONS, STATUS_ICONS, STATUS_LABELS } from './flow-icons.js'
+import { MENU_ICONS, STATUS_ICONS } from './flow-icons.js'
+import { flowMessages } from './messages.js'
 import type {
   FlowActionsPlacement,
   FlowContextMenuRenderer,
@@ -129,7 +131,18 @@ function detailRows(details: FlowNode['details']): [string, string][] {
   return Array.isArray(details) ? details : Object.entries(details)
 }
 
-const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in STATUS_LABELS ? node.status : 'pending')
+const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in STATUS_ICONS ? node.status : 'pending')
+
+/** The message a screen reader reads for each status, since the marker is a glyph. */
+const STATUS_MESSAGES = {
+  pending: 'statusPending',
+  current: 'statusCurrent',
+  running: 'statusRunning',
+  success: 'statusSuccess',
+  error: 'statusError',
+  warning: 'statusWarning',
+  skipped: 'statusSkipped',
+} as const satisfies Record<FlowStatus, string>
 
 const edgeKey = (source: string, target: string) => `${source}\u0000${target}`
 
@@ -450,6 +463,8 @@ export class Flow extends LitElement {
   @state() private selectedEdge: string | null = null
   @state() private connection: Connection | null = null
   @state() private announcement = ''
+
+  private readonly msg = new LocalizeController(this, flowMessages)
 
   @query('.stage') private stage?: HTMLElement
   @query('.card') private card?: HTMLElement
@@ -1278,7 +1293,7 @@ export class Flow extends LitElement {
   private startKeyboardConnection(source: string) {
     const targets = this.connectionTargets(source)
     if (!targets.length) {
-      this.announce(`${this.labelOf(source)} is already connected to every other node.`)
+      this.announce(this.msg.t('alreadyConnected', this.labelOf(source)))
       return
     }
     this.hideCard(true)
@@ -1287,7 +1302,7 @@ export class Flow extends LitElement {
     const target = targets.find((id) => this.positions.get(id)![main] > from) ?? targets[0]
     const sides = defaultSides(this.direction)
     this.connection = { source, sourceSide: sides.source, point: null, target, targetSide: sides.target, keyboard: true }
-    this.announce(`Connect ${this.labelOf(source)} to ${this.labelOf(target)}. Arrow keys or Tab choose another node, Enter connects, Escape cancels.`)
+    this.announce(this.msg.t('connectPrompt', this.labelOf(source), this.labelOf(target)))
   }
 
   private handleConnectionKey(event: KeyboardEvent, connection: Connection) {
@@ -1299,41 +1314,41 @@ export class Flow extends LitElement {
       const index = targets.indexOf(connection.target ?? '')
       const next = index < 0 ? 0 : (index + step + targets.length) % targets.length
       this.connection = { ...connection, target: targets[next] }
-      this.announce(`${this.labelOf(targets[next])}, ${next + 1} of ${targets.length}`)
+      this.announce(this.msg.t('connectTarget', this.labelOf(targets[next]), next + 1, targets.length))
     } else if (event.key === 'Enter') {
       event.preventDefault()
       this.connection = null
       if (this.canConnect(connection.source, connection.target)) {
         this.finishConnection({ ...connection, point: null })
-        this.announce(`Connected ${this.labelOf(connection.source)} to ${this.labelOf(connection.target)}.`)
+        this.announce(this.msg.t('connected', this.labelOf(connection.source), this.labelOf(connection.target)))
       }
     } else if (event.key === 'Escape') {
       event.preventDefault()
       event.stopPropagation()
       this.cancelConnection()
-      this.announce('Connection cancelled.')
+      this.announce(this.msg.t('connectionCancelled'))
     }
   }
 
-  private selectEdge(key: string, position = '') {
+  /** `position` of `total` when `E` steps through several edges of a node; `total` 0 otherwise. */
+  private selectEdge(key: string, position = 0, total = 0) {
     const edge = this.edgeByKey(key)
     if (!edge) return
     this.select(null)
     this.selectedEdge = key
     this.hideCard(true)
-    const label = edge.label?.trim() ? `, labelled ${edge.label.trim()}` : ''
-    this.announce(`Edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}${label}${position} selected. Delete removes it, F2 edits its label.`)
+    this.announce(this.msg.t('edgeSelected', this.labelOf(edge.source), this.labelOf(edge.target), edge.label?.trim() ?? '', position, total))
   }
 
   /** `E` on a node: selects its edges one after the other. */
   private stepEdges(id: string) {
     const keys = [...new Set(this.edges.filter((edge) => edge.source === id || edge.target === id).map((edge) => edgeKey(edge.source, edge.target)))]
     if (!keys.length) {
-      this.announce(`${this.labelOf(id)} has no edges.`)
+      this.announce(this.msg.t('noEdges', this.labelOf(id)))
       return
     }
     const index = (keys.indexOf(this.selectedEdge ?? '') + 1) % keys.length
-    this.selectEdge(keys[index], keys.length > 1 ? `, ${index + 1} of ${keys.length},` : '')
+    this.selectEdge(keys[index], index + 1, keys.length > 1 ? keys.length : 0)
   }
 
   private deleteNode(id: string, fromKeyboard = false) {
@@ -1692,7 +1707,7 @@ export class Flow extends LitElement {
       ${
         node
           ? html`<c2-menu-item value="flow:rename" aria-keyshortcuts="F2"
-              >${this.menuIcon(MENU_ICONS.rename)}Rename<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
+              >${this.menuIcon(MENU_ICONS.rename)}${this.msg.t('rename')}<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
             >`
           : nothing
       }
@@ -1700,10 +1715,12 @@ export class Flow extends LitElement {
         node
           ? nothing
           : html`<c2-menu-item value="flow:edit-label" aria-keyshortcuts="F2"
-              >${this.menuIcon(MENU_ICONS.rename)}Edit label<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
+              >${this.menuIcon(MENU_ICONS.rename)}${this.msg.t('editLabel')}<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
             >`
       }
-      <c2-menu-item value="flow:delete" aria-keyshortcuts="Delete">${this.menuIcon(MENU_ICONS.remove)}Delete<c2-kbd slot="shortcut">Del</c2-kbd></c2-menu-item>
+      <c2-menu-item value="flow:delete" aria-keyshortcuts="Delete"
+        >${this.menuIcon(MENU_ICONS.remove)}${this.msg.t('delete')}<c2-kbd slot="shortcut">Del</c2-kbd></c2-menu-item
+      >
     `
   }
 
@@ -1732,26 +1749,26 @@ export class Flow extends LitElement {
       ${
         this.editable
           ? html`<c2-menu-item value="flow:add-node" aria-keyshortcuts="N"
-                >${this.menuIcon(MENU_ICONS.add)}Add node<c2-kbd slot="shortcut">N</c2-kbd></c2-menu-item
+                >${this.menuIcon(MENU_ICONS.add)}${this.msg.t('addNode')}<c2-kbd slot="shortcut">N</c2-kbd></c2-menu-item
               >
               <hr />`
           : nothing
       }
       <c2-menu-item value="flow:zoom-in" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_IN_KEYS)}
-        >${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">${mod}+</c2-kbd></c2-menu-item
+        >${this.menuIcon(MENU_ICONS.zoomIn)}${this.msg.t('zoomIn')}<c2-kbd slot="shortcut">${mod}+</c2-kbd></c2-menu-item
       >
       <c2-menu-item value="flow:zoom-out" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_OUT_KEYS)}
-        >${this.menuIcon(MENU_ICONS.zoomOut)}Zoom out<c2-kbd slot="shortcut">${mod}−</c2-kbd></c2-menu-item
+        >${this.menuIcon(MENU_ICONS.zoomOut)}${this.msg.t('zoomOut')}<c2-kbd slot="shortcut">${mod}−</c2-kbd></c2-menu-item
       >
       <c2-menu-item value="flow:fit" aria-keyshortcuts=${ariaKeyShortcuts(FIT_KEYS)}
-        >${this.menuIcon(MENU_ICONS.fit)}Fit view<c2-kbd slot="shortcut">${mod}0</c2-kbd></c2-menu-item
+        >${this.menuIcon(MENU_ICONS.fit)}${this.msg.t('fitView')}<c2-kbd slot="shortcut">${mod}0</c2-kbd></c2-menu-item
       >
       <hr />
-      <h6>Layout</h6>
-      <c2-menu-item type="radio" name="flow-direction" value="flow:direction-lr" .checked=${lr}>Left to right</c2-menu-item>
-      <c2-menu-item type="radio" name="flow-direction" value="flow:direction-tb" .checked=${!lr}>Top to bottom</c2-menu-item>
-      <c2-menu-item value="flow:auto-layout" ?disabled=${!this.custom}>${this.menuIcon(MENU_ICONS.layout)}Auto layout</c2-menu-item>
-      <c2-menu-item type="checkbox" value="flow:lock" .checked=${this.locked}>Lock layout</c2-menu-item>
+      <h6>${this.msg.t('layout')}</h6>
+      <c2-menu-item type="radio" name="flow-direction" value="flow:direction-lr" .checked=${lr}>${this.msg.t('leftToRight')}</c2-menu-item>
+      <c2-menu-item type="radio" name="flow-direction" value="flow:direction-tb" .checked=${!lr}>${this.msg.t('topToBottom')}</c2-menu-item>
+      <c2-menu-item value="flow:auto-layout" ?disabled=${!this.custom}>${this.menuIcon(MENU_ICONS.layout)}${this.msg.t('autoLayout')}</c2-menu-item>
+      <c2-menu-item type="checkbox" value="flow:lock" .checked=${this.locked}>${this.msg.t('lockLayout')}</c2-menu-item>
     `
   }
 
@@ -1942,7 +1959,7 @@ export class Flow extends LitElement {
     return html`<input
       class=${overlay ? 'label-editor label-editor--overlay' : 'label-editor'}
       .value=${node.label}
-      aria-label=${`Rename ${node.label}`}
+      aria-label=${this.msg.t('renameNode', node.label)}
       autocomplete="off"
       enterkeyhint="done"
       @keydown=${this.handleEditorKeydown}
@@ -1964,7 +1981,7 @@ export class Flow extends LitElement {
 
   private defaultCard(node: FlowNode) {
     const status = statusOf(node)
-    const rows = [...(node.meta ? [['Duration', node.meta] as [string, string]] : []), ...detailRows(node.details)]
+    const rows = [...(node.meta ? [[this.msg.t('duration'), node.meta] as [string, string]] : []), ...detailRows(node.details)]
     return html`<div class="card-content status--${status}">
       <div class="card-head">
         ${this.icon(status)}
@@ -1973,7 +1990,7 @@ export class Flow extends LitElement {
           ${node.description ? html`<span class="description">${node.description}</span>` : nothing}
         </span>
       </div>
-      <div class="card-status">${STATUS_LABELS[status]}</div>
+      <div class="card-status">${this.msg.t(STATUS_MESSAGES[status])}</div>
       ${
         rows.length
           ? html`<dl class="card-details">
@@ -2053,7 +2070,7 @@ export class Flow extends LitElement {
       class="label-editor label-editor--edge"
       style=${`transform: translate(${mid.x}px, ${mid.y}px) translate(-50%, -50%)`}
       .value=${edge.label ?? ''}
-      aria-label=${`Label of the edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}`}
+      aria-label=${this.msg.t('edgeLabelField', this.labelOf(edge.source), this.labelOf(edge.target))}
       autocomplete="off"
       enterkeyhint="done"
       @keydown=${this.handleEditorKeydown}
@@ -2125,11 +2142,11 @@ export class Flow extends LitElement {
   }
 
   /** "After Idea." or, when an edge has a label, "Before Book the night bus, yes; Walk home, no." */
-  private relation(word: string, ids: string[], keyOf: (id: string) => string) {
+  private relation(word: 'after' | 'before', ids: string[], keyOf: (id: string) => string) {
     if (!ids.length) return ''
     const labels = ids.map((id) => this.edgeLabels.get(keyOf(id)))
     const parts = ids.map((id, i) => (labels[i] ? `${this.labelOf(id)}, ${labels[i]}` : this.labelOf(id)))
-    return `${word} ${parts.join(labels.some(Boolean) ? '; ' : ', ')}.`
+    return this.msg.t(word, parts, labels.some(Boolean))
   }
 
   private renderNodeElement(node: FlowNode, index: number, ends: Map<string, Map<FlowSide, { in: boolean; out: boolean }>>) {
@@ -2137,7 +2154,7 @@ export class Flow extends LitElement {
     const p = this.positions.get(node.id) ?? { x: 0, y: 0 }
     const before = this.graph.predecessors.get(node.id) ?? []
     const after = this.graph.successors.get(node.id) ?? []
-    const relations = [this.relation('After', before, (id) => edgeKey(id, node.id)), this.relation('Before', after, (id) => edgeKey(node.id, id))]
+    const relations = [this.relation('after', before, (id) => edgeKey(id, node.id)), this.relation('before', after, (id) => edgeKey(node.id, id))]
       .filter(Boolean)
       .join(' ')
     const context = this.context(node)
@@ -2169,7 +2186,7 @@ export class Flow extends LitElement {
       data-node-id=${node.id}
       role=${editing ? 'group' : 'button'}
       tabindex=${node.id === this.focusId ? 0 : -1}
-      aria-label=${`${node.label}, ${STATUS_LABELS[status].toLowerCase()}${node.meta ? `, ${node.meta}` : ''}`}
+      aria-label=${`${node.label}, ${this.msg.t(STATUS_MESSAGES[status]).toLowerCase()}${node.meta ? `, ${node.meta}` : ''}`}
       aria-describedby=${relations ? `relations-${index}` : nothing}
       style=${styleMap({
         transform: `translate(${p.x}px, ${p.y}px)`,
@@ -2190,7 +2207,7 @@ export class Flow extends LitElement {
                 html`<span
                   class=${`connector connector--${side}${side === connectSide ? ' is-connect-side' : ''}`}
                   data-side=${side}
-                  title="Drag to connect"
+                  title=${this.msg.t('dragToConnect')}
                 ></span>`,
             )
           : nothing
@@ -2213,7 +2230,7 @@ export class Flow extends LitElement {
       class=${`actions actions--${placement}`}
       part="actions"
       role="toolbar"
-      aria-label="Flow actions"
+      aria-label=${this.msg.t('flowActions')}
       aria-orientation=${vertical ? 'vertical' : 'horizontal'}
       ?hidden=${!this.slotPresence.has('actions')}
       @keydown=${this.handleActionsKeydown}
@@ -2274,7 +2291,7 @@ export class Flow extends LitElement {
     const ends = this.edgeEnds()
     return html`
       <c2-context-menu
-        menu-label="Flow"
+        menu-label=${this.msg.t('flowMenu')}
         ?disabled=${this.noContextMenu}
         .renderContextMenu=${this.buildMenu}
         @context-menu-select=${this.handleMenuSelect}
@@ -2285,7 +2302,7 @@ export class Flow extends LitElement {
           style=${`--_zoom: ${this.zoom}; background-position: ${this.tx}px ${this.ty}px`}
           tabindex=${emptyCanvas ? 0 : this.selectedEdge !== null ? -1 : nothing}
           role=${emptyCanvas ? 'group' : nothing}
-          aria-label=${emptyCanvas ? 'Empty flow' : nothing}
+          aria-label=${emptyCanvas ? this.msg.t('emptyFlow') : nothing}
           aria-describedby=${emptyCanvas ? 'empty-hint' : nothing}
           @pointerdown=${this.handlePointerDown}
           @pointermove=${this.handlePointerMove}
@@ -2306,7 +2323,7 @@ export class Flow extends LitElement {
             )}
             ${this.ghost ? this.renderGhost(this.ghost) : nothing}
           </div>
-          ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">Press N or Enter to add a node.</span>` : nothing}
+          ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">${this.msg.t('emptyHint')}</span>` : nothing}
         </div>
       </c2-context-menu>
       ${this.renderActions()} ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement}</div>` : nothing}

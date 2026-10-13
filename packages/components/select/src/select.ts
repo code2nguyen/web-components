@@ -2,6 +2,8 @@ import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValueMap } from
 import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { selectMessages } from './messages'
 import styles from './select.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
@@ -127,6 +129,8 @@ export class Select extends LitElement {
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
   private readonly internals = this.attachInternals()
+  /** The built-in validation message in the nearest `lang` (English, French, Vietnamese). */
+  private readonly msg = new LocalizeController(this, selectMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false
   private defaultValue: string[] = []
@@ -404,7 +408,7 @@ export class Select extends LitElement {
     }
     const missing = this.required && this.value.length === 0
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? 'Please select an option.' : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     this.internals.setValidity(flags, message, this.button)
   }
 

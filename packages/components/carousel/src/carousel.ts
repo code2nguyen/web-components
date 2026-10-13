@@ -3,6 +3,8 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { carouselMessages } from './messages'
 import styles from './carousel.scss?inline'
 
 export interface SlideChangeEventDetail {
@@ -157,23 +159,26 @@ export class Carousel extends LitElement {
   /** Milliseconds each slide stays on show while `autoplay` rotates. */
   @property({ type: Number }) interval = 5000
 
-  /** Accessible name of the carousel region. */
-  @property({ type: String }) label = 'Carousel'
+  /** The built-in labels in the nearest `lang` (English, French, Vietnamese); a label set below wins. */
+  private readonly msg = new LocalizeController(this, carouselMessages)
 
-  /** Accessible name of the previous-slide control. */
-  @property({ type: String, attribute: 'previous-label' }) previousLabel = 'Previous slide'
-  /** Accessible name of the next-slide control. */
-  @property({ type: String, attribute: 'next-label' }) nextLabel = 'Next slide'
-  /** Accessible name of the indicator group. */
-  @property({ type: String, attribute: 'indicators-label' }) indicatorsLabel = 'Choose slide'
-  /** Accessible name of an indicator. Placeholders: `{index}` (1-based), `{count}`. */
-  @property({ type: String, attribute: 'indicator-label-template' }) indicatorLabelTemplate = 'Go to slide {index}'
-  /** Accessible name given to a slide without its own `aria-label`. Placeholders: `{index}` (1-based), `{count}`. */
-  @property({ type: String, attribute: 'slide-label-template' }) slideLabelTemplate = '{index} of {count}'
-  /** Accessible name of the control that starts rotation. */
-  @property({ type: String, attribute: 'play-label' }) playLabel = 'Start slide rotation'
-  /** Accessible name of the control that stops rotation. */
-  @property({ type: String, attribute: 'pause-label' }) pauseLabel = 'Stop slide rotation'
+  /** Accessible name of the carousel region. Defaults to "Carousel" in the nearest `lang`. */
+  @property({ type: String }) label = ''
+
+  /** Accessible name of the previous-slide control. Defaults to "Previous slide" in the nearest `lang`. */
+  @property({ type: String, attribute: 'previous-label' }) previousLabel = ''
+  /** Accessible name of the next-slide control. Defaults to "Next slide" in the nearest `lang`. */
+  @property({ type: String, attribute: 'next-label' }) nextLabel = ''
+  /** Accessible name of the indicator group. Defaults to "Choose slide" in the nearest `lang`. */
+  @property({ type: String, attribute: 'indicators-label' }) indicatorsLabel = ''
+  /** Accessible name of an indicator. Placeholders: `{index}` (1-based), `{count}`. Defaults to "Go to slide {index}" in the nearest `lang`. */
+  @property({ type: String, attribute: 'indicator-label-template' }) indicatorLabelTemplate = ''
+  /** Accessible name given to a slide without its own `aria-label`. Placeholders: `{index}` (1-based), `{count}`. Defaults to "{index} of {count}" in the nearest `lang`. */
+  @property({ type: String, attribute: 'slide-label-template' }) slideLabelTemplate = ''
+  /** Accessible name of the control that starts rotation. Defaults to "Start slide rotation" in the nearest `lang`. */
+  @property({ type: String, attribute: 'play-label' }) playLabel = ''
+  /** Accessible name of the control that stops rotation. Defaults to "Stop slide rotation" in the nearest `lang`. */
+  @property({ type: String, attribute: 'pause-label' }) pauseLabel = ''
 
   @state() private slides: HTMLElement[] = []
 
@@ -211,6 +216,10 @@ export class Carousel extends LitElement {
   private focusControlAfterUpdate: 'previous' | 'next' | null = null
   /** Slides whose `aria-label` the carousel wrote, so it may rewrite it and never touches an author's. */
   private readonly labelledSlides = new WeakSet<Element>()
+  /** Slides whose `aria-roledescription` the carousel wrote, so it may translate it and never touches an author's. */
+  private readonly describedSlides = new WeakSet<Element>()
+  /** The language the slides were last labelled in. */
+  private labelledLocale = ''
   private readonly reducedMotion = !isServer && typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : undefined
 
   /** Number of positions the carousel can rest at; one per slide unless several slides fit in the viewport at once. */
@@ -285,7 +294,8 @@ export class Carousel extends LitElement {
   }
 
   protected override updated(changed: PropertyValues) {
-    if (changed.has('slides') || changed.has('positionCount') || changed.has('slideLabelTemplate')) this.labelSlides()
+    if (changed.has('slides') || changed.has('positionCount') || changed.has('slideLabelTemplate') || this.msg.locale !== this.labelledLocale)
+      this.labelSlides()
     if (this.scrolledIndex !== this.currentIndex) this.scrollToIndex(this.currentIndex, this.scrolledIndex !== -1)
     if (changed.has('index') || changed.has('autoplay') || changed.has('interval') || changed.has('rotating') || changed.has('held') || changed.has('slides')) {
       this.scheduleRotation()
@@ -305,11 +315,18 @@ export class Carousel extends LitElement {
 
   private labelSlides() {
     const count = this.slides.length
+    this.labelledLocale = this.msg.locale
     this.slides.forEach((slide, index) => {
       slide.setAttribute('role', slide.getAttribute('role') ?? 'group')
-      slide.setAttribute('aria-roledescription', slide.getAttribute('aria-roledescription') ?? 'slide')
+      if (!slide.hasAttribute('aria-roledescription') || this.describedSlides.has(slide)) {
+        slide.setAttribute('aria-roledescription', this.msg.t('slide'))
+        this.describedSlides.add(slide)
+      }
       if (slide.hasAttribute('aria-label') && !this.labelledSlides.has(slide)) return
-      slide.setAttribute('aria-label', format(this.slideLabelTemplate, { index: index + 1, count }))
+      slide.setAttribute(
+        'aria-label',
+        this.slideLabelTemplate ? format(this.slideLabelTemplate, { index: index + 1, count }) : this.msg.t('slideLabel', index + 1, count),
+      )
       this.labelledSlides.add(slide)
     })
   }
@@ -646,7 +663,7 @@ export class Carousel extends LitElement {
         part="indicator"
         type="button"
         tabindex=${current ? 0 : -1}
-        aria-label=${format(this.indicatorLabelTemplate, { index: position + 1, count })}
+        aria-label=${this.indicatorLabelTemplate ? format(this.indicatorLabelTemplate, { index: position + 1, count }) : this.msg.t('goTo', position + 1, count)}
         aria-current=${current ? 'true' : nothing}
         @click=${() => this.goTo(position)}
       ></button>`
@@ -658,7 +675,7 @@ export class Carousel extends LitElement {
     const index = this.currentIndex
     const atStart = !this.loop && index <= 0
     const atEnd = !this.loop && index >= count - 1
-    return html`<section class="c2-carousel" part="carousel" aria-roledescription="carousel" aria-label=${this.label}>
+    return html`<section class="c2-carousel" part="carousel" aria-roledescription=${this.msg.t('carousel')} aria-label=${this.label || this.msg.t('label')}>
       <div class="c2-carousel-viewport">
         <div class="c2-carousel-zone" aria-hidden="true"></div>
         <div
@@ -687,7 +704,7 @@ export class Carousel extends LitElement {
                   part="control previous"
                   type="button"
                   data-control="previous"
-                  aria-label=${this.previousLabel}
+                  aria-label=${this.previousLabel || this.msg.t('previous')}
                   ?disabled=${atStart}
                   @click=${(event: Event) => this.handleControl(event, 'previous')}
                 >
@@ -698,7 +715,7 @@ export class Carousel extends LitElement {
                   part="control next"
                   type="button"
                   data-control="next"
-                  aria-label=${this.nextLabel}
+                  aria-label=${this.nextLabel || this.msg.t('next')}
                   ?disabled=${atEnd}
                   @click=${(event: Event) => this.handleControl(event, 'next')}
                 >
@@ -716,7 +733,7 @@ export class Carousel extends LitElement {
                       class="c2-carousel-rotation"
                       part="rotation"
                       type="button"
-                      aria-label=${this.rotating ? this.pauseLabel : this.playLabel}
+                      aria-label=${this.rotating ? this.pauseLabel || this.msg.t('pause') : this.playLabel || this.msg.t('play')}
                       @click=${this.toggleRotation}
                     >
                       <span class="c2-carousel-icon">
@@ -725,7 +742,12 @@ export class Carousel extends LitElement {
                     </button>`
                   : nothing
               }
-              <div class="c2-carousel-indicator-group" role="group" aria-label=${this.indicatorsLabel} @keydown=${this.handleIndicatorKeydown}>
+              <div
+                class="c2-carousel-indicator-group"
+                role="group"
+                aria-label=${this.indicatorsLabel || this.msg.t('indicators')}
+                @keydown=${this.handleIndicatorKeydown}
+              >
                 ${this.renderIndicators(index, count)}
               </div>
             </div>`

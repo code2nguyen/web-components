@@ -6,6 +6,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { styleMap } from 'lit/directives/style-map.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { ToastController, type ToastOptions, type ToastDismissReason } from './toast-controller.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { toastMessages } from './messages.js'
 import styles from './toast.scss?inline'
 import regionStyles from './toast-region.scss?inline'
 
@@ -74,6 +76,7 @@ export interface Toast {
 @customElement('c2-toast')
 export class Toast extends LitElement {
   static override styles = unsafeCSS(styles)
+  private readonly msg = new LocalizeController(this, toastMessages)
   /** Plain-text message; the default slot can replace it. */
   @property() message = ''
   /** Optional title above the message. */
@@ -95,8 +98,8 @@ export class Toast extends LitElement {
    * button, for a short action such as Undo that belongs with the message.
    */
   @property({ attribute: 'action-placement', reflect: true }) actionPlacement: 'below' | 'end' = 'below'
-  /** Accessible name of the dismiss button. */
-  @property({ attribute: 'close-label' }) closeLabel = 'Dismiss notification'
+  /** Accessible name of the dismiss button. Defaults to "Dismiss notification" in the nearest `lang` (English, French, Vietnamese). */
+  @property({ attribute: 'close-label' }) closeLabel = ''
   /** Set by a region to prevent duplicate announcements. */
   @property({ type: Boolean }) managed = false
 
@@ -150,7 +153,7 @@ export class Toast extends LitElement {
       ${this.actionPlacement === 'end' ? html`<div class="action-end" part="action-end" ?hidden=${!this.actionLabel && !this.hasActionSlot}>${this.renderAction()}</div>` : nothing}
       ${
         this.dismissible
-          ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel} @click=${this.dismiss}>
+          ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel || this.msg.t('dismiss')} @click=${this.dismiss}>
               <slot name="close-icon"
                 ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"></path></svg
               ></slot>
@@ -189,12 +192,13 @@ export interface ToastRegion {
 @customElement('c2-toast-region')
 export class ToastRegion extends LitElement {
   static override styles = unsafeCSS(regionStyles)
+  private readonly msg = new LocalizeController(this, toastMessages)
   /** Viewport corner or center edge at which notifications appear. */
   @property({ reflect: true }) position: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' = 'bottom-right'
   /** Maximum visible notifications; the rest wait without running their timers. */
   @property({ type: Number, attribute: 'max-visible' }) maxVisible = 3
-  /** Accessible region name. */
-  @property() label = 'Notifications'
+  /** Accessible region name. Defaults to "Notifications" in the nearest `lang` (English, French, Vietnamese). */
+  @property() label = ''
   /** Inline layout for embedded notification stacks. */
   @property({ type: Boolean, reflect: true }) inline = false
 
@@ -380,7 +384,7 @@ export class ToastRegion extends LitElement {
 
   override render() {
     return html`<section
-      aria-label=${this.label}
+      aria-label=${this.label || this.msg.t('region')}
       @mouseenter=${() => this.controller.pause('hover')}
       @mouseleave=${() => this.controller.resume('hover')}
       @focusin=${() => this.controller.pause('focus')}

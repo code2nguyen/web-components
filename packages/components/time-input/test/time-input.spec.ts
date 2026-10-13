@@ -134,3 +134,21 @@ test('picker shows AM/PM on 12-hour locales and supports the keyboard', async ({
   await expect(hours).toHaveCount(0)
   await expect(host.locator('input')).toBeFocused()
 })
+
+test('the picker labels and the 12/24-hour columns follow a lang change', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-time-input value="21:00" aria-label="Réveil"></c2-time-input></div>')
+  await page.getByRole('button', { name: 'Ouvrir le sélecteur d’heure', exact: true }).click()
+  await expect(page.getByRole('listbox', { name: 'Heures', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Terminé', exact: true })).toBeVisible()
+  await expect(page.getByRole('listbox', { name: 'AM/PM', exact: true })).toHaveCount(0)
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('listbox', { name: 'Giờ', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Bây giờ', exact: true })).toBeVisible()
+  // A 12-hour locale adds the AM/PM column at once.
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'en-US'))
+  await expect(page.getByRole('listbox', { name: 'Hours', exact: true })).toBeVisible()
+  await expect(page.getByRole('listbox', { name: 'AM/PM', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('button', { name: 'Done', exact: true })).toBeVisible()
+  await expect(page.getByRole('listbox', { name: 'AM/PM', exact: true })).toHaveCount(0)
+})

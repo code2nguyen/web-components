@@ -80,3 +80,13 @@ for (const direction of ['ltr', 'rtl']) {
     await expect(page.locator('c2-switch')).toHaveAttribute('data-events', '[null]')
   })
 }
+
+test('the required message follows the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-switch required>Wi-Fi</c2-switch></div>')
+  const host = page.locator('c2-switch')
+  await expect(host).toHaveJSProperty('validationMessage', 'Veuillez activer cet interrupteur.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Vui lòng bật công tắc này.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Please turn on this switch.')
+})
