@@ -93,6 +93,7 @@ import skeleton from '@c2n/skeleton/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
 import splitPanel from '@c2n/split-panel/custom-elements.json'
+import spreadsheet from '@c2n/spreadsheet/custom-elements.json'
 import stat from '@c2n/stat/custom-elements.json'
 import stateTimeline from '@c2n/state-timeline/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
@@ -219,6 +220,7 @@ export const componentManifests = (function () {
     slider,
     spinner,
     splitPanel,
+    spreadsheet,
     stat,
     stateTimeline,
     statusPanel,

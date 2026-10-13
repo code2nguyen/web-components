@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-spreadsheet</title>
+    <script type="module" src="/src/spreadsheet.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 760px;
+        padding: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .dark {
+        --c2-spreadsheet--background-color: #18181b;
+        --c2-spreadsheet--color: #f4f4f5;
+        --c2-spreadsheet--border: 1px solid #3f3f46;
+        --c2-spreadsheet__cell--border-color: #27272a;
+        --c2-spreadsheet__header--background-color: #1f1f23;
+        --c2-spreadsheet__header--color: #a1a1aa;
+        --c2-spreadsheet__column-label--color: #f4f4f5;
+        --c2-spreadsheet__header__selected--background-color: #0f2d5c;
+        --c2-spreadsheet__header__selected--color: #5aa3ff;
+        --c2-spreadsheet__cell__active--outline: 2px solid #5aa3ff;
+        --c2-spreadsheet__editor--background-color: #18181b;
+        --c2-spreadsheet__summary--background-color: #1f1f23;
+        --c2-spreadsheet__summary-value--color: #f4f4f5;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Budget with formula bar and summary</h2>
+      <c2-spreadsheet
+        id="budget"
+        label="Team offsite budget"
+        rows="12"
+        formula-bar
+        summary
+        columns='[{"label":"Item","width":170},{"label":"Category","width":110},{"label":"Qty","width":72,"format":"number"},{"label":"Unit cost","width":110,"format":"currency"},{"label":"Total","width":130,"format":"currency"}]'
+        data='[["Flights","Travel",6,289,"=C1*D1"],["Hotel, 2 nights","Lodging",3,412,"=C2*D2"],["Team dinner","Food",1,640,"=C3*D3"],["Lunches","Food",12,18.5,"=C4*D4"],[],["Subtotal","","","","=SUM(E1:E4)"],["Contingency","","","10%","=E6*D7"],["Total","","","","=E6+E7"],["Budget","","","",5500],["Remaining","","","","=IF(E9-E8>=0, E9-E8, \"Over by \"&ROUND(E8-E9,0))"]]'
+      ></c2-spreadsheet>
+      <pre id="log"></pre>
+    </section>
+
+    <section>
+      <h2>Read-only</h2>
+      <c2-spreadsheet
+        label="Quiz scores"
+        rows="5"
+        readonly
+        summary
+        columns='[{"label":"Student"},{"label":"Quiz 1","format":"number"},{"label":"Quiz 2","format":"number"},{"label":"Average","format":"number"}]'
+        data='[["Linh",18,17,"=AVERAGE(B1:C1)"],["Mateo",14,19,"=AVERAGE(B2:C2)"],["Aiko",20,16,"=AVERAGE(B3:C3)"],["Noor",12,15,"=AVERAGE(B4:C4)"],["Class","=AVERAGE(B1:B4)","=AVERAGE(C1:C4)","=AVERAGE(D1:D4)"]]'
+      ></c2-spreadsheet>
+    </section>
+
+    <section>
+      <h2>Errors and a custom function</h2>
+      <c2-spreadsheet
+        id="errors"
+        label="Errors"
+        rows="6"
+        columns='[{"label":"Case","width":130},{"label":"Result"},{"label":"Formula","width":160}]'
+        data='[["Divide by zero","=10/0","&apos;=10/0"],["Unknown name","=TOTAL(B1)","&apos;=TOTAL(B1)"],["Text in maths","=\"ten\"*2","&apos;=\"ten\"*2"],["Circular","=B4+1","&apos;=B4+1"],["Custom TAX()","=TAX(100)","&apos;=TAX(100)"]]'
+      ></c2-spreadsheet>
+    </section>
+
+    <section>
+      <h2>Themed (dark)</h2>
+      <c2-spreadsheet class="dark" label="Scratch" rows="6" columns="5" formula-bar summary></c2-spreadsheet>
+    </section>
+
+    <script type="module">
+      const budget = document.getElementById('budget')
+      const log = document.getElementById('log')
+      budget.addEventListener('cell-change', (event) => (log.textContent = JSON.stringify(event.detail.changes)))
+      document.getElementById('errors').functions = { TAX: ([amount]) => (typeof amount === 'number' ? amount * 0.2 : 0) }
+    </script>
+  </body>
+</html>

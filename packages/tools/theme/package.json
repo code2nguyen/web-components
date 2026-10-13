@@ -146,6 +146,7 @@
         "../../components/slider:build",
         "../../components/spinner:build",
         "../../components/split-panel:build",
+        "../../components/spreadsheet:build",
         "../../components/stat:build",
         "../../components/state-timeline:build",
         "../../components/status-panel:build",

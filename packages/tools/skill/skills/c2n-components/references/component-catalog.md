@@ -73,6 +73,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
+- **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
 
 ## Feedback
 

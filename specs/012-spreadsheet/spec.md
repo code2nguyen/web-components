@@ -1,6 +1,6 @@
 # Feature: `c2-spreadsheet` — a small editable grid with basic formulas
 
-**Status**: Design (not started)
+**Status**: Implemented in `packages/components/spreadsheet` (v1 scope below).
 **Roadmap**: row 91 (section G), `c2-spreadsheet`, P3.
 **Related**: `c2-table` shows records with typed columns and stays read-only. `c2-spreadsheet` is a free-form grid where any cell can hold a value or a formula.
 
@@ -39,7 +39,7 @@ What the products agree on, and so what v1 copies:
 - Formulas: `+ - * / ^ &`, `= <> < > <= >=`, parentheses, unary minus, `%` suffix, `A1` references, `A1:B5` ranges, `$A$1` accepted (the `$` only matters for paste, below).
 - Functions: `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, `COUNTA`, `ROUND`, `ABS`, `IF`, `AND`, `OR`, `NOT`, `IFERROR`, `CONCAT`, `LEN`, `UPPER`, `LOWER`, `TRIM`, `TODAY`, `SUMIF`. Apps register more with `functions`.
 - Recalculation through a dependency graph: changing a cell recalculates only the cells that depend on it. A cycle gives `#CIRC!` in each cell of the cycle.
-- Column options: header label, width and a display `format` (`number`, `currency`, `percent`, `text`). The format changes the display only, never the stored value. A number typed as `10%` or `$12` keeps that look in its cell, whatever the column format.
+- Column options: header label, width and a display `format` (`general`, `number`, `currency`, `percent`, `text`). The format changes the display only, never the stored value. A number typed as `10%` or `$12` keeps that look in its cell, whatever the column format.
 - Optional formula bar, optional selection summary, `readonly`, undo and redo.
 - Paste of a formula shifts its relative references, so pasting `=B2*C2` one row down gives `=B3*C3`. `$` pins a row or column.
 
@@ -78,17 +78,18 @@ What the products agree on, and so what v1 copies:
 
 ## Public API
 
-| Property     | Attribute     | Type                                  | Default | Purpose                                                                                                                       |
-| ------------ | ------------- | ------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `data`       | `data`        | `CellInput[][]`                       | `[]`    | Raw inputs, row by row (`string \| number \| boolean \| null`; strings starting with `=` are formulas). JSON as an attribute. |
-| `rows`       | `rows`        | `number`                              | `20`    | Row count. Grows to fit `data`.                                                                                               |
-| `columns`    | —             | `number \| SpreadsheetColumn[]`       | `8`     | Column count, or one options object per column: `{ label?, width?, format?, align? }`. Labels default to A, B, C…             |
-| `formulaBar` | `formula-bar` | `boolean`                             | `false` | Shows the name box and formula bar above the grid.                                                                            |
-| `summary`    | `summary`     | `boolean`                             | `false` | Shows Sum, Average and Count of the selection below the grid.                                                                 |
-| `readonly`   | `readonly`    | `boolean`                             | `false` | Selection and copy work; editing, paste and delete do not.                                                                    |
-| `locale`     | `locale`      | `string`                              | page    | Number and currency formatting through `Intl.NumberFormat`. Formula syntax stays English (`,` separator).                     |
-| `currency`   | `currency`    | `string`                              | `'USD'` | Currency code for the `currency` format.                                                                                      |
-| `functions`  | —             | `Record<string, SpreadsheetFunction>` | —       | Extra functions, `(args: CellValue[]) => CellValue`. Names are upper-cased.                                                   |
+| Property     | Attribute     | Type                                  | Default | Purpose                                                                                                                                     |
+| ------------ | ------------- | ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`       | `data`        | `CellInput[][]`                       | `[]`    | Raw inputs, row by row (`string \| number \| boolean \| null`; strings starting with `=` are formulas). JSON as an attribute.               |
+| `rows`       | `rows`        | `number`                              | `20`    | Row count. Grows to fit `data`.                                                                                                             |
+| `columns`    | `columns`     | `number \| SpreadsheetColumn[]`       | `8`     | Column count, or one options object per column: `{ label?, width?, format?, align? }` (JSON in markup). The header always shows the letter. |
+| `label`      | `label`       | `string`                              | `''`    | Accessible name of the grid.                                                                                                                |
+| `formulaBar` | `formula-bar` | `boolean`                             | `false` | Shows the name box and formula bar above the grid.                                                                                          |
+| `summary`    | `summary`     | `boolean`                             | `false` | Shows Sum, Average and Count of the selection below the grid.                                                                               |
+| `readonly`   | `readonly`    | `boolean`                             | `false` | Selection and copy work; editing, paste and delete do not.                                                                                  |
+| `locale`     | `locale`      | `string`                              | page    | Number and currency formatting through `Intl.NumberFormat`. Formula syntax stays English (`,` separator).                                   |
+| `currency`   | `currency`    | `string`                              | `'USD'` | Currency code for the `currency` format.                                                                                                    |
+| `functions`  | —             | `Record<string, SpreadsheetFunction>` | —       | Extra functions, `(args: CellValue[]) => CellValue`. Names are upper-cased.                                                                 |
 
 Methods:
 
@@ -108,31 +109,32 @@ Events:
 
 ## Theming
 
-All presentation is CSS variables, defaults in the `$theme` map, chosen from literals the theme generator already maps:
+All presentation is CSS variables, defaults in the `$theme` map, chosen from literals the theme generator already maps. The full list, with defaults, is in the component's JSDoc and the docs API page. The groups:
 
-- `--c2-spreadsheet--border`, `--c2-spreadsheet--border-radius` (8px), `--c2-spreadsheet--font-size` (14px), `--c2-spreadsheet--max-height`.
-- `--c2-spreadsheet__cell--height` (32px), `--c2-spreadsheet__cell--padding`, `--c2-spreadsheet__cell--min-width` (96px), `--c2-spreadsheet__cell--border-color` (`#e4e4e7`).
-- `--c2-spreadsheet__header--background-color` (`#fafafa`), `--c2-spreadsheet__header--color` (`#71717a`), `--c2-spreadsheet__header__selected--background-color` (`#edf1fe`), `--c2-spreadsheet__header__selected--color` (`#0265dc`).
-- `--c2-spreadsheet__active--border-color` (`#0265dc`), `--c2-spreadsheet__range--background-color` (`rgba(2, 101, 220, 0.08)`).
-- `--c2-spreadsheet__error--color` (`#dc2626`), `--c2-spreadsheet__reference--color` (the colours that outline the cells a formula reads while it is edited).
-- `--c2-spreadsheet__formula-bar--background-color`, `--c2-spreadsheet__formula-bar--font-family` (monospace), `--c2-spreadsheet__summary--color`.
+- Frame: `--c2-spreadsheet--background-color`, `--color`, `--font-family`, `--font-size` (14px), `--border` (`1px solid #bcbcc6`), `--border-radius` (8px), `--max-height`, and `__grid__focus--outline` for the ring around the focused grid.
+- Cells: `__cell--width` (112px, for columns without their own `width`), `__cell--height` (32px), `__cell--padding`, `__cell--border-color` (`#e4e4e7`), `__cell__selected--background-color` (a wash of the accent), `__cell__active--outline` (`2px solid` accent), `__cell__error--color` (`#dc2626`).
+- Headers: `__header--background-color` (`#fafafa`), `__header--color`, `__header--font-size`, `__header--font-weight`, `__header__selected--background-color` (`#edf1fe`), `__header__selected--color`, `__column-label--color`, `__row-header--width` (44px).
+- Editor and formula bar: `__editor--background-color`, `__editor--font-family` (monospace), `__editor--box-shadow`, `__formula-bar--height`, `__formula-bar--background-color`, `__formula-bar--font-family`, `__name-box--width`, `__fx--color`.
+- Summary: `__summary--background-color`, `__summary--color`, `__summary--font-size`, `__summary-value--color`.
+- `__reference-1--color` to `__reference-4--color`: the outlines of the cells a formula reads while it is edited.
+
+Every colour variable maps to a `@c2n/theme` token, except references 2 to 4, which are fixed hues (excluded in `overrides.ts`).
 
 ## Accessibility
 
-- The grid is `role="grid"` inside the shadow root, with `aria-rowcount`, `aria-colcount`, `row` / `columnheader` / `rowheader` / `gridcell` roles and `aria-selected` on selected cells. These attributes live on shadow elements, so the no-host-attribute rule is kept.
-- One cell is focusable at a time (roving `tabindex`). `Tab` inside the grid moves between cells while editing and leaves the grid when not editing, so keyboard users are never trapped.
-- Each cell's accessible name is its address and value (`D3, 1,280.00`). A formula cell adds its formula as the description.
-- Editing uses a real `<input>` overlaid on the cell, labelled with the cell address.
-- Errors are announced through a polite live region (`D4: division by zero`).
+- The grid is a `role="grid"` element inside the shadow root, with `row`, `columnheader`, `rowheader` and `gridcell` roles and `aria-selected` on every selected cell. Nothing is written on the host.
+- The grid is one tab stop and points at the current cell with `aria-activedescendant`, which keeps one focus target while the selection moves. `Tab` outside an edit leaves the grid, so keyboard users are never trapped; while editing, `Tab` commits and moves right.
+- `label` names the grid. Editing uses a real `<input>` over the cell, labelled with the cell address, and the formula bar input is labelled with the current address.
+- An error value shows its reason in a tooltip, and the reason is announced through a polite status region (`A5: Division by zero`).
 
 ## Bundle
 
-No runtime dependencies besides Lit and `@c2n/core`. The formula engine (`src/formula/{tokenize,parse,evaluate,functions}.ts`) is internal, has no DOM, and is unit-tested with `node --test`. Budget: under 12 kB gzipped for the entry.
+No runtime dependencies besides Lit and `@c2n/core`. The formula engine (`src/formula.ts`) is internal, has no DOM, and is unit-tested in `test/formula.spec.ts`, which Playwright runs without a page. The umbrella entry is about 16 kB gzipped (unminified, which is how the umbrella measures), recorded in `size-budget.json`.
 
 ## Test plan
 
-- Engine: operator precedence, references and ranges, each function, errors (`#DIV/0!`, `#REF!`, `#NAME?`, `#VALUE!`), cycles, dependent-only recalculation, reference shift on paste.
-- Browser: typing, `Enter` / `Tab` / `Escape` / `F2`, arrow and `Shift`+arrow selection, `Delete`, undo and redo, TSV copy and paste (with the clipboard events, not the permission API), `readonly`, `cell-change` detail, non-bubbling `selection-change`.
+- Engine (`test/formula.spec.ts`): operator precedence, references and ranges, each function, errors (`#DIV/0!`, `#REF!`, `#NAME?`, `#VALUE!`), cycles, dependent-only recalculation, reference shift on paste.
+- Browser (`test/spreadsheet.spec.ts`): typing, `Enter` / `Tab` / `Escape` / `F2`, arrow and `Shift`+arrow selection, `Delete`, undo and redo, TSV copy and paste (with the clipboard events, not the permission API), `readonly`, `cell-change` detail, non-bubbling `selection-change`.
 - Accessibility: axe on the default and editing states, roles and `aria-selected` on a range.
 
 ## Open questions

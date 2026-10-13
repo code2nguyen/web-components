@@ -1,0 +1,368 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-spreadsheet,
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    font-family: null,
+    font-size: 14px,
+    border: 1px solid #bcbcc6,
+    border-radius: 8px,
+    max-height: null,
+    grid__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    cell--width: 112px,
+    cell--height: 32px,
+    cell--padding: 0 10px,
+    cell--border-color: #e4e4e7,
+    cell__selected--background-color: rgba(2, 101, 220, 0.08),
+    cell__active--outline: 2px solid rgb(2, 101, 220),
+    cell__error--color: #dc2626,
+
+    header--background-color: #fafafa,
+    header--color: #71717a,
+    header--font-size: 12px,
+    header--font-weight: 500,
+    header__selected--background-color: #edf1fe,
+    header__selected--color: rgb(2, 101, 220),
+    column-label--color: #18181b,
+    row-header--width: 44px,
+
+    editor--background-color: #ffffff,
+    editor--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    editor--box-shadow: 0 4px 14px rgba(24, 24, 27, 0.14),
+    formula-bar--height: 38px,
+    formula-bar--background-color: #ffffff,
+    formula-bar--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    name-box--width: 72px,
+    fx--color: #71717a,
+
+    summary--background-color: #fafafa,
+    summary--color: #71717a,
+    summary--font-size: 12px,
+    summary-value--color: #18181b,
+
+    reference-1--color: rgb(2, 101, 220),
+    reference-2--color: #c2410c,
+    reference-3--color: #7c3aed,
+    reference-4--color: #0f766e,
+  )
+);
+
+:host {
+  display: block;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.spreadsheet {
+  display: flex;
+  flex-direction: column;
+  max-height: css.cssVar(max-height);
+  overflow: hidden;
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+// --- Formula bar -------------------------------------------------------------------------------------------------
+
+.formula-bar {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  height: css.cssVar(formula-bar--height);
+  background-color: css.cssVar(formula-bar--background-color);
+  border-bottom: 1px solid css.cssVar(cell--border-color);
+}
+
+.name-box {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(name-box--width);
+  padding: 0 6px;
+  overflow: hidden;
+  border-right: 1px solid css.cssVar(cell--border-color);
+  font-family: css.cssVar(formula-bar--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fx {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid css.cssVar(cell--border-color);
+  color: css.cssVar(fx--color);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.formula-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family: css.cssVar(formula-bar--font-family);
+  font-size: 13px;
+
+  &:focus {
+    box-shadow: inset 0 -2px 0 css.cssVar(header__selected--color);
+  }
+
+  &[readonly] {
+    color: css.cssVar(header--color);
+  }
+}
+
+// --- Grid --------------------------------------------------------------------------------------------------------
+
+.scroller {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scroll-padding-top: calc(#{css.cssVar(cell--height)} + 2px);
+  scroll-padding-left: css.cssVar(row-header--width);
+}
+
+.grid {
+  --_cell-width: #{css.cssVar(cell--width)};
+  --_row-header-width: #{css.cssVar(row-header--width)};
+
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:focus-visible {
+    outline: css.cssVar(grid__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.row {
+  display: contents;
+}
+
+.cell,
+.header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: css.cssVar(cell--height);
+  border-right: 1px solid css.cssVar(cell--border-color);
+  border-bottom: 1px solid css.cssVar(cell--border-color);
+  white-space: nowrap;
+}
+
+.header {
+  position: sticky;
+  z-index: 1;
+  background-color: css.cssVar(header--background-color);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  cursor: default;
+
+  &.selected {
+    background-color: css.cssVar(header__selected--background-color);
+    color: css.cssVar(header__selected--color);
+
+    .column-label {
+      color: inherit;
+    }
+  }
+}
+
+.column-header {
+  top: 0;
+  gap: 8px;
+  padding: css.cssVar(cell--padding);
+  overflow: hidden;
+}
+
+.column-letter {
+  flex: none;
+  font-family: css.cssVar(formula-bar--font-family);
+  font-size: 11px;
+}
+
+.column-label {
+  overflow: hidden;
+  color: css.cssVar(column-label--color);
+  text-overflow: ellipsis;
+}
+
+.row-header {
+  left: 0;
+  justify-content: center;
+  font-family: css.cssVar(formula-bar--font-family);
+  font-size: 11px;
+}
+
+.corner {
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.cell {
+  position: relative;
+  padding: css.cssVar(cell--padding);
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  cursor: cell;
+
+  // `display: flex` ignores `text-overflow` on bare text, so the text sits in an anonymous block that can clip.
+  display: block;
+  line-height: calc(#{css.cssVar(cell--height)} - 1px);
+  text-overflow: ellipsis;
+}
+
+.kind-number {
+  text-align: end;
+}
+
+.kind-boolean,
+.kind-error {
+  text-align: center;
+}
+
+.kind-error {
+  color: css.cssVar(cell__error--color);
+  font-size: 0.93em;
+  font-weight: 500;
+}
+
+.align-start {
+  text-align: start;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-end {
+  text-align: end;
+}
+
+.cell.selected {
+  background-color: css.cssVar(cell__selected--background-color);
+}
+
+.cell.active {
+  outline: css.cssVar(cell__active--outline);
+  outline-offset: -2px;
+}
+
+.cell.reference {
+  outline: 2px dashed var(--_reference-color);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--_reference-color) 10%, transparent);
+}
+
+@for $i from 1 through 4 {
+  .reference-#{$i} {
+    --_reference-color: #{css.cssVar(reference-#{$i}--color)};
+  }
+}
+
+.cell.editing {
+  z-index: 3;
+  overflow: visible;
+  padding: 0;
+}
+
+.editor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: css.cssVar(cell--padding);
+  border: 0;
+  outline: css.cssVar(cell__active--outline);
+  outline-offset: -2px;
+  background-color: css.cssVar(editor--background-color);
+  box-shadow: css.cssVar(editor--box-shadow);
+  color: inherit;
+  font-family: css.cssVar(editor--font-family);
+  font-size: 0.93em;
+}
+
+.readonly .cell {
+  cursor: default;
+}
+
+// --- Summary -----------------------------------------------------------------------------------------------------
+
+.summary {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 18px;
+  min-height: 32px;
+  padding: 7px 14px;
+  background-color: css.cssVar(summary--background-color);
+  border-top: 1px solid css.cssVar(cell--border-color);
+  color: css.cssVar(summary--color);
+  font-size: css.cssVar(summary--font-size);
+  font-variant-numeric: tabular-nums;
+
+  b {
+    color: css.cssVar(summary-value--color);
+    font-weight: 600;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
