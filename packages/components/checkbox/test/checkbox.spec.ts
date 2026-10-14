@@ -185,3 +185,19 @@ test('a disabled fieldset disables the group options', async ({ page, renderScen
   await page.locator('fieldset').evaluate((element) => ((element as HTMLFieldSetElement).disabled = false))
   await expect(page.getByRole('checkbox', { name: 'Email' })).toBeEnabled()
 })
+
+test('the required messages follow the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<div lang="fr"><c2-checkbox id="terms" required>Terms</c2-checkbox><c2-checkbox-group required><c2-checkbox value="email">Email</c2-checkbox></c2-checkbox-group></div>',
+  )
+  const box = page.locator('#terms')
+  const group = page.locator('c2-checkbox-group')
+  await expect(box).toHaveJSProperty('validationMessage', 'Veuillez cocher cette case.')
+  await expect(group).toHaveJSProperty('validationMessage', 'Veuillez sélectionner au moins une option.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(box).toHaveJSProperty('validationMessage', 'Vui lòng đánh dấu vào ô này.')
+  await expect(group).toHaveJSProperty('validationMessage', 'Vui lòng chọn ít nhất một mục.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(box).toHaveJSProperty('validationMessage', 'Please check this box.')
+  await expect(group).toHaveJSProperty('validationMessage', 'Please select at least one option.')
+})

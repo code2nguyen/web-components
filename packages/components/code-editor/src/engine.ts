@@ -37,6 +37,8 @@ export interface EditorOptions {
   placeholder: string
   /** Accessible name put on the editable element itself, which is what carries `role=textbox`. */
   label: string
+  /** CodeMirror's interface text in the editor's language, by English phrase (`{ Find: 'Rechercher' }`). */
+  phrases: Record<string, string>
   onInput: (value: string) => void
   onBlur: () => void
   onFocus: () => void
@@ -55,6 +57,7 @@ export interface EditorHandle {
   setTabSize(size: number): void
   setPlaceholder(text: string): void
   setLabel(label: string): void
+  setPhrases(phrases: Record<string, string>): void
   focus(): void
   destroy(): void
 }
@@ -176,6 +179,7 @@ export async function createEditor(options: EditorOptions): Promise<EditorHandle
     tabSize: new Compartment(),
     placeholder: new Compartment(),
     label: new Compartment(),
+    phrases: new Compartment(),
   }
 
   // A programmatic `setValue` dispatches a transaction like any edit, so the update listener has to be able to tell
@@ -210,6 +214,7 @@ export async function createEditor(options: EditorOptions): Promise<EditorHandle
         compartments.placeholder.of(options.placeholder ? placeholder(options.placeholder) : []),
         // The editor is the labelled control, not the box around it: this is the element that carries `role=textbox`.
         compartments.label.of(EditorView.contentAttributes.of(contentAttributes())),
+        compartments.phrases.of(EditorState.phrases.of(options.phrases)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged && !applying) options.onInput(update.state.doc.toString())
           if (update.focusChanged) (update.view.hasFocus ? options.onFocus : options.onBlur)()
@@ -254,6 +259,7 @@ export async function createEditor(options: EditorOptions): Promise<EditorHandle
       contentState = { ...contentState, label }
       reconfigure(compartments.label, EditorView.contentAttributes.of(contentAttributes()))
     },
+    setPhrases: (phrases) => reconfigure(compartments.phrases, EditorState.phrases.of(phrases)),
     focus: () => view.focus(),
     destroy: () => view.destroy(),
   }

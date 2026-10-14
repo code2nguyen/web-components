@@ -5,6 +5,8 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { SlotPresenceController, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { sheetMessages } from './messages'
 import styles from './sheet.scss?inline'
 
 export type SheetSide = 'right' | 'left' | 'top' | 'bottom'
@@ -100,6 +102,9 @@ export interface Sheet {
 @customElement('c2-sheet')
 export class Sheet extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  /** The close button's label in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, sheetMessages)
 
   /** Open state. Setting it shows or closes the sheet. */
   @property({ type: Boolean, reflect: true }) open = false
@@ -216,7 +221,7 @@ export class Sheet extends LitElement {
             ${
               this.hideClose
                 ? nothing
-                : html`<button class="c2-sheet__close" part="close" type="button" aria-label="Close" @click=${() => this.close()}>
+                : html`<button class="c2-sheet__close" part="close" type="button" aria-label=${this.msg.t('close')} @click=${() => this.close()}>
                     <slot name="close-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 6 6 18M6 6l12 12"></path>

@@ -1078,15 +1078,36 @@ svg {
 
 // Customize panel --------------------------------------------------------------------------------------------------
 
+// A popover in the top layer, placed in the window by script: it keeps the list's colours, which it inherits.
 .panel {
-  display: flex;
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 16px));
+  border: 0;
+  overflow: visible;
+  color: inherit;
+  font: inherit;
   flex-direction: column;
   gap: 16px;
   padding: 16px;
   border-radius: css.cssVar(panel--border-radius);
   background-color: css.cssVar(panel--background-color);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 6%, transparent);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
   animation: panel-in calc($duration * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  &:popover-open {
+    display: flex;
+  }
+
+  // Taller than the window: it scrolls.
+  &.scrolling {
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+  }
 }
 
 .view {
@@ -1096,36 +1117,39 @@ svg {
 .panel-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 4px;
 }
 
-.panel-foot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.done-button {
+// Closes the panel, as Escape, a press elsewhere or the palette button do: every change is already applied.
+.panel-close {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 32px;
-  padding: 0 12px 0 8px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -6px -4px 0;
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: css.cssVar(on-accent--color);
-  background-color: $accent;
+  color: $muted;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
 
   svg {
     width: 16px;
     height: 16px;
     stroke-width: 2;
   }
+
+  &:hover {
+    color: $ink;
+    background-color: css.cssVar(chip--background-color);
+  }
 }
 
+
+
 .panel-title {
+  flex: 1;
   font-size: 14px;
   font-weight: 600;
 }
@@ -1654,7 +1678,7 @@ svg {
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateY(-6px);
   }
 }
 

@@ -2,6 +2,7 @@ import type { Node as ProseNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { Decoration, EditorView, NodeView } from 'prosemirror-view'
 import { LANGUAGES, languageLabel, normalizeLanguage } from './languages'
+import type { PageEditorText } from './messages'
 
 const CHECK = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 const CARET = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
@@ -17,8 +18,19 @@ const element = <K extends keyof HTMLElementTagNameMap>(tag: K, className: strin
   return node
 }
 
+/** A node view with interface text of its own, which it rewrites when the page's language changes. */
+export interface Localizable {
+  localize(): void
+}
+
+/** Where node views read their text from, and the set of live views the host relocalizes on a language change. */
+export interface ViewText {
+  text: PageEditorText
+  live: Set<Localizable>
+}
+
 /** Bullet, numbered and to-do items: a marker the caret cannot enter, then the item's text. */
-export class ItemView implements NodeView {
+export class ItemView implements NodeView, Localizable {
   readonly dom: HTMLElement
   readonly contentDOM: HTMLElement
   private readonly marker: HTMLElement
@@ -30,6 +42,7 @@ export class ItemView implements NodeView {
     private readonly getPos: () => number | undefined,
     decorations: readonly Decoration[],
     private readonly onToggle: (pos: number) => void,
+    private readonly i18n: ViewText,
   ) {
     this.node = node
     this.dom = element('div', 'item')
@@ -37,7 +50,8 @@ export class ItemView implements NodeView {
     if (node.attrs.kind === 'todo') {
       this.marker.classList.add('box')
       this.marker.setAttribute('role', 'checkbox')
-      this.marker.setAttribute('aria-label', 'Done')
+      this.localize()
+      i18n.live.add(this)
       // A static SVG string, rendered once.
       this.marker.innerHTML = CHECK
       this.marker.addEventListener('mousedown', (event) => event.preventDefault())
@@ -77,8 +91,16 @@ export class ItemView implements NodeView {
     else delete this.contentDOM.dataset.placeholder
   }
 
+  localize() {
+    if (this.node.attrs.kind === 'todo') this.marker.setAttribute('aria-label', this.i18n.text.t('done'))
+  }
+
   stopEvent(event: Event) {
     return this.marker.contains(event.target as Node)
+  }
+
+  destroy() {
+    this.i18n.live.delete(this)
   }
 
   ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Node }) {
@@ -88,14 +110,14 @@ export class ItemView implements NodeView {
   }
 }
 
-export interface CodeBlockOptions {
+export interface CodeBlockOptions extends ViewText {
   /** How the platform spells the modifier key, for the hint under a focused block. */
   modKey: string
   onCopy?: (text: string) => void
 }
 
 /** A code block: language picker, wrap toggle and copy button over a `<pre>`, with line numbers in a gutter. */
-export class CodeBlockView implements NodeView {
+export class CodeBlockView implements NodeView, Localizable {
   readonly dom: HTMLElement
   readonly contentDOM: HTMLElement
   private readonly header: HTMLElement
@@ -111,6 +133,7 @@ export class CodeBlockView implements NodeView {
   private lines = 0
   private active = 0
   private copyTimer?: ReturnType<typeof setTimeout>
+  private copied = false
   private readonly id = `c2-code-${++uid}`
 
   constructor(
@@ -125,9 +148,8 @@ export class CodeBlockView implements NodeView {
     this.languageButton = element('button', 'code-language', { type: 'button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false' })
     this.languageButton.addEventListener('click', () => this.toggleMenu())
     this.hint = element('div', 'code-hint', { contenteditable: 'false', 'aria-hidden': 'true' })
-    this.hint.innerHTML = `<span><kbd>Tab</kbd> indent</span><span><kbd>${settings.modKey}↵</kbd> or <kbd>↵↵↵</kbd> leave the block</span>`
     const tools = element('div', 'code-tools')
-    this.wrapButton = element('button', 'code-tool', { type: 'button', 'aria-label': 'Wrap long lines', 'aria-pressed': 'false', title: 'Wrap long lines' })
+    this.wrapButton = element('button', 'code-tool', { type: 'button', 'aria-pressed': 'false' })
     this.wrapButton.innerHTML = WRAP
     this.wrapButton.addEventListener('click', () => {
       const wrap = !this.dom.classList.contains('wrap')
@@ -136,7 +158,6 @@ export class CodeBlockView implements NodeView {
     })
     this.copyButton = element('button', 'code-tool code-copy', { type: 'button' })
     this.copyButton.addEventListener('click', () => this.copy())
-    this.renderCopy(false)
     tools.append(this.wrapButton, this.copyButton)
     this.header.append(this.languageButton, tools)
     // The keyboard hint sits in the header, so showing it never moves the blocks below.
@@ -150,17 +171,15 @@ export class CodeBlockView implements NodeView {
     pre.append(this.contentDOM)
     body.append(this.gutter, pre)
 
-    this.menu = element('div', 'code-menu', { popover: 'auto', role: 'dialog', 'aria-label': 'Language', contenteditable: 'false' })
+    this.menu = element('div', 'code-menu', { popover: 'auto', role: 'dialog', contenteditable: 'false' })
     this.search = element('input', 'code-search', {
       type: 'text',
-      placeholder: 'Search languages…',
-      'aria-label': 'Search languages',
       role: 'combobox',
       'aria-expanded': 'true',
       'aria-controls': `${this.id}-list`,
       'aria-autocomplete': 'list',
     })
-    this.options = element('div', 'code-options', { role: 'listbox', id: `${this.id}-list`, 'aria-label': 'Languages' })
+    this.options = element('div', 'code-options', { role: 'listbox', id: `${this.id}-list` })
     this.menu.append(this.search, this.options)
     this.search.addEventListener('input', () => {
       this.active = 0
@@ -179,7 +198,32 @@ export class CodeBlockView implements NodeView {
     })
 
     this.dom.append(this.header, body, this.menu)
+    this.localize()
+    settings.live.add(this)
+  }
+
+  /** Writes every piece of interface text, in the page's current language. */
+  localize() {
+    const t = this.settings.text.t.bind(this.settings.text)
+    const kbd = (key: string) => {
+      const node = document.createElement('kbd')
+      node.textContent = key
+      return node
+    }
+    const indent = document.createElement('span')
+    indent.append(kbd('Tab'), ` ${t('hintIndent')}`)
+    const leave = document.createElement('span')
+    leave.append(kbd(`${this.settings.modKey}↵`), ` ${t('hintOr')} `, kbd('↵↵↵'), ` ${t('hintLeave')}`)
+    this.hint.replaceChildren(indent, leave)
+    this.wrapButton.setAttribute('aria-label', t('wrapLines'))
+    this.wrapButton.title = t('wrapLines')
+    this.menu.setAttribute('aria-label', t('language'))
+    this.search.placeholder = t('searchLanguagesPlaceholder')
+    this.search.setAttribute('aria-label', t('searchLanguages'))
+    this.options.setAttribute('aria-label', t('languages'))
+    this.renderCopy(this.copied)
     this.sync()
+    if (this.menu.matches(':popover-open')) this.renderOptions()
   }
 
   update(node: ProseNode) {
@@ -193,9 +237,10 @@ export class CodeBlockView implements NodeView {
     const language = normalizeLanguage(this.node.attrs.language)
     this.dom.dataset.language = language
     this.languageButton.innerHTML = ''
-    this.languageButton.append(languageLabel(language))
+    const label = languageLabel(language, this.settings.text.t('plainText'))
+    this.languageButton.append(label)
     this.languageButton.insertAdjacentHTML('beforeend', CARET)
-    this.languageButton.setAttribute('aria-label', `Language: ${languageLabel(language)}`)
+    this.languageButton.setAttribute('aria-label', this.settings.text.t('languageIs', label))
     this.languageButton.disabled = !this.view.editable
     const lines = this.node.textContent.split('\n').length
     if (lines !== this.lines) {
@@ -205,9 +250,16 @@ export class CodeBlockView implements NodeView {
   }
 
   private renderCopy(copied: boolean) {
+    const t = this.settings.text.t.bind(this.settings.text)
+    this.copied = copied
     this.copyButton.innerHTML = COPY
-    this.copyButton.append(copied ? 'Copied' : 'Copy')
-    this.copyButton.setAttribute('aria-label', copied ? 'Copied' : 'Copy code')
+    this.copyButton.append(copied ? t('copied') : t('copy'))
+    this.copyButton.setAttribute('aria-label', copied ? t('copied') : t('copyCode'))
+  }
+
+  /** A language's name as the picker shows it: "Plain text" in the page's language, the others as they are. */
+  private labelOf(language: { id: string; label: string }) {
+    return language.id ? language.label : this.settings.text.t('plainText')
   }
 
   private copy() {
@@ -225,7 +277,9 @@ export class CodeBlockView implements NodeView {
 
   private filtered() {
     const query = this.search.value.trim().toLowerCase()
-    return LANGUAGES.filter((each) => !query || each.label.toLowerCase().includes(query) || each.id.includes(query))
+    return LANGUAGES.filter(
+      (each) => !query || this.labelOf(each).toLowerCase().includes(query) || each.label.toLowerCase().includes(query) || each.id.includes(query),
+    )
   }
 
   private renderOptions() {
@@ -241,7 +295,7 @@ export class CodeBlockView implements NodeView {
           'data-id': each.id,
         })
         if (index === this.active) option.classList.add('active')
-        option.append(each.label)
+        option.append(this.labelOf(each))
         if (each.id === current) option.insertAdjacentHTML('beforeend', CHECK)
         return option
       }),
@@ -312,6 +366,7 @@ export class CodeBlockView implements NodeView {
   }
 
   destroy() {
+    this.settings.live.delete(this)
     clearTimeout(this.copyTimer)
     if (this.menu.matches(':popover-open')) this.menu.hidePopover()
   }

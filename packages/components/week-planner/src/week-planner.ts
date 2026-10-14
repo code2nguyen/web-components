@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -9,6 +9,8 @@ import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 // Registers `c2-button-group` and `c2-button`, the odd/even week switch, and `c2-badge`, the current week's number.
 import '@c2n/button-group'
 import '@c2n/badge'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { weekPlannerMessages } from './messages'
 import styles from './week-planner.scss?inline'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -143,110 +145,6 @@ interface DragPreview {
   to: number
 }
 
-interface Labels {
-  odd: string
-  even: string
-  kind: string
-  plan: string
-  previous: string
-  next: string
-  previousWeek: string
-  nextWeek: string
-  add: string
-}
-
-/** Words the browser cannot translate through `Intl`, by language; any other language falls back to English. */
-const LABELS: Record<string, Labels> = {
-  en: {
-    odd: 'Odd week',
-    even: 'Even week',
-    kind: 'Kind of week',
-    plan: 'Week plan',
-    previous: 'Previous days',
-    next: 'Next days',
-    previousWeek: 'Previous week',
-    nextWeek: 'Next week',
-    add: 'New event',
-  },
-  fr: {
-    odd: 'Semaine impaire',
-    even: 'Semaine paire',
-    kind: 'Type de semaine',
-    plan: 'Planning de la semaine',
-    previous: 'Jours précédents',
-    next: 'Jours suivants',
-    previousWeek: 'Semaine précédente',
-    nextWeek: 'Semaine suivante',
-    add: 'Nouvel événement',
-  },
-  de: {
-    odd: 'Ungerade Woche',
-    even: 'Gerade Woche',
-    kind: 'Wochentyp',
-    plan: 'Wochenplan',
-    previous: 'Vorherige Tage',
-    next: 'Nächste Tage',
-    previousWeek: 'Vorherige Woche',
-    nextWeek: 'Nächste Woche',
-    add: 'Neuer Termin',
-  },
-  es: {
-    odd: 'Semana impar',
-    even: 'Semana par',
-    kind: 'Tipo de semana',
-    plan: 'Plan semanal',
-    previous: 'Días anteriores',
-    next: 'Días siguientes',
-    previousWeek: 'Semana anterior',
-    nextWeek: 'Semana siguiente',
-    add: 'Nuevo evento',
-  },
-  it: {
-    odd: 'Settimana dispari',
-    even: 'Settimana pari',
-    kind: 'Tipo di settimana',
-    plan: 'Piano settimanale',
-    previous: 'Giorni precedenti',
-    next: 'Giorni successivi',
-    previousWeek: 'Settimana precedente',
-    nextWeek: 'Settimana successiva',
-    add: 'Nuovo evento',
-  },
-  pt: {
-    odd: 'Semana ímpar',
-    even: 'Semana par',
-    kind: 'Tipo de semana',
-    plan: 'Plano semanal',
-    previous: 'Dias anteriores',
-    next: 'Próximos dias',
-    previousWeek: 'Semana anterior',
-    nextWeek: 'Próxima semana',
-    add: 'Novo evento',
-  },
-  nl: {
-    odd: 'Oneven week',
-    even: 'Even week',
-    kind: 'Soort week',
-    plan: 'Weekplanning',
-    previous: 'Vorige dagen',
-    next: 'Volgende dagen',
-    previousWeek: 'Vorige week',
-    nextWeek: 'Volgende week',
-    add: 'Nieuwe afspraak',
-  },
-  vi: {
-    odd: 'Tuần lẻ',
-    even: 'Tuần chẵn',
-    kind: 'Loại tuần',
-    plan: 'Kế hoạch tuần',
-    previous: 'Những ngày trước',
-    next: 'Những ngày sau',
-    previousWeek: 'Tuần trước',
-    nextWeek: 'Tuần sau',
-    add: 'Sự kiện mới',
-  },
-}
-
 const DAYS: WeekPlannerDay[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 const timePattern = /^(\d{1,2}):(\d{2})$/
 
@@ -356,11 +254,11 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * a link, an editable field). The `actions` slot puts buttons of your own at the end of the header, e.g. "Add event"
  * or a settings menu.
  *
- * Text follows `locale`, or the browser's language when it is not set: day names, dates and "today"/"this week" come
- * from `Intl`, and the other labels from a built-in list (English, French, German, Spanish, Italian, Portuguese,
- * Dutch, Vietnamese; other languages fall back to English). Today's column is tinted, inside the grid lines, and
- * carries a line at the current time. Overlapping events cascade, each stepped in from the one it overlaps; the hour
- * range grows to fit every event.
+ * Text follows `locale`, else the nearest `lang` attribute (redrawing when it changes), else the browser's language:
+ * day names, dates and "today"/"this week" come from `Intl`, and the other labels from a built-in list (English,
+ * French, German, Spanish, Italian, Portuguese, Dutch, Vietnamese; other languages fall back to English). Today's
+ * column is tinted, inside the grid lines, and carries a line at the current time. Overlapping events cascade, each
+ * stepped in from the one it overlaps; the hour range grows to fit every event.
  *
  * Below 640px of width the planner shows three days, and below 420px one, of a strip that scrolls sideways and snaps
  * to a day: swiped on a touch screen, paged with the previous/next arrows that then appear in its header. It opens on
@@ -478,7 +376,7 @@ export class WeekPlanner extends LitElement {
   @property({ type: Number, attribute: 'end-hour' }) endHour = 18
   /** First day of the week. Defaults to the convention of `locale` (Sunday in `en-US`, Monday in `fr` or `en-GB`). */
   @property({ attribute: 'week-start', reflect: true }) weekStart: WeekPlannerWeekStart | '' = ''
-  /** Language of the planner's text and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
+  /** Language of the planner's text and day names, e.g. `fr` or `en-GB`. Defaults to the nearest `lang`, else the browser's language. */
   @property({ type: String }) locale = ''
   /** Title shown at the start of the header, e.g. "Kids' schedule". It also names the planner for assistive technology. */
   @property() heading = ''
@@ -575,8 +473,11 @@ export class WeekPlanner extends LitElement {
     scroller.scrollBy({ left: direction * shown * day.offsetWidth, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
+  /** `locale`, else the nearest `lang`, else the browser's language; a `lang` change redraws the planner. */
+  private readonly msg = new LocalizeController(this, weekPlannerMessages, () => this.locale)
+
   private get effectiveLocale() {
-    return resolveLocale(this.locale)
+    return isServer ? resolveLocale(this.locale) : this.msg.locale
   }
 
   /** First day of the week as `Date#getDay` numbers it: `week-start` when set, else the locale's convention. */
@@ -592,10 +493,6 @@ export class WeekPlanner extends LitElement {
     const date = fromIso(this.date)
     if (!date) return null
     return addDays(date, -((date.getDay() - this.firstWeekday + 7) % 7))
-  }
-
-  private get labels(): Labels {
-    return LABELS[this.effectiveLocale.toLowerCase().split('-')[0]] ?? LABELS.en
   }
 
   private get snap(): number {
@@ -857,22 +754,20 @@ export class WeekPlanner extends LitElement {
   }
 
   private renderNavigation() {
-    const labels = this.labels
     return html`<div class="navigation">
-      <button class="nav" type="button" aria-label=${labels.previous} ?disabled=${this.atStart} @click=${() => this.scrollDays(-1)}>
+      <button class="nav" type="button" aria-label=${this.msg.t('previous')} ?disabled=${this.atStart} @click=${() => this.scrollDays(-1)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
       </button>
-      <button class="nav" type="button" aria-label=${labels.next} ?disabled=${this.atEnd} @click=${() => this.scrollDays(1)}>
+      <button class="nav" type="button" aria-label=${this.msg.t('next')} ?disabled=${this.atEnd} @click=${() => this.scrollDays(1)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
       </button>
     </div>`
   }
 
   private renderWeekNavigation() {
-    const labels = this.labels
     // On a narrow strip the arrow moves by days until it reaches the edge of the week.
-    const previous = this.overflowing && !this.atStart ? labels.previous : labels.previousWeek
-    const next = this.overflowing && !this.atEnd ? labels.next : labels.nextWeek
+    const previous = this.overflowing && !this.atStart ? this.msg.t('previous') : this.msg.t('previousWeek')
+    const next = this.overflowing && !this.atEnd ? this.msg.t('next') : this.msg.t('nextWeek')
     return html`<div class="week-navigation">
       <button class="nav" type="button" aria-label=${previous} @click=${() => this.page(-1)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
@@ -896,7 +791,6 @@ export class WeekPlanner extends LitElement {
   private renderSwitch() {
     const week = isoWeek(this.now)
     const shown = this.shownParity
-    const labels = this.labels
     const badge = (parity: WeekPlannerParity) =>
       parity === this.currentParity
         ? html`<c2-badge slot="suffix-icon" class="week-number" tone="primary" title=${this.relative('week')}
@@ -907,7 +801,7 @@ export class WeekPlanner extends LitElement {
       class="switch"
       appearance="segmented"
       size="s"
-      aria-label=${labels.kind}
+      aria-label=${this.msg.t('kind')}
       .value=${shown}
       @change=${(event: CustomEvent<{ value: string }>) => {
         // The group's change is composed; the planner reports it as parity-change instead.
@@ -915,8 +809,8 @@ export class WeekPlanner extends LitElement {
         if (event.detail.value === 'odd' || event.detail.value === 'even') this.showParity(event.detail.value)
       }}
     >
-      <c2-button value="odd">${labels.odd}${badge('odd')}</c2-button>
-      <c2-button value="even">${labels.even}${badge('even')}</c2-button>
+      <c2-button value="odd">${this.msg.t('odd')}${badge('odd')}</c2-button>
+      <c2-button value="even">${this.msg.t('even')}${badge('even')}</c2-button>
     </c2-button-group>`
   }
 
@@ -969,7 +863,7 @@ export class WeekPlanner extends LitElement {
     return html`<button
       class="add"
       type="button"
-      aria-label=${`${this.labels.add}, ${dayLabel} ${formatMinutes(from)}–${formatMinutes(to)}`}
+      aria-label=${`${this.msg.t('add')}, ${dayLabel} ${formatMinutes(from)}–${formatMinutes(to)}`}
       style=${styleMap({ '--from': String(from / 60 - firstHour), '--span': String((to - from) / 60) })}
       @click=${() => this.fireSlot(column, from)}
     >
@@ -1021,7 +915,7 @@ export class WeekPlanner extends LitElement {
     return html`<section
       class="c2-week-planner"
       data-rendered-at=${this.now.getTime()}
-      aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || this.labels.plan}
+      aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || this.msg.t('plan')}
       aria-labelledby=${labelledByHeading ? 'heading' : nothing}
     >
       <div class="body">

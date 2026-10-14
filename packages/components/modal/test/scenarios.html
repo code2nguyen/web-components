@@ -16,7 +16,12 @@
       }
     </style>
     <script type="module">
+      // The app's languages: French and Vietnamese, added as an app would.
+      import './translations.ts'
       import '../src/modal.ts'
+      import { addMessages } from '@c2n/core/localize.js'
+      // For the localization scenario: an app adding its own wording.
+      window.addMessages = addMessages
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

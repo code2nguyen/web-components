@@ -1,3 +1,5 @@
+// The app's languages: French and Vietnamese, added as an app would.
+import './translations.js'
 import '../src/code-editor'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
@@ -29,6 +31,8 @@ const markup: Record<string, string> = {
     <button type="submit">Submit</button>
     <button type="reset">Reset</button>
   </form>`,
+  // No label: the editor is named in the page's language, and so is its validation message.
+  lang: `<div lang="fr"><c2-code-editor id="subject" language="javascript" required></c2-code-editor></div>`,
   'slot-label': `<c2-code-editor id="subject" language="javascript"><span slot="label">Slotted label</span><span slot="supporting-text">Slotted help</span></c2-code-editor>`,
 }
 
@@ -48,7 +52,7 @@ const submitted = document.querySelector('#submitted')!
 
 // `form` starts from a default value so reset has something to restore.
 if (scenario === 'form') subject.setAttribute('value', 'const initial = 1')
-else if (scenario !== 'placeholder' && scenario !== 'no-language' && scenario !== 'late') subject.value = SAMPLE
+else if (scenario !== 'placeholder' && scenario !== 'no-language' && scenario !== 'late' && scenario !== 'lang') subject.value = SAMPLE
 if (scenario === 'json') subject.value = '{ "name": "c2n", "count": 2 }'
 
 let inputs = 0

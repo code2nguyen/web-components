@@ -104,3 +104,13 @@ test('consumer-owned trigger and option slots remain directly styleable', async 
     .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
     .toEqual(Array(4).fill('rgb(1, 2, 3)'))
 })
+
+test('the required message follows the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-select aria-label="Fruit" required><c2-list-item value="apple">Apple</c2-list-item></c2-select></div>')
+  const host = page.locator('c2-select')
+  await expect(host).toHaveJSProperty('validationMessage', 'Veuillez sélectionner une option.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Vui lòng chọn một mục.')
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(host).toHaveJSProperty('validationMessage', 'Please select an option.')
+})

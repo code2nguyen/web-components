@@ -1,4 +1,5 @@
 ---
+import { componentMessages } from '../../../store/component-messages'
 import Main from '../../../layouts/Main.astro'
 import DocComponentLayout from '../../../layouts/DocComponentLayout.astro'
 import ApiTable from '../../../components/ApiTable.astro'
@@ -43,6 +44,7 @@ const headings = elements.flatMap(({ tag, manifest, idPrefix }) =>
     manifest.events.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-events`, text: 'Events' },
     manifest.cssParts.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-parts`, text: 'CSS parts' },
     manifest.cssProperties.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-css`, text: 'CSS custom properties' },
+    componentMessages(tag, idPrefix === 'api') && { depth: multiple ? 3 : 2, slug: `${idPrefix}-text`, text: 'Text and languages' },
   ].filter((heading): heading is Heading => Boolean(heading)),
 )
 ---

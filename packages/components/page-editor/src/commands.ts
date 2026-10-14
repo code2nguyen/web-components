@@ -357,17 +357,15 @@ export const lineBreak: Command = (state, dispatch) => {
 
 // ---- input rules ------------------------------------------------------------------------------------------------
 
-/** Meta key carrying the label of the format an input rule just applied, shown with "⌫ to undo". */
-export const autoformatKey = new PluginKey<{ label: string; pos: number } | null>('c2-page-editor-autoformat')
+/**
+ * Meta key carrying the format an input rule just applied, shown with "⌫ to undo": a block name (`heading1`), or
+ * `mark:` and a mark name (`mark:bold`). It is named when drawn, so the note follows a change of language.
+ */
+export const autoformatKey = new PluginKey<{ format: string; pos: number } | null>('c2-page-editor-autoformat')
 
 type Allowed = (block: PageEditorBlock) => boolean
 
-function blockRule(
-  pattern: RegExp,
-  make: (match: RegExpMatchArray, node: ProseNode) => PageEditorBlock | null,
-  allowed: Allowed,
-  label: (block: PageEditorBlock) => string,
-) {
+function blockRule(pattern: RegExp, make: (match: RegExpMatchArray, node: ProseNode) => PageEditorBlock | null, allowed: Allowed) {
   return new InputRule(pattern, (state, match, start, end) => {
     const $start = state.doc.resolve(start)
     const node = $start.parent
@@ -377,17 +375,17 @@ function blockRule(
     if (!target) return null
     const tr = state.tr.delete(start, end)
     tr.setNodeMarkup($start.before(), target.type, target.attrs)
-    return tr.setMeta(autoformatKey, label(block))
+    return tr.setMeta(autoformatKey, block)
   })
 }
 
-export function buildInputRules(allowed: Allowed, label: (block: PageEditorBlock) => string, markAllowed: () => boolean): InputRule[] {
+export function buildInputRules(allowed: Allowed, markAllowed: () => boolean): InputRule[] {
   const fromParagraph =
     (block: PageEditorBlock | ((match: RegExpMatchArray) => PageEditorBlock)) =>
     (match: RegExpMatchArray, node: ProseNode): PageEditorBlock | null =>
       node.type === paragraph ? (typeof block === 'string' ? block : block(match)) : null
 
-  const markRule = (pattern: RegExp, open: number, type: keyof typeof schema.marks, name: string) =>
+  const markRule = (pattern: RegExp, open: number, type: keyof typeof schema.marks) =>
     new InputRule(pattern, (state, match, start, end) => {
       if (!markAllowed()) return null
       const [whole, lead = '', inner] = match
@@ -402,7 +400,7 @@ export function buildInputRules(allowed: Allowed, label: (block: PageEditorBlock
       const mark = schema.marks[type].create()
       tr.addMark(from, from + inner.length, mark)
       tr.removeStoredMark(mark.type)
-      return tr.setMeta(autoformatKey, name)
+      return tr.setMeta(autoformatKey, `mark:${type}`)
     })
 
   return [
@@ -410,17 +408,11 @@ export function buildInputRules(allowed: Allowed, label: (block: PageEditorBlock
       /^(#{1,3})\s$/,
       fromParagraph((match) => `heading${match[1].length}` as PageEditorBlock),
       allowed,
-      label,
     ),
-    blockRule(/^[-*+]\s$/, fromParagraph('bullet'), allowed, label),
-    blockRule(/^\d{1,9}[.)]\s$/, fromParagraph('ordered'), allowed, label),
-    blockRule(
-      /^\[([ xX]?)\]\s$/,
-      (_match, node) => (node.type === paragraph || (node.type === item && node.attrs.kind === 'bullet') ? 'todo' : null),
-      allowed,
-      label,
-    ),
-    blockRule(/^>\s$/, fromParagraph('quote'), allowed, label),
+    blockRule(/^[-*+]\s$/, fromParagraph('bullet'), allowed),
+    blockRule(/^\d{1,9}[.)]\s$/, fromParagraph('ordered'), allowed),
+    blockRule(/^\[([ xX]?)\]\s$/, (_match, node) => (node.type === paragraph || (node.type === item && node.attrs.kind === 'bullet') ? 'todo' : null), allowed),
+    blockRule(/^>\s$/, fromParagraph('quote'), allowed),
     new InputRule(/^```([\w+#-]*)\s$/, (state, match, start, end) => {
       const $start = state.doc.resolve(start)
       if ($start.parent.type !== paragraph || !allowed('code')) return null
@@ -429,7 +421,7 @@ export function buildInputRules(allowed: Allowed, label: (block: PageEditorBlock
       const rest = node.textBetween(end - pos - 1, node.content.size)
       const tr = state.tr.replaceWith(pos, pos + node.nodeSize, codeBlock.create({ language: match[1].toLowerCase() }, line(rest)))
       tr.setSelection(TextSelection.create(tr.doc, pos + 1))
-      return tr.setMeta(autoformatKey, label('code'))
+      return tr.setMeta(autoformatKey, 'code')
     }),
     new InputRule(/^---$/, (state, _match, start, end) => {
       const $start = state.doc.resolve(start)
@@ -438,24 +430,27 @@ export function buildInputRules(allowed: Allowed, label: (block: PageEditorBlock
       const pos = $start.before()
       const tr = state.tr.replaceWith(pos, pos + node.nodeSize, [divider.create(), paragraph.create()])
       tr.setSelection(TextSelection.create(tr.doc, pos + 2))
-      return tr.setMeta(autoformatKey, label('divider'))
+      return tr.setMeta(autoformatKey, 'divider')
     }),
-    markRule(/()\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/, 2, 'bold', 'Bold'),
-    markRule(/(^|[^*])\*([^*\s](?:[^*]*[^*\s])?)\*$/, 1, 'italic', 'Italic'),
-    markRule(/()~~([^~\s](?:[^~]*[^~\s])?)~~$/, 2, 'strike', 'Strikethrough'),
-    markRule(/(^|[^`])`([^`]+)`$/, 1, 'code', 'Code'),
+    markRule(/()\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/, 2, 'bold'),
+    markRule(/(^|[^*])\*([^*\s](?:[^*]*[^*\s])?)\*$/, 1, 'italic'),
+    markRule(/()~~([^~\s](?:[^~]*[^~\s])?)~~$/, 2, 'strike'),
+    markRule(/(^|[^`])`([^`]+)`$/, 1, 'code'),
   ]
 }
 
-/** Shows what an input rule just did, with the key that undoes it, until the next edit or caret move. */
-export function autoformatHint(enabled: () => boolean): Plugin {
-  return new Plugin<{ label: string; pos: number } | null>({
+/**
+ * Shows what an input rule just did, with the key that undoes it, until the next edit or caret move. `describe` gives
+ * the note for a format, in the page's language.
+ */
+export function autoformatHint(enabled: () => boolean, describe: (format: string) => string): Plugin {
+  return new Plugin<{ format: string; pos: number } | null>({
     key: autoformatKey,
     state: {
       init: () => null,
       apply: (tr, value) => {
-        const label = tr.getMeta(autoformatKey) as string | undefined
-        if (label) return { label, pos: tr.selection.head }
+        const format = tr.getMeta(autoformatKey) as string | undefined
+        if (format) return { format, pos: tr.selection.head }
         if (tr.docChanged || tr.selectionSet) return null
         return value
       },
@@ -464,6 +459,7 @@ export function autoformatHint(enabled: () => boolean): Plugin {
       decorations: (state) => {
         const hint = autoformatKey.getState(state)
         if (!hint || !enabled()) return null
+        const text = describe(hint.format)
         return DecorationSet.create(state.doc, [
           Decoration.widget(
             hint.pos,
@@ -472,10 +468,10 @@ export function autoformatHint(enabled: () => boolean): Plugin {
               span.className = 'autoformat-hint'
               span.contentEditable = 'false'
               span.setAttribute('aria-hidden', 'true')
-              span.textContent = `${hint.label} · ⌫ to undo`
+              span.textContent = text
               return span
             },
-            { side: 1, ignoreSelection: true, key: `hint-${hint.label}` },
+            { side: 1, ignoreSelection: true, key: `hint-${text}` },
           ),
         ])
       },

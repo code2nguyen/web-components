@@ -3,8 +3,9 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { spinnerMessages } from './messages'
 import styles from './spinner.scss?inline'
 
 /** Radius of the ring in the 48-unit view box; the circumference drives the dash lengths. */
@@ -42,13 +43,16 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 export class Spinner extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** The default name in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, spinnerMessages)
+
   /** Progress between `0` and `max`. Leave unset for an indeterminate spinner. */
   @property({ type: Number }) value: number | undefined = undefined
 
   /** Value that fills the whole ring. */
   @property({ type: Number }) max = 100
 
-  /** Accessible name when nothing is slotted. Defaults to "Loading". */
+  /** Accessible name when nothing is slotted. Defaults to "Loading" in the nearest `lang` (English, or a language the app adds). */
   @property() label = ''
 
   private readonly slotPresence = new SlotPresenceController(this, [''])
@@ -73,7 +77,7 @@ export class Spinner extends LitElement {
       <div
         class=${classMap({ 'c2-spinner': true, 'is-determinate': determinate, 'has-text': hasText })}
         role="progressbar"
-        aria-label=${hasText ? nothing : ifDefined(this.label || 'Loading')}
+        aria-label=${hasText ? nothing : this.label || this.msg.t('label')}
         aria-labelledby=${hasText ? 'label' : nothing}
         aria-valuemin=${determinate ? '0' : nothing}
         aria-valuemax=${determinate ? String(this.max > 0 ? this.max : 100) : nothing}

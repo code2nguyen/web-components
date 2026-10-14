@@ -8,7 +8,7 @@ or delete it and right to check it (the swipe and the reordering come from `@c2n
 swatch submenu. Click a task's icon to change it. Archived tasks collect at the bottom and every removal can be undone.
 
 Tasks can carry an optional icon from `@c2n/task-icons`, a highlighter background and a pen colour for their text.
-With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the background (whose
+With `customizable`, a palette button opens a panel over the tasks, kept in the window, that styles the whole list: the background (whose
 text colour follows from it), a colour palette (Classic, Soft, Earth or Ocean: its accent, highlighters and pens),
 the list's icon, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
 `localStorage`.

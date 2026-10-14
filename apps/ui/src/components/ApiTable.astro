@@ -2,6 +2,7 @@
 import { groupCssProperties, deepFlatGroupCssProperties } from '../utils/manifest-utils'
 import { renderManifestDescription } from '../utils/manifest-description'
 import { componentManifests } from '../store/component-manifests'
+import { componentMessages } from '../store/component-messages'
 import SiteIconButton from './ui/SiteIconButton.astro'
 
 interface Props {
@@ -19,6 +20,9 @@ const hasSlots = componentManifest.slots.length > 0
 const hasEvents = componentManifest.events && componentManifest.events.length > 0
 const hasCssParts = componentManifest.cssParts.length > 0
 const hasCss = flattenGroupedCssProperties.length > 0
+// The text the component shows, which an app translates; on a page of several elements, once, under the first.
+const text = componentMessages(componentTag, idPrefix === 'api')
+const guideHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/guides/languages`
 ---
 
 <div class="api">
@@ -220,6 +224,62 @@ const hasCss = flattenGroupedCssProperties.length > 0
                   </tr>
                 ),
               )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+  {
+    text && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-text`}>Text and languages</h3>
+        <p class="api__hint">
+          The text the component shows, in English. It shows another language when the app adds one with{' '}
+          <code>addTranslations</code>, under <code>{text.name}</code>, and the nearest <code>lang</code> asks for it; any message not
+          translated stays in English. <code>{'{0}'}</code>, <code>{'{1}'}</code>… stand for the values a message carries.{' '}
+          <a href={guideHref}>Languages guide</a>.
+          {text.builtIn.length > 0 && (
+            <>
+              {' '}Built in besides English: <code>{text.builtIn.join(', ')}</code>; an app can override them.
+            </>
+          )}
+        </p>
+        <div class="api__table-wrapper">
+          <table class="api__table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th class="api__col-description">English</th>
+                <th>Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              {text.messages.map((message) => (
+                <tr>
+                  <td class="api__name">
+                    <span class="api__name-cell">
+                      <code>{message.key}</code>
+                      <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={message.key}>
+                        <c2-feather-copy />
+                      </SiteIconButton>
+                    </span>
+                  </td>
+                  <td class="api__col-description">{message.text || <span class="api__none">—</span>}</td>
+                  <td>
+                    {message.args.length > 0 ? (
+                      message.args.map((name, index) => (
+                        <span class="api__type">
+                          {`{${index}}`} {name}
+                          <br />
+                        </span>
+                      ))
+                    ) : (
+                      <span class="api__none">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
