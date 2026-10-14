@@ -88,6 +88,8 @@ export class Highlight extends LitElement {
   private found: TextMatch[] = []
   private mutationObserver?: MutationObserver
   private reportedCount = 0
+  /** A declarative shadow root from a server render: the first client render has to match its slot before marking. */
+  private readonly serverRendered = !isServer && this.shadowRoot !== null
 
   /** Number of matches in the current text. */
   get matchCount(): number {
@@ -125,6 +127,11 @@ export class Highlight extends LitElement {
     })
   }
 
+  protected override firstUpdated(changed: PropertyValues<this>): void {
+    super.firstUpdated(changed)
+    if (this.serverRendered) this.requestUpdate()
+  }
+
   protected override updated(changed: PropertyValues<this>): void {
     super.updated(changed)
     const count = this.found.length
@@ -140,7 +147,7 @@ export class Highlight extends LitElement {
   }
 
   override render() {
-    if (this.text === null) return html`<span class="c2-highlight" part="text"><slot></slot></span>`
+    if (this.text === null || (this.serverRendered && !this.hasUpdated)) return html`<span class="c2-highlight" part="text"><slot></slot></span>`
     const text = this.text
     const parts: unknown[] = []
     let offset = 0
