@@ -12,6 +12,7 @@ import {
   SheetModel,
   cellRef,
   columnName,
+  insertIntoFormula,
   isCellError,
   parseCellRef,
   parseFormula,
@@ -29,6 +30,7 @@ export {
   CellError,
   cellRef,
   columnName,
+  insertIntoFormula,
   isCellError,
   parseCellRef,
   parseRange,
@@ -164,6 +166,9 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * it, Enter and Tab commit and move, Escape cancels, Delete clears, Ctrl/⌘+C, X, V copy, cut and paste as
  * tab-separated text, Ctrl/⌘+Z and Y undo and redo, Ctrl/⌘+A selects every cell. Tab outside an edit leaves the grid.
  *
+ * A paste larger than the space left grows the sheet to fit. `insertRows` and `insertColumns` add empty rows and
+ * columns, and formulas keep pointing at the cells they read.
+ *
  * Drag the right edge of a column header to resize the column, or double-click it to fit the column to its content.
  * The new width is written to `columns` and reported by `column-resize`.
  *
@@ -237,12 +242,13 @@ export class Spreadsheet extends LitElement {
    */
   @property({ converter: jsonPropertyConverter }) data: CellInput[][] = []
 
-  /** Number of rows. Grows to fit `data`. */
+  /** Number of rows. Grows to fit `data`, a paste past the last row and `insertRows`. */
   @property({ type: Number }) rows = 20
 
   /**
    * Number of columns, or one options object per column (`label`, `width`, `format`, `align`, `resizable`, `minWidth`). JSON
-   * in markup. Resizing a column writes a new array here with its `width`.
+   * in markup. Grows to fit `data`, a paste past the last column and `insertColumns`. Resizing a column writes a new
+   * array here with its `width`.
    */
   @property({ converter: columnsConverter }) columns: number | SpreadsheetColumn[] = 8
 
@@ -360,6 +366,24 @@ export class Spreadsheet extends LitElement {
       step.map(({ key, after }) => ({ key, input: after })),
       { record: false, notify: true },
     )
+  }
+
+  /**
+   * Inserts `count` empty rows before the zero-based row `index`: `0` adds them at the top, `rows` at the bottom.
+   * The rows below move down and every formula follows the cells it reads, so `=SUM(B1:B5)` becomes `=SUM(B1:B6)`
+   * when a row goes in inside the range. Writes `data` and `rows`, clears the undo history and fires no event.
+   */
+  insertRows(index: number, count = 1): void {
+    this.insert('row', index, count)
+  }
+
+  /**
+   * Inserts `count` empty columns before the zero-based column `index`: `0` adds them first, the column count last.
+   * The columns to the right move over with their options (`label`, `width`, `format`, `align`), and every formula
+   * follows the cells it reads. Writes `data` and `columns`, clears the undo history and fires no event.
+   */
+  insertColumns(index: number, count = 1): void {
+    this.insert('column', index, count)
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -728,6 +752,50 @@ export class Spreadsheet extends LitElement {
   }
 
   // ---------------------------------------------------------------------------------------------------------------
+  // Sheet size
+
+  /** Sets the size now rather than at the next update, so the writes that follow land inside the sheet. */
+  private resizeSheet(rows: number, columns: SpreadsheetColumn[]): void {
+    this.rows = rows
+    this.columns = Array.isArray(this.columns) ? columns : columns.length
+    this.columnDefs = columns
+    this.model.resize(rows, columns.length)
+  }
+
+  private insert(axis: 'row' | 'column', index: number, count: number): void {
+    count = Math.floor(count)
+    if (!Number.isFinite(index) || !(count >= 1)) return
+    const size = axis === 'row' ? this.model.rows : this.columnDefs.length
+    const at = Math.max(0, Math.min(size, Math.floor(index)))
+    if (this.editing) this.commitEdit(0, 0, false)
+
+    const move = (position: CellPosition): CellPosition =>
+      axis === 'row'
+        ? { row: position.row >= at ? position.row + count : position.row, column: position.column }
+        : { row: position.row, column: position.column >= at ? position.column + count : position.column }
+    const entries: [string, string][] = []
+    for (const key of this.model.keys()) {
+      const position = parseCellRef(key)
+      if (!position) continue
+      const input = this.model.getInput(key)
+      const moved = move(position)
+      entries.push([cellRef(moved.row, moved.column), this.model.isFormula(key) ? insertIntoFormula(input, axis, at, count) : input])
+    }
+
+    const columns = [...this.columnDefs]
+    if (axis === 'column') columns.splice(at, 0, ...Array.from({ length: count }, () => ({})))
+    this.resizeSheet(this.model.rows + (axis === 'row' ? count : 0), columns)
+    this.model.load(entries)
+    // History steps name cells by address, which the insertion just changed.
+    this.undoStack = []
+    this.redoStack = []
+    this.ownData = this.serialise()
+    this.data = this.ownData
+    this.cursor = move(this.cursor)
+    this.extent = move(this.extent)
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
   // Changes and history
 
   private applyChanges(changes: Change[], { record, notify }: { record: boolean; notify: boolean }): void {
@@ -1029,17 +1097,17 @@ export class Spreadsheet extends LitElement {
           row.map((input) => (input.startsWith('=') ? shiftFormula(input, target.row - own.origin.row, target.column - own.origin.column) : input)),
         )
       : parseTsv(text)
-    const changes: Change[] = []
-    grid.forEach((cells, rowOffset) =>
-      cells.forEach((input, columnOffset) => {
-        const row = target.row + rowOffset
-        const column = target.column + columnOffset
-        if (row < this.model.rows && column < this.columnDefs.length) changes.push({ key: cellRef(row, column), input })
-      }),
-    )
-    this.applyChanges(changes, { record: true, notify: true })
     const height = Math.max(1, grid.length)
     const width = Math.max(1, ...grid.map((row) => row.length))
+    // A paste past the edge grows the sheet, as in Sheets and Excel, rather than dropping what does not fit.
+    const missing = target.column + width - this.columnDefs.length
+    if (target.row + height > this.model.rows || missing > 0)
+      this.resizeSheet(Math.max(this.model.rows, target.row + height), [...this.columnDefs, ...Array.from({ length: Math.max(0, missing) }, () => ({}))])
+    const changes: Change[] = []
+    grid.forEach((cells, rowOffset) =>
+      cells.forEach((input, columnOffset) => changes.push({ key: cellRef(target.row + rowOffset, target.column + columnOffset), input })),
+    )
+    this.applyChanges(changes, { record: true, notify: true })
     this.userSelect(target, { row: target.row + height - 1, column: target.column + width - 1 })
   }
 }

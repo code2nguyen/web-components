@@ -253,6 +253,47 @@ test('pastes text copied from another spreadsheet as values', async ({ page, ren
   await expect(host(page)).toHaveAttribute('data-events', /"ref":"C5","input":"25","value":25/)
 })
 
+test('a paste past the last row and column grows the sheet instead of dropping cells', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-spreadsheet rows="2" columns='[{"label":"Item"},{"label":"Qty"}]'></c2-spreadsheet>`)
+  await cell(page, 'B2').click()
+  await clipboardEvent(grid(page), 'paste', 'a\tb\tc\nd\te\tf\ng\th\ti')
+  await expect(cell(page, 'D4')).toHaveText('i')
+  const size = await host(page).evaluate((element: Spreadsheet) => ({ rows: element.rows, columns: element.columns, selection: element.selection }))
+  expect(size).toEqual({ rows: 4, columns: [{ label: 'Item' }, { label: 'Qty' }, {}, {}], selection: 'B2:D4' })
+  await expect(page.locator('c2-spreadsheet [role="row"]')).toHaveCount(5)
+})
+
+test('insertRows and insertColumns move cells, their column options and the formulas that read them', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await cell(page, 'D3').click()
+  await host(page).evaluate((element: Spreadsheet) => element.insertRows(1))
+  await expect(cell(page, 'A3')).toHaveText('Hotel')
+  await expect(cell(page, 'A2')).toHaveText('')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.getInput('D3'), element.getInput('D4'), element.selection])).toEqual([
+    7,
+    '=B3*C3',
+    '=SUM(D1:D3)',
+    'D4',
+  ])
+
+  // The new row sits inside the total's range, so a value typed into it is added up.
+  await host(page).evaluate((element: Spreadsheet) => element.setInput('D2', 50))
+  await expect(cell(page, 'D4')).toHaveText('$950.00')
+
+  await host(page).evaluate((element: Spreadsheet) => element.insertColumns(1, 2))
+  await expect(page.locator('c2-spreadsheet [role="columnheader"][data-column="3"]')).toHaveText(/D\s*Qty/)
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('F3'), element.getInput('F4'), element.data[0]])).toEqual([
+    '=D3*E3',
+    '=SUM(F1:F3)',
+    ['Flights', null, null, 2, 300, '=D1*E1'],
+  ])
+  await expect(cell(page, 'F4')).toHaveText('$950.00')
+
+  // History named cells by their old addresses, so the insertion clears it rather than undo the wrong cell.
+  await host(page).evaluate((element: Spreadsheet) => element.undo())
+  await expect(cell(page, 'F2')).toHaveText('$50.00')
+})
+
 test('cut clears the range it copied', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await cell(page, 'A1').click()

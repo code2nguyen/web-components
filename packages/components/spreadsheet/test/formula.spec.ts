@@ -1,5 +1,16 @@
 import { test, expect } from '@playwright/test'
-import { CellError, SheetModel, columnIndex, columnName, parseLiteral, parseRange, rangeRef, shiftFormula, type CellValue } from '../src/formula'
+import {
+  CellError,
+  SheetModel,
+  columnIndex,
+  columnName,
+  insertIntoFormula,
+  parseLiteral,
+  parseRange,
+  rangeRef,
+  shiftFormula,
+  type CellValue,
+} from '../src/formula'
 
 // The engine has no DOM, so these run in the Playwright worker without a page.
 
@@ -148,5 +159,17 @@ test.describe('shiftFormula', () => {
     expect(shiftFormula('=$B$2*C2+B$2+$B2', 2, 1)).toBe('=$B$2*D4+C$2+$B4')
     expect(shiftFormula('=SUM(A1:A3)&"A1"', 0, 1)).toBe('=SUM(B1:B3)&"A1"')
     expect(shiftFormula('=A1', -1, 0)).toBe('=#REF!')
+  })
+})
+
+test.describe('insertIntoFormula', () => {
+  test('moves every reference past the insertion, pinned or not, and grows ranges that span it', () => {
+    expect(insertIntoFormula('=B2*C5', 'row', 2, 1)).toBe('=B2*C6')
+    expect(insertIntoFormula('=$B$3+B$3+$B3', 'row', 2, 2)).toBe('=$B$5+B$5+$B5')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 2, 1)).toBe('=SUM(B1:B6)')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 0, 1)).toBe('=SUM(B2:B6)')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 5, 1)).toBe('=SUM(B1:B5)')
+    expect(insertIntoFormula('=SUM(A1:C1)&"B1"', 'column', 1, 2)).toBe('=SUM(A1:E1)&"B1"')
+    expect(insertIntoFormula('=Z1', 'column', 0, 1)).toBe('=AA1')
   })
 })

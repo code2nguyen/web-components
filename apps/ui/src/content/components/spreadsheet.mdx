@@ -32,6 +32,12 @@ copied from Excel or Sheets pastes straight in; a formula copied inside the grid
 (`=B2*C2` one row down becomes `=B3*C3`, and `$` pins a row or column). Ctrl/⌘+Z and Y undo and redo. Tab outside an
 edit leaves the grid.
 
+A paste larger than the space left grows the sheet to fit rather than dropping what does not fit. To add rows or
+columns from code, call `insertRows(index, count)` or `insertColumns(index, count)` with a zero-based index (`0` for
+the top or first column, `rows` or the column count for the end): the cells after it move, column options move with
+their columns, and formulas keep reading the same cells, so `=SUM(B1:B5)` becomes `=SUM(B1:B6)` when a row goes in
+inside the range. Inserting clears the undo history.
+
 Drag the right edge of a column header to resize the column, or double-click it to fit the column to its widest
 cell. The new width is written to `columns` and reported by `column-resize`, so an app can save it and hand it back.
 A column stops at its `minWidth` (32px by default); `resizable: false` on a column, or `resizable="false"` on the

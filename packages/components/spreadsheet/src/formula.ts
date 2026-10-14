@@ -313,6 +313,25 @@ export function shiftFormula(formula: string, rows: number, columns: number): st
   )
 }
 
+/**
+ * Rewrites a formula for `count` rows or columns inserted at index `at`, as Sheets and Excel do: every reference at
+ * or past `at` moves by `count`, pinned or not, so it still names the same cell. A range spanning the insertion
+ * grows to take in the new rows or columns. Text inside double quotes is left alone.
+ */
+export function insertIntoFormula(formula: string, axis: 'row' | 'column', at: number, count: number): string {
+  return formula.replace(
+    /"(?:[^"]|"")*"|(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![A-Za-z0-9_.(])/g,
+    (whole, columnPin: string, column: string, rowPin: string, row: string) => {
+      if (whole.startsWith('"')) return whole
+      let newColumn = columnIndex(column)
+      let newRow = +row - 1
+      if (axis === 'column' && newColumn >= at) newColumn += count
+      if (axis === 'row' && newRow >= at) newRow += count
+      return `${columnPin}${columnName(newColumn)}${rowPin}${newRow + 1}`
+    },
+  )
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // Values and functions
 
