@@ -129,13 +129,15 @@ export function parseLiteral(input: string): { value: CellValue; hint?: FormatHi
 // ---------------------------------------------------------------------------------------------------------------
 // Tokenizer and parser
 
-type Token = { type: 'number'; value: number } | { type: 'string' | 'ref' | 'name' | 'op'; value: string }
+type Token = { type: 'number'; value: number } | { type: 'string' | 'ref' | 'name' | 'op' | 'error'; value: string }
 
 export type FormulaNode =
   | { kind: 'literal'; value: number | string | boolean }
   | { kind: 'ref'; row: number; column: number }
   | { kind: 'range'; start: CellPosition; end: CellPosition }
   | { kind: 'name'; name: string }
+  /** `#REF!` written in place of a reference that was deleted or moved off the sheet. */
+  | { kind: 'error'; error: '#REF!' }
   | { kind: 'negate' | 'percent'; operand: FormulaNode }
   | { kind: 'binary'; operator: string; left: FormulaNode; right: FormulaNode }
   | { kind: 'call'; name: string; args: FormulaNode[] }
@@ -156,6 +158,8 @@ function tokenize(source: string): Token[] {
       tokens.push({ type: 'string', value: match[1].replace(/""/g, '"') })
     } else if ((match = /^\$?[A-Za-z]{1,3}\$?\d+(?![A-Za-z0-9_.(])/.exec(rest))) {
       tokens.push({ type: 'ref', value: match[0] })
+    } else if ((match = /^#REF!/i.exec(rest))) {
+      tokens.push({ type: 'error', value: '#REF!' })
     } else if ((match = /^[A-Za-z_][A-Za-z0-9_.]*/.exec(rest))) {
       tokens.push({ type: 'name', value: match[0].toUpperCase() })
     } else if ((match = /^(?:<>|<=|>=|[-+*/^&=<>(),:%])/.exec(rest))) {
@@ -198,6 +202,8 @@ export function parseFormula(source: string): FormulaNode {
       case 'number':
       case 'string':
         return { kind: 'literal', value: token.value }
+      case 'error':
+        return { kind: 'error', error: '#REF!' }
       case 'ref': {
         const start = parseCellRef(token.value)!
         if (!isOp(':')) return { kind: 'ref', ...start }
@@ -330,6 +336,56 @@ export function insertIntoFormula(formula: string, axis: 'row' | 'column', at: n
       return `${columnPin}${columnName(newColumn)}${rowPin}${newRow + 1}`
     },
   )
+}
+
+/**
+ * Rewrites a formula for `count` rows or columns deleted from index `at`, as Sheets and Excel do: references past
+ * the deleted ones move back, a reference to a deleted cell becomes `#REF!`, and a range that loses some of its
+ * rows or columns shrinks (`=SUM(B1:B5)` becomes `=SUM(B1:B4)` when row 3 goes). A range whose cells are all deleted
+ * becomes `#REF!`. Text inside double quotes is left alone.
+ */
+export function deleteFromFormula(formula: string, axis: 'row' | 'column', at: number, count: number): string {
+  const end = at + count
+  const index = (ref: RefParts) => (axis === 'row' ? ref.row : ref.column)
+  const withIndex = (ref: RefParts, value: number): RefParts => (axis === 'row' ? { ...ref, row: value } : { ...ref, column: value })
+  return formula.replace(
+    /"(?:[^"]|"")*"|(\$?[A-Za-z]{1,3}\$?\d+)(?::(\$?[A-Za-z]{1,3}\$?\d+))?(?![A-Za-z0-9_.(])/g,
+    (whole, first: string | undefined, second: string | undefined) => {
+      if (!first) return whole
+      const a = splitRef(first)
+      if (!second) {
+        const i = index(a)
+        if (i >= at && i < end) return '#REF!'
+        return joinRef(i >= end ? withIndex(a, i - count) : a)
+      }
+      const b = splitRef(second)
+      // The endpoints may be written either way round (`B5:B1`); `low` is the one nearer the top or the left.
+      const [low, high] = index(a) <= index(b) ? [a, b] : [b, a]
+      const lo = index(low)
+      const hi = index(high)
+      if (lo >= at && hi < end) return '#REF!'
+      const newLow = lo < at ? lo : lo >= end ? lo - count : at
+      const newHigh = hi < at ? hi : hi >= end ? hi - count : at - 1
+      const moved = [withIndex(low, newLow), withIndex(high, newHigh)]
+      return low === a ? `${joinRef(moved[0])}:${joinRef(moved[1])}` : `${joinRef(moved[1])}:${joinRef(moved[0])}`
+    },
+  )
+}
+
+interface RefParts {
+  columnPin: string
+  column: number
+  rowPin: string
+  row: number
+}
+
+function splitRef(ref: string): RefParts {
+  const [, columnPin, column, rowPin, row] = /^(\$?)([A-Za-z]{1,3})(\$?)(\d+)$/.exec(ref)!
+  return { columnPin, column: columnIndex(column), rowPin, row: +row - 1 }
+}
+
+function joinRef({ columnPin, column, rowPin, row }: RefParts): string {
+  return `${columnPin}${columnName(column)}${rowPin}${row + 1}`
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -679,6 +735,8 @@ export class SheetModel {
       }
       case 'name':
         return new CellError('#NAME?', `Unknown name ${node.name}`)
+      case 'error':
+        return new CellError('#REF!', 'The formula refers to a cell that was deleted or moved off the sheet')
       case 'negate': {
         const n = toNumber(this.evaluate(node.operand))
         return isCellError(n) ? n : -n

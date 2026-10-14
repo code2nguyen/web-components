@@ -5,6 +5,7 @@ import { live } from 'lit/directives/live.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './spreadsheet.scss?inline'
 import {
@@ -12,6 +13,7 @@ import {
   SheetModel,
   cellRef,
   columnName,
+  deleteFromFormula,
   insertIntoFormula,
   isCellError,
   parseCellRef,
@@ -30,6 +32,7 @@ export {
   CellError,
   cellRef,
   columnName,
+  deleteFromFormula,
   insertIntoFormula,
   isCellError,
   parseCellRef,
@@ -87,6 +90,23 @@ export interface SpreadsheetColumnResizeEventDetail {
   index: number
   /** The new width in pixels, also written to `columns`. */
   width: number
+}
+
+/**
+ * What a right click (or long press, or the context-menu key) landed on, handed to an enclosing `c2-context-menu` as
+ * `context.data`. The selection has already moved there, so `start` and `end` are what an insert or delete acts on.
+ */
+export interface SpreadsheetContextMenuData {
+  /** A cell, a row header, a column header, or the corner that selects everything. */
+  area: 'cell' | 'row' | 'column' | 'corner'
+  /** The selected range, such as `B2:C4`. */
+  range: string
+  /** The current cell, such as `B2`. */
+  active: string
+  /** Zero-based top-left of the selection. */
+  start: CellPosition
+  /** Zero-based bottom-right of the selection. */
+  end: CellPosition
 }
 
 export interface SpreadsheetSelectionChangeEventDetail {
@@ -166,8 +186,13 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * it, Enter and Tab commit and move, Escape cancels, Delete clears, Ctrl/⌘+C, X, V copy, cut and paste as
  * tab-separated text, Ctrl/⌘+Z and Y undo and redo, Ctrl/⌘+A selects every cell. Tab outside an edit leaves the grid.
  *
- * A paste larger than the space left grows the sheet to fit. `insertRows` and `insertColumns` add empty rows and
- * columns, and formulas keep pointing at the cells they read.
+ * A paste larger than the space left grows the sheet to fit. `insertRows`, `insertColumns`, `deleteRows` and
+ * `deleteColumns` change the sheet's shape, and formulas keep pointing at the cells they read.
+ *
+ * Wrapped in a `c2-context-menu`, a right-clicked cell, row header or column header selects itself (unless it is
+ * already selected) and answers the menu's request with a `SpreadsheetContextMenuData` (`area`, `range`, `active`,
+ * `start`, `end`), which `renderContextMenu` receives as `context.data` with this element as `context.source`: enough
+ * to offer "Insert row above" or "Delete columns" and call the methods above.
  *
  * Drag the right edge of a column header to resize the column, or double-click it to fit the column to its content.
  * The new width is written to `columns` and reported by `column-resize`.
@@ -374,7 +399,7 @@ export class Spreadsheet extends LitElement {
    * when a row goes in inside the range. Writes `data` and `rows`, clears the undo history and fires no event.
    */
   insertRows(index: number, count = 1): void {
-    this.insert('row', index, count)
+    this.restructure('row', index, count, false)
   }
 
   /**
@@ -383,7 +408,25 @@ export class Spreadsheet extends LitElement {
    * follows the cells it reads. Writes `data` and `columns`, clears the undo history and fires no event.
    */
   insertColumns(index: number, count = 1): void {
-    this.insert('column', index, count)
+    this.restructure('column', index, count, false)
+  }
+
+  /**
+   * Deletes `count` rows from the zero-based row `index`. The rows below move up and formulas follow them: a
+   * reference to a deleted cell becomes `#REF!` and a range that loses rows shrinks (`=SUM(B1:B5)` becomes
+   * `=SUM(B1:B4)`). At least one row always stays. Writes `data` and `rows`, clears the undo history and fires no event.
+   */
+  deleteRows(index: number, count = 1): void {
+    this.restructure('row', index, count, true)
+  }
+
+  /**
+   * Deletes `count` columns from the zero-based column `index`, with their options. The columns to the right move
+   * over and formulas follow them, as `deleteRows` describes. At least one column always stays. Writes `data` and
+   * `columns`, clears the undo history and fires no event.
+   */
+  deleteColumns(index: number, count = 1): void {
+    this.restructure('column', index, count, true)
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -532,6 +575,7 @@ export class Spreadsheet extends LitElement {
             @pointerdown=${this.onPointerDown}
             @pointerover=${this.onPointerOver}
             @dblclick=${this.onDoubleClick}
+            @c2-context-menu-request=${this.onContextMenuRequest}
             @copy=${this.onCopy}
             @cut=${this.onCut}
             @paste=${this.onPaste}
@@ -762,35 +806,49 @@ export class Spreadsheet extends LitElement {
     this.model.resize(rows, columns.length)
   }
 
-  private insert(axis: 'row' | 'column', index: number, count: number): void {
+  /** Inserts or deletes rows or columns, moving every cell after them and rewriting the formulas that read them. */
+  private restructure(axis: 'row' | 'column', index: number, count: number, remove: boolean): void {
     count = Math.floor(count)
     if (!Number.isFinite(index) || !(count >= 1)) return
     const size = axis === 'row' ? this.model.rows : this.columnDefs.length
     const at = Math.max(0, Math.min(size, Math.floor(index)))
+    if (remove) {
+      if (at >= size) return
+      count = Math.min(count, size - at, size - 1)
+      if (count < 1) return
+    }
     if (this.editing) this.commitEdit(0, 0, false)
 
-    const move = (position: CellPosition): CellPosition =>
-      axis === 'row'
-        ? { row: position.row >= at ? position.row + count : position.row, column: position.column }
-        : { row: position.row, column: position.column >= at ? position.column + count : position.column }
+    const end = at + count
+    /** Where an index lands, or `undefined` for a deleted one. */
+    const place = (i: number): number | undefined => (remove ? (i < at ? i : i >= end ? i - count : undefined) : i >= at ? i + count : i)
     const entries: [string, string][] = []
     for (const key of this.model.keys()) {
       const position = parseCellRef(key)
       if (!position) continue
+      const row = axis === 'row' ? place(position.row) : position.row
+      const column = axis === 'column' ? place(position.column) : position.column
+      if (row === undefined || column === undefined) continue
       const input = this.model.getInput(key)
-      const moved = move(position)
-      entries.push([cellRef(moved.row, moved.column), this.model.isFormula(key) ? insertIntoFormula(input, axis, at, count) : input])
+      const rewrite = remove ? deleteFromFormula : insertIntoFormula
+      entries.push([cellRef(row, column), this.model.isFormula(key) ? rewrite(input, axis, at, count) : input])
     }
 
     const columns = [...this.columnDefs]
-    if (axis === 'column') columns.splice(at, 0, ...Array.from({ length: count }, () => ({})))
-    this.resizeSheet(this.model.rows + (axis === 'row' ? count : 0), columns)
+    if (axis === 'column') {
+      if (remove) columns.splice(at, count)
+      else columns.splice(at, 0, ...Array.from({ length: count }, () => ({})))
+    }
+    this.resizeSheet(this.model.rows + (axis === 'row' ? (remove ? -count : count) : 0), columns)
     this.model.load(entries)
-    // History steps name cells by address, which the insertion just changed.
+    // History steps name cells by address, which the change just moved.
     this.undoStack = []
     this.redoStack = []
     this.ownData = this.serialise()
     this.data = this.ownData
+    // The selection follows its cells; on a deleted row or column it moves to the one that took its place.
+    const move = (position: CellPosition): CellPosition =>
+      this.clamp(axis === 'row' ? { ...position, row: place(position.row) ?? at } : { ...position, column: place(position.column) ?? at })
     this.cursor = move(this.cursor)
     this.extent = move(this.extent)
   }
@@ -906,6 +964,43 @@ export class Spreadsheet extends LitElement {
     if (!this.dragging || !(event.buttons & 1)) return
     const position = this.positionOf(event.target)
     if (position && position !== 'corner' && 'row' in position && 'column' in position) this.userSelect(this.cursor, position)
+  }
+
+  /**
+   * An enclosing `c2-context-menu` asks what was right-clicked. Outside the selection, the click selects what it
+   * landed on first, as in Sheets and Excel; the keyboard's context-menu key keeps the selection.
+   */
+  private onContextMenuRequest = (event: Event): void => {
+    let node = event.composedPath()[0] as Node | undefined
+    if (node && !(node instanceof Element)) node = node.parentElement ?? undefined
+    const position = this.positionOf(node ?? null)
+    if (this.editing) this.commitEdit(0, 0, false)
+    const box = this.selectedBox()
+    const lastRow = this.model.rows - 1
+    const lastColumn = this.columnDefs.length - 1
+    const within = (row: number, column: number) => row >= box.start.row && row <= box.end.row && column >= box.start.column && column <= box.end.column
+    let area: SpreadsheetContextMenuData['area'] = 'cell'
+    if (position === 'corner') {
+      area = 'corner'
+      this.userSelect({ row: 0, column: 0 }, { row: lastRow, column: lastColumn })
+    } else if (position && !('column' in position)) {
+      area = 'row'
+      if (!(within(position.row, 0) && box.start.column === 0 && box.end.column === lastColumn))
+        this.userSelect({ row: position.row, column: 0 }, { row: position.row, column: lastColumn })
+    } else if (position && !('row' in position)) {
+      area = 'column'
+      if (!(within(0, position.column) && box.start.row === 0 && box.end.row === lastRow))
+        this.userSelect({ row: 0, column: position.column }, { row: lastRow, column: position.column })
+    } else if (position && !within(position.row, position.column)) this.userSelect(position)
+    this.focusGrid()
+    const selected = this.selectedBox()
+    provideContextMenuData(event, this, {
+      area,
+      range: rangeRef(selected),
+      active: cellRef(this.cursor.row, this.cursor.column),
+      start: selected.start,
+      end: selected.end,
+    } satisfies SpreadsheetContextMenuData)
   }
 
   private stopDragging = (): void => {

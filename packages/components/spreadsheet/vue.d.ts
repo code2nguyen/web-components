@@ -25,6 +25,7 @@ declare module 'vue' {
         onCellChange?: (event: EventOf<Spreadsheet, 'cell-change'>) => void
         onInput?: (event: EventOf<Spreadsheet, 'input'>) => void
         onChange?: (event: EventOf<Spreadsheet, 'change'>) => void
+        onColumnResize?: (event: EventOf<Spreadsheet, 'column-resize'>) => void
       }
     >
   }

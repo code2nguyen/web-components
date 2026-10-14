@@ -294,6 +294,55 @@ test('insertRows and insertColumns move cells, their column options and the form
   await expect(cell(page, 'F2')).toHaveText('$50.00')
 })
 
+test('deleteRows and deleteColumns close the gap and break references to what they removed', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await host(page).evaluate((element: Spreadsheet) => element.deleteRows(0))
+  await expect(cell(page, 'A1')).toHaveText('Hotel')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.getInput('D1'), element.getInput('D2')])).toEqual([
+    5,
+    '=B1*C1',
+    '=SUM(D1:D1)',
+  ])
+  await expect(cell(page, 'D2')).toHaveText('$300.00')
+
+  await host(page).evaluate((element: Spreadsheet) => element.deleteColumns(1))
+  await expect(page.locator('c2-spreadsheet [role="columnheader"][data-column="1"]')).toHaveText(/B\s*Price/)
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('C1'), element.data[0]])).toEqual(['=#REF!*B1', ['Hotel', 100, '=#REF!*B1']])
+  await expect(cell(page, 'C1')).toHaveText('#REF!')
+
+  // One row and one column always stay.
+  await host(page).evaluate((element: Spreadsheet) => {
+    element.deleteRows(0, 99)
+    element.deleteColumns(0, 99)
+  })
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.columns])).toEqual([1, [{ label: 'Total', format: 'currency' }]])
+})
+
+test('answers an enclosing context menu with what was right-clicked, selecting it first', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  const request = (selector: string) =>
+    host(page).evaluate((element, target) => {
+      const node = element.shadowRoot!.querySelector(target)!
+      const detail = { data: undefined as unknown, source: null as Element | null }
+      node.dispatchEvent(new CustomEvent('c2-context-menu-request', { bubbles: true, composed: true, detail }))
+      return { data: detail.data, source: detail.source === element }
+    }, selector)
+
+  await cell(page, 'A1').click()
+  await cell(page, 'B2').click({ modifiers: ['Shift'] })
+  // Inside the selection, it stays.
+  expect(await request('#cell-B1')).toEqual({
+    data: { area: 'cell', range: 'A1:B2', active: 'A1', start: { row: 0, column: 0 }, end: { row: 1, column: 1 } },
+    source: true,
+  })
+  // Outside it, the cell is selected first.
+  expect((await request('#cell-C3')).data).toMatchObject({ area: 'cell', range: 'C3', active: 'C3' })
+  expect((await request('[role="rowheader"][data-row="1"]')).data).toMatchObject({ area: 'row', range: 'A2:D2' })
+  expect((await request('[role="columnheader"][data-column="2"] .column-label')).data).toMatchObject({ area: 'column', range: 'C1:C6' })
+  expect((await request('[data-corner]')).data).toMatchObject({ area: 'corner', range: 'A1:D6' })
+  await expect(grid(page)).toBeFocused()
+})
+
 test('cut clears the range it copied', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await cell(page, 'A1').click()
