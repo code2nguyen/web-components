@@ -31,3 +31,12 @@ test('out-of-range progress announces the same bounds as the visual arc', async 
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0')
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuemax', '100')
 })
+
+test('the default name follows the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-spinner></c2-spinner></div>')
+  await expect(page.getByRole('progressbar', { name: 'Chargement', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('progressbar', { name: 'Đang tải', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('progressbar', { name: 'Loading', exact: true })).toBeVisible()
+})

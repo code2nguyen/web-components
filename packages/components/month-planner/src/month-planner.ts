@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { queryAll, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -6,6 +6,8 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { monthPlannerMessages } from './messages'
 import styles from './month-planner.scss?inline'
 
 export type MonthPlannerWeekStart = 'monday' | 'sunday' | 'saturday'
@@ -105,92 +107,6 @@ interface Gesture {
 /** Movement, in pixels, below which a press stays a click. */
 const DRAG_THRESHOLD = 4
 
-interface Labels {
-  previousMonth: string
-  nextMonth: string
-  previousYear: string
-  nextYear: string
-  chooseMonth: string
-  hasEvents: string
-  noEvents: string
-}
-
-/** Words the browser cannot translate through `Intl`, by language; any other language falls back to English. */
-const LABELS: Record<string, Labels> = {
-  en: {
-    previousMonth: 'Previous month',
-    nextMonth: 'Next month',
-    previousYear: 'Previous year',
-    nextYear: 'Next year',
-    chooseMonth: 'Choose a month',
-    hasEvents: 'has events',
-    noEvents: 'No events',
-  },
-  fr: {
-    previousMonth: 'Mois précédent',
-    nextMonth: 'Mois suivant',
-    previousYear: 'Année précédente',
-    nextYear: 'Année suivante',
-    chooseMonth: 'Choisir un mois',
-    hasEvents: 'contient des événements',
-    noEvents: 'Aucun événement',
-  },
-  de: {
-    previousMonth: 'Vorheriger Monat',
-    nextMonth: 'Nächster Monat',
-    previousYear: 'Vorheriges Jahr',
-    nextYear: 'Nächstes Jahr',
-    chooseMonth: 'Monat auswählen',
-    hasEvents: 'hat Termine',
-    noEvents: 'Keine Termine',
-  },
-  es: {
-    previousMonth: 'Mes anterior',
-    nextMonth: 'Mes siguiente',
-    previousYear: 'Año anterior',
-    nextYear: 'Año siguiente',
-    chooseMonth: 'Elegir un mes',
-    hasEvents: 'tiene eventos',
-    noEvents: 'Sin eventos',
-  },
-  it: {
-    previousMonth: 'Mese precedente',
-    nextMonth: 'Mese successivo',
-    previousYear: 'Anno precedente',
-    nextYear: 'Anno successivo',
-    chooseMonth: 'Scegli un mese',
-    hasEvents: 'ha eventi',
-    noEvents: 'Nessun evento',
-  },
-  pt: {
-    previousMonth: 'Mês anterior',
-    nextMonth: 'Próximo mês',
-    previousYear: 'Ano anterior',
-    nextYear: 'Próximo ano',
-    chooseMonth: 'Escolher um mês',
-    hasEvents: 'tem eventos',
-    noEvents: 'Sem eventos',
-  },
-  nl: {
-    previousMonth: 'Vorige maand',
-    nextMonth: 'Volgende maand',
-    previousYear: 'Vorig jaar',
-    nextYear: 'Volgend jaar',
-    chooseMonth: 'Kies een maand',
-    hasEvents: 'heeft afspraken',
-    noEvents: 'Geen afspraken',
-  },
-  vi: {
-    previousMonth: 'Tháng trước',
-    nextMonth: 'Tháng sau',
-    previousYear: 'Năm trước',
-    nextYear: 'Năm sau',
-    chooseMonth: 'Chọn tháng',
-    hasEvents: 'có sự kiện',
-    noEvents: 'Không có sự kiện',
-  },
-}
-
 const isoPattern = /^\d{4}-\d{2}-\d{2}$/
 const monthPattern = /^(\d{4})-(\d{2})$/
 
@@ -251,9 +167,9 @@ function dayDiff(from: Date, to: Date): number {
  * week and Alt+Shift+Arrow Left/Right changes its end. The planner never changes `events` itself: update them in the
  * handler. A compact planner fires `day-click` on a tap as well.
  *
- * Text follows `locale`, or the browser's language when it is not set: month and day names, "Today" and "this month"
- * come from `Intl`, and the navigation labels from a built-in list (English, French, German, Spanish, Italian,
- * Portuguese, Dutch, Vietnamese; other languages fall back to English).
+ * Text follows `locale`, else the nearest `lang` attribute (redrawing when it changes), else the browser's language:
+ * month and day names, "Today" and "this month" come from `Intl`, and the navigation labels from a built-in list
+ * (English, French, German, Spanish, Italian, Portuguese, Dutch, Vietnamese; other languages fall back to English).
  *
  * @tag c2-month-planner
  *
@@ -365,7 +281,7 @@ export class MonthPlanner extends LitElement {
   @property({ converter: jsonPropertyConverter }) events: MonthPlannerEvent[] = []
   /** Month shown, as `YYYY-MM`. Defaults to the current month; the header navigation updates it. */
   @property({ type: String }) month = ''
-  /** Language of the planner's text, month and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
+  /** Language of the planner's text, month and day names, e.g. `fr` or `en-GB`. Defaults to the nearest `lang`, else the browser's language. */
   @property({ type: String }) locale = ''
   /** First day of the week. Defaults to the convention of `locale` (Sunday in `en-US`, Monday in `fr` or `en-GB`). */
   @property({ attribute: 'week-start', reflect: true }) weekStart: MonthPlannerWeekStart | '' = ''
@@ -407,8 +323,11 @@ export class MonthPlanner extends LitElement {
     this.endGesture()
   }
 
+  /** `locale`, else the nearest `lang`, else the browser's language; a `lang` change redraws the planner. */
+  private readonly msg = new LocalizeController(this, monthPlannerMessages, () => this.locale)
+
   private get effectiveLocale() {
-    return resolveLocale(this.locale)
+    return isServer ? resolveLocale(this.locale) : this.msg.locale
   }
 
   /** First day of the week as `Date#getDay` numbers it: `week-start` when set, else the locale's convention. */
@@ -417,10 +336,6 @@ export class MonthPlanner extends LitElement {
     if (this.weekStart === 'monday') return 1
     if (this.weekStart === 'saturday') return 6
     return firstDayOfWeek(this.effectiveLocale)
-  }
-
-  private get labels(): Labels {
-    return LABELS[this.effectiveLocale.toLowerCase().split('-')[0]] ?? LABELS.en
   }
 
   /** The Today button's label: "today" in the planner's language, capitalised. */
@@ -528,16 +443,16 @@ export class MonthPlanner extends LitElement {
     return html`<div
       class="picker"
       role="dialog"
-      aria-label=${this.labels.chooseMonth}
+      aria-label=${this.msg.t('chooseMonth')}
       @keydown=${this.handlePickerKeydown}
       @focusout=${this.handlePickerFocusout}
     >
       <div class="picker-year">
-        <button class="nav" type="button" aria-label=${this.labels.previousYear} @click=${() => this.movePickerFocus(this.pickerFocus - 12)}>
+        <button class="nav" type="button" aria-label=${this.msg.t('previousYear')} @click=${() => this.movePickerFocus(this.pickerFocus - 12)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
         <span class="picker-year-label" aria-live="polite">${year}</span>
-        <button class="nav" type="button" aria-label=${this.labels.nextYear} @click=${() => this.movePickerFocus(this.pickerFocus + 12)}>
+        <button class="nav" type="button" aria-label=${this.msg.t('nextYear')} @click=${() => this.movePickerFocus(this.pickerFocus + 12)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
         </button>
       </div>
@@ -547,7 +462,7 @@ export class MonthPlanner extends LitElement {
           const hasEvents = marked.has(toMonth(date))
           const selected = year === shown.getFullYear() && month === shown.getMonth()
           const current = year === now.getFullYear() && month === now.getMonth()
-          const label = [long.format(date), hasEvents ? this.labels.hasEvents : '', current ? this.relative('month') : ''].filter(Boolean).join(', ')
+          const label = [long.format(date), hasEvents ? this.msg.t('hasEvents') : '', current ? this.relative('month') : ''].filter(Boolean).join(', ')
           return html`<button
             class="picker-month ${hasEvents ? 'marked' : ''} ${selected ? 'selected' : ''} ${current ? 'current' : ''}"
             type="button"
@@ -843,7 +758,7 @@ export class MonthPlanner extends LitElement {
   /** The compact layout's day: a date in a circle over one dot per event (three at most), picking the listed day. */
   private renderDaySelect(date: Date, value: string, today: boolean, selected: boolean, dated: DatedEvent[], dateLabel: Intl.DateTimeFormat) {
     const onDay = dated.filter((item) => item.start <= date && item.end >= date)
-    const label = `${dateLabel.format(date)}${today ? `, ${this.relative('day')}` : ''}${onDay.length ? `, ${this.labels.hasEvents}` : ''}`
+    const label = `${dateLabel.format(date)}${today ? `, ${this.relative('day')}` : ''}${onDay.length ? `, ${this.msg.t('hasEvents')}` : ''}`
     return html`<button
       class="day-select"
       type="button"
@@ -894,7 +809,7 @@ export class MonthPlanner extends LitElement {
                   </li>`,
               )}
             </ul>`
-          : html`<p class="agenda-empty">${this.labels.noEvents}</p>`
+          : html`<p class="agenda-empty">${this.msg.t('noEvents')}</p>`
       }
     </section>`
   }
@@ -945,11 +860,11 @@ export class MonthPlanner extends LitElement {
             <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </div>
           <div class="navigation">
-            <button class="nav" type="button" aria-label=${this.labels.previousMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, -1))}>
+            <button class="nav" type="button" aria-label=${this.msg.t('previousMonth')} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, -1))}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
             <button class="nav today-button" type="button" @click=${() => this.showMonth(beginningOfMonth(new Date()))}>${this.todayLabel()}</button>
-            <button class="nav" type="button" aria-label=${this.labels.nextMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, 1))}>
+            <button class="nav" type="button" aria-label=${this.msg.t('nextMonth')} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, 1))}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           </div>

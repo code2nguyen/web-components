@@ -722,3 +722,32 @@ test('the tape of the toolbar is cut from the paper it sits on, unless its colou
   await host.evaluate((element) => element.style.setProperty('--c2-notepad__toolbar--background', 'rgb(200, 30, 30)'))
   await expect.poll(tape).toBe('rgb(200, 30, 30)')
 })
+
+test('its text follows the nearest lang, and a lang change, without re-creating the element', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-notepad label="Notes" paper-picker required value="- [ ] Lait"></c2-notepad></div>')
+  const lang = page.locator('div[lang]')
+  const host = page.locator('c2-notepad')
+  const box = host.locator('.task .box')
+  const validation = () => host.evaluate((element: HTMLElement & { validationMessage: string }) => element.validationMessage)
+  await expect(host.locator('.toolbar')).toHaveAttribute('aria-label', 'Mise en forme')
+  await expect(host.locator('.toolbar .group[data-group="ink"] .trigger')).toHaveAttribute('aria-label', 'Couleur d’encre : Encre par défaut')
+  await expect(host.locator('.toolbar [data-mark="ink"][data-color="1"]')).toHaveAttribute('aria-label', 'Encre bleue')
+  await expect(page.getByRole('button', { name: 'Papier' })).toBeVisible()
+  await expect(host.locator('#paper-lines')).toHaveText('Réglure')
+  // The checkbox is drawn by ProseMirror, outside Lit.
+  await expect(box).toHaveAttribute('aria-label', 'Terminé')
+
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(host.locator('.toolbar')).toHaveAttribute('aria-label', 'Định dạng')
+  await expect(page.getByRole('button', { name: 'Giấy' })).toBeVisible()
+  await expect(host.locator('#paper-lines')).toHaveText('Dòng kẻ')
+  await expect(box).toHaveAttribute('aria-label', 'Xong')
+  await host.evaluate((element: HTMLElement & { value: string }) => (element.value = ''))
+  await expect.poll(validation).toBe('Vui lòng viết gì đó.')
+
+  // A language the library does not ship falls back to English.
+  await lang.evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(host.locator('.toolbar')).toHaveAttribute('aria-label', 'Formatting')
+  await expect(page.getByRole('button', { name: 'Paper' })).toBeVisible()
+  await expect.poll(validation).toBe('Please write something.')
+})

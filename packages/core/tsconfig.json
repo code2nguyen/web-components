@@ -9,5 +9,6 @@
     "allowImportingTsExtensions": false,
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
-  "include": ["**/*"]
+  "include": ["**/*"],
+  "exclude": ["dist", "**/*.test.ts"]
 }

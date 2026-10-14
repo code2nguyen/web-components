@@ -85,3 +85,17 @@ test('has no axe violations', async ({ page, scenario }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('a lang change redraws the phrase at once, and an explicit locale still wins', async ({ page, scenario }) => {
+  await scenario('lang')
+  const lang = page.locator('p[lang]')
+  const time = page.locator('#subject time')
+  await lang.evaluate((el) => el.setAttribute('lang', 'en'))
+  await expect(time).toHaveText('3 minutes ago')
+  await lang.evaluate((el) => el.setAttribute('lang', 'fr'))
+  await expect(time).toHaveText('il y a 3 minutes')
+  await page.locator('#subject').evaluate((el) => el.setAttribute('locale', 'en'))
+  await expect(time).toHaveText('3 minutes ago')
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(time).toHaveText('3 minutes ago')
+})

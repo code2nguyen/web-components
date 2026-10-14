@@ -132,3 +132,12 @@ test('a sheet holding a modal keeps the page locked until both have closed', asy
   await page.locator('c2-sheet').evaluate((el) => (el as HTMLElement & { close(): void }).close())
   await expect(page.locator('html')).not.toHaveCSS('overflow', 'hidden')
 })
+
+test('the close button is named in the nearest lang and follows a lang change', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-sheet label="Filtres" open>Bonjour</c2-sheet></div>')
+  await expect(page.getByRole('button', { name: 'Fermer', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('button', { name: 'Đóng', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
+})

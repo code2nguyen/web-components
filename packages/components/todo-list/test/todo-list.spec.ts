@@ -393,7 +393,8 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
 
   await list.getByRole('button', { name: 'Customize look' }).click()
   await expect(list.getByRole('region', { name: 'Customize the list' })).toBeVisible()
-  await expect(list.locator('.tasks')).toHaveCount(0)
+  // The panel floats over the tasks, which stay to show the changes.
+  await expect(list.locator('.tasks')).toBeVisible()
   await list.getByRole('radio', { name: 'Night' }).click()
   await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(26, 26, 31)')
   await expect(list.locator('.heading')).toHaveCSS('color', 'rgb(241, 240, 238)')
@@ -405,7 +406,7 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
   await list.getByRole('radio', { name: 'Cross' }).click()
   await list.getByRole('radio', { name: 'Bar' }).click()
   await expect(list.locator('.bar')).toBeVisible()
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(list.getByRole('button', { name: 'Customize look' })).toBeFocused()
   await expect(list.locator('[data-reorder-key="a"] .mark path')).toHaveAttribute('d', /^M6\.5 6\.8/)
   await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ background: 6, doneMark: 'cross', progress: 'bar' })
@@ -460,7 +461,7 @@ test('a palette recolours the highlighters and pens, in a light or dark variant'
   await expect.poll(() => cssVar(list, '--c2-todo-list__pen-violet--color')).toBe('#d1b7dc')
   await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 3, background: 6 })
 
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(passport).not.toHaveCSS('background-color', before)
   // The palette's accent is what changes most: Earth's dark sienna on the ticks, the progress and the Add button.
   await expect(list.locator('.add-button')).toHaveCSS('background-color', 'rgb(235, 169, 147)')
@@ -483,7 +484,7 @@ test('choosing a palette recolours the progress, even over a pen stored earlier'
   await list.getByRole('button', { name: 'Customize look' }).click()
   await list.getByRole('button', { name: 'Palette' }).click()
   await list.getByRole('option', { name: 'Earth' }).click()
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   // Earth's sienna accent, light variant.
   await expect(ring).toHaveCSS('stroke', 'rgb(154, 74, 38)')
   await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 3 })
@@ -606,7 +607,7 @@ test('custom backgrounds and palettes fill the panel and are stored by position'
   await list.getByRole('option', { name: 'Brand' }).click()
   await list.getByRole('radio', { name: 'Ink' }).click()
   await expect.poll(() => cssVar(list, '--c2-todo-list__accent--color')).toBe('rgb(165, 180, 252)')
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(list.locator('[data-reorder-key="b"] .label')).toHaveCSS('color', 'rgb(240, 240, 250)')
 })
 
@@ -654,7 +655,7 @@ test('remembers the look and the tasks in localStorage', async ({ page, scenario
   await list.getByRole('radio', { name: 'Sand' }).click()
   await list.getByRole('radio', { name: 'Hero' }).click()
   await expect(list.getByText('Saved in this browser')).toHaveCount(0)
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   await list.getByRole('checkbox', { name: 'Renew passport' }).click()
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2-todo-list:spec') ?? 'null'))
@@ -678,7 +679,8 @@ test('changes the list icon from the customize panel, and remembers it', async (
   await expect(ring.locator('c2-task-icon-calendar')).toBeAttached()
 
   await list.getByRole('button', { name: 'Customize look' }).click()
-  const toggle = list.getByRole('button', { name: 'Icon' })
+  const panel = list.getByRole('region', { name: 'Customize the list' })
+  const toggle = panel.getByRole('button', { name: 'Icon', exact: true })
   await expect(toggle).toHaveAccessibleDescription('Schedule · from the heading')
   await toggle.click()
   // The named list icons, after Automatic (the heading's suggestion) and Empty.
@@ -705,19 +707,19 @@ test('changes the list icon from the customize panel, and remembers it', async (
   await expect(list.getByRole('region', { name: 'Customize the list' })).toBeVisible()
   await expect(list).toHaveAttribute('data-events', 'look-change')
 
-  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await list.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(ring.locator('c2-task-icon-cart')).toBeAttached()
   await scenario('persist')
   await expect(ring.locator('c2-task-icon-cart')).toBeAttached()
   expect(await list.evaluate((element: TodoList) => element.look.icon)).toBe('groceries')
 
   await list.getByRole('button', { name: 'Customize look' }).click()
-  await list.getByRole('button', { name: 'Icon' }).click()
+  await toggle.click()
   await list.getByRole('button', { name: 'Empty' }).click()
-  await expect(list.getByRole('button', { name: 'Icon' })).toHaveAccessibleDescription('Empty')
-  await list.getByRole('button', { name: 'Icon' }).click()
+  await expect(toggle).toHaveAccessibleDescription('Empty')
+  await toggle.click()
   await list.getByRole('button', { name: 'Automatic' }).click()
-  await expect(list.getByRole('button', { name: 'Icon' })).toHaveAccessibleDescription('Schedule · from the heading')
+  await expect(toggle).toHaveAccessibleDescription('Schedule · from the heading')
 })
 
 test('takes a list icon name in the icon attribute', async ({ page, scenario }) => {
@@ -848,6 +850,30 @@ test('editHeading() opens the heading editor; it does nothing when the heading i
   await expect(list.locator('.heading-edit')).toHaveCount(0)
 })
 
+test('the customize panel floats in the window, whole, over a list too short to hold it', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 420, height: 520 })
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  // A card with a fixed height that scrolls, as on a board.
+  await list.evaluate((element: HTMLElement) => Object.assign(element.style, { display: 'block', height: '220px', overflow: 'auto' }))
+  await list.getByRole('button', { name: 'Customize look' }).click()
+  const panel = list.getByRole('region', { name: 'Customize the list' })
+  await expect(panel).toBeVisible()
+  expect(await panel.evaluate((element) => element.matches(':popover-open'))).toBe(true)
+  const box = (await panel.boundingBox())!
+  expect(box.y).toBeGreaterThanOrEqual(0)
+  expect(box.y + box.height).toBeLessThanOrEqual(520)
+  await expect(panel.getByRole('button', { name: 'Close', exact: true })).toBeInViewport({ ratio: 1 })
+
+  // A press elsewhere closes it; Close returns to the palette button.
+  await page.mouse.click(5, 515)
+  await expect(panel).toHaveCount(0)
+  await list.getByRole('button', { name: 'Customize look' }).click()
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(panel).toHaveCount(0)
+  await expect(list.getByRole('button', { name: 'Customize look' })).toBeFocused()
+})
+
 test('actions-placement puts the actions slot before or after the customize button', async ({ page, scenario }) => {
   const order = () =>
     page.locator('c2-todo-list .actions').evaluate((actions) => [...actions.children].map((child) => (child.localName === 'slot' ? 'slot' : child.className)))
@@ -916,4 +942,34 @@ test('has no detectable accessibility violations with a submenu, the icon picker
   await list.getByRole('button', { name: 'Customize look' }).click()
   await list.getByRole('radio', { name: 'Blush' }).click()
   await accessible(page)
+})
+
+test('shows its text in the nearest lang and follows a lang change', async ({ page, scenario }) => {
+  await scenario('lang')
+  const list = page.locator('c2-todo-list')
+  const lang = page.locator('div[lang]')
+  const tabs = list.locator('c2-tabs.filters c2-tab')
+
+  // Visible text, a value and plural message, an aria-label, a placeholder and the default pen names.
+  await expect(list.locator('.meta')).toHaveText('2 sur 6 terminées · 1 urgente')
+  await expect(list.getByRole('progressbar', { name: '2 tâches sur 6 terminées' })).toBeVisible()
+  await expect(tabs.first()).toContainText('Toutes')
+  await expect(list.getByRole('button', { name: 'Personnaliser l’apparence' })).toBeVisible()
+  await expect(list.getByRole('textbox', { name: 'Nouvelle tâche' })).toHaveAttribute('placeholder', 'Ajouter une tâche — une note après un tiret')
+  await list.getByRole('button', { name: 'Actions pour Dentist appointment' }).click()
+  await list.getByRole('menuitem', { name: 'Surligner' }).hover()
+  await expect(list.getByRole('menuitemradio', { name: 'Surligneur rose' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Escape')
+
+  await lang.evaluate((element) => element.setAttribute('lang', 'vi'))
+  await expect(list.locator('.meta')).toHaveText('Đã xong 2/6 · 1 việc gấp')
+  await expect(tabs.first()).toContainText('Tất cả')
+  await expect(list.getByRole('button', { name: 'Tùy chỉnh giao diện' })).toBeVisible()
+
+  // A language the library does not ship falls back to English.
+  await lang.evaluate((element) => element.setAttribute('lang', 'de'))
+  await expect(list.locator('.meta')).toHaveText('2 of 6 done · 1 urgent')
+  await expect(tabs.first()).toContainText('All')
+  await expect(list.getByRole('button', { name: 'Customize look' })).toBeVisible()
 })

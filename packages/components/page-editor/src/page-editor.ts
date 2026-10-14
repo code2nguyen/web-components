@@ -4,6 +4,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController, formatMessage } from '@c2n/core/localize.js'
 import { DOMSerializer, Fragment, Slice, type Mark, type MarkType, type Node as ProseNode, type ResolvedPos } from 'prosemirror-model'
 import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view'
@@ -48,7 +49,8 @@ import {
   type PageEditorFormat,
   type PageEditorMark,
 } from './schema'
-import { CodeBlockView, ItemView } from './views'
+import { CodeBlockView, ItemView, type Localizable, type ViewText } from './views'
+import { pageEditorMessages } from './messages'
 import styles from './page-editor.scss?inline'
 
 export { BLOCK_NAMES as PAGE_EDITOR_BLOCKS, COLORS as PAGE_EDITOR_COLORS, MARK_NAMES as PAGE_EDITOR_MARKS } from './schema'
@@ -91,16 +93,14 @@ interface SlashState {
   query: string
 }
 
-const COLOR_LABELS: Record<PageEditorColor, string> = {
-  gray: 'Gray',
-  brown: 'Brown',
-  orange: 'Orange',
-  yellow: 'Yellow',
-  green: 'Green',
-  blue: 'Blue',
-  purple: 'Purple',
-  red: 'Red',
-}
+/** A message in English, which the slash menu also matches whatever the page's language. */
+const english = (key: 'colourText' | 'colourBackground' | PageEditorColor, colour?: PageEditorColor): string =>
+  key === 'colourText' || key === 'colourBackground'
+    ? formatMessage(pageEditorMessages, 'en', key, formatMessage(pageEditorMessages, 'en', colour!))
+    : formatMessage(pageEditorMessages, 'en', key)
+
+/** Lowercase without accents, so `tieu de` finds "Tiêu đề" and `separ` finds "Séparateur". */
+const fold = (text: string) => text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd')
 
 const icon = (body: TemplateResult) => html`<svg viewBox="0 0 20 20" aria-hidden="true">${body}</svg>`
 const stroke = (d: string) => svg`<path d=${d} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />`
@@ -158,18 +158,18 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @cssproperty {length} [--c2-page-editor__content--min-height=120px]
  * @cssproperty {length} [--c2-page-editor__content--max-height=none] - Past this height the page scrolls.
  * @cssproperty {color} [--c2-page-editor__content--color=#18181b] - Text colour. The named colours are mixed with it, so they follow it into dark mode.
- * @cssproperty {font-family} [--c2-page-editor__content--font-family=inherit]
+ * @cssproperty {font-family} [--c2-page-editor__content--font-family=ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol']
  * @cssproperty {font-size} [--c2-page-editor__content--font-size=16px]
- * @cssproperty {number} [--c2-page-editor__content--line-height=1.65]
- * @cssproperty {length} [--c2-page-editor__block--margin-top=4px] - Space between blocks.
+ * @cssproperty {number} [--c2-page-editor__content--line-height=1.5]
+ * @cssproperty {length} [--c2-page-editor__block--margin-top=6px] - Space between blocks.
  * @cssproperty {color} [--c2-page-editor__placeholder--color=#a1a1aa]
  * @cssproperty {color} [--c2-page-editor__selection--background=rgba(2, 101, 220, 0.18)]
  * @cssproperty {font-size} [--c2-page-editor__heading1--font-size=30px]
  * @cssproperty {font-size} [--c2-page-editor__heading2--font-size=24px]
  * @cssproperty {font-size} [--c2-page-editor__heading3--font-size=20px]
  * @cssproperty {font-weight} [--c2-page-editor__heading--font-weight=600]
- * @cssproperty {length} [--c2-page-editor__heading--margin-top=20px] - Space above a heading, which replaces the block spacing.
- * @cssproperty {color} [--c2-page-editor__link--color=rgb(2, 101, 220)]
+ * @cssproperty {length} [--c2-page-editor__heading--margin-top=1em] - Space above a heading, which replaces the block spacing. In `em`, it grows with the heading's size.
+ * @cssproperty {color} [--c2-page-editor__link--color=currentColor] - Links take the text colour, underlined, as in Notion.
  * @cssproperty {border} [--c2-page-editor__quote--border-left=3px solid currentColor]
  * @cssproperty {length} [--c2-page-editor__quote--padding-left=14px]
  * @cssproperty {length} [--c2-page-editor__item--indent=26px] - Indentation of one list level, which is also the width of the marker column.
@@ -180,12 +180,12 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @cssproperty {color} [--c2-page-editor__todo__checked--color=#71717a] - Text of a ticked to-do.
  * @cssproperty {border} [--c2-page-editor__divider--border-top=1px solid #e4e4e7]
  * @cssproperty {font-family} [--c2-page-editor__code--font-family=ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace]
- * @cssproperty {color} [--c2-page-editor__inline-code--background=rgba(113, 113, 122, 0.14)]
- * @cssproperty {color} [--c2-page-editor__inline-code--color=#d44c47]
+ * @cssproperty {color} [--c2-page-editor__inline-code--background=rgba(135, 131, 120, 0.15)]
+ * @cssproperty {color} [--c2-page-editor__inline-code--color=#eb5757]
  * @cssproperty {border-radius} [--c2-page-editor__inline-code--border-radius=4px]
  * @cssproperty {color} [--c2-page-editor__code-block--background=#f4f4f5]
  * @cssproperty {color} [--c2-page-editor__code-block--color=#18181b]
- * @cssproperty {border-radius} [--c2-page-editor__code-block--border-radius=8px]
+ * @cssproperty {border-radius} [--c2-page-editor__code-block--border-radius=4px]
  * @cssproperty {font-size} [--c2-page-editor__code-block--font-size=14px]
  * @cssproperty {box-shadow} [--c2-page-editor__code-block__focus--box-shadow=0 0 0 2px rgba(2, 101, 220, 0.25)] - Ring around the code block that holds the caret.
  * @cssproperty {color} [--c2-page-editor__code-header--color=#52525b] - Language button, tools, line numbers and hint of a code block.
@@ -232,6 +232,12 @@ export class PageEditor extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, pageEditorMessages)
+  /** The node views showing interface text of their own, rewritten when the language changes. */
+  private readonly liveViews = new Set<Localizable>()
+  private readonly viewText: ViewText = { text: this.msg, live: this.liveViews }
+  /** The language the ProseMirror parts were last drawn in. */
+  private editorLocale = ''
 
   /** The page as Markdown: headings, lists, to-dos, quotes, fenced code, dividers, emphasis and links, with `<u>`, `<span data-color>` and `<mark data-color>` for underline and colours. */
   @property() value = ''
@@ -455,8 +461,8 @@ export class PageEditor extends LitElement {
         editable: () => this.editable,
         attributes: () => this.surfaceAttributes(),
         nodeViews: {
-          item: (node, view, getPos, decorations) => new ItemView(node, view, getPos, decorations, (pos) => this.toggleTodo(pos)),
-          code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos, { modKey: this.modKey }),
+          item: (node, view, getPos, decorations) => new ItemView(node, view, getPos, decorations, (pos) => this.toggleTodo(pos), this.viewText),
+          code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos, { ...this.viewText, modKey: this.modKey }),
         },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleTextInput: (view, from, _to, text) => {
@@ -509,6 +515,7 @@ export class PageEditor extends LitElement {
       },
     )
     this.serialized = toMarkdown(this.view.state.doc)
+    this.editorLocale = this.msg.locale
     this.syncFormState()
   }
 
@@ -522,7 +529,13 @@ export class PageEditor extends LitElement {
       this.emitFormat()
     }
     const surfaceInputs = ['label', 'ariaLabel', 'placeholder', 'disabled', 'readOnly', 'required', 'disabledByForm', 'blocks', 'slash', 'slashIndex']
-    if (surfaceInputs.some((key) => changed.has(key))) {
+    // The language changed: ProseMirror draws outside Lit, so its placeholders, notes and node views are redrawn here.
+    const relocalized = this.msg.locale !== this.editorLocale
+    if (relocalized) {
+      this.editorLocale = this.msg.locale
+      for (const live of this.liveViews) live.localize()
+    }
+    if (relocalized || surfaceInputs.some((key) => changed.has(key))) {
       // Re-reads `editable`, the surface attributes and the placeholder decorations.
       view.setProps({})
       if (!this.editable) this.hideFloating()
@@ -606,11 +619,7 @@ export class PageEditor extends LitElement {
       }),
       history(),
       inputRules({
-        rules: buildInputRules(
-          allowed,
-          (name) => this.blockLabel(name),
-          () => this.editable,
-        ),
+        rules: buildInputRules(allowed, () => this.editable),
       }),
       keymap({
         'Mod-z': undo,
@@ -642,7 +651,10 @@ export class PageEditor extends LitElement {
         Escape: dismissToolbar,
       }),
       keymap(baseKeymap),
-      autoformatHint(() => this.editable),
+      autoformatHint(
+        () => this.editable,
+        (format) => this.msg.t('undoHint', this.formatLabel(format)),
+      ),
       listNumbering,
       normalize,
       highlightPlugin(),
@@ -673,11 +685,11 @@ export class PageEditor extends LitElement {
       if (!node.isTextblock || node.content.size > 0 || node.type === schema.nodes.code_block) return
       const here = focused && index === caretIndex && this.editable
       let text = ''
-      if (node.type === schema.nodes.heading) text = `Heading ${node.attrs.level}`
+      if (node.type === schema.nodes.heading) text = this.msg.t('heading', node.attrs.level as number)
       else if (!here) return
       else if (node.type === schema.nodes.paragraph) text = this.commandHint()
-      else if (node.type === schema.nodes.quote) text = 'Quote'
-      else if (node.type === schema.nodes.item) text = node.attrs.kind === 'todo' ? 'To-do' : 'List'
+      else if (node.type === schema.nodes.quote) text = this.msg.t('quotePlaceholder')
+      else if (node.type === schema.nodes.item) text = this.msg.t(node.attrs.kind === 'todo' ? 'todoPlaceholder' : 'listPlaceholder')
       if (!text) return
       // A list item's view shows it on its text, after the marker.
       if (node.type === schema.nodes.item) decorations.push(Decoration.node(pos, pos + node.nodeSize, {}, { placeholder: text }))
@@ -687,7 +699,7 @@ export class PageEditor extends LitElement {
   }
 
   private commandHint() {
-    return this.coarse ? 'Tap + for blocks' : "Type '/' for commands"
+    return this.msg.t(this.coarse ? 'tapPlus' : 'typeSlash')
   }
 
   private surfaceAttributes(): Record<string, string> {
@@ -787,8 +799,21 @@ export class PageEditor extends LitElement {
     if (tr) view.dispatch(tr)
   }
 
+  /** A block's name in the page's language. */
   private blockLabel(block: PageEditorBlock) {
-    return BLOCK_ENTRIES.find((each) => each.block === block)?.label ?? 'Text'
+    if (block === 'heading1' || block === 'heading2' || block === 'heading3') return this.msg.t('heading', Number(block.slice(-1)))
+    return BLOCK_NAMES.includes(block) ? this.msg.t(block) : this.msg.t('paragraph')
+  }
+
+  /** The name of a format an input rule applied: a block name, or `mark:` and a mark name. */
+  private formatLabel(format: string) {
+    const marks: Record<string, 'bold' | 'italic' | 'strikethrough' | 'codeShort'> = {
+      'mark:bold': 'bold',
+      'mark:italic': 'italic',
+      'mark:strike': 'strikethrough',
+      'mark:code': 'codeShort',
+    }
+    return format in marks ? this.msg.t(marks[format]) : this.blockLabel(format as PageEditorBlock)
   }
 
   /** Pasted plain text is read as Markdown; its first and last lines join the line being written when they are text. */
@@ -962,9 +987,9 @@ export class PageEditor extends LitElement {
     const allowed = this.allowedBlocks
     const entries: MenuEntry[] = BLOCK_ENTRIES.filter((entry) => allowed.has(entry.block)).map((entry) => ({
       id: entry.block,
-      section: 'Blocks',
-      label: entry.label,
-      description: entry.description,
+      section: this.msg.t('blocksSection'),
+      label: this.blockLabel(entry.block),
+      description: this.msg.t(`${entry.block}Description`),
       keywords: entry.keywords,
       shortcut: entry.shortcut,
       icon: entry.icon,
@@ -975,10 +1000,10 @@ export class PageEditor extends LitElement {
         html`<span class="swatch ${kind}" data-color=${color ?? 'default'} aria-hidden="true">A</span>`
       entries.push({
         id: 'color-default',
-        section: 'Colours',
-        label: 'Default colour',
-        description: 'Remove text and background colours',
-        keywords: 'color colour reset clear none',
+        section: this.msg.t('coloursSection'),
+        label: this.msg.t('defaultColour'),
+        description: this.msg.t('defaultColourDescription'),
+        keywords: 'default color colour reset clear none',
         icon: swatch('color', null),
         run: () => {
           this.applyColor('color', null, true)
@@ -988,10 +1013,10 @@ export class PageEditor extends LitElement {
       for (const color of COLORS) {
         entries.push({
           id: `color-${color}`,
-          section: 'Colours',
-          label: `${COLOR_LABELS[color]} text`,
-          description: 'Colour the current line',
-          keywords: `color colour text ${color}`,
+          section: this.msg.t('coloursSection'),
+          label: this.msg.t('colourText', this.msg.t(color)),
+          description: this.msg.t('colourTextDescription'),
+          keywords: `${english('colourText', color)} color colour text ${color}`,
           icon: swatch('color', color),
           run: () => this.applyColor('color', color, true),
         })
@@ -999,27 +1024,28 @@ export class PageEditor extends LitElement {
       for (const color of COLORS) {
         entries.push({
           id: `background-${color}`,
-          section: 'Colours',
-          label: `${COLOR_LABELS[color]} background`,
-          description: 'Highlight the current line',
-          keywords: `color colour background highlight ${color}`,
+          section: this.msg.t('coloursSection'),
+          label: this.msg.t('colourBackground', this.msg.t(color)),
+          description: this.msg.t('colourBackgroundDescription'),
+          keywords: `${english('colourBackground', color)} color colour background highlight ${color}`,
           icon: swatch('background', color),
           run: () => this.applyColor('background', color, true),
         })
       }
     }
-    const query = slash.query.trim().toLowerCase()
+    const query = fold(slash.query.trim())
     if (!query) return entries
-    // Every word typed starts a word of the entry: `co` finds Code and Colour, `red` does not find unordered.
+    // Every word typed starts a word of the entry: `co` finds Code and Colour, `red` does not find unordered. The
+    // entry's name in the page's language and its English keywords both count, accents aside.
     const terms = query.split(/\s+/)
     const matches = entries.filter((entry) => {
-      const words = `${entry.label} ${entry.keywords}`.toLowerCase().split(/[\s-]+/)
+      const words = fold(`${entry.label} ${entry.keywords}`).split(/[\s-]+/)
       return terms.every((term) => words.some((word) => word.startsWith(term)))
     })
     // Within a section, a label that starts with the query comes first.
     return matches.sort((a, b) => {
       if (a.section !== b.section) return 0
-      return Number(!a.label.toLowerCase().startsWith(query)) - Number(!b.label.toLowerCase().startsWith(query))
+      return Number(!fold(a.label).startsWith(query)) - Number(!fold(b.label).startsWith(query))
     })
   }
 
@@ -1395,7 +1421,7 @@ export class PageEditor extends LitElement {
       message = this.customValidityMessage
     } else if (this.required && !this.text.trim()) {
       flags.valueMissing = true
-      message = 'Please write something.'
+      message = this.msg.t('valueMissing')
     }
     this.internals.setValidity(flags, message, this.surface)
   }
@@ -1412,11 +1438,20 @@ export class PageEditor extends LitElement {
   private renderToolbar() {
     if (this.toolbarMode === 'link') {
       return html`<form class="link-form" @submit=${this.submitLink} @keydown=${this.handleLinkKeydown}>
-        <input class="link-input" type="text" inputmode="url" placeholder="Paste or type a link" aria-label="Link address" autocomplete="off" />
-        <button type="submit" class="tool" aria-label="Apply link" title="Apply link">${ICONS.check}</button>
+        <input
+          class="link-input"
+          type="text"
+          inputmode="url"
+          placeholder=${this.msg.t('linkPlaceholder')}
+          aria-label=${this.msg.t('linkAddress')}
+          autocomplete="off"
+        />
+        <button type="submit" class="tool" aria-label=${this.msg.t('applyLink')} title=${this.msg.t('applyLink')}>${ICONS.check}</button>
         ${
           this.format.link
-            ? html`<button type="button" class="tool" aria-label="Remove link" title="Remove link" @click=${this.removeLink}>${ICONS.close}</button>`
+            ? html`<button type="button" class="tool" aria-label=${this.msg.t('removeLink')} title=${this.msg.t('removeLink')} @click=${this.removeLink}>
+                ${ICONS.close}
+              </button>`
             : nothing
         }
       </form>`
@@ -1429,7 +1464,7 @@ export class PageEditor extends LitElement {
         tabindex="-1"
         aria-label=${label}
         aria-pressed=${String(format[mark])}
-        title=${`${label} (${this.shortcut(keys)})`}
+        title=${this.msg.t('withShortcut', label, this.shortcut(keys))}
         @click=${() => this.toggleMark(mark)}
       >
         ${content}
@@ -1444,7 +1479,7 @@ export class PageEditor extends LitElement {
                 tabindex="0"
                 aria-haspopup="true"
                 aria-expanded=${String(this.turnMenu)}
-                title="Turn into"
+                title=${this.msg.t('turnInto')}
                 @click=${(event: MouseEvent) => this.openTurnMenu(event.currentTarget as HTMLElement, event.detail === 0)}
               >
                 ${this.blockLabel(format.block)} ${ICONS.caret}
@@ -1452,16 +1487,16 @@ export class PageEditor extends LitElement {
               <span class="sep" aria-hidden="true"></span>`
           : nothing
       }
-      ${markButton('bold', 'Bold', html`<b>B</b>`, 'Mod-B')} ${markButton('italic', 'Italic', html`<i>I</i>`, 'Mod-I')}
-      ${markButton('underline', 'Underline', html`<u>U</u>`, 'Mod-U')} ${markButton('strike', 'Strikethrough', html`<s>S</s>`, 'Mod-Shift-S')}
-      ${markButton('code', 'Inline code', ICONS.code, 'Mod-E')}
+      ${markButton('bold', this.msg.t('bold'), html`<b>B</b>`, 'Mod-B')} ${markButton('italic', this.msg.t('italic'), html`<i>I</i>`, 'Mod-I')}
+      ${markButton('underline', this.msg.t('underline'), html`<u>U</u>`, 'Mod-U')}
+      ${markButton('strike', this.msg.t('strikethrough'), html`<s>S</s>`, 'Mod-Shift-S')} ${markButton('code', this.msg.t('inlineCode'), ICONS.code, 'Mod-E')}
       <button
         type="button"
         class="tool"
         tabindex="-1"
-        aria-label="Link"
+        aria-label=${this.msg.t('link')}
         aria-pressed=${String(Boolean(format.link))}
-        title=${`Link (${this.shortcut('Mod-K')})`}
+        title=${this.msg.t('withShortcut', this.msg.t('link'), this.shortcut('Mod-K'))}
         @click=${() => this.openLinkEditor()}
       >
         ${ICONS.link}
@@ -1471,10 +1506,10 @@ export class PageEditor extends LitElement {
         type="button"
         class="tool color-tool"
         tabindex="-1"
-        aria-label="Colour"
+        aria-label=${this.msg.t('colour')}
         aria-haspopup="true"
         aria-expanded=${String(this.palette === 'toolbar')}
-        title="Colour"
+        title=${this.msg.t('colour')}
         @click=${(event: MouseEvent) => this.openPalette('toolbar', event.currentTarget as HTMLElement, event.detail === 0)}
       >
         <span class="swatch-letter" data-color=${format.color ?? 'default'} data-background=${format.background ?? 'none'}>A</span>
@@ -1498,9 +1533,9 @@ export class PageEditor extends LitElement {
           type="button"
           class="swatch ${kind}"
           data-color="default"
-          aria-label=${kind === 'color' ? 'Default text colour' : 'No background'}
+          aria-label=${this.msg.t(kind === 'color' ? 'defaultTextColour' : 'noBackground')}
           aria-pressed=${String(!current)}
-          title=${kind === 'color' ? 'Default' : 'None'}
+          title=${this.msg.t(kind === 'color' ? 'defaultSwatch' : 'noneSwatch')}
           @click=${pick(kind, null)}
         >
           ${kind === 'color' ? 'A' : ICONS.none}
@@ -1511,9 +1546,9 @@ export class PageEditor extends LitElement {
               type="button"
               class="swatch ${kind}"
               data-color=${color}
-              aria-label=${`${COLOR_LABELS[color]} ${kind === 'color' ? 'text' : 'background'}`}
+              aria-label=${this.msg.t(kind === 'color' ? 'colourText' : 'colourBackground', this.msg.t(color))}
               aria-pressed=${String(current === color)}
-              title=${COLOR_LABELS[color]}
+              title=${this.msg.t(color)}
               @click=${pick(kind, color)}
             >
               ${kind === 'color' ? 'A' : ''}
@@ -1523,19 +1558,19 @@ export class PageEditor extends LitElement {
     }
     const last = this.lastColor
     return html`
-      <span class="menu-label" id="palette-color">Text</span>
+      <span class="menu-label" id="palette-color">${this.msg.t('paletteText')}</span>
       ${row('color')}
-      <span class="menu-label" id="palette-background">Background</span>
+      <span class="menu-label" id="palette-background">${this.msg.t('paletteBackground')}</span>
       ${row('background')}
       <div class="palette-footer">
-        Last used:
+        ${this.msg.t('lastUsed')}
         <span
           class="swatch-letter"
           data-color=${last.kind === 'color' ? last.name : 'default'}
           data-background=${last.kind === 'background' ? last.name : 'none'}
-          >${COLOR_LABELS[last.name]}</span
+          >${this.msg.t(last.name)}</span
         >
-        · <kbd>${this.shortcut('Mod-Shift-H')}</kbd> to reapply
+        · <kbd>${this.shortcut('Mod-Shift-H')}</kbd> ${this.msg.t('toReapply')}
       </div>
     `
   }
@@ -1555,7 +1590,7 @@ export class PageEditor extends LitElement {
           }}
         >
           <span class="menu-icon">${entry.icon}</span>
-          <span class="turn-label">${entry.label}</span>
+          <span class="turn-label">${this.blockLabel(entry.block)}</span>
           ${current === entry.block ? html`<span class="turn-check">${ICONS.check}</span>` : nothing}
         </button>`,
     )
@@ -1564,7 +1599,7 @@ export class PageEditor extends LitElement {
   private renderSlash() {
     const entries = this.slashEntries()
     if (!this.slash) return nothing
-    if (!entries.length) return html`<div class="slash-empty">No results</div>`
+    if (!entries.length) return html`<div class="slash-empty">${this.msg.t('noResults')}</div>`
     return html`${entries.map((entry, index) => {
         const heading = entry.section !== entries[index - 1]?.section ? html`<div class="menu-label" role="presentation">${entry.section}</div>` : nothing
         return html`${heading}
@@ -1584,7 +1619,8 @@ export class PageEditor extends LitElement {
           </div>`
       })}
       <div class="slash-footer" role="presentation">
-        <span><kbd>↑↓</kbd> move</span><span><kbd>↵</kbd> insert</span><span><kbd>esc</kbd> close</span>
+        <span><kbd>↑↓</kbd> ${this.msg.t('menuMove')}</span><span><kbd>↵</kbd> ${this.msg.t('menuInsert')}</span
+        ><span><kbd>esc</kbd> ${this.msg.t('menuClose')}</span>
       </div>`
   }
 
@@ -1593,14 +1629,16 @@ export class PageEditor extends LitElement {
     const allowed = this.allowedBlocks
     const keep = (event: Event) => event.preventDefault()
     return html`
-      <button type="button" class="tool" aria-label="Insert a block" @click=${() => this.insertSlash()}>${ICONS.plus}</button>
-      <button type="button" class="tool aa" aria-label="Turn into" @click=${() => (this.slash ? this.closeSlash(false) : this.openTurnInto())}>Aa</button>
+      <button type="button" class="tool" aria-label=${this.msg.t('insertBlock')} @click=${() => this.insertSlash()}>${ICONS.plus}</button>
+      <button type="button" class="tool aa" aria-label=${this.msg.t('turnInto')} @click=${() => (this.slash ? this.closeSlash(false) : this.openTurnInto())}>
+        Aa
+      </button>
       ${
         allowed.has('todo')
           ? html`<button
               type="button"
               class="tool"
-              aria-label="To-do"
+              aria-label=${this.msg.t('todoButton')}
               aria-pressed=${String(format.block === 'todo')}
               @click=${() => this.run(toggleBlock('todo'))}
             >
@@ -1608,12 +1646,16 @@ export class PageEditor extends LitElement {
             </button>`
           : nothing
       }
-      <button type="button" class="tool" aria-label="Bold" aria-pressed=${String(format.bold)} @click=${() => this.toggleMark('bold')}><b>B</b></button>
-      <button type="button" class="tool" aria-label="Italic" aria-pressed=${String(format.italic)} @click=${() => this.toggleMark('italic')}><i>I</i></button>
+      <button type="button" class="tool" aria-label=${this.msg.t('bold')} aria-pressed=${String(format.bold)} @click=${() => this.toggleMark('bold')}>
+        <b>B</b>
+      </button>
+      <button type="button" class="tool" aria-label=${this.msg.t('italic')} aria-pressed=${String(format.italic)} @click=${() => this.toggleMark('italic')}>
+        <i>I</i>
+      </button>
       <button
         type="button"
         class="tool color-tool"
-        aria-label="Colour"
+        aria-label=${this.msg.t('colour')}
         aria-expanded=${String(this.palette === 'bar')}
         @click=${(event: MouseEvent) => this.openPalette('bar', event.currentTarget as HTMLElement, false)}
       >
@@ -1624,7 +1666,7 @@ export class PageEditor extends LitElement {
           ? html`<button
               type="button"
               class="tool"
-              aria-label="Code block"
+              aria-label=${this.msg.t('code')}
               aria-pressed=${String(format.block === 'code')}
               @click=${() => this.run(toggleBlock('code'))}
             >
@@ -1635,7 +1677,7 @@ export class PageEditor extends LitElement {
       <button
         type="button"
         class="tool"
-        aria-label="Indent"
+        aria-label=${this.msg.t('indent')}
         @click=${() => this.run(indentItems(1))}
         ?hidden=${!['bullet', 'ordered', 'todo'].includes(format.block)}
       >
@@ -1644,7 +1686,7 @@ export class PageEditor extends LitElement {
       <button
         type="button"
         class="tool"
-        aria-label="Outdent"
+        aria-label=${this.msg.t('outdent')}
         @click=${() => this.run(indentItems(-1))}
         ?hidden=${!['bullet', 'ordered', 'todo'].includes(format.block)}
       >
@@ -1668,8 +1710,8 @@ export class PageEditor extends LitElement {
             type="button"
             class="plus"
             tabindex="-1"
-            aria-label="Insert a block"
-            title="Insert a block"
+            aria-label=${this.msg.t('insertBlock')}
+            title=${this.msg.t('insertBlock')}
             ?hidden=${this.plusTop === null}
             style=${this.plusTop === null ? '' : `top: ${this.plusTop}px`}
             @mousedown=${keepFocus}
@@ -1684,7 +1726,7 @@ export class PageEditor extends LitElement {
         part="toolbar"
         popover="manual"
         role="toolbar"
-        aria-label="Formatting"
+        aria-label=${this.msg.t('formatting')}
         @mousedown=${keepFocus}
         @keydown=${this.handleToolbarKeydown}
         @focusout=${this.handleFocusOut}
@@ -1695,7 +1737,7 @@ export class PageEditor extends LitElement {
         class="turn-menu"
         popover="manual"
         role="menu"
-        aria-label="Turn into"
+        aria-label=${this.msg.t('turnInto')}
         @mousedown=${keepFocus}
         @keydown=${this.handleMenuKeydown}
         @focusout=${this.handleFocusOut}
@@ -1707,7 +1749,7 @@ export class PageEditor extends LitElement {
         part="palette"
         popover="manual"
         role="dialog"
-        aria-label="Colour"
+        aria-label=${this.msg.t('colour')}
         @mousedown=${keepFocus}
         @keydown=${this.handleMenuKeydown}
         @focusout=${this.handleFocusOut}
@@ -1715,43 +1757,46 @@ export class PageEditor extends LitElement {
         ${this.renderPalette()}
       </div>
       <!-- Focus stays in the page while the menu is open (Tab picks an item); the tab stop only makes the scrolling list keyboard-reachable for assistive tools. -->
-      <div class="slash" part="slash-menu" id="slash-menu" popover="manual" role="listbox" aria-label="Insert a block" tabindex="0" @mousedown=${keepFocus}>
+      <div
+        class="slash"
+        part="slash-menu"
+        id="slash-menu"
+        popover="manual"
+        role="listbox"
+        aria-label=${this.msg.t('insertBlock')}
+        tabindex="0"
+        @mousedown=${keepFocus}
+      >
         ${this.renderSlash()}
       </div>
-      <div class="format-bar" part="format-bar" popover="manual" role="toolbar" aria-label="Format" @mousedown=${keepFocus} @focusout=${this.handleFocusOut}>
+      <div
+        class="format-bar"
+        part="format-bar"
+        popover="manual"
+        role="toolbar"
+        aria-label=${this.msg.t('format')}
+        @mousedown=${keepFocus}
+        @focusout=${this.handleFocusOut}
+      >
         ${this.renderBar()}
       </div>
     `
   }
 }
 
-const BLOCK_ENTRIES: ReadonlyArray<{ block: PageEditorBlock; label: string; description: string; keywords: string; shortcut?: string; icon: TemplateResult }> =
-  [
-    { block: 'paragraph', label: 'Text', description: 'Plain writing', keywords: 'text paragraph plain', icon: glyph('T') },
-    { block: 'heading1', label: 'Heading 1', description: 'Big section title', keywords: 'h1 title heading', shortcut: '#', icon: glyph('H1') },
-    { block: 'heading2', label: 'Heading 2', description: 'Medium section title', keywords: 'h2 subtitle heading', shortcut: '##', icon: glyph('H2') },
-    { block: 'heading3', label: 'Heading 3', description: 'Small section title', keywords: 'h3 heading', shortcut: '###', icon: glyph('H3') },
-    { block: 'bullet', label: 'Bulleted list', description: 'A simple list', keywords: 'bullet list ul unordered', shortcut: '-', icon: ICONS.bullet },
-    { block: 'ordered', label: 'Numbered list', description: 'A list with numbers', keywords: 'numbered list ol ordered', shortcut: '1.', icon: ICONS.ordered },
-    {
-      block: 'todo',
-      label: 'To-do list',
-      description: 'Track tasks with checkboxes',
-      keywords: 'todo task checkbox check list',
-      shortcut: '[]',
-      icon: ICONS.todo,
-    },
-    { block: 'quote', label: 'Quote', description: 'Set a quotation apart', keywords: 'quote blockquote citation', shortcut: '>', icon: ICONS.quote },
-    {
-      block: 'code',
-      label: 'Code block',
-      description: 'Snippet with syntax colours',
-      keywords: 'code snippet pre programming',
-      shortcut: '```',
-      icon: ICONS.code,
-    },
-    { block: 'divider', label: 'Divider', description: 'Separate sections', keywords: 'divider line rule hr separator', shortcut: '---', icon: ICONS.divider },
-  ]
+/** The blocks the menus offer, in order. Names and descriptions are messages; the keywords are English and match in every language. */
+const BLOCK_ENTRIES: ReadonlyArray<{ block: PageEditorBlock; keywords: string; shortcut?: string; icon: TemplateResult }> = [
+  { block: 'paragraph', keywords: 'text paragraph plain', icon: glyph('T') },
+  { block: 'heading1', keywords: 'heading 1 h1 title heading', shortcut: '#', icon: glyph('H1') },
+  { block: 'heading2', keywords: 'heading 2 h2 subtitle heading', shortcut: '##', icon: glyph('H2') },
+  { block: 'heading3', keywords: 'heading 3 h3 heading', shortcut: '###', icon: glyph('H3') },
+  { block: 'bullet', keywords: 'bulleted list bullet list ul unordered', shortcut: '-', icon: ICONS.bullet },
+  { block: 'ordered', keywords: 'numbered list ol ordered', shortcut: '1.', icon: ICONS.ordered },
+  { block: 'todo', keywords: 'to-do list todo task checkbox check list', shortcut: '[]', icon: ICONS.todo },
+  { block: 'quote', keywords: 'quote blockquote citation', shortcut: '>', icon: ICONS.quote },
+  { block: 'code', keywords: 'code block code snippet pre programming', shortcut: '```', icon: ICONS.code },
+  { block: 'divider', keywords: 'divider line rule hr separator', shortcut: '---', icon: ICONS.divider },
+]
 
 /** Places a popover next to `anchor`, flipping to the other side when there is no room. */
 function place(popover: HTMLElement, anchor: DOMRect, side: 'above' | 'below') {

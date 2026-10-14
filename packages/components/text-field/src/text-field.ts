@@ -4,6 +4,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { textFieldMessages } from './messages'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
@@ -133,6 +135,8 @@ export class TextField extends LitElement {
   static override styles: CSSResult | CSSResult[] = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The clear button's label in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, textFieldMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false
 
@@ -340,7 +344,7 @@ export class TextField extends LitElement {
 
   protected renderClearButton() {
     if (!this.clearable || !this.value || this.effectiveDisabled || this.readOnly) return nothing
-    return html`<button class="clear-button" type="button" aria-label="Clear" tabindex="-1" @click=${this.handleClear}>
+    return html`<button class="clear-button" type="button" aria-label=${this.msg.t('clear')} tabindex="-1" @click=${this.handleClear}>
       <slot name="clear-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>

@@ -553,3 +553,21 @@ test.describe('editable', () => {
     await expect(page.getByRole('status')).toHaveText('')
   })
 })
+
+test('without a locale it follows the nearest lang and redraws when it changes', async ({ page, scenario }) => {
+  await scenario('lang')
+  const lang = page.locator('main[lang]')
+  const firstDay = page.locator('c2-week-planner').locator('.day-header').first()
+  await expect(page.getByRole('region', { name: 'Planning de la semaine', exact: true })).toBeVisible()
+  await expect(firstDay).toHaveText('lun.')
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('region', { name: 'Kế hoạch tuần', exact: true })).toBeVisible()
+  // A language the planner has no words for falls back to English; Intl still speaks it.
+  await lang.evaluate((el) => el.setAttribute('lang', 'ja'))
+  await expect(page.getByRole('region', { name: 'Week plan', exact: true })).toBeVisible()
+  // An explicit locale wins over lang.
+  await page.locator('c2-week-planner').evaluate((el) => el.setAttribute('locale', 'fr'))
+  await expect(page.getByRole('region', { name: 'Planning de la semaine', exact: true })).toBeVisible()
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('region', { name: 'Planning de la semaine', exact: true })).toBeVisible()
+})

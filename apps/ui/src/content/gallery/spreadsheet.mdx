@@ -1,0 +1,93 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Spreadsheet } from '@c2n/components/spreadsheet'
+
+## Presets
+
+Looks for `c2-spreadsheet`. The cell variables (`__cell--height`, `__cell--padding`, `__cell--border-color`), the
+header colours and the active-cell outline do most of the work. Open any card in the studio to start from it.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-spreadsheet
+  label="Quote"
+  rows="6"
+  columns='[{"label":"Item","width":180},{"label":"Hours","width":80,"format":"number"},{"label":"Rate","width":110,"format":"currency"},{"label":"Total","width":130,"format":"currency"}]'
+  data='[["Design",8,120,"=B1*C1"],["Build",24,95,"=B2*C2"],["Testing",6,80,"=B3*C3"],["Total","=SUM(B1:B3)","","=SUM(D1:D3)"]]'
+></c2-spreadsheet>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .sheet-compact {
+    --c2-spreadsheet--font-size: 12px;
+    --c2-spreadsheet__cell--height: 24px;
+    --c2-spreadsheet__cell--padding: 0 6px;
+    --c2-spreadsheet__cell--width: 96px;
+    --c2-spreadsheet__row-header--width: 32px;
+    --c2-spreadsheet__header--font-size: 11px;
+    --c2-spreadsheet--border-radius: 4px;
+  }
+</style>
+<c2-spreadsheet
+  class="sheet-compact"
+  label="Unit prices"
+  rows="6"
+  columns='[{"label":"SKU"},{"label":"Cost","format":"currency"},{"label":"Margin","format":"percent"},{"label":"Price","format":"currency"}]'
+  data='[["KB-01",42,0.35,"=ROUND(B1*(1+C1),2)"],["MS-07",11,0.5,"=ROUND(B2*(1+C2),2)"],["HD-12",64,0.3,"=ROUND(B3*(1+C3),2)"],["CB-03",4,0.6,"=ROUND(B4*(1+C4),2)"]]'
+></c2-spreadsheet>
+```
+
+```html tag=MdxCodeBlock,label=Ledger
+<style>
+  .sheet-ledger {
+    --c2-spreadsheet--border: 1px solid light-dark(#d9cfb8, #4a4232);
+    --c2-spreadsheet--border-radius: 2px;
+    --c2-spreadsheet--background-color: light-dark(#fffdf6, #1f1c15);
+    --c2-spreadsheet__cell--border-color: light-dark(#ece4d0, #3a3428);
+    --c2-spreadsheet__header--background-color: light-dark(#f6efdc, #2a251b);
+    --c2-spreadsheet__header--color: light-dark(#8a7a55, #c2b08a);
+    --c2-spreadsheet__column-label--color: light-dark(#4d4127, #e8dcc0);
+    --c2-spreadsheet__header__selected--background-color: light-dark(#ece0bd, #3d3524);
+    --c2-spreadsheet__header__selected--color: light-dark(#6b5414, #e3c886);
+    --c2-spreadsheet__cell__active--outline: 2px solid #b4892a;
+    --c2-spreadsheet__cell__selected--background-color: rgba(180, 137, 42, 0.12);
+    --c2-spreadsheet__summary--background-color: light-dark(#f6efdc, #2a251b);
+    --c2-spreadsheet__summary--color: light-dark(#8a7a55, #c2b08a);
+    --c2-spreadsheet__summary-value--color: light-dark(#4d4127, #e8dcc0);
+  }
+</style>
+<c2-spreadsheet
+  class="sheet-ledger"
+  label="Household ledger"
+  rows="6"
+  summary
+  columns='[{"label":"Month","width":130},{"label":"Income","width":120,"format":"currency"},{"label":"Spent","width":120,"format":"currency"},{"label":"Saved","width":120,"format":"currency"}]'
+  data='[["July",4200,3610,"=B1-C1"],["August",4200,3980,"=B2-C2"],["September",4350,3720,"=B3-C3"],["Total","=SUM(B1:B3)","=SUM(C1:C3)","=SUM(D1:D3)"]]'
+></c2-spreadsheet>
+```
+
+```html tag=MdxCodeBlock,label=Embedded
+<style>
+  .sheet-embedded {
+    --c2-spreadsheet--border: none;
+    --c2-spreadsheet--border-radius: 0px;
+    --c2-spreadsheet__header--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-spreadsheet__header__selected--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-spreadsheet__cell--border-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-spreadsheet__formula-bar--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-spreadsheet
+  class="sheet-embedded"
+  label="Pay split"
+  rows="5"
+  formula-bar
+  columns='[{"label":"Person","width":180},{"label":"Share","width":110,"format":"percent"},{"label":"Amount","width":140,"format":"currency"}]'
+  data='[["Ana","40%","=B1*$C$5"],["Ben","35%","=B2*$C$5"],["Chi","25%","=B3*$C$5"],[],["Pot","=SUM(B1:B3)",2400]]'
+></c2-spreadsheet>
+```
+
+</GalleryGrid>

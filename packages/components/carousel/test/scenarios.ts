@@ -1,3 +1,5 @@
+// The app's languages: French and Vietnamese, added as an app would.
+import './translations.js'
 import '../src/carousel'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
@@ -22,8 +24,12 @@ const attributes = {
   'side-controls-rtl': 'loop dir="rtl" style="--c2-carousel__control--opacity: 0; --c2-carousel__control__opposite--opacity: 0"',
 }[scenario]
 
+const carousel =
+  scenario === 'lang'
+    ? `<div lang="fr"><c2-carousel id="subject" autoplay interval="60000">${slides}</c2-carousel></div>`
+    : `<c2-carousel id="subject" label="Featured" class="${scenario}" ${attributes ?? ''}>${slides}</c2-carousel>`
 main.innerHTML = `<button id="before">Before</button>
-  <c2-carousel id="subject" label="Featured" class="${scenario}" ${attributes ?? ''}>${slides}</c2-carousel>
+  ${carousel}
   <output aria-label="Changes"></output>`
 
 const subject = document.querySelector('c2-carousel')!

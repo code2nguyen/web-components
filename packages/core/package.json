@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -63,6 +63,10 @@
     "./locale-helper.js": {
       "types": "./dist/locale-helper.d.ts",
       "default": "./dist/locale-helper.js"
+    },
+    "./localize.js": {
+      "types": "./dist/localize.d.ts",
+      "default": "./dist/localize.js"
     },
     "./stream-reveal.js": {
       "types": "./dist/stream-reveal.d.ts",

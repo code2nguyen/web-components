@@ -5,6 +5,8 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { SlotPresenceController, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { modalMessages } from './messages'
 import styles from './modal.scss?inline'
 
 /** Events fired by {@link Modal}, keyed for `addEventListener`. */
@@ -97,6 +99,9 @@ export interface Modal {
 @customElement('c2-modal')
 export class Modal extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  /** The close button's label, in the nearest `lang`. */
+  private readonly msg = new LocalizeController(this, modalMessages)
 
   /** Open state. Setting it shows or closes the dialog. */
   @property({ type: Boolean, reflect: true }) open = false
@@ -217,7 +222,7 @@ export class Modal extends LitElement {
             ${
               this.hideClose
                 ? nothing
-                : html`<button part="close-button" class="c2-modal__close" type="button" aria-label="Close" @click=${() => this.close()}>
+                : html`<button part="close-button" class="c2-modal__close" type="button" aria-label=${this.msg.t('close')} @click=${() => this.close()}>
                     <slot name="close-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 6 6 18M6 6l12 12"></path>

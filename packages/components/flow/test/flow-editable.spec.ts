@@ -948,3 +948,32 @@ test.describe('actions', () => {
     await expect(page.getByRole('toolbar')).toHaveCount(0)
   })
 })
+
+test('its text follows the nearest lang, and a lang change, without re-creating the element', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${flow({ nodes: [], edges: [] })}</div>`)
+  const lang = page.locator('div[lang]')
+  const stage = page.locator('c2-flow .stage')
+  await expect(stage).toHaveAttribute('aria-label', 'Flux vide')
+  await expect(page.locator('c2-flow #empty-hint')).toHaveText('Appuyez sur N ou Entrée pour ajouter un nœud.')
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(stage).toHaveAttribute('aria-label', 'Sơ đồ trống')
+
+  // Nodes, their status and an announcement, built outside the render when a key is pressed.
+  await host(page).evaluate((element: Flow) => (element.nodes = [{ id: 'solo', label: 'Solo', status: 'running' }]))
+  await expect(node(page, 'solo')).toHaveAttribute('aria-label', 'Solo, đang chạy')
+  await node(page, 'solo').focus()
+  await page.keyboard.press('e')
+  await expect(page.locator('c2-flow [role="status"]')).toHaveText('Solo không có cạnh nào.')
+  await expect(page.locator('c2-flow .connector').first()).toHaveAttribute('title', 'Kéo để nối')
+
+  await lang.evaluate((el) => el.setAttribute('lang', 'fr'))
+  await expect(node(page, 'solo')).toHaveAttribute('aria-label', 'Solo, en cours')
+  await page.keyboard.press('e')
+  await expect(page.locator('c2-flow [role="status"]')).toHaveText('Solo n’a aucun lien.')
+
+  // A language the library does not ship falls back to English.
+  await lang.evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(node(page, 'solo')).toHaveAttribute('aria-label', 'Solo, running')
+  await page.keyboard.press('e')
+  await expect(page.locator('c2-flow [role="status"]')).toHaveText('Solo has no edges.')
+})

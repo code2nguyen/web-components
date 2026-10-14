@@ -758,6 +758,7 @@ export const overrides: Record<string, Override> = {
     value: '0 0 0 2px color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 25%, transparent)',
   },
   '--c2-page-editor__quote--border-left': { exclude: 'follows the text colour' },
+  '--c2-page-editor__link--color': { exclude: 'follows the text colour, underlined' },
   '--c2-page-editor__code--font-family': { exclude: 'monospace code face' },
   '--c2-page-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
   '--c2-page-editor__color-gray--color': { exclude: 'named hue, mixed with the text colour inside the component' },
@@ -835,4 +836,15 @@ export const overrides: Record<string, Override> = {
   '--c2-confirm-dialog__confirm-button__destructive__hover--background-color': { exclude: 'solid destructive fill' },
   '--c2-confirm-dialog__confirm-button__destructive__active--background-color': { exclude: 'solid destructive fill' },
   '--c2-confirm-dialog__confirm-button__destructive__focus--outline': { exclude: 'focus ring matches the destructive fill' },
+  // Spreadsheet: the current cell and the selected range are the accent (a ring and a light wash of it), and the
+  // floating cell editor uses the popover shadow. Formula references 2 to 4 are fixed hues that tell ranges apart.
+  '--c2-spreadsheet__cell__active--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  '--c2-spreadsheet__cell__selected--background-color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 8%, transparent)',
+  },
+  '--c2-spreadsheet__editor--box-shadow': { token: 'shadow-md' },
+  '--c2-spreadsheet__reference-2--color': { exclude: 'fixed hue that tells formula references apart' },
+  '--c2-spreadsheet__reference-3--color': { exclude: 'fixed hue that tells formula references apart' },
+  '--c2-spreadsheet__reference-4--color': { exclude: 'fixed hue that tells formula references apart' },
 }

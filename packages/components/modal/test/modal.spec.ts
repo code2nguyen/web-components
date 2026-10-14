@@ -65,3 +65,22 @@ test('alert announces an alertdialog described by its body', async ({ page, rend
   await expect(dialog).toBeVisible()
   await expect(dialog).toHaveAccessibleDescription('Your edits will be lost.')
 })
+
+test('the close button is named in the nearest lang, follows a lang change and takes an app override', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-modal label="Réglages" open>Bonjour</c2-modal></div>')
+  await expect(page.getByRole('button', { name: 'Fermer', exact: true })).toBeVisible()
+  // A language switched while the dialog is open: no reload, the label follows.
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('button', { name: 'Đóng', exact: true })).toBeVisible()
+  // A region falls back to its language, a language the library does not ship to English.
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'fr-CA'))
+  await expect(page.getByRole('button', { name: 'Fermer', exact: true })).toBeVisible()
+  await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
+  await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
+  // An app adds its own wording.
+  await page.evaluate(() => {
+    const { addMessages } = window as unknown as { addMessages: (name: string, locale: string, messages: Record<string, string>) => void }
+    addMessages('modal', 'de', { close: 'Schließen' })
+  })
+  await expect(page.getByRole('button', { name: 'Schließen', exact: true })).toBeVisible()
+})

@@ -171,7 +171,6 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                           | Calendly, Cal.com                               | P2       | Proposed |
 | 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                              | Google Drive, Dropbox                           | P2       | Proposed |
 | 90  | `c2-order-book`       | Live bids and asks with depth bars and grouping                                                          | Binance, Coinbase Advanced                      | P2       | Proposed |
-| 91  | `c2-spreadsheet`      | Editable cell grid with formulas, fill handle and copy/paste ranges                                      | Airtable, Google Sheets                         | P3       | Proposed |
 | 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                            | XMind, Miro mind map                            | P3       | Proposed |
 | 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                   | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
 

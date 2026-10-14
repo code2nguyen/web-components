@@ -10,6 +10,8 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import type { Overlay } from '@c2n/overlay'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { autocompleteMessages } from './messages'
 import styles from './autocomplete.scss?inline'
 
 import '@c2n/list'
@@ -146,6 +148,8 @@ export class Autocomplete extends LitElement {
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
   private readonly internals = this.attachInternals()
+  /** The built-in status text, labels and validation message in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, autocompleteMessages)
   private readonly uid = ++autocompleteId
   private defaultValue = ''
   private defaultValueCaptured = false
@@ -664,9 +668,9 @@ export class Autocomplete extends LitElement {
   }
 
   private renderRows() {
-    if (this.loading) return html`<div class="status" role="status"><slot name="loading">Loading suggestions…</slot></div>`
-    if (this.loadError) return html`<div class="status status--error" role="status"><slot name="error">Could not load suggestions.</slot></div>`
-    if (this.results.length === 0) return html`<div class="status" role="status"><slot name="empty">No suggestions found.</slot></div>`
+    if (this.loading) return html`<div class="status" role="status"><slot name="loading">${this.msg.t('loading')}</slot></div>`
+    if (this.loadError) return html`<div class="status status--error" role="status"><slot name="error">${this.msg.t('loadError')}</slot></div>`
+    if (this.results.length === 0) return html`<div class="status" role="status"><slot name="empty">${this.msg.t('empty')}</slot></div>`
 
     return this.results.map((item, index) => this.renderListItem(item, index))
   }
@@ -678,7 +682,7 @@ export class Autocomplete extends LitElement {
       return
     }
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, this.input)
-    else if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, 'Please fill out this field.', this.input)
+    else if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), this.input)
     else this.internals.setValidity({})
   }
 
@@ -728,7 +732,7 @@ export class Autocomplete extends LitElement {
         />
         ${
           this.value && !this.effectiveDisabled && !this.readonly
-            ? html`<button class="clear" type="button" aria-label="Clear" tabindex="-1" @click=${this.handleClear}>
+            ? html`<button class="clear" type="button" aria-label=${this.msg.t('clear')} tabindex="-1" @click=${this.handleClear}>
                 <slot name="clear-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                     <path d="m6 6 12 12M18 6 6 18"></path>
@@ -754,7 +758,7 @@ export class Autocomplete extends LitElement {
             id=${this.listboxId}
             class="list"
             required
-            aria-label=${ifDefined(this.ariaLabel ? `${this.ariaLabel} suggestions` : 'Suggestions')}
+            aria-label=${this.ariaLabel ? this.msg.t('suggestionsFor', this.ariaLabel) : this.msg.t('suggestions')}
             .value=${selectedValue}
             @pointerdown=${(event: PointerEvent) => event.preventDefault()}
             @selection-change=${this.handleListSelection}

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -146,6 +146,7 @@
         "../../components/slider:build",
         "../../components/spinner:build",
         "../../components/split-panel:build",
+        "../../components/spreadsheet:build",
         "../../components/stat:build",
         "../../components/state-timeline:build",
         "../../components/status-panel:build",

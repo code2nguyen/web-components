@@ -31,6 +31,8 @@ import type {
 } from './masonry-model'
 import type { MasonryItem } from './masonry-item'
 import './masonry-item'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { masonryMessages } from './messages'
 import styles from './masonry.scss?inline'
 
 export type { MasonryColumns, MasonryLayoutItem, MasonryLayoutSnapshot, MasonryLayoutChangeDetail, MasonryLayoutErrorDetail } from './masonry-model'
@@ -87,6 +89,9 @@ interface PointerSession {
 @customElement('c2-masonry')
 export class Masonry extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  /** The live-region announcements in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, masonryMessages)
 
   // Tiles pick their item by hand instead of writing `slot` on it: an attribute written on a child while the page
   // upgrades is one the server never rendered, which React reports as a hydration mismatch.
@@ -409,7 +414,7 @@ export class Masonry extends LitElement {
     this.cancelSession()
     this.session = { kind, inputMethod, itemId: item.itemId, original: cloneSnapshot(this.committed), candidate: cloneSnapshot(this.committed), phase }
     item.toggleAttribute('data-dragging', true)
-    this.statusMessage = `${item.label || item.itemId} ${kind} started. Use arrow keys; Enter saves and Escape cancels.`
+    this.statusMessage = this.msg.t('started', item.label || item.itemId, kind)
     this.draw()
     return true
   }
@@ -554,7 +559,12 @@ export class Masonry extends LitElement {
     const [min, max] = moveRange(candidate.items, this.isPinned(item.id), (id) => this.isPinned(id))
     candidate.items.splice(Math.max(min, Math.min(max, targetIndex)), 0, item)
     this.session.candidate = candidate
-    this.statusMessage = `${this.itemById.get(item.id)?.label || item.id}: position ${candidate.items.findIndex((entry) => entry.id === item.id) + 1} of ${candidate.items.length}.`
+    this.statusMessage = this.msg.t(
+      'position',
+      this.itemById.get(item.id)?.label || item.id,
+      candidate.items.findIndex((entry) => entry.id === item.id) + 1,
+      candidate.items.length,
+    )
     this.draw()
   }
 
@@ -580,7 +590,7 @@ export class Masonry extends LitElement {
     item.columns[range] = clampResizedSpan(columns, original.columns[range], resolveMinSpan(element?.minCols), MASONRY_COLUMN_COUNT[range])
     item.rows = clampResizedSpan(rows, original.rows, resolveMinSpan(element?.minRows))
     const atMinimum = columns < item.columns[range] || rows < item.rows
-    this.statusMessage = `${element?.label || item.id}: ${item.columns[range]} columns, ${item.rows} rows.${atMinimum ? ' Smallest size reached.' : ''}`
+    this.statusMessage = this.msg.t('size', element?.label || item.id, item.columns[range], item.rows, atMinimum)
   }
 
   private commitSession(): void {
@@ -589,13 +599,13 @@ export class Masonry extends LitElement {
     const changed = JSON.stringify(session.original) !== JSON.stringify(session.candidate)
     this.finishSession()
     if (!changed) {
-      this.statusMessage = 'No layout change.'
+      this.statusMessage = this.msg.t('noChange')
       return
     }
     this.committed = cloneSnapshot(session.candidate)
     this.saveCommittedLayout()
     this.draw()
-    this.statusMessage = `${this.itemById.get(session.itemId)?.label || session.itemId} ${session.kind} saved.`
+    this.statusMessage = this.msg.t('saved', this.itemById.get(session.itemId)?.label || session.itemId, session.kind)
     const detail: MasonryLayoutChangeDetail = {
       layout: cloneSnapshot(this.committed),
       itemId: session.itemId,
@@ -611,7 +621,7 @@ export class Masonry extends LitElement {
     const label = item?.label || this.session.itemId
     this.finishSession()
     this.draw()
-    this.statusMessage = `${label} edit canceled.`
+    this.statusMessage = this.msg.t('canceled', label)
     if (!item?.isConnected) {
       // Made focusable only here: a tabindex written on connect is an attribute the server never rendered, which fails React hydration.
       if (!this.hasAttribute('tabindex')) this.tabIndex = -1

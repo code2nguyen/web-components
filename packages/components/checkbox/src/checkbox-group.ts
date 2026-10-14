@@ -7,6 +7,8 @@ import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 // Registers `c2-checkbox` so consumers of the group alone get the option element too (same pattern as radio-group).
 import { Checkbox } from './checkbox'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { checkboxMessages } from './messages'
 import styles from './checkbox-group.scss?inline'
 
 const CHECKBOX_TAG = 'c2-checkbox'
@@ -60,6 +62,8 @@ export class CheckboxGroup extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** The built-in validation message in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, checkboxMessages)
   private customValidityMessage = ''
   @state() private disabledByForm = false
   private defaultValue: string[] | undefined
@@ -211,7 +215,7 @@ export class CheckboxGroup extends LitElement {
     this.internals.setFormValue(entries, JSON.stringify(this.value))
     const missing = this.required && this.value.length === 0
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? 'Please select at least one option.' : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t('groupValueMissing') : '')
     this.internals.setValidity(flags, message)
   }
 

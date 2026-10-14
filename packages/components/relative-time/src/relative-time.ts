@@ -2,6 +2,7 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { resolveLocale } from '@c2n/core/locale-helper.js'
+import { LocaleController } from '@c2n/core/localize.js'
 import styles from './relative-time.scss?inline'
 
 /** Length of the phrase, as `Intl.RelativeTimeFormat` names it: "3 minutes ago", "3 min. ago", "3m ago". */
@@ -84,8 +85,8 @@ export function nextChangeIn(date: Date, now: Date = new Date()): number {
 
 /**
  * Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current. The phrase comes from
- * `Intl.RelativeTimeFormat` in the element's `locale` (else the nearest `lang` attribute, else the browser's language),
- * picks the largest unit that fits and redraws exactly when the rounded value changes, so a page full of timestamps
+ * `Intl.RelativeTimeFormat` in the element's `locale` (else the nearest `lang` attribute, which it follows as soon as it
+ * changes, else the browser's language), picks the largest unit that fits and redraws exactly when the rounded value changes, so a page full of timestamps
  * costs one timer each and no polling. The full date and time is the inner `<time>` element's `datetime` and its
  * hover title.
  *
@@ -125,6 +126,9 @@ export class RelativeTime extends LitElement {
 
   #timer: ReturnType<typeof setTimeout> | undefined
 
+  /** `locale`, else the nearest `lang`, else the browser's language; a `lang` change redraws the phrase at once. */
+  readonly #language = new LocaleController(this, () => this.locale)
+
   override connectedCallback() {
     super.connectedCallback()
     // A reconnected element may have been detached for longer than its last delay.
@@ -137,12 +141,7 @@ export class RelativeTime extends LitElement {
   }
 
   get #locale(): string {
-    if (this.locale) return this.locale
-    if (!isServer) {
-      const lang = this.closest('[lang]')?.getAttribute('lang')
-      if (lang) return lang
-    }
-    return resolveLocale()
+    return isServer ? resolveLocale(this.locale) : this.#language.locale
   }
 
   #stop() {

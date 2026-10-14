@@ -1,3 +1,5 @@
+// The app's languages: French and Vietnamese, added as an app would.
+import './translations.js'
 import { html } from 'lit'
 import '../src/autocomplete'
 import type { Autocomplete } from '../src/autocomplete'

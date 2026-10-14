@@ -31,11 +31,11 @@ the focus away (a click outside the list, on another row or a menu), saves both 
 cancels, an empty name keeps the old one, and an edit can be undone like the rest. Clicking a task never edits it: it
 shows the whole note, where the row shows only its first line.
 
-Add `customizable` for a palette button. It swaps the tasks for a panel that styles the whole list: the list's
+Add `customizable` for a palette button. It opens a panel over the tasks, kept in the window, that styles the whole list: the list's
 **icon** (a dropdown with every task icon, the one suggested by the heading, or none), the background (the text colour follows
 from it), a colour **palette** (a dropdown of Classic, Soft, Earth and Ocean, each with six
 highlighters and five pens in a light and a dark variant), the done mark, the density
-and the progress style; **Back to the list** (or Escape) returns to the tasks. With a `storage-key` those choices are
+and the progress style. Changes apply at once; the × button, Escape or a press elsewhere closes the panel. With a `storage-key` those choices are
 remembered in `localStorage`; `persist-tasks` remembers the tasks too.
 
 ## Import

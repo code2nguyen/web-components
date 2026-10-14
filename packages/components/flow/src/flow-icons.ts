@@ -1,17 +1,6 @@
 import { svg } from 'lit'
 import type { FlowStatus } from './flow-types.js'
 
-/** What a screen reader reads for each status, since the marker is a glyph. */
-export const STATUS_LABELS: Record<FlowStatus, string> = {
-  pending: 'Pending',
-  current: 'Waiting',
-  running: 'Running',
-  success: 'Succeeded',
-  error: 'Failed',
-  warning: 'Succeeded with warnings',
-  skipped: 'Skipped',
-}
-
 /** One 16×16 glyph per status. Filled glyphs cut their mark out with the node's own background colour. */
 export const STATUS_ICONS: Record<FlowStatus, unknown> = {
   success: svg`<circle cx="8" cy="8" r="7" fill="currentColor"></circle><path d="M5 8.3l2 2 4-4.4" fill="none" class="cutout" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>`,

@@ -275,3 +275,19 @@ test('puts the actions slot before the month navigation, at the end of the heade
   const next = (await planner.getByRole('button', { name: 'Next month' }).boundingBox())!
   expect(next.x + next.width).toBeLessThanOrEqual(host.x + host.width)
 })
+
+test('without a locale it follows the nearest lang and redraws when it changes', async ({ page, scenario }) => {
+  await scenario('lang')
+  const lang = page.locator('main[lang]')
+  await expect(page.getByRole('heading', { name: 'septembre 2026' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mois suivant', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Aujourd’hui', exact: true })).toBeVisible()
+  await lang.evaluate((el) => el.setAttribute('lang', 'vi'))
+  await expect(page.getByRole('button', { name: 'Tháng sau', exact: true })).toBeVisible()
+  await lang.evaluate((el) => el.setAttribute('lang', 'ja'))
+  await expect(page.getByRole('button', { name: 'Next month', exact: true })).toBeVisible()
+  await page.locator('c2-month-planner').evaluate((el) => el.setAttribute('locale', 'en-US'))
+  await expect(page.getByRole('heading', { name: 'September 2026' })).toBeVisible()
+  await lang.evaluate((el) => el.setAttribute('lang', 'fr'))
+  await expect(page.getByRole('button', { name: 'Next month', exact: true })).toBeVisible()
+})

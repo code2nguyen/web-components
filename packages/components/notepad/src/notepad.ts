@@ -5,6 +5,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { Fragment, Slice, type Mark, type MarkType, type Node as ProseNode } from 'prosemirror-model'
 import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView, type NodeView } from 'prosemirror-view'
@@ -15,6 +16,7 @@ import { InputRule, inputRules, textblockTypeInputRule, undoInputRule } from 'pr
 import { fromMarkdown, toMarkdown } from './markdown'
 import { HIGHLIGHTS, INKS, MARK_NAMES, colorIndex, emptyFormat, formatOf, schema, type NotepadColor, type NotepadFormat, type NotepadMark } from './schema'
 import { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
+import { notepadMessages } from './messages'
 import styles from './notepad.scss?inline'
 
 export { fromMarkdown, toMarkdown } from './markdown'
@@ -75,7 +77,8 @@ export interface Notepad {
 
 /**
  * The lists used while `inks` / `highlights` are unset, in the order a page stores them (`data-ink="3"` is red): the
- * documented `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Spread them to extend the defaults.
+ * documented `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Spread them to extend the defaults. The
+ * names here are the English ones; while the list is unset the toolbar names these colours in the notepad's language.
  */
 export const DEFAULT_INKS: readonly NotepadColor[] = [
   { name: 'Blue ink', value: 'var(--c2-notepad__ink-blue--color, #2848b8)' },
@@ -90,6 +93,9 @@ export const DEFAULT_HIGHLIGHTS: readonly NotepadColor[] = [
 ]
 /** Position of the default black ink, which on night paper becomes the paper's own ink rather than a lifted grey. */
 const DEFAULT_BLACK_INK = 2
+/** Messages naming the default inks and highlighters, in the order of `DEFAULT_INKS` / `DEFAULT_HIGHLIGHTS`. */
+const DEFAULT_INK_NAMES = ['inkBlue', 'inkBlack', 'inkRed', 'inkGreen'] as const
+const DEFAULT_HIGHLIGHT_NAMES = ['highlightYellow', 'highlightGreen', 'highlightPink'] as const
 
 /** A colour of a list as the toolbar uses it: a value, and the name its swatch is announced and titled with. */
 interface NamedColor {
@@ -102,41 +108,44 @@ const isColor = (entry: unknown): entry is NotepadColor =>
   (typeof entry === 'object' && entry !== null && typeof (entry as { value?: unknown }).value === 'string')
 
 /**
- * A usable list, or the defaults: a malformed attribute must not leave the writer without colours. An entry with no
- * name is called by its kind and position (`Ink 2`), so a swatch always has an accessible name.
+ * A usable list, or the defaults: a malformed attribute must not leave the writer without colours. The defaults take
+ * `defaultNames`, in the notepad's language; an entry with no name is called by its kind and position (`Ink 2`), so a
+ * swatch always has an accessible name.
  */
-const colorList = (value: unknown, defaults: readonly NotepadColor[], kind: string): readonly NamedColor[] => {
-  const list = Array.isArray(value) && value.some(isColor) ? (value as unknown[]) : defaults
-  return list
-    .filter(isColor)
-    .map((entry, position) =>
-      typeof entry === 'string'
-        ? { name: `${kind} ${position + 1}`, value: entry }
-        : { name: entry.name?.trim() || `${kind} ${position + 1}`, value: entry.value },
-    )
+const colorList = (
+  value: unknown,
+  defaults: readonly NotepadColor[],
+  defaultNames: readonly string[],
+  unnamed: (position: number) => string,
+): readonly NamedColor[] => {
+  const custom = Array.isArray(value) && value.some(isColor)
+  const list = custom ? (value as unknown[]) : defaults
+  return list.filter(isColor).map((entry, position) => {
+    const name = (custom ? undefined : defaultNames[position]) || (typeof entry === 'string' ? '' : entry.name?.trim()) || unnamed(position + 1)
+    return { name, value: typeof entry === 'string' ? entry : entry.value }
+  })
 }
 
-const PAD_LABELS: Record<NotepadPad, string> = {
-  notebook: 'Notebook',
-  legal: 'Legal pad',
-  sticky: 'Sticky note',
-  'index-card': 'Index card',
-}
+/** Messages naming the pads, rulings and paper colours of the picker. */
+const PAD_LABELS = { notebook: 'padNotebook', legal: 'padLegal', sticky: 'padSticky', 'index-card': 'padIndexCard' } as const satisfies Record<
+  NotepadPad,
+  string
+>
 /** Name of the `default` paper colour, which is the pad's own colour. */
-const PAD_COLOR_LABELS: Record<NotepadPad, string> = {
-  notebook: 'White',
-  legal: 'Canary',
-  sticky: 'Lemon',
-  'index-card': 'Card',
-}
-const PAPER_LABELS: Record<NotepadPaper, string> = { lined: 'Lined', grid: 'Grid', dot: 'Dot grid', blank: 'Blank' }
-const PAPER_COLOR_LABELS: Record<Exclude<NotepadPaperColor, 'default'>, string> = {
-  yellow: 'Yellow',
-  green: 'Green',
-  blue: 'Blue',
-  pink: 'Pink',
-  night: 'Night',
-}
+const PAD_COLOR_LABELS = {
+  notebook: 'colorNotebook',
+  legal: 'colorLegal',
+  sticky: 'colorSticky',
+  'index-card': 'colorIndexCard',
+} as const satisfies Record<NotepadPad, string>
+const PAPER_LABELS = { lined: 'paperLined', grid: 'paperGrid', dot: 'paperDot', blank: 'paperBlank' } as const satisfies Record<NotepadPaper, string>
+const PAPER_COLOR_LABELS = {
+  yellow: 'colorYellow',
+  green: 'colorGreen',
+  blue: 'colorBlue',
+  pink: 'colorPink',
+  night: 'colorNight',
+} as const satisfies Record<Exclude<NotepadPaperColor, 'default'>, string>
 /** Each paper colour is a pair: the sheet and the ink written on it. */
 const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
   default: '--_swatch: var(--_pad-paper); --_swatch-ink: var(--c2-notepad__writing--color, #1e2a4a)',
@@ -183,7 +192,8 @@ class TaskView implements NodeView {
   private readonly box: HTMLElement
   private node: ProseNode
 
-  constructor(node: ProseNode, getPos: () => number | undefined, toggle: (pos: number) => void) {
+  /** `label` names the checkbox in the notepad's language; the notepad renames every box when the language changes. */
+  constructor(node: ProseNode, getPos: () => number | undefined, toggle: (pos: number) => void, label: string) {
     this.node = node
     this.dom = document.createElement('div')
     this.dom.className = 'task'
@@ -191,7 +201,7 @@ class TaskView implements NodeView {
     this.box.className = 'box'
     this.box.contentEditable = 'false'
     this.box.setAttribute('role', 'checkbox')
-    this.box.setAttribute('aria-label', 'Done')
+    this.box.setAttribute('aria-label', label)
     // The SVG is a static Lit template; render its markup once.
     this.box.innerHTML = BOX
     this.box.addEventListener('mousedown', (event) => event.preventDefault())
@@ -331,6 +341,9 @@ export class Notepad extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, notepadMessages)
+  /** Language the checklist boxes, which ProseMirror draws outside Lit, were last named in. */
+  private boxLocale = ''
 
   /** The page, in the notepad Markdown dialect: one line per line, `- [ ]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `<u>`, `<span data-ink>` and `<mark data-color>`. */
   @property() value = ''
@@ -372,11 +385,12 @@ export class Notepad extends LitElement {
    * The inks of the toolbar: each entry a CSS colour (`var()` included), or `{ value, name }` to give its swatch a
    * friendly name (`{ "value": "#b91c1c", "name": "Alert" }`); without one it is called `Ink 2`. The page stores an ink
    * by its 1-based position in this list (`<span data-ink="2">`), so give a dark theme a list of the same length and
-   * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks. A list you give is used
-   * as given: its contrast on the paper is yours to choose.
+   * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks, named in the notepad's
+   * language (`Blue ink`, `Encre bleue`, …); the `Ink 2` of an unnamed entry is translated too. A list you give is used
+   * as given, names included: its contrast on the paper is yours to choose.
    */
   @property({ converter: jsonPropertyConverter }) inks?: NotepadColor[]
-  /** The highlighters of the toolbar, as colours or `{ value, name }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters. */
+  /** The highlighters of the toolbar, as colours or `{ value, name }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters, named in the notepad's language. */
   @property({ converter: jsonPropertyConverter }) highlights?: NotepadColor[]
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
@@ -603,7 +617,7 @@ export class Notepad extends LitElement {
         state: this.createState(this.value),
         editable: () => this.editable,
         attributes: () => this.surfaceAttributes(),
-        nodeViews: { task: (node, _view, getPos) => new TaskView(node, getPos, (pos) => this.toggleTask(pos)) },
+        nodeViews: { task: (node, _view, getPos) => new TaskView(node, getPos, (pos) => this.toggleTask(pos), this.msg.t('done')) },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleDOMEvents: {
           keydown: (view, event) => {
@@ -649,6 +663,7 @@ export class Notepad extends LitElement {
     }
     const view = this.view
     if (!view) return
+    this.renameBoxes()
     if (changed.has('value') && this.value !== this.serialized) {
       view.updateState(this.createState(this.value))
       this.serialized = this.value
@@ -662,6 +677,14 @@ export class Notepad extends LitElement {
     }
     if (changed.has('toolbar') || changed.has('marks')) this.updateToolbar()
     this.syncFormState()
+  }
+
+  /** The checklist boxes are ProseMirror node views: a language change renames those already drawn. */
+  private renameBoxes() {
+    if (this.boxLocale === this.msg.locale) return
+    this.boxLocale = this.msg.locale
+    const label = this.msg.t('done')
+    for (const box of this.surface.querySelectorAll('.task > .box')) box.setAttribute('aria-label', label)
   }
 
   private createState(markdown: string) {
@@ -1171,13 +1194,13 @@ export class Notepad extends LitElement {
       part="paper-menu"
       popover="auto"
       role="dialog"
-      aria-label="Paper"
+      aria-label=${this.msg.t('paper')}
       @toggle=${this.handlePaperMenuToggle}
       @keydown=${this.handlePaperMenuKeydown}
       @pointerenter=${this.handlePaperHover}
       @pointerleave=${this.handlePaperHover}
     >
-      <span class="label" id="paper-pads">Pad</span>
+      <span class="label" id="paper-pads">${this.msg.t('pad')}</span>
       <div class="row grid3 pads" role="radiogroup" aria-labelledby="paper-pads">
         ${PADS.map(
           (pad) =>
@@ -1185,17 +1208,17 @@ export class Notepad extends LitElement {
               type="button"
               role="radio"
               aria-checked=${String(this.pad === pad)}
-              aria-label=${PAD_LABELS[pad]}
-              title=${PAD_LABELS[pad]}
+              aria-label=${this.msg.t(PAD_LABELS[pad])}
+              title=${this.msg.t(PAD_LABELS[pad])}
               tabindex=${this.pad === pad ? 0 : -1}
               @click=${() => this.choosePaper({ pad })}
             >
               <span class="pad-thumb ${pad}"></span>
-              <span class="name">${PAD_LABELS[pad]}</span>
+              <span class="name">${this.msg.t(PAD_LABELS[pad])}</span>
             </button>`,
         )}
       </div>
-      <span class="label" id="paper-lines">Lines</span>
+      <span class="label" id="paper-lines">${this.msg.t('lines')}</span>
       <div class="row" role="radiogroup" aria-labelledby="paper-lines">
         ${PAPERS.map(
           (paper) =>
@@ -1203,8 +1226,8 @@ export class Notepad extends LitElement {
               type="button"
               role="radio"
               aria-checked=${String(this.paper === paper)}
-              aria-label=${PAPER_LABELS[paper]}
-              title=${PAPER_LABELS[paper]}
+              aria-label=${this.msg.t(PAPER_LABELS[paper])}
+              title=${this.msg.t(PAPER_LABELS[paper])}
               tabindex=${this.paper === paper ? 0 : -1}
               @click=${() => this.choosePaper({ paper })}
             >
@@ -1212,10 +1235,10 @@ export class Notepad extends LitElement {
             </button>`,
         )}
       </div>
-      <span class="label" id="paper-colors">Paper</span>
+      <span class="label" id="paper-colors">${this.msg.t('paperColors')}</span>
       <div class="row grid3 colors" role="radiogroup" aria-labelledby="paper-colors">
         ${PAPER_COLORS.map((color) => {
-          const name = color === 'default' ? PAD_COLOR_LABELS[this.pad] : PAPER_COLOR_LABELS[color]
+          const name = this.msg.t(color === 'default' ? PAD_COLOR_LABELS[this.pad] : PAPER_COLOR_LABELS[color])
           return html`<button
             type="button"
             role="radio"
@@ -1282,16 +1305,28 @@ export class Notepad extends LitElement {
       message = this.customValidityMessage
     } else if (this.required && !text.trim()) {
       flags.valueMissing = true
-      message = 'Please write something.'
+      message = this.msg.t('valueMissing')
     } else if (this.maxLength >= 0 && text.replace(/\n/g, '').length > this.maxLength) {
       flags.tooLong = true
-      message = `Please use at most ${this.maxLength} characters.`
+      message = this.msg.t('tooLong', this.maxLength)
     }
     this.internals.setValidity(flags, message, this.surface)
   }
 
   private colorsOf(group: 'ink' | 'highlight'): readonly NamedColor[] {
-    return group === 'ink' ? colorList(this.inks, DEFAULT_INKS, 'Ink') : colorList(this.highlights, DEFAULT_HIGHLIGHTS, 'Highlighter')
+    return group === 'ink'
+      ? colorList(
+          this.inks,
+          DEFAULT_INKS,
+          DEFAULT_INK_NAMES.map((key) => this.msg.t(key)),
+          (position) => this.msg.t('inkN', position),
+        )
+      : colorList(
+          this.highlights,
+          DEFAULT_HIGHLIGHTS,
+          DEFAULT_HIGHLIGHT_NAMES.map((key) => this.msg.t(key)),
+          (position) => this.msg.t('highlighterN', position),
+        )
   }
 
   /**
@@ -1317,8 +1352,9 @@ export class Notepad extends LitElement {
     // A page may hold a position the current list does not have: it shows as no colour rather than a wrong one.
     const picked = this.format[group]
     const current = picked && picked <= colors.length ? picked : null
-    const label = ink ? 'Ink colour' : 'Highlighter'
-    const currentLabel = current ? colors[current - 1].name : ink ? 'Default ink' : 'No highlighter'
+    const label = this.msg.t(ink ? 'inkColor' : 'highlighter')
+    const none = this.msg.t(ink ? 'defaultInk' : 'noHighlighter')
+    const currentLabel = current ? colors[current - 1].name : none
     const swatch = (index: number) => html`<span class=${ink ? 'ink' : 'hi'} style=${styleMap({ '--_swatch': `var(--_${group}-${index})` })}></span>`
     const open = this.openGroup === group
     return html`<div
@@ -1334,7 +1370,7 @@ export class Notepad extends LitElement {
         class="trigger"
         tabindex="-1"
         data-key=${group}
-        aria-label=${`${label}: ${currentLabel}`}
+        aria-label=${this.msg.t('colorButton', label, currentLabel)}
         aria-haspopup="true"
         aria-expanded=${String(open)}
         title=${label}
@@ -1345,16 +1381,8 @@ export class Notepad extends LitElement {
         </svg>
       </button>
       <div class="flyout">
-        <div class="scrap" role="group" aria-label=${ink ? 'Ink colours' : 'Highlighters'}>
-          <button
-            type="button"
-            tabindex="-1"
-            data-mark=${group}
-            data-color=""
-            aria-label=${ink ? 'Default ink' : 'No highlighter'}
-            aria-pressed=${String(!current)}
-            title=${ink ? 'Default ink' : 'No highlighter'}
-          >
+        <div class="scrap" role="group" aria-label=${this.msg.t(ink ? 'inkColors' : 'highlighters')}>
+          <button type="button" tabindex="-1" data-mark=${group} data-color="" aria-label=${none} aria-pressed=${String(!current)} title=${none}>
             ${ink ? html`<span class="ink default"></span>` : html`<span class="hi none"></span>`}
           </button>
           ${colors.map((color, position) => {
@@ -1410,11 +1438,13 @@ export class Notepad extends LitElement {
             <rect x="2" y="1" width="8" height="10" rx="1" />
             <path d="M4 4h4M4 6h4M4 8h3" />
           </svg>
-          Paper
+          ${this.msg.t('paper')}
         </button>`
       : nothing
     const tearButton = this.tearable
-      ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>Tear off</button>`
+      ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>
+          ${this.msg.t('tearOff')}
+        </button>`
       : nothing
     // The slot stays put and the built-in buttons move around it: a re-created slot would report its stale assignment.
     const builtIns = html`${paperButton}${tearButton}`
@@ -1451,7 +1481,7 @@ export class Notepad extends LitElement {
         part="toolbar"
         popover="manual"
         role="toolbar"
-        aria-label="Formatting"
+        aria-label=${this.msg.t('formatting')}
         style=${styleMap(colorVars)}
         @toggle=${this.handlePopoverToggle}
         @mousedown=${(event: Event) => event.preventDefault()}
@@ -1459,8 +1489,9 @@ export class Notepad extends LitElement {
         @keydown=${this.handleToolbarKeydown}
         @focusout=${this.handleFocusOut}
       >
-        ${markButton('bold', 'Bold', html`<b>B</b>`, 'Ctrl+B')} ${markButton('italic', 'Italic', html`<i>I</i>`, 'Ctrl+I')}
-        ${markButton('underline', 'Underline', html`<u>U</u>`, 'Ctrl+U')} ${markButton('strike', 'Strikethrough', html`<s>S</s>`, 'Ctrl+Shift+X')}
+        ${markButton('bold', this.msg.t('bold'), html`<b>B</b>`, 'Ctrl+B')} ${markButton('italic', this.msg.t('italic'), html`<i>I</i>`, 'Ctrl+I')}
+        ${markButton('underline', this.msg.t('underline'), html`<u>U</u>`, 'Ctrl+U')}
+        ${markButton('strike', this.msg.t('strikethrough'), html`<s>S</s>`, 'Ctrl+Shift+X')}
         ${hasEmphasis && (allowed.has('ink') || allowed.has('highlight')) ? html`<span class="sep" aria-hidden="true"></span>` : nothing}
         ${this.renderColorGroup('ink')} ${this.renderColorGroup('highlight')}
         <slot name="toolbar"></slot>

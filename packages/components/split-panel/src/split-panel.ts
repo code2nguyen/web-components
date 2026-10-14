@@ -4,6 +4,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { splitPanelMessages } from './messages'
 import styles from './split-panel.scss?inline'
 
 export type SplitPanelOrientation = 'horizontal' | 'vertical'
@@ -72,6 +74,9 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 export class SplitPanel extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** The divider's default name in the nearest `lang` (English, or a language the app adds). */
+  private readonly msg = new LocalizeController(this, splitPanelMessages)
+
   @query('.container') private container!: HTMLElement
   @query('[part~="divider"]') private divider!: HTMLElement
 
@@ -99,8 +104,8 @@ export class SplitPanel extends LitElement {
   /** Locks the divider: no dragging, no keyboard, not focusable. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
-  /** Accessible name of the divider. */
-  @property() label = 'Resize panels'
+  /** Accessible name of the divider. Defaults to "Resize panels" in the nearest `lang` (English, or a language the app adds). */
+  @property() label = ''
 
   private resizeObserver?: ResizeObserver
   private lastSize = 0
@@ -257,7 +262,7 @@ export class SplitPanel extends LitElement {
           part="divider"
           role="separator"
           tabindex=${this.disabled ? -1 : 0}
-          aria-label=${this.label}
+          aria-label=${this.label || this.msg.t('label')}
           aria-controls="start"
           aria-orientation=${this.vertical ? 'horizontal' : 'vertical'}
           aria-valuenow=${Math.round(this.position)}

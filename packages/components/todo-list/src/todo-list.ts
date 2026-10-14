@@ -6,6 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { html as staticHtml, unsafeStatic, type StaticValue } from 'lit/static-html.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/reorder-list'
 import '@c2n/tabs'
@@ -14,9 +15,10 @@ import '@c2n/inline-edit'
 import type { InlineEdit } from '@c2n/inline-edit'
 import type { ReorderEventDetail, ReorderSwipeAction, ReorderSwipeActionEventDetail } from '@c2n/reorder-list'
 import '@c2n/task-icons'
-import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type TaskIconName, type TaskIconCategory } from '@c2n/task-icons/task-icon-names.js'
+import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type TaskIconName } from '@c2n/task-icons/task-icon-names.js'
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'
 import styles from './todo-list.scss?inline'
+import { todoListMessages } from './messages.js'
 
 /**
  * The default pens, in order: pen `1` is blue, `2` red and so on. A task stores its pen by position (`ink: 2`); these
@@ -226,13 +228,6 @@ const STORAGE_PREFIX = 'c2-todo-list:'
 const ICON_COLUMNS = 8
 const LIST_ICON_COLUMNS = 4
 const TOAST_MS = 5000
-// Swiping a row left reveals Archive and Delete, swiping it right checks it. The list cancels the inner list's own
-// delete and applies each action to its data.
-const SWIPE_ACTIONS: ReorderSwipeAction[] = [
-  { id: 'archive', label: 'Archive', side: 'end', tone: 'warning', icon: 'archive' },
-  { id: 'delete', label: 'Delete', side: 'end', tone: 'danger', icon: 'delete' },
-  { id: 'toggle', label: 'Done', side: 'start', tone: 'success', icon: 'check' },
-]
 const v = (name: string) => `--c2-todo-list__${name}`
 
 /**
@@ -412,16 +407,23 @@ const isTodoColor = (entry: unknown): entry is TodoColor =>
 /** Whether the application gave a list of its own, rather than leaving the defaults. */
 const hasColors = (value: unknown) => Array.isArray(value) && value.some(isTodoColor)
 
-/** The usable list, or the defaults. An entry with no name is called by its kind and position (`Pen 2`), so a swatch always has an accessible name. */
-const colorList = (value: unknown, defaults: readonly TodoColor[], kind: string): readonly NamedColor[] => {
+/**
+ * The usable list, or the defaults. A default entry (also one spread into a list of the application's) takes its name
+ * in the list's language; an entry with no name is called by its kind and position (`Pen 2`), so a swatch always has an
+ * accessible name.
+ */
+const colorList = (
+  value: unknown,
+  defaults: readonly TodoColor[],
+  defaultName: (position: number) => string,
+  unnamed: (position: number) => string,
+): readonly NamedColor[] => {
   const list = Array.isArray(value) && value.some(isTodoColor) ? (value as unknown[]) : defaults
-  return list
-    .filter(isTodoColor)
-    .map((entry, position) =>
-      typeof entry === 'string'
-        ? { name: `${kind} ${position + 1}`, value: entry }
-        : { name: entry.name?.trim() || `${kind} ${position + 1}`, value: entry.value },
-    )
+  return list.filter(isTodoColor).map((entry, position) => {
+    if (typeof entry === 'string') return { name: unnamed(position + 1), value: entry }
+    const known = defaults.indexOf(entry)
+    return { name: (known >= 0 ? defaultName(known + 1) : entry.name?.trim()) || unnamed(position + 1), value: entry.value }
+  })
 }
 
 /** A task with its pen and highlighter as positions, so the list and its events only ever carry numbers. */
@@ -441,33 +443,16 @@ function colorStyle(ink: number | undefined, highlight: number | undefined): Rec
   }
 }
 
-const CATEGORY_LABELS: Record<TaskIconCategory, string> = {
-  work: 'Work',
-  communication: 'Communication',
-  tech: 'Tech',
-  learning: 'Learning',
-  health: 'Health',
-  sport: 'Sport',
-  home: 'Home',
-  family: 'Family & friends',
-  food: 'Food & groceries',
-  shopping: 'Shopping',
-  finance: 'Money',
-  travel: 'Travel',
-  leisure: 'Leisure',
-  nature: 'Nature',
-  planning: 'Planning',
-}
-const PROGRESS_OPTIONS: [TodoProgress, string][] = [
-  ['ring', 'Ring'],
-  ['bar', 'Bar'],
-  ['hero', 'Hero'],
-  ['none', 'None'],
+const PROGRESS_OPTIONS: [TodoProgress, 'progressRing' | 'progressBar' | 'progressHero' | 'progressNone'][] = [
+  ['ring', 'progressRing'],
+  ['bar', 'progressBar'],
+  ['hero', 'progressHero'],
+  ['none', 'progressNone'],
 ]
-const FILTERS: [TodoFilter, string][] = [
-  ['all', 'All'],
-  ['active', 'To do'],
-  ['done', 'Done'],
+const FILTERS: [TodoFilter, 'filterAll' | 'filterActive' | 'filterDone'][] = [
+  ['all', 'filterAll'],
+  ['active', 'filterActive'],
+  ['done', 'filterDone'],
 ]
 
 // Hand-drawn marks: an open pen circle, a tick, a cross and a slightly wavy strike line.
@@ -489,7 +474,6 @@ function renderTaskIcon(name: TaskIconName): TemplateResult {
 
 const iconGroups = taskIconCategories.map((category) => ({
   category,
-  label: CATEGORY_LABELS[category],
   icons: taskIconCatalog.filter((icon) => icon.category === category),
 }))
 
@@ -568,7 +552,7 @@ interface Toast {
  * and Escape cancels. Clicking a task only shows its whole note.
  * Archived tasks collect in a section at the bottom, and every removal can be undone.
  *
- * With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the list's icon, the
+ * With `customizable`, a palette button opens a panel over the tasks, kept in the window, that styles the whole list: the list's icon, the
  * background (whose text colour and pens follow from it), the palette (its accent, pens and highlighters), the done
  * mark, the density and the progress style. `look.pen` still sets the accent from script. With
  * `storage-key` those choices are remembered in `localStorage`.
@@ -660,8 +644,8 @@ export class TodoList extends LitElement {
    */
   @property({ type: Boolean, attribute: 'heading-editable' }) headingEditable = false
 
-  /** What an editable heading shows while it is empty. */
-  @property({ attribute: 'heading-placeholder' }) headingPlaceholder = 'Untitled list'
+  /** What an editable heading shows while it is empty. Unset, `Untitled list` in the list's language. */
+  @property({ attribute: 'heading-placeholder' }) headingPlaceholder = ''
 
   /** Where the `actions` slot sits: before the customize button (`start`) or after it (`end`). */
   @property({ attribute: 'actions-placement' }) actionsPlacement: TodoActionsPlacement = 'start'
@@ -724,8 +708,8 @@ export class TodoList extends LitElement {
   /** Tasks cannot be checked, added, reordered, swiped, removed or edited. The look can still be customized. */
   @property({ type: Boolean }) readonly = false
 
-  /** Placeholder of the add field. */
-  @property() placeholder = 'Add a task — a note after a dash'
+  /** Placeholder of the add field. Unset, `Add a task — a note after a dash` in the list's language. */
+  @property() placeholder = ''
 
   /** The viewer's customization. Set it to apply a look from script; the panel and `storage-key` keep it up to date. */
   @property({ attribute: false }) look: TodoListLook = {}
@@ -752,10 +736,34 @@ export class TodoList extends LitElement {
 
   private loadedKey: string | undefined
   private pendingFocus: (() => void) | undefined
+  private followingViewport = false
+  private viewportFrame = 0
   private toastTimer: ReturnType<typeof setTimeout> | undefined
 
   /** Hydrating server-rendered markup, which was drawn without what `localStorage` holds. */
   private hydrating = false
+
+  private readonly msg = new LocalizeController(this, todoListMessages)
+
+  /**
+   * Swiping a row left reveals Archive and Delete, swiping it right checks it. The list cancels the inner list's own
+   * delete and applies each action to its data. Kept while the language holds, so the inner list is not redrawn.
+   */
+  private swipeActionsCache: { locale: string; actions: ReorderSwipeAction[] } | undefined
+  private get swipeActions(): ReorderSwipeAction[] {
+    const locale = this.msg.locale
+    if (this.swipeActionsCache?.locale !== locale) {
+      this.swipeActionsCache = {
+        locale,
+        actions: [
+          { id: 'archive', label: this.msg.t('swipeArchive'), side: 'end', tone: 'warning', icon: 'archive' },
+          { id: 'delete', label: this.msg.t('swipeDelete'), side: 'end', tone: 'danger', icon: 'delete' },
+          { id: 'toggle', label: this.msg.t('swipeDone'), side: 'start', tone: 'success', icon: 'check' },
+        ],
+      }
+    }
+    return this.swipeActionsCache.actions
+  }
 
   override connectedCallback(): void {
     // Read before `super`, which attaches the shadow root of a client-rendered element.
@@ -768,6 +776,7 @@ export class TodoList extends LitElement {
   override disconnectedCallback(): void {
     document.removeEventListener('pointerdown', this.handleOutsidePointer, true)
     document.removeEventListener('keydown', this.handleDocumentEscape)
+    this.followViewport(false)
     clearTimeout(this.toastTimer)
     super.disconnectedCallback()
   }
@@ -798,6 +807,7 @@ export class TodoList extends LitElement {
       const dark = isDark(surface || '#ffffff')
       if (dark !== this.darkSurface) this.darkSurface = dark
     }
+    this.showPanel()
     const focus = this.pendingFocus
     this.pendingFocus = undefined
     focus?.()
@@ -913,7 +923,7 @@ export class TodoList extends LitElement {
     this.closeRow(task)
     const archived = this.replaceTask(task, { archived: true }, (detail) => new CustomEvent('task-archive', { detail }))
     this.focusAfterRemoval(index)
-    this.showToast(`Archived “${task.label}”`, () => this.restoreTask(archived))
+    this.showToast(this.msg.t('archivedTask', task.label), () => this.restoreTask(archived))
   }
 
   private restoreTask(task: TodoTask): void {
@@ -931,7 +941,7 @@ export class TodoList extends LitElement {
       task,
     )
     if (index >= 0) this.focusAfterRemoval(index)
-    this.showToast(`Deleted “${task.label}”`, () => {
+    this.showToast(this.msg.t('deletedTask', task.label), () => {
       const tasks = [...this.tasks]
       tasks.splice(Math.min(position, tasks.length), 0, task)
       this.commitTasks(tasks, (detail) => new CustomEvent('task-add', { detail }), task)
@@ -990,13 +1000,15 @@ export class TodoList extends LitElement {
   }
 
   private readonly handleOutsidePointer = (event: PointerEvent): void => {
-    if (!this.menuId && !this.iconPickerId && !this.panelIconOpen && !this.panelPaletteOpen) return
+    if (!this.menuId && !this.iconPickerId && !this.panelIconOpen && !this.panelPaletteOpen && !this.panelOpen) return
     const path = event.composedPath()
     const within = (...classes: string[]) => path.some((node) => node instanceof HTMLElement && classes.some((name) => node.classList.contains(name)))
     if (this.menuId && !within('menu', 'more')) this.closeMenus()
     if (this.iconPickerId && !within('icon-popover', 'task-icon')) this.iconPickerId = undefined
     if (this.panelIconOpen && !within('icon-dropdown')) this.panelIconOpen = false
     if (this.panelPaletteOpen && !within('palette-dropdown')) this.panelPaletteOpen = false
+    // A press anywhere else closes the panel, leaving the focus where the press puts it.
+    if (this.panelOpen && !within('panel', 'customize')) this.closePanel(false)
   }
 
   /** Escape closes an open menu or icon picker wherever focus is, e.g. after a menu opened on hover. */
@@ -1151,7 +1163,7 @@ export class TodoList extends LitElement {
     const previous = { label: current.label, note: current.note }
     if (label === previous.label && note === (previous.note ?? '')) return
     const edited = this.replaceTask(current, { label, note: note || undefined }, (detail) => new CustomEvent('task-change', { detail }))
-    this.showToast(`Edited “${previous.label}”`, () => {
+    this.showToast(this.msg.t('editedTask', previous.label), () => {
       const latest = this.tasks.find((item) => item.id === edited.id)
       if (latest) this.patchTask(latest, previous)
     })
@@ -1206,11 +1218,75 @@ export class TodoList extends LitElement {
     this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.panel [role="radio"][aria-checked="true"]')?.focus()
   }
 
-  private closePanel(): void {
+  private closePanel(refocus = true): void {
     this.panelOpen = false
     this.panelIconOpen = false
     this.panelPaletteOpen = false
-    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.customize')?.focus()
+    if (refocus) this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.customize')?.focus()
+  }
+
+  // The panel is a fixed-position popover in the top layer, so a short list (a card with a fixed height, a scrolling
+  // container) shows all of it, and the tasks stay in view to show the changes. While it is open, a scroll anywhere or
+  // a resize moves the palette button, so it is placed again on the next frame.
+
+  private showPanel(): void {
+    const panel = this.renderRoot.querySelector<HTMLElement>('.panel')
+    this.followViewport(!!panel)
+    if (!panel) return
+    if (!panel.matches(':popover-open')) panel.showPopover()
+    this.placePanel()
+  }
+
+  /**
+   * Under the palette button, their right edges lined up, or above it; beside the list when neither has room for it,
+   * so the tasks stay in view. Always in the window.
+   */
+  private placePanel(): void {
+    const panel = this.renderRoot.querySelector<HTMLElement>('.panel')
+    if (!panel?.matches(':popover-open')) return
+    const margin = 8
+    const gap = 6
+    // Scrolls only when taller than the window: otherwise it would clip the dropdowns that float out of it.
+    panel.classList.remove('scrolling')
+    if (panel.offsetHeight > innerHeight - margin * 2) panel.classList.add('scrolling')
+    const anchor = (this.renderRoot.querySelector<HTMLElement>('.customize') ?? this).getBoundingClientRect()
+    const width = panel.offsetWidth
+    const height = panel.offsetHeight
+    const below = innerHeight - margin - anchor.bottom - gap
+    const roomAbove = anchor.top - gap - margin
+    const list = this.getBoundingClientRect()
+    const after = list.right + gap + width <= innerWidth - margin
+    const before = list.left - gap - width >= margin
+    let side: 'bottom' | 'top' | 'right' | 'left' = height <= below || below >= roomAbove ? 'bottom' : 'top'
+    if (height > below && height > roomAbove && (after || before)) side = after ? 'right' : 'left'
+    const top = side === 'bottom' ? anchor.bottom + gap : side === 'top' ? anchor.top - gap - height : anchor.top
+    const left = side === 'right' ? list.right + gap : side === 'left' ? list.left - gap - width : anchor.right - width
+    const x = Math.min(Math.max(margin, left), innerWidth - width - margin)
+    const y = Math.min(Math.max(margin, top), innerHeight - height - margin)
+    panel.style.left = `${Math.round(x)}px`
+    panel.style.top = `${Math.round(y)}px`
+    panel.dataset.side = side
+  }
+
+  private readonly handleViewportChange = (): void => {
+    if (this.viewportFrame) return
+    this.viewportFrame = requestAnimationFrame(() => {
+      this.viewportFrame = 0
+      this.placePanel()
+    })
+  }
+
+  private followViewport(follow: boolean): void {
+    if (follow === this.followingViewport) return
+    this.followingViewport = follow
+    const method = follow ? 'addEventListener' : 'removeEventListener'
+    // Capture: scroll does not bubble, and the scrolling element may be any ancestor.
+    window[method]('scroll', this.handleViewportChange, { capture: true, passive: true } as AddEventListenerOptions)
+    window[method]('resize', this.handleViewportChange)
+    if (!follow && this.viewportFrame) {
+      cancelAnimationFrame(this.viewportFrame)
+      this.viewportFrame = 0
+    }
   }
 
   private moveIconFocus(event: KeyboardEvent, close: () => void, columns = ICON_COLUMNS): void {
@@ -1274,8 +1350,8 @@ export class TodoList extends LitElement {
     }
     const allDone = total > 0 && closed === total
     const urgent = active.filter((task) => task.urgent && !task.done && !task.dropped).length
-    const summary = total === 0 ? 'No tasks yet' : allDone ? 'All done. Nice work.' : `${closed} of ${total} done`
-    const meta = urgent && !allDone ? `${summary} · ${urgent} urgent` : summary
+    const summary = total === 0 ? this.msg.t('noTasksYet') : allDone ? this.msg.t('allDone') : this.msg.t('done', closed, total)
+    const meta = urgent && !allDone ? `${summary} · ${this.msg.t('urgent', urgent)}` : summary
     const panel = this.panelOpen && this.customizable
     const classes = {
       container: true,
@@ -1289,20 +1365,17 @@ export class TodoList extends LitElement {
     return html`
       <section class=${classMap(classes)} style=${styleMap(containerStyle)}>
         ${this.renderHeader(progress, percent, closed, total, meta)}
-        ${progress === 'bar' ? html`<c2-progress class="bar" value=${percent} label=${`${closed} of ${total} tasks done`}></c2-progress>` : nothing}
-        ${
-          panel
-            ? this.renderPanel()
-            : html`<div class="view">
-                ${total > 0 ? this.renderFilteredTasks(active, total, closed) : this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()}
-                ${this.renderArchive()}
-              </div>`
-        }
+        ${progress === 'bar' ? html`<c2-progress class="bar" value=${percent} label=${this.msg.t('tasksDone', closed, total)}></c2-progress>` : nothing}
+        <div class="view">
+          ${total > 0 ? this.renderFilteredTasks(active, total, closed) : this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()}
+          ${this.renderArchive()}
+        </div>
+        ${panel ? this.renderPanel() : nothing}
         ${
           this.toast
             ? html`<div class="toast" role="status">
                 <span class="toast-message">${this.toast.message}</span>
-                <button class="toast-undo" type="button" @click=${this.undo}>Undo</button>
+                <button class="toast-undo" type="button" @click=${this.undo}>${this.msg.t('undo')}</button>
               </div>`
             : nothing
         }
@@ -1317,7 +1390,7 @@ export class TodoList extends LitElement {
       <header class="header">
         ${
           ring
-            ? html`<c2-progress class="ring" variant="circular" value=${percent} label=${`${closed} of ${total} tasks done`}>
+            ? html`<c2-progress class="ring" variant="circular" value=${percent} label=${this.msg.t('tasksDone', closed, total)}>
                 <span slot="value" class=${classMap({ 'ring-value': true, 'with-icon': !!icon && progress === 'ring' })} aria-hidden="true">
                   ${
                     total > 0 && closed === total
@@ -1344,7 +1417,7 @@ export class TodoList extends LitElement {
               ? html`<button
                   class="customize"
                   type="button"
-                  aria-label="Customize look"
+                  aria-label=${this.msg.t('customizeLook')}
                   aria-expanded=${this.panelOpen ? 'true' : 'false'}
                   aria-controls="panel"
                   @click=${this.openPanel}
@@ -1371,10 +1444,10 @@ export class TodoList extends LitElement {
       return html`<div class="heading" role="heading" aria-level=${level}>
         <c2-inline-edit
           class="heading-edit"
-          label="List title"
+          label=${this.msg.t('listTitle')}
           maxlength="200"
           .value=${this.heading}
-          placeholder=${this.headingPlaceholder}
+          placeholder=${this.headingPlaceholder || this.msg.t('untitledList')}
           @edit-start=${stopEvent}
           @edit-commit=${stopEvent}
           @edit-cancel=${stopEvent}
@@ -1420,14 +1493,14 @@ export class TodoList extends LitElement {
     return html`
       <c2-tabs
         class="filters"
-        aria-label="Show"
+        aria-label=${this.msg.t('filters')}
         selected-tab=${`filter-${this.filter}`}
         @selection-change=${(event: CustomEvent<{ value: string }>) => {
           event.stopPropagation()
           this.filter = event.detail.value.replace('filter-', '') as TodoFilter
         }}
       >
-        ${FILTERS.map(([filter, label]) => html`<c2-tab slot="tab" for=${`filter-${filter}`}>${label}<span class="count">${counts[filter]}</span></c2-tab>`)}
+        ${FILTERS.map(([filter, label]) => html`<c2-tab slot="tab" for=${`filter-${filter}`}>${this.msg.t(label)}<span class="count">${counts[filter]}</span></c2-tab>`)}
         ${FILTERS.map(
           ([filter]) =>
             html`<div class="filter-panel" id=${`filter-${filter}`} slot=${this.filter === filter ? 'tab-content' : nothing}>
@@ -1440,22 +1513,22 @@ export class TodoList extends LitElement {
 
   private renderTasks(active: TodoTask[]) {
     if (active.length === 0) {
-      return html`<div class="empty"><slot name="empty">No tasks yet. Add your first one below.</slot></div>`
+      return html`<div class="empty"><slot name="empty">${this.msg.t('emptyList')}</slot></div>`
     }
     const visible = active.filter((task) =>
       this.filter === 'active' ? !task.done && !task.dropped : this.filter === 'done' ? task.done || task.dropped : true,
     )
     if (visible.length === 0) {
-      return html`<p class="empty">${this.filter === 'done' ? 'Nothing crossed off yet. You’ve got this.' : 'Everything’s done. Enjoy the calm.'}</p>`
+      return html`<p class="empty">${this.filter === 'done' ? this.msg.t('nothingDone') : this.msg.t('everythingDone')}</p>`
     }
     const reorderable = !this.readonly && this.filter === 'all' && visible.length > 1
     return html`
       <c2-reorder-list
         class="tasks"
-        aria-label=${this.heading ? `${this.heading} tasks` : 'Tasks'}
+        aria-label=${this.heading ? this.msg.t('tasksOf', this.heading) : this.msg.t('tasks')}
         ?editable=${reorderable}
         ?swipeable=${!this.readonly}
-        .swipeActions=${SWIPE_ACTIONS}
+        .swipeActions=${this.swipeActions}
         @reorder=${this.handleReorder}
         @swipe-action=${this.handleSwipeAction}
         @change=${(event: Event) => event.stopPropagation()}
@@ -1483,7 +1556,7 @@ export class TodoList extends LitElement {
     const expanded = this.expandedId === id
     const ink = this.colorOf('ink', task.ink)
     const highlight = this.colorOf('highlight', task.highlight)
-    const status = task.dropped ? `${task.label}, won’t do` : task.label
+    const status = task.dropped ? this.msg.t('wontDoTask', task.label) : task.label
     return html`
       <div class="task-slot" data-reorder-key=${id} data-reorder-label=${task.label}>
         <div
@@ -1506,7 +1579,7 @@ export class TodoList extends LitElement {
         >
           ${
             reorderable
-              ? html`<span class="grip" title="Drag to reorder" aria-hidden="true"
+              ? html`<span class="grip" title=${this.msg.t('dragToReorder')} aria-hidden="true"
                   ><svg viewBox="0 0 24 24">
                     <circle cx="9" cy="6" r="1.4"></circle>
                     <circle cx="15" cy="6" r="1.4"></circle>
@@ -1535,7 +1608,7 @@ export class TodoList extends LitElement {
                 : html`<button
                     class="task-icon"
                     type="button"
-                    aria-label=${`Change icon for ${task.label}`}
+                    aria-label=${this.msg.t('changeIconFor', task.label)}
                     aria-haspopup="dialog"
                     aria-expanded=${this.iconPickerId === id ? 'true' : 'false'}
                     @click=${() => this.openIconPicker(task, '.task-icon')}
@@ -1553,12 +1626,12 @@ export class TodoList extends LitElement {
                     @focusout=${(event: FocusEvent) => this.handleEditorFocusOut(event, task)}
                     @keydown=${(event: KeyboardEvent) => this.handleEditorKey(event, task)}
                   >
-                    <input class="label-input" type="text" aria-label=${`Name of ${task.label}`} .value=${task.label} />
+                    <input class="label-input" type="text" aria-label=${this.msg.t('nameOf', task.label)} .value=${task.label} />
                     <textarea
                       class="note-input"
-                      aria-label=${`Note for ${task.label}`}
+                      aria-label=${this.msg.t('noteFor', task.label)}
                       rows=${Math.max(2, (task.note ?? '').split('\n').length)}
-                      placeholder="Add a note: a quantity, an address, a link…"
+                      placeholder=${this.msg.t('notePlaceholder')}
                       .value=${task.note ?? ''}
                     ></textarea>
                   </div>`
@@ -1589,7 +1662,7 @@ export class TodoList extends LitElement {
               : html`<button
                   class=${classMap({ more: true, open: this.menuId === id })}
                   type="button"
-                  aria-label=${`Actions for ${task.label}`}
+                  aria-label=${this.msg.t('actionsFor', task.label)}
                   aria-haspopup="menu"
                   aria-expanded=${this.menuId === id ? 'true' : 'false'}
                   @click=${() => this.openMenu(task, false)}
@@ -1658,18 +1731,25 @@ export class TodoList extends LitElement {
       <div
         class="menu"
         role="menu"
-        aria-label=${`Actions for ${task.label}`}
+        aria-label=${this.msg.t('actionsFor', task.label)}
         @pointerdown=${keepFromRow}
         @keydown=${(event: KeyboardEvent) => this.handleMenuKey(event, task)}
       >
-        ${item('edit', 'Edit task', 'F2', 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4')}
-        ${item('icon', this.iconOf(task) ? 'Change icon' : 'Add an icon', 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
-        ${trigger('highlight', 'Highlight', this.colorOf('highlight', task.highlight))} ${trigger('ink', 'Text colour', this.colorOf('ink', task.ink))}
-        ${item('drop', task.dropped ? 'Undo won’t do' : 'Won’t do', 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11')}
-        ${item('archive', 'Archive', 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4', { separated: true })}
-        ${item('delete', 'Delete', 'Del', 'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13', {
-          danger: true,
-        })}
+        ${item('edit', this.msg.t('editTask'), 'F2', 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4')}
+        ${item('icon', this.iconOf(task) ? this.msg.t('changeIcon') : this.msg.t('addIcon'), 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
+        ${trigger('highlight', this.msg.t('highlight'), this.colorOf('highlight', task.highlight))}
+        ${trigger('ink', this.msg.t('textColour'), this.colorOf('ink', task.ink))}
+        ${item('drop', task.dropped ? this.msg.t('undoWontDo') : this.msg.t('wontDo'), 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11')}
+        ${item('archive', this.msg.t('archive'), 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4', { separated: true })}
+        ${item(
+          'delete',
+          this.msg.t('delete'),
+          this.msg.t('deleteKey'),
+          'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13',
+          {
+            danger: true,
+          },
+        )}
         ${this.submenu ? this.renderSubmenu(task, this.submenu) : nothing}
       </div>
     `
@@ -1690,8 +1770,8 @@ export class TodoList extends LitElement {
               type="button"
               role="menuitemradio"
               aria-checked=${radio(!currentHighlight)}
-              aria-label="No highlight"
-              title="None"
+              aria-label=${this.msg.t('noHighlight')}
+              title=${this.msg.t('none')}
               @click=${() => choose({ highlight: undefined })}
             ></button>`,
             ...this.colorsOf('highlight').map(
@@ -1716,8 +1796,8 @@ export class TodoList extends LitElement {
               type="button"
               role="menuitemradio"
               aria-checked=${radio(!currentInk)}
-              aria-label="Default text colour"
-              title="Default"
+              aria-label=${this.msg.t('defaultTextColour')}
+              title=${this.msg.t('default')}
               @click=${() => choose({ ink: undefined })}
             ></button>`,
             ...this.colorsOf('ink').map(
@@ -1728,7 +1808,7 @@ export class TodoList extends LitElement {
                   type="button"
                   role="menuitemradio"
                   aria-checked=${radio(currentInk === position + 1)}
-                  aria-label=${`${name} text`}
+                  aria-label=${this.msg.t('penText', name)}
                   title=${name}
                   @click=${() => choose({ ink: position + 1 })}
                 ></button>`,
@@ -1737,7 +1817,7 @@ export class TodoList extends LitElement {
     return html`<div
       class=${`submenu submenu-${name}`}
       role="menu"
-      aria-label=${name === 'highlight' ? 'Highlight' : 'Text colour'}
+      aria-label=${name === 'highlight' ? this.msg.t('highlight') : this.msg.t('textColour')}
       @keydown=${this.handleSubmenuKey}
       @mouseenter=${() => (this.submenu = name)}
     >
@@ -1756,7 +1836,7 @@ export class TodoList extends LitElement {
         class=${classMap({ 'icon-popover': true, inked: !!this.colorOf('ink', task.ink) })}
         style=${styleMap(colorStyle(this.colorOf('ink', task.ink), undefined))}
         role="dialog"
-        aria-label=${`Icon for ${task.label}`}
+        aria-label=${this.msg.t('iconFor', task.label)}
         @pointerdown=${keepFromRow}
         @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, () => this.closeIconPicker(task))}
       >
@@ -1766,8 +1846,8 @@ export class TodoList extends LitElement {
           html`<button
             class="no-icon"
             type="button"
-            aria-label="No icon"
-            title="No icon"
+            aria-label=${this.msg.t('noIcon')}
+            title=${this.msg.t('noIcon')}
             aria-pressed=${current ? 'false' : 'true'}
             @click=${() => pick(undefined)}
           >
@@ -1794,8 +1874,8 @@ export class TodoList extends LitElement {
         <input
           class="icon-search"
           type="search"
-          aria-label="Search icons"
-          placeholder=${`Search ${taskIconCatalog.length} icons`}
+          aria-label=${this.msg.t('searchIcons')}
+          placeholder=${this.msg.t('searchIconsPlaceholder', taskIconCatalog.length)}
           .value=${this.iconQuery}
           @input=${(event: Event) => (this.iconQuery = (event.target as HTMLInputElement).value)}
         />
@@ -1804,8 +1884,8 @@ export class TodoList extends LitElement {
       <div class="icon-picker">
         ${groups.map(
           (group) => html`
-            <div class="icon-group" role="group" aria-label=${group.label}>
-              <span class="icon-group-label" aria-hidden="true">${group.label}</span>
+            <div class="icon-group" role="group" aria-label=${this.msg.t('iconCategory', group.category)}>
+              <span class="icon-group-label" aria-hidden="true">${this.msg.t('iconCategory', group.category)}</span>
               <div class="icon-grid">
                 ${group.icons.map(
                   ({ name, title }) =>
@@ -1825,7 +1905,7 @@ export class TodoList extends LitElement {
             </div>
           `,
         )}
-        ${groups.length === 0 ? html`<p class="hint">No icon matches “${this.iconQuery}”.</p>` : nothing}
+        ${groups.length === 0 ? html`<p class="hint">${this.msg.t('noIconMatches', this.iconQuery)}</p>` : nothing}
       </div>
     `
   }
@@ -1912,7 +1992,19 @@ export class TodoList extends LitElement {
   }
 
   private colorsOf(group: Submenu): readonly NamedColor[] {
-    return group === 'ink' ? colorList(this.pens, defaultTodoPens, 'Pen') : colorList(this.highlights, defaultTodoHighlights, 'Highlighter')
+    return group === 'ink'
+      ? colorList(
+          this.pens,
+          defaultTodoPens,
+          (position) => this.msg.t('defaultPen', position),
+          (position) => this.msg.t('penN', position),
+        )
+      : colorList(
+          this.highlights,
+          defaultTodoHighlights,
+          (position) => this.msg.t('defaultHighlight', position),
+          (position) => this.msg.t('highlighterN', position),
+        )
   }
 
   /** A task's pen or highlighter position, or `undefined` when it has none or the current list is shorter. */
@@ -1931,6 +2023,23 @@ export class TodoList extends LitElement {
     this.colorsOf('ink').forEach(({ value }, position) => (vars[`--_pen-${position + 1}`] = value))
     this.colorsOf('highlight').forEach(({ value }, position) => (vars[`--_highlight-${position + 1}`] = value))
     return vars
+  }
+
+  /** A list icon's label in the list's language. */
+  private listIconLabel(entry: (typeof todoListIcons)[number] | undefined): string | undefined {
+    return entry && this.msg.t('listIcon', entry.name)
+  }
+
+  /** A background's name: a default one's in the list's language, else its own, else `Background 2`. */
+  private backgroundName(option: TodoBackgroundOption, position: number): string {
+    const known = defaultTodoBackgrounds.indexOf(option)
+    return (known >= 0 ? this.msg.t('defaultBackground', known + 1) : option.name?.trim()) || this.msg.t('backgroundN', position)
+  }
+
+  /** A palette's name: a default one's in the list's language, else its own, else `Palette 2`. */
+  private paletteName(option: TodoPaletteOption | undefined, position: number): string {
+    const known = option ? defaultTodoPalettes.indexOf(option) : -1
+    return (known >= 0 ? this.msg.t('defaultPalette', known + 1) : option?.name?.trim()) || this.msg.t('paletteN', position)
   }
 
   private renderChevron() {
@@ -1970,11 +2079,11 @@ export class TodoList extends LitElement {
     const chosen = this.paletteOf(look.palette)
     // The position of the palette in use: the chosen one, or the first one a chosen background brings.
     const selected = chosen ? todoColorIndex(look.palette, todoPalettes) : this.backgroundOf(look.background) ? 1 : undefined
-    const nameOf = (position: number) => palettes[position - 1]?.name?.trim() || `Palette ${position}`
+    const nameOf = (position: number) => this.paletteName(palettes[position - 1], position)
     const open = this.panelPaletteOpen
     return html`
       <div class="field">
-        <span class="field-label" id="palette-label">Palette</span>
+        <span class="field-label" id="palette-label">${this.msg.t('palette')}</span>
         <div class="dropdown palette-dropdown">
           <button
             class="dropdown-trigger"
@@ -1987,7 +2096,7 @@ export class TodoList extends LitElement {
             @click=${this.togglePalettes}
           >
             ${this.renderPalettePreview(selected ? palettes[selected - 1] : undefined)}
-            <span class="dropdown-value" id="palette-current">${selected ? nameOf(selected) : 'From the theme'}</span>
+            <span class="dropdown-value" id="palette-current">${selected ? nameOf(selected) : this.msg.t('fromTheme')}</span>
             ${this.renderChevron()}
           </button>
           ${
@@ -2033,11 +2142,14 @@ export class TodoList extends LitElement {
     const chosen = this.look.icon
     const suggested = this.heading ? suggestTaskIcon(this.heading) : undefined
     const nameOf = (taskIcon: TaskIconName | undefined) =>
-      taskIcon ? (todoListIcons.find((entry) => entry.icon === taskIcon)?.label ?? taskIconCatalog.find((entry) => entry.name === taskIcon)?.title) : undefined
-    const description = !icon ? 'Empty' : chosen ? nameOf(icon) : this.icon ? nameOf(icon) : `${nameOf(icon)} · from the heading`
+      taskIcon
+        ? (this.listIconLabel(todoListIcons.find((entry) => entry.icon === taskIcon)) ?? taskIconCatalog.find((entry) => entry.name === taskIcon)?.title)
+        : undefined
+    const description = !icon ? this.msg.t('empty') : chosen ? nameOf(icon) : this.icon ? nameOf(icon) : this.msg.t('fromHeading', nameOf(icon) ?? icon)
     const open = this.panelIconOpen
     // One tile in the tab order, the current one; the arrow keys move between the others.
-    const current = !chosen && suggested ? 'Automatic' : chosen === 'none' ? 'Empty' : (listIconOf(chosen)?.label ?? 'Empty')
+    const current =
+      !chosen && suggested ? this.msg.t('automatic') : chosen === 'none' ? this.msg.t('empty') : (this.listIconLabel(listIconOf(chosen)) ?? this.msg.t('empty'))
     const tile = (label: string, pressed: boolean, onPick: () => void, content: unknown) =>
       html`<button
         class="icon-option list-icon-option"
@@ -2051,7 +2163,7 @@ export class TodoList extends LitElement {
       </button>`
     return html`
       <div class="field">
-        <span class="field-label" id="icon-label">Icon</span>
+        <span class="field-label" id="icon-label">${this.msg.t('icon')}</span>
         <div class="dropdown icon-dropdown">
           <button
             class="dropdown-trigger"
@@ -2071,13 +2183,13 @@ export class TodoList extends LitElement {
               ? html`<div
                   class="dropdown-popup panel-icons"
                   role="dialog"
-                  aria-label="Icon of the list"
+                  aria-label=${this.msg.t('listIconDialog')}
                   @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, () => this.closeListIconPicker(), LIST_ICON_COLUMNS)}
                 >
                   <div class="list-icon-grid">
-                    ${suggested ? tile('Automatic', !chosen, () => this.setListIcon(undefined), renderTaskIcon(suggested)) : nothing}
-                    ${tile('Empty', chosen === 'none', () => this.setListIcon('none'), nothing)}
-                    ${todoListIcons.map((entry) => tile(entry.label, chosen === entry.name, () => this.setListIcon(entry.name), renderTaskIcon(entry.icon)))}
+                    ${suggested ? tile(this.msg.t('automatic'), !chosen, () => this.setListIcon(undefined), renderTaskIcon(suggested)) : nothing}
+                    ${tile(this.msg.t('empty'), chosen === 'none', () => this.setListIcon('none'), nothing)}
+                    ${todoListIcons.map((entry) => tile(this.msg.t('listIcon', entry.name), chosen === entry.name, () => this.setListIcon(entry.name), renderTaskIcon(entry.icon)))}
                   </div>
                 </div>`
               : nothing
@@ -2094,12 +2206,12 @@ export class TodoList extends LitElement {
         <input
           class="add-input"
           type="text"
-          aria-label="New task"
+          aria-label=${this.msg.t('newTask')}
           .value=${this.draft}
-          placeholder=${this.placeholder}
+          placeholder=${this.placeholder || this.msg.t('addPlaceholder')}
           @input=${(event: Event) => (this.draft = (event.target as HTMLInputElement).value)}
         />
-        <button class="add-button" type="submit" ?disabled=${!this.draft.trim()}>Add</button>
+        <button class="add-button" type="submit" ?disabled=${!this.draft.trim()}>${this.msg.t('add')}</button>
       </form>
     `
   }
@@ -2116,7 +2228,7 @@ export class TodoList extends LitElement {
           @click=${() => (this.showArchived = !this.showArchived)}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4"></path></svg>
-          <span>Archived · ${archived.length}</span>
+          <span>${this.msg.t('archivedCount', archived.length)}</span>
           <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
         </button>
         ${
@@ -2129,11 +2241,21 @@ export class TodoList extends LitElement {
                       ${
                         this.readonly
                           ? nothing
-                          : html`<button class="text-button" type="button" aria-label=${`Restore ${task.label}`} @click=${() => this.restoreTask(task)}>
-                                Restore
+                          : html`<button
+                                class="text-button"
+                                type="button"
+                                aria-label=${this.msg.t('restoreTask', task.label)}
+                                @click=${() => this.restoreTask(task)}
+                              >
+                                ${this.msg.t('restore')}
                               </button>
-                              <button class="text-button danger" type="button" aria-label=${`Delete ${task.label}`} @click=${() => this.removeTask(task)}>
-                                Delete
+                              <button
+                                class="text-button danger"
+                                type="button"
+                                aria-label=${this.msg.t('deleteTask', task.label)}
+                                @click=${() => this.removeTask(task)}
+                              >
+                                ${this.msg.t('delete')}
                               </button>`
                       }
                     </li>
@@ -2155,21 +2277,24 @@ export class TodoList extends LitElement {
     const doneMark = look.doneMark ?? 'tick'
     const radio = (checked: boolean) => (checked ? 'true' : 'false')
     return html`
-      <div class="panel" id="panel" role="region" aria-label="Customize the list" @keydown=${this.handlePanelKey}>
+      <div class="panel" id="panel" popover="manual" role="region" aria-label=${this.msg.t('customizeList')} @keydown=${this.handlePanelKey}>
         <div class="panel-head">
-          <span class="panel-title">Customize the list</span>
-          <button class="reset" type="button" ?disabled=${Object.keys(look).length === 0} @click=${this.resetFromPanel}>Reset</button>
+          <span class="panel-title">${this.msg.t('customizeList')}</span>
+          <button class="reset" type="button" ?disabled=${Object.keys(look).length === 0} @click=${this.resetFromPanel}>${this.msg.t('reset')}</button>
+          <button class="panel-close" type="button" aria-label=${this.msg.t('closePanel')} title=${this.msg.t('closePanel')} @click=${() => this.closePanel()}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
         </div>
-        <p class="hint">Applies to the whole list. Style one task from its ⋯ menu, or click its icon.</p>
+        <p class="hint">${this.msg.t('panelHint')}</p>
 
         ${this.renderListIconField()}
 
         <div class="field">
-          <span class="field-label" id="background-label">Background</span>
+          <span class="field-label" id="background-label">${this.msg.t('background')}</span>
           <div class="swatches" role="radiogroup" aria-labelledby="background-label">
             ${[undefined, ...this.backgroundList()].map((option, position) => {
               const preset = option ? presetOf(option) : undefined
-              const name = option ? option.name?.trim() || `Background ${position}` : 'Default'
+              const name = option ? this.backgroundName(option, position) : this.msg.t('default')
               return html`<button
                 class="background-swatch"
                 type="button"
@@ -2190,7 +2315,7 @@ export class TodoList extends LitElement {
 
         <div class="field-row">
           <div class="field">
-            <span class="field-label" id="mark-label">Done mark</span>
+            <span class="field-label" id="mark-label">${this.msg.t('doneMark')}</span>
             <div class="segmented" role="radiogroup" aria-labelledby="mark-label">
               ${(['tick', 'cross'] as const).map(
                 (option) =>
@@ -2202,13 +2327,13 @@ export class TodoList extends LitElement {
                     @click=${() => this.setLook({ doneMark: option })}
                   >
                     <svg class="pen" viewBox="0 0 24 24" aria-hidden="true"><path d=${option === 'tick' ? TICK : CROSS}></path></svg>
-                    ${option === 'tick' ? 'Tick' : 'Cross'}
+                    ${option === 'tick' ? this.msg.t('tick') : this.msg.t('cross')}
                   </button>`,
               )}
             </div>
           </div>
           <div class="field">
-            <span class="field-label" id="density-label">Density</span>
+            <span class="field-label" id="density-label">${this.msg.t('density')}</span>
             <div class="segmented" role="radiogroup" aria-labelledby="density-label">
               ${(['cozy', 'compact'] as const).map(
                 (option) =>
@@ -2219,7 +2344,7 @@ export class TodoList extends LitElement {
                     aria-checked=${radio(density === option)}
                     @click=${() => this.setLook({ density: option })}
                   >
-                    ${option === 'cozy' ? 'Cozy' : 'Compact'}
+                    ${option === 'cozy' ? this.msg.t('cozy') : this.msg.t('compact')}
                   </button>`,
               )}
             </div>
@@ -2227,7 +2352,7 @@ export class TodoList extends LitElement {
         </div>
 
         <div class="field">
-          <span class="field-label" id="progress-label">Progress</span>
+          <span class="field-label" id="progress-label">${this.msg.t('progress')}</span>
           <div class="segmented" role="radiogroup" aria-labelledby="progress-label">
             ${PROGRESS_OPTIONS.map(
               ([option, label]) =>
@@ -2238,17 +2363,10 @@ export class TodoList extends LitElement {
                   aria-checked=${radio(progress === option)}
                   @click=${() => this.setLook({ progress: option })}
                 >
-                  ${label}
+                  ${this.msg.t(label)}
                 </button>`,
             )}
           </div>
-        </div>
-
-        <div class="panel-foot">
-          <button class="done-button" type="button" @click=${this.closePanel}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
-            Back to the list
-          </button>
         </div>
       </div>
     `

@@ -58,7 +58,9 @@ export function normalizeLanguage(language: string | null | undefined): string {
   return id in ALIASES ? ALIASES[id] : id
 }
 
-export function languageLabel(language: string): string {
+/** The name of a language; `plainText` names no language, in the page's own words. */
+export function languageLabel(language: string, plainText = 'Plain text'): string {
   const id = normalizeLanguage(language)
-  return LANGUAGES.find((each) => each.id === id)?.label ?? (id ? id : 'Plain text')
+  if (!id) return plainText
+  return LANGUAGES.find((each) => each.id === id)?.label ?? id
 }
