@@ -3,6 +3,21 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.9](https://github.com/code2nguyen/web-components/releases/tag/v1.0.9) — 2026-10-14
+
+### Features
+
+- Localize built-in text, float the to-do list's customize panel, give the page editor Notion's look ([61bfe13](https://github.com/code2nguyen/web-components/commit/61bfe13))
+- **spreadsheet:** Add c2-spreadsheet, a small editable grid with basic formulas ([9493378](https://github.com/code2nguyen/web-components/commit/9493378))
+
+### Fixes
+
+- **spreadsheet:** Fit gallery and docs examples, draw the focus ring around the frame ([8c11e17](https://github.com/code2nguyen/web-components/commit/8c11e17))
+
+### Docs site & examples
+
+- **docs:** Give c2-modal's open its description back; the built-in text is English ([c4c9e4b](https://github.com/code2nguyen/web-components/commit/c4c9e4b))
+
 ## [1.0.8](https://github.com/code2nguyen/web-components/releases/tag/v1.0.8) — 2026-10-10
 
 ### Features
