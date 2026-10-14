@@ -425,6 +425,10 @@
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
     },
+    "./mask-input": {
+      "types": "./dist/mask-input.d.ts",
+      "default": "./dist/mask-input.js"
+    },
     "./masonry": {
       "types": "./dist/masonry.d.ts",
       "default": "./dist/masonry.js"
@@ -893,6 +897,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",

@@ -1469,6 +1469,26 @@
       "reason": "The default slot projects the marked text; its font and colour stay the consumer's, and the mark is drawn by the mark and outline parts."
     },
     {
+      "tag": "c2-mask-input",
+      "slot": "prefix-icon",
+      "decision": "variables",
+      "variables": ["--c2-mask-input__icon--size", "--c2-mask-input__icon--color"],
+      "reason": "The field sizes and colours the slotted prefix icon or adornment through the icon variables."
+    },
+    {
+      "tag": "c2-mask-input",
+      "slot": "suffix-icon",
+      "decision": "variables",
+      "variables": ["--c2-mask-input__icon--size", "--c2-mask-input__icon--color"],
+      "reason": "The field sizes and colours the slotted suffix icon or adornment through the icon variables."
+    },
+    {
+      "tag": "c2-mask-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-masonry",
       "slot": "default",
       "decision": "assigned-content",

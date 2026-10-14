@@ -72,6 +72,17 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   `__hover`); `packages/components/link-button` — `--c2-link-button__container--border` (plus `__hover`), like
   `c2-button`'s. Then move the example onto them and drop the comments.
 
+### `c2-mask-input` cannot express a format whose optional part sits in the middle
+
+- **Severity:** gap
+- **Hit while:** adding a postcode field to the Account Form example (`apps/examples/basic-form-html`), 2026-10-14.
+- **What happens:** `?` makes the _rest_ of the mask optional, so a value whose variable part comes before a fixed
+  tail cannot be masked. UK postcodes (`M1 1AE`, `SW1A 1AA`: a 2–4 character outward code, then `9AA`) are the
+  common case. The example leaves the field unmasked (`mask=""`, free text) when the country is the UK.
+- **Where the fix belongs:** `packages/components/mask-input` — either optional groups (`A[*][*]* 9AA`, a group
+  skipped when the next typed character only fits what follows it) or an array of alternative masks tried in
+  order, as PrimeVue and Mantine allow. Then give the example its UK mask.
+
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                     |

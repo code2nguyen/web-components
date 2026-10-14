@@ -57,6 +57,7 @@ import list from '@c2n/list/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
+import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
@@ -184,6 +185,7 @@ export const componentManifests = (function () {
     logViewer,
     markdown,
     marker,
+    maskInput,
     masonry,
     matIcon,
     math,
