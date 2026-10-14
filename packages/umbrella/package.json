@@ -305,6 +305,10 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./date-time-picker": {
+      "types": "./dist/date-time-picker.d.ts",
+      "default": "./dist/date-time-picker.js"
+    },
     "./description-list": {
       "types": "./dist/description-list.d.ts",
       "default": "./dist/description-list.js"
@@ -886,6 +890,7 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/filter-builder": "*",
