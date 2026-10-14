@@ -36,8 +36,8 @@ export interface Highlight {
  *
  * @event {CustomEvent<number>} match-change - Fired when the number of matches changes; `detail` is the new `matchCount`. Does not bubble.
  *
- * @csspart text - The wrapper around the rendered text.
- * @csspart mark - Every highlighted match.
+ * @csspart text - Wrapper drawing the text read from the default slot, matches marked inside it. Before the element connects (a server render) it wraps the default slot itself.
+ * @csspart mark - Every highlighted match, a `<mark>` inside the `text` wrapper.
  * @csspart active - The match at `active-index`, which also carries the `mark` part.
  *
  * @cssproperty {color} [--c2-highlight__mark--color=inherit]

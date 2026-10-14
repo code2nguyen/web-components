@@ -1103,6 +1103,13 @@
       "reason": "The default slot holds marker and route definitions, which render nothing in place; each is styled through its own variables."
     },
     {
+      "tag": "c2-highlight",
+      "slot": "",
+      "decision": "part",
+      "parts": ["text"],
+      "reason": "The slot only supplies the text; it is drawn in the text part, and the --c2-highlight__mark--* variables style each match."
+    },
+    {
       "tag": "c2-header",
       "slot": "",
       "decision": "part",
