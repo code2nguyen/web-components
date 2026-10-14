@@ -44,7 +44,9 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
+- **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
+- **Highlight** — `c2-highlight` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
@@ -116,6 +118,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
+- **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
 - **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
