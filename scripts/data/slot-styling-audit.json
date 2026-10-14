@@ -1219,6 +1219,31 @@
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-money-input",
+      "slot": "symbol",
+      "decision": "variables",
+      "variables": [
+        "--c2-money-input__symbol--display",
+        "--c2-money-input__symbol--color",
+        "--c2-money-input__symbol--font-size",
+        "--c2-money-input__symbol--font-weight"
+      ],
+      "reason": "The symbol box shows, colours and sizes the slotted symbol and its Intl fallback through the symbol variables."
+    },
+    {
+      "tag": "c2-money-input",
+      "slot": "chevron-icon",
+      "decision": "variables",
+      "variables": ["--c2-money-input__icon--size", "--c2-money-input__icon--color"],
+      "reason": "The currency picker's chevron box sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-money-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-trace-waterfall",
       "slot": "empty",
       "decision": "assigned-content",

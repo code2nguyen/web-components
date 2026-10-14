@@ -160,6 +160,7 @@
         "./packages/components/menu:build",
         "./packages/components/mermaid:build",
         "./packages/components/modal:build",
+        "./packages/components/money-input:build",
         "./packages/components/month-planner:build",
         "./packages/components/navigation-menu:build",
         "./packages/components/notepad:build",
