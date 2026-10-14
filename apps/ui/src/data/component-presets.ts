@@ -627,6 +627,38 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-format-date': {
+    html: `<c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for bylines and card metadata',
+        css: {
+          '--c2-format-date--color': '#71717a',
+          '--c2-format-date--font-size': '12px',
+        },
+        attributes: { 'date-style': 'medium' },
+      },
+      {
+        name: 'Headline',
+        description: 'Large bold date for an event or a due date',
+        css: {
+          '--c2-format-date--font-size': '20px',
+          '--c2-format-date--font-weight': '600',
+        },
+        attributes: { 'date-style': 'full' },
+      },
+      {
+        name: 'Timestamp',
+        description: 'Short date and time with tabular digits for table cells',
+        css: {
+          '--c2-format-date--font-size': '12px',
+          '--c2-format-date--font-variant-numeric': 'tabular-nums',
+        },
+        attributes: { 'date-style': 'short', 'time-style': 'short' },
+      },
+    ],
+  },
   'c2-state-timeline': {
     html: `<c2-state-timeline style="width: 100%" aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
     presets: [
@@ -1033,6 +1065,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-query-input__key--color': '#1d4ed8',
           '--c2-query-input__separator--color': '#1d4ed8',
           '--c2-query-input__value--color': '#1e3a8a',
+        },
+      },
+    ],
+  },
+  'c2-mask-input': {
+    html: `<c2-mask-input mask="AA99 XXXX XXXX XXXX XXXX XXXX XXX" value="FR7630006000011234567890189" aria-label="IBAN" style="width: 320px"></c2-mask-input>`,
+    presets: [
+      {
+        name: 'Monospace',
+        description: 'A monospace face with a fainter mask hint, so long codes such as IBANs read in even columns.',
+        css: {
+          '--c2-mask-input--font-family': "ui-monospace, 'SF Mono', Menlo, monospace",
+          '--c2-mask-input--font-size': '13px',
+          '--c2-mask-input--border-radius': '8px',
+          '--c2-mask-input__slot--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Code entry',
+        description: 'Large, widely spaced digits in a filled field, for a verification or gift-card code.',
+        css: {
+          '--c2-mask-input--min-height': '52px',
+          '--c2-mask-input--padding': '8px 20px',
+          '--c2-mask-input--font-size': '24px',
+          '--c2-mask-input--letter-spacing': '0.2em',
+          '--c2-mask-input--border-radius': '14px',
+          '--c2-mask-input--background': '#f4f4f5',
+          '--c2-mask-input--border': '1px solid transparent',
+          '--c2-mask-input__focus--background': '#ffffff',
         },
       },
     ],

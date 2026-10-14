@@ -329,6 +329,10 @@
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
     },
+    "./format-date": {
+      "types": "./dist/format-date.d.ts",
+      "default": "./dist/format-date.js"
+    },
     "./gantt": {
       "types": "./dist/gantt.d.ts",
       "default": "./dist/gantt.js"
@@ -428,6 +432,10 @@
     "./marker": {
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
+    },
+    "./mask-input": {
+      "types": "./dist/mask-input.d.ts",
+      "default": "./dist/mask-input.js"
     },
     "./masonry": {
       "types": "./dist/masonry.d.ts",
@@ -878,6 +886,7 @@
     "@c2n/details": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
+    "@c2n/format-date": "*",
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",
     "@c2n/header": "*",
@@ -898,6 +907,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
