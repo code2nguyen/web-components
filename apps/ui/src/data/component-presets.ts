@@ -709,6 +709,37 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-highlight': {
+    html: `<c2-highlight query="apple" active-index="1">Apple pie, apple tart and pineapple crumble.</c2-highlight>`,
+    presets: [
+      {
+        name: 'Bold match',
+        description: 'No fill, the match in a heavier weight, as in search suggestions',
+        css: {
+          '--c2-highlight__mark--background-color': 'transparent',
+          '--c2-highlight__mark--font-weight': '600',
+        },
+      },
+      {
+        name: 'Highlighter',
+        description: 'A yellow stroke across the lower half of the match',
+        css: {
+          '--c2-highlight__mark--background-color': 'transparent',
+          '--c2-highlight__mark--box-shadow': 'inset 0 -0.45em 0 rgba(250, 204, 21, 0.55)',
+          '--c2-highlight__mark--border-radius': '0',
+        },
+      },
+      {
+        name: 'Blue find bar',
+        description: 'Blue tint for every match and a stronger outlined current match',
+        css: {
+          '--c2-highlight__mark--background-color': 'rgba(2, 101, 220, 0.18)',
+          '--c2-highlight__mark__active--background-color': 'rgba(2, 101, 220, 0.45)',
+          '--c2-highlight__mark__active--box-shadow': '0 0 0 1px rgb(2, 101, 220)',
+        },
+      },
+    ],
+  },
   'c2-label': {
     html: `<c2-label required>Email address</c2-label>`,
     presets: [

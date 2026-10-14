@@ -1,0 +1,97 @@
+---
+description: 'Ready-made looks for c2-highlight: search suggestions, highlighter strokes, tinted chips and a find bar. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Highlight } from '@c2n/components/highlight'
+
+## Presets
+
+Every match is one `<mark>`, styled by the `--c2-highlight__mark--*` variables; the match at `active-index` adds the `--c2-highlight__mark__active--*` ones on top.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-highlight query="apple">Apple pie, apple tart and pineapple crumble.</c2-highlight>
+```
+
+```html tag=MdxCodeBlock,label=Search suggestions
+<style>
+  .highlight-suggest {
+    display: grid;
+    gap: 6px;
+    font-size: 14px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .highlight-suggest c2-highlight {
+    --c2-highlight__mark--background-color: transparent;
+    --c2-highlight__mark--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-highlight__mark--font-weight: 600;
+  }
+</style>
+<div class="highlight-suggest">
+  <c2-highlight query="cal">Calendar settings</c2-highlight>
+  <c2-highlight query="cal">Local time zone</c2-highlight>
+  <c2-highlight query="cal">Scale invoices to the fiscal year</c2-highlight>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Highlighter stroke
+<style>
+  .highlight-stroke {
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 320px;
+    --c2-highlight__mark--background-color: transparent;
+    --c2-highlight__mark--box-shadow: inset 0 -0.45em 0 rgba(250, 204, 21, 0.55);
+    --c2-highlight__mark--border-radius: 0;
+  }
+</style>
+<c2-highlight class="highlight-stroke" query="renewable energy" words>Renewable sources supplied 41% of the grid this quarter, and energy storage covered the evening peak for the first time.</c2-highlight>
+```
+
+```html tag=MdxCodeBlock,label=Tinted chip
+<style>
+  .highlight-chip {
+    font-size: 14px;
+    --c2-highlight__mark--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-highlight__mark--color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-highlight__mark--font-weight: 500;
+    --c2-highlight__mark--padding: 1px 3px;
+    --c2-highlight__mark--border-radius: 4px;
+  }
+</style>
+<c2-highlight class="highlight-chip" query="#design" words>Moved the onboarding flow to #design review, cc #design-systems.</c2-highlight>
+```
+
+```html tag=MdxCodeBlock,label=Spell check
+<style>
+  .highlight-squiggle {
+    font-size: 15px;
+    --c2-highlight__mark--background-color: transparent;
+    --c2-highlight__mark--text-decoration: underline wavy rgb(211, 21, 16) 1px;
+  }
+</style>
+<c2-highlight class="highlight-squiggle" query="recieve definately" words whole-word>You will recieve the parcel definately by Friday.</c2-highlight>
+```
+
+```html tag=MdxCodeBlock,label=Find bar
+<style>
+  .highlight-find {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre;
+    --c2-highlight__mark--background-color: rgba(2, 101, 220, 0.18);
+    --c2-highlight__mark__active--background-color: rgba(2, 101, 220, 0.45);
+    --c2-highlight__mark__active--box-shadow: 0 0 0 1px rgb(2, 101, 220);
+  }
+</style>
+<c2-highlight class="highlight-find" query="user" active-index="2">const user = await getUser(id)
+if (!user.active) return null
+return formatUser(user)</c2-highlight>
+```
+
+</GalleryGrid>

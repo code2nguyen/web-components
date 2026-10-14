@@ -95,6 +95,7 @@
         "../../components/gantt:build",
         "../../components/google-map:build",
         "../../components/header:build",
+        "../../components/highlight:build",
         "../../components/hover-card:build",
         "../../components/icon-button:build",
         "../../components/image:build",

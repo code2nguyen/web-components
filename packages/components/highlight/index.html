@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-highlight</title>
+    <script type="module" src="/src/highlight.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+        max-width: 560px;
+      }
+      .bold {
+        --c2-highlight__mark--background-color: transparent;
+        --c2-highlight__mark--font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body>
+    <label>Search <input id="search" value="apple" /></label>
+    <c2-highlight class="live" query="apple">Apple pie, apple tart and pineapple crumble are on the café menu.</c2-highlight>
+    <c2-highlight class="live" query="apple" whole-word>Whole words: Apple pie, apple tart and pineapple crumble.</c2-highlight>
+    <c2-highlight class="live bold" query="apple" words>Bold, every word: Apple pie, apple tart and pineapple crumble.</c2-highlight>
+    <c2-highlight query="cafe" ignore-accents>Ignore accents: café, cafe and Café.</c2-highlight>
+    <div><button id="next">Next match</button> <span id="count"></span></div>
+    <c2-highlight id="find" query="the" active-index="0">The quick fox jumps over the lazy dog and then the cat.</c2-highlight>
+    <script type="module">
+      const search = document.querySelector('#search')
+      search.addEventListener('input', () => document.querySelectorAll('.live').forEach((el) => (el.query = search.value)))
+      const find = document.querySelector('#find')
+      const count = document.querySelector('#count')
+      const show = () => (count.textContent = `${find.activeIndex + 1} of ${find.matchCount}`)
+      find.addEventListener('match-change', show)
+      document.querySelector('#next').addEventListener('click', () => {
+        find.activeIndex = (find.activeIndex + 1) % find.matchCount
+        show()
+      })
+      find.updateComplete.then(show)
+    </script>
+  </body>
+</html>

@@ -138,6 +138,7 @@
         "./packages/components/gantt:build",
         "./packages/components/google-map:build",
         "./packages/components/header:build",
+        "./packages/components/highlight:build",
         "./packages/components/hover-card:build",
         "./packages/components/icon-button:build",
         "./packages/components/image:build",
