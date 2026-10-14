@@ -124,7 +124,7 @@ test('an incomplete value is invalid, and required checks for a value', async ({
   expect(await page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('zip'))).toBe('94103')
 })
 
-test('input and change are re-dispatched from the inner input', async ({ page, renderScenario }) => {
+test('input follows each edit and change fires once per committed value', async ({ page, renderScenario }) => {
   await renderScenario('<c2-mask-input mask="999" aria-label="Code"></c2-mask-input>')
   const seen = await page.locator('c2-mask-input').evaluateHandle((el) => {
     const log: string[] = []
@@ -134,8 +134,14 @@ test('input and change are re-dispatched from the inner input', async ({ page, r
   })
   await page.getByRole('textbox', { name: 'Code' }).click()
   await page.keyboard.type('12')
+  await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
+  // Enter commits the value; leaving the field with nothing new to commit fires nothing more.
   expect(await seen.jsonValue()).toEqual(['input:1', 'input:12', 'change:12'])
+  await page.getByRole('textbox', { name: 'Code' }).click()
+  await page.keyboard.type('3')
+  await page.keyboard.press('Tab')
+  expect(await seen.jsonValue()).toEqual(['input:1', 'input:12', 'change:12', 'input:123', 'change:123'])
 })
 
 test('a digits-only mask asks for the numeric keyboard', async ({ page, renderScenario }) => {

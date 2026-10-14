@@ -27,8 +27,8 @@ declare module 'vue' {
         readonly?: unknown
         'error-text'?: unknown
         onComplete?: (event: EventOf<MaskInput, 'complete'>) => void
-        onInput?: (event: EventOf<MaskInput, 'input'>) => void
         onChange?: (event: EventOf<MaskInput, 'change'>) => void
+        onInput?: (event: EventOf<MaskInput, 'input'>) => void
       }
     >
   }

@@ -62,7 +62,7 @@ const digitsOnly = (parts: MaskPart[]) =>
  * @slot supporting-text - Rich helper content below the field. `help` and `error-text` are the plain-text shortcuts.
  *
  * @event {InputEvent} input - Re-dispatched from the inner input after each edit; `value` is already updated.
- * @event {Event} change - Re-dispatched from the inner input when the value is committed (blur or Enter).
+ * @event {Event} change - Fired when an edited value is committed (blur or Enter), like an input's `change`.
  * @event {CustomEvent<MaskInputCompleteDetail>} complete - The user filled the last required position of the mask.
  *
  * @cssproperty {pixel} [--c2-mask-input--min-height=36px]
@@ -172,6 +172,8 @@ export class MaskInput extends LitElement {
   private parts: MaskPart[] = []
   private result: MaskResult = applyMask('', [])
   private wasComplete = false
+  /** The formatted text when the value was last committed: `change` fires when blur or Enter finds it different. */
+  private committed = ''
 
   @query('.input') private readonly input?: HTMLInputElement | null
   @query('.slots') private readonly slots?: HTMLElement | null
@@ -353,6 +355,30 @@ export class MaskInput extends LitElement {
     this.commit(result, before, new InputEvent('input', { bubbles: true, composed: true, inputType: 'insertCompositionText', data: event.data }))
   }
 
+  private handleFocus() {
+    this.focused = true
+    this.committed = this.result.formatted
+  }
+
+  private handleBlur() {
+    this.focused = false
+    this.commitChange()
+  }
+
+  private handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.isComposing) this.commitChange()
+  }
+
+  /**
+   * Fires `change` when the value differs from the last committed one. The native event cannot be relied on: rewriting
+   * the inner input's value on every edit makes Firefox drop it.
+   */
+  private commitChange() {
+    if (this.result.formatted === this.committed) return
+    this.committed = this.result.formatted
+    this.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+
   private syncScroll() {
     if (this.slots && this.input) this.slots.scrollLeft = this.input.scrollLeft
   }
@@ -433,11 +459,11 @@ export class MaskInput extends LitElement {
             @beforeinput=${this.handleBeforeInput}
             @input=${this.handleInput}
             @compositionend=${this.handleCompositionEnd}
-            @change=${(event: Event) => redispatchEvent(this, event)}
+            @keydown=${this.handleKeyDown}
             @scroll=${this.syncScroll}
             @keyup=${this.syncScroll}
-            @focus=${() => (this.focused = true)}
-            @blur=${() => (this.focused = false)}
+            @focus=${this.handleFocus}
+            @blur=${this.handleBlur}
           />
         </div>
         <slot name="suffix-icon" class="icon"></slot>
