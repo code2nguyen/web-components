@@ -1,0 +1,209 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-money-input,
+  $theme: (
+    min-height: 36px,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    value--padding: 6px 12px,
+    value--gap: 6px,
+    input--text-align: left,
+    input--font-variant-numeric: tabular-nums,
+    input--font-weight: 400,
+    placeholder--color: #71717a,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--outline: none,
+    focus--outline-offset: 0px,
+    error--border: 1px solid #dc2626,
+    error__focus--outline: none,
+    read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    symbol--display: inline,
+    symbol--color: #71717a,
+    symbol--font-size: 14px,
+    symbol--font-weight: 400,
+    picker--padding: 0 30px 0 10px,
+    picker--color: #18181b,
+    picker--background: transparent,
+    picker__hover--background: #f4f4f5,
+    picker--font-size: 14px,
+    picker--font-weight: 500,
+    picker--border-left: 1px solid #e4e4e7,
+    picker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    icon--size: 16px,
+    icon--color: #71717a,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  box-sizing: border-box;
+  min-height: css.cssVar(min-height);
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &.focused {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &.error {
+    border: css.cssVar(error--border);
+
+    &.focused {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+.value-area {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: css.cssVar(value--gap);
+  padding: css.cssVar(value--padding);
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  width: 10ch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: css.cssVar(input--font-weight);
+  font-variant-numeric: css.cssVar(input--font-variant-numeric);
+  line-height: inherit;
+  text-align: css.cssVar(input--text-align);
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+.symbol {
+  display: css.cssVar(symbol--display);
+  flex: none;
+  color: css.cssVar(symbol--color);
+  font-size: css.cssVar(symbol--font-size);
+  font-weight: css.cssVar(symbol--font-weight);
+  white-space: nowrap;
+}
+
+.picker {
+  position: relative;
+  display: flex;
+  flex: none;
+  border-left: css.cssVar(picker--border-left);
+}
+
+select {
+  margin: 0;
+  padding: css.cssVar(picker--padding);
+  border: 0;
+  border-radius: 0;
+  color: css.cssVar(picker--color);
+  background: css.cssVar(picker--background);
+  font: inherit;
+  font-size: css.cssVar(picker--font-size);
+  font-weight: css.cssVar(picker--font-weight);
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  transition: animation.standard(background);
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(picker__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(picker__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-flex;
+  color: css.cssVar(icon--color);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.chevron svg,
+::slotted([slot='chevron-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}

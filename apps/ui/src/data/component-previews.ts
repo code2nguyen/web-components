@@ -257,6 +257,7 @@ greet('world')"></c2-code-editor>`,
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
+  'money-input': `<c2-money-input value="250000" locale="en-US" currencies="USD;EUR;GBP" aria-label="Payout amount" style="width:220px"></c2-money-input>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">

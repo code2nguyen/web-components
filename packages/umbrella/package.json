@@ -481,6 +481,10 @@
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
     },
+    "./money-input": {
+      "types": "./dist/money-input.d.ts",
+      "default": "./dist/money-input.js"
+    },
     "./month-planner": {
       "types": "./dist/month-planner.d.ts",
       "default": "./dist/month-planner.js"
@@ -924,6 +928,7 @@
     "@c2n/menu": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
+    "@c2n/money-input": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",

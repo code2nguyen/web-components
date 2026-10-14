@@ -1,0 +1,71 @@
+---
+description: 'Amount fields for checkout, payouts, invoices and ledgers.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MoneyInput } from '@c2n/components/money-input'
+
+## Presets
+
+The symbol, picker and input variables do most of the work: `__input--text-align` lines amounts up in a column, `__symbol--*` sets how loud the currency reads, and `__picker--*` styles the currency chooser.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 220px;
+  }
+</style>
+<c2-money-input class="default" aria-label="Amount" locale="en-US" value="125000"></c2-money-input>
+```
+
+```html tag=MdxCodeBlock,label=Payout
+<style>
+  .payout {
+    width: 260px;
+    --c2-money-input--min-height: 44px;
+    --c2-money-input--border-radius: 8px;
+    --c2-money-input--font-size: 18px;
+    --c2-money-input--line-height: 24px;
+    --c2-money-input__input--font-weight: 600;
+    --c2-money-input__symbol--font-size: 18px;
+    --c2-money-input__picker--font-size: 13px;
+    --c2-money-input__picker--background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-money-input class="payout" aria-label="Payout amount" locale="en-US" value="250000" currencies="USD;EUR;GBP"></c2-money-input>
+```
+
+```html tag=MdxCodeBlock,label=Ledger
+<style>
+  .ledger {
+    width: 200px;
+    --c2-money-input__input--text-align: right;
+    --c2-money-input--border-radius: 4px;
+    --c2-money-input--min-height: 32px;
+    --c2-money-input__value--padding: 4px 10px;
+    --c2-money-input__symbol--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 45%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-money-input class="ledger" aria-label="Debit" locale="en-US" value="1849950"></c2-money-input>
+```
+
+```html tag=MdxCodeBlock,label=Checkout
+<style>
+  .checkout {
+    width: 240px;
+    --c2-money-input--border-radius: 999px;
+    --c2-money-input__value--padding: 6px 16px;
+    --c2-money-input__focus--border: 1px solid #16a34a;
+    --c2-money-input__focus--outline: 3px solid rgba(22, 163, 74, 0.2);
+    --c2-money-input__symbol--color: light-dark(#15803d, #4ade80);
+    --c2-money-input__symbol--font-weight: 600;
+  }
+</style>
+<c2-money-input class="checkout" aria-label="Tip" locale="en-US" value="500" help="Optional tip for the courier."></c2-money-input>
+```
+
+</GalleryGrid>

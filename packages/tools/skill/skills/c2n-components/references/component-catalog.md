@@ -121,6 +121,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
+- **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.

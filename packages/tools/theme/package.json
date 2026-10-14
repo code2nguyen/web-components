@@ -122,6 +122,7 @@
         "../../components/menu:build",
         "../../components/mermaid:build",
         "../../components/modal:build",
+        "../../components/money-input:build",
         "../../components/month-planner:build",
         "../../components/navigation-menu:build",
         "../../components/notepad:build",

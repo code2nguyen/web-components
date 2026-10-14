@@ -1,0 +1,50 @@
+---
+title: 'Money Input'
+description: 'Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { MoneyInput } from '@c2n/components/money-input'
+
+`c2-money-input` is the amount field of a payments dashboard. Its `value` is an integer count of minor units (`value="1050"` is $10.50, and ¥1,050 in `JPY`), so an amount never passes through floating point on its way to your API. Set `currency` for the symbol and the number of decimals, `locale` (or a `lang` on the page) for the separators and the symbol position, and `currencies` to let the user pick the currency next to the amount.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/money-input'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/money-input
+<style>
+  .money-width {
+    width: 220px;
+  }
+</style>
+<div data-label="Default">
+  <c2-money-input class="money-width" aria-label="Amount" locale="en-US" value="125000"></c2-money-input>
+  <c2-money-input class="money-width" aria-label="Empty amount" locale="en-US"></c2-money-input>
+</div>
+<div data-label="Currencies and locales">
+  <c2-money-input class="money-width" aria-label="Betrag" locale="de-DE" currency="EUR" value="123456"></c2-money-input>
+  <c2-money-input class="money-width" aria-label="Montant" locale="fr-FR" currency="EUR" value="99900"></c2-money-input>
+  <c2-money-input class="money-width" aria-label="Yen amount" locale="ja-JP" currency="JPY" value="15800"></c2-money-input>
+</div>
+<div data-label="Currency picker">
+  <c2-money-input class="money-width" aria-label="Payout" locale="en-US" value="250000" currencies="USD;EUR;GBP;JPY"></c2-money-input>
+</div>
+<div data-label="Supporting text">
+  <c2-money-input class="money-width" aria-label="Budget" locale="en-US" value="500000" help="Monthly limit per team."></c2-money-input>
+  <c2-money-input class="money-width" aria-label="Refund" locale="en-US" value="12000" error error-text="Refund exceeds the charge."></c2-money-input>
+</div>
+<div data-label="States">
+  <c2-money-input class="money-width" aria-label="Read-only total" locale="en-US" value="4999" readonly></c2-money-input>
+  <c2-money-input class="money-width" aria-label="Disabled total" locale="en-US" value="4999" disabled></c2-money-input>
+</div>
+```
+
+Typing groups the digits and keeps the caret where it was; the fraction is padded when the field loses focus, which is also when `change` fires. A pasted `1,234.56` or `1.234,56` reads as 1234.56 whatever the locale. Amounts are positive unless `min` is negative; `min` and `max` are in minor units too and report `rangeUnderflow` and `rangeOverflow`. Read `amount` for the value in major units, and set `currency-name` to submit the currency code with the form.
