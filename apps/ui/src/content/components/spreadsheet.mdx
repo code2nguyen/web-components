@@ -1,0 +1,84 @@
+---
+title: 'Spreadsheet'
+description: 'A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Spreadsheet } from '@c2n/components/spreadsheet'
+
+`c2-spreadsheet` is a calculating grid for the cases where an app needs a few rows of numbers that add up: a budget,
+a quote with line items, a price list, a grade sheet. It is one sheet with about twenty functions, keyboard editing
+that works like Google Sheets and Excel, and copy and paste with both. It does not try to be a spreadsheet
+application: there is no cell styling, no second sheet and no file import.
+
+`data` holds the raw inputs row by row. A string starting with `=` is a formula, a leading `'` keeps the rest as
+text, and a number typed as `10%` or `$12` keeps that look. `columns` is either a count or one object per column with
+a `label`, a `width` in pixels, a `format` (`general`, `number`, `currency`, `percent`, `text`) and an `align`. The
+column letter stays in the header next to the label, because formulas use the letter. Edits write a new array to
+`data` and fire `cell-change` with every cell the user changed.
+
+Formulas support `+ - * / ^ &`, comparisons, a `%` suffix, `A1` references and `A1:B5` ranges, and the functions
+`SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, `COUNTA`, `ROUND`, `ABS`, `IF`, `IFERROR`, `AND`, `OR`, `NOT`, `SUMIF`,
+`CONCAT`, `LEN`, `UPPER`, `LOWER`, `TRIM` and `TODAY`. Add your own through the `functions` property. Changing a cell
+recalculates only the cells that read it. Errors stay in their cell (`#DIV/0!`, `#REF!`, `#NAME?`, `#VALUE!`,
+`#CIRC!`) and the tooltip says why.
+
+Arrows move, Shift+arrows extend the range, typing replaces the cell, Enter, F2 or a double-click edit it, Enter and
+Tab commit, Escape cancels and Delete clears. Ctrl/⌘+C, X and V copy, cut and paste tab-separated text, so a range
+copied from Excel or Sheets pastes straight in; a formula copied inside the grid moves its references when pasted
+(`=B2*C2` one row down becomes `=B3*C3`, and `$` pins a row or column). Ctrl/⌘+Z and Y undo and redo. Tab outside an
+edit leaves the grid.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/spreadsheet'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/spreadsheet
+<style>
+  .sheet-demo {
+    width: 100%;
+  }
+</style>
+<div data-label="Formula bar and summary">
+  <c2-spreadsheet
+    class="sheet-demo"
+    label="Team offsite budget"
+    rows="10"
+    formula-bar
+    summary
+    columns='[{"label":"Item","width":150},{"label":"Category","width":100},{"label":"Qty","width":60,"format":"number"},{"label":"Unit cost","width":100,"format":"currency"},{"label":"Total","width":110,"format":"currency"}]'
+    data='[["Flights","Travel",6,289,"=C1*D1"],["Hotel, 2 nights","Lodging",3,412,"=C2*D2"],["Team dinner","Food",1,640,"=C3*D3"],["Lunches","Food",12,18.5,"=C4*D4"],[],["Subtotal","","","","=SUM(E1:E4)"],["Contingency","","","10%","=E6*D7"],["Total","","","","=E6+E7"]]'
+  ></c2-spreadsheet>
+</div>
+<div data-label="Read-only">
+  <c2-spreadsheet
+    class="sheet-demo"
+    label="Quiz scores"
+    rows="5"
+    readonly
+    summary
+    columns='[{"label":"Student"},{"label":"Quiz 1","format":"number"},{"label":"Quiz 2","format":"number"},{"label":"Average","format":"number"}]'
+    data='[["Linh",18,17,"=AVERAGE(B1:C1)"],["Mateo",14,19,"=AVERAGE(B2:C2)"],["Aiko",20,16,"=AVERAGE(B3:C3)"],["Noor",12,15,"=AVERAGE(B4:C4)"],["Class","=AVERAGE(B1:B4)","=AVERAGE(C1:C4)","=AVERAGE(D1:D4)"]]'
+  ></c2-spreadsheet>
+</div>
+<div data-label="Blank sheet">
+  <c2-spreadsheet class="sheet-demo" label="Scratch sheet" rows="6" columns="6"></c2-spreadsheet>
+</div>
+```
+
+Read the result from script with `getValue('E8')`, write a cell with `setInput('C1', 8)`, select a range with
+`select('B1:E5')` and export the computed values with `toCSV()` or `toTSV()`. `selection-change` does not bubble, so
+listen on the element itself.
+
+```typescript tag=CodeBlock
+const sheet = document.querySelector('c2-spreadsheet')!
+sheet.functions = { TAX: ([amount]) => (typeof amount === 'number' ? amount * 0.2 : 0) }
+sheet.addEventListener('cell-change', (event) => save(sheet.data, event.detail.changes))
+```

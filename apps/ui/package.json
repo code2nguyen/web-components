@@ -115,6 +115,7 @@
     "@c2n/slider": "*",
     "@c2n/spinner": "*",
     "@c2n/split-panel": "*",
+    "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",
     "@c2n/state-timeline": "*",
     "@c2n/status-panel": "*",

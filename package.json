@@ -189,6 +189,7 @@
         "./packages/components/slider:build",
         "./packages/components/spinner:build",
         "./packages/components/split-panel:build",
+        "./packages/components/spreadsheet:build",
         "./packages/components/stat:build",
         "./packages/components/state-timeline:build",
         "./packages/components/status-panel:build",

@@ -355,6 +355,7 @@ greet('world')"></c2-code-editor>`,
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
 </c2-split-panel>`,
+  spreadsheet: `<c2-spreadsheet style="width: 100%" label="Quote" rows="4" columns='[{"label":"Item","width":110},{"label":"Qty","width":56,"format":"number"},{"label":"Total","width":96,"format":"currency"}]' data='[["Design",8,"=B1*120"],["Build",24,"=B2*95"],["Total","=SUM(B1:B2)","=SUM(C1:C2)"]]'></c2-spreadsheet>`,
   stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
   <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
 </c2-stat>`,
