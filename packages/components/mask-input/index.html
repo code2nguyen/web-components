@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-mask-input</title>
+    <script type="module" src="/src/mask-input.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-mask-input {
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-mask-input mask="AA99 XXXX XXXX XXXX ?XXXX XXXX XXXX XXXX XX" placeholder="IBAN" help="Spaces are added for you."></c2-mask-input>
+    <c2-mask-input mask="+1 (999) 999-9999" placeholder="Phone" autocomplete="tel"></c2-mask-input>
+    <c2-mask-input mask="99/99" placeholder="MM/YY" include-literals></c2-mask-input>
+    <c2-mask-input mask="A9A 9A9" value="K1A0B1" aria-label="Postal code" readonly></c2-mask-input>
+    <c2-mask-input mask="99/99" value="0120" error error-text="This card has expired."></c2-mask-input>
+  </body>
+</html>

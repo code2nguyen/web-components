@@ -80,6 +80,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",

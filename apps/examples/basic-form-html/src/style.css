@@ -41,7 +41,8 @@ body {
   gap: 6px;
 }
 .field c2-text-field,
-.field c2-select {
+.field c2-select,
+.field c2-mask-input {
   width: 100%;
 }
 

@@ -1038,6 +1038,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-mask-input': {
+    html: `<c2-mask-input mask="AA99 XXXX XXXX XXXX XXXX XXXX XXX" value="FR7630006000011234567890189" aria-label="IBAN" style="width: 320px"></c2-mask-input>`,
+    presets: [
+      {
+        name: 'Monospace',
+        description: 'A monospace face with a fainter mask hint, so long codes such as IBANs read in even columns.',
+        css: {
+          '--c2-mask-input--font-family': "ui-monospace, 'SF Mono', Menlo, monospace",
+          '--c2-mask-input--font-size': '13px',
+          '--c2-mask-input--border-radius': '8px',
+          '--c2-mask-input__slot--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Code entry',
+        description: 'Large, widely spaced digits in a filled field, for a verification or gift-card code.',
+        css: {
+          '--c2-mask-input--min-height': '52px',
+          '--c2-mask-input--padding': '8px 20px',
+          '--c2-mask-input--font-size': '24px',
+          '--c2-mask-input--letter-spacing': '0.2em',
+          '--c2-mask-input--border-radius': '14px',
+          '--c2-mask-input--background': '#f4f4f5',
+          '--c2-mask-input--border': '1px solid transparent',
+          '--c2-mask-input__focus--background': '#ffffff',
+        },
+      },
+    ],
+  },
   'c2-password-field': {
     html: `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width: 260px"></c2-password-field>`,
     presets: [
