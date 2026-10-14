@@ -2,6 +2,50 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.9",
+      "date": "2026-10-14",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Localize built-in text, float the to-do list's customize panel, give the page editor Notion's look",
+              "hash": "61bfe13"
+            },
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Add c2-spreadsheet, a small editable grid with basic formulas",
+              "hash": "9493378"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Fit gallery and docs examples, draw the focus ring around the frame",
+              "hash": "8c11e17"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["docs"],
+              "text": "Give c2-modal's open its description back; the built-in text is English",
+              "hash": "c4c9e4b"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.8",
       "date": "2026-10-10",
       "sections": [
