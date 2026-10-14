@@ -94,6 +94,7 @@
         "../../components/filter-builder:build",
         "../../components/flow:build",
         "../../components/format-date:build",
+        "../../components/format-number:build",
         "../../components/gantt:build",
         "../../components/google-map:build",
         "../../components/header:build",

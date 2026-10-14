@@ -40,6 +40,7 @@ import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formatDate from '@c2n/format-date/custom-elements.json'
+import formatNumber from '@c2n/format-number/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
@@ -171,6 +172,7 @@ export const componentManifests = (function () {
     filterBuilder,
     flow,
     formatDate,
+    formatNumber,
     gantt,
     googleMap,
     header,

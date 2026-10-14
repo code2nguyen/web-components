@@ -137,6 +137,7 @@
         "./packages/components/filter-builder:build",
         "./packages/components/flow:build",
         "./packages/components/format-date:build",
+        "./packages/components/format-number:build",
         "./packages/components/gantt:build",
         "./packages/components/google-map:build",
         "./packages/components/header:build",
