@@ -139,6 +139,7 @@ greet('world')"></c2-code-editor>`,
 </c2-dashboard>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
+  'date-time-picker': `<c2-date-time-picker value="2026-10-14T09:30" time-zone="Europe/Paris" aria-label="Meeting" style="width:240px"></c2-date-time-picker>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>

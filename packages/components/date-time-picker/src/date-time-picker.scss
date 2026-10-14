@@ -1,0 +1,419 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-time-picker,
+  $theme: (
+    min-height: 36px,
+    gap: 8px,
+    padding: 6px 8px 6px 12px,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid #0265dc,
+    focus--outline: none,
+    focus--outline-offset: 0px,
+    error--border: 1px solid #dc2626,
+    error__focus--outline: none,
+    read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    calendar-icon--size: 18px,
+    calendar-icon--color: #71717a,
+    calendar-icon__hover--color: #18181b,
+    time-zone--color: #71717a,
+    time-zone--font-size: 12px,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+    picker--background: #ffffff,
+    picker--color: #18181b,
+    picker--border: 1px solid #e4e4e7,
+    picker--border-radius: 8px,
+    picker--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    picker--padding: 12px,
+    picker--gap: 10px,
+    picker-divider--border: 1px solid #e4e4e7,
+    month-title--font-size: 14px,
+    month-title--font-weight: 600,
+    navigation--size: 28px,
+    navigation--border-radius: 6px,
+    navigation--color: #71717a,
+    navigation__hover--background: #f4f4f5,
+    weekday--color: #71717a,
+    weekday--font-size: 12px,
+    day--size: 32px,
+    day--font-size: 14px,
+    day--border-radius: 999px,
+    day__hover--background: #f4f4f5,
+    day__today--color: #0265dc,
+    day__today--font-weight: 600,
+    day__selected--background: #0265dc,
+    day__selected--color: #ffffff,
+    day__disabled--opacity: 0.38,
+    picker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    picker__focus--outline-offset: 1px,
+    picker-label--color: #71717a,
+    picker-label--font-size: 12px,
+    zone-select--border: 1px solid #bcbcc6,
+    zone-select--border-radius: 6px,
+    zone-select--background: #ffffff,
+    picker-action--font-size: 12px,
+    picker-action--font-weight: 600,
+    picker-action--color: #71717a,
+    picker-action__hover--color: #18181b,
+    picker-action-primary--color: #0265dc,
+    picker-action-primary__hover--color: #0154b8,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &.focused {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &.error {
+    border: css.cssVar(error--border);
+
+    &.focused {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: inherit;
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.time-zone {
+  flex: none;
+  color: css.cssVar(time-zone--color);
+  font-size: css.cssVar(time-zone--font-size);
+  white-space: nowrap;
+}
+
+.calendar-button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: css.cssVar(calendar-icon--size);
+  height: css.cssVar(calendar-icon--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: css.cssVar(calendar-icon--color);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: css.cssVar(calendar-icon__hover--color);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.calendar-button svg,
+::slotted([slot='calendar-icon']) {
+  width: css.cssVar(calendar-icon--size);
+  height: css.cssVar(calendar-icon--size);
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}
+
+// ---- picker ---------------------------------------------------------------------------------------------------------
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(picker--gap);
+  box-sizing: border-box;
+  padding: css.cssVar(picker--padding);
+  border: css.cssVar(picker--border);
+  border-radius: css.cssVar(picker--border-radius);
+  color: css.cssVar(picker--color);
+  background: css.cssVar(picker--background);
+  box-shadow: css.cssVar(picker--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.month-title {
+  font-size: css.cssVar(month-title--font-size);
+  font-weight: css.cssVar(month-title--font-weight);
+}
+
+.navigation {
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  color: css.cssVar(navigation--color);
+  background: transparent;
+  cursor: pointer;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(day__disabled--opacity);
+  }
+}
+
+.grid {
+  display: grid;
+  gap: 2px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(7, css.cssVar(day--size));
+  gap: 2px;
+}
+
+.weekday {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(weekday--font-size);
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(day--size);
+  height: css.cssVar(day--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(day--border-radius);
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: css.cssVar(day--font-size);
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(day__hover--background);
+  }
+
+  &.today {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  &.selected,
+  &.selected:hover:not(:disabled) {
+    color: css.cssVar(day__selected--color);
+    background: css.cssVar(day__selected--background);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(day__disabled--opacity);
+  }
+}
+
+.day,
+.navigation,
+.action,
+.zone-select {
+  outline: none;
+
+  &:focus-visible {
+    outline: css.cssVar(picker__focus--outline);
+    outline-offset: css.cssVar(picker__focus--outline-offset);
+  }
+}
+
+.time-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: css.cssVar(picker--gap);
+  border-top: css.cssVar(picker-divider--border);
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  c2-time-input,
+  .zone-select,
+  .zone-name {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.picker-label {
+  flex: none;
+  min-width: 64px;
+  color: css.cssVar(picker-label--color);
+  font-size: css.cssVar(picker-label--font-size);
+}
+
+.zone-name {
+  text-align: end;
+}
+
+.zone-select {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: css.cssVar(zone-select--border);
+  border-radius: css.cssVar(zone-select--border-radius);
+  color: inherit;
+  background: css.cssVar(zone-select--background);
+  font: inherit;
+  font-size: css.cssVar(picker-label--font-size);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: css.cssVar(picker-divider--border);
+}
+
+.action {
+  margin: 0;
+  padding: 4px 2px;
+  border: 0;
+  color: css.cssVar(picker-action--color);
+  background: none;
+  font-family: inherit;
+  font-size: css.cssVar(picker-action--font-size);
+  font-weight: css.cssVar(picker-action--font-weight);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(picker-action__hover--color);
+  }
+
+  &.primary {
+    color: css.cssVar(picker-action-primary--color);
+
+    &:hover {
+      color: css.cssVar(picker-action-primary__hover--color);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field,
+  .navigation,
+  .day,
+  .action {
+    transition: none;
+  }
+}
