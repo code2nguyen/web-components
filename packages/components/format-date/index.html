@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-format-date</title>
+    <script type="module" src="/src/format-date.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 12px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .muted {
+        --c2-format-date--color: #71717a;
+        --c2-format-date--font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Default: <c2-format-date date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p>Full date: <c2-format-date date-style="full" date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p>Date and time: <c2-format-date date-style="medium" time-style="short" date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p>Fields: <c2-format-date weekday="short" month="short" day="numeric" hour="numeric" minute="2-digit" date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p>
+      24-hour, UTC:
+      <c2-format-date hour="2-digit" minute="2-digit" hour-format="24" time-zone="UTC" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+    </p>
+    <p>Tokyo: <c2-format-date date-style="medium" time-style="long" time-zone="Asia/Tokyo" date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p lang="fr">Français : <c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date></p>
+    <p class="muted">Updated <c2-format-date id="now" date-style="medium" time-style="short"></c2-format-date></p>
+    <p>Due: <c2-format-date>No date</c2-format-date></p>
+    <script type="module">
+      document.getElementById('now').date = new Date()
+    </script>
+  </body>
+</html>

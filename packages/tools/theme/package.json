@@ -92,6 +92,7 @@
         "../../components/details:build",
         "../../components/filter-builder:build",
         "../../components/flow:build",
+        "../../components/format-date:build",
         "../../components/gantt:build",
         "../../components/google-map:build",
         "../../components/header:build",

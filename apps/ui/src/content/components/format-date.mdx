@@ -1,0 +1,53 @@
+---
+title: 'Format Date'
+description: 'A date and time formatted for the reader''s language and, optionally, a fixed time zone.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FormatDate } from '@c2n/components/format-date'
+
+`c2-format-date` shows a moment with `Intl.DateTimeFormat`, so the same markup reads "October 14, 2026" in English, "14 octobre 2026" in French and "2026年10月14日" in Japanese. Pick a preset length with `date-style` and `time-style` (`full`, `long`, `medium`, `short`), or name the fields to show (`weekday`, `year`, `month`, `day`, `hour`, `minute`, `second`, `time-zone-name`, `era`); the presets win when both are given, because `Intl` cannot mix them, and with neither the date shows in the `medium` style. `time-zone` takes an IANA name such as `UTC` or `Asia/Ho_Chi_Minh`, otherwise the reader's own zone is used; set it when the page is rendered on a server so the text does not change on hydration. `hour-format` forces a `12` or `24`-hour clock, and `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. `date` takes an ISO 8601 string or a millisecond timestamp in markup and a `Date` from script; the text sits in a `<time>` element whose `datetime` is the exact instant. Until `date` holds a valid date, the default slot shows instead, for a fallback such as "No date". For "3 minutes ago", use [`c2-relative-time`](/web-components/components/relative-time).
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/format-date'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/format-date
+<style>
+  .meta {
+    --c2-format-date--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-format-date--font-size: 12px;
+  }
+</style>
+<div data-label="Date style">
+  <c2-format-date date-style="full" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date date-style="medium" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date date-style="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+<div data-label="Date and time">
+  <c2-format-date date-style="medium" time-style="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date weekday="short" month="short" day="numeric" hour="numeric" minute="2-digit" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+<div data-label="Time zone">
+  <c2-format-date hour="2-digit" minute="2-digit" hour-format="24" time-zone="UTC" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date hour="numeric" minute="2-digit" time-zone="America/New_York" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date hour="numeric" minute="2-digit" time-zone="Asia/Tokyo" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+<div data-label="Locale">
+  <c2-format-date locale="fr" date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date locale="de" date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <c2-format-date locale="ja" date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+<div data-label="Fallback">
+  <span>Due: <c2-format-date>No date</c2-format-date></span>
+  <span class="meta">Created <c2-format-date date-style="medium" date="2026-01-05T08:00:00Z"></c2-format-date></span>
+</div>
+```
