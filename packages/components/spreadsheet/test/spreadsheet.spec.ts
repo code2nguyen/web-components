@@ -135,6 +135,56 @@ test('pointer selects cells, ranges, columns and rows', async ({ page, renderSce
   await expect(nameBox).toHaveText('A2:D2')
 })
 
+test('dragging a column edge resizes it without selecting, and writes the width to columns', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet', '<c2-spreadsheet formula-bar'))
+  await cell(page, 'A1').click()
+  const header = page.locator('c2-spreadsheet [role="columnheader"][data-column="1"]')
+  const width = async () => Math.round((await header.boundingBox())!.width)
+  expect(await width()).toBe(112)
+
+  await watch(host(page), 'column-resize')
+  const handle = (await header.locator('.resizer').boundingBox())!
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handle.x + handle.width / 2 + 48, handle.y + handle.height / 2, { steps: 4 })
+  await page.mouse.up()
+
+  expect(await width()).toBe(160)
+  expect(Math.round((await cell(page, 'B2').boundingBox())!.width)).toBe(160)
+  await expect(page.locator('c2-spreadsheet .name-box')).toHaveText('A1')
+  await expect(host(page)).toHaveAttribute('data-events', JSON.stringify([{ column: 'B', index: 1, width: 160 }]))
+  const columns = await host(page).evaluate((element: Spreadsheet) => element.columns)
+  expect(columns).toEqual([
+    { label: 'Item' },
+    { label: 'Qty', format: 'number', width: 160 },
+    { label: 'Price', format: 'currency' },
+    { label: 'Total', format: 'currency' },
+  ])
+})
+
+test('a column stops at its minWidth, double-clicking the edge fits the content, and resizable="false" turns it off', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-spreadsheet rows="2" columns='[{"minWidth":60},{},{"resizable":false}]'
+    data='[["A much longer piece of text than the column shows","x"]]'></c2-spreadsheet>`)
+  const header = (column: number) => page.locator(`c2-spreadsheet [role="columnheader"][data-column="${column}"]`)
+  const width = async (column: number) => Math.round((await header(column).boundingBox())!.width)
+
+  const handle = (await header(0).locator('.resizer').boundingBox())!
+  await page.mouse.move(handle.x + 4, handle.y + 4)
+  await page.mouse.down()
+  await page.mouse.move(handle.x - 200, handle.y + 4, { steps: 4 })
+  await page.mouse.up()
+  expect(await width(0)).toBe(60)
+
+  await header(0).locator('.resizer').dblclick()
+  expect(await width(0)).toBeGreaterThan(200)
+  expect(await cell(page, 'A1').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await expect(page.locator('c2-spreadsheet .editor')).toHaveCount(0)
+
+  await expect(header(2).locator('.resizer')).toHaveCount(0)
+  await host(page).evaluate((element) => element.setAttribute('resizable', 'false'))
+  await expect(page.locator('c2-spreadsheet .resizer')).toHaveCount(0)
+})
+
 test('Delete clears the selection, and undo and redo restore it', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await cell(page, 'B1').click()

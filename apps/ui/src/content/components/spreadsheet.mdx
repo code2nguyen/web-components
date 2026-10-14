@@ -32,6 +32,11 @@ copied from Excel or Sheets pastes straight in; a formula copied inside the grid
 (`=B2*C2` one row down becomes `=B3*C3`, and `$` pins a row or column). Ctrl/⌘+Z and Y undo and redo. Tab outside an
 edit leaves the grid.
 
+Drag the right edge of a column header to resize the column, or double-click it to fit the column to its widest
+cell. The new width is written to `columns` and reported by `column-resize`, so an app can save it and hand it back.
+A column stops at its `minWidth` (32px by default); `resizable: false` on a column, or `resizable="false"` on the
+sheet, turns resizing off.
+
 ## Import
 
 ```typescript tag=CodeBlock
