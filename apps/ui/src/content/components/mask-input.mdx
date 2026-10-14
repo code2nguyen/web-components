@@ -1,0 +1,51 @@
+---
+title: 'Mask Input'
+description: 'A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { MaskInput } from '@c2n/components/mask-input'
+
+`c2-mask-input` is a text field for values with a fixed shape. The `mask` says what each position accepts: `9` a digit, `a` a letter, `A` a letter in upper case, `*` a letter or digit and `X` a letter or digit in upper case. Any other character is a literal the field inserts itself, `\` turns a mask character into a literal (`\9`), and `?` makes the rest of the mask optional, for values whose length varies. From script, `tokens` adds mask characters of your own, such as `{ H: { pattern: /^[0-9a-f]$/i } }` for hex digits.
+
+Characters a position does not accept are dropped, so the user can type with or without the separators, paste a formatted or unformatted value, or backspace across a separator, which deletes the character before it. While the field has focus or a value, the rest of the mask shows behind the text in `slot-char`s (`_` by default); `placeholder` shows while it is empty and blurred. A mask of digits only brings up the numeric keyboard (`inputmode` overrides it).
+
+`value` holds the typed characters only, `1226` for `12/26`; with `include-literals` it holds the formatted text. The element is form-associated (`name`) and submits that same value. It validates like an input: `required` checks for a value, and an incomplete one is invalid. `complete` fires when the last required position is filled, and the host matches `:state(complete)`. `formatMask` and `unmask` are exported for formatting a value outside the field.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/mask-input'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/mask-input
+<style>
+  .mask {
+    width: 280px;
+  }
+  .mask-short {
+    width: 140px;
+  }
+</style>
+<div data-label="IBAN">
+  <c2-mask-input class="mask" mask="AA99 XXXX XXXX XXXX ?XXXX XXXX XXXX XXXX XX" name="iban" placeholder="IBAN" help="Spaces are added for you."></c2-mask-input>
+</div>
+<div data-label="Postcodes">
+  <c2-mask-input class="mask-short" mask="99999?-9999" placeholder="ZIP code" autocomplete="postal-code"></c2-mask-input>
+  <c2-mask-input class="mask-short" mask="A9A 9A9" placeholder="Postal code" autocomplete="postal-code"></c2-mask-input>
+</div>
+<div data-label="Tax ID and expiry">
+  <c2-mask-input class="mask-short" mask="99-9999999" placeholder="EIN"></c2-mask-input>
+  <c2-mask-input class="mask-short" mask="99/99" placeholder="MM/YY" autocomplete="cc-exp" include-literals></c2-mask-input>
+</div>
+<div data-label="States">
+  <c2-mask-input class="mask-short" mask="99/99" value="0120" error error-text="This card has expired."></c2-mask-input>
+  <c2-mask-input class="mask-short" mask="999-99-9999" value="123456789" aria-label="SSN" readonly></c2-mask-input>
+  <c2-mask-input class="mask-short" mask="99999" value="94103" aria-label="ZIP code" disabled></c2-mask-input>
+</div>
+```
