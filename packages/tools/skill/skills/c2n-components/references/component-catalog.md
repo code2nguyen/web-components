@@ -46,6 +46,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
+- **Highlight** — `c2-highlight` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.

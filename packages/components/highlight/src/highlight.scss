@@ -1,0 +1,61 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-highlight,
+  $theme: (
+    mark--color: inherit,
+    mark--background-color: rgba(250, 204, 21, 0.4),
+    mark--font-weight: inherit,
+    mark--padding: 0,
+    mark--border-radius: 2px,
+    mark--text-decoration: none,
+    mark--box-shadow: none,
+
+    mark__active--color: inherit,
+    mark__active--background-color: rgba(251, 146, 60, 0.6),
+    mark__active--font-weight: inherit,
+    mark__active--box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.8),
+  )
+);
+
+// Inline like the text it stands in for, so it can sit inside a sentence, a list item or a table cell.
+:host {
+  display: inline;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-highlight {
+  white-space: inherit;
+}
+
+.c2-highlight__mark {
+  color: css.cssVar(mark--color);
+  background-color: css.cssVar(mark--background-color);
+  font-weight: css.cssVar(mark--font-weight);
+  padding: css.cssVar(mark--padding);
+  border-radius: css.cssVar(mark--border-radius);
+  text-decoration: css.cssVar(mark--text-decoration);
+  box-shadow: css.cssVar(mark--box-shadow);
+  // A match broken over two lines keeps its padding, radius and shadow on both halves.
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.c2-highlight__mark--active {
+  color: css.cssVar(mark__active--color);
+  background-color: css.cssVar(mark__active--background-color);
+  font-weight: css.cssVar(mark__active--font-weight);
+  box-shadow: css.cssVar(mark__active--box-shadow);
+}
+
+@media (forced-colors: active) {
+  .c2-highlight__mark {
+    color: MarkText;
+    background-color: Mark;
+  }
+
+  .c2-highlight__mark--active {
+    outline: 2px solid Highlight;
+  }
+}

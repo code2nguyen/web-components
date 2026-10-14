@@ -361,6 +361,10 @@
       "types": "./dist/header.d.ts",
       "default": "./dist/header.js"
     },
+    "./highlight": {
+      "types": "./dist/highlight.d.ts",
+      "default": "./dist/highlight.js"
+    },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
       "default": "./dist/hover-card.js"
@@ -886,6 +890,7 @@
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",
     "@c2n/header": "*",
+    "@c2n/highlight": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
     "@c2n/image": "*",

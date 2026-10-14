@@ -42,6 +42,7 @@ import formatDate from '@c2n/format-date/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
+import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
@@ -171,6 +172,7 @@ export const componentManifests = (function () {
     gantt,
     googleMap,
     header,
+    highlight,
     hoverCard,
     iconButton,
     image,

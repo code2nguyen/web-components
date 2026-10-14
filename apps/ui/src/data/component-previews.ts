@@ -164,6 +164,10 @@ greet('world')"></c2-code-editor>`,
   <span style="font-size:12px">Markets</span>
   <c2-button slot="actions" style="--c2-button__container--height:30px;--c2-button__container--padding-left:12px;--c2-button__container--padding-right:12px;--c2-button__container--font-size:13px;--c2-button__container--background-color:var(--c2-theme--color-surface-container, #f4f4f5);--c2-button__container--color:var(--c2-theme--color-on-surface, #18181b);--c2-button__container--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-button__container__hover--background-color:var(--c2-theme--color-surface-container-low, #fafafa);--c2-button__container__active--background-color:var(--c2-theme--color-surface-container, #f4f4f5)">Sign in</c2-button>
 </c2-header>`,
+  highlight: `<div style="display:grid;gap:6px;font-size:14px;max-width:240px">
+  <c2-highlight query="apple">Apple pie and pineapple crumble</c2-highlight>
+  <c2-highlight query="the" active-index="1">The fox jumps over the lazy dog</c2-highlight>
+</div>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:var(--c2-theme--color-on-surface-variant, #71717a)">Wrote the first published algorithm.</div></c2-hover-card>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">
