@@ -11,12 +11,13 @@ import { DateTimePicker } from '@c2n/components/date-time-picker'
 
 Each treatment changes only the public CSS variables. The field's `background`, `border` and `border-radius` set its look, and the `__picker*` and `__day*` variables restyle the popup.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
   .default {
-    width: 260px;
+    width: 100%;
+    max-width: 280px;
   }
 </style>
 <c2-date-time-picker class="default" aria-label="Meeting" value="2026-10-14T09:30"></c2-date-time-picker>
@@ -25,7 +26,8 @@ Each treatment changes only the public CSS variables. The field's `background`, 
 ```html tag=MdxCodeBlock,label=Soft
 <style>
   .soft {
-    width: 260px;
+    width: 100%;
+    max-width: 280px;
     --c2-date-time-picker--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-date-time-picker--border: 1px solid transparent;
     --c2-date-time-picker__hover--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
@@ -57,7 +59,8 @@ Each treatment changes only the public CSS variables. The field's `background`, 
 ```html tag=MdxCodeBlock,label=Time zones
 <style>
   .zones {
-    width: 280px;
+    width: 100%;
+    max-width: 280px;
     --c2-date-time-picker__time-zone--color: var(--c2-theme--color-primary, #0265dc);
     --c2-date-time-picker__day--border-radius: 6px;
   }
