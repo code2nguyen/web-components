@@ -627,6 +627,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-format-number': {
+    html: `<c2-format-number type="currency" value="1234.5"></c2-format-number>`,
+    presets: [
+      {
+        name: 'Price',
+        description: 'Large digits with a smaller, muted currency symbol',
+        css: {
+          '--c2-format-number--font-size': '28px',
+          '--c2-format-number--font-weight': '600',
+          '--c2-format-number__unit--font-size': '16px',
+          '--c2-format-number__unit--color': '#71717a',
+        },
+      },
+      {
+        name: 'Gain / loss',
+        description: 'Green above zero, red below, with an explicit sign',
+        css: {
+          '--c2-format-number__positive--color': '#15803d',
+          '--c2-format-number__negative--color': '#dc2626',
+          '--c2-format-number--font-weight': '600',
+        },
+        attributes: { 'sign-display': 'exceptZero' },
+      },
+      {
+        name: 'Compact',
+        description: 'Short form for dense dashboards and table cells',
+        css: {
+          '--c2-format-number--font-size': '12px',
+        },
+        attributes: { notation: 'compact' },
+      },
+    ],
+  },
   'c2-state-timeline': {
     html: `<c2-state-timeline style="width: 100%" aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
     presets: [

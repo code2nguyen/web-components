@@ -1,0 +1,114 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FormatNumber } from '@c2n/components/format-number'
+
+## Presets
+
+Curated looks for `c2-format-number`. Open any card in the studio to start from it. The number inherits the surrounding text, so colour, size and weight do most of the work; the `unit` variables set the currency symbol or suffix apart from the digits, and the negative and positive colours read profit and loss at a glance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-format-number value="1234567.891"></c2-format-number>
+```
+
+```html tag=MdxCodeBlock,label=Price tag
+<style>
+  .price-tag {
+    --c2-format-number--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-number--font-size: 32px;
+    --c2-format-number--font-weight: 600;
+    --c2-format-number__unit--font-size: 16px;
+    --c2-format-number__unit--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .price-tag-period {
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div>
+  <c2-format-number class="price-tag" type="currency" value="49"></c2-format-number>
+  <span class="price-tag-period">/ month</span>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Profit and loss
+<style>
+  .pnl-list {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 6px 24px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .pnl-list c2-format-number {
+    justify-self: end;
+    --c2-format-number--font-weight: 600;
+    --c2-format-number__negative--color: light-dark(#dc2626, #f87171);
+    --c2-format-number__positive--color: light-dark(#15803d, #4ade80);
+  }
+</style>
+<div class="pnl-list">
+  <span>AAPL</span><c2-format-number type="percent" sign-display="exceptZero" minimum-fraction-digits="2" value="0.0142"></c2-format-number>
+  <span>MSFT</span><c2-format-number type="percent" sign-display="exceptZero" minimum-fraction-digits="2" value="-0.0087"></c2-format-number>
+  <span>NVDA</span><c2-format-number type="percent" sign-display="exceptZero" minimum-fraction-digits="2" value="0.0315"></c2-format-number>
+  <span>TSLA</span><c2-format-number type="percent" sign-display="exceptZero" minimum-fraction-digits="2" value="0"></c2-format-number>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=KPI tile
+<style>
+  .kpi-tile {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .kpi-tile c2-format-number {
+    --c2-format-number--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-number--font-size: 28px;
+    --c2-format-number--font-weight: 600;
+  }
+</style>
+<div class="kpi-tile">
+  <span>Monthly active users</span>
+  <c2-format-number notation="compact" value="1284310"></c2-format-number>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Storage usage
+<style>
+  .storage-usage {
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .storage-usage c2-format-number {
+    --c2-format-number--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-number--font-weight: 600;
+  }
+</style>
+<p class="storage-usage">
+  <c2-format-number type="bytes" value="4831838208"></c2-format-number> of <c2-format-number type="bytes" value="15000000000"></c2-format-number> used
+</p>
+```
+
+```html tag=MdxCodeBlock,label=Accounting column
+<style>
+  .ledger {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    font-size: 14px;
+    --c2-format-number--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-number__negative--color: light-dark(#b91c1c, #f87171);
+  }
+</style>
+<div class="ledger">
+  <c2-format-number type="currency" currency-sign="accounting" value="12500"></c2-format-number>
+  <c2-format-number type="currency" currency-sign="accounting" value="-3420.5"></c2-format-number>
+  <c2-format-number type="currency" currency-sign="accounting" value="980.25"></c2-format-number>
+</div>
+```
+
+</GalleryGrid>

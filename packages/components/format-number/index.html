@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-format-number</title>
+    <script type="module" src="/src/format-number.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 12px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .pnl {
+        --c2-format-number__negative--color: #dc2626;
+        --c2-format-number__positive--color: #16a34a;
+      }
+      .price {
+        --c2-format-number--font-size: 24px;
+        --c2-format-number--font-weight: 600;
+        --c2-format-number__unit--font-size: 14px;
+        --c2-format-number__unit--color: #71717a;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Decimal: <c2-format-number value="1234567.891"></c2-format-number></p>
+    <p>Currency: <c2-format-number type="currency" currency="EUR" value="1234.5"></c2-format-number></p>
+    <p>Accounting: <c2-format-number type="currency" currency-sign="accounting" value="-1234.5"></c2-format-number></p>
+    <p>Percent: <c2-format-number type="percent" maximum-fraction-digits="1" value="0.1234"></c2-format-number></p>
+    <p>Compact: <c2-format-number notation="compact" value="1234567"></c2-format-number></p>
+    <p>Unit: <c2-format-number type="unit" unit="kilometer-per-hour" value="88"></c2-format-number></p>
+    <p>Bytes: <c2-format-number type="bytes" value="1536000"></c2-format-number></p>
+    <p lang="fr">Français : <c2-format-number type="currency" currency="EUR" value="1234.5"></c2-format-number></p>
+    <p class="pnl">
+      P&amp;L: <c2-format-number type="currency" sign-display="exceptZero" value="420.5"></c2-format-number> /
+      <c2-format-number type="currency" sign-display="exceptZero" value="-87.25"></c2-format-number>
+    </p>
+    <p class="price"><c2-format-number type="currency" value="49"></c2-format-number></p>
+    <p>Missing: <c2-format-number>—</c2-format-number></p>
+  </body>
+</html>
