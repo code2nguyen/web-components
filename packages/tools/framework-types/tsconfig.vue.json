@@ -19,6 +19,7 @@
         "c2-checkbox-group": true,
         "c2-code-editor": true,
         "c2-date-input": true,
+        "c2-date-time-picker": true,
         "c2-inline-edit": true,
         "c2-map-chart": true,
         "c2-notepad": true,

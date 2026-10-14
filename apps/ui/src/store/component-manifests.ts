@@ -33,6 +33,7 @@ import copyButton from '@c2n/copy-button/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
+import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
@@ -160,6 +161,7 @@ export const componentManifests = (function () {
     dashboard,
     dateInput,
     dateSelector,
+    dateTimePicker,
     descriptionList,
     details,
     featherIcons,

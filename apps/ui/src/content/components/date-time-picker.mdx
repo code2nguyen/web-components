@@ -1,0 +1,60 @@
+---
+title: 'Date Time Picker'
+description: 'Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DateTimePicker } from '@c2n/components/date-time-picker'
+
+`c2-date-time-picker` picks a date and a time of day in one field. Its `value`, `min` and `max` are wall-clock strings in the shape of `<input type="datetime-local">` (`YYYY-MM-DDTHH:mm`, with `:ss` when `step` is below 60 seconds), read in `time-zone`: an IANA name such as `Europe/Paris`, or empty for the browser's own zone. Typing in the field stays native. The calendar button (or Alt+ArrowDown in the field) opens a popup with a month calendar, a `c2-time-input` for the time and, when `time-zones` lists several zones, a time-zone choice. Changing the zone keeps the wall clock, so a meeting at 09:00 in Tokyo stays 09:00 in Tokyo whoever picks it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/date-time-picker'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/date-time-picker
+<style>
+  .date-time-width {
+    width: 260px;
+  }
+</style>
+<div data-label="Default">
+  <c2-date-time-picker class="date-time-width" aria-label="Starts at"></c2-date-time-picker>
+  <c2-date-time-picker class="date-time-width" aria-label="Meeting" value="2026-10-14T09:30"></c2-date-time-picker>
+</div>
+<div data-label="Time zone">
+  <c2-date-time-picker class="date-time-width" aria-label="Launch" value="2026-10-14T09:00" time-zone="Asia/Tokyo"></c2-date-time-picker>
+  <c2-date-time-picker
+    class="date-time-width"
+    aria-label="Standup"
+    value="2026-10-14T09:00"
+    time-zone="Europe/London"
+    time-zones="Europe/London America/New_York Asia/Tokyo"
+  ></c2-date-time-picker>
+</div>
+<div data-label="Constraints">
+  <c2-date-time-picker
+    class="date-time-width"
+    aria-label="Delivery slot"
+    min="2026-10-12T09:00"
+    max="2026-10-30T18:00"
+    step="1800"
+    required
+    help="Between 12 and 30 October, on the half hour."
+  ></c2-date-time-picker>
+  <c2-date-time-picker class="date-time-width" aria-label="Deadline" value="2026-10-01T17:00" error error-text="The deadline has passed."></c2-date-time-picker>
+</div>
+<div data-label="States">
+  <c2-date-time-picker class="date-time-width" aria-label="Created" value="2026-10-14T09:00" readonly></c2-date-time-picker>
+  <c2-date-time-picker class="date-time-width" aria-label="Archived" value="2026-10-14T09:00" disabled></c2-date-time-picker>
+</div>
+```
+
+Listen for `input` while the value changes and `change` when it is committed; each pick in the popup fires both, and so does choosing another zone. `valueAsDate` is the instant the value names in its zone (setting it writes that instant's wall clock), `valueAsISOString` the same with the zone's offset (`2026-10-14T09:00:00+09:00`), and `resolvedTimeZone` the zone in use. A time that a daylight-saving jump skips resolves forward, as `Temporal` does. The form submits the wall clock under `name`; add `time-zone-name` to submit the zone as well. `min` and `max` disable the days outside them and clamp the time picked in the popup, `step` (in seconds, counted from `min`) sets the time grid, and `week-start` chooses Monday or Sunday.
