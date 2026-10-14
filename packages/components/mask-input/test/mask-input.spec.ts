@@ -125,23 +125,27 @@ test('an incomplete value is invalid, and required checks for a value', async ({
 })
 
 test('input follows each edit and change fires once per committed value', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-mask-input mask="999" aria-label="Code"></c2-mask-input>')
+  // A button after the field gives Tab somewhere to go inside the page: tabbing out of the page blurs late in Firefox.
+  await renderScenario('<c2-mask-input mask="999" aria-label="Code"></c2-mask-input><button type="button">Next</button>')
   const seen = await page.locator('c2-mask-input').evaluateHandle((el) => {
     const log: string[] = []
     el.addEventListener('input', () => log.push(`input:${(el as MaskInputElement).value}`))
     el.addEventListener('change', () => log.push(`change:${(el as MaskInputElement).value}`))
     return log
   })
+  const log = () => seen.jsonValue()
   await page.getByRole('textbox', { name: 'Code' }).click()
   await page.keyboard.type('12')
   await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Next' })).toBeFocused()
   // Enter commits the value; leaving the field with nothing new to commit fires nothing more.
-  expect(await seen.jsonValue()).toEqual(['input:1', 'input:12', 'change:12'])
+  await expect.poll(log).toEqual(['input:1', 'input:12', 'change:12'])
   await page.getByRole('textbox', { name: 'Code' }).click()
   await page.keyboard.type('3')
   await page.keyboard.press('Tab')
-  expect(await seen.jsonValue()).toEqual(['input:1', 'input:12', 'change:12', 'input:123', 'change:123'])
+  await expect(page.getByRole('button', { name: 'Next' })).toBeFocused()
+  await expect.poll(log).toEqual(['input:1', 'input:12', 'change:12', 'input:123', 'change:123'])
 })
 
 test('a digits-only mask asks for the numeric keyboard', async ({ page, renderScenario }) => {
