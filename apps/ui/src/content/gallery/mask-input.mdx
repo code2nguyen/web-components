@@ -20,14 +20,14 @@ The box is one set of variables (`--c2-mask-input--border`, `--c2-mask-input--ba
 ```html tag=MdxCodeBlock,label=Monospace IBAN
 <style>
   .iban {
-    width: 320px;
+    width: 240px;
     --c2-mask-input--font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     --c2-mask-input--font-size: 13px;
     --c2-mask-input--border-radius: 8px;
     --c2-mask-input__slot--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
-<c2-mask-input class="iban" mask="AA99 XXXX XXXX XXXX XXXX XXXX XXX" value="FR7630006000011234567890189" aria-label="IBAN" help="French IBAN, 27 characters."></c2-mask-input>
+<c2-mask-input class="iban" mask="AA99 9999 9999 9999" value="BE68539007547034" aria-label="IBAN" help="Belgian IBAN, 16 characters."></c2-mask-input>
 ```
 
 ```html tag=MdxCodeBlock,label=Verification code
