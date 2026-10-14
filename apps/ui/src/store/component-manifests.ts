@@ -39,6 +39,7 @@ import details from '@c2n/details/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
+import formatDate from '@c2n/format-date/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
@@ -58,6 +59,7 @@ import list from '@c2n/list/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
+import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
@@ -167,6 +169,7 @@ export const componentManifests = (function () {
     featherIcons,
     filterBuilder,
     flow,
+    formatDate,
     gantt,
     googleMap,
     header,
@@ -186,6 +189,7 @@ export const componentManifests = (function () {
     logViewer,
     markdown,
     marker,
+    maskInput,
     masonry,
     matIcon,
     math,
