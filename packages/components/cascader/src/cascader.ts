@@ -128,7 +128,7 @@ export class Cascader extends LitElement {
   @property({ converter: arrayPropertyConverter, reflect: true }) value: string[] = []
 
   /** Name used when the cascader participates in a form. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Text shown before a path is selected. */
   @property({ type: String }) placeholder = 'Please select'

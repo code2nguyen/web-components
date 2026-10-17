@@ -355,7 +355,7 @@ export class MapChart extends EchartsChartBase {
   @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name. The form receives one entry per selected region. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** The geometry once loaded and joined to `region-key`. */
   @state() private prepared?: PreparedMap

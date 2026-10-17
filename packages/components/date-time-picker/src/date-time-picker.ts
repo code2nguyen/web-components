@@ -195,7 +195,7 @@ export class DateTimePicker extends LitElement {
   /** First day of each calendar week. */
   @property({ attribute: 'week-start', reflect: true }) weekStart: DateTimePickerWeekStart = 'monday'
   /** Form field name of the value. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Form field name under which the time zone is submitted too (the browser's zone when `time-zone` is empty). */
   @property({ attribute: 'time-zone-name' }) timeZoneName = ''
   /** Requires a date and time before the form can be submitted. */

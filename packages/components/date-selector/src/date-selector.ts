@@ -118,9 +118,9 @@ export class DateSelector extends LitElement {
   /** Number of consecutive months shown; clamped to one or two. */
   @property({ type: Number, reflect: true }) months = 2
   /** Form field name for the start date. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Form field name for the end date. Defaults to `${name}-end`. */
-  @property({ attribute: 'end-name' }) endName = ''
+  @property({ attribute: 'end-name', reflect: true }) endName = ''
   /** Requires both endpoints when the selector participates in a form. */
   @property({ type: Boolean, reflect: true }) required = false
   /** Prevents navigation and selection and excludes the control from form submission. */

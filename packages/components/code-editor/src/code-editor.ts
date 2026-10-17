@@ -143,7 +143,7 @@ export class CodeEditor extends LitElement {
   @property({ attribute: false }) languageLoader: LanguageLoader | undefined = undefined
 
   /** Form field name. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Label above the editor, when the `label` slot is empty. */
   @property() label = ''

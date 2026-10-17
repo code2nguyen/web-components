@@ -155,7 +155,7 @@ export class Questionnaire extends LitElement {
   @property({ type: Boolean, reflect: true }) completed = false
 
   /** Form field name. Its submitted value is the answer object serialized as JSON. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Disables options and navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
