@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { RelativeTime } from '@c2n/components/relative-time'
 
-`c2-relative-time` phrases a moment relative to now with `Intl.RelativeTimeFormat`: the largest unit that fits ("42 seconds ago", "in 3 hours", "yesterday", "2 weeks ago"), rounded to the nearest unit. It redraws exactly when the rounded value changes, so a feed full of timestamps stays current without polling; `no-update` draws it once. `date` takes an ISO 8601 string or a millisecond timestamp in markup and a `Date` from script. `format` sets the length (`long`, `short`, `narrow`), `numeric="always"` keeps a number where `auto` says "yesterday" or "now", and `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The phrase sits in a `<time>` element whose `datetime` is the exact instant and whose hover title is the full date and time. Until `date` holds a valid date, the default slot shows instead, for a fallback such as "Never".
+`c2-relative-time` phrases a moment relative to now with `Intl.RelativeTimeFormat`: the largest unit that fits ("42 seconds ago", "in 3 hours", "yesterday", "2 weeks ago"), rounded to the nearest unit. It redraws exactly when the rounded value changes, so a feed full of timestamps stays current without polling; `no-update` draws it once. `date` takes an ISO 8601 string or a millisecond timestamp in markup and a `Date` from script. `format` sets the length (`long`, `short`, `narrow`), `numeric="always"` keeps a number where `auto` says "yesterday" or "now", `min-unit` sets the smallest unit counted (`min-unit="minute"` reads "now" for anything under a minute away instead of counting seconds, and redraws at most once a minute), and `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The phrase sits in a `<time>` element whose `datetime` is the exact instant and whose hover title is the full date and time. Until `date` holds a valid date, the default slot shows instead, for a fallback such as "Never".
 
 ## Import
 
@@ -34,6 +34,10 @@ import '@c2n/components/relative-time'
   <c2-relative-time date="2025-06-12T09:00:00Z"></c2-relative-time>
   <c2-relative-time format="short" date="2025-06-12T09:00:00Z"></c2-relative-time>
   <c2-relative-time format="narrow" date="2025-06-12T09:00:00Z"></c2-relative-time>
+</div>
+<div data-label="Minimum unit">
+  <c2-relative-time min-unit="minute" date="2026-09-30T14:20:00Z"></c2-relative-time>
+  <c2-relative-time min-unit="day" date="2026-09-30T14:20:00Z"></c2-relative-time>
 </div>
 <div data-label="Locale">
   <c2-relative-time locale="fr" date="2026-09-30T14:20:00Z"></c2-relative-time>

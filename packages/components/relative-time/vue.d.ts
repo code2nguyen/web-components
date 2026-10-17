@@ -17,6 +17,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-relative-time': DefineComponent<
       C2Props<RelativeTime> & {
+        'min-unit'?: unknown
         'no-update'?: unknown
       }
     >

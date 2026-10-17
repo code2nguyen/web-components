@@ -23,6 +23,11 @@ const markup: Record<string, string> = {
   fallback: `
     <c2-relative-time id="unset">Never</c2-relative-time>
     <c2-relative-time id="invalid" date="not a date">Unknown</c2-relative-time>`,
+  'min-unit': `
+    <c2-relative-time id="subject" locale="en-US" min-unit="minute" date="${at(-5 * SECOND)}"></c2-relative-time>
+    <c2-relative-time id="future" locale="en-US" min-unit="minute" date="${at(90 * SECOND)}"></c2-relative-time>
+    <c2-relative-time id="always" locale="en-US" min-unit="minute" numeric="always" date="${at(-5 * SECOND)}"></c2-relative-time>
+    <c2-relative-time id="day" locale="en-US" min-unit="day" date="${at(-3 * HOUR)}"></c2-relative-time>`,
   'no-update': `<c2-relative-time id="subject" locale="en-US" no-update date="${at(-5 * SECOND)}"></c2-relative-time>`,
   timestamp: `<c2-relative-time id="subject" locale="en-US" date="${Date.now() - 2 * HOUR}"></c2-relative-time>`,
 }
