@@ -2,6 +2,95 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.10",
+      "date": "2026-10-17",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["diff-viewer"],
+              "text": "Add c2-diff-viewer, a read-only line diff of two texts",
+              "hash": "21867d1"
+            },
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Delete rows and columns, and answer c2-context-menu",
+              "hash": "b882856"
+            },
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Insert rows and columns, and grow the sheet on paste",
+              "hash": "71c86d7"
+            },
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Resize columns by dragging the header edge",
+              "hash": "10936be"
+            },
+            {
+              "scopes": ["format-date"],
+              "text": "Add c2-format-date",
+              "hash": "c9d1cbc"
+            },
+            {
+              "scopes": ["format-number"],
+              "text": "Add c2-format-number for locale number, currency, percent, compact and byte formatting",
+              "hash": "9f84219"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Add c2-highlight to mark the parts of a text that match a query",
+              "hash": "9efb47d"
+            },
+            {
+              "scopes": ["mask-input"],
+              "text": "Add c2-mask-input for pattern masks (IBAN, tax ID, postcode)",
+              "hash": "49d611d"
+            },
+            {
+              "scopes": ["date-time-picker"],
+              "text": "Add c2-date-time-picker with calendar, time and time zone",
+              "hash": "6ba7975"
+            },
+            {
+              "scopes": ["money-input"],
+              "text": "Add c2-money-input, a currency amount field that stores minor units",
+              "hash": "04ca971"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["mask-input"],
+              "text": "Fire change on blur and Enter in Firefox too",
+              "hash": "0ac1dba"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Match the server-rendered slot on the first hydrated render",
+              "hash": "76606ea"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Fit the date-time-picker gallery cards in two columns",
+              "hash": "2d60918"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.9",
       "date": "2026-10-14",
       "sections": [
