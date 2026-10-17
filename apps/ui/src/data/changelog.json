@@ -2,6 +2,23 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.11",
+      "date": "2026-10-17",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["components"],
+              "text": "Reflect name on form-associated elements",
+              "hash": "e4c61a9"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.10",
       "date": "2026-10-17",
       "sections": [

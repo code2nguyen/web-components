@@ -3,6 +3,12 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.11](https://github.com/code2nguyen/web-components/releases/tag/v1.0.11) — 2026-10-17
+
+### Fixes
+
+- **components:** Reflect name on form-associated elements ([e4c61a9](https://github.com/code2nguyen/web-components/commit/e4c61a9))
+
 ## [1.0.10](https://github.com/code2nguyen/web-components/releases/tag/v1.0.10) — 2026-10-17
 
 ### Features
