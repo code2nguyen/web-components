@@ -13,6 +13,7 @@
     hover--border: 1px solid #a1a1aa,
     focus--border: 1px solid rgb(2, 101, 220),
     focus--outline: none,
+    error--border: 1px solid #dc2626,
     placeholder--color: #71717a,
     disabled--opacity: 0.38,
     icon--size: 18px,
@@ -83,6 +84,11 @@
     border: css.cssVar(focus--border);
     outline: css.cssVar(focus--outline);
     outline-offset: 1px;
+  }
+
+  // An enclosing c2-form-field shows an error.
+  &.error {
+    border: css.cssVar(error--border);
   }
 }
 

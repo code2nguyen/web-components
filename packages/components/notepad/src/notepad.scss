@@ -616,7 +616,8 @@
   outline: css.cssVar(focus--outline);
   outline-offset: 4px;
 }
-:host([error]) .sheet {
+:host([error]) .sheet,
+:host(:state(error)) .sheet {
   --_margin-c: #{css.cssVar(error--color)};
 }
 .error-note {

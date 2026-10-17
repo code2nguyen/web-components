@@ -5,6 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController, formatMessage } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { DOMSerializer, Fragment, Slice, type Mark, type MarkType, type Node as ProseNode, type ResolvedPos } from 'prosemirror-model'
 import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view'
@@ -223,6 +224,7 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @cssproperty {color} [--c2-page-editor__plus-button--color=#a1a1aa]
  * @cssproperty {color} [--c2-page-editor__hint--color=#71717a] - The "⌫ to undo" note after an automatic format.
  * @cssproperty {outline} [--c2-page-editor__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {outline} [--c2-page-editor__content__error--outline=1px solid #dc2626] - Drawn round the page while an enclosing `c2-form-field` shows an error.
  * @cssproperty {opacity} [--c2-page-editor__disabled--opacity=0.38]
  */
 @customElement('c2-page-editor')
@@ -232,6 +234,10 @@ export class PageEditor extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  /** The surface attributes ProseMirror last read, so a change made only by an enclosing field still reaches the page. */
+  private appliedSurfaceAttributes = ''
   private readonly msg = new LocalizeController(this, pageEditorMessages)
   /** The node views showing interface text of their own, rewritten when the language changes. */
   private readonly liveViews = new Set<Localizable>()
@@ -515,12 +521,16 @@ export class PageEditor extends LitElement {
       },
     )
     this.serialized = toMarkdown(this.view.state.doc)
+    this.appliedSurfaceAttributes = JSON.stringify(this.surfaceAttributes())
     this.editorLocale = this.msg.locale
     this.syncFormState()
   }
 
   protected override updated(changedProperties: PropertyValues<this>) {
     const changed = changedProperties as Map<PropertyKey, unknown>
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.disabled && !this.disabledByForm) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     const view = this.view
     if (!view) return
     if (changed.has('value') && this.value !== this.serialized) {
@@ -535,7 +545,9 @@ export class PageEditor extends LitElement {
       this.editorLocale = this.msg.locale
       for (const live of this.liveViews) live.localize()
     }
-    if (relocalized || surfaceInputs.some((key) => changed.has(key))) {
+    const surfaceAttributes = JSON.stringify(this.surfaceAttributes())
+    if (relocalized || surfaceInputs.some((key) => changed.has(key)) || surfaceAttributes !== this.appliedSurfaceAttributes) {
+      this.appliedSurfaceAttributes = surfaceAttributes
       // Re-reads `editable`, the surface attributes and the placeholder decorations.
       view.setProps({})
       if (!this.editable) this.hideFloating()
@@ -709,8 +721,11 @@ export class PageEditor extends LitElement {
       role: 'textbox',
       'aria-multiline': 'true',
     }
-    const name = this.label || this.ariaLabel
+    const name = this.label || this.ariaLabel || this.field.label
     if (name) attributes['aria-label'] = name
+    const describedBy = this.field.describedBy()
+    if (describedBy !== nothing) attributes['aria-describedby'] = describedBy
+    if (this.field.invalid) attributes['aria-invalid'] = 'true'
     if (this.placeholder) attributes['aria-placeholder'] = this.placeholder
     if (this.required) attributes['aria-required'] = 'true'
     if (this.readOnly) {
@@ -1780,6 +1795,7 @@ export class PageEditor extends LitElement {
       >
         ${this.renderBar()}
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

@@ -40,6 +40,8 @@ import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
+import formField from '@c2n/form-field/custom-elements.json'
+import form from '@c2n/form/custom-elements.json'
 import formatDate from '@c2n/format-date/custom-elements.json'
 import formatNumber from '@c2n/format-number/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
@@ -174,6 +176,8 @@ export const componentManifests = (function () {
     featherIcons,
     filterBuilder,
     flow,
+    form,
+    formField,
     formatDate,
     formatNumber,
     gantt,

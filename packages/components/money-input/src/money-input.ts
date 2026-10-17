@@ -8,6 +8,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import {
   amountOfMinorUnits,
   caretAfter,
@@ -134,6 +135,8 @@ export class MoneyInput extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, moneyInputMessages, () => this.locale)
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private customValidityMessage = ''
   private defaultValue = ''
   private defaultCurrency = 'USD'
@@ -435,13 +438,15 @@ export class MoneyInput extends LitElement {
     const locale = this.msg.locale
     const currency = normalizeCurrency(this.currency)
     const showError = this.error && !this.effectiveDisabled
+    // An enclosing field asks for the invalid look without setting `error`, and then draws the supporting line itself.
+    const invalid = (this.error || this.field.invalid) && !this.effectiveDisabled
     const message = showError ? this.errorText : this.help
-    const showSupporting = !!message || this.slotPresence.has('supporting-text')
+    const showSupporting = !this.field.managed && (!!message || this.slotPresence.has('supporting-text'))
     const currencies = this.pickerCurrencies
-    const describedBy = showSupporting ? 'currency-name supporting-text' : 'currency-name'
+    const describedBy = this.field.describedBy('currency-name', showSupporting && 'supporting-text')
     return html`
       <div
-        class="field ${classMap({ focused: this.focused, error: showError, 'read-only': this.readOnly, disabled: this.effectiveDisabled })}"
+        class="field ${classMap({ focused: this.focused, error: invalid, 'read-only': this.readOnly, disabled: this.effectiveDisabled })}"
         @click=${this.forwardFocus}
       >
         <div class="value-area">
@@ -450,8 +455,8 @@ export class MoneyInput extends LitElement {
             type="text"
             inputmode=${this.format.fractionDigits > 0 ? 'decimal' : 'numeric'}
             spellcheck="false"
-            aria-label=${ifDefined(this.ariaLabel || undefined)}
-            aria-invalid=${showError ? 'true' : nothing}
+            aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
+            aria-invalid=${invalid ? 'true' : nothing}
             aria-describedby=${describedBy}
             name=${ifDefined(this.name || undefined)}
             autocomplete=${ifDefined(this.autocomplete || undefined)}
@@ -478,6 +483,7 @@ export class MoneyInput extends LitElement {
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }
+      ${this.field.renderDescription()}
     `
   }
 }

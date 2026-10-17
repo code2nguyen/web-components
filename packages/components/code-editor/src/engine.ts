@@ -37,11 +37,22 @@ export interface EditorOptions {
   placeholder: string
   /** Accessible name put on the editable element itself, which is what carries `role=textbox`. */
   label: string
+  /** `aria-describedby` for the editable element: ids in the same shadow root, or empty. */
+  describedBy: string
+  /** Puts `aria-invalid="true"` on the editable element. */
+  invalid: boolean
   /** CodeMirror's interface text in the editor's language, by English phrase (`{ Find: 'Rechercher' }`). */
   phrases: Record<string, string>
   onInput: (value: string) => void
   onBlur: () => void
   onFocus: () => void
+}
+
+/** What labels and describes the editable element. */
+export interface EditorAccessibility {
+  label: string
+  describedBy: string
+  invalid: boolean
 }
 
 /** What the element drives. Every setter is a live reconfiguration, never a teardown. */
@@ -56,7 +67,8 @@ export interface EditorHandle {
   setAutocomplete(on: boolean): void
   setTabSize(size: number): void
   setPlaceholder(text: string): void
-  setLabel(label: string): void
+  /** The accessible name, description ids and invalid flag of the editable element, which change together. */
+  setAccessibility(accessibility: EditorAccessibility): void
   setPhrases(phrases: Record<string, string>): void
   focus(): void
   destroy(): void
@@ -159,9 +171,17 @@ export async function createEditor(options: EditorOptions): Promise<EditorHandle
 
   // One compartment for the content attributes: the accessible name, the editing state a screen reader announces,
   // and the input hints. They change together, so they are rebuilt together.
-  let contentState = { label: options.label, readOnly: options.readOnly, editable: options.editable }
+  let contentState = {
+    label: options.label,
+    describedBy: options.describedBy,
+    invalid: options.invalid,
+    readOnly: options.readOnly,
+    editable: options.editable,
+  }
   const contentAttributes = () => ({
     'aria-label': contentState.label,
+    ...(contentState.describedBy ? { 'aria-describedby': contentState.describedBy } : {}),
+    ...(contentState.invalid ? { 'aria-invalid': 'true' } : {}),
     'aria-readonly': contentState.readOnly ? 'true' : 'false',
     ...(contentState.editable ? {} : { 'aria-disabled': 'true' }),
     spellcheck: 'false',
@@ -255,8 +275,8 @@ export async function createEditor(options: EditorOptions): Promise<EditorHandle
     setAutocomplete: (on) => reconfigure(compartments.autocomplete, on ? autocomplete.autocompletion() : []),
     setTabSize: (size) => reconfigure(compartments.tabSize, EditorState.tabSize.of(size)),
     setPlaceholder: (text) => reconfigure(compartments.placeholder, text ? placeholder(text) : []),
-    setLabel(label) {
-      contentState = { ...contentState, label }
+    setAccessibility({ label, describedBy, invalid }) {
+      contentState = { ...contentState, label, describedBy, invalid }
       reconfigure(compartments.label, EditorView.contentAttributes.of(contentAttributes()))
     },
     setPhrases: (phrases) => reconfigure(compartments.phrases, EditorState.phrases.of(phrases)),

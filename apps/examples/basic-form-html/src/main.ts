@@ -5,23 +5,21 @@ import '@c2n/components/theme.css'
 import './style.css'
 
 import '@c2n/components/card'
-import '@c2n/components/label'
+import '@c2n/components/form-field'
 import '@c2n/components/list-item'
-import { type TextField } from '@c2n/components/text-field'
+import '@c2n/components/text-field'
+import '@c2n/components/checkbox'
+import '@c2n/components/switch'
+import '@c2n/components/button'
+import { type Form } from '@c2n/components/form'
 import { type Select } from '@c2n/components/select'
 import { type MaskInput } from '@c2n/components/mask-input'
-import { type Checkbox } from '@c2n/components/checkbox'
-import { type Switch } from '@c2n/components/switch'
-import '@c2n/components/button'
 import { toast } from '@c2n/components/toast'
 
-const fullName = document.querySelector<TextField>('#full-name')!
-const email = document.querySelector<TextField>('#email')!
-const digest = document.querySelector<Switch>('#digest')!
-const terms = document.querySelector<Checkbox>('#terms')!
-const form = document.querySelector<HTMLFormElement>('#account-form')!
+const account = document.querySelector<Form>('#account')!
 const country = document.querySelector<Select>('#country')!
 const postcode = document.querySelector<MaskInput>('#postcode')!
+const unsaved = document.querySelector<HTMLElement>('#unsaved')!
 
 // Each country's postcode shape. The UK's varies in length in the middle (SW1A 1AA, M1 1AE), which one mask cannot
 // say, so it stays free text.
@@ -43,45 +41,31 @@ country.addEventListener('change', () => {
   postcode.value = ''
   syncPostcode()
 })
+account.form?.addEventListener('reset', () => setTimeout(syncPostcode))
 
-// Text fields, selects and checkboxes are form-associated custom elements, so FormData, reset, disabled fieldsets
-// and native constraint validation work exactly where a plain-HTML consumer expects them.
+// The form validates every field on submit and only fires `valid-submit` once they all pass. Validation messages,
+// the error summary and focus are its job; the app only saves. A rejected promise with `{ name: message }` shows
+// those errors on their fields, the way a server response would.
+const save = (values: Record<string, unknown>) =>
+  new Promise<void>((resolve, reject) =>
+    setTimeout(() => (String(values.email).endsWith('@example.org') ? reject({ email: 'That email is already registered.' }) : resolve()), 700),
+  )
 
-const clearErrors = () => {
-  for (const field of [fullName, email, postcode]) {
-    field.error = false
-    field.errorText = ''
-  }
-}
-
-const fail = (field: TextField | MaskInput, message: string) => {
-  field.error = true
-  field.errorText = message
-  field.focus()
-  toast.show({ variant: 'error', heading: 'Check the form', message })
-}
-
-document.querySelector('#save')!.addEventListener('click', () => {
-  clearErrors()
-
-  if (!fullName.value.trim()) return fail(fullName, 'Enter your full name.')
-  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email.value)) return fail(email, 'Enter a valid email address.')
-  if (!postcode.checkValidity()) return fail(postcode, `Enter a postcode like ${postcode.placeholder}.`)
-  if (!terms.checked) return toast.show({ variant: 'warning', message: 'Please accept the terms of service.' })
-
-  const data = new FormData(form)
-
-  toast.show({
-    variant: 'success',
-    heading: 'Saved',
-    message: `${data.get('fullName')} · ${data.get('country') || 'no country'} · weekly digest ${digest.checked ? 'on' : 'off'}`,
-  })
+account.addEventListener('valid-submit', (event) => {
+  const { values } = event.detail
+  const saving = save(values)
+  event.detail.waitUntil(saving)
+  saving.then(
+    () =>
+      toast.show({
+        variant: 'success',
+        heading: 'Saved',
+        message: `${values.fullName} · ${values.country || 'no country'} · weekly digest ${values.digest ? 'on' : 'off'}`,
+      }),
+    () => {},
+  )
 })
 
-document.querySelector('#reset')!.addEventListener('click', () => {
-  clearErrors()
-  form.reset()
-  syncPostcode()
-  digest.checked = true
-  toast.show({ message: 'Form reset.' })
+account.addEventListener('dirty-change', (event) => {
+  unsaved.hidden = !event.detail.dirty
 })

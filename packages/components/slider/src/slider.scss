@@ -11,6 +11,7 @@
     track--border-radius: 999px,
     track--color: #e4e4e7,
     fill--color: #0265dc,
+    track__error--color: #dc2626,
 
     thumb--size: 18px,
     thumb--border-radius: 999px,
@@ -109,6 +110,11 @@ $_range-length: calc((var(--_end) - var(--_start)) * (100% - #{$_thumb}));
   inset: auto 0 0 0;
   width: auto;
   height: $_offset;
+}
+
+// An enclosing c2-form-field shows an error: the unfilled track takes the error colour.
+:host(:state(error)) .c2-slider-track {
+  background: css.cssVar(track__error--color);
 }
 
 // Range mode: the fill spans the selected interval.

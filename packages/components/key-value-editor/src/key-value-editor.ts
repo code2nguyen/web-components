@@ -7,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { formatEnv, parseEnv, type KeyValueEntry } from './dotenv.js'
 import styles from './key-value-editor.scss?inline'
 
@@ -86,7 +87,7 @@ let nextRowId = 0
  * @cssproperty {border} [--c2-key-value-editor__field--border=1px solid #bcbcc6]
  * @cssproperty {border} [--c2-key-value-editor__field__hover--border=1px solid #a1a1aa]
  * @cssproperty {border} [--c2-key-value-editor__field__focus--border=1px solid #476ef9]
- * @cssproperty {border} [--c2-key-value-editor__field__error--border=1px solid #dc2626] - Border of a refused key.
+ * @cssproperty {border} [--c2-key-value-editor__field__error--border=1px solid #dc2626] - Border of a refused key, and of every field while an enclosing `c2-form-field` shows an error.
  * @cssproperty {border} [--c2-key-value-editor__field__locked--border=1px solid transparent] - Border of a locked key (`lock-keys` or an entry's `lockKey`). Transparent by default, so a locked key reads as a label aligned with the fields.
  * @cssproperty {color} [--c2-key-value-editor__field__locked--background=transparent] - Background of a locked key.
  * @cssproperty {border-radius} [--c2-key-value-editor__field--border-radius=6px]
@@ -129,6 +130,8 @@ export class KeyValueEditor extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the hint line. */
+  private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
 
   // Data
 
@@ -555,7 +558,8 @@ export class KeyValueEditor extends LitElement {
   }
 
   private renderHint() {
-    return html`<div class="hint" ?hidden=${!this.hasHint}><slot name="hint" @slotchange=${this.handleSlotchange}></slot></div>`
+    // Inside a `c2-form-field` the field draws the hint; the slot stays in the tree so `hasHint` stays current.
+    return html`<div class="hint" ?hidden=${!this.hasHint || this.formField.managed}><slot name="hint" @slotchange=${this.handleSlotchange}></slot></div>`
   }
 
   private renderEmpty() {
@@ -573,6 +577,8 @@ export class KeyValueEditor extends LitElement {
     const locked = this.isKeyLocked(entry)
     // A fixed key names its value field; an editable one may still be blank, so the field is numbered instead.
     const valueName = locked && key.trim() ? key.trim() : `${this.valueLabel} ${number}`
+    // An enclosing field's error marks every field, as the browser marks an invalid native control.
+    const fieldInvalid = this.formField.invalid && !this.isDisabled
     const keyCell = locked
       ? html`<span class="key locked" aria-invalid=${error ? 'true' : nothing} aria-describedby=${ifDefined(error ? errorId : undefined)} title=${key}
           >${key}</span
@@ -581,7 +587,7 @@ export class KeyValueEditor extends LitElement {
           class="key"
           type="text"
           aria-label="${this.keyLabel} ${number}"
-          aria-invalid=${error ? 'true' : nothing}
+          aria-invalid=${error || fieldInvalid ? 'true' : nothing}
           aria-describedby=${ifDefined(error ? errorId : undefined)}
           placeholder=${this.keyPlaceholder || nothing}
           autocomplete="off"
@@ -601,6 +607,7 @@ export class KeyValueEditor extends LitElement {
           class="value"
           type=${hidden ? 'password' : 'text'}
           aria-label=${valueName}
+          aria-invalid=${fieldInvalid ? 'true' : nothing}
           placeholder=${this.valuePlaceholder || nothing}
           autocomplete="off"
           autocapitalize="off"
@@ -673,15 +680,21 @@ export class KeyValueEditor extends LitElement {
       <span>${this.valueLabel}</span>
     </div>`
     if (this.viewing) {
-      return html`<div class="editor viewing" role="group" aria-label=${ifDefined(this.label || undefined)}>
+      return html`<div
+        class="editor viewing"
+        role="group"
+        aria-label=${ifDefined(this.label || this.formField.label || undefined)}
+        aria-describedby=${this.formField.describedBy()}
+      >
         ${this.realRows.some((entry) => String(entry.key ?? '').trim() !== '') ? header : nothing} ${this.renderView()} ${this.renderFooter(false)}
-        ${this.renderHint()}
+        ${this.renderHint()} ${this.formField.renderDescription()}
       </div>`
     }
     return html`<div
       class="editor ${classMap({ 'lock-keys': this.lockKeys })}"
       role="group"
-      aria-label=${ifDefined(this.label || undefined)}
+      aria-label=${ifDefined(this.label || this.formField.label || undefined)}
+      aria-describedby=${this.formField.describedBy()}
       @focusin=${this.handleFocusin}
     >
       ${rows.length ? header : nothing}
@@ -696,7 +709,7 @@ export class KeyValueEditor extends LitElement {
             </div>`
           : this.renderEmpty()
       }
-      ${this.renderFooter(!this.lockKeys)} ${this.renderHint()}
+      ${this.renderFooter(!this.lockKeys)} ${this.renderHint()} ${this.formField.renderDescription()}
     </div>`
   }
 }

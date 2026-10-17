@@ -62,6 +62,8 @@
     "@c2n/feather-icons": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
+    "@c2n/form": "*",
+    "@c2n/form-field": "*",
     "@c2n/format-date": "*",
     "@c2n/format-number": "*",
     "@c2n/gantt": "*",

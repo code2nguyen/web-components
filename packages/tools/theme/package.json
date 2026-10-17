@@ -94,6 +94,8 @@
         "../../components/diff-viewer:build",
         "../../components/filter-builder:build",
         "../../components/flow:build",
+        "../../components/form-field:build",
+        "../../components/form:build",
         "../../components/format-date:build",
         "../../components/format-number:build",
         "../../components/gantt:build",

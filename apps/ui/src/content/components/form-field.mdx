@@ -1,0 +1,112 @@
+---
+title: 'Form Field'
+description: 'Label, hint, error, warning and character counter around any form control, wired for assistive technology.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FormField } from '@c2n/components/form-field'
+import { TextField } from '@c2n/components/text-field'
+import { Textarea } from '@c2n/components/textarea'
+import { Select } from '@c2n/components/select'
+import { ListItem } from '@c2n/components/list-item'
+import { Checkbox } from '@c2n/components/checkbox'
+import { Switch } from '@c2n/components/switch'
+
+`c2-form-field` wraps one form control and draws everything around it: the label with a required or "Optional" marker, a `label-action` link, the hint, the error or a non-blocking warning, and a `length / maxlength` counter. It reads `required`, `disabled`, `maxLength`, `value` and `validity` from the control, so you state those once, on the control. The `c2-*` controls receive the label and the hint or error as text and put them on their own focusable element, which `aria-labelledby` and `aria-describedby` could not reach across the shadow boundary; while a field wraps a control that draws its own hint line, the control hides it.
+
+Errors follow "reward early, punish late": nothing shows while a field is untouched or being typed in for the first time. An error shows when a form submit finds the control invalid, on `validate()`, or on blur or input with `validate-on="blur"` / `"input"`, and from then on the field re-checks on every edit, so the error clears as soon as the value is fixed. The message comes from a server error, `error-text`, a slotted `<span slot="error" data-match="valueMissing">` for that validity key, a slotted error without `data-match`, or a built-in message in the page's language. Wrap the fields in a [`c2-form`](/web-components/components/form) for an error summary, server errors and dirty tracking.
+
+Layout is CSS: `--c2-form-field--direction: row` puts the label beside the control and wraps it above once the control would be narrower than `--c2-form-field__body--min-width`. Custom properties inherit, so set them once on a form or any ancestor.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/form-field'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/form-field
+<style>
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px 16px;
+    width: min(720px, 100%);
+  }
+  .side {
+    width: min(520px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    --c2-form-field--direction: row;
+    --c2-form-field__label--width: 120px;
+    --c2-form-field__label--padding-top: 8px;
+  }
+  .consent {
+    --c2-form-field__supporting-text--indent: 32px;
+  }
+</style>
+<div data-label="Text controls" class="fields">
+  <c2-form-field label="Email" hint="We'll send a confirmation link.">
+    <c2-text-field name="email" type="email" required placeholder="you@example.com"></c2-text-field>
+  </c2-form-field>
+  <c2-form-field label="Handle" error-text="That handle is taken. Try another one.">
+    <c2-text-field name="handle" value="admin"></c2-text-field>
+  </c2-form-field>
+  <c2-form-field label="Bio" necessity="optional" hint="Shown on your profile." counter>
+    <c2-textarea name="bio" maxlength="160" rows="2"></c2-textarea>
+  </c2-form-field>
+  <c2-form-field label="Password" warning-text="This password appeared in a known data breach.">
+    <c2-text-field name="password" type="password" value="password1"></c2-text-field>
+  </c2-form-field>
+</div>
+<div data-label="Choices" class="fields">
+  <c2-form-field label="Country" error-text="Select your country.">
+    <c2-select name="country" placeholder="Select a country">
+      <c2-list-item value="GB">United Kingdom</c2-list-item>
+      <c2-list-item value="FR">France</c2-list-item>
+      <c2-list-item value="VN">Vietnam</c2-list-item>
+    </c2-select>
+  </c2-form-field>
+  <c2-form-field class="consent" error-text="Accept the terms to continue.">
+    <c2-checkbox name="terms" required>I agree to the terms of service</c2-checkbox>
+  </c2-form-field>
+  <c2-form-field hint="A summary of your team's activity every Monday.">
+    <c2-switch name="digest" checked>Weekly digest</c2-switch>
+  </c2-form-field>
+</div>
+<div data-label="Side labels" class="side">
+  <c2-form-field label="Full name">
+    <c2-text-field name="fullName" required value="Ada Lovelace"></c2-text-field>
+  </c2-form-field>
+  <c2-form-field label="Email" hint="Used to sign in.">
+    <c2-text-field name="email" type="email" required value="ada@example.com"></c2-text-field>
+  </c2-form-field>
+  <c2-form-field label="Time zone">
+    <c2-select name="zone" value="london">
+      <c2-list-item value="london">Europe/London</c2-list-item>
+      <c2-list-item value="hanoi">Asia/Ho_Chi_Minh</c2-list-item>
+    </c2-select>
+  </c2-form-field>
+</div>
+```
+
+### Messages per validity key
+
+The built-in messages are generic ("Fill in this field."). Give a field its own wording with one slotted `error` element per validity key; the first key that fails picks the message, and an element without `data-match` covers any other failure. The slotted text is read as text.
+
+```html tag=CodeBlock
+<c2-form-field label="Email">
+  <c2-text-field name="email" type="email" required></c2-text-field>
+  <span slot="error" data-match="valueMissing">Enter your email address.</span>
+  <span slot="error" data-match="typeMismatch">Enter an email address like name@example.com.</span>
+</c2-form-field>
+```
+
+### Native controls
+
+A native `<input>`, `<select>` or `<textarea>` sits in the light DOM, so it can only be named by light-DOM text: use the `label` and `hint` slots, which the field links with `ariaLabelledByElements` / `ariaDescribedByElements`. The `label` and `hint` attributes render inside the field's shadow root, which a native control cannot reference.

@@ -891,4 +891,9 @@ export const overrides: Record<string, Override> = {
   '--c2-spreadsheet__reference-2--color': { exclude: 'fixed hue that tells formula references apart' },
   '--c2-spreadsheet__reference-3--color': { exclude: 'fixed hue that tells formula references apart' },
   '--c2-spreadsheet__reference-4--color': { exclude: 'fixed hue that tells formula references apart' },
+  // Form field: a warning and a counter near its limit are a status hue, and the icon glyph sits on that hue or on
+  // the error colour, whichever the theme makes it.
+  '--c2-form-field__warning--color': { exclude: 'semantic warning colour' },
+  '--c2-form-field__counter__near-limit--color': { exclude: 'semantic warning colour' },
+  '--c2-form-field__icon-glyph--color': { exclude: 'glyph on the error or warning disc' },
 }

@@ -5,6 +5,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { AttachmentStatus } from '@c2n/attachment'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './upload.scss?inline'
 
 import '@c2n/attachment'
@@ -118,6 +119,8 @@ let uploadItemId = 0
  * @cssproperty {outline} [--c2-upload__dropzone__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-upload__dropzone__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-upload__dropzone__disabled--opacity=0.38]
+ * @cssproperty {color} [--c2-upload__dropzone__error--border-color=#dc2626] - Drop-zone border colour while an enclosing `c2-form-field` shows an error.
+ * @cssproperty {border} [--c2-upload__compact__error--border=1px solid #dc2626] - Border of the compact upload button while an enclosing `c2-form-field` shows an error.
  * @cssproperty {pixel} [--c2-upload__icon--size=32px]
  * @cssproperty {color} [--c2-upload__icon--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-upload__prompt--color=#18181b]
@@ -145,6 +148,8 @@ export class Upload extends LitElement {
   private readonly controllers = new Map<string, AbortController>()
   private dragDepth = 0
   private customValidityMessage = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   @state() private uploadItems: UploadItem[] = []
   @state() private rejections: UploadRejection[] = []
   @state() private dragging = false
@@ -248,6 +253,9 @@ export class Upload extends LitElement {
   }
 
   protected override updated(): void {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     this.syncFormState()
   }
 
@@ -538,7 +546,9 @@ export class Upload extends LitElement {
         class=${classMap({ picker: true, dropzone: true, 'dropzone--dragging': this.dragging })}
         role="button"
         tabindex=${this.effectiveDisabled ? -1 : 0}
-        aria-label=${this.ariaLabel || 'Upload files'}
+        aria-label=${this.ariaLabel || this.field.label || 'Upload files'}
+        aria-describedby=${this.field.describedBy()}
+        aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
         @click=${this.browse}
         @keydown=${this.handleKeydown}
@@ -567,7 +577,7 @@ export class Upload extends LitElement {
       <input
         type="file"
         tabindex="-1"
-        aria-label=${this.ariaLabel || 'Upload files'}
+        aria-label=${this.ariaLabel || this.field.label || 'Upload files'}
         .accept=${this.accept}
         ?multiple=${this.multiple}
         ?disabled=${this.pickerDisabled}
@@ -604,6 +614,7 @@ export class Upload extends LitElement {
             </div>`
           : html`<slot part="empty" name="empty"></slot>`
       }
+      ${this.field.renderDescription()}
     `
   }
 }

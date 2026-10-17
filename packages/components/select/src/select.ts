@@ -10,6 +10,7 @@ import type { SelectionChangeEventDetail } from '@c2n/list'
 import { ListItem } from '@c2n/list-item'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 import '@c2n/overlay'
 import '@c2n/list'
@@ -79,6 +80,10 @@ let warnedUnupgraded = false
  * @cssproperty {border} [--c2-select__button__open--border-right=1px solid #476ef9]
  * @cssproperty {border} [--c2-select__button__open--border-bottom=1px solid #476ef9]
  * @cssproperty {border} [--c2-select__button__open--border-left=1px solid #476ef9]
+ * @cssproperty {border} [--c2-select__button__error--border-top=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
+ * @cssproperty {border} [--c2-select__button__error--border-right=1px solid #dc2626]
+ * @cssproperty {border} [--c2-select__button__error--border-bottom=1px solid #dc2626]
+ * @cssproperty {border} [--c2-select__button__error--border-left=1px solid #dc2626]
  *
  * @cssproperty {outline} [--c2-select__button__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
  * @cssproperty {pixel} [--c2-select__button__focus--outline-offset=0px] - Flush by default: `[open]` already turns the border accent, so an offset ring reads as a second border.
@@ -132,6 +137,8 @@ export class Select extends LitElement {
   /** The built-in validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, selectMessages)
   private customValidityMessage = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
   @state() private disabledByForm = false
   private defaultValue: string[] = []
   private defaultValueCaptured = false
@@ -388,6 +395,8 @@ export class Select extends LitElement {
   }
 
   protected override updated(_changedProperties: PropertyValueMap<this>): void {
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     if (_changedProperties.has('ariaLabelledByAttr')) this.syncLabelText()
     if (_changedProperties.has('open') || _changedProperties.has('readonly') || _changedProperties.has('disabled')) {
       this.toggle(this.open)
@@ -435,7 +444,7 @@ export class Select extends LitElement {
    * the button. So the label's *text* is copied onto the button instead.
    */
   private get triggerLabel(): string {
-    return this.ariaLabel || this.labelText
+    return this.ariaLabel || this.labelText || this.field.label
   }
 
   /** Reads the text of whatever labels the host: `aria-labelledby` first, then any associated `<label>`. */
@@ -458,6 +467,8 @@ export class Select extends LitElement {
       <button
         type="button"
         aria-label=${this.triggerLabel || nothing}
+        aria-describedby=${this.field.describedBy()}
+        aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-haspopup="listbox"
         aria-expanded=${this.open ? 'true' : 'false'}
         id="button"
@@ -484,6 +495,7 @@ export class Select extends LitElement {
           <slot @slotchange=${this.handleSlotChange}></slot>
         </c2-list>
       </c2-overlay>
+      ${this.field.renderDescription()}
     </div> `
   }
 }

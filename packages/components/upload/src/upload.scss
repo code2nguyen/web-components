@@ -16,6 +16,8 @@
     dropzone__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     dropzone__focus--outline-offset: 2px,
     dropzone__disabled--opacity: variables.$disabled-content-opacity,
+    dropzone__error--border-color: #dc2626,
+    compact__error--border: 1px solid #dc2626,
     icon--size: 32px,
     icon--color: rgb(2, 101, 220),
     prompt--color: #18181b,
@@ -77,6 +79,16 @@
 .dropzone--dragging:hover {
   border: css.cssVar(dropzone__drag--border);
   background: css.cssVar(dropzone__drag--background);
+}
+
+// An enclosing c2-form-field shows an error: the drop zone keeps its border style in the error colour, and the
+// compact button takes an error border. A drag in progress keeps its own look.
+:host(:state(error)) .dropzone:not(.dropzone--dragging) {
+  border-color: css.cssVar(dropzone__error--border-color);
+}
+
+:host(:state(error)) .compact-button {
+  --c2-button__container--border: #{css.cssVar(compact__error--border)};
 }
 
 input {

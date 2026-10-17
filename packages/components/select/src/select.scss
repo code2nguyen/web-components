@@ -46,6 +46,11 @@
     button__open--border-bottom: 1px solid #476ef9,
     button__open--border-left: 1px solid #476ef9,
 
+    button__error--border-top: 1px solid #dc2626,
+    button__error--border-right: 1px solid #dc2626,
+    button__error--border-bottom: 1px solid #dc2626,
+    button__error--border-left: 1px solid #dc2626,
+
     button__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
     // Flush, not offset: `[open]` already turns the border accent, and a ring standing 1px off it reads as a
     // second border whenever the dropdown is opened from the keyboard (both states apply at once).
@@ -207,6 +212,13 @@
   .default-icon {
     transform: rotate(180deg);
   }
+}
+
+:host(:state(error):not([open])) .button {
+  border-top: css.cssVar(button__error--border-top);
+  border-bottom: css.cssVar(button__error--border-bottom);
+  border-right: css.cssVar(button__error--border-right);
+  border-left: css.cssVar(button__error--border-left);
 }
 
 :host([readonly]) .button {

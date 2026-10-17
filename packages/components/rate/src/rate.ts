@@ -1,9 +1,10 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './rate.scss?inline'
 
 export interface RateChangeEventDetail {
@@ -36,6 +37,7 @@ export interface Rate {
  * @cssproperty {color} [--c2-rate__icon--color=#e4e4e7]
  * @cssproperty {color} [--c2-rate__icon__filled--color=#facc15]
  * @cssproperty {color} [--c2-rate__icon__preview--color=#fbbf24]
+ * @cssproperty {color} [--c2-rate__icon__error--color=#dc2626] - Empty icons while an enclosing `c2-form-field` shows an error.
  * @cssproperty {number} [--c2-rate__icon__hover--scale=1.12]
  * @cssproperty {duration} [--c2-rate__icon--transition-duration=150ms]
  * @cssproperty {outline} [--c2-rate__container__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
@@ -54,6 +56,8 @@ export class Rate extends LitElement {
   private defaultValue = 0
   private defaultValueCaptured = false
   private customValidityMessage = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
   @state() private previewValue: number | null = null
   @state() private disabledByForm = false
 
@@ -149,6 +153,9 @@ export class Rate extends LitElement {
   }
 
   protected override updated(_changed: PropertyValues<this>): void {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     this.syncFormState()
   }
 
@@ -233,7 +240,9 @@ export class Rate extends LitElement {
         class="rate"
         role="slider"
         tabindex=${this.readonly || this.effectiveDisabled ? -1 : 0}
-        aria-label=${this.ariaLabel || 'Rating'}
+        aria-label=${this.ariaLabel || this.field.label || 'Rating'}
+        aria-describedby=${this.field.describedBy()}
+        aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-valuemin="0"
         aria-valuemax=${this.max}
         aria-valuenow=${this.value}
@@ -258,6 +267,7 @@ export class Rate extends LitElement {
           `
         })}
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

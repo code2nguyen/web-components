@@ -70,11 +70,13 @@
   box-shadow: css.cssVar(container__focus--box-shadow);
 }
 
-.container:has(.textarea:invalid) {
+.container:has(.textarea:invalid),
+:host(:state(error)) .container {
   border: css.cssVar(container__invalid--border);
 }
 
-.container:has(.textarea:invalid):focus-within {
+.container:has(.textarea:invalid):focus-within,
+:host(:state(error)) .container:focus-within {
   box-shadow: css.cssVar(container__invalid__focus--box-shadow);
 }
 
