@@ -48,6 +48,17 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   display: none;
 }
 
+// While a c2-form-field wraps the group, the role moves onto this wrapper; it takes over the host's flex layout.
+.field-group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: inherit;
+  flex-wrap: inherit;
+  align-items: inherit;
+  gap: inherit;
+  min-width: 0;
+}
+
 :host([orientation='vertical']) {
   flex-direction: column;
   align-items: stretch;

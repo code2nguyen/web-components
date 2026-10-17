@@ -1,4 +1,4 @@
-import { test, expect } from '../../../../tests/component-fixture'
+import { test, expect, accessible } from '../../../../tests/component-fixture'
 
 // Every form-associated control takes part in the field protocol: inside a c2-form-field its focusable element is
 // named by the field's label and described by the hint, then by the error. The focusable element is the one whose
@@ -27,6 +27,8 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-rate', markup: '<c2-rate></c2-rate>' },
   { tag: 'c2-radio-group', markup: '<c2-radio-group><c2-radio value="a">A</c2-radio><c2-radio value="b">B</c2-radio></c2-radio-group>' },
   { tag: 'c2-checkbox-group', markup: '<c2-checkbox-group><c2-checkbox value="a">A</c2-checkbox></c2-checkbox-group>' },
+  // Its role moves from the host's internals onto an inner wrapper while a field wraps it.
+  { tag: 'c2-button-group', markup: '<c2-button-group><c2-button value="a">A</c2-button><c2-button value="b">B</c2-button></c2-button-group>' },
   { tag: 'c2-upload', markup: '<c2-upload></c2-upload>' },
   { tag: 'c2-code-editor', markup: '<c2-code-editor></c2-code-editor>' },
   { tag: 'c2-notepad', markup: '<c2-notepad></c2-notepad>' },
@@ -55,16 +57,17 @@ for (const { tag, markup, selfLabelled } of controls) {
   })
 }
 
-test('c2-button-group takes its name and description through its internals', async ({ page, renderScenario }) => {
+test('c2-button-group keeps its role on its internals outside a field and on the wrapper inside one', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-form-field label="Field label" hint="Field hint"><c2-button-group><c2-button value="a">A</c2-button><c2-button value="b">B</c2-button></c2-button-group></c2-form-field>`,
+    `<c2-form-field label="Alignment"><c2-button-group toolbar><c2-button value="a">A</c2-button></c2-button-group></c2-form-field><div id="out"></div>`,
   )
   const group = page.locator('c2-button-group')
-  await expect(group).toHaveHostAria('aria-label', 'Field label')
-  // The description travels as text, which every engine keeps. The element reference set next to it reads back empty in
-  // WebKit, which drops a reference from internals into the host's own shadow root, so it is not asserted here.
-  await expect(group).toHaveHostAria('aria-description', 'Field hint')
+  await expect(group).toHaveHostAria('role', null)
+  await expect(page.getByRole('toolbar', { name: 'Alignment' })).toBeVisible()
   await page.locator('c2-form-field').evaluate((field) => field.setAttribute('error-text', 'Pick one'))
-  await expect(group).toHaveHostAria('aria-description', 'Error: Pick one')
-  await expect(group).toHaveHostAria('aria-invalid', 'true')
+  await expect(page.getByRole('toolbar', { name: 'Alignment' })).toHaveAccessibleDescription('Error: Pick one')
+  await accessible(page)
+  await page.evaluate(() => document.querySelector('#out')!.append(document.querySelector('c2-button-group')!))
+  await expect(group).toHaveHostAria('role', 'toolbar')
+  await expect(group.locator('.field-group')).toHaveCount(0)
 })

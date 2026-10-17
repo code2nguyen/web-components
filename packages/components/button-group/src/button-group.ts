@@ -93,7 +93,7 @@ export class ButtonGroup extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
-  /** Label and description handed down by an enclosing `c2-form-field`, set on the host's internals. */
+  /** Label and description handed down by an enclosing `c2-form-field`; see {@link syncFieldSemantics}. */
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
   /** `none` (default) for plain attached buttons, `single` for one pressed item, `multiple` for independent toggles. */
@@ -202,11 +202,6 @@ export class ButtonGroup extends LitElement {
 
   override updated(changed: PropertyValues<this>) {
     this.syncFieldSemantics()
-    if (changed.has('toolbar')) {
-      this.internals.role = this.toolbar ? 'toolbar' : 'group'
-      if (this.toolbar) this.internals.ariaOrientation = this.orientation
-      else this.internals.ariaOrientation = null
-    } else if (changed.has('orientation') && this.toolbar) this.internals.ariaOrientation = this.orientation
     if (changed.has('value') || changed.has('selection') || changed.has('name')) this.syncFormValue()
     if (
       changed.has('value') ||
@@ -229,21 +224,27 @@ export class ButtonGroup extends LitElement {
   }
 
   /**
-   * The group's role lives on its internals and no inner element owns it, so the field's label and description go
-   * there too. Read on every update: the field changes them without changing a property of this element.
+   * Outside a field the role, and the orientation of a toolbar, live on the host's internals. While a `c2-form-field`
+   * wraps the group they move onto an inner wrapper instead (see `render`), which can reference the field's
+   * description in the same tree: WebKit drops a reference from internals into the host's own shadow root, and has no
+   * `ariaDescription` on internals. Read on every update, since the field changes without changing a property here.
    */
   private syncFieldSemantics() {
-    const named = !!this.ariaLabel || this.hasAttribute('aria-labelledby') || this.internals.labels.length > 0
-    this.internals.ariaLabel = !named && this.field.label ? this.field.label : null
-    // The reference reaches the hidden description in Chromium and Firefox. WebKit drops a reference from internals into
-    // the host's own shadow root, so the same text also goes on as `ariaDescription`, which a browser reads only when
-    // `aria-describedby` resolves to nothing.
-    const description = this.renderRoot.querySelector(`#${FieldContextConsumer.descriptionId}`)
-    this.internals.ariaDescribedByElements = description ? [description] : null
-    this.internals.ariaDescription = this.field.description || null
-    this.internals.ariaInvalid = this.field.invalid ? 'true' : null
+    const managed = this.field.managed
+    this.internals.role = managed ? null : this.toolbar ? 'toolbar' : 'group'
+    this.internals.ariaOrientation = !managed && this.toolbar ? this.orientation : null
     if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
     else this.internals.states.delete('error')
+  }
+
+  /** The name the inner wrapper takes while a field wraps the group: the group's own name first, then the field's. */
+  private get fieldGroupLabel(): string {
+    if (this.ariaLabel) return this.ariaLabel
+    const root = this.getRootNode() as Document | ShadowRoot
+    const ids = (this.getAttribute('aria-labelledby') ?? '').split(/\s+/).filter(Boolean)
+    const fromIds = ids.map((id) => root.getElementById?.(id)?.textContent?.trim()).filter(Boolean)
+    const fromLabels = [...this.internals.labels].map((label) => label.textContent?.trim()).filter(Boolean)
+    return [...fromIds, ...fromLabels].join(' ') || this.field.label
   }
 
   /** What the form submits: nothing without a name, one entry per pressed value otherwise. */
@@ -460,7 +461,19 @@ export class ButtonGroup extends LitElement {
   override render() {
     return html`
       <span class="indicator" style=${Object.keys(this.indicatorStyle).length ? styleMap(this.indicatorStyle) : nothing} aria-hidden="true"></span>
-      <slot @slotchange=${this.syncItems}></slot>
+      ${
+        this.field.managed
+          ? html`<div
+              class="field-group"
+              role=${this.toolbar ? 'toolbar' : 'group'}
+              aria-label=${this.fieldGroupLabel || nothing}
+              aria-describedby=${this.field.describedBy()}
+              aria-orientation=${this.toolbar ? this.orientation : nothing}
+            >
+              <slot @slotchange=${this.syncItems}></slot>
+            </div>`
+          : html`<slot @slotchange=${this.syncItems}></slot>`
+      }
       ${this.field.renderDescription()}
     `
   }
