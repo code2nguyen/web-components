@@ -235,9 +235,12 @@ export class ButtonGroup extends LitElement {
   private syncFieldSemantics() {
     const named = !!this.ariaLabel || this.hasAttribute('aria-labelledby') || this.internals.labels.length > 0
     this.internals.ariaLabel = !named && this.field.label ? this.field.label : null
-    // Internals may reference an element in the host's own shadow root.
+    // The reference reaches the hidden description in Chromium and Firefox. WebKit drops a reference from internals into
+    // the host's own shadow root, so the same text also goes on as `ariaDescription`, which a browser reads only when
+    // `aria-describedby` resolves to nothing.
     const description = this.renderRoot.querySelector(`#${FieldContextConsumer.descriptionId}`)
     this.internals.ariaDescribedByElements = description ? [description] : null
+    this.internals.ariaDescription = this.field.description || null
     this.internals.ariaInvalid = this.field.invalid ? 'true' : null
     if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
     else this.internals.states.delete('error')

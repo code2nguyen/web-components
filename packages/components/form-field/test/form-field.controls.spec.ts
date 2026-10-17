@@ -61,12 +61,10 @@ test('c2-button-group takes its name and description through its internals', asy
   )
   const group = page.locator('c2-button-group')
   await expect(group).toHaveHostAria('aria-label', 'Field label')
-  await expect
-    .poll(() =>
-      group.evaluate((element) => {
-        const internals = (element as Element & { internals?: { ariaDescribedByElements?: Element[] | null } }).internals
-        return internals?.ariaDescribedByElements?.map((node) => node.textContent).join(' ') ?? ''
-      }),
-    )
-    .toBe('Field hint')
+  // The description travels as text, which every engine keeps. The element reference set next to it reads back empty in
+  // WebKit, which drops a reference from internals into the host's own shadow root, so it is not asserted here.
+  await expect(group).toHaveHostAria('aria-description', 'Field hint')
+  await page.locator('c2-form-field').evaluate((field) => field.setAttribute('error-text', 'Pick one'))
+  await expect(group).toHaveHostAria('aria-description', 'Error: Pick one')
+  await expect(group).toHaveHostAria('aria-invalid', 'true')
 })
