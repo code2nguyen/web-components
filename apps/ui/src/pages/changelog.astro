@@ -156,6 +156,7 @@ const timeline = rawElement(
   import '@c2n/components/card'
   import '@c2n/components/details'
   import '@c2n/components/relative-time'
+  import { revealPreviews } from '../utils/reveal-previews'
 
   // The preview cards need every component package; load them only once the first card is about to scroll into view.
   const canvases = document.querySelectorAll('.preview-card__canvas')
@@ -164,7 +165,7 @@ const timeline = rawElement(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return
         observer.disconnect()
-        void import('../data/component-modules').then(() => canvases.forEach((canvas) => canvas.classList.add('ready')))
+        revealPreviews(canvases, () => import('../data/component-modules'))
       },
       { rootMargin: '400px' },
     )
