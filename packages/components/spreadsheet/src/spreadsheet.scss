@@ -27,6 +27,9 @@
     header__selected--color: rgb(2, 101, 220),
     column-label--color: #18181b,
     row-header--width: 44px,
+    resizer--width: 9px,
+    resizer__hover--color: rgb(2, 101, 220),
+    resizer__hover--line-width: 2px,
 
     editor--background-color: #ffffff,
     editor--font-family: (
@@ -175,7 +178,6 @@
   outline: none;
   user-select: none;
   -webkit-user-select: none;
-
 }
 
 .row {
@@ -217,6 +219,28 @@
   gap: 8px;
   padding: css.cssVar(cell--padding);
   overflow: hidden;
+}
+
+// A wide, invisible grab area over the column's right border; the border itself is the resting divider, and an accent
+// line replaces it while the handle is hovered or dragged.
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  width: css.cssVar(resizer--width);
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.resizer:hover::after,
+.resizer--active::after {
+  content: '';
+  width: css.cssVar(resizer__hover--line-width);
+  height: 100%;
+  background: css.cssVar(resizer__hover--color);
 }
 
 .column-letter {
