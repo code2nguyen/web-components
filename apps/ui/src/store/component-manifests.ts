@@ -36,6 +36,7 @@ import dateSelector from '@c2n/date-selector/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
+import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
@@ -169,6 +170,7 @@ export const componentManifests = (function () {
     dateTimePicker,
     descriptionList,
     details,
+    diffViewer,
     featherIcons,
     filterBuilder,
     flow,

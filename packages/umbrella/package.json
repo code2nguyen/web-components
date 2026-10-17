@@ -325,6 +325,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./diff-viewer": {
+      "types": "./dist/diff-viewer.d.ts",
+      "default": "./dist/diff-viewer.js"
+    },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
@@ -897,6 +901,7 @@
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/diff-viewer": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
     "@c2n/format-date": "*",

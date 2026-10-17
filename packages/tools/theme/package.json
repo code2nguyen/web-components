@@ -91,6 +91,7 @@
         "../../components/date-time-picker:build",
         "../../components/description-list:build",
         "../../components/details:build",
+        "../../components/diff-viewer:build",
         "../../components/filter-builder:build",
         "../../components/flow:build",
         "../../components/format-date:build",

@@ -3458,6 +3458,57 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-diff-viewer': {
+    html: `<c2-diff-viewer line-numbers original-label="Current" modified-label="Proposed" original="name: shop
+selectors:
+  item: .card
+  price: .price
+" modified="name: shop
+selectors:
+  item: article.product
+  price: .price
+  title: h2
+"></c2-diff-viewer>`,
+    presets: [
+      {
+        name: 'Word highlights only',
+        description: 'No row tint: only the words that changed are marked',
+        css: {
+          '--c2-diff-viewer__line__added--background-color': 'transparent',
+          '--c2-diff-viewer__line__removed--background-color': 'transparent',
+          '--c2-diff-viewer__line-number__added--background-color': 'transparent',
+          '--c2-diff-viewer__line-number__removed--background-color': 'transparent',
+          '--c2-diff-viewer__word--border-radius': '4px',
+        },
+      },
+      {
+        name: 'Colour-blind safe',
+        description: 'Blue for added lines and orange for removed ones instead of green and red',
+        css: {
+          '--c2-diff-viewer__line__added--background-color': 'rgba(2, 101, 220, 0.12)',
+          '--c2-diff-viewer__line-number__added--background-color': 'rgba(2, 101, 220, 0.2)',
+          '--c2-diff-viewer__word__added--background-color': 'rgba(2, 101, 220, 0.3)',
+          '--c2-diff-viewer__marker__added--color': '#0154b8',
+          '--c2-diff-viewer__stats__added--color': '#0154b8',
+          '--c2-diff-viewer__line__removed--background-color': 'rgba(234, 88, 12, 0.12)',
+          '--c2-diff-viewer__line-number__removed--background-color': 'rgba(234, 88, 12, 0.2)',
+          '--c2-diff-viewer__word__removed--background-color': 'rgba(234, 88, 12, 0.3)',
+          '--c2-diff-viewer__marker__removed--color': '#9a3412',
+          '--c2-diff-viewer__stats__removed--color': '#9a3412',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Smaller code font and tighter rows for a side panel',
+        css: {
+          '--c2-diff-viewer__code--font-size': '12px',
+          '--c2-diff-viewer__code--line-height': '1.4',
+          '--c2-diff-viewer__line--padding': '0 8px 0 2px',
+          '--c2-diff-viewer__fold--padding': '2px 8px',
+        },
+      },
+    ],
+  },
   'c2-dashboard': {
     html: `<c2-dashboard style="height:200px" columns="1fr 2fr" rows="1fr 1fr"><c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card><c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card><c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card></c2-dashboard>`,
     presets: [
