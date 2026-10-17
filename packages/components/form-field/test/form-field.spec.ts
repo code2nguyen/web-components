@@ -105,14 +105,20 @@ test('a warning shows without blocking validity', async ({ page, renderScenario 
 })
 
 test('validate-on="blur" shows the error when focus leaves an edited control', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-form-field label="Email" validate-on="blur"><c2-text-field type="email"></c2-text-field></c2-form-field>`)
+  // A second focusable element gives Tab somewhere to go: with only one, Firefox can wrap focus back to the same input.
+  await renderScenario(
+    `<c2-form-field label="Email" validate-on="blur"><c2-text-field type="email"></c2-text-field></c2-form-field><button type="button">Next</button>`,
+  )
   const input = page.getByRole('textbox', { name: 'Email' })
+  const next = page.getByRole('button', { name: 'Next' })
   await input.focus()
   await page.keyboard.press('Tab')
+  await expect(next).toBeFocused()
   await expect(field(page)).not.toHaveState('user-invalid')
   await input.fill('ada@')
   await expect(field(page)).not.toHaveState('user-invalid')
   await page.keyboard.press('Tab')
+  await expect(next).toBeFocused()
   await expect(field(page)).toHaveState('user-invalid')
 })
 
