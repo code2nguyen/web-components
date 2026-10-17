@@ -4,6 +4,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { provide } from '@lit/context'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
@@ -82,6 +83,8 @@ export class RadioGroup extends LitElement {
   override ariaLabel!: string
 
   private readonly slotPresence = new SlotPresenceController(this, ['label', 'description'])
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the description line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
   @provide({ context: radioGroupContext })
   protected context: RadioGroupContext = this.createContext()
@@ -270,14 +273,16 @@ export class RadioGroup extends LitElement {
 
   override render() {
     const hasLabel = this.slotPresence.has('label')
-    const hasDescription = this.slotPresence.has('description')
+    // Inside a `c2-form-field` the field draws the hint; the own description stays slotted (hidden) so presence tracking keeps working.
+    const hasDescription = this.slotPresence.has('description') && !this.field.managed
     return html`
       <div
         class="c2-radio-group"
         role="radiogroup"
-        aria-label=${ifDefined(this.ariaLabel)}
+        aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
         aria-labelledby=${hasLabel ? 'label' : nothing}
-        aria-describedby=${hasDescription ? 'description' : nothing}
+        aria-describedby=${this.field.describedBy(hasDescription && 'description')}
+        aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-disabled=${this.effectiveDisabled ? 'true' : nothing}
         aria-orientation=${this.orientation}
       >
@@ -289,6 +294,7 @@ export class RadioGroup extends LitElement {
         </div>
         <div class="c2-radio-group-items"><slot @slotchange=${this.handleSlotChange}></slot></div>
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

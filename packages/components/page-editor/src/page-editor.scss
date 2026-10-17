@@ -76,6 +76,7 @@
     plus-button--color: #a1a1aa,
     hint--color: #71717a,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    content__error--outline: 1px solid #dc2626,
     disabled--opacity: 0.38,
   )
 );
@@ -157,6 +158,11 @@ $syntax: keyword, string, function, constant, comment, parameter, punctuation, l
 :host(:focus-visible) .content,
 .content:focus-visible {
   outline: none;
+}
+// An enclosing c2-form-field shows an error: the borderless page gets a red outline, drawn inside its box.
+:host(:state(error)) .content {
+  outline: css.cssVar(content__error--outline);
+  outline-offset: -1px;
 }
 
 p {

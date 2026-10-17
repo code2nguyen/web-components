@@ -1042,6 +1042,48 @@
       "reason": "The node:{id} slot projects consumer-owned light DOM as the node's body; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-form",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's native <form>; it is laid out through --c2-form--display, --c2-form--columns and the gap variables, and otherwise keeps its own styles."
+    },
+    {
+      "tag": "c2-form",
+      "slot": "error-summary-heading",
+      "decision": "assigned-content",
+      "reason": "The error-summary-heading slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-form-field",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's control, which keeps its own styling contract."
+    },
+    {
+      "tag": "c2-form-field",
+      "slot": "label",
+      "decision": "assigned-content",
+      "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-form-field",
+      "slot": "label-action",
+      "decision": "assigned-content",
+      "reason": "The label-action slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-form-field",
+      "slot": "hint",
+      "decision": "assigned-content",
+      "reason": "The hint slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-form-field",
+      "slot": "error",
+      "decision": "assigned-content",
+      "reason": "Slotted error elements are never displayed: the field reads their text and draws it in its supporting-text part."
+    },
+    {
       "tag": "c2-format-date",
       "slot": "",
       "decision": "assigned-content",

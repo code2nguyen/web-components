@@ -6,6 +6,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/overlay'
 import '@c2n/chip'
@@ -162,6 +163,7 @@ interface Suggestion {
  * @cssproperty {border} [--c2-query-input__focus--border=1px solid rgb(2, 101, 220)]
  * @cssproperty {color} --c2-query-input__focus--background
  * @cssproperty {outline} [--c2-query-input__focus--outline=none]
+ * @cssproperty {border} [--c2-query-input__error--border=1px solid #dc2626] - Border while an enclosing `c2-form-field` shows an error, at rest, on hover and on focus.
  * @cssproperty {opacity} [--c2-query-input__disabled--opacity=0.38]
  * @cssproperty {color} [--c2-query-input__selection--background=rgba(2, 101, 220, 0.2)] - Background of selected text.
  *
@@ -228,6 +230,8 @@ export class QueryInput extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** Label and description handed down by an enclosing `c2-form-field` (`field` is the box around the input). */
+  private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
 
   /** The query. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
@@ -714,6 +718,8 @@ export class QueryInput extends LitElement {
       expanded: this.open,
       invalid: this.invalid,
       disabled: this.effectiveDisabled,
+      // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+      error: this.formField.invalid && !this.effectiveDisabled,
     }
     for (const [name, on] of Object.entries(states)) {
       if (on) this.internals.states.add(name)
@@ -826,7 +832,7 @@ export class QueryInput extends LitElement {
   override render() {
     const hasFields = this.fieldList.length > 0
     const open = this.open
-    const name = this.ariaLabel || this.placeholder || 'Search query'
+    const name = this.ariaLabel || this.formField.label || this.placeholder || 'Search query'
     return html`<div class="field" @click=${this.handleFieldClick}>
         <span class="icon" aria-hidden="true">
           <slot name="search-icon">
@@ -858,7 +864,8 @@ export class QueryInput extends LitElement {
               aria-controls=${ifDefined(hasFields ? 'suggestions' : undefined)}
               aria-expanded=${ifDefined(hasFields ? String(open) : undefined)}
               aria-activedescendant=${ifDefined(open && this.activeIndex >= 0 ? `suggestion-${this.activeIndex}` : undefined)}
-              aria-invalid=${this.invalid ? 'true' : nothing}
+              aria-describedby=${this.formField.describedBy()}
+              aria-invalid=${this.invalid || this.formField.invalid ? 'true' : nothing}
               name=${ifDefined(this.name || undefined)}
               placeholder=${this.chips.length ? nothing : this.placeholder || nothing}
               .value=${live(this.draft)}
@@ -878,7 +885,7 @@ export class QueryInput extends LitElement {
         ${this.renderClearButton()}
         <slot name="suffix-icon"></slot>
       </div>
-      ${hasFields ? this.renderPanel() : nothing}`
+      ${hasFields ? this.renderPanel() : nothing}${this.formField.renderDescription()}`
   }
 }
 

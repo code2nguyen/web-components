@@ -4,6 +4,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { getFieldValue } from '@c2n/core/data-helper.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -100,6 +101,7 @@ let autocompleteId = 0
  * @cssproperty {border} [--c2-autocomplete__hover--border=1px solid #a1a1aa]
  * @cssproperty {border} [--c2-autocomplete__focus--border=1px solid rgb(2, 101, 220)]
  * @cssproperty {outline} [--c2-autocomplete__focus--outline=none]
+ * @cssproperty {border} [--c2-autocomplete__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
  * @cssproperty {color} [--c2-autocomplete__placeholder--color=#71717a]
  * @cssproperty {opacity} [--c2-autocomplete__disabled--opacity=0.38]
  * @cssproperty {pixel} [--c2-autocomplete__icon--size=18px]
@@ -245,6 +247,8 @@ export class Autocomplete extends LitElement {
   /** Height of the header and footer, measured while they are shown (hidden, they measure 0). */
   private panelChromeHeight = 0
   private readonly slotPresence = new SlotPresenceController(this, ['header', 'footer'])
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private panelSpaceObserver: MutationObserver | null = null
 
   @query('.input') private input?: HTMLInputElement
@@ -706,7 +710,9 @@ export class Autocomplete extends LitElement {
 
   override render() {
     const selectedValue = this.activeIndex >= 0 ? [this.keyOf(this.results[this.activeIndex], this.activeIndex)] : []
-    return html`<div class="field" @click=${this.handleFieldClick}>
+    const label = this.ariaLabel || this.field.label
+    const invalid = this.field.invalid && !this.effectiveDisabled
+    return html`<div class=${classMap({ field: true, error: invalid })} @click=${this.handleFieldClick}>
         <slot name="prefix-icon"></slot>
         <input
           class="input"
@@ -714,7 +720,9 @@ export class Autocomplete extends LitElement {
           role="combobox"
           autocomplete="off"
           aria-autocomplete="list"
-          aria-label=${ifDefined(this.ariaLabel || undefined)}
+          aria-label=${ifDefined(label || undefined)}
+          aria-describedby=${this.field.describedBy()}
+          aria-invalid=${invalid ? 'true' : nothing}
           aria-controls=${this.listboxId}
           aria-expanded=${this.open ? 'true' : 'false'}
           aria-activedescendant=${ifDefined(this.activeOptionId)}
@@ -758,7 +766,7 @@ export class Autocomplete extends LitElement {
             id=${this.listboxId}
             class="list"
             required
-            aria-label=${this.ariaLabel ? this.msg.t('suggestionsFor', this.ariaLabel) : this.msg.t('suggestions')}
+            aria-label=${label ? this.msg.t('suggestionsFor', label) : this.msg.t('suggestions')}
             .value=${selectedValue}
             @pointerdown=${(event: PointerEvent) => event.preventDefault()}
             @selection-change=${this.handleListSelection}
@@ -768,7 +776,8 @@ export class Autocomplete extends LitElement {
             <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </footer>
         </div>
-      </c2-overlay>`
+      </c2-overlay>
+      ${this.field.renderDescription()}`
   }
 }
 

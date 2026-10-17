@@ -6,6 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './textarea.scss?inline'
 
 /** Events fired by {@link Textarea}, keyed for `addEventListener`. */
@@ -102,6 +103,8 @@ export class Textarea extends LitElement {
 
   @state() private dirty = false
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   @query('textarea') private input?: HTMLTextAreaElement
 
   /** The containing form, when this control is associated with one. */
@@ -177,6 +180,9 @@ export class Textarea extends LitElement {
   }
 
   protected override updated(_changed: PropertyValues) {
+    // `:state(error)` styles the invalid look an enclosing field asks for, as the `error` attribute does on its own.
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     this.syncFormState()
   }
 
@@ -207,14 +213,15 @@ export class Textarea extends LitElement {
     redispatchEvent(this, event)
   }
   override render() {
-    const invalid = this.error && !this.effectiveDisabled
-    const showError = invalid && !!this.errorText
-    const supporting = !!this.help || this.slotPresence.has('supporting-text') || showError || this.maxLength >= 0
+    const invalid = (this.error || this.field.invalid) && !this.effectiveDisabled
+    const managed = this.field.managed
+    const showError = this.error && !this.effectiveDisabled && !!this.errorText && !managed
+    const supporting = !managed && (!!this.help || this.slotPresence.has('supporting-text') || showError || this.maxLength >= 0)
     return html` <textarea
         part="textarea"
         name=${ifDefined(this.name || undefined)}
-        aria-label=${ifDefined(this.label || this.ariaLabel || undefined)}
-        aria-describedby=${supporting ? 'supporting-text' : nothing}
+        aria-label=${ifDefined(this.label || this.ariaLabel || this.field.label || undefined)}
+        aria-describedby=${this.field.describedBy(supporting && 'supporting-text')}
         aria-invalid=${invalid ? 'true' : nothing}
         placeholder=${this.placeholder}
         rows=${this.rows > 0 ? this.rows : 3}
@@ -237,7 +244,8 @@ export class Textarea extends LitElement {
           ${showError ? html`<span role="alert">${this.errorText}</span>` : nothing}
         </span>
         ${this.maxLength >= 0 ? html`<span class="counter">${this.value.length} / ${this.maxLength}</span>` : nothing}
-      </div>`
+      </div>
+      ${this.field.renderDescription()}`
   }
 }
 

@@ -5,6 +5,7 @@ import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { resolveLocale } from '@c2n/core/locale-helper.js'
 import '@c2n/overlay'
@@ -71,7 +72,7 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  * The element is form-associated: the E.164 value is submitted under `name`. `required` reports an empty field, and a
  * number whose length the country's numbering plan does not allow is reported as invalid (`validity.patternMismatch`);
  * `valid` tells the same from script. The host exposes `:state(open)`, `:state(invalid)` (a number was typed but is
- * not possible), `:state(focus-within)` and `:state(disabled)`.
+ * not possible), `:state(error)` (an enclosing `c2-form-field` shows an error), `:state(focus-within)` and `:state(disabled)`.
  *
  * @tag c2-phone-input
  *
@@ -94,7 +95,7 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  * @cssproperty {border} [--c2-phone-input__focus--border=1px solid rgb(2, 101, 220)]
  * @cssproperty {color} --c2-phone-input__focus--background
  * @cssproperty {outline} [--c2-phone-input__focus--outline=none]
- * @cssproperty {border} [--c2-phone-input__invalid--border=1px solid #dc2626] - Border while the typed number is not possible for the country, once the field lost focus.
+ * @cssproperty {border} [--c2-phone-input__invalid--border=1px solid #dc2626] - Border while the typed number is not possible for the country, once the field lost focus, or while an enclosing `c2-form-field` shows an error.
  * @cssproperty {opacity} [--c2-phone-input__disabled--opacity=0.38]
  *
  * @cssproperty {display} [--c2-phone-input__country--display=inline-flex] - `none` hides the country button, or the fixed prefix of a single allowed country, leaving only the number field.
@@ -142,6 +143,8 @@ export class PhoneInput extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly fieldContext = new FieldContextConsumer(this, { kind: 'text' })
 
   /**
    * The number in E.164 (`+33612345678`), or an empty string. Setting a value with `+` picks its country; a value
@@ -654,6 +657,7 @@ export class PhoneInput extends LitElement {
     const states: Record<string, boolean> = {
       open: this.open,
       invalid: invalid && this.touched,
+      error: this.fieldContext.invalid && !this.effectiveDisabled,
       'focus-within': this.focused,
       disabled: this.effectiveDisabled,
     }
@@ -786,9 +790,9 @@ export class PhoneInput extends LitElement {
           type="tel"
           inputmode="tel"
           autocomplete="tel"
-          aria-label=${this.ariaLabel || 'Phone number'}
-          aria-describedby=${ifDefined(fixed ? 'country' : undefined)}
-          aria-invalid=${!!this.significant && !this.valid && this.touched ? 'true' : nothing}
+          aria-label=${this.ariaLabel || this.fieldContext.label || 'Phone number'}
+          aria-describedby=${this.fieldContext.describedBy(fixed && 'country')}
+          aria-invalid=${(!!this.significant && !this.valid && this.touched) || this.fieldContext.invalid ? 'true' : nothing}
           placeholder=${this.placeholder || this.exampleNumber || nothing}
           .value=${live(this.formatted)}
           ?disabled=${disabled}
@@ -799,7 +803,7 @@ export class PhoneInput extends LitElement {
           @change=${(event: Event) => redispatchEvent(this, event)}
         />
       </div>
-      ${this.open ? this.renderPanel() : nothing}`
+      ${this.open ? this.renderPanel() : nothing}${this.fieldContext.renderDescription()}`
   }
 }
 

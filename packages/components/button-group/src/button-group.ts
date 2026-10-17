@@ -4,6 +4,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 // Registers `c2-button`, the usual item element.
 import '@c2n/button'
 // Registers `c2-icon-button`, so a client-only group can keep its item elements as direct children.
@@ -62,8 +63,10 @@ export interface ButtonGroup {
  * @cssproperty {pixel} [--c2-button-group__divider--width=1px] - Width of the line between attached items; also how much their borders overlap.
  * @cssproperty {color} [--c2-button-group__divider--color=rgba(255, 255, 255, 0.35)] - Colour of the line between attached items. Match the border colour for outlined groups, `transparent` for none.
  * @cssproperty {flex} [--c2-button-group__item--flex=0 0 auto] - `1 1 0` makes every item grow to the same width.
+ * @cssproperty {border} [--c2-button-group__item__error--border=1px solid #dc2626] - Border of every item while an enclosing `c2-form-field` shows an error.
  * @cssproperty {color} [--c2-button-group__segmented--background-color=#f4f4f5] - Track background in the segmented appearance.
  * @cssproperty {border} [--c2-button-group__segmented--border=1px solid transparent] - Track border in the segmented appearance.
+ * @cssproperty {border} [--c2-button-group__segmented__error--border=1px solid #dc2626] - Track border in the segmented appearance while an enclosing `c2-form-field` shows an error.
  * @cssproperty {padding} [--c2-button-group__segmented--padding=3px] - Space around the segmented items.
  * @cssproperty {pixel} [--c2-button-group__segmented--gap=2px] - Space between segmented items.
  * @cssproperty {color} [--c2-button-group__segmented-item--color=#52525b] - Segmented item text colour.
@@ -90,6 +93,8 @@ export class ButtonGroup extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
+  /** Label and description handed down by an enclosing `c2-form-field`, set on the host's internals. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
   /** `none` (default) for plain attached buttons, `single` for one pressed item, `multiple` for independent toggles. */
   @property({ reflect: true }) selection: ButtonGroupSelection = 'none'
@@ -196,6 +201,7 @@ export class ButtonGroup extends LitElement {
   }
 
   override updated(changed: PropertyValues<this>) {
+    this.syncFieldSemantics()
     if (changed.has('toolbar')) {
       this.internals.role = this.toolbar ? 'toolbar' : 'group'
       if (this.toolbar) this.internals.ariaOrientation = this.orientation
@@ -220,6 +226,21 @@ export class ButtonGroup extends LitElement {
       changed.has('stretched')
     )
       this.queueIndicatorUpdate()
+  }
+
+  /**
+   * The group's role lives on its internals and no inner element owns it, so the field's label and description go
+   * there too. Read on every update: the field changes them without changing a property of this element.
+   */
+  private syncFieldSemantics() {
+    const named = !!this.ariaLabel || this.hasAttribute('aria-labelledby') || this.internals.labels.length > 0
+    this.internals.ariaLabel = !named && this.field.label ? this.field.label : null
+    // Internals may reference an element in the host's own shadow root.
+    const description = this.renderRoot.querySelector(`#${FieldContextConsumer.descriptionId}`)
+    this.internals.ariaDescribedByElements = description ? [description] : null
+    this.internals.ariaInvalid = this.field.invalid ? 'true' : null
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
   }
 
   /** What the form submits: nothing without a name, one entry per pressed value otherwise. */
@@ -437,6 +458,7 @@ export class ButtonGroup extends LitElement {
     return html`
       <span class="indicator" style=${Object.keys(this.indicatorStyle).length ? styleMap(this.indicatorStyle) : nothing} aria-hidden="true"></span>
       <slot @slotchange=${this.syncItems}></slot>
+      ${this.field.renderDescription()}
     `
   }
 }

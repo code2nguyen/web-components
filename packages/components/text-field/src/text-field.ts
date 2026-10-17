@@ -10,6 +10,7 @@ import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
 
@@ -200,6 +201,8 @@ export class TextField extends LitElement {
   @state() private dirty = false
   @state() private focused = false
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
 
   // Query
   @query('.input') private readonly input?: HTMLInputElement | null
@@ -356,6 +359,9 @@ export class TextField extends LitElement {
   }
 
   protected renderSupportingText() {
+    if (this.field.managed) {
+      return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
+    }
     const showError = this.error && !this.disabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     const counter = this.maxLength > 0 ? `${this.value.length} / ${this.maxLength}` : ''
@@ -375,13 +381,13 @@ export class TextField extends LitElement {
   }
 
   protected override updated(changed: PropertyValues): void {
-    if (changed.has('disabled') || changed.has('disabledByForm') || changed.has('error') || changed.has('readOnly') || changed.has('focused')) {
-      // Never on the host's `class`: a server-rendered host would then differ from the hydrated one. Custom states
-      // are invisible to the DOM and match `c2-text-field:state(focus-within)` in page CSS.
-      for (const [name, on] of Object.entries(this.stateClasses)) {
-        if (on) this.internals.states.add(name)
-        else this.internals.states.delete(name)
-      }
+    super.updated(changed)
+    // Never on the host's `class`: a server-rendered host would then differ from the hydrated one. Custom states
+    // are invisible to the DOM and match `c2-text-field:state(focus-within)` in page CSS. Read on every update:
+    // an enclosing field changes `error` without changing a property of this element.
+    for (const [name, on] of Object.entries(this.stateClasses)) {
+      if (on) this.internals.states.add(name)
+      else this.internals.states.delete(name)
     }
     this.syncFormState()
   }
@@ -403,7 +409,7 @@ export class TextField extends LitElement {
   private get stateClasses() {
     return {
       disabled: this.effectiveDisabled,
-      error: !this.effectiveDisabled && this.error,
+      error: !this.effectiveDisabled && (this.error || this.field.invalid),
       'read-only': this.readOnly,
       'focus-within': this.focused,
     }
@@ -415,7 +421,8 @@ export class TextField extends LitElement {
         <div class="c2-text-field ${classMap(classes)}" @click=${this.forwardFocusin}>
           ${this.renderPrefixSlot()}
           <input
-            aria-label=${ifDefined(this.ariaLabel || undefined)}
+            aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
+            aria-describedby=${this.field.describedBy()}
             type=${this.type}
             class="input"
             name=${ifDefined(this.name || undefined)}
@@ -426,7 +433,7 @@ export class TextField extends LitElement {
             ?disabled=${this.effectiveDisabled}
             ?readonly=${this.readOnly}
             ?required=${this.required}
-            aria-invalid=${this.error ? 'true' : nothing}
+            aria-invalid=${this.error || this.field.invalid ? 'true' : nothing}
             placeholder=${this.placeholder || nothing}
             .value=${live(this.value)}
             @change=${this.redispatchEvent}
@@ -439,7 +446,7 @@ export class TextField extends LitElement {
         </div>
         ${this.renderHelpIconSlot()}
       </div>
-      ${this.renderSupportingText()}`
+      ${this.renderSupportingText()}${this.field.renderDescription()}`
   }
 }
 

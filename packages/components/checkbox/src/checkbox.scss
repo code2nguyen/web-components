@@ -29,6 +29,7 @@
     container__focus--outline-offset: 2px,
 
     container__disabled--opacity: variables.$disabled-content-opacity,
+    container__error--border-color: #dc2626,
 
     checkmark--size: 12px,
     checkmark--color: #ffffff,
@@ -303,6 +304,11 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
       opacity: 1;
     }
   }
+}
+
+// An enclosing c2-form-field shows an error: the unchecked box takes the error colour.
+:host(:state(error)) #{$_unselected-enabled-selector} ~ .c2-checkbox__background {
+  border-color: css.cssVar(container__error--border-color);
 }
 
 // Disabled

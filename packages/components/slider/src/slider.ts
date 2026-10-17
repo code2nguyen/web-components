@@ -8,6 +8,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './slider.scss?inline'
 
 export type SliderOrientation = 'horizontal' | 'vertical'
@@ -60,6 +61,7 @@ export interface Slider {
  * @cssproperty {border-radius} [--c2-slider__track--border-radius=999px]
  * @cssproperty {color} [--c2-slider__track--color=#e4e4e7]
  * @cssproperty {color} [--c2-slider__fill--color=#0265dc] - Filled part of the track, from the start to the thumb.
+ * @cssproperty {color} [--c2-slider__track__error--color=#dc2626] - Unfilled track while an enclosing `c2-form-field` shows an error.
  *
  * @cssproperty {pixel} [--c2-slider__thumb--size=18px]
  * @cssproperty {border-radius} [--c2-slider__thumb--border-radius=999px]
@@ -92,6 +94,8 @@ export class Slider extends LitElement {
 
   private readonly internals = this.attachInternals()
   private customValidityMessage = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
   @state() private disabledByForm = false
   private defaultValue = 0
   private defaultValueStart = 0
@@ -257,6 +261,9 @@ export class Slider extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     const bounds = changed.has('min') || changed.has('max') || changed.has('step') || changed.has('mode')
     if (this.isRange) {
       if (bounds || changed.has('valueStart') || changed.has('valueEnd')) this.sanitizeRange()
@@ -401,7 +408,8 @@ export class Slider extends LitElement {
   }
 
   private rangeLabel(thumbLabel: string) {
-    return this.ariaLabel ? `${this.ariaLabel}, ${thumbLabel}` : thumbLabel
+    const name = this.ariaLabel || this.field.label
+    return name ? `${name}, ${thumbLabel}` : thumbLabel
   }
 
   private renderRangeThumb(thumb: RangeThumb, value: number) {
@@ -420,6 +428,8 @@ export class Slider extends LitElement {
       .value=${live(String(value))}
       ?disabled=${this.effectiveDisabled}
       aria-label=${this.rangeLabel(thumb === 'start' ? this.startLabel : this.endLabel)}
+      aria-describedby=${this.field.describedBy()}
+      aria-invalid=${this.field.invalid ? 'true' : nothing}
       aria-valuetext=${this.formatValue(value)}
       aria-orientation=${this.orientation}
       @input=${(event: Event) => this.handleRangeInput(thumb, event)}
@@ -446,6 +456,7 @@ export class Slider extends LitElement {
         </div>
         ${this.renderRangeInput('start', this.valueStart)} ${this.renderRangeInput('end', this.valueEnd)}
       </div>
+      ${this.field.renderDescription()}
     `
   }
 
@@ -470,14 +481,17 @@ export class Slider extends LitElement {
           step=${this.step}
           .value=${String(this.value)}
           ?disabled=${this.effectiveDisabled}
-          aria-label=${ifDefined(this.ariaLabel)}
+          aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
           aria-labelledby=${ifDefined(this.ariaLabelledBy)}
+          aria-describedby=${this.field.describedBy()}
+          aria-invalid=${this.field.invalid ? 'true' : nothing}
           aria-valuetext=${formatted}
           aria-orientation=${this.orientation}
           @input=${this.handleInput}
           @change=${this.handleChange}
         />
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

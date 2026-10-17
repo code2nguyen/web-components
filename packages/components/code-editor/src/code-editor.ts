@@ -6,9 +6,10 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
-import { createEditor, type EditorHandle, type LanguageLoader } from './engine.js'
+import { createEditor, type EditorAccessibility, type EditorHandle, type LanguageLoader } from './engine.js'
 import { CODEMIRROR_PHRASES, codeEditorMessages } from './messages'
 import styles from './code-editor.scss?inline'
 
@@ -127,6 +128,10 @@ export class CodeEditor extends LitElement {
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, codeEditorMessages)
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  /** What the editable element was last labelled with, so `updated()` only reconfigures CodeMirror on a change. */
+  private appliedAccessibility = ''
   /** The language the editor's own text (name, CodeMirror's panels) was last set in. */
   private editorLocale = ''
 
@@ -235,7 +240,17 @@ export class CodeEditor extends LitElement {
 
   /** What labels the editable element. CodeMirror's content node is the `textbox`, so the name has to land there. */
   private get accessibleName(): string {
-    return this.label || this.ariaLabel || this.msg.t('codeEditor')
+    return this.label || this.ariaLabel || this.field.label || this.msg.t('codeEditor')
+  }
+
+  private get invalid(): boolean {
+    return (this.error || this.field.invalid) && !this.effectiveDisabled
+  }
+
+  /** Name, description ids and invalid flag of the editable element: CodeMirror's content node or the fallback textarea. */
+  private get accessibility(): EditorAccessibility {
+    const describedBy = this.field.describedBy()
+    return { label: this.accessibleName, describedBy: describedBy === nothing ? '' : describedBy, invalid: this.invalid }
   }
 
   /** CodeMirror's interface text in the editor's language, keyed by its English phrase. */
@@ -324,7 +339,7 @@ export class CodeEditor extends LitElement {
       autocomplete: this.autocomplete,
       tabSize: this.tabSize,
       placeholder: this.placeholder,
-      label: this.accessibleName,
+      ...this.accessibility,
       locale: this.msg.locale,
     }
   }
@@ -339,7 +354,8 @@ export class CodeEditor extends LitElement {
     if (now.autocomplete !== mounted.autocomplete) editor.setAutocomplete(now.autocomplete)
     if (now.tabSize !== mounted.tabSize) editor.setTabSize(now.tabSize)
     if (now.placeholder !== mounted.placeholder) editor.setPlaceholder(now.placeholder)
-    if (now.label !== mounted.label) editor.setLabel(now.label)
+    if (now.label !== mounted.label || now.describedBy !== mounted.describedBy || now.invalid !== mounted.invalid) editor.setAccessibility(now)
+    this.appliedAccessibility = JSON.stringify([now.label, now.describedBy, now.invalid])
     if (now.locale !== mounted.locale) editor.setPhrases(this.phrases())
     this.editorLocale = now.locale
   }
@@ -361,7 +377,14 @@ export class CodeEditor extends LitElement {
         this.editorLocale = this.msg.locale
         editor.setPhrases(this.phrases())
       }
-      if (changed.has('label') || changed.has('ariaLabel') || relocalized) editor.setLabel(this.accessibleName)
+      // Compared rather than keyed on changed properties: an enclosing field changes the name, the description and
+      // the invalid flag without changing a property of this element.
+      const accessibility = this.accessibility
+      const key = JSON.stringify([accessibility.label, accessibility.describedBy, accessibility.invalid])
+      if (key !== this.appliedAccessibility) {
+        this.appliedAccessibility = key
+        editor.setAccessibility(accessibility)
+      }
     }
     this.internals.setFormValue(this.value, this.value)
     const missing = this.required && !this.value
@@ -411,6 +434,8 @@ export class CodeEditor extends LitElement {
       part="editor"
       name=${ifDefined(this.name || undefined)}
       aria-label=${this.accessibleName}
+      aria-describedby=${this.field.describedBy()}
+      aria-invalid=${this.invalid ? 'true' : nothing}
       placeholder=${ifDefined(this.placeholder || undefined)}
       spellcheck="false"
       autocapitalize="off"
@@ -426,9 +451,11 @@ export class CodeEditor extends LitElement {
   }
 
   override render() {
-    const invalid = this.error && !this.effectiveDisabled
-    const showError = invalid && !!this.errorText
-    const supporting = !!this.help || showError
+    const invalid = this.invalid
+    // Inside a `c2-form-field` the field draws the help and error line; the slot stays in the tree, hidden.
+    const managed = this.field.managed
+    const showError = this.error && !this.effectiveDisabled && !!this.errorText && !managed
+    const supporting = !managed && (!!this.help || showError)
     return html`
       <div
         class=${classMap({
@@ -457,6 +484,7 @@ export class CodeEditor extends LitElement {
           ${showError ? html`<span role="alert">${this.errorText}</span>` : html`<slot name="supporting-text">${this.help}</slot>`}
         </div>
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

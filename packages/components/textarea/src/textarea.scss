@@ -79,7 +79,8 @@ textarea {
 :host([resize='both']) textarea {
   resize: both;
 }
-:host([error]:not([disabled])) {
+:host([error]:not([disabled])),
+:host(:state(error)) {
   textarea {
     border: css.cssVar(container__error--border);
   }

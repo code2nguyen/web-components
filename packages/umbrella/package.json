@@ -337,6 +337,14 @@
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
     },
+    "./form": {
+      "types": "./dist/form.d.ts",
+      "default": "./dist/form.js"
+    },
+    "./form-field": {
+      "types": "./dist/form-field.d.ts",
+      "default": "./dist/form-field.js"
+    },
     "./format-date": {
       "types": "./dist/format-date.d.ts",
       "default": "./dist/format-date.js"
@@ -904,6 +912,8 @@
     "@c2n/diff-viewer": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
+    "@c2n/form": "*",
+    "@c2n/form-field": "*",
     "@c2n/format-date": "*",
     "@c2n/format-number": "*",
     "@c2n/gantt": "*",

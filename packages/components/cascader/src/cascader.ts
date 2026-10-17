@@ -4,6 +4,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { Overlay } from '@c2n/overlay'
 import styles from './cascader.scss?inline'
 
@@ -75,6 +76,7 @@ export interface Cascader {
  * @cssproperty {border} [--c2-cascader__trigger__hover--border=1px solid #a1a1aa]
  * @cssproperty {color} [--c2-cascader__trigger__hover--background=#fafafa]
  * @cssproperty {border} [--c2-cascader__trigger__open--border=1px solid rgb(2, 101, 220)]
+ * @cssproperty {border} [--c2-cascader__trigger__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error and the panel is closed.
  * @cssproperty {outline} [--c2-cascader__trigger__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-cascader__trigger__focus--outline-offset=0px]
  * @cssproperty {opacity} [--c2-cascader__trigger__disabled--opacity=0.38]
@@ -120,6 +122,8 @@ export class Cascader extends LitElement {
   private customValidityMessage = ''
   @state() private disabledByForm = false
   @state() private activePath: CascaderOption[] = []
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
   /** Nested hierarchy shown in the floating panel. In markup this is a JSON array. */
   @property({ converter: jsonPropertyConverter }) options: CascaderOption[] = []
@@ -407,12 +411,16 @@ export class Cascader extends LitElement {
 
   override render() {
     const displayValue = this.displayValue
+    const label = this.ariaLabel || this.field.label
+    const invalid = this.field.invalid && !this.effectiveDisabled
     return html`
       <button
         id="trigger"
-        class="trigger"
+        class=${classMap({ trigger: true, error: invalid && !this.open })}
         type="button"
-        aria-label=${this.ariaLabel || nothing}
+        aria-label=${label || nothing}
+        aria-describedby=${this.field.describedBy()}
+        aria-invalid=${invalid ? 'true' : nothing}
         aria-haspopup="tree"
         aria-expanded=${this.open ? 'true' : 'false'}
         popovertarget=${this.readonly || this.effectiveDisabled ? nothing : 'panel-overlay'}
@@ -424,7 +432,7 @@ export class Cascader extends LitElement {
         <slot name="suffix-icon">${this.renderChevron()}</slot>
       </button>
       <c2-overlay id="panel-overlay" popover free-width @toggle=${this.handleOverlayToggle}>
-        <div class="panel" role="tree" aria-label=${this.ariaLabel || 'Cascader options'}>
+        <div class="panel" role="tree" aria-label=${label || 'Cascader options'}>
           ${
             this.options.length
               ? this.columns.map(
@@ -436,6 +444,7 @@ export class Cascader extends LitElement {
           }
         </div>
       </c2-overlay>
+      ${this.field.renderDescription()}
     `
   }
 }

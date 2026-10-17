@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -9,6 +9,7 @@ import { LocalizeController } from '@c2n/core/localize.js'
 import { checkboxMessages } from './messages'
 import styles from './checkbox.scss?inline'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 /** Events fired by {@link Checkbox}, keyed for `addEventListener`. */
 export interface CheckboxEventMap {
@@ -68,6 +69,7 @@ export interface Checkbox {
  * @cssproperty {pixel} [--c2-checkbox__container__focus--outline-offset=2px]
  *
  * @cssproperty {opacity} [--c2-checkbox__container__disabled--opacity=0.38]
+ * @cssproperty {color} [--c2-checkbox__container__error--border-color=#dc2626] - Border of an unchecked box while an enclosing `c2-form-field` shows an error.
  *
  * @cssproperty {pixel} [--c2-checkbox__checkmark--size=12px]
  * @cssproperty {color} [--c2-checkbox__checkmark--color=#ffffff]
@@ -142,6 +144,8 @@ export class Checkbox extends LitElement {
   @property({ type: Boolean, attribute: false }) groupDisabled = false
 
   private readonly slotPresence = new SlotPresenceController(this, ['', 'description'])
+  /** Description handed down by an enclosing `c2-form-field`; the checkbox keeps its own text as its name. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
 
   /** The containing form, when this control is associated with one. */
   get form() {
@@ -207,7 +211,8 @@ export class Checkbox extends LitElement {
             aria-checked="${ifDefined(ariaChecked)}"
             aria-label="${ifDefined(this.ariaLabel)}"
             aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
-            aria-describedby="${ifDefined(this.ariaDescribedBy)}"
+            aria-describedby="${this.field.describedBy(this.ariaDescribedBy)}"
+            aria-invalid="${this.field.invalid ? 'true' : nothing}"
             ?disabled="${this.effectiveDisabled}"
             ?required="${this.required}"
             .value="${this.value}"
@@ -245,6 +250,7 @@ export class Checkbox extends LitElement {
           </span>
         </span>
       </label>
+      ${this.field.renderDescription()}
     `
   }
 
@@ -260,6 +266,8 @@ export class Checkbox extends LitElement {
   }
 
   protected override updated(_changedProperties: PropertyValues) {
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     this.internals.setFormValue(this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked')
     const missing = this.required && !this.checked
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}

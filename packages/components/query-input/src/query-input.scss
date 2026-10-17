@@ -17,6 +17,7 @@
     focus--border: 1px solid rgb(2, 101, 220),
     focus--background: null,
     focus--outline: none,
+    error--border: 1px solid #dc2626,
     disabled--opacity: variables.$disabled-content-opacity,
     selection--background: rgba(2, 101, 220, 0.2),
 
@@ -115,6 +116,11 @@
     outline: css.cssVar(focus--outline);
     outline-offset: 1px;
   }
+}
+
+// An enclosing c2-form-field shows an error: the field keeps the error border on hover and focus too.
+:host(:state(error)) .field {
+  border: css.cssVar(error--border);
 }
 
 :host(:state(disabled)) .field {

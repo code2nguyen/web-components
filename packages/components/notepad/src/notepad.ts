@@ -6,6 +6,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { Fragment, Slice, type Mark, type MarkType, type Node as ProseNode } from 'prosemirror-model'
 import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView, type NodeView } from 'prosemirror-view'
@@ -342,6 +343,10 @@ export class Notepad extends LitElement {
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, notepadMessages)
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the error line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  /** The surface attributes ProseMirror last read, so a change made only by an enclosing field still reaches the page. */
+  private appliedSurfaceAttributes = ''
   /** Language the checklist boxes, which ProseMirror draws outside Lit, were last named in. */
   private boxLocale = ''
 
@@ -650,11 +655,15 @@ export class Notepad extends LitElement {
       },
     )
     this.serialized = toMarkdown(this.view.state.doc)
+    this.appliedSurfaceAttributes = JSON.stringify(this.surfaceAttributes())
     if (getComputedStyle(this.surface).fontFamily.includes(NOTEPAD_FONT_FAMILY)) void loadNotepadFont()
     this.syncFormState()
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.disabled && !this.disabledByForm) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     // Each time the pad becomes a sticky note it is stuck on again, at a new angle: 1°–4° either way, never quite
     // straight. The angle is set inside the shadow root, not on the host, and only applies under pad="sticky".
     if (changed.has('pad') && this.pad === 'sticky') {
@@ -670,7 +679,9 @@ export class Notepad extends LitElement {
       this.emitFormat()
     }
     const surfaceInputs = ['label', 'ariaLabel', 'placeholder', 'disabled', 'readOnly', 'required', 'error', 'errorText', 'disabledByForm']
-    if (surfaceInputs.some((key) => (changed as Map<PropertyKey, unknown>).has(key))) {
+    const surfaceAttributes = JSON.stringify(this.surfaceAttributes())
+    if (surfaceInputs.some((key) => (changed as Map<PropertyKey, unknown>).has(key)) || surfaceAttributes !== this.appliedSurfaceAttributes) {
+      this.appliedSurfaceAttributes = surfaceAttributes
       // Re-reads `editable`, the surface attributes and the placeholder decoration.
       view.setProps({})
       if (!this.editable) this.hideToolbar()
@@ -789,7 +800,7 @@ export class Notepad extends LitElement {
       'aria-multiline': 'true',
       translate: 'no',
     }
-    const name = this.label || this.ariaLabel
+    const name = this.label || this.ariaLabel || this.field.label
     if (name) attributes['aria-label'] = name
     if (this.placeholder) attributes['aria-placeholder'] = this.placeholder
     if (this.required) attributes['aria-required'] = 'true'
@@ -799,9 +810,15 @@ export class Notepad extends LitElement {
       attributes.tabindex = '0'
     }
     if (this.disabled || this.disabledByForm) attributes['aria-disabled'] = 'true'
-    if (this.error && this.errorText) attributes['aria-describedby'] = 'error-note'
-    if (this.error) attributes['aria-invalid'] = 'true'
+    const describedBy = this.field.describedBy(this.showsErrorNote && 'error-note')
+    if (describedBy !== nothing) attributes['aria-describedby'] = describedBy
+    if (this.error || this.field.invalid) attributes['aria-invalid'] = 'true'
     return attributes
+  }
+
+  /** The red-pen note under the page; inside a `c2-form-field` the field draws the error instead. */
+  private get showsErrorNote() {
+    return this.error && !!this.errorText && !this.field.managed
   }
 
   private handleTransaction(tr: Transaction) {
@@ -1420,7 +1437,7 @@ export class Notepad extends LitElement {
         ${glyph}
       </button>`
     const hasEmphasis = ['bold', 'italic', 'underline', 'strike'].some((mark) => allowed.has(mark as NotepadMark))
-    const showError = this.error && !!this.errorText
+    const showError = this.showsErrorNote
     const colorVars = this.colorVars()
     const paperButton = this.paperPicker
       ? html`<button
@@ -1496,7 +1513,7 @@ export class Notepad extends LitElement {
         ${this.renderColorGroup('ink')} ${this.renderColorGroup('highlight')}
         <slot name="toolbar"></slot>
       </div>
-      ${this.paperPicker ? this.renderPaperMenu() : nothing}
+      ${this.paperPicker ? this.renderPaperMenu() : nothing} ${this.field.renderDescription()}
     `
   }
 }

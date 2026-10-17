@@ -15,6 +15,7 @@
     trigger__hover--border: 1px solid #a1a1aa,
     trigger__hover--background: #fafafa,
     trigger__open--border: 1px solid rgb(2, 101, 220),
+    trigger__error--border: 1px solid #dc2626,
     trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     trigger__focus--outline-offset: 0px,
     trigger__disabled--opacity: variables.$disabled-content-opacity,
@@ -98,6 +99,12 @@
   .trigger-icon {
     transform: rotate(180deg);
   }
+}
+
+// An enclosing c2-form-field shows an error (the class is dropped while the panel is open).
+.trigger.error,
+.trigger.error:hover:not(:disabled) {
+  border: css.cssVar(trigger__error--border);
 }
 
 :host([readonly]) .trigger {
