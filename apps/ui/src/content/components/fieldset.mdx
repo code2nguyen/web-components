@@ -1,0 +1,75 @@
+---
+title: 'Fieldset'
+description: 'Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Fieldset } from '@c2n/components/fieldset'
+import { Checkbox } from '@c2n/components/checkbox'
+import { TextField } from '@c2n/components/text-field'
+import { FormField } from '@c2n/components/form-field'
+import { LinkButton } from '@c2n/components/link-button'
+
+`c2-fieldset` is the native `<fieldset>` and `<legend>` pair as a component: it groups related controls (a set of checkboxes, an address, the parts of a date) under a legend that assistive technology announces as the group's name. A `description` and an `error-text` describe the group, `required` marks the legend, and a `legend-action` slot holds a link or button at the end of the legend row. The group is a real `fieldset` in the shadow root, so the slotted controls sit inside it in the accessibility tree.
+
+`disabled` works like a native disabled fieldset: every control inside gets `disabled`, including controls added later, so they also leave the form's data; turning it off re-enables only the controls the fieldset disabled. For a single choice from a set, prefer [`c2-radio-group`](/web-components/components/radio), which names itself and adds arrow-key navigation.
+
+Layout and the box are CSS: `--c2-fieldset__content--direction: row` puts the controls side by side, and `--c2-fieldset--border: none` with `--c2-fieldset--padding: 0` gives a bare group.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/fieldset'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/fieldset
+<style>
+  .group {
+    width: min(420px, 100%);
+  }
+  .address {
+    width: min(420px, 100%);
+    --c2-fieldset__content--direction: row;
+  }
+  .address c2-form-field {
+    flex: 1 1 160px;
+  }
+  .inline {
+    width: min(420px, 100%);
+    --c2-fieldset__content--direction: row;
+    --c2-fieldset__content--gap: 8px 20px;
+  }
+</style>
+<div data-label="Default">
+  <c2-fieldset class="group" legend="Notifications" description="Choose what we email you about.">
+    <c2-checkbox name="notify" value="mentions" checked>Mentions and replies</c2-checkbox>
+    <c2-checkbox name="notify" value="digest">Weekly digest</c2-checkbox>
+    <c2-checkbox name="notify" value="product">Product updates</c2-checkbox>
+  </c2-fieldset>
+</div>
+<div data-label="Required, with error">
+  <c2-fieldset class="inline" legend="Topics" required error-text="Choose at least one topic.">
+    <c2-checkbox name="topics" value="design">Design</c2-checkbox>
+    <c2-checkbox name="topics" value="engineering">Engineering</c2-checkbox>
+    <c2-checkbox name="topics" value="research">Research</c2-checkbox>
+  </c2-fieldset>
+</div>
+<div data-label="Legend action">
+  <c2-fieldset class="address" legend="Shipping address">
+    <c2-link-button slot="legend-action" href="#">Same as billing</c2-link-button>
+    <c2-form-field label="Street"><c2-text-field name="street" value="12 Analytical Way"></c2-text-field></c2-form-field>
+    <c2-form-field label="City"><c2-text-field name="city" value="London"></c2-text-field></c2-form-field>
+  </c2-fieldset>
+</div>
+<div data-label="Disabled">
+  <c2-fieldset class="group" legend="Billing contact" description="Managed by your organisation." disabled>
+    <c2-form-field label="Email"><c2-text-field name="billing" value="billing@example.com"></c2-text-field></c2-form-field>
+    <c2-checkbox name="invoices" checked>Send invoices to this address</c2-checkbox>
+  </c2-fieldset>
+</div>
+```
