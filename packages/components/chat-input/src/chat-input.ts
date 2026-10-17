@@ -82,7 +82,7 @@ export class ChatInput extends LitElement {
   /** Current message text. Set this property to update the composer programmatically. */
   @property() value = ''
   /** Name used when the composer participates in a form. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
   /** Disables editing, sending, and form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false
   /** Requires a nonempty message for form validation. */

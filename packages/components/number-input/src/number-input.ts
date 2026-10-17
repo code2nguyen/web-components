@@ -92,7 +92,7 @@ export class NumberInput extends LitElement {
   /** Increment used by Arrow keys and the step controls, or `any` to disable step controls. */
   @property({ type: String }) step = '1'
   /** Form field name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Browser autocomplete hint. */
   @property({ type: String }) autocomplete = ''
   /** Text shown while the field is empty. */

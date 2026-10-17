@@ -348,7 +348,7 @@ export class Notepad extends LitElement {
   /** The page, in the notepad Markdown dialect: one line per line, `- [ ]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `<u>`, `<span data-ink>` and `<mark data-color>`. */
   @property() value = ''
   /** Name submitted with the form. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
   /** Accessible name of the writing surface. */
   @property() label = ''
   /** Accessible name forwarded from the host. */

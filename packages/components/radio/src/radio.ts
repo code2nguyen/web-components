@@ -117,7 +117,7 @@ export class Radio extends LitElement {
   @property() value = ''
 
   /** Form field name. Inside a group, the group's `name` wins. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Requires this standalone radio, or its containing group, to have a selected option. */
   @property({ type: Boolean, reflect: true }) required = false

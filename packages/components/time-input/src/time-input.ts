@@ -178,7 +178,7 @@ export class TimeInput extends LitElement {
   /** Granularity in seconds between valid times. Below 60 the field also shows seconds. */
   @property({ type: Number }) step = 60
   /** Form field name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Browser autocomplete hint. */
   @property({ type: String }) autocomplete = ''
   /** Requires a time before the form can be submitted. */

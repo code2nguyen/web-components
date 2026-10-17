@@ -77,7 +77,7 @@ export class CheckboxGroup extends LitElement {
   @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name. Every checked option is submitted under it; leave the options themselves unnamed. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Disables every option. */
   @property({ type: Boolean, reflect: true }) disabled = false

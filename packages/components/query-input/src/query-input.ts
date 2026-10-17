@@ -239,7 +239,7 @@ export class QueryInput extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** Form field name: the query is submitted with the form under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Disables the field and its suggestions. */
   @property({ type: Boolean, reflect: true }) disabled = false

@@ -163,7 +163,7 @@ export class MoneyInput extends LitElement {
   /** Largest valid value, in minor units. */
   @property({ type: String }) max = ''
   /** Form field name of the value. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Form field name of the currency code. Empty submits the value only. */
   @property({ attribute: 'currency-name' }) currencyName = ''
   /** Browser autocomplete hint, such as `transaction-amount`. */

@@ -194,7 +194,7 @@ export class PhoneInput extends LitElement {
   @property({ attribute: 'empty-label' }) emptyLabel = 'No country found'
 
   /** Form field name: the E.164 number is submitted with the form under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** An empty number makes the form invalid. */
   @property({ type: Boolean, reflect: true }) required = false

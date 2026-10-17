@@ -242,7 +242,7 @@ export class PageEditor extends LitElement {
   /** The page as Markdown: headings, lists, to-dos, quotes, fenced code, dividers, emphasis and links, with `<u>`, `<span data-color>` and `<mark data-color>` for underline and colours. */
   @property() value = ''
   /** Name submitted with the form. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
   /** Accessible name of the page. */
   @property() label = ''
   /** Accessible name forwarded from the host. */

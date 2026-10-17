@@ -149,7 +149,7 @@ export class SearchField extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** Form field name: the query is submitted with the form under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Disables the field, its shortcut and the recent searches. */
   @property({ type: Boolean, reflect: true }) disabled = false

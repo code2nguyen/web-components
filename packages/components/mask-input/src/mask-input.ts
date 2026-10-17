@@ -133,7 +133,7 @@ export class MaskInput extends LitElement {
   @property({ attribute: 'slot-char' }) slotChar = '_'
 
   /** Form field name: the value is submitted with the form under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Text shown while the field is empty and does not have focus. */
   @property({ type: String }) placeholder = ''

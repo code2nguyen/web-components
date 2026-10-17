@@ -116,7 +116,7 @@ export class ButtonGroup extends LitElement {
   @property({ type: Boolean, reflect: true }) toolbar = false
 
   /** Name the pressed values are submitted under. Without one the group takes no part in a form. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Makes the group and every item share the available width. */
   @property({ type: Boolean, reflect: true }) stretched = false
