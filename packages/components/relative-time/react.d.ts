@@ -24,6 +24,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-relative-time': C2Props<RelativeTime> & {
+        'min-unit'?: Attribute
         'no-update'?: Attribute
       }
     }
