@@ -144,6 +144,13 @@ greet('world')"></c2-code-editor>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,
+  'diff-viewer': `<c2-diff-viewer style="width:300px" original="name: shop
+item: .card
+price: .price
+" modified="name: shop
+item: article.product
+price: .price
+"></c2-diff-viewer>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
   <c2-feather-camera></c2-feather-camera>

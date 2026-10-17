@@ -1,0 +1,77 @@
+---
+title: 'Diff Viewer'
+description: 'Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DiffViewer } from '@c2n/components/diff-viewer'
+
+`c2-diff-viewer` shows what changed between two texts, for reviewing a change before it is applied: a configuration, a generated file, a document revision. Set `original` and `modified` and the element computes the diff itself (Myers' algorithm on lines, then on the words of each changed line pair), so the words that changed inside a line are marked too. `mode="unified"` (the default) draws one column with removed lines before added ones; `mode="split"` puts the two texts side by side, and draws the unified layout while the element is narrower than `--c2-diff-viewer--split-min-width`. Unchanged runs longer than the `context` lines kept around each change (3 by default) fold into a "Show N unchanged lines" row; opening one fires `fold-expand`, and `expandAll()` opens them all. `line-numbers` adds both line numbers, `original-label` and `modified-label` add a header with the counts of added and removed lines, and `label` names the diff for screen readers. The counts are also the `stats` property and the `:state(changed)` custom state.
+
+A last line without a final line break differs from the same line with one, as in `git diff`, and says so. There is no syntax highlighting and no editing; `diffLines(original, modified)` is exported for code that needs the diff itself.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/diff-viewer'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/diff-viewer
+<div data-label="Unified, with line numbers and labels">
+  <c2-diff-viewer
+    line-numbers
+    original-label="plan v3 (live)"
+    modified-label="plan v4 (repaired)"
+    original="name: shop
+start_url: https://shop.example/list
+selectors:
+  item: .card
+  price: .price
+pagination: next
+"
+    modified="name: shop
+start_url: https://shop.example/list
+selectors:
+  item: article.product
+  price: .price
+  title: h2
+pagination: next
+"
+  ></c2-diff-viewer>
+</div>
+<div data-label="Side by side">
+  <c2-diff-viewer
+    mode="split"
+    original-label="Before"
+    modified-label="After"
+    original="timeout: 30
+retries: 2
+user_agent: my-plan/1.0"
+    modified="timeout: 45
+retries: 2
+user_agent: my-plan/1.1"
+  ></c2-diff-viewer>
+</div>
+<div data-label="Identical texts">
+  <c2-diff-viewer original="same text
+on two lines" modified="same text
+on two lines"></c2-diff-viewer>
+</div>
+```
+
+Set the texts as properties when they come from the app, and read the counts back:
+
+```js tag=CodeBlock
+const viewer = document.querySelector('c2-diff-viewer')
+viewer.original = await loadPlan('live')
+viewer.modified = await loadPlan('repaired')
+
+await viewer.updateComplete
+publishButton.disabled = viewer.stats.additions + viewer.stats.deletions === 0
+viewer.addEventListener('fold-expand', (event) => console.log(event.detail)) // { originalStart, modifiedStart, count }
+```

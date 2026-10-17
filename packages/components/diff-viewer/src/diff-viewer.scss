@@ -1,0 +1,311 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-diff-viewer,
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    max-height: none,
+    split-min-width: 600px,
+
+    code--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    code--font-size: 13px,
+    code--line-height: 1.5,
+    code--tab-size: 2,
+    code--white-space: pre-wrap,
+
+    header--background-color: #fafafa,
+    header--color: #18181b,
+    header--border-bottom: 1px solid #e4e4e7,
+    header--padding: 8px 12px,
+    header--font-size: 12px,
+    header--font-weight: 600,
+    stats__added--color: #15803d,
+    stats__removed--color: #dc2626,
+
+    divider--border: 1px solid #e4e4e7,
+    line--padding: 0 12px 0 4px,
+    line__added--background-color: rgba(22, 163, 74, 0.12),
+    line__removed--background-color: rgba(220, 38, 38, 0.12),
+    line__empty--background-color: #fafafa,
+    word__added--background-color: rgba(22, 163, 74, 0.3),
+    word__removed--background-color: rgba(220, 38, 38, 0.3),
+    word--border-radius: 2px,
+
+    line-number--color: #71717a,
+    line-number--width: 5ch,
+    line-number--padding: 0 8px,
+    line-number__added--color: #18181b,
+    line-number__removed--color: #18181b,
+    line-number__added--background-color: rgba(22, 163, 74, 0.2),
+    line-number__removed--background-color: rgba(220, 38, 38, 0.2),
+    marker--width: 2.5ch,
+    marker__added--color: #15803d,
+    marker__removed--color: #dc2626,
+
+    fold--background-color: #fafafa,
+    fold--color: #71717a,
+    fold__hover--color: rgb(2, 101, 220),
+    fold__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    fold--padding: 4px 12px,
+
+    no-newline--color: #71717a,
+    empty--color: #71717a,
+    empty--padding: 8px 12px,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-diff-viewer {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Header: the two names and the counts, in the UI font.
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: css.cssVar(header--background-color);
+  color: css.cssVar(header--color);
+  border-bottom: css.cssVar(header--border-bottom);
+  padding: css.cssVar(header--padding);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  line-height: 1.4;
+
+  .is-split > & {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.header-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrow {
+  opacity: 0.6;
+}
+
+.stats {
+  margin-inline-start: auto;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-added {
+  color: css.cssVar(stats__added--color);
+}
+
+.stats-removed {
+  color: css.cssVar(stats__removed--color);
+}
+
+.empty {
+  margin: 0;
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+}
+
+.body {
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+
+  &:focus-visible {
+    outline: css.cssVar(fold__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+  line-height: css.cssVar(code--line-height);
+  tab-size: css.cssVar(code--tab-size);
+}
+
+.col-number {
+  width: calc(css.cssVar(line-number--width) + 2ch);
+}
+
+.col-marker {
+  width: css.cssVar(marker--width);
+}
+
+td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.number {
+  padding: css.cssVar(line-number--padding);
+  color: css.cssVar(line-number--color);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+
+  &.added {
+    color: css.cssVar(line-number__added--color);
+    background-color: css.cssVar(line-number__added--background-color);
+  }
+
+  &.removed {
+    color: css.cssVar(line-number__removed--color);
+    background-color: css.cssVar(line-number__removed--background-color);
+  }
+}
+
+.marker {
+  text-align: center;
+  user-select: none;
+
+  &.added {
+    color: css.cssVar(marker__added--color);
+    background-color: css.cssVar(line__added--background-color);
+  }
+
+  &.removed {
+    color: css.cssVar(marker__removed--color);
+    background-color: css.cssVar(line__removed--background-color);
+  }
+}
+
+.content {
+  padding: css.cssVar(line--padding);
+  white-space: css.cssVar(code--white-space);
+  overflow-wrap: anywhere;
+
+  &.added {
+    background-color: css.cssVar(line__added--background-color);
+  }
+
+  &.removed {
+    background-color: css.cssVar(line__removed--background-color);
+  }
+}
+
+.empty-side {
+  background-color: css.cssVar(line__empty--background-color);
+}
+
+.is-split .content {
+  // The split columns are equal, so the right side starts with a divider.
+  &:not(:last-child) {
+    border-inline-end: css.cssVar(divider--border);
+  }
+}
+
+.word {
+  border-radius: css.cssVar(word--border-radius);
+
+  &.added {
+    background-color: css.cssVar(word__added--background-color);
+  }
+
+  &.removed {
+    background-color: css.cssVar(word__removed--background-color);
+  }
+}
+
+.no-newline {
+  margin-inline-start: 1ch;
+  color: css.cssVar(no-newline--color);
+  font-size: 0.85em;
+  font-style: italic;
+  user-select: none;
+}
+
+.fold-row td {
+  padding: 0;
+  background-color: css.cssVar(fold--background-color);
+}
+
+.fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: css.cssVar(fold--padding);
+  border: 0;
+  background: transparent;
+  color: css.cssVar(fold--color);
+  font: inherit;
+  font-size: 0.92em;
+  text-align: start;
+  cursor: pointer;
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(fold__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(fold__focus--outline);
+    outline-offset: -2px;
+    color: css.cssVar(fold__hover--color);
+  }
+}
+
+.fold-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fold {
+    transition: none;
+  }
+}
