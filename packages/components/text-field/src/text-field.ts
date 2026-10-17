@@ -171,7 +171,7 @@ export class TextField extends LitElement {
   @property({ type: String }) type: TextFieldType = 'text'
 
   /** Form field name forwarded to the input. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** `autocomplete` hint forwarded to the input, e.g. `email` or `current-password`. */
   @property({ type: String }) autocomplete = ''

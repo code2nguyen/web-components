@@ -5,6 +5,7 @@ import { live } from 'lit/directives/live.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './spreadsheet.scss?inline'
 import {
@@ -12,6 +13,8 @@ import {
   SheetModel,
   cellRef,
   columnName,
+  deleteFromFormula,
+  insertIntoFormula,
   isCellError,
   parseCellRef,
   parseFormula,
@@ -29,6 +32,8 @@ export {
   CellError,
   cellRef,
   columnName,
+  deleteFromFormula,
+  insertIntoFormula,
   isCellError,
   parseCellRef,
   parseRange,
@@ -56,6 +61,10 @@ export interface SpreadsheetColumn {
   format?: SpreadsheetColumnFormat
   /** Overrides the alignment chosen from the value (numbers at the end, text at the start). */
   align?: 'start' | 'center' | 'end'
+  /** Lets the user drag the column's edge. Absent inherits the spreadsheet's `resizable`. */
+  resizable?: boolean
+  /** Narrowest width in pixels the user can drag the column to. Defaults to 32. */
+  minWidth?: number
 }
 
 /** One changed cell in a `cell-change` event. */
@@ -74,6 +83,32 @@ export interface SpreadsheetCellChangeEventDetail {
   changes: SpreadsheetCellChange[]
 }
 
+export interface SpreadsheetColumnResizeEventDetail {
+  /** The column letter, such as `B`. */
+  column: string
+  /** Zero-based column index. */
+  index: number
+  /** The new width in pixels, also written to `columns`. */
+  width: number
+}
+
+/**
+ * What a right click (or long press, or the context-menu key) landed on, handed to an enclosing `c2-context-menu` as
+ * `context.data`. The selection has already moved there, so `start` and `end` are what an insert or delete acts on.
+ */
+export interface SpreadsheetContextMenuData {
+  /** A cell, a row header, a column header, or the corner that selects everything. */
+  area: 'cell' | 'row' | 'column' | 'corner'
+  /** The selected range, such as `B2:C4`. */
+  range: string
+  /** The current cell, such as `B2`. */
+  active: string
+  /** Zero-based top-left of the selection. */
+  start: CellPosition
+  /** Zero-based bottom-right of the selection. */
+  end: CellPosition
+}
+
 export interface SpreadsheetSelectionChangeEventDetail {
   /** The selected range, such as `B1:E5`, or one address. */
   range: string
@@ -85,6 +120,7 @@ export interface SpreadsheetSelectionChangeEventDetail {
 export interface SpreadsheetEventMap {
   'cell-change': CustomEvent<SpreadsheetCellChangeEventDetail>
   'selection-change': CustomEvent<SpreadsheetSelectionChangeEventDetail>
+  'column-resize': CustomEvent<SpreadsheetColumnResizeEventDetail>
 }
 
 export interface Spreadsheet {
@@ -129,6 +165,9 @@ interface CopiedRange {
 type Change = { key: string; input: string }
 type HistoryStep = { key: string; before: string; after: string }[]
 
+/** Narrowest a column can be dragged, unless it sets `minWidth`. */
+const MIN_COLUMN_WIDTH = 32
+
 const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }
 
 /**
@@ -147,12 +186,26 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * it, Enter and Tab commit and move, Escape cancels, Delete clears, Ctrl/⌘+C, X, V copy, cut and paste as
  * tab-separated text, Ctrl/⌘+Z and Y undo and redo, Ctrl/⌘+A selects every cell. Tab outside an edit leaves the grid.
  *
+ * A paste larger than the space left grows the sheet to fit. `insertRows`, `insertColumns`, `deleteRows` and
+ * `deleteColumns` change the sheet's shape, and formulas keep pointing at the cells they read.
+ *
+ * Wrapped in a `c2-context-menu`, a right-clicked cell, row header or column header selects itself (unless it is
+ * already selected) and answers the menu's request with a `SpreadsheetContextMenuData` (`area`, `range`, `active`,
+ * `start`, `end`), which `renderContextMenu` receives as `context.data` with this element as `context.source`: enough
+ * to offer "Insert row above" or "Delete columns" and call the methods above.
+ *
+ * Drag the right edge of a column header to resize the column, or double-click it to fit the column to its content.
+ * The new width is written to `columns` and reported by `column-resize`.
+ *
  * @tag c2-spreadsheet
  *
  * @event {CustomEvent<SpreadsheetCellChangeEventDetail>} cell-change - Fired once per edit, paste, cut, delete, undo or redo with every cell the user changed (`detail.changes`: `ref`, `input`, `value`, `previous`). Cells that only recalculated are not listed.
  * @event {CustomEvent<SpreadsheetSelectionChangeEventDetail>} selection-change - Fired after the user moves the selection. `detail.range` is the selected range and `detail.active` the current cell. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself.
+ * @event {CustomEvent<SpreadsheetColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle or double-clicks it to fit the content. `detail.column` is the letter, `detail.index` the zero-based index and `detail.width` the new width in pixels, which is also written to `columns`.
  * @event {Event} input - Fired with every `cell-change`, for generic two-way bindings.
  * @event {Event} change - Fired with every `cell-change`, for generic two-way bindings.
+ *
+ * @csspart resizer - The grab area at a column header's right edge.
  *
  * @cssproperty {color} [--c2-spreadsheet--background-color=#ffffff]
  * @cssproperty {color} [--c2-spreadsheet--color=#18181b]
@@ -179,6 +232,10 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * @cssproperty {color} [--c2-spreadsheet__header__selected--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-spreadsheet__column-label--color=#18181b] - Column label shown after the letter.
  * @cssproperty {pixel} [--c2-spreadsheet__row-header--width=44px]
+ *
+ * @cssproperty {pixel} [--c2-spreadsheet__resizer--width=9px] - Width of a column's resize grab area, not of the visible line.
+ * @cssproperty {color} [--c2-spreadsheet__resizer__hover--color=rgb(2, 101, 220)] - The line drawn at a column's edge while its handle is hovered or dragged.
+ * @cssproperty {pixel} [--c2-spreadsheet__resizer__hover--line-width=2px]
  *
  * @cssproperty {color} [--c2-spreadsheet__editor--background-color=#ffffff] - The input over a cell being edited.
  * @cssproperty {font-family} [--c2-spreadsheet__editor--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
@@ -210,11 +267,21 @@ export class Spreadsheet extends LitElement {
    */
   @property({ converter: jsonPropertyConverter }) data: CellInput[][] = []
 
-  /** Number of rows. Grows to fit `data`. */
+  /** Number of rows. Grows to fit `data`, a paste past the last row and `insertRows`. */
   @property({ type: Number }) rows = 20
 
-  /** Number of columns, or one options object per column (`label`, `width`, `format`, `align`). JSON in markup. */
+  /**
+   * Number of columns, or one options object per column (`label`, `width`, `format`, `align`, `resizable`, `minWidth`). JSON
+   * in markup. Grows to fit `data`, a paste past the last column and `insertColumns`. Resizing a column writes a new
+   * array here with its `width`.
+   */
   @property({ converter: columnsConverter }) columns: number | SpreadsheetColumn[] = 8
+
+  /**
+   * Lets the user drag a column header's edge to resize the column, and double-click it to fit the content. On by
+   * default; `resizable="false"` turns it off. A column's own `resizable` still wins.
+   */
+  @property({ type: Boolean }) resizable = true
 
   /** Shows the current cell's address and raw input above the grid. The formula bar is editable. */
   @property({ type: Boolean, attribute: 'formula-bar' }) formulaBar = false
@@ -326,6 +393,42 @@ export class Spreadsheet extends LitElement {
     )
   }
 
+  /**
+   * Inserts `count` empty rows before the zero-based row `index`: `0` adds them at the top, `rows` at the bottom.
+   * The rows below move down and every formula follows the cells it reads, so `=SUM(B1:B5)` becomes `=SUM(B1:B6)`
+   * when a row goes in inside the range. Writes `data` and `rows`, clears the undo history and fires no event.
+   */
+  insertRows(index: number, count = 1): void {
+    this.restructure('row', index, count, false)
+  }
+
+  /**
+   * Inserts `count` empty columns before the zero-based column `index`: `0` adds them first, the column count last.
+   * The columns to the right move over with their options (`label`, `width`, `format`, `align`), and every formula
+   * follows the cells it reads. Writes `data` and `columns`, clears the undo history and fires no event.
+   */
+  insertColumns(index: number, count = 1): void {
+    this.restructure('column', index, count, false)
+  }
+
+  /**
+   * Deletes `count` rows from the zero-based row `index`. The rows below move up and formulas follow them: a
+   * reference to a deleted cell becomes `#REF!` and a range that loses rows shrinks (`=SUM(B1:B5)` becomes
+   * `=SUM(B1:B4)`). At least one row always stays. Writes `data` and `rows`, clears the undo history and fires no event.
+   */
+  deleteRows(index: number, count = 1): void {
+    this.restructure('row', index, count, true)
+  }
+
+  /**
+   * Deletes `count` columns from the zero-based column `index`, with their options. The columns to the right move
+   * over and formulas follow them, as `deleteRows` describes. At least one column always stays. Writes `data` and
+   * `columns`, clears the undo history and fires no event.
+   */
+  deleteColumns(index: number, count = 1): void {
+    this.restructure('column', index, count, true)
+  }
+
   // ---------------------------------------------------------------------------------------------------------------
   // Lifecycle
 
@@ -378,7 +481,7 @@ export class Spreadsheet extends LitElement {
     const multi = box.start.row !== box.end.row || box.start.column !== box.end.column
     const references = this.editing ? this.referencedCells(this.editing.value) : new Map<string, number>()
     const columns = this.columnDefs
-    const template = `var(--_row-header-width) ${columns.map((column) => (column.width ? `${column.width}px` : 'var(--_cell-width)')).join(' ')}`
+    const template = `var(--_row-header-width) ${this.columnTracks().join(' ')}`
     const activeKey = cellRef(this.cursor.row, this.cursor.column)
 
     const rows = []
@@ -472,6 +575,7 @@ export class Spreadsheet extends LitElement {
             @pointerdown=${this.onPointerDown}
             @pointerover=${this.onPointerOver}
             @dblclick=${this.onDoubleClick}
+            @c2-context-menu-request=${this.onContextMenuRequest}
             @copy=${this.onCopy}
             @cut=${this.onCut}
             @paste=${this.onPaste}
@@ -486,6 +590,17 @@ export class Spreadsheet extends LitElement {
                     data-column=${index}
                   >
                     <span class="column-letter">${columnName(index)}</span>${column.label ? html`<span class="column-label">${column.label}</span>` : nothing}
+                    ${
+                      (column.resizable ?? this.resizable)
+                        ? html`<span
+                            class="resizer"
+                            part="resizer"
+                            aria-hidden="true"
+                            @pointerdown=${(event: PointerEvent) => this.startResize(event, index)}
+                            @dblclick=${(event: MouseEvent) => this.fitColumn(event, index)}
+                          ></span>`
+                        : nothing
+                    }
                   </div>`,
               )}
             </div>
@@ -496,6 +611,10 @@ export class Spreadsheet extends LitElement {
         <div class="visually-hidden" role="status">${this.announcement}</div>
       </div>
     `
+  }
+
+  private columnTracks(): string[] {
+    return this.columnDefs.map((column) => (column.width ? `${column.width}px` : 'var(--_cell-width)'))
   }
 
   private renderSummary(box: { start: CellPosition; end: CellPosition }) {
@@ -677,6 +796,64 @@ export class Spreadsheet extends LitElement {
   }
 
   // ---------------------------------------------------------------------------------------------------------------
+  // Sheet size
+
+  /** Sets the size now rather than at the next update, so the writes that follow land inside the sheet. */
+  private resizeSheet(rows: number, columns: SpreadsheetColumn[]): void {
+    this.rows = rows
+    this.columns = Array.isArray(this.columns) ? columns : columns.length
+    this.columnDefs = columns
+    this.model.resize(rows, columns.length)
+  }
+
+  /** Inserts or deletes rows or columns, moving every cell after them and rewriting the formulas that read them. */
+  private restructure(axis: 'row' | 'column', index: number, count: number, remove: boolean): void {
+    count = Math.floor(count)
+    if (!Number.isFinite(index) || !(count >= 1)) return
+    const size = axis === 'row' ? this.model.rows : this.columnDefs.length
+    const at = Math.max(0, Math.min(size, Math.floor(index)))
+    if (remove) {
+      if (at >= size) return
+      count = Math.min(count, size - at, size - 1)
+      if (count < 1) return
+    }
+    if (this.editing) this.commitEdit(0, 0, false)
+
+    const end = at + count
+    /** Where an index lands, or `undefined` for a deleted one. */
+    const place = (i: number): number | undefined => (remove ? (i < at ? i : i >= end ? i - count : undefined) : i >= at ? i + count : i)
+    const entries: [string, string][] = []
+    for (const key of this.model.keys()) {
+      const position = parseCellRef(key)
+      if (!position) continue
+      const row = axis === 'row' ? place(position.row) : position.row
+      const column = axis === 'column' ? place(position.column) : position.column
+      if (row === undefined || column === undefined) continue
+      const input = this.model.getInput(key)
+      const rewrite = remove ? deleteFromFormula : insertIntoFormula
+      entries.push([cellRef(row, column), this.model.isFormula(key) ? rewrite(input, axis, at, count) : input])
+    }
+
+    const columns = [...this.columnDefs]
+    if (axis === 'column') {
+      if (remove) columns.splice(at, count)
+      else columns.splice(at, 0, ...Array.from({ length: count }, () => ({})))
+    }
+    this.resizeSheet(this.model.rows + (axis === 'row' ? (remove ? -count : count) : 0), columns)
+    this.model.load(entries)
+    // History steps name cells by address, which the change just moved.
+    this.undoStack = []
+    this.redoStack = []
+    this.ownData = this.serialise()
+    this.data = this.ownData
+    // The selection follows its cells; on a deleted row or column it moves to the one that took its place.
+    const move = (position: CellPosition): CellPosition =>
+      this.clamp(axis === 'row' ? { ...position, row: place(position.row) ?? at } : { ...position, column: place(position.column) ?? at })
+    this.cursor = move(this.cursor)
+    this.extent = move(this.extent)
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
   // Changes and history
 
   private applyChanges(changes: Change[], { record, notify }: { record: boolean; notify: boolean }): void {
@@ -789,6 +966,43 @@ export class Spreadsheet extends LitElement {
     if (position && position !== 'corner' && 'row' in position && 'column' in position) this.userSelect(this.cursor, position)
   }
 
+  /**
+   * An enclosing `c2-context-menu` asks what was right-clicked. Outside the selection, the click selects what it
+   * landed on first, as in Sheets and Excel; the keyboard's context-menu key keeps the selection.
+   */
+  private onContextMenuRequest = (event: Event): void => {
+    let node = event.composedPath()[0] as Node | undefined
+    if (node && !(node instanceof Element)) node = node.parentElement ?? undefined
+    const position = this.positionOf(node ?? null)
+    if (this.editing) this.commitEdit(0, 0, false)
+    const box = this.selectedBox()
+    const lastRow = this.model.rows - 1
+    const lastColumn = this.columnDefs.length - 1
+    const within = (row: number, column: number) => row >= box.start.row && row <= box.end.row && column >= box.start.column && column <= box.end.column
+    let area: SpreadsheetContextMenuData['area'] = 'cell'
+    if (position === 'corner') {
+      area = 'corner'
+      this.userSelect({ row: 0, column: 0 }, { row: lastRow, column: lastColumn })
+    } else if (position && !('column' in position)) {
+      area = 'row'
+      if (!(within(position.row, 0) && box.start.column === 0 && box.end.column === lastColumn))
+        this.userSelect({ row: position.row, column: 0 }, { row: position.row, column: lastColumn })
+    } else if (position && !('row' in position)) {
+      area = 'column'
+      if (!(within(0, position.column) && box.start.row === 0 && box.end.row === lastRow))
+        this.userSelect({ row: 0, column: position.column }, { row: lastRow, column: position.column })
+    } else if (position && !within(position.row, position.column)) this.userSelect(position)
+    this.focusGrid()
+    const selected = this.selectedBox()
+    provideContextMenuData(event, this, {
+      area,
+      range: rangeRef(selected),
+      active: cellRef(this.cursor.row, this.cursor.column),
+      start: selected.start,
+      end: selected.end,
+    } satisfies SpreadsheetContextMenuData)
+  }
+
   private stopDragging = (): void => {
     this.dragging = false
   }
@@ -796,6 +1010,78 @@ export class Spreadsheet extends LitElement {
   private onDoubleClick = (event: MouseEvent): void => {
     const position = this.positionOf(event.target)
     if (position && position !== 'corner' && 'row' in position && 'column' in position && !this.editing) this.startEdit(false)
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // Column resizing
+
+  private startResize(event: PointerEvent, index: number): void {
+    if (event.button !== 0) return
+    // The header underneath would select the whole column.
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.editing) this.commitEdit(0, 0, false)
+    const handle = event.currentTarget as HTMLElement
+    const header = handle.parentElement
+    if (!header) return
+    const startWidth = header.getBoundingClientRect().width
+    const startX = event.clientX
+    const minWidth = this.columnDefs[index]?.minWidth ?? MIN_COLUMN_WIDTH
+    let width = Math.round(startWidth)
+
+    const move = (moveEvent: PointerEvent) => {
+      width = Math.max(minWidth, Math.round(startWidth + moveEvent.clientX - startX))
+      this.writeColumnWidth(index, width)
+    }
+    const finish = (upEvent: PointerEvent) => {
+      if (handle.hasPointerCapture(upEvent.pointerId)) handle.releasePointerCapture(upEvent.pointerId)
+      handle.removeEventListener('pointermove', move)
+      handle.removeEventListener('pointerup', finish)
+      handle.removeEventListener('pointercancel', finish)
+      handle.classList.remove('resizer--active')
+      if (width !== Math.round(startWidth)) this.dispatchColumnResize(index, width)
+    }
+
+    handle.setPointerCapture(event.pointerId)
+    handle.classList.add('resizer--active')
+    handle.addEventListener('pointermove', move)
+    handle.addEventListener('pointerup', finish)
+    handle.addEventListener('pointercancel', finish)
+  }
+
+  /** Fits a column to its widest header or cell, as a double-click on the edge does in Sheets and Excel. */
+  private fitColumn(event: MouseEvent, index: number): void {
+    event.preventDefault()
+    event.stopPropagation()
+    const grid = this.renderRoot.querySelector<HTMLElement>('.grid')
+    const header = (event.currentTarget as HTMLElement).parentElement
+    if (!grid || !header) return
+    // A `max-content` track is as wide as the column's widest header or cell, padding and border included.
+    const template = grid.style.gridTemplateColumns
+    const tracks = this.columnTracks().map((track, column) => (column === index ? 'max-content' : track))
+    grid.style.gridTemplateColumns = `var(--_row-header-width) ${tracks.join(' ')}`
+    const content = header.getBoundingClientRect().width
+    grid.style.gridTemplateColumns = template
+    const width = Math.max(this.columnDefs[index]?.minWidth ?? MIN_COLUMN_WIDTH, Math.ceil(content))
+    if (width === this.columnDefs[index]?.width) return
+    this.writeColumnWidth(index, width)
+    this.dispatchColumnResize(index, width)
+  }
+
+  /** Writes a new `columns` array with the column's width, as edits write `data`. */
+  private writeColumnWidth(index: number, width: number): void {
+    if (this.columnDefs[index]?.width === width) return
+    this.columns = this.columnDefs.map((column, other) => (other === index ? { ...column, width } : column))
+  }
+
+  private dispatchColumnResize(index: number, width: number): void {
+    this.dispatchEvent(
+      new CustomEvent<SpreadsheetColumnResizeEventDetail>('column-resize', {
+        detail: { column: columnName(index), index, width },
+        bubbles: true,
+        composed: true,
+      }),
+    )
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -906,17 +1192,17 @@ export class Spreadsheet extends LitElement {
           row.map((input) => (input.startsWith('=') ? shiftFormula(input, target.row - own.origin.row, target.column - own.origin.column) : input)),
         )
       : parseTsv(text)
-    const changes: Change[] = []
-    grid.forEach((cells, rowOffset) =>
-      cells.forEach((input, columnOffset) => {
-        const row = target.row + rowOffset
-        const column = target.column + columnOffset
-        if (row < this.model.rows && column < this.columnDefs.length) changes.push({ key: cellRef(row, column), input })
-      }),
-    )
-    this.applyChanges(changes, { record: true, notify: true })
     const height = Math.max(1, grid.length)
     const width = Math.max(1, ...grid.map((row) => row.length))
+    // A paste past the edge grows the sheet, as in Sheets and Excel, rather than dropping what does not fit.
+    const missing = target.column + width - this.columnDefs.length
+    if (target.row + height > this.model.rows || missing > 0)
+      this.resizeSheet(Math.max(this.model.rows, target.row + height), [...this.columnDefs, ...Array.from({ length: Math.max(0, missing) }, () => ({}))])
+    const changes: Change[] = []
+    grid.forEach((cells, rowOffset) =>
+      cells.forEach((input, columnOffset) => changes.push({ key: cellRef(target.row + rowOffset, target.column + columnOffset), input })),
+    )
+    this.applyChanges(changes, { record: true, notify: true })
     this.userSelect(target, { row: target.row + height - 1, column: target.column + width - 1 })
   }
 }

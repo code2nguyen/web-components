@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-date-time-picker</title>
+    <script type="module" src="/src/date-time-picker.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      c2-date-time-picker {
+        width: 280px;
+      }
+      .soft {
+        --c2-date-time-picker--background: #f4f4f5;
+        --c2-date-time-picker--border: 1px solid transparent;
+        --c2-date-time-picker--border-radius: 10px;
+        --c2-date-time-picker__picker--border-radius: 14px;
+        --c2-date-time-picker__day--border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Default</h2>
+    <section>
+      <c2-date-time-picker aria-label="Starts at"></c2-date-time-picker>
+      <c2-date-time-picker aria-label="Meeting" value="2026-10-14T09:30"></c2-date-time-picker>
+    </section>
+    <h2>Time zones</h2>
+    <section>
+      <c2-date-time-picker aria-label="Launch" value="2026-10-14T09:00" time-zone="Asia/Tokyo"></c2-date-time-picker>
+      <c2-date-time-picker
+        aria-label="Standup"
+        value="2026-10-14T09:00"
+        time-zone="Europe/London"
+        time-zones="Europe/London America/New_York Asia/Tokyo"
+      ></c2-date-time-picker>
+    </section>
+    <h2>Constraints and states</h2>
+    <section>
+      <c2-date-time-picker
+        aria-label="Delivery slot"
+        min="2026-10-12T09:00"
+        max="2026-10-30T18:00"
+        step="1800"
+        required
+        help="Weekdays, 09:00–18:00."
+      ></c2-date-time-picker>
+      <c2-date-time-picker aria-label="Deadline" value="2026-10-01T17:00" error error-text="The deadline has passed."></c2-date-time-picker>
+      <c2-date-time-picker aria-label="Created" value="2026-10-14T09:00" readonly></c2-date-time-picker>
+      <c2-date-time-picker aria-label="Disabled" value="2026-10-14T09:00" disabled></c2-date-time-picker>
+    </section>
+    <h2>Themed</h2>
+    <section>
+      <c2-date-time-picker class="soft" aria-label="Reminder" value="2026-10-14T09:00" week-start="sunday"></c2-date-time-picker>
+    </section>
+  </body>
+</html>

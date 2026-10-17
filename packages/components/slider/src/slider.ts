@@ -129,7 +129,7 @@ export class Slider extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Form field name forwarded to the inner input. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Direction of the track. A vertical slider takes `--c2-slider__container--length` as its height. */
   @property({ reflect: true }) orientation: SliderOrientation = 'horizontal'

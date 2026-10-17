@@ -166,7 +166,7 @@ export class Autocomplete extends LitElement {
   @property({ type: String }) value = ''
 
   /** Input name used for form submission. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Text shown while the input is empty. */
   @property({ type: String }) placeholder = ''

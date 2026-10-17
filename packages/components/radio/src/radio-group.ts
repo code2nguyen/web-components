@@ -66,7 +66,7 @@ export class RadioGroup extends LitElement {
   @property({ reflect: true }) value = ''
 
   /** Form field name applied to every option. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Disables every option. */
   @property({ type: Boolean, reflect: true }) disabled = false

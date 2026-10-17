@@ -135,6 +135,56 @@ test('pointer selects cells, ranges, columns and rows', async ({ page, renderSce
   await expect(nameBox).toHaveText('A2:D2')
 })
 
+test('dragging a column edge resizes it without selecting, and writes the width to columns', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet', '<c2-spreadsheet formula-bar'))
+  await cell(page, 'A1').click()
+  const header = page.locator('c2-spreadsheet [role="columnheader"][data-column="1"]')
+  const width = async () => Math.round((await header.boundingBox())!.width)
+  expect(await width()).toBe(112)
+
+  await watch(host(page), 'column-resize')
+  const handle = (await header.locator('.resizer').boundingBox())!
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handle.x + handle.width / 2 + 48, handle.y + handle.height / 2, { steps: 4 })
+  await page.mouse.up()
+
+  expect(await width()).toBe(160)
+  expect(Math.round((await cell(page, 'B2').boundingBox())!.width)).toBe(160)
+  await expect(page.locator('c2-spreadsheet .name-box')).toHaveText('A1')
+  await expect(host(page)).toHaveAttribute('data-events', JSON.stringify([{ column: 'B', index: 1, width: 160 }]))
+  const columns = await host(page).evaluate((element: Spreadsheet) => element.columns)
+  expect(columns).toEqual([
+    { label: 'Item' },
+    { label: 'Qty', format: 'number', width: 160 },
+    { label: 'Price', format: 'currency' },
+    { label: 'Total', format: 'currency' },
+  ])
+})
+
+test('a column stops at its minWidth, double-clicking the edge fits the content, and resizable="false" turns it off', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-spreadsheet rows="2" columns='[{"minWidth":60},{},{"resizable":false}]'
+    data='[["A much longer piece of text than the column shows","x"]]'></c2-spreadsheet>`)
+  const header = (column: number) => page.locator(`c2-spreadsheet [role="columnheader"][data-column="${column}"]`)
+  const width = async (column: number) => Math.round((await header(column).boundingBox())!.width)
+
+  const handle = (await header(0).locator('.resizer').boundingBox())!
+  await page.mouse.move(handle.x + 4, handle.y + 4)
+  await page.mouse.down()
+  await page.mouse.move(handle.x - 200, handle.y + 4, { steps: 4 })
+  await page.mouse.up()
+  expect(await width(0)).toBe(60)
+
+  await header(0).locator('.resizer').dblclick()
+  expect(await width(0)).toBeGreaterThan(200)
+  expect(await cell(page, 'A1').evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await expect(page.locator('c2-spreadsheet .editor')).toHaveCount(0)
+
+  await expect(header(2).locator('.resizer')).toHaveCount(0)
+  await host(page).evaluate((element) => element.setAttribute('resizable', 'false'))
+  await expect(page.locator('c2-spreadsheet .resizer')).toHaveCount(0)
+})
+
 test('Delete clears the selection, and undo and redo restore it', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await cell(page, 'B1').click()
@@ -201,6 +251,96 @@ test('pastes text copied from another spreadsheet as values', async ({ page, ren
   await expect(page.locator('c2-spreadsheet .grid')).toHaveAttribute('aria-activedescendant', 'cell-A4')
   expect(await host(page).evaluate((element: Spreadsheet) => element.selection)).toBe('A4:C5')
   await expect(host(page)).toHaveAttribute('data-events', /"ref":"C5","input":"25","value":25/)
+})
+
+test('a paste past the last row and column grows the sheet instead of dropping cells', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-spreadsheet rows="2" columns='[{"label":"Item"},{"label":"Qty"}]'></c2-spreadsheet>`)
+  await cell(page, 'B2').click()
+  await clipboardEvent(grid(page), 'paste', 'a\tb\tc\nd\te\tf\ng\th\ti')
+  await expect(cell(page, 'D4')).toHaveText('i')
+  const size = await host(page).evaluate((element: Spreadsheet) => ({ rows: element.rows, columns: element.columns, selection: element.selection }))
+  expect(size).toEqual({ rows: 4, columns: [{ label: 'Item' }, { label: 'Qty' }, {}, {}], selection: 'B2:D4' })
+  await expect(page.locator('c2-spreadsheet [role="row"]')).toHaveCount(5)
+})
+
+test('insertRows and insertColumns move cells, their column options and the formulas that read them', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await cell(page, 'D3').click()
+  await host(page).evaluate((element: Spreadsheet) => element.insertRows(1))
+  await expect(cell(page, 'A3')).toHaveText('Hotel')
+  await expect(cell(page, 'A2')).toHaveText('')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.getInput('D3'), element.getInput('D4'), element.selection])).toEqual([
+    7,
+    '=B3*C3',
+    '=SUM(D1:D3)',
+    'D4',
+  ])
+
+  // The new row sits inside the total's range, so a value typed into it is added up.
+  await host(page).evaluate((element: Spreadsheet) => element.setInput('D2', 50))
+  await expect(cell(page, 'D4')).toHaveText('$950.00')
+
+  await host(page).evaluate((element: Spreadsheet) => element.insertColumns(1, 2))
+  await expect(page.locator('c2-spreadsheet [role="columnheader"][data-column="3"]')).toHaveText(/D\s*Qty/)
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('F3'), element.getInput('F4'), element.data[0]])).toEqual([
+    '=D3*E3',
+    '=SUM(F1:F3)',
+    ['Flights', null, null, 2, 300, '=D1*E1'],
+  ])
+  await expect(cell(page, 'F4')).toHaveText('$950.00')
+
+  // History named cells by their old addresses, so the insertion clears it rather than undo the wrong cell.
+  await host(page).evaluate((element: Spreadsheet) => element.undo())
+  await expect(cell(page, 'F2')).toHaveText('$50.00')
+})
+
+test('deleteRows and deleteColumns close the gap and break references to what they removed', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await host(page).evaluate((element: Spreadsheet) => element.deleteRows(0))
+  await expect(cell(page, 'A1')).toHaveText('Hotel')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.getInput('D1'), element.getInput('D2')])).toEqual([
+    5,
+    '=B1*C1',
+    '=SUM(D1:D1)',
+  ])
+  await expect(cell(page, 'D2')).toHaveText('$300.00')
+
+  await host(page).evaluate((element: Spreadsheet) => element.deleteColumns(1))
+  await expect(page.locator('c2-spreadsheet [role="columnheader"][data-column="1"]')).toHaveText(/B\s*Price/)
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('C1'), element.data[0]])).toEqual(['=#REF!*B1', ['Hotel', 100, '=#REF!*B1']])
+  await expect(cell(page, 'C1')).toHaveText('#REF!')
+
+  // One row and one column always stay.
+  await host(page).evaluate((element: Spreadsheet) => {
+    element.deleteRows(0, 99)
+    element.deleteColumns(0, 99)
+  })
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.rows, element.columns])).toEqual([1, [{ label: 'Total', format: 'currency' }]])
+})
+
+test('answers an enclosing context menu with what was right-clicked, selecting it first', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  const request = (selector: string) =>
+    host(page).evaluate((element, target) => {
+      const node = element.shadowRoot!.querySelector(target)!
+      const detail = { data: undefined as unknown, source: null as Element | null }
+      node.dispatchEvent(new CustomEvent('c2-context-menu-request', { bubbles: true, composed: true, detail }))
+      return { data: detail.data, source: detail.source === element }
+    }, selector)
+
+  await cell(page, 'A1').click()
+  await cell(page, 'B2').click({ modifiers: ['Shift'] })
+  // Inside the selection, it stays.
+  expect(await request('#cell-B1')).toEqual({
+    data: { area: 'cell', range: 'A1:B2', active: 'A1', start: { row: 0, column: 0 }, end: { row: 1, column: 1 } },
+    source: true,
+  })
+  // Outside it, the cell is selected first.
+  expect((await request('#cell-C3')).data).toMatchObject({ area: 'cell', range: 'C3', active: 'C3' })
+  expect((await request('[role="rowheader"][data-row="1"]')).data).toMatchObject({ area: 'row', range: 'A2:D2' })
+  expect((await request('[role="columnheader"][data-column="2"] .column-label')).data).toMatchObject({ area: 'column', range: 'C1:C6' })
+  expect((await request('[data-corner]')).data).toMatchObject({ area: 'corner', range: 'A1:D6' })
+  await expect(grid(page)).toBeFocused()
 })
 
 test('cut clears the range it copied', async ({ page, renderScenario }) => {

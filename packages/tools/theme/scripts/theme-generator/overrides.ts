@@ -12,6 +12,13 @@ const onPrimary = { token: 'color-on-primary' }
 export const overrides: Record<string, Override> = {
   // The highlighter is a translucent hue on purpose: it tints any surface, light or dark, and the text keeps its colour.
   '--c2-marker__mark--background-color': { exclude: 'translucent highlighter hue' },
+  // Search matches use the same idea: translucent yellow and orange tints that read on any surface, text colour kept.
+  '--c2-highlight__mark--background-color': { exclude: 'translucent highlighter hue' },
+  '--c2-highlight__mark__active--background-color': { exclude: 'translucent highlighter hue' },
+  '--c2-highlight__mark__active--box-shadow': { exclude: 'outline in the current-match hue' },
+  // A mark is a run of inline text, not a box: no padding and a hairline radius so it never shifts the line.
+  '--c2-highlight__mark--padding': { exclude: 'inline text run' },
+  '--c2-highlight__mark--border-radius': { exclude: 'inline text run' },
   // Message body text is a slightly softer ink than the title; it is still body text on the surface.
   '--c2-chat-message__message--color': { token: 'color-on-surface' },
   // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.
@@ -232,6 +239,8 @@ export const overrides: Record<string, Override> = {
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
   // The calendar's month picker floats over the grid like any popover.
   '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
+  // The date-time popup floats over the page like any popover.
+  '--c2-date-time-picker__picker--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -511,6 +520,41 @@ export const overrides: Record<string, Override> = {
   '--c2-password-field__requirement-icon__met--color': { exclude: 'success status colour' },
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
+  // Diff viewer: added and removed lines are translucent washes of the positive and error colours, so they tint the
+  // surface in either theme and the text keeps its colour; the green text is mixed toward the ink for contrast.
+  '--c2-diff-viewer__code--font-family': { exclude: 'monospace font, not the UI font' },
+  '--c2-diff-viewer__line__added--background-color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 12%, transparent)',
+  },
+  '--c2-diff-viewer__line-number__added--background-color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 20%, transparent)',
+  },
+  '--c2-diff-viewer__word__added--background-color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 30%, transparent)',
+  },
+  '--c2-diff-viewer__line__removed--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 12%, transparent)',
+  },
+  '--c2-diff-viewer__line-number__removed--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 20%, transparent)',
+  },
+  '--c2-diff-viewer__word__removed--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 30%, transparent)',
+  },
+  '--c2-diff-viewer__marker__added--color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-diff-viewer__stats__added--color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
   '--c2-chip__remove-button__hover--background-color': { exclude: 'translucent wash works on any chip background' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.

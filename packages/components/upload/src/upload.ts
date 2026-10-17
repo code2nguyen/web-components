@@ -175,7 +175,7 @@ export class Upload extends LitElement {
   @property({ type: Boolean, reflect: true }) required = false
 
   /** Form field name. Each queued file is appended with this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Accessible name for the drop zone. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
@@ -499,7 +499,7 @@ export class Upload extends LitElement {
     const missing = this.required && this.uploadItems.length === 0
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
     const message = this.customValidityMessage || (missing ? 'Please select a file.' : '')
-    const anchor = (this.renderRoot.querySelector('.picker') as HTMLElement | null) ?? undefined
+    const anchor = (this.renderRoot?.querySelector('.picker') as HTMLElement | null | undefined) ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
 

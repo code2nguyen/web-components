@@ -107,7 +107,7 @@ export class Switch extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Form field name forwarded to the inner input. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** Form value submitted while on. Defaults to `on`, like a native checkbox. */
   @property() value = 'on'

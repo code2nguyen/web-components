@@ -1,0 +1,42 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-format-number,
+  $theme: (
+    color: inherit,
+    font-size: inherit,
+    font-weight: inherit,
+    font-variant-numeric: tabular-nums,
+    white-space: nowrap,
+    negative--color: inherit,
+    positive--color: inherit,
+    unit--color: inherit,
+    unit--font-size: inherit,
+    unit--font-weight: inherit,
+  )
+);
+
+:host {
+  display: inline;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-variant-numeric: css.cssVar(font-variant-numeric);
+  white-space: css.cssVar(white-space);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.negative {
+  color: css.cssVar(negative--color);
+}
+
+.positive {
+  color: css.cssVar(positive--color);
+}
+
+[part='unit'] {
+  color: css.cssVar(unit--color);
+  font-size: css.cssVar(unit--font-size);
+  font-weight: css.cssVar(unit--font-weight);
+}

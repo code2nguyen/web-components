@@ -106,7 +106,7 @@ export class OtpInput extends LitElement {
   /** Single character shown in every empty cell. */
   @property({ type: String }) placeholder = ''
   /** Form field name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Browser autocomplete hint. `one-time-code` lets iOS/Android offer a code received by SMS. */
   @property({ type: String }) autocomplete = 'one-time-code'
   /** Requires a complete code before the form can be submitted. */

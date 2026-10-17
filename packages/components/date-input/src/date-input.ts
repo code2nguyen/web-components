@@ -83,7 +83,7 @@ export class DateInput extends LitElement {
   /** Number of days between valid dates. */
   @property({ type: Number }) step = 1
   /** Form field name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
   /** Browser autocomplete hint, for example `bday`. */
   @property({ type: String }) autocomplete = ''
   /** Requires a date before the form can be submitted. */

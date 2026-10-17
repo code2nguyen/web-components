@@ -627,6 +627,71 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-format-date': {
+    html: `<c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>`,
+    presets: [
+      {
+        name: 'Caption',
+        description: 'Small secondary text for bylines and card metadata',
+        css: {
+          '--c2-format-date--color': '#71717a',
+          '--c2-format-date--font-size': '12px',
+        },
+        attributes: { 'date-style': 'medium' },
+      },
+      {
+        name: 'Headline',
+        description: 'Large bold date for an event or a due date',
+        css: {
+          '--c2-format-date--font-size': '20px',
+          '--c2-format-date--font-weight': '600',
+        },
+        attributes: { 'date-style': 'full' },
+      },
+      {
+        name: 'Timestamp',
+        description: 'Short date and time with tabular digits for table cells',
+        css: {
+          '--c2-format-date--font-size': '12px',
+          '--c2-format-date--font-variant-numeric': 'tabular-nums',
+        },
+        attributes: { 'date-style': 'short', 'time-style': 'short' },
+      },
+    ],
+  },
+  'c2-format-number': {
+    html: `<c2-format-number type="currency" value="1234.5"></c2-format-number>`,
+    presets: [
+      {
+        name: 'Price',
+        description: 'Large digits with a smaller, muted currency symbol',
+        css: {
+          '--c2-format-number--font-size': '28px',
+          '--c2-format-number--font-weight': '600',
+          '--c2-format-number__unit--font-size': '16px',
+          '--c2-format-number__unit--color': '#71717a',
+        },
+      },
+      {
+        name: 'Gain / loss',
+        description: 'Green above zero, red below, with an explicit sign',
+        css: {
+          '--c2-format-number__positive--color': '#15803d',
+          '--c2-format-number__negative--color': '#dc2626',
+          '--c2-format-number--font-weight': '600',
+        },
+        attributes: { 'sign-display': 'exceptZero' },
+      },
+      {
+        name: 'Compact',
+        description: 'Short form for dense dashboards and table cells',
+        css: {
+          '--c2-format-number--font-size': '12px',
+        },
+        attributes: { notation: 'compact' },
+      },
+    ],
+  },
   'c2-state-timeline': {
     html: `<c2-state-timeline style="width: 100%" aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
     presets: [
@@ -705,6 +770,37 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-truncate__toggle--border-radius': '999px',
           '--c2-truncate__toggle--background-color': '#eef2ff',
           '--c2-truncate__toggle--color': '#4338ca',
+        },
+      },
+    ],
+  },
+  'c2-highlight': {
+    html: `<c2-highlight query="apple" active-index="1">Apple pie, apple tart and pineapple crumble.</c2-highlight>`,
+    presets: [
+      {
+        name: 'Bold match',
+        description: 'No fill, the match in a heavier weight, as in search suggestions',
+        css: {
+          '--c2-highlight__mark--background-color': 'transparent',
+          '--c2-highlight__mark--font-weight': '600',
+        },
+      },
+      {
+        name: 'Highlighter',
+        description: 'A yellow stroke across the lower half of the match',
+        css: {
+          '--c2-highlight__mark--background-color': 'transparent',
+          '--c2-highlight__mark--box-shadow': 'inset 0 -0.45em 0 rgba(250, 204, 21, 0.55)',
+          '--c2-highlight__mark--border-radius': '0',
+        },
+      },
+      {
+        name: 'Blue find bar',
+        description: 'Blue tint for every match and a stronger outlined current match',
+        css: {
+          '--c2-highlight__mark--background-color': 'rgba(2, 101, 220, 0.18)',
+          '--c2-highlight__mark__active--background-color': 'rgba(2, 101, 220, 0.45)',
+          '--c2-highlight__mark__active--box-shadow': '0 0 0 1px rgb(2, 101, 220)',
         },
       },
     ],
@@ -1002,6 +1098,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-query-input__key--color': '#1d4ed8',
           '--c2-query-input__separator--color': '#1d4ed8',
           '--c2-query-input__value--color': '#1e3a8a',
+        },
+      },
+    ],
+  },
+  'c2-mask-input': {
+    html: `<c2-mask-input mask="AA99 XXXX XXXX XXXX XXXX XXXX XXX" value="FR7630006000011234567890189" aria-label="IBAN" style="width: 320px"></c2-mask-input>`,
+    presets: [
+      {
+        name: 'Monospace',
+        description: 'A monospace face with a fainter mask hint, so long codes such as IBANs read in even columns.',
+        css: {
+          '--c2-mask-input--font-family': "ui-monospace, 'SF Mono', Menlo, monospace",
+          '--c2-mask-input--font-size': '13px',
+          '--c2-mask-input--border-radius': '8px',
+          '--c2-mask-input__slot--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Code entry',
+        description: 'Large, widely spaced digits in a filled field, for a verification or gift-card code.',
+        css: {
+          '--c2-mask-input--min-height': '52px',
+          '--c2-mask-input--padding': '8px 20px',
+          '--c2-mask-input--font-size': '24px',
+          '--c2-mask-input--letter-spacing': '0.2em',
+          '--c2-mask-input--border-radius': '14px',
+          '--c2-mask-input--background': '#f4f4f5',
+          '--c2-mask-input--border': '1px solid transparent',
+          '--c2-mask-input__focus--background': '#ffffff',
         },
       },
     ],
@@ -3329,6 +3454,57 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-table__row__odd--background': '#ffffff',
           '--c2-table__cell--padding': '0 16px',
           '--c2-table__header-cell--padding': '0 16px',
+        },
+      },
+    ],
+  },
+  'c2-diff-viewer': {
+    html: `<c2-diff-viewer line-numbers original-label="Current" modified-label="Proposed" original="name: shop
+selectors:
+  item: .card
+  price: .price
+" modified="name: shop
+selectors:
+  item: article.product
+  price: .price
+  title: h2
+"></c2-diff-viewer>`,
+    presets: [
+      {
+        name: 'Word highlights only',
+        description: 'No row tint: only the words that changed are marked',
+        css: {
+          '--c2-diff-viewer__line__added--background-color': 'transparent',
+          '--c2-diff-viewer__line__removed--background-color': 'transparent',
+          '--c2-diff-viewer__line-number__added--background-color': 'transparent',
+          '--c2-diff-viewer__line-number__removed--background-color': 'transparent',
+          '--c2-diff-viewer__word--border-radius': '4px',
+        },
+      },
+      {
+        name: 'Colour-blind safe',
+        description: 'Blue for added lines and orange for removed ones instead of green and red',
+        css: {
+          '--c2-diff-viewer__line__added--background-color': 'rgba(2, 101, 220, 0.12)',
+          '--c2-diff-viewer__line-number__added--background-color': 'rgba(2, 101, 220, 0.2)',
+          '--c2-diff-viewer__word__added--background-color': 'rgba(2, 101, 220, 0.3)',
+          '--c2-diff-viewer__marker__added--color': '#0154b8',
+          '--c2-diff-viewer__stats__added--color': '#0154b8',
+          '--c2-diff-viewer__line__removed--background-color': 'rgba(234, 88, 12, 0.12)',
+          '--c2-diff-viewer__line-number__removed--background-color': 'rgba(234, 88, 12, 0.2)',
+          '--c2-diff-viewer__word__removed--background-color': 'rgba(234, 88, 12, 0.3)',
+          '--c2-diff-viewer__marker__removed--color': '#9a3412',
+          '--c2-diff-viewer__stats__removed--color': '#9a3412',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Smaller code font and tighter rows for a side panel',
+        css: {
+          '--c2-diff-viewer__code--font-size': '12px',
+          '--c2-diff-viewer__code--line-height': '1.4',
+          '--c2-diff-viewer__line--padding': '0 8px 0 2px',
+          '--c2-diff-viewer__fold--padding': '2px 8px',
         },
       },
     ],

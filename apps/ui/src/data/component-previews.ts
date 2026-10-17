@@ -139,10 +139,18 @@ greet('world')"></c2-code-editor>`,
 </c2-dashboard>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
+  'date-time-picker': `<c2-date-time-picker value="2026-10-14T09:30" time-zone="Europe/Paris" aria-label="Meeting" style="width:240px"></c2-date-time-picker>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,
+  'diff-viewer': `<c2-diff-viewer style="width:300px" original="name: shop
+item: .card
+price: .price
+" modified="name: shop
+item: article.product
+price: .price
+"></c2-diff-viewer>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
   <c2-feather-camera></c2-feather-camera>
@@ -151,6 +159,8 @@ greet('world')"></c2-code-editor>`,
 </div>`,
   'filter-builder': `<c2-filter-builder compact-below="0" style="width:300px" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>`,
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
+  'format-date': `<div class="preview-row"><c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date><c2-format-date hour="numeric" minute="2-digit" time-zone="Asia/Tokyo" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date></div>`,
+  'format-number': `<div class="preview-row"><c2-format-number type="currency" currency="EUR" value="1234.5"></c2-format-number><c2-format-number notation="compact" value="1284310"></c2-format-number><c2-format-number type="bytes" value="1536000"></c2-format-number></div>`,
   gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
   <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
   <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
@@ -163,6 +173,10 @@ greet('world')"></c2-code-editor>`,
   <span style="font-size:12px">Markets</span>
   <c2-button slot="actions" style="--c2-button__container--height:30px;--c2-button__container--padding-left:12px;--c2-button__container--padding-right:12px;--c2-button__container--font-size:13px;--c2-button__container--background-color:var(--c2-theme--color-surface-container, #f4f4f5);--c2-button__container--color:var(--c2-theme--color-on-surface, #18181b);--c2-button__container--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-button__container__hover--background-color:var(--c2-theme--color-surface-container-low, #fafafa);--c2-button__container__active--background-color:var(--c2-theme--color-surface-container, #f4f4f5)">Sign in</c2-button>
 </c2-header>`,
+  highlight: `<div style="display:grid;gap:6px;font-size:14px;max-width:240px">
+  <c2-highlight query="apple">Apple pie and pineapple crumble</c2-highlight>
+  <c2-highlight query="the" active-index="1">The fox jumps over the lazy dog</c2-highlight>
+</div>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:var(--c2-theme--color-on-surface-variant, #71717a)">Wrote the first published algorithm.</div></c2-hover-card>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">
@@ -217,6 +231,10 @@ greet('world')"></c2-code-editor>`,
   'map-chart': `<c2-map-chart style="width:280px;height:132px;--c2-chart--padding:8px" aria-label="Revenue by country" legend="none" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>`,
   markdown: `<c2-markdown style="width:280px;--c2-markdown--font-size:13px;--c2-markdown--block-gap:6px" data-markdown-demo="preview"></c2-markdown>`,
   marker: `<p style="max-width:240px;margin:0;font-size:15px;line-height:1.8;text-align:center">Deploys are <c2-marker>fully automated</c2-marker>, <c2-marker variant="underline">reviewed</c2-marker> and <c2-marker variant="circle">reversible</c2-marker>.</p>`,
+  'mask-input': `<div class="preview-row" style="flex-direction:column;gap:8px">
+  <c2-mask-input mask="AA99 XXXX XXXX XXXX XXXX XXXX XXX" value="FR763000600001123" aria-label="IBAN" style="width:280px"></c2-mask-input>
+  <c2-mask-input mask="99/99" value="12" aria-label="Expiry" style="width:280px"></c2-mask-input>
+</div>`,
   masonry: `<c2-masonry style="width:260px;color:var(--c2-theme--color-on-surface, #18181b);font-size:12px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:var(--c2-theme--color-surface-container, #f4f4f5);--c2-masonry--border-radius:8px;--c2-masonry-item--background:var(--c2-theme--color-surface, #ffffff);--c2-masonry-item--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
@@ -246,6 +264,7 @@ greet('world')"></c2-code-editor>`,
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
+  'money-input': `<c2-money-input value="250000" locale="en-US" currencies="USD;EUR;GBP" aria-label="Payout amount" style="width:220px"></c2-money-input>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">

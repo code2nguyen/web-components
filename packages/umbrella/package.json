@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -305,6 +305,10 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./date-time-picker": {
+      "types": "./dist/date-time-picker.d.ts",
+      "default": "./dist/date-time-picker.js"
+    },
     "./description-list": {
       "types": "./dist/description-list.d.ts",
       "default": "./dist/description-list.js"
@@ -321,6 +325,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./diff-viewer": {
+      "types": "./dist/diff-viewer.d.ts",
+      "default": "./dist/diff-viewer.js"
+    },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
@@ -328,6 +336,14 @@
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
+    },
+    "./format-date": {
+      "types": "./dist/format-date.d.ts",
+      "default": "./dist/format-date.js"
+    },
+    "./format-number": {
+      "types": "./dist/format-number.d.ts",
+      "default": "./dist/format-number.js"
     },
     "./gantt": {
       "types": "./dist/gantt.d.ts",
@@ -356,6 +372,10 @@
     "./header": {
       "types": "./dist/header.d.ts",
       "default": "./dist/header.js"
+    },
+    "./highlight": {
+      "types": "./dist/highlight.d.ts",
+      "default": "./dist/highlight.js"
     },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
@@ -425,6 +445,10 @@
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
     },
+    "./mask-input": {
+      "types": "./dist/mask-input.d.ts",
+      "default": "./dist/mask-input.js"
+    },
     "./masonry": {
       "types": "./dist/masonry.d.ts",
       "default": "./dist/masonry.js"
@@ -460,6 +484,10 @@
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
+    },
+    "./money-input": {
+      "types": "./dist/money-input.d.ts",
+      "default": "./dist/money-input.js"
     },
     "./month-planner": {
       "types": "./dist/month-planner.d.ts",
@@ -740,10 +768,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.9",
-    "@c2n/phosphor-icons": "1.0.9",
-    "@c2n/task-icons": "1.0.9",
-    "@c2n/theme": "1.0.9",
+    "@c2n/core": "1.0.11",
+    "@c2n/phosphor-icons": "1.0.11",
+    "@c2n/task-icons": "1.0.11",
+    "@c2n/theme": "1.0.11",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -870,13 +898,18 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/diff-viewer": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
+    "@c2n/format-date": "*",
+    "@c2n/format-number": "*",
     "@c2n/gantt": "*",
     "@c2n/google-map": "*",
     "@c2n/header": "*",
+    "@c2n/highlight": "*",
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
     "@c2n/image": "*",
@@ -893,12 +926,14 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
+    "@c2n/money-input": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",

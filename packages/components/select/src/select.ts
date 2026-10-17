@@ -173,7 +173,7 @@ export class Select extends LitElement {
   @property({ type: Boolean }) required: boolean = false
 
   /** Name used when the select participates in a form. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Selected values. Written as `value="a;b"` in markup, read as `['a', 'b']` from the property. */
   @property({

@@ -185,7 +185,7 @@ export class TagInput extends LitElement {
   @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name. Each tag is submitted as its own entry under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Text shown in the input while there are no tags. */
   @property({ type: String }) placeholder = ''

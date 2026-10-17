@@ -1,0 +1,116 @@
+---
+description: 'Ready-made looks for c2-mask-input: a monospace IBAN field, a large code entry, a card expiry pill, a filled postcode and a compact table filter. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MaskInput } from '@c2n/components/mask-input'
+
+## Presets
+
+The box is one set of variables (`--c2-mask-input--border`, `--c2-mask-input--background`, `--c2-mask-input--border-radius`, `--c2-mask-input--min-height`), with `--c2-mask-input__hover--*`, `__focus--*` and `__error--*` states on top. The text and the mask hint behind it share `--c2-mask-input--font-family`, `--c2-mask-input--letter-spacing` and `--c2-mask-input--font-variant-numeric`; `--c2-mask-input__slot--color` colours the hint.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-mask-input mask="99/99" placeholder="MM/YY"></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Monospace IBAN
+<style>
+  .iban {
+    width: 240px;
+    --c2-mask-input--font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    --c2-mask-input--font-size: 13px;
+    --c2-mask-input--border-radius: 8px;
+    --c2-mask-input__slot--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-mask-input class="iban" mask="AA99 9999 9999 9999" value="BE68539007547034" aria-label="IBAN" help="Belgian IBAN, 16 characters."></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Verification code
+<style>
+  .code {
+    width: 200px;
+    --c2-mask-input--min-height: 52px;
+    --c2-mask-input--padding: 8px 20px;
+    --c2-mask-input--font-size: 24px;
+    --c2-mask-input--letter-spacing: 0.2em;
+    --c2-mask-input--border-radius: 14px;
+    --c2-mask-input--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-mask-input--border: 1px solid transparent;
+    --c2-mask-input__focus--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-mask-input class="code" mask="999-999" slot-char="•" aria-label="Verification code" autocomplete="one-time-code" value="482"></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Card expiry pill
+<style>
+  .expiry {
+    width: 140px;
+    --c2-mask-input--min-height: 40px;
+    --c2-mask-input--padding: 8px 18px;
+    --c2-mask-input--border-radius: 999px;
+    --c2-mask-input__focus--outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
+  }
+</style>
+<c2-mask-input class="expiry" mask="99/99" placeholder="MM / YY" autocomplete="cc-exp" include-literals></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Filled postcode
+<style>
+  .filled {
+    width: 180px;
+    --c2-mask-input--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-mask-input--border: 1px solid transparent;
+    --c2-mask-input__hover--border: 1px solid transparent;
+    --c2-mask-input--border-radius: 8px;
+    --c2-mask-input__focus--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-mask-input class="filled" mask="A9A 9A9" value="K1A0B1" aria-label="Postal code"></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Tax ID with prefix
+<style>
+  .tax-id {
+    width: 240px;
+    --c2-mask-input--border-radius: 8px;
+    --c2-mask-input__icon--color: light-dark(#7e22ce, #a76cdc);
+  }
+  .tax-id span {
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+<c2-mask-input class="tax-id" mask="99-9999999" placeholder="Employer ID">
+  <span slot="prefix-icon">EIN</span>
+</c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Compact filter
+<style>
+  .compact {
+    width: 130px;
+    --c2-mask-input--min-height: 28px;
+    --c2-mask-input--padding: 2px 8px;
+    --c2-mask-input--font-size: 12px;
+    --c2-mask-input--border-radius: 4px;
+  }
+</style>
+<c2-mask-input class="compact" mask="9999-99-99" placeholder="YYYY-MM-DD" include-literals></c2-mask-input>
+```
+
+```html tag=MdxCodeBlock,label=Validation error
+<style>
+  .invalid {
+    width: 180px;
+  }
+</style>
+<c2-mask-input class="invalid" mask="99/99" value="0120" error error-text="This card has expired."></c2-mask-input>
+```
+
+</GalleryGrid>

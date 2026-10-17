@@ -1,0 +1,138 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FormatDate } from '@c2n/components/format-date'
+
+## Presets
+
+Curated looks for `c2-format-date`. Open any card in the studio to start from it. The text inherits the surrounding type, so colour, size and weight do most of the work; `date-style` or the individual fields decide how much room it takes.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-format-date date="2026-10-14T15:05:09Z"></c2-format-date>
+```
+
+```html tag=MdxCodeBlock,label=Calendar tile
+<style>
+  .calendar-tile {
+    display: inline-grid;
+    justify-items: center;
+    width: 72px;
+    overflow: hidden;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .calendar-tile .month {
+    width: 100%;
+    padding: 4px 0;
+    text-align: center;
+    background: #dc2626;
+    --c2-format-date--color: #ffffff;
+    --c2-format-date--font-size: 12px;
+    --c2-format-date--font-weight: 600;
+  }
+  .calendar-tile .day {
+    padding: 6px 0 8px;
+    --c2-format-date--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-date--font-size: 28px;
+    --c2-format-date--font-weight: 600;
+  }
+</style>
+<div class="calendar-tile">
+  <span class="month"><c2-format-date month="short" time-zone="UTC" date="2026-10-14T15:05:09Z"></c2-format-date></span>
+  <span class="day"><c2-format-date day="numeric" time-zone="UTC" date="2026-10-14T15:05:09Z"></c2-format-date></span>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Article byline
+<style>
+  .byline {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .byline strong {
+    font-weight: 600;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div class="byline">
+  <strong>Ana Ng</strong>
+  <span>·</span>
+  <c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=World clock
+<style>
+  .world-clock {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .world-clock c2-format-date {
+    --c2-format-date--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-date--font-weight: 600;
+  }
+</style>
+<div class="world-clock">
+  <span>San Francisco</span><c2-format-date hour="numeric" minute="2-digit" time-zone="America/Los_Angeles" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <span>London</span><c2-format-date hour="numeric" minute="2-digit" time-zone="Europe/London" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <span>Ho Chi Minh City</span><c2-format-date hour="numeric" minute="2-digit" time-zone="Asia/Ho_Chi_Minh" time-zone-name="shortOffset" date="2026-10-14T15:05:09Z"></c2-format-date>
+  <span>Tokyo</span><c2-format-date hour="numeric" minute="2-digit" time-zone="Asia/Tokyo" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Event card
+<style>
+  .event-card {
+    display: grid;
+    gap: 4px;
+    padding: 12px 16px;
+    border-left: 3px solid #7c3aed;
+    border-radius: 6px;
+    background: light-dark(#f3e8ff, #26153c);
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .event-card strong {
+    font-weight: 600;
+  }
+  .event-card c2-format-date {
+    --c2-format-date--color: light-dark(#7e22ce, #c9a3ef);
+    --c2-format-date--font-size: 12px;
+    --c2-format-date--font-weight: 500;
+  }
+</style>
+<div class="event-card">
+  <strong>Design review</strong>
+  <c2-format-date weekday="long" month="long" day="numeric" hour="numeric" minute="2-digit" time-zone="Europe/Paris" time-zone-name="short" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Table column
+<style>
+  .date-column {
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .date-column c2-format-date {
+    --c2-format-date--font-variant-numeric: tabular-nums;
+  }
+</style>
+<div class="date-column">
+  <c2-format-date date-style="short" time-style="short" time-zone="UTC" date="2026-01-05T08:00:00Z"></c2-format-date>
+  <c2-format-date date-style="short" time-style="short" time-zone="UTC" date="2026-07-21T17:45:00Z"></c2-format-date>
+  <c2-format-date date-style="short" time-style="short" time-zone="UTC" date="2026-10-14T15:05:09Z"></c2-format-date>
+</div>
+```
+
+</GalleryGrid>

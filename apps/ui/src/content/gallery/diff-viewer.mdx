@@ -1,0 +1,214 @@
+---
+description: 'Ready-made looks for c2-diff-viewer: a review panel, side by side, word highlights only, a colour-blind safe palette, a compact log and a terminal. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DiffViewer } from '@c2n/components/diff-viewer'
+
+## Presets
+
+Rows are tinted by `--c2-diff-viewer__line__added--background-color` and `__line__removed--background-color`, the changed words inside them by the `__word__*` variables, and the line numbers by `__line-number__*`. Folded runs are the `__fold--*` variables; the code font, size and wrapping are `__code--*`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-diff-viewer
+  original="name: shop
+selectors:
+  item: .card
+  price: .price
+"
+  modified="name: shop
+selectors:
+  item: article.product
+  price: .price
+  title: h2
+"
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Review panel
+<style>
+  .diff-review {
+    --c2-diff-viewer--border-radius: 12px;
+    --c2-diff-viewer--max-height: 220px;
+    --c2-diff-viewer__header--padding: 10px 14px;
+    --c2-diff-viewer__header--font-size: 13px;
+  }
+</style>
+<c2-diff-viewer
+  class="diff-review"
+  line-numbers
+  original-label="plan v3 (live)"
+  modified-label="plan v4 (repaired)"
+  original="name: shop
+start_url: https://shop.example/list
+selectors:
+  item: .card
+  price: .price
+  stock: .availability
+pagination:
+  next: a.next
+  max_pages: 5
+schedule: daily
+"
+  modified="name: shop
+start_url: https://shop.example/list
+selectors:
+  item: article.product
+  price: .price
+  stock: .availability
+pagination:
+  next: a[rel=next]
+  max_pages: 5
+schedule: daily
+"
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Side by side
+<c2-diff-viewer
+  mode="split"
+  line-numbers
+  original-label="Before"
+  modified-label="After"
+  original="timeout: 30
+retries: 2
+user_agent: my-plan/1.0
+"
+  modified="timeout: 45
+retries: 2
+user_agent: my-plan/1.1
+proxy: none
+"
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Word highlights only
+<style>
+  .diff-words {
+    --c2-diff-viewer__line__added--background-color: transparent;
+    --c2-diff-viewer__line__removed--background-color: transparent;
+    --c2-diff-viewer__line-number__added--background-color: transparent;
+    --c2-diff-viewer__line-number__removed--background-color: transparent;
+    --c2-diff-viewer__word__added--background-color: rgba(22, 163, 74, 0.28);
+    --c2-diff-viewer__word__removed--background-color: rgba(220, 38, 38, 0.24);
+    --c2-diff-viewer__word--border-radius: 4px;
+  }
+</style>
+<c2-diff-viewer
+  class="diff-words"
+  original="The quick brown fox jumps over the lazy dog.
+It barked twice."
+  modified="The quick red fox leaps over the lazy dog.
+It barked twice."
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Colour-blind safe
+<style>
+  .diff-safe {
+    --c2-diff-viewer__line__added--background-color: rgba(2, 101, 220, 0.12);
+    --c2-diff-viewer__line-number__added--background-color: rgba(2, 101, 220, 0.2);
+    --c2-diff-viewer__word__added--background-color: rgba(2, 101, 220, 0.3);
+    --c2-diff-viewer__marker__added--color: #0154b8;
+    --c2-diff-viewer__stats__added--color: #0154b8;
+    --c2-diff-viewer__line__removed--background-color: rgba(234, 88, 12, 0.12);
+    --c2-diff-viewer__line-number__removed--background-color: rgba(234, 88, 12, 0.2);
+    --c2-diff-viewer__word__removed--background-color: rgba(234, 88, 12, 0.3);
+    --c2-diff-viewer__marker__removed--color: #9a3412;
+    --c2-diff-viewer__stats__removed--color: #9a3412;
+  }
+</style>
+<c2-diff-viewer
+  class="diff-safe"
+  line-numbers
+  original-label="Draft"
+  modified-label="Final"
+  original="Ship on Friday.
+Owner: Ana"
+  modified="Ship on Monday.
+Owner: Ana"
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .diff-compact {
+    --c2-diff-viewer--border-radius: 6px;
+    --c2-diff-viewer__code--font-size: 12px;
+    --c2-diff-viewer__code--line-height: 1.4;
+    --c2-diff-viewer__line--padding: 0 8px 0 2px;
+    --c2-diff-viewer__marker--width: 2ch;
+    --c2-diff-viewer__fold--padding: 2px 8px;
+  }
+</style>
+<c2-diff-viewer
+  class="diff-compact"
+  context="1"
+  original="a: 1
+b: 2
+c: 3
+d: 4
+e: 5
+f: 6
+"
+  modified="a: 1
+b: 2
+c: 3
+d: 40
+e: 5
+f: 6
+"
+></c2-diff-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .diff-terminal {
+    --c2-diff-viewer--background-color: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-diff-viewer--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-diff-viewer--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-diff-viewer__header--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-diff-viewer__header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-diff-viewer__header--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-diff-viewer__line-number--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-diff-viewer__line-number__added--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-diff-viewer__line-number__removed--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-diff-viewer__line__added--background-color: rgba(74, 222, 128, 0.14);
+    --c2-diff-viewer__line__removed--background-color: rgba(248, 113, 113, 0.14);
+    --c2-diff-viewer__line-number__added--background-color: rgba(74, 222, 128, 0.22);
+    --c2-diff-viewer__line-number__removed--background-color: rgba(248, 113, 113, 0.22);
+    --c2-diff-viewer__word__added--background-color: rgba(74, 222, 128, 0.32);
+    --c2-diff-viewer__word__removed--background-color: rgba(248, 113, 113, 0.32);
+    --c2-diff-viewer__marker__added--color: #4ade80;
+    --c2-diff-viewer__marker__removed--color: #f87171;
+    --c2-diff-viewer__stats__added--color: #4ade80;
+    --c2-diff-viewer__stats__removed--color: #f87171;
+    --c2-diff-viewer__fold--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-diff-viewer__fold--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-diff-viewer__fold__hover--color: #93c5fd;
+    --c2-diff-viewer__empty--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-diff-viewer__no-newline--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-diff-viewer__line__empty--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-diff-viewer__divider--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+  }
+</style>
+<c2-diff-viewer
+  class="diff-terminal"
+  line-numbers
+  original-label="config.yml"
+  modified-label="config.yml (staged)"
+  original="port: 8080
+log_level: info
+workers: 2"
+  modified="port: 8080
+log_level: debug
+workers: 4
+"
+></c2-diff-viewer>
+```
+
+</GalleryGrid>

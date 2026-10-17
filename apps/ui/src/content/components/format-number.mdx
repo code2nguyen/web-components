@@ -1,0 +1,62 @@
+---
+title: 'Format Number'
+description: 'A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FormatNumber } from '@c2n/components/format-number'
+
+`c2-format-number` writes a number the way its reader expects it, with `Intl.NumberFormat`: grouping and decimals of the locale ("1,234.5" in English, "1 234,5" in French), and `type` for what it counts: `currency` (with `currency`, `currency-display` and `currency-sign="accounting"` for parentheses on losses), `percent` (0.25 reads "25%"), `unit` (any unit `Intl` knows, such as `kilometer-per-hour` or `celsius`) and `bytes`, scaled to the largest unit that fits ("1.5 MB"; `binary` steps by 1024). `notation="compact"` shortens large counts to "1.2K" or "1.2 thousand", the digit attributes (`minimum-fraction-digits`, `maximum-significant-digits`…) and `sign-display` work as in `Intl`, and `no-grouping` drops the separators for years and IDs. `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The digits sit in a `<data>` element whose `value` is the raw number, and a shortened display carries the full figure as its hover title. The currency symbol, unit and compact suffix are the `unit` part, so `--c2-format-number__unit--*` can set them smaller or lighter than the digits, and `--c2-format-number__negative--color` / `__positive--color` colour losses and gains. Until `value` holds a number, the default slot shows instead, for a fallback such as "—".
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/format-number'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/format-number
+<style>
+  .pnl {
+    --c2-format-number__negative--color: light-dark(#dc2626, #f87171);
+    --c2-format-number__positive--color: light-dark(#15803d, #4ade80);
+  }
+  .price {
+    --c2-format-number--font-size: 24px;
+    --c2-format-number--font-weight: 600;
+    --c2-format-number__unit--font-size: 14px;
+    --c2-format-number__unit--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div data-label="Type">
+  <c2-format-number value="1234567.891"></c2-format-number>
+  <c2-format-number type="currency" currency="EUR" value="1234.5"></c2-format-number>
+  <c2-format-number type="percent" maximum-fraction-digits="1" value="0.1234"></c2-format-number>
+  <c2-format-number type="unit" unit="kilometer-per-hour" value="88"></c2-format-number>
+  <c2-format-number type="bytes" value="1536000"></c2-format-number>
+</div>
+<div data-label="Compact">
+  <c2-format-number notation="compact" value="1234567"></c2-format-number>
+  <c2-format-number notation="compact" compact-display="long" value="1234567"></c2-format-number>
+  <c2-format-number type="currency" notation="compact" value="2500000"></c2-format-number>
+</div>
+<div data-label="Locale">
+  <c2-format-number locale="fr" type="currency" currency="EUR" value="1234.5"></c2-format-number>
+  <c2-format-number locale="de" type="currency" currency="EUR" value="1234.5"></c2-format-number>
+  <c2-format-number locale="ja" type="currency" currency="JPY" value="1234.5"></c2-format-number>
+  <c2-format-number locale="en-IN" value="12345678"></c2-format-number>
+</div>
+<div data-label="Gains and losses">
+  <span class="pnl"><c2-format-number type="currency" sign-display="exceptZero" value="420.5"></c2-format-number></span>
+  <span class="pnl"><c2-format-number type="currency" sign-display="exceptZero" value="-87.25"></c2-format-number></span>
+  <c2-format-number type="currency" currency-sign="accounting" value="-1234.5"></c2-format-number>
+</div>
+<div data-label="Styled and fallback">
+  <c2-format-number class="price" type="currency" value="49"></c2-format-number>
+  <span>Balance: <c2-format-number>—</c2-format-number></span>
+</div>
+```

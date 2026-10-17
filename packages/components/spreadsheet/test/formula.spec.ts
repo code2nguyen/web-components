@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test'
-import { CellError, SheetModel, columnIndex, columnName, parseLiteral, parseRange, rangeRef, shiftFormula, type CellValue } from '../src/formula'
+import {
+  CellError,
+  SheetModel,
+  columnIndex,
+  columnName,
+  deleteFromFormula,
+  insertIntoFormula,
+  parseLiteral,
+  parseRange,
+  rangeRef,
+  shiftFormula,
+  type CellValue,
+} from '../src/formula'
 
 // The engine has no DOM, so these run in the Playwright worker without a page.
 
@@ -148,5 +160,37 @@ test.describe('shiftFormula', () => {
     expect(shiftFormula('=$B$2*C2+B$2+$B2', 2, 1)).toBe('=$B$2*D4+C$2+$B4')
     expect(shiftFormula('=SUM(A1:A3)&"A1"', 0, 1)).toBe('=SUM(B1:B3)&"A1"')
     expect(shiftFormula('=A1', -1, 0)).toBe('=#REF!')
+  })
+})
+
+test.describe('deleteFromFormula', () => {
+  test('moves later references back, breaks deleted ones and shrinks ranges that lose cells', () => {
+    expect(deleteFromFormula('=B2*C5', 'row', 2, 1)).toBe('=B2*C4')
+    expect(deleteFromFormula('=B3+$B$4', 'row', 2, 1)).toBe('=#REF!+$B$3')
+    expect(deleteFromFormula('=SUM(B1:B5)', 'row', 2, 1)).toBe('=SUM(B1:B4)')
+    expect(deleteFromFormula('=SUM(B3:B6)', 'row', 1, 3)).toBe('=SUM(B2:B3)')
+    expect(deleteFromFormula('=SUM(B1:B4)', 'row', 2, 4)).toBe('=SUM(B1:B2)')
+    expect(deleteFromFormula('=SUM(B5:B1)', 'row', 0, 1)).toBe('=SUM(B4:B1)')
+    expect(deleteFromFormula('=SUM(B3:B4)', 'row', 2, 2)).toBe('=SUM(#REF!)')
+    expect(deleteFromFormula('=SUM(A1:D1)&"C1"', 'column', 1, 2)).toBe('=SUM(A1:B1)&"C1"')
+  })
+
+  test('a #REF! left in a formula evaluates to #REF!, which IFERROR catches', () => {
+    const model = sheet({ A1: '=#REF!+1', A2: '=IFERROR(#REF!, 0)', A3: '=SUM(#REF!)' })
+    expect(errorOf(model.getValue('A1'))).toBe('#REF!')
+    expect(model.getValue('A2')).toBe(0)
+    expect(errorOf(model.getValue('A3'))).toBe('#REF!')
+  })
+})
+
+test.describe('insertIntoFormula', () => {
+  test('moves every reference past the insertion, pinned or not, and grows ranges that span it', () => {
+    expect(insertIntoFormula('=B2*C5', 'row', 2, 1)).toBe('=B2*C6')
+    expect(insertIntoFormula('=$B$3+B$3+$B3', 'row', 2, 2)).toBe('=$B$5+B$5+$B5')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 2, 1)).toBe('=SUM(B1:B6)')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 0, 1)).toBe('=SUM(B2:B6)')
+    expect(insertIntoFormula('=SUM(B1:B5)', 'row', 5, 1)).toBe('=SUM(B1:B5)')
+    expect(insertIntoFormula('=SUM(A1:C1)&"B1"', 'column', 1, 2)).toBe('=SUM(A1:E1)&"B1"')
+    expect(insertIntoFormula('=Z1', 'column', 0, 1)).toBe('=AA1')
   })
 })

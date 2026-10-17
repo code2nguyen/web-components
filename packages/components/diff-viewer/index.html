@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-diff-viewer</title>
+    <script type="module" src="/src/diff-viewer.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+        max-width: 960px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div><button id="mode">Toggle split</button> <button id="expand">Expand all</button> <span id="stats"></span></div>
+    <c2-diff-viewer id="plan" line-numbers original-label="plan v3 (live)" modified-label="plan v4 (repaired)"></c2-diff-viewer>
+    <c2-diff-viewer
+      mode="split"
+      original="price: 10
+currency: EUR"
+      modified="price: 12
+currency: EUR
+"
+    ></c2-diff-viewer>
+    <c2-diff-viewer original="same" modified="same"></c2-diff-viewer>
+
+    <script type="module">
+      const lines = (n, edit) => Array.from({ length: n }, (_, i) => edit(i)).join('\n') + '\n'
+      const plan = document.querySelector('#plan')
+      plan.original = lines(40, (i) => (i === 3 ? '  item: .card' : i === 25 ? '  price: .price' : `  field_${i}: .f${i}`))
+      plan.modified = lines(41, (i) =>
+        i === 3 ? '  item: article.product' : i === 25 ? '  price: .amount' : i === 40 ? '  title: h2' : `  field_${i}: .f${i}`,
+      )
+      const stats = document.querySelector('#stats')
+      const show = () => (stats.textContent = `+${plan.stats.additions} −${plan.stats.deletions}`)
+      customElements.whenDefined('c2-diff-viewer').then(() => plan.updateComplete.then(show))
+      plan.addEventListener('fold-expand', (event) => console.log('fold-expand', event.detail))
+      document.querySelector('#mode').addEventListener('click', () => (plan.mode = plan.mode === 'split' ? 'unified' : 'split'))
+      document.querySelector('#expand').addEventListener('click', () => plan.expandAll())
+    </script>
+  </body>
+</html>

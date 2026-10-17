@@ -198,7 +198,7 @@ export class PasswordField extends LitElement {
   @property({ type: String }) value = ''
 
   /** Form field name: the password is submitted with the form under this name. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Text shown while the field is empty. */
   @property({ type: String }) placeholder = ''

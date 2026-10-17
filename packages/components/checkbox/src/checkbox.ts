@@ -118,7 +118,7 @@ export class Checkbox extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Form field name forwarded to the inner input. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Value submitted while checked. */
   @property({ type: String }) value = 'on'

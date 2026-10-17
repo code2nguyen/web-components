@@ -33,14 +33,19 @@ import copyButton from '@c2n/copy-button/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
+import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
+import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
+import formatDate from '@c2n/format-date/custom-elements.json'
+import formatNumber from '@c2n/format-number/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
+import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
@@ -57,12 +62,14 @@ import list from '@c2n/list/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
+import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
+import moneyInput from '@c2n/money-input/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
@@ -160,14 +167,19 @@ export const componentManifests = (function () {
     dashboard,
     dateInput,
     dateSelector,
+    dateTimePicker,
     descriptionList,
     details,
+    diffViewer,
     featherIcons,
     filterBuilder,
     flow,
+    formatDate,
+    formatNumber,
     gantt,
     googleMap,
     header,
+    highlight,
     hoverCard,
     iconButton,
     image,
@@ -184,12 +196,14 @@ export const componentManifests = (function () {
     logViewer,
     markdown,
     marker,
+    maskInput,
     masonry,
     matIcon,
     math,
     menu,
     mermaid,
     modal,
+    moneyInput,
     monthPlanner,
     navigationMenu,
     notepad,

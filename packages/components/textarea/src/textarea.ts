@@ -66,7 +66,7 @@ export class Textarea extends LitElement {
   /** Current text. Set this property to update the value programmatically. */
   @property() value = ''
   /** Name forwarded to the native control. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
   /** Accessible name for the native textarea. */
   @property() label = ''
   /** Accessible name forwarded from the host. */

@@ -79,7 +79,7 @@ export class Rate extends LitElement {
   @property({ type: Boolean, reflect: true }) required = false
 
   /** Name used when the rating participates in a form. */
-  @property({ type: String }) name = ''
+  @property({ type: String, reflect: true }) name = ''
 
   /** Accessible name of the rating control. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null

@@ -3,6 +3,36 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.11](https://github.com/code2nguyen/web-components/releases/tag/v1.0.11) — 2026-10-17
+
+### Fixes
+
+- **components:** Reflect name on form-associated elements ([e4c61a9](https://github.com/code2nguyen/web-components/commit/e4c61a9))
+
+## [1.0.10](https://github.com/code2nguyen/web-components/releases/tag/v1.0.10) — 2026-10-17
+
+### Features
+
+- **diff-viewer:** Add c2-diff-viewer, a read-only line diff of two texts ([21867d1](https://github.com/code2nguyen/web-components/commit/21867d1))
+- **spreadsheet:** Delete rows and columns, and answer c2-context-menu ([b882856](https://github.com/code2nguyen/web-components/commit/b882856))
+- **spreadsheet:** Insert rows and columns, and grow the sheet on paste ([71c86d7](https://github.com/code2nguyen/web-components/commit/71c86d7))
+- **spreadsheet:** Resize columns by dragging the header edge ([10936be](https://github.com/code2nguyen/web-components/commit/10936be))
+- **format-date:** Add c2-format-date ([c9d1cbc](https://github.com/code2nguyen/web-components/commit/c9d1cbc))
+- **format-number:** Add c2-format-number for locale number, currency, percent, compact and byte formatting ([9f84219](https://github.com/code2nguyen/web-components/commit/9f84219))
+- **highlight:** Add c2-highlight to mark the parts of a text that match a query ([9efb47d](https://github.com/code2nguyen/web-components/commit/9efb47d))
+- **mask-input:** Add c2-mask-input for pattern masks (IBAN, tax ID, postcode) ([49d611d](https://github.com/code2nguyen/web-components/commit/49d611d))
+- **date-time-picker:** Add c2-date-time-picker with calendar, time and time zone ([6ba7975](https://github.com/code2nguyen/web-components/commit/6ba7975))
+- **money-input:** Add c2-money-input, a currency amount field that stores minor units ([04ca971](https://github.com/code2nguyen/web-components/commit/04ca971))
+
+### Fixes
+
+- **mask-input:** Fire change on blur and Enter in Firefox too ([0ac1dba](https://github.com/code2nguyen/web-components/commit/0ac1dba))
+- **highlight:** Match the server-rendered slot on the first hydrated render ([76606ea](https://github.com/code2nguyen/web-components/commit/76606ea))
+
+### Docs site & examples
+
+- **ui:** Fit the date-time-picker gallery cards in two columns ([2d60918](https://github.com/code2nguyen/web-components/commit/2d60918))
+
 ## [1.0.9](https://github.com/code2nguyen/web-components/releases/tag/v1.0.9) — 2026-10-14
 
 ### Features
