@@ -266,8 +266,10 @@ export class FieldContextConsumer {
 A control puts `label` on its focusable element as the fallback name, `describedBy()` as its `aria-describedby`, the
 hidden description in the same shadow root, `aria-invalid` and its error look while `invalid`, and hides its own
 hint/error line while `managed`. Nothing is written on the host or on light-DOM children, which keeps SSR hydration
-clean. A control whose role sits on its host through `ElementInternals` (`c2-button-group`) sets
-`internals.ariaLabel` and `internals.ariaDescribedByElements` instead.
+clean. A control whose role sits on its host through `ElementInternals` (`c2-button-group`) cannot be described from
+there: WebKit drops an internals reference into the host's own shadow root and has no `ariaDescription` on internals.
+While a field wraps such a control, its role, name and description move onto a wrapper inside its shadow root, and the
+host's internals role is cleared; outside a field nothing changes.
 
 ### Coverage and known gaps
 
@@ -297,7 +299,7 @@ All 32 controls take part. Where the reports from wiring them found limits:
 timing modes, `data-match`, `error-text`, server errors, warning, necessity, counter and its announcement, select,
 checkbox, switch, leaving the field, a late upgrade, reset, no attributes written, axe),
 `form-field.controls.spec.ts` (every control's focusable element named and described, error description, released
-when it leaves the field; `c2-button-group` through internals) and `packages/components/form/test/form.spec.ts` (14:
+when it leaves the field; `c2-button-group`'s role moving onto its wrapper and back) and `packages/components/form/test/form.spec.ts` (14:
 summary and focus, summary links, single error, `error-summary` modes, `valid-submit` values without navigation,
 `waitUntil` resolve and reject, server errors, `validator`, dirty tracking and reset, inherited defaults, `submit()`,
 no attributes written, axe).
