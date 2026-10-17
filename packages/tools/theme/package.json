@@ -92,6 +92,7 @@
         "../../components/description-list:build",
         "../../components/details:build",
         "../../components/diff-viewer:build",
+        "../../components/fieldset:build",
         "../../components/filter-builder:build",
         "../../components/flow:build",
         "../../components/form-field:build",
