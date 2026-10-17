@@ -1,0 +1,86 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-form,
+  $theme: (
+    display: grid,
+    columns: minmax(0, 1fr),
+    gap: 18px,
+    column-gap: 16px,
+
+    summary--margin-bottom: 18px,
+    summary--padding: 14px 16px,
+    summary--border: 1px solid #dc2626,
+    summary--border-radius: 8px,
+    summary--background: #ffffff,
+    summary--color: #18181b,
+    summary-heading--color: #dc2626,
+    summary-heading--font-size: 14px,
+    summary-heading--font-weight: 600,
+    summary-link--color: #dc2626,
+    summary-link--font-size: 14px,
+    summary__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+::slotted(form) {
+  display: css.cssVar(display);
+  grid-template-columns: css.cssVar(columns);
+  row-gap: css.cssVar(gap);
+  column-gap: css.cssVar(column-gap);
+  margin: 0;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: css.cssVar(summary--margin-bottom);
+  padding: css.cssVar(summary--padding);
+  border: css.cssVar(summary--border);
+  border-radius: css.cssVar(summary--border-radius);
+  background: css.cssVar(summary--background);
+  color: css.cssVar(summary--color);
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(summary__focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.summary-heading {
+  color: css.cssVar(summary-heading--color);
+  font-size: css.cssVar(summary-heading--font-size);
+  font-weight: css.cssVar(summary-heading--font-weight);
+  line-height: 20px;
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.summary-link {
+  color: css.cssVar(summary-link--color);
+  font-size: css.cssVar(summary-link--font-size);
+  line-height: 20px;
+}
+
+a.summary-link:focus-visible {
+  outline: css.cssVar(summary__focus--outline);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

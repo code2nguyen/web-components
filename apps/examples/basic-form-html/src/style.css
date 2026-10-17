@@ -18,12 +18,6 @@ body {
   max-width: 460px;
 }
 
-.form-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .form-card__head h1 {
   margin: 0;
   font-size: 17px;
@@ -35,24 +29,15 @@ body {
   color: var(--c2-theme--color-on-surface-variant, #52525b);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.field c2-text-field,
-.field c2-select,
-.field c2-mask-input {
-  width: 100%;
+.consent {
+  /* Line the error up with the checkbox text: the 32px touch target plus the checkbox's gap. */
+  --c2-form-field__supporting-text--indent: 36px;
 }
 
-.consent {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.consent c2-label {
-  cursor: pointer;
+.unsaved {
+  margin-inline-end: auto;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant, #52525b);
 }
 
 .form-card__actions {
