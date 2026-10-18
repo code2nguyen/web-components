@@ -1,3 +1,4 @@
+import { relative, dirname } from 'node:path'
 import type { Locator, Page } from '@playwright/test'
 import { test, expect, props, accessible } from '../../../../tests/component-fixture'
 import { validateSchema, fromAjvErrors } from '../src/validate'
@@ -320,6 +321,18 @@ test.describe('markup layout', () => {
     expect(await host(page).evaluate((element) => (element as HTMLElement & { reportValidity(): boolean }).reportValidity())).toBe(false)
     await expect(page.getByRole('textbox', { name: 'Email' })).toBeFocused()
   })
+})
+
+test('fields parsed before their form is defined still connect to it', async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  const directory = relative(testInfo.project.testDir, dirname(testInfo.file)).replaceAll('\\', '/')
+  await page.goto(`/${directory}/markup-first.html`)
+  await expect(page.getByRole('textbox', { name: 'Name' })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'City' })).toBeVisible()
+  await page.getByRole('textbox', { name: 'City' }).fill('Paris')
+  expect(await value(host(page))).toEqual({ city: 'Paris' })
+  expect(errors).toEqual([])
 })
 
 test('a form-specific renderer outranks the built-in one', async ({ page, renderScenario }) => {

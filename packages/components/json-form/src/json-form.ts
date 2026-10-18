@@ -78,6 +78,8 @@ export interface JsonForm {
  * @cssproperty {pixel} [--c2-json-form__array-item--padding-bottom=16px]
  * @cssproperty {color} [--c2-json-form__array-item-header--color=#71717a]
  * @cssproperty {font-size} [--c2-json-form__array-item-header--font-size=12px]
+ * @cssproperty {font-family} [--c2-json-form__step-label--font-family=system-ui, sans-serif] - The stepper's step names.
+ * @cssproperty {pixel} [--c2-json-form__slider--margin-top=24px] - Room above a slider for the value it shows over its thumb.
  *
  * @csspart field - Every `c2-form-field`; `field-<key>` names one by its property, e.g. `::part(field-email)`.
  * @csspart group - An object, a list or a `Group` (`group-<key>` for a property).

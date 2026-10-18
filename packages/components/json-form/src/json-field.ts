@@ -1,4 +1,4 @@
-import { LitElement, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { JsonForm } from './json-form'
@@ -35,8 +35,18 @@ export class JsonField extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.form = this.closest('c2-json-form')
-    this.form?.connectField(this)
+    void this.connectForm()
+  }
+
+  /** Markup can upgrade the fields before their form: wait for the form's definition. */
+  private async connectForm() {
+    const form = this.closest('c2-json-form')
+    if (!form) return
+    await customElements.whenDefined('c2-json-form')
+    if (!this.isConnected || this.closest('c2-json-form') !== form || this.form === form) return
+    this.form = form
+    form.connectField(this)
+    this.requestUpdate()
   }
 
   override disconnectedCallback() {
@@ -48,7 +58,9 @@ export class JsonField extends LitElement {
   protected override render() {
     if (!this.form || !this.scope) return nothing
     const element: UiElement = { type: 'Control', scope: this.scope, options: this.options, label: this.label }
-    return this.form.renderField(element, this.idPrefix)
+    const rendered = this.form.renderField(element, this.idPrefix)
+    // `*` stands for several fields: lay them out like the generated form does.
+    return this.scope === '*' ? html`<div class="layout vertical">${rendered}</div>` : rendered
   }
 }
 

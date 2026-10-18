@@ -16,6 +16,11 @@
     array-item--padding-bottom: 16px,
     array-item-header--color: #71717a,
     array-item-header--font-size: 12px,
+    slider--margin-top: 24px,
+    step-label--font-family: (
+      system-ui,
+      sans-serif,
+    ),
   )
 );
 
@@ -78,6 +83,16 @@ c2-select,
 c2-slider {
   display: block;
   width: 100%;
+}
+
+// Room for the value the slider shows above its thumb.
+c2-slider {
+  margin-top: css.cssVar(slider--margin-top);
+}
+
+// A wizard's step names read as interface text, not as a trace.
+.stepper c2-steps {
+  --c2-step__label--font-family: #{css.cssVar(step-label--font-family)};
 }
 
 .label {
