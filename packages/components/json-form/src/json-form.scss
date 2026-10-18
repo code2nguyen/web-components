@@ -1,0 +1,139 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-json-form,
+  $theme: (
+    gap: 16px,
+    horizontal__item--min-width: 200px,
+    grid--column-gap: 16px,
+    grid--row-gap: 16px,
+    label--color: #71717a,
+    label--font-size: 14px,
+    group-label--color: #18181b,
+    group-label--font-size: 14px,
+    group-label--font-weight: 600,
+    group-error--color: #dc2626,
+    group-error--font-size: 12px,
+    array-item--border-bottom: 1px solid #e4e4e7,
+    array-item--padding-bottom: 16px,
+    array-item-header--color: #71717a,
+    array-item-header--font-size: 12px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.layout {
+  display: flex;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.horizontal {
+  flex-wrap: wrap;
+
+  > * {
+    flex: 1 1 css.cssVar(horizontal__item--min-width);
+    min-width: 0;
+  }
+}
+
+.grid-container {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--_columns, 2), minmax(0, 1fr));
+  column-gap: css.cssVar(grid--column-gap);
+  row-gap: css.cssVar(grid--row-gap);
+}
+
+// Narrow containers stack the grid into one column, whatever the spans say.
+@container (width < 480px) {
+  .grid > * {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+.field,
+.group {
+  min-width: 0;
+}
+
+c2-select,
+c2-slider {
+  display: block;
+  width: 100%;
+}
+
+.label {
+  margin: 0;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+.group-label {
+  color: css.cssVar(group-label--color);
+  font-size: css.cssVar(group-label--font-size);
+  font-weight: css.cssVar(group-label--font-weight);
+}
+
+.group-error {
+  color: css.cssVar(group-error--color);
+  font-size: css.cssVar(group-error--font-size);
+}
+
+.array-item {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  padding-bottom: css.cssVar(array-item--padding-bottom);
+  border-bottom: css.cssVar(array-item--border-bottom);
+}
+
+.array-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: css.cssVar(array-item-header--color);
+  font-size: css.cssVar(array-item-header--font-size);
+}
+
+.array-actions,
+.stepper-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.stepper-actions {
+  justify-content: space-between;
+}
+
+.category {
+  min-width: 0;
+}
+
+c2-tabs .category {
+  padding-top: css.cssVar(gap);
+}

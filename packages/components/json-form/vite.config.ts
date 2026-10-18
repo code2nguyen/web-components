@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: ['src/index.ts', 'src/json-form.ts', 'src/json-field.ts'],
       formats: ['es'],
     },
     minify: false,

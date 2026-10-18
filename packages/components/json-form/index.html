@@ -2,111 +2,155 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-json-form</title>
     <script type="module" src="/src/index.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
-
     <style>
       body {
+        margin: 0;
         padding: 24px;
+        font: 14px system-ui;
+        color: #18181b;
       }
-      .demo {
-        display: flex;
-        align-items: center;
+      main {
+        display: grid;
+        gap: 48px;
+        max-width: 720px;
+      }
+      pre {
+        padding: 12px;
+        background: #f4f4f5;
+        border-radius: 6px;
+        white-space: pre-wrap;
+      }
+      .profile-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .profile-layout .tip {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: #71717a;
       }
     </style>
   </head>
   <body>
-    <c2-json-form id="jsonForm"></c2-json-form>
-    <script>
-      const jsonForm = document.getElementById('jsonForm')
-      jsonForm.addEventListener('formDataChange', (event) => {
-        console.log(event)
-      })
-      jsonForm.formData = {
-        isSameBillAddress: true,
-        size: 'Small',
-        billingAddress: {
-          address: '8 rue de la Chine',
-          city: 'Paris',
-        },
-      }
-      jsonForm.json = {
-        isSameBillAddress: {
-          value: {
-            type: 'boolean',
-          },
-          ui: {
-            componentName: 'checkbox',
-            data: true,
-          },
-          wrapperUI: {
-            componentName: 'label',
-            data: 'Use the same bill address ',
-            attributes: {
-              formItemIdAttribute: 'for',
-            },
-          },
-        },
-        size: {
-          value: {
+    <main>
+      <section>
+        <h2>Schema only</h2>
+        <c2-json-form id="generated"></c2-json-form>
+        <pre id="generated-value"></pre>
+      </section>
+
+      <section>
+        <h2>UI schema: grid, group, rule, stepper</h2>
+        <c2-json-form id="ui"></c2-json-form>
+      </section>
+
+      <section>
+        <h2>Your own markup</h2>
+        <c2-json-form id="markup">
+          <div class="profile-layout">
+            <c2-json-field scope="firstName"></c2-json-field>
+            <c2-json-field scope="lastName"></c2-json-field>
+            <p class="tip">Your name appears on invoices.</p>
+          </div>
+          <c2-json-field scope="*"></c2-json-field>
+        </c2-json-form>
+      </section>
+    </main>
+
+    <script type="module">
+      const schema = {
+        type: 'object',
+        required: ['firstName', 'email'],
+        properties: {
+          firstName: { type: 'string', title: 'First name' },
+          lastName: { type: 'string', title: 'Last name' },
+          email: { type: 'string', format: 'email', description: 'We never share it.' },
+          birthday: { type: 'string', format: 'date' },
+          plan: {
             type: 'string',
+            oneOf: [
+              { const: 'free', title: 'Free' },
+              { const: 'pro', title: 'Pro' },
+              { const: 'team', title: 'Team' },
+            ],
           },
-          ui: {
-            componentName: 'radioBox',
-            enumData: ['Small', 'Medium', 'Large'],
-          },
-          wrapperUI: {
-            componentName: 'label',
-            attributes: {
-              valueAttribute: 'for',
-            },
-          },
-        },
-        billingAddress: {
-          address: {
-            value: {
-              type: 'string',
-            },
-            ui: {
-              componentName: 'input',
-              attributes: {
-                check: true,
-              },
-              css: 'billing-address',
-            },
-            wrapperUI: {
-              componentName: 'label',
-              data: 'Address',
-              attributes: {
-                formItemIdAttribute: 'for',
-              },
-              slotBeforeChildren: true,
-            },
-          },
-          city: {
-            value: {
-              type: 'string',
-            },
-            ui: {
-              componentName: 'select',
-              css: 'billing-city',
-              enumData: ['Paris', 'Antony', 'Nice'],
-            },
-            wrapperUI: {
-              componentName: 'label',
-              data: 'City',
-              attributes: {
-                formItemIdAttribute: 'for',
-              },
-              slotBeforeChildren: true,
-            },
+          seats: { type: 'integer', minimum: 1, maximum: 50, default: 1 },
+          newsletter: { type: 'boolean', title: 'Send me the newsletter' },
+          interests: { type: 'array', items: { type: 'string' } },
+          billing: {
+            type: 'object',
+            title: 'Billing address',
+            required: ['street'],
+            properties: { sameAsShipping: { type: 'boolean', title: 'Same as shipping' }, street: { type: 'string' }, city: { type: 'string' } },
           },
         },
       }
+
+      const generated = document.getElementById('generated')
+      generated.schema = schema
+      generated.value = { firstName: 'Ada' }
+      const show = () => (document.getElementById('generated-value').textContent = JSON.stringify(generated.value, null, 2))
+      generated.addEventListener('input', show)
+      show()
+
+      const ui = document.getElementById('ui')
+      ui.schema = schema
+      ui.uiSchema = {
+        type: 'Categorization',
+        options: { variant: 'stepper' },
+        elements: [
+          {
+            type: 'Category',
+            label: 'Profile',
+            elements: [
+              {
+                type: 'GridLayout',
+                elements: [
+                  { type: 'Control', scope: '#/properties/firstName' },
+                  { type: 'Control', scope: '#/properties/lastName' },
+                  { type: 'Control', scope: '#/properties/email', options: { span: 2 } },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'Category',
+            label: 'Plan',
+            elements: [
+              { type: 'Control', scope: '#/properties/plan' },
+              { type: 'Control', scope: '#/properties/seats', options: { widget: 'slider' } },
+              { type: 'Control', scope: '#/properties/newsletter', options: { toggle: true } },
+            ],
+          },
+          {
+            type: 'Category',
+            label: 'Billing',
+            elements: [
+              { type: 'Control', scope: '#/properties/billing/properties/sameAsShipping' },
+              {
+                type: 'Group',
+                label: 'Billing address',
+                rule: { effect: 'HIDE', condition: { scope: '#/properties/billing/properties/sameAsShipping', schema: { const: true } } },
+                elements: [
+                  {
+                    type: 'HorizontalLayout',
+                    elements: [
+                      { type: 'Control', scope: '#/properties/billing/properties/street' },
+                      { type: 'Control', scope: '#/properties/billing/properties/city' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }
+
+      document.getElementById('markup').schema = schema
     </script>
   </body>
 </html>
