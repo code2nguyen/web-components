@@ -203,6 +203,9 @@ export class Steps extends LitElement {
   private observer?: MutationObserver
 
   private syncQueued = false
+  private hydrationSyncQueued = false
+  /** A declarative shadow root is attached before the element upgrades: the list was rendered on the server. */
+  private readonly serverRendered = this.shadowRoot !== null
 
   override connectedCallback() {
     super.connectedCallback()
@@ -221,6 +224,16 @@ export class Steps extends LitElement {
   }
 
   protected override updated() {
+    // Server-rendered steps nested in this shadow root hydrate after this first update: writing to them before that
+    // would make their first render differ from what the server drew. Sync once they have.
+    if (this.serverRendered && !this.hasSynced) {
+      if (this.hydrationSyncQueued) return
+      this.hydrationSyncQueued = true
+      const root: ParentNode = this.steps?.length ? (this.renderRoot as ShadowRoot) : this
+      const steps = [...root.querySelectorAll('c2-step')] as (HTMLElement & { updateComplete?: Promise<unknown> })[]
+      void Promise.all(steps.map((step) => step.updateComplete)).then(() => this.syncSteps())
+      return
+    }
     this.syncSteps()
   }
 

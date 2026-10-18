@@ -267,15 +267,22 @@ export class Step extends LitElement {
     // The arrival animation runs on the host, the settling one on the marker inside the shadow root — and an
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
-    this.renderRoot.addEventListener('animationend', this.handleAnimationEnd)
     if (serverRendered) void this.updateComplete.then(() => this.syncHasChildren())
     else this.syncHasChildren()
   }
 
   override disconnectedCallback() {
     this.removeEventListener('animationend', this.handleAnimationEnd)
-    this.renderRoot.removeEventListener('animationend', this.handleAnimationEnd)
     super.disconnectedCallback()
+  }
+
+  // The shadow root's listener goes on when the root is created: a step nested in another server-rendered shadow
+  // root defers hydration, and its render root does not exist yet in `connectedCallback`. The root outlives a
+  // disconnect, so the listener stays with it.
+  protected override createRenderRoot() {
+    const root = super.createRenderRoot()
+    root.addEventListener('animationend', this.handleAnimationEnd)
+    return root
   }
 
   /**

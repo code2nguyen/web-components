@@ -2,9 +2,40 @@
   "name": "@c2n/json-form",
   "version": "0.0.13",
   "private": true,
-  "c2n": {
-    "status": "wip"
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./json-form.js": {
+      "types": "./types/src/json-form.d.ts",
+      "default": "./dist/json-form.js"
+    },
+    "./json-field.js": {
+      "types": "./types/src/json-field.d.ts",
+      "default": "./dist/json-field.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
   "keywords": [
     "json form",
     "json schema",
@@ -13,36 +44,77 @@
     "web component",
     "lit"
   ],
+  "author": "code2nguyen@gmail.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
   },
-  "author": "code2nguyen@gmail.com",
-  "type": "module",
-  "exports": {
-    "./c2-webcomponents.js": "./dist/lib/c2-webcomponents.js",
-    "./json-form.js": "./dist/json-form.js"
-  },
-  "main": "dist/index.js",
-  "types": "types/src/index.d.ts",
-  "files": [
-    "dist",
-    "types",
-    "custom-elements.json"
-  ],
   "scripts": {
-    "--build": "npm run type-check && vite build",
     "dev": "vite",
-    "type-check": "tsc -p tsconfig.lib.json --composite false"
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../button:build",
+        "../card:build",
+        "../checkbox:build",
+        "../date-input:build",
+        "../date-time-picker:build",
+        "../details:build",
+        "../form-field:build",
+        "../list-item:build",
+        "../number-input:build",
+        "../password-field:build",
+        "../radio:build",
+        "../select:build",
+        "../slider:build",
+        "../steps:build",
+        "../switch:build",
+        "../tabs:build",
+        "../tag-input:build",
+        "../text-field:build",
+        "../textarea:build",
+        "../time-input:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/button": "*",
+    "@c2n/card": "*",
+    "@c2n/checkbox": "*",
+    "@c2n/date-input": "*",
+    "@c2n/date-time-picker": "*",
+    "@c2n/details": "*",
+    "@c2n/form-field": "*",
+    "@c2n/list-item": "*",
+    "@c2n/number-input": "*",
+    "@c2n/password-field": "*",
+    "@c2n/radio": "*",
+    "@c2n/select": "*",
+    "@c2n/slider": "*",
+    "@c2n/steps": "*",
+    "@c2n/switch": "*",
+    "@c2n/tabs": "*",
+    "@c2n/tag-input": "*",
+    "@c2n/text-field": "*",
+    "@c2n/textarea": "*",
+    "@c2n/time-input": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/checkbox": "*",
-    "@c2n/config": "*",
-    "custom-elements-manifest": "2.1.0"
+    "@c2n/config": "*"
   },
   "customElements": "custom-elements.json"
 }

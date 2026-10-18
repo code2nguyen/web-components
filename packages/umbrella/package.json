@@ -409,6 +409,18 @@
       "types": "./dist/inline-edit.d.ts",
       "default": "./dist/inline-edit.js"
     },
+    "./json-form": {
+      "types": "./dist/json-form.d.ts",
+      "default": "./dist/json-form.js"
+    },
+    "./json-form/json-field": {
+      "types": "./dist/json-form/json-field.d.ts",
+      "default": "./dist/json-form/json-field.js"
+    },
+    "./json-form/json-form": {
+      "types": "./dist/json-form/json-form.d.ts",
+      "default": "./dist/json-form/json-form.js"
+    },
     "./json-viewer": {
       "types": "./dist/json-viewer.d.ts",
       "default": "./dist/json-viewer.js"
@@ -930,6 +942,7 @@
     "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-form": "*",
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",

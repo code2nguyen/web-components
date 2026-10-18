@@ -54,6 +54,7 @@ import iconButton from '@c2n/icon-button/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
+import jsonForm from '@c2n/json-form/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
@@ -191,6 +192,7 @@ export const componentManifests = (function () {
     image,
     indicator,
     inlineEdit,
+    jsonForm,
     jsonViewer,
     kanban,
     kbd,
