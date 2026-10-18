@@ -5,6 +5,7 @@
     horizontal__item--min-width: 200px,
     grid--column-gap: 16px,
     grid--row-gap: 16px,
+    grid--preferred-width: 480px,
     label--color: #71717a,
     label--font-size: 14px,
     group-label--color: #18181b,
@@ -57,6 +58,9 @@
 
 .grid-container {
   container-type: inline-size;
+  // Size containment gives the grid no width of its own, so a form sized to its content (a card, a dialog) would
+  // shrink it to nothing: ask for this much, and the container query stacks it when it gets less.
+  contain-intrinsic-inline-size: css.cssVar(grid--preferred-width);
   min-width: 0;
 }
 
@@ -88,6 +92,16 @@ c2-slider {
 // Room for the value the slider shows above its thumb.
 c2-slider {
   margin-top: css.cssVar(slider--margin-top);
+}
+
+// List and navigation buttons are secondary; a stepper's Next stays the primary action.
+.array-item-header c2-button,
+.array-actions c2-button,
+.stepper-actions .previous {
+  --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+  --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+  --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
 }
 
 // A wizard's step names read as interface text, not as a trace.

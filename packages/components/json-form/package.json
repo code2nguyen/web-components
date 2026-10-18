@@ -2,9 +2,6 @@
   "name": "@c2n/json-form",
   "version": "0.0.13",
   "private": true,
-  "c2n": {
-    "status": "wip"
-  },
   "type": "module",
   "main": "dist/index.js",
   "exports": {
@@ -19,11 +16,25 @@
     "./json-field.js": {
       "types": "./types/src/json-field.d.ts",
       "default": "./dist/json-field.js"
-    }
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "json form",
@@ -33,14 +44,15 @@
     "web component",
     "lit"
   ],
+  "author": "code2nguyen@gmail.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
   },
-  "author": "code2nguyen@gmail.com",
   "scripts": {
     "dev": "vite",
     "build": "wireit",
+    "build:only": "vite build",
     "type-check": "wireit"
   },
   "wireit": {
@@ -103,5 +115,6 @@
   },
   "devDependencies": {
     "@c2n/config": "*"
-  }
+  },
+  "customElements": "custom-elements.json"
 }

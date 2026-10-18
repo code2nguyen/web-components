@@ -1,11 +1,10 @@
 # JSON Form
 
 `c2-json-form` renders a form from a [JSON Schema](https://json-schema.org/). The schema describes the data and its
-validation; how the form looks is decided in layers, each optional. Work in progress (`"c2n": { "status": "wip" }`): it
-is not in the root build, the umbrella package or the docs site yet.
+validation; how the form looks is decided in layers, each optional.
 
 ```js
-import '@c2n/json-form'
+import '@c2n/components/json-form'
 
 form.schema = {
   type: 'object',
@@ -124,7 +123,7 @@ The highest rank wins; built-ins rank 1 to 3.
 
 ```js
 import '@c2n/rate'
-import { registerRenderer, rankWith, and, isControl, schemaTypeIs, optionIs } from '@c2n/json-form'
+import { registerRenderer, rankWith, and, isControl, schemaTypeIs, optionIs } from '@c2n/components/json-form'
 import { html } from 'lit'
 
 // `{ "type": "integer", "minimum": 1, "maximum": 5 }` with `"options": { "rating": true }` becomes a star rating.
@@ -155,7 +154,7 @@ not generate code, so it runs under a strict CSP. For full JSON Schema, plug in 
 
 ```js
 import Ajv from 'ajv'
-import { fromAjvErrors } from '@c2n/json-form'
+import { fromAjvErrors } from '@c2n/components/json-form'
 
 const ajv = new Ajv({ allErrors: true })
 form.validator = (schema, value) => {

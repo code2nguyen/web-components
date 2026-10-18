@@ -75,6 +75,9 @@ export class FieldContextConsumer implements ReactiveController {
 
   private state: FieldState | undefined
   private owner: Element | null = null
+  private pending: { owner: Element; state: FieldState } | undefined
+  /** A declarative shadow root is attached before the element upgrades: the host was rendered on the server. */
+  private readonly serverRendered: boolean
 
   constructor(
     private readonly host: ReactiveControllerHost & HTMLElement,
@@ -82,6 +85,7 @@ export class FieldContextConsumer implements ReactiveController {
   ) {
     this.kind = options.kind ?? 'text'
     this.selfLabelled = options.selfLabelled ?? false
+    this.serverRendered = host.shadowRoot !== null
     ;(host as ConsumerHost)[consumerKey] = this
     host.addController(this)
   }
@@ -92,6 +96,20 @@ export class FieldContextConsumer implements ReactiveController {
 
   /** Called by the field that claims this control, and again on every change of what it shows. */
   attach(owner: Element, state: FieldState) {
+    // The first render of a server-rendered control hydrates what the server drew, which had no field around it:
+    // a label or description now would not match. Apply them once that render is done.
+    if (this.serverRendered && !(this.host as { hasUpdated?: boolean }).hasUpdated) {
+      const queued = this.pending !== undefined
+      this.pending = { owner, state }
+      if (!queued) {
+        void this.host.updateComplete.then(() => {
+          const pending = this.pending
+          this.pending = undefined
+          if (pending) this.attach(pending.owner, pending.state)
+        })
+      }
+      return
+    }
     const changed =
       this.owner !== owner || this.state?.label !== state.label || this.state?.description !== state.description || this.state?.invalid !== state.invalid
     this.owner = owner
@@ -101,6 +119,7 @@ export class FieldContextConsumer implements ReactiveController {
 
   /** Called by the field when the control leaves it. A call from a field that no longer owns the control is ignored. */
   detach(owner: Element) {
+    if (this.pending?.owner === owner) this.pending = undefined
     if (this.owner !== owner) return
     this.owner = null
     this.state = undefined

@@ -1,0 +1,94 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { JsonForm } from '@c2n/components/json-form'
+
+## Presets
+
+Layouts and looks for `c2-json-form`. The structure comes from the `ui-schema` (groups, tabs, stepper, lists); spacing and
+the field look come from `--c2-json-form__*` and the `--c2-form-field__*` variables set on the form, which every field
+inherits. Open any card in the studio to start from it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-json-form
+  schema='{"type":"object","required":["name"],"properties":{"name":{"type":"string","title":"Full name"},"email":{"type":"string","format":"email"},"newsletter":{"type":"boolean","title":"Send me the newsletter"}}}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Side labels
+<style>
+  .json-form-side {
+    --c2-json-form--gap: 12px;
+    --c2-form-field--direction: row;
+    --c2-form-field__label--width: 72px;
+    --c2-form-field__label--padding-top: 8px;
+    --c2-form-field__body--min-width: 120px;
+  }
+</style>
+<c2-json-form
+  class="json-form-side"
+  schema='{"type":"object","required":["name","email"],"properties":{"name":{"type":"string","title":"Name"},"email":{"type":"string","format":"email"},"company":{"type":"string"},"seats":{"type":"integer","minimum":1,"default":5}}}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .json-form-compact {
+    --c2-json-form--gap: 8px;
+    --c2-form-field--gap: 2px;
+    --c2-form-field__label--font-size: 12px;
+    --c2-form-field__label--line-height: 16px;
+    --c2-form-field__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-json-form
+  class="json-form-compact"
+  schema='{"type":"object","properties":{"host":{"type":"string","default":"db.internal"},"port":{"type":"integer","minimum":1,"maximum":65535,"default":5432},"database":{"type":"string","default":"orders"},"ssl":{"type":"boolean","title":"Require SSL","default":true},"timeout":{"type":"integer","title":"Timeout (s)","default":30}}}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Stepper
+<c2-json-form
+  schema='{"type":"object","required":["name","email"],"properties":{"name":{"type":"string","title":"Full name"},"email":{"type":"string","format":"email"},"plan":{"type":"string","oneOf":[{"const":"free","title":"Free"},{"const":"pro","title":"Pro"},{"const":"team","title":"Team"}]},"seats":{"type":"integer","minimum":1,"maximum":50,"default":3},"terms":{"type":"boolean","title":"I accept the terms"}}}'
+  ui-schema='{"type":"Categorization","options":{"variant":"stepper"},"elements":[{"type":"Category","label":"Account","elements":[{"type":"Control","scope":"name"},{"type":"Control","scope":"email"}]},{"type":"Category","label":"Plan","elements":[{"type":"Control","scope":"plan"},{"type":"Control","scope":"seats","options":{"widget":"slider"}}]},{"type":"Category","label":"Confirm","elements":[{"type":"Control","scope":"terms","options":{"toggle":true}}]}]}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Settings tabs
+<style>
+  .json-form-tabs {
+    --c2-json-form--gap: 12px;
+  }
+</style>
+<c2-json-form
+  class="json-form-tabs"
+  schema='{"type":"object","properties":{"displayName":{"type":"string","title":"Display name"},"language":{"type":"string","enum":["English","Français","Deutsch","Español","Italiano","Tiếng Việt"]},"email":{"type":"boolean","title":"Email me about activity","default":true},"digest":{"type":"string","enum":["Daily","Weekly","Never"],"default":"Weekly"},"twoFactor":{"type":"boolean","title":"Two-factor authentication"}}}'
+  ui-schema='{"type":"Categorization","elements":[{"type":"Category","label":"Profile","elements":[{"type":"Control","scope":"displayName"},{"type":"Control","scope":"language"}]},{"type":"Category","label":"Alerts","elements":[{"type":"Control","scope":"email","options":{"toggle":true}},{"type":"Control","scope":"digest","options":{"orientation":"horizontal"}}]},{"type":"Category","label":"Security","elements":[{"type":"Control","scope":"twoFactor","options":{"toggle":true}}]}]}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Repeatable list
+<style>
+  .json-form-list {
+    --c2-json-form--gap: 12px;
+    --c2-json-form__array-item--padding-bottom: 12px;
+  }
+</style>
+<c2-json-form
+  class="json-form-list"
+  schema='{"type":"object","properties":{"team":{"type":"array","title":"Team members","minItems":1,"items":{"type":"object","required":["name"],"properties":{"name":{"type":"string"},"role":{"type":"string","enum":["Owner","Editor","Viewer"],"default":"Editor"}}}}}}'
+  value='{"team":[{"name":"Ada Lovelace","role":"Owner"}]}'
+  ui-schema='{"type":"Control","scope":"team","options":{"detail":{"type":"HorizontalLayout","elements":[{"type":"Control","scope":"name"},{"type":"Control","scope":"role","options":{"widget":"select"}}]}}}'
+></c2-json-form>
+```
+
+```html tag=MdxCodeBlock,label=Collapsible sections
+<c2-json-form
+  schema='{"type":"object","properties":{"title":{"type":"string"},"slug":{"type":"string","pattern":"^[a-z0-9-]+$","description":"Lowercase letters, digits and dashes."},"published":{"type":"boolean","title":"Published"},"publishOn":{"type":"string","format":"date","title":"Publish on"},"tags":{"type":"array","items":{"type":"string"}}}}'
+  ui-schema='{"type":"VerticalLayout","elements":[{"type":"Group","label":"Content","options":{"collapsible":true},"elements":[{"type":"Control","scope":"title"},{"type":"Control","scope":"slug"},{"type":"Control","scope":"tags"}]},{"type":"Group","label":"Publishing","options":{"collapsible":true,"expanded":false},"elements":[{"type":"Control","scope":"published","options":{"toggle":true}},{"type":"Control","scope":"publishOn","rule":{"effect":"SHOW","condition":{"scope":"published","schema":{"const":true}}}}]}]}'
+></c2-json-form>
+```
+
+</GalleryGrid>

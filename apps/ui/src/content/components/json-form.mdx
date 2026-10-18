@@ -1,0 +1,83 @@
+---
+title: 'JSON Form'
+description: 'A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { JsonForm, JsonField } from '@c2n/components/json-form'
+
+`c2-json-form` turns a [JSON Schema](https://json-schema.org/) into a form. The schema describes the data and how it is
+validated; the form picks a control for each property from its `type`, `format` and `enum`: a text field, a number input,
+a checkbox, a radio group (five options or fewer) or a select, a date or time input, a tag input for a list of strings, a
+checkbox group for a list of choices, a card for an object and a repeatable group for a list of objects. Labels come from
+`title`, hints from `description`, the required marker from `required`.
+
+How the form is laid out is decided in three layers, each optional:
+
+- **Nothing**: one field per property, in schema order.
+- **`ui-schema`**: a layout tree in the [JSON Forms](https://jsonforms.io/docs/uischema/) shape. `VerticalLayout`,
+  `HorizontalLayout`, `GridLayout` (`options.columns`, `options.span` on a child), `Group` (`options.collapsible`),
+  `Categorization` (tabs, or `options.variant: "stepper"`) and `Label` hold `Control`s, each pointing at the data with a
+  `scope` (`#/properties/billing/properties/zip`, or the shorthand `billing.zip`). A `rule` shows, hides, enables or
+  disables any element from the data, `options.widget` picks another control (`textarea`, `slider`, `switch`, `select`,
+  `radio`…), and `{ "type": "Control", "scope": "*" }` stands for every field not placed elsewhere.
+- **Your own markup**: put `c2-json-field` elements, with any HTML and CSS around them, inside the form. They replace the
+  generated layout; each renders the field its `scope` names.
+
+A field shows its error once its edit is committed; `reportValidity()` or a submit attempt shows them all and focuses the
+first, opening its tab or step. Fields a rule hides do not block the form. Inside a `<form>`, the element submits its
+value as JSON under `name` and resets with the form; it fires `input` and `change`, so `v-model` and Angular forms bind
+`value`. The built-in validator covers the keywords a form needs without generating code; set `validator` to use
+another, such as Ajv through `fromAjvErrors`. A new kind of control is a renderer: `registerRenderer({ name, tester,
+render })`, the highest tester rank winning.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/json-form'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/json-form
+<style>
+  .json-form-demo {
+    width: min(560px, 100%);
+  }
+  .json-form-names {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+</style>
+<div data-label="Schema only">
+  <c2-json-form
+    class="json-form-demo"
+    schema='{"type":"object","required":["name","email"],"properties":{"name":{"type":"string","title":"Full name"},"email":{"type":"string","format":"email","description":"We never share it."},"plan":{"type":"string","oneOf":[{"const":"free","title":"Free"},{"const":"pro","title":"Pro"},{"const":"team","title":"Team"}]},"newsletter":{"type":"boolean","title":"Send me the newsletter"}}}'
+    value='{"plan":"pro"}'
+  ></c2-json-form>
+</div>
+<div data-label="UI schema: grid, group and a rule">
+  <c2-json-form
+    class="json-form-demo"
+    schema='{"type":"object","properties":{"firstName":{"type":"string","title":"First name"},"lastName":{"type":"string","title":"Last name"},"sameAsShipping":{"type":"boolean","title":"Billing address same as shipping","default":true},"billing":{"type":"object","required":["street"],"properties":{"street":{"type":"string"},"city":{"type":"string"}}}}}'
+    ui-schema='{"type":"VerticalLayout","elements":[{"type":"GridLayout","elements":[{"type":"Control","scope":"#/properties/firstName"},{"type":"Control","scope":"#/properties/lastName"}]},{"type":"Control","scope":"#/properties/sameAsShipping"},{"type":"Group","label":"Billing address","rule":{"effect":"HIDE","condition":{"scope":"#/properties/sameAsShipping","schema":{"const":true}}},"elements":[{"type":"HorizontalLayout","elements":[{"type":"Control","scope":"#/properties/billing/properties/street"},{"type":"Control","scope":"#/properties/billing/properties/city"}]}]}]}'
+  ></c2-json-form>
+</div>
+<div data-label="Your own markup">
+  <c2-json-form
+    class="json-form-demo"
+    schema='{"type":"object","required":["email"],"properties":{"firstName":{"type":"string","title":"First name"},"lastName":{"type":"string","title":"Last name"},"email":{"type":"string","format":"email"},"role":{"type":"string","enum":["Engineer","Designer","Manager"]}}}'
+  >
+    <div class="json-form-names">
+      <c2-json-field scope="firstName"></c2-json-field>
+      <c2-json-field scope="lastName"></c2-json-field>
+    </div>
+    <c2-json-field scope="*"></c2-json-field>
+  </c2-json-form>
+</div>
+```

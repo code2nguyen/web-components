@@ -75,6 +75,7 @@
     "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-form": "*",
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",

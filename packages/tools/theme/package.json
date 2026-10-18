@@ -107,6 +107,7 @@
         "../../components/image:build",
         "../../components/indicator:build",
         "../../components/inline-edit:build",
+        "../../components/json-form:build",
         "../../components/json-viewer:build",
         "../../components/kanban:build",
         "../../components/kbd:build",

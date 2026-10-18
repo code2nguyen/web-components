@@ -173,6 +173,8 @@ export class FormField extends LitElement {
   private appliedCustomError = ''
   private announceTimer: ReturnType<typeof setTimeout> | undefined
   private ownerForm: HTMLFormElement | null = null
+  /** A declarative shadow root is attached before the element upgrades: the field was rendered on the server. */
+  private readonly serverRendered = this.shadowRoot !== null
 
   constructor() {
     super()
@@ -273,6 +275,12 @@ export class FormField extends LitElement {
   }
 
   private adoptControl(control: FormFieldControl | null) {
+    // The server cannot see the control, so it drew the field without one (no required marker, no counter). The
+    // hydrating render must match that: adopt the control once it is done.
+    if (this.serverRendered && !this.hasUpdated) {
+      void this.updateComplete.then(() => this.adoptControl(this.findControl()))
+      return
+    }
     // The same element again counts as new once it upgraded into a consumer.
     if (control === this.control && fieldConsumerOf(control) === this.consumer) return
     const previous = this.control

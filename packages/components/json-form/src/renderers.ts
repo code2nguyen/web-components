@@ -598,13 +598,12 @@ const stepper: JsonFormRenderer = {
         orientation="horizontal"
         interactive
         selected=${String(current)}
+        .steps=${items.map((item, i) => ({ id: String(i), label: item.label || '', status: status(i) }))}
         @selection-change=${(event: CustomEvent<{ value: string }>) => go(Number(event.detail.value))}
-      >
-        ${items.map((item, i) => html`<c2-step value=${String(i)} label=${item.label || ''} status=${status(i)}></c2-step>`)}
-      </c2-steps>
+      ></c2-steps>
       ${items.map((_item, i) => html`<div class="category" ?hidden=${i !== current}>${panels[i]}</div>`)}
       <div class="stepper-actions" part="stepper-actions">
-        <c2-button type="button" ?hidden=${current === 0} @click=${() => go(current - 1)}>${ctx.t('previous')}</c2-button>
+        <c2-button type="button" class="previous" ?hidden=${current === 0} @click=${() => go(current - 1)}>${ctx.t('previous')}</c2-button>
         <c2-button type="button" ?hidden=${current >= items.length - 1} @click=${() => go(current + 1)}>${ctx.t('next')}</c2-button>
       </div>
     </div>`

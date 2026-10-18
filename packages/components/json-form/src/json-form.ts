@@ -67,6 +67,7 @@ export interface JsonForm {
  * @cssproperty {pixel} [--c2-json-form__horizontal__item--min-width=200px] - A horizontal layout wraps a child narrower than this onto the next row.
  * @cssproperty {pixel} [--c2-json-form__grid--column-gap=16px]
  * @cssproperty {pixel} [--c2-json-form__grid--row-gap=16px]
+ * @cssproperty {pixel} [--c2-json-form__grid--preferred-width=480px] - The width a grid asks for when the form is sized to its content; narrower than 480px, it stacks into one column.
  * @cssproperty {color} [--c2-json-form__label--color=#71717a] - Text of a `Label` element.
  * @cssproperty {font-size} [--c2-json-form__label--font-size=14px]
  * @cssproperty {color} [--c2-json-form__group-label--color=#18181b]
@@ -90,7 +91,7 @@ export interface JsonForm {
  * @csspart categorization - The tabs or the stepper of a `Categorization`.
  * @csspart stepper-actions - The Back and Next buttons of a stepper.
  * @csspart array-item - One item of a list. Every element also carries the names in its `options.part`.
- * @csspart array-item-header
+ * @csspart array-item-header - The row above a list item holding its number and its Remove button.
  * @csspart array-actions - The row holding the Add button.
  *
  * @internalcomponent c2-form-field
@@ -113,7 +114,8 @@ export class JsonForm extends LitElement {
   /** Submitted as JSON under this name by an enclosing `<form>`. */
   @property({ type: String, reflect: true }) name = ''
 
-  @property({ type: Boolean }) disabled = false
+  /** Disables every control; the value is not submitted and does not block a form while disabled. */
+  @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Every control is read-only. */
   @property({ type: Boolean }) readonly = false
@@ -134,6 +136,8 @@ export class JsonForm extends LitElement {
   private readonly categorySelection = new Map<string, number>()
   private readonly fields = new Set<JsonFieldLike>()
   private parentDisabled = false
+  /** A declarative shadow root is attached before the element upgrades: the form was rendered on the server. */
+  private readonly serverRendered = this.shadowRoot !== null
   @state() private submitted = false
   @state() private templated = false
 
@@ -311,9 +315,16 @@ export class JsonForm extends LitElement {
     this.categoryOf.clear()
     const schema = this.schema ?? {}
     const layout = this.uiSchema ?? generateLayout(schema, schema)
-    return html`${this.templated ? nothing : renderUiElement(this.engine, layout, createState('jf', placedPaths(layout)))}<slot
+    // The server cannot see the light DOM, so it drew the generated layout. The hydrating render draws it again to
+    // match, and `updated` drops it once the form knows its markup replaces it.
+    const generated = !this.templated || (this.serverRendered && !this.hasUpdated)
+    return html`${generated ? renderUiElement(this.engine, layout, createState('jf', placedPaths(layout))) : nothing}<slot
         @slotchange=${this.handleSlotChange}
       ></slot>`
+  }
+
+  protected override firstUpdated() {
+    if (this.serverRendered && this.templated) this.requestUpdate()
   }
 
   protected override updated() {
