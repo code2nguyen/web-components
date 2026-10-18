@@ -291,6 +291,34 @@ test('pasting Markdown or HTML keeps its structure, and a link pasted over text 
   await expect(content.locator('a')).toHaveText('words')
 })
 
+test("a web page's lines pasted as one paragraph of <br>s become lines of their own, so a heading takes one, and - lines a list", async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const content = page$(page)
+  await content.click()
+  await paste(page, {
+    'text/html': '<div>Details<br>A flat in Hanoi.<br><br>- 91 m²<br>- South-east balcony</div>',
+    'text/plain': 'Details\nA flat in Hanoi.\n\n- 91 m²\n- South-east balcony',
+  })
+  await expect(content.locator('p')).toHaveCount(2)
+  await expect(content.locator('.item[data-kind="bullet"]')).toHaveText(['91 m²', 'South-east balcony'])
+  await content.locator('p', { hasText: 'Details' }).click()
+  // A key, so the editor has taken the caret from the click before the block changes.
+  await page.keyboard.press('ArrowLeft')
+  await host(page).evaluate((element: HTMLElement & { setBlock(block: string): boolean }) => element.setBlock('heading2'))
+  await expect(content.locator('h2')).toHaveText('Details')
+  await expect(content.locator('p')).toHaveCount(1)
+  await expect(host(page)).toHaveJSProperty('value', '## Details\n\nA flat in Hanoi.\n\n- 91 m²\n- South-east balcony')
+
+  // Copied from a page editor, a line break typed with Shift+Enter stays one.
+  await page.keyboard.press('Control+End')
+  await page.keyboard.press('Enter')
+  await paste(page, { 'text/html': '<p data-pm-slice="0 0 []">one<br>two</p>', 'text/plain': 'one\ntwo' })
+  await expect(content.locator('p', { hasText: 'one' }).locator('br')).toHaveCount(1)
+})
+
 test('fires input on each edit and change on blur, and takes part in forms', async ({ page, renderScenario }) => {
   await renderScenario(`<form><c2-page-editor label="Notes" name="body" required></c2-page-editor></form><button>After</button>`)
   const editor = host(page)

@@ -307,6 +307,8 @@ export class PageEditor extends LitElement {
   private customValidityMessage = ''
   private formatKey = ''
   private dismissedSelection: { from: number; to: number } | null = null
+  /** The HTML being pasted was copied from a page editor, whose line breaks are meant (see splitPastedLines). */
+  private pastingOwnHtml = false
   private pendingSlash = -1
   /** Length of the last query that still matched something; a few characters past it the menu gives up. */
   private slashMatched = 0
@@ -530,7 +532,15 @@ export class PageEditor extends LitElement {
             return false
           },
         },
-        transformPasted: (slice) => this.filterSlice(slice),
+        transformPastedHTML: (html) => {
+          this.pastingOwnHtml = html.includes('data-pm-slice')
+          return html
+        },
+        transformPasted: (slice, view, plain) => {
+          const own = this.pastingOwnHtml || plain || Boolean(view.dragging)
+          this.pastingOwnHtml = false
+          return this.filterSlice(own ? slice : splitPastedLines(slice))
+        },
         handlePaste: (view, event, slice) => this.handlePaste(view, event, slice),
         clipboardTextParser: (text) => this.parsePastedText(text),
         clipboardTextSerializer: (slice) => {
@@ -1980,4 +1990,37 @@ declare global {
   interface HTMLElementTagNameMap {
     'c2-page-editor': PageEditor
   }
+}
+
+/** A list marker a pasted line starts with: `-`, `*`, `•` or `–` for a bullet, `1.` or `1)` for a numbered item. */
+const PASTED_MARKER = /^\s*(?:([-*•–])|\d+[.)])\s+/
+
+/** A pasted paragraph that starts with a list marker, as a list item without the marker; anything else as it is. */
+function pastedListItem(node: ProseNode): ProseNode {
+  const first = node.firstChild
+  const match = node.type === schema.nodes.paragraph && first?.isText ? PASTED_MARKER.exec(first.text!) : null
+  if (!match || first!.text!.length === match[0].length) return node
+  const rest = first!.cut(match[0].length)
+  return schema.nodes.item.create({ kind: match[1] ? 'bullet' : 'ordered' }, node.content.replaceChild(0, rest), node.marks)
+}
+
+/**
+ * A web page's text often comes as one paragraph whose lines are `<br>`s: pasted as is, it is one block, so a heading
+ * or a list made of one line takes them all. Each line of a pasted text block becomes a block of its own (the blank
+ * ones a `<br><br>` leaves are dropped), and a line starting with a list marker a list item. A code block keeps its
+ * lines.
+ */
+export function splitPastedLines(slice: Slice): Slice {
+  const blocks: ProseNode[] = []
+  slice.content.forEach((node) => {
+    if (!node.isTextblock || node.type.spec.code) {
+      blocks.push(node)
+      return
+    }
+    const lines: ProseNode[][] = [[]]
+    node.forEach((child) => (child.type === schema.nodes.hard_break ? lines.push([]) : lines[lines.length - 1].push(child)))
+    const kept = lines.length > 1 ? lines.filter((line) => line.some((child) => !child.isText || child.text!.trim())) : lines
+    for (const line of kept.length ? kept : [[]]) blocks.push(pastedListItem(node.type.create(node.attrs, line, node.marks)))
+  })
+  return new Slice(Fragment.fromArray(blocks), slice.openStart, slice.openEnd)
 }
