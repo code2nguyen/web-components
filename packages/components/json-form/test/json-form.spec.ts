@@ -56,6 +56,19 @@ test.describe('generated layout', () => {
     expect(change).toBeGreaterThanOrEqual(3)
   })
 
+  test('a nested object without defaults stays absent', async ({ page, renderScenario }) => {
+    await renderScenario('<c2-json-form></c2-json-form>')
+    const schema = {
+      type: 'object',
+      properties: {
+        billing: { type: 'object', properties: { city: { type: 'string' } } },
+        prefs: { type: 'object', properties: { theme: { type: 'string', default: 'dark' } } },
+      },
+    }
+    await props(host(page), { schema, value: {} })
+    expect(await value(host(page))).toEqual({ prefs: { theme: 'dark' } })
+  })
+
   test('an emptied text field removes its key', async ({ page, renderScenario }) => {
     await renderScenario('<c2-json-form></c2-json-form>')
     await props(host(page), { schema: profile, value: { name: 'Ada', email: 'ada@example.com' } })

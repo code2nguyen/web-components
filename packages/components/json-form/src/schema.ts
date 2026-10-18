@@ -131,7 +131,8 @@ export function applyDefaults(schema: JsonSchema, value: unknown, root: JsonSche
       const child = applyDefaults(property, object[key], root)
       if (child !== undefined) object[key] = child
     }
-    return object
+    // An object nothing was filled into stays absent rather than becoming `{}`.
+    return value === undefined && Object.keys(object).length === 0 ? undefined : object
   }
   if (Array.isArray(value) && resolved.items) return value.map((item) => applyDefaults(resolved.items!, item, root))
   return value
