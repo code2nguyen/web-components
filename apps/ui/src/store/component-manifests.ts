@@ -38,6 +38,7 @@ import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
+import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
@@ -174,6 +175,7 @@ export const componentManifests = (function () {
     details,
     diffViewer,
     featherIcons,
+    fieldset,
     filterBuilder,
     flow,
     form,

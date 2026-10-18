@@ -1,0 +1,158 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-fieldset,
+  $theme: (
+    grid-column: string.unquote('1 / -1'),
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 16px,
+    background-color: transparent,
+    invalid--border: 1px solid #dc2626,
+
+    header--gap: 2px,
+    header--margin-bottom: 12px,
+    legend--color: #18181b,
+    legend--font-size: 14px,
+    legend--font-weight: 600,
+    legend--line-height: 20px,
+    required-indicator--color: #dc2626,
+    legend-action--color: #0265dc,
+    legend-action--font-size: 12px,
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 16px,
+    error--color: #dc2626,
+    error--font-size: 12px,
+    icon--size: 14px,
+    icon-glyph--color: #ffffff,
+    header__disabled--opacity: 0.38,
+
+    content--direction: column,
+    content--gap: 12px,
+    content--align-items: stretch,
+  )
+);
+
+:host {
+  display: block;
+  grid-column: css.cssVar(grid-column);
+  min-width: 0;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+fieldset {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  box-sizing: border-box;
+
+  &.invalid {
+    border: css.cssVar(invalid--border);
+  }
+}
+
+// A floated legend sits inside the box instead of cutting a notch into its top border.
+.legend-row {
+  float: inline-start;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  color: css.cssVar(legend--color);
+  font-size: css.cssVar(legend--font-size);
+  font-weight: css.cssVar(legend--font-weight);
+  line-height: css.cssVar(legend--line-height);
+
+  & + * {
+    clear: both;
+  }
+}
+
+.legend {
+  min-width: 0;
+}
+
+.required {
+  margin-inline-start: 2px;
+  color: css.cssVar(required-indicator--color);
+}
+
+.legend-action {
+  margin-inline-start: auto;
+  color: css.cssVar(legend-action--color);
+  font-size: css.cssVar(legend-action--font-size);
+  font-weight: 400;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(header--gap);
+  margin-bottom: css.cssVar(header--margin-bottom);
+}
+
+.legend-row:not([hidden]) + .header {
+  padding-top: css.cssVar(header--gap);
+}
+
+.description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 2px;
+  color: css.cssVar(error--color);
+  font-size: css.cssVar(error--font-size);
+  line-height: css.cssVar(description--line-height);
+  overflow-wrap: anywhere;
+}
+
+.icon {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  margin-top: 1px;
+
+  .glyph {
+    fill: css.cssVar(icon-glyph--color);
+  }
+}
+
+:host(:state(disabled)) {
+  .legend-row,
+  .description {
+    opacity: css.cssVar(header__disabled--opacity);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: css.cssVar(content--direction);
+  flex-wrap: wrap;
+  align-items: css.cssVar(content--align-items);
+  gap: css.cssVar(content--gap);
+  min-width: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
