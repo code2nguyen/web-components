@@ -137,6 +137,14 @@ menu.addEventListener('context-menu-select', ({ detail }) => {
 })
 ```
 
+Typing a formula is guided. After `=`, or on a name, a list offers the functions with their arguments and what they do: ↑↓ chooses and Tab or Enter inserts `SUM(`. Inside a call, a hint names its arguments with the current one in bold, and the result shows before Enter. Where a reference can go, clicking a cell puts it in the formula and dragging makes it a range. The formula bar's **fx** button lists every function. App functions from `functions` are listed by name.
+
+With `summary`, each total of the selection is a button that writes its formula next to the range: under each column of a taller range (`=SUM(C1:C4)` in C5), after a one-row range, with a row or column inserted when that place is taken. `insertTotal('SUM', 'C1:C4')` does the same from your own menu.
+
+Cells take a style in `styles` or through `setStyle(range, change)`: one of eight named text and background colours (`gray`, `brown`, `orange`, `yellow`, `green`, `blue`, `purple`, `red`), a `small` or `large` size, and `bold`, which Ctrl/⌘+B toggles on the selection. Styles move with their cells, paste with a range copied from the sheet and undo with the values; a user's change fires `style-change`.
+
+With `rename-columns`, double-clicking a column header names the column in place, and `renameColumn(index)` opens the same field from your own menu: Enter or leaving the field saves the name, Escape cancels, and Tab saves it and goes on to the next column. The name is written to `columns` as the column's `label` and reported by `column-rename`.
+
 Read the result from script with `getValue('E8')`, write a cell with `setInput('C1', 8)`, select a range with
 `select('B1:E5')` and export the computed values with `toCSV()` or `toTSV()`. `selection-change` does not bubble, so
 listen on the element itself.

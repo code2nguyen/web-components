@@ -661,6 +661,16 @@ export class SheetModel {
     return [...changed]
   }
 
+  /** What a formula would give, written in no cell: the preview of one being typed. Never cached. */
+  preview(input: string): CellValue {
+    if (!input.startsWith('=') || input.length < 2) return null
+    try {
+      return settle(this.evaluate(parseFormula(input.slice(1))))
+    } catch (error) {
+      return isCellError(error) ? error : syntaxError(String(error))
+    }
+  }
+
   /** The computed value of a cell. */
   getValue(key: string): CellValue {
     const cached = this.values.get(key)
