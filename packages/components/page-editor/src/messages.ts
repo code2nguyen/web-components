@@ -27,6 +27,8 @@ const en = {
   codeDescription: 'Snippet with syntax colours',
   divider: 'Divider',
   dividerDescription: 'Separate sections',
+  table: 'Table',
+  tableDescription: 'Rows and columns, with sums and formulas',
 
   // Slash menu.
   blocksSection: 'Blocks',
@@ -106,6 +108,35 @@ const en = {
   hintIndent: 'indent',
   hintOr: 'or',
   hintLeave: 'leave the block',
+
+  // Tables: the buttons under a table and its right-click menu.
+  tableActions: 'Table actions',
+  newRow: 'New row',
+  newColumn: 'New column',
+  insertRowAbove: 'Insert row above',
+  insertRowBelow: 'Insert row below',
+  insertColumnLeft: 'Insert column left',
+  insertColumnRight: 'Insert column right',
+  renameColumn: 'Rename column',
+  deleteRows: 'Delete rows',
+  deleteColumns: 'Delete columns',
+  formulaBar: 'Formula bar',
+  selectionTotals: 'Totals of the selection',
+  // How the selected cells look: submenus of the table's menu.
+  textColour: 'Text colour',
+  backgroundColour: 'Background',
+  textSize: 'Size',
+  sizeSmall: 'Small',
+  sizeNormal: 'Normal',
+  sizeLarge: 'Large',
+  // A submenu of the table's menu: a formula under the selected range.
+  addTotal: 'Add a total',
+  totalSum: 'Sum',
+  totalAverage: 'Average',
+  totalCount: 'Count',
+  totalMin: 'Minimum',
+  totalMax: 'Maximum',
+  deleteTable: 'Delete table',
 }
 
 export type PageEditorMessages = typeof en
