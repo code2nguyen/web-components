@@ -466,7 +466,7 @@ test('cell styles are written as page text styles in the pipe table, and read ba
   ].join('\n')
   await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
   const editor = host(page)
-  await editor.evaluate((element: PageEditor, markdown) => (element.value = markdown), value)
+  await editor.evaluate((element: HTMLElement & { value: string }, markdown) => (element.value = markdown), value)
   await expect(cell(page, 'A1')).toHaveText('Hotel')
   await expect(cell(page, 'A1')).toHaveClass(/background-yellow/)
   await expect(cell(page, 'A1')).toHaveClass(/color-red/)
@@ -521,7 +521,7 @@ test('the right-click menu makes cells bold, colours them and sizes them', async
   // Ctrl/⌘+B in the sheet is saved too, and undo takes it back.
   await page.keyboard.press('ControlOrMeta+b')
   await expect
-    .poll(() => editor.evaluate((element: PageEditor) => element.value))
+    .poll(() => editor.evaluate((element: HTMLElement & { value: string }) => element.value))
     .toMatch(/\| <mark data-color="yellow"><span data-color="red" data-size="large">Hotel<\/span><\/mark> \|/)
 })
 
