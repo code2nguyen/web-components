@@ -1,0 +1,92 @@
+---
+title: 'Fieldset gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { Fieldset } from '@c2n/components/fieldset'
+import { Checkbox } from '@c2n/components/checkbox'
+import { TextField } from '@c2n/components/text-field'
+import { FormField } from '@c2n/components/form-field'
+import { Switch } from '@c2n/components/switch'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .notify-group { width: 320px; }
+</style>
+<c2-fieldset class="notify-group" legend="Notifications" description="Choose what we email you about.">
+  <c2-checkbox name="notify" value="mentions" checked>Mentions and replies</c2-checkbox>
+  <c2-checkbox name="notify" value="digest">Weekly digest</c2-checkbox>
+</c2-fieldset>
+```
+
+```html tag=MdxCodeBlock,label=Bare
+<style>
+  .bare-group {
+    width: 320px;
+    --c2-fieldset--border: none;
+    --c2-fieldset--padding: 0;
+    --c2-fieldset__content--gap: 8px;
+  }
+</style>
+<c2-fieldset class="bare-group" legend="Privacy">
+  <c2-switch name="profile" checked>Public profile</c2-switch>
+  <c2-switch name="activity">Show activity status</c2-switch>
+</c2-fieldset>
+```
+
+```html tag=MdxCodeBlock,label=Section card
+<style>
+  .section-group {
+    width: 340px;
+    --c2-fieldset--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-fieldset--border-radius: 14px;
+    --c2-fieldset--padding: 20px;
+    --c2-fieldset__legend--font-size: 16px;
+    --c2-fieldset__description--font-size: 14px;
+    --c2-fieldset__header--margin-bottom: 16px;
+  }
+</style>
+<c2-fieldset class="section-group" legend="Profile" description="How you appear to your team.">
+  <c2-form-field label="Display name"><c2-text-field name="name" value="Ada Lovelace"></c2-text-field></c2-form-field>
+  <c2-form-field label="Title"><c2-text-field name="title" value="Analyst"></c2-text-field></c2-form-field>
+</c2-fieldset>
+```
+
+```html tag=MdxCodeBlock,label=Accent rule
+<style>
+  .rule-group {
+    width: 320px;
+    --c2-fieldset--border: none;
+    --c2-fieldset--border-radius: 0;
+    --c2-fieldset--padding: 4px 0 4px 16px;
+    --c2-fieldset__legend--color: light-dark(#7e22ce, #a76cdc);
+  }
+  .rule-group::part(fieldset) {
+    border-inline-start: 3px solid #a855f7;
+  }
+</style>
+<c2-fieldset class="rule-group" legend="Experiments" description="Try features before they ship.">
+  <c2-checkbox name="labs" value="ai">AI summaries</c2-checkbox>
+  <c2-checkbox name="labs" value="canvas">New canvas</c2-checkbox>
+</c2-fieldset>
+```
+
+```html tag=MdxCodeBlock,label=Inline options
+<style>
+  .inline-group {
+    width: 360px;
+    --c2-fieldset__content--direction: row;
+    --c2-fieldset__content--gap: 8px 20px;
+  }
+</style>
+<c2-fieldset class="inline-group" legend="Topics" required error-text="Choose at least one topic.">
+  <c2-checkbox name="topics" value="design">Design</c2-checkbox>
+  <c2-checkbox name="topics" value="engineering">Engineering</c2-checkbox>
+  <c2-checkbox name="topics" value="research">Research</c2-checkbox>
+</c2-fieldset>
+```
+
+</GalleryGrid>

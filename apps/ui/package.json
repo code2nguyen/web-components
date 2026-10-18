@@ -60,6 +60,7 @@
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/feather-icons": "*",
+    "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
     "@c2n/form": "*",

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-fieldset</title>
+    <script type="module" src="/src/fieldset.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 480px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .row {
+        --c2-fieldset__content--direction: row;
+      }
+      .bare {
+        --c2-fieldset--border: none;
+        --c2-fieldset--padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-fieldset legend="Notifications" description="Choose what we email you about.">
+      <label><input type="checkbox" name="notify" value="mentions" checked /> Mentions and replies</label>
+      <label><input type="checkbox" name="notify" value="digest" /> Weekly digest</label>
+    </c2-fieldset>
+
+    <c2-fieldset class="row" legend="Topics" required error-text="Choose at least one topic.">
+      <label><input type="checkbox" name="topics" value="design" /> Design</label>
+      <label><input type="checkbox" name="topics" value="research" /> Research</label>
+    </c2-fieldset>
+
+    <c2-fieldset legend="Shipping address">
+      <a slot="legend-action" href="#">Same as billing</a>
+      <input aria-label="Street" placeholder="Street" />
+      <input aria-label="City" placeholder="City" />
+    </c2-fieldset>
+
+    <c2-fieldset class="bare" legend="Billing contact" description="Managed by your organisation." disabled>
+      <input aria-label="Email" value="billing@example.com" />
+    </c2-fieldset>
+  </body>
+</html>

@@ -135,6 +135,7 @@
         "./packages/components/description-list:build",
         "./packages/components/details:build",
         "./packages/components/diff-viewer:build",
+        "./packages/components/fieldset:build",
         "./packages/components/filter-builder:build",
         "./packages/components/flow:build",
         "./packages/components/form-field:build",
