@@ -457,8 +457,6 @@ export class TableView implements NodeView, Localizable {
   private shape = ''
   /** The sheet's selection when the key now going down reached the table, before the sheet moved it. */
   private selectionAtKey = ''
-  /** The right-click menu is open: the table is still in use, though the focus is in the menu. */
-  private menuOpen = false
 
   constructor(
     node: ProseNode,
@@ -467,10 +465,12 @@ export class TableView implements NodeView, Localizable {
     private readonly settings: TableOptions,
   ) {
     this.node = node
-    this.dom = element('div', 'table-block idle', { contenteditable: 'false' })
+    this.dom = element('div', 'table-block', { contenteditable: 'false' })
     this.menu = document.createElement('c2-context-menu')
     this.sheet = document.createElement('c2-spreadsheet')
     this.sheet.className = 'table-sheet'
+    // No selection left behind once neither the focus nor the menu is in the table.
+    this.sheet.hideSelectionOnBlur = true
     this.menu.append(this.sheet)
     this.menu.renderContextMenu = (context) => this.renderMenu(context)
     this.menu.addEventListener('context-menu-select', (event) => void this.pick(event.detail))
@@ -489,15 +489,6 @@ export class TableView implements NodeView, Localizable {
     // Before the sheet moves its selection: whether ArrowUp was pressed on the first row is read here.
     this.dom.addEventListener('keydown', () => (this.selectionAtKey = this.sheet.selection ?? ''), { capture: true })
     this.dom.addEventListener('keydown', (event) => this.handleKey(event))
-    // Idle (its selection hidden) once neither the focus nor the open menu is in the table. The focus leaves for the
-    // menu, which the page's :focus-within does not see, hence a class.
-    this.dom.addEventListener('focusin', () => this.updateIdle())
-    this.dom.addEventListener('focusout', () => setTimeout(() => this.updateIdle()))
-    this.menu.addEventListener('toggle', (event) => {
-      if (event.target !== this.menu) return
-      this.menuOpen = (event as ToggleEvent).newState === 'open'
-      this.updateIdle()
-    })
     // The sheet's and the menu's events are the table's own business: the page fires its own `input` and `change`.
     for (const type of [
       'input',
@@ -759,13 +750,6 @@ export class TableView implements NodeView, Localizable {
     else return
     this.write()
     sheet.focus()
-  }
-
-  private updateIdle() {
-    let focused: Element | null = document.activeElement
-    while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
-    const inside = Boolean(focused && (this.dom.contains(focused) || this.dom.contains((focused.getRootNode() as ShadowRoot).host ?? null)))
-    this.dom.classList.toggle('idle', !this.menuOpen && !(inside || this.dom.matches(':focus-within')))
   }
 
   /** Removes the table, leaving the caret where it stood. */

@@ -238,12 +238,6 @@ hr {
   }
 }
 
-.table-block.idle .table-sheet {
-  --c2-spreadsheet__cell__active--outline: none;
-  --c2-spreadsheet__cell__selected--background-color: transparent;
-  --c2-spreadsheet__header__selected--background-color: var(--c2-spreadsheet__header--background-color, #fafafa);
-  --c2-spreadsheet__header__selected--color: var(--c2-spreadsheet__header--color, #71717a);
-}
 .table-tools {
   display: flex;
   gap: 2px;
