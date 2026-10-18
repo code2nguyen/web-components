@@ -12,6 +12,7 @@ import { LocalizeController } from '@c2n/core/localize.js'
 import { isApplePlatform } from '@c2n/core/shortcut-helper.js'
 import '@c2n/overlay'
 import { spreadsheetMessages } from './messages'
+import { MENU_ICONS } from './menu-icons'
 import { FUNCTION_ORDER, closeFormula, formulaContext, type BuiltinFunctionName } from './formula-help'
 import styles from './spreadsheet.scss?inline'
 import {
@@ -229,6 +230,34 @@ type StyleEntry = { key: string; style: true; before: SpreadsheetCellStyle | und
 /** One undoable change: the inputs and the styles it changed, cell by cell. */
 type HistoryStep = (InputEntry | StyleEntry)[]
 
+/** The default look of each named colour, for the menu's swatches, which the element's stylesheet does not reach. */
+const COLOR_DEFAULTS: Record<SpreadsheetColor, string> = {
+  gray: '#91918e',
+  brown: '#a27763',
+  orange: '#d9730d',
+  yellow: '#cb912f',
+  green: '#448361',
+  blue: '#337ea9',
+  purple: '#9065b0',
+  red: '#d44c47',
+}
+const BACKGROUND_DEFAULTS: Record<SpreadsheetColor, string> = {
+  gray: 'rgba(145, 145, 142, 0.2)',
+  brown: 'rgba(162, 119, 99, 0.2)',
+  orange: 'rgba(217, 115, 13, 0.18)',
+  yellow: 'rgba(223, 171, 1, 0.22)',
+  green: 'rgba(68, 131, 97, 0.18)',
+  blue: 'rgba(51, 126, 169, 0.18)',
+  purple: 'rgba(144, 101, 176, 0.18)',
+  red: 'rgba(212, 76, 71, 0.18)',
+}
+const SWATCH =
+  'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 4px; font-size: 13px; font-weight: 600; line-height: 1;'
+
+let contextMenuLoaded: Promise<unknown> | undefined
+/** The right-click menu loads with the first sheet that asks for one. */
+const loadContextMenu = () => (contextMenuLoaded ??= import('@c2n/context-menu'))
+
 const isStyleEntry = (entry: InputEntry | StyleEntry): entry is StyleEntry => 'style' in entry
 
 /** Narrowest a column can be dragged, unless it sets `minWidth`. */
@@ -252,6 +281,10 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * chooses, Tab or Enter inserts `SUM(`); inside a call, a hint names its arguments with the current one in bold, and
  * the result shows before Enter. Where a reference can go, clicking a cell puts it in the formula and dragging makes a
  * range. A formula left open is closed on Enter. The formula bar's fx button lists every function.
+ *
+ * With `context-menu`, a right-click opens a menu of its own (loaded with the first sheet that asks): insert and
+ * delete rows and columns, rename a column, add a total, and make the selected cells bold, coloured or larger. Its
+ * changes fire `input` and `change` like an edit.
  *
  * The totals bar (`summary`) adds up the selection; each total is a button that writes its formula under the range
  * (`=SUM(C1:C4)` in C5), as `insertTotal()` does.
@@ -288,6 +321,7 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * @event {CustomEvent<SpreadsheetColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle or double-clicks it to fit the content. `detail.column` is the letter, `detail.index` the zero-based index and `detail.width` the new width in pixels, which is also written to `columns`.
  * @event {Event} input - Fired with every `cell-change`, for generic two-way bindings.
  * @event {Event} change - Fired with every `cell-change`, for generic two-way bindings.
+ * @attr styles - Cell styles keyed by address (`{"D5": {"bold": true, "background": "yellow"}}`), as JSON. Edits write a new object to the `styles` property, so it always holds the current styles.
  *
  * @csspart resizer - The grab area at a column header's right edge.
  *
@@ -407,6 +441,20 @@ export class Spreadsheet extends LitElement {
   /** Lets the user name a column by double-clicking its header. `renameColumn()` works without it. */
   @property({ type: Boolean, attribute: 'rename-columns' }) renameColumns = false
 
+  /**
+   * A right-click menu of its own: insert and delete rows and columns, rename a column, add a total, and make the
+   * selected cells bold, coloured or larger. Its changes fire `input` and `change` like an edit. Leave it off when an
+   * enclosing `c2-context-menu` builds the menu (it gets `SpreadsheetContextMenuData`).
+   */
+  @property({ type: Boolean, attribute: 'context-menu' }) contextMenu = false
+
+  /**
+   * Shows the selection and the current cell only while the sheet has the focus or its menu is open (its own, or a
+   * `c2-context-menu` it sits in), for a sheet among other content (a card on a board, a table in a page) where a
+   * highlight left behind reads as still being there.
+   */
+  @property({ type: Boolean, attribute: 'hide-selection-on-blur' }) hideSelectionOnBlur = false
+
   /** Shows the current cell's address and raw input above the grid. The formula bar is editable. */
   @property({ type: Boolean, attribute: 'formula-bar' }) formulaBar = false
 
@@ -441,6 +489,12 @@ export class Spreadsheet extends LitElement {
   @state() private helpClosed = false
   /** The fx button asked for every function. */
   @state() private showAllFunctions = false
+  /** The focus is in the sheet (its grid, an editor, its menu). */
+  @state() private focusWithin = false
+  /** The sheet's own right-click menu, or the c2-context-menu around it, is open. */
+  @state() private cellMenuOpen = false
+  /** The c2-context-menu the sheet sits in, whose menu acts on the sheet's selection as its own does. */
+  private outerMenu: Element | null = null
 
   private readonly msg = new LocalizeController(this, spreadsheetMessages)
 
@@ -643,6 +697,7 @@ export class Spreadsheet extends LitElement {
       this.redoStack = []
     }
     if (changed.has('functions')) this.model.setFunctions(this.functions ?? {})
+    if (this.contextMenu) void loadContextMenu()
     if (changed.has('locale') || changed.has('currency')) this.formatters.clear()
     this.cursor = this.clamp(this.cursor)
     this.extent = this.clamp(this.extent)
@@ -678,9 +733,21 @@ export class Spreadsheet extends LitElement {
     }
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.addEventListener('focusin', this.onFocusIn)
+    this.addEventListener('focusout', this.onFocusOut)
+    this.outerMenu = this.closest('c2-context-menu')
+    this.outerMenu?.addEventListener('toggle', this.onOuterMenuToggle)
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     window.removeEventListener('pointerup', this.stopDragging)
+    this.removeEventListener('focusin', this.onFocusIn)
+    this.removeEventListener('focusout', this.onFocusOut)
+    this.outerMenu?.removeEventListener('toggle', this.onOuterMenuToggle)
+    this.outerMenu = null
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -759,8 +826,77 @@ export class Spreadsheet extends LitElement {
       )
     }
 
+    const scroller = html`<div class="scroller">
+      <div
+        class="grid"
+        role="grid"
+        tabindex="0"
+        aria-label=${this.label || nothing}
+        aria-readonly=${this.readonly ? 'true' : 'false'}
+        aria-multiselectable="true"
+        aria-activedescendant=${`cell-${activeKey}`}
+        style=${styleMap({ gridTemplateColumns: template })}
+        @keydown=${this.onGridKeyDown}
+        @pointerdown=${this.onPointerDown}
+        @pointerover=${this.onPointerOver}
+        @dblclick=${this.onDoubleClick}
+        @c2-context-menu-request=${this.onContextMenuRequest}
+        @copy=${this.onCopy}
+        @cut=${this.onCut}
+        @paste=${this.onPaste}
+      >
+        <div role="row" class="row">
+          <div role="columnheader" class="header corner" data-corner><span class="visually-hidden">Row</span></div>
+          ${columns.map(
+            (column, index) =>
+              html`<div
+                role="columnheader"
+                class=${classMap({ header: true, 'column-header': true, selected: index >= box.start.column && index <= box.end.column })}
+                data-column=${index}
+              >
+                <span class="column-letter">${columnName(index)}</span>${
+                  this.renaming?.index === index
+                    ? html`<input
+                        class="label-editor"
+                        aria-label=${this.msg.t('columnName', columnName(index))}
+                        spellcheck="false"
+                        autocomplete="off"
+                        data-index=${index}
+                        .value=${live(this.renaming.value)}
+                        @input=${this.onRenameInput}
+                        @keydown=${this.onRenameKeyDown}
+                        @blur=${this.onRenameBlur}
+                      />`
+                    : column.label
+                      ? html`<span class="column-label">${column.label}</span>`
+                      : nothing
+                }
+                ${
+                  (column.resizable ?? this.resizable)
+                    ? html`<span
+                        class="resizer"
+                        part="resizer"
+                        aria-hidden="true"
+                        @pointerdown=${(event: PointerEvent) => this.startResize(event, index)}
+                        @dblclick=${(event: MouseEvent) => this.fitColumn(event, index)}
+                      ></span>`
+                    : nothing
+                }
+              </div>`,
+          )}
+        </div>
+        ${rows}
+      </div>
+    </div>`
+
     return html`
-      <div class=${classMap({ spreadsheet: true, readonly: this.readonly })}>
+      <div
+        class=${classMap({
+          spreadsheet: true,
+          readonly: this.readonly,
+          blurred: this.hideSelectionOnBlur && !this.focusWithin && !this.cellMenuOpen && !this.editing,
+        })}
+      >
         ${
           this.formulaBar
             ? html`<div class="formula-bar">
@@ -801,68 +937,17 @@ export class Spreadsheet extends LitElement {
               </div>`
             : nothing
         }
-        <div class="scroller">
-          <div
-            class="grid"
-            role="grid"
-            tabindex="0"
-            aria-label=${this.label || nothing}
-            aria-readonly=${this.readonly ? 'true' : 'false'}
-            aria-multiselectable="true"
-            aria-activedescendant=${`cell-${activeKey}`}
-            style=${styleMap({ gridTemplateColumns: template })}
-            @keydown=${this.onGridKeyDown}
-            @pointerdown=${this.onPointerDown}
-            @pointerover=${this.onPointerOver}
-            @dblclick=${this.onDoubleClick}
-            @c2-context-menu-request=${this.onContextMenuRequest}
-            @copy=${this.onCopy}
-            @cut=${this.onCut}
-            @paste=${this.onPaste}
-          >
-            <div role="row" class="row">
-              <div role="columnheader" class="header corner" data-corner><span class="visually-hidden">Row</span></div>
-              ${columns.map(
-                (column, index) =>
-                  html`<div
-                    role="columnheader"
-                    class=${classMap({ header: true, 'column-header': true, selected: index >= box.start.column && index <= box.end.column })}
-                    data-column=${index}
-                  >
-                    <span class="column-letter">${columnName(index)}</span>${
-                      this.renaming?.index === index
-                        ? html`<input
-                            class="label-editor"
-                            aria-label=${this.msg.t('columnName', columnName(index))}
-                            spellcheck="false"
-                            autocomplete="off"
-                            data-index=${index}
-                            .value=${live(this.renaming.value)}
-                            @input=${this.onRenameInput}
-                            @keydown=${this.onRenameKeyDown}
-                            @blur=${this.onRenameBlur}
-                          />`
-                        : column.label
-                          ? html`<span class="column-label">${column.label}</span>`
-                          : nothing
-                    }
-                    ${
-                      (column.resizable ?? this.resizable)
-                        ? html`<span
-                            class="resizer"
-                            part="resizer"
-                            aria-hidden="true"
-                            @pointerdown=${(event: PointerEvent) => this.startResize(event, index)}
-                            @dblclick=${(event: MouseEvent) => this.fitColumn(event, index)}
-                          ></span>`
-                        : nothing
-                    }
-                  </div>`,
-              )}
-            </div>
-            ${rows}
-          </div>
-        </div>
+        ${
+          this.contextMenu && !this.readonly
+            ? html`<c2-context-menu
+                class="cell-menu"
+                .renderContextMenu=${this.renderCellMenu}
+                @context-menu-select=${this.onCellMenuSelect}
+                @toggle=${this.onCellMenuToggle}
+                >${scroller}</c2-context-menu
+              >`
+            : scroller
+        }
         ${this.summary ? html`<div class="summary">${this.renderSummary(box)}</div>` : nothing} ${this.renderHelp(suggestions, suggestionIndex)}
         <div class="visually-hidden" role="status">${this.announcement}</div>
       </div>
@@ -907,6 +992,148 @@ export class Spreadsheet extends LitElement {
       'COUNTA',
       count,
     )}`
+  }
+
+  /** The built-in right-click menu, for the cells the request selected (`context-menu`). */
+  private renderCellMenu = ({ data }: { data?: unknown }) => {
+    if (this.readonly || !data) return nothing
+    const { area, start, end, active } = data as SpreadsheetContextMenuData
+    const t = this.msg.t.bind(this.msg)
+    const rows = area !== 'column'
+    const columns = area !== 'row'
+    const several = start.row !== end.row || start.column !== end.column
+    const style = this.cellStyles.get(normaliseRef(active) ?? '') ?? {}
+    const swatch = (kind: 'color' | 'background', color: SpreadsheetColor | null) => {
+      const paint = color
+        ? kind === 'color'
+          ? `color: var(--c2-spreadsheet--color-${color}, ${COLOR_DEFAULTS[color]});`
+          : `background: var(--c2-spreadsheet--background-${color}, ${BACKGROUND_DEFAULTS[color]});`
+        : ''
+      return html`<span slot="prefix-icon" aria-hidden="true" style=${SWATCH + paint}>A</span>`
+    }
+    // The menu renders in the context menu's shadow root, out of reach of this element's styles: swatches are styled inline.
+    const palette = (kind: 'color' | 'background', current: SpreadsheetColor | undefined) =>
+      html`<c2-menu slot="submenu">
+        <c2-menu-row>
+          <c2-menu-item
+            type="radio"
+            name=${kind}
+            value=${`${kind}-default`}
+            label=${t(kind === 'color' ? 'defaultColour' : 'noBackground')}
+            ?checked=${!current}
+            >${swatch(kind, null)}</c2-menu-item
+          >
+          ${SPREADSHEET_COLORS.map(
+            (color) =>
+              html`<c2-menu-item type="radio" name=${kind} value=${`${kind}-${color}`} label=${t(color)} ?checked=${current === color}
+                >${swatch(kind, color)}</c2-menu-item
+              >`,
+          )}
+        </c2-menu-row>
+      </c2-menu>`
+    return html`
+      ${rows ? html`<c2-menu-item value="row-above">${MENU_ICONS.rowAbove}${t('insertRowAbove')}</c2-menu-item><c2-menu-item value="row-below">${MENU_ICONS.rowBelow}${t('insertRowBelow')}</c2-menu-item>` : nothing}
+      ${
+        columns
+          ? html`<c2-menu-item value="column-left">${MENU_ICONS.columnLeft}${t('insertColumnLeft')}</c2-menu-item
+              ><c2-menu-item value="column-right">${MENU_ICONS.columnRight}${t('insertColumnRight')}</c2-menu-item>`
+          : nothing
+      }
+      ${columns && this.renameColumns ? html`<c2-menu-item value="rename-column">${MENU_ICONS.rename}${t('renameColumn')}</c2-menu-item>` : nothing}
+      ${
+        several
+          ? html`<c2-menu-item value="total"
+              >${MENU_ICONS.total}${t('addTotal')}
+              <c2-menu slot="submenu">
+                <c2-menu-item value="total-SUM">${t('sum')}</c2-menu-item>
+                <c2-menu-item value="total-AVERAGE">${t('average')}</c2-menu-item>
+                <c2-menu-item value="total-COUNTA">${t('count')}</c2-menu-item>
+                <c2-menu-item value="total-MIN">${t('minimum')}</c2-menu-item>
+                <c2-menu-item value="total-MAX">${t('maximum')}</c2-menu-item>
+              </c2-menu>
+            </c2-menu-item>`
+          : nothing
+      }
+      <hr />
+      <c2-menu-item type="checkbox" value="bold" ?checked=${Boolean(style.bold)}>${MENU_ICONS.bold}${t('bold')}</c2-menu-item>
+      <c2-menu-item value="text-colour">${MENU_ICONS.textColour}${t('textColour')}${palette('color', style.color)}</c2-menu-item>
+      <c2-menu-item value="background-colour">${MENU_ICONS.background}${t('backgroundColour')}${palette('background', style.background)}</c2-menu-item>
+      <c2-menu-item value="text-size"
+        >${MENU_ICONS.size}${t('textSize')}
+        <c2-menu slot="submenu">
+          ${(['small', 'normal', 'large'] as const).map(
+            (size) =>
+              html`<c2-menu-item type="radio" name="size" value=${`size-${size}`} ?checked=${(style.size ?? 'normal') === size}
+                >${t(size === 'small' ? 'sizeSmall' : size === 'large' ? 'sizeLarge' : 'sizeNormal')}</c2-menu-item
+              >`,
+          )}
+        </c2-menu>
+      </c2-menu-item>
+      <hr />
+      ${rows ? html`<c2-menu-item value="delete-rows" destructive>${MENU_ICONS.delete}${t('deleteRows')}</c2-menu-item>` : nothing}
+      ${columns ? html`<c2-menu-item value="delete-columns" destructive>${MENU_ICONS.delete}${t('deleteColumns')}</c2-menu-item>` : nothing}
+    `
+  }
+
+  private onCellMenuSelect = (event: Event): void => {
+    event.stopPropagation()
+    const { value, context } = (event as CustomEvent<{ value: string; context: { data?: unknown } }>).detail
+    const data = context?.data as SpreadsheetContextMenuData | undefined
+    if (!data || this.readonly) return
+    const { start, end, range, active } = data
+    const rowCount = end.row - start.row + 1
+    const columnCount = end.column - start.column + 1
+    const format = /^(bold|color|background|size)(?:-(\w+))?$/.exec(value)
+    if (value === 'rename-column') return this.renameColumn(start.column)
+    if (format) {
+      const [, kind, name] = format
+      const change: SpreadsheetStyleChange =
+        kind === 'bold'
+          ? { bold: !this.getStyle(active)?.bold }
+          : kind === 'size'
+            ? { size: name as 'small' | 'normal' | 'large' }
+            : { [kind]: name === 'default' ? null : (name as SpreadsheetColor) }
+      const box = parseRange(range)
+      if (box) this.restyle(box, change, true)
+      this.notifyChanged()
+    } else if (value.startsWith('total-')) {
+      const box = parseRange(range)
+      if (box) this.writeTotal(value.slice(6) as SpreadsheetTotal, box, true)
+    } else {
+      if (value === 'row-above') this.insertRows(start.row, rowCount)
+      else if (value === 'row-below') this.insertRows(end.row + 1, rowCount)
+      else if (value === 'column-left') this.insertColumns(start.column, columnCount)
+      else if (value === 'column-right') this.insertColumns(end.column + 1, columnCount)
+      else if (value === 'delete-rows') this.deleteRows(start.row, rowCount)
+      else if (value === 'delete-columns') this.deleteColumns(start.column, columnCount)
+      else return
+      this.notifyChanged()
+    }
+    this.focusGrid()
+  }
+
+  private onCellMenuToggle = (event: Event): void => {
+    this.cellMenuOpen = (event as ToggleEvent).newState === 'open'
+  }
+
+  /** The menu around the sheet: its own toggle, not that of a menu or popover inside the sheet bubbling up to it. */
+  private onOuterMenuToggle = (event: Event): void => {
+    if (event.target === this.outerMenu) this.onCellMenuToggle(event)
+  }
+
+  /** The focus came in, or left: checked once it has landed, as it may only be moving within the sheet. */
+  private onFocusIn = (): void => {
+    this.focusWithin = true
+  }
+
+  private onFocusOut = (): void => {
+    setTimeout(() => (this.focusWithin = this.matches(':focus-within')))
+  }
+
+  /** A change from the built-in menu, reported as an edit is. */
+  private notifyChanged(): void {
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true }))
   }
 
   /** Where the totals of a range go: under each column of a taller range, after a one-row range. */

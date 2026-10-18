@@ -555,6 +555,56 @@ test('the totals bar writes its total as a formula under the range', async ({ pa
   expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('D1'), element.getInput('E1')])).toEqual(['=MAX(B1:C1)', '=B1*C1'])
 })
 
+test('context-menu opens a menu of its own that inserts rows and styles the selection', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet ', '<c2-spreadsheet context-menu rename-columns '))
+  const item = (value: string) => page.locator(`c2-spreadsheet c2-menu-item[value="${value}"]`)
+  await watch(host(page), 'change')
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await cell(page, 'B1').click({ button: 'right' })
+  await item('text-colour').hover()
+  await expect(item('color-red').locator('span')).not.toHaveCSS(
+    'color',
+    await item('color-default')
+      .locator('span')
+      .evaluate((element) => getComputedStyle(element).color),
+  )
+  await item('color-red').click()
+  expect(await host(page).evaluate((element: Spreadsheet) => element.styles)).toEqual({ A1: { color: 'red' }, B1: { color: 'red' } })
+
+  await cell(page, 'A1').click({ button: 'right' })
+  await item('row-above').click()
+  await expect(cell(page, 'A2')).toHaveText('Flights')
+  await expect(cell(page, 'A2')).toHaveClass(/color-red/)
+  await expect(host(page)).toHaveAttribute('data-events', '[null,null]')
+
+  // Read-only: no menu.
+  await host(page).evaluate((element: Spreadsheet) => (element.readonly = true))
+  await cell(page, 'A2').click({ button: 'right' })
+  await expect(item('bold')).toHaveCount(0)
+})
+
+test('hide-selection-on-blur shows the selection only while the sheet or its menu has the focus', async ({ page, renderScenario }) => {
+  await renderScenario(`${budget.replace('<c2-spreadsheet ', '<c2-spreadsheet context-menu hide-selection-on-blur ')}<input aria-label="Elsewhere" />`)
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await expect(cell(page, 'A1')).not.toHaveCSS('outline-style', 'none')
+
+  // The menu takes the focus: the cells it acts on stay marked.
+  await cell(page, 'B1').click({ button: 'right' })
+  await expect(page.locator('c2-spreadsheet c2-menu-item[value="bold"]')).toBeVisible()
+  await expect(cell(page, 'A1')).not.toHaveCSS('outline-style', 'none')
+  await page.keyboard.press('Escape')
+
+  await page.getByLabel('Elsewhere').click()
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'none')
+  await expect(cell(page, 'B1')).toHaveCSS('background-image', 'none')
+
+  // Back in the sheet, the selection is where it was.
+  await cell(page, 'C2').click()
+  await expect(cell(page, 'C2')).not.toHaveCSS('outline-style', 'none')
+})
+
 test('focus() hands the keyboard to the current cell', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await host(page).evaluate(async (element: Spreadsheet) => {

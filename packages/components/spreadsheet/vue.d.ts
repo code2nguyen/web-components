@@ -21,11 +21,13 @@ declare module 'vue' {
     'c2-spreadsheet': DefineComponent<
       C2Props<Spreadsheet> & {
         'rename-columns'?: unknown
+        'context-menu'?: unknown
+        'hide-selection-on-blur'?: unknown
         'formula-bar'?: unknown
-        onSelectionChange?: (event: EventOf<Spreadsheet, 'selection-change'>) => void
-        onCellChange?: (event: EventOf<Spreadsheet, 'cell-change'>) => void
         onInput?: (event: EventOf<Spreadsheet, 'input'>) => void
         onChange?: (event: EventOf<Spreadsheet, 'change'>) => void
+        onSelectionChange?: (event: EventOf<Spreadsheet, 'selection-change'>) => void
+        onCellChange?: (event: EventOf<Spreadsheet, 'cell-change'>) => void
         onStyleChange?: (event: EventOf<Spreadsheet, 'style-change'>) => void
         onColumnRename?: (event: EventOf<Spreadsheet, 'column-rename'>) => void
         onColumnResize?: (event: EventOf<Spreadsheet, 'column-resize'>) => void

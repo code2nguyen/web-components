@@ -139,6 +139,10 @@ menu.addEventListener('context-menu-select', ({ detail }) => {
 
 Typing a formula is guided. After `=`, or on a name, a list offers the functions with their arguments and what they do: ↑↓ chooses and Tab or Enter inserts `SUM(`. Inside a call, a hint names its arguments with the current one in bold, and the result shows before Enter. Where a reference can go, clicking a cell puts it in the formula and dragging makes it a range. The formula bar's **fx** button lists every function. App functions from `functions` are listed by name.
 
+With `context-menu`, a right-click opens the sheet's own menu, loaded with the first sheet that asks for it: insert and delete rows and columns, rename a column, add a total, and make the selected cells bold, coloured or larger. Its changes fire `input` and `change` like an edit. Leave it off when you wrap the sheet in your own `c2-context-menu`, which receives `SpreadsheetContextMenuData`.
+
+With `hide-selection-on-blur`, the selection and the current cell show only while the sheet has the focus or a menu acting on it is open (its own, or a `c2-context-menu` around it). Use it for a sheet among other content, such as a card on a board or a table in a page, where a highlight left behind would look like the sheet is still in use.
+
 With `summary`, each total of the selection is a button that writes its formula next to the range: under each column of a taller range (`=SUM(C1:C4)` in C5), after a one-row range, with a row or column inserted when that place is taken. `insertTotal('SUM', 'C1:C4')` does the same from your own menu.
 
 Cells take a style in `styles` or through `setStyle(range, change)`: one of eight named text and background colours (`gray`, `brown`, `orange`, `yellow`, `green`, `blue`, `purple`, `red`), a `small` or `large` size, and `bold`, which Ctrl/⌘+B toggles on the selection. Styles move with their cells, paste with a range copied from the sheet and undo with the values; a user's change fires `style-change`.

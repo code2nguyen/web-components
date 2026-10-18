@@ -455,6 +455,26 @@ button.fx {
   outline-offset: -2px;
 }
 
+// hide-selection-on-blur: neither the focus nor the menu is in the sheet, so it shows no selection.
+.blurred {
+  .cell.selected {
+    background-image: none;
+  }
+
+  .cell.active {
+    outline: none;
+  }
+
+  .header.selected {
+    background-color: css.cssVar(header--background-color);
+    color: css.cssVar(header--color);
+
+    .column-label {
+      color: css.cssVar(column-label--color);
+    }
+  }
+}
+
 .cell.reference {
   outline: 2px dashed var(--_reference-color);
   outline-offset: -2px;
