@@ -1,0 +1,66 @@
+---
+title: 'View Options'
+description: 'The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ViewOptions } from '@c2n/components/view-options'
+
+`c2-view-options` is the **Display** button of Linear, Notion and GitHub Projects. Its panel chooses the layout, what the collection is grouped and sub-grouped by, how it is ordered (one level per row, **Add sort** for more), which kinds of items it includes and which properties each item shows. Filtering is not part of it: pair it with `c2-filter-builder`.
+
+The component holds no data and draws no items. It edits one value, `{ layout, groupBy, subGroupBy, orderBy, show, properties }`, and fires `view-change` with the whole value after every edit. Your app applies it to whatever renders the collection, so how an item looks stays entirely yours. `orderBy` is `c2-table`'s own `sortModel`, `groupBy` feeds its `group-by`, and `properties` maps onto its columns' `hidden`.
+
+Describe the fields with `c2-view-field` children (`groupable`, `orderable`, `property` say where each one is offered) or with a `fields` array, which replaces the children and shares `id`, `label` and `icon` with `c2-filter-builder`'s fields. The Show switches are `c2-view-toggle` children or a `toggles` array. `layouts` lists the layout ids; `list`, `board`, `table`, `gallery`, `calendar` and `timeline` come with an icon, and on a `board` Grouping and Sub-grouping read Columns and Rows. `max-sorts` caps the ordering levels (3 by default, 1 for a single sort).
+
+The component stores nothing. Keep `value` wherever your app keeps settings. With `default-value` set, **Reset** returns to it and the host matches `:state(changed)` while the value differs; `can-set-default` adds **Set as default**, which fires `default-request` and leaves saving to you.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/view-options'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/view-options
+<div data-label="Issues">
+  <c2-view-options layouts="list board table" can-set-default default-value='{"groupBy":"status"}' value='{"groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}'>
+    <c2-view-field field="status" label="Status" groupable orderable property></c2-view-field>
+    <c2-view-field field="priority" label="Priority" groupable orderable property></c2-view-field>
+    <c2-view-field field="assignee" label="Assignee" groupable property></c2-view-field>
+    <c2-view-field field="labels" label="Labels" property></c2-view-field>
+    <c2-view-field field="due" label="Due date" orderable property></c2-view-field>
+    <c2-view-toggle key="completed" label="Completed issues"></c2-view-toggle>
+    <c2-view-toggle key="sub" label="Sub-issues" checked></c2-view-toggle>
+  </c2-view-options>
+</div>
+<div data-label="Single sort">
+  <c2-view-options max-sorts="1" value='{"orderBy":[{"field":"name","direction":"asc"}]}' fields='[{"id":"name","label":"Name","orderable":true,"property":true},{"id":"team","label":"Team","groupable":true,"property":true},{"id":"joined","label":"Joined","orderable":true,"property":true}]'></c2-view-options>
+</div>
+<div data-label="Custom trigger">
+  <c2-view-options layouts="gallery table" fields='[{"id":"type","label":"Type","groupable":true,"property":true},{"id":"size","label":"Size","orderable":true,"property":true},{"id":"modified","label":"Modified","orderable":true,"property":true}]'>
+    <c2-button slot="trigger">View</c2-button>
+  </c2-view-options>
+</div>
+```
+
+Listen to `view-change` and apply the value to the collection. With a `c2-table` that takes three assignments:
+
+```typescript tag=CodeBlock
+const options = document.querySelector('c2-view-options')!
+const table = document.querySelector('c2-table')!
+
+options.addEventListener('view-change', (event) => {
+  const view = event.detail.value
+  table.groupBy = view.groupBy ? [view.groupBy] : []
+  table.sortModel = view.orderBy
+  for (const column of table.columns) column.hidden = !view.properties.includes(column.field)
+  localStorage.setItem('issues-view', JSON.stringify(view))
+})
+options.addEventListener('default-request', (event) => {
+  options.defaultValue = event.detail.value // after saving it for everyone
+})
+```

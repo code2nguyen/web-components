@@ -179,6 +179,7 @@
         "../../components/tree:build",
         "../../components/truncate:build",
         "../../components/upload:build",
+        "../../components/view-options:build",
         "../../components/virtual-list:build",
         "../../components/week-planner:build",
         "../../components/working-indicator:build",

@@ -222,6 +222,7 @@
         "./packages/components/tree:build",
         "./packages/components/truncate:build",
         "./packages/components/upload:build",
+        "./packages/components/view-options:build",
         "./packages/components/virtual-list:build",
         "./packages/components/week-planner:build",
         "./packages/components/working-indicator:build",

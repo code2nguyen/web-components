@@ -36,6 +36,18 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
   to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
 
+### `c2-select` opens from the keyboard but an option cannot be chosen with it
+
+- **Severity:** bug
+- **Hit while:** building `c2-view-options` (its Grouping and Ordering selects), 2026-10-19.
+- **What happens:** Enter or ArrowDown on the trigger opens the dropdown, but focus stays on the trigger. Further
+  arrow keys only re-open it, End does nothing, and Enter closes it without picking. Tab moves focus to the page
+  body rather than into the list. A pointer pick also leaves focus on the body once the popover closes. The suite
+  has no test that picks an option from the keyboard.
+- **Where the fix belongs:** `packages/components/select` — move focus into the `c2-list` when the dropdown opens
+  (it already handles arrows, Home/End, typeahead and Enter), and return it to the trigger when the dropdown closes,
+  with a keyboard-only test for picking an option.
+
 ### Charts have no time markers or annotated ranges
 
 - **Severity:** gap

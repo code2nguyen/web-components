@@ -1,0 +1,165 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-view-options,
+  $theme: (
+    panel--width: 320px,
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    section--padding: 12px,
+    section--gap: 10px,
+    section--border-top: 1px solid #e4e4e7,
+
+    label--color: #71717a,
+    label--font-size: 14px,
+    label--width: 104px,
+
+    heading--color: #71717a,
+    heading--font-size: 12px,
+    heading--font-weight: 600,
+    heading--letter-spacing: 0.06em,
+    heading--text-transform: uppercase,
+
+    footer--background: transparent,
+    changed--color: rgb(2, 101, 220),
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.glyph,
+.icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.changed {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: css.cssVar(changed--color);
+}
+
+.panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: css.cssVar(panel--width);
+  max-width: calc(100vw - 16px);
+  background: css.cssVar(panel--background);
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  box-shadow: css.cssVar(panel--box-shadow);
+  outline: none;
+  overflow: hidden;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(section--gap);
+  padding: css.cssVar(section--padding);
+
+  & + .section,
+  & + .footer {
+    border-top: css.cssVar(section--border-top);
+  }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: css.cssVar(label--width) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+
+  &.top {
+    align-items: start;
+  }
+
+  &.top > .label {
+    padding-top: 8px;
+  }
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+.heading {
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  letter-spacing: css.cssVar(heading--letter-spacing);
+  text-transform: css.cssVar(heading--text-transform);
+}
+
+c2-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.sorts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+
+  c2-select {
+    flex: 1;
+  }
+
+  c2-icon-button {
+    flex: none;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.add-sort {
+  align-self: flex-start;
+}
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: css.cssVar(section--padding);
+  background: css.cssVar(footer--background);
+
+  .reset {
+    margin-inline-end: auto;
+  }
+}

@@ -3172,6 +3172,24 @@
       "reason": "The semantic prompt region owns the prompt slot's component-side presentation."
     },
     {
+      "tag": "c2-view-options",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds c2-view-field and c2-view-toggle elements, which describe the panel and render nothing; it is hidden."
+    },
+    {
+      "tag": "c2-view-options",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-view-options",
+      "slot": "extra",
+      "decision": "assigned-content",
+      "reason": "The extra slot projects consumer-owned rows into the panel; style the assigned nodes through their own class or public contract."
+    },
+    {
       "tag": "c2-virtual-list",
       "slot": "empty",
       "decision": "part",
