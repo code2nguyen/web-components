@@ -165,6 +165,10 @@
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"
     },
+    "./chart/heatmap-chart": {
+      "types": "./dist/chart/heatmap-chart.d.ts",
+      "default": "./dist/chart/heatmap-chart.js"
+    },
     "./chart/line-chart": {
       "types": "./dist/chart/line-chart.d.ts",
       "default": "./dist/chart/line-chart.js"
