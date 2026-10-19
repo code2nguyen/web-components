@@ -43,6 +43,31 @@ export interface FlowSize {
  */
 export type FlowNodeShape = 'rect' | 'pill' | 'diamond' | 'circle' | 'note' | 'slanted'
 
+/**
+ * How an end of an edge is drawn: an `arrow` (the default at the target), `none` (the default at the source), or one
+ * of the crow's-foot cardinalities of an entity-relationship diagram: `one` (exactly one, two bars), `zero-one` (a
+ * circle and a bar), `many` (a crow's foot), `one-many` (a bar and a crow's foot) or `zero-many` (a circle and a
+ * crow's foot).
+ */
+export type FlowEdgeMarker = 'arrow' | 'none' | 'one' | 'zero-one' | 'many' | 'one-many' | 'zero-many'
+
+/**
+ * One row of a node: a column of a table, a field of a class. Every row is a port: an edge that names it in
+ * `sourcePort` or `targetPort` leaves or arrives at the row instead of the middle of the node's side.
+ */
+export interface FlowNodeRow {
+  /** Unique within its node. Edges refer to it as `sourcePort` / `targetPort`. */
+  id: string
+  /** The row's name. */
+  label: string
+  /** Short trailing value, such as a column's type. */
+  meta?: string
+  /** Shown before the label, like a node's `icon`: a Lit template, a DOM node or a string. Decorative. */
+  icon?: unknown
+  /** Rows of the row's own hover card, as `[label, value]` pairs or an object. Without them the node's card shows. */
+  details?: [string, string][] | Record<string, string>
+}
+
 /** One step of the flow. */
 export interface FlowNode<T = unknown> {
   /** Stable identity. Edges, the saved layout and the `node:<id>` slot refer to it. */
@@ -75,6 +100,16 @@ export interface FlowNode<T = unknown> {
    * (an emoji). Decorative: the label names the node.
    */
   icon?: unknown
+  /**
+   * Rows drawn under the label in the default body, each a port edges can attach to; see {@link FlowNodeRow}. A body
+   * drawn by `renderNode` or a `node:<id>` slot marks its own ports with a `data-flow-port="<row id>"` attribute.
+   */
+  rows?: FlowNodeRow[]
+  /**
+   * How many of `rows` show before the rest fold into a "+ N more" row, over the flow's `row-limit`; 0 shows them
+   * all. Rows an edge meets always show.
+   */
+  rowLimit?: number
   /** Anything else the application needs in its render functions. */
   data?: T
 }
@@ -99,6 +134,18 @@ export interface FlowEdge {
    * outside of the nodes; one with a side set runs from the middle of one side to the middle of the other.
    */
   targetSide?: FlowSide
+  /**
+   * The row of the source node the edge leaves from: the `id` of one of its `rows`, or the `data-flow-port` of an
+   * element in a custom body. The edge then meets that row's `left` or `right` side: the one `sourceSide` names, else
+   * the one facing the target. Two nodes can be joined by several edges between different rows.
+   */
+  sourcePort?: string
+  /** The row of the target node the edge arrives at; see `sourcePort`. */
+  targetPort?: string
+  /** How the source end is drawn; `none` when unset. */
+  sourceMarker?: FlowEdgeMarker
+  /** How the target end is drawn; `arrow` when unset. */
+  targetMarker?: FlowEdgeMarker
 }
 
 /** Positions keyed by node id, in canvas pixels (the top-left corner of each node). */
@@ -110,6 +157,8 @@ export interface FlowRenderContext<T = unknown> {
   status: FlowStatus
   selected: boolean
   direction: FlowDirection
+  /** For `renderCard` only: the row whose card is open, when the pointer is on a row that has `details`. */
+  row?: FlowNodeRow
 }
 
 /** Returns the body of one node or one hover card: a Lit template, a DOM node or a string. */
@@ -183,11 +232,33 @@ export interface FlowNodeAddDetail {
   source?: string
   /** Set with `source`: the side of `source` the connection was drawn from, for the new edge's `sourceSide`. */
   sourceSide?: FlowSide
+  /** Set with `source` when the connection was drawn from a row: the row, for the new edge's `sourcePort`. */
+  sourcePort?: string
   /**
    * Set with `source`: the side of the new node that `position` puts on the drop point, facing the source (the side
    * opposite `sourceSide`), for the new edge's `targetSide`.
    */
   targetSide?: FlowSide
+}
+
+/** `rows-toggle`: the user showed or folded the rows past the limit of node `id`. */
+export interface FlowRowsToggleDetail {
+  id: string
+  /** Whether every row now shows. */
+  expanded: boolean
+}
+
+/**
+ * `row-move`: the user moved row `row` of node `id` from index `from` to index `to` of its `rows`, in an `editable`
+ * flow. The flow does not reorder them: move the row in the node's `rows`.
+ */
+export interface FlowRowMoveDetail {
+  id: string
+  row: string
+  /** Its index in `rows` before the move. */
+  from: number
+  /** Its index in `rows` after the move, counted once the row is taken out and put back. */
+  to: number
 }
 
 /** `node-edit`: the user renamed a node with the inline editor. Update the node's `label`. */
@@ -203,12 +274,17 @@ export interface FlowNodeDeleteDetail {
 }
 
 /**
- * `edge-delete`: the user asked to delete the edge from `source` to `target`. Also the base of `edge-add`, which never
- * names the same node twice nor a pair that is already connected.
+ * `edge-delete`: the user asked to delete the edge from `source` to `target` (between those rows, when it has ports).
+ * Also the base of `edge-add`, which never names an edge that already exists, nor the same node twice unless between
+ * two different rows of it (a table referencing itself).
  */
 export interface FlowEdgeEventDetail {
   source: string
   target: string
+  /** The edge's `sourcePort`, when it has one. */
+  sourcePort?: string
+  /** The edge's `targetPort`, when it has one. */
+  targetPort?: string
 }
 
 /**
@@ -218,14 +294,20 @@ export interface FlowEdgeEventDetail {
 export interface FlowEdgeAddDetail extends FlowEdgeEventDetail {
   /**
    * The side of `source` whose handle the connection was dragged from; for a keyboard connection (`C`), the
-   * outgoing side of the `direction`.
+   * outgoing side of the `direction`. Left out when the connection starts on a row (`sourcePort`): that end faces the
+   * target by itself, wherever the nodes move.
    */
-  sourceSide: FlowSide
+  sourceSide?: FlowSide
   /**
    * The side of `target` it arrives by: the handle it was dropped on, else the side of the target nearest the
-   * pointer; for a keyboard connection, the incoming side of the `direction`.
+   * pointer; for a keyboard connection, the incoming side of the `direction`. Left out when the connection ends on a
+   * row (`targetPort`).
    */
-  targetSide: FlowSide
+  targetSide?: FlowSide
+  /** Set when the connection was dragged from a row's handle: that row. */
+  sourcePort?: string
+  /** Set when the connection was dropped on a row of the target: that row. */
+  targetPort?: string
 }
 
 /**
@@ -235,6 +317,8 @@ export interface FlowEdgeAddDetail extends FlowEdgeEventDetail {
 export interface FlowEdgeEditDetail {
   source: string
   target: string
+  sourcePort?: string
+  targetPort?: string
   /** The new label, trimmed. Empty when the user cleared it; never the current label. */
   label: string
 }

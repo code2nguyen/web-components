@@ -21,14 +21,28 @@ const flip = (rect: Rect): Rect => ({ x: rect.y, y: rect.x, width: rect.height, 
 /**
  * Where an edge's route runs: its SVG path, the point halfway along it (where its label goes), its end point and the
  * angle (degrees, clockwise from pointing right) it arrives at the target with, which is where its arrowhead points.
- * A route between chosen sides also carries its bounding box, which can reach past the two nodes.
+ * `start` and `startAngle` are the same for the source end: the angle points into the source, as a marker drawn there
+ * does. A route between chosen sides also carries its bounding box, which can reach past the two nodes.
  */
 export interface EdgeRoute {
   d: string
   mid: FlowPoint
+  start: FlowPoint
+  startAngle: number
   end: FlowPoint
   angle: number
   bounds?: Rect
+}
+
+/**
+ * Where on its node each end of an edge sits, when not the middle of its side: the middle of a row's side, for an
+ * edge between ports. The route still goes round the whole node.
+ */
+export interface EdgeAnchors {
+  start?: FlowPoint
+  end?: FlowPoint
+  /** Other nodes the route should not run behind, when it has a way round them. */
+  obstacles?: Rect[]
 }
 
 /** The point halfway along a polyline, measured by length. */
@@ -66,7 +80,7 @@ function routeLeftToRight(a: Rect, b: Rect, type: FlowEdgeType, back: boolean, m
   const end = { x: b.x, y: b.y + b.height / 2 }
   const polyline = (points: FlowPoint[], radius: number): EdgeRoute => {
     const mapped = points.map(map)
-    return { d: roundedPolyline(mapped, radius), mid: polylineMidpoint(mapped), end: map(end), angle }
+    return { d: roundedPolyline(mapped, radius), mid: polylineMidpoint(mapped), start: map(start), startAngle: angle + 180, end: map(end), angle }
   }
   if (back) {
     // Out of the source, round the far side of both nodes, and back into the target.
@@ -92,7 +106,7 @@ function routeLeftToRight(a: Rect, b: Rect, type: FlowEdgeType, back: boolean, m
   const [s, c1, c2, e] = [start, { x: start.x + pull, y: start.y }, { x: end.x - pull, y: end.y }, end].map(map)
   // The curve is symmetric about its centre, so t = 0.5 is also halfway along its length.
   const mid = { x: (s.x + 3 * c1.x + 3 * c2.x + e.x) / 8, y: (s.y + 3 * c1.y + 3 * c2.y + e.y) / 8 }
-  return { d: `M${point(s)} C${point(c1)} ${point(c2)} ${point(e)}`, mid, end: e, angle }
+  return { d: `M${point(s)} C${point(c1)} ${point(c2)} ${point(e)}`, mid, start: s, startAngle: angle + 180, end: e, angle }
 }
 
 /**
@@ -203,9 +217,9 @@ function reverses(a: FlowPoint, b: FlowPoint, c: FlowPoint): boolean {
  * round the outside of both nodes) it takes the one that runs through neither node, then the shortest, counting
  * every turn as a little extra length.
  */
-function stepPoints(a: Rect, sa: FlowSide, b: Rect, sb: FlowSide): FlowPoint[] {
-  const start = sidePoint(a, sa)
-  const end = sidePoint(b, sb)
+function stepPoints(a: Rect, sa: FlowSide, b: Rect, sb: FlowSide, anchors: EdgeAnchors = {}): FlowPoint[] {
+  const start = anchors.start ?? sidePoint(a, sa)
+  const end = anchors.end ?? sidePoint(b, sb)
   const s = { x: start.x + NORMALS[sa].x * STUB, y: start.y + NORMALS[sa].y * STUB }
   const t = { x: end.x + NORMALS[sb].x * STUB, y: end.y + NORMALS[sb].y * STUB }
   const left = Math.min(a.x, b.x) - LOOP_CLEARANCE
@@ -231,6 +245,8 @@ function stepPoints(a: Rect, sa: FlowSide, b: Rect, sb: FlowSide): FlowPoint[] {
       score += Math.hypot(q.x - p.x, q.y - p.y)
       if (crosses(p, q, a)) score += 1e6
       if (b !== a && crosses(p, q, b)) score += 1e6
+      // Behind another node is better than through either end, but worse than any way round.
+      for (const obstacle of anchors.obstacles ?? []) if (crosses(p, q, obstacle)) score += 1e5
     }
     score += (points.length - 2) * 12
     if (score < bestScore) {
@@ -264,35 +280,51 @@ const pull = (ahead: number) => (ahead >= 0 ? Math.max(28, ahead / 2) : Math.max
  * perpendicular to its source side and arrives perpendicular to its target side, whatever the two sides are (the
  * same side, opposite sides, or the target behind the source). A `step` route goes round both nodes rather than
  * through them; a `bezier` route is a single curve, unless that curve would cut through one of the nodes: it then
- * takes the step route with wide rounded corners, as a back edge does.
+ * takes the step route with wide rounded corners, as a back edge does. `anchors` move either end along its side, to a
+ * row of the node.
  */
-export function sideEdgeRoute(source: Rect, sa: FlowSide, target: Rect, sb: FlowSide, type: FlowEdgeType): EdgeRoute {
+export function sideEdgeRoute(source: Rect, sa: FlowSide, target: Rect, sb: FlowSide, type: FlowEdgeType, anchors: EdgeAnchors = {}): EdgeRoute {
   const angle = ARRIVAL[sb]
-  if (type === 'step') {
-    const points = stepPoints(source, sa, target, sb)
-    return { d: roundedPolyline(points, 8), mid: polylineMidpoint(points), end: points[points.length - 1], angle, bounds: boundsOf(points) }
-  }
-  const s = sidePoint(source, sa)
-  const e = sidePoint(target, sb)
+  const startAngle = ARRIVAL[sa]
+  const polyline = (points: FlowPoint[], radius: number): EdgeRoute => ({
+    d: roundedPolyline(points, radius),
+    mid: polylineMidpoint(points),
+    start: points[0],
+    startAngle,
+    end: points[points.length - 1],
+    angle,
+    bounds: boundsOf(points),
+  })
+  if (type === 'step') return polyline(stepPoints(source, sa, target, sb, anchors), 8)
+  const s = anchors.start ?? sidePoint(source, sa)
+  const e = anchors.end ?? sidePoint(target, sb)
   const [na, nb] = [NORMALS[sa], NORMALS[sb]]
   const pa = pull((e.x - s.x) * na.x + (e.y - s.y) * na.y)
   const pb = pull((s.x - e.x) * nb.x + (s.y - e.y) * nb.y)
   const c1 = { x: s.x + na.x * pa, y: s.y + na.y * pa }
   const c2 = { x: e.x + nb.x * pb, y: e.y + nb.y * pb }
   const samples = sampleCubic(s, c1, c2, e)
-  if (samples.some((p) => inside(p, source) || inside(p, target))) {
+  if (samples.some((p) => inside(p, source) || inside(p, target) || anchors.obstacles?.some((obstacle) => inside(p, obstacle)))) {
     // The curve would cut through a node (a target behind its source, two sides facing away from each other): go
     // round the outside like a back edge, on the step route with wide rounded corners.
-    const points = stepPoints(source, sa, target, sb)
-    return { d: roundedPolyline(points, 16), mid: polylineMidpoint(points), end: points[points.length - 1], angle, bounds: boundsOf(points) }
+    return polyline(stepPoints(source, sa, target, sb, anchors), 16)
   }
-  return { d: `M${point(s)} C${point(c1)} ${point(c2)} ${point(e)}`, mid: polylineMidpoint(samples), end: e, angle, bounds: boundsOf(samples) }
+  return {
+    d: `M${point(s)} C${point(c1)} ${point(c2)} ${point(e)}`,
+    mid: polylineMidpoint(samples),
+    start: s,
+    startAngle,
+    end: e,
+    angle,
+    bounds: boundsOf(samples),
+  }
 }
 
 /**
  * The route of an edge leaving `source` by `sourceSide` and arriving at `target` by `targetSide`. A side left out is
  * the default for the direction (the outgoing side of the source, the incoming side of the target); when both sides
- * are the defaults the edge takes the {@link edgeRoute} it always had, back-edge loop included.
+ * are the defaults and no end is anchored to a row, the edge takes the {@link edgeRoute} it always had, back-edge loop
+ * included.
  */
 export function routeBetween(
   source: Rect,
@@ -302,12 +334,29 @@ export function routeBetween(
   back: boolean,
   sourceSide?: FlowSide,
   targetSide?: FlowSide,
+  anchors: EdgeAnchors = {},
 ): EdgeRoute {
   const defaults = defaultSides(direction)
   const sa = sourceSide ?? defaults.source
   const sb = targetSide ?? defaults.target
-  if (sa === defaults.source && sb === defaults.target) return edgeRoute(source, target, direction, type, back)
-  return sideEdgeRoute(source, sa, target, sb, type)
+  if (sa === defaults.source && sb === defaults.target && !anchors.start && !anchors.end) return edgeRoute(source, target, direction, type, back)
+  return sideEdgeRoute(source, sa, target, sb, type, anchors)
+}
+
+/** The point on side `side` of `rect` level with a row spanning `top` to `top + height` (offsets from `rect.y`). */
+export function rowPoint(rect: Rect, side: 'left' | 'right', top: number, height: number): FlowPoint {
+  return { x: side === 'left' ? rect.x : rect.x + rect.width, y: rect.y + top + height / 2 }
+}
+
+/**
+ * The sides two rows face each other by: the source's side towards the target and the target's towards the source.
+ * Two nodes that overlap across (one above the other, or a node linked to itself) both use their right side, so the
+ * edge loops round the outside rather than through them.
+ */
+export function facingSides(source: Rect, target: Rect): { source: 'left' | 'right'; target: 'left' | 'right' } {
+  if (target.x >= source.x + source.width) return { source: 'right', target: 'left' }
+  if (target.x + target.width <= source.x) return { source: 'left', target: 'right' }
+  return { source: 'right', target: 'right' }
 }
 
 /**

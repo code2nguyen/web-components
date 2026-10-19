@@ -725,6 +725,16 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__edge--color': { token: 'color-outline' },
   '--c2-flow__success--color': { exclude: 'success status colour' },
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
+  // The lines between a node's rows are a fainter hairline than its outline, and a highlighted row is a wash of the
+  // primary colour, so both stay quiet on a dark node.
+  '--c2-flow__row--border-top': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-outline-variant, #e4e4e7) 60%, transparent)',
+  },
+  '--c2-flow__row__highlighted--background-color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
   // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
   // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
   // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
