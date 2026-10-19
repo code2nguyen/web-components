@@ -373,6 +373,251 @@ test('Tab outside an edit leaves the grid', async ({ page, renderScenario, tab }
   await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
 })
 
+test('rename-columns names a column in its header: Enter saves, Tab goes on, Escape cancels', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-spreadsheet label="Budget" rows="2" columns="3" rename-columns></c2-spreadsheet>`)
+  const header = (index: number) => page.locator('c2-spreadsheet .column-header').nth(index)
+  const field = page.locator('c2-spreadsheet .label-editor')
+  await watch(host(page), 'column-rename')
+  await header(0).dblclick()
+  await expect(field).toBeFocused()
+  await expect(field).toHaveAttribute('aria-label', 'Name of column A')
+  await page.keyboard.type('Item')
+  await page.keyboard.press('Tab')
+  await expect(field).toHaveAttribute('aria-label', 'Name of column B')
+  await page.keyboard.type('Cost')
+  await page.keyboard.press('Enter')
+  await expect(grid(page)).toBeFocused()
+  await expect(header(0)).toHaveText(/A\s*Item/)
+  await expect(header(1)).toHaveText(/B\s*Cost/)
+  await expect(host(page)).toHaveAttribute(
+    'data-events',
+    JSON.stringify([
+      { column: 'A', index: 0, label: 'Item', previous: '' },
+      { column: 'B', index: 1, label: 'Cost', previous: '' },
+    ]),
+  )
+  expect(await host(page).evaluate((element: Spreadsheet) => element.columns)).toEqual([{ label: 'Item' }, { label: 'Cost' }, {}])
+
+  // From code, and cancelled with Escape.
+  await host(page).evaluate((element: Spreadsheet) => element.renameColumn(0))
+  await expect(field).toHaveValue('Item')
+  await page.keyboard.type('Nope')
+  await page.keyboard.press('Escape')
+  await expect(header(0)).toHaveText(/A\s*Item/)
+
+  // Without the attribute, a double-click on a header does not open it.
+  await host(page).evaluate((element: Spreadsheet) => (element.renameColumns = false))
+  await header(2).dblclick()
+  await expect(field).toHaveCount(0)
+})
+
+test('styles colour, size and bold cells, move with them and undo with the values', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-spreadsheet label="Budget" rows="4" columns="3" data='[["a","b"],["c","d"]]' styles='{"A1":{"background":"yellow","bold":true},"B1":{"color":"nope"}}'></c2-spreadsheet>`,
+  )
+  await expect(cell(page, 'A1')).toHaveClass(/background-yellow/)
+  await expect(cell(page, 'A1')).toHaveClass(/bold/)
+  await expect(cell(page, 'A1')).toHaveCSS('font-weight', '600')
+  await expect(cell(page, 'B1')).not.toHaveClass(/color-/)
+
+  // From code: parts merge, null removes one, and no event fires.
+  await watch(host(page), 'style-change')
+  await host(page).evaluate((element: Spreadsheet) => {
+    element.setStyle('A1:B2', { color: 'red', size: 'large' })
+    element.setStyle('A1', { background: null })
+  })
+  expect(await host(page).evaluate((element: Spreadsheet) => element.styles)).toEqual({
+    A1: { color: 'red', size: 'large', bold: true },
+    B1: { color: 'red', size: 'large' },
+    A2: { color: 'red', size: 'large' },
+    B2: { color: 'red', size: 'large' },
+  })
+  await expect(host(page)).toHaveAttribute('data-events', '[]')
+
+  // Ctrl/⌘+B: bold unless every cell already is.
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await page.keyboard.press('ControlOrMeta+b')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getStyle('A1')?.bold, element.getStyle('B1')?.bold])).toEqual([true, true])
+  await expect(host(page)).toHaveAttribute(
+    'data-events',
+    JSON.stringify([{ changes: [{ ref: 'B1', style: { color: 'red', size: 'large', bold: true }, previous: { color: 'red', size: 'large' } }] }]),
+  )
+  await page.keyboard.press('ControlOrMeta+b')
+  await expect(cell(page, 'A1')).not.toHaveClass(/bold/)
+  await page.keyboard.press('ControlOrMeta+z')
+  await expect(cell(page, 'A1')).toHaveClass(/bold/)
+
+  // A copied range pastes its styles; one undo takes back the values and the styles.
+  await clipboardEvent(grid(page), 'copy')
+  await cell(page, 'A4').click()
+  await clipboardEvent(grid(page), 'paste', 'a\tb')
+  expect(await host(page).evaluate((element: Spreadsheet) => element.getStyle('B4'))).toEqual({ color: 'red', size: 'large', bold: true })
+  await page.keyboard.press('ControlOrMeta+z')
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('A4'), element.getStyle('A4')])).toEqual(['', undefined])
+
+  // Inserting a row moves the styles down with their cells.
+  await host(page).evaluate((element: Spreadsheet) => element.insertRows(0))
+  expect(Object.keys(await host(page).evaluate((element: Spreadsheet) => element.styles)).sort()).toEqual(['A2', 'A3', 'B2', 'B3'])
+})
+
+test('typing a formula suggests functions, hints their arguments, previews the result and points at cells', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  const help = page.locator('c2-spreadsheet .help')
+  const options = page.locator('c2-spreadsheet .help-option')
+  const editor = page.locator('c2-spreadsheet .editor')
+  await cell(page, 'B5').click()
+  await page.keyboard.type('=')
+  await expect(options.first()).toContainText('SUM(value1, [value2, …])')
+  await expect(options.first()).toHaveAttribute('aria-selected', 'true')
+  await page.keyboard.type('su')
+  await expect(options).toHaveText([/SUM\(value1/, /SUMIF\(range, condition/])
+  await expect(editor).toHaveAttribute('aria-activedescendant', 'function-0')
+  await page.keyboard.press('ArrowDown')
+  await expect(editor).toHaveAttribute('aria-activedescendant', 'function-1')
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('Tab')
+  await expect(editor).toHaveValue('=SUM(')
+  await expect(help.locator('.current')).toHaveText('value1')
+  await expect(help).toContainText('Click or drag over cells to add them')
+
+  // A click then a drag put a range in the formula; the result shows before Enter, which closes the call.
+  await cell(page, 'B1').hover()
+  await page.mouse.down()
+  await cell(page, 'B2').hover()
+  await page.mouse.up()
+  await expect(editor).toHaveValue('=SUM(B1:B2')
+  await expect(help.locator('.result')).toHaveText('Result 5')
+  await page.keyboard.type(',')
+  await expect(help.locator('.current')).toHaveText('[value2, …]')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.press('Enter')
+  expect(await host(page).evaluate((element: Spreadsheet) => element.getInput('B5'))).toBe('=SUM(B1:B2)')
+  await expect(cell(page, 'B5')).toHaveText('5')
+
+  // Escape closes the list first, then cancels.
+  await cell(page, 'C5').click()
+  await page.keyboard.type('=a')
+  await expect(options).toHaveText([/AVERAGE/, /ABS/, /AND/])
+  await page.keyboard.press('Escape')
+  await expect(help).toHaveCount(0)
+  await expect(editor).toHaveValue('=a')
+  await page.keyboard.press('Escape')
+  await expect(editor).toHaveCount(0)
+})
+
+test('editing text keeps the cell font, a formula switches to the code font', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await cell(page, 'A1').dblclick()
+  const editor = page.locator('c2-spreadsheet .editor')
+  const font = await cell(page, 'A2').evaluate((element) => [getComputedStyle(element).fontFamily, getComputedStyle(element).fontSize])
+  expect(await editor.evaluate((element) => [getComputedStyle(element).fontFamily, getComputedStyle(element).fontSize])).toEqual(font)
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('=1')
+  await expect(editor).toHaveCSS('font-family', /monospace/)
+})
+
+test('fx lists every function and starts a formula in the current cell', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet ', '<c2-spreadsheet formula-bar '))
+  await cell(page, 'B5').click()
+  await page.locator('c2-spreadsheet button.fx').click()
+  const input = page.locator('c2-spreadsheet .formula-input')
+  await expect(input).toBeFocused()
+  await expect(input).toHaveValue('=')
+  await expect(page.locator('c2-spreadsheet .help-option')).toHaveCount(20)
+  await page.locator('c2-spreadsheet .help-option', { hasText: 'TODAY' }).click()
+  await expect(input).toHaveValue('=TODAY()')
+  await expect(input).toBeFocused()
+})
+
+test('the totals bar writes its total as a formula under the range', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet ', '<c2-spreadsheet summary '))
+  await watch(host(page), 'cell-change')
+  await cell(page, 'B1').click()
+  await page.keyboard.press('Shift+ArrowDown')
+  const sum = page.locator('c2-spreadsheet .total', { hasText: 'Sum' })
+  await expect(sum).toHaveAttribute('title', 'Insert =SUM(B1:B2) in B3')
+  await sum.click()
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('B3'), element.selection])).toEqual(['=SUM(B1:B2)', 'B3'])
+  await expect(cell(page, 'B3')).toHaveText('5')
+
+  // B3 is taken now: a row goes in for the next total. A one-row range gets its total after it.
+  await cell(page, 'B1').click()
+  await page.keyboard.press('Shift+ArrowDown')
+  await page.locator('c2-spreadsheet .total', { hasText: 'Average' }).click()
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('B3'), element.getInput('B4'), element.rows])).toEqual([
+    '=AVERAGE(B1:B2)',
+    '=SUM(B1:B2)',
+    7,
+  ])
+  expect(await host(page).evaluate((element: Spreadsheet) => element.insertTotal('MAX', 'B1:C1'))).toBe('D1')
+  // D1 was taken: a column went in, and its formula moved over to E1.
+  expect(await host(page).evaluate((element: Spreadsheet) => [element.getInput('D1'), element.getInput('E1')])).toEqual(['=MAX(B1:C1)', '=B1*C1'])
+})
+
+test('context-menu opens a menu of its own that inserts rows and styles the selection', async ({ page, renderScenario }) => {
+  await renderScenario(budget.replace('<c2-spreadsheet ', '<c2-spreadsheet context-menu rename-columns '))
+  const item = (value: string) => page.locator(`c2-spreadsheet c2-menu-item[value="${value}"]`)
+  await watch(host(page), 'change')
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await cell(page, 'B1').click({ button: 'right' })
+  await item('text-colour').hover()
+  await expect(item('color-red').locator('span')).not.toHaveCSS(
+    'color',
+    await item('color-default')
+      .locator('span')
+      .evaluate((element) => getComputedStyle(element).color),
+  )
+  await item('color-red').click()
+  expect(await host(page).evaluate((element: Spreadsheet) => element.styles)).toEqual({ A1: { color: 'red' }, B1: { color: 'red' } })
+
+  await cell(page, 'A1').click({ button: 'right' })
+  await item('row-above').click()
+  await expect(cell(page, 'A2')).toHaveText('Flights')
+  await expect(cell(page, 'A2')).toHaveClass(/color-red/)
+  await expect(host(page)).toHaveAttribute('data-events', '[null,null]')
+
+  // Read-only: no menu.
+  await host(page).evaluate((element: Spreadsheet) => (element.readonly = true))
+  await cell(page, 'A2').click({ button: 'right' })
+  await expect(item('bold')).toHaveCount(0)
+})
+
+test('hide-selection-on-blur shows the selection only while the sheet or its menu has the focus', async ({ page, renderScenario }) => {
+  await renderScenario(`${budget.replace('<c2-spreadsheet ', '<c2-spreadsheet context-menu hide-selection-on-blur ')}<input aria-label="Elsewhere" />`)
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await expect(cell(page, 'A1')).not.toHaveCSS('outline-style', 'none')
+
+  // The menu takes the focus: the cells it acts on stay marked.
+  await cell(page, 'B1').click({ button: 'right' })
+  await expect(page.locator('c2-spreadsheet c2-menu-item[value="bold"]')).toBeVisible()
+  await expect(cell(page, 'A1')).not.toHaveCSS('outline-style', 'none')
+  await page.keyboard.press('Escape')
+
+  await page.getByLabel('Elsewhere').click()
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'none')
+  await expect(cell(page, 'B1')).toHaveCSS('background-image', 'none')
+
+  // Back in the sheet, the selection is where it was.
+  await cell(page, 'C2').click()
+  await expect(cell(page, 'C2')).not.toHaveCSS('outline-style', 'none')
+})
+
+test('focus() hands the keyboard to the current cell', async ({ page, renderScenario }) => {
+  await renderScenario(budget)
+  await host(page).evaluate(async (element: Spreadsheet) => {
+    element.select('B2')
+    await element.updateComplete
+    element.focus()
+  })
+  await expect(grid(page)).toBeFocused()
+  await page.keyboard.type('7')
+  await page.keyboard.press('Enter')
+  expect(await host(page).evaluate((element: Spreadsheet) => element.getInput('B2'))).toBe('7')
+})
+
 test('methods write, select and export cells', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await host(page).evaluate(async (element: Spreadsheet) => {

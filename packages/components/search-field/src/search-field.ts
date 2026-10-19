@@ -5,6 +5,7 @@ import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ariaKeyShortcuts, formatShortcut, isEditableTarget, registerShortcuts } from '@c2n/core/shortcut-helper.js'
 import '@c2n/overlay'
@@ -60,7 +61,8 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * `localStorage`. The panel's Clear button empties the list; both ways fire `recent-change`.
  *
  * `loading` swaps the search icon for a spinner while results are fetched. The host exposes its state as custom
- * states: `:state(focus-within)`, `:state(expanded)`, `:state(loading)` and `:state(disabled)`.
+ * states: `:state(focus-within)`, `:state(expanded)`, `:state(loading)`, `:state(disabled)` and, while an enclosing `c2-form-field`
+ * shows an error, `:state(error)`.
  *
  * @tag c2-search-field
  *
@@ -89,6 +91,7 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * @cssproperty {border} [--c2-search-field__focus--border=1px solid rgb(2, 101, 220)]
  * @cssproperty {color} --c2-search-field__focus--background
  * @cssproperty {outline} [--c2-search-field__focus--outline=none]
+ * @cssproperty {border} [--c2-search-field__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
  * @cssproperty {opacity} [--c2-search-field__disabled--opacity=0.38]
  *
  * @cssproperty {pixel} [--c2-search-field__icon--size=16px]
@@ -138,6 +141,8 @@ export class SearchField extends LitElement {
   private readonly internals = this.attachInternals()
   /** The built-in labels in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, searchFieldMessages)
+  /** Label and description handed down by an enclosing `c2-form-field`. Not `field`: that is the box queried below. */
+  private readonly fieldContext = new FieldContextConsumer(this, { kind: 'text' })
 
   /** The query. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
@@ -493,11 +498,13 @@ export class SearchField extends LitElement {
   }
 
   protected override updated(changed: PropertyValues) {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
     const states: Record<string, boolean> = {
       'focus-within': this.focused,
       expanded: this.open,
       loading: this.loading,
       disabled: this.effectiveDisabled,
+      error: this.fieldContext.invalid && !this.effectiveDisabled,
     }
     for (const [name, on] of Object.entries(states)) {
       if (on) this.internals.states.add(name)
@@ -593,7 +600,7 @@ export class SearchField extends LitElement {
   override render() {
     const hasRecent = this.recentMatches.length > 0 || !!this.historyKey || this.recent.length > 0
     const open = this.open
-    const name = this.ariaLabel || this.placeholder || this.msg.t('search')
+    const name = this.ariaLabel || this.fieldContext.label || this.placeholder || this.msg.t('search')
     const shortcuts = this.shortcut && !isServer ? [ariaKeyShortcuts(this.shortcutParts.composed), ...this.shortcutParts.bare].filter(Boolean).join(' ') : ''
     return html`<div class="field" @click=${this.handleFieldClick}>
         ${this.renderLeadingIcon()}
@@ -610,6 +617,8 @@ export class SearchField extends LitElement {
           aria-activedescendant=${ifDefined(open && this.activeIndex >= 0 ? `recent-${this.activeIndex}` : undefined)}
           aria-keyshortcuts=${ifDefined(shortcuts || undefined)}
           aria-busy=${this.loading ? 'true' : nothing}
+          aria-describedby=${this.fieldContext.describedBy()}
+          aria-invalid=${this.fieldContext.invalid ? 'true' : nothing}
           name=${ifDefined(this.name || undefined)}
           placeholder=${this.placeholder || nothing}
           .value=${live(this.value)}
@@ -623,7 +632,7 @@ export class SearchField extends LitElement {
         ${this.renderClearButton()} ${this.renderShortcutHint()}
         <slot name="suffix-icon"></slot>
       </div>
-      ${hasRecent ? this.renderPanel() : nothing}`
+      ${hasRecent ? this.renderPanel() : nothing}${this.fieldContext.renderDescription()}`
   }
 }
 

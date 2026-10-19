@@ -6,6 +6,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { applyMask, defaultMaskTokens, maskTemplate, parseMask, type MaskPart, type MaskResult, type MaskToken } from './mask.js'
 import { maskInputMessages } from './messages.js'
@@ -109,6 +110,9 @@ export class MaskInput extends LitElement {
   private readonly msg = new LocalizeController(this, maskInputMessages)
 
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
+
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
 
   /**
    * The pattern: `9` digit, `a` letter, `A` upper-case letter, `*` letter or digit, `X` upper-case letter or digit,
@@ -389,10 +393,11 @@ export class MaskInput extends LitElement {
   }
 
   protected override updated() {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
     const states: Record<string, boolean> = {
       'focus-within': this.focused,
       complete: this.complete,
-      error: this.error && !this.effectiveDisabled,
+      error: (this.error || this.field.invalid) && !this.effectiveDisabled,
       disabled: this.effectiveDisabled,
       'read-only': this.readOnly,
     }
@@ -421,6 +426,9 @@ export class MaskInput extends LitElement {
   }
 
   private renderSupportingText() {
+    if (this.field.managed) {
+      return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
+    }
     const showError = this.error && !this.effectiveDisabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     return html`<div class="supporting-text ${showError ? 'error' : ''}" id="help" ?hidden=${!message && !this.slotPresence.has('supporting-text')}>
@@ -433,7 +441,7 @@ export class MaskInput extends LitElement {
     const showSlots = (this.focused || formatted !== '') && !this.readOnly
     // While empty, the whole mask is the hint, leading literals included.
     const rest = showSlots ? maskTemplate(this.parts, this.slotChar || '_', formatted ? this.result.nextPart : 0) : ''
-    const name = this.ariaLabel || this.placeholder || undefined
+    const name = this.ariaLabel || this.field.label || this.placeholder || undefined
     const inputMode = this.inputMode || (digitsOnly(this.parts) ? 'numeric' : 'text')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <slot name="prefix-icon" class="icon"></slot>
@@ -443,8 +451,8 @@ export class MaskInput extends LitElement {
             class="input"
             type="text"
             aria-label=${ifDefined(name)}
-            aria-describedby="format help"
-            aria-invalid=${this.error ? 'true' : nothing}
+            aria-describedby=${this.field.describedBy('format', !this.field.managed && 'help')}
+            aria-invalid=${this.error || this.field.invalid ? 'true' : nothing}
             autocomplete=${ifDefined(this.autocomplete || undefined)}
             autocapitalize="off"
             autocorrect="off"
@@ -469,7 +477,7 @@ export class MaskInput extends LitElement {
         <slot name="suffix-icon" class="icon"></slot>
       </div>
       <span class="visually-hidden" id="format">${this.parts.length ? this.msg.t('format', this.template()) : nothing}</span>
-      ${this.renderSupportingText()}`
+      ${this.renderSupportingText()}${this.field.renderDescription()}`
   }
 }
 

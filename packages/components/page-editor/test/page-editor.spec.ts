@@ -130,6 +130,19 @@ async function pressHome(page: Page) {
   }).toPass()
 }
 
+test('an empty heading just made by Markdown shows the undo note, not its placeholder under it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const content = page$(page)
+  await content.click()
+  await page.keyboard.type('## ')
+  await expect(content.locator('.autoformat-hint')).toHaveText('Heading 2 · ⌫ to undo')
+  await expect(content.locator('h2')).not.toHaveClass(/placeholder/)
+  // Once the note goes, the empty heading names itself again.
+  await page.keyboard.type('x')
+  await page.keyboard.press('Backspace')
+  await expect(content.locator('h2')).toHaveAttribute('data-placeholder', 'Heading 2')
+})
+
 test('Backspace at the start of a list item or heading makes it text first', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-page-editor label="Notes" value="## Heading&#10;&#10;- item"></c2-page-editor>`)
   const content = page$(page)
@@ -278,6 +291,34 @@ test('pasting Markdown or HTML keeps its structure, and a link pasted over text 
   await expect(content.locator('a')).toHaveText('words')
 })
 
+test("a web page's lines pasted as one paragraph of <br>s become lines of their own, so a heading takes one, and - lines a list", async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const content = page$(page)
+  await content.click()
+  await paste(page, {
+    'text/html': '<div>Details<br>A flat in Hanoi.<br><br>- 91 m²<br>- South-east balcony</div>',
+    'text/plain': 'Details\nA flat in Hanoi.\n\n- 91 m²\n- South-east balcony',
+  })
+  await expect(content.locator('p')).toHaveCount(2)
+  await expect(content.locator('.item[data-kind="bullet"]')).toHaveText(['91 m²', 'South-east balcony'])
+  await content.locator('p', { hasText: 'Details' }).click()
+  // A key, so the editor has taken the caret from the click before the block changes.
+  await page.keyboard.press('ArrowLeft')
+  await host(page).evaluate((element: HTMLElement & { setBlock(block: string): boolean }) => element.setBlock('heading2'))
+  await expect(content.locator('h2')).toHaveText('Details')
+  await expect(content.locator('p')).toHaveCount(1)
+  await expect(host(page)).toHaveJSProperty('value', '## Details\n\nA flat in Hanoi.\n\n- 91 m²\n- South-east balcony')
+
+  // Copied from a page editor, a line break typed with Shift+Enter stays one.
+  await page.keyboard.press('Control+End')
+  await page.keyboard.press('Enter')
+  await paste(page, { 'text/html': '<p data-pm-slice="0 0 []">one<br>two</p>', 'text/plain': 'one\ntwo' })
+  await expect(content.locator('p', { hasText: 'one' }).locator('br')).toHaveCount(1)
+})
+
 test('fires input on each edit and change on blur, and takes part in forms', async ({ page, renderScenario }) => {
   await renderScenario(`<form><c2-page-editor label="Notes" name="body" required></c2-page-editor></form><button>After</button>`)
   const editor = host(page)
@@ -304,6 +345,277 @@ test('read-only pages cannot be edited', async ({ page, renderScenario }) => {
   await expect(host(page)).toHaveJSProperty('value', 'Fixed text')
 })
 
+const cell = (page: Page, ref: string) => page.locator(`c2-page-editor c2-spreadsheet #cell-${ref}`)
+const grid = (page: Page) => page.locator('c2-page-editor c2-spreadsheet [role="grid"]')
+const columnHeader = (page: Page, index: number) => page.locator('c2-page-editor c2-spreadsheet .column-header').nth(index)
+const nameField = (page: Page) => page.locator('c2-page-editor c2-spreadsheet .label-editor')
+const menuItem = (page: Page, value: string) => page.locator(`c2-menu-item[value="${value}"]`)
+
+const TABLE = `Before
+
+<!-- table: formula-bar -->
+| Item | Cost |
+| --- | ---: |
+| Bus \\| night | 450 |
+| Total | =SUM(B1:B1) |
+
+After`
+
+test('a pipe table is a spreadsheet whose edits are written back as a pipe table', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const editor = host(page)
+  await editor.evaluate((element, value) => ((element as HTMLElement & { value: string }).value = value), TABLE)
+  // The header names the columns; the rows under it are numbered from 1.
+  await expect(columnHeader(page, 0)).toHaveText(/A\s*Item/)
+  await expect(columnHeader(page, 1)).toHaveText(/B\s*Cost/)
+  await expect(cell(page, 'A1')).toHaveText('Bus | night')
+  await expect(cell(page, 'B2')).toHaveText('450')
+  await expect(page.locator('c2-page-editor c2-spreadsheet .formula-input')).toBeVisible()
+  await expect(editor).toHaveJSProperty('text', 'Before\nItem\tCost\nBus | night\t450\nTotal\t=SUM(B1:B1)\nAfter')
+
+  // One `input` from the page per edit: the sheet's own events stay inside it.
+  await watch(editor, 'input')
+  await cell(page, 'B1').click()
+  await page.keyboard.type('500')
+  await page.keyboard.press('Enter')
+  await expect(cell(page, 'B2')).toHaveText('500')
+  await expect(editor).toHaveAttribute('data-events', '[null]')
+  await expect(editor).toHaveJSProperty('value', TABLE.replace('| 450 |', '| 500 |'))
+
+  // Double-clicking a column header renames the column, which is the header row of the value.
+  await columnHeader(page, 1).dblclick()
+  await expect(nameField(page)).toBeFocused()
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('Price')
+  await page.keyboard.press('Enter')
+  await expect(editor).toHaveJSProperty('value', TABLE.replace('| 450 |', '| 500 |').replace('| Item | Cost |', '| Item | Price |'))
+})
+
+test('the slash menu inserts a table that takes the keyboard, and the arrows and Escape leave it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const editor = host(page)
+  const content = page$(page)
+  await content.click()
+  await page.keyboard.type('Intro')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('/table')
+  await expect(slashMenu(page).getByRole('option').first()).toHaveText(/Table/)
+  await page.keyboard.press('Enter')
+  // A new table starts on the name of its first column; Tab goes on to the next one, Enter to the first row.
+  await expect(nameField(page)).toBeFocused()
+  await page.keyboard.type('Name')
+  await page.keyboard.press('Tab')
+  await page.keyboard.type('Age')
+  await page.keyboard.press('Enter')
+  await expect(grid(page)).toBeFocused()
+  await expect(editor).toHaveJSProperty('value', 'Intro\n\n| Name | Age |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |')
+
+  // ArrowUp on the first row leaves for the line above, ArrowDown at its end comes back.
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'solid')
+  await page.keyboard.press('ArrowUp')
+  await expect(content).toBeFocused()
+  // Left behind, the table shows no current cell.
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'none')
+  await page.keyboard.type('!')
+  await page.keyboard.press('ArrowDown')
+  await expect(grid(page)).toBeFocused()
+  await expect(cell(page, 'A1')).toHaveClass(/active/)
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'solid')
+
+  // Escape selects the table as a block: typing leaves it alone, Enter goes back in, Backspace removes it.
+  await page.keyboard.press('Escape')
+  await expect(content.locator('.table-block')).toHaveClass(/ProseMirror-selectednode/)
+  await page.keyboard.type('x')
+  await page.keyboard.press('Enter')
+  await expect(grid(page)).toBeFocused()
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Backspace')
+  await expect(content.locator('.table-block')).toHaveCount(0)
+  await expect(editor).toHaveJSProperty('value', 'Intro!')
+})
+
+test('the right-click menu and the buttons under a table change its rows, columns and options', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="| A | B |&#10;| --- | --- |&#10;| 1 | 2 |"></c2-page-editor>`)
+  const editor = host(page)
+  await expect(cell(page, 'A1')).toHaveText('1')
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'row-below').click()
+  await expect(editor).toHaveJSProperty('value', '| A | B |\n| --- | --- |\n| 1 | 2 |\n|  |  |')
+
+  await cell(page, 'B1').click({ button: 'right' })
+  await menuItem(page, 'formula-bar').click()
+  await expect(page.locator('c2-page-editor c2-spreadsheet .formula-input')).toBeVisible()
+  await expect(editor).toHaveJSProperty('value', '<!-- table: formula-bar -->\n| A | B |\n| --- | --- |\n| 1 | 2 |\n|  |  |')
+
+  await cell(page, 'B1').click({ button: 'right' })
+  await menuItem(page, 'delete-columns').click()
+  // A new column opens with its name to type.
+  await page$(page).getByRole('button', { name: 'New column' }).click()
+  await expect(nameField(page)).toBeFocused()
+  await page.keyboard.type('C')
+  await page.keyboard.press('Enter')
+  await expect(editor).toHaveJSProperty('value', '<!-- table: formula-bar -->\n| A | C |\n| --- | --- |\n| 1 |  |\n|  |  |')
+
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'rename-column').click()
+  await expect(nameField(page)).toBeFocused()
+  await page.keyboard.type('Name')
+  await page.keyboard.press('Enter')
+  await expect(columnHeader(page, 0)).toHaveText(/A\s*Name/)
+
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'delete-table').click()
+  await expect(page$(page).locator('.table-block')).toHaveCount(0)
+  await expect(editor).toHaveJSProperty('value', '')
+})
+
+test('the right-click menu adds a total under the selected cells', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="| Item | Cost |&#10;| --- | --- |&#10;| Hotel | 2 |&#10;| Taxi | 3 |"></c2-page-editor>`)
+  const editor = host(page)
+  // One cell: nothing to total.
+  await cell(page, 'B1').click({ button: 'right' })
+  await expect(menuItem(page, 'total')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await cell(page, 'B1').click()
+  await page.keyboard.press('Shift+ArrowDown')
+  await cell(page, 'B2').click({ button: 'right' })
+  await menuItem(page, 'total').hover()
+  await menuItem(page, 'total-SUM').click()
+  await expect(editor).toHaveJSProperty('value', '| Item | Cost |\n| --- | --- |\n| Hotel | 2 |\n| Taxi | 3 |\n|  | =SUM(B1:B2) |')
+  await expect(cell(page, 'B3')).toHaveText('5')
+})
+
+test('cell styles are written as page text styles in the pipe table, and read back', async ({ page, renderScenario }) => {
+  const value = [
+    '| Item | Cost |',
+    '| --- | --- |',
+    '| <mark data-color="yellow"><span data-color="red" data-size="large">**Hotel**</span></mark> | 2 |',
+    '| \\**not bold** | <span data-size="small">3</span> |',
+  ].join('\n')
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const editor = host(page)
+  await editor.evaluate((element: HTMLElement & { value: string }, markdown) => (element.value = markdown), value)
+  await expect(cell(page, 'A1')).toHaveText('Hotel')
+  await expect(cell(page, 'A1')).toHaveClass(/background-yellow/)
+  await expect(cell(page, 'A1')).toHaveClass(/color-red/)
+  await expect(cell(page, 'A1')).toHaveClass(/bold/)
+  await expect(cell(page, 'A2')).toHaveText('**not bold**')
+  await expect(cell(page, 'A2')).not.toHaveClass(/bold/)
+  await expect(cell(page, 'B2')).toHaveClass(/size-small/)
+
+  // An edit writes the table back with its styles as they were.
+  await cell(page, 'B1').click()
+  await page.keyboard.type('5')
+  await page.keyboard.press('Enter')
+  await expect(editor).toHaveJSProperty('value', value.replace('| 2 |', '| 5 |'))
+})
+
+test('the right-click menu makes cells bold, colours them and sizes them', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="| Item | Cost |&#10;| --- | --- |&#10;| Hotel | 2 |"></c2-page-editor>`)
+  const editor = host(page)
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'bold').click()
+  await expect(editor).toHaveJSProperty('value', '| Item | Cost |\n| --- | --- |\n| **Hotel** | **2** |')
+
+  await cell(page, 'A1').click({ button: 'right' })
+  await expect(menuItem(page, 'bold')).toHaveJSProperty('checked', true)
+  await menuItem(page, 'text-colour').hover()
+  // The swatches show the page's colours, though the menu renders outside the page's stylesheet.
+  const red = await page$(page).evaluate((element) => getComputedStyle(element).getPropertyValue('--_color-red'))
+  expect(red).not.toBe('')
+  await expect(menuItem(page, 'color-red').locator('[data-color="red"]')).not.toHaveCSS(
+    'color',
+    await menuItem(page, 'color-default')
+      .locator('span')
+      .evaluate((element) => getComputedStyle(element).color),
+  )
+  await menuItem(page, 'color-red').click()
+  await expect(cell(page, 'B1')).toHaveClass(/color-red/)
+
+  await cell(page, 'A1').click()
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'background-colour').hover()
+  await menuItem(page, 'background-yellow').click()
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'text-size').hover()
+  await menuItem(page, 'size-large').click()
+  await expect(editor).toHaveJSProperty(
+    'value',
+    '| Item | Cost |\n| --- | --- |\n| <mark data-color="yellow"><span data-color="red" data-size="large">**Hotel**</span></mark> | <span data-color="red">**2**</span> |',
+  )
+
+  // Ctrl/⌘+B in the sheet is saved too, and undo takes it back.
+  await page.keyboard.press('ControlOrMeta+b')
+  await expect
+    .poll(() => editor.evaluate((element: HTMLElement & { value: string }) => element.value))
+    .toMatch(/\| <mark data-color="yellow"><span data-color="red" data-size="large">Hotel<\/span><\/mark> \|/)
+})
+
+test('a style from the right-click menu applies to every cell of a range selected with the mouse', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="| A | B |&#10;| --- | --- |&#10;| 1 | 2 |&#10;| 3 | 4 |"></c2-page-editor>`)
+  await cell(page, 'A1').hover()
+  await page.mouse.down()
+  await cell(page, 'B2').hover()
+  await page.mouse.up()
+  const cells = ['A1', 'B1', 'A2', 'B2']
+  await cell(page, 'B2').click({ button: 'right' })
+  await menuItem(page, 'text-size').hover()
+  await menuItem(page, 'size-large').click()
+  await cell(page, 'A1').click({ button: 'right' })
+  await menuItem(page, 'text-colour').hover()
+  await menuItem(page, 'color-blue').click()
+  await cell(page, 'B1').click({ button: 'right' })
+  await menuItem(page, 'background-colour').hover()
+  await menuItem(page, 'background-green').click()
+  for (const ref of cells) {
+    await expect(cell(page, ref)).toHaveClass(/size-large/)
+    await expect(cell(page, ref)).toHaveClass(/color-blue/)
+    await expect(cell(page, ref)).toHaveClass(/background-green/)
+  }
+})
+
+test('the selection stays highlighted while the right-click menu is open', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="| A | B |&#10;| --- | --- |&#10;| 1 | 2 |&#10;| 3 | 4 |"></c2-page-editor>`)
+  await cell(page, 'A1').click()
+  await page.keyboard.press('Shift+ArrowRight')
+  const background = await cell(page, 'B1').evaluate((element) => getComputedStyle(element).backgroundImage)
+  expect(background).not.toBe('none')
+  await cell(page, 'B1').click({ button: 'right' })
+  await expect(menuItem(page, 'bold')).toBeVisible()
+  await expect(cell(page, 'B1')).toHaveCSS('background-image', background)
+  await expect(cell(page, 'A1')).toHaveCSS('outline-style', 'solid')
+  // Closed and left for the text, the table hides its selection again.
+  await page.keyboard.press('Escape')
+  await page$(page).locator('p').last().click()
+  await expect(cell(page, 'B1')).not.toHaveCSS('background-image', background)
+})
+
+test('cells pasted from a sheet make a table, and a single cell is pasted as text', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  const editor = host(page)
+  await page$(page).click()
+  await paste(page, {
+    'text/html':
+      '<google-sheets-html-origin><table><tbody><tr><td>Item</td><td>Qty</td></tr><tr><td>Pens</td><td>4</td></tr></tbody></table></google-sheets-html-origin>',
+    'text/plain': 'Item\tQty\nPens\t4',
+  })
+  await expect(columnHeader(page, 0)).toHaveText(/A\s*Item/)
+  await expect(cell(page, 'A1')).toHaveText('Pens')
+  await expect(editor).toHaveJSProperty('value', '| Item | Qty |\n| --- | --- |\n| Pens | 4 |')
+
+  await editor.evaluate((element) => ((element as HTMLElement & { value: string }).value = ''))
+  await page$(page).click()
+  await paste(page, { 'text/html': '<table><tr><td>42</td></tr></table>', 'text/plain': '42' })
+  await expect(editor).toHaveJSProperty('value', '42')
+
+  // Without HTML, tab-separated lines are a sheet too.
+  await page.keyboard.press('Enter')
+  await paste(page, { 'text/plain': 'a\tb\nc\td' })
+  await expect(editor).toHaveJSProperty('value', '42\n\n| a | b |\n| --- | --- |\n| c | d |')
+})
+
 test('blocks limits the menu and the shortcuts', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-page-editor label="Notes" blocks="paragraph bullet"></c2-page-editor>`)
   const content = page$(page)
@@ -313,6 +625,12 @@ test('blocks limits the menu and the shortcuts', async ({ page, renderScenario }
   await page.keyboard.press('Enter')
   await page.keyboard.type('/')
   await expect(slashMenu(page).getByRole('option')).toHaveText([/Text/, /Bulleted list/, /Default colour/, ...Array(16).fill(/./)])
+  await page.keyboard.press('Escape')
+  await page.keyboard.press('Backspace')
+  // A table is not allowed: pasted, its rows become lines of text.
+  await paste(page, { 'text/html': '<table><tr><th>Item</th><th>Qty</th></tr><tr><td>Pens</td><td>4</td></tr></table>', 'text/plain': 'Item\tQty\nPens\t4' })
+  await expect(page$(page).locator('.table-block')).toHaveCount(0)
+  await expect(host(page)).toHaveJSProperty('value', '\\# not a heading\n\nItem | Qty\n\nPens | 4')
 })
 
 test('is accessible with its menus open', async ({ page, renderScenario }) => {

@@ -1,0 +1,102 @@
+---
+title: 'Form'
+description: 'Form container with validation timing, an error summary, server errors, dirty tracking and async submit.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Form } from '@c2n/components/form'
+import { FormField } from '@c2n/components/form-field'
+import { TextField } from '@c2n/components/text-field'
+import { Select } from '@c2n/components/select'
+import { ListItem } from '@c2n/components/list-item'
+import { Checkbox } from '@c2n/components/checkbox'
+import { Button } from '@c2n/components/button'
+
+`c2-form` wraps a native `<form>` and its [`c2-form-field`](/web-components/components/form-field)s. The native form stays in charge of its controls, so `FormData`, reset, `requestSubmit`, `<fieldset disabled>` and framework bindings work as they do without it. On a submit attempt it suppresses the browser's validation bubbles, shows every field's error, and focuses either an error summary (two or more errors, each linking to its control) or the one invalid control. When every control is valid it runs `validator` for cross-field checks, then fires `valid-submit` instead of submitting the page.
+
+`valid-submit` carries the `FormData`, a plain `values` object and `waitUntil(promise)`: while the promise is pending the form is in `:state(submitting)` and a `c2-button` submitter shows its `running` spinner. A promise that resolves makes the current values the new pristine state; one that rejects with `{ name: message }` shows those errors on their fields. Server errors can also come from the `errors` attribute or `setErrors()`; each clears when the user edits its control. `dirty-change` fires when the values start or stop differing from the pristine state, and `warn-unsaved` asks before the page unloads while they do.
+
+`necessity` and `validate-on` set the defaults of every field inside. The form is a grid of its children: `--c2-form--columns` gives it columns and `--c2-form-field--grid-column: 1 / -1` spans a field across them.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/form'
+import '@c2n/components/form-field'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/form
+<style>
+  .account {
+    width: min(560px, 100%);
+    --c2-form--columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .account .wide {
+    --c2-form-field--grid-column: 1 / -1;
+  }
+  .account .actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .account .secondary {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<div data-label="Press Save to see the summary">
+  <c2-form class="account">
+    <form>
+      <c2-form-field label="Full name">
+        <c2-text-field name="fullName" required autocomplete="name"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field label="Email" hint="We'll send a confirmation link.">
+        <c2-text-field name="email" type="email" required value="ada@" autocomplete="email"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field label="Country">
+        <c2-select name="country" required placeholder="Select a country">
+          <c2-list-item value="GB">United Kingdom</c2-list-item>
+          <c2-list-item value="FR">France</c2-list-item>
+          <c2-list-item value="VN">Vietnam</c2-list-item>
+        </c2-select>
+      </c2-form-field>
+      <c2-form-field label="Handle" necessity="optional">
+        <c2-text-field name="handle" value="ada"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field class="wide">
+        <c2-checkbox name="terms" value="accepted" required>I agree to the terms of service</c2-checkbox>
+      </c2-form-field>
+      <div class="actions">
+        <c2-button class="secondary" type="reset">Discard</c2-button>
+        <c2-button type="submit">Save changes</c2-button>
+      </div>
+    </form>
+  </c2-form>
+</div>
+```
+
+### Saving
+
+```typescript tag=CodeBlock
+const form = document.querySelector('c2-form')!
+
+form.addEventListener('valid-submit', (event) => {
+  // Rejecting with { name: message } shows those errors on their fields.
+  event.detail.waitUntil(api.saveAccount(event.detail.values))
+})
+
+form.addEventListener('dirty-change', (event) => {
+  saveBar.hidden = !event.detail.dirty
+})
+
+// Checks across fields, after every control passes its own constraints.
+form.validator = (values) => (values.password === values.confirm ? {} : { confirm: 'The passwords do not match.' })
+```

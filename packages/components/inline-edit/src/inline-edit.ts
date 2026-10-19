@@ -7,6 +7,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { inlineEditMessages } from './messages'
 import styles from './inline-edit.scss?inline'
 
@@ -125,6 +126,8 @@ export class InlineEdit extends LitElement {
   private readonly internals = this.attachInternals()
   /** The display's name, the save and cancel buttons' labels and the validation message in the nearest `lang` (English, or a language the app adds). */
   private readonly msg = new LocalizeController(this, inlineEditMessages)
+  /** Label and description handed down by an enclosing `c2-form-field` (`field` is the built-in input). */
+  private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
 
   // Data
 
@@ -607,6 +610,16 @@ export class InlineEdit extends LitElement {
     }
   }
 
+  /** The `label`, else the label of an enclosing `c2-form-field`. */
+  private get accessibleLabel() {
+    return this.label || this.formField.label
+  }
+
+  /** The built-in field draws the invalid look for a refused draft, and while an enclosing field shows an error. */
+  private get showsInvalid() {
+    return this.invalid || (this.formField.invalid && !this.isDisabled)
+  }
+
   private renderDisplay() {
     const text = this.displayText
     const content = html`<span class="text ${classMap({ placeholder: !text })}"
@@ -617,7 +630,8 @@ export class InlineEdit extends LitElement {
       return html`<span
         class="display static"
         tabindex=${ifDefined(this.readOnly ? undefined : -1)}
-        aria-label=${ifDefined(this.label ? this.msg.t('display', this.label, text || this.placeholder) : undefined)}
+        aria-label=${ifDefined(this.accessibleLabel ? this.msg.t('display', this.accessibleLabel, text || this.placeholder) : undefined)}
+        aria-describedby=${this.formField.describedBy()}
         >${content}</span
       >`
     }
@@ -625,7 +639,8 @@ export class InlineEdit extends LitElement {
       class="display"
       type="button"
       ?disabled=${this.isDisabled}
-      aria-label=${ifDefined(this.label ? this.msg.t('display', this.label, text || this.placeholder) : undefined)}
+      aria-label=${ifDefined(this.accessibleLabel ? this.msg.t('display', this.accessibleLabel, text || this.placeholder) : undefined)}
+      aria-describedby=${this.formField.describedBy()}
       @click=${this.handleDisplayClick}
       @dblclick=${this.handleDisplayDblclick}
     >
@@ -647,8 +662,9 @@ export class InlineEdit extends LitElement {
       return html`<textarea
         class="field"
         rows="1"
-        aria-label=${ifDefined(this.label || undefined)}
-        aria-invalid=${this.invalid ? 'true' : nothing}
+        aria-label=${ifDefined(this.accessibleLabel || undefined)}
+        aria-describedby=${this.formField.describedBy()}
+        aria-invalid=${this.showsInvalid ? 'true' : nothing}
         maxlength=${ifDefined(maxLength)}
         placeholder=${this.placeholder || nothing}
         ?required=${this.required}
@@ -660,8 +676,9 @@ export class InlineEdit extends LitElement {
     return html`<input
       class="field"
       type="text"
-      aria-label=${ifDefined(this.label || undefined)}
-      aria-invalid=${this.invalid ? 'true' : nothing}
+      aria-label=${ifDefined(this.accessibleLabel || undefined)}
+      aria-describedby=${this.formField.describedBy()}
+      aria-invalid=${this.showsInvalid ? 'true' : nothing}
       maxlength=${ifDefined(maxLength)}
       placeholder=${this.placeholder || nothing}
       ?required=${this.required}
@@ -696,12 +713,12 @@ export class InlineEdit extends LitElement {
     const editorSlot = html`<slot name="editor" @slotchange=${this.syncSlots}></slot>`
     if (!this.editing) {
       // The slot stays rendered (hidden) so `slotchange` keeps `hasEditor` current and option labels stay readable.
-      return html`${this.renderDisplay()}<span class="editor-host" hidden>${editorSlot}</span>`
+      return html`${this.renderDisplay()}<span class="editor-host" hidden>${editorSlot}</span>${this.formField.renderDescription()}`
     }
-    return html`<span class="editor ${classMap({ invalid: this.invalid, multiline: this.multiline })}" @keydown=${this.handleKeydown}>
-      <span class="editor-host ${classMap({ custom: this.hasEditor })}">${this.hasEditor ? editorSlot : this.renderField()}</span>
-      ${this.renderControls()}
-    </span>`
+    return html`<span class="editor ${classMap({ invalid: this.showsInvalid, multiline: this.multiline })}" @keydown=${this.handleKeydown}>
+        <span class="editor-host ${classMap({ custom: this.hasEditor })}">${this.hasEditor ? editorSlot : this.renderField()}</span>
+        ${this.renderControls()} </span
+      >${this.formField.renderDescription()}`
   }
 }
 

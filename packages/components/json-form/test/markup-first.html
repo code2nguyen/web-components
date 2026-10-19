@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>json-form markup parsed before the definitions</title>
+  </head>
+  <body>
+    <main aria-label="Component scenario">
+      <c2-json-form>
+        <c2-json-field scope="name"></c2-json-field>
+        <c2-json-field scope="*"></c2-json-field>
+      </c2-json-form>
+    </main>
+    <script type="module">
+      import '../src/index.ts'
+      const form = document.querySelector('c2-json-form')
+      form.schema = { type: 'object', properties: { name: { type: 'string' }, city: { type: 'string' } } }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </body>
+</html>

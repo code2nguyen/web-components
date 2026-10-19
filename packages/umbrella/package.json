@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -329,6 +329,10 @@
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
     },
+    "./fieldset": {
+      "types": "./dist/fieldset.d.ts",
+      "default": "./dist/fieldset.js"
+    },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
@@ -336,6 +340,14 @@
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
+    },
+    "./form": {
+      "types": "./dist/form.d.ts",
+      "default": "./dist/form.js"
+    },
+    "./form-field": {
+      "types": "./dist/form-field.d.ts",
+      "default": "./dist/form-field.js"
     },
     "./format-date": {
       "types": "./dist/format-date.d.ts",
@@ -396,6 +408,18 @@
     "./inline-edit": {
       "types": "./dist/inline-edit.d.ts",
       "default": "./dist/inline-edit.js"
+    },
+    "./json-form": {
+      "types": "./dist/json-form.d.ts",
+      "default": "./dist/json-form.js"
+    },
+    "./json-form/json-field": {
+      "types": "./dist/json-form/json-field.d.ts",
+      "default": "./dist/json-form/json-field.js"
+    },
+    "./json-form/json-form": {
+      "types": "./dist/json-form/json-form.d.ts",
+      "default": "./dist/json-form/json-form.js"
     },
     "./json-viewer": {
       "types": "./dist/json-viewer.d.ts",
@@ -768,10 +792,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.11",
-    "@c2n/phosphor-icons": "1.0.11",
-    "@c2n/task-icons": "1.0.11",
-    "@c2n/theme": "1.0.11",
+    "@c2n/core": "1.0.12",
+    "@c2n/phosphor-icons": "1.0.12",
+    "@c2n/task-icons": "1.0.12",
+    "@c2n/theme": "1.0.12",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -902,8 +926,11 @@
     "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
+    "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/flow": "*",
+    "@c2n/form": "*",
+    "@c2n/form-field": "*",
     "@c2n/format-date": "*",
     "@c2n/format-number": "*",
     "@c2n/gantt": "*",
@@ -915,6 +942,7 @@
     "@c2n/image": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
+    "@c2n/json-form": "*",
     "@c2n/json-viewer": "*",
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",

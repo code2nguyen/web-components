@@ -8,8 +8,10 @@
     divider--width: 1px,
     divider--color: rgba(255, 255, 255, 0.35),
     item--flex: 0 0 auto,
+    item__error--border: 1px solid #dc2626,
     segmented--background-color: #f4f4f5,
     segmented--border: 1px solid transparent,
+    segmented__error--border: 1px solid #dc2626,
     segmented--padding: 3px,
     segmented--gap: 2px,
     segmented-item--color: #52525b,
@@ -44,6 +46,17 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
 
 .indicator {
   display: none;
+}
+
+// While a c2-form-field wraps the group, the role moves onto this wrapper; it takes over the host's flex layout.
+.field-group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: inherit;
+  flex-wrap: inherit;
+  align-items: inherit;
+  gap: inherit;
+  min-width: 0;
 }
 
 :host([orientation='vertical']) {
@@ -120,6 +133,12 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   box-shadow: 0 calc(-1 * #{$_overlap}) 0 0 css.cssVar(divider--color);
 }
 
+// An enclosing c2-form-field shows an error: every item takes the error border.
+:host(:state(error)) ::slotted(*) {
+  --c2-button__container--border: #{css.cssVar(item__error--border)};
+  --c2-icon-button--border: #{css.cssVar(item__error--border)};
+}
+
 // The hovered, focused or pressed item rises above its neighbours so its full border and focus ring are visible.
 ::slotted(:hover),
 ::slotted(:focus-within),
@@ -138,6 +157,10 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   border-radius: css.cssVar(border-radius);
   background-color: css.cssVar(segmented--background-color);
   isolation: isolate;
+}
+
+:host([appearance='segmented']:state(error)) {
+  border: css.cssVar(segmented__error--border);
 }
 
 :host([appearance='segmented'][stretched]) {

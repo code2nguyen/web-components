@@ -24,6 +24,9 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-spreadsheet': Omit<C2Props<Spreadsheet>, 'data' | 'columns'> & {
+        'rename-columns'?: Attribute
+        'context-menu'?: Attribute
+        'hide-selection-on-blur'?: Attribute
         'formula-bar'?: Attribute
         data?: Spreadsheet['data'] | string
         columns?: Spreadsheet['columns'] | string

@@ -1,9 +1,10 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import styles from './chat-input.scss?inline'
@@ -46,7 +47,7 @@ export interface ChatInput {
  * @cssproperty {border} [--c2-chat-input__container__hover--border=1px solid #a1a1aa]
  * @cssproperty {border} [--c2-chat-input__container__focus--border=1px solid #476ef9]
  * @cssproperty {box-shadow} [--c2-chat-input__container__focus--box-shadow=none]
- * @cssproperty {border} [--c2-chat-input__container__invalid--border=1px solid #dc2626]
+ * @cssproperty {border} [--c2-chat-input__container__invalid--border=1px solid #dc2626] - Also drawn while an enclosing `c2-form-field` shows an error.
  * @cssproperty {box-shadow} [--c2-chat-input__container__invalid__focus--box-shadow=none]
  * @cssproperty {opacity} [--c2-chat-input__container__disabled--opacity=0.5]
  * @cssproperty {pixel} [--c2-chat-input__textarea--max-height=192px]
@@ -76,6 +77,8 @@ export class ChatInput extends LitElement {
 
   private readonly internals = this.attachInternals()
   private customValidityMessage = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
 
   /** Hint shown while the composer is empty. */
   @property() placeholder = ''
@@ -178,6 +181,9 @@ export class ChatInput extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
+    if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
+    else this.internals.states.delete('error')
     this.syncFormState()
     if (changed.has('value') || changed.has('minRows')) this.scheduleInputHeightUpdate()
   }
@@ -277,7 +283,9 @@ export class ChatInput extends LitElement {
           class="textarea"
           part="textarea"
           name=${ifDefined(this.name || undefined)}
-          aria-label=${ifDefined(this.ariaLabel || undefined)}
+          aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
+          aria-describedby=${this.field.describedBy()}
+          aria-invalid=${this.field.invalid ? 'true' : nothing}
           .value=${live(this.value)}
           placeholder=${this.placeholder}
           rows=${Math.max(1, this.minRows)}
@@ -314,6 +322,7 @@ export class ChatInput extends LitElement {
           </button>
         </div>
       </div>
+      ${this.field.renderDescription()}
     `
   }
 }

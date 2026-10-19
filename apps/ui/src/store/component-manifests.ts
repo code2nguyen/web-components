@@ -38,8 +38,11 @@ import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
+import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
+import formField from '@c2n/form-field/custom-elements.json'
+import form from '@c2n/form/custom-elements.json'
 import formatDate from '@c2n/format-date/custom-elements.json'
 import formatNumber from '@c2n/format-number/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
@@ -51,6 +54,7 @@ import iconButton from '@c2n/icon-button/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
+import jsonForm from '@c2n/json-form/custom-elements.json'
 import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
@@ -172,8 +176,11 @@ export const componentManifests = (function () {
     details,
     diffViewer,
     featherIcons,
+    fieldset,
     filterBuilder,
     flow,
+    form,
+    formField,
     formatDate,
     formatNumber,
     gantt,
@@ -185,6 +192,7 @@ export const componentManifests = (function () {
     image,
     indicator,
     inlineEdit,
+    jsonForm,
     jsonViewer,
     kanban,
     kbd,

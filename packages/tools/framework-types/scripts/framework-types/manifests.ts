@@ -62,7 +62,7 @@ interface PackageJson {
  * Packages that are work in progress and deliberately outside the build graph, and `@c2n/components`, whose merged
  * manifest documents the elements of the packages it bundles a second time.
  */
-const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form', '@c2n/components'])
+const EXCLUDED = new Set(['@c2n/design-board', '@c2n/components'])
 
 /** Nearest `node_modules/@c2n` above this package: the workspace symlinks, one per `@c2n` package. */
 export function scopeDir(): string {

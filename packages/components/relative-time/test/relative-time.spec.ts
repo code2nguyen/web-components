@@ -36,6 +36,28 @@ test('counts down to a future date and drops to seconds under a minute', async (
   await expect(time).toHaveText('3 seconds ago')
 })
 
+test('min-unit stops counting below that unit', async ({ page, scenario }) => {
+  await scenario('min-unit')
+  const time = page.locator('#subject time')
+  const future = page.locator('#future time')
+  await expect(time).toHaveText('now')
+  await expect(future).toHaveText('in 2 minutes')
+  await expect(page.locator('#always time')).toHaveText('in 0 minutes')
+  await expect(page.locator('#day time')).toHaveText('today')
+
+  await page.clock.runFor(30_000)
+  await expect(time).toHaveText('now')
+  await expect(future).toHaveText('in 1 minute')
+  await page.clock.runFor(26_000)
+  await expect(time).toHaveText('1 minute ago')
+  await expect(future).toHaveText('now')
+  await page.clock.runFor(60_000)
+  await expect(time).toHaveText('2 minutes ago')
+  await expect(future).toHaveText('now')
+  await page.clock.runFor(35_000)
+  await expect(future).toHaveText('1 minute ago')
+})
+
 test('follows numeric, format and the largest unit that fits', async ({ page, scenario }) => {
   await scenario('numeric')
   await expect(page.locator('#auto time')).toHaveText('yesterday')

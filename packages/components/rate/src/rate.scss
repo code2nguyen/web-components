@@ -8,6 +8,7 @@
     icon--color: #e4e4e7,
     icon__filled--color: #facc15,
     icon__preview--color: #fbbf24,
+    icon__error--color: #dc2626,
     icon__hover--scale: 1.12,
     icon--transition-duration: 150ms,
     container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
@@ -62,6 +63,11 @@
 
 .star--empty {
   color: css.cssVar(icon--color);
+}
+
+// An enclosing c2-form-field shows an error: the empty icons take the error colour.
+:host(:state(error)) .star--empty {
+  color: css.cssVar(icon__error--color);
 }
 
 .fill {

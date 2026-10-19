@@ -7,6 +7,7 @@ import { live } from 'lit/directives/live.js'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './tag-input.scss?inline'
 
 /** Detail of the `tag-add` event. */
@@ -125,7 +126,7 @@ function escapeForCharacterClass(characters: string) {
  * @cssproperty {border} [--c2-tag-input__focus--border-left=1px solid #476ef9]
  * @cssproperty {outline} [--c2-tag-input__focus--outline=none]
  *
- * @cssproperty {border} [--c2-tag-input__error--border-top=1px solid #dc2626]
+ * @cssproperty {border} [--c2-tag-input__error--border-top=1px solid #dc2626] - Shown while `error` is set, a tag is invalid, or an enclosing `c2-form-field` shows an error.
  * @cssproperty {border} [--c2-tag-input__error--border-right=1px solid #dc2626]
  * @cssproperty {border} [--c2-tag-input__error--border-bottom=1px solid #dc2626]
  * @cssproperty {border} [--c2-tag-input__error--border-left=1px solid #dc2626]
@@ -192,6 +193,8 @@ export class TagInput extends LitElement {
 
   /** Accessible name forwarded to the input. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
 
   // Splitting
 
@@ -635,7 +638,8 @@ export class TagInput extends LitElement {
   }
 
   override render() {
-    const invalid = this.error || this.rejected || this.invalidTags.length > 0
+    const invalid = this.error || this.rejected || this.invalidTags.length > 0 || this.field.invalid
+    const label = this.ariaLabel || this.field.label
     const classes = {
       field: true,
       disabled: this.effectiveDisabled,
@@ -645,36 +649,38 @@ export class TagInput extends LitElement {
     }
     const hideInput = this.isFull || this.readOnly
     return html`<div class=${classMap(classes)} part="field" @click=${this.handleFieldClick} @focusin=${this.handleFocusin} @focusout=${this.handleFocusout}>
-      <slot name="prefix-icon"></slot>
-      ${
-        this.value.length
-          ? html`<ul class="tags" role="list" aria-label=${ifDefined(this.ariaLabel || undefined)} aria-disabled=${this.effectiveDisabled ? 'true' : nothing}>
-              ${repeat(
-                this.value,
-                (tag, index) => (this.allowDuplicates ? `${index}:${tag}` : tag),
-                (tag, index) => this.renderTag(tag, index),
-              )}
-            </ul>`
-          : nothing
-      }
-      <input
-        class="input"
-        part="input"
-        type="text"
-        ?hidden=${hideInput}
-        aria-label=${ifDefined(this.ariaLabel || undefined)}
-        aria-invalid=${invalid ? 'true' : nothing}
-        placeholder=${this.value.length ? nothing : this.placeholder || nothing}
-        autocomplete="off"
-        ?disabled=${this.effectiveDisabled}
-        ?readonly=${this.readOnly}
-        .value=${live(this.text)}
-        @input=${this.handleInput}
-        @change=${(event: Event) => event.stopPropagation()}
-        @keydown=${this.handleInputKeydown}
-        @paste=${this.handlePaste}
-      />
-    </div>`
+        <slot name="prefix-icon"></slot>
+        ${
+          this.value.length
+            ? html`<ul class="tags" role="list" aria-label=${ifDefined(label || undefined)} aria-disabled=${this.effectiveDisabled ? 'true' : nothing}>
+                ${repeat(
+                  this.value,
+                  (tag, index) => (this.allowDuplicates ? `${index}:${tag}` : tag),
+                  (tag, index) => this.renderTag(tag, index),
+                )}
+              </ul>`
+            : nothing
+        }
+        <input
+          class="input"
+          part="input"
+          type="text"
+          ?hidden=${hideInput}
+          aria-label=${ifDefined(label || undefined)}
+          aria-describedby=${this.field.describedBy()}
+          aria-invalid=${invalid ? 'true' : nothing}
+          placeholder=${this.value.length ? nothing : this.placeholder || nothing}
+          autocomplete="off"
+          ?disabled=${this.effectiveDisabled}
+          ?readonly=${this.readOnly}
+          .value=${live(this.text)}
+          @input=${this.handleInput}
+          @change=${(event: Event) => event.stopPropagation()}
+          @keydown=${this.handleInputKeydown}
+          @paste=${this.handlePaste}
+        />
+      </div>
+      ${this.field.renderDescription()}`
   }
 }
 

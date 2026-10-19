@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import { PageEditor } from '@c2n/components/page-editor'
 
-`c2-page-editor` is a form control for writing long text with structure, without learning an editor. It has the blocks people reach for (headings, bulleted, numbered and to-do lists, quotes, code blocks and dividers), the usual inline formats and links, and eight named text and background colours. It has nothing else: no tables, images or columns. Every format can be reached three ways, so people use whichever they already know:
+`c2-page-editor` is a form control for writing long text with structure, without learning an editor. It has the blocks people reach for (headings, bulleted, numbered and to-do lists, quotes, code blocks, dividers and tables), the usual inline formats and links, and eight named text and background colours. It has nothing else: no images or columns. Every format can be reached three ways, so people use whichever they already know:
 
 - **Markdown as you type**: `# ` gives a heading, `- ` a bullet, `[] ` a to-do, ` ``` ` a code block, `**bold**` bold. If the editor guessed wrong, Backspace straight after puts the characters back.
 - **The `/` menu**: type `/` at the start of a line or after a space, then a few letters (`/code`, `/red`, `/h2`). The `+` button on an empty line opens the same menu.
@@ -46,6 +46,11 @@ The **new table** ships on <span data-color=&quot;red&quot;>Friday</span>; see `
 - [x] Freeze the API
 - [ ] Update the docs
 
+| Task | Hours |
+| --- | ---: |
+| Docs | 3 |
+| Total | =SUM(B1:B1) |
+
 &#96;&#96;&#96;ts
 const table = document.querySelector('c2-table')
 &#96;&#96;&#96;"></c2-page-editor>
@@ -73,6 +78,7 @@ const table = document.querySelector('c2-table')
 | Quote            | `> `                                     |                             |
 | Code block       | ` ``` ` or ` ```ts ` then Space or Enter |                             |
 | Divider          | `---`                                    |                             |
+| Table            | `/table`, or paste cells from a sheet    |                             |
 | Bold             | `**bold**`                               | <kbd>Ctrl/⌘ B</kbd>         |
 | Italic           | `*italic*`                               | <kbd>Ctrl/⌘ I</kbd>         |
 | Underline        |                                          | <kbd>Ctrl/⌘ U</kbd>         |
@@ -90,6 +96,14 @@ Pasted rich text (from a web page, Google Docs or Word) keeps its headings, list
 ## Code blocks
 
 Each code block has a language picker with search, a wrap toggle and a copy button, and shows line numbers. Syntax colours come from [shiki](https://shiki.style), loaded the first time a block names a language and only for that language, so a page without code loads none of it. Every token colour is a CSS variable (`--c2-page-editor__syntax-keyword--color` and so on), mixed with the code's text colour so it reads in light and dark themes.
+
+## Tables
+
+A table is a [`c2-spreadsheet`](/web-components/components/spreadsheet), loaded with the first table on a page: cells take numbers, text and formulas (`=SUM(B1:B4)`), and edit with the keys of Sheets and Excel. Typing `=` lists the functions, and inside one a hint names its arguments and shows the result. Right-click a cell, row or column to insert or delete rows and columns, make the selected cells bold, colour their text or background with the page's colours or change their size (Ctrl/⌘+B toggles bold), add a total under them, show the formula bar, show the totals of the selection, or delete the table; New row and New column sit under it. ArrowDown at the end of the line above goes into its first row and ArrowUp on its first row comes back out, ArrowDown on its last row leaves it below, and Escape selects the whole table, which Enter goes back into and Backspace removes. Cells pasted from Sheets, Excel or a web page, or tab-separated lines, become a table; a single pasted cell stays text.
+
+The header names the columns: double-click a column header, or right-click and pick Rename column, to type its name, and Tab goes on to the next. A new table starts there. The rows under the header are numbered from 1, so a formula reads them as in Sheets (`=SUM(B1:B4)`).
+
+In the value a table is a pipe table: the header row holds the column names and each cell its raw input, so a formula stays a formula. The formula bar and the totals, which Markdown cannot say, are a comment line above it: `<!-- table: formula-bar summary -->`. A styled cell is written as styled page text is: `<mark data-color="yellow"><span data-color="red" data-size="large">**Total**</span></mark>`.
 
 ## Colours
 
@@ -110,6 +124,11 @@ Ship the **new table** before <span data-color="red">Friday</span>, see `c2-tabl
 > Easy to use matters most.
 
 ---
+
+| Task | Hours |
+| --- | ---: |
+| Docs | 3 |
+| Total | =SUM(B1:B1) |
 
 Read the [guide](https://example.com/guide).
 ```

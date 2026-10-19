@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -6,6 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { switchMessages } from './messages'
 import styles from './switch.scss?inline'
@@ -131,6 +132,8 @@ export class Switch extends LitElement {
   ariaDescribedBy!: undefined | string
 
   private readonly slotPresence = new SlotPresenceController(this, ['description'])
+  /** Description handed down by an enclosing `c2-form-field`; the switch keeps its own text as its name. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
   /** True while the thumb follows the pointer; disables the slide transition. */
   @state() private dragging = false
 
@@ -305,7 +308,8 @@ export class Switch extends LitElement {
             .value=${this.value}
             aria-label=${ifDefined(this.ariaLabel)}
             aria-labelledby=${ifDefined(this.ariaLabelledBy)}
-            aria-describedby=${ifDefined(this.ariaDescribedBy)}
+            aria-describedby=${this.field.describedBy(this.ariaDescribedBy)}
+            aria-invalid=${this.field.invalid ? 'true' : nothing}
             ?checked=${this.checked}
             ?disabled=${this.effectiveDisabled}
             ?required=${this.required}
@@ -330,6 +334,7 @@ export class Switch extends LitElement {
           </span>
         </span>
       </label>
+      ${this.field.renderDescription()}
     `
   }
 }

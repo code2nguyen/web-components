@@ -1,0 +1,63 @@
+---
+title: 'Form Field gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { FormField } from '@c2n/components/form-field'
+import { TextField } from '@c2n/components/text-field'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .email-field { width: 280px; }
+</style>
+<c2-form-field class="email-field" label="Email" hint="We'll send a confirmation link.">
+  <c2-text-field name="email" type="email" required placeholder="you@example.com"></c2-text-field>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Error
+<style>
+  .handle-field { width: 280px; }
+</style>
+<c2-form-field class="handle-field" label="Handle" error-text="That handle is taken. Try another one.">
+  <c2-text-field name="handle" value="admin"></c2-text-field>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Side label
+<style>
+  .side-field {
+    width: 420px;
+    --c2-form-field--direction: row;
+    --c2-form-field__label--width: 120px;
+    --c2-form-field__label--padding-top: 8px;
+  }
+</style>
+<c2-form-field class="side-field" label="Workspace" hint="Shown in your sidebar.">
+  <c2-text-field name="workspace" value="Analytical Engines"></c2-text-field>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Quiet label
+<style>
+  .quiet-field {
+    width: 280px;
+    --c2-form-field__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-form-field__label--font-size: 12px;
+    --c2-form-field__label--font-weight: 600;
+    --c2-form-field--gap: 4px;
+  }
+  .quiet-field::part(label) {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+</style>
+<c2-form-field class="quiet-field" label="Billing email" necessity="optional">
+  <c2-text-field name="billing" type="email" placeholder="billing@example.com"></c2-text-field>
+</c2-form-field>
+```
+
+</GalleryGrid>

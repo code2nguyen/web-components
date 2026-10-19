@@ -5,6 +5,7 @@ import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './password-field.scss?inline'
 
@@ -193,6 +194,9 @@ export class PasswordField extends LitElement {
   static override styles = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
+
+  /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
 
   /** The password. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
@@ -405,11 +409,12 @@ export class PasswordField extends LitElement {
     const value = this.value
     const score = this.strength
     const requirements = this.requirementStates
+    // Read on every update: an enclosing field changes `invalid` without changing a property of this element.
     const states: Record<string, boolean> = {
       'focus-within': this.focused,
       revealed: this.revealed,
       'caps-lock': this.capsLockShown,
-      error: this.error && !this.effectiveDisabled,
+      error: (this.error || this.field.invalid) && !this.effectiveDisabled,
       disabled: this.effectiveDisabled,
       'requirements-met': requirements.length > 0 && requirements.every((requirement) => requirement.met),
     }
@@ -521,6 +526,9 @@ export class PasswordField extends LitElement {
   }
 
   private renderSupportingText() {
+    if (this.field.managed) {
+      return html`<slot name="supporting-text" hidden @slotchange=${this.handleSupportingSlotChange}></slot>`
+    }
     const showError = this.error && !this.effectiveDisabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     return html`<div class="supporting-text ${showError ? 'error' : ''}" id="help" ?hidden=${!message && !this.hasSupportingSlot}>
@@ -530,8 +538,8 @@ export class PasswordField extends LitElement {
 
   override render() {
     const requirements = this.requirementStates
-    const name = this.ariaLabel || this.placeholder || 'Password'
-    const describedBy = [this.meter ? 'meter' : '', requirements.length ? 'requirements' : '', 'help', 'caps-lock'].filter(Boolean).join(' ')
+    const name = this.ariaLabel || this.field.label || this.placeholder || 'Password'
+    const describedBy = this.field.describedBy(this.meter && 'meter', requirements.length > 0 && 'requirements', !this.field.managed && 'help', 'caps-lock')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <slot name="prefix-icon" class="prefix"></slot>
         <input
@@ -539,7 +547,7 @@ export class PasswordField extends LitElement {
           type=${this.revealed ? 'text' : 'password'}
           aria-label=${name}
           aria-describedby=${describedBy}
-          aria-invalid=${this.error ? 'true' : nothing}
+          aria-invalid=${this.error || this.field.invalid ? 'true' : nothing}
           autocomplete=${ifDefined(this.autocomplete || undefined)}
           autocapitalize="off"
           spellcheck="false"
@@ -561,7 +569,7 @@ export class PasswordField extends LitElement {
       </div>
       ${this.renderMeter()} ${this.renderRequirements(requirements)}
       <div class="caps-lock" id="caps-lock" role="status">${this.capsLockShown ? this.capsLockText : nothing}</div>
-      ${this.renderSupportingText()}`
+      ${this.renderSupportingText()}${this.field.renderDescription()}`
   }
 }
 

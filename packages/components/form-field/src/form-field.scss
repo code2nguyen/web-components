@@ -1,0 +1,167 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-form-field,
+  $theme: (
+    direction: column,
+    gap: 6px,
+    column-gap: 16px,
+    grid-column: auto,
+    body--min-width: 240px,
+
+    label--width: auto,
+    label--padding-top: 0px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    label--line-height: 20px,
+    required-indicator--color: #dc2626,
+    optional-indicator--color: #71717a,
+    optional-indicator--font-size: 12px,
+    label-action--color: #0265dc,
+    label-action--font-size: 12px,
+
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--indent: 0px,
+    hint--color: #71717a,
+    error--color: #dc2626,
+    warning--color: #b45309,
+    icon--size: 14px,
+    icon-glyph--color: #ffffff,
+    counter--color: #71717a,
+    counter__near-limit--color: #b45309,
+  )
+);
+
+:host {
+  display: block;
+  grid-column: css.cssVar(grid-column);
+  min-width: 0;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.field {
+  display: flex;
+  flex-direction: css.cssVar(direction);
+  flex-wrap: wrap;
+  row-gap: css.cssVar(gap);
+  column-gap: css.cssVar(column-gap);
+  min-width: 0;
+}
+
+.label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: css.cssVar(label--width);
+  max-width: 100%;
+  padding-top: css.cssVar(label--padding-top);
+  box-sizing: border-box;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+}
+
+.label {
+  min-width: 0;
+  cursor: default;
+}
+
+:host(:state(disabled)) .label-row {
+  opacity: 0.38;
+}
+
+.required {
+  margin-inline-start: 2px;
+  color: css.cssVar(required-indicator--color);
+}
+
+.optional {
+  margin-inline-start: 8px;
+  color: css.cssVar(optional-indicator--color);
+  font-size: css.cssVar(optional-indicator--font-size);
+  font-weight: 400;
+}
+
+.label-action {
+  margin-inline-start: auto;
+  color: css.cssVar(label-action--color);
+  font-size: css.cssVar(label-action--font-size);
+  font-weight: 400;
+
+  &:not(:has(*)) {
+    display: none;
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  min-width: min(100%, #{css.cssVar(body--min-width)});
+}
+
+.supporting-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-inline-start: css.cssVar(supporting-text--indent);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+  color: css.cssVar(hint--color);
+}
+
+.message {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  color: css.cssVar(error--color);
+}
+
+.warning {
+  color: css.cssVar(warning--color);
+}
+
+.icon {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  margin-top: 1px;
+
+  .glyph {
+    fill: css.cssVar(icon-glyph--color);
+  }
+}
+
+.counter {
+  flex: none;
+  margin-inline-start: auto;
+  color: css.cssVar(counter--color);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &.near {
+    color: css.cssVar(counter__near-limit--color);
+    font-weight: 600;
+  }
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

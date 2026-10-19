@@ -3,6 +3,7 @@ import { queryAll, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './date-selector.scss?inline'
 
 export type DateSelectorWeekStart = 'monday' | 'sunday'
@@ -21,6 +22,8 @@ export interface DateSelector {
   addEventListener: TypedAddEventListener<DateSelector, DateSelectorEventMap>
   removeEventListener: TypedRemoveEventListener<DateSelector, DateSelectorEventMap>
 }
+
+const defaultLabel = 'Choose a date range'
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}$/
 
@@ -88,6 +91,7 @@ function addDays(date: Date, amount: number): Date {
  * @cssproperty {outline} [--c2-date-selector__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-date-selector__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-date-selector__disabled--opacity=0.38]
+ * @cssproperty {border} [--c2-date-selector__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
  */
 @customElement('c2-date-selector')
 export class DateSelector extends LitElement {
@@ -101,6 +105,8 @@ export class DateSelector extends LitElement {
   @state() private disabledByForm = false
   @state() private visibleMonth = beginningOfMonth(new Date())
   @state() private focusDate = ''
+  /** Label and description handed down by an enclosing `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
   @queryAll('.day:not(:disabled)') private readonly dayButtons!: NodeListOf<HTMLButtonElement>
 
   /** Start of the selected range as `YYYY-MM-DD`. */
@@ -126,7 +132,7 @@ export class DateSelector extends LitElement {
   /** Prevents navigation and selection and excludes the control from form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false
   /** Accessible name for the complete calendar. */
-  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = 'Choose a date range'
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = defaultLabel
 
   get form() {
     return this.internals.form
@@ -341,9 +347,19 @@ export class DateSelector extends LitElement {
   }
 
   override render() {
-    return html`<div class="c2-date-selector" role="group" aria-label=${this.ariaLabel ?? nothing} aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}>
-      ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index))}
-    </div>`
+    // The built-in default name gives way to an enclosing field's label; one the author set still wins.
+    const label = this.ariaLabel === defaultLabel ? this.field.label || this.ariaLabel : this.ariaLabel
+    const invalid = this.field.invalid && !this.effectiveDisabled
+    return html`<div
+        class="c2-date-selector ${invalid ? 'error' : ''}"
+        role="group"
+        aria-label=${label ?? nothing}
+        aria-describedby=${this.field.describedBy()}
+        aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
+      >
+        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index))}
+      </div>
+      ${this.field.renderDescription()}`
   }
 }
 

@@ -51,16 +51,46 @@
     ),
     name-box--width: 72px,
     fx--color: #71717a,
-
+    fx__hover--background-color: #edf1fe,
+    fx__hover--color: rgb(2, 101, 220),
     summary--background-color: #fafafa,
     summary--color: #71717a,
     summary--font-size: 12px,
     summary-value--color: #18181b,
-
+    total__hover--background-color: rgba(2, 101, 220, 0.08),
+    help--background-color: #ffffff,
+    help--color: #18181b,
+    help--border: 1px solid #e4e4e7,
+    help--border-radius: 10px,
+    help--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.16),
+    help--width: 340px,
+    help-muted--color: #71717a,
+    help-option__active--background-color: #edf1fe,
+    help-accent--color: rgb(2, 101, 220),
     reference-1--color: rgb(2, 101, 220),
     reference-2--color: #c2410c,
     reference-3--color: #7c3aed,
     reference-4--color: #0f766e,
+
+    color-gray: #91918e,
+    color-brown: #a27763,
+    color-orange: #d9730d,
+    color-yellow: #cb912f,
+    color-green: #448361,
+    color-blue: #337ea9,
+    color-purple: #9065b0,
+    color-red: #d44c47,
+    background-gray: rgba(145, 145, 142, 0.2),
+    background-brown: rgba(162, 119, 99, 0.2),
+    background-orange: rgba(217, 115, 13, 0.18),
+    background-yellow: rgba(223, 171, 1, 0.22),
+    background-green: rgba(68, 131, 97, 0.18),
+    background-blue: rgba(51, 126, 169, 0.18),
+    background-purple: rgba(144, 101, 176, 0.18),
+    background-red: rgba(212, 76, 71, 0.18),
+    cell__small--font-size: 0.86em,
+    cell__large--font-size: 1.25em,
+    cell__bold--font-weight: 600,
   )
 );
 
@@ -127,6 +157,22 @@
   color: css.cssVar(fx--color);
   font-family: Georgia, 'Times New Roman', serif;
   font-style: italic;
+}
+
+button.fx {
+  margin: 0;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: none;
+  font-size: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: css.cssVar(fx__hover--background-color);
+    color: css.cssVar(fx__hover--color);
+  }
 }
 
 .formula-input {
@@ -255,6 +301,21 @@
   text-overflow: ellipsis;
 }
 
+// The name of a column being edited, in its header after the letter.
+.label-editor {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  outline: css.cssVar(cell__active--outline);
+  outline-offset: -2px;
+  background-color: css.cssVar(editor--background-color);
+  color: css.cssVar(column-label--color);
+  font: inherit;
+}
+
 .row-header {
   left: 0;
   justify-content: center;
@@ -308,13 +369,110 @@
   text-align: end;
 }
 
+// Cell styles. The background comes before the selection, which is drawn over it as an image so both show.
+.color-gray {
+  color: css.cssVar(color-gray);
+}
+
+.color-brown {
+  color: css.cssVar(color-brown);
+}
+
+.color-orange {
+  color: css.cssVar(color-orange);
+}
+
+.color-yellow {
+  color: css.cssVar(color-yellow);
+}
+
+.color-green {
+  color: css.cssVar(color-green);
+}
+
+.color-blue {
+  color: css.cssVar(color-blue);
+}
+
+.color-purple {
+  color: css.cssVar(color-purple);
+}
+
+.color-red {
+  color: css.cssVar(color-red);
+}
+
+.background-gray {
+  background-color: css.cssVar(background-gray);
+}
+
+.background-brown {
+  background-color: css.cssVar(background-brown);
+}
+
+.background-orange {
+  background-color: css.cssVar(background-orange);
+}
+
+.background-yellow {
+  background-color: css.cssVar(background-yellow);
+}
+
+.background-green {
+  background-color: css.cssVar(background-green);
+}
+
+.background-blue {
+  background-color: css.cssVar(background-blue);
+}
+
+.background-purple {
+  background-color: css.cssVar(background-purple);
+}
+
+.background-red {
+  background-color: css.cssVar(background-red);
+}
+
+.size-small {
+  font-size: css.cssVar(cell__small--font-size);
+}
+
+.size-large {
+  font-size: css.cssVar(cell__large--font-size);
+}
+
+.bold {
+  font-weight: css.cssVar(cell__bold--font-weight);
+}
+
 .cell.selected {
-  background-color: css.cssVar(cell__selected--background-color);
+  background-image: linear-gradient(#{css.cssVar(cell__selected--background-color)}, #{css.cssVar(cell__selected--background-color)});
 }
 
 .cell.active {
   outline: css.cssVar(cell__active--outline);
   outline-offset: -2px;
+}
+
+// hide-selection-on-blur: neither the focus nor the menu is in the sheet, so it shows no selection.
+.blurred {
+  .cell.selected {
+    background-image: none;
+  }
+
+  .cell.active {
+    outline: none;
+  }
+
+  .header.selected {
+    background-color: css.cssVar(header--background-color);
+    color: css.cssVar(header--color);
+
+    .column-label {
+      color: css.cssVar(column-label--color);
+    }
+  }
 }
 
 .cell.reference {
@@ -348,8 +506,14 @@
   background-color: css.cssVar(editor--background-color);
   box-shadow: css.cssVar(editor--box-shadow);
   color: inherit;
-  font-family: css.cssVar(editor--font-family);
-  font-size: 0.93em;
+  // Text edits in the cell's own font, so nothing jumps; a formula reads in the code font, as in the formula bar.
+  font: inherit;
+  line-height: normal;
+
+  &.formula {
+    font-family: css.cssVar(editor--font-family);
+    font-size: 0.93em;
+  }
 }
 
 .readonly .cell {
@@ -376,6 +540,116 @@
     color: css.cssVar(summary-value--color);
     font-weight: 600;
   }
+}
+
+// A total in the bar writes its formula next to the range.
+.total {
+  margin: -3px -6px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: css.cssVar(total__hover--background-color);
+  }
+}
+
+// Formula help: the functions matching what is typed, or the hint for the call the caret is in.
+.help {
+  box-sizing: border-box;
+  width: css.cssVar(help--width);
+  max-width: calc(100vw - 16px);
+  max-height: min(320px, var(--c2-overlay--available-height, 320px));
+  overflow: auto;
+  padding: 6px;
+  background-color: css.cssVar(help--background-color);
+  border: css.cssVar(help--border);
+  border-radius: css.cssVar(help--border-radius);
+  box-shadow: css.cssVar(help--box-shadow);
+  color: css.cssVar(help--color);
+  font-family: css.cssVar(font-family);
+  font-size: 13px;
+  line-height: 1.4;
+
+  &.hint {
+    padding: 10px 12px;
+  }
+}
+
+.help-header,
+.help-footer {
+  padding: 4px 8px;
+  color: css.cssVar(help-muted--color);
+  font-size: 11px;
+}
+
+.help-header {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.help-option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    background-color: css.cssVar(help-option__active--background-color);
+  }
+}
+
+.help .signature {
+  font-family: css.cssVar(editor--font-family);
+  font-weight: 600;
+}
+
+.typed {
+  color: css.cssVar(help-accent--color);
+}
+
+.args {
+  color: css.cssVar(help-muted--color);
+  font-weight: 400;
+}
+
+.hint .signature {
+  font-weight: 400;
+}
+
+.current {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.help .description {
+  color: css.cssVar(help-muted--color);
+}
+
+.hint .description {
+  margin-top: 2px;
+}
+
+.point-hint,
+.result {
+  margin-top: 6px;
+  color: css.cssVar(help-muted--color);
+  font-size: 12px;
+}
+
+.result b {
+  color: css.cssVar(help--color);
+  font-family: css.cssVar(editor--font-family);
+  font-size: 13px;
 }
 
 .visually-hidden {
