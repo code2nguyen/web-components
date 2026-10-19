@@ -30,12 +30,12 @@ below in full.
   Host semantics go through `this.internals` (`attachInternals()`), and light-DOM children are routed with manual slot
   assignment (`assignSlot`). React, Next.js and React Router report every such write as a hydration mismatch.
 - A reflected property's default is not reflected. Styles for the default state must also match the bare element
-  (`:host(:not([side]))`), never only `:host([size='m'])`.
+  (`:host([size='m']), :host(:not([size]))`), never only `:host([size='m'])`.
 - A child rendered inside another component's server-rendered shadow root hydrates after its parent. Writes to it
   before its first update are deferred.
 - `customElement` comes from `@c2n/core/element-helper.js` and `property` from `@c2n/core/lit-helper.js`, never from
   `lit/decorators.js`. Boolean attributes must read `"false"` and `"0"` as false.
-- `requestUpdate()` or reactive-property writes inside `firstUpdated()`, and slot state that relies only on
+- Flag `requestUpdate()` or reactive-property writes inside `firstUpdated()`, and slot state that relies only on
   `slotchange` (`npm run check:lifecycle`).
 - Code that touches `window`, `document`, `customElements` or layout at module load or in the constructor breaks
   server rendering.
