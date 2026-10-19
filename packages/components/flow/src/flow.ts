@@ -12,7 +12,19 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
-import { FLOW_SIDES, defaultSides, nearestSide, oppositeSide, routeBetween, sidePoint, type EdgeRoute } from './flow-geometry.js'
+import {
+  FLOW_SIDES,
+  defaultSides,
+  facingSides,
+  nearestSide,
+  oppositeSide,
+  routeBetween,
+  rowPoint,
+  sidePoint,
+  type EdgeAnchors,
+  type EdgeRoute,
+  type Rect,
+} from './flow-geometry.js'
 import { MENU_ICONS, STATUS_ICONS } from './flow-icons.js'
 import { flowMessages } from './messages.js'
 import type {
@@ -23,6 +35,7 @@ import type {
   FlowEdgeAddDetail,
   FlowEdgeEditDetail,
   FlowEdgeEventDetail,
+  FlowEdgeMarker,
   FlowEdgeType,
   FlowLayout,
   FlowLayoutChangeDetail,
@@ -33,6 +46,7 @@ import type {
   FlowNodeDeleteDetail,
   FlowNodeEditDetail,
   FlowNodeEventDetail,
+  FlowNodeRow,
   FlowNodeShape,
   FlowPoint,
   FlowRenderContext,
@@ -131,6 +145,12 @@ function detailRows(details: FlowNode['details']): [string, string][] {
   return Array.isArray(details) ? details : Object.entries(details)
 }
 
+/** The well-formed rows of a node. */
+const rowsOf = (node: FlowNode): FlowNodeRow[] => (Array.isArray(node.rows) ? node.rows.filter((row) => !!row && typeof row.id === 'string' && !!row.id) : [])
+
+/** See `edgeEnds()`. */
+type NodeEnds = Map<string, Map<string, { in: boolean; out: boolean }>>
+
 const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in STATUS_ICONS ? node.status : 'pending')
 
 /** The message a screen reader reads for each status, since the marker is a glyph. */
@@ -144,7 +164,61 @@ const STATUS_MESSAGES = {
   skipped: 'statusSkipped',
 } as const satisfies Record<FlowStatus, string>
 
-const edgeKey = (source: string, target: string) => `${source}\u0000${target}`
+const pairKey = (source: string, target: string) => `${source}\u0000${target}`
+
+/** A port id, or `undefined` for anything else (an empty string included). */
+const portId = (value: unknown): string | undefined => (typeof value === 'string' && value ? value : undefined)
+
+type EdgeIdentity = Pick<FlowEdge, 'source' | 'target' | 'sourcePort' | 'targetPort'>
+
+/** Identity of an edge: its two nodes, and its two rows when it has any, since two tables can be linked by several columns. */
+const edgeKey = (edge: EdgeIdentity) => {
+  const [sourcePort, targetPort] = [portId(edge.sourcePort), portId(edge.targetPort)]
+  const pair = pairKey(edge.source, edge.target)
+  return sourcePort || targetPort ? `${pair}\u0000${sourcePort ?? ''}\u0000${targetPort ?? ''}` : pair
+}
+
+/** The ports of an edge, for the detail of an event about it: only those it has. */
+const portsOf = (edge: EdgeIdentity): Pick<FlowEdge, 'sourcePort' | 'targetPort'> => {
+  const ports: Pick<FlowEdge, 'sourcePort' | 'targetPort'> = {}
+  const [sourcePort, targetPort] = [portId(edge.sourcePort), portId(edge.targetPort)]
+  if (sourcePort) ports.sourcePort = sourcePort
+  if (targetPort) ports.targetPort = targetPort
+  return ports
+}
+
+const MARKERS = new Set<FlowEdgeMarker>(['arrow', 'none', 'one', 'zero-one', 'many', 'one-many', 'zero-many'])
+
+/**
+ * The crow's-foot ends, drawn in a 20×12 box whose right edge touches the node: the crow's foot spreads to the full
+ * height there, bars stand across the line, and a circle (filled with the canvas) sits further out.
+ */
+const MARKER_PATHS: Partial<Record<FlowEdgeMarker, unknown>> = {
+  one: svg`<path d="M-4 -5V5M-8 -5V5"></path>`,
+  'zero-one': svg`<path d="M-4 -5V5"></path><circle class="marker-ring" cx="-11" cy="0" r="3"></circle>`,
+  many: svg`<path d="M-12 0L0 -6M-12 0L0 6"></path>`,
+  'one-many': svg`<path d="M-12 0L0 -6M-12 0L0 6M-15 -5V5"></path>`,
+  'zero-many': svg`<path d="M-12 0L0 -6M-12 0L0 6"></path><circle class="marker-ring" cx="-16" cy="0" r="3"></circle>`,
+}
+
+const markerOf = (value: unknown, fallback: FlowEdgeMarker): FlowEdgeMarker => (MARKERS.has(value as FlowEdgeMarker) ? (value as FlowEdgeMarker) : fallback)
+
+/** Where a row sits in its node, in canvas pixels from the top of the node's border box; `inset` is its top border. */
+interface PortBox {
+  top: number
+  height: number
+  inset: number
+}
+
+/** The geometry of an edge's two ends: the nodes it joins, the sides it uses and, for rows, where on those sides. */
+interface EdgeEnds {
+  a: Rect
+  b: Rect
+  sides: { source: FlowSide; target: FlowSide }
+  anchors: EdgeAnchors
+  /** Whether either end is on a row. */
+  ported: boolean
+}
 
 /** A key press without Ctrl, ⌘ or Alt: the single-letter editing shortcuts must not shadow browser or app chords. */
 const plainKey = (event: KeyboardEvent, key: string) => !event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === key
@@ -156,8 +230,12 @@ interface Connection {
   sourceSide: FlowSide
   /** Pointer position in canvas pixels; `null` while the keyboard chooses. */
   point: FlowPoint | null
+  /** The row of `source` it was dragged from, when it started on a row's handle. */
+  sourcePort?: string
   /** The node under the pointer, or the keyboard's candidate. */
   target: string | null
+  /** The row of `target` under the pointer, if any. */
+  targetPort?: string
   /** The side of `target` it would arrive by; `null` without a target. */
   targetSide: FlowSide | null
   keyboard: boolean
@@ -206,6 +284,19 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  *
  * **Custom nodes.** `renderNode` returns the body of each node (a Lit template, a DOM node or a string), or a
  * framework renders it into the `node:<id>` slot. Handles, dragging, edges and the card still come from the flow.
+ *
+ * **Rows and ports (schema diagrams).** A node's `rows` are drawn as a list under its label (a table's columns, with
+ * the column type as `meta` and a key icon as `icon`), and each row is a port: an edge with `sourcePort` or
+ * `targetPort` leaves or arrives at that row, on its left or right side, whichever faces the other end unless the
+ * edge names one. Several edges may join the same two nodes through different rows, and a node may be joined to
+ * itself between two of its rows. A custom body marks its own ports with `data-flow-port="<id>"`. Hovering a row
+ * highlights its edges and the rows at their far ends; a row with `details` opens its own hover card. Screen readers
+ * hear the rows and the rows each edge joins ("After customers.id through customer_id."). `sourceMarker` and
+ * `targetMarker` draw an end as an `arrow` (the target's default), `none` (the source's) or a crow's-foot cardinality:
+ * `one`, `zero-one`, `many`, `one-many`, `zero-many`. With `edge-type="step"`, `direction="LR"`,
+ * `--c2-flow__marker--display: none` and a monospace `--c2-flow__row--font-family`, a flow is an entity-relationship
+ * diagram. In an `editable` flow a node with rows is connected row to row: each row has a handle on both sides, and
+ * `edge-add` names the rows (`node-add`, `edge-delete` and `edge-edit` too); the keyboard still connects whole nodes.
  *
  * **Keyboard.** One node is in the tab order; arrow keys follow the edges (forward to the next step, back to the
  * previous one, across to a sibling of the same rank), Enter selects, Alt+arrow moves the node (8px, 24px with
@@ -322,6 +413,7 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {time} [--c2-flow__edge--animation-duration=600ms] - One cycle of the active edge's dash animation.
  * @cssproperty {pixel} [--c2-flow__arrow--size=8px] - Length and width of the arrowhead at the target end of every edge. It takes the edge's colour.
  * @cssproperty {display} [--c2-flow__arrow--display=block] - `none` draws the edges without arrowheads.
+ * @cssproperty {pixel} [--c2-flow__edge-marker--size=12px] - Height of a crow's-foot end (`one`, `many`…); it is 5/3 as long. It takes the edge's colour and width.
  * @cssproperty {color} [--c2-flow__edge-label--background-color=#ffffff] - Background of the pill an edge's `label` is drawn in, so it stays readable over the line and the dot grid.
  * @cssproperty {color} [--c2-flow__edge-label--color=#71717a]
  * @cssproperty {font-size} [--c2-flow__edge-label--font-size=12px]
@@ -366,8 +458,18 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {border-radius} [--c2-flow__editor--border-radius=4px]
  * @cssproperty {outline} [--c2-flow__editor__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  *
- * @cssproperty {pixel} [--c2-flow__icon--size=16px] - Size of a node's `icon`.
+ * @cssproperty {pixel} [--c2-flow__icon--size=16px] - Size of a node's `icon` and of a row's.
  * @cssproperty {color} [--c2-flow__icon--color=currentColor] - Colour of a node's `icon`; the node's text colour by default.
+ * @cssproperty {border} [--c2-flow__rows--border-top=1px solid #e4e4e7] - Line between a node's header and its rows.
+ * @cssproperty {pixel} [--c2-flow__row--min-height=32px]
+ * @cssproperty {padding} [--c2-flow__row--padding=0 12px]
+ * @cssproperty {pixel} [--c2-flow__row--gap=8px] - Space between a row's icon, label and meta.
+ * @cssproperty {font-family} --c2-flow__row--font-family - Font of the rows, e.g. a monospace one for a schema.
+ * @cssproperty {font-size} [--c2-flow__row--font-size=13px]
+ * @cssproperty {border} [--c2-flow__row--border-top=1px solid #f4f4f5] - Line between two rows.
+ * @cssproperty {color} [--c2-flow__row__highlighted--background-color=rgba(2, 101, 220, 0.08)] - The hovered row and the rows at the far end of its edges, and the row a connection would arrive at.
+ * @cssproperty {color} [--c2-flow__row-meta--color=#71717a] - A row's `meta`, such as a column type.
+ * @cssproperty {font-size} [--c2-flow__row-meta--font-size=12px]
  * @cssproperty {color} [--c2-flow__shape--border-color=#bcbcc6] - Outline of a diamond, circle or slanted node, and the fold of a note.
  * @cssproperty {pixel} [--c2-flow__shape--border-width=1px] - Width of that outline.
  * @cssproperty {pixel} [--c2-flow__shape__diamond--min-height=88px] - A diamond's least height, so its middle has room for the label.
@@ -450,7 +552,11 @@ export class Flow extends LitElement {
   @state() private ty = 0
   @state() private zoom = 1
   @state() private cardId: string | null = null
+  /** The row of `cardId` whose own card is open, or `null` for the node's card. */
+  @state() private cardPort: string | null = null
   @state() private highlightId: string | null = null
+  /** The row under the pointer: its edges and the rows at their far ends are highlighted. */
+  @state() private highlightPort: { node: string; port: string } | null = null
   @state() private focusId: string | null = null
   /** Where the placeholder of a node dragged in by `dragNewNode()` is, in canvas pixels; null when not over the canvas. */
   @state() private ghost: FlowPoint | null = null
@@ -476,6 +582,14 @@ export class Flow extends LitElement {
   private rank = new Map<string, number>()
   private positions = new Map<string, FlowPoint>()
   private sizes = new Map<string, FlowSize>()
+  /** Every port of every node, as measured: rows of the default body and `data-flow-port` elements of custom ones. */
+  private ports = new Map<string, Map<string, PortBox>>()
+  /** The nodes' content may have changed, so the ports are measured again after the next render. */
+  private portsDirty = true
+  /** What each node slot had assigned when it last changed; see `handleNodeSlotChange`. */
+  private slotted = new WeakMap<HTMLSlotElement, Node[]>()
+  /** Rows to highlight in this render, as `node\0port`: the hovered row and the rows at the far end of its edges. */
+  private litRows = new Set<string>()
   /** Positions the user chose (or that were restored): the input of the merge on every re-layout. */
   private pinned: FlowLayout = {}
   private byId = new Map<string, FlowNode>()
@@ -496,7 +610,7 @@ export class Flow extends LitElement {
   private menuEdge: FlowEdge | null = null
   private menuPoint: FlowPoint | null = null
   /** A press on a node's connection handle, until it moves far enough to become a connection. */
-  private connectDrag: { source: string; side: FlowSide; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
+  private connectDrag: { source: string; side: FlowSide; port?: string; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
   private lastTap: { target: string; time: number; x: number; y: number } | null = null
   /** The position each node's own `position` field was last applied with, so an unchanged value does not undo a drag. */
   private appliedPositions = new Map<string, string>()
@@ -511,6 +625,8 @@ export class Flow extends LitElement {
   /** A keyboard delete: where focus goes once the application has removed the node. */
   private refocus: { removed: string; next: string | null } | null = null
   private openTimer: ReturnType<typeof setTimeout> | undefined
+  /** The card `openTimer` opens, as `node\0port`. */
+  private pendingCard: string | null = null
   private closeTimer: ReturnType<typeof setTimeout> | undefined
   private cleanupCard: (() => void) | null = null
   private stageObserver: ResizeObserver | null = null
@@ -532,7 +648,10 @@ export class Flow extends LitElement {
     this.stageObserver = new ResizeObserver(() => {
       if (!this.viewTouched) this.fitView()
     })
-    this.nodeObserver = new ResizeObserver(() => this.measure())
+    this.nodeObserver = new ResizeObserver(() => {
+      this.portsDirty = true
+      this.measure()
+    })
     if (this.hasUpdated) this.observe()
   }
 
@@ -626,12 +745,17 @@ export class Flow extends LitElement {
   }
 
   /**
-   * Opens the inline label editor on the edge from `source` to `target`, as a double-click would; for example on the
-   * branch an application has just added to a decision. Does nothing unless the flow is `editable` and the edge exists.
+   * Opens the inline label editor on the edge from `source` to `target` (between rows `sourcePort` and `targetPort`,
+   * for an edge between rows), as a double-click would; for example on the branch an application has just added to a
+   * decision. Does nothing unless the flow is `editable` and the edge exists.
    */
-  async editEdgeLabel(source: string, target: string): Promise<void> {
-    const key = edgeKey(source, target)
-    if (!this.editable || !this.edgeByKey(key) || !this.positions.has(source) || !this.positions.has(target)) return
+  async editEdgeLabel(source: string, target: string, sourcePort?: string, targetPort?: string): Promise<void> {
+    await this.openEdgeEditor(edgeKey({ source, target, sourcePort, targetPort }))
+  }
+
+  private async openEdgeEditor(key: string) {
+    const edge = this.edgeByKey(key)
+    if (!this.editable || !edge || !this.positions.has(edge.source) || !this.positions.has(edge.target)) return
     this.hideCard(true)
     this.cancelConnection()
     this.editingId = null
@@ -711,24 +835,83 @@ export class Flow extends LitElement {
     )
   }
 
-  /** Measures every node; a size that changed re-runs the layout, so custom bodies and late fonts are accounted for. */
+  /**
+   * Measures every node, and its ports when its content may have changed; a size that changed re-runs the layout, so
+   * custom bodies and late fonts are accounted for, and a port that moved redraws the edges.
+   */
   private measure() {
     const root = this.renderRoot as ShadowRoot | undefined
     if (!root) return
     let changed = false
+    const measurePorts = this.portsDirty
+    let portsChanged = false
+    const seen = new Set<string>()
     for (const element of root.querySelectorAll<HTMLElement>('.node')) {
       const id = element.dataset.nodeId!
       const size = { width: element.offsetWidth, height: element.offsetHeight }
       if (!size.width && !size.height) continue
+      seen.add(id)
       const previous = this.sizes.get(id)
-      if (!previous || previous.width !== size.width || previous.height !== size.height) {
+      const resized = !previous || previous.width !== size.width || previous.height !== size.height
+      if (resized) {
         this.sizes.set(id, size)
         changed = true
       }
+      if (measurePorts || resized) portsChanged = this.measurePorts(element, id) || portsChanged
     }
-    if (!changed) return
+    if (measurePorts) {
+      this.portsDirty = false
+      for (const id of this.ports.keys()) {
+        if (seen.has(id)) continue
+        this.ports.delete(id)
+        portsChanged = true
+      }
+    }
+    if (!changed) {
+      if (portsChanged) this.requestUpdate()
+      return
+    }
     this.relayout()
     if (!this.viewTouched) this.fitView()
+  }
+
+  /** The elements in node `id` that carry `data-flow-port`, in its shadow body or in the light DOM slotted into it. */
+  private portElements(element: HTMLElement, id: string, port?: string) {
+    const selector = port === undefined ? '[data-flow-port]' : `[data-flow-port="${CSS.escape(port)}"]`
+    const slotted = [...this.querySelectorAll<HTMLElement>(`:scope > [slot="node:${CSS.escape(id)}"]`)]
+    return [
+      ...element.querySelectorAll<HTMLElement>(selector),
+      ...slotted.flatMap((child) => [...(child.matches(selector) ? [child] : []), ...child.querySelectorAll<HTMLElement>(selector)]),
+      // The fallback body of a slot that has content is in the DOM but not drawn.
+    ].filter((el) => el.getClientRects().length > 0)
+  }
+
+  /** Measures the ports of node `id`; returns whether any moved, appeared or went away. */
+  private measurePorts(element: HTMLElement, id: string) {
+    const nodeRect = element.getBoundingClientRect()
+    // The viewport is scaled by the zoom; the ports are kept in canvas pixels.
+    const scale = element.offsetHeight ? nodeRect.height / element.offsetHeight : 0
+    const boxes = new Map<string, PortBox>()
+    if (scale > 0) {
+      for (const el of this.portElements(element, id)) {
+        const port = el.getAttribute('data-flow-port')
+        if (!port || boxes.has(port)) continue
+        const rect = el.getBoundingClientRect()
+        const top = Math.round(((rect.top - nodeRect.top) / scale) * 10) / 10
+        boxes.set(port, { top, height: Math.round((rect.height / scale) * 10) / 10, inset: element.clientTop })
+      }
+    }
+    const previous = this.ports.get(id)
+    const same =
+      (previous?.size ?? 0) === boxes.size &&
+      [...boxes].every(([port, box]) => {
+        const old = previous?.get(port)
+        return !!old && old.top === box.top && old.height === box.height && old.inset === box.inset
+      })
+    if (same) return false
+    if (boxes.size) this.ports.set(id, boxes)
+    else this.ports.delete(id)
+    return true
   }
 
   private observe() {
@@ -912,23 +1095,37 @@ export class Flow extends LitElement {
   /**
    * Where a connection from `source` dragged to `point` would arrive: the node whose side handle is under the point
    * (handles reach past the node's box), else the topmost node under the point, by its side nearest the point. Ties
-   * go to the incoming side of the direction.
+   * go to the incoming side of the direction. On a node with rows, the handles are those of its rows and the point
+   * picks the row it is level with, by its left or right side; a connection from a row may end on another row of its
+   * own node.
    */
-  private dropTarget(point: FlowPoint, source: string): { target: string | null; side: FlowSide | null } {
+  private dropTarget(point: FlowPoint, source: string, sourcePort?: string): { target: string | null; side: FlowSide | null; port?: string } {
     // The handle's visible radius plus the 6px of hit area round it (`.connector::before`).
     const reach = this.readPixels('--c2-flow__connector--size', 12) / 2 + 6
+    const near = (handle: FlowPoint) => Math.hypot(point.x - handle.x, point.y - handle.y) <= reach
     for (let i = this.nodes.length - 1; i >= 0; i--) {
       const id = this.nodes[i].id
-      const rect = id === source ? null : this.rectOf(id)
-      if (!rect) continue
-      for (const side of FLOW_SIDES) {
-        const handle = sidePoint(rect, side)
-        if (Math.hypot(point.x - handle.x, point.y - handle.y) <= reach) return { target: id, side }
+      const rect = this.rectOf(id)
+      const ports = this.ports.get(id)
+      if (!rect || (id === source && !(sourcePort && ports))) continue
+      if (ports) {
+        for (const [port, box] of ports) {
+          if (id === source && port === sourcePort) continue
+          for (const side of ['left', 'right'] as const) if (near(rowPoint(rect, side, box.top, box.height))) return { target: id, side, port }
+        }
+        continue
       }
+      for (const side of FLOW_SIDES) if (near(sidePoint(rect, side))) return { target: id, side }
     }
     const target = this.nodeAt(point)
     const rect = target === null ? null : this.rectOf(target)
     if (target === null || !rect) return { target: null, side: null }
+    const side: FlowSide = point.x < rect.x + rect.width / 2 ? 'left' : 'right'
+    for (const [port, box] of this.ports.get(target) ?? []) {
+      if (point.y >= rect.y + box.top && point.y <= rect.y + box.top + box.height) {
+        return target === source && (!sourcePort || port === sourcePort) ? { target: null, side: null } : { target, side, port }
+      }
+    }
     const incoming = defaultSides(this.direction).target
     return { target, side: nearestSide(rect, point, [incoming, ...FLOW_SIDES.filter((side) => side !== incoming)]) }
   }
@@ -949,7 +1146,8 @@ export class Flow extends LitElement {
     const connector = this.editable && id ? (this.fromPart(event, 'connector') as HTMLElement | null) : null
     if (id && connector) {
       const side = isSide(connector.dataset.side) ? connector.dataset.side : defaultSides(this.direction).source
-      this.connectDrag = { source: id, side, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
+      const port = portId(connector.dataset.port)
+      this.connectDrag = { source: id, side, port, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
     } else if (id) {
       // A locked flow still tracks the press on a node, so it can tell a click from a pan.
       this.drag = { id, startX: event.clientX, startY: event.clientY, origin: { ...this.positions.get(id)! }, moved: false, pointerId: event.pointerId }
@@ -962,15 +1160,15 @@ export class Flow extends LitElement {
 
   private handlePointerMove = (event: PointerEvent) => {
     if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
-      const { source, side, startX, startY } = this.connectDrag
+      const { source, side, port, startX, startY } = this.connectDrag
       if (!this.connectDrag.moved && Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD) return
       if (!this.connectDrag.moved) {
         this.connectDrag.moved = true
         this.hideCard(true)
       }
       const point = this.toCanvas(event.clientX, event.clientY)
-      const { target, side: targetSide } = this.dropTarget(point, source)
-      this.connection = { source, sourceSide: side, point, target, targetSide, keyboard: false }
+      const { target, side: targetSide, port: targetPort } = this.dropTarget(point, source, port)
+      this.connection = { source, sourceSide: side, sourcePort: port, point, target, targetPort, targetSide, keyboard: false }
     } else if (this.drag && event.pointerId === this.drag.pointerId) {
       const dx = event.clientX - this.drag.startX
       const dy = event.clientY - this.drag.startY
@@ -1030,8 +1228,7 @@ export class Flow extends LitElement {
           // edge, unlike one on a node, focuses nothing), the canvas takes it while the edge is selected, so they
           // reach the flow at all.
           if (!(this.renderRoot as ShadowRoot).activeElement) void this.updateComplete.then(() => this.stage?.focus({ preventScroll: true }))
-          const selected = this.edgeByKey(edge)
-          if (selected && this.isDoubleTap(`edge:${edge}`, event)) void this.editEdgeLabel(selected.source, selected.target)
+          if (this.edgeByKey(edge) && this.isDoubleTap(`edge:${edge}`, event)) void this.openEdgeEditor(edge)
         } else {
           this.select(null)
           if (this.editable && !this.noDoubleClickAdd && this.isDoubleTap('canvas', event)) {
@@ -1077,17 +1274,38 @@ export class Flow extends LitElement {
 
   private labelOf = (id: string) => this.byId.get(id)?.label ?? id
 
-  private hasEdge(source: string, target: string) {
-    return this.edges.some((edge) => edge.source === source && edge.target === target)
+  /** The label of a row: its `label` in `rows`, else its id (a port of a custom body). */
+  private rowLabel(id: string, port: string) {
+    return this.rowOf(id, port)?.label ?? port
   }
 
-  /** Whether connecting `source` to `target` would make a new edge: no self-loop, no duplicate. */
-  private canConnect(source: string, target: string | null): target is string {
-    return target !== null && target !== source && this.byId.has(target) && !this.hasEdge(source, target)
+  private rowOf(id: string, port: string): FlowNodeRow | undefined {
+    const rows = this.byId.get(id)?.rows
+    return Array.isArray(rows) ? rows.find((row) => row?.id === port) : undefined
+  }
+
+  /** "orders.customer_id" for an end on a row, else the node's label. */
+  private endLabel(id: string, port?: string) {
+    return port ? `${this.labelOf(id)}.${this.rowLabel(id, port)}` : this.labelOf(id)
+  }
+
+  private hasEdge(source: string, target: string, sourcePort?: string, targetPort?: string) {
+    const key = edgeKey({ source, target, sourcePort, targetPort })
+    return this.edges.some((edge) => edgeKey(edge) === key)
+  }
+
+  /**
+   * Whether connecting `source` to `target` would make a new edge: no duplicate, and no self-loop except between two
+   * different rows of one node (a table referencing itself).
+   */
+  private canConnect(source: string, target: string | null, sourcePort?: string, targetPort?: string): target is string {
+    if (target === null || !this.byId.has(target)) return false
+    if (target === source && !(sourcePort && targetPort && sourcePort !== targetPort)) return false
+    return !this.hasEdge(source, target, sourcePort, targetPort)
   }
 
   private edgeByKey(key: string | null): FlowEdge | null {
-    return key === null ? null : (this.edges.find((edge) => edgeKey(edge.source, edge.target) === key) ?? null)
+    return key === null ? null : (this.edges.find((edge) => edgeKey(edge) === key) ?? null)
   }
 
   private announce(text: string) {
@@ -1119,7 +1337,7 @@ export class Flow extends LitElement {
     return avoidOverlap(id, start, [...this.positions.keys()], this.positions, (key) => (key === id ? size : this.sizeOf(key)), this.layoutOptions())
   }
 
-  private requestNode(position: FlowPoint, source?: string, fromKeyboard = false, sides?: { source: FlowSide; target: FlowSide }) {
+  private requestNode(position: FlowPoint, source?: string, fromKeyboard = false, sides?: { source: FlowSide; target: FlowSide }, sourcePort?: string) {
     if (fromKeyboard) this.focusAdded = new Set(this.byId.keys())
     const detail: FlowNodeAddDetail = { position: { x: Math.round(position.x), y: Math.round(position.y) } }
     if (source !== undefined) detail.source = source
@@ -1127,6 +1345,7 @@ export class Flow extends LitElement {
       detail.sourceSide = sides.source
       detail.targetSide = sides.target
     }
+    if (source !== undefined && sourcePort) detail.sourcePort = sourcePort
     this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
   }
 
@@ -1264,14 +1483,20 @@ export class Flow extends LitElement {
    * Ends a connection: an edge to its target, or a new connected node at its point when there is no target, placed
    * with the side facing the source (opposite the source side) on the point.
    */
-  private finishConnection({ source, sourceSide, target, targetSide, point }: Connection) {
+  private finishConnection({ source, sourceSide, sourcePort, target, targetSide, targetPort, point }: Connection) {
     if (target === null) {
       const side = oppositeSide(sourceSide)
-      if (point) this.requestNode(this.sideAt(point, side), source, false, { source: sourceSide, target: side })
+      if (point) this.requestNode(this.sideAt(point, side), source, false, { source: sourceSide, target: side }, sourcePort)
       return
     }
-    if (!this.canConnect(source, target)) return
-    const detail: FlowEdgeAddDetail = { source, target, sourceSide, targetSide: targetSide ?? defaultSides(this.direction).target }
+    if (!this.canConnect(source, target, sourcePort, targetPort)) return
+    const detail: FlowEdgeAddDetail = {
+      source,
+      target,
+      sourceSide,
+      targetSide: targetSide ?? defaultSides(this.direction).target,
+      ...portsOf({ source, target, sourcePort, targetPort }),
+    }
     this.dispatchEvent(new CustomEvent<FlowEdgeAddDetail>('edge-add', { detail }))
   }
 
@@ -1337,12 +1562,13 @@ export class Flow extends LitElement {
     this.select(null)
     this.selectedEdge = key
     this.hideCard(true)
-    this.announce(this.msg.t('edgeSelected', this.labelOf(edge.source), this.labelOf(edge.target), edge.label?.trim() ?? '', position, total))
+    const [source, target] = [this.endLabel(edge.source, portId(edge.sourcePort)), this.endLabel(edge.target, portId(edge.targetPort))]
+    this.announce(this.msg.t('edgeSelected', source, target, edge.label?.trim() ?? '', position, total))
   }
 
   /** `E` on a node: selects its edges one after the other. */
   private stepEdges(id: string) {
-    const keys = [...new Set(this.edges.filter((edge) => edge.source === id || edge.target === id).map((edge) => edgeKey(edge.source, edge.target)))]
+    const keys = [...new Set(this.edges.filter((edge) => edge.source === id || edge.target === id).map((edge) => edgeKey(edge)))]
     if (!keys.length) {
       this.announce(this.msg.t('noEdges', this.labelOf(id)))
       return
@@ -1361,7 +1587,7 @@ export class Flow extends LitElement {
   }
 
   private deleteEdge(edge: FlowEdge) {
-    this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-delete', { detail: { source: edge.source, target: edge.target } }))
+    this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-delete', { detail: { source: edge.source, target: edge.target, ...portsOf(edge) } }))
   }
 
   private commitEdgeEdit(refocus: boolean) {
@@ -1371,7 +1597,7 @@ export class Flow extends LitElement {
     this.editingEdge = null
     const edge = this.edgeByKey(key)
     if (edge && label !== (edge.label ?? '').trim()) {
-      this.dispatchEvent(new CustomEvent<FlowEdgeEditDetail>('edge-edit', { detail: { source: edge.source, target: edge.target, label } }))
+      this.dispatchEvent(new CustomEvent<FlowEdgeEditDetail>('edge-edit', { detail: { source: edge.source, target: edge.target, ...portsOf(edge), label } }))
     }
     if (refocus) this.refocusAfterEdgeEdit()
   }
@@ -1424,10 +1650,9 @@ export class Flow extends LitElement {
       event.preventDefault()
       return true
     }
-    const selectedEdge = this.edgeByKey(this.selectedEdge)
-    if (selectedEdge && (event.key === 'F2' || (event.key === 'Enter' && !event.shiftKey))) {
+    if (this.selectedEdge !== null && this.edgeByKey(this.selectedEdge) && (event.key === 'F2' || (event.key === 'Enter' && !event.shiftKey))) {
       event.preventDefault()
-      void this.editEdgeLabel(selectedEdge.source, selectedEdge.target)
+      void this.openEdgeEditor(this.selectedEdge)
       return true
     }
     if (plainKey(event, 'n')) {
@@ -1581,52 +1806,93 @@ export class Flow extends LitElement {
     const id = (event.currentTarget as HTMLElement).dataset.nodeId!
     if (this.drag || this.pan?.moved) return
     this.highlightId = id
-    if (event.pointerType !== 'touch') this.scheduleCard(id)
+    // The card opens from `handleNodeOver` (`pointerover` comes first), which knows the row under the pointer.
   }
 
   private handleNodeLeave = (event: PointerEvent) => {
     this.highlightId = null
+    this.highlightPort = null
     if (event.pointerType !== 'touch') this.scheduleCardClose()
   }
 
-  private scheduleCard(id: string) {
+  /** The `data-flow-port` of the row the event comes from, inside the node it reached; a row's handle counts as the row. */
+  private portFromEvent(event: Event): string | null {
+    for (const target of event.composedPath()) {
+      if (target === this || (target instanceof HTMLElement && target.classList.contains('node'))) break
+      if (!(target instanceof HTMLElement)) continue
+      if (target.dataset.flowPort) return target.dataset.flowPort
+      if (target.classList.contains('connector') && target.dataset.port) return target.dataset.port
+    }
+    return null
+  }
+
+  /** The pointer moved onto another part of a node: a row lights its edges, and a row with `details` opens its own card. */
+  private handleNodeOver = (event: PointerEvent) => {
+    if (this.drag || this.pan?.moved || this.connection) return
+    const id = (event.currentTarget as HTMLElement).dataset.nodeId!
+    const port = this.portFromEvent(event)
+    const current = this.highlightPort
+    if (port === null) {
+      if (current) this.highlightPort = null
+    } else if (current?.node !== id || current.port !== port) this.highlightPort = { node: id, port }
+    if (event.pointerType === 'touch') return
+    const row = port === null ? undefined : this.rowOf(id, port)
+    this.scheduleCard(id, row?.details ? port : null)
+  }
+
+  private scheduleCard(id: string, port: string | null = null) {
     clearTimeout(this.closeTimer)
     this.closeTimer = undefined
     if (this.noCard || this.draggingId || this.editingId !== null || this.editingEdge !== null || this.connection) return
-    if (this.cardId === id) return
+    if (this.cardId === id && this.cardPort === port) {
+      // Back on the card that is open: a switch to another one that was about to happen is off.
+      this.cancelPendingCard()
+      return
+    }
+    const key = `${id}\u0000${port ?? ''}`
+    if (this.openTimer !== undefined && this.pendingCard === key) return
     clearTimeout(this.openTimer)
-    // Moving from one node's card to the next node's opens it at once, like a menu bar.
+    // Moving from one node's card to the next node's (or a row's) opens it at once, like a menu bar.
     const delay = this.cardId ? 0 : this.openDelay
+    this.pendingCard = key
     this.openTimer = setTimeout(() => {
       this.openTimer = undefined
+      this.pendingCard = null
       this.cardId = id
+      this.cardPort = port
     }, delay)
   }
 
-  private scheduleCardClose() {
+  private cancelPendingCard() {
     clearTimeout(this.openTimer)
     this.openTimer = undefined
+    this.pendingCard = null
+  }
+
+  private scheduleCardClose() {
+    this.cancelPendingCard()
     if (!this.cardId || this.closeTimer) return
     this.closeTimer = setTimeout(() => {
       this.closeTimer = undefined
       this.cardId = null
+      this.cardPort = null
     }, this.closeDelay)
   }
 
   private hideCard(now = false) {
-    clearTimeout(this.openTimer)
-    this.openTimer = undefined
+    this.cancelPendingCard()
     if (now) {
       clearTimeout(this.closeTimer)
       this.closeTimer = undefined
       this.cardId = null
+      this.cardPort = null
     } else this.scheduleCardClose()
   }
 
   private clearCardTimers() {
-    clearTimeout(this.openTimer)
+    this.cancelPendingCard()
     clearTimeout(this.closeTimer)
-    this.openTimer = this.closeTimer = undefined
+    this.closeTimer = undefined
   }
 
   private handleCardEnter = () => {
@@ -1655,7 +1921,9 @@ export class Flow extends LitElement {
   private syncCard() {
     const card = this.card
     if (!card) return
-    const anchor = this.cardId ? this.renderRoot.querySelector<HTMLElement>(`.node[data-node-id="${CSS.escape(this.cardId)}"]`) : null
+    const node = this.cardId ? this.renderRoot.querySelector<HTMLElement>(`.node[data-node-id="${CSS.escape(this.cardId)}"]`) : null
+    // A row's card sits next to the row.
+    const anchor = node && this.cardId && this.cardPort !== null ? (this.portElements(node, this.cardId, this.cardPort)[0] ?? node) : node
     this.stopCardPositioning()
     if (!anchor) {
       if (card.matches(':popover-open')) card.hidePopover()
@@ -1667,7 +1935,8 @@ export class Flow extends LitElement {
       return
     }
     const gap = this.readPixels('--c2-flow__card--offset', 8)
-    const placement = this.direction === 'LR' ? 'bottom' : 'right'
+    // A row's card goes beside its node, where it does not cover the rows below.
+    const placement = this.direction === 'LR' && this.cardPort === null ? 'bottom' : 'right'
     this.cleanupCard = autoUpdate(anchor, card, async () => {
       const { x, y } = await computePosition(anchor, card, {
         placement,
@@ -1785,7 +2054,7 @@ export class Flow extends LitElement {
         if (node) setTimeout(() => void this.editLabel(node.id))
         return
       case 'flow:edit-label':
-        if (edge) setTimeout(() => void this.editEdgeLabel(edge.source, edge.target))
+        if (edge) setTimeout(() => void this.openEdgeEditor(edgeKey(edge)))
         return
       case 'flow:delete':
         if (!this.editable) return
@@ -1858,10 +2127,12 @@ export class Flow extends LitElement {
       if (!Array.isArray(this.edges)) this.edges = []
       this.edgeLabels = new Map()
       for (const edge of this.edges) {
-        const key = edgeKey(edge.source, edge.target)
+        const key = pairKey(edge.source, edge.target)
         if (!this.edgeLabels.has(key) && edge.label?.trim()) this.edgeLabels.set(key, edge.label.trim())
       }
     }
+    if (changed.has('nodes') || changed.has('renderNode') || changed.has('direction')) this.portsDirty = true
+    if (this.highlightPort && !this.byId.has(this.highlightPort.node)) this.highlightPort = null
     if (this.selectedEdge !== null && !this.edgeByKey(this.selectedEdge)) this.selectedEdge = null
     if (this.editingEdge !== null && !this.edgeByKey(this.editingEdge)) this.editingEdge = null
     const ids = this.nodes.map((node) => node.id).join('\u0000')
@@ -1941,7 +2212,8 @@ export class Flow extends LitElement {
     }
     this.measure()
     if (!this.fitted && !this.viewTouched) this.fitView()
-    if ((changed as Map<PropertyKey, unknown>).has('cardId') || changed.has('nodes') || changed.has('direction')) this.syncCard()
+    const own = changed as Map<PropertyKey, unknown>
+    if (own.has('cardId') || own.has('cardPort') || changed.has('nodes') || changed.has('direction')) this.syncCard()
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -1970,12 +2242,34 @@ export class Flow extends LitElement {
   private defaultNode(node: FlowNode) {
     const status = statusOf(node)
     return html`<div class="body">
-      ${this.icon(status)} ${node.icon ? html`<span class="node-icon" aria-hidden="true">${node.icon}</span>` : nothing}
-      <span class="text">
-        ${node.id === this.editingId ? this.labelEditor(node, false) : html`<span class="label">${node.label}</span>`}
-        ${node.description ? html`<span class="description">${node.description}</span>` : nothing}
-      </span>
-      ${node.meta ? html`<span class="meta">${node.meta}</span>` : nothing}
+        ${this.icon(status)} ${node.icon ? html`<span class="node-icon" aria-hidden="true">${node.icon}</span>` : nothing}
+        <span class="text">
+          ${node.id === this.editingId ? this.labelEditor(node, false) : html`<span class="label">${node.label}</span>`}
+          ${node.description ? html`<span class="description">${node.description}</span>` : nothing}
+        </span>
+        ${node.meta ? html`<span class="meta">${node.meta}</span>` : nothing}
+      </div>
+      ${this.renderRows(node)}`
+  }
+
+  /** The rows of the default body; see {@link FlowNodeRow}. */
+  private renderRows(node: FlowNode) {
+    const rows = rowsOf(node)
+    if (!rows.length) return nothing
+    // A row without an icon keeps the icon's room when another row has one, so the labels line up.
+    const icons = rows.some((row) => row.icon)
+    const connection = this.connection
+    return html`<div class="rows">
+      ${rows.map((row) => {
+        const target =
+          connection?.target === node.id && connection.targetPort === row.id && this.canConnect(connection.source, node.id, connection.sourcePort, row.id)
+        const classes = `row${this.litRows.has(`${node.id}\u0000${row.id}`) ? ' is-highlighted' : ''}${target ? ' is-connect-target' : ''}`
+        return html`<div class=${classes} data-flow-port=${row.id}>
+          ${icons ? html`<span class="row-icon" aria-hidden="true">${row.icon ?? nothing}</span>` : nothing}
+          <span class="row-label">${row.label}</span>
+          ${row.meta ? html`<span class="row-meta">${row.meta}</span>` : nothing}
+        </div>`
+      })}
     </div>`
   }
 
@@ -2005,6 +2299,30 @@ export class Flow extends LitElement {
     </div>`
   }
 
+  /** The card of a row with `details`: the row's name and `meta`, then its details. */
+  private defaultRowCard(node: FlowNode, row: FlowNodeRow) {
+    const rows = detailRows(row.details)
+    return html`<div class="card-content">
+      <div class="card-head">
+        <span class="text">
+          <span class="card-title">${node.label}.${row.label}</span>
+          ${row.meta ? html`<span class="description">${row.meta}</span>` : nothing}
+        </span>
+      </div>
+      ${
+        rows.length
+          ? html`<dl class="card-details">
+              ${rows.map(
+                ([term, value]) =>
+                  html`<dt>${term}</dt>
+                    <dd>${value}</dd>`,
+              )}
+            </dl>`
+          : nothing
+      }
+    </div>`
+  }
+
   /** An arrowhead at the end of an edge, pointing into the target through the side the edge arrives by. */
   private arrow(classes: string, end: FlowPoint, angle: number) {
     return html`<span
@@ -2013,7 +2331,34 @@ export class Flow extends LitElement {
     ></span>`
   }
 
-  private renderEdges() {
+  /** The end of an edge drawn as `marker`, at `at`, pointing into its node by `angle`. */
+  private marker(marker: FlowEdgeMarker, classes: string, at: FlowPoint, angle: number) {
+    if (marker === 'arrow') return this.arrow(classes, at, angle)
+    const paths = MARKER_PATHS[marker]
+    if (!paths) return nothing
+    return html`<span
+      class=${`marker ${classes}`}
+      style=${`transform: translate(${at.x}px, ${at.y}px) rotate(${angle}deg) translate(var(--_arrow-offset), -50%)`}
+      ><svg viewBox="-20 -6 20 12">${paths}</svg></span
+    >`
+  }
+
+  /** Whether `edge` leaves or arrives at row `port` of node `node`. */
+  private touchesPort(edge: FlowEdge, { node, port }: { node: string; port: string }) {
+    return (edge.source === node && portId(edge.sourcePort) === port) || (edge.target === node && portId(edge.targetPort) === port)
+  }
+
+  /**
+   * The hovered row, when edges meet it: those edges are then the highlighted ones (rather than every edge of its node),
+   * and the rows at both of their ends light up.
+   */
+  private activePort() {
+    const port = this.highlightPort
+    if (!port || port.node !== this.highlightId) return null
+    return this.edges.some((edge) => this.touchesPort(edge, port)) ? port : null
+  }
+
+  private renderEdges(port: { node: string; port: string } | null) {
     const highlight = this.highlightId ?? this.selected
     const paths: unknown[] = []
     const marks: unknown[] = []
@@ -2023,8 +2368,8 @@ export class Flow extends LitElement {
       if (!route) return
       const back = this.graph.backEdges.has(index) && !this.sidedEdge(edge)
       const edgeClass = edgeState(statusOf(this.byId.get(edge.source)!), statusOf(this.byId.get(edge.target)!))
-      const on = highlight !== null && (edge.source === highlight || edge.target === highlight)
-      const key = edgeKey(edge.source, edge.target)
+      const on = port ? this.touchesPort(edge, port) : highlight !== null && (edge.source === highlight || edge.target === highlight)
+      const key = edgeKey(edge)
       const selected = key === this.selectedEdge
       const states = `${on ? ' is-highlighted' : ''}${selected ? ' is-selected' : ''}`
       paths.push(svg`<path class=${`edge edge--${edgeClass}${back ? ' edge--back' : ''}${states}`} d=${route.d}></path>`)
@@ -2039,7 +2384,8 @@ export class Flow extends LitElement {
       }
       // The arrowhead and the label take the edge's colour from a `mark--<state>` class of their own.
       const classes = `mark--${edgeClass}${states}`
-      marks.push(this.arrow(classes, route.end, route.angle))
+      marks.push(this.marker(markerOf(edge.targetMarker, 'arrow'), classes, route.end, route.angle))
+      marks.push(this.marker(markerOf(edge.sourceMarker, 'none'), classes, route.start, route.startAngle))
       const label = edge.label?.trim()
       if (key === this.editingEdge) editor = this.edgeLabelEditor(edge, route.mid)
       else if (label) {
@@ -2070,7 +2416,7 @@ export class Flow extends LitElement {
       class="label-editor label-editor--edge"
       style=${`transform: translate(${mid.x}px, ${mid.y}px) translate(-50%, -50%)`}
       .value=${edge.label ?? ''}
-      aria-label=${this.msg.t('edgeLabelField', this.labelOf(edge.source), this.labelOf(edge.target))}
+      aria-label=${this.msg.t('edgeLabelField', this.endLabel(edge.source, portId(edge.sourcePort)), this.endLabel(edge.target, portId(edge.targetPort)))}
       autocomplete="off"
       enterkeyhint="done"
       @keydown=${this.handleEditorKeydown}
@@ -2078,26 +2424,47 @@ export class Flow extends LitElement {
     />`
   }
 
-  /** The sides edge `edge` leaves and arrives by: its own, else the defaults of the direction. */
-  private sidesOf(edge: FlowEdge): { source: FlowSide; target: FlowSide } {
+  /**
+   * Where edge `edge` meets its nodes, with the nodes at `positions`; null when an end is missing. An end on a row
+   * (a measured port) uses the row's `left` or `right` side: the one the edge names, else the one facing the other
+   * end. Any other end uses its own side, else the default of the direction.
+   */
+  private endsOf(edge: FlowEdge, positions: Map<string, FlowPoint> = this.positions): EdgeEnds | null {
+    const a = this.rectOf(edge.source, positions)
+    const b = this.rectOf(edge.target, positions)
+    if (!a || !b) return null
+    const sourcePort = portId(edge.sourcePort)
+    const targetPort = portId(edge.targetPort)
+    const sp = sourcePort ? this.ports.get(edge.source)?.get(sourcePort) : undefined
+    const tp = targetPort ? this.ports.get(edge.target)?.get(targetPort) : undefined
     const defaults = defaultSides(this.direction)
-    return { source: isSide(edge.sourceSide) ? edge.sourceSide : defaults.source, target: isSide(edge.targetSide) ? edge.targetSide : defaults.target }
+    const facing = facingSides(a, b)
+    const rowSide = (side: unknown, auto: 'left' | 'right') => (side === 'left' || side === 'right' ? side : auto)
+    const source = sp ? rowSide(edge.sourceSide, facing.source) : isSide(edge.sourceSide) ? edge.sourceSide : defaults.source
+    const target = tp ? rowSide(edge.targetSide, facing.target) : isSide(edge.targetSide) ? edge.targetSide : defaults.target
+    const anchors: EdgeAnchors = {}
+    if (sp) anchors.start = rowPoint(a, source as 'left' | 'right', sp.top, sp.height)
+    if (tp) anchors.end = rowPoint(b, target as 'left' | 'right', tp.top, tp.height)
+    return { a, b, sides: { source, target }, anchors, ported: !!(sp || tp) }
   }
 
-  /** Whether edge `edge` uses a side other than the default, so it is routed between sides rather than along the axis. */
+  /**
+   * Whether edge `edge` meets a row or uses a side other than the default, so it is routed between sides rather than
+   * along the axis.
+   */
   private sidedEdge(edge: FlowEdge) {
+    const ends = this.endsOf(edge)
+    if (!ends) return false
     const defaults = defaultSides(this.direction)
-    const sides = this.sidesOf(edge)
-    return sides.source !== defaults.source || sides.target !== defaults.target
+    return ends.ported || ends.sides.source !== defaults.source || ends.sides.target !== defaults.target
   }
 
   /** The route of edge `edge` (number `index` of `edges`), with the nodes at `positions`; null when an end is missing. */
   private routeOf(edge: FlowEdge, index: number, positions: Map<string, FlowPoint> = this.positions): EdgeRoute | null {
-    const a = this.rectOf(edge.source, positions)
-    const b = this.rectOf(edge.target, positions)
-    if (!a || !b) return null
-    const sides = this.sidesOf(edge)
-    return routeBetween(a, b, this.direction, this.edgeType, this.graph.backEdges.has(index), sides.source, sides.target)
+    const ends = this.endsOf(edge, positions)
+    if (!ends) return null
+    const { a, b, sides, anchors } = ends
+    return routeBetween(a, b, this.direction, this.edgeType, this.graph.backEdges.has(index), sides.source, sides.target, anchors)
   }
 
   /**
@@ -2109,54 +2476,95 @@ export class Flow extends LitElement {
     const connection = this.connection
     const a = connection && this.rectOf(connection.source)
     if (!connection || !a) return null
-    const target = this.canConnect(connection.source, connection.target) ? connection.target : null
+    const target = this.canConnect(connection.source, connection.target, connection.sourcePort, connection.targetPort) ? connection.target : null
     const b = target === null ? null : this.rectOf(target)
     const defaults = defaultSides(this.direction)
-    if (b) return routeBetween(a, b, this.direction, this.edgeType, false, connection.sourceSide, connection.targetSide ?? defaults.target)
+    // Out of the row it was dragged from, and into the row under the pointer.
+    const anchors: EdgeAnchors = {}
+    const sp = connection.sourcePort ? this.ports.get(connection.source)?.get(connection.sourcePort) : undefined
+    if (sp && (connection.sourceSide === 'left' || connection.sourceSide === 'right')) anchors.start = rowPoint(a, connection.sourceSide, sp.top, sp.height)
+    if (b && target !== null) {
+      const side = connection.targetSide ?? defaults.target
+      const tp = connection.targetPort ? this.ports.get(target)?.get(connection.targetPort) : undefined
+      if (tp && (side === 'left' || side === 'right')) anchors.end = rowPoint(b, side, tp.top, tp.height)
+      return routeBetween(a, b, this.direction, this.edgeType, false, connection.sourceSide, side, anchors)
+    }
     const point = connection.point
     if (!point) return null
     const end = { ...point, width: 0, height: 0 }
-    if (connection.sourceSide === defaults.source) return routeBetween(a, end, this.direction, this.edgeType, false)
-    const start = sidePoint(a, connection.sourceSide)
+    if (connection.sourceSide === defaults.source && !anchors.start) return routeBetween(a, end, this.direction, this.edgeType, false)
+    const start = anchors.start ?? sidePoint(a, connection.sourceSide)
     const [dx, dy] = [start.x - point.x, start.y - point.y]
     const facing: FlowSide = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : dy < 0 ? 'top' : 'bottom'
-    return routeBetween(a, end, this.direction, this.edgeType, false, connection.sourceSide, facing)
+    return routeBetween(a, end, this.direction, this.edgeType, false, connection.sourceSide, facing, anchors)
   }
 
-  /** The sides of each node that edges leave (`out`) or arrive (`in`) by, keyed by node id. */
-  private edgeEnds() {
-    const ends = new Map<string, Map<FlowSide, { in: boolean; out: boolean }>>()
-    const mark = (id: string, side: FlowSide, way: 'in' | 'out') => {
+  /**
+   * Where edges leave (`out`) or arrive (`in`) at each node, keyed by node id, then by side, or by `port\0side` for an
+   * end on a row.
+   */
+  private edgeEnds(): NodeEnds {
+    const ends: NodeEnds = new Map()
+    const mark = (id: string, key: string, way: 'in' | 'out') => {
       let sides = ends.get(id)
       if (!sides) ends.set(id, (sides = new Map()))
-      const entry = sides.get(side) ?? { in: false, out: false }
+      const entry = sides.get(key) ?? { in: false, out: false }
       entry[way] = true
-      sides.set(side, entry)
+      sides.set(key, entry)
     }
     for (const edge of this.edges) {
-      const sides = this.sidesOf(edge)
-      mark(edge.source, sides.source, 'out')
-      mark(edge.target, sides.target, 'in')
+      const at = this.endsOf(edge)
+      if (!at) continue
+      mark(edge.source, at.anchors.start ? `${portId(edge.sourcePort)}\u0000${at.sides.source}` : at.sides.source, 'out')
+      mark(edge.target, at.anchors.end ? `${portId(edge.targetPort)}\u0000${at.sides.target}` : at.sides.target, 'in')
     }
     return ends
   }
 
-  /** "After Idea." or, when an edge has a label, "Before Book the night bus, yes; Walk home, no." */
-  private relation(word: 'after' | 'before', ids: string[], keyOf: (id: string) => string) {
+  /**
+   * "After Idea." or, when an edge has a label, "Before Book the night bus, yes; Walk home, no." An edge between rows
+   * names the rows: "After customers.id through customer_id." on `orders`.
+   */
+  private relation(word: 'after' | 'before', self: string, ids: string[]) {
     if (!ids.length) return ''
-    const labels = ids.map((id) => this.edgeLabels.get(keyOf(id)))
-    const parts = ids.map((id, i) => (labels[i] ? `${this.labelOf(id)}, ${labels[i]}` : this.labelOf(id)))
-    return this.msg.t(word, parts, labels.some(Boolean))
+    const incoming = word === 'after'
+    const parts: string[] = []
+    let labelled = false
+    // Two edges to one neighbour (through two rows) list it once, with both rows.
+    for (const id of new Set(ids)) {
+      const [source, target] = incoming ? [id, self] : [self, id]
+      const between = this.edges.filter((edge) => edge.source === source && edge.target === target)
+      const ported = between.filter((edge) => portId(edge.sourcePort) || portId(edge.targetPort))
+      for (const edge of ported) {
+        const [other, own] = incoming ? [portId(edge.sourcePort), portId(edge.targetPort)] : [portId(edge.targetPort), portId(edge.sourcePort)]
+        const end = this.endLabel(id, other)
+        const label = edge.label?.trim()
+        labelled ||= !!label
+        const part = own ? this.msg.t('throughRow', end, this.rowLabel(self, own)) : end
+        parts.push(label ? `${part}, ${label}` : part)
+      }
+      if (ported.length === between.length && ported.length) continue
+      const label = this.edgeLabels.get(pairKey(source, target))
+      labelled ||= !!label
+      parts.push(label ? `${this.labelOf(id)}, ${label}` : this.labelOf(id))
+    }
+    return this.msg.t(word, parts, labelled)
   }
 
-  private renderNodeElement(node: FlowNode, index: number, ends: Map<string, Map<FlowSide, { in: boolean; out: boolean }>>) {
+  private renderNodeElement(node: FlowNode, index: number, ends: NodeEnds) {
     const status = statusOf(node)
     const p = this.positions.get(node.id) ?? { x: 0, y: 0 }
     const before = this.graph.predecessors.get(node.id) ?? []
     const after = this.graph.successors.get(node.id) ?? []
-    const relations = [this.relation('after', before, (id) => edgeKey(id, node.id)), this.relation('before', after, (id) => edgeKey(node.id, id))]
-      .filter(Boolean)
-      .join(' ')
+    const rows = rowsOf(node)
+    // The node is one button to assistive technology, so its rows are read with its relations.
+    const rowsText = rows.length
+      ? this.msg.t(
+          'rows',
+          rows.map((row) => (row.meta ? `${row.label} ${row.meta}` : row.label)),
+        )
+      : ''
+    const relations = [this.relation('after', node.id, before), this.relation('before', node.id, after), rowsText].filter(Boolean).join(' ')
     const context = this.context(node)
     const body = this.renderNode ? this.renderNode(context) : this.defaultNode(node)
     const connection = this.connection
@@ -2170,15 +2578,55 @@ export class Flow extends LitElement {
       node.id === this.selected ? 'is-selected' : '',
       node.id === this.draggingId ? 'is-dragging' : '',
       connection?.source === node.id ? 'is-connect-source' : '',
-      connection && connection.target === node.id && this.canConnect(connection.source, node.id) ? 'is-connect-target' : '',
+      connection && connection.target === node.id && this.canConnect(connection.source, node.id, connection.sourcePort, connection.targetPort)
+        ? 'is-connect-target'
+        : '',
     ]
     const sides = ends.get(node.id)
-    // A dot on every side an edge leaves or arrives by; one side can take both.
-    const handles = FLOW_SIDES.flatMap((side) => {
-      const end = sides?.get(side)
-      return end ? [html`<span class=${`handle handle--${side}${end.in ? ' handle--in' : ''}${end.out ? ' handle--out' : ''}`}></span>`] : []
+    const ports = this.ports.get(node.id)
+    // Handles and connectors on a row sit level with it; `inset` turns its offset from the border box into one from
+    // the padding box the handle is placed in.
+    const rowTop = (box: PortBox) => `top: ${box.top + box.height / 2 - box.inset}px`
+    // A dot on every side an edge leaves or arrives by, or on the side of the row it meets; one place can take both.
+    const handles = [...(sides ?? [])].flatMap(([key, end]) => {
+      const [port, side] = key.includes('\u0000') ? key.split('\u0000') : [null, key]
+      const box = port === null ? null : ports?.get(port)
+      if (port !== null && !box) return []
+      const classes = `handle handle--${side}${box ? ' handle--port' : ''}${end.in ? ' handle--in' : ''}${end.out ? ' handle--out' : ''}`
+      return [html`<span class=${classes} style=${box ? rowTop(box) : nothing}></span>`]
     })
     const connectSide = connection && !connection.keyboard && connection.target === node.id ? connection.targetSide : null
+    const connectPort = connectSide ? (connection?.targetPort ?? null) : null
+    const activeRow = this.highlightPort?.node === node.id ? this.highlightPort.port : null
+    const sourceRow = connection?.source === node.id ? (connection.sourcePort ?? null) : null
+    // A node with rows is connected row to row: a pair of handles on each row, instead of one on each side.
+    const connectors = !this.editable
+      ? nothing
+      : ports
+        ? [...ports].flatMap(([port, box]) =>
+            (['left', 'right'] as const).map((side) => {
+              const classes = [
+                `connector connector--${side} connector--port`,
+                port === activeRow || port === sourceRow ? 'is-row-active' : '',
+                port === connectPort && side === connectSide ? 'is-connect-side' : '',
+              ]
+              return html`<span
+                class=${classes.filter(Boolean).join(' ')}
+                style=${rowTop(box)}
+                data-side=${side}
+                data-port=${port}
+                title=${this.msg.t('dragToConnect')}
+              ></span>`
+            }),
+          )
+        : FLOW_SIDES.map(
+            (side) =>
+              html`<span
+                class=${`connector connector--${side}${side === connectSide ? ' is-connect-side' : ''}`}
+                data-side=${side}
+                title=${this.msg.t('dragToConnect')}
+              ></span>`,
+          )
     // A node drawn by the application has no label of ours to swap: the editor covers its whole body instead.
     const custom = !!this.renderNode || !!this.querySelector(`:scope > [slot="node:${CSS.escape(node.id)}"]`)
     return html`<div
@@ -2194,31 +2642,36 @@ export class Flow extends LitElement {
         '--_node-color': node.color || undefined,
       })}
       @pointerenter=${this.handleNodeEnter}
+      @pointerover=${this.handleNodeOver}
       @pointerleave=${this.handleNodeLeave}
       @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { node })}
     >
       ${shape && OUTLINES[shape] ? html`<svg class="shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${OUTLINES[shape]}</svg>` : nothing}
-      <slot name=${`node:${node.id}`}>${body}</slot>
-      ${editing && custom ? this.labelEditor(node, true) : nothing} ${handles}
-      ${
-        this.editable
-          ? FLOW_SIDES.map(
-              (side) =>
-                html`<span
-                  class=${`connector connector--${side}${side === connectSide ? ' is-connect-side' : ''}`}
-                  data-side=${side}
-                  title=${this.msg.t('dragToConnect')}
-                ></span>`,
-            )
-          : nothing
-      }
+      <slot name=${`node:${node.id}`} @slotchange=${this.handleNodeSlotChange}>${body}</slot>
+      ${editing && custom ? this.labelEditor(node, true) : nothing} ${handles} ${connectors}
       ${relations ? html`<span id=${`relations-${index}`} class="visually-hidden">${relations}</span>` : nothing}
     </div>`
+  }
+
+  /**
+   * Slotted content of a node changed: its ports are measured again. A slot with nothing assigned also fires
+   * `slotchange` when its fallback (the body we render) changes, which must not start another render.
+   */
+  private handleNodeSlotChange = (event: Event) => {
+    const slot = event.target as HTMLSlotElement
+    const assigned = slot.assignedNodes()
+    const previous = this.slotted.get(slot) ?? []
+    this.slotted.set(slot, assigned)
+    if (assigned.length === previous.length && assigned.every((node, i) => node === previous[i])) return
+    this.portsDirty = true
+    this.requestUpdate()
   }
 
   private renderCardContent() {
     const node = this.cardId ? this.byId.get(this.cardId) : undefined
     if (!node) return nothing
+    const row = this.cardPort !== null ? this.rowOf(node.id, this.cardPort) : undefined
+    if (row) return this.renderCard ? this.renderCard({ ...this.context(node), row }) : this.defaultRowCard(node, row)
     const body = this.renderCard ? this.renderCard(this.context(node)) : this.defaultCard(node)
     return html`<slot name=${`card:${node.id}`}>${body}</slot>`
   }
@@ -2289,6 +2742,14 @@ export class Flow extends LitElement {
     // With no node to focus, the empty canvas of an editable flow takes focus, so `N` and Enter can add the first one.
     const emptyCanvas = this.editable && !this.nodes.length
     const ends = this.edgeEnds()
+    const port = this.activePort()
+    this.litRows = new Set(
+      port
+        ? this.edges
+            .filter((edge) => this.touchesPort(edge, port))
+            .flatMap((edge) => [`${edge.source}\u0000${portId(edge.sourcePort) ?? ''}`, `${edge.target}\u0000${portId(edge.targetPort) ?? ''}`])
+        : [],
+    )
     return html`
       <c2-context-menu
         menu-label=${this.msg.t('flowMenu')}
@@ -2315,7 +2776,7 @@ export class Flow extends LitElement {
           @focusout=${this.handleFocusOut}
         >
           <div class="viewport" style=${`transform: translate(${this.tx}px, ${this.ty}px) scale(${this.zoom})`}>
-            ${this.renderEdges()}
+            ${this.renderEdges(port)}
             ${repeat(
               this.nodes,
               (node) => node.id,

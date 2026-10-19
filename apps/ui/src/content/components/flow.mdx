@@ -1,6 +1,6 @@
 ---
 title: 'Flow'
-description: 'A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.'
+description: 'A pipeline, dependency graph or database schema on a pannable canvas: steps with a status, smooth edges, rows joined row to row, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.'
 category: 'Editors & viewers'
 ---
 
@@ -30,7 +30,7 @@ The entry also registers `c2-context-menu` and `c2-menu`, which it renders inter
 
 ## Usage
 
-Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the sixth places its nodes itself and runs edges between chosen sides (see [Sides](#sides)); the last one is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag one of the four handles on a node's sides to connect it from that side, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the sixth places its nodes itself and runs edges between chosen sides (see [Sides](#sides)); the seventh is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag one of the four handles on a node's sides to connect it from that side, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected. The last one is a database schema (see [Rows and schema diagrams](#rows-and-schema-diagrams)): hover a column to follow its foreign key, and drag the handle of a column onto a column of another table to link them.
 
 ```html tag=UsageBlock,package=@c2n/flow
 <style>
@@ -46,6 +46,18 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
   }
   .demo .diagram {
     --c2-flow__marker--display: none;
+  }
+  .demo .schema {
+    --c2-flow--height: 420px;
+    --c2-flow__marker--display: none;
+    --c2-flow__node--width: 230px;
+    --c2-flow__rank--gap: 96px;
+    --c2-flow__row--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --c2-flow__row--font-size: 12px;
+    --c2-flow__edge--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .demo .schema-key {
+    --c2-feather-icon--color: #b45309;
   }
   .flow-action {
     --c2-icon-button__state-layer--size: 28px;
@@ -103,6 +115,12 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
       <c2-icon-button class="flow-action" slot="actions" data-flow-action="layout" tooltip="Auto layout" aria-label="Auto layout"><c2-feather-layout></c2-feather-layout></c2-icon-button>
       <c2-icon-button class="flow-action" slot="actions" data-flow-action="fit" tooltip="Fit view" aria-label="Fit view"><c2-feather-maximize></c2-feather-maximize></c2-icon-button>
     </c2-flow>
+    <output class="result"></output>
+  </div>
+</div>
+<div data-label="Database schema">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="schema" editable edge-type="step" class="schema" aria-label="Shop schema" nodes='[{"id":"customers","label":"customers","meta":"public","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"email","label":"email","meta":"text"},{"id":"name","label":"name","meta":"text"}]},{"id":"products","label":"products","meta":"public","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"sku","label":"sku","meta":"text"},{"id":"name","label":"name","meta":"text"},{"id":"price","label":"price","meta":"numeric"}]},{"id":"orders","label":"orders","meta":"public","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"customer_id","label":"customer_id","meta":"uuid","details":{"References":"customers.id","On delete":"cascade"}},{"id":"status","label":"status","meta":"order_status"},{"id":"placed_at","label":"placed_at","meta":"timestamptz"}]},{"id":"order_items","label":"order_items","meta":"public","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"order_id","label":"order_id","meta":"uuid","details":{"References":"orders.id","On delete":"cascade"}},{"id":"product_id","label":"product_id","meta":"uuid","details":{"References":"products.id","On delete":"restrict"}},{"id":"quantity","label":"quantity","meta":"int4"}]}]' edges='[{"source":"customers","sourcePort":"id","target":"orders","targetPort":"customer_id","sourceMarker":"one","targetMarker":"many"},{"source":"orders","sourcePort":"id","target":"order_items","targetPort":"order_id","sourceMarker":"one","targetMarker":"one-many"},{"source":"products","sourcePort":"id","target":"order_items","targetPort":"product_id","sourceMarker":"one","targetMarker":"zero-many"}]'></c2-flow>
     <output class="result"></output>
   </div>
 </div>
@@ -210,6 +228,34 @@ An edge leaves its source by the outgoing side of the `direction` and arrives by
   nodes='[{"id":"review","label":"Review","position":{"x":280,"y":0}},{"id":"fix","label":"Fix","position":{"x":280,"y":130}}, …]'
   edges='[{"source":"review","target":"fix","sourceSide":"bottom","targetSide":"top","label":"changes"}, …]'
 ></c2-flow>
+```
+
+## Rows and schema diagrams
+
+A node's `rows` are drawn as a list under its label: the columns of a table, the fields of a class. Each row has an `id`, a `label`, an optional `meta` (a column type) and `icon` (a key), and `details` for a hover card of its own. Every row is a **port**: an edge that names it in `sourcePort` or `targetPort` leaves or arrives level with that row, on its left or right side, whichever faces the other end (or the one `sourceSide` / `targetSide` names). Two tables can be joined by several edges through different columns, and a table can be joined to itself between two of its columns.
+
+`sourceMarker` and `targetMarker` draw the ends of an edge: an `arrow` (the default at the target), `none` (the default at the source), or a crow's-foot cardinality, `one`, `zero-one`, `many`, `one-many` or `zero-many`, in the edge's colour and width. `--c2-flow__edge-marker--size` sizes them.
+
+```html tag=CodeBlock
+<c2-flow
+  edge-type="step"
+  nodes='[{"id":"customers","label":"customers","rows":[{"id":"id","label":"id","meta":"uuid"}, …]},
+          {"id":"orders","label":"orders","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"customer_id","label":"customer_id","meta":"uuid"}, …]}]'
+  edges='[{"source":"customers","sourcePort":"id","target":"orders","targetPort":"customer_id","sourceMarker":"one","targetMarker":"many"}]'
+></c2-flow>
+```
+
+Hovering a row highlights its edges and the rows at their far ends. Screen readers hear a node's rows and the rows each of its edges joins ("After customers.id through customer_id."). In an `editable` flow a node with rows is connected row to row: each row shows a handle on both sides, and `edge-add` names the rows in `sourcePort` and `targetPort` (as do `node-add`, `edge-delete` and `edge-edit`), so the application can store them with the cardinality it chooses. A body drawn by `renderNode` or a `node:<id>` slot marks its own ports with `data-flow-port="<id>"`.
+
+The rows are styled through `--c2-flow__row--*` and `--c2-flow__row-meta--*`; a schema usually also hides the status marker and sets a monospace font:
+
+```css tag=CodeBlock
+c2-flow.schema {
+  --c2-flow__marker--display: none;
+  --c2-flow__node--width: 240px;
+  --c2-flow__row--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --c2-flow__row__highlighted--background-color: rgba(2, 101, 220, 0.08);
+}
 ```
 
 ## Custom nodes and cards

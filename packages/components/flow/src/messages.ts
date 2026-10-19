@@ -27,6 +27,10 @@ const en = {
   /** The nodes before or after a node; `labelled` when an edge carries a label, so its items hold a comma. */
   after: (items: string[], labelled: boolean) => `After ${items.join(labelled ? '; ' : ', ')}.`,
   before: (items: string[], labelled: boolean) => `Before ${items.join(labelled ? '; ' : ', ')}.`,
+  /** An edge between rows, read on one of its nodes: the far end (`customers.id`), then this node's own row. */
+  throughRow: (end: string, row: string) => `${end} through ${row}`,
+  /** The rows of a node, each its label and its `meta`. */
+  rows: (items: string[]) => `Rows: ${items.join(', ')}.`,
   duration: 'Duration',
   dragToConnect: 'Drag to connect',
   flowActions: 'Flow actions',

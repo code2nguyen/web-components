@@ -11,12 +11,17 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 ></c2-flow>
 ```
 
-- **Data:** `nodes` (`id`, `label`, `status`, `description`, `meta`, `details`, `position`, `data`) and `edges` (`source`,
-  `target`, `label`, `sourceSide`, `targetSide`), as properties or JSON attributes. Statuses: `pending`, `current`, `running`, `success`, `warning`,
+- **Data:** `nodes` (`id`, `label`, `status`, `description`, `meta`, `details`, `position`, `rows`, `data`) and `edges`
+  (`source`, `target`, `label`, `sourceSide`, `targetSide`, `sourcePort`, `targetPort`, `sourceMarker`,
+  `targetMarker`), as properties or JSON attributes. Statuses: `pending`, `current`, `running`, `success`, `warning`,
   `error`, `skipped`. Edges take their style from the statuses at both ends.
 - **Sides:** an edge runs from the outgoing side of the `direction` to the incoming one, unless it names a `sourceSide`
   or `targetSide` (`top`, `right`, `bottom`, `left`): it then leaves and arrives perpendicular to those sides, in
   either `edge-type`. A side left out keeps its default; the auto layout ignores sides.
+- **Rows and ports (schema diagrams):** a node's `rows` (`id`, `label`, `meta`, `icon`, `details`) are drawn under its
+  label, and each is a port: an edge with `sourcePort`/`targetPort` meets that row on the side facing the other end.
+  `sourceMarker`/`targetMarker` draw `arrow`, `none` or a crow's-foot `one`, `zero-one`, `many`, `one-many`,
+  `zero-many`. Hovering a row highlights its edges; editable flows connect row to row.
 - **Layout:** layered auto layout along `direction` (`LR` or `TB`); cycles are allowed and drawn as back edges.
   Dragging (or Alt+arrow) makes a custom layout, saved with the direction under `storage-key`. A saved layout is
   merged into a changed graph: kept nodes stay, new ones are placed next to their neighbours. `getLayout()`,

@@ -61,6 +61,7 @@
     edge--animation-duration: 600ms,
     arrow--size: 8px,
     arrow--display: block,
+    edge-marker--size: 12px,
     edge-label--background-color: #ffffff,
     edge-label--color: #71717a,
     edge-label--font-size: 12px,
@@ -107,9 +108,19 @@
     editor--border: 1px solid #bcbcc6,
     editor--border-radius: 4px,
     editor__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
-
     icon--size: 16px,
     icon--color: currentColor,
+
+    rows--border-top: 1px solid #e4e4e7,
+    row--min-height: 32px,
+    row--padding: 0 12px,
+    row--gap: 8px,
+    row--font-family: null,
+    row--font-size: 13px,
+    row--border-top: 1px solid #f4f4f5,
+    row__highlighted--background-color: rgba(2, 101, 220, 0.08),
+    row-meta--color: #71717a,
+    row-meta--font-size: 12px,
     shape--border-color: #bcbcc6,
     shape--border-width: 1px,
     shape__diamond--min-height: 88px,
@@ -241,6 +252,9 @@
   .arrow.mark--#{$state} {
     background-color: css.cssVar($name);
   }
+  .marker.mark--#{$state} {
+    color: css.cssVar($name);
+  }
 }
 
 @include edge-color(done, edge__done--color);
@@ -294,6 +308,45 @@
   transition:
     background-color 200ms,
     opacity 200ms;
+}
+
+// The crow's-foot ends (`sourceMarker`, `targetMarker`): strokes in the edge's colour and width, drawn like the arrow.
+.marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(#{css.cssVar(edge-marker--size)} * 5 / 3);
+  height: css.cssVar(edge-marker--size);
+  transform-origin: 0 0;
+  --_arrow-offset: calc(-100% - #{css.cssVar(handle--size)} / 2);
+  color: css.cssVar(edge--color);
+  transition:
+    color 200ms,
+    opacity 200ms;
+}
+
+.marker svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: css.cssVar(edge--width);
+  stroke-linecap: round;
+}
+
+.marker svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+// The circle of `zero-one` and `zero-many` hides the line it sits on.
+.marker-ring {
+  fill: css.cssVar(background-color);
+}
+
+.marker.is-highlighted svg {
+  stroke-width: css.cssVar(edge__highlighted--width);
 }
 
 .edge-label {
@@ -572,6 +625,7 @@
   top: 50%;
   transform: translateY(-50%);
 }
+// A handle on a row is placed level with it by an inline `top`.
 .handle--top,
 .handle--bottom {
   left: 50%;
@@ -639,6 +693,69 @@
 
 .body > .status {
   display: css.cssVar(marker--display);
+}
+
+// Rows (`rows`): a list under the header, full width of the node, one port each.
+.rows {
+  margin: css.cssVar(node--padding-bottom) calc(-1 * #{css.cssVar(node--padding-right)}) calc(-1 * #{css.cssVar(node--padding-bottom)})
+    calc(-1 * #{css.cssVar(node--padding-left)});
+  border-top: css.cssVar(rows--border-top);
+  border-radius: 0 0 calc(#{css.cssVar(node--border-radius)} - 1px) calc(#{css.cssVar(node--border-radius)} - 1px);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(row--gap);
+  box-sizing: border-box;
+  min-height: css.cssVar(row--min-height);
+  padding: css.cssVar(row--padding);
+  font-family: css.cssVar(row--font-family);
+  font-size: css.cssVar(row--font-size);
+  line-height: 1.3;
+  transition: background-color 150ms;
+}
+
+.row + .row {
+  border-top: css.cssVar(row--border-top);
+}
+
+.row.is-highlighted,
+.row.is-connect-target {
+  background-color: css.cssVar(row__highlighted--background-color);
+}
+
+.row-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  font-size: css.cssVar(icon--size);
+  line-height: 1;
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-meta {
+  flex: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: css.cssVar(row-meta--font-size);
+  color: css.cssVar(row-meta--color);
 }
 
 .status svg {
@@ -771,6 +888,12 @@
 .arrow.is-selected {
   background-color: css.cssVar(edge__selected--color);
 }
+.marker.is-selected {
+  color: css.cssVar(edge__selected--color);
+}
+.marker.is-selected svg {
+  stroke-width: css.cssVar(edge__selected--width);
+}
 
 .edge.is-selected,
 .edges.has-highlight .edge.is-selected {
@@ -852,6 +975,13 @@
 .node.is-connect-source .connector {
   opacity: 1;
   pointer-events: auto;
+}
+
+// A node with rows has a pair of handles on each row: under the pointer only the hovered row's show, on a selected or
+// focused node every row's (a touch screen has no hover).
+.node:not(.is-selected, :focus-visible):is(:hover, .is-connect-source) .connector--port:not(.is-row-active) {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .stage.is-connecting .node:not(.is-connect-source) .connector {
