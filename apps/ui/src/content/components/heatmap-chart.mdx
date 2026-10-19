@@ -100,7 +100,19 @@ The built-in legend is the colour key, and by default (`legend-detail="histogram
 
 `legend` places the key: below the plot (`bottom`, the default), above it (`top`), or beside it (`start` or `end`, left and right in a left-to-right page), where the key stands upright with its low end at the bottom, as on a value axis, and its ends named above and below it. A square matrix leaves room at the side, as in the currency matrix above; `--c2-chart__scale-key--height` sets the upright key's length.
 
-`legend-detail="simple"` keeps the bar, its ticks and its ends. `legend-interaction="preview"` only previews, and `none` makes the key a plain picture. The kept range is `scale-filter`, `[from, to)` with `null` for an open end; the application can set it, to share one filter between two heatmaps, and `scale-filter-change` reports the reader's changes. `legend="none"` hides the key.
+`legend-detail="simple"` keeps the bar, its ticks and its ends. Each line of text can also be hidden on its own, through a CSS variable set to `none`:
+
+| Variable                                 | Hides                                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| `--c2-chart__scale-key-title--display`   | The key's title                                                                        |
+| `--c2-chart__scale-key-readout--display` | The line under the title: count, range, total, and the hovered cell's value            |
+| `--c2-chart__scale-key-total--display`   | Only the total, for values that do not add up to anything (a mean, a rate, a % change) |
+| `--c2-chart__scale-key-hint--display`    | The "hover a band…" line (always hidden beside the plot)                               |
+| `--c2-chart__scale-key-poles--display`   | The names of the two ends                                                              |
+
+To show the heatmap alone, `legend="none"` removes the key and `--c2-chart__axis-label--display: none` removes the row, column, group and month labels, giving the cells the room they took: a compact calendar in a table row or a card, with the tooltip still naming each cell. `cell-labels="none"` clears the values from the cells too. A calendar keeps square cells, at most `--c2-chart__cell--max-size` on a side.
+
+`legend-interaction="preview"` only previews, and `none` makes the key a plain picture. The kept range is `scale-filter`, `[from, to)` with `null` for an open end; the application can set it, to share one filter between two heatmaps, and `scale-filter-change` reports the reader's changes. `legend="none"` hides the key.
 
 ## Keyboard and events
 

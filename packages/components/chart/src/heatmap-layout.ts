@@ -719,6 +719,8 @@ export interface HeatmapMetrics {
   /** Space between two row groups. */
   groupGap: number
   marginals: 'none' | 'top' | 'end' | 'both'
+  /** `false` draws the cells alone: no axis, group or month labels, and no room kept for them. */
+  labels?: boolean
 }
 
 export interface HeatmapRect {
@@ -800,10 +802,11 @@ function layoutAxes(model: HeatmapModel, width: number, height: number, metrics:
   const calendar = model.layout === 'calendar'
   const top = metrics.marginals === 'top' || metrics.marginals === 'both' ? metrics.marginalSize : 0
   const end = metrics.marginals === 'end' || metrics.marginals === 'both' ? metrics.marginalSize : 0
-  const groupWidth = model.groups.length > 0 ? Math.max(...model.groups.map((group) => metrics.measure(group.label))) + 14 : 0
-  const labelWidth = model.ys.length > 0 ? Math.max(...model.ys.map((item) => metrics.measure(item.label))) + 8 : 0
+  const labelled = metrics.labels !== false
+  const groupWidth = labelled && model.groups.length > 0 ? Math.max(...model.groups.map((group) => metrics.measure(group.label))) + 14 : 0
+  const labelWidth = labelled && model.ys.length > 0 ? Math.max(...model.ys.map((item) => metrics.measure(item.label))) + 8 : 0
   const left = groupWidth + labelWidth
-  const head = fontSize + 8
+  const head = labelled ? fontSize + 8 : 0
   const columns = model.xs.length
   const rows = model.ys.length
   const gaps = Math.max(0, model.groups.length - 1) * metrics.groupGap
@@ -865,7 +868,7 @@ function layoutAxes(model: HeatmapModel, width: number, height: number, metrics:
     ...(top > 0 ? marginalBars(model.xTotals, 'x', (column) => ({ start: xAt(column), size: cellWidth }), { from: 2, to: top - 4 }) : []),
     ...(end > 0 ? marginalBars(model.yTotals, 'y', (row) => ({ start: ys[row], size: cellHeight }), { from: gridRight + 6, to: gridRight + end - 2 }) : []),
   ]
-  return { cells, texts, bars, rules, dayNumbers: false }
+  return { cells, texts: labelled ? texts : [], bars, rules: labelled ? rules : [], dayNumbers: false }
 }
 
 function layoutMonths(model: HeatmapModel, width: number, height: number, metrics: HeatmapMetrics): HeatmapGeometry {
@@ -873,7 +876,8 @@ function layoutMonths(model: HeatmapModel, width: number, height: number, metric
   const columns = Math.max(1, model.xs.length)
   const rows = Math.max(1, ...model.panelRows)
   const panels = model.months.length
-  const head = fontSize + 8 + fontSize + 6
+  const labelled = metrics.labels !== false
+  const head = labelled ? fontSize + 8 + fontSize + 6 : 0
   const panelGap = Math.max(16, fontSize * 2)
   // The number of grids side by side that gives the largest cells.
   let best = { across: 1, cellWidth: 0, cellHeight: 0 }
@@ -909,7 +913,7 @@ function layoutMonths(model: HeatmapModel, width: number, height: number, metric
     const { x, y } = origin(cell.panel ?? 0)
     return { x: x + cell.xIndex * (cellWidth + gap), y: y + head + cell.yIndex * (cellHeight + gap), width: cellWidth, height: cellHeight }
   })
-  return { cells, texts, bars: [], rules: [], dayNumbers: cellHeight >= fontSize * 1.4 + 4 && cellWidth >= fontSize * 1.6 }
+  return { cells, texts: labelled ? texts : [], bars: [], rules: [], dayNumbers: cellHeight >= fontSize * 1.4 + 4 && cellWidth >= fontSize * 1.6 }
 }
 
 // ----------------------------------------------------------------- legend ---

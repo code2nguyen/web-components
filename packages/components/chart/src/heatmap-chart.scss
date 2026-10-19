@@ -18,6 +18,12 @@
     scale-end--color: #0a3b8c,
     scale-negative--color: #c2410c,
     scale-mid--color: #e4e4e7,
+    axis-label--display: block,
+    scale-key-title--display: inline,
+    scale-key-readout--display: inline,
+    scale-key-total--display: inline,
+    scale-key-hint--display: inline,
+    scale-key-poles--display: flex,
     scale-key--width: 280px,
     scale-key--height: 200px,
     scale-key-histogram--height: 28px,
@@ -49,12 +55,23 @@
 }
 
 .scale-key__title {
+  display: css.cssVar(scale-key-title--display);
   font-weight: 600;
   color: css.cssVar(scale-key-marker--color);
 }
 
 .scale-key__status {
+  display: css.cssVar(scale-key-readout--display);
   min-width: 0;
+}
+
+// Each readout part carries the separator before it, so hiding the total, which comes last, leaves none behind.
+.scale-key__readout-total {
+  display: css.cssVar(scale-key-total--display);
+}
+
+.scale-key__hint {
+  display: css.cssVar(scale-key-hint--display);
 }
 
 .scale-key__clear {
@@ -238,7 +255,7 @@ button.scale-key__band {
 }
 
 .scale-key__poles {
-  display: flex;
+  display: css.cssVar(scale-key-poles--display);
   justify-content: space-between;
   gap: 12px;
   color: css.cssVar(scale-key-marker--color);
@@ -392,6 +409,7 @@ button.scale-key__band {
 }
 
 .scale-key__pole {
+  display: css.cssVar(scale-key-poles--display);
   color: css.cssVar(scale-key-marker--color);
 }
 

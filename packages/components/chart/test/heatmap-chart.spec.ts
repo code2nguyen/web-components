@@ -395,3 +395,48 @@ test('a key beside the plot stands upright, its low end at the bottom', async ({
   const flat = await chart.locator('.scale-key__track').boundingBox()
   expect(flat && flat.width > flat.height).toBe(true)
 })
+
+test('each line of the key can be hidden through its display variable', async ({ page }) => {
+  await open(page, 'calendar')
+  const chart = page.locator('c2-heatmap-chart')
+  await expect(chart).toHaveState('ready')
+  await expect(chart.locator('.scale-key__readout')).toHaveText('6 days · -120,000 to 150,000 · total 36,000')
+  await chart.evaluate((element) => {
+    element.style.setProperty('--c2-chart__scale-key-total--display', 'none')
+    element.style.setProperty('--c2-chart__scale-key-hint--display', 'none')
+    element.style.setProperty('--c2-chart__scale-key-poles--display', 'none')
+  })
+  await expect(chart.locator('.scale-key__readout-total')).toBeHidden()
+  // The separator before the total goes with it.
+  await expect(chart.locator('.scale-key__readout')).toHaveJSProperty('innerText', '6 days · -120,000 to 150,000')
+  await expect(chart.locator('.scale-key__hint')).toBeHidden()
+  await expect(chart.locator('.scale-key__poles')).toBeHidden()
+  await chart.evaluate((element) => {
+    element.style.setProperty('--c2-chart__scale-key-title--display', 'none')
+    element.style.setProperty('--c2-chart__scale-key-readout--display', 'none')
+  })
+  await expect(chart.locator('.scale-key__title')).toBeHidden()
+  await expect(chart.locator('.scale-key__status')).toBeHidden()
+  // The bar itself stays.
+  await expect(chart.locator('button.scale-key__band').first()).toBeVisible()
+})
+
+test('--c2-chart__axis-label--display: none leaves the cells alone, filling the plot', async ({ page }) => {
+  await open(page, 'groups', '&renderer=svg')
+  const chart = page.locator('c2-heatmap-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate((element) => {
+    element.style.setProperty('--c2-chart__axis-label--display', 'none')
+    element.setAttribute('legend', 'none')
+    element.setAttribute('cell-labels', 'none')
+  })
+  await expect.poll(async () => (await drawnCells(page)).texts).toEqual([])
+  await expect(chart.locator('.scale-key')).toHaveCount(0)
+  // With no label gutter, the first column starts at the plot's edge.
+  const left = await chart.evaluate((element) => {
+    const path = element.shadowRoot?.querySelector('.plot svg path[fill]:not([fill="none"])')
+    return path?.getBoundingClientRect().left ?? -1
+  })
+  const plot = await chart.locator('.plot').boundingBox()
+  expect(Math.abs(left - (plot?.x ?? 0))).toBeLessThan(2)
+})

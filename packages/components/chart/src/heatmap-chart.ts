@@ -113,6 +113,8 @@ interface HeatmapStyle {
   groupGap: number
   dimmedOpacity: number
   labelFontSize: number
+  /** Whether the axis, group and month labels are drawn: `--c2-chart__axis-label--display` is not `none`. */
+  labels: boolean
   emptyColor: string
   hoverColor: string
   focusColor: string
@@ -133,6 +135,7 @@ const STYLE_FALLBACK: HeatmapStyle = {
   groupGap: 12,
   dimmedOpacity: 0.15,
   labelFontSize: 11,
+  labels: true,
   emptyColor: '#f4f4f5',
   hoverColor: '#18181b',
   focusColor: '#0265dc',
@@ -257,7 +260,9 @@ function measureText(text: string, font: string, size: number): number {
  * The legend is the colour key. By default (`legend-detail="histogram"`) it counts the cells in each band, names
  * both ends (`scale-poles`), marks the hovered cell's value, and filters the cells: hover a band to preview it, click
  * to keep it, drag across a continuous scale for a range. `legend-detail="simple"` keeps the bar and its ticks only.
- * `legend` places the key above, below, or beside the plot (`start`, `end`), where it stands upright.
+ * `legend` places the key above, below, or beside the plot (`start`, `end`), where it stands upright; `legend="none"` hides it.
+ * Each line of text in the key can be hidden through its `--c2-chart__scale-key-…--display` variable, and
+ * `--c2-chart__axis-label--display: none` leaves only the cells.
  * `scale-filter` holds the kept range and can be set by the application.
  *
  * The plot is one tab stop: the arrow keys move from cell to cell, Enter fires `cell-click` and Escape leaves.
@@ -288,6 +293,12 @@ function measureText(text: string, font: string, size: number): number {
  * @cssproperty {color} [--c2-chart__scale-end--color=#0a3b8c] - High end of a sequential scale, and positive end of a diverging one.
  * @cssproperty {color} [--c2-chart__scale-negative--color=#c2410c] - Negative end of a diverging scale.
  * @cssproperty {color} [--c2-chart__scale-mid--color=#e4e4e7] - Neutral midpoint of a diverging scale.
+ * @cssproperty {string} [--c2-chart__axis-label--display=block] - `none` draws the cells alone: no row, column, group or month labels, and no room kept for them.
+ * @cssproperty {string} [--c2-chart__scale-key-title--display=inline] - `none` hides the colour key's title.
+ * @cssproperty {string} [--c2-chart__scale-key-readout--display=inline] - `none` hides the line under the key's title: the count, the range, the total and the hovered cell's value.
+ * @cssproperty {string} [--c2-chart__scale-key-total--display=inline] - `none` hides the total in the readout, for values that do not add up to anything meaningful.
+ * @cssproperty {string} [--c2-chart__scale-key-hint--display=inline] - `none` hides the line saying how to preview and keep a band. It is always hidden beside the plot.
+ * @cssproperty {string} [--c2-chart__scale-key-poles--display=flex] - `none` hides the names of the scale's two ends.
  * @cssproperty {length} [--c2-chart__scale-key--width=280px] - Width of the colour key.
  * @cssproperty {length} [--c2-chart__scale-key--height=200px] - Length of the colour key when it stands beside the plot (`legend="start"` or `"end"`), where it runs from bottom to top.
  * @cssproperty {pixel} [--c2-chart__scale-key-histogram--height=28px] - Height of the distribution bars above the colour key, and their width beside a vertical key.
@@ -649,6 +660,7 @@ export class HeatmapChart extends EchartsChartBase {
       groupGap: Math.max(0, read('--c2-chart__group--gap', fallback.groupGap)),
       dimmedOpacity: read('--c2-chart__cell__dimmed--opacity', fallback.dimmedOpacity),
       labelFontSize: read('--c2-chart__cell-label--font-size', fallback.labelFontSize),
+      labels: style.getPropertyValue('--c2-chart__axis-label--display').trim() !== 'none',
       emptyColor: this.#probeColor('empty', fallback.emptyColor),
       hoverColor: this.#probeColor('hover', fallback.hoverColor),
       focusColor: this.#probeColor('focus', fallback.focusColor),
@@ -684,6 +696,7 @@ export class HeatmapChart extends EchartsChartBase {
       marginalSize: style.marginalSize,
       groupGap: style.groupGap,
       marginals: this.marginals,
+      labels: style.labels,
     })
     this.#geometry = { key, geometry }
     return geometry
@@ -722,6 +735,8 @@ export class HeatmapChart extends EchartsChartBase {
     const { theme } = draw
     const fontFamily = this.#fontFamily(theme)
     const strong = (role: string) => role === 'group' || role === 'panel'
+    // An empty group would leave the previous labels on screen: ECharts keeps old children it is handed none for.
+    if (geometry.texts.length === 0 && geometry.rules.length === 0) return null
     return {
       type: 'group',
       children: [
@@ -762,7 +777,8 @@ export class HeatmapChart extends EchartsChartBase {
         shape: { ...rect, r: radius },
         z2: focused ? 2 : 0,
         style: { fill, opacity, stroke: focused ? style.focusColor : 'none', lineWidth: focused ? 2 : 0 },
-        emphasis: { style: { stroke: focused ? style.focusColor : style.hoverColor, lineWidth: 2 } },
+        // The outline is the hover; the fill stays the scale's colour, which ECharts would otherwise lighten.
+        emphasis: { style: { fill, stroke: focused ? style.focusColor : style.hoverColor, lineWidth: 2 } },
       },
     ]
     const light = (luminance(fill) ?? 1) > 0.36
@@ -1127,18 +1143,27 @@ export class HeatmapChart extends EchartsChartBase {
     return this.msg.t('range', format(from), format(to))
   }
 
-  #readout(model: HeatmapModel, key: ScaleKey, range: HeatmapScaleRange | null): string {
+  /**
+   * The readout under the key's title, as parts the page can hide one by one (`--c2-chart__scale-key-total--display`).
+   * The total comes last, so hiding it leaves no separator behind.
+   */
+  #readout(model: HeatmapModel, key: ScaleKey, range: HeatmapScaleRange | null): { part: 'count' | 'range' | 'note' | 'total'; text: string }[] {
     const values = model.values
+    const sum = (list: number[]) => list.reduce((total, value) => total + value, 0)
     if (!range) {
-      const parts = [this.#noun(values.length), this.msg.t('range', this.#formatValue(Math.min(...values)), this.#formatValue(Math.max(...values)))]
-      if (this.#summable()) parts.push(this.msg.t('total', this.#formatValue(values.reduce((sum, value) => sum + value, 0))))
-      if (key.clampLow || key.clampHigh) parts.push(this.msg.t('pastScale'))
-      return parts.join(' · ')
+      return [
+        { part: 'count' as const, text: this.#noun(values.length) },
+        { part: 'range' as const, text: this.msg.t('range', this.#formatValue(Math.min(...values)), this.#formatValue(Math.max(...values))) },
+        ...(key.clampLow || key.clampHigh ? [{ part: 'note' as const, text: this.msg.t('pastScale') }] : []),
+        ...(this.#summable() ? [{ part: 'total' as const, text: this.msg.t('total', this.#formatValue(sum(values))) }] : []),
+      ]
     }
     const kept = values.filter((value) => inRange(value, range))
-    const parts = [this.#rangeText(range), this.msg.t('ofTotal', this.formatValue(kept.length), this.#noun(values.length))].filter(Boolean)
-    if (this.#summable()) parts.push(this.msg.t('total', this.#formatValue(kept.reduce((sum, value) => sum + value, 0))))
-    return parts.join(' · ')
+    return [
+      { part: 'range' as const, text: this.#rangeText(range) },
+      { part: 'count' as const, text: this.msg.t('ofTotal', this.formatValue(kept.length), this.#noun(values.length)) },
+      ...(this.#summable() ? [{ part: 'total' as const, text: this.msg.t('total', this.#formatValue(sum(kept))) }] : []),
+    ].filter((item) => item.text)
   }
 
   /** Shows the hovered cell's value on the key, without an update: the marker and the readout are written directly. */
@@ -1359,7 +1384,11 @@ export class HeatmapChart extends EchartsChartBase {
           ${
             histogram
               ? html`<span class="scale-key__status" aria-live="polite"
-                  ><span class="scale-key__readout">${this.#readout(model, key, range)}</span><span class="scale-key__hover" hidden></span
+                  ><span class="scale-key__readout"
+                    >${this.#readout(model, key, range).map(
+                      (item, index) => html`<span class="scale-key__readout-${item.part}">${index > 0 ? ' · ' : ''}${item.text}</span>`,
+                    )}</span
+                  ><span class="scale-key__hover" hidden></span
                 ></span>`
               : nothing
           }
