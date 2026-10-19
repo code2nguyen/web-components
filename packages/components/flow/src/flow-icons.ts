@@ -22,5 +22,7 @@ export const MENU_ICONS = {
   // A list growing by its last rows, and shrinking back.
   showRows: svg`<path d="M2.5 3.5h11M2.5 7h11M2.5 10.5h5M11 9.5v4M9 11.5h4"></path>`,
   hideRows: svg`<path d="M2.5 3.5h11M2.5 7h11M2.5 10.5h5M9 11.5h4"></path>`,
+  rowUp: svg`<path d="M8 13V3M4 7l4-4 4 4"></path>`,
+  rowDown: svg`<path d="M8 3v10M4 9l4 4 4-4"></path>`,
   remove: svg`<path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 7v4M9.2 7v4"></path>`,
 }

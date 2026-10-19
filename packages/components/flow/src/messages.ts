@@ -39,6 +39,15 @@ const en = {
   rowsHidden: (count: number) => `${count} more rows, Shift+Enter shows them.`,
   rowsShown: (node: string) => `All rows of ${node} shown.`,
   rowsFolded: (node: string) => `Rows of ${node} folded.`,
+  dragToReorder: 'Drag to reorder',
+  moveRowUp: 'Move row up',
+  moveRowDown: 'Move row down',
+  /** `R` on a node: the row picked first, its position and how many rows can move. */
+  rowMovePrompt: (node: string, row: string, position: number, total: number) =>
+    `Reordering the rows of ${node}. ${row}, ${position} of ${total}. Up and down arrows pick a row, Alt with an arrow moves it, Enter or Escape ends.`,
+  rowPicked: (row: string, position: number, total: number) => `${row}, ${position} of ${total}`,
+  rowMoved: (row: string, position: number, total: number) => `${row} moved to ${position} of ${total}.`,
+  rowMoveEnded: 'Done reordering rows.',
   duration: 'Duration',
   dragToConnect: 'Drag to connect',
   flowActions: 'Flow actions',

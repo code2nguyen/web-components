@@ -121,6 +121,8 @@
     row__highlighted--background-color: rgba(2, 101, 220, 0.08),
     row-meta--color: #71717a,
     row-meta--font-size: 12px,
+    row-grip--color: #a1a1aa,
+    row__moving--background-color: rgba(2, 101, 220, 0.12),
     row-more--color: rgb(2, 101, 220),
     row-more--font-size: 12px,
     shape--border-color: #bcbcc6,
@@ -728,6 +730,44 @@
   background-color: css.cssVar(row__highlighted--background-color);
 }
 
+// The grip an editable flow puts at the start of each row, shown on hover: dragging it reorders the rows. It sits in
+// the row, clear of the connection handle on the node's side.
+.row-grip {
+  flex: none;
+  width: 10px;
+  height: 16px;
+  margin-right: -2px;
+  color: css.cssVar(row-grip--color);
+  // Two columns of three dots.
+  background-image: radial-gradient(circle, currentColor 1.1px, transparent 1.4px);
+  background-size: 5px 5px;
+  background-position: 0 0.5px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+
+.row:hover .row-grip,
+.row.is-moving .row-grip,
+.row.is-picked .row-grip {
+  opacity: 1;
+}
+
+.row.is-moving,
+.row.is-picked {
+  background-color: css.cssVar(row__moving--background-color);
+}
+
+.row.is-moving,
+.row.is-moving .row-grip {
+  cursor: grabbing;
+}
+
+// The row `R` picked: a ring inside the row, since the node keeps the focus.
+.row.is-picked {
+  box-shadow: inset 0 0 0 2px css.cssVar(node__selected--border-color);
+}
+
 // The "+ N more" row, which folds the rows past the limit and shows them on a click.
 .row.row-more {
   justify-content: center;
@@ -1007,6 +1047,14 @@
 // The handle of the target side a connection would arrive by.
 .stage.is-connecting .node.is-connect-target .connector.is-connect-side {
   opacity: 1;
+}
+
+// A row's handle takes presses outside the node only, leaving the row's grip to its own.
+.connector--port.connector--left::before {
+  inset: -6px 50% -6px -6px;
+}
+.connector--port.connector--right::before {
+  inset: -6px -6px -6px 50%;
 }
 
 // One handle in the middle of each side.

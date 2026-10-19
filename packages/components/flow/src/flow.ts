@@ -51,6 +51,7 @@ import type {
   FlowPoint,
   FlowRenderContext,
   FlowRenderer,
+  FlowRowMoveDetail,
   FlowRowsToggleDetail,
   FlowSelectionChangeDetail,
   FlowSide,
@@ -79,6 +80,7 @@ export interface FlowEventMap {
   'edge-delete': CustomEvent<FlowEdgeEventDetail>
   'edge-edit': CustomEvent<FlowEdgeEditDetail>
   'rows-toggle': CustomEvent<FlowRowsToggleDetail>
+  'row-move': CustomEvent<FlowRowMoveDetail>
 }
 
 export interface Flow {
@@ -300,7 +302,10 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * highlights its edges and the rows at their far ends; a row with `details` opens its own hover card. Screen readers
  * hear the rows and the rows each edge joins ("After customers.id through customer_id."). Past `row-limit` (or a
  * node's `rowLimit`) the other rows fold into a "+ N more" row, whose card lists them: a click on it, Shift+Enter on
- * the node or its context menu shows them all (`rows-toggle`). Rows an edge meets always show. `sourceMarker` and
+ * the node or its context menu shows them all (`rows-toggle`). Rows an edge meets always show. In an `editable` flow a
+ * hovered row shows a grip: dragging it moves the row among the node's shown rows, live, with its edges, and fires
+ * `row-move` on release (Escape puts it back); `R` on a focused node does the same from the keyboard (arrows pick a
+ * row, Alt+arrows move it, Enter or Escape ends), and a row's context menu has **Move row up** and **Move row down**. `sourceMarker` and
  * `targetMarker` draw an end as an `arrow` (the target's default), `none` (the source's) or a crow's-foot cardinality:
  * `one`, `zero-one`, `many`, `one-many`, `zero-many`. With `edge-type="step"`, `direction="LR"`,
  * `--c2-flow__marker--display: none` and a monospace `--c2-flow__row--font-family`, a flow is an entity-relationship
@@ -363,6 +368,7 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @event {CustomEvent<FlowNodeDeleteDetail>} node-delete - `editable` only: the user asked to delete node `detail.id`. Does not bubble.
  * @event {CustomEvent<FlowEdgeAddDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`, from side `detail.sourceSide` of the source to side `detail.targetSide` of the target. Never a self-loop or an existing edge. Does not bubble.
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
+ * @event {CustomEvent<FlowRowMoveDetail>} row-move - `editable` only: the user moved row `detail.row` of node `detail.id` from index `detail.from` to `detail.to` of its `rows`, by its grip, the keyboard (`R`) or the row's context menu. Move it in `rows`. Does not bubble.
  * @event {CustomEvent<FlowRowsToggleDetail>} rows-toggle - The user showed or folded the rows of node `detail.id` past the `row-limit` (the "+ N more" row, Shift+Enter or the context menu). Does not bubble.
  * @event {CustomEvent<FlowEdgeEditDetail>} edge-edit - `editable` only: the user changed the label of the edge from `detail.source` to `detail.target` to `detail.label` with the inline editor; an empty `label` removes it. Does not bubble.
  *
@@ -480,6 +486,8 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {color} [--c2-flow__row__highlighted--background-color=rgba(2, 101, 220, 0.08)] - The hovered row and the rows at the far end of its edges, and the row a connection would arrive at.
  * @cssproperty {color} [--c2-flow__row-meta--color=#71717a] - A row's `meta`, such as a column type.
  * @cssproperty {font-size} [--c2-flow__row-meta--font-size=12px]
+ * @cssproperty {color} [--c2-flow__row-grip--color=#a1a1aa] - The grip an `editable` flow shows on a hovered row, which reorders the rows.
+ * @cssproperty {color} [--c2-flow__row__moving--background-color=rgba(2, 101, 220, 0.12)] - The row being moved, by its grip or the keyboard.
  * @cssproperty {color} [--c2-flow__row-more--color=rgb(2, 101, 220)] - The "+ N more" row of a node past its `row-limit`.
  * @cssproperty {font-size} [--c2-flow__row-more--font-size=12px]
  * @cssproperty {color} [--c2-flow__shape--border-color=#bcbcc6] - Outline of a diamond, circle or slanted node, and the fold of a note.
@@ -578,6 +586,11 @@ export class Flow extends LitElement {
   @state() private highlightPort: { node: string; port: string } | null = null
   /** Nodes whose rows past the limit are shown. */
   @state() private expanded = new Set<string>()
+  /**
+   * A row being moved: by its grip (`pointer`) or the keyboard (`R`). While it moves, its node draws it at `to` among
+   * its other shown rows, so the edges follow it.
+   */
+  @state() private rowMove: { node: string; row: string; to: number; pointer: boolean } | null = null
   @state() private focusId: string | null = null
   /** Where the placeholder of a node dragged in by `dragNewNode()` is, in canvas pixels; null when not over the canvas. */
   @state() private ghost: FlowPoint | null = null
@@ -631,6 +644,10 @@ export class Flow extends LitElement {
   private menuNode: FlowNode | null = null
   private menuEdge: FlowEdge | null = null
   private menuPoint: FlowPoint | null = null
+  /** A press on a row's grip, until it moves far enough to start moving the row. */
+  private rowDrag: { node: string; row: string; startY: number; moved: boolean; pointerId: number } | null = null
+  /** The row under the pointer when the context menu opened on a node. */
+  private menuRow: string | null = null
   /** A press on a node's connection handle, until it moves far enough to become a connection. */
   private connectDrag: { source: string; side: FlowSide; port?: string; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
   private lastTap: { target: string; time: number; x: number; y: number } | null = null
@@ -1183,7 +1200,11 @@ export class Flow extends LitElement {
     if (event.button !== 0 || !this.stage || this.fromPart(event, 'label-editor')) return
     const id = this.nodeIdFromEvent(event)
     const connector = this.editable && id ? (this.fromPart(event, 'connector') as HTMLElement | null) : null
-    if (id && connector) {
+    const grip = this.editable && id ? (this.fromPart(event, 'row-grip') as HTMLElement | null) : null
+    if (id && grip) {
+      const row = grip.closest<HTMLElement>('[data-flow-port]')?.dataset.flowPort
+      if (row) this.rowDrag = { node: id, row, startY: event.clientY, moved: false, pointerId: event.pointerId }
+    } else if (id && connector) {
       const side = isSide(connector.dataset.side) ? connector.dataset.side : defaultSides(this.direction).source
       const port = portId(connector.dataset.port)
       this.connectDrag = { source: id, side, port, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
@@ -1199,6 +1220,30 @@ export class Flow extends LitElement {
   }
 
   private handlePointerMove = (event: PointerEvent) => {
+    if (this.rowDrag && event.pointerId === this.rowDrag.pointerId) {
+      const drag = this.rowDrag
+      if (!drag.moved && Math.abs(event.clientY - drag.startY) < DRAG_THRESHOLD) return
+      if (!drag.moved) {
+        drag.moved = true
+        this.hideCard(true)
+      }
+      const node = this.byId.get(drag.node)
+      const p = this.positions.get(drag.node)
+      if (!node || !p) return
+      // The slot among the other shown rows the pointer is past the middle of.
+      const y = this.toCanvas(event.clientX, event.clientY).y - p.y
+      const ports = this.ports.get(drag.node)
+      const others = this.visibleRows(node).shown.filter((row) => row.id !== drag.row)
+      const to = others.filter((row) => {
+        const box = ports?.get(row.id)
+        return !!box && box.top + box.height / 2 < y
+      }).length
+      if (this.rowMove?.to !== to || this.rowMove.row !== drag.row) {
+        this.rowMove = { node: drag.node, row: drag.row, to, pointer: true }
+        this.portsDirty = true
+      }
+      return
+    }
     if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
       const { source, side, port, startX, startY } = this.connectDrag
       if (!this.connectDrag.moved && Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD) return
@@ -1238,6 +1283,14 @@ export class Flow extends LitElement {
 
   private handlePointerUp = (event: PointerEvent) => {
     const released = event.type === 'pointerup'
+    if (this.rowDrag && event.pointerId === this.rowDrag.pointerId) {
+      const { moved } = this.rowDrag
+      const move = this.rowMove
+      this.rowDrag = null
+      this.endRowMove()
+      if (moved && released && move) this.moveRow(move.node, move.row, move.to)
+      return
+    }
     if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
       const { source, moved } = this.connectDrag
       const connection = this.connection
@@ -1367,6 +1420,80 @@ export class Flow extends LitElement {
     this.hideCard(true)
     this.announce(this.msg.t(expanded ? 'rowsShown' : 'rowsFolded', this.labelOf(id)))
     this.dispatchEvent(new CustomEvent<FlowRowsToggleDetail>('rows-toggle', { detail: { id, expanded } }))
+  }
+
+  /** Stops showing a row being moved anywhere but in its own place. */
+  private endRowMove() {
+    if (!this.rowMove) return
+    this.rowMove = null
+    this.portsDirty = true
+  }
+
+  /**
+   * Asks for row `row` of node `id` to go to slot `to` among the node's other shown rows (its folded rows keep their
+   * place): fires `row-move` with its indices in `rows`. Returns whether it moved.
+   */
+  private moveRow(id: string, row: string, to: number) {
+    const node = this.byId.get(id)
+    if (!node || !this.editable) return false
+    const rows = rowsOf(node)
+    const from = rows.findIndex((r) => r.id === row)
+    if (from < 0) return false
+    const rest = rows.filter((r) => r.id !== row)
+    const others = this.visibleRows(node).shown.filter((r) => r.id !== row)
+    const slot = Math.max(0, Math.min(to, others.length))
+    // Before the shown row now in that slot, or just after the last shown row.
+    const index = slot < others.length ? rest.indexOf(others[slot]) : rest.indexOf(others[others.length - 1]) + 1
+    if (index === from) return false
+    this.dispatchEvent(new CustomEvent<FlowRowMoveDetail>('row-move', { detail: { id, row, from, to: index } }))
+    return true
+  }
+
+  /** The slot of row `row` among the shown rows of node `id`, and how many there are. */
+  private rowSlot(id: string, row: string) {
+    const node = this.byId.get(id)
+    const shown = node ? this.visibleRows(node).shown : []
+    return { index: shown.findIndex((r) => r.id === row), total: shown.length }
+  }
+
+  /** `R` on a node with rows: picks its first row to move, until Enter or Escape. */
+  private startRowKeyboard(id: string) {
+    const node = this.byId.get(id)
+    const shown = node ? this.visibleRows(node).shown : []
+    if (!node || shown.length < 2) return false
+    this.hideCard(true)
+    const row = shown[0]
+    this.rowMove = { node: id, row: row.id, to: 0, pointer: false }
+    this.announce(this.msg.t('rowMovePrompt', node.label, row.label, 1, shown.length))
+    return true
+  }
+
+  private handleRowKey(event: KeyboardEvent, move: { node: string; row: string; to: number; pointer: boolean }) {
+    const step = ({ ArrowDown: 1, ArrowUp: -1 } as Record<string, number>)[event.key]
+    if (step) {
+      event.preventDefault()
+      const node = this.byId.get(move.node)
+      const shown = node ? this.visibleRows(node).shown : []
+      const { index } = this.rowSlot(move.node, move.row)
+      if (event.altKey) {
+        // Alt moves the row; the application reorders `rows`, and the row stays the one picked.
+        if (this.moveRow(move.node, move.row, index + step)) {
+          const at = Math.max(0, Math.min(shown.length - 1, index + step))
+          this.announce(this.msg.t('rowMoved', this.rowLabel(move.node, move.row), at + 1, shown.length))
+        }
+        return
+      }
+      const next = shown[Math.max(0, Math.min(shown.length - 1, index + step))]
+      if (next && next.id !== move.row) {
+        this.rowMove = { ...move, row: next.id }
+        this.announce(this.msg.t('rowPicked', next.label, shown.indexOf(next) + 1, shown.length))
+      }
+    } else if (event.key === 'Enter' || event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.rowMove = null
+      this.announce(this.msg.t('rowMoveEnded'))
+    }
   }
 
   /** "orders.customer_id" for an end on a row, else the node's label. */
@@ -1763,6 +1890,10 @@ export class Flow extends LitElement {
       this.startKeyboardConnection(id)
       return true
     }
+    if (plainKey(event, 'r') && this.startRowKeyboard(id)) {
+      event.preventDefault()
+      return true
+    }
     if (plainKey(event, 'e')) {
       event.preventDefault()
       this.stepEdges(id)
@@ -1778,6 +1909,14 @@ export class Flow extends LitElement {
     // The label editor handles its own keys.
     if (this.fromPart(event, 'label-editor')) return
     if (this.connection?.keyboard) return this.handleConnectionKey(event, this.connection)
+    if (this.rowMove && !this.rowMove.pointer) return this.handleRowKey(event, this.rowMove)
+    if (this.rowDrag?.moved && event.key === 'Escape') {
+      // Escape while dragging a row puts it back.
+      event.stopPropagation()
+      this.rowDrag = null
+      this.endRowMove()
+      return
+    }
     if (this.connection && event.key === 'Escape') {
       event.stopPropagation()
       this.cancelConnection()
@@ -1875,6 +2014,7 @@ export class Flow extends LitElement {
     const next = event.relatedTarget as Node | null
     // A keyboard connection lasts while focus stays in the flow.
     if (this.connection?.keyboard && !(next && this.renderRoot.contains(next))) this.cancelConnection()
+    if (this.rowMove && !this.rowMove.pointer && !(next && this.renderRoot.contains(next))) this.rowMove = null
     if (next && (this.card?.contains(next) || this.contains(next))) return
     this.highlightId = null
     this.scheduleCardClose()
@@ -2068,12 +2208,24 @@ export class Flow extends LitElement {
             )}<c2-kbd slot="shortcut">⇧↵</c2-kbd></c2-menu-item
           >`
         : nothing
-    const nodeItems = this.editable ? html`${rowItem}${rowItem === nothing ? nothing : html`<hr />`}${this.editMenuItems(node)}` : rowItem
+    // The row under the pointer can move up or down among the node's shown rows.
+    const menuRow = this.editable && node && this.highlightPort?.node === node.id ? this.highlightPort.port : null
+    const slot = menuRow && node ? this.rowSlot(node.id, menuRow) : null
+    const moveItems =
+      slot && slot.index >= 0 && slot.total > 1
+        ? html`<c2-menu-item value="flow:row-up" ?disabled=${slot.index === 0}>${this.menuIcon(MENU_ICONS.rowUp)}${this.msg.t('moveRowUp')}</c2-menu-item>
+            <c2-menu-item value="flow:row-down" ?disabled=${slot.index === slot.total - 1}
+              >${this.menuIcon(MENU_ICONS.rowDown)}${this.msg.t('moveRowDown')}</c2-menu-item
+            >
+            <hr />`
+        : nothing
+    const nodeItems = this.editable ? html`${moveItems}${rowItem}${rowItem === nothing ? nothing : html`<hr />`}${this.editMenuItems(node)}` : rowItem
     const defaultItems = node ? nodeItems : edge ? (this.editable ? this.editMenuItems(null) : nothing) : this.defaultMenuItems()
     const custom = this.renderContextMenu?.({ node, edge, defaultItems, x: context.x, y: context.y })
     const rows = custom === undefined ? (defaultItems === nothing ? null : defaultItems) : custom
     if (rows !== null && rows !== undefined && rows !== nothing && rows !== false) {
       this.menuNode = node
+      this.menuRow = menuRow
       this.menuEdge = edge
       this.menuPoint = this.toCanvas(context.x, context.y)
       this.hideCard(true)
@@ -2173,6 +2325,10 @@ export class Flow extends LitElement {
         if (node) this.deleteNode(node.id)
         else if (edge) this.deleteEdge(edge)
         return
+      case 'flow:row-up':
+      case 'flow:row-down':
+        if (node && this.menuRow) this.moveRow(node.id, this.menuRow, this.rowSlot(node.id, this.menuRow).index + (value === 'flow:row-up' ? -1 : 1))
+        return
       case 'flow:toggle-rows':
         if (node) this.userToggleRows(node.id)
         return
@@ -2248,6 +2404,8 @@ export class Flow extends LitElement {
     }
     if (changed.has('nodes') || changed.has('renderNode') || changed.has('direction')) this.portsDirty = true
     if (this.highlightPort && !this.byId.has(this.highlightPort.node)) this.highlightPort = null
+    if (this.rowMove && (!this.editable || !this.rowOf(this.rowMove.node, this.rowMove.row))) this.rowMove = null
+    if (changed.has('nodes') && this.rowMove) this.portsDirty = true
     if (this.selectedEdge !== null && !this.edgeByKey(this.selectedEdge)) this.selectedEdge = null
     if (this.editingEdge !== null && !this.edgeByKey(this.editingEdge)) this.editingEdge = null
     const ids = this.nodes.map((node) => node.id).join('\u0000')
@@ -2369,8 +2527,16 @@ export class Flow extends LitElement {
 
   /** The rows of the default body; see {@link FlowNodeRow}. */
   private renderRows(node: FlowNode) {
-    const { shown: rows, hidden } = this.visibleRows(node)
-    if (!rows.length) return nothing
+    const { shown, hidden } = this.visibleRows(node)
+    if (!shown.length) return nothing
+    const move = this.rowMove?.node === node.id ? this.rowMove : null
+    let rows = shown
+    // A row dragged by its grip is drawn in the slot it would land in.
+    const moving = move?.pointer ? shown.find((row) => row.id === move.row) : undefined
+    if (move && moving) {
+      rows = shown.filter((row) => row !== moving)
+      rows.splice(Math.min(move.to, rows.length), 0, moving)
+    }
     // A row without an icon keeps the icon's room when another row has one, so the labels line up.
     const icons = rows.some((row) => row.icon)
     const connection = this.connection
@@ -2378,8 +2544,14 @@ export class Flow extends LitElement {
       ${rows.map((row) => {
         const target =
           connection?.target === node.id && connection.targetPort === row.id && this.canConnect(connection.source, node.id, connection.sourcePort, row.id)
-        const classes = `row${this.litRows.has(`${node.id}\u0000${row.id}`) ? ' is-highlighted' : ''}${target ? ' is-connect-target' : ''}`
-        return html`<div class=${classes} data-flow-port=${row.id}>
+        const classes = [
+          'row',
+          this.litRows.has(`${node.id}\u0000${row.id}`) ? 'is-highlighted' : '',
+          target ? 'is-connect-target' : '',
+          move?.row === row.id ? (move.pointer ? 'is-moving' : 'is-picked') : '',
+        ]
+        return html`<div class=${classes.filter(Boolean).join(' ')} data-flow-port=${row.id}>
+          ${this.editable && shown.length > 1 ? html`<span class="row-grip" title=${this.msg.t('dragToReorder')} aria-hidden="true"></span>` : nothing}
           ${icons ? html`<span class="row-icon" aria-hidden="true">${row.icon ?? nothing}</span>` : nothing}
           <span class="row-label">${row.label}</span>
           ${row.meta ? html`<span class="row-meta">${row.meta}</span>` : nothing}

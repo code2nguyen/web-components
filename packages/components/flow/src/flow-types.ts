@@ -248,6 +248,19 @@ export interface FlowRowsToggleDetail {
   expanded: boolean
 }
 
+/**
+ * `row-move`: the user moved row `row` of node `id` from index `from` to index `to` of its `rows`, in an `editable`
+ * flow. The flow does not reorder them: move the row in the node's `rows`.
+ */
+export interface FlowRowMoveDetail {
+  id: string
+  row: string
+  /** Its index in `rows` before the move. */
+  from: number
+  /** Its index in `rows` after the move, counted once the row is taken out and put back. */
+  to: number
+}
+
 /** `node-edit`: the user renamed a node with the inline editor. Update the node's `label`. */
 export interface FlowNodeEditDetail {
   id: string

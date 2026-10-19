@@ -30,7 +30,7 @@ The entry also registers `c2-context-menu` and `c2-menu`, which it renders inter
 
 ## Usage
 
-Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the sixth places its nodes itself and runs edges between chosen sides (see [Sides](#sides)); the seventh is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag one of the four handles on a node's sides to connect it from that side, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected. The last one is a database schema (see [Rows and schema diagrams](#rows-and-schema-diagrams)): hover a column to follow its foreign key, drag the handle of a column onto a column of another table to link them, and click **+ 4 more** on a long table to show its other columns.
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the sixth places its nodes itself and runs edges between chosen sides (see [Sides](#sides)); the seventh is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag one of the four handles on a node's sides to connect it from that side, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected. The last one is a database schema (see [Rows and schema diagrams](#rows-and-schema-diagrams)): hover a column to follow its foreign key, drag the handle of a column onto a column of another table to link them, click **+ 4 more** on a long table to show its other columns, and drag a column by the grip at its start to reorder the table.
 
 ```html tag=UsageBlock,package=@c2n/flow
 <style>
@@ -249,7 +249,20 @@ Hovering a row highlights its edges and the rows at their far ends. Screen reade
 
 A long table can fold its columns: `row-limit="4"` on the flow (or `rowLimit` on one node) shows the first four rows and folds the rest into a **+ N more** row, whose hover card lists them. Rows an edge meets always show, so no foreign key disappears. A click on that row, Shift+Enter on the table or **Show all rows** in its context menu shows every row (`rows-toggle`), and `toggleRows(id, expanded?)` does the same from script. With a `storage-key`, the open tables are saved with the layout.
 
-The rows are styled through `--c2-flow__row--*`, `--c2-flow__row-meta--*` and `--c2-flow__row-more--*`; a schema usually also hides the status marker and sets a monospace font:
+In an `editable` flow the rows can be reordered. A hovered row shows a grip at its start: drag it and the row moves among the table's shown rows as you go, its links with it, and on release the flow fires `row-move` with the row and its `from` and `to` indices in `rows` (Escape puts it back). Like every edit, the flow does not apply it: move the row in `rows`. From the keyboard, `R` on a focused table picks its first row, the arrows pick another, Alt with an arrow moves it and Enter or Escape ends; a row's context menu also has **Move row up** and **Move row down**.
+
+```ts tag=CodeBlock
+flow.addEventListener('row-move', ({ detail }) => {
+  flow.nodes = flow.nodes.map((node) => {
+    if (node.id !== detail.id) return node
+    const rows = [...node.rows!]
+    rows.splice(detail.to, 0, ...rows.splice(detail.from, 1))
+    return { ...node, rows }
+  })
+})
+```
+
+The rows are styled through `--c2-flow__row--*`, `--c2-flow__row-meta--*`, `--c2-flow__row-grip--*` and `--c2-flow__row-more--*`; a schema usually also hides the status marker and sets a monospace font:
 
 ```css tag=CodeBlock
 c2-flow.schema {

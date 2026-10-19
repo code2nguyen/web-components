@@ -34,6 +34,7 @@ declare module 'vue' {
         onSelectionChange?: (event: EventOf<Flow, 'selection-change'>) => void
         onNodeClick?: (event: EventOf<Flow, 'node-click'>) => void
         onRowsToggle?: (event: EventOf<Flow, 'rows-toggle'>) => void
+        onRowMove?: (event: EventOf<Flow, 'row-move'>) => void
         onNodeAdd?: (event: EventOf<Flow, 'node-add'>) => void
         onEdgeAdd?: (event: EventOf<Flow, 'edge-add'>) => void
         onNodeDelete?: (event: EventOf<Flow, 'node-delete'>) => void

@@ -276,6 +276,122 @@ test.describe('row limit', () => {
   })
 })
 
+test.describe('reordering rows', () => {
+  /** Records `row-move` and answers it as an application reordering `rows` would. */
+  async function wireMoves(page: Page) {
+    await host(page).evaluate((element: Flow) => {
+      const moves: unknown[] = []
+      ;(element as unknown as { moves: unknown[] }).moves = moves
+      element.addEventListener('row-move', ({ detail }) => {
+        moves.push({ ...detail })
+        element.nodes = element.nodes.map((node) => {
+          if (node.id !== detail.id || !node.rows) return node
+          const rows = [...node.rows]
+          const [moved] = rows.splice(detail.from, 1)
+          rows.splice(detail.to, 0, moved)
+          return { ...node, rows }
+        })
+      })
+    })
+  }
+  const moves = (page: Page) => host(page).evaluate((element) => (element as unknown as { moves: unknown[] }).moves)
+  const order = (page: Page, id: string) =>
+    node(page, id)
+      .locator('.row:not(.row-more)')
+      .evaluateAll((rows) => rows.map((row) => (row as HTMLElement).dataset.flowPort))
+
+  test('dragging a row’s grip moves it, live with its edges, and asks for the move on release', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, flow({ attributes: 'editable edge-type="step"' }))
+    await wireMoves(page)
+    await expect(row(page, 'orders', 'id').locator('.row-grip')).toHaveCount(1)
+    await row(page, 'orders', 'customer_id').hover()
+    const grip = await box(row(page, 'orders', 'customer_id').locator('.row-grip'))
+    const last = await box(row(page, 'orders', 'parent_id'))
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(grip.x + grip.width / 2, last.y + last.height - 4, { steps: 8 })
+    // Drawn in the slot it would land in, and its edge follows it there.
+    await expect(row(page, 'orders', 'customer_id')).toHaveClass(/is-moving/)
+    expect(await order(page, 'orders')).toEqual(['id', 'billing_id', 'parent_id', 'customer_id'])
+    await expect
+      .poll(async () => {
+        const [line] = await ends(page)
+        return near(line.end.y, (await rowLine(page, 'orders', 'customer_id')).y)
+      })
+      .toBe(true)
+    await page.mouse.up()
+    expect(await moves(page)).toEqual([{ id: 'orders', row: 'customer_id', from: 1, to: 3 }])
+    expect(await order(page, 'orders')).toEqual(['id', 'billing_id', 'parent_id', 'customer_id'])
+    await expect(row(page, 'orders', 'customer_id')).not.toHaveClass(/is-moving/)
+    // Dragging the row itself, rather than its grip, still moves the node.
+    const before = await host(page).evaluate((element: Flow) => element.getLayout().orders)
+    const body = await box(row(page, 'orders', 'billing_id').locator('.row-label'))
+    await page.mouse.move(body.x + 4, body.y + body.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(body.x + 64, body.y + 40, { steps: 6 })
+    await page.mouse.up()
+    expect(await host(page).evaluate((element: Flow) => element.getLayout().orders)).not.toEqual(before)
+    expect(await moves(page)).toHaveLength(1)
+  })
+
+  test('Escape during a drag puts the row back and asks for nothing', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, flow({ attributes: 'editable edge-type="step"' }))
+    await wireMoves(page)
+    await node(page, 'orders').focus()
+    await row(page, 'orders', 'id').hover()
+    const grip = await box(row(page, 'orders', 'id').locator('.row-grip'))
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + 80, { steps: 6 })
+    expect((await order(page, 'orders'))[0]).not.toBe('id')
+    await page.keyboard.press('Escape')
+    expect(await order(page, 'orders')).toEqual(['id', 'customer_id', 'billing_id', 'parent_id'])
+    await page.mouse.up()
+    expect(await moves(page)).toEqual([])
+  })
+
+  test('R picks a row from the keyboard, Alt+arrows move it, Enter ends', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, flow({ attributes: 'editable edge-type="step"' }))
+    await wireMoves(page)
+    await node(page, 'orders').focus()
+    await page.keyboard.press('r')
+    await expect(row(page, 'orders', 'id')).toHaveClass(/is-picked/)
+    await expect(page.locator('c2-flow [role="status"]')).toContainText('Reordering the rows of orders. id, 1 of 4.')
+    await page.keyboard.press('ArrowDown')
+    await expect(row(page, 'orders', 'customer_id')).toHaveClass(/is-picked/)
+    await page.keyboard.press('Alt+ArrowDown')
+    await page.keyboard.press('Alt+ArrowDown')
+    expect(await order(page, 'orders')).toEqual(['id', 'billing_id', 'parent_id', 'customer_id'])
+    await expect(page.locator('c2-flow [role="status"]')).toHaveText('customer_id moved to 4 of 4.')
+    // At the end it goes no further.
+    await page.keyboard.press('Alt+ArrowDown')
+    await page.keyboard.press('Enter')
+    await expect(node(page, 'orders').locator('.row.is-picked')).toHaveCount(0)
+    expect(await moves(page)).toEqual([
+      { id: 'orders', row: 'customer_id', from: 1, to: 2 },
+      { id: 'orders', row: 'customer_id', from: 2, to: 3 },
+    ])
+  })
+
+  test('a row’s context menu moves it up and down; folded rows keep their place', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, flow({ attributes: 'editable edge-type="step" row-limit="2"' }))
+    await wireMoves(page)
+    // Shown: id, customer_id, billing_id (linked); folded: parent_id.
+    await row(page, 'orders', 'billing_id').hover()
+    await row(page, 'orders', 'billing_id').click({ button: 'right' })
+    await expect(page.locator('c2-menu-item[value="flow:row-down"]')).toHaveAttribute('disabled', '')
+    await page.locator('c2-menu-item[value="flow:row-up"]').click()
+    expect(await moves(page)).toEqual([{ id: 'orders', row: 'billing_id', from: 2, to: 1 }])
+    expect(await order(page, 'orders')).toEqual(['id', 'billing_id', 'customer_id'])
+    // A read-only flow has no grip and no move rows.
+    await host(page).evaluate(async (element: Flow) => {
+      element.editable = false
+      await element.updateComplete
+    })
+    await expect(node(page, 'orders').locator('.row-grip')).toHaveCount(0)
+  })
+})
+
 test.describe('editable', () => {
   /** Records the editing events and answers `edge-add` as an application storing the ports would. */
   async function wire(page: Page) {

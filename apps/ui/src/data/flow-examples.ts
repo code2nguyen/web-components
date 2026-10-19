@@ -130,6 +130,17 @@ function wireSchema(flow: Flow, say: (text: string) => void) {
       flow.edges,
     )
   })
+  flow.addEventListener('row-move', ({ detail }) => {
+    const nodes = flow.nodes.map((node) => {
+      if (node.id !== detail.id || !node.rows) return node
+      const rows = [...node.rows]
+      const [moved] = rows.splice(detail.from, 1)
+      rows.splice(detail.to, 0, moved)
+      return { ...node, rows }
+    })
+    update(nodes, flow.edges)
+    say(`row-move: ${detail.id}.${detail.row} from ${detail.from} to ${detail.to}`)
+  })
   flow.addEventListener('node-delete', ({ detail }) => {
     update(
       flow.nodes.filter((node) => node.id !== detail.id),
