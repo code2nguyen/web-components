@@ -757,6 +757,10 @@
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
     },
+    "./view-options": {
+      "types": "./dist/view-options.d.ts",
+      "default": "./dist/view-options.js"
+    },
     "./virtual-list": {
       "types": "./dist/virtual-list.d.ts",
       "default": "./dist/virtual-list.js"
@@ -1013,6 +1017,7 @@
     "@c2n/tree": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
+    "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
     "@c2n/week-planner": "*",
     "@c2n/working-indicator": "*"
