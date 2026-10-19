@@ -3,6 +3,34 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.12](https://github.com/code2nguyen/web-components/releases/tag/v1.0.12) — 2026-10-19
+
+### Features
+
+- **spreadsheet:** A right-click menu of its own, and a selection hidden on blur ([c601772](https://github.com/code2nguyen/web-components/commit/c601772))
+- **page-editor:** Tables, built on c2-spreadsheet ([0d03a65](https://github.com/code2nguyen/web-components/commit/0d03a65))
+- **spreadsheet:** Column names, cell styles, formula help and quick totals ([f989c94](https://github.com/code2nguyen/web-components/commit/f989c94))
+- **json-form:** Publish c2-json-form in @c2n/components with docs and gallery ([7f47b3e](https://github.com/code2nguyen/web-components/commit/7f47b3e))
+- **json-form:** Rebuild on JSON Schema with UI-schema layouts, markup fields and renderers ([316b518](https://github.com/code2nguyen/web-components/commit/316b518))
+- **fieldset:** Add c2-fieldset ([d4fa97d](https://github.com/code2nguyen/web-components/commit/d4fa97d))
+- **form:** Add c2-form with submit validation, an error summary and dirty tracking ([c87c557](https://github.com/code2nguyen/web-components/commit/c87c557))
+- **form-field:** Add c2-form-field, a label, hint and error wrapper for any control ([f731908](https://github.com/code2nguyen/web-components/commit/f731908))
+- **relative-time:** Add min-unit to stop counting below a unit ([db8914d](https://github.com/code2nguyen/web-components/commit/db8914d))
+
+### Fixes
+
+- **page-editor:** A web page's lines pasted as one paragraph become blocks of their own ([6c334b0](https://github.com/code2nguyen/web-components/commit/6c334b0))
+- **page-editor:** A table hides its selection through the sheet's hide-selection-on-blur ([8ddec0a](https://github.com/code2nguyen/web-components/commit/8ddec0a))
+- **page-editor:** Type the test's editor by its value, so test:type-check passes ([3c59936](https://github.com/code2nguyen/web-components/commit/3c59936))
+- **json-form:** Leave a nested object absent when no default fills it ([d47a49c](https://github.com/code2nguyen/web-components/commit/d47a49c))
+- **json-form:** Connect fields parsed before the form, and polish the layout ([ec86ddc](https://github.com/code2nguyen/web-components/commit/ec86ddc))
+- **button-group:** Move the role onto an inner wrapper while a form field wraps the group ([f9cf120](https://github.com/code2nguyen/web-components/commit/f9cf120))
+- **button-group:** Describe the group by text as well as by reference ([37ad2ac](https://github.com/code2nguyen/web-components/commit/37ad2ac))
+
+### Docs site & examples
+
+- **ui:** Reveal gallery previews per card instead of after every module loads ([3f705e5](https://github.com/code2nguyen/web-components/commit/3f705e5))
+
 ## [1.0.11](https://github.com/code2nguyen/web-components/releases/tag/v1.0.11) — 2026-10-17
 
 ### Fixes
