@@ -189,6 +189,25 @@ test('a fields array replaces the c2-view-field children, and child edits are pi
   await expect(page.getByRole('switch')).toHaveCount(0)
 })
 
+test('children wrapped in another element, as Astro islands wrap them, are still read', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-view-options><div><c2-view-field field="owner" label="Owner" groupable property></c2-view-field></div><div><c2-view-toggle key="archived" label="Archived"></c2-view-toggle></div></c2-view-options>`,
+  )
+  await openPanel(page)
+  await expect(page.getByRole('button', { name: 'Owner' })).toBeVisible()
+  await expect(page.getByRole('switch', { name: 'Archived' })).toBeVisible()
+})
+
+test('a server-rendered shadow root reads the children once it has rendered', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page
+    .locator('#mount')
+    .evaluate((mount, markup) => mount.setHTMLUnsafe(`<c2-view-options><template shadowrootmode="open"></template>${markup}</c2-view-options>`), fields)
+  await openPanel(page)
+  await expect(page.getByRole('button', { name: 'Due date' })).toBeVisible()
+  await expect(page.getByRole('switch', { name: 'Sub-issues' })).toBeChecked()
+})
+
 test('with a default value, the host reports changes and Reset restores it', async ({ page, renderScenario }) => {
   await renderScenario(issues(`default-value='{"groupBy":"status"}' value='{"groupBy":"status"}'`))
   await watch(host(page), 'view-change')

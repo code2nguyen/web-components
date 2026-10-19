@@ -235,6 +235,9 @@ export class ViewOptions extends LitElement {
   @state() private hasExtra = false
 
   private readonly internals = this.attachInternals()
+
+  /** A declarative shadow root at construction: the first client render must match the server's, which saw no children. */
+  private readonly serverRendered = !isServer && this.shadowRoot !== null
   private readonly msg = new LocalizeController(this, viewOptionsMessages)
 
   /** Open state at the pointerdown that started a press on the trigger; the popover light-dismisses before the click. */
@@ -301,9 +304,20 @@ export class ViewOptions extends LitElement {
 
   // ---- children ---------------------------------------------------------------------------------------------------
 
+  /**
+   * The direct children, unwrapped: in the docs app every element of an example is an Astro island, so a
+   * `c2-view-field` arrives as the first element of its wrapper.
+   */
+  private definitions(): Element[] {
+    return [...this.children].map((child) => (child instanceof ViewField || child instanceof ViewToggle ? child : (child.firstElementChild ?? child)))
+  }
+
   private readChildren = () => {
-    const fields = [...this.children].filter((child): child is ViewField => child instanceof ViewField).map((child) => child.toConfig())
-    const toggles = [...this.children].filter((child): child is ViewToggle => child instanceof ViewToggle).map((child) => child.toConfig())
+    // A server renders without the children's state; the client reads them once it has hydrated.
+    if (isServer) return
+    const definitions = this.definitions()
+    const fields = definitions.filter((child): child is ViewField => child instanceof ViewField).map((child) => child.toConfig())
+    const toggles = definitions.filter((child): child is ViewToggle => child instanceof ViewToggle).map((child) => child.toConfig())
     // Assigning equal arrays would still schedule an update: the children report on every update of their own.
     if (JSON.stringify(fields) !== JSON.stringify(this.childFields)) this.childFields = fields
     if (JSON.stringify(toggles) !== JSON.stringify(this.childToggles)) this.childToggles = toggles
@@ -479,11 +493,13 @@ export class ViewOptions extends LitElement {
 
   protected override willUpdate() {
     // Read the children before the first render, so it does not need a second one when the slot reports them.
-    if (!this.hasUpdated) this.readChildren()
+    if (!this.hasUpdated && !this.serverRendered) this.readChildren()
   }
 
   protected override firstUpdated() {
     void this.syncTriggerAria()
+    // Hydrated: the slot was assigned before the component upgraded, so it may never report a change.
+    if (this.serverRendered) this.readChildren()
   }
 
   protected override updated(changed: PropertyValues<this>) {
