@@ -21,7 +21,8 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 - **Rows and ports (schema diagrams):** a node's `rows` (`id`, `label`, `meta`, `icon`, `details`) are drawn under its
   label, and each is a port: an edge with `sourcePort`/`targetPort` meets that row on the side facing the other end.
   `sourceMarker`/`targetMarker` draw `arrow`, `none` or a crow's-foot `one`, `zero-one`, `many`, `one-many`,
-  `zero-many`. Hovering a row highlights its edges; editable flows connect row to row.
+  `zero-many`. Hovering a row highlights its edges; editable flows connect row to row. `row-limit` (or a node's `rowLimit`)
+  folds the rows past it into a "+ N more" row (rows an edge meets stay); `toggleRows()` and `rows-toggle`.
 - **Layout:** layered auto layout along `direction` (`LR` or `TB`); cycles are allowed and drawn as back edges.
   Dragging (or Alt+arrow) makes a custom layout, saved with the direction under `storage-key`. A saved layout is
   merged into a changed graph: kept nodes stay, new ones are placed next to their neighbours. `getLayout()`,

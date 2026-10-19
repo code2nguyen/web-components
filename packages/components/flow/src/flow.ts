@@ -51,6 +51,7 @@ import type {
   FlowPoint,
   FlowRenderContext,
   FlowRenderer,
+  FlowRowsToggleDetail,
   FlowSelectionChangeDetail,
   FlowSide,
   FlowSize,
@@ -77,6 +78,7 @@ export interface FlowEventMap {
   'edge-add': CustomEvent<FlowEdgeAddDetail>
   'edge-delete': CustomEvent<FlowEdgeEventDetail>
   'edge-edit': CustomEvent<FlowEdgeEditDetail>
+  'rows-toggle': CustomEvent<FlowRowsToggleDetail>
 }
 
 export interface Flow {
@@ -88,7 +90,12 @@ interface StoredLayout {
   v: 1
   direction?: FlowDirection
   positions?: FlowLayout | null
+  /** Nodes whose rows past the limit are shown. */
+  expanded?: string[]
 }
+
+/** The card key of a node's "+ N more" row, which lists the rows it folds. Not a row id: it carries no edges. */
+const MORE_ROWS = '\u0000more'
 
 const STORAGE_VERSION = 1
 const MIN_ZOOM = 0.25
@@ -291,7 +298,9 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * edge names one. Several edges may join the same two nodes through different rows, and a node may be joined to
  * itself between two of its rows. A custom body marks its own ports with `data-flow-port="<id>"`. Hovering a row
  * highlights its edges and the rows at their far ends; a row with `details` opens its own hover card. Screen readers
- * hear the rows and the rows each edge joins ("After customers.id through customer_id."). `sourceMarker` and
+ * hear the rows and the rows each edge joins ("After customers.id through customer_id."). Past `row-limit` (or a
+ * node's `rowLimit`) the other rows fold into a "+ N more" row, whose card lists them: a click on it, Shift+Enter on
+ * the node or its context menu shows them all (`rows-toggle`). Rows an edge meets always show. `sourceMarker` and
  * `targetMarker` draw an end as an `arrow` (the target's default), `none` (the source's) or a crow's-foot cardinality:
  * `one`, `zero-one`, `many`, `one-many`, `zero-many`. With `edge-type="step"`, `direction="LR"`,
  * `--c2-flow__marker--display: none` and a monospace `--c2-flow__row--font-family`, a flow is an entity-relationship
@@ -354,6 +363,7 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @event {CustomEvent<FlowNodeDeleteDetail>} node-delete - `editable` only: the user asked to delete node `detail.id`. Does not bubble.
  * @event {CustomEvent<FlowEdgeAddDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`, from side `detail.sourceSide` of the source to side `detail.targetSide` of the target. Never a self-loop or an existing edge. Does not bubble.
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
+ * @event {CustomEvent<FlowRowsToggleDetail>} rows-toggle - The user showed or folded the rows of node `detail.id` past the `row-limit` (the "+ N more" row, Shift+Enter or the context menu). Does not bubble.
  * @event {CustomEvent<FlowEdgeEditDetail>} edge-edit - `editable` only: the user changed the label of the edge from `detail.source` to `detail.target` to `detail.label` with the inline editor; an empty `label` removes it. Does not bubble.
  *
  * @csspart actions - The toolbar around the `actions` slot.
@@ -470,6 +480,8 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {color} [--c2-flow__row__highlighted--background-color=rgba(2, 101, 220, 0.08)] - The hovered row and the rows at the far end of its edges, and the row a connection would arrive at.
  * @cssproperty {color} [--c2-flow__row-meta--color=#71717a] - A row's `meta`, such as a column type.
  * @cssproperty {font-size} [--c2-flow__row-meta--font-size=12px]
+ * @cssproperty {color} [--c2-flow__row-more--color=rgb(2, 101, 220)] - The "+ N more" row of a node past its `row-limit`.
+ * @cssproperty {font-size} [--c2-flow__row-more--font-size=12px]
  * @cssproperty {color} [--c2-flow__shape--border-color=#bcbcc6] - Outline of a diamond, circle or slanted node, and the fold of a note.
  * @cssproperty {pixel} [--c2-flow__shape--border-width=1px] - Width of that outline.
  * @cssproperty {pixel} [--c2-flow__shape__diamond--min-height=88px] - A diamond's least height, so its middle has room for the label.
@@ -521,6 +533,13 @@ export class Flow extends LitElement {
    */
   @property({ type: Number, attribute: 'fit-min-zoom' }) fitMinZoom = DEFAULT_FIT_MIN_ZOOM
 
+  /**
+   * How many rows a node shows before the rest fold into a "+ N more" row the user clicks to show them (Shift+Enter or
+   * the context menu from the keyboard); a node's own `rowLimit` wins. Rows an edge meets always show. 0 shows every
+   * row. Which nodes are open is saved with the layout under `storage-key`.
+   */
+  @property({ type: Number, attribute: 'row-limit' }) rowLimit = 0
+
   /** Turns off moving nodes; panning, zooming, selection and the hover card still work. */
   @property({ type: Boolean }) locked = false
 
@@ -557,6 +576,8 @@ export class Flow extends LitElement {
   @state() private highlightId: string | null = null
   /** The row under the pointer: its edges and the rows at their far ends are highlighted. */
   @state() private highlightPort: { node: string; port: string } | null = null
+  /** Nodes whose rows past the limit are shown. */
+  @state() private expanded = new Set<string>()
   @state() private focusId: string | null = null
   /** Where the placeholder of a node dragged in by `dragNewNode()` is, in canvas pixels; null when not over the canvas. */
   @state() private ghost: FlowPoint | null = null
@@ -602,7 +623,8 @@ export class Flow extends LitElement {
   private viewTouched = false
   private fitted = false
 
-  private drag: { id: string; startX: number; startY: number; origin: FlowPoint; moved: boolean; pointerId: number } | null = null
+  /** A press on a node; `more` when it was on the node's "+ N more" row, which a click toggles. */
+  private drag: { id: string; startX: number; startY: number; origin: FlowPoint; moved: boolean; pointerId: number; more: boolean } | null = null
   /** A press on empty canvas, or on an edge of an editable flow (`edge`), until it moves far enough to pan. */
   private pan: { startX: number; startY: number; tx: number; ty: number; moved: boolean; pointerId: number; edge: string | null } | null = null
   private tween = 0
@@ -692,6 +714,21 @@ export class Flow extends LitElement {
     if (!this.editable) return
     const selected = this.selected !== null && this.byId.has(this.selected) ? this.selected : null
     this.requestNodeNearby(selected ?? this.focusedNodeId() ?? this.lastFocusedNode(), selected !== null)
+  }
+
+  /**
+   * Shows (`expanded` true) or folds (false) the rows of node `id` past its row limit; toggles them when `expanded` is
+   * left out. Saved under `storage-key`. Does nothing for a node with no rows past its limit.
+   */
+  toggleRows(id: string, expanded?: boolean): void {
+    if (!this.foldsRows(id)) return
+    const open = expanded ?? !this.expanded.has(id)
+    if (open === this.expanded.has(id)) return
+    const next = new Set(this.expanded)
+    if (open) next.add(id)
+    else next.delete(id)
+    this.expanded = next
+    this.save()
   }
 
   zoomIn(): void {
@@ -804,6 +841,7 @@ export class Flow extends LitElement {
     const stored = this.readStorage()
     this.pinned = stored?.positions ?? {}
     this.custom = Object.keys(this.pinned).length > 0
+    this.expanded = new Set(Array.isArray(stored?.expanded) ? stored.expanded.filter((id) => typeof id === 'string') : [])
     if (stored?.direction === 'LR' || stored?.direction === 'TB') this.direction = stored.direction
   }
 
@@ -821,6 +859,7 @@ export class Flow extends LitElement {
     if (!this.storageKey || isServer) return
     try {
       const stored: StoredLayout = { v: STORAGE_VERSION, direction: this.direction, positions: this.custom ? this.getLayout() : null }
+      if (this.expanded.size) stored.expanded = [...this.expanded]
       localStorage.setItem(this.storageKey, JSON.stringify(stored))
     } catch {
       // Storage full or blocked: the layout still applies for this visit.
@@ -1150,7 +1189,8 @@ export class Flow extends LitElement {
       this.connectDrag = { source: id, side, port, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
     } else if (id) {
       // A locked flow still tracks the press on a node, so it can tell a click from a pan.
-      this.drag = { id, startX: event.clientX, startY: event.clientY, origin: { ...this.positions.get(id)! }, moved: false, pointerId: event.pointerId }
+      const more = !!this.fromPart(event, 'row-more')
+      this.drag = { id, startX: event.clientX, startY: event.clientY, origin: { ...this.positions.get(id)! }, moved: false, pointerId: event.pointerId, more }
     } else {
       const edge = this.editable ? this.edgeKeyFromEvent(event) : null
       this.pan = { startX: event.clientX, startY: event.clientY, tx: this.tx, ty: this.ty, moved: false, pointerId: event.pointerId, edge }
@@ -1208,10 +1248,11 @@ export class Flow extends LitElement {
       } else if (released && connection?.point) this.finishConnection(connection)
     }
     if (this.drag && event.pointerId === this.drag.pointerId) {
-      const { id, moved } = this.drag
+      const { id, moved, more } = this.drag
       this.drag = null
       this.draggingId = null
       if (moved) this.commitCustomLayout()
+      else if (released && more) this.userToggleRows(id)
       else if (released) {
         this.select(id, true)
         if (this.editable && this.isDoubleTap(`node:${id}`, event)) void this.editLabel(id)
@@ -1282,6 +1323,50 @@ export class Flow extends LitElement {
   private rowOf(id: string, port: string): FlowNodeRow | undefined {
     const rows = this.byId.get(id)?.rows
     return Array.isArray(rows) ? rows.find((row) => row?.id === port) : undefined
+  }
+
+  /** The row limit of node `id`: its own `rowLimit`, else the flow's; 0 for none. */
+  private limitOf(node: FlowNode) {
+    const limit = Number(node.rowLimit ?? this.rowLimit)
+    return Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0
+  }
+
+  /**
+   * The rows of `node` that show and those folded into its "+ N more" row: past its limit, only the rows an edge meets
+   * show, unless the user opened the node.
+   */
+  private visibleRows(node: FlowNode): { shown: FlowNodeRow[]; hidden: FlowNodeRow[] } {
+    const rows = rowsOf(node)
+    const limit = this.limitOf(node)
+    if (!limit || rows.length <= limit || this.expanded.has(node.id)) return { shown: rows, hidden: [] }
+    const linked = new Set<string>()
+    for (const edge of this.edges) {
+      const [sourcePort, targetPort] = [portId(edge.sourcePort), portId(edge.targetPort)]
+      if (edge.source === node.id && sourcePort) linked.add(sourcePort)
+      if (edge.target === node.id && targetPort) linked.add(targetPort)
+    }
+    const shown: FlowNodeRow[] = []
+    const hidden: FlowNodeRow[] = []
+    rows.forEach((row, index) => (index < limit || linked.has(row.id) ? shown : hidden).push(row))
+    return { shown, hidden }
+  }
+
+  /** Whether node `id` has rows past its limit to show or fold, open or not. */
+  private foldsRows(id: string) {
+    const node = this.byId.get(id)
+    if (!node) return false
+    const limit = this.limitOf(node)
+    return !!limit && rowsOf(node).length > limit && (this.expanded.has(id) || this.visibleRows(node).hidden.length > 0)
+  }
+
+  /** The user toggled the rows of node `id`: as `toggleRows`, and reported. */
+  private userToggleRows(id: string) {
+    if (!this.foldsRows(id)) return
+    this.toggleRows(id)
+    const expanded = this.expanded.has(id)
+    this.hideCard(true)
+    this.announce(this.msg.t(expanded ? 'rowsShown' : 'rowsFolded', this.labelOf(id)))
+    this.dispatchEvent(new CustomEvent<FlowRowsToggleDetail>('rows-toggle', { detail: { id, expanded } }))
   }
 
   /** "orders.customer_id" for an end on a row, else the node's label. */
@@ -1717,6 +1802,11 @@ export class Flow extends LitElement {
       this.fitView()
       return
     }
+    if (id && event.key === 'Enter' && event.shiftKey && this.foldsRows(id)) {
+      event.preventDefault()
+      this.userToggleRows(id)
+      return
+    }
     if (this.editable && this.handleEditKey(event, id)) return
     if (!id) return
     if (event.key === 'Enter' || event.key === ' ') {
@@ -1821,6 +1911,7 @@ export class Flow extends LitElement {
       if (target === this || (target instanceof HTMLElement && target.classList.contains('node'))) break
       if (!(target instanceof HTMLElement)) continue
       if (target.dataset.flowPort) return target.dataset.flowPort
+      if (target.classList.contains('row-more')) return MORE_ROWS
       if (target.classList.contains('connector') && target.dataset.port) return target.dataset.port
     }
     return null
@@ -1831,6 +1922,11 @@ export class Flow extends LitElement {
     if (this.drag || this.pan?.moved || this.connection) return
     const id = (event.currentTarget as HTMLElement).dataset.nodeId!
     const port = this.portFromEvent(event)
+    if (port === MORE_ROWS) {
+      if (this.highlightPort) this.highlightPort = null
+      if (event.pointerType !== 'touch') this.scheduleCard(id, MORE_ROWS)
+      return
+    }
     const current = this.highlightPort
     if (port === null) {
       if (current) this.highlightPort = null
@@ -1923,7 +2019,13 @@ export class Flow extends LitElement {
     if (!card) return
     const node = this.cardId ? this.renderRoot.querySelector<HTMLElement>(`.node[data-node-id="${CSS.escape(this.cardId)}"]`) : null
     // A row's card sits next to the row.
-    const anchor = node && this.cardId && this.cardPort !== null ? (this.portElements(node, this.cardId, this.cardPort)[0] ?? node) : node
+    const row =
+      node && this.cardId && this.cardPort !== null
+        ? this.cardPort === MORE_ROWS
+          ? node.querySelector<HTMLElement>('.row-more')
+          : this.portElements(node, this.cardId, this.cardPort)[0]
+        : null
+    const anchor = row ?? node
     this.stopCardPositioning()
     if (!anchor) {
       if (card.matches(':popover-open')) card.hidePopover()
@@ -1957,7 +2059,17 @@ export class Flow extends LitElement {
     const edge = data?.edge ?? null
     // The view controls belong to the canvas: a node has no built-in rows unless the flow is editable, so it opens a
     // menu only when `renderContextMenu` gives it one.
-    const defaultItems = node || edge ? (this.editable ? this.editMenuItems(node) : nothing) : this.defaultMenuItems()
+    // A node with folded rows offers to show them, in a read-only flow too.
+    const rowItem =
+      node && this.foldsRows(node.id)
+        ? html`<c2-menu-item value="flow:toggle-rows" aria-keyshortcuts="Shift+Enter"
+            >${this.menuIcon(this.expanded.has(node.id) ? MENU_ICONS.hideRows : MENU_ICONS.showRows)}${this.msg.t(
+              this.expanded.has(node.id) ? 'showFewerRows' : 'showAllRows',
+            )}<c2-kbd slot="shortcut">⇧↵</c2-kbd></c2-menu-item
+          >`
+        : nothing
+    const nodeItems = this.editable ? html`${rowItem}${rowItem === nothing ? nothing : html`<hr />`}${this.editMenuItems(node)}` : rowItem
+    const defaultItems = node ? nodeItems : edge ? (this.editable ? this.editMenuItems(null) : nothing) : this.defaultMenuItems()
     const custom = this.renderContextMenu?.({ node, edge, defaultItems, x: context.x, y: context.y })
     const rows = custom === undefined ? (defaultItems === nothing ? null : defaultItems) : custom
     if (rows !== null && rows !== undefined && rows !== nothing && rows !== false) {
@@ -2060,6 +2172,9 @@ export class Flow extends LitElement {
         if (!this.editable) return
         if (node) this.deleteNode(node.id)
         else if (edge) this.deleteEdge(edge)
+        return
+      case 'flow:toggle-rows':
+        if (node) this.userToggleRows(node.id)
         return
       case 'flow:details':
         if (node) this.select(node.id, true)
@@ -2254,7 +2369,7 @@ export class Flow extends LitElement {
 
   /** The rows of the default body; see {@link FlowNodeRow}. */
   private renderRows(node: FlowNode) {
-    const rows = rowsOf(node)
+    const { shown: rows, hidden } = this.visibleRows(node)
     if (!rows.length) return nothing
     // A row without an icon keeps the icon's room when another row has one, so the labels line up.
     const icons = rows.some((row) => row.icon)
@@ -2270,6 +2385,11 @@ export class Flow extends LitElement {
           ${row.meta ? html`<span class="row-meta">${row.meta}</span>` : nothing}
         </div>`
       })}
+      ${
+        this.foldsRows(node.id)
+          ? html`<div class="row row-more" aria-hidden="true">${hidden.length ? this.msg.t('moreRows', hidden.length) : this.msg.t('fewerRows')}</div>`
+          : nothing
+      }
     </div>`
   }
 
@@ -2300,12 +2420,12 @@ export class Flow extends LitElement {
   }
 
   /** The card of a row with `details`: the row's name and `meta`, then its details. */
-  private defaultRowCard(node: FlowNode, row: FlowNodeRow) {
+  private defaultRowCard(node: FlowNode, row: FlowNodeRow, qualified = true) {
     const rows = detailRows(row.details)
     return html`<div class="card-content">
       <div class="card-head">
         <span class="text">
-          <span class="card-title">${node.label}.${row.label}</span>
+          <span class="card-title">${qualified ? `${node.label}.${row.label}` : row.label}</span>
           ${row.meta ? html`<span class="description">${row.meta}</span>` : nothing}
         </span>
       </div>
@@ -2571,14 +2691,19 @@ export class Flow extends LitElement {
     const p = this.positions.get(node.id) ?? { x: 0, y: 0 }
     const before = this.graph.predecessors.get(node.id) ?? []
     const after = this.graph.successors.get(node.id) ?? []
-    const rows = rowsOf(node)
+    const { shown, hidden } = this.visibleRows(node)
     // The node is one button to assistive technology, so its rows are read with its relations.
-    const rowsText = rows.length
-      ? this.msg.t(
-          'rows',
-          rows.map((row) => (row.meta ? `${row.label} ${row.meta}` : row.label)),
-        )
-      : ''
+    const rowsText = [
+      shown.length
+        ? this.msg.t(
+            'rows',
+            shown.map((row) => (row.meta ? `${row.label} ${row.meta}` : row.label)),
+          )
+        : '',
+      hidden.length ? this.msg.t('rowsHidden', hidden.length) : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
     const relations = [this.relation('after', node.id, before), this.relation('before', node.id, after), rowsText].filter(Boolean).join(' ')
     const context = this.context(node)
     const body = this.renderNode ? this.renderNode(context) : this.defaultNode(node)
@@ -2685,6 +2810,16 @@ export class Flow extends LitElement {
   private renderCardContent() {
     const node = this.cardId ? this.byId.get(this.cardId) : undefined
     if (!node) return nothing
+    if (this.cardPort === MORE_ROWS && !this.renderCard) {
+      // The folded rows, by name and type.
+      const hidden = this.visibleRows(node).hidden
+      const more: FlowNodeRow = {
+        id: MORE_ROWS,
+        label: this.msg.t('moreRows', hidden.length),
+        details: hidden.map((row): [string, string] => [row.label, row.meta ?? '']),
+      }
+      if (hidden.length) return this.defaultRowCard(node, more, false)
+    }
     const row = this.cardPort !== null ? this.rowOf(node.id, this.cardPort) : undefined
     if (row) return this.renderCard ? this.renderCard({ ...this.context(node), row }) : this.defaultRowCard(node, row)
     const body = this.renderCard ? this.renderCard(this.context(node)) : this.defaultCard(node)

@@ -19,5 +19,8 @@ export const MENU_ICONS = {
   layout: svg`<rect x="1.5" y="3" width="4" height="3" rx="0.8"></rect><rect x="10.5" y="1.5" width="4" height="3" rx="0.8"></rect><rect x="10.5" y="11.5" width="4" height="3" rx="0.8"></rect><path d="M5.5 4.5h2.5v-1.5h2.5M8 4.5v8.5h2.5"></path>`,
   add: svg`<path d="M8 3v10M3 8h10"></path>`,
   rename: svg`<path d="M10.5 2.5l3 3-8 8H2.5v-3z"></path><path d="M9 4l3 3"></path>`,
+  // A list growing by its last rows, and shrinking back.
+  showRows: svg`<path d="M2.5 3.5h11M2.5 7h11M2.5 10.5h5M11 9.5v4M9 11.5h4"></path>`,
+  hideRows: svg`<path d="M2.5 3.5h11M2.5 7h11M2.5 10.5h5M9 11.5h4"></path>`,
   remove: svg`<path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 7v4M9.2 7v4"></path>`,
 }

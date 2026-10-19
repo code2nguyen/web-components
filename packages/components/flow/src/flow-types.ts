@@ -105,6 +105,11 @@ export interface FlowNode<T = unknown> {
    * drawn by `renderNode` or a `node:<id>` slot marks its own ports with a `data-flow-port="<row id>"` attribute.
    */
   rows?: FlowNodeRow[]
+  /**
+   * How many of `rows` show before the rest fold into a "+ N more" row, over the flow's `row-limit`; 0 shows them
+   * all. Rows an edge meets always show.
+   */
+  rowLimit?: number
   /** Anything else the application needs in its render functions. */
   data?: T
 }
@@ -234,6 +239,13 @@ export interface FlowNodeAddDetail {
    * opposite `sourceSide`), for the new edge's `targetSide`.
    */
   targetSide?: FlowSide
+}
+
+/** `rows-toggle`: the user showed or folded the rows past the limit of node `id`. */
+export interface FlowRowsToggleDetail {
+  id: string
+  /** Whether every row now shows. */
+  expanded: boolean
 }
 
 /** `node-edit`: the user renamed a node with the inline editor. Update the node's `label`. */

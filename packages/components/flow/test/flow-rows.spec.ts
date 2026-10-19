@@ -212,6 +212,70 @@ test('a custom body marks its own ports with data-flow-port', async ({ page, ren
     .toBe(true)
 })
 
+test.describe('row limit', () => {
+  // `orders` has four rows; with a limit of 2, `id` and `customer_id` show, `billing_id` too since an edge meets it.
+  const markup = (attributes = 'row-limit="2" open-delay="0" storage-key="flow-test:rows"') => flow({ attributes: `edge-type="step" ${attributes}` })
+  const more = (page: Page, id: string) => node(page, id).locator('.row-more')
+
+  test('rows past the limit fold into a "+ N more" row; rows an edge meets stay', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, markup())
+    await expect(node(page, 'orders').locator('.row:not(.row-more)')).toHaveCount(3)
+    await expect(row(page, 'orders', 'parent_id')).toHaveCount(0)
+    await expect(more(page, 'orders')).toHaveText('+ 1 more')
+    // customers has two rows: within its limit, nothing folds.
+    await expect(more(page, 'customers')).toHaveCount(0)
+    await expect(node(page, 'orders').locator('.visually-hidden')).toContainText('1 more rows, Shift+Enter shows them.')
+    // Its card lists the folded rows.
+    await more(page, 'orders').hover()
+    const card = page.locator('c2-flow .card')
+    await expect(card.locator('.card-title')).toHaveText('+ 1 more')
+    await expect(card.locator('dt')).toHaveText(['parent_id'])
+    await accessible(page)
+  })
+
+  test('a click on the row, Shift+Enter or the menu shows them all and folds them again', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, markup())
+    const toggles = await host(page).evaluate((element: Flow) => {
+      const seen: unknown[] = []
+      element.addEventListener('rows-toggle', ({ detail }) => seen.push(detail))
+      ;(element as unknown as { seen: unknown[] }).seen = seen
+      return seen.length
+    })
+    expect(toggles).toBe(0)
+    await more(page, 'orders').click()
+    await expect(row(page, 'orders', 'parent_id')).toHaveCount(1)
+    await expect(more(page, 'orders')).toHaveText('Show fewer')
+    // The node grew, and the edges still meet their rows.
+    const [line] = await ends(page)
+    const customer = await rowLine(page, 'orders', 'customer_id')
+    expect(near(line.end.y, customer.y)).toBe(true)
+    // Saved with the layout.
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('flow-test:rows') ?? 'null')?.expanded)).toEqual(['orders'])
+    await node(page, 'orders').focus()
+    await page.keyboard.press('Shift+Enter')
+    await expect(row(page, 'orders', 'parent_id')).toHaveCount(0)
+    await node(page, 'orders').click({ button: 'right' })
+    await page.locator('c2-menu-item[value="flow:toggle-rows"]').click()
+    await expect(row(page, 'orders', 'parent_id')).toHaveCount(1)
+    expect(await host(page).evaluate((element) => (element as unknown as { seen: unknown[] }).seen)).toEqual([
+      { id: 'orders', expanded: true },
+      { id: 'orders', expanded: false },
+      { id: 'orders', expanded: true },
+    ])
+  })
+
+  test('a node’s own rowLimit wins, toggleRows() opens it from script, and the open nodes are restored', async ({ page, renderScenario }) => {
+    const nodes: FlowNode[] = [{ ...NODES[0], rowLimit: 1 }, NODES[1]]
+    await renderScenario('<p>loading</p>')
+    await page.evaluate(() => localStorage.setItem('flow-test:rows', JSON.stringify({ v: 1, expanded: ['orders'] })))
+    await render(page, renderScenario, flow({ nodes, attributes: 'edge-type="step" row-limit="2" storage-key="flow-test:rows"' }))
+    await expect(row(page, 'orders', 'parent_id')).toHaveCount(1)
+    await expect(more(page, 'customers')).toHaveText('+ 1 more')
+    await host(page).evaluate((element: Flow) => element.toggleRows('customers', true))
+    await expect(row(page, 'customers', 'email')).toHaveCount(1)
+  })
+})
+
 test.describe('editable', () => {
   /** Records the editing events and answers `edge-add` as an application storing the ports would. */
   async function wire(page: Page) {

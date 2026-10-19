@@ -25,6 +25,7 @@ declare module 'vue' {
         'no-double-click-add'?: unknown
         'actions-placement'?: unknown
         'fit-min-zoom'?: unknown
+        'row-limit'?: unknown
         'no-card'?: unknown
         'no-context-menu'?: unknown
         'open-delay'?: unknown
@@ -32,6 +33,7 @@ declare module 'vue' {
         onLayoutChange?: (event: EventOf<Flow, 'layout-change'>) => void
         onSelectionChange?: (event: EventOf<Flow, 'selection-change'>) => void
         onNodeClick?: (event: EventOf<Flow, 'node-click'>) => void
+        onRowsToggle?: (event: EventOf<Flow, 'rows-toggle'>) => void
         onNodeAdd?: (event: EventOf<Flow, 'node-add'>) => void
         onEdgeAdd?: (event: EventOf<Flow, 'edge-add'>) => void
         onNodeDelete?: (event: EventOf<Flow, 'node-delete'>) => void

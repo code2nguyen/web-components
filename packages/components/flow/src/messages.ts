@@ -31,6 +31,14 @@ const en = {
   throughRow: (end: string, row: string) => `${end} through ${row}`,
   /** The rows of a node, each its label and its `meta`. */
   rows: (items: string[]) => `Rows: ${items.join(', ')}.`,
+  /** The row a node's folded rows collapse into, and its label once they show. */
+  moreRows: (count: number) => `+ ${count} more`,
+  fewerRows: 'Show fewer',
+  showAllRows: 'Show all rows',
+  showFewerRows: 'Show fewer rows',
+  rowsHidden: (count: number) => `${count} more rows, Shift+Enter shows them.`,
+  rowsShown: (node: string) => `All rows of ${node} shown.`,
+  rowsFolded: (node: string) => `Rows of ${node} folded.`,
   duration: 'Duration',
   dragToConnect: 'Drag to connect',
   flowActions: 'Flow actions',

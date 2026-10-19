@@ -121,6 +121,8 @@
     row__highlighted--background-color: rgba(2, 101, 220, 0.08),
     row-meta--color: #71717a,
     row-meta--font-size: 12px,
+    row-more--color: rgb(2, 101, 220),
+    row-more--font-size: 12px,
     shape--border-color: #bcbcc6,
     shape--border-width: 1px,
     shape__diamond--min-height: 88px,
@@ -723,6 +725,20 @@
 
 .row.is-highlighted,
 .row.is-connect-target {
+  background-color: css.cssVar(row__highlighted--background-color);
+}
+
+// The "+ N more" row, which folds the rows past the limit and shows them on a click.
+.row.row-more {
+  justify-content: center;
+  font-family: inherit;
+  font-size: css.cssVar(row-more--font-size);
+  font-weight: 500;
+  color: css.cssVar(row-more--color);
+  cursor: pointer;
+}
+
+.row.row-more:hover {
   background-color: css.cssVar(row__highlighted--background-color);
 }
 
