@@ -34,6 +34,10 @@ function renderTrainingNode({ node, status }: { node: FlowNode; status: string }
   </div>`
 }
 
+/** The edge an event names: its nodes, and its rows, since two nodes can be joined between several pairs of rows. */
+const same = (edge: FlowEdge, detail: Pick<FlowEdge, 'source' | 'target' | 'sourcePort' | 'targetPort'>) =>
+  edge.source === detail.source && edge.target === detail.target && edge.sourcePort === detail.sourcePort && edge.targetPort === detail.targetPort
+
 /** What an application does with an editable flow: apply each edit, then let the user name a new node. */
 function wireEditable(flow: Flow, say: (text: string) => void) {
   let next = 1
@@ -65,12 +69,12 @@ function wireEditable(flow: Flow, say: (text: string) => void) {
     say(`edge-add: ${detail.source} (${detail.sourceSide}) → ${detail.target} (${detail.targetSide})`)
   })
   flow.addEventListener('edge-delete', ({ detail }) => {
-    flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+    flow.edges = flow.edges.filter((edge) => !same(edge, detail))
     say(`edge-delete: ${detail.source} → ${detail.target}`)
   })
   flow.addEventListener('edge-edit', ({ detail }) => {
     flow.edges = flow.edges.map((edge) => {
-      if (edge.source !== detail.source || edge.target !== detail.target) return edge
+      if (!same(edge, detail)) return edge
       const next: FlowEdge = { ...edge, label: detail.label }
       if (!detail.label) delete next.label
       return next
@@ -104,8 +108,6 @@ function wireSchema(flow: Flow, say: (text: string) => void) {
     flow.nodes = withKeyIcons(nodes, edges)
   }
   update(flow.nodes, flow.edges)
-  const same = (edge: FlowEdge, detail: Pick<FlowEdge, 'source' | 'target' | 'sourcePort' | 'targetPort'>) =>
-    edge.source === detail.source && edge.target === detail.target && edge.sourcePort === detail.sourcePort && edge.targetPort === detail.targetPort
   flow.addEventListener('edge-add', ({ detail }) => {
     // The application picks the cardinality: one row of the source to many rows of the target.
     update(flow.nodes, [...flow.edges, { ...detail, sourceMarker: 'one', targetMarker: 'many' }])

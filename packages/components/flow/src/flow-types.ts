@@ -294,14 +294,16 @@ export interface FlowEdgeEventDetail {
 export interface FlowEdgeAddDetail extends FlowEdgeEventDetail {
   /**
    * The side of `source` whose handle the connection was dragged from; for a keyboard connection (`C`), the
-   * outgoing side of the `direction`.
+   * outgoing side of the `direction`. Left out when the connection starts on a row (`sourcePort`): that end faces the
+   * target by itself, wherever the nodes move.
    */
-  sourceSide: FlowSide
+  sourceSide?: FlowSide
   /**
    * The side of `target` it arrives by: the handle it was dropped on, else the side of the target nearest the
-   * pointer; for a keyboard connection, the incoming side of the `direction`.
+   * pointer; for a keyboard connection, the incoming side of the `direction`. Left out when the connection ends on a
+   * row (`targetPort`).
    */
-  targetSide: FlowSide
+  targetSide?: FlowSide
   /** Set when the connection was dragged from a row's handle: that row. */
   sourcePort?: string
   /** Set when the connection was dropped on a row of the target: that row. */

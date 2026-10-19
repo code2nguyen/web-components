@@ -151,7 +151,7 @@ An edge's label is edited in the same inline field, opened halfway along the edg
 The inline editor replaces the label of a node drawn by the flow. A node drawn by `renderNode` or a `node:<id>` slot gets the editor over its whole body and the same `node-edit` event, but must render `node.label` itself for the new name to show.
 
 ```ts tag=CodeBlock
-import type { FlowEdge } from '@c2n/components/flow'
+import type { FlowEdge, FlowEdgeEventDetail } from '@c2n/components/flow'
 
 const flow = document.querySelector('c2-flow')!
 let next = 1
@@ -171,14 +171,17 @@ flow.addEventListener('node-delete', ({ detail }) => {
   flow.edges = flow.edges.filter((edge) => edge.source !== detail.id && edge.target !== detail.id)
 })
 flow.addEventListener('edge-add', ({ detail }) => {
-  flow.edges = [...flow.edges, detail] // source, target, sourceSide, targetSide
+  flow.edges = [...flow.edges, detail] // source, target, and sourceSide/targetSide or sourcePort/targetPort
 })
+// The same two nodes can be joined between several pairs of rows, so the rows are part of an edge's identity.
+const same = (edge: FlowEdge, detail: FlowEdgeEventDetail) =>
+  edge.source === detail.source && edge.target === detail.target && edge.sourcePort === detail.sourcePort && edge.targetPort === detail.targetPort
 flow.addEventListener('edge-delete', ({ detail }) => {
-  flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+  flow.edges = flow.edges.filter((edge) => !same(edge, detail))
 })
 flow.addEventListener('edge-edit', ({ detail }) => {
   flow.edges = flow.edges.map((edge) => {
-    if (edge.source !== detail.source || edge.target !== detail.target) return edge
+    if (!same(edge, detail)) return edge
     const next: FlowEdge = { ...edge, label: detail.label }
     if (!detail.label) delete next.label
     return next

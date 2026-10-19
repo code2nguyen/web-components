@@ -36,7 +36,7 @@ const en = {
   fewerRows: 'Show fewer',
   showAllRows: 'Show all rows',
   showFewerRows: 'Show fewer rows',
-  rowsHidden: (count: number) => `${count} more rows, Shift+Enter shows them.`,
+  rowsHidden: (count: number) => `${count} more ${count === 1 ? 'row' : 'rows'}, Shift+Enter shows ${count === 1 ? 'it' : 'them'}.`,
   rowsShown: (node: string) => `All rows of ${node} shown.`,
   rowsFolded: (node: string) => `Rows of ${node} folded.`,
   dragToReorder: 'Drag to reorder',

@@ -106,6 +106,17 @@ test('rows are drawn under the label with their meta and icon room, and read wit
   await accessible(page)
 })
 
+test('a label on an edge between rows stays with that edge, and one folded row reads in the singular', async ({ page, renderScenario }) => {
+  const edges: FlowEdge[] = [
+    { ...EDGES[0], label: 'fk' },
+    { source: 'customers', target: 'orders' },
+  ]
+  await render(page, renderScenario, flow({ edges, attributes: 'row-limit="3"' }))
+  const description = node(page, 'orders').locator('.visually-hidden')
+  await expect(description).toContainText('After customers.id through customer_id, fk; customers.')
+  await expect(description).toContainText('1 more row, Shift+Enter shows it.')
+})
+
 test('an edge between rows leaves and arrives level with them, on the sides facing each other', async ({ page, renderScenario }) => {
   await render(page, renderScenario, flow())
   const lines = await ends(page)
@@ -224,7 +235,7 @@ test.describe('row limit', () => {
     await expect(more(page, 'orders')).toHaveText('+ 1 more')
     // customers has two rows: within its limit, nothing folds.
     await expect(more(page, 'customers')).toHaveCount(0)
-    await expect(node(page, 'orders').locator('.visually-hidden')).toContainText('1 more rows, Shift+Enter shows them.')
+    await expect(node(page, 'orders').locator('.visually-hidden')).toContainText('1 more row, Shift+Enter shows it.')
     // Its card lists the folded rows.
     await more(page, 'orders').hover()
     const card = page.locator('c2-flow .card')
@@ -373,6 +384,22 @@ test.describe('reordering rows', () => {
     ])
   })
 
+  test('clicking another node leaves keyboard reordering; indices count the node’s own rows', async ({ page, renderScenario }) => {
+    // A malformed entry in `rows` is skipped when drawn but still counts in the indices of `row-move`.
+    const nodes = [NODES[0], { ...NODES[1], rows: [null, ...NODES[1].rows!] }] as unknown as FlowNode[]
+    await render(page, renderScenario, flow({ nodes, attributes: 'editable edge-type="step"' }))
+    await wireMoves(page)
+    await node(page, 'orders').focus()
+    await page.keyboard.press('r')
+    await expect(row(page, 'orders', 'id')).toHaveClass(/is-picked/)
+    await page.keyboard.press('Alt+ArrowDown')
+    expect(await moves(page)).toEqual([{ id: 'orders', row: 'id', from: 1, to: 2 }])
+    await node(page, 'customers').locator('.label').click()
+    await expect(node(page, 'orders').locator('.row.is-picked')).toHaveCount(0)
+    await page.keyboard.press('Alt+ArrowDown')
+    expect(await moves(page)).toHaveLength(1)
+  })
+
   test('a row’s context menu moves it up and down; folded rows keep their place', async ({ page, renderScenario }) => {
     await render(page, renderScenario, flow({ attributes: 'editable edge-type="step" row-limit="2"' }))
     await wireMoves(page)
@@ -433,10 +460,8 @@ test.describe('editable', () => {
     await expect(row(page, 'orders', 'parent_id')).toHaveClass(/is-connect-target/)
     await page.mouse.up()
     expect(await recorded(page, 'edge-add')).toEqual([
-      {
-        type: 'edge-add',
-        detail: { source: 'customers', target: 'orders', sourceSide: 'right', targetSide: 'left', sourcePort: 'id', targetPort: 'parent_id' },
-      },
+      // An end on a row has no side: it faces the other end wherever the nodes move.
+      { type: 'edge-add', detail: { source: 'customers', target: 'orders', sourcePort: 'id', targetPort: 'parent_id' } },
     ])
     // The same two rows again are not a new edge; another row of the same node is.
     await row(page, 'customers', 'id').hover()
