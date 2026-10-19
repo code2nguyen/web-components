@@ -2,6 +2,8 @@ import { defineMessages } from '@c2n/core/localize.js'
 
 const en = {
   noData: 'No data',
+  needsAxes: 'A heatmap grid needs x-field and y-field.',
+  needsDate: 'A calendar heatmap needs date-field.',
   clearFilter: 'Clear filter',
   cells: (count: string) => `${count} cells`,
   days: (count: string) => `${count} days`,

@@ -160,10 +160,12 @@ export function parseInstant(value: unknown, timeZone: HeatmapTimeZone): Heatmap
   if (typeof value === 'number') return fromTime(value, timeZone)
   if (typeof value !== 'string') return null
   const text = value.trim()
-  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text)
-  if (day) {
-    const [year, month, date] = [Number(day[1]), Number(day[2]), Number(day[3])]
-    return { year, month, day: date, hour: 0, dayNumber: dayNumberOf(year, month, date) }
+  // A date, or a date and time with no offset, is a wall-clock reading: taken as written in either time zone. Date.parse
+  // would read the time as local, and a UTC chart would then move it by the browser's offset.
+  const wall = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/.exec(text)
+  if (wall) {
+    const [year, month, date] = [Number(wall[1]), Number(wall[2]), Number(wall[3])]
+    return { year, month, day: date, hour: wall[4] ? Number(wall[4]) : 0, dayNumber: dayNumberOf(year, month, date) }
   }
   const time = Date.parse(text)
   return Number.isFinite(time) ? fromTime(time, timeZone) : null
@@ -513,7 +515,10 @@ function buildGrid(rows: readonly unknown[], options: HeatmapModelOptions): Heat
       new Map(),
     ).map((item) => item.key)
     // A listed group with no rows has nothing to band.
+    // A listed row without data has no group of its own: it goes to an unlabelled band after the others.
+    yOrdered = yOrdered.map((item) => (item.group === undefined ? { ...item, group: '' } : item))
     const present = groupOrder.filter((key) => groups.has(key))
+    if (yOrdered.some((item) => item.group === '') && !present.includes('')) present.push('')
     yOrdered = present.flatMap((key) => yOrdered.filter((item) => (item.group ?? '') === key))
     let from = 0
     for (const key of present) {

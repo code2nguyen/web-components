@@ -440,3 +440,66 @@ test('--c2-chart__axis-label--display: none leaves the cells alone, filling the 
   const plot = await chart.locator('.plot').boundingBox()
   expect(Math.abs(left - (plot?.x ?? 0))).toBeLessThan(2)
 })
+
+test('a time without an offset is read as written, in either time zone', async ({ page }) => {
+  await open(page)
+  const result = await page.evaluate(() => {
+    const { parseInstant } = window.heatmapScenario.layout
+    return {
+      utc: parseInstant('2026-07-01T01:00', 'utc'),
+      local: parseInstant('2026-07-01 23:30:00', 'local'),
+      offset: parseInstant('2026-07-01T01:00:00Z', 'utc'),
+    }
+  })
+  expect(result.utc).toMatchObject({ year: 2026, month: 7, day: 1, hour: 1 })
+  expect(result.local).toMatchObject({ day: 1, hour: 23 })
+  expect(result.offset).toMatchObject({ day: 1, hour: 1 })
+})
+
+test('a listed row without data keeps its place when rows are grouped', async ({ page }) => {
+  await open(page)
+  const keys = await page.evaluate(() => {
+    const { buildHeatmapModel } = window.heatmapScenario.layout
+    const model = buildHeatmapModel(
+      [
+        { pair: 'EURUSD', region: 'G10', tenor: '1M', vol: 7 },
+        { pair: 'USDBRL', region: 'EM', tenor: '1M', vol: 14 },
+      ],
+      {
+        layout: 'grid',
+        xField: 'tenor',
+        yField: 'pair',
+        valueField: 'vol',
+        dateField: '',
+        groupField: 'region',
+        yOrder: ['EURUSD', 'USDBRL', 'USDNEW'],
+        aggregate: 'sum',
+        diagonal: 'show',
+        weekdays: 'all',
+        weekStart: 'monday',
+        timeZone: 'utc',
+      },
+    )
+    return { rows: model.ys.map((item) => item.key), bands: model.groups.map((group) => [group.key, group.from, group.to]) }
+  })
+  expect(keys.rows).toEqual(['EURUSD', 'USDBRL', 'USDNEW'])
+  expect(keys.bands).toEqual([
+    ['G10', 0, 0],
+    ['EM', 1, 1],
+    ['', 2, 2],
+  ])
+})
+
+test('changing the span clears the keyboard focus, which would name another day', async ({ page }) => {
+  await open(page, 'calendar')
+  const chart = page.locator('c2-heatmap-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.locator('.plot').focus()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await chart.evaluate((element) => element.setAttribute('range', '2026-01-05/2026-01-31'))
+  await page.keyboard.press('Enter')
+  // Nothing is focused any more, so Enter clicks nothing.
+  const clicks = await page.evaluate(() => window.heatmapScenario.events.filter((event) => event.type === 'cell-click').length)
+  expect(clicks).toBe(0)
+})

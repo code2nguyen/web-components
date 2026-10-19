@@ -15,6 +15,7 @@ import type { ChartInput, ChartPointEventDetail, ChartRow, ChartSeriesConfig, Ch
 import type { ChartTheme } from './chart-theme.js'
 import { createMapScale, parseColor, type MapScale } from './map-scale.js'
 import { heatmapMessages } from './messages.js'
+import { measureText } from './chart-measure.js'
 import {
   buildHeatmapModel,
   fillLegendBins,
@@ -153,6 +154,29 @@ const CHROME_SERIES = 0
 const CELL_SERIES = 1
 const TOTAL_SERIES = 2
 
+/** Properties that reshape the model, so an index into its cells or its key bands no longer means the same thing. */
+const MODEL_KEYS = [
+  'dataRevision',
+  'layout',
+  'xField',
+  'yField',
+  'valueField',
+  'dateField',
+  'groupField',
+  'xBin',
+  'yBin',
+  'xOrder',
+  'yOrder',
+  'groupOrder',
+  'aggregate',
+  'diagonal',
+  'range',
+  'weekdays',
+  'weekStart',
+  'timeZone',
+  'locale',
+] as const
+
 /** Slices of a continuous scale's key: fine enough to show the distribution, coarse enough to hover. */
 const CONTINUOUS_BINS = 20
 
@@ -173,6 +197,13 @@ interface DrawState {
   theme: ChartTheme
   /** The range cells are dimmed outside of: the previewed band, else the kept filter. */
   active: HeatmapScaleRange | null
+  /** The colour key, computed once per build for the hover marker. */
+  key?: ScaleKey
+  fontFamily: string
+  /** Everything besides the plot's size that the geometry depends on. */
+  geometryKey: string
+  /** Text widths already measured in this build, by font and text. */
+  widths: Map<string, number>
 }
 
 /** The colour key, computed from the scale and the cell values. */
@@ -223,16 +254,6 @@ function luminance(color: string): number | undefined {
     return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
   })
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
-let measureContext: CanvasRenderingContext2D | null | undefined
-
-/** Width of `text` in `font`, measured on a canvas; an estimate where there is none. */
-function measureText(text: string, font: string, size: number): number {
-  if (measureContext === undefined) measureContext = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d')
-  if (!measureContext) return text.length * size * 0.6
-  measureContext.font = font
-  return measureContext.measureText(text).width
 }
 
 /**
@@ -419,6 +440,9 @@ export class HeatmapChart extends EchartsChartBase {
   #modelCache?: { key: string; data: unknown; model: HeatmapModel }
   #modelVersion = 0
   #draw?: DrawState
+  #style?: HeatmapStyle
+  #table?: { key: string; template: TemplateResult }
+  #tableFormat?: (value: number) => string
   #geometry?: { key: string; geometry: HeatmapGeometry }
   #drag: number | null = null
   #keyFocus = -1
@@ -472,8 +496,11 @@ export class HeatmapChart extends EchartsChartBase {
     // Set before the base reads `changed`, so the data change counts as a presentation change too.
     if (changed.has('data') || changed.has('revision')) this.dataRevision += 1
     // A different scale or data makes the previewed bins meaningless.
-    if (changed.has('dataRevision') || changed.has('thresholds') || changed.has('domain') || changed.has('scale')) this.previewBins = null
-    if (changed.has('dataRevision') || changed.has('layout')) this.focusedCell = null
+    // A focused cell or a previewed band is an index into the model or the key: one that changed shape makes it stale.
+    const reshaped = MODEL_KEYS.some((key) => changed.has(key))
+    if (reshaped || changed.has('thresholds') || changed.has('domain') || changed.has('scale')) this.previewBins = null
+    if (reshaped) this.focusedCell = null
+    this.#style = undefined
     super.willUpdate(changed)
   }
 
@@ -482,8 +509,8 @@ export class HeatmapChart extends EchartsChartBase {
   }
 
   protected override validationError(): string {
-    if (this.layout === 'grid' && (!this.xField || !this.yField)) return 'A heatmap grid needs x-field and y-field.'
-    if (this.layout !== 'grid' && !this.dateField) return 'A calendar heatmap needs date-field.'
+    if (this.layout === 'grid' && (!this.xField || !this.yField)) return this.msg.t('needsAxes')
+    if (this.layout !== 'grid' && !this.dateField) return this.msg.t('needsDate')
     return ''
   }
 
@@ -591,7 +618,18 @@ export class HeatmapChart extends EchartsChartBase {
     const model = this.#model()
     const style = this.#readStyle()
     const scale = this.#scale(model, style)
-    this.#draw = { model, scale, style, theme, active: this.#activeRange(model, scale) }
+    const fontFamily = this.#fontFamily(theme)
+    this.#draw = {
+      model,
+      scale,
+      style,
+      theme,
+      active: this.#activeRange(model, scale),
+      key: this.#scaleKey(model, scale),
+      fontFamily,
+      geometryKey: `${this.#modelVersion}|${this.marginals}|${JSON.stringify(style)}|${theme.axisFontSize}|${fontFamily}`,
+      widths: new Map(),
+    }
     return this.#draw
   }
 
@@ -644,8 +682,16 @@ export class HeatmapChart extends EchartsChartBase {
     return color || fallback
   }
 
+  /** Read once per update: the legend, the option build and the data projection all ask for it. */
   #readStyle(): HeatmapStyle {
     if (typeof getComputedStyle !== 'function') return STYLE_FALLBACK
+    // Before the first render the colour probes do not exist yet: read without keeping it, so the draw reads again.
+    if (!this.renderRoot?.querySelector('.heat-probe')) return this.#computeStyle()
+    this.#style ??= this.#computeStyle()
+    return this.#style
+  }
+
+  #computeStyle(): HeatmapStyle {
     const style = getComputedStyle(this)
     const read = (name: string, fallback: number): number => {
       const value = parseFloat(style.getPropertyValue(name))
@@ -683,13 +729,12 @@ export class HeatmapChart extends EchartsChartBase {
   #geometryFor(width: number, height: number): HeatmapGeometry | undefined {
     const draw = this.#draw
     if (!draw) return undefined
-    const { model, style, theme } = draw
-    const fontFamily = this.#fontFamily(theme)
-    const key = `${width}x${height}|${this.#modelVersion}|${this.marginals}|${JSON.stringify(style)}|${theme.axisFontSize}|${fontFamily}`
+    const { model, style, theme, fontFamily } = draw
+    const key = `${width}x${height}|${draw.geometryKey}`
     if (this.#geometry?.key === key) return this.#geometry.geometry
     const font = `${theme.axisFontSize}px ${fontFamily}`
     const geometry = layoutHeatmap(model, width, height, {
-      measure: (text) => measureText(text, font, theme.axisFontSize),
+      measure: (text) => this.#measure(text, font, theme.axisFontSize),
       fontSize: theme.axisFontSize,
       gap: style.gap,
       maxCellSize: style.maxCellSize,
@@ -700,6 +745,17 @@ export class HeatmapChart extends EchartsChartBase {
     })
     this.#geometry = { key, geometry }
     return geometry
+  }
+
+  /** A text width, measured once per build. */
+  #measure(text: string, font: string, size: number): number {
+    const widths = this.#draw?.widths
+    const id = `${font}|${text}`
+    const known = widths?.get(id)
+    if (known !== undefined) return known
+    const width = measureText(text, font, size)
+    widths?.set(id, width)
+    return width
   }
 
   /** The last drawn geometry, for placing the tooltip of a cell reached with the keyboard. */
@@ -732,8 +788,7 @@ export class HeatmapChart extends EchartsChartBase {
     const draw = this.#draw
     const geometry = this.#geometryFor(api.getWidth(), api.getHeight())
     if (!draw || !geometry) return null
-    const { theme } = draw
-    const fontFamily = this.#fontFamily(theme)
+    const { theme, fontFamily } = draw
     const strong = (role: string) => role === 'group' || role === 'panel'
     // An empty group would leave the previous labels on screen: ECharts keeps old children it is handed none for.
     if (geometry.texts.length === 0 && geometry.rules.length === 0) return null
@@ -783,13 +838,13 @@ export class HeatmapChart extends EchartsChartBase {
     ]
     const light = (luminance(fill) ?? 1) > 0.36
     const ink = light ? style.labelColor : style.labelInverseColor
-    const fontFamily = this.#fontFamily(theme)
+    const fontFamily = draw.fontFamily
     if (cell.value !== null && this.cellLabels !== 'none') {
       const text = this.#formatValue(cell.value)
       const fits =
         this.cellLabels === 'always'
           ? rect.height >= style.labelFontSize
-          : rect.height >= style.labelFontSize + 4 && measureText(text, `500 ${style.labelFontSize}px ${fontFamily}`, style.labelFontSize) + 6 <= rect.width
+          : rect.height >= style.labelFontSize + 4 && this.#measure(text, `500 ${style.labelFontSize}px ${fontFamily}`, style.labelFontSize) + 6 <= rect.width
       // A month grid's day number takes the top-left corner, so the value goes below the middle there.
       const below = geometry.dayNumbers && cell.date !== undefined
       if (fits && (!below || rect.height >= style.labelFontSize * 2.6))
@@ -1151,9 +1206,11 @@ export class HeatmapChart extends EchartsChartBase {
     const values = model.values
     const sum = (list: number[]) => list.reduce((total, value) => total + value, 0)
     if (!range) {
+      // A loop, not a spread: a large grid has more values than a call takes arguments.
+      const extent = values.reduce<[number, number]>((pair, value) => [Math.min(pair[0], value), Math.max(pair[1], value)], [Infinity, -Infinity])
       return [
         { part: 'count' as const, text: this.#noun(values.length) },
-        { part: 'range' as const, text: this.msg.t('range', this.#formatValue(Math.min(...values)), this.#formatValue(Math.max(...values))) },
+        { part: 'range' as const, text: this.msg.t('range', this.#formatValue(extent[0]), this.#formatValue(extent[1])) },
         ...(key.clampLow || key.clampHigh ? [{ part: 'note' as const, text: this.msg.t('pastScale') }] : []),
         ...(this.#summable() ? [{ part: 'total' as const, text: this.msg.t('total', this.#formatValue(sum(values))) }] : []),
       ]
@@ -1172,8 +1229,7 @@ export class HeatmapChart extends EchartsChartBase {
     const marker = root?.querySelector<HTMLElement>('.scale-key__marker')
     const hover = root?.querySelector<HTMLElement>('.scale-key__hover')
     const idle = root?.querySelector<HTMLElement>('.scale-key__readout')
-    const draw = this.#draw
-    const key = draw ? this.#scaleKey(draw.model, draw.scale) : undefined
+    const key = this.#draw?.key
     if (!marker || !key || value === null) {
       if (marker) marker.hidden = true
       if (hover) hover.hidden = true
@@ -1263,6 +1319,12 @@ export class HeatmapChart extends EchartsChartBase {
     this.#drag = null
     if (this.legendInteraction === 'filter') this.#keep(key, bins)
     else this.previewBins = null
+  }
+
+  /** A touch that turns into a scroll ends the drag without a release: nothing is kept. */
+  #onTrackCancel(): void {
+    this.#drag = null
+    this.previewBins = null
   }
 
   #onTrackLeave(): void {
@@ -1409,6 +1471,7 @@ export class HeatmapChart extends EchartsChartBase {
             @pointermove=${trackHandlers ? (event: PointerEvent) => this.#onTrackMove(event, key) : nothing}
             @pointerup=${trackHandlers ? (event: PointerEvent) => this.#onTrackUp(event, key) : nothing}
             @pointerleave=${trackHandlers ? () => this.#onTrackLeave() : nothing}
+            @pointercancel=${trackHandlers ? () => this.#onTrackCancel() : nothing}
             @keydown=${trackHandlers ? (event: KeyboardEvent) => this.#onTrackKey(event, key) : nothing}
             @blur=${trackHandlers ? () => (this.previewBins = null) : nothing}
           >
@@ -1450,6 +1513,16 @@ export class HeatmapChart extends EchartsChartBase {
 
   /** The cells with a value as a table, for a screen reader: the canvas itself says nothing. */
   #renderDataTable(): TemplateResult | typeof nothing {
+    // Rebuilt only when the cells or their wording change, not on every focus move or band preview.
+    const id = `${this.#modelCache?.key}|${this.#modelVersion}|${this.#valueLabel()}|${this.unit}|${this.msg.locale}`
+    if (this.#table?.key === id && this.#tableFormat === this.format) return this.#table.template
+    const template = this.#buildDataTable()
+    this.#tableFormat = this.format
+    this.#table = template === nothing ? undefined : { key: id, template: template as TemplateResult }
+    return template
+  }
+
+  #buildDataTable(): TemplateResult | typeof nothing {
     const model = this.#model()
     const cells = model.cells.filter((cell) => cell.value !== null)
     if (cells.length === 0) return nothing

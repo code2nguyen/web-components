@@ -6,6 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import overlapStyles from './overlap-chart.scss?inline'
 import { ChartBase, type ChartEventMap, type ChartLegendItem } from './chart-base.js'
 import { EchartsChartBase } from './echarts-chart-base.js'
+import { measureText } from './chart-measure.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
@@ -1259,16 +1260,6 @@ function boxTouchesCircles(box: OverlapBox, circles: readonly OverlapCircle[], g
     const y = Math.min(Math.max(circle.y, box.y1), box.y2)
     return Math.hypot(circle.x - x, circle.y - y) < circle.radius + gap
   })
-}
-
-let measureContext: CanvasRenderingContext2D | null | undefined
-
-/** Width of `text` in `font`, measured on a canvas; an estimate where there is none (a test runner without one). */
-function measureText(text: string, font: string, size: number): number {
-  if (measureContext === undefined) measureContext = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d')
-  if (!measureContext) return text.length * size * 0.6
-  measureContext.font = font
-  return measureContext.measureText(text).width
 }
 
 /** ECharts rich text uses `{style|text}`: a brace or a pipe in a label would end the run early. */
