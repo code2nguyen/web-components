@@ -1,7 +1,7 @@
 import { LitElement, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import type { ViewField as ViewFieldConfig } from './view-options-types'
+import type { ViewFieldConfig } from './view-options-types'
 
 /** Private protocol event: a `c2-view-field` or `c2-view-toggle` changed, so its `c2-view-options` re-reads its children. */
 export const VIEW_CHILD_CHANGE = 'c2-view-child-change'

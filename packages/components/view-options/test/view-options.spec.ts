@@ -54,6 +54,8 @@ test('a second press on the trigger closes the panel', async ({ page, renderScen
 test('a slotted trigger replaces the Display button', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-view-options>${fields}<button slot="trigger">View</button></c2-view-options>`)
   await expect(trigger(page)).toHaveCount(0)
+  // The author's own markup is left as written until the user acts: a server rendered it without these attributes.
+  await expect(page.getByRole('button', { name: 'View' })).not.toHaveAttribute('aria-expanded')
   await page.getByRole('button', { name: 'View' }).click()
   await expect(panel(page)).toBeVisible()
   await expect(page.getByRole('button', { name: 'View' })).toHaveAttribute('aria-expanded', 'true')
@@ -109,7 +111,8 @@ test('ordering has several levels: add, flip the direction, change the field, re
   await openPanel(page)
   const direction = (level: number) => panel(page).locator(`.sort[data-level="${level}"] c2-icon-button.direction`).getByRole('button')
 
-  await expect(direction(0)).toHaveAttribute('aria-pressed', 'false')
+  // The button names the current direction, which its arrow shows too.
+  await expect(direction(0)).toHaveAccessibleName('Descending')
   await expect(page.getByRole('button', { name: 'Remove sort level 1' })).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Add sort' }).click()
@@ -129,7 +132,7 @@ test('ordering has several levels: add, flip the direction, change the field, re
   expect((await lastEvent(page)).value.orderBy[1]).toEqual({ field: 'due', direction: 'asc' })
 
   await direction(0).click()
-  await expect(direction(0)).toHaveAttribute('aria-pressed', 'true')
+  await expect(direction(0)).toHaveAccessibleName('Ascending')
   expect((await lastEvent(page)).value.orderBy[0]).toEqual({ field: 'priority', direction: 'asc' })
 
   await page.getByRole('button', { name: 'Remove sort level 1' }).click()
@@ -206,6 +209,34 @@ test('a server-rendered shadow root reads the children once it has rendered', as
   await openPanel(page)
   await expect(page.getByRole('button', { name: 'Due date' })).toBeVisible()
   await expect(page.getByRole('switch', { name: 'Sub-issues' })).toBeChecked()
+})
+
+test('a press dragged off the trigger does not stop the keyboard from opening the panel', async ({ page, renderScenario }) => {
+  await renderScenario(issues())
+  await openPanel(page)
+  const box = (await trigger(page).boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x - 200, box.y + 200)
+  await page.mouse.up()
+  // No click reached the trigger, so the press it recorded is stale. Close the panel another way.
+  await page.keyboard.press('Escape')
+  await expect(panel(page)).toBeHidden()
+  await trigger(page).focus()
+  await page.keyboard.press('Enter')
+  await expect(panel(page)).toBeVisible()
+})
+
+test('a child added after load is read, and the changed state follows a child edit', async ({ page, renderScenario }) => {
+  await renderScenario(issues(`default-value='{"show":{"sub":true}}'`))
+  await expect(host(page)).not.toHaveState('changed')
+  await host(page).evaluate((element) => element.insertAdjacentHTML('beforeend', '<c2-view-toggle key="archived" label="Archived" checked></c2-view-toggle>'))
+  await openPanel(page)
+  await expect(page.getByRole('switch', { name: 'Archived' })).toBeChecked()
+  // With no value of its own, Sub-issues follows its toggle's default, which now differs from the default value.
+  await page.locator('c2-view-toggle[key="sub"]').evaluate((element) => element.removeAttribute('checked'))
+  await expect(page.getByRole('switch', { name: 'Sub-issues' })).not.toBeChecked()
+  await expect(host(page)).toHaveState('changed')
 })
 
 test('with a default value, the host reports changes and Reset restores it', async ({ page, renderScenario }) => {

@@ -18,14 +18,7 @@ import '@c2n/switch'
 import { ViewField, VIEW_CHILD_CHANGE } from './view-field'
 import { ViewToggle } from './view-toggle'
 import { viewOptionsMessages } from './messages'
-import type {
-  ViewChangeEventDetail,
-  ViewDefaultRequestEventDetail,
-  ViewField as ViewFieldConfig,
-  ViewOptionsValue,
-  ViewSort,
-  ViewToggle as ViewToggleConfig,
-} from './view-options-types'
+import type { ViewChangeEventDetail, ViewDefaultRequestEventDetail, ViewFieldConfig, ViewOptionsValue, ViewSort, ViewToggleConfig } from './view-options-types'
 import styles from './view-options.scss?inline'
 
 /** The part of `c2-select`'s `selection-change` detail this component reads. */
@@ -159,7 +152,7 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @tag c2-view-options
  *
  * @slot - `c2-view-field` and `c2-view-toggle` elements. They render nothing themselves.
- * @slot trigger - The element that opens the panel. Without one, a "Display" button is drawn.
+ * @slot trigger - The element that opens the panel. Without one, a "Display" button is drawn. A `c2-*` trigger gets `aria-haspopup` and `aria-expanded` on its inner button; a plain element is the author's markup, so write `aria-haspopup="dialog"` on it yourself (`aria-expanded` is kept up to date once the panel has opened).
  * @slot extra - App-specific rows (density, timeline zoom) shown below the Show switches.
  *
  * @event {CustomEvent<ViewChangeEventDetail>} view-change - Fired after the user edits the value. `detail.value` is the whole new value (already in `value`), `detail.changed` the key that changed, or `null` after Reset. Does not bubble.
@@ -312,6 +305,18 @@ export class ViewOptions extends LitElement {
     return [...this.children].map((child) => (child instanceof ViewField || child instanceof ViewToggle ? child : (child.firstElementChild ?? child)))
   }
 
+  private readScheduled = false
+
+  /** Children report each of their updates; read them once per task however many reported. */
+  private scheduleReadChildren = () => {
+    if (this.readScheduled) return
+    this.readScheduled = true
+    queueMicrotask(() => {
+      this.readScheduled = false
+      this.readChildren()
+    })
+  }
+
   private readChildren = () => {
     // A server renders without the children's state; the client reads them once it has hydrated.
     if (isServer) return
@@ -341,11 +346,16 @@ export class ViewOptions extends LitElement {
   }
 
   /** `aria-haspopup` / `aria-expanded` go on the element with the button role: inside a `c2-*` trigger's shadow root. */
-  private async syncTriggerAria() {
+  /**
+   * A plain light-DOM trigger is the author's markup, which a server rendered: it is only written once the user has
+   * opened the panel, long after any framework hydrated it. `userOpened` says that has happened.
+   */
+  private async syncTriggerAria(userOpened = false) {
     const trigger = this.triggerElement as (HTMLElement & { updateComplete?: Promise<unknown> }) | null
     if (!trigger) return
     if (trigger.updateComplete) await trigger.updateComplete
     const inner = trigger.localName.includes('-') ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]') : null
+    if (!inner && !userOpened && !trigger.hasAttribute('aria-expanded')) return
     const target = inner ?? trigger
     target.setAttribute('aria-haspopup', 'dialog')
     target.setAttribute('aria-expanded', String(this.open))
@@ -356,10 +366,13 @@ export class ViewOptions extends LitElement {
   }
 
   private handleTriggerClick = (event: Event) => {
-    if (event.defaultPrevented) return
-    const wasOpen = this.openBeforePress ?? this.open
+    const pressed = this.openBeforePress
     this.openBeforePress = undefined
-    this.open = !wasOpen
+    if (event.defaultPrevented) return
+    // Only a pointer click follows the pointerdown that recorded `pressed`; Enter and Space click with `detail` 0, and
+    // a press dragged off the trigger never clicks at all.
+    const fromPointer = event instanceof MouseEvent && event.detail > 0
+    this.open = !(fromPointer && pressed !== undefined ? pressed : this.open)
   }
 
   // ---- overlay ----------------------------------------------------------------------------------------------------
@@ -370,7 +383,7 @@ export class ViewOptions extends LitElement {
     this.open = isOpen
     if (isOpen) this.panel?.focus()
     else if (this.focusWasInside()) this.triggerElement?.focus()
-    void this.syncTriggerAria()
+    void this.syncTriggerAria(true)
     redispatchEvent(this, event)
   }
 
@@ -482,13 +495,13 @@ export class ViewOptions extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.addEventListener(VIEW_CHILD_CHANGE, this.readChildren)
+    this.addEventListener(VIEW_CHILD_CHANGE, this.scheduleReadChildren)
     if (!isServer && this.renderRoot.hasChildNodes()) void this.updateComplete.then(() => this.syncTriggerAria())
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.removeEventListener(VIEW_CHILD_CHANGE, this.readChildren)
+    this.removeEventListener(VIEW_CHILD_CHANGE, this.scheduleReadChildren)
   }
 
   protected override willUpdate() {
@@ -497,16 +510,17 @@ export class ViewOptions extends LitElement {
   }
 
   protected override firstUpdated() {
+    // The first render ran before the default trigger existed; anchor the overlay now rather than render again.
+    if (this.overlay) this.overlay.anchor = this.triggerElement ?? undefined
     void this.syncTriggerAria()
     // Hydrated: the slot was assigned before the component upgraded, so it may never report a change.
     if (this.serverRendered) this.readChildren()
   }
 
-  protected override updated(changed: PropertyValues<this>) {
-    if (changed.has('value') || changed.has('defaultValue') || changed.has('fields') || changed.has('toggles') || changed.has('layouts')) {
-      if (this.changed) this.internals.states.add('changed')
-      else this.internals.states.delete('changed')
-    }
+  protected override updated(_changed: PropertyValues<this>) {
+    // Every input of the comparison can change it, the children's state included, and the check is cheap.
+    if (this.changed) this.internals.states.add('changed')
+    else this.internals.states.delete('changed')
   }
 
   // ---- rendering ----------------------------------------------------------------------------------------------------
@@ -587,6 +601,7 @@ export class ViewOptions extends LitElement {
     const used = view.orderBy.map((sort) => sort.field)
     const canAdd = view.orderBy.length < Math.max(1, this.maxSorts) && orderable.some((field) => !used.includes(field.id))
     const ascending = this.msg.t('ascending')
+    const descending = this.msg.t('descending')
     return html`<div class="row top">
       <span class="label" part="label">${this.msg.t('ordering')}</span>
       <div class="sorts" role="group" aria-label=${this.msg.t('ordering')}>
@@ -605,10 +620,8 @@ export class ViewOptions extends LitElement {
               </c2-select>
               <c2-icon-button
                 class="direction"
-                toggle
-                .selected=${sort.direction === 'asc'}
-                aria-label=${ascending}
-                tooltip=${ascending}
+                aria-label=${sort.direction === 'asc' ? ascending : descending}
+                tooltip=${sort.direction === 'asc' ? ascending : descending}
                 @click=${() => this.toggleDirection(level)}
                 >${sort.direction === 'asc' ? ascendingIcon : descendingIcon}</c2-icon-button
               >

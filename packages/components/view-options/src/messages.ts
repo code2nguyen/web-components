@@ -20,6 +20,7 @@ const en = {
   ordering: 'Ordering',
   sortField: (level: number) => `Sort level ${level}`,
   ascending: 'Ascending',
+  descending: 'Descending',
   removeSort: (level: number) => `Remove sort level ${level}`,
   addSort: 'Add sort',
   show: 'Show',

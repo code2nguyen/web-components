@@ -27,7 +27,7 @@ export interface ViewOptionsValue {
  * A field the collection can be grouped by, ordered by or show on its items. Shares `id`, `label` and `icon` with
  * `FilterField` from `@c2n/filter-builder`, so one array can describe both.
  */
-export interface ViewField {
+export interface ViewFieldConfig {
   id: string
   label: string
   /** Tag name of an icon element shown before the label, e.g. `c2-feather-user`. */
@@ -41,7 +41,7 @@ export interface ViewField {
 }
 
 /** A switch in the Show section. */
-export interface ViewToggle {
+export interface ViewToggleConfig {
   key: string
   label: string
   /** State used while `value.show` has no entry for this key. */

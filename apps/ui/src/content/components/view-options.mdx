@@ -48,7 +48,7 @@ import '@c2n/components/view-options'
 </div>
 ```
 
-Listen to `view-change` and apply the value to the collection. With a `c2-table` that takes three assignments:
+Listen to `view-change` and apply the value to the collection. With a `c2-table` built from `c2-table-column` children that takes three assignments:
 
 ```typescript tag=CodeBlock
 const options = document.querySelector('c2-view-options')!
@@ -56,9 +56,9 @@ const table = document.querySelector('c2-table')!
 
 options.addEventListener('view-change', (event) => {
   const view = event.detail.value
-  table.groupBy = view.groupBy ? [view.groupBy] : []
+  table.groupBy = [view.groupBy, view.subGroupBy].filter((field): field is string => field !== null)
   table.sortModel = view.orderBy
-  for (const column of table.columns) column.hidden = !view.properties.includes(column.field)
+  for (const column of table.querySelectorAll('c2-table-column')) column.hidden = !view.properties.includes(column.field)
   localStorage.setItem('issues-view', JSON.stringify(view))
 })
 options.addEventListener('default-request', (event) => {

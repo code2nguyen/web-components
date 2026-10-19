@@ -1,7 +1,7 @@
 import { LitElement, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import type { ViewToggle as ViewToggleConfig } from './view-options-types'
+import type { ViewToggleConfig } from './view-options-types'
 import { VIEW_CHILD_CHANGE } from './view-field'
 
 /**
