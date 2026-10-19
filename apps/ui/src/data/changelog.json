@@ -2,6 +2,69 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.13",
+      "date": "2026-10-19",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Reorder rows by drag and drop in editable flows",
+              "hash": "a205444"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Hide the heatmap key's text line by line, or draw the cells alone",
+              "hash": "1d51e63"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Fold rows past a row limit into a \"+ N more\" row",
+              "hash": "c94b3f2"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Stand the heatmap's colour key upright beside the plot",
+              "hash": "e76298b"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-heatmap-chart, a heatmap on any two keys or a calendar",
+              "hash": "f511824"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Rows with ports and crow's-foot edge ends for schema diagrams",
+              "hash": "b069bb6"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Address review findings on rows, ports and reordering",
+              "hash": "877110c"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Heatmap review fixes: wall-clock times, stale focus, grouped listed rows",
+              "hash": "3679a6a"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Route row edges round other nodes, and theme the row lines",
+              "hash": "1e1a75d"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.12",
       "date": "2026-10-19",
       "sections": [

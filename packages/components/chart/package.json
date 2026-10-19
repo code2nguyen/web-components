@@ -77,6 +77,10 @@
       "types": "./types/src/map-scale.d.ts",
       "default": "./dist/map-scale.js"
     },
+    "./heatmap-chart.js": {
+      "types": "./types/src/heatmap-chart.d.ts",
+      "default": "./dist/heatmap-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"
@@ -159,6 +163,8 @@
     "map chart",
     "choropleth",
     "geo map",
+    "heatmap",
+    "calendar heatmap",
     "sparkline",
     "uplot",
     "echarts",

@@ -29,6 +29,7 @@ declare module 'react' {
         'no-double-click-add'?: Attribute
         'actions-placement'?: Attribute
         'fit-min-zoom'?: Attribute
+        'row-limit'?: Attribute
         'no-card'?: Attribute
         'no-context-menu'?: Attribute
         'open-delay'?: Attribute

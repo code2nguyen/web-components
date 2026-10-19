@@ -22,6 +22,7 @@ import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
+import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { MapChart } from '@c2n/chart/map-chart.js'
 import type { MapLayer } from '@c2n/chart/map-layer.js'
@@ -132,6 +133,38 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: GaugeChart['series'] | string
+      }
+      'c2-heatmap-chart': Omit<C2Props<HeatmapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scalePoles' | 'series'> & {
+        'y-field'?: Attribute
+        'value-field'?: Attribute
+        'value-label'?: Attribute
+        'date-field'?: Attribute
+        'x-bin'?: Attribute
+        'y-bin'?: Attribute
+        'x-order'?: Attribute
+        'y-order'?: Attribute
+        'group-field'?: Attribute
+        'group-order'?: Attribute
+        'cell-labels'?: Attribute
+        'week-start'?: Attribute
+        'time-zone'?: Attribute
+        'scale-colors'?: Attribute
+        'scale-poles'?: Attribute
+        'legend-detail'?: Attribute
+        'legend-interaction'?: Attribute
+        'scale-filter'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        domain?: HeatmapChart['domain'] | string
+        thresholds?: HeatmapChart['thresholds'] | string
+        scaleColors?: HeatmapChart['scaleColors'] | string
+        scalePoles?: HeatmapChart['scalePoles'] | string
+        series?: HeatmapChart['series'] | string
       }
       'c2-line-chart': Omit<C2Props<LineChart>, 'series'> & {
         'y-min'?: Attribute
