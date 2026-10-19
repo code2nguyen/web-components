@@ -4,7 +4,7 @@ import { Decoration, DecorationSet } from 'prosemirror-view'
 import { InputRule } from 'prosemirror-inputrules'
 import { MAX_INDENT, blockOf, listNumbers, schema, type ListKind, type PageEditorBlock } from './schema'
 
-const { paragraph, heading, item, quote, code_block: codeBlock, divider, hard_break: hardBreak } = schema.nodes
+const { paragraph, heading, item, quote, code_block: codeBlock, divider, table, hard_break: hardBreak } = schema.nodes
 
 /** A top-level block and where it starts. */
 interface Located {
@@ -79,6 +79,7 @@ export function setBlock(block: PageEditorBlock): Command {
   return (state, dispatch) => {
     const blocks = selectedBlocks(state)
     if (block === 'divider') return insertDivider(state, dispatch)
+    if (block === 'table') return insertTable(state, dispatch)
     if (block === 'code') {
       const textblocks = blocks.filter(({ node }) => node.isTextblock)
       if (!textblocks.length) return false
@@ -154,6 +155,49 @@ export const insertDivider: Command = (state, dispatch) => {
     dispatch(tr.scrollIntoView())
   }
   return true
+}
+
+/**
+ * Puts a new table after the current block (in place of it when it is empty), with a line after it, and selects the
+ * table: the host then hands the keyboard to its first cell.
+ */
+export const insertTable: Command = (state, dispatch) => {
+  const { $from } = state.selection
+  const index = $from.index(0)
+  const block = state.doc.child(index)
+  const pos = $from.posAtIndex(index, 0)
+  if (dispatch) {
+    const tr = state.tr
+    const empty = block.isTextblock && block.content.size === 0
+    const next = state.doc.maybeChild(index + 1)
+    if (empty) tr.replaceWith(pos, pos + block.nodeSize, [table.create(), paragraph.create()])
+    else tr.insert(pos + block.nodeSize, next && next.isTextblock && next.content.size === 0 ? table.create() : [table.create(), paragraph.create()])
+    tr.setSelection(NodeSelection.create(tr.doc, empty ? pos : pos + block.nodeSize))
+    dispatch(tr.scrollIntoView())
+  }
+  return true
+}
+
+/**
+ * Puts the caret on the line before or after the table at `pos`, adding a line when the block there does not take a
+ * caret (another table, a divider, a code block, or the edge of the page).
+ */
+export function leaveTable(state: EditorState, pos: number, side: 'before' | 'after'): Transaction | null {
+  const node = state.doc.nodeAt(pos)
+  if (!node || node.type !== table) return null
+  const tr = state.tr
+  if (side === 'before') {
+    const $pos = state.doc.resolve(pos)
+    const previous = $pos.nodeBefore
+    if (previous?.isTextblock && previous.type !== codeBlock) return tr.setSelection(TextSelection.create(tr.doc, pos - 1))
+    tr.insert(pos, paragraph.create())
+    return tr.setSelection(TextSelection.create(tr.doc, pos + 1))
+  }
+  const end = pos + node.nodeSize
+  const next = state.doc.resolve(end).nodeAfter
+  if (next?.isTextblock && next.type !== codeBlock) return tr.setSelection(TextSelection.create(tr.doc, end + 1))
+  tr.insert(end, paragraph.create())
+  return tr.setSelection(TextSelection.create(tr.doc, end + 1))
 }
 
 /**
@@ -503,7 +547,7 @@ function numbering(doc: ProseNode): DecorationSet {
 
 /**
  * Keeps the page well formed after any change: an item is never more than one level deeper than the item above it,
- * and a code block or divider at the end always has a line after it for the caret.
+ * and a code block, divider or table at the end always has a line after it for the caret.
  */
 export const normalize = new Plugin({
   appendTransaction(transactions, _old, state) {
@@ -518,7 +562,7 @@ export const normalize = new Plugin({
       } else previousIndent = -1
     })
     const last = state.doc.lastChild
-    if (last && (last.type === codeBlock || last.type === divider)) tr.insert(state.doc.content.size, paragraph.create())
+    if (last && (last.type === codeBlock || last.type === divider || last.type === table)) tr.insert(state.doc.content.size, paragraph.create())
     return tr.docChanged ? tr.setMeta('addToHistory', false) : null
   },
 })

@@ -48,7 +48,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../overlay:build",
+        "../context-menu:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -60,7 +62,9 @@
     }
   },
   "dependencies": {
+    "@c2n/context-menu": "*",
     "@c2n/core": "*",
+    "@c2n/overlay": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

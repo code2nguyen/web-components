@@ -1,11 +1,11 @@
 import { Fragment, type Mark, type Node as ProseNode } from 'prosemirror-model'
-import { MAX_INDENT, isColor, listNumbers, safeHref, schema } from './schema'
+import { MAX_INDENT, isColor, listNumbers, safeHref, schema, squareRows, tableCellRef, type TableAlign, type TableAttrs, type TableCellStyle } from './schema'
 
 /**
  * The value is GitHub-flavoured Markdown, so it reads well as plain text and renders anywhere:
  *
  * - `#`–`###` headings, `-` bullets, `1.` numbered items, `- [ ]` / `- [x]` to-dos (nested by indentation), `>`
- *   quotes, fenced code blocks with a language, and `---` dividers;
+ *   quotes, fenced code blocks with a language, `---` dividers and `| a | b |` tables;
  * - `**bold**`, `*italic*`, `~~strike~~`, `` `code` `` and `[links](https://…)`;
  * - what Markdown has no syntax for is inline HTML, which Markdown passes through: `<u>underline</u>`,
  *   `<span data-color="red">text colour</span>`, `<mark data-color="yellow">background</mark>`, and `<br>` for a
@@ -139,6 +139,69 @@ function escapeBlockStart(body: string): string {
 
 const isEmptyParagraph = (node: ProseNode) => node.type === schema.nodes.paragraph && node.content.size === 0
 
+/** A cell's raw input as a pipe-table cell: `|` escaped, a line break as `<br>`. */
+const tableCell = (text: string) => text.replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>')
+
+const DELIMITER: Record<string, string> = { start: ':---', center: ':---:', end: '---:' }
+
+/** What a styled cell starts with. A plain cell that does is written with a `\` in front, so it reads back plain. */
+const STYLED = /^(\*\*|<(span|mark)\b)/
+
+/**
+ * A body cell, its style written as page text's is: `<mark data-color>` for the background, `<span data-color
+ * data-size>` for the colour and the size, `**` for bold.
+ */
+function styledCell(text: string, style: TableCellStyle | undefined): string {
+  let out = tableCell(text)
+  if (!style) return STYLED.test(out) ? `\\${out}` : out
+  if (style.bold) out = `**${out}**`
+  const attrs = `${style.color ? ` data-color="${style.color}"` : ''}${style.size ? ` data-size="${style.size}"` : ''}`
+  if (attrs) out = `<span${attrs}>${out}</span>`
+  if (style.background) out = `<mark data-color="${style.background}">${out}</mark>`
+  return out
+}
+
+/** A body cell read back: its input and its style. */
+function readStyledCell(cell: string): { text: string; style?: TableCellStyle } {
+  if (cell.startsWith('\\') && STYLED.test(cell.slice(1))) return { text: cell.slice(1) }
+  const style: TableCellStyle = {}
+  let text = cell
+  const mark = /^<mark data-color="([a-z]+)">([\s\S]*)<\/mark>$/.exec(text)
+  if (mark && isColor(mark[1])) {
+    style.background = mark[1]
+    text = mark[2]
+  }
+  const span = /^<span((?: data-(?:color|size)="[a-z]+")+)>([\s\S]*)<\/span>$/.exec(text)
+  if (span) {
+    const color = /data-color="([a-z]+)"/.exec(span[1])?.[1]
+    const size = /data-size="([a-z]+)"/.exec(span[1])?.[1]
+    if (isColor(color)) style.color = color
+    if (size === 'small' || size === 'large') style.size = size
+    text = span[2]
+  }
+  const bold = /^\*\*([\s\S]*)\*\*$/.exec(text)
+  if (bold) {
+    style.bold = true
+    text = bold[1]
+  }
+  return Object.keys(style).length ? { text, style } : { text }
+}
+
+/**
+ * A table as a GitHub pipe table, its first row the header. Cells keep their raw input, so a formula reads
+ * `=SUM(B2:B4)`. The formula bar and the selection totals, which Markdown has no syntax for, go in a comment above it.
+ */
+function tableToMarkdown({ rows, align, formulaBar, summary, styles = {} }: TableAttrs): string {
+  const square = squareRows(rows)
+  const line = (row: string[], index = -1) =>
+    `| ${row.map((text, column) => (index < 0 ? tableCell(text) : styledCell(text, styles[tableCellRef(index, column)]))).join(' | ')} |`
+  const options = [formulaBar && 'formula-bar', summary && 'summary'].filter(Boolean)
+  const lines = options.length ? [`<!-- table: ${options.join(' ')} -->`] : []
+  lines.push(line(square[0]), `| ${square[0].map((_, index) => DELIMITER[align[index] ?? ''] ?? '---').join(' | ')} |`)
+  square.slice(1).forEach((row, index) => lines.push(line(row, index)))
+  return lines.join('\n')
+}
+
 /** Serializes a page to Markdown. */
 export function toMarkdown(doc: ProseNode): string {
   const blocks: ProseNode[] = []
@@ -185,6 +248,9 @@ export function toMarkdown(doc: ProseNode): string {
       }
       case 'divider':
         out += '---'
+        break
+      case 'table':
+        out += tableToMarkdown(block.attrs as TableAttrs)
         break
       default: {
         const body = serializeInline(block)
@@ -405,6 +471,49 @@ const TODO = /^\[([ xX])\](?:[ \t]+(.*)|$)/
 
 const width = (spaces: string) => spaces.replace(/\t/g, '    ').length
 
+const TABLE_OPTIONS = /^ {0,3}<!--\s*table:([^>]*?)\s*-->\s*$/
+const DELIMITER_CELL = /^\s*(:?)-+(:?)\s*$/
+
+/** The cells of a pipe-table row: split on unescaped `|`, outer pipes optional, `\|` and `<br>` read back. */
+function tableCells(line: string): string[] {
+  let body = line.trim()
+  if (body.startsWith('|')) body = body.slice(1)
+  if (body.endsWith('|') && !body.endsWith('\\|')) body = body.slice(0, -1)
+  return body.split(/(?<!\\)\|/).map((cell) =>
+    cell
+      .trim()
+      .replace(/\\\|/g, '|')
+      .replace(/<br\s*\/?>/gi, '\n'),
+  )
+}
+
+const hasPipe = (line: string) => /(?<!\\)\|/.test(line)
+
+/** The alignment of each column when `line` is a delimiter row (`| --- | :-: |`) for `count` columns, else `null`. */
+function delimiterRow(line: string | undefined, count: number): TableAlign[] | null {
+  if (line === undefined || !hasPipe(line)) return null
+  const cells = tableCells(line)
+  if (cells.length !== count) return null
+  const align: TableAlign[] = []
+  for (const cell of cells) {
+    const match = DELIMITER_CELL.exec(cell)
+    if (!match) return null
+    align.push(match[1] && match[2] ? 'center' : match[2] ? 'end' : match[1] ? 'start' : null)
+  }
+  return align
+}
+
+/**
+ * Tab-separated text, as a sheet puts it on the clipboard: every line with the same number of cells, two or more.
+ * Lines that all start with a tab are indented text, not a sheet. Returns the rows, or `null`.
+ */
+export function tableFromText(text: string): string[][] | null {
+  const lines = text.replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n')
+  const rows = lines.map((line) => line.split('\t'))
+  if (rows[0].length < 2 || rows.some((row) => row.length !== rows[0].length) || lines.every((line) => line.startsWith('\t'))) return null
+  return rows.map((row) => row.map((cell) => cell.trim()))
+}
+
 /** Parses Markdown into a page. */
 export function fromMarkdown(markdown: string): ProseNode {
   const lines = (markdown ?? '').replace(/\r\n?/g, '\n').split('\n')
@@ -427,6 +536,44 @@ export function fromMarkdown(markdown: string): ProseNode {
     }
     const wasBlank = blank
     blank = false
+
+    // A pipe table: a header row, then a delimiter row with as many cells. A comment above it carries its options.
+    const options = TABLE_OPTIONS.exec(line)
+    const headerAt = options ? index + 1 : index
+    const header = lines[headerAt]
+    if (header !== undefined && hasPipe(header)) {
+      const head = tableCells(header)
+      const align = delimiterRow(lines[headerAt + 1], head.length)
+      if (align) {
+        const rows = [head]
+        for (index = headerAt + 2; index < lines.length && lines[index].trim() && hasPipe(lines[index]); index++)
+          rows.push(tableCells(lines[index]).slice(0, head.length))
+        index--
+        const flags = options?.[1].split(/\s+/) ?? []
+        // Body cells may carry a style; the header holds column names.
+        const styles: Record<string, TableCellStyle> = {}
+        const read = rows.map((row, index) =>
+          Array.from({ length: head.length }, (_, column) => {
+            const cell = row[column] ?? ''
+            if (!index) return cell
+            const { text, style } = readStyledCell(cell)
+            if (style) styles[tableCellRef(index - 1, column)] = style
+            return text
+          }),
+        )
+        blocks.push(
+          schema.nodes.table.create({
+            rows: squareRows(read),
+            styles,
+            align: align.some(Boolean) ? align : [],
+            formulaBar: flags.includes('formula-bar'),
+            summary: flags.includes('summary'),
+          }),
+        )
+        levels = []
+        continue
+      }
+    }
 
     const fence = FENCE.exec(line)
     if (fence) {

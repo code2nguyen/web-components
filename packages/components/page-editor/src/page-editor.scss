@@ -7,7 +7,9 @@
     content--max-height: none,
     content--color: #18181b,
     // Notion's: the system face of each platform, with its colour emoji.
-    content--font-family: string.unquote("ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol'"),
+    content--font-family: string.unquote(
+        "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol'"
+      ),
     content--font-size: 16px,
     content--line-height: 1.5,
     block--margin-top: 6px,
@@ -212,6 +214,50 @@ hr {
   }
 }
 
+// ---- tables --------------------------------------------------------------------------------------------------------
+
+.table-block {
+  position: relative;
+  white-space: normal;
+  cursor: default;
+  .content > & {
+    margin-block: 10px;
+  }
+  &.ProseMirror-selectednode {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+// The sheet marks its current cell and range even unfocused; in a page, only the table being edited shows them.
+// Cells take the page's named colours, so a table's text and highlights match the page's (dark pages too).
+.table-sheet {
+  @each $color in $colors {
+    --c2-spreadsheet--color-#{$color}: var(--_color-#{$color});
+    --c2-spreadsheet--background-#{$color}: var(--_background-#{$color});
+  }
+}
+
+.table-tools {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+  color: css.cssVar(hint--color);
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  .table-block:hover &,
+  .table-block:focus-within & {
+    opacity: 1;
+  }
+}
+@media (hover: none) {
+  .table-tools {
+    opacity: 1;
+  }
+}
+
 a {
   color: css.cssVar(link--color);
   text-decoration: underline;
@@ -398,7 +444,8 @@ mark {
   user-select: none;
 }
 .code-language,
-.code-tool {
+.code-tool,
+.table-tool {
   display: inline-flex;
   align-items: center;
   gap: 4px;

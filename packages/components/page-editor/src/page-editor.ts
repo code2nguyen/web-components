@@ -7,7 +7,7 @@ import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController, formatMessage } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { DOMSerializer, Fragment, Slice, type Mark, type MarkType, type Node as ProseNode, type ResolvedPos } from 'prosemirror-model'
-import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
+import { EditorState, NodeSelection, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view'
 import { keymap } from 'prosemirror-keymap'
 import { baseKeymap, chainCommands, toggleMark as toggleMarkCommand } from 'prosemirror-commands'
@@ -25,6 +25,7 @@ import {
   exitCode,
   indentCode,
   indentItems,
+  leaveTable,
   lineBreak,
   listNumbering,
   normalize,
@@ -33,7 +34,7 @@ import {
   toggleChecked,
 } from './commands'
 import { highlightPlugin } from './highlight'
-import { fromMarkdown, toMarkdown } from './markdown'
+import { fromMarkdown, tableFromText, toMarkdown } from './markdown'
 import {
   BLOCK_NAMES,
   COLORS,
@@ -49,8 +50,9 @@ import {
   type PageEditorColor,
   type PageEditorFormat,
   type PageEditorMark,
+  type TableAttrs,
 } from './schema'
-import { CodeBlockView, ItemView, type Localizable, type ViewText } from './views'
+import { CodeBlockView, ItemView, TableView, tableViewOf, type Localizable, type TableExit, type ViewText } from './views'
 import { pageEditorMessages } from './messages'
 import styles from './page-editor.scss?inline'
 
@@ -129,13 +131,17 @@ const ICONS = {
   none: icon(stroke('M5 15L15 5')),
   indent: icon(stroke('M9 5h8M9 10h8M9 15h8M3 7l3 3-3 3')),
   outdent: icon(stroke('M9 5h8M9 10h8M9 15h8M6 7l-3 3 3 3')),
+  table: icon(svg`<rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6" />${stroke('M3 8h14M3 12h14M8 4v12')}`),
 }
+
+/** Blocks the menus insert rather than turn the current block into. */
+const INSERTED = new Set<PageEditorBlock>(['divider', 'table'])
 
 const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${text}</span>`
 
 /**
  * A page editor for long text, in the spirit of Notion but with only what makes writing faster: headings, lists,
- * to-dos, quotes, code blocks with syntax colours, dividers, links, and eight named text and background colours.
+ * to-dos, quotes, code blocks with syntax colours, dividers, tables, links, and eight named text and background colours.
  *
  * Formatting is reachable three ways, all running the same commands: Markdown typed as you go (`# `, `- `, `[] `,
  * `> `, three backticks, `**bold**`; Backspace right after undoes it), a `/` menu (or the `+` button on an empty line),
@@ -143,6 +149,13 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  *
  * The value is GitHub-flavoured Markdown, with inline HTML for underline and colours, and the element is a form
  * control. Code blocks load their syntax colours on demand from shiki, only when a block names a language.
+ *
+ * A table is a `c2-spreadsheet`, loaded with the first table on the page: formulas, keyboard editing like Sheets, and
+ * a right-click menu to insert or delete rows and columns and to show the formula bar or the totals of the selection.
+ * Its header names the columns (double-click one, or right-click, to rename it), and its rows are numbered from the
+ * first under the header. It is written as a pipe table holding each cell's raw input (`=SUM(B1:B3)`). Pasting
+ * cells from a sheet makes a table. ArrowDown on the line above enters it, ArrowUp on its first row leaves it, and
+ * Escape selects it as a block, which Enter goes back into and Backspace removes.
  *
  * @tag c2-page-editor
  * @slot header - Content above the page, such as a title field or a breadcrumb.
@@ -245,7 +258,7 @@ export class PageEditor extends LitElement {
   /** The language the ProseMirror parts were last drawn in. */
   private editorLocale = ''
 
-  /** The page as Markdown: headings, lists, to-dos, quotes, fenced code, dividers, emphasis and links, with `<u>`, `<span data-color>` and `<mark data-color>` for underline and colours. */
+  /** The page as Markdown: headings, lists, to-dos, quotes, fenced code, dividers, pipe tables, emphasis and links, with `<u>`, `<span data-color>` and `<mark data-color>` for underline and colours. */
   @property() value = ''
   /** Name submitted with the form. */
   @property({ reflect: true }) name = ''
@@ -255,7 +268,7 @@ export class PageEditor extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
   /** Shown while the page is empty. */
   @property() placeholder = ''
-  /** Space-separated block types the writer may use (`paragraph heading1 heading2 heading3 bullet ordered todo quote code divider`). The menus and Markdown shortcuts offer only these, and pasted blocks outside the list become text. Empty allows all. */
+  /** Space-separated block types the writer may use (`paragraph heading1 heading2 heading3 bullet ordered todo quote code divider table`). The menus and Markdown shortcuts offer only these, and pasted blocks outside the list become text. Empty allows all. */
   @property() blocks = ''
   /** Prevents editing and removes the page from keyboard navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
@@ -294,6 +307,8 @@ export class PageEditor extends LitElement {
   private customValidityMessage = ''
   private formatKey = ''
   private dismissedSelection: { from: number; to: number } | null = null
+  /** The HTML being pasted was copied from a page editor, whose line breaks are meant (see splitPastedLines). */
+  private pastingOwnHtml = false
   private pendingSlash = -1
   /** Length of the last query that still matched something; a few characters past it the menu gives up. */
   private slashMatched = 0
@@ -324,7 +339,10 @@ export class PageEditor extends LitElement {
   get text(): string {
     const doc = this.view?.state.doc ?? fromMarkdown(this.value)
     const lines: string[] = []
-    doc.forEach((block) => lines.push(block.textBetween(0, block.content.size, '\n', '\n')))
+    doc.forEach((block) => {
+      if (block.type === schema.nodes.table) lines.push((block.attrs as TableAttrs).rows.map((row) => row.join('\t')).join('\n'))
+      else lines.push(block.textBetween(0, block.content.size, '\n', '\n'))
+    })
     return lines.join('\n').replace(/\n+$/, '')
   }
 
@@ -394,9 +412,12 @@ export class PageEditor extends LitElement {
     this.syncFormState()
   }
 
-  /** Turns the blocks at the selection into `block` (`divider` inserts one). Returns whether anything was applied. */
+  /** Turns the blocks at the selection into `block` (`divider` and `table` insert one). Returns whether anything was applied. */
   setBlock(block: PageEditorBlock): boolean {
-    return this.run(setBlockCommand(block), this.allowedBlocks.has(block))
+    const applied = this.run(setBlockCommand(block), this.allowedBlocks.has(block))
+    // A new table takes the keyboard on the name of its first column.
+    if (applied && block === 'table') this.enterSelectedTable('name')
+    return applied
   }
 
   /** Toggles bold, italic, underline, strike or inline code on the selection, or on what is typed next. */
@@ -469,9 +490,12 @@ export class PageEditor extends LitElement {
         nodeViews: {
           item: (node, view, getPos, decorations) => new ItemView(node, view, getPos, decorations, (pos) => this.toggleTodo(pos), this.viewText),
           code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos, { ...this.viewText, modKey: this.modKey }),
+          table: (node, view, getPos) => new TableView(node, view, getPos, { ...this.viewText, onLeave: (pos, exit) => this.leaveTable(pos, exit) }),
         },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleTextInput: (view, from, _to, text) => {
+          // Typing never replaces a selected table: Enter goes into it, Backspace removes it.
+          if (isSelectedTable(view.state)) return true
           if (text === '/' && !view.state.selection.$from.parent.type.spec.code) {
             const before = view.state.doc.textBetween(Math.max(view.state.selection.$from.start(), from - 1), from)
             if (!before || /\s/.test(before)) this.pendingSlash = from
@@ -508,7 +532,15 @@ export class PageEditor extends LitElement {
             return false
           },
         },
-        transformPasted: (slice) => this.filterSlice(slice),
+        transformPastedHTML: (html) => {
+          this.pastingOwnHtml = html.includes('data-pm-slice')
+          return html
+        },
+        transformPasted: (slice, view, plain) => {
+          const own = this.pastingOwnHtml || plain || Boolean(view.dragging)
+          this.pastingOwnHtml = false
+          return this.filterSlice(own ? slice : splitPastedLines(slice))
+        },
         handlePaste: (view, event, slice) => this.handlePaste(view, event, slice),
         clipboardTextParser: (text) => this.parsePastedText(text),
         clipboardTextSerializer: (slice) => {
@@ -550,6 +582,7 @@ export class PageEditor extends LitElement {
       this.appliedSurfaceAttributes = surfaceAttributes
       // Re-reads `editable`, the surface attributes and the placeholder decorations.
       view.setProps({})
+      for (const live of this.liveViews) live.refresh?.()
       if (!this.editable) this.hideFloating()
     }
     if (changed.has('slash') || changed.has('slashIndex')) this.placeSlash()
@@ -563,7 +596,7 @@ export class PageEditor extends LitElement {
   private createState(markdown: string) {
     let doc = fromMarkdown(markdown)
     const last = doc.lastChild
-    if (last && (last.type === schema.nodes.code_block || last.type === schema.nodes.divider)) {
+    if (last && (last.type === schema.nodes.code_block || last.type === schema.nodes.divider || last.type === schema.nodes.table)) {
       doc = doc.copy(doc.content.append(Fragment.from(schema.nodes.paragraph.create())))
     }
     return EditorState.create({ schema, doc, plugins: this.plugins() })
@@ -602,6 +635,20 @@ export class PageEditor extends LitElement {
       this.hideToolbar()
       return true
     }
+    const enterTable: Command = () => this.enterSelectedTable()
+    // ArrowDown at the end of the line above a table, or ArrowUp on the line below it, goes into its first or last row.
+    const intoTable =
+      (direction: 'up' | 'down'): Command =>
+      (state, _dispatch, view) => {
+        const { $head, empty } = state.selection
+        if (!view || !empty || $head.depth < 1 || !view.endOfTextblock(direction)) return false
+        const index = $head.index(0) + (direction === 'down' ? 1 : -1)
+        if (state.doc.maybeChild(index)?.type !== schema.nodes.table) return false
+        const table = tableViewOf(view.nodeDOM($head.posAtIndex(index, 0)))
+        if (!table) return false
+        void table.enter(direction === 'down' ? 'start' : 'end')
+        return true
+      }
     const editLink: Command = (state) => {
       if (state.selection.$from.parent.type.spec.code) return false
       return this.openLinkEditor()
@@ -654,7 +701,9 @@ export class PageEditor extends LitElement {
         'Shift-Mod-8': block('bullet'),
         'Shift-Mod-9': block('todo'),
         'Mod-Enter': chainCommands(exitCode, toggleTodoAtCaret),
-        Enter: chainCommands(enterInCode, enterInItem, enterInTextblock),
+        Enter: chainCommands(enterTable, enterInCode, enterInItem, enterInTextblock),
+        ArrowDown: intoTable('down'),
+        ArrowUp: intoTable('up'),
         'Shift-Enter': lineBreak,
         Backspace: chainCommands(undoInputRule, backspaceAtStart),
         Tab: chainCommands(indentCode(1), indentItems(1)),
@@ -692,9 +741,12 @@ export class PageEditor extends LitElement {
     }
     const { $head, empty } = state.selection
     // Right after an automatic format, its "⌫ to undo" note stands where the placeholder would.
-    const caretIndex = empty && !autoformatKey.getState(state) ? $head.index(0) : -1
+    const hint = autoformatKey.getState(state)
+    const caretIndex = empty && !hint ? $head.index(0) : -1
+    // An empty heading always names itself, except the one the note sits in: the two would be drawn over each other.
+    const hintIndex = hint && this.editable ? doc.resolve(hint.pos).index(0) : -1
     doc.forEach((node, pos, index) => {
-      if (!node.isTextblock || node.content.size > 0 || node.type === schema.nodes.code_block) return
+      if (!node.isTextblock || node.content.size > 0 || node.type === schema.nodes.code_block || index === hintIndex) return
       const here = focused && index === caretIndex && this.editable
       let text = ''
       if (node.type === schema.nodes.heading) text = this.msg.t('heading', node.attrs.level as number)
@@ -833,6 +885,9 @@ export class PageEditor extends LitElement {
 
   /** Pasted plain text is read as Markdown; its first and last lines join the line being written when they are text. */
   private parsePastedText(text: string): Slice {
+    // Cells copied from a sheet arrive as tab-separated text when the clipboard has no HTML.
+    const rows = this.allowedBlocks.has('table') ? tableFromText(text) : null
+    if (rows) return new Slice(Fragment.from(schema.nodes.table.create({ rows })), 0, 0)
     const content = fromMarkdown(text).content
     const open = (node: ProseNode | null) => (node && node.type === schema.nodes.paragraph ? 1 : 0)
     return new Slice(content, open(content.firstChild), open(content.lastChild))
@@ -865,6 +920,9 @@ export class PageEditor extends LitElement {
     const nodes: ProseNode[] = []
     slice.content.forEach((node) => {
       if (node.isInline || allowed.has(blockOf(node))) nodes.push(node)
+      else if (node.type === schema.nodes.table)
+        for (const row of (node.attrs as TableAttrs).rows)
+          nodes.push(schema.nodes.paragraph.create(null, row.some(Boolean) ? schema.text(row.join(' | ')) : null))
       else if (node.type === schema.nodes.code_block)
         for (const line of node.textContent.split('\n')) nodes.push(schema.nodes.paragraph.create(null, line ? schema.text(line) : null))
       else if (node.isTextblock) nodes.push(schema.nodes.paragraph.create(null, node.content, node.marks))
@@ -1360,8 +1418,33 @@ export class PageEditor extends LitElement {
     bar.style.bottom = `${Math.round(bottom)}px`
   }
 
-  private handleFocusIn() {
+  private handleFocusIn(event: FocusEvent) {
     this.focused = true
+    // The keyboard went into a table: the menus and the + button of the line it left go away.
+    if (event.composedPath().some((node) => node instanceof HTMLElement && node.classList.contains('table-block'))) {
+      this.plusTop = null
+      this.closeSlash(false)
+      this.hideToolbar()
+    }
+  }
+
+  /** Hands the keyboard to the selected table, on its first cell or, for a new table, on its first column's name. */
+  private enterSelectedTable(edge: 'start' | 'name' = 'start'): boolean {
+    const view = this.view
+    if (!view || !isSelectedTable(view.state)) return false
+    const table = tableViewOf(view.nodeDOM(view.state.selection.from))
+    if (!table) return false
+    void table.enter(edge)
+    return true
+  }
+
+  /** The keyboard leaves the table at `pos`: to the line above or below, or with the table selected as a block. */
+  private leaveTable(pos: number, exit: TableExit) {
+    const view = this.view
+    if (!view) return
+    const tr = exit === 'select' ? view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)) : leaveTable(view.state, pos, exit)
+    if (tr) view.dispatch(tr.scrollIntoView())
+    view.focus()
   }
 
   private handleFocusOut(event: FocusEvent) {
@@ -1484,7 +1567,7 @@ export class PageEditor extends LitElement {
       >
         ${content}
       </button>`
-    const turnable = BLOCK_ENTRIES.filter((entry) => entry.block !== 'divider' && this.allowedBlocks.has(entry.block))
+    const turnable = BLOCK_ENTRIES.filter((entry) => !INSERTED.has(entry.block) && this.allowedBlocks.has(entry.block))
     return html`
       ${
         turnable.length > 1
@@ -1592,7 +1675,7 @@ export class PageEditor extends LitElement {
 
   private renderTurnMenu() {
     const current = this.format.block
-    return BLOCK_ENTRIES.filter((entry) => entry.block !== 'divider' && this.allowedBlocks.has(entry.block)).map(
+    return BLOCK_ENTRIES.filter((entry) => !INSERTED.has(entry.block) && this.allowedBlocks.has(entry.block)).map(
       (entry) =>
         html`<button
           type="button"
@@ -1812,7 +1895,10 @@ const BLOCK_ENTRIES: ReadonlyArray<{ block: PageEditorBlock; keywords: string; s
   { block: 'quote', keywords: 'quote blockquote citation', shortcut: '>', icon: ICONS.quote },
   { block: 'code', keywords: 'code block code snippet pre programming', shortcut: '```', icon: ICONS.code },
   { block: 'divider', keywords: 'divider line rule hr separator', shortcut: '---', icon: ICONS.divider },
+  { block: 'table', keywords: 'table grid spreadsheet sheet rows columns formula', icon: ICONS.table },
 ]
+
+const isSelectedTable = (state: EditorState) => state.selection instanceof NodeSelection && state.selection.node.type === schema.nodes.table
 
 /** Places a popover next to `anchor`, flipping to the other side when there is no room. */
 function place(popover: HTMLElement, anchor: DOMRect, side: 'above' | 'below') {
@@ -1904,4 +1990,37 @@ declare global {
   interface HTMLElementTagNameMap {
     'c2-page-editor': PageEditor
   }
+}
+
+/** A list marker a pasted line starts with: `-`, `*`, `•` or `–` for a bullet, `1.` or `1)` for a numbered item. */
+const PASTED_MARKER = /^\s*(?:([-*•–])|\d+[.)])\s+/
+
+/** A pasted paragraph that starts with a list marker, as a list item without the marker; anything else as it is. */
+function pastedListItem(node: ProseNode): ProseNode {
+  const first = node.firstChild
+  const match = node.type === schema.nodes.paragraph && first?.isText ? PASTED_MARKER.exec(first.text!) : null
+  if (!match || first!.text!.length === match[0].length) return node
+  const rest = first!.cut(match[0].length)
+  return schema.nodes.item.create({ kind: match[1] ? 'bullet' : 'ordered' }, node.content.replaceChild(0, rest), node.marks)
+}
+
+/**
+ * A web page's text often comes as one paragraph whose lines are `<br>`s: pasted as is, it is one block, so a heading
+ * or a list made of one line takes them all. Each line of a pasted text block becomes a block of its own (the blank
+ * ones a `<br><br>` leaves are dropped), and a line starting with a list marker a list item. A code block keeps its
+ * lines.
+ */
+export function splitPastedLines(slice: Slice): Slice {
+  const blocks: ProseNode[] = []
+  slice.content.forEach((node) => {
+    if (!node.isTextblock || node.type.spec.code) {
+      blocks.push(node)
+      return
+    }
+    const lines: ProseNode[][] = [[]]
+    node.forEach((child) => (child.type === schema.nodes.hard_break ? lines.push([]) : lines[lines.length - 1].push(child)))
+    const kept = lines.length > 1 ? lines.filter((line) => line.some((child) => !child.isText || child.text!.trim())) : lines
+    for (const line of kept.length ? kept : [[]]) blocks.push(pastedListItem(node.type.create(node.attrs, line, node.marks)))
+  })
+  return new Slice(Fragment.fromArray(blocks), slice.openStart, slice.openEnd)
 }

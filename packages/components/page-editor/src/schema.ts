@@ -1,11 +1,11 @@
-import { Schema, type Mark, type Node as ProseNode } from 'prosemirror-model'
+import { Schema, type DOMOutputSpec, type Mark, type Node as ProseNode } from 'prosemirror-model'
 
 /** The named colours a writer can give text or its background. Each resolves to a CSS variable, so themes and dark mode recolour them. */
 export const COLORS = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'red'] as const
 export type PageEditorColor = (typeof COLORS)[number]
 
 /** Block types accepted by `blocks`, `setBlock()` and reported by `format-change`. */
-export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider'] as const
+export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider', 'table'] as const
 export type PageEditorBlock = (typeof BLOCK_NAMES)[number]
 
 /** Inline formats accepted by `toggleMark()`. */
@@ -28,6 +28,75 @@ export function safeHref(href: string | null | undefined): string | null {
   // A bare domain ("example.com/docs") is a web address.
   return /^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(value) ? `https://${value}` : value
 }
+
+/** How a table column aligns its cells, as a Markdown delimiter row spells it (`:--`, `:-:`, `--:`); `null` leaves it to the value. */
+export type TableAlign = 'start' | 'center' | 'end' | null
+
+/** A table's attributes: raw cell inputs row by row (formulas as `=SUM(B2:B4)`), the first row being the header. */
+export interface TableAttrs {
+  rows: string[][]
+  align: TableAlign[]
+  formulaBar: boolean
+  summary: boolean
+  /** Cell styles keyed by address, `A1` being the first row under the header: a named colour and background, a size, bold. */
+  styles: Record<string, TableCellStyle>
+}
+
+/** How a table cell looks, with the page's named colours. */
+export interface TableCellStyle {
+  color?: PageEditorColor
+  background?: PageEditorColor
+  size?: 'small' | 'large'
+  bold?: boolean
+}
+
+/** A cell's address under the header: row 0, column 0 is `A1`. */
+export function tableCellRef(row: number, column: number): string {
+  let name = ''
+  for (let index = column + 1; index > 0; index = Math.floor((index - 1) / 26)) name = String.fromCharCode(65 + ((index - 1) % 26)) + name
+  return `${name}${row + 1}`
+}
+
+/** A new table: three columns, a header row and two rows to fill. */
+export const emptyTableRows = (): string[][] => Array.from({ length: 3 }, () => ['', '', ''])
+
+/** Rows padded to one width, so every row has a cell per column. */
+export function squareRows(rows: string[][]): string[][] {
+  const width = Math.max(1, ...rows.map((row) => row.length))
+  return (rows.length ? rows : [['']]).map((row) => Array.from({ length: width }, (_, index) => row[index] ?? ''))
+}
+
+const ALIGN_STYLE: Record<string, TableAlign> = { left: 'start', start: 'start', center: 'center', right: 'end', end: 'end' }
+
+/**
+ * A pasted HTML table (Sheets, Excel, a web page) read as cell text. A single cell is not a table: it is pasted as
+ * text, so copying one value from a sheet does not drop a grid into the page.
+ */
+function tableFromDOM(table: HTMLElement): TableAttrs | false {
+  const rows: string[][] = []
+  const align: TableAlign[] = []
+  for (const tr of table.querySelectorAll('tr')) {
+    if (tr.closest('table') !== table) continue
+    const row: string[] = []
+    for (const cell of tr.querySelectorAll<HTMLElement>(':scope > td, :scope > th')) {
+      const text = (cell.textContent ?? '').replace(/\u00a0/g, ' ').trim()
+      if (rows.length === 0) align[row.length] = ALIGN_STYLE[cell.style.textAlign || cell.getAttribute('align') || ''] ?? null
+      row.push(text)
+      for (let span = Number(cell.getAttribute('colspan')) || 1; span > 1; span--) row.push('')
+    }
+    if (row.length) rows.push(row)
+  }
+  if (!rows.length || (rows.length === 1 && rows[0].length === 1)) return false
+  return {
+    rows: squareRows(rows),
+    align: align.some(Boolean) ? align : [],
+    formulaBar: table.dataset.formulaBar === 'true',
+    summary: table.dataset.summary === 'true',
+    styles: {},
+  }
+}
+
+const TEXT_ALIGN = { start: 'left', center: 'center', end: 'right' } as const
 
 const listDepth = (dom: HTMLElement) => {
   let depth = 0
@@ -141,6 +210,34 @@ export const schema = new Schema({
       parseDOM: [{ tag: 'hr' }],
       toDOM: () => ['hr'],
     },
+    // A grid the caret never enters: a c2-spreadsheet edits it, and the page holds its raw inputs.
+    table: {
+      group: 'block',
+      atom: true,
+      selectable: true,
+      attrs: {
+        rows: { default: emptyTableRows() },
+        align: { default: [] },
+        formulaBar: { default: false },
+        summary: { default: false },
+        styles: { default: {} },
+      },
+      parseDOM: [{ tag: 'table', getAttrs: (dom) => tableFromDOM(dom as HTMLElement) }],
+      toDOM: (node) => {
+        const { rows, align, formulaBar, summary } = node.attrs as TableAttrs
+        const cell = (tag: 'th' | 'td', text: string, index: number) => {
+          const side = align[index]
+          return side ? [tag, { style: `text-align: ${TEXT_ALIGN[side]}` }, text] : [tag, text]
+        }
+        const [head = [], ...body] = rows
+        return [
+          'table',
+          { 'data-formula-bar': String(formulaBar), 'data-summary': String(summary) },
+          ['thead', ['tr', ...head.map((text, index) => cell('th', text, index))]],
+          ['tbody', ...body.map((row) => ['tr', ...row.map((text, index) => cell('td', text, index))])],
+        ] as unknown as DOMOutputSpec
+      },
+    },
     text: { group: 'inline' },
     hard_break: {
       group: 'inline',
@@ -233,6 +330,8 @@ export function blockOf(node: ProseNode): PageEditorBlock {
       return 'code'
     case 'divider':
       return 'divider'
+    case 'table':
+      return 'table'
     default:
       return 'paragraph'
   }
