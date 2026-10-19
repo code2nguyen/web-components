@@ -3,6 +3,23 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.13](https://github.com/code2nguyen/web-components/releases/tag/v1.0.13) — 2026-10-19
+
+### Features
+
+- **flow:** Reorder rows by drag and drop in editable flows ([a205444](https://github.com/code2nguyen/web-components/commit/a205444))
+- **chart:** Hide the heatmap key's text line by line, or draw the cells alone ([1d51e63](https://github.com/code2nguyen/web-components/commit/1d51e63))
+- **flow:** Fold rows past a row limit into a "+ N more" row ([c94b3f2](https://github.com/code2nguyen/web-components/commit/c94b3f2))
+- **chart:** Stand the heatmap's colour key upright beside the plot ([e76298b](https://github.com/code2nguyen/web-components/commit/e76298b))
+- **chart:** Add c2-heatmap-chart, a heatmap on any two keys or a calendar ([f511824](https://github.com/code2nguyen/web-components/commit/f511824))
+- **flow:** Rows with ports and crow's-foot edge ends for schema diagrams ([b069bb6](https://github.com/code2nguyen/web-components/commit/b069bb6))
+
+### Fixes
+
+- **flow:** Address review findings on rows, ports and reordering ([877110c](https://github.com/code2nguyen/web-components/commit/877110c))
+- **chart:** Heatmap review fixes: wall-clock times, stale focus, grouped listed rows ([3679a6a](https://github.com/code2nguyen/web-components/commit/3679a6a))
+- **flow:** Route row edges round other nodes, and theme the row lines ([1e1a75d](https://github.com/code2nguyen/web-components/commit/1e1a75d))
+
 ## [1.0.12](https://github.com/code2nguyen/web-components/releases/tag/v1.0.12) — 2026-10-19
 
 ### Features
