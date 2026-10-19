@@ -164,6 +164,7 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @cssproperty {border} [--c2-view-options__panel--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-view-options__panel--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-view-options__panel--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {pixel} [--c2-view-options__panel--max-height=640px] - Tallest the panel grows before it scrolls; it also never exceeds the room beside the trigger.
  * @cssproperty {padding} [--c2-view-options__section--padding=12px] - Inner padding of each section.
  * @cssproperty {pixel} [--c2-view-options__section--gap=10px] - Space between the rows of a section.
  * @cssproperty {border} [--c2-view-options__section--border-top=1px solid #e4e4e7] - Line between sections.
@@ -177,6 +178,10 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @cssproperty {text-transform} [--c2-view-options__heading--text-transform=uppercase]
  * @cssproperty {color} [--c2-view-options__footer--background=transparent]
  * @cssproperty {color} [--c2-view-options__changed--color=rgb(2, 101, 220)] - Dot on the default trigger while the value differs from `default-value`.
+ * @cssproperty {color} [--c2-view-options__button--background-color=#ffffff] - Background of the outlined buttons: the default trigger, Add sort and Reset.
+ * @cssproperty {color} [--c2-view-options__button--color=#18181b] - Text of the outlined buttons.
+ * @cssproperty {border} [--c2-view-options__button--border=1px solid #bcbcc6] - Border of the outlined buttons.
+ * @cssproperty {color} [--c2-view-options__button__hover--background-color=#f4f4f5] - Background of an outlined button on hover and press.
  *
  * @internalcomponent c2-overlay
  * @internalcomponent c2-button-group

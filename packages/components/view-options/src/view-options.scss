@@ -8,6 +8,7 @@
     panel--border: 1px solid #e4e4e7,
     panel--border-radius: 8px,
     panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    panel--max-height: 640px,
     section--padding: 12px,
     section--gap: 10px,
     section--border-top: 1px solid #e4e4e7,
@@ -24,6 +25,10 @@
 
     footer--background: transparent,
     changed--color: rgb(2, 101, 220),
+    button--background-color: #ffffff,
+    button--color: #18181b,
+    button--border: 1px solid #bcbcc6,
+    button__hover--background-color: #f4f4f5,
   )
 );
 
@@ -61,7 +66,27 @@
   border-radius: css.cssVar(panel--border-radius);
   box-shadow: css.cssVar(panel--box-shadow);
   outline: none;
-  overflow: hidden;
+  // Never taller than the room the overlay found on its side, so the panel scrolls instead of leaving the viewport.
+  max-height: min(#{css.cssVar(panel--max-height)}, var(--c2-overlay--available-height, 100vh));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+// The trigger, Add sort and Reset are secondary actions: an outlined button, not the filled accent.
+.trigger,
+.add-sort,
+.reset {
+  --c2-button__container--background-color: #{css.cssVar(button--background-color)};
+  --c2-button__container--color: #{css.cssVar(button--color)};
+  --c2-button__container--border: #{css.cssVar(button--border)};
+  --c2-button__container__hover--background-color: #{css.cssVar(button__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(button__hover--background-color)};
+}
+
+.add-sort {
+  --c2-button__container--height: 32px;
+  --c2-button__container--padding-left: 10px;
+  --c2-button__container--padding-right: 12px;
 }
 
 .section {
@@ -82,12 +107,9 @@
   align-items: center;
   gap: 8px;
 
+  // Ordering stacks: each level needs the full width for its field, direction and remove button.
   &.top {
-    align-items: start;
-  }
-
-  &.top > .label {
-    padding-top: 8px;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
