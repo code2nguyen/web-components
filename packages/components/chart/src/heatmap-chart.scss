@@ -1,0 +1,489 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    cell--gap: 2px,
+    cell--border-radius: 2px,
+    cell--max-size: 24px,
+    cell__empty--background-color: #f4f4f5,
+    cell__hover--border-color: #18181b,
+    cell__focus--border-color: #0265dc,
+    cell__dimmed--opacity: 0.15,
+    cell-label--color: #18181b,
+    cell-label__inverse--color: #ffffff,
+    cell-label--font-size: 11px,
+    group--gap: 12px,
+    marginal--size: 40px,
+    marginal--color: #a1a1aa,
+    scale-start--color: #dce8fb,
+    scale-end--color: #0a3b8c,
+    scale-negative--color: #c2410c,
+    scale-mid--color: #e4e4e7,
+    axis-label--display: block,
+    scale-key-title--display: inline,
+    scale-key-readout--display: inline,
+    scale-key-total--display: inline,
+    scale-key-hint--display: inline,
+    scale-key-poles--display: flex,
+    scale-key--width: 280px,
+    scale-key--height: 200px,
+    scale-key-histogram--height: 28px,
+    scale-key-histogram--color: #a1a1aa,
+    scale-key-marker--color: #18181b,
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: 2px;
+}
+
+// ------------------------------------------------------------- colour key ---
+
+.scale-key {
+  display: grid;
+  gap: 4px;
+  width: min(100%, css.cssVar(scale-key--width));
+  font-variant-numeric: tabular-nums;
+}
+
+.scale-key__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+
+.scale-key__title {
+  display: css.cssVar(scale-key-title--display);
+  font-weight: 600;
+  color: css.cssVar(scale-key-marker--color);
+}
+
+.scale-key__status {
+  display: css.cssVar(scale-key-readout--display);
+  min-width: 0;
+}
+
+// Each readout part carries the separator before it, so hiding the total, which comes last, leaves none behind.
+.scale-key__readout-total {
+  display: css.cssVar(scale-key-total--display);
+}
+
+.scale-key__hint {
+  display: css.cssVar(scale-key-hint--display);
+}
+
+.scale-key__clear {
+  margin-inline-start: auto;
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.scale-key__clear:focus-visible,
+.scale-key__band:focus-visible,
+.scale-key__track--interactive:focus-visible {
+  outline: 2px solid css.cssVar(cell__focus--border-color);
+  outline-offset: 2px;
+}
+
+.scale-key__track {
+  position: relative;
+  display: grid;
+  // The distribution bars sit above the colour bar, and the marker spans both.
+  grid-template-rows: auto 10px;
+  align-items: end;
+  padding-block-start: 6px;
+  outline: none;
+}
+
+.scale-key__track--interactive {
+  cursor: pointer;
+  touch-action: none;
+}
+
+.scale-key__histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: css.cssVar(scale-key-histogram--height);
+  margin-block-end: 3px;
+}
+
+.scale-key--histogram .scale-key__steps ~ .scale-key__histogram,
+.scale-key__histogram {
+  grid-row: 1;
+}
+
+.scale-key__count {
+  // Faded through the fill alone, so the count written above a stepped band keeps the legend's full contrast.
+  --count-strength: 55%;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 1px 1px 0 0;
+  background: color-mix(in srgb, css.cssVar(scale-key-histogram--color) var(--count-strength), transparent);
+  transition: background-color 0.12s;
+}
+
+.scale-key__count.is-on {
+  --count-strength: 100%;
+}
+
+.scale-key__count.is-off {
+  --count-strength: 20%;
+}
+
+.scale-key__count-text {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.scale-key__steps,
+.scale-key__gradient {
+  grid-row: 2;
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 10px;
+}
+
+.scale-key__gradient {
+  border-radius: 2px;
+}
+
+.scale-key__band {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  background: var(--band-color);
+  font: inherit;
+}
+
+button.scale-key__band {
+  cursor: pointer;
+}
+
+.scale-key__band.is-on {
+  box-shadow: 0 0 0 1.5px css.cssVar(scale-key-marker--color);
+}
+
+// An arrow past an end of a continuous key: some values lie beyond the scale's domain.
+.scale-key__clamp {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-block: 5px solid transparent;
+}
+
+.scale-key__clamp--low {
+  inset-inline-end: calc(100% + 2px);
+  border-inline-end: 6px solid var(--clamp-color);
+}
+
+.scale-key__clamp--high {
+  inset-inline-start: calc(100% + 2px);
+  border-inline-start: 6px solid var(--clamp-color);
+}
+
+// The range previewed or kept on a continuous key.
+.scale-key__brush {
+  position: absolute;
+  top: 0;
+  bottom: -3px;
+  border: 1px solid css.cssVar(scale-key-marker--color);
+  border-radius: 2px;
+  background: color-mix(in srgb, css.cssVar(scale-key-marker--color) 6%, transparent);
+  pointer-events: none;
+}
+
+// The hovered cell's value. Written directly by the chart, never by a render.
+.scale-key__marker {
+  position: absolute;
+  top: 0;
+  bottom: -2px;
+  width: 0;
+  border-inline-start: 1.5px solid css.cssVar(scale-key-marker--color);
+  transform: translateX(-0.75px);
+  pointer-events: none;
+}
+
+.scale-key__marker::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  border-inline: 4px solid transparent;
+  border-top: 5px solid css.cssVar(scale-key-marker--color);
+}
+
+.scale-key__marker[hidden] {
+  display: none;
+}
+
+.scale-key__ticks {
+  position: relative;
+  height: 1.4em;
+}
+
+.scale-key__tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.scale-key__tick::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  height: 3px;
+  border-inline-start: 1px solid currentColor;
+}
+
+.scale-key__poles {
+  display: css.cssVar(scale-key-poles--display);
+  justify-content: space-between;
+  gap: 12px;
+  color: css.cssVar(scale-key-marker--color);
+}
+
+.scale-key__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+
+.scale-key__no-data {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scale-key__no-data i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35);
+}
+
+.scale-key__body {
+  display: grid;
+  gap: 4px;
+}
+
+// -------------------------------------------------- vertical key (side legend) ---
+
+// Beside the plot the key stands upright: low values at the bottom, as on a value axis.
+.scale-key--vertical {
+  width: auto;
+  max-width: 14em;
+}
+
+.scale-key--vertical .scale-key__body {
+  display: flex;
+  gap: 6px;
+  height: css.cssVar(scale-key--height);
+}
+
+.scale-key--vertical .scale-key__track {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding-block-start: 0;
+  padding-inline-start: 6px;
+}
+
+.scale-key--vertical .scale-key__histogram {
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  width: css.cssVar(scale-key-histogram--height);
+  height: auto;
+  margin-block-end: 0;
+  margin-inline-end: 3px;
+}
+
+.scale-key--vertical .scale-key__count {
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: 1px 0 0 1px;
+}
+
+.scale-key--vertical .scale-key__count-text {
+  inset-inline: auto calc(100% + 3px);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.scale-key--vertical .scale-key__steps,
+.scale-key--vertical .scale-key__gradient {
+  flex-direction: column-reverse;
+  width: 10px;
+  height: auto;
+}
+
+.scale-key--vertical .scale-key__band {
+  width: 10px;
+  height: auto;
+}
+
+.scale-key--vertical .scale-key__clamp {
+  inset-inline-start: 0;
+  width: 0;
+  height: 0;
+  border-block: 0;
+  border-inline: 5px solid transparent;
+}
+
+.scale-key--vertical .scale-key__clamp--low {
+  inset-block: calc(100% + 2px) auto;
+  border-top: 6px solid var(--clamp-color);
+}
+
+.scale-key--vertical .scale-key__clamp--high {
+  inset-block: auto calc(100% + 2px);
+  border-bottom: 6px solid var(--clamp-color);
+}
+
+.scale-key--vertical .scale-key__brush {
+  inset-inline: 0 -3px;
+  top: auto;
+  bottom: auto;
+}
+
+.scale-key--vertical .scale-key__marker {
+  inset-inline: 0 -2px;
+  top: auto;
+  width: auto;
+  height: 0;
+  border-inline-start: 0;
+  border-top: 1.5px solid css.cssVar(scale-key-marker--color);
+  transform: translateY(0.75px);
+}
+
+.scale-key--vertical .scale-key__marker::before {
+  top: -5px;
+  left: -6px;
+  border-inline: 0;
+  border-block: 4px solid transparent;
+  border-inline-start: 5px solid css.cssVar(scale-key-marker--color);
+}
+
+.scale-key--vertical .scale-key__ticks {
+  height: auto;
+  min-width: 2.5em;
+  margin-inline-start: -4px;
+}
+
+// The tick runs from the bar's edge, the value a little further out, so it does not read as a minus sign.
+.scale-key--vertical .scale-key__tick {
+  inset-inline-start: 0;
+  top: auto;
+  padding-inline-start: 9px;
+  transform: translateY(50%);
+}
+
+.scale-key--vertical .scale-key__tick::before {
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 0;
+  border-inline-start: 0;
+  border-top: 1px solid currentColor;
+}
+
+.scale-key__pole {
+  display: css.cssVar(scale-key-poles--display);
+  color: css.cssVar(scale-key-marker--color);
+}
+
+.scale-key--vertical .scale-key__foot {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+// Beside the plot there is no room for the usage hint; the bands and the scale carry their own labels.
+.scale-key--vertical .scale-key__hint {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scale-key__count {
+    transition: none;
+  }
+}
+
+// Read by a screen reader only: the canvas carries no text of its own.
+.data-table {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * Theme probes, read by the chart's style lookup: computed colours resolve `var()` and `color-mix()` chains into what
+ * the engine accepts. `display: none` keeps them free.
+ */
+.heat-probes,
+.heat-probe {
+  display: none;
+}
+
+.heat-probe--empty {
+  color: css.cssVar(cell__empty--background-color);
+}
+
+.heat-probe--hover {
+  color: css.cssVar(cell__hover--border-color);
+}
+
+.heat-probe--focus {
+  color: css.cssVar(cell__focus--border-color);
+}
+
+.heat-probe--label {
+  color: css.cssVar(cell-label--color);
+}
+
+.heat-probe--label-inverse {
+  color: css.cssVar(cell-label__inverse--color);
+}
+
+.heat-probe--marginal {
+  color: css.cssVar(marginal--color);
+}
+
+.heat-probe--scale-start {
+  color: css.cssVar(scale-start--color);
+}
+
+.heat-probe--scale-end {
+  color: css.cssVar(scale-end--color);
+}
+
+.heat-probe--scale-negative {
+  color: css.cssVar(scale-negative--color);
+}
+
+.heat-probe--scale-mid {
+  color: css.cssVar(scale-mid--color);
+}

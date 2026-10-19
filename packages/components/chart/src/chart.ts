@@ -19,6 +19,7 @@ import './candlestick-chart.js'
 import './overlap-chart.js'
 import './map-chart.js'
 import './map-layer.js'
+import './heatmap-chart.js'
 import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
@@ -64,6 +65,20 @@ export {
 } from './map-chart.js'
 export { MapLayer, MAP_LAYER_CHANGE_EVENT, type MapLayerConfig } from './map-layer.js'
 export { createMapScale, mixColors, type MapScale, type MapScaleOptions } from './map-scale.js'
+export {
+  HeatmapChart,
+  type HeatmapAggregate,
+  type HeatmapBin,
+  type HeatmapCellDetail,
+  type HeatmapChartEventMap,
+  type HeatmapLayout,
+  type HeatmapOrder,
+  type HeatmapScaleFilterChangeEventDetail,
+  type HeatmapScaleRange,
+  type HeatmapTooltipContext,
+  type HeatmapTotalDetail,
+} from './heatmap-chart.js'
+export { tenorDays } from './heatmap-layout.js'
 export type { MapFeature, MapFeatureProperties, MapProjection, MapSource } from './maps/map-source.js'
 export { ChartSeries, SERIES_CHANGE_EVENT } from './chart-series.js'
 export { ChartLegend } from './chart-legend.js'

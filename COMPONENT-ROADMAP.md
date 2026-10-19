@@ -98,18 +98,16 @@ Domain patterns with no design-system home come from the products that made them
 
 ### C. Charts
 
-These join `@c2n/chart`, which already ships 14 chart elements (line, area, bar, pie, scatter, bubble, radar, gauge, pyramid, candlestick, butterfly, overlap, map, sparkline). Each needs only a new series type on the existing engine.
+These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar, pie, scatter, bubble, radar, gauge, pyramid, candlestick, butterfly, overlap, map, heatmap, sparkline). Each needs only a new series type on the existing engine.
 
-| #   | Component             | What it adds                                                               | Real-world model                               | Priority | Decision |
-| --- | --------------------- | -------------------------------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
-| 49  | `c2-heatmap-chart`    | Two categorical axes and a colour scale (cohort retention, hour × weekday) | Amplitude and Mixpanel retention grids         | P2       | Proposed |
-| 50  | `c2-calendar-heatmap` | One cell per day across a year                                             | GitHub contribution graph                      | P2       | Proposed |
-| 51  | `c2-treemap-chart`    | Nested rectangles sized by value                                           | Finviz market map, disk-usage tools            | P2       | Proposed |
-| 52  | `c2-waterfall-chart`  | Running total bridged by positive and negative steps                       | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
-| 53  | `c2-sankey-chart`     | Flows between stages                                                       | Money-flow and user-journey reports            | P3       | Proposed |
-| 54  | `c2-boxplot-chart`    | Distribution summary (median, quartiles, outliers)                         | Datadog and Grafana latency views              | P3       | Proposed |
-| 55  | `c2-bullet-chart`     | One measure against a target and qualitative bands                         | KPI scorecards                                 | P3       | Proposed |
-| 56  | `c2-depth-chart`      | Cumulative bid and ask volume around the mid price                         | Binance, Coinbase Advanced                     | P3       | Proposed |
+| #   | Component            | What it adds                                         | Real-world model                               | Priority | Decision |
+| --- | -------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
+| 51  | `c2-treemap-chart`   | Nested rectangles sized by value                     | Finviz market map, disk-usage tools            | P2       | Proposed |
+| 52  | `c2-waterfall-chart` | Running total bridged by positive and negative steps | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
+| 53  | `c2-sankey-chart`    | Flows between stages                                 | Money-flow and user-journey reports            | P3       | Proposed |
+| 54  | `c2-boxplot-chart`   | Distribution summary (median, quartiles, outliers)   | Datadog and Grafana latency views              | P3       | Proposed |
+| 55  | `c2-bullet-chart`    | One measure against a target and qualitative bands   | KPI scorecards                                 | P3       | Proposed |
+| 56  | `c2-depth-chart`     | Cumulative bid and ask volume around the mid price   | Binance, Coinbase Advanced                     | P3       | Proposed |
 
 ### D. Navigation and layout
 
