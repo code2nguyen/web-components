@@ -2445,7 +2445,21 @@ export class Flow extends LitElement {
     const anchors: EdgeAnchors = {}
     if (sp) anchors.start = rowPoint(a, source as 'left' | 'right', sp.top, sp.height)
     if (tp) anchors.end = rowPoint(b, target as 'left' | 'right', tp.top, tp.height)
-    return { a, b, sides: { source, target }, anchors, ported: !!(sp || tp) }
+    const ported = !!(sp || tp)
+    // A foreign key between two tables a rank apart would otherwise run behind the table between them.
+    if (ported) anchors.obstacles = this.obstacles(positions, edge.source, edge.target)
+    return { a, b, sides: { source, target }, anchors, ported }
+  }
+
+  /** The rectangles of every node but `source` and `target`, for a route between rows to go round. */
+  private obstacles(positions: Map<string, FlowPoint>, source: string, target: string) {
+    const rects: Rect[] = []
+    for (const id of positions.keys()) {
+      if (id === source || id === target) continue
+      const rect = this.rectOf(id, positions)
+      if (rect) rects.push(rect)
+    }
+    return rects
   }
 
   /**
@@ -2483,6 +2497,7 @@ export class Flow extends LitElement {
     const anchors: EdgeAnchors = {}
     const sp = connection.sourcePort ? this.ports.get(connection.source)?.get(connection.sourcePort) : undefined
     if (sp && (connection.sourceSide === 'left' || connection.sourceSide === 'right')) anchors.start = rowPoint(a, connection.sourceSide, sp.top, sp.height)
+    if (anchors.start) anchors.obstacles = this.obstacles(this.positions, connection.source, target ?? connection.source)
     if (b && target !== null) {
       const side = connection.targetSide ?? defaults.target
       const tp = connection.targetPort ? this.ports.get(target)?.get(connection.targetPort) : undefined

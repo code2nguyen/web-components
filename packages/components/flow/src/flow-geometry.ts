@@ -41,6 +41,8 @@ export interface EdgeRoute {
 export interface EdgeAnchors {
   start?: FlowPoint
   end?: FlowPoint
+  /** Other nodes the route should not run behind, when it has a way round them. */
+  obstacles?: Rect[]
 }
 
 /** The point halfway along a polyline, measured by length. */
@@ -243,6 +245,8 @@ function stepPoints(a: Rect, sa: FlowSide, b: Rect, sb: FlowSide, anchors: EdgeA
       score += Math.hypot(q.x - p.x, q.y - p.y)
       if (crosses(p, q, a)) score += 1e6
       if (b !== a && crosses(p, q, b)) score += 1e6
+      // Behind another node is better than through either end, but worse than any way round.
+      for (const obstacle of anchors.obstacles ?? []) if (crosses(p, q, obstacle)) score += 1e5
     }
     score += (points.length - 2) * 12
     if (score < bestScore) {
@@ -300,7 +304,7 @@ export function sideEdgeRoute(source: Rect, sa: FlowSide, target: Rect, sb: Flow
   const c1 = { x: s.x + na.x * pa, y: s.y + na.y * pa }
   const c2 = { x: e.x + nb.x * pb, y: e.y + nb.y * pb }
   const samples = sampleCubic(s, c1, c2, e)
-  if (samples.some((p) => inside(p, source) || inside(p, target))) {
+  if (samples.some((p) => inside(p, source) || inside(p, target) || anchors.obstacles?.some((obstacle) => inside(p, obstacle)))) {
     // The curve would cut through a node (a target behind its source, two sides facing away from each other): go
     // round the outside like a back edge, on the step route with wide rounded corners.
     return polyline(stepPoints(source, sa, target, sb, anchors), 16)
