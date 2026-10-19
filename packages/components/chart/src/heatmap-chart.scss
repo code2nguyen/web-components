@@ -19,6 +19,7 @@
     scale-negative--color: #c2410c,
     scale-mid--color: #e4e4e7,
     scale-key--width: 280px,
+    scale-key--height: 200px,
     scale-key-histogram--height: 28px,
     scale-key-histogram--color: #a1a1aa,
     scale-key-marker--color: #18181b,
@@ -262,6 +263,146 @@ button.scale-key__band {
   height: 10px;
   border-radius: 2px;
   box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35);
+}
+
+.scale-key__body {
+  display: grid;
+  gap: 4px;
+}
+
+// -------------------------------------------------- vertical key (side legend) ---
+
+// Beside the plot the key stands upright: low values at the bottom, as on a value axis.
+.scale-key--vertical {
+  width: auto;
+  max-width: 14em;
+}
+
+.scale-key--vertical .scale-key__body {
+  display: flex;
+  gap: 6px;
+  height: css.cssVar(scale-key--height);
+}
+
+.scale-key--vertical .scale-key__track {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding-block-start: 0;
+  padding-inline-start: 6px;
+}
+
+.scale-key--vertical .scale-key__histogram {
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  width: css.cssVar(scale-key-histogram--height);
+  height: auto;
+  margin-block-end: 0;
+  margin-inline-end: 3px;
+}
+
+.scale-key--vertical .scale-key__count {
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: 1px 0 0 1px;
+}
+
+.scale-key--vertical .scale-key__count-text {
+  inset-inline: auto calc(100% + 3px);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.scale-key--vertical .scale-key__steps,
+.scale-key--vertical .scale-key__gradient {
+  flex-direction: column-reverse;
+  width: 10px;
+  height: auto;
+}
+
+.scale-key--vertical .scale-key__band {
+  width: 10px;
+  height: auto;
+}
+
+.scale-key--vertical .scale-key__clamp {
+  inset-inline-start: 0;
+  width: 0;
+  height: 0;
+  border-block: 0;
+  border-inline: 5px solid transparent;
+}
+
+.scale-key--vertical .scale-key__clamp--low {
+  inset-block: calc(100% + 2px) auto;
+  border-top: 6px solid var(--clamp-color);
+}
+
+.scale-key--vertical .scale-key__clamp--high {
+  inset-block: auto calc(100% + 2px);
+  border-bottom: 6px solid var(--clamp-color);
+}
+
+.scale-key--vertical .scale-key__brush {
+  inset-inline: 0 -3px;
+  top: auto;
+  bottom: auto;
+}
+
+.scale-key--vertical .scale-key__marker {
+  inset-inline: 0 -2px;
+  top: auto;
+  width: auto;
+  height: 0;
+  border-inline-start: 0;
+  border-top: 1.5px solid css.cssVar(scale-key-marker--color);
+  transform: translateY(0.75px);
+}
+
+.scale-key--vertical .scale-key__marker::before {
+  top: -5px;
+  left: -6px;
+  border-inline: 0;
+  border-block: 4px solid transparent;
+  border-inline-start: 5px solid css.cssVar(scale-key-marker--color);
+}
+
+.scale-key--vertical .scale-key__ticks {
+  height: auto;
+  min-width: 2.5em;
+  margin-inline-start: -4px;
+}
+
+// The tick runs from the bar's edge, the value a little further out, so it does not read as a minus sign.
+.scale-key--vertical .scale-key__tick {
+  inset-inline-start: 0;
+  top: auto;
+  padding-inline-start: 9px;
+  transform: translateY(50%);
+}
+
+.scale-key--vertical .scale-key__tick::before {
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 0;
+  border-inline-start: 0;
+  border-top: 1px solid currentColor;
+}
+
+.scale-key__pole {
+  color: css.cssVar(scale-key-marker--color);
+}
+
+.scale-key--vertical .scale-key__foot {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+// Beside the plot there is no room for the usage hint; the bands and the scale carry their own labels.
+.scale-key--vertical .scale-key__hint {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

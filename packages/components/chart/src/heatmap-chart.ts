@@ -257,6 +257,7 @@ function measureText(text: string, font: string, size: number): number {
  * The legend is the colour key. By default (`legend-detail="histogram"`) it counts the cells in each band, names
  * both ends (`scale-poles`), marks the hovered cell's value, and filters the cells: hover a band to preview it, click
  * to keep it, drag across a continuous scale for a range. `legend-detail="simple"` keeps the bar and its ticks only.
+ * `legend` places the key above, below, or beside the plot (`start`, `end`), where it stands upright.
  * `scale-filter` holds the kept range and can be set by the application.
  *
  * The plot is one tab stop: the arrow keys move from cell to cell, Enter fires `cell-click` and Escape leaves.
@@ -288,7 +289,8 @@ function measureText(text: string, font: string, size: number): number {
  * @cssproperty {color} [--c2-chart__scale-negative--color=#c2410c] - Negative end of a diverging scale.
  * @cssproperty {color} [--c2-chart__scale-mid--color=#e4e4e7] - Neutral midpoint of a diverging scale.
  * @cssproperty {length} [--c2-chart__scale-key--width=280px] - Width of the colour key.
- * @cssproperty {pixel} [--c2-chart__scale-key-histogram--height=28px] - Height of the distribution bars above the colour key.
+ * @cssproperty {length} [--c2-chart__scale-key--height=200px] - Length of the colour key when it stands beside the plot (`legend="start"` or `"end"`), where it runs from bottom to top.
+ * @cssproperty {pixel} [--c2-chart__scale-key-histogram--height=28px] - Height of the distribution bars above the colour key, and their width beside a vertical key.
  * @cssproperty {color} [--c2-chart__scale-key-histogram--color=#a1a1aa] - Colour of the distribution bars.
  * @cssproperty {color} [--c2-chart__scale-key-marker--color=#18181b] - Colour of the hovered value's marker and of the kept range's outline on the colour key.
  * @cssproperty {outline} [--c2-chart__plot__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the plot when it is reached with the keyboard.
@@ -1096,6 +1098,16 @@ export class HeatmapChart extends EchartsChartBase {
     return (index + Math.min(1, Math.max(0, share))) / key.bins.length
   }
 
+  /** Whether the key stands beside the plot (`legend="start"` or `"end"`), running from bottom to top. */
+  #verticalKey(): boolean {
+    return this.legend === 'start' || this.legend === 'end'
+  }
+
+  /** Places a mark at `at` (0–1) along the key: from the inline start, or up from the bottom of a vertical key. */
+  #along(at: number): Record<string, string> {
+    return this.#verticalKey() ? { 'inset-block-end': `${at * 100}%` } : { 'inset-inline-start': `${at * 100}%` }
+  }
+
   #noun(count: number): string {
     const text = this.formatValue(count)
     return this.layout === 'grid' ? this.msg.t('cells', text) : this.msg.t('days', text)
@@ -1143,7 +1155,9 @@ export class HeatmapChart extends EchartsChartBase {
       if (idle) idle.hidden = false
       return
     }
-    marker.style.insetInlineStart = `${this.#keyPosition(key, value) * 100}%`
+    const at = `${this.#keyPosition(key, value) * 100}%`
+    marker.style.insetInlineStart = this.#verticalKey() ? '' : at
+    marker.style.insetBlockEnd = this.#verticalKey() ? at : ''
     marker.hidden = false
     if (!hover || !idle || this.previewBins) return
     const band = key.bins[legendBinIndex(key.bins, value)]
@@ -1192,7 +1206,14 @@ export class HeatmapChart extends EchartsChartBase {
 
   #binAt(event: PointerEvent, key: ScaleKey): number {
     const track = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    const share = track.width > 0 ? (event.clientX - track.left) / track.width : 0
+    // A vertical key runs from the bottom up, as a value axis does.
+    const share = this.#verticalKey()
+      ? track.height > 0
+        ? (track.bottom - event.clientY) / track.height
+        : 0
+      : track.width > 0
+        ? (event.clientX - track.left) / track.width
+        : 0
     return Math.min(key.bins.length - 1, Math.max(0, Math.floor(share * key.bins.length)))
   }
 
@@ -1225,9 +1246,12 @@ export class HeatmapChart extends EchartsChartBase {
 
   #onTrackKey(event: KeyboardEvent, key: ScaleKey): void {
     const last = key.bins.length - 1
-    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'Home' || event.key === 'End') {
+    // Right and Up move towards the high end, whichever way the key runs.
+    const up = event.key === 'ArrowRight' || event.key === 'ArrowUp'
+    const down = event.key === 'ArrowLeft' || event.key === 'ArrowDown'
+    if (up || down || event.key === 'Home' || event.key === 'End') {
       event.preventDefault()
-      const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
+      const step = up ? 1 : down ? -1 : 0
       this.#keyFocus =
         event.key === 'Home' ? 0 : event.key === 'End' ? last : this.#keyFocus < 0 ? (step > 0 ? 0 : last) : Math.min(last, Math.max(0, this.#keyFocus + step))
       // Shift extends the previewed range from where it started.
@@ -1272,6 +1296,7 @@ export class HeatmapChart extends EchartsChartBase {
     if (!key) return nothing
     const histogram = this.legendDetail === 'histogram'
     const interactive = this.legendInteraction !== 'none'
+    const vertical = this.#verticalKey()
     const covered = this.#filteredBins(key)
     const active = covered.size > 0
     const range = this.previewBins ? this.#binRange(key, this.previewBins) : Array.isArray(this.scaleFilter) ? (this.scaleFilter as HeatmapScaleRange) : null
@@ -1288,7 +1313,7 @@ export class HeatmapChart extends EchartsChartBase {
             (bin, index) =>
               html`<span
                 class="scale-key__count ${active ? (covered.has(index) ? 'is-on' : 'is-off') : ''}"
-                style="height:${bin.count > 0 ? Math.max(6, (bin.count / peak) * 100) : 0}%"
+                style=${styleMap({ [vertical ? 'width' : 'height']: `${bin.count > 0 ? Math.max(6, (bin.count / peak) * 100) : 0}%` })}
                 >${key.stepped && bin.count > 0 ? html`<span class="scale-key__count-text">${this.formatValue(bin.count)}</span>` : nothing}</span
               >`,
           )}
@@ -1315,7 +1340,9 @@ export class HeatmapChart extends EchartsChartBase {
               : html`<span class="scale-key__band" part="scale-band" style=${styleMap({ '--band-color': bin.color })}></span>`,
           )}
         </span>`
-      : html`<span class="scale-key__gradient" style=${styleMap({ background: `linear-gradient(90deg, ${key.bins.map((bin) => bin.color).join(', ')})` })}
+      : html`<span
+          class="scale-key__gradient"
+          style=${styleMap({ background: `linear-gradient(${vertical ? '0deg' : '90deg'}, ${key.bins.map((bin) => bin.color).join(', ')})` })}
           >${key.clampLow ? html`<span class="scale-key__clamp scale-key__clamp--low" style=${styleMap({ '--clamp-color': key.bins[0].color })}></span>` : nothing}${
             key.clampHigh
               ? html`<span class="scale-key__clamp scale-key__clamp--high" style=${styleMap({ '--clamp-color': key.bins[key.bins.length - 1].color })}></span>`
@@ -1326,7 +1353,7 @@ export class HeatmapChart extends EchartsChartBase {
     const ticks = key.stepped ? key.bins.slice(1).map((bin, index) => ({ at: (index + 1) / key.bins.length, text: this.#formatTick(bin.from) })) : key.ticks
     const trackHandlers = !key.stepped && interactive
     return html`
-      <div class="scale-key ${histogram ? 'scale-key--histogram' : 'scale-key--simple'}" part="scale-key">
+      <div class="scale-key ${histogram ? 'scale-key--histogram' : 'scale-key--simple'} ${vertical ? 'scale-key--vertical' : ''}" part="scale-key">
         <div class="scale-key__head">
           <span class="scale-key__title">${key.title}</span>
           ${
@@ -1342,37 +1369,46 @@ export class HeatmapChart extends EchartsChartBase {
               : nothing
           }
         </div>
-        <div
-          class="scale-key__track ${trackHandlers ? 'scale-key__track--interactive' : ''}"
-          role=${trackHandlers ? 'group' : nothing}
-          tabindex=${trackHandlers ? '0' : nothing}
-          aria-label=${trackHandlers ? this.msg.t('scaleLabel', key.title) : nothing}
-          @pointerdown=${trackHandlers ? (event: PointerEvent) => this.#onTrackDown(event, key) : nothing}
-          @pointermove=${trackHandlers ? (event: PointerEvent) => this.#onTrackMove(event, key) : nothing}
-          @pointerup=${trackHandlers ? (event: PointerEvent) => this.#onTrackUp(event, key) : nothing}
-          @pointerleave=${trackHandlers ? () => this.#onTrackLeave() : nothing}
-          @keydown=${trackHandlers ? (event: KeyboardEvent) => this.#onTrackKey(event, key) : nothing}
-          @blur=${trackHandlers ? () => (this.previewBins = null) : nothing}
-        >
-          ${bars} ${ramp}
-          ${
-            !key.stepped && active
-              ? html`<span
-                  class="scale-key__brush"
-                  style="inset-inline-start:${(lo / key.bins.length) * 100}%;width:${((hi - lo + 1) / key.bins.length) * 100}%"
-                ></span>`
-              : nothing
-          }
-          <span class="scale-key__marker" hidden></span>
+        ${vertical && poles ? html`<div class="scale-key__pole">↑ ${poles[1]}</div>` : nothing}
+        <div class="scale-key__body">
+          <div
+            class="scale-key__track ${trackHandlers ? 'scale-key__track--interactive' : ''}"
+            role=${trackHandlers ? 'group' : nothing}
+            tabindex=${trackHandlers ? '0' : nothing}
+            aria-label=${trackHandlers ? this.msg.t('scaleLabel', key.title) : nothing}
+            @pointerdown=${trackHandlers ? (event: PointerEvent) => this.#onTrackDown(event, key) : nothing}
+            @pointermove=${trackHandlers ? (event: PointerEvent) => this.#onTrackMove(event, key) : nothing}
+            @pointerup=${trackHandlers ? (event: PointerEvent) => this.#onTrackUp(event, key) : nothing}
+            @pointerleave=${trackHandlers ? () => this.#onTrackLeave() : nothing}
+            @keydown=${trackHandlers ? (event: KeyboardEvent) => this.#onTrackKey(event, key) : nothing}
+            @blur=${trackHandlers ? () => (this.previewBins = null) : nothing}
+          >
+            ${bars} ${ramp}
+            ${
+              !key.stepped && active
+                ? html`<span
+                    class="scale-key__brush"
+                    style=${styleMap({ ...this.#along(lo / key.bins.length), [vertical ? 'height' : 'width']: `${((hi - lo + 1) / key.bins.length) * 100}%` })}
+                  ></span>`
+                : nothing
+            }
+            <span class="scale-key__marker" hidden></span>
+          </div>
+          <div class="scale-key__ticks" aria-hidden="true">
+            ${ticks.map((tick) => html`<span class="scale-key__tick" style=${styleMap(this.#along(tick.at))}>${tick.text}</span>`)}
+          </div>
         </div>
-        <div class="scale-key__ticks" aria-hidden="true">
-          ${ticks.map((tick) => html`<span class="scale-key__tick" style="inset-inline-start:${tick.at * 100}%">${tick.text}</span>`)}
-        </div>
-        ${poles ? html`<div class="scale-key__poles"><span>← ${poles[0]}</span><span>${poles[1]} →</span></div>` : nothing}
+        ${
+          poles
+            ? vertical
+              ? html`<div class="scale-key__pole">↓ ${poles[0]}</div>`
+              : html`<div class="scale-key__poles"><span>← ${poles[0]}</span><span>${poles[1]} →</span></div>`
+            : nothing
+        }
         ${
           (histogram && interactive) || missing
             ? html`<div class="scale-key__foot">
-                ${histogram && interactive ? html`<span>${key.stepped ? this.msg.t('hintStepped') : this.msg.t('hintContinuous')}</span>` : nothing}
+                ${histogram && interactive ? html`<span class="scale-key__hint">${key.stepped ? this.msg.t('hintStepped') : this.msg.t('hintContinuous')}</span>` : nothing}
                 ${missing ? html`<span class="scale-key__no-data"><i style=${styleMap({ background: style.emptyColor })}></i>${this.msg.t('noData')}</span>` : nothing}
               </div>`
             : nothing

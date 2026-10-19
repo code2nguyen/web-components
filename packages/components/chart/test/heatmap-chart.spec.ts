@@ -357,3 +357,41 @@ test('updateData() reshapes the axes and the key, as assigning data does', async
     .toEqual(['USDJPY 1W', 'USDJPY 3M'])
   await expect(chart.locator('.scale-key__readout')).toContainText('2 cells')
 })
+
+test('a key beside the plot stands upright, its low end at the bottom', async ({ page }) => {
+  await open(page, 'matrix')
+  const chart = page.locator('c2-heatmap-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate((element) => element.setAttribute('legend', 'end'))
+  const key = chart.locator('.scale-key--vertical')
+  await expect(key).toBeVisible()
+  const track = chart.locator('.scale-key__track')
+  const box = await track.boundingBox()
+  if (!box) throw new Error('The key has no box')
+  // Taller than wide, and to the right of the plot.
+  expect(box.height).toBeGreaterThan(box.width * 3)
+  const plot = await chart.locator('.plot').boundingBox()
+  expect(box.x).toBeGreaterThan((plot?.x ?? 0) + (plot?.width ?? 0) - 1)
+  // The ends are named above and below the bar, the high one on top.
+  await expect(chart.locator('.scale-key__pole')).toHaveText(['↑ base stronger', '↓ base weaker'])
+
+  // The bottom band is the lowest values, open below: [−∞, −1.35).
+  await page.mouse.click(box.x + box.width - 4, box.y + box.height - 2)
+  await expect(chart).toHaveJSProperty('scaleFilter', [null, -1.35])
+  // Up moves towards the high end.
+  await track.focus()
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowUp')
+  await expect(chart.locator('.scale-key__readout')).toContainText('-1.35% to -1.2%')
+
+  // Hovering a cell marks its value from the bottom of the bar.
+  await page.evaluate(() => window.heatmapScenario.hover({ index: 0, seriesIndex: 1, px: 0, py: 0 }))
+  const marker = await chart.locator('.scale-key__marker').evaluate((element) => (element as HTMLElement).style.insetBlockEnd)
+  expect(marker).toMatch(/%$/)
+
+  // Back on top, the key lies flat again.
+  await chart.evaluate((element) => element.setAttribute('legend', 'top'))
+  await expect(chart.locator('.scale-key--vertical')).toHaveCount(0)
+  const flat = await chart.locator('.scale-key__track').boundingBox()
+  expect(flat && flat.width > flat.height).toBe(true)
+})
