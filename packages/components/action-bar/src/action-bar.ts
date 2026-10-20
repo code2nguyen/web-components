@@ -23,8 +23,10 @@ export interface ActionBar {
  * layout. Leave some bottom padding on the collection so the bar never covers its last row.
  *
  * The app owns the selection. Set `count` from it: the bar shows while `count` is above zero and slides away at zero.
- * The clear button and Escape fire `clear`; empty the selection there, which sets `count` back to 0. The count line is
- * a live region, so a screen reader hears "3 selected" as the selection changes. Hiding the bar takes its actions out
+ * The clear button and Escape fire `clear`; empty the selection there, which sets `count` back to 0. Escape that a
+ * popup inside the bar uses (an open `c2-select` or menu) does not clear: the bar skips an Escape inside an open
+ * popover or one whose `keydown` was `preventDefault()`ed. The count is announced to screen readers ("3 selected") as
+ * it changes, in the built-in wording even when the `label` slot replaces the visible text. Hiding the bar takes its actions out
  * of the Tab order, so an action that empties the selection should move focus back to the collection.
  *
  * Put the actions in the default slot: `c2-button`s, a `c2-button-group toolbar` for one Tab stop with arrow keys,
@@ -72,6 +74,11 @@ export class ActionBar extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, actionBarMessages)
 
+  constructor() {
+    super()
+    this.internals.role = 'group'
+  }
+
   /** How many items are selected. The bar shows while it is above zero. */
   @property({ type: Number }) count = 0
 
@@ -108,24 +115,27 @@ export class ActionBar extends LitElement {
   }
 
   protected override updated(): void {
-    this.internals.role = 'group'
     this.internals.ariaLabel = this.msg.t('actions')
     if (this.count > 0) this.internals.states.add('open')
     else this.internals.states.delete('open')
   }
 
   override render() {
-    return html`<div class="bar">
-      <span class="label" role="status"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
-      <span class="divider" aria-hidden="true"></span>
-      <div class="actions"><slot></slot></div>
-      <button type="button" class="clear" aria-label=${this.msg.t('clear')} @click=${this.clear}>
-        <slot name="clear-icon"
-          ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="m6 6 12 12M6 18 18 6"></path></svg
-        ></slot>
-      </button>
-    </div>`
+    // The live region sits outside the bar: the bar is `visibility: hidden` while closed, and a region that enters
+    // the accessibility tree together with its first text is often not announced. It says the count even when the
+    // `label` slot replaces the visible text, and nothing at zero.
+    return html`<span class="announcer" role="status">${this.count > 0 ? this.msg.t('selected', this.count) : ''}</span>
+      <div class="bar">
+        <span class="label"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
+        <span class="divider" aria-hidden="true"></span>
+        <div class="actions"><slot></slot></div>
+        <button type="button" class="clear" aria-label=${this.msg.t('clear')} @click=${this.clear}>
+          <slot name="clear-icon"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="m6 6 12 12M6 18 18 6"></path></svg
+          ></slot>
+        </button>
+      </div>`
   }
 }
 

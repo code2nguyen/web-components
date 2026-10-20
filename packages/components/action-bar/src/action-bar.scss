@@ -36,6 +36,9 @@
   display: block;
   position: css.cssVar(position);
   bottom: css.cssVar(inset-bottom);
+  // Spans its container (or, with `position: fixed`, the viewport) so the bar can centre in it.
+  left: 0;
+  right: 0;
   z-index: css.cssVar(z-index);
   height: 0;
   pointer-events: none;
@@ -77,6 +80,15 @@
   visibility: hidden;
   pointer-events: none;
   transition-delay: 0s, 0s, css.cssVar(container--transition-duration);
+}
+
+.announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .label {

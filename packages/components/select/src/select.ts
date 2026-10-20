@@ -409,8 +409,26 @@ export class Select extends LitElement {
     this.restoringFocus = false
     // Space picks on keydown, then its keyup lands on the trigger, which Firefox reads as a click that reopens the
     // dropdown. Swallow that one keyup; a key pressed on the trigger itself clears the guard.
-    this.button.addEventListener('keyup', this.swallowSpaceKeyup)
-    this.button.addEventListener('keydown', this.clearSpaceGuard)
+    if (this.spacePressedInList) {
+      this.button.addEventListener('keyup', this.swallowSpaceKeyup)
+      this.button.addEventListener('keydown', this.clearSpaceGuard)
+    }
+    this.spacePressedInList = false
+  }
+
+  /** Whether the last key pressed in the list was Space, which is what arms the keyup guard above. */
+  private spacePressedInList = false
+
+  private handleOverlayKeydown(event: KeyboardEvent) {
+    this.spacePressedInList = event.key === ' '
+  }
+
+  /** Set while a pointer is down on the trigger: that click toggles the dropdown itself, so focusout must not. */
+  private pointerOnTrigger = false
+
+  private handleTriggerPointerDown() {
+    this.pointerOnTrigger = true
+    window.addEventListener('pointerup', () => (this.pointerOnTrigger = false), { once: true })
   }
 
   private restoringFocus = false
@@ -429,6 +447,9 @@ export class Select extends LitElement {
   private handleOverlayFocusOut(event: FocusEvent) {
     const next = event.relatedTarget as Node | null
     if (this.restoringFocus || !next || this.menu.contains(next) || (next !== this && this.contains(next))) return
+    // A press on the trigger moves focus to it before its click closes the dropdown: closing here would let that
+    // click open it again.
+    if (next === this.button && this.pointerOnTrigger) return
     this.toggle(false)
   }
 
@@ -446,14 +467,16 @@ export class Select extends LitElement {
     return !!active && active !== this && this.contains(active)
   }
 
-  /** The row holding the list's roving tabindex: the selected one, else the first enabled one. */
+  /**
+   * The row holding the list's roving tabindex: the selected one, else the first enabled one. Falls back to picking it
+   * here when the list has not given any row the tabindex yet (rows replaced just before opening).
+   */
   private focusedOption(): ListItem | undefined {
-    const rows = this.listItemSlot?.assignedElements({ flatten: true }) ?? []
-    for (const slotItem of rows) {
-      const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstElementChild
-      if (listItem instanceof ListItem && listItem.tabIndex === 0) return listItem
-    }
-    return undefined
+    const rows = (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
+      .map((slotItem) => (slotItem instanceof ListItem ? slotItem : slotItem.firstElementChild))
+      .filter((row): row is ListItem => row instanceof ListItem)
+    const enabled = rows.filter((row) => !row.disabled)
+    return rows.find((row) => row.tabIndex === 0) ?? enabled.find((row) => this.value.includes(row.value)) ?? enabled[0]
   }
 
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
@@ -545,6 +568,7 @@ export class Select extends LitElement {
         class="button"
         @blur=${this.onButtonBlur}
         @focus=${this.onButtonFocus}
+        @pointerdown=${this.handleTriggerPointerDown}
         ?disabled=${this.effectiveDisabled}
       >
         <slot name="button-prefix-icon"></slot>
@@ -557,6 +581,7 @@ export class Select extends LitElement {
         @beforetoggle=${this.handleOverlayBeforeToggle}
         @toggle=${this.handleOverlayToggle}
         @focusout=${this.handleOverlayFocusOut}
+        @keydown=${this.handleOverlayKeydown}
         ?fit-anchor=${this.fitSize}
       >
         <c2-list

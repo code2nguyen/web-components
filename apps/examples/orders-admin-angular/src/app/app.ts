@@ -80,10 +80,9 @@ const FILTERS: { id: Filter; label: string }[] = [
         checkbox-selection
         sortable
         stripe
-        (row-click)="handleRowClick($event)"
         (selection-change)="handleSelectionChange($event)"
       >
-        <c2-table-column field="id" header="Order" width="130px" pinned="start"></c2-table-column>
+        <c2-table-column field="id" header="Order" width="130px" pinned="start" [renderCell]="renderOrderLink"></c2-table-column>
         <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
         <c2-table-column field="status" header="Status" width="130px" [renderCell]="renderStatus"></c2-table-column>
         <c2-table-column field="items" header="Items" width="90px" align="end" format="number"></c2-table-column>
@@ -93,7 +92,7 @@ const FILTERS: { id: Filter; label: string }[] = [
 
       <!-- The bar shows while count is above zero and floats over the bottom of the page. It does not own the
            selection: (clear), its × button or Escape, is where the table's selection is emptied. -->
-      <c2-action-bar [count]="checked().length" (clear)="clearChecked(table)">
+      <c2-action-bar [count]="checkedVisible().length" (clear)="clearChecked(table)">
         <c2-button class="ghost" (click)="refundChecked(table)">Refund</c2-button>
         <c2-button (click)="advanceChecked(table)">Advance status</c2-button>
       </c2-action-bar>
@@ -137,8 +136,16 @@ export class App {
   protected readonly query = signal('')
   protected readonly openOnly = signal(false)
   protected readonly selected = signal<Order | null>(null)
-  /** Keys of the rows ticked in the table, for the bulk actions. */
+  /** Keys of the rows ticked in the table. */
   protected readonly checked = signal<string[]>([])
+  /**
+   * The ticked rows the filter still shows. The table keeps a hidden row's key selected, so the bar counts and the
+   * bulk actions apply to these only: a search must not leave an order the user cannot see in a bulk refund.
+   */
+  protected readonly checkedVisible = computed(() => {
+    const keys = new Set(this.checked())
+    return this.visible().filter((order) => keys.has(order.id))
+  })
 
   protected readonly visible = computed(() => {
     const needle = this.query().trim().toLowerCase()
@@ -163,8 +170,20 @@ export class App {
     this.checked.set((event as TableEventMap['selection-change']).detail.value)
   }
 
-  protected handleRowClick(event: Event): void {
-    this.selected.set((event as TableEventMap['row-click']).detail.row as Order)
+  /**
+   * The order id opens its details. A row click is the table's own selection gesture, which with
+   * `selection="multiple"` narrows the selection to that row, so opening details from it would drop the ticked rows.
+   * The click stops at the link: the table never sees it, so the selection stays as it was.
+   */
+  protected readonly renderOrderLink = ({ row }: { row: Record<string, unknown> }) => {
+    const order = row as unknown as Order
+    const link = document.createElement('c2-link-button')
+    link.textContent = order.id
+    link.addEventListener('click', (event) => {
+      event.stopPropagation()
+      this.selected.set(order)
+    })
+    return link
   }
 
   /**
@@ -209,7 +228,7 @@ export class App {
   }
 
   private updateChecked(table: HTMLElement, status: (order: Order) => OrderStatus, verb: string): void {
-    const keys = new Set(this.checked())
+    const keys = new Set(this.checkedVisible().map((order) => order.id))
     this.orders.update((orders) => orders.map((order) => (keys.has(order.id) ? { ...order, status: status(order) } : order)))
     this.clearChecked(table)
     toast.show({ variant: 'success', heading: `${keys.size} orders ${verb}`, message: 'The table shows their new status.' })

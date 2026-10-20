@@ -60,7 +60,9 @@ test('the clear button and Escape fire clear, and the app hides the bar by empty
 test('the count line keeps the last count while the bar hides, rather than reading "0 selected"', async ({ page, renderScenario }) => {
   await renderScenario(owned(4))
   await props(bar(page), { count: 0 })
-  await expect(bar(page).locator('span[role=status]')).toHaveText('4 selected')
+  await expect(bar(page).locator('.bar > span.label')).toHaveText('4 selected')
+  // And the live region says nothing rather than "0 selected".
+  await expect(page.getByRole('status')).toHaveText('')
 })
 
 test('Escape in a select inside the bar closes the select and keeps the selection', async ({ page, renderScenario }) => {
@@ -80,7 +82,9 @@ test('the label slot replaces the count text', async ({ page, renderScenario }) 
   await renderScenario(`<c2-action-bar count="3"><span slot="label">3 orders selected</span>${actions}</c2-action-bar>`)
   // The status span's own text is the slot's fallback; what renders is the slotted label.
   await expect(page.getByText('3 orders selected')).toBeVisible()
-  await expect(page.getByText('3 selected', { exact: true })).toBeHidden()
+  await expect(bar(page).locator('.bar > span.label').getByText('3 selected', { exact: true })).toBeHidden()
+  // The announcement keeps the built-in wording.
+  await expect(page.getByRole('status')).toHaveText('3 selected')
 })
 
 test('sticks to the bottom of its scroll container, over the content', async ({ page, renderScenario }) => {
@@ -100,4 +104,23 @@ test('the built-in text follows the nearest lang, with plurals', async ({ page, 
   await expect(page.getByRole('status')).toHaveText('5 sélectionnés')
   await expect(page.getByRole('button', { name: 'Effacer la sélection' })).toBeVisible()
   await expect(bar(page)).toHaveHostAria('aria-label', 'Actions sur la sélection')
+})
+
+test('the count is announced from a live region that is not hidden with the bar', async ({ page, renderScenario }) => {
+  await renderScenario(owned(0))
+  const status = page.getByRole('status')
+  await expect(status).toHaveText('')
+  // Present in the accessibility tree before the first selection, so its first text is announced.
+  expect(await status.evaluate((element) => getComputedStyle(element).visibility)).toBe('visible')
+  await props(bar(page), { count: 2 })
+  await expect(status).toHaveText('2 selected')
+})
+
+test('with position: fixed the bar centres in the viewport', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-action-bar count="1" style="--c2-action-bar--position: fixed">${actions}</c2-action-bar>`)
+  const viewport = page.viewportSize()!
+  const box = (await surface(page).boundingBox())!
+  expect(box.width).toBeGreaterThan(150)
+  expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThan(2)
+  expect(Math.round(viewport.height - (box.y + box.height))).toBe(16)
 })

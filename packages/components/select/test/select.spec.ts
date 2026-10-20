@@ -178,3 +178,14 @@ test('a pointer pick returns focus to the trigger', async ({ page, renderScenari
   await expect(listbox(page)).not.toBeVisible()
   await expect.poll(() => focused(page)).toBe('c2-select')
 })
+
+test('clicking the trigger of an open dropdown closes it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-select placeholder="Choose fruit">${rows}</c2-select>`)
+  const trigger = page.getByRole('button', { name: 'Choose fruit' })
+  await trigger.click()
+  await expect(listbox(page)).toBeVisible()
+  await expect.poll(() => focused(page)).toBe('Apple')
+  await trigger.click()
+  await expect(listbox(page)).not.toBeVisible()
+  await expect(page.locator('c2-select')).toHaveJSProperty('open', false)
+})
