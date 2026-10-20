@@ -114,3 +114,67 @@ test('the required message follows the nearest lang', async ({ page, renderScena
   await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
   await expect(host).toHaveJSProperty('validationMessage', 'Please select an option.')
 })
+
+// Which element holds focus: a light-DOM row by its text, the select by its tag when focus is on its trigger.
+const focused = (page: Page) =>
+  page.evaluate(() => {
+    const active = document.activeElement
+    return active?.localName === 'c2-list-item' ? active.textContent?.trim() : active?.localName
+  })
+
+test('an option is picked with the keyboard alone, and focus returns to the trigger', async ({ page, renderScenario, tab }) => {
+  await renderScenario(`<c2-select placeholder="Choose fruit">${rows}<c2-list-item value="c">Cherry</c2-list-item></c2-select><button>After</button>`)
+  const host = page.locator('c2-select')
+  await tab()
+  await expect.poll(() => focused(page)).toBe('c2-select')
+
+  // Enter opens and focus lands on the first option, since nothing is selected yet.
+  await page.keyboard.press('Enter')
+  await expect(listbox(page)).toBeVisible()
+  await expect.poll(() => focused(page)).toBe('Apple')
+  await page.keyboard.press('End')
+  await expect.poll(() => focused(page)).toBe('Cherry')
+  await page.keyboard.press('ArrowUp')
+  await expect.poll(() => focused(page)).toBe('Berry')
+  await page.keyboard.press('Enter')
+  await expect(host).toHaveJSProperty('value', ['b'])
+  await expect(listbox(page)).not.toBeVisible()
+  await expect.poll(() => focused(page)).toBe('c2-select')
+
+  // Reopening with ArrowDown starts on the selected option; typeahead and Space pick another.
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(() => focused(page)).toBe('Berry')
+  await page.keyboard.press('c')
+  await expect.poll(() => focused(page)).toBe('Cherry')
+  await page.keyboard.press('Space')
+  await expect(host).toHaveJSProperty('value', ['c'])
+  await expect.poll(() => focused(page)).toBe('c2-select')
+  // The Space keyup that lands on the trigger does not reopen it.
+  await expect(listbox(page)).not.toBeVisible()
+  await expect(host).toHaveJSProperty('open', false)
+})
+
+test('Escape closes and returns focus to the trigger; Tab leaves and closes', async ({ page, renderScenario, tab }) => {
+  await renderScenario(`<c2-select placeholder="Choose fruit">${rows}</c2-select><button>After</button>`)
+  await tab()
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(() => focused(page)).toBe('Apple')
+  await page.keyboard.press('Escape')
+  await expect(listbox(page)).not.toBeVisible()
+  await expect.poll(() => focused(page)).toBe('c2-select')
+  await expect(page.locator('c2-select')).toHaveJSProperty('value', [])
+
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(() => focused(page)).toBe('Apple')
+  await tab()
+  await expect.poll(() => focused(page)).toBe('button')
+  await expect(listbox(page)).not.toBeVisible()
+})
+
+test('a pointer pick returns focus to the trigger', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-select placeholder="Choose fruit">${rows}</c2-select>`)
+  await page.getByRole('button', { name: 'Choose fruit' }).click()
+  await option(page, 'Berry').click()
+  await expect(listbox(page)).not.toBeVisible()
+  await expect.poll(() => focused(page)).toBe('c2-select')
+})
