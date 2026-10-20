@@ -1,0 +1,86 @@
+{
+  "name": "@c2n/view-options",
+  "version": "1.0.12",
+  "private": true,
+  "type": "module",
+  "main": "dist/view-options.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/view-options.d.ts",
+      "default": "./dist/view-options.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "view-options",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../button:build",
+        "../button-group:build",
+        "../chip:build",
+        "../icon-button:build",
+        "../list-item:build",
+        "../overlay:build",
+        "../select:build",
+        "../switch:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "*",
+    "@c2n/button": "*",
+    "@c2n/button-group": "*",
+    "@c2n/chip": "*",
+    "@c2n/icon-button": "*",
+    "@c2n/list-item": "*",
+    "@c2n/overlay": "*",
+    "@c2n/select": "*",
+    "@c2n/switch": "*",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

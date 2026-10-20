@@ -128,6 +128,7 @@ import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
+import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
@@ -266,6 +267,7 @@ export const componentManifests = (function () {
     tree,
     truncate,
     upload,
+    viewOptions,
     virtualList,
     weekPlanner,
     workingIndicator,
