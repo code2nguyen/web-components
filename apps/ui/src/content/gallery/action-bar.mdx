@@ -1,0 +1,207 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ActionBar } from '@c2n/components/action-bar'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherTagIcon as FeatherTag } from '@c2n/feather-icons/icons/tag.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+## Presets
+
+Curated looks for `c2-action-bar`. Open any card in the studio to start from it. The `__container--*` variables
+restyle the floating surface, `__label--*` the count, and `__clear--*` the clear button; `__divider--border-left: none`
+drops the rule between the count and the actions. Each card sits in a frame standing in for the collection the bar
+floats over.
+
+<GalleryGrid min="480">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .ab-frame {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+</style>
+<div class="ab-frame">
+  <c2-action-bar count="3">
+    <c2-button>Archive</c2-button>
+    <c2-button>Delete</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Emphasized
+<style>
+  .ab-frame-emphasized {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-emphasized {
+    --c2-action-bar__container--background: #18181b;
+    --c2-action-bar__container--color: #fafafa;
+    --c2-action-bar__container--border: 1px solid #27272a;
+    --c2-action-bar__container--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.32);
+    --c2-action-bar__label--color: #fafafa;
+    --c2-action-bar__divider--border-left: 1px solid #3f3f46;
+    --c2-action-bar__clear--color: #a1a1aa;
+    --c2-action-bar__clear__hover--background: #27272a;
+    --c2-action-bar__clear__hover--color: #fafafa;
+    --c2-button__container--background-color: #27272a;
+    --c2-button__container--color: #fafafa;
+    --c2-button__container--border: 1px solid #3f3f46;
+    --c2-button__container__hover--background-color: #3f3f46;
+  }
+</style>
+<div class="ab-frame-emphasized">
+  <c2-action-bar class="ab-emphasized" count="2">
+    <c2-button>Move</c2-button>
+    <c2-button>Archive</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .ab-frame-pill {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-pill {
+    --c2-action-bar__container--border-radius: 999px;
+    --c2-action-bar__container--padding: 6px 6px 6px 20px;
+    --c2-action-bar__clear--border-radius: 999px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--height: 30px;
+  }
+</style>
+<div class="ab-frame-pill">
+  <c2-action-bar class="ab-pill" count="8">
+    <c2-button>Share</c2-button>
+    <c2-button>Download</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Tinted
+<style>
+  .ab-frame-tinted {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-tinted {
+    --c2-action-bar__container--background: light-dark(#f3e8ff, #26153c);
+    --c2-action-bar__container--border: 1px solid light-dark(#e9d5ff, #3b2160);
+    --c2-action-bar__label--color: light-dark(#7e22ce, #a76cdc);
+    --c2-action-bar__divider--border-left: 1px solid light-dark(#e9d5ff, #3b2160);
+    --c2-action-bar__clear--color: light-dark(#7e22ce, #a76cdc);
+    --c2-action-bar__clear__hover--background: light-dark(#e9d5ff, #3b2160);
+    --c2-action-bar__clear__hover--color: light-dark(#7e22ce, #a76cdc);
+    --c2-button__container--background-color: #9333ea;
+    --c2-button__container__hover--background-color: #7e22ce;
+  }
+</style>
+<div class="ab-frame-tinted">
+  <c2-action-bar class="ab-tinted" count="5">
+    <c2-button>Assign</c2-button>
+    <c2-button>Add to project</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Icon actions
+<style>
+  .ab-frame-icons {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-icons {
+    --c2-action-bar__container--padding: 4px 4px 4px 14px;
+    --c2-action-bar__container--gap: 8px;
+    --c2-action-bar__actions--gap: 2px;
+    --c2-action-bar__label--font-size: 13px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="ab-frame-icons">
+  <c2-action-bar class="ab-icons" count="4">
+    <c2-icon-button aria-label="Archive"><c2-feather-archive></c2-feather-archive></c2-icon-button>
+    <c2-icon-button aria-label="Label"><c2-feather-tag></c2-feather-tag></c2-icon-button>
+    <c2-icon-button aria-label="Delete"><c2-feather-trash-2></c2-feather-trash-2></c2-icon-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Destructive
+<style>
+  .ab-frame-destructive {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-destructive {
+    --c2-action-bar__divider--border-left: none;
+    --c2-action-bar__container--gap: 10px;
+  }
+  .ab-destructive-quiet {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+  .ab-destructive-danger {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+</style>
+<div class="ab-frame-destructive">
+  <c2-action-bar class="ab-destructive" count="17">
+    <span slot="label">17 files selected</span>
+    <c2-button class="ab-destructive-quiet">Cancel</c2-button>
+    <c2-button class="ab-destructive-danger">Delete permanently</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+</GalleryGrid>

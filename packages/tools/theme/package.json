@@ -56,6 +56,7 @@
       "dependencies": [
         "../../../open-packages/chatbot:build",
         "../../components/accordion:build",
+        "../../components/action-bar:build",
         "../../components/attachment:build",
         "../../components/autocomplete:build",
         "../../components/avatar:build",

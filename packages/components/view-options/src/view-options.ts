@@ -521,7 +521,8 @@ export class ViewOptions extends LitElement {
     // Read the children before the first render, so it does not need a second one when the slot reports them.
     if (!this.hasUpdated && !this.serverRendered) {
       this.readChildren()
-      this.hasSlottedTrigger = !!this.querySelector(':scope > [slot="trigger"]')
+      // A server render has no light DOM to query; the slot reports a slotted trigger once the client hydrates.
+      if (!isServer) this.hasSlottedTrigger = !!this.querySelector(':scope > [slot="trigger"]')
     }
   }
 

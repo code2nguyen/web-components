@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>action-bar scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        max-width: 800px;
+      }
+      .scroller {
+        height: 320px;
+        overflow: auto;
+        border: 1px solid #e4e4e7;
+      }
+      .rows {
+        height: 900px;
+      }
+    </style>
+    <script type="module">
+      // The app's language: French, added as an app would.
+      import './translations.ts'
+      import '../src/action-bar.ts'
+      import '@c2n/button'
+      import '@c2n/select'
+      import '@c2n/list-item'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

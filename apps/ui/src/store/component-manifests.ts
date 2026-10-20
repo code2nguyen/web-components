@@ -1,5 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
+import actionBar from '@c2n/action-bar/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
@@ -139,6 +140,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
+    actionBar,
     attachment,
     autocomplete,
     avatar,

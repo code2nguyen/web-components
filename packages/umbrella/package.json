@@ -73,6 +73,10 @@
       "types": "./dist/accordion.d.ts",
       "default": "./dist/accordion.js"
     },
+    "./action-bar": {
+      "types": "./dist/action-bar.d.ts",
+      "default": "./dist/action-bar.js"
+    },
     "./attachment": {
       "types": "./dist/attachment.d.ts",
       "default": "./dist/attachment.js"
@@ -896,6 +900,7 @@
   },
   "devDependencies": {
     "@c2n/accordion": "*",
+    "@c2n/action-bar": "*",
     "@c2n/attachment": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",

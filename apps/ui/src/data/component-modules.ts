@@ -4,6 +4,7 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/components/accordion'
+import '@c2n/components/action-bar'
 import '@c2n/components/attachment'
 import '@c2n/components/autocomplete'
 import '@c2n/components/avatar'

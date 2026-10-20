@@ -1,0 +1,87 @@
+---
+title: 'Action Bar'
+description: 'A floating bar for the current selection: the count, the bulk actions and a button that clears it.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ActionBar } from '@c2n/components/action-bar'
+import { Button } from '@c2n/components/button'
+import { ButtonGroup } from '@c2n/components/button-group'
+
+`c2-action-bar` appears once the user selects something in a table, a list or a grid of cards, and offers what can be
+done to the whole selection: "3 selected", then Archive, Delete, Export. Place it after the collection, in the same
+scroll container: it sticks to the bottom of that container and floats over the content, taking no room in the
+layout. The app owns the selection. Set `count` from it (the bar shows while it is above zero) and empty the
+selection on `clear`, which the clear button and Escape fire. The count line is a live region, so the selection is
+announced as it changes.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/action-bar'
+```
+
+Wire it to a `c2-table` (or any collection with a selection event):
+
+```typescript tag=CodeBlock
+const table = document.querySelector('c2-table')
+const bar = document.querySelector('c2-action-bar')
+table.addEventListener('selection-change', (event) => (bar.count = event.detail.value.length))
+bar.addEventListener('clear', () => table.clearSelection())
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/action-bar
+<style>
+  .action-bar-frame {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 560px;
+    max-width: 100%;
+    height: 112px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .action-bar-inline {
+    --c2-action-bar--position: relative;
+    --c2-action-bar--inset-bottom: 12px;
+  }
+  .action-bar-group {
+    --c2-button-group--gap: 8px;
+  }
+  .action-bar-secondary {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+</style>
+<div data-label="Selection">
+  <div class="action-bar-frame">
+    <c2-action-bar class="action-bar-inline" count="3">
+      <c2-button class="action-bar-secondary">Archive</c2-button>
+      <c2-button>Delete</c2-button>
+    </c2-action-bar>
+  </div>
+</div>
+<div data-label="Named label and a toolbar">
+  <div class="action-bar-frame">
+    <c2-action-bar class="action-bar-inline" count="12">
+      <span slot="label">12 orders selected</span>
+      <c2-button-group class="action-bar-group" toolbar aria-label="Order actions">
+        <c2-button class="action-bar-secondary">Mark paid</c2-button>
+        <c2-button class="action-bar-secondary">Export CSV</c2-button>
+        <c2-button>Refund</c2-button>
+      </c2-button-group>
+    </c2-action-bar>
+  </div>
+</div>
+```
+
+The examples set `--c2-action-bar--position: relative` so the bar sits inside its frame; leave it at the default
+`sticky` in an app, or use `fixed` to pin it to the viewport. Leave some bottom padding on the collection so the bar
+never covers its last row.

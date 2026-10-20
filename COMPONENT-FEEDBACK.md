@@ -36,17 +36,16 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
   to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
 
-### `c2-select` opens from the keyboard but an option cannot be chosen with it
+### `c2-table` cannot be focused from outside
 
-- **Severity:** bug
-- **Hit while:** building `c2-view-options` (its Grouping and Ordering selects), 2026-10-19.
-- **What happens:** Enter or ArrowDown on the trigger opens the dropdown, but focus stays on the trigger. Further
-  arrow keys only re-open it, End does nothing, and Enter closes it without picking. Tab moves focus to the page
-  body rather than into the list. A pointer pick also leaves focus on the body once the popover closes. The suite
-  has no test that picks an option from the keyboard.
-- **Where the fix belongs:** `packages/components/select` — move focus into the `c2-list` when the dropdown opens
-  (it already handles arrows, Home/End, typeahead and Enter), and return it to the trigger when the dropdown closes,
-  with a keyboard-only test for picking an option.
+- **Severity:** gap
+- **Hit while:** adding a `c2-action-bar` to the Orders admin example (`apps/examples/orders-admin-angular`), 2026-10-20.
+- **What happens:** a bulk action empties the selection, which hides the action bar and the button that had focus,
+  so focus drops to the body. Focus belongs back on the table, but `table.focus()` does nothing: the host has no
+  `tabindex`, no `delegatesFocus` and no `focus()` override, and the roving cell is inside the shadow root. The
+  example leaves focus where the browser puts it.
+- **Where the fix belongs:** `packages/components/table` — `override focus(options)` that focuses the cell holding
+  the roving tabindex (the one `#pendingFocus` already targets), with a test.
 
 ### Charts have no time markers or annotated ranges
 
@@ -109,6 +108,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-select`                     | A labelled select had no accessible name: the focusable control is a `<button>` in the shadow root, and neither route reaches it — `aria-labelledby` on the host points at a light-DOM id that ARIA cannot resolve across the boundary, and a wrapping `<label>` names the host.                                                | 2026-09-14, the label's text is copied onto the trigger; two tests, one per route.                                                                                                                           |
 | `c2-select`                     | Opened from the keyboard it painted two concentric accent rings: `[open]` turns the border accent and `:focus-visible` drew a ring 1px off it, both mapped to the same token.                                                                                                                                                   | 2026-09-14, `button__focus--outline-offset` defaults to `0`.                                                                                                                                                 |
 | `c2-select`                     | A `c2-list-item` child that never upgraded was skipped in silence, leaving an empty trigger that looks like a styling bug.                                                                                                                                                                                                      | 2026-09-14, a one-per-page console warning naming the cause.                                                                                                                                                 |
+| `c2-select`                     | Opened from the keyboard, focus stayed on the trigger, so no option could be picked without a pointer; a pick or Escape then dropped focus to the body, because slotted rows do not count as inside the popover for its focus return.                                                                                           | 2026-10-20, focus moves to the selected (else first) option on open and back to the trigger on close; Tab out closes; three keyboard/focus tests.                                                            |
 | `c2-details`                    | The icon only rotated when open, from 0°, so the nav idiom (chevron right when closed, down when open) needed a slotted replacement icon.                                                                                                                                                                                       | 2026-09-14, `--c2-details__header__icon--rotate-collapsed`; the docs sidebar now uses the stock chevron.                                                                                                     |
 | `c2-line-chart` and siblings    | `grid` was a boolean, and a boolean attribute is true whenever present — `grid="false"` turned the grid _on_ and no markup could turn it off.                                                                                                                                                                                   | 2026-09-14, now `'both' \| 'x' \| 'y' \| 'none'` (matching `axes`), which also adds vertical grid lines. **Breaking:** `.grid = false` becomes `.grid = 'none'`.                                             |
 | `c2-chart-series`               | `axis="right"` was documented and typed but no adapter read it, so a dual-axis chart drew both series against the left scale.                                                                                                                                                                                                   | 2026-09-14, a `y2` scale and a right-hand axis contributed only when a series asks; tested.                                                                                                                  |

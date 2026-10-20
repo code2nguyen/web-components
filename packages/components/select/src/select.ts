@@ -37,6 +37,10 @@ let warnedUnupgraded = false
  * trigger through `--c2-select__button--*`. The select has no intrinsic width: give the host a `width` (or place it in
  * a grid/flex cell) and the trigger fills it.
  *
+ * Keyboard: Enter, Space, ArrowDown or ArrowUp on the trigger opens the dropdown and moves focus to the selected
+ * option (else the first). The list then takes arrows, Home/End and typeahead; Enter or Space picks. Picking (single
+ * select) or Escape closes it and returns focus to the trigger; Tab leaves the select and closes the dropdown.
+ *
  * @tag c2-select
  *
  * @slot default - The options: `c2-list-item` elements, each with a `value`.
@@ -385,6 +389,94 @@ export class Select extends LitElement {
   private handleOverlayToggle(event: Event) {
     const toggleEvent = event as ToggleEvent
     this.open = toggleEvent.newState == 'open'
+    // However it opened (a click, Enter, an arrow key, `open`), the list takes focus so its own keyboard handling —
+    // arrows, Home/End, typeahead, Enter — picks an option. Only while the trigger still holds focus: an app that
+    // opened the select from elsewhere keeps its focus.
+    if (this.open && this.focusIsOnTrigger()) this.focusedOption()?.focus()
+  }
+
+  /**
+   * Runs before the dropdown hides, while its rows can still hold focus. A row is light DOM slotted into the popover,
+   * so the browser does not count it as inside the popover and does not hand focus back to the trigger: hiding the
+   * focused row would drop focus to the body. Focus moves back to the trigger here instead. Focus that already left
+   * (Tab, a click elsewhere) is not taken back.
+   */
+  private handleOverlayBeforeToggle(event: Event) {
+    if ((event as ToggleEvent).newState !== 'closed' || !this.focusIsOnOption()) return
+    // The row's focusout sees the trigger as outside the list; it must not hide the dropdown a second time.
+    this.restoringFocus = true
+    this.button.focus({ preventScroll: true })
+    this.restoringFocus = false
+    // Space picks on keydown, then its keyup lands on the trigger, which Firefox reads as a click that reopens the
+    // dropdown. Swallow that one keyup; a key pressed on the trigger itself clears the guard.
+    if (this.spacePressedInList) {
+      this.button.addEventListener('keyup', this.swallowSpaceKeyup)
+      this.button.addEventListener('keydown', this.clearSpaceGuard)
+    }
+    this.spacePressedInList = false
+  }
+
+  /** Whether the last key pressed in the list was Space, which is what arms the keyup guard above. */
+  private spacePressedInList = false
+
+  private handleOverlayKeydown(event: KeyboardEvent) {
+    this.spacePressedInList = event.key === ' '
+  }
+
+  /** Set while a pointer is down on the trigger: that click toggles the dropdown itself, so focusout must not. */
+  private pointerOnTrigger = false
+
+  private handleTriggerPointerDown() {
+    this.pointerOnTrigger = true
+    window.addEventListener('pointerup', () => (this.pointerOnTrigger = false), { once: true })
+  }
+
+  private restoringFocus = false
+
+  private swallowSpaceKeyup = (event: KeyboardEvent): void => {
+    if (event.key === ' ') event.preventDefault()
+    this.clearSpaceGuard()
+  }
+
+  private clearSpaceGuard = (): void => {
+    this.button.removeEventListener('keyup', this.swallowSpaceKeyup)
+    this.button.removeEventListener('keydown', this.clearSpaceGuard)
+  }
+
+  /** Closes the dropdown when focus moves from a row to something outside it: Tab and Shift+Tab out of the list. */
+  private handleOverlayFocusOut(event: FocusEvent) {
+    const next = event.relatedTarget as Node | null
+    if (this.restoringFocus || !next || this.menu.contains(next) || (next !== this && this.contains(next))) return
+    // A press on the trigger moves focus to it before its click closes the dropdown: closing here would let that
+    // click open it again.
+    if (next === this.button && this.pointerOnTrigger) return
+    this.toggle(false)
+  }
+
+  /** The element with focus in this select's tree: a light-DOM row, or the host itself when focus is on the trigger. */
+  private get activeInTree(): Element | null {
+    return (this.getRootNode() as Document | ShadowRoot).activeElement
+  }
+
+  private focusIsOnTrigger(): boolean {
+    return this.activeInTree === this && this.shadowRoot?.activeElement === this.button
+  }
+
+  private focusIsOnOption(): boolean {
+    const active = this.activeInTree
+    return !!active && active !== this && this.contains(active)
+  }
+
+  /**
+   * The row holding the list's roving tabindex: the selected one, else the first enabled one. Falls back to picking it
+   * here when the list has not given any row the tabindex yet (rows replaced just before opening).
+   */
+  private focusedOption(): ListItem | undefined {
+    const rows = (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
+      .map((slotItem) => (slotItem instanceof ListItem ? slotItem : slotItem.firstElementChild))
+      .filter((row): row is ListItem => row instanceof ListItem)
+    const enabled = rows.filter((row) => !row.disabled)
+    return rows.find((row) => row.tabIndex === 0) ?? enabled.find((row) => this.value.includes(row.value)) ?? enabled[0]
   }
 
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
@@ -476,13 +568,22 @@ export class Select extends LitElement {
         class="button"
         @blur=${this.onButtonBlur}
         @focus=${this.onButtonFocus}
+        @pointerdown=${this.handleTriggerPointerDown}
         ?disabled=${this.effectiveDisabled}
       >
         <slot name="button-prefix-icon"></slot>
         <slot name="button-content">${this.renderButtonContent()}</slot>
         <slot name="button-suffix-icon">${this.renderButtonSuffixIcon()}</slot>
       </button>
-      <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-anchor=${this.fitSize}>
+      <c2-overlay
+        id="menu-overlay"
+        popover
+        @beforetoggle=${this.handleOverlayBeforeToggle}
+        @toggle=${this.handleOverlayToggle}
+        @focusout=${this.handleOverlayFocusOut}
+        @keydown=${this.handleOverlayKeydown}
+        ?fit-anchor=${this.fitSize}
+      >
         <c2-list
           id="list"
           aria-labelledby="button"
