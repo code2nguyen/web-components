@@ -18,6 +18,7 @@ import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
+import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { MapChart } from '@c2n/chart/map-chart.js'
 import type { MapLayer } from '@c2n/chart/map-layer.js'
@@ -188,6 +189,47 @@ declare module 'vue' {
         onChartError?: (event: EventOf<GaugeChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<GaugeChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<GaugeChart, 'point-click'>) => void
+      }
+    >
+    'c2-heatmap-chart': DefineComponent<
+      C2Props<HeatmapChart> & {
+        'y-field'?: unknown
+        'value-field'?: unknown
+        'value-label'?: unknown
+        'date-field'?: unknown
+        'x-bin'?: unknown
+        'y-bin'?: unknown
+        'x-order'?: unknown
+        'y-order'?: unknown
+        'group-field'?: unknown
+        'group-order'?: unknown
+        'cell-labels'?: unknown
+        'week-start'?: unknown
+        'time-zone'?: unknown
+        'scale-colors'?: unknown
+        'scale-poles'?: unknown
+        'legend-detail'?: unknown
+        'legend-interaction'?: unknown
+        'scale-filter'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onCellHover?: (event: EventOf<HeatmapChart, 'cell-hover'>) => void
+        onCellClick?: (event: EventOf<HeatmapChart, 'cell-click'>) => void
+        onScaleFilterChange?: (event: EventOf<HeatmapChart, 'scale-filter-change'>) => void
+        onTooltipChange?: (event: EventOf<HeatmapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<HeatmapChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<HeatmapChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<HeatmapChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<HeatmapChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<HeatmapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<HeatmapChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<HeatmapChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<HeatmapChart, 'point-click'>) => void
       }
     >
     'c2-line-chart': DefineComponent<

@@ -326,6 +326,10 @@ export const overrides: Record<string, Override> = {
     token: 'chart-series-2',
     value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  // A heatmap writes each value in the dark or the light label colour by the lightness of its cell's fill, which the
+  // scale decides, not the page theme: both stay as they are in either theme.
+  '--c2-chart__cell-label--color': { exclude: 'chosen per cell by the fill lightness, not the theme' },
+  '--c2-chart__cell-label__inverse--color': { exclude: 'chosen per cell by the fill lightness, not the theme' },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
   // The success green has no token, but a fixed green fails on a dark surface; pulled towards the ink it reads on both.
   '--c2-attachment__status__complete--color': {
@@ -725,6 +729,16 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__edge--color': { token: 'color-outline' },
   '--c2-flow__success--color': { exclude: 'success status colour' },
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
+  // The lines between a node's rows are a fainter hairline than its outline, and a highlighted row is a wash of the
+  // primary colour, so both stay quiet on a dark node.
+  '--c2-flow__row--border-top': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-outline-variant, #e4e4e7) 60%, transparent)',
+  },
+  '--c2-flow__row__highlighted--background-color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
   // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
   // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
   // dimmed rules, brighter inks). On dark paper the same mix would glare, so the rules and margin take a fainter mix there under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar

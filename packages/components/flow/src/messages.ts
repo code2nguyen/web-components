@@ -27,6 +27,27 @@ const en = {
   /** The nodes before or after a node; `labelled` when an edge carries a label, so its items hold a comma. */
   after: (items: string[], labelled: boolean) => `After ${items.join(labelled ? '; ' : ', ')}.`,
   before: (items: string[], labelled: boolean) => `Before ${items.join(labelled ? '; ' : ', ')}.`,
+  /** An edge between rows, read on one of its nodes: the far end (`customers.id`), then this node's own row. */
+  throughRow: (end: string, row: string) => `${end} through ${row}`,
+  /** The rows of a node, each its label and its `meta`. */
+  rows: (items: string[]) => `Rows: ${items.join(', ')}.`,
+  /** The row a node's folded rows collapse into, and its label once they show. */
+  moreRows: (count: number) => `+ ${count} more`,
+  fewerRows: 'Show fewer',
+  showAllRows: 'Show all rows',
+  showFewerRows: 'Show fewer rows',
+  rowsHidden: (count: number) => `${count} more ${count === 1 ? 'row' : 'rows'}, Shift+Enter shows ${count === 1 ? 'it' : 'them'}.`,
+  rowsShown: (node: string) => `All rows of ${node} shown.`,
+  rowsFolded: (node: string) => `Rows of ${node} folded.`,
+  dragToReorder: 'Drag to reorder',
+  moveRowUp: 'Move row up',
+  moveRowDown: 'Move row down',
+  /** `R` on a node: the row picked first, its position and how many rows can move. */
+  rowMovePrompt: (node: string, row: string, position: number, total: number) =>
+    `Reordering the rows of ${node}. ${row}, ${position} of ${total}. Up and down arrows pick a row, Alt with an arrow moves it, Enter or Escape ends.`,
+  rowPicked: (row: string, position: number, total: number) => `${row}, ${position} of ${total}`,
+  rowMoved: (row: string, position: number, total: number) => `${row} moved to ${position} of ${total}.`,
+  rowMoveEnded: 'Done reordering rows.',
   duration: 'Duration',
   dragToConnect: 'Drag to connect',
   flowActions: 'Flow actions',

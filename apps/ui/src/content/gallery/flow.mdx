@@ -77,4 +77,24 @@ Looks for `c2-flow`. The node variables (`--c2-flow__node--*`) and the edge colo
 <c2-flow client:only="lit" class="flow-mindmap" data-flow-demo="editable" editable aria-label="Mind map" nodes='[{"id":"trip","label":"Weekend trip"},{"id":"where","label":"Where?"},{"id":"budget","label":"Budget"}]' edges='[{"source":"trip","target":"where"},{"source":"trip","target":"budget"}]'></c2-flow>
 ```
 
+```html tag=MdxCodeBlock,label=Database schema
+<style>
+  .flow-schema {
+    width: 100%;
+    --c2-flow--height: 340px;
+    --c2-flow__marker--display: none;
+    --c2-flow__node--width: 200px;
+    --c2-flow__node--border-radius: 6px;
+    --c2-flow__rank--gap: 80px;
+    --c2-flow__row--min-height: 28px;
+    --c2-flow__row--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --c2-flow__row--font-size: 12px;
+    --c2-flow__edge--color: light-dark(#0d9488, #8cc9c4);
+    --c2-flow__handle--border-color: light-dark(#0d9488, #8cc9c4);
+    --c2-flow__row__highlighted--background-color: light-dark(#ccfbf1, #0f3b37);
+  }
+</style>
+<c2-flow client:only="lit" class="flow-schema" data-flow-demo="schema" edge-type="step" aria-label="Blog schema" nodes='[{"id":"users","label":"users","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"handle","label":"handle","meta":"text"},{"id":"joined_at","label":"joined_at","meta":"date"}]},{"id":"posts","label":"posts","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"author_id","label":"author_id","meta":"uuid"},{"id":"title","label":"title","meta":"text"},{"id":"published","label":"published","meta":"bool"}]},{"id":"comments","label":"comments","rows":[{"id":"id","label":"id","meta":"uuid"},{"id":"post_id","label":"post_id","meta":"uuid"},{"id":"author_id","label":"author_id","meta":"uuid"},{"id":"body","label":"body","meta":"text"}]}]' edges='[{"source":"users","sourcePort":"id","target":"posts","targetPort":"author_id","sourceMarker":"one","targetMarker":"many"},{"source":"posts","sourcePort":"id","target":"comments","targetPort":"post_id","sourceMarker":"one","targetMarker":"zero-many"},{"source":"users","sourcePort":"id","target":"comments","targetPort":"author_id","sourceMarker":"one","targetMarker":"zero-many"}]'></c2-flow>
+```
+
 </GalleryGrid>

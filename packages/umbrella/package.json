@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -164,6 +164,10 @@
     "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"
+    },
+    "./chart/heatmap-chart": {
+      "types": "./dist/chart/heatmap-chart.d.ts",
+      "default": "./dist/chart/heatmap-chart.js"
     },
     "./chart/line-chart": {
       "types": "./dist/chart/line-chart.d.ts",
@@ -796,10 +800,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.12",
-    "@c2n/phosphor-icons": "1.0.12",
-    "@c2n/task-icons": "1.0.12",
-    "@c2n/theme": "1.0.12",
+    "@c2n/core": "1.0.13",
+    "@c2n/phosphor-icons": "1.0.13",
+    "@c2n/task-icons": "1.0.13",
+    "@c2n/theme": "1.0.13",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
