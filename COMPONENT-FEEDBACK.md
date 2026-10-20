@@ -36,6 +36,17 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
   to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
 
+### `c2-table` cannot be focused from outside
+
+- **Severity:** gap
+- **Hit while:** adding a `c2-action-bar` to the Orders admin example (`apps/examples/orders-admin-angular`), 2026-10-20.
+- **What happens:** a bulk action empties the selection, which hides the action bar and the button that had focus,
+  so focus drops to the body. Focus belongs back on the table, but `table.focus()` does nothing: the host has no
+  `tabindex`, no `delegatesFocus` and no `focus()` override, and the roving cell is inside the shadow root. The
+  example leaves focus where the browser puts it.
+- **Where the fix belongs:** `packages/components/table` — `override focus(options)` that focuses the cell holding
+  the roving tabindex (the one `#pendingFocus` already targets), with a test.
+
 ### Charts have no time markers or annotated ranges
 
 - **Severity:** gap

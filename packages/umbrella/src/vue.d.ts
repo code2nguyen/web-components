@@ -10,6 +10,7 @@
 // It also re-exports the composables of table, which import Vue.
 
 import '@c2n/accordion/vue'
+import '@c2n/action-bar/vue'
 import '@c2n/attachment/vue'
 import '@c2n/autocomplete/vue'
 import '@c2n/avatar/vue'

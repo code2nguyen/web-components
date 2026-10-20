@@ -6,6 +6,7 @@
 //     import '@c2n/components/button'
 
 export * from './accordion.js'
+export * from './action-bar.js'
 export * from './attachment.js'
 export * from './autocomplete.js'
 export * from './avatar.js'

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import type { TableEventMap } from '@c2n/components/table'
+import type { Table, TableEventMap } from '@c2n/components/table'
 import type { TabsEventMap } from '@c2n/components/tabs'
 import { C2_FORM_ACCESSORS } from '@c2n/angular'
 import { toast } from '@c2n/components/toast'
@@ -71,14 +71,17 @@ const FILTERS: { id: Filter; label: string }[] = [
            only work through a property binding, which is why they are written as [rowKey] / [emptyMessage]
            below. React 19 hides this difference by checking the property first; Angular does not. -->
       <c2-table
+        #table
         class="orders"
         [rows]="visible()"
         [rowKey]="'id'"
         [emptyMessage]="'No orders match this filter'"
-        selection="single"
+        selection="multiple"
+        checkbox-selection
         sortable
         stripe
         (row-click)="handleRowClick($event)"
+        (selection-change)="handleSelectionChange($event)"
       >
         <c2-table-column field="id" header="Order" width="130px" pinned="start"></c2-table-column>
         <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
@@ -87,6 +90,13 @@ const FILTERS: { id: Filter; label: string }[] = [
         <c2-table-column field="total" header="Total" width="130px" align="end" format="currency" currency="USD"></c2-table-column>
         <c2-table-column field="placed" header="Placed" width="130px" format="date"></c2-table-column>
       </c2-table>
+
+      <!-- The bar shows while count is above zero and floats over the bottom of the page. It does not own the
+           selection: (clear), its × button or Escape, is where the table's selection is emptied. -->
+      <c2-action-bar [count]="checked().length" (clear)="clearChecked(table)">
+        <c2-button class="ghost" (click)="refundChecked(table)">Refund</c2-button>
+        <c2-button (click)="advanceChecked(table)">Advance status</c2-button>
+      </c2-action-bar>
 
       <!-- open is a plain property, so the dialog is driven by state rather than by calling show() on an element ref. -->
       <c2-modal [open]="!!selected()" (close)="selected.set(null)">
@@ -127,6 +137,8 @@ export class App {
   protected readonly query = signal('')
   protected readonly openOnly = signal(false)
   protected readonly selected = signal<Order | null>(null)
+  /** Keys of the rows ticked in the table, for the bulk actions. */
+  protected readonly checked = signal<string[]>([])
 
   protected readonly visible = computed(() => {
     const needle = this.query().trim().toLowerCase()
@@ -145,6 +157,10 @@ export class App {
 
   protected handleFilterChange(event: Event): void {
     this.filter.set((event as TabsEventMap['selection-change']).detail.value as Filter)
+  }
+
+  protected handleSelectionChange(event: Event): void {
+    this.checked.set((event as TableEventMap['selection-change']).detail.value)
   }
 
   protected handleRowClick(event: Event): void {
@@ -173,5 +189,29 @@ export class App {
     this.orders.update((orders) => orders.map((candidate) => (candidate.id === order.id ? { ...candidate, status } : candidate)))
     this.selected.set(null)
     toast.show({ variant: 'success', heading: order.id, message: `Status is now ${status}.` })
+  }
+
+  protected advanceChecked(table: HTMLElement): void {
+    const next: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: 'shipped', shipped: 'shipped', refunded: 'refunded' }
+    this.updateChecked(table, (order) => next[order.status], 'advanced')
+  }
+
+  protected refundChecked(table: HTMLElement): void {
+    this.updateChecked(table, () => 'refunded', 'refunded')
+  }
+
+  /**
+   * Empties the selection, which hides the action bar and its buttons with it. Focus should go back to the table
+   * then, but `c2-table` cannot be focused from outside yet (see COMPONENT-FEEDBACK.md).
+   */
+  protected clearChecked(table: HTMLElement): void {
+    ;(table as Table).clearSelection()
+  }
+
+  private updateChecked(table: HTMLElement, status: (order: Order) => OrderStatus, verb: string): void {
+    const keys = new Set(this.checked())
+    this.orders.update((orders) => orders.map((order) => (keys.has(order.id) ? { ...order, status: status(order) } : order)))
+    this.clearChecked(table)
+    toast.show({ variant: 'success', heading: `${keys.size} orders ${verb}`, message: 'The table shows their new status.' })
   }
 }

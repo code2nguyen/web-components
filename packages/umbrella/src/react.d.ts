@@ -10,6 +10,7 @@
 // It also re-exports the hooks of table, which import React.
 
 import '@c2n/accordion/react'
+import '@c2n/action-bar/react'
 import '@c2n/attachment/react'
 import '@c2n/autocomplete/react'
 import '@c2n/avatar/react'

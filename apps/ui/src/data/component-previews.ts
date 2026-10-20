@@ -8,6 +8,9 @@ export const componentPreviews: Record<string, string> = {
   <c2-details label="Shipping" expanded>Ships in 3–5 days.</c2-details>
   <c2-details label="Returns">Free within 30 days.</c2-details>
 </c2-accordion>`,
+  'action-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
+  <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
+</div>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
   autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,

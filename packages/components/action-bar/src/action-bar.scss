@@ -1,0 +1,143 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-action-bar,
+  $theme: (
+    position: sticky,
+    inset-bottom: 16px,
+    z-index: 10,
+    container--background: #ffffff,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 8px,
+    container--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    container--padding: 6px 6px 6px 16px,
+    container--gap: 12px,
+    container--max-width: calc(100% - 32px),
+    container--offset: 8px,
+    container--transition-duration: 150ms,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    label--color: #18181b,
+    divider--border-left: 1px solid #e4e4e7,
+    divider--height: 20px,
+    actions--gap: 8px,
+    clear--size: 28px,
+    clear--border-radius: 6px,
+    clear--color: #71717a,
+    clear__hover--background: #f4f4f5,
+    clear__hover--color: #18181b,
+    clear__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    clear-icon--size: 16px,
+  )
+);
+
+// The host is a zero-height strip pinned to the bottom of its scroll container; the bar floats above it, over the
+// content, so it takes no room in the layout whether it shows or not.
+:host {
+  display: block;
+  position: css.cssVar(position);
+  bottom: css.cssVar(inset-bottom);
+  z-index: css.cssVar(z-index);
+  height: 0;
+  pointer-events: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.bar {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
+  width: max-content;
+  max-width: css.cssVar(container--max-width);
+  padding: css.cssVar(container--padding);
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  box-shadow: css.cssVar(container--box-shadow);
+  pointer-events: auto;
+  translate: -50% 0;
+  transition:
+    opacity css.cssVar(container--transition-duration) ease,
+    translate css.cssVar(container--transition-duration) ease,
+    visibility 0s linear;
+}
+
+// Closed: faded, slid down and invisible, which also takes the bar and its slotted actions out of the Tab order.
+// Visibility flips only once the fade has finished.
+:host(:not(:state(open))) .bar {
+  opacity: 0;
+  translate: -50% css.cssVar(container--offset);
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, 0s, css.cssVar(container--transition-duration);
+}
+
+.label {
+  flex: none;
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  color: css.cssVar(label--color);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.divider {
+  flex: none;
+  align-self: center;
+  height: css.cssVar(divider--height);
+  border-left: css.cssVar(divider--border-left);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  min-width: 0;
+}
+
+.clear {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: css.cssVar(clear--size);
+  height: css.cssVar(clear--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(clear--border-radius);
+  background: transparent;
+  color: css.cssVar(clear--color);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(clear__hover--background);
+    color: css.cssVar(clear__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(clear__focus--outline);
+    outline-offset: 0;
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(clear-icon--size);
+    height: css.cssVar(clear-icon--size);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  :host(:not(:state(open))) .bar {
+    translate: -50% 0;
+  }
+}

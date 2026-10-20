@@ -67,6 +67,44 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-action-bar': {
+    html: `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:520px;max-width:100%;height:112px;padding-bottom:16px;box-sizing:border-box"><c2-action-bar count="3"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar></div>`,
+    presets: [
+      {
+        name: 'Emphasized',
+        description: 'A dark floating bar that stands apart from a light page, as in Gmail and Linear.',
+        css: {
+          '--c2-action-bar__container--background': '#18181b',
+          '--c2-action-bar__container--color': '#fafafa',
+          '--c2-action-bar__container--border': '1px solid #27272a',
+          '--c2-action-bar__label--color': '#fafafa',
+          '--c2-action-bar__divider--border-left': '1px solid #3f3f46',
+          '--c2-action-bar__clear--color': '#a1a1aa',
+          '--c2-action-bar__clear__hover--background': '#27272a',
+          '--c2-action-bar__clear__hover--color': '#fafafa',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded surface and clear button.',
+        css: {
+          '--c2-action-bar__container--border-radius': '999px',
+          '--c2-action-bar__container--padding': '6px 6px 6px 20px',
+          '--c2-action-bar__clear--border-radius': '999px',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Tighter padding and a smaller count, no divider: for dense tables.',
+        css: {
+          '--c2-action-bar__container--padding': '4px 4px 4px 12px',
+          '--c2-action-bar__container--gap': '8px',
+          '--c2-action-bar__label--font-size': '12px',
+          '--c2-action-bar__divider--border-left': 'none',
+        },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [

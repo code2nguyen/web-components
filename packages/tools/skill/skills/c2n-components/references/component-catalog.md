@@ -152,6 +152,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Layout
 
 - **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
+- **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it.
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface.
 - **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
