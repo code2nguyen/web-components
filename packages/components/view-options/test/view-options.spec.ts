@@ -54,11 +54,20 @@ test('a second press on the trigger closes the panel', async ({ page, renderScen
 test('a slotted trigger replaces the Display button', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-view-options>${fields}<button slot="trigger">View</button></c2-view-options>`)
   await expect(trigger(page)).toHaveCount(0)
+  // Left out of the shadow root, not kept as slot fallback: WebKit exposes fallback content beside the slotted node.
+  await expect(page.locator('c2-view-options #default-trigger')).toHaveCount(0)
   // The author's own markup is left as written until the user acts: a server rendered it without these attributes.
   await expect(page.getByRole('button', { name: 'View' })).not.toHaveAttribute('aria-expanded')
   await page.getByRole('button', { name: 'View' }).click()
   await expect(panel(page)).toBeVisible()
   await expect(page.getByRole('button', { name: 'View' })).toHaveAttribute('aria-expanded', 'true')
+})
+
+test('removing the slotted trigger brings the Display button back', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-view-options>${fields}<button slot="trigger">View</button></c2-view-options>`)
+  await expect(trigger(page)).toHaveCount(0)
+  await page.getByRole('button', { name: 'View' }).evaluate((button) => button.remove())
+  await openPanel(page)
 })
 
 test('the layout switch changes the layout and, on a board, relabels grouping as columns and rows', async ({ page, renderScenario }) => {

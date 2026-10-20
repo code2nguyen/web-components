@@ -232,6 +232,12 @@ export class ViewOptions extends LitElement {
   @state() private childToggles: ViewToggleConfig[] = []
   @state() private hasExtra = false
 
+  /**
+   * Whether the app slotted its own trigger. The Display button is then left out of the shadow root rather than kept as
+   * the slot's fallback, which WebKit still exposes to assistive technology next to the slotted trigger.
+   */
+  @state() private hasSlottedTrigger = false
+
   private readonly internals = this.attachInternals()
 
   /** A declarative shadow root at construction: the first client render must match the server's, which saw no children. */
@@ -345,6 +351,7 @@ export class ViewOptions extends LitElement {
   }
 
   private syncAnchor = () => {
+    this.hasSlottedTrigger = (this.triggerSlot?.assignedElements({ flatten: true }).length ?? 0) > 0
     void this.syncTriggerAria()
     // Re-render so the overlay is anchored to the new trigger; the anchor is read at render, not kept as state.
     if (this.hasUpdated) this.requestUpdate()
@@ -511,7 +518,10 @@ export class ViewOptions extends LitElement {
 
   protected override willUpdate() {
     // Read the children before the first render, so it does not need a second one when the slot reports them.
-    if (!this.hasUpdated && !this.serverRendered) this.readChildren()
+    if (!this.hasUpdated && !this.serverRendered) {
+      this.readChildren()
+      this.hasSlottedTrigger = !!this.querySelector(':scope > [slot="trigger"]')
+    }
   }
 
   protected override firstUpdated() {
@@ -705,9 +715,13 @@ export class ViewOptions extends LitElement {
     const view = this.view
     const changed = this.changed
     return html`<slot name="trigger" @slotchange=${this.syncAnchor} @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}
-        ><c2-button id="default-trigger" class="trigger" part="trigger"
-          >${displayIcon}${this.msg.t('display')}${changed ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing}</c2-button
-        ></slot
+        >${
+          this.hasSlottedTrigger
+            ? nothing
+            : html`<c2-button id="default-trigger" class="trigger" part="trigger"
+                >${displayIcon}${this.msg.t('display')}${changed ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing}</c2-button
+              >`
+        }</slot
       >
       <c2-overlay
         id="overlay"
