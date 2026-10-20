@@ -67,7 +67,9 @@ test('removing the slotted trigger brings the Display button back', async ({ pag
   await renderScenario(`<c2-view-options>${fields}<button slot="trigger">View</button></c2-view-options>`)
   await expect(trigger(page)).toHaveCount(0)
   await page.getByRole('button', { name: 'View' }).evaluate((button) => button.remove())
+  await expect(trigger(page)).toHaveAttribute('aria-haspopup', 'dialog')
   await openPanel(page)
+  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true')
 })
 
 test('the layout switch changes the layout and, on a board, relabels grouping as columns and rows', async ({ page, renderScenario }) => {

@@ -352,9 +352,10 @@ export class ViewOptions extends LitElement {
 
   private syncAnchor = () => {
     this.hasSlottedTrigger = (this.triggerSlot?.assignedElements({ flatten: true }).length ?? 0) > 0
-    void this.syncTriggerAria()
-    // Re-render so the overlay is anchored to the new trigger; the anchor is read at render, not kept as state.
+    // Re-render so the overlay is anchored to the new trigger (the anchor is read at render, not kept as state), then
+    // describe that trigger: the Display button may only exist after this render.
     if (this.hasUpdated) this.requestUpdate()
+    void this.updateComplete.then(() => this.syncTriggerAria())
   }
 
   /** `aria-haspopup` / `aria-expanded` go on the element with the button role: inside a `c2-*` trigger's shadow root. */
@@ -714,15 +715,16 @@ export class ViewOptions extends LitElement {
   override render() {
     const view = this.view
     const changed = this.changed
-    return html`<slot name="trigger" @slotchange=${this.syncAnchor} @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}
-        >${
-          this.hasSlottedTrigger
-            ? nothing
-            : html`<c2-button id="default-trigger" class="trigger" part="trigger"
-                >${displayIcon}${this.msg.t('display')}${changed ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing}</c2-button
-              >`
-        }</slot
-      >
+    // The Display button sits beside the slot, not inside it as fallback content: browsers disagree on whether
+    // fallback content stays exposed, and comes back, while something is assigned to the slot.
+    return html`<slot name="trigger" @slotchange=${this.syncAnchor} @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}></slot>
+      ${
+        this.hasSlottedTrigger
+          ? nothing
+          : html`<c2-button id="default-trigger" class="trigger" part="trigger" @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}
+              >${displayIcon}${this.msg.t('display')}${changed ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing}</c2-button
+            >`
+      }
       <c2-overlay
         id="overlay"
         .anchor=${this.triggerElement ?? undefined}
