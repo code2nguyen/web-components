@@ -96,7 +96,7 @@ test('applies a typed absolute range and remembers it', async ({ page, renderSce
 
   await expect(dialog).toBeHidden()
   await expect(host).toHaveAttribute('data-events', JSON.stringify([{ from: '2026-10-20T09:00', to: '2026-10-20T17:30', timeZone: 'UTC' }]))
-  await expect(host.locator('#trigger .label')).toHaveText('Oct 20, 09:00 AM → Oct 20, 05:30 PM')
+  await expect(host.locator('#trigger .label')).toHaveText('Oct 20, 9:00 AM → 5:30 PM')
   await expect(host.locator('#trigger .time-zone')).toHaveText('UTC')
 
   const again = await open(page)

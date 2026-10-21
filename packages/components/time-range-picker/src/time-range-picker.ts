@@ -348,10 +348,21 @@ export class TimeRangePicker extends LitElement {
     if (last) return this.msg.t('last', this.spanLabel(last.amount, last.unit))
     const named = NAMED[`${from}|${to}` as keyof typeof NAMED]
     if (named) return this.msg.t(named)
-    return `${this.endLabel(from)} → ${this.endLabel(to)}`
+    return `${this.endLabel(from)} → ${this.endLabel(to, this.sameDay(from, to))}`
   }
 
-  private endLabel(expression: string): string {
+  /** Whether both ends are wall clocks on the same day in the zone, so the end can be written as a time alone. */
+  private sameDay(from: string, to: string) {
+    if (isRelative(from) || isRelative(to) || isDateOnly(from) || isDateOnly(to)) return false
+    const start = resolveTime(from, this.options())
+    const end = resolveTime(to, this.options())
+    if (start === null || end === null) return false
+    const a = wallClockAt(start, this.zone)
+    const b = wallClockAt(end, this.zone)
+    return a.year === b.year && a.month === b.month && a.day === b.day
+  }
+
+  private endLabel(expression: string, timeOnly = false): string {
     if (expression === 'now' || isRelative(expression)) return expression
     const instant = resolveTime(expression, this.options())
     if (instant === null) return expression
@@ -359,10 +370,10 @@ export class TimeRangePicker extends LitElement {
     const dateOnly = isDateOnly(expression)
     const format: Intl.DateTimeFormatOptions = {
       timeZone: this.zone || undefined,
-      month: 'short',
-      day: 'numeric',
-      year: sameYear ? undefined : 'numeric',
-      hour: dateOnly ? undefined : '2-digit',
+      month: timeOnly ? undefined : 'short',
+      day: timeOnly ? undefined : 'numeric',
+      year: sameYear || timeOnly ? undefined : 'numeric',
+      hour: dateOnly ? undefined : 'numeric',
       minute: dateOnly ? undefined : '2-digit',
     }
     return this.formatter<Intl.DateTimeFormat>('date', format).format(instant)
