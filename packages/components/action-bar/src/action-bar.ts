@@ -1,4 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { query, state } from 'lit/decorators.js'
+import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -30,7 +32,9 @@ export interface ActionBar {
  * of the Tab order, so an action that empties the selection should move focus back to the collection.
  *
  * Put the actions in the default slot: `c2-button`s, a `c2-button-group toolbar` for one Tab stop with arrow keys,
- * or a menu of further actions.
+ * or a menu of further actions. The actions stay on one line. Where the bar is 480px wide or less (a phone), the count
+ * and the clear button share the top row and the actions take a full-width row below; actions that still do not fit
+ * scroll sideways, and the edge with more actions past it fades.
  *
  * @tag c2-action-bar
  *
@@ -50,7 +54,7 @@ export interface ActionBar {
  * @cssproperty {box-shadow} [--c2-action-bar__container--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {padding} [--c2-action-bar__container--padding=6px 6px 6px 16px]
  * @cssproperty {pixel} [--c2-action-bar__container--gap=12px] - Space between the count, the divider, the actions and the clear button.
- * @cssproperty {pixel} [--c2-action-bar__container--max-width=calc(100% - 32px)] - The actions wrap past this width.
+ * @cssproperty {pixel} [--c2-action-bar__container--max-width=calc(100% - 32px)] - Past this width the actions scroll sideways (or wrap, with `--c2-action-bar__actions--flex-wrap: wrap`).
  * @cssproperty {pixel} [--c2-action-bar__container--offset=8px] - How far the bar slides as it shows and hides.
  * @cssproperty {time} [--c2-action-bar__container--transition-duration=150ms]
  * @cssproperty {font-size} [--c2-action-bar__label--font-size=14px]
@@ -59,6 +63,8 @@ export interface ActionBar {
  * @cssproperty {border} [--c2-action-bar__divider--border-left=1px solid #e4e4e7] - The rule between the count and the actions; `none` removes it.
  * @cssproperty {pixel} [--c2-action-bar__divider--height=20px]
  * @cssproperty {pixel} [--c2-action-bar__actions--gap=8px]
+ * @cssproperty {string} [--c2-action-bar__actions--flex-wrap=nowrap] - `nowrap` keeps the actions on one line, scrolling sideways when the bar is narrower than they are; `wrap` stacks them onto further lines instead.
+ * @cssproperty {pixel} [--c2-action-bar__actions__fade--size=24px] - How far the fade reaches in from an edge that has more actions scrolled past it.
  * @cssproperty {pixel} [--c2-action-bar__clear--size=28px]
  * @cssproperty {border-radius} [--c2-action-bar__clear--border-radius=6px]
  * @cssproperty {color} [--c2-action-bar__clear--color=#71717a]
@@ -88,6 +94,13 @@ export class ActionBar extends LitElement {
    */
   private shownCount = 0
 
+  /** Which ends of the actions have more actions scrolled past them; that end fades. */
+  @state() private overflow = { start: false, end: false }
+
+  @query('.actions') private actionsElement?: HTMLElement
+
+  private resizeObserver?: ResizeObserver
+
   /** Fires `clear`, as the clear button and Escape do. */
   clear(): void {
     this.dispatchEvent(new Event('clear'))
@@ -100,7 +113,35 @@ export class ActionBar extends LitElement {
 
   override disconnectedCallback() {
     this.removeEventListener('keydown', this.handleKeydown)
+    this.resizeObserver?.disconnect()
+    this.resizeObserver = undefined
     super.disconnectedCallback()
+  }
+
+  protected override firstUpdated(): void {
+    this.observeActions()
+  }
+
+  /** Watches the actions box and every action in it, so the fades follow a resize or an action changing width. */
+  private observeActions = (): void => {
+    const actions = this.actionsElement
+    if (!actions || typeof ResizeObserver === 'undefined') return
+    this.resizeObserver ??= new ResizeObserver(this.measureOverflow)
+    this.resizeObserver.disconnect()
+    this.resizeObserver.observe(actions)
+    // Observing measures once, after layout. Measuring here instead would flush styles before `updated` marks the bar
+    // open, and an open bar would then slide in rather than start in place.
+    for (const action of actions.querySelector('slot')?.assignedElements() ?? []) this.resizeObserver.observe(action)
+  }
+
+  private measureOverflow = (): void => {
+    const actions = this.actionsElement
+    if (!actions) return
+    // `scrollLeft` counts down from 0 in right-to-left, so its magnitude is the distance from the start.
+    const scrolled = Math.abs(actions.scrollLeft)
+    const start = scrolled > 1
+    const end = scrolled + actions.clientWidth < actions.scrollWidth - 1
+    if (start !== this.overflow.start || end !== this.overflow.end) this.overflow = { start, end }
   }
 
   private handleKeydown = (event: KeyboardEvent): void => {
@@ -128,7 +169,9 @@ export class ActionBar extends LitElement {
       <div class="bar">
         <span class="label"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
         <span class="divider" aria-hidden="true"></span>
-        <div class="actions"><slot></slot></div>
+        <div class=${classMap({ actions: true, 'fade-start': this.overflow.start, 'fade-end': this.overflow.end })} @scroll=${this.measureOverflow}>
+          <slot @slotchange=${this.observeActions}></slot>
+        </div>
         <button type="button" class="clear" aria-label=${this.msg.t('clear')} @click=${this.clear}>
           <slot name="clear-icon"
             ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
