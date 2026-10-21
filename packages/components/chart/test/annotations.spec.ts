@@ -17,7 +17,7 @@ async function boxes(page: import('@playwright/test').Page): Promise<{ plot: { l
         const marker = box.querySelector<HTMLElement>('.annotation-marker')
         const dot = marker && !marker.hidden ? marker.getBoundingClientRect() : null
         return {
-          hidden: box.hidden,
+          hidden: box.hidden !== false,
           left: rect.left - plot.left,
           width: rect.width,
           top: rect.top - plot.top,
