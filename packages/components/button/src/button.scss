@@ -13,6 +13,7 @@
     container--gap: 8px,
     container--border-radius: 6px,
     container--border: 1px solid transparent,
+    container--box-shadow: none,
     container--background-color: variables.$color-blue,
     container--color: #ffffff,
     container--font-size: 14px,
@@ -21,6 +22,7 @@
     container__hover--background-color: rgb(1, 84, 184),
     container__hover--color: null,
     container__hover--border: null,
+    container__hover--box-shadow: null,
 
     container__active--background-color: rgb(1, 70, 154),
     container__selected--background-color: null,
@@ -63,6 +65,7 @@
   padding-right: css.cssVar(container--padding-right);
   border: css.cssVar(container--border);
   border-radius: css.cssVar(container--border-radius);
+  box-shadow: css.cssVar(container--box-shadow);
   background-color: css.cssVar(container--background-color);
   color: css.cssVar(container--color);
   font-family: inherit;
@@ -73,13 +76,14 @@
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  will-change: background-color, color, border-color;
-  transition: animation.standard(background-color), animation.standard(color), animation.standard(border-color);
+  will-change: background-color, color, border-color, box-shadow;
+  transition: animation.standard(background-color), animation.standard(color), animation.standard(border-color), animation.standard(box-shadow);
 
   &:hover:not(:disabled) {
     background-color: css.cssVar(container__hover--background-color, container--background-color);
     color: css.cssVar(container__hover--color, container--color);
     border: css.cssVar(container__hover--border, container--border);
+    box-shadow: css.cssVar(container__hover--box-shadow, container--box-shadow);
   }
 
   &:active:not(:disabled) {

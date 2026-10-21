@@ -114,14 +114,16 @@ test('replaces prefix with the custom running icon and restores it', async ({ pa
   await expect(page.getByTestId('running-icon')).not.toBeVisible()
 })
 
-test('applies consumer theme variables to size, hover, focus and selected state', async ({ page, scenario, tab }) => {
+test('applies consumer theme variables to size, shadow, hover, focus and selected state', async ({ page, scenario, tab }) => {
   await scenario('themed')
   const button = page.getByRole('button', { name: 'Save', exact: true })
   await expect(button).toHaveCSS('height', '48px')
   await expect(button).toHaveCSS('border-radius', '24px')
   await expect(button).toHaveCSS('background-color', 'rgb(20, 30, 40)')
+  await expect(button).toHaveCSS('box-shadow', 'rgb(1, 2, 3) 0px 2px 4px 0px')
   await button.hover()
   await expect(button).toHaveCSS('background-color', 'rgb(40, 50, 60)')
+  await expect(button).toHaveCSS('box-shadow', 'rgb(4, 5, 6) 0px 6px 12px 0px')
   await page.getByRole('button', { name: 'Before', exact: true }).focus()
   await tab()
   await expect(button).toHaveCSS('outline-width', '3px')
