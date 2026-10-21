@@ -1,0 +1,38 @@
+---
+title: 'Chord chart gallery'
+description: 'Currency transfers, customer switching, orders by market and migration drawn as chord diagrams.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ChordChart } from '@c2n/components/chart/chord-chart'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-chord-chart source-field="from" target-field="to" value-field="amount" data='[{"from":"EUR","to":"USD","amount":42.1},{"from":"EUR","to":"GBP","amount":18.4},{"from":"USD","to":"EUR","amount":31.6},{"from":"USD","to":"JPY","amount":14.8},{"from":"GBP","to":"EUR","amount":21},{"from":"GBP","to":"USD","amount":15.5},{"from":"JPY","to":"USD","amount":9.9}]'></c2-chord-chart>
+```
+
+```html tag=MdxCodeBlock,label=Customer switching
+<style>
+  .chord-switching { width: 100%; --c2-chart--height: 300px; --c2-chart__arc--width: 20px; --c2-chart__arc--gap: 2; --c2-chart__ribbon--opacity: 0.4; --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #db2777; --c2-chart__series-3--color: #059669; --c2-chart__series-4--color: #d97706; }
+</style>
+<c2-chord-chart class="chord-switching" ribbon-color="gradient" data='[{"source":"Basic","target":"Plus","value":820},{"source":"Basic","target":"Business","value":140},{"source":"Plus","target":"Basic","value":310},{"source":"Plus","target":"Business","value":460},{"source":"Business","target":"Plus","value":120},{"source":"Business","target":"Enterprise","value":95},{"source":"Enterprise","target":"Business","value":18}]'></c2-chord-chart>
+```
+
+```html tag=MdxCodeBlock,label=Orders by market
+<style>
+  .chord-markets { width: 100%; --c2-chart--height: 320px; --c2-chart__arc--width: 10px; --c2-chart__arc--gap: 4; }
+</style>
+<c2-chord-chart class="chord-markets" layout="bipartite" ribbon-color="target" sort="desc" data='[{"source":"Q1","target":"Canada","value":4.1},{"source":"Q1","target":"China","value":6.2},{"source":"Q1","target":"Germany","value":3.9},{"source":"Q2","target":"Canada","value":3.6},{"source":"Q2","target":"China","value":7.4},{"source":"Q2","target":"Germany","value":4.4},{"source":"Q3","target":"Canada","value":4.8},{"source":"Q3","target":"China","value":5.1},{"source":"Q3","target":"Germany","value":5.2},{"source":"Q4","target":"Canada","value":5.5},{"source":"Q4","target":"China","value":8},{"source":"Q4","target":"Germany","value":6.1}]'></c2-chord-chart>
+```
+
+```html tag=MdxCodeBlock,label=With a legend
+<style>
+  .chord-legend { width: 100%; --c2-chart--height: 320px; --c2-chart__arc--width: 16px; --c2-chart__ribbon--opacity: 0.65; }
+</style>
+<c2-chord-chart class="chord-legend" labels="none" legend="bottom" legend-action="toggle" sort="desc" data='[{"source":"Africa","target":"Europe","value":3.2},{"source":"Asia","target":"Europe","value":4.1},{"source":"Asia","target":"North America","value":5.6},{"source":"Asia","target":"Oceania","value":1.9},{"source":"Europe","target":"North America","value":1.4},{"source":"Latin America","target":"North America","value":6.3},{"source":"Latin America","target":"Europe","value":1.7},{"source":"Europe","target":"Oceania","value":0.6}]'></c2-chord-chart>
+```
+
+</GalleryGrid>

@@ -30,3 +30,19 @@ const en = {
 
 /** The heatmap's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const heatmapMessages = defineMessages('heatmap-chart', en)
+
+const chordEn = {
+  flow: 'Flow',
+  from: 'From',
+  to: 'To',
+  outgoing: 'Outgoing',
+  incoming: 'Incoming',
+  share: 'Share of total',
+  flowName: (source: string, target: string) => `${source} → ${target}`,
+  summary: (groups: string) => `Chord diagram of ${groups}`,
+  roleDescription: 'chord diagram',
+  groupAnnouncement: (group: string, outgoing: string, incoming: string) => `${group}: outgoing ${outgoing}, incoming ${incoming}`,
+}
+
+/** The chord chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const chordMessages = defineMessages('chord-chart', chordEn)

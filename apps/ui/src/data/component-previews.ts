@@ -94,6 +94,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-chip>Product</c2-chip>
   <c2-chip>Marketing</c2-chip>
 </c2-chip-group>`,
+  'chord-chart': `<c2-chord-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__arc--width:8px;--c2-chart--font-size:10px" aria-label="Transfers between currency wallets" data='[{"source":"EUR","target":"USD","value":42},{"source":"EUR","target":"GBP","value":18},{"source":"USD","target":"EUR","value":32},{"source":"USD","target":"JPY","value":15},{"source":"GBP","target":"EUR","value":21},{"source":"GBP","target":"USD","value":15},{"source":"JPY","target":"USD","value":10}]'></c2-chord-chart>`,
   'code-editor': `<c2-code-editor style="width:300px;--c2-code-editor--min-height:132px;--c2-code-editor--font-size:12px" language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) =>
   \`hello \${name}\`
 

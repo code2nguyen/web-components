@@ -1,0 +1,102 @@
+---
+title: 'Chord chart'
+description: 'Flows between groups around a circle, where one row is one flow from a source to a target.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-chord-chart'
+apiTags: ['c2-chord-chart', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ChordChart } from '@c2n/components/chart/chord-chart'
+
+A chord diagram shows how much moves between a set of groups: money between currency wallets, customers
+between products, orders from quarters to countries. One row is one flow, read through `source-field`,
+`target-field` and `value-field`. Each group is an arc whose length is everything that leaves and reaches it,
+and each flow is a ribbon between two arcs, as wide as the flow. Rows for the same pair are summed. It is drawn
+by ECharts' chord series, so hovering an arc lights up the ribbons it touches.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/chord-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .chord-plot {
+    width: 100%;
+    --c2-chart--height: 340px;
+  }
+</style>
+
+<div data-label="Transfers between wallets">
+  <c2-chord-chart
+    class="chord-plot"
+    source-field="from"
+    target-field="to"
+    value-field="amount"
+    data='[{"from":"EUR","to":"USD","amount":42.1},{"from":"EUR","to":"GBP","amount":18.4},{"from":"EUR","to":"CHF","amount":9.7},{"from":"EUR","to":"JPY","amount":6.2},{"from":"USD","to":"EUR","amount":31.6},{"from":"USD","to":"GBP","amount":12.2},{"from":"USD","to":"JPY","amount":14.8},{"from":"GBP","to":"EUR","amount":21},{"from":"GBP","to":"USD","amount":15.5},{"from":"CHF","to":"EUR","amount":11.3},{"from":"CHF","to":"USD","amount":4.6},{"from":"JPY","to":"USD","amount":9.9},{"from":"JPY","to":"EUR","amount":3.8}]'
+  ></c2-chord-chart>
+</div>
+
+<div data-label="Quarters to countries">
+  <c2-chord-chart
+    class="chord-plot"
+    layout="bipartite"
+    ribbon-color="target"
+    data='[{"source":"Q1","target":"Canada","value":4.1},{"source":"Q1","target":"France","value":2.8},{"source":"Q1","target":"Japan","value":2.2},{"source":"Q2","target":"Canada","value":3.6},{"source":"Q2","target":"France","value":3.3},{"source":"Q2","target":"Japan","value":2.9},{"source":"Q3","target":"Canada","value":4.8},{"source":"Q3","target":"France","value":3.9},{"source":"Q3","target":"Japan","value":3.4},{"source":"Q4","target":"Canada","value":5.5},{"source":"Q4","target":"France","value":4.6},{"source":"Q4","target":"Japan","value":3}]'
+  ></c2-chord-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects, and the three fields may be dotted paths. A row is left out when it has no source or no
+target, when its value is not a positive number, or when it flows from a group to itself: none of those can be
+drawn as a ribbon. Two flows between the same groups in opposite directions are two ribbons, and the tooltip of
+either shows both.
+
+The `groups` and `flows` getters return what the chart drew (each group's outgoing, incoming and total, each
+flow with its reverse), for a table beside the chart or an export. `buildChordModel(rows, options)` is the same
+computation as a plain function.
+
+### Layout and order
+
+`layout="circle"` (the default) places the groups in the order they first appear, starting at twelve o'clock.
+`layout="bipartite"` is for flows between two different kinds of thing: the groups that send go on the right
+half and the groups that only receive go on the left, reversed so that the two sides face each other. `sort`
+(`asc` or `desc`) orders the groups by their total; in a bipartite layout each side is sorted on its own.
+
+### Colour
+
+Each group takes the next colour of `--c2-chart__series-1…8--color` in order of first appearance, and keeps it
+when the groups are sorted or one is hidden. `ribbon-color` decides which end of a flow its ribbon shows:
+`source` (the default) makes it easy to follow where something went, `target` where it came from, and
+`gradient` blends the two.
+
+### Interaction
+
+Hovering an arc emphasises it and its ribbons and fires `group-hover`; hovering a ribbon fires `ribbon-hover`.
+Clicking an arc fires `group-click` and highlights the group (its key goes to `highlighted` and
+`series-highlight` fires), dimming the ribbons it does not touch; a second click clears it, and
+`preventDefault()` on `group-click` keeps the highlight as it is. Clicking a ribbon fires `ribbon-click`.
+
+The labels already name every group, so the legend is off by default. With `legend="bottom"` and
+`legend-action="toggle"`, an entry hides its group and every flow that touches it (`setGroupVisible(key,
+false)` does the same from code); the last two groups stay on.
+
+The plot is one tab stop: the arrow keys move between groups and announce their totals, Enter highlights the
+focused group and Escape clears. A visually hidden table lists every flow for screen readers.
+
+### Styling
+
+`--c2-chart__arc--width` sets the thickness of the arcs (`12px`), `--c2-chart__arc--gap` the gap between them in
+degrees (`3`), and `--c2-chart__ribbon--opacity` and `--c2-chart__ribbon__hover--opacity` how strongly the
+ribbons show at rest and under the pointer. `labels="none"` hands the room the labels took back to the circle.

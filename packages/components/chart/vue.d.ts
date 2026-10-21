@@ -17,6 +17,7 @@ import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import type { ChordChart } from '@c2n/chart/chord-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
@@ -167,6 +168,34 @@ declare module 'vue' {
       }
     >
     'c2-chart-tooltip': DefineComponent<C2Props<ChartTooltip>>
+    'c2-chord-chart': DefineComponent<
+      C2Props<ChordChart> & {
+        'source-field'?: unknown
+        'target-field'?: unknown
+        'value-field'?: unknown
+        'ribbon-color'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onGroupHover?: (event: EventOf<ChordChart, 'group-hover'>) => void
+        onRibbonHover?: (event: EventOf<ChordChart, 'ribbon-hover'>) => void
+        onRibbonClick?: (event: EventOf<ChordChart, 'ribbon-click'>) => void
+        onGroupClick?: (event: EventOf<ChordChart, 'group-click'>) => void
+        onTooltipChange?: (event: EventOf<ChordChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<ChordChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<ChordChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<ChordChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<ChordChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<ChordChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<ChordChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<ChordChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<ChordChart, 'point-click'>) => void
+      }
+    >
     'c2-gauge-chart': DefineComponent<
       C2Props<GaugeChart> & {
         'start-angle'?: unknown

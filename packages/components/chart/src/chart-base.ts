@@ -862,7 +862,9 @@ export abstract class ChartBase extends LitElement {
   protected handleEngineViewChange(_detail: { zoom: number }): void {}
 
   /** The engine reports a hovered datum, or `null` when the pointer leaves. A chart with its own events extends this. */
-  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void {
+  protected handleEngineHover(
+    detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string; dataType?: string } | null,
+  ): void {
     if (!detail || !this.frame) {
       this.#tooltipContext = null
       this.#setHover(null)
@@ -998,7 +1000,7 @@ export abstract class ChartBase extends LitElement {
    * The engine reports a clicked datum: `point-click` fires, and unless a listener cancels it the clicked series is
    * highlighted, or the highlight cleared when it already was. A chart with its own events extends this.
    */
-  protected handleEngineClick(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void {
+  protected handleEngineClick(detail: { index: number; seriesIndex: number; name?: string; component?: string; dataType?: string }): void {
     const point = this.pointAt(detail.index, detail.seriesIndex)
     if (!point) return
     const event = new CustomEvent<ChartPointEventDetail>('point-click', { detail: point, cancelable: true })

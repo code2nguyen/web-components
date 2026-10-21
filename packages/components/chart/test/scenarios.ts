@@ -22,6 +22,7 @@ import '../src/bubble-chart'
 import '../src/candlestick-chart'
 import '../src/overlap-chart'
 import * as overlapLayout from '../src/overlap-layout'
+import '../src/chord-chart'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -247,6 +248,12 @@ function build(): void {
           <c2-chart-series field="d"></c2-chart-series>
         </c2-overlap-chart>`
       break
+    case 'chord':
+      main.innerHTML = `<c2-chord-chart id="chart" source-field="from" target-field="to" value-field="amount"></c2-chord-chart>`
+      break
+    case 'chord-bipartite':
+      main.innerHTML = `<c2-chord-chart id="chart" layout="bipartite" legend="bottom" legend-action="toggle"></c2-chord-chart>`
+      break
     case 'family':
       main.innerHTML = `
         <c2-line-chart style="--c2-chart--color:rgb(1,2,3)" x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-line-chart>
@@ -319,7 +326,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -345,6 +352,26 @@ function build(): void {
       { sets: ['web', 'api'], size: 2150 },
       { sets: ['mobile', 'api'], size: 1020 },
       { sets: ['web', 'mobile', 'api'], size: 740 },
+    ]
+  } else if (scenario === 'chord') {
+    chart.data = [
+      { from: 'EUR', to: 'USD', amount: 40 },
+      { from: 'USD', to: 'EUR', amount: 30 },
+      { from: 'EUR', to: 'GBP', amount: 20 },
+      { from: 'GBP', to: 'USD', amount: 10 },
+      // A second row for the same pair is summed, and rows that cannot be a ribbon are left out.
+      { from: 'EUR', to: 'USD', amount: 2 },
+      { from: 'GBP', to: 'GBP', amount: 5 },
+      { from: 'USD', to: 'JPY', amount: 0 },
+      { from: 'JPY', amount: 3 },
+    ]
+  } else if (scenario === 'chord-bipartite') {
+    chart.data = [
+      { source: 'Q1', target: 'France', value: 3 },
+      { source: 'Q1', target: 'Japan', value: 1 },
+      { source: 'Q2', target: 'France', value: 2 },
+      { source: 'Q2', target: 'Canada', value: 4 },
+      { source: 'Q3', target: 'Japan', value: 5 },
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
@@ -460,7 +487,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart',
     ),
   ),
 ).then(() => {

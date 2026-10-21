@@ -165,6 +165,10 @@
       "types": "./dist/chart/chart-tooltip.d.ts",
       "default": "./dist/chart/chart-tooltip.js"
     },
+    "./chart/chord-chart": {
+      "types": "./dist/chart/chord-chart.d.ts",
+      "default": "./dist/chart/chord-chart.js"
+    },
     "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"
