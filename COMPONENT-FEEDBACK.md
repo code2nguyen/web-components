@@ -47,18 +47,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/chart` — an `annotations` property (`{ x, x2?, label, tone }[]`)
   drawn by both engines, with the markers reachable from the keyboard and announced in the chart's description.
 
-### Bridging `@c2n/theme` tokens on `:root` loses to the theme's own dark fallback when the OS is dark
-
-- **Severity:** papercut
-- **Hit while:** bridging the Log Lens palette onto `--c2-theme--*`, 2026-09-28.
-- **What happens:** `tokens.css` sets the dark values under `@media (prefers-color-scheme: dark)
-:root:not([data-theme='light']):not(.c2-light)` — specificity 0,3,0. An app that follows the documented advice
-  (override tokens on `:root` and under its dark selector, e.g. `:root[data-theme='dark']`, 0,2,0) keeps its tokens
-  on a light OS but silently gets the stock dark palette whenever the OS is dark and the page is in dark mode. The
-  example raises its selector with two dummy `:not()`s to match.
-- **Where the fix belongs:** `packages/tools/theme` — wrap the generated token blocks in a cascade layer (or
-  `:where()`) so any unlayered app override wins regardless of specificity, and say so in the theming guide.
-
 ### `c2-button` has no shadow variable and `c2-link-button` no border variable
 
 - **Severity:** gap
@@ -130,6 +118,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-table`                      | Wrapping took a row-height variable and two `::part` overrides. The `wrap` attribute does it in one, turns windowing off, and pads top-aligned text with `--c2-table__cell__wrap--padding`.                                                                                                                                     | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | A `cell-slot` column needed a child per row. Slots are now named by display line, `cell:{line}:{field}` (breaking), and `range-change`/`renderedRange` report the rendered `rows` (`line`, `key`, `row`), so a framework renders children only for the window.                                                                  | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | The grid's keydown handler cancelled Enter/Space on any control inside a cell, so slotted buttons could not be pressed from the keyboard, and it stole arrow keys from text inputs. Controls now own those keys. No upgrade-order race reproduced (pre-upgrade properties, children before and after rows).                     | 2026-10-03                                                                                                                                                                                                   |
+| `@c2n/theme`                    | The OS dark fallback (`:root:not([data-theme='light']):not(.c2-light)`, specificity 0,3,0) beat an app's `:root` token overrides, so a bridged palette turned stock dark whenever the OS was dark. `tokens.css` and `base.css` now sit in the `c2n-theme` cascade layer, which any unlayered rule beats.                        | 2026-10-21                                                                                                                                                                                                   |
 
 ## Won't fix
 

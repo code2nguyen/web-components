@@ -36,6 +36,10 @@ import '@c2n/theme/theme.css' // tokens + base theme
 
 Set `data-theme="dark"` (or the `c2-dark` class) on `<html>` or on any subtree; without it the OS preference applies. `data-theme="light"` / `c2-light` opts a subtree out.
 
+## Cascade layer
+
+`tokens.css` and `base.css` put every rule in the `c2n-theme` [cascade layer](https://developer.mozilla.org/docs/Web/CSS/@layer). An unlayered rule beats a layered one whatever its specificity or source order, so a plain `:root { --c2-theme--color-primary: … }` overrides the token in light mode, under `data-theme="dark"` and under the OS dark fallback alike, and so does a component variable you set yourself. If your app puts its own styles in layers, declare `c2n-theme` first so it stays the lowest: `@layer c2n-theme, base, components;`.
+
 ## Layers
 
 1. **Tokens** — `--c2-theme--*`, set by the app.
