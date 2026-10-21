@@ -1,12 +1,11 @@
 'use client'
 
-import type { ButtonGroup } from '@c2n/components/button-group'
-import type { DateInput } from '@c2n/components/date-input'
 import type { Select } from '@c2n/components/select'
 import type { ThemeSelect } from '@c2n/components/theme-select'
-import { useEffect, useRef, useState } from 'react'
+import type { TimeRangePicker, TimeRangePreset } from '@c2n/components/time-range-picker'
+import { useRef } from 'react'
 import { useReplay } from '@/providers/ReplayProvider'
-import { ENVIRONMENT_IDS, RELATIVE_RANGES, useScope, type EnvironmentId, type RelativeRange } from '@/providers/ScopeProvider'
+import { ENVIRONMENT_IDS, RELATIVE_RANGES, useScope, type EnvironmentId, type InvestigationRange, type RelativeRange } from '@/providers/ScopeProvider'
 import { useAppContext, type ThemePreference } from '@/providers/AppProviders'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
 import { useElementProperties } from '@/components/c2n/element-bindings'
@@ -14,30 +13,33 @@ import { DEFAULT_REPLAY_MAX_TICK } from '@/lib/replay/replay-clock'
 
 const ENVIRONMENT_LABELS: Record<EnvironmentId, string> = { production: 'Production', staging: 'Staging' }
 const RANGE_LABELS: Record<RelativeRange, string> = { '30m': 'Last 30 minutes', '2h': 'Last 2 hours', '24h': 'Last 24 hours' }
+const RANGE_PRESETS: TimeRangePreset[] = RELATIVE_RANGES.map((range) => ({ from: `now-${range}`, to: 'now', label: RANGE_LABELS[range] }))
+const DAY_START = 'T00:00:00.000Z'
+const DAY_END = 'T23:59:59.999Z'
 
-function datePart(value: string): string {
-  return value.slice(0, 10)
+/** The picker's ends for a scope range: whole UTC days as dates, so the trigger reads "Aug 16 → Aug 17". */
+function pickerRange(range: InvestigationRange): { from: string; to: string } {
+  if (range.kind === 'relative') return { from: `now-${range.value}`, to: 'now' }
+  if (range.from.endsWith(DAY_START) && range.to.endsWith(DAY_END)) return { from: range.from.slice(0, 10), to: range.to.slice(0, 10) }
+  return { from: range.from, to: range.to }
 }
+
+// The picker only applies ends it could read, so a date-shaped end here is a real date. (The module is not imported
+// at runtime: elements are registered on the client by C2Registry, and this file also renders on the server.)
+const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
 
 export function GlobalScopeControls({ navigationOpen, onNavigationToggle }: Readonly<{ navigationOpen: boolean; onNavigationToggle: () => void }>) {
   const { scope, setEnvironment, setRelativeRange, setAbsoluteRange } = useScope()
   const replay = useReplay()
   const { theme, setTheme, announce } = useAppContext()
   const environmentRef = useRef<Select>(null)
-  const rangeRef = useRef<Select>(null)
-  const modeRef = useRef<ButtonGroup>(null)
-  const fromRef = useRef<DateInput>(null)
-  const toRef = useRef<DateInput>(null)
+  const rangeRef = useRef<TimeRangePicker>(null)
   const themeRef = useRef<ThemeSelect>(null)
-  const [rangeMode, setRangeMode] = useState<'relative' | 'absolute'>(scope.range.kind)
-  const [from, setFrom] = useState(scope.range.kind === 'absolute' ? datePart(scope.range.from) : '2026-08-16')
-  const [to, setTo] = useState(scope.range.kind === 'absolute' ? datePart(scope.range.to) : '2026-08-17')
   const replayComplete = replay.tick >= DEFAULT_REPLAY_MAX_TICK
+  const range = pickerRange(scope.range)
 
-  useEffect(() => setRangeMode(scope.range.kind), [scope.range.kind])
   useElementProperties(environmentRef, 'c2-select', { value: [scope.environmentId] }, [scope.environmentId])
-  useElementProperties(rangeRef, 'c2-select', { value: [scope.range.kind === 'relative' ? scope.range.value : '2h'] }, [scope.range])
-  useElementProperties(modeRef, 'c2-button-group', { value: rangeMode === 'absolute' ? '1' : '0' }, [rangeMode])
+  useElementProperties(rangeRef, 'c2-time-range-picker', { presets: RANGE_PRESETS, from: range.from, to: range.to }, [range.from, range.to])
   useElementProperties(themeRef, 'c2-theme-select', { modes: ['system', 'light', 'dark'], value: theme }, [theme])
 
   useCustomEvent(environmentRef, 'selection-change', (event) => {
@@ -48,22 +50,28 @@ export function GlobalScopeControls({ navigationOpen, onNavigationToggle }: Read
     }
   })
 
-  useCustomEvent(rangeRef, 'selection-change', (event) => {
-    const value = event.detail.value[0]
-    if (RELATIVE_RANGES.some((candidate) => candidate === value)) {
-      setRelativeRange(value as RelativeRange)
-      announce(`Time range changed to ${RANGE_LABELS[value as RelativeRange]}.`)
+  useCustomEvent(rangeRef, 'change', (event) => {
+    const { from, to } = event.detail
+    const relative = RELATIVE_RANGES.find((candidate) => from === `now-${candidate}` && to === 'now')
+    if (relative) {
+      setRelativeRange(relative)
+      announce(`Time range changed to ${RANGE_LABELS[relative]}.`)
+      return
     }
+    // Any other range (a typed span, a shift, two calendar days) is pinned to the instants it covers now.
+    const resolved = rangeRef.current?.resolve()
+    if (!resolved) return
+    const start = isDateOnly(from) ? `${from}${DAY_START}` : resolved.from.toISOString()
+    const end = isDateOnly(to) ? `${to}${DAY_END}` : resolved.to.toISOString()
+    if (setAbsoluteRange(start, end)) {
+      announce(`Absolute range applied from ${start.slice(0, 16)} to ${end.slice(0, 16)} UTC.`)
+      return
+    }
+    // The scope kept its range, so the picker goes back to showing it.
+    Object.assign(event.currentTarget as TimeRangePicker, pickerRange(scope.range))
+    announce('The end must be after the start.')
   })
 
-  useCustomEvent(modeRef, 'change', (event) => {
-    const nextMode = event.detail.value === '1' ? 'absolute' : 'relative'
-    setRangeMode(nextMode)
-    if (nextMode === 'relative') setRelativeRange(scope.range.kind === 'relative' ? scope.range.value : '2h')
-  })
-
-  useCustomEvent(fromRef, 'input', () => setFrom(fromRef.current?.value ?? ''))
-  useCustomEvent(toRef, 'input', () => setTo(toRef.current?.value ?? ''))
   useCustomEvent(themeRef, 'theme-change', (event) => {
     const value = event.detail.value
     if (value === 'system' || value === 'light' || value === 'dark') {
@@ -71,11 +79,6 @@ export function GlobalScopeControls({ navigationOpen, onNavigationToggle }: Read
       announce(`Theme changed to ${value}.`)
     }
   })
-
-  const applyAbsoluteRange = () => {
-    const accepted = setAbsoluteRange(`${from}T00:00:00.000Z`, `${to}T23:59:59.999Z`)
-    announce(accepted ? `Absolute range applied from ${from} to ${to}.` : 'The end date must be after the start date.')
-  }
 
   return (
     <section className="global-scope" aria-label="Global investigation controls">
@@ -103,26 +106,7 @@ export function GlobalScopeControls({ navigationOpen, onNavigationToggle }: Read
 
       <div className="scope-field scope-time">
         <span className="scope-label">Time</span>
-        <c2-button-group ref={modeRef} selection="single" appearance="segmented" size="s" aria-label="Time range mode">
-          <c2-button selected={rangeMode === 'relative'}>Relative</c2-button>
-          <c2-button selected={rangeMode === 'absolute'}>Absolute</c2-button>
-        </c2-button-group>
-        {rangeMode === 'relative' ? (
-          <c2-select ref={rangeRef} aria-label="Relative time range" placeholder="Time range">
-            {RELATIVE_RANGES.map((range) => (
-              <c2-list-item key={range} value={range} selected={scope.range.kind === 'relative' && scope.range.value === range}>
-                {RANGE_LABELS[range]}
-              </c2-list-item>
-            ))}
-          </c2-select>
-        ) : (
-          <div className="absolute-range">
-            <c2-date-input ref={fromRef} aria-label="Start date" value={from} max={to} />
-            <span aria-hidden="true">–</span>
-            <c2-date-input ref={toRef} aria-label="End date" value={to} min={from} />
-            <c2-button onClick={applyAbsoluteRange}>Apply</c2-button>
-          </div>
-        )}
+        <c2-time-range-picker ref={rangeRef} aria-label="Time range" time-zone="UTC" nav />
       </div>
 
       <div className="replay-controls" aria-label="Deterministic replay">

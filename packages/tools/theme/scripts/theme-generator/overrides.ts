@@ -241,6 +241,18 @@ export const overrides: Record<string, Override> = {
   '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The date-time popup floats over the page like any popover.
   '--c2-date-time-picker__picker--box-shadow': { token: 'shadow-md' },
+  // The time range popup floats over the page like any popover; a running auto-refresh is outlined in the accent
+  // and marked by a semantic "live" green, which has no token.
+  '--c2-time-range-picker__popup--box-shadow': { token: 'shadow-md' },
+  '--c2-time-range-picker__refresh__active--border': { token: 'color-primary', value: '1px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-time-range-picker__live--color': { exclude: 'semantic success colour' },
+  // The From and To fields hold expressions such as now-1d/d, which read best in a monospace face whatever the app font.
+  '--c2-time-range-picker__input--font-family': { exclude: 'monospace for typed expressions' },
+  // The zone chip sits on a muted fill, where the muted text role drops below 4.5:1; a deeper mix of the ink keeps it.
+  '--c2-time-range-picker__time-zone--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
+  },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

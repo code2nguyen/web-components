@@ -93,11 +93,11 @@ export const COMPONENT_USAGE = defineComponentUsage([
     sourcePaths: [appSource('features/alerts/AlertRuleForm.tsx')],
   },
   {
-    tag: 'c2-date-input',
-    packageName: '@c2n/components/date-input',
-    purpose: 'Captures explicit investigation boundaries in a keyboard-accessible date field.',
+    tag: 'c2-time-range-picker',
+    packageName: '@c2n/components/time-range-picker',
+    purpose: 'Sets the shared investigation window: relative quick ranges, absolute UTC days and shift/zoom.',
     regions: ['global-scope'],
-    docsPath: docs('date-input'),
+    docsPath: docs('time-range-picker'),
     sourcePaths: [appSource('components/scope/GlobalScopeControls.tsx')],
   },
   {

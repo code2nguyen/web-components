@@ -173,6 +173,7 @@
         "../../components/textarea:build",
         "../../components/theme-select:build",
         "../../components/time-input:build",
+        "../../components/time-range-picker:build",
         "../../components/timeline:build",
         "../../components/toast:build",
         "../../components/todo-list:build",
