@@ -351,3 +351,59 @@ test('attribute columns fit their widest values and only message fills remaining
     .poll(() => viewer.locator('[data-index="0"] [data-attribute="source"]').evaluate((cell) => cell.getBoundingClientRect().width))
     .toBeGreaterThan(sizes.widths[1])
 })
+
+test('scrollToStart opens a replaced buffer at the first entry and keeps it there while appending', async ({ page, scenario }) => {
+  await scenario('many')
+  const viewer = page.locator('c2-log-viewer')
+  const scrollTop = () => viewer.evaluate((element) => element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop)
+  await expect.poll(scrollTop).toBeGreaterThan(0)
+  await viewer.evaluate((element) => {
+    const log = element as LogViewer
+    log.clear()
+    log.appendEntries(Array.from({ length: 2000 }, (_, index) => ({ message: `replaced ${index}` })))
+    log.scrollToStart()
+  })
+  await expect(viewer.locator('[data-index="0"]')).toContainText('replaced 0')
+  expect(await scrollTop()).toBe(0)
+  await viewer.evaluate((element) => (element as LogViewer).appendEntries({ message: 'later' }))
+  await viewer.evaluate((element) => (element as LogViewer).updateComplete)
+  expect(await scrollTop()).toBe(0)
+
+  // An empty viewport is also its own end: a pinned start still holds while a stream fills it.
+  await viewer.evaluate((element) => {
+    const log = element as LogViewer
+    log.clear()
+    log.scrollToStart()
+  })
+  for (let batch = 0; batch < 3; batch++) {
+    await viewer.evaluate(
+      (element, batch) => (element as LogViewer).appendEntries(Array.from({ length: 200 }, (_, index) => ({ message: `stream ${batch}-${index}` }))),
+      batch,
+    )
+    await viewer.evaluate((element) => (element as LogViewer).updateComplete)
+  }
+  expect(await scrollTop()).toBe(0)
+  await viewer.evaluate((element) => (element as LogViewer).scrollToEnd())
+  await expect.poll(scrollTop).toBeGreaterThan(0)
+})
+
+test('entry-click reports the clicked entry and its retained index, not the copy button', async ({ page, scenario }) => {
+  await scenario('entries')
+  const viewer = page.locator('c2-log-viewer')
+  await viewer.evaluate((element) => {
+    const events: unknown[] = []
+    ;(window as unknown as { entryClicks: unknown[] }).entryClicks = events
+    document.addEventListener('entry-click', (event) => events.push((event as CustomEvent).detail))
+    ;(element as LogViewer).setFilter({ attributes: { source: 'api' } })
+  })
+  const clicks = () => page.evaluate(() => (window as unknown as { entryClicks: unknown[] }).entryClicks)
+  await viewer.locator('[data-index="2"] [data-attribute="message"]').click()
+  await expect.poll(clicks).toEqual([{ entry: { timestamp: '12:02', level: 'error', source: 'api', message: '<failed>' }, index: 2 }])
+  await page
+    .context()
+    .grantPermissions(['clipboard-read', 'clipboard-write'])
+    .catch(() => {})
+  await viewer.locator('[data-index="3"]').hover()
+  await viewer.locator('[data-index="3"] [part="copy-button"]').click()
+  expect(await clicks()).toHaveLength(1)
+})

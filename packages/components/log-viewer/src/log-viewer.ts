@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyDeclaration, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { columnOrder, matchesFilter, validateEntries, validateFilter } from './log-model.js'
 import type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
 import { LineIndex, textLayout, type TextLayout } from './log-position.js'
@@ -17,10 +18,27 @@ interface LayoutEntry {
   height: number
 }
 
+/** Detail of `entry-click`: the clicked entry and its position among the retained entries (`entryCount`), whatever the filter. */
+export interface LogViewerEntryEventDetail {
+  entry: LogEntry
+  index: number
+}
+
+/** Events fired by {@link LogViewer}, keyed for `addEventListener`. */
+export interface LogViewerEventMap {
+  'entry-click': CustomEvent<LogViewerEntryEventDetail>
+}
+
+export interface LogViewer {
+  addEventListener: TypedAddEventListener<LogViewer, LogViewerEventMap>
+  removeEventListener: TypedRemoveEventListener<LogViewer, LogViewerEventMap>
+}
+
 /**
  * A text-only, variable-height virtual log viewport. Filters and search are controlled by the application.
  * With the viewport focused, Home jumps to the first entry and End follows the latest; Ctrl/Command variants also work.
  * @tag c2-log-viewer
+ * @event {CustomEvent<LogViewerEntryEventDetail>} entry-click - Fired when an entry is clicked, except on its copy button or after selecting text. Bubbles.
  * @cssproperty {CSS value} [--c2-log-viewer--height=480px] - Viewport height
  * @cssproperty {color} [--c2-log-viewer--background=#0b1220] - Terminal surface
  * @cssproperty {color} [--c2-log-viewer--color=#d3deee] - Text color
@@ -105,6 +123,8 @@ export class LogViewer extends LitElement {
   private signature = ''
   private resetAnchor = false
   private follow = true
+  // Set by scrollToStart(): appends keep the viewport at the top, even while it is also the bottom, until the user scrolls.
+  private pinned = false
   private appended = false
   private deferred = false
   private lastUpdate = -Infinity
@@ -177,10 +197,20 @@ export class LogViewer extends LitElement {
     this.requestUpdate()
   }
 
+  /** Scroll to the first matching entry and stop following appends until the user scrolls to the end or `scrollToEnd()` is called. */
+  scrollToStart(): void {
+    this.follow = false
+    this.pinned = true
+    this.viewTop = 0
+    if (this.viewport) this.viewport.scrollTop = 0
+    this.requestUpdate()
+  }
+
   /** Scroll to the newest matching content and resume following subsequent appends. */
   scrollToEnd(): void {
     if (this.viewport) this.viewTop = this.viewport.scrollTop
     this.follow = true
+    this.pinned = false
     this.requestUpdate()
   }
 
@@ -234,7 +264,8 @@ export class LogViewer extends LitElement {
     // Scroll events can arrive after a resize/update. Capture user movement before reflow anchors or tail following.
     const viewport = this.viewport
     // An append while resting at the bottom resumes following, as does any user movement that ends there.
-    if (this.hasUpdated && viewport && (Math.abs(viewport.scrollTop - this.viewTop) > 0.5 || (this.appended && !this.follow))) {
+    if (this.hasUpdated && viewport && (Math.abs(viewport.scrollTop - this.viewTop) > 0.5 || (this.appended && !this.follow && !this.pinned))) {
+      this.pinned = false
       this.viewTop = viewport.scrollTop
       this.follow = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
     }
@@ -443,6 +474,7 @@ export class LogViewer extends LitElement {
     this.hoveredSource = null
     this.viewLeft = viewport.scrollLeft
     if (echo) return
+    this.pinned = false
     this.viewTop = viewport.scrollTop
     this.follow = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
     if (!this.frame)
@@ -458,12 +490,7 @@ export class LogViewer extends LitElement {
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault()
       if (event.key === 'End') this.scrollToEnd()
-      else {
-        this.follow = false
-        this.viewTop = 0
-        viewport.scrollTo({ top: 0, behavior: 'instant' })
-        this.requestUpdate()
-      }
+      else this.scrollToStart()
       return
     }
     if (event.ctrlKey || event.metaKey) return
@@ -472,11 +499,23 @@ export class LogViewer extends LitElement {
     const distance = distances[event.key]
     if (distance === undefined) return
     event.preventDefault()
+    this.pinned = false
     // Native animated keyboard scrolling can race virtual reflow. Keep each vertical movement immediate.
     this.viewTop = Math.max(0, Math.min(viewport.scrollTop + distance, viewport.scrollHeight - viewport.clientHeight))
     this.follow = viewport.scrollHeight - this.viewTop - viewport.clientHeight <= 2
     viewport.scrollTo({ top: this.viewTop, behavior: 'instant' })
     this.requestUpdate()
+  }
+
+  private onClick(event: MouseEvent): void {
+    const path = event.composedPath()
+    if (path.some((node) => node instanceof HTMLElement && node.part.contains('copy-button'))) return
+    const row = path.find((node): node is HTMLElement => node instanceof HTMLElement && node.dataset.copySource !== undefined)
+    const entry = row ? this.entries[Number(row.dataset.copySource)] : undefined
+    // Releasing a text selection inside the entry is reading, not choosing it.
+    if (!row || !entry || String(document.getSelection() ?? '')) return
+    const index = Number(row.dataset.copySource)
+    this.dispatchEvent(new CustomEvent<LogViewerEntryEventDetail>('entry-click', { detail: { entry: { ...entry }, index }, bubbles: true, composed: true }))
   }
 
   private revealCopy(event: PointerEvent): void {
@@ -574,6 +613,7 @@ export class LogViewer extends LitElement {
         aria-label=${this.getAttribute('aria-label') ?? 'Log content'}
         @scroll=${this.onScroll}
         @keydown=${this.onKeyDown}
+        @click=${this.onClick}
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerleave=${this.onPointerLeave}
