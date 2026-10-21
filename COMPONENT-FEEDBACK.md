@@ -24,17 +24,14 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### `c2-log-viewer` can follow the end but cannot be sent to the start, or tell the app which entry was chosen
+### `c2-log-viewer` entries cannot be chosen from the keyboard
 
 - **Severity:** gap
-- **Hit while:** building the raw-log view of the Log Lens Next.js example (`apps/examples/log-lens-nextjs`), 2026-09-28.
-- **What happens:** replacing the buffer (`clear()` + `appendEntries()`) leaves the viewer following the newest
-  entry, because an empty viewport counts as "at the bottom". An analysis view wants to open at the first record;
-  the only public way there is calling `setFilter(null, 'filter')` afterwards for its anchor-reset side effect. The
-  viewer also fires no event for an entry, so a record cannot open a detail panel or be added to a filter from the
-  viewport — the app has to offer those actions somewhere else.
-- **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
-  to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
+- **Hit while:** adding `entry-click`, 2026-10-21.
+- **What happens:** the viewport is one focus stop that scrolls with the arrow keys; there is no current entry, so
+  `entry-click` (and anything an app hangs on it, such as a detail panel) is pointer-only.
+- **Where the fix belongs:** `packages/components/log-viewer` — a roving active entry (`aria-activedescendant` on the
+  viewport) moved by the arrow keys, and an `entry-activate` event on Enter, like `c2-table`'s `row-activate`.
 
 ### Charts have no time markers or annotated ranges
 
@@ -46,18 +43,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   approximates the plot's x scale (axes and padding shift it) and does not follow zoom.
 - **Where the fix belongs:** `packages/components/chart` — an `annotations` property (`{ x, x2?, label, tone }[]`)
   drawn by both engines, with the markers reachable from the keyboard and announced in the chart's description.
-
-### Bridging `@c2n/theme` tokens on `:root` loses to the theme's own dark fallback when the OS is dark
-
-- **Severity:** papercut
-- **Hit while:** bridging the Log Lens palette onto `--c2-theme--*`, 2026-09-28.
-- **What happens:** `tokens.css` sets the dark values under `@media (prefers-color-scheme: dark)
-:root:not([data-theme='light']):not(.c2-light)` — specificity 0,3,0. An app that follows the documented advice
-  (override tokens on `:root` and under its dark selector, e.g. `:root[data-theme='dark']`, 0,2,0) keeps its tokens
-  on a light OS but silently gets the stock dark palette whenever the OS is dark and the page is in dark mode. The
-  example raises its selector with two dummy `:not()`s to match.
-- **Where the fix belongs:** `packages/tools/theme` — wrap the generated token blocks in a cascade layer (or
-  `:where()`) so any unlayered app override wins regardless of specificity, and say so in the theming guide.
 
 ### `c2-button` has no shadow variable and `c2-link-button` no border variable
 
@@ -72,21 +57,11 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   `__hover`); `packages/components/link-button` — `--c2-link-button__container--border` (plus `__hover`), like
   `c2-button`'s. Then move the example onto them and drop the comments.
 
-### `c2-mask-input` cannot express a format whose optional part sits in the middle
-
-- **Severity:** gap
-- **Hit while:** adding a postcode field to the Account Form example (`apps/examples/basic-form-html`), 2026-10-14.
-- **What happens:** `?` makes the _rest_ of the mask optional, so a value whose variable part comes before a fixed
-  tail cannot be masked. UK postcodes (`M1 1AE`, `SW1A 1AA`: a 2–4 character outward code, then `9AA`) are the
-  common case. The example leaves the field unmasked (`mask=""`, free text) when the country is the UK.
-- **Where the fix belongs:** `packages/components/mask-input` — either optional groups (`A[*][*]* 9AA`, a group
-  skipped when the next typed character only fits what follows it) or an array of alternative masks tried in
-  order, as PrimeVue and Mantine allow. Then give the example its UK mask.
-
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                     |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `c2-mask-input`                 | `?` only made the _rest_ of a mask optional, so a format whose variable part sits in the middle (UK postcodes, `M1 1AE` / `SW1A 1AA`) could not be masked and the Account Form example left the UK postcode as free text.                                                                                                       | 2026-10-21, optional groups (`A[A]9[X] 9AA`), with browser tests; the example now masks UK postcodes.                                                                                                        |
 | `c2-sparkline`                  | `decorateOptions` passed `axes: []`; uPlot pads a short array back up to two _visible_ axes, so a 120×32 sparkline spent 52px on a y-axis gutter and drew its line in a 66px sliver.                                                                                                                                            | 2026-09-14, with a regression test asserting no axis element and a 116px plot.                                                                                                                               |
 | `c2-line-chart`, `c2-bar-chart` | `linePaths`/`barPaths` filled their cache from `loadUplot().then(…)` and returned synchronously, so the builder always arrived one microtask after uPlot read `paths`: every chart drew its first frame straight and `curve` only applied on a later rebuild.                                                                   | 2026-09-14, `loadedUplot()` + a test that the first frame of a `curve="step"` chart differs from linear.                                                                                                     |
 | `c2-bar-chart`                  | Grouped series were drawn on the same x and overlapped completely; `bar-gap` was being passed as uPlot's _minimum bar width in pixels_.                                                                                                                                                                                         | 2026-09-14, `disp.x0`/`disp.size` grouping + a test that both series' colours survive.                                                                                                                       |
@@ -130,6 +105,8 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-table`                      | Wrapping took a row-height variable and two `::part` overrides. The `wrap` attribute does it in one, turns windowing off, and pads top-aligned text with `--c2-table__cell__wrap--padding`.                                                                                                                                     | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | A `cell-slot` column needed a child per row. Slots are now named by display line, `cell:{line}:{field}` (breaking), and `range-change`/`renderedRange` report the rendered `rows` (`line`, `key`, `row`), so a framework renders children only for the window.                                                                  | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | The grid's keydown handler cancelled Enter/Space on any control inside a cell, so slotted buttons could not be pressed from the keyboard, and it stole arrow keys from text inputs. Controls now own those keys. No upgrade-order race reproduced (pre-upgrade properties, children before and after rows).                     | 2026-10-03                                                                                                                                                                                                   |
+| `c2-log-viewer`                 | Could follow the end but not be sent to the start (replacing the buffer left it following the newest entry), and fired no event for an entry, so a record could not open a detail panel.                                                                                                                                        | 2026-10-21, `scrollToStart()` (holds the top through appends until the reader scrolls) and a bubbling `entry-click` with `{ entry, index }`, each with a regression test.                                    |
+| `@c2n/theme`                    | The OS dark fallback (`:root:not([data-theme='light']):not(.c2-light)`, specificity 0,3,0) beat an app's `:root` token overrides, so a bridged palette turned stock dark whenever the OS was dark. `tokens.css` and `base.css` now sit in the `c2n-theme` cascade layer, which any unlayered rule beats.                        | 2026-10-21                                                                                                                                                                                                   |
 
 ## Won't fix
 
