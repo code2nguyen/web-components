@@ -175,6 +175,35 @@ export interface ChartRangeEventDetail {
   max: number
 }
 
+/** The colour family an annotation is drawn in, each with its own `--c2-chart__annotation__<tone>--color`. */
+export type ChartAnnotationTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
+
+/**
+ * A marker at one x value, or a shaded x range when `x2` is set, drawn over a cartesian chart's plot.
+ *
+ * `x` and `x2` are x values: what the chart's `x-field` holds (epoch milliseconds on a time chart), or the row index
+ * when there is no `x-field`, and always on the candlestick chart's category axis. The pair may be given in either order.
+ */
+export interface ChartAnnotation {
+  /** Where the marker sits, or where the range starts. */
+  x: number
+  /** Where the range ends. A marker without it is a single vertical line. */
+  x2?: number
+  /** What the marker means. It is the marker's accessible name and its title, so keep it short. */
+  label: string
+  /** The colour family. Defaults to `neutral`. */
+  tone?: ChartAnnotationTone
+  /** An application key handed back in `annotation-click`. */
+  id?: string
+}
+
+/** Detail of the `annotation-click` event. */
+export interface ChartAnnotationEventDetail {
+  annotation: ChartAnnotation
+  /** Position of the annotation in the `annotations` array. */
+  index: number
+}
+
 /** Detail of the `series-toggle` event. */
 export interface ChartSeriesToggleEventDetail {
   seriesIndex: number

@@ -93,6 +93,20 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
   </c2-line-chart>
 </div>
 
+<div data-label="Annotations">
+  <c2-line-chart
+    class="plot"
+    x-field="year"
+    label-field="year"
+    annotations='[{"x":2020,"label":"Covid-19 lockdowns","tone":"warning"},{"x":2022,"x2":2023,"label":"Stress-corrosion outages","tone":"danger"}]'
+    data='[{"year":2015,"nuclear":437.43,"wind":21.42,"solar":7.75},{"year":2016,"nuclear":403.2,"wind":21.38,"solar":8.66},{"year":2017,"nuclear":398.36,"wind":24.61,"solar":8.87},{"year":2018,"nuclear":412.94,"wind":28.6,"solar":11.15},{"year":2019,"nuclear":399.01,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"wind":45.43,"solar":24.87}]'
+  >
+    <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
 <div data-label="Custom legend + tooltip" data-energy-custom>
   <div class="energy-linked">
     <c2-line-chart
@@ -159,6 +173,28 @@ chart.maxPoints = 6
 for (const row of incomingYears) {
   chart.appendPoint(row.year, [row.nuclear, row.wind, row.solar])
 }
+```
+
+## Annotations
+
+`annotations` marks moments and periods on the plot: `{ x, label, tone }` draws a dashed rule with a marker at
+`x`, and adding `x2` shades the range between the two. `x` is an x value — what `x-field` holds (epoch milliseconds
+on a time chart, the year here), or the row index when there is no `x-field` — and `tone` (`neutral`, `info`, `success`, `warning`, `danger`)
+picks the colour, each set by its own `--c2-chart__annotation__<tone>--color`. The markers are placed by the
+engine's own scale after every draw, so they stay on their x through a resize, new data and a drag-to-zoom, and
+an annotation outside the visible window is hidden.
+
+Each marker is a button: Tab reaches it, its accessible name is the label and where it sits ("Stress-corrosion
+outages, 2022 to 2023"), and a click or Enter fires `annotation-click` with the entry and its index. The same
+property works on the area, bar, sparkline, scatter, bubble and candlestick charts; a horizontal bar chart draws
+the rule across the plot at its category.
+
+```js tag=CodeBlock
+chart.annotations = [
+  { x: Date.parse('2024-03-01T09:40Z'), label: 'Deploy 4.2', tone: 'info', id: 'deploy' },
+  { x: Date.parse('2024-03-01T10:05Z'), x2: Date.parse('2024-03-01T10:40Z'), label: 'Error surge', tone: 'danger' },
+]
+chart.addEventListener('annotation-click', (event) => openIncident(event.detail.annotation.id))
 ```
 
 ## Independent legend and tooltip

@@ -46,3 +46,12 @@ const chordEn = {
 
 /** The chord chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const chordMessages = defineMessages('chord-chart', chordEn)
+
+const chartEn = {
+  annotations: 'Annotations',
+  annotationAt: (label: string, at: string) => `${label}, ${at}`,
+  annotationRange: (label: string, from: string, to: string) => `${label}, ${from} to ${to}`,
+}
+
+/** The interface text every chart shares, in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const chartMessages = defineMessages('chart', chartEn)

@@ -68,7 +68,24 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
       })),
     [timeline],
   )
-  useElementProperties(chartRef, 'c2-bar-chart', { data }, [data])
+  // The detected chapters, drawn on the chart itself: a marker at each one's start, its span shaded when it lasts.
+  const chapters = useMemo(() => analysis.chapters.filter((chapter) => chapter.kind !== 'opening' && chapter.kind !== 'closing'), [analysis.chapters])
+  const annotations = useMemo(
+    () =>
+      chapters.map((chapter) => ({
+        x: chapter.start,
+        x2: chapter.end > chapter.start ? chapter.end : undefined,
+        label: chapter.title,
+        tone: chapter.tone,
+        id: chapter.id,
+      })),
+    [chapters],
+  )
+  useElementProperties(chartRef, 'c2-bar-chart', { data, annotations }, [data, annotations])
+  useCustomEvent(chartRef, 'annotation-click', (event) => {
+    const chapter = chapters[event.detail.index]
+    if (chapter) document.getElementById(chapterId(chapter))?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
   useCustomEvent(chartRef, 'point-click', (event) => {
     const bucket = timeline.buckets[event.detail.index]
     if (bucket)
@@ -80,7 +97,6 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
     actions.setLens({ window: { start: min, end: max, label: `${formatClock(min)}–${formatClock(max)}` } })
   })
 
-  const span = Math.max(1, analysis.end - analysis.start)
   const peak = timeline.buckets.reduce((best, bucket) => (bucket.problems > best.problems ? bucket : best), timeline.buckets[0])
 
   return (
@@ -90,7 +106,9 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
           <p className="ll-eyebrow">The file&apos;s rhythm</p>
           <h2>Volume and trouble over time</h2>
         </div>
-        <span className="ll-muted">Click a bar or drag across the chart to put that time in the lens · one bar = {formatDuration(timeline.bucketMs)}</span>
+        <span className="ll-muted">
+          Click a bar or drag across the chart to put that time in the lens · a dot marks a chapter · one bar = {formatDuration(timeline.bucketMs)}
+        </span>
       </div>
       <c2-bar-chart
         ref={chartRef}
@@ -109,26 +127,6 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
         <c2-chart-series field="warnings" label="Warnings" />
         <c2-chart-series field="other" label="Everything else" />
       </c2-bar-chart>
-      <div className="ll-chapter-strip" aria-label="Chapters on the timeline">
-        <span className="ll-chapter-strip__time">{formatClock(analysis.start)}</span>
-        <div className="ll-chapter-strip__track">
-          {analysis.chapters
-            .filter((chapter) => chapter.kind !== 'opening' && chapter.kind !== 'closing')
-            .map((chapter) => (
-              <c2-icon-button
-                key={chapter.id}
-                className={`ll-marker ll-marker--${chapter.tone}`}
-                style={{ left: `${((chapter.start - analysis.start) / span) * 100}%` }}
-                aria-label={`${chapter.title} at ${formatClock(chapter.start)}`}
-                tooltip={`${formatClock(chapter.start)} · ${chapter.title}`}
-                onClick={() => document.getElementById(chapterId(chapter))?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-              >
-                <ChapterIcon kind={chapter.kind} />
-              </c2-icon-button>
-            ))}
-        </div>
-        <span className="ll-chapter-strip__time">{formatClock(analysis.end)}</span>
-      </div>
     </c2-card>
   )
 }

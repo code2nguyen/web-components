@@ -324,6 +324,10 @@ export class BubbleChart extends EchartsChartBase {
     }
   }
 
+  protected override get drawsAnnotations(): boolean {
+    return true
+  }
+
   protected override coordinateSystem(context: ChartBuildContext): Record<string, unknown> {
     const { theme } = context
     const system = super.coordinateSystem(context) as { grid: Record<string, number>; xAxis: Record<string, unknown>; yAxis: Record<string, unknown> }

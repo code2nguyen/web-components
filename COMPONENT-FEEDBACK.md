@@ -36,17 +36,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
   to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
 
-### Charts have no time markers or annotated ranges
-
-- **Severity:** gap
-- **Hit while:** marking the detected story chapters (error surge, recovery, silent service) on the Log Lens rhythm
-  chart, 2026-09-28.
-- **What happens:** `c2-area-chart`/`c2-line-chart` cannot draw a vertical marker at an x value or shade an x range.
-  The example renders a separate strip of positioned `c2-icon-button` markers under the chart, which only
-  approximates the plot's x scale (axes and padding shift it) and does not follow zoom.
-- **Where the fix belongs:** `packages/components/chart` — an `annotations` property (`{ x, x2?, label, tone }[]`)
-  drawn by both engines, with the markers reachable from the keyboard and announced in the chart's description.
-
 ### Bridging `@c2n/theme` tokens on `:root` loses to the theme's own dark fallback when the OS is dark
 
 - **Severity:** papercut

@@ -2,12 +2,16 @@ import { LitElement, html, isServer, nothing, render, unsafeCSS, type CSSResultG
 import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import styles from './chart.scss?inline'
 import { ChartFrameBuilder, columnValue, type NormalizeContext } from './chart-data.js'
 import { ChartThemeController, PROBE_COLORS, type ChartTheme } from './chart-theme.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import { SERIES_CHANGE_EVENT, SERIES_TAG, type ChartSeries } from './chart-series.js'
+import { chartMessages } from './messages.js'
 import type {
+  ChartAnnotation,
+  ChartAnnotationEventDetail,
   ChartDataSource,
   ChartFrame,
   ChartInput,
@@ -48,6 +52,8 @@ const VIEW_ONLY_KEYS: ReadonlySet<string> = new Set([
   'hasLinkedLegend',
   'hasLinkedTooltip',
   'dataSource',
+  // Drawn in this component's own overlay, positioned from the engine's scale: never part of the engine options.
+  'annotations',
 ])
 
 /** One row of the legend. `series` and `index` are what a custom `renderLegendItem` is handed. */
@@ -99,6 +105,7 @@ export interface ChartEventMap {
   'range-change': CustomEvent<ChartRangeEventDetail>
   'series-toggle': CustomEvent<ChartSeriesToggleEventDetail>
   'series-highlight': CustomEvent<ChartSeriesHighlightEventDetail>
+  'annotation-click': CustomEvent<ChartAnnotationEventDetail>
 }
 
 /** Detail of `series-highlight`. */
@@ -154,6 +161,7 @@ export interface ChartBase {
  * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
  * @event {CustomEvent<ChartRangeEventDetail>} range-change - Fired after the user zooms or brushes. `detail.min` and `detail.max` are the new x bounds. Does not bubble.
  * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a series is hidden or shown, from the legend with `legend-action="toggle"` or through `setSeriesVisible`. Does not bubble.
+ * @event {CustomEvent<ChartAnnotationEventDetail>} annotation-click - Fired when an annotation's marker is clicked, or activated from the keyboard. `detail.annotation` is the entry and `detail.index` its position in `annotations`. Does not bubble.
  * @event {CustomEvent<ChartSeriesHighlightEventDetail>} series-highlight - Fired when the reader highlights a series, from the legend or by clicking it in the plot, or clears the highlight. `detail.key` names it, or is `null`. Does not bubble.
  *
  * @csspart frame - The outer flex column holding the legend and the plot area.
@@ -162,6 +170,11 @@ export interface ChartBase {
  * @csspart overlay - The non-interactive layer above the canvas that holds the tooltip and the actions.
  * @csspart tooltip - Component-owned bubble containing the `tooltip` slot and its generated fallback content.
  * @csspart actions - The container for the `actions` slot.
+ * @csspart annotations - The layer holding the annotations, above the plot and below the tooltip.
+ * @csspart annotation - One annotation: the box from `x` to `x2`, or a zero-width box at `x`.
+ * @csspart annotation-range - The shaded fill of a range annotation.
+ * @csspart annotation-line - The rule drawn at an annotation's `x`.
+ * @csspart annotation-marker - The focusable button at the top of an annotation's rule.
  * @csspart state - Shared message layer containing the `empty`, `loading`, or `error` slot and its fallback state.
  * @csspart legend - Component-owned container wrapping the `legend` slot and generated legend fallback.
  * @csspart legend-item - One legend entry, a toggle button.
@@ -219,6 +232,18 @@ export interface ChartBase {
  * @cssproperty {border-radius} [--c2-chart__tooltip--border-radius=6px] - Tooltip corner radius.
  * @cssproperty {box-shadow} [--c2-chart__tooltip--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)] - Tooltip shadow.
  * @cssproperty {pixel} [--c2-chart__tooltip--gap=6px] - Gap between tooltip rows.
+ *
+ * @cssproperty {color} [--c2-chart__annotation--color=#71717a] - Colour of a `neutral` annotation (the default tone).
+ * @cssproperty {color} [--c2-chart__annotation__info--color=#0265dc] - Colour of an `info` annotation.
+ * @cssproperty {color} [--c2-chart__annotation__success--color=#16a34a] - Colour of a `success` annotation.
+ * @cssproperty {color} [--c2-chart__annotation__warning--color=#d97706] - Colour of a `warning` annotation.
+ * @cssproperty {color} [--c2-chart__annotation__danger--color=#dc2626] - Colour of a `danger` annotation.
+ * @cssproperty {opacity} [--c2-chart__annotation-range--opacity=0.12] - Opacity of the shaded fill of a range annotation.
+ * @cssproperty {pixel} [--c2-chart__annotation-line--border-width=1px] - Width of an annotation's rule.
+ * @cssproperty {border-style} [--c2-chart__annotation-line--border-style=dashed] - Style of an annotation's rule.
+ * @cssproperty {pixel} [--c2-chart__annotation-marker--size=10px] - Diameter of an annotation's marker.
+ * @cssproperty {color} [--c2-chart__annotation-marker--border-color=#ffffff] - Ring drawn around a marker, so it stands out from the bars or lines behind it.
+ * @cssproperty {outline} [--c2-chart__annotation-marker__focus--outline=2px solid #0265dc] - Focus ring of a marker.
  *
  * @cssproperty {color} [--c2-chart__state--color=#71717a] - Colour of the empty, loading and error text.
  * @cssproperty {font-size} [--c2-chart__state--font-size=14px] - Font size of the empty, loading and error text.
@@ -312,6 +337,15 @@ export abstract class ChartBase extends LitElement {
   /** Defers loading the engine until the host first scrolls into view. */
   @property({ type: Boolean, attribute: 'lazy-render' }) lazyRender = false
 
+  /**
+   * Markers at an x value and shaded x ranges, drawn over the plot of a cartesian chart (line, area, bar, sparkline,
+   * scatter, bubble, candlestick) and placed by the engine's own x scale, so they follow the axes, a resize and a
+   * zoom. `x`/`x2` are x values: what `x-field` holds (epoch milliseconds on a time chart), else the row index. Each
+   * marker is a button, reachable with Tab and named by its label and x, that fires `annotation-click`. Charts
+   * without an x axis ignore it.
+   */
+  @property({ converter: jsonPropertyConverter }) annotations?: ChartAnnotation[]
+
   /** Renders the tooltip body from a function instead of the `tooltip` slot. Property only. */
   @property({ attribute: false }) renderTooltip?: (context: ChartTooltipContext) => unknown
 
@@ -329,6 +363,7 @@ export abstract class ChartBase extends LitElement {
   @state() private themeRevision = 0
 
   protected themeController = new ChartThemeController(this, () => this.handleThemeChange())
+  protected readonly chartMsg = new LocalizeController(this, chartMessages, () => this.locale)
   protected frameBuilder = new ChartFrameBuilder()
   protected frame?: ChartFrame
 
@@ -400,6 +435,11 @@ export abstract class ChartBase extends LitElement {
    * always replaces.
    */
   protected replacesOptions(_changed: PropertyValues): boolean {
+    return false
+  }
+
+  /** Whether this chart type has an x axis to place `annotations` against. The cartesian charts turn it on. */
+  protected get drawsAnnotations(): boolean {
     return false
   }
 
@@ -527,6 +567,7 @@ export abstract class ChartBase extends LitElement {
     }
     this.#syncTooltipPopover()
     this.#renderLegendEntries()
+    if (changed.has('annotations')) this.#placeAnnotations()
     if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
   }
 
@@ -750,6 +791,7 @@ export abstract class ChartBase extends LitElement {
         click: (detail) => this.handleEngineClick(detail),
         rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
         viewChange: (detail) => this.handleEngineViewChange(detail),
+        draw: () => this.#placeAnnotations(),
       })
       this.adapter = adapter
       this.#optionsDirty = false
@@ -757,6 +799,7 @@ export abstract class ChartBase extends LitElement {
       this.restoreVisibility(adapter)
       this.internals.states.add(`engine-${this.engineName}`)
       this.internals.states.add('ready')
+      this.#placeAnnotations()
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {
       this.engineFailed = true
@@ -1059,6 +1102,7 @@ export abstract class ChartBase extends LitElement {
           <!-- No bindings inside: Lit never patches this node, so the engine's canvas survives updates. -->
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
+            ${this.renderAnnotations()}
             <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
             <div class="actions" part="actions">${this.renderActionsExtras()}<slot name="actions"></slot></div>
           </div>
@@ -1070,6 +1114,101 @@ export abstract class ChartBase extends LitElement {
       <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
       <slot class="definitions" @slotchange=${this.#handleSlotChange}></slot>
     `
+  }
+
+  /** The annotation layer. Every box starts hidden; `#placeAnnotations` shows and positions it once the engine can say where. */
+  private renderAnnotations(): TemplateResult | typeof nothing {
+    const annotations = this.drawsAnnotations ? (this.annotations ?? []) : []
+    if (annotations.length === 0) return nothing
+    return html`
+      <div class="annotations" part="annotations" role="group" aria-label=${this.chartMsg.t('annotations')}>
+        ${annotations.map((annotation, index) => {
+          const ranged = annotation.x2 !== undefined && annotation.x2 !== annotation.x
+          return html`
+            <div class="annotation annotation--${annotation.tone ?? 'neutral'}" part="annotation" hidden>
+              ${ranged ? html`<div class="annotation-range" part="annotation-range"></div>` : nothing}
+              <div class="annotation-line" part="annotation-line"></div>
+              <button
+                class="annotation-marker"
+                part="annotation-marker"
+                type="button"
+                title=${annotation.label}
+                aria-label=${this.annotationName(annotation)}
+                @click=${() => this.#handleAnnotationClick(annotation, index)}
+              ></button>
+            </div>
+          `
+        })}
+      </div>
+    `
+  }
+
+  /** The marker's accessible name: its label, then where it sits, in the tooltip's x format. */
+  protected annotationName(annotation: ChartAnnotation): string {
+    // A row's label names its x, as on the axis; any other value is formatted the way the tooltip formats x.
+    const at = (value: number) => {
+      const frame = this.frame
+      if (frame?.labels) {
+        for (let index = 0; index < frame.length; index += 1) if (frame.x[index] === value && frame.labels[index] !== undefined) return frame.labels[index]
+      }
+      return this.formatX(value)
+    }
+    if (annotation.x2 === undefined || annotation.x2 === annotation.x) return this.chartMsg.t('annotationAt', annotation.label, at(annotation.x))
+    const [from, to] = annotation.x2 < annotation.x ? [annotation.x2, annotation.x] : [annotation.x, annotation.x2]
+    return this.chartMsg.t('annotationRange', annotation.label, at(from), at(to))
+  }
+
+  #handleAnnotationClick(annotation: ChartAnnotation, index: number): void {
+    this.dispatchEvent(new CustomEvent<ChartAnnotationEventDetail>('annotation-click', { detail: { annotation, index } }))
+  }
+
+  /**
+   * Positions every annotation box from the engine's scale. Runs after each engine draw, so a streaming tick, a resize
+   * or a zoom moves the markers with the data; it writes styles straight to the nodes and never schedules an update.
+   * A box wholly outside the visible x window is hidden, and a range that crosses an edge is clipped to the plot.
+   */
+  #placeAnnotations(): void {
+    const boxes = this.renderRoot?.querySelectorAll<HTMLElement>('.annotations > .annotation')
+    const annotations = this.annotations ?? []
+    if (!boxes || boxes.length === 0) return
+    const values = annotations.flatMap((annotation) => [annotation.x, annotation.x2 ?? annotation.x])
+    const geometry = this.adapter?.xGeometry?.(values) ?? null
+    boxes.forEach((box, index) => {
+      const start = geometry?.offsets[index * 2]
+      const end = geometry?.offsets[index * 2 + 1]
+      if (!geometry || start === null || start === undefined || end === null || end === undefined) {
+        box.hidden = true
+        return
+      }
+      const { plot, horizontal } = geometry
+      const extent = horizontal ? plot.width : plot.height
+      const low = Math.min(start, end)
+      const high = Math.max(start, end)
+      // Half a pixel of slack keeps a marker on the very first or last x, which can land a rounding error outside.
+      if (high < -0.5 || low > extent + 0.5) {
+        box.hidden = true
+        return
+      }
+      const from = Math.max(0, low)
+      const size = Math.min(extent, high) - from
+      box.hidden = false
+      box.classList.toggle('annotation--vertical', !horizontal)
+      // The marker belongs to the annotation's own `x`; a range clipped at that edge loses it rather than misplace it.
+      const marker = box.querySelector<HTMLElement>('.annotation-marker')
+      if (marker) marker.hidden = start < -0.5 || start > extent + 0.5
+      box.style.setProperty('--_marker', `${start - from}px`)
+      if (horizontal) {
+        box.style.left = `${plot.left + from}px`
+        box.style.top = `${plot.top}px`
+        box.style.width = `${size}px`
+        box.style.height = `${plot.height}px`
+      } else {
+        box.style.left = `${plot.left}px`
+        box.style.top = `${plot.top + from}px`
+        box.style.width = `${plot.width}px`
+        box.style.height = `${size}px`
+      }
+    })
   }
 
   /** Named slot, then the renderer property, then the built-in rows — the library's three-layer fallback. */
