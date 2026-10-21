@@ -20,6 +20,7 @@
     divider--border-left: 1px solid #e4e4e7,
     divider--height: 20px,
     actions--gap: 8px,
+    actions--flex-wrap: nowrap,
     clear--size: 28px,
     clear--border-radius: 6px,
     clear--color: #71717a,
@@ -109,10 +110,20 @@
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: css.cssVar(actions--flex-wrap);
   align-items: center;
   gap: css.cssVar(actions--gap);
   min-width: 0;
+  // On a narrow screen the actions stay on one line and scroll sideways, keeping the count and the clear button in
+  // place. The padding, taken back by the margin, leaves room for the actions' focus rings, which the scroll box clips.
+  overflow-x: auto;
+  padding: 4px;
+  margin: -4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .clear {

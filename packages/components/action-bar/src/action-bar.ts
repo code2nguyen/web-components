@@ -50,7 +50,7 @@ export interface ActionBar {
  * @cssproperty {box-shadow} [--c2-action-bar__container--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {padding} [--c2-action-bar__container--padding=6px 6px 6px 16px]
  * @cssproperty {pixel} [--c2-action-bar__container--gap=12px] - Space between the count, the divider, the actions and the clear button.
- * @cssproperty {pixel} [--c2-action-bar__container--max-width=calc(100% - 32px)] - The actions wrap past this width.
+ * @cssproperty {pixel} [--c2-action-bar__container--max-width=calc(100% - 32px)] - Past this width the actions scroll sideways (or wrap, with `--c2-action-bar__actions--flex-wrap: wrap`).
  * @cssproperty {pixel} [--c2-action-bar__container--offset=8px] - How far the bar slides as it shows and hides.
  * @cssproperty {time} [--c2-action-bar__container--transition-duration=150ms]
  * @cssproperty {font-size} [--c2-action-bar__label--font-size=14px]
@@ -59,6 +59,7 @@ export interface ActionBar {
  * @cssproperty {border} [--c2-action-bar__divider--border-left=1px solid #e4e4e7] - The rule between the count and the actions; `none` removes it.
  * @cssproperty {pixel} [--c2-action-bar__divider--height=20px]
  * @cssproperty {pixel} [--c2-action-bar__actions--gap=8px]
+ * @cssproperty {string} [--c2-action-bar__actions--flex-wrap=nowrap] - `nowrap` keeps the actions on one line, scrolling sideways when the bar is narrower than they are; `wrap` stacks them onto further lines instead.
  * @cssproperty {pixel} [--c2-action-bar__clear--size=28px]
  * @cssproperty {border-radius} [--c2-action-bar__clear--border-radius=6px]
  * @cssproperty {color} [--c2-action-bar__clear--color=#71717a]

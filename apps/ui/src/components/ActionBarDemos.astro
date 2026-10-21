@@ -1,0 +1,268 @@
+---
+// Two working screens built around `c2-action-bar`: an orders table whose bulk actions change, export and delete
+// the selected rows, and an inbox list whose actions mark messages read and archive them. Each one owns its
+// selection, sets the bar's `count` from the collection's `selection-change`, and empties it on `clear`.
+---
+
+<section class="ab-demo" data-ab-orders>
+  <header class="ab-demo__header">
+    <div>
+      <p class="ab-demo__title">Orders</p>
+      <p class="ab-demo__note" data-ab-status role="status">Tick some rows to see the bulk actions.</p>
+    </div>
+    <c2-button class="ab-demo__ghost" data-ab-reset>Reset</c2-button>
+  </header>
+  <div class="ab-demo__scroller">
+    <c2-table class="ab-demo__table" aria-label="Orders" selection="multiple" checkbox-selection row-key="id" empty-message="No orders left">
+      <c2-table-column field="id" header="Order" width="96px"></c2-table-column>
+      <c2-table-column field="customer" header="Customer" width="2fr" min-width="140"></c2-table-column>
+      <c2-table-column field="status" header="Status" width="1fr" min-width="90"></c2-table-column>
+      <c2-table-column field="total" header="Total" width="110px" align="end" format="currency" currency="EUR"></c2-table-column>
+    </c2-table>
+    <c2-action-bar class="ab-demo__bar">
+      <span slot="label" data-ab-label></span>
+      <c2-button class="ab-demo__secondary" data-ab-action="paid">Mark paid</c2-button>
+      <c2-button class="ab-demo__secondary" data-ab-action="export">Export CSV</c2-button>
+      <c2-button class="ab-demo__danger" data-ab-action="delete">Delete</c2-button>
+    </c2-action-bar>
+  </div>
+</section>
+
+<section class="ab-demo" data-ab-inbox>
+  <header class="ab-demo__header">
+    <div>
+      <p class="ab-demo__title">Inbox</p>
+      <p class="ab-demo__note" data-ab-status role="status">Select messages to archive them or mark them read.</p>
+    </div>
+    <c2-button class="ab-demo__ghost" data-ab-reset>Reset</c2-button>
+  </header>
+  <div class="ab-demo__scroller">
+    <c2-list class="ab-demo__list" multiple aria-label="Messages" data-ab-list></c2-list>
+    <c2-action-bar class="ab-demo__bar">
+      <c2-button class="ab-demo__secondary" data-ab-action="read">Mark read</c2-button>
+      <c2-button data-ab-action="archive">Archive</c2-button>
+    </c2-action-bar>
+  </div>
+</section>
+
+<style lang="scss">
+  .ab-demo {
+    display: grid;
+    gap: 12px;
+    margin-block: 16px 24px;
+    padding: 16px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+  }
+  .ab-demo__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .ab-demo__title {
+    margin: 0;
+    font-weight: 600;
+  }
+  .ab-demo__note {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--site-color-on-surface-variant);
+  }
+  // The scroll container the bar sticks to. The bottom padding keeps the bar off the last row.
+  .ab-demo__scroller {
+    max-height: 320px;
+    overflow: auto;
+    padding-bottom: 72px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 8px;
+  }
+  .ab-demo__table {
+    --c2-table--border-top: none;
+    --c2-table--border-right: none;
+    --c2-table--border-bottom: none;
+    --c2-table--border-left: none;
+  }
+  .ab-demo__list {
+    --c2-list--background: transparent;
+  }
+  .ab-demo__bar {
+    --c2-action-bar__container--background: var(--site-color-surface);
+    --c2-action-bar__container--color: var(--site-color-on-surface);
+    --c2-action-bar__label--color: var(--site-color-on-surface);
+    --c2-action-bar__container--border: 1px solid var(--site-color-outline-variant);
+    --c2-action-bar__divider--border-left: 1px solid var(--site-color-outline-variant);
+  }
+  .ab-demo__secondary,
+  .ab-demo__ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--site-color-on-surface);
+    --c2-button__container--border: 1px solid var(--site-color-outline-variant);
+  }
+  .ab-demo__ghost {
+    flex: none;
+  }
+  .ab-demo__danger {
+    --c2-button__container--background-color: light-dark(#dc2626, #f87171);
+    --c2-button__container--color: light-dark(#ffffff, #18181b);
+  }
+</style>
+
+<script>
+  import '@c2n/components/action-bar'
+  import '@c2n/components/button'
+  import '@c2n/components/list'
+  import '@c2n/components/list-item'
+  import '@c2n/components/table'
+  import type { ActionBar } from '@c2n/components/action-bar'
+  import type { List } from '@c2n/components/list'
+  import type { ListItem } from '@c2n/components/list-item'
+  import type { Table, TableRow } from '@c2n/components/table'
+
+  const ORDERS: TableRow[] = [
+    { id: '#1042', customer: 'Ada Lovelace', status: 'Pending', total: 129 },
+    { id: '#1043', customer: 'Grace Hopper', status: 'Pending', total: 54.5 },
+    { id: '#1044', customer: 'Alan Turing', status: 'Paid', total: 310 },
+    { id: '#1045', customer: 'Katherine Johnson', status: 'Pending', total: 89.9 },
+    { id: '#1046', customer: 'Radia Perlman', status: 'Refunded', total: 42 },
+    { id: '#1047', customer: 'Barbara Liskov', status: 'Pending', total: 215 },
+    { id: '#1048', customer: 'Margaret Hamilton', status: 'Paid', total: 76.4 },
+    { id: '#1049', customer: 'Edsger Dijkstra', status: 'Pending', total: 18 },
+    { id: '#1050', customer: 'Frances Allen', status: 'Pending', total: 164 },
+    { id: '#1051', customer: 'John Backus', status: 'Paid', total: 99 },
+  ]
+
+  const MESSAGES = [
+    { id: 'm1', from: 'Stripe', subject: 'Your payout of €2,480 is on its way' },
+    { id: 'm2', from: 'Linear', subject: '3 issues were assigned to you' },
+    { id: 'm3', from: 'Ada Lovelace', subject: 'Re: Q4 roadmap review' },
+    { id: 'm4', from: 'GitHub', subject: '[web-components] PR #812 was merged' },
+    { id: 'm5', from: 'Grace Hopper', subject: 'Lunch on Friday?' },
+    { id: 'm6', from: 'Vercel', subject: 'Deployment ready: docs-preview' },
+    { id: 'm7', from: 'Calendar', subject: 'Design sync moved to 15:00' },
+  ]
+
+  const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`
+
+  document.querySelectorAll<HTMLElement>('[data-ab-orders]').forEach((demo) => {
+    const table = demo.querySelector<Table>('c2-table')!
+    const bar = demo.querySelector<ActionBar>('c2-action-bar')!
+    const label = demo.querySelector<HTMLElement>('[data-ab-label]')!
+    const status = demo.querySelector<HTMLElement>('[data-ab-status]')!
+
+    const sync = () => {
+      bar.count = table.value.length
+      if (bar.count) label.textContent = `${plural(bar.count, 'order')} selected`
+    }
+    const reset = () => {
+      table.rows = ORDERS.map((row) => ({ ...row }))
+      table.clearSelection()
+      sync()
+    }
+    // Every action ends by emptying the selection and handing focus back to the table, since the bar hides.
+    const done = (message: string) => {
+      status.textContent = message
+      table.clearSelection()
+      sync()
+      table.focus()
+    }
+
+    table.addEventListener('selection-change', sync)
+    bar.addEventListener('clear', () => {
+      table.clearSelection()
+      sync()
+      table.focus()
+    })
+    demo.querySelector('[data-ab-reset]')!.addEventListener('click', () => {
+      reset()
+      status.textContent = 'Orders restored.'
+    })
+
+    bar.addEventListener('click', (event) => {
+      const action = (event.target as Element).closest<HTMLElement>('[data-ab-action]')?.dataset.abAction
+      if (!action) return
+      const selected = new Set(table.value)
+      const count = selected.size
+      if (action === 'paid') {
+        table.rows = table.rows.map((row) => (selected.has(String(row.id)) ? { ...row, status: 'Paid' } : row))
+        done(`${plural(count, 'order')} marked paid.`)
+      } else if (action === 'delete') {
+        table.rows = table.rows.filter((row) => !selected.has(String(row.id)))
+        done(`${plural(count, 'order')} deleted.`)
+      } else if (action === 'export') {
+        const lines = [['Order', 'Customer', 'Status', 'Total'], ...table.getSelectedRows().map((row) => [row.id, row.customer, row.status, row.total])]
+        const csv = lines.map((line) => line.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
+        const link = Object.assign(document.createElement('a'), {
+          href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
+          download: 'orders.csv',
+        })
+        link.click()
+        URL.revokeObjectURL(link.href)
+        done(`${plural(count, 'order')} exported to orders.csv.`)
+      }
+    })
+
+    reset()
+  })
+
+  document.querySelectorAll<HTMLElement>('[data-ab-inbox]').forEach((demo) => {
+    const list = demo.querySelector<List>('[data-ab-list]')!
+    const bar = demo.querySelector<ActionBar>('c2-action-bar')!
+    const status = demo.querySelector<HTMLElement>('[data-ab-status]')!
+    const unread = new Set<string>()
+
+    const render = (messages: typeof MESSAGES) => {
+      list.replaceChildren(
+        ...messages.map((message) => {
+          const item = document.createElement('c2-list-item') as ListItem
+          item.value = message.id
+          const from = document.createElement('strong')
+          from.textContent = message.from
+          const subject = Object.assign(document.createElement('span'), { slot: 'description', textContent: message.subject })
+          item.append(from, unread.has(message.id) ? ' • new' : '', subject)
+          return item
+        }),
+      )
+    }
+    const remaining = () => MESSAGES.filter((message) => list.querySelector(`c2-list-item[value="${message.id}"]`))
+    const clear = () => {
+      list.value = []
+      bar.count = 0
+    }
+    // The list keeps a roving tabindex on its rows, so focus goes to the row that holds it once the list has updated.
+    const focusList = () => requestAnimationFrame(() => list.querySelector<HTMLElement>('c2-list-item[tabindex="0"]')?.focus())
+    const reset = () => {
+      MESSAGES.forEach((message, index) => index < 4 && unread.add(message.id))
+      render(MESSAGES)
+      clear()
+    }
+
+    list.addEventListener('selection-change', (event) => (bar.count = event.detail.value.length))
+    bar.addEventListener('clear', () => {
+      clear()
+      focusList()
+    })
+    demo.querySelector('[data-ab-reset]')!.addEventListener('click', () => {
+      reset()
+      status.textContent = 'Inbox restored.'
+    })
+
+    bar.addEventListener('click', (event) => {
+      const action = (event.target as Element).closest<HTMLElement>('[data-ab-action]')?.dataset.abAction
+      if (!action) return
+      const selected = new Set(list.value)
+      if (action === 'read') {
+        selected.forEach((id) => unread.delete(id))
+        render(remaining())
+        status.textContent = `${plural(selected.size, 'message')} marked read.`
+      } else if (action === 'archive') {
+        render(remaining().filter((message) => !selected.has(message.id)))
+        status.textContent = `${plural(selected.size, 'message')} archived.`
+      }
+      clear()
+      focusList()
+    })
+
+    reset()
+  })
+</script>

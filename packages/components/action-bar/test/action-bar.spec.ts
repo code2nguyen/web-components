@@ -124,3 +124,20 @@ test('with position: fixed the bar centres in the viewport', async ({ page, rend
   expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThan(2)
   expect(Math.round(viewport.height - (box.y + box.height))).toBe(16)
 })
+
+test('on a narrow screen the actions stay on one line and scroll, clear of the count and the clear button', async ({ page, renderScenario }) => {
+  await page.setViewportSize({ width: 360, height: 640 })
+  await renderScenario(
+    `<div style="position: relative; height: 200px"><c2-action-bar count="12" style="--c2-action-bar--position: absolute"><span slot="label">12 orders selected</span><c2-button>Mark paid</c2-button><c2-button>Export CSV</c2-button><c2-button>Refund</c2-button></c2-action-bar></div>`,
+  )
+  const buttons = page.locator('c2-button')
+  const tops = await buttons.evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().top)))
+  expect(new Set(tops).size).toBe(1)
+  const actions = bar(page).locator('.actions')
+  expect(await actions.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
+  // The clear button sits past the end of the actions box, not over an action.
+  const actionsBox = (await actions.boundingBox())!
+  const clearBox = (await clearButton(page).boundingBox())!
+  expect(clearBox.x).toBeGreaterThanOrEqual(actionsBox.x + actionsBox.width - 4)
+  expect(clearBox.x + clearBox.width).toBeLessThanOrEqual(360)
+})
