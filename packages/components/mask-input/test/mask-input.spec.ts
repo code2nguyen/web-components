@@ -110,6 +110,55 @@ test('complete fires once the required part is filled; the optional part may sta
   await expect(input).toHaveValue('FR76 AB1CD')
 })
 
+test('an optional group in the middle is filled or skipped by what is typed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-mask-input mask="A[A]9[X] 9AA" aria-label="Postcode"></c2-mask-input>')
+  const host = page.locator('c2-mask-input')
+  const input = page.getByRole('textbox', { name: 'Postcode' })
+  const slots = page.locator('c2-mask-input .slots')
+  await input.click()
+  // Groups not started yet are left out of the hint.
+  await expect(slots).toHaveText('__ ___')
+  await page.keyboard.type('sw')
+  await expect(slots).toHaveText('SW_ ___')
+  await page.keyboard.type('1a1aa')
+  await expect(input).toHaveValue('SW1A 1AA')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('m11')
+  await expect(input).toHaveValue('M11')
+  // `A` does not fit the digit after the second group, so the 1 moves past it: both groups are skipped.
+  await page.keyboard.type('a')
+  await expect(input).toHaveValue('M1 1A')
+  expect(await host.evaluate((el) => (el as MaskInputElement).checkValidity())).toBe(false)
+  await page.keyboard.type('e')
+  await expect(input).toHaveValue('M1 1AE')
+  expect(await value(page)).toBe('M11AE')
+  expect(await host.evaluate((el) => (el as MaskInputElement).checkValidity())).toBe(true)
+
+  await host.evaluate(async (el) => {
+    const field = el as MaskInputElement & { updateComplete: Promise<boolean> }
+    field.value = 'EC1A1BB'
+    await field.updateComplete
+  })
+  await expect(input).toHaveValue('EC1A 1BB')
+})
+
+test('a group being filled must be finished', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-mask-input mask="99[-99]" aria-label="Range"></c2-mask-input>')
+  const host = page.locator('c2-mask-input')
+  const input = page.getByRole('textbox', { name: 'Range' })
+  await input.click()
+  await page.keyboard.type('12')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+  await page.keyboard.type('3')
+  await expect(input).toHaveValue('12-3')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(false)
+  await expect(page.locator('c2-mask-input .slots')).toHaveText('12-3_')
+  await page.keyboard.type('4')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+})
+
 test('an incomplete value is invalid, and required checks for a value', async ({ page, renderScenario }) => {
   await renderScenario('<form><c2-mask-input mask="99999" name="zip" required aria-label="ZIP"></c2-mask-input></form>')
   const host = page.locator('c2-mask-input')

@@ -72,21 +72,11 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   `__hover`); `packages/components/link-button` — `--c2-link-button__container--border` (plus `__hover`), like
   `c2-button`'s. Then move the example onto them and drop the comments.
 
-### `c2-mask-input` cannot express a format whose optional part sits in the middle
-
-- **Severity:** gap
-- **Hit while:** adding a postcode field to the Account Form example (`apps/examples/basic-form-html`), 2026-10-14.
-- **What happens:** `?` makes the _rest_ of the mask optional, so a value whose variable part comes before a fixed
-  tail cannot be masked. UK postcodes (`M1 1AE`, `SW1A 1AA`: a 2–4 character outward code, then `9AA`) are the
-  common case. The example leaves the field unmasked (`mask=""`, free text) when the country is the UK.
-- **Where the fix belongs:** `packages/components/mask-input` — either optional groups (`A[*][*]* 9AA`, a group
-  skipped when the next typed character only fits what follows it) or an array of alternative masks tried in
-  order, as PrimeVue and Mantine allow. Then give the example its UK mask.
-
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                     |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `c2-mask-input`                 | `?` only made the _rest_ of a mask optional, so a format whose variable part sits in the middle (UK postcodes, `M1 1AE` / `SW1A 1AA`) could not be masked and the Account Form example left the UK postcode as free text.                                                                                                       | 2026-10-21, optional groups (`A[A]9[X] 9AA`), with browser tests; the example now masks UK postcodes.                                                                                                        |
 | `c2-sparkline`                  | `decorateOptions` passed `axes: []`; uPlot pads a short array back up to two _visible_ axes, so a 120×32 sparkline spent 52px on a y-axis gutter and drew its line in a 66px sliver.                                                                                                                                            | 2026-09-14, with a regression test asserting no axis element and a 116px plot.                                                                                                                               |
 | `c2-line-chart`, `c2-bar-chart` | `linePaths`/`barPaths` filled their cache from `loadUplot().then(…)` and returned synchronously, so the builder always arrived one microtask after uPlot read `paths`: every chart drew its first frame straight and `curve` only applied on a later rebuild.                                                                   | 2026-09-14, `loadedUplot()` + a test that the first frame of a `curve="step"` chart differs from linear.                                                                                                     |
 | `c2-bar-chart`                  | Grouped series were drawn on the same x and overlapped completely; `bar-gap` was being passed as uPlot's _minimum bar width in pixels_.                                                                                                                                                                                         | 2026-09-14, `disp.x0`/`disp.size` grouping + a test that both series' colours survive.                                                                                                                       |
