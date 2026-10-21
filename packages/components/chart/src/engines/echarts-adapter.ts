@@ -50,8 +50,14 @@ export async function createEchartsAdapter(
       instance.setOption(withData(options, data), { notMerge: true })
 
       instance.on('click', (params) => {
-        const point = params as { dataIndex?: number; seriesIndex?: number; name?: string; componentType?: string }
-        events?.click({ index: point.dataIndex ?? 0, seriesIndex: point.seriesIndex ?? 0, name: point.name, component: point.componentType })
+        const point = params as { dataIndex?: number; seriesIndex?: number; name?: string; componentType?: string; dataType?: string }
+        events?.click({
+          index: point.dataIndex ?? 0,
+          seriesIndex: point.seriesIndex ?? 0,
+          name: point.name,
+          component: point.componentType,
+          dataType: point.dataType,
+        })
       })
       instance.on('mouseover', (params) => {
         const point = params as {
@@ -59,6 +65,7 @@ export async function createEchartsAdapter(
           seriesIndex?: number
           name?: string
           componentType?: string
+          dataType?: string
           event?: { offsetX: number; offsetY: number }
         }
         events?.hover({
@@ -68,6 +75,7 @@ export async function createEchartsAdapter(
           py: point.event?.offsetY ?? 0,
           name: point.name,
           component: point.componentType,
+          dataType: point.dataType,
         })
       })
       // A map's wheel zoom, drag and zoom buttons all end in the `geoRoam` action, which ECharts reports as this event.

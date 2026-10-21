@@ -81,6 +81,10 @@
       "types": "./types/src/heatmap-chart.d.ts",
       "default": "./dist/heatmap-chart.js"
     },
+    "./chord-chart.js": {
+      "types": "./types/src/chord-chart.d.ts",
+      "default": "./dist/chord-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"
@@ -165,6 +169,8 @@
     "geo map",
     "heatmap",
     "calendar heatmap",
+    "chord diagram",
+    "chord chart",
     "sparkline",
     "uplot",
     "echarts",
