@@ -145,6 +145,11 @@ const mobileNavItems = [
       import '../data/google-maps-config'
     </script>
     <style lang="scss">
+      // The skip link focuses the whole content column; it needs no ring of its own.
+      .site-main:focus {
+        outline: none;
+      }
+
       :global(.skip-link) {
         --c2-skip-link--inset-inline-start: 16px;
         --c2-skip-link--z-index: 2000;

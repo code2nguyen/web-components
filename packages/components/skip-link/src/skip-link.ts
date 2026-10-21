@@ -53,15 +53,19 @@ export class SkipLink extends LitElement {
   }
 
   private resolveTarget(): HTMLElement | null {
-    if (!this.href) return document.querySelector('main')
+    const root = this.getRootNode() as Document | ShadowRoot
+    if (!this.href) return root.querySelector('main') ?? document.querySelector('main')
     if (!this.href.startsWith('#')) return null
     const id = safeDecode(this.href.slice(1))
-    const root = this.getRootNode() as Document | ShadowRoot
     return root.getElementById(id) ?? document.getElementById(id)
   }
 
   private handleClick(event: MouseEvent) {
+    // A modified click (new tab, new window, download) is the browser's to handle.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     const target = this.resolveTarget()
+    // Without href the link only ever means "the main content": never fall through to navigating to "#".
+    if (!this.href) event.preventDefault()
     // A link to another page, or a fragment that is not on this one, keeps the browser's own navigation.
     if (!target) return
     event.preventDefault()
@@ -71,11 +75,22 @@ export class SkipLink extends LitElement {
 
 function focusTarget(target: HTMLElement) {
   target.focus()
-  if (isFocused(target)) return
+  if (isFocused(target) || target.hasAttribute('tabindex')) return
   // Not focusable by itself: make it so only while it holds focus, so it never becomes a Tab stop.
   target.setAttribute('tabindex', '-1')
-  target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true })
   target.focus()
+  if (!isFocused(target)) {
+    // Disabled, inert or hidden: leave it exactly as it was.
+    target.removeAttribute('tabindex')
+    return
+  }
+  const release = () => {
+    // The window losing focus blurs the target too, but it is still the active element and gets focus back on return.
+    if (isFocused(target)) return
+    target.removeAttribute('tabindex')
+    target.removeEventListener('blur', release)
+  }
+  target.addEventListener('blur', release)
 }
 
 function safeDecode(fragment: string) {

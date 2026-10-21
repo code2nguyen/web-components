@@ -42,6 +42,14 @@ test('focuses a focusable target without touching its tabindex', async ({ page, 
   await expect(page.locator('#go')).not.toHaveAttribute('tabindex')
 })
 
+test('leaves a target that cannot take focus as it was', async ({ page, renderScenario, tab }) => {
+  await renderScenario('<c2-skip-link href="#off">Skip to the action</c2-skip-link><button id="off" disabled>Off</button>')
+  await tab()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#off')).not.toHaveAttribute('tabindex')
+  await expect(page.locator('c2-skip-link').locator('[part="link"]')).toBeFocused()
+})
+
 test("without href it targets the page's first main", async ({ page, renderScenario, tab }) => {
   await renderScenario('<c2-skip-link></c2-skip-link><a href="#x">Elsewhere</a>')
   await tab()
