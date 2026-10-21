@@ -407,3 +407,42 @@ test('entry-click reports the clicked entry and its retained index, not the copy
   await viewer.locator('[data-index="3"] [part="copy-button"]').click()
   expect(await clicks()).toHaveLength(1)
 })
+
+test('a drag that selects text inside an entry does not report entry-click', async ({ page, scenario }) => {
+  await scenario('entries')
+  const viewer = page.locator('c2-log-viewer')
+  await page.evaluate(() => {
+    const events: unknown[] = []
+    ;(window as unknown as { entryClicks: unknown[] }).entryClicks = events
+    document.addEventListener('entry-click', (event) => events.push((event as CustomEvent).detail))
+  })
+  const message = viewer.locator('[data-index="0"] [data-attribute="message"] [part="text"]')
+  const box = (await message.boundingBox())!
+  await page.mouse.move(box.x + 1, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 5 })
+  await page.mouse.up()
+  await message.click()
+  await expect.poll(() => page.evaluate(() => (window as unknown as { entryClicks: unknown[] }).entryClicks.length)).toBe(1)
+})
+
+test('scrollToStart jumps instantly under smooth scroll-behavior and stays pinned', async ({ page, scenario }) => {
+  await scenario('many')
+  const viewer = page.locator('c2-log-viewer')
+  await viewer.evaluate((element) => {
+    element.shadowRoot!.querySelector<HTMLElement>('[part="viewport"]')!.style.scrollBehavior = 'smooth'
+  })
+  const box = (await viewer.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await expect(viewer.locator('[data-copy-hover="true"]')).toHaveCount(1)
+  const scrollTop = await viewer.evaluate(async (element) => {
+    const log = element as LogViewer
+    log.scrollToStart()
+    await log.updateComplete
+    return element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop
+  })
+  expect(scrollTop).toBe(0)
+  await viewer.evaluate((element) => (element as LogViewer).appendEntries({ message: 'later' }))
+  await viewer.evaluate((element) => (element as LogViewer).updateComplete)
+  expect(await viewer.evaluate((element) => element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop)).toBe(0)
+})

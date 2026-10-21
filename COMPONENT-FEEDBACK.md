@@ -10,9 +10,7 @@ rather than editing someone else's. Keep it short and concrete: what you were bu
 what actually happened, and the smallest change that would have avoided it.
 
 **Who clears entries:** whoever fixes the component. Move the entry to `## Fixed` with the commit or PR, or
-to `|`c2-log-viewer`| Could follow the end but not be sent to the start (replacing the buffer left it following the newest entry), and fired no event for an entry, so a record could not open a detail panel. | 2026-10-21,`scrollToStart()`(holds the top through appends until the reader scrolls) and a bubbling`entry-click`with`{ entry, index }`, each with a regression test. |
-
-## Won't fix` with the reason. Do not delete an entry without resolving it.
+to `## Won't fix` with the reason. Do not delete an entry without resolving it.
 
 **Components that do not exist yet** are candidates, not feedback: they are listed, with a decision column, in [`COMPONENT-ROADMAP.md`](COMPONENT-ROADMAP.md).
 
@@ -25,6 +23,15 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 ---
 
 ## Open
+
+### `c2-log-viewer` entries cannot be chosen from the keyboard
+
+- **Severity:** gap
+- **Hit while:** adding `entry-click`, 2026-10-21.
+- **What happens:** the viewport is one focus stop that scrolls with the arrow keys; there is no current entry, so
+  `entry-click` (and anything an app hangs on it, such as a detail panel) is pointer-only.
+- **Where the fix belongs:** `packages/components/log-viewer` — a roving active entry (`aria-activedescendant` on the
+  viewport) moved by the arrow keys, and an `entry-activate` event on Enter, like `c2-table`'s `row-activate`.
 
 ### Charts have no time markers or annotated ranges
 
@@ -120,6 +127,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-table`                      | Wrapping took a row-height variable and two `::part` overrides. The `wrap` attribute does it in one, turns windowing off, and pads top-aligned text with `--c2-table__cell__wrap--padding`.                                                                                                                                     | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | A `cell-slot` column needed a child per row. Slots are now named by display line, `cell:{line}:{field}` (breaking), and `range-change`/`renderedRange` report the rendered `rows` (`line`, `key`, `row`), so a framework renders children only for the window.                                                                  | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | The grid's keydown handler cancelled Enter/Space on any control inside a cell, so slotted buttons could not be pressed from the keyboard, and it stole arrow keys from text inputs. Controls now own those keys. No upgrade-order race reproduced (pre-upgrade properties, children before and after rows).                     | 2026-10-03                                                                                                                                                                                                   |
+| `c2-log-viewer`                 | Could follow the end but not be sent to the start (replacing the buffer left it following the newest entry), and fired no event for an entry, so a record could not open a detail panel.                                                                                                                                        | 2026-10-21, `scrollToStart()` (holds the top through appends until the reader scrolls) and a bubbling `entry-click` with `{ entry, index }`, each with a regression test.                                    |
 
 ## Won't fix
 

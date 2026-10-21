@@ -139,7 +139,7 @@ The viewer renders the entries in the visible window plus a small overscan margi
 
 In continuous text mode (`tabular="false"`), it also renders only the visible lines **inside** a very large entry. A single long trace can be read without mounting all of its text.
 
-Appends follow the end when you are already there. Scroll up to read history and incoming entries preserve your position. Call `scrollToEnd()` to resume following, or `scrollToStart()` to open at the first entry: an analysis view that replaces its buffer (`clear()` then `appendEntries()`) calls it afterwards, and the viewer stays at the top through later appends until the reader scrolls to the end.
+Appends follow the end when you are already there. Scroll up to read history and incoming entries preserve your position. Call `scrollToEnd()` to resume following, or `scrollToStart()` to open at the first entry: an analysis view that replaces its buffer (`clear()` then `appendEntries()`) calls it afterwards, and the viewer stays at the top through later appends until the reader scrolls.
 
 ### Streaming
 
@@ -192,7 +192,7 @@ viewer.scrollToEnd()
 
 ## Choose an entry
 
-Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a text selection, are not reported.
+Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a drag or text selection, are not reported. Entries cannot yet be chosen from the keyboard, so offer the same action somewhere a keyboard reaches too.
 
 ```ts tag=CodeBlock
 viewer.addEventListener('entry-click', (event) => {
