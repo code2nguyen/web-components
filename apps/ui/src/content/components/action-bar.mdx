@@ -6,6 +6,7 @@ category: 'Layout'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ActionBarDemos from '../../components/ActionBarDemos.astro'
 
 import { ActionBar } from '@c2n/components/action-bar'
 import { Button } from '@c2n/components/button'
@@ -85,3 +86,51 @@ bar.addEventListener('clear', () => table.clearSelection())
 The examples set `--c2-action-bar--position: relative` so the bar sits inside its frame; leave it at the default
 `sticky` in an app, or use `fixed` to pin it to the viewport. Leave some bottom padding on the collection so the bar
 never covers its last row.
+
+The actions always stay on one line. On a phone (the bar 480px wide or less) the count and the clear button share the
+top row and the actions get a full-width row below; actions that still do not fit scroll sideways, with a fade on the
+edge that has more past it. Set `--c2-action-bar__actions--flex-wrap: wrap` to wrap them onto further lines instead.
+
+## In an application
+
+Two screens as they appear in a real app. Each scrolls inside its own box with the bar left at its default `sticky`
+position, so it follows the bottom of the box as you scroll. The app owns the selection: it sets `count` from the
+collection's `selection-change`, and every action, like the clear button and Escape, ends by emptying the selection
+and moving focus back to the collection, since the bar hides.
+
+In the orders table, tick rows, then mark them paid, download them as CSV or delete them; the `label` slot names
+what is selected. In the inbox, a `c2-list` with `multiple`, select messages, then mark them read or archive them.
+
+<ActionBarDemos />
+
+The wiring of the orders table, trimmed to the delete action:
+
+```html tag=CodeBlock
+<div class="orders" style="max-height: 320px; overflow: auto; padding-bottom: 72px">
+  <c2-table selection="multiple" checkbox-selection row-key="id" aria-label="Orders">…</c2-table>
+  <c2-action-bar>
+    <span slot="label" id="orders-label"></span>
+    <c2-button id="mark-paid">Mark paid</c2-button>
+    <c2-button id="export">Export CSV</c2-button>
+    <c2-button id="delete">Delete</c2-button>
+  </c2-action-bar>
+</div>
+
+<script type="module">
+  const table = document.querySelector('.orders c2-table')
+  const bar = document.querySelector('.orders c2-action-bar')
+  const sync = () => {
+    bar.count = table.value.length
+    if (bar.count) document.querySelector('#orders-label').textContent = `${bar.count} orders selected`
+  }
+  table.addEventListener('selection-change', sync)
+  bar.addEventListener('clear', () => table.clearSelection())
+
+  document.querySelector('#delete').addEventListener('click', () => {
+    const selected = new Set(table.value)
+    table.rows = table.rows.filter((row) => !selected.has(row.id))
+    table.clearSelection()
+    table.focus()
+  })
+</script>
+```

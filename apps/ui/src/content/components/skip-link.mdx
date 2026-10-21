@@ -6,6 +6,7 @@ category: 'Navigation'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import SkipLinkDemo from '../../components/SkipLinkDemo.astro'
 
 import { SkipLink } from '@c2n/components/skip-link'
 
@@ -71,3 +72,47 @@ The examples above set `--c2-skip-link--position: absolute` so the link appears 
 A target focused this way can match `:focus-visible`, so the browser may draw its focus ring around the whole region. Add `main:focus { outline: none }` (or your own style) if a ring around the content column is not what you want.
 
 A page with several landmarks can offer several links (`Skip to search`, `Skip to results`): each one shows only while it holds focus, so they share the same corner.
+
+## In an application
+
+A store's search results page, where skip links pay off most: the brand, five departments, the search field, the
+account and cart links and the filters all sit in front of the results, which is a dozen Tab presses before the
+first product. Click inside the page and press Tab: the first stop is **Skip to results**, and Enter on it puts focus
+on the results so the next Tab lands on the first product. Press Tab instead of Enter and **Skip to filters** appears
+in the same corner. The line below the page counts the Tab presses and names what has focus; try reaching the first
+product with and without the link.
+
+<SkipLinkDemo />
+
+The page's markup, trimmed. The skip links come first, each naming a landmark by its `id`:
+
+```html tag=CodeBlock
+<body>
+  <c2-skip-link href="#results">Skip to results</c2-skip-link>
+  <c2-skip-link href="#filters">Skip to filters</c2-skip-link>
+
+  <header>
+    <a href="/">Stride</a>
+    <nav aria-label="Departments">…</nav>
+    <c2-search-field aria-label="Search the store"></c2-search-field>
+    <nav aria-label="Account">…</nav>
+  </header>
+
+  <aside id="filters" aria-label="Filters">…</aside>
+  <main id="results" aria-labelledby="results-title">
+    <h1 id="results-title">24 results for “running shoes”</h1>
+    …
+  </main>
+</body>
+```
+
+```css tag=CodeBlock
+/* The results region takes focus from the link; a ring around the whole column is not wanted. */
+#results:focus {
+  outline: none;
+}
+```
+
+In the demo the links set `--c2-skip-link--position: absolute` to appear inside the page frame; on a real page keep
+the default `fixed`. This documentation site does the same: press Tab right after loading any page and its own
+**Skip to main content** link appears in the top-start corner.
