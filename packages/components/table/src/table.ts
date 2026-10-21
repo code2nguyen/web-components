@@ -2306,6 +2306,21 @@ export class Table extends LitElement {
     }
   }
 
+  /**
+   * Moves focus to the cell holding the roving tabindex — where Tab would land — so an app can hand focus back to the
+   * table, e.g. after a bulk action hides the control that had it. Before the first render it focuses that cell once
+   * it exists.
+   */
+  override focus(options?: FocusOptions) {
+    const cell = this.renderRoot?.querySelector<HTMLElement>('.cell[tabindex="0"]')
+    if (cell) {
+      cell.focus(options)
+      return
+    }
+    this.#pendingFocus = true
+    this.requestUpdate()
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     this.addEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)

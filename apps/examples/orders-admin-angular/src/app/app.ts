@@ -220,11 +220,12 @@ export class App {
   }
 
   /**
-   * Empties the selection, which hides the action bar and its buttons with it. Focus should go back to the table
-   * then, but `c2-table` cannot be focused from outside yet (see COMPONENT-FEEDBACK.md).
+   * Empties the selection, which hides the action bar and its buttons with it, so focus goes back to the table's
+   * current cell rather than dropping to the page.
    */
   protected clearChecked(table: HTMLElement): void {
     ;(table as Table).clearSelection()
+    table.focus()
   }
 
   private updateChecked(table: HTMLElement, status: (order: Order) => OrderStatus, verb: string): void {

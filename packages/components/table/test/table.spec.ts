@@ -785,6 +785,32 @@ test('summary-span stretches a label across columns, and the keyboard moves betw
   expect(await active()).toBe('820')
 })
 
+test('focus() moves focus to the roving cell, so an app can hand focus back to the table', async ({ page, renderScenario }) => {
+  await renderScenario(table())
+  const host = page.locator('c2-table')
+  const active = () => host.evaluate((element) => element.shadowRoot!.activeElement?.textContent?.trim())
+  await host.evaluate((element) => element.focus())
+  expect(await active()).toBe('Name')
+
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowDown')
+  expect(await active()).toBe('Grace Hopper')
+  await host.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  expect(await active()).toBeUndefined()
+  await host.evaluate((element) => element.focus())
+  expect(await active()).toBe('Grace Hopper')
+})
+
+test('focus() before the first render focuses the roving cell once it exists', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="mount"></div>')
+  await page.evaluate((markup) => {
+    const mount = document.getElementById('mount')!
+    mount.innerHTML = markup
+    mount.querySelector('c2-table')!.focus()
+  }, table())
+  await expect.poll(() => page.locator('c2-table').evaluate((element) => element.shadowRoot!.activeElement?.textContent?.trim())).toBe('Name')
+})
+
 test('summary-scope="page" totals the page on show, and an empty table has no summary row', async ({ page, renderScenario }) => {
   await renderScenario(ledger('page-size="10" summary-scope="page"'))
   expect((await summaryCells(page))[1].text).toBe('55')
