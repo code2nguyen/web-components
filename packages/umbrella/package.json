@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -72,6 +72,10 @@
     "./accordion": {
       "types": "./dist/accordion.d.ts",
       "default": "./dist/accordion.js"
+    },
+    "./action-bar": {
+      "types": "./dist/action-bar.d.ts",
+      "default": "./dist/action-bar.js"
     },
     "./attachment": {
       "types": "./dist/attachment.d.ts",
@@ -160,6 +164,10 @@
     "./chart/chart-tooltip": {
       "types": "./dist/chart/chart-tooltip.d.ts",
       "default": "./dist/chart/chart-tooltip.js"
+    },
+    "./chart/chord-chart": {
+      "types": "./dist/chart/chord-chart.d.ts",
+      "default": "./dist/chart/chord-chart.js"
     },
     "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
@@ -637,6 +645,10 @@
       "types": "./dist/skeleton.d.ts",
       "default": "./dist/skeleton.js"
     },
+    "./skip-link": {
+      "types": "./dist/skip-link.d.ts",
+      "default": "./dist/skip-link.js"
+    },
     "./slider": {
       "types": "./dist/slider.d.ts",
       "default": "./dist/slider.js"
@@ -761,6 +773,10 @@
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
     },
+    "./view-options": {
+      "types": "./dist/view-options.d.ts",
+      "default": "./dist/view-options.js"
+    },
     "./virtual-list": {
       "types": "./dist/virtual-list.d.ts",
       "default": "./dist/virtual-list.js"
@@ -796,10 +812,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.13",
-    "@c2n/phosphor-icons": "1.0.13",
-    "@c2n/task-icons": "1.0.13",
-    "@c2n/theme": "1.0.13",
+    "@c2n/core": "1.0.14",
+    "@c2n/phosphor-icons": "1.0.14",
+    "@c2n/task-icons": "1.0.14",
+    "@c2n/theme": "1.0.14",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -892,6 +908,7 @@
   },
   "devDependencies": {
     "@c2n/accordion": "*",
+    "@c2n/action-bar": "*",
     "@c2n/attachment": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
@@ -992,6 +1009,7 @@
     "@c2n/shortcut": "*",
     "@c2n/side-nav": "*",
     "@c2n/skeleton": "*",
+    "@c2n/skip-link": "*",
     "@c2n/slider": "*",
     "@c2n/spinner": "*",
     "@c2n/split-panel": "*",
@@ -1017,6 +1035,7 @@
     "@c2n/tree": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
+    "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
     "@c2n/week-planner": "*",
     "@c2n/working-indicator": "*"

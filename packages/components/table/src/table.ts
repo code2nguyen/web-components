@@ -724,6 +724,7 @@ export class Table extends LitElement {
   #measuredRowHeight = 0
   #selectionAnchor = -1
   #pendingFocus = false
+  #pendingFocusOptions?: FocusOptions
   #requestToken = 0
   /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
   #pagers = new WeakSet<EventTarget>()
@@ -1081,7 +1082,8 @@ export class Table extends LitElement {
     this.#syncFocusToWindow()
     if (this.#pendingFocus) {
       this.#pendingFocus = false
-      this.renderRoot.querySelector<HTMLElement>('.cell[tabindex="0"]')?.focus()
+      this.renderRoot.querySelector<HTMLElement>('.cell[tabindex="0"]')?.focus(this.#pendingFocusOptions)
+      this.#pendingFocusOptions = undefined
     }
     if (this.dataSource) this.#ensureBlocks()
     this.#reportRenderedRange()
@@ -2304,6 +2306,23 @@ export class Table extends LitElement {
     } finally {
       this.#pendingBlocks.delete(block)
     }
+  }
+
+  /**
+   * Moves focus to the cell holding the roving tabindex — where Tab would land — so an app can hand focus back to the
+   * table, e.g. after a bulk action hides the control that had it. Before the first render it focuses that cell once
+   * it exists.
+   */
+  override focus(options?: FocusOptions) {
+    const cell = this.renderRoot?.querySelector<HTMLElement>('.cell[tabindex="0"]')
+    if (cell) {
+      cell.focus(options)
+      return
+    }
+    // Only a table that has not rendered yet waits: once rendered, a later update must not steal focus back.
+    if (this.hasUpdated) return
+    this.#pendingFocus = true
+    this.#pendingFocusOptions = options
   }
 
   override connectedCallback() {

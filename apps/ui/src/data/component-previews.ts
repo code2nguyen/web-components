@@ -8,6 +8,9 @@ export const componentPreviews: Record<string, string> = {
   <c2-details label="Shipping" expanded>Ships in 3–5 days.</c2-details>
   <c2-details label="Returns">Free within 30 days.</c2-details>
 </c2-accordion>`,
+  'action-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
+  <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
+</div>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
   autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
@@ -91,6 +94,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-chip>Product</c2-chip>
   <c2-chip>Marketing</c2-chip>
 </c2-chip-group>`,
+  'chord-chart': `<c2-chord-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__arc--width:8px;--c2-chart--font-size:10px" aria-label="Transfers between currency wallets" data='[{"source":"EUR","target":"USD","value":42},{"source":"EUR","target":"GBP","value":18},{"source":"USD","target":"EUR","value":32},{"source":"USD","target":"JPY","value":15},{"source":"GBP","target":"EUR","value":21},{"source":"GBP","target":"USD","value":15},{"source":"JPY","target":"USD","value":10}]'></c2-chord-chart>`,
   'code-editor': `<c2-code-editor style="width:300px;--c2-code-editor--min-height:132px;--c2-code-editor--font-size:12px" language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) =>
   \`hello \${name}\`
 
@@ -365,6 +369,7 @@ price: .price
   <c2-skeleton variant="circle"></c2-skeleton>
   <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>
 </div>`,
+  'skip-link': `<c2-skip-link class="preview-skip-link"></c2-skip-link>`,
   slider: `<div style="display:grid;gap:12px;width:220px">
   <c2-slider value="40"></c2-slider>
   <c2-slider value="60" ticks step="20"></c2-slider>
@@ -446,6 +451,7 @@ price: .price
 </c2-tree>`,
   truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
+  'view-options': `<c2-view-options layouts="list board table" value='{"groupBy":"status"}' fields='[{"id":"status","label":"Status","groupable":true,"orderable":true,"property":true},{"id":"priority","label":"Priority","groupable":true,"orderable":true,"property":true}]'></c2-view-options>`,
   'virtual-list': `<c2-virtual-list aria-label="People" style="width:240px;height:132px" item-key="id" label-field="name" description-field="team" items='[{"id":"1","name":"Ada Lovelace","team":"Analytics"},{"id":"2","name":"Grace Hopper","team":"Compilers"},{"id":"3","name":"Alan Turing","team":"Research"},{"id":"4","name":"Katherine Johnson","team":"Flight"},{"id":"5","name":"Radia Perlman","team":"Networks"},{"id":"6","name":"Barbara Liskov","team":"Research"},{"id":"7","name":"Margaret Hamilton","team":"Flight"}]'></c2-virtual-list>`,
   'week-planner': `<c2-week-planner locale="en-US" start-hour="8" end-hour="14" style="width:720px;max-width:none;zoom:0.34;--c2-week-planner--padding:16px;--c2-week-planner__hour--height:36px;--c2-week-planner__hour-label--font-size:16px;--c2-week-planner__day-header--font-size:18px;--c2-week-planner__event--font-size:16px" events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Kids","day":"wed","start":"11:00","end":"14:00","color":"#0f766e"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Football","day":"sat","start":"09:00","end":"12:00","color":"#0f766e"}]'></c2-week-planner>`,
   'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">

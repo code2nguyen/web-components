@@ -9,6 +9,27 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-action-bar",
+      "slot": "clear-icon",
+      "decision": "variables",
+      "variables": ["--c2-action-bar__clear-icon--size"],
+      "reason": "The clear button sizes the slotted icon and its SVG fallback through the icon size variable."
+    },
+    {
+      "tag": "c2-action-bar",
+      "slot": "default",
+      "decision": "variables",
+      "variables": ["--c2-action-bar__actions--gap"],
+      "reason": "The actions row spaces the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-action-bar",
+      "slot": "label",
+      "decision": "variables",
+      "variables": ["--c2-action-bar__label--font-size", "--c2-action-bar__label--font-weight", "--c2-action-bar__label--color"],
+      "reason": "The count line sets the type the slotted label inherits."
+    },
+    {
       "tag": "c2-area-chart",
       "slot": "actions",
       "decision": "part",
@@ -638,6 +659,54 @@
       "slot": "label",
       "decision": "assigned-content",
       "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chord-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
       "tag": "c2-code-editor",
@@ -1393,6 +1462,12 @@
       "slot": "supporting-text",
       "decision": "assigned-content",
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-skip-link",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned link text inside the link; the link's own colour and font come from its public variables."
     },
     {
       "tag": "c2-trace-waterfall",
@@ -3218,6 +3293,24 @@
       "decision": "part",
       "parts": ["prompt"],
       "reason": "The semantic prompt region owns the prompt slot's component-side presentation."
+    },
+    {
+      "tag": "c2-view-options",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds c2-view-field and c2-view-toggle elements, which describe the panel and render nothing; it is hidden."
+    },
+    {
+      "tag": "c2-view-options",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-view-options",
+      "slot": "extra",
+      "decision": "assigned-content",
+      "reason": "The extra slot projects consumer-owned rows into the panel; style the assigned nodes through their own class or public contract."
     },
     {
       "tag": "c2-virtual-list",

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-action-bar</title>
+    <script type="module">
+      import '/src/action-bar.ts'
+      import '@c2n/button'
+      import '@c2n/checkbox'
+
+      const bar = document.querySelector('c2-action-bar')
+      const boxes = [...document.querySelectorAll('.rows c2-checkbox')]
+      const sync = () => (bar.count = boxes.filter((box) => box.checked).length)
+      for (const box of boxes) box.addEventListener('change', sync)
+      bar.addEventListener('clear', () => {
+        for (const box of boxes) box.checked = false
+        sync()
+      })
+    </script>
+    <style>
+      body {
+        margin: 24px;
+        font: 14px system-ui;
+      }
+      .scroller {
+        height: 360px;
+        overflow: auto;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      .rows {
+        display: grid;
+        gap: 8px;
+        padding: 16px 16px 72px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>Tick some rows: the bar appears at the bottom of the scroll container.</p>
+    <div class="scroller">
+      <div class="rows">
+        <c2-checkbox>Invoice #1001</c2-checkbox>
+        <c2-checkbox>Invoice #1002</c2-checkbox>
+        <c2-checkbox>Invoice #1003</c2-checkbox>
+        <c2-checkbox>Invoice #1004</c2-checkbox>
+        <c2-checkbox>Invoice #1005</c2-checkbox>
+        <c2-checkbox>Invoice #1006</c2-checkbox>
+        <c2-checkbox>Invoice #1007</c2-checkbox>
+        <c2-checkbox>Invoice #1008</c2-checkbox>
+        <c2-checkbox>Invoice #1009</c2-checkbox>
+        <c2-checkbox>Invoice #1010</c2-checkbox>
+        <c2-checkbox>Invoice #1011</c2-checkbox>
+        <c2-checkbox>Invoice #1012</c2-checkbox>
+      </div>
+      <c2-action-bar>
+        <c2-button>Export</c2-button>
+        <c2-button>Delete</c2-button>
+      </c2-action-bar>
+    </div>
+  </body>
+</html>

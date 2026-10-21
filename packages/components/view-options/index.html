@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-view-options</title>
+    <script type="module" src="/src/view-options.ts"></script>
+    <style>
+      body {
+        font: 14px system-ui;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      pre {
+        font-size: 12px;
+        margin: 0;
+      }
+      .compact {
+        --c2-view-options__panel--width: 280px;
+        --c2-view-options__label--width: 88px;
+        --c2-view-options__section--padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Child elements, with a default value</h3>
+    <section>
+      <c2-view-options
+        id="issues"
+        layouts="list board table"
+        can-set-default
+        default-value='{"groupBy":"status"}'
+        value='{"groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}'
+      >
+        <c2-view-field field="status" label="Status" groupable orderable property></c2-view-field>
+        <c2-view-field field="priority" label="Priority" groupable orderable property></c2-view-field>
+        <c2-view-field field="assignee" label="Assignee" groupable property></c2-view-field>
+        <c2-view-field field="labels" label="Labels" property></c2-view-field>
+        <c2-view-field field="due" label="Due date" orderable property></c2-view-field>
+        <c2-view-field field="created" label="Created" orderable></c2-view-field>
+        <c2-view-toggle key="completed" label="Completed issues"></c2-view-toggle>
+        <c2-view-toggle key="sub" label="Sub-issues" checked></c2-view-toggle>
+      </c2-view-options>
+      <pre id="out"></pre>
+    </section>
+
+    <h3>Fields as an array, one layout, a slotted trigger</h3>
+    <section>
+      <c2-view-options id="array" class="compact" max-sorts="1">
+        <button slot="trigger">View</button>
+      </c2-view-options>
+    </section>
+
+    <script type="module">
+      const issues = document.querySelector('#issues')
+      const out = document.querySelector('#out')
+      const show = (value) => (out.textContent = JSON.stringify(value, null, 2))
+      issues.addEventListener('view-change', (event) => show(event.detail.value))
+      issues.addEventListener('default-request', (event) => (issues.defaultValue = event.detail.value))
+      await issues.updateComplete
+      show(issues.view)
+
+      document.querySelector('#array').fields = [
+        { id: 'name', label: 'Name', orderable: true, property: true },
+        { id: 'team', label: 'Team', groupable: true, property: true },
+        { id: 'joined', label: 'Joined', orderable: true, property: true },
+      ]
+    </script>
+  </body>
+</html>

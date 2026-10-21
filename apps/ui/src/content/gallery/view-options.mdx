@@ -1,0 +1,50 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ViewOptions, ViewField, ViewToggle } from '@c2n/components/view-options'
+
+## Presets
+
+Looks for the Display popover. Open a card and press its trigger to see the panel: the width, the label column and the
+section padding do most of the work.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-view-options layouts="list board table" value='{"groupBy":"status"}' fields='[{"id":"status","label":"Status","groupable":true,"orderable":true,"property":true},{"id":"priority","label":"Priority","groupable":true,"orderable":true,"property":true},{"id":"assignee","label":"Assignee","groupable":true,"property":true}]'></c2-view-options>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact-view {
+    --c2-view-options__panel--width: 272px;
+    --c2-view-options__label--width: 84px;
+    --c2-view-options__label--font-size: 12px;
+    --c2-view-options__section--padding: 8px;
+    --c2-view-options__section--gap: 6px;
+  }
+</style>
+<c2-view-options class="compact-view" max-sorts="1" fields='[{"id":"name","label":"Name","orderable":true,"property":true},{"id":"team","label":"Team","groupable":true,"property":true},{"id":"joined","label":"Joined","orderable":true,"property":true}]'></c2-view-options>
+```
+
+```html tag=MdxCodeBlock,label=Soft panel
+<style>
+  .soft-view {
+    --c2-view-options__panel--border-radius: 14px;
+    --c2-view-options__panel--box-shadow: 0 16px 40px rgba(24, 24, 27, 0.16);
+    --c2-view-options__section--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-view-options__heading--text-transform: none;
+    --c2-view-options__heading--letter-spacing: 0;
+    --c2-view-options__heading--font-size: 14px;
+    --c2-view-options__footer--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-view-options class="soft-view" layouts="list board" default-value='{"groupBy":"stage"}' value='{"layout":"board","groupBy":"stage"}'>
+  <c2-view-field field="stage" label="Stage" groupable orderable property></c2-view-field>
+  <c2-view-field field="owner" label="Owner" groupable property></c2-view-field>
+  <c2-view-field field="amount" label="Amount" orderable property></c2-view-field>
+  <c2-view-toggle key="won" label="Closed deals"></c2-view-toggle>
+</c2-view-options>
+```
+
+</GalleryGrid>

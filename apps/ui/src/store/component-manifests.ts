@@ -1,5 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
+import actionBar from '@c2n/action-bar/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
@@ -101,6 +102,7 @@ import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
+import skipLink from '@c2n/skip-link/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
 import splitPanel from '@c2n/split-panel/custom-elements.json'
@@ -128,6 +130,7 @@ import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
+import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
@@ -138,6 +141,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
+    actionBar,
     attachment,
     autocomplete,
     avatar,
@@ -239,6 +243,7 @@ export const componentManifests = (function () {
     shortcut,
     sideNav,
     skeleton,
+    skipLink,
     slider,
     spinner,
     splitPanel,
@@ -266,6 +271,7 @@ export const componentManifests = (function () {
     tree,
     truncate,
     upload,
+    viewOptions,
     virtualList,
     weekPlanner,
     workingIndicator,

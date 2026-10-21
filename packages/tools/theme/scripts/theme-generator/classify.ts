@@ -73,6 +73,7 @@ const FONT_SIZE_TOKENS: Record<string, string> = { '12px': 'font-size-sm', '14px
 const FONT_WEIGHT_TOKENS: Record<string, string> = { '500': 'font-weight-medium', '600': 'font-weight-semibold' }
 
 const SHADOW_MD_PREFIXES = new Set([
+  'c2-action-bar',
   'c2-carousel',
   'c2-filter-builder',
   'c2-chart',
@@ -91,6 +92,8 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-navigation-menu',
   'c2-navigation-menu-item',
   'c2-theme-select',
+  'c2-view-options',
+  'c2-skip-link',
 ])
 const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-sheet', 'c2-side-nav'])
 

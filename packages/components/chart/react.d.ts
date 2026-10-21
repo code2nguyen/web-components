@@ -21,6 +21,7 @@ import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import type { ChordChart } from '@c2n/chart/chord-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
@@ -120,6 +121,20 @@ declare module 'react' {
         'span-gaps'?: Attribute
       }
       'c2-chart-tooltip': C2Props<ChartTooltip>
+      'c2-chord-chart': Omit<C2Props<ChordChart>, 'series'> & {
+        'source-field'?: Attribute
+        'target-field'?: Attribute
+        'value-field'?: Attribute
+        'ribbon-color'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: ChordChart['series'] | string
+      }
       'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series'> & {
         'start-angle'?: Attribute
         'end-angle'?: Attribute

@@ -31,3 +31,11 @@
   color: var(--site-color-on-surface);
   box-shadow: var(--site-elevation-2);
 }
+// A skip link is hidden until it takes focus; the preview shows its focused look.
+.preview-skip-link::part(link) {
+  position: static;
+  clip-path: none;
+  opacity: 1;
+  translate: none;
+  pointer-events: auto;
+}

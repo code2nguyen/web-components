@@ -8,6 +8,7 @@ import { FeatherGithubIcon, FeatherLayersIcon, FeatherSearchIcon, PhosphorDiscor
 import { Header } from '@c2n/components/header'
 import { LinkButton } from '@c2n/components/link-button'
 import { NavigationMenu } from '@c2n/components/navigation-menu'
+import { SkipLink } from '@c2n/components/skip-link'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import SearchPalette from '../components/SearchPalette.astro'
 import { packageVersion } from '../data/package-release'
@@ -67,7 +68,7 @@ const mobileNavItems = [
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <SkipLink client:load class="skip-link" href="#main" />
     <Header client:load class="site-header" sticky blurred navigation-label="Primary">
       <div slot="brand" class="site-header__brand-group">
         <a href={`${base}/`} class="site-header__brand" aria-label="c2n web components home">
@@ -144,18 +145,18 @@ const mobileNavItems = [
       import '../data/google-maps-config'
     </script>
     <style lang="scss">
-      .skip-link {
-        position: absolute;
-        left: 16px;
-        top: -100px;
-        z-index: 2000;
-        padding: 8px 12px;
-        background: var(--site-color-primary);
-        color: var(--site-color-on-primary);
-        border-radius: var(--site-radius-sm);
-        &:focus {
-          top: 8px;
-        }
+      // The skip link focuses the whole content column; it needs no ring of its own.
+      .site-main:focus {
+        outline: none;
+      }
+
+      :global(.skip-link) {
+        --c2-skip-link--inset-inline-start: 16px;
+        --c2-skip-link--z-index: 2000;
+        --c2-skip-link--padding: 8px 12px;
+        --c2-skip-link--background-color: var(--site-color-primary);
+        --c2-skip-link--color: var(--site-color-on-primary);
+        --c2-skip-link--border-radius: var(--site-radius-sm);
       }
 
       // Theme the Lit island host globally, matching the site's other component wrappers.

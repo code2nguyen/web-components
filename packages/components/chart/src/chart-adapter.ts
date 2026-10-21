@@ -27,10 +27,11 @@ export interface ChartBuildContext {
 export interface ChartAdapterEvents {
   /**
    * A point is hovered, or `null` when the pointer leaves the plot. `name` and `component` are set by an engine whose
-   * marks are not series data: a map region reports its region name and `component: 'geo'`.
+   * marks are not series data: a map region reports its region name and `component: 'geo'`. `dataType` is set by a
+   * series with two kinds of mark: a chord diagram's groups are `'node'` and its ribbons `'edge'`.
    */
-  hover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void
-  click(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void
+  hover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string; dataType?: string } | null): void
+  click(detail: { index: number; seriesIndex: number; name?: string; component?: string; dataType?: string }): void
   rangeChange(detail: { min: number; max: number }): void
   /** The reader zoomed or panned a map. `zoom` is the engine's current zoom factor, `1` at the initial fit. */
   viewChange?(detail: { zoom: number }): void
