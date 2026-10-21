@@ -83,42 +83,53 @@ export function parseMask(mask: string, tokens: Record<string, MaskToken> = {}):
   return parts
 }
 
-const accepts = (token: MaskToken, char: string) => {
-  token.pattern.lastIndex = 0
-  return token.pattern.test(char)
-}
-
 const accept = (token: MaskToken, char: string): string | undefined => {
-  if (!accepts(token, char)) return undefined
+  token.pattern.lastIndex = 0
+  if (!token.pattern.test(char)) return undefined
   const result = token.transform ? token.transform(char) : char
   return [...result].length === 1 ? result : char
 }
 
-/** A part a character can land on from some position, with the literals the field inserts on the way there. */
-interface Reach {
-  part: number
+/** Where one typed character can go from a mask position. */
+interface Move {
+  /** Mask position after the character. */
+  next: number
+  /** Literals the field inserts before the character, or the typed literal and those before it. */
   literals: string
+  /** The character as a slot took it; absent when it was taken as a literal or dropped. */
+  accepted?: string
+  /** The character was dropped. */
+  dropped?: boolean
 }
 
 /**
- * For each mask position, the parts the next character can land on, in order of preference: walking past literals,
- * and into an optional group before going around it.
+ * Where `char` can go from position `from`: walking the literals ahead, a character equal to one is taken as that
+ * literal (unless `raw`), anything else goes to the slot after them or is dropped. An optional group not started yet
+ * gives two moves, into the group and past it, in that order; with no groups there is always exactly one.
  */
-function reachable(parts: MaskPart[]): Reach[][] {
-  return parts.map((_, from) => {
-    const found: Reach[] = []
-    const seen = new Set<number>()
-    const walk = (index: number, literals: string) => {
-      if (index >= parts.length || seen.has(index)) return
-      seen.add(index)
-      found.push({ part: index, literals })
-      const current = parts[index]
-      if (current.kind === 'literal') walk(index + 1, literals + current.char)
-      if (current.group && current.group.start === index) walk(current.group.end, literals)
+function moves(parts: MaskPart[], from: number, char: string, raw: boolean): Move[] {
+  const found: Move[] = []
+  const walk = (index: number, literals: string, decided: boolean) => {
+    if (index >= parts.length) {
+      found.push({ next: from, literals: '', dropped: true })
+      return
     }
-    walk(from, '')
-    return found
-  })
+    const current = parts[index]
+    if (!decided && current.group && current.group.start === index) {
+      walk(index, literals, true)
+      walk(current.group.end, literals, false)
+      return
+    }
+    if (current.kind === 'literal') {
+      if (!raw && current.char === char) found.push({ next: index + 1, literals: literals + char })
+      else walk(index + 1, literals + current.char, false)
+      return
+    }
+    const accepted = accept(current.token, char)
+    found.push(accepted === undefined ? { next: from, literals: '', dropped: true } : { next: index + 1, literals, accepted })
+  }
+  walk(from, '', false)
+  return found
 }
 
 /** Options of {@link applyMask}. */
@@ -144,61 +155,57 @@ export function applyMask(text: string, parts: MaskPart[], options: ApplyMaskOpt
     }
     return { raw: text, formatted: text, positions, nextPart: 0, complete: true, full: true }
   }
-  const reach = reachable(parts)
-  // A typed character may be taken as a literal ahead (unless the text is raw), go to a slot ahead that accepts it, or
-  // be dropped. Optional groups make the first choice not always the best one (`M11AE` against `A[A]9[*] 9AA` must
-  // skip both groups), so `best[i][p]` counts the characters the slots can take from the `i`-th character on, at
-  // mask position `p`; the walk below then takes the first choice that keeps that count, which, with no groups, is
-  // always the first one that applies.
+  const raw = !!options.raw
+  // A choice exists only where an optional group may be entered or skipped, and the right one can depend on what comes
+  // later (`M11AE` against `A[A]9[X] 9AA` skips both groups). For those, `best[i * width + p]` scores the rest of the
+  // text from the `i`-th character at position `p`: two points per character a slot takes, one more if the value ends
+  // complete. Masks without groups never need it.
   const width = parts.length + 1
-  const best = new Int32Array((chars.length + 1) * width)
-  const step = (char: string, entry: Reach): { next: number; gain: number } | undefined => {
-    const current = parts[entry.part]
-    if (current.kind === 'literal') return !options.raw && current.char === char ? { next: entry.part + 1, gain: 0 } : undefined
-    return accepts(current.token, char) ? { next: entry.part + 1, gain: 1 } : undefined
-  }
-  for (let i = chars.length - 1; i >= 0; i--) {
-    for (let p = 0; p < parts.length; p++) {
-      let score = best[(i + 1) * width + p]
-      for (const entry of reach[p]) {
-        const move = step(chars[i], entry)
-        if (move) score = Math.max(score, move.gain + best[(i + 1) * width + move.next])
+  let best: Int32Array | undefined
+  if (parts.some((entry) => entry.group)) {
+    best = new Int32Array((chars.length + 1) * width)
+    for (let p = 0; p <= parts.length; p++) best[chars.length * width + p] = remaining(parts, p).required ? 0 : 1
+    for (let i = chars.length - 1; i >= 0; i--) {
+      for (let p = 0; p <= parts.length; p++) {
+        let score = -1
+        for (const move of moves(parts, p, chars[i], raw)) score = Math.max(score, (move.accepted === undefined ? 0 : 2) + best[(i + 1) * width + move.next])
+        best[i * width + p] = score
       }
-      best[i * width + p] = score
     }
   }
 
-  let raw = ''
+  let rawText = ''
   let formatted = ''
   let pending = ''
   const positions: number[] = []
   let part = 0
   let lastSlot = -1
   for (let i = 0; i < chars.length && part < parts.length; i++) {
-    const target = best[i * width + part]
-    for (const entry of reach[part]) {
-      const move = step(chars[i], entry)
-      if (!move || move.gain + best[(i + 1) * width + move.next] !== target) continue
-      const current = parts[entry.part]
-      if (current.kind === 'literal') pending += entry.literals + current.char
-      else {
-        const accepted = accept(current.token, chars[i]) as string
-        formatted += pending + entry.literals
-        pending = ''
-        positions.push(formatted.length)
-        formatted += accepted
-        raw += accepted
-        lastSlot = entry.part
-      }
-      part = move.next
-      break
+    const choices = moves(parts, part, chars[i], raw)
+    let move = choices[0]
+    if (best && choices.length > 1) {
+      // The first of the best moves: entering a group wins a tie.
+      const score = (entry: Move) => (entry.accepted === undefined ? 0 : 2) + best[(i + 1) * width + entry.next]
+      for (const entry of choices) if (score(entry) > score(move)) move = entry
     }
+    if (move.dropped) continue
+    if (move.accepted === undefined) pending += move.literals
+    else {
+      formatted += pending + move.literals
+      pending = ''
+      positions.push(formatted.length)
+      formatted += move.accepted
+      rawText += move.accepted
+      lastSlot = move.next - 1
+    }
+    part = move.next
   }
 
   const first = parts.findIndex((entry) => entry.kind === 'slot')
   const nextPart = lastSlot >= 0 ? lastSlot + 1 : first < 0 ? parts.length : first
-  const rest = remaining(parts, lastSlot + 1)
-  return { raw, formatted, positions, nextPart, complete: !rest.required, full: !rest.any }
+  // Moves skip slots only by skipping a whole group, so the slots left are the ones from `part` on.
+  const rest = remaining(parts, part)
+  return { raw: rawText, formatted, positions, nextPart, complete: !rest.required, full: !rest.any }
 }
 
 /** Whether slots are left from `from` on: any at all, and any that must be filled. */
