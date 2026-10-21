@@ -3,6 +3,28 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.14](https://github.com/code2nguyen/web-components/releases/tag/v1.0.14) — 2026-10-21
+
+### Features
+
+- **chart:** Add c2-chord-chart, flows between groups around a circle ([82da00f](https://github.com/code2nguyen/web-components/commit/82da00f))
+- **skip-link:** Add c2-skip-link, a "Skip to main content" link ([4212ef4](https://github.com/code2nguyen/web-components/commit/4212ef4))
+- **table:** Focus() moves focus to the roving cell ([2b1960e](https://github.com/code2nguyen/web-components/commit/2b1960e))
+- **action-bar:** Add c2-action-bar, a floating bar for the current selection ([0cd87d5](https://github.com/code2nguyen/web-components/commit/0cd87d5))
+- **view-options:** Add c2-view-options, the Display popover of a collection ([c94932c](https://github.com/code2nguyen/web-components/commit/c94932c))
+
+### Fixes
+
+- **skip-link:** Address code review findings ([bc30804](https://github.com/code2nguyen/web-components/commit/bc30804))
+- **table:** Focus() waits only before the first render, and keeps its options ([ee48bb8](https://github.com/code2nguyen/web-components/commit/ee48bb8))
+- **view-options:** Do not query the light DOM while server rendering ([d5b1368](https://github.com/code2nguyen/web-components/commit/d5b1368))
+- **select:** Pick an option from the keyboard and return focus to the trigger ([749738d](https://github.com/code2nguyen/web-components/commit/749738d))
+- **view-options:** Render the Display button beside the trigger slot, not as its fallback ([e2c72e5](https://github.com/code2nguyen/web-components/commit/e2c72e5))
+- **view-options:** Leave the Display button out when a trigger is slotted ([9b0dfc7](https://github.com/code2nguyen/web-components/commit/9b0dfc7))
+- **view-options:** Cap the panel height, stack the ordering levels and outline secondary buttons ([4a92b80](https://github.com/code2nguyen/web-components/commit/4a92b80))
+- **view-options:** Address review findings ([61a1090](https://github.com/code2nguyen/web-components/commit/61a1090))
+- **view-options:** Read wrapped and server-rendered children; fix the docs imports ([add168f](https://github.com/code2nguyen/web-components/commit/add168f))
+
 ## [1.0.13](https://github.com/code2nguyen/web-components/releases/tag/v1.0.13) — 2026-10-19
 
 ### Features

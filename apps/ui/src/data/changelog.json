@@ -2,6 +2,94 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.14",
+      "date": "2026-10-21",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-chord-chart, flows between groups around a circle",
+              "hash": "82da00f"
+            },
+            {
+              "scopes": ["skip-link"],
+              "text": "Add c2-skip-link, a \"Skip to main content\" link",
+              "hash": "4212ef4"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Focus() moves focus to the roving cell",
+              "hash": "2b1960e"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "Add c2-action-bar, a floating bar for the current selection",
+              "hash": "0cd87d5"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Add c2-view-options, the Display popover of a collection",
+              "hash": "c94932c"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["skip-link"],
+              "text": "Address code review findings",
+              "hash": "bc30804"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Focus() waits only before the first render, and keeps its options",
+              "hash": "ee48bb8"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Do not query the light DOM while server rendering",
+              "hash": "d5b1368"
+            },
+            {
+              "scopes": ["select"],
+              "text": "Pick an option from the keyboard and return focus to the trigger",
+              "hash": "749738d"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Render the Display button beside the trigger slot, not as its fallback",
+              "hash": "e2c72e5"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Leave the Display button out when a trigger is slotted",
+              "hash": "9b0dfc7"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Cap the panel height, stack the ordering levels and outline secondary buttons",
+              "hash": "4a92b80"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Address review findings",
+              "hash": "61a1090"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Read wrapped and server-rendered children; fix the docs imports",
+              "hash": "add168f"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.13",
       "date": "2026-10-19",
       "sections": [
