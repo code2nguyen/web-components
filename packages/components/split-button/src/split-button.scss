@@ -71,7 +71,6 @@ $_duration: css.cssVar(transition--duration);
   display: none;
 }
 
-:host([disabled]),
 :host(:state(disabled)) {
   opacity: css.cssVar(disabled--opacity);
 }
@@ -133,8 +132,8 @@ $_duration: css.cssVar(transition--duration);
   }
 }
 
-:host([selected]) .main,
-:host([selected]) .main:hover:not(:disabled):not([aria-disabled]) {
+:host(:state(selected)) .main,
+:host(:state(selected)) .main:hover:not(:disabled):not([aria-disabled]) {
   background-color: css.cssVar(main__selected--background-color, main__hover--background-color, main--background-color);
   color: css.cssVar(main__selected--color, main--color);
 }
@@ -144,7 +143,7 @@ $_duration: css.cssVar(transition--duration);
   opacity: css.cssVar(disabled--opacity);
 }
 
-:host([running]) .main {
+:host(:state(running)) .main {
   cursor: progress;
 }
 

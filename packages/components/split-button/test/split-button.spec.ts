@@ -211,6 +211,8 @@ test('choice mode: a cancelled menu-select keeps the choice, and a value set fro
 test('choice mode: an empty value takes the first enabled row', async ({ page, renderScenario }) => {
   await renderScenario(merge.replace(' value="squash"', '').replace('value="merge"', 'value="merge" disabled'))
   await expect(page.getByRole('button', { name: 'Squash and merge', exact: true })).toBeVisible()
+  // The resolved choice is the value a binding reads.
+  expect(await page.locator('c2-split-button').evaluate((element) => (element as HTMLElement & { value: string }).value)).toBe('squash')
   await watch(page.locator('c2-split-button'), 'action')
   await page.getByRole('button', { name: 'Squash and merge', exact: true }).click()
   expect(await events(page)).toEqual([{ value: 'squash' }])
@@ -230,6 +232,57 @@ test('toggle: the main half is pressed and flips on activation', async ({ page, 
   // Named as a group by its label.
   await expect(page.locator('c2-split-button')).toHaveHostAria('role', 'group')
   await accessible(page)
+})
+
+test('choice mode: renaming or disabling the chosen row in place updates the main half', async ({ page, renderScenario }) => {
+  await renderScenario(merge.replace(' label="Squash and merge"', ''))
+  await row(page, 'squash').evaluate((element) => (element.firstChild!.textContent = 'Squash & merge'))
+  await expect(page.getByRole('button', { name: 'Squash & merge', exact: true })).toBeVisible()
+  await row(page, 'squash').evaluate((element) => element.setAttribute('disabled', ''))
+  await expect(page.getByRole('button', { name: 'Create a merge commit', exact: true })).toBeVisible()
+})
+
+test('the caret name follows the main text when it changes in place', async ({ page, renderScenario }) => {
+  await renderScenario(send)
+  await page.locator('c2-split-button').evaluate((element) => (element.firstChild!.textContent = 'Sending'))
+  await expect(page.getByRole('button', { name: 'More Sending options' })).toBeVisible()
+})
+
+test('choice mode opens on the current choice inside another shadow root', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="outer"></div>')
+  await page.locator('#outer').evaluate((outer, markup) => {
+    outer.attachShadow({ mode: 'open' }).innerHTML = markup
+  }, merge)
+  const caret = page.getByRole('button', { name: 'Choose merge method' })
+  await caret.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('c2-menu-item[value="squash"]')).toBeFocused()
+})
+
+test('open set from code moves no focus, and a disabled control never stays open', async ({ page, renderScenario }) => {
+  await renderScenario(send)
+  const host = page.locator('c2-split-button')
+  const before = page.getByRole('button', { name: 'Before' })
+  await before.focus()
+  await host.evaluate((element) => ((element as HTMLElement & { open: boolean }).open = true))
+  await expect(row(page, 'schedule')).toBeVisible()
+  await expect(before).toBeFocused()
+  await host.evaluate((element) => ((element as HTMLElement & { disabled: boolean }).disabled = true))
+  await expect(row(page, 'schedule')).toBeHidden()
+  await expect(host).not.toHaveState('open')
+  await host.evaluate((element) => ((element as HTMLElement & { open: boolean }).open = true))
+  await expect(host).not.toHaveState('open')
+  expect(await host.evaluate((element) => (element as HTMLElement & { open: boolean }).open)).toBe(false)
+})
+
+test('"false" attributes and a selected without toggle draw no state', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-split-button disabled="false" selected="false" toggle label="Mute">M<c2-menu-item slot="menu" value="a">A</c2-menu-item></c2-split-button>
+  <c2-split-button id="plain" selected>Send<c2-menu-item slot="menu" value="a">A</c2-menu-item></c2-split-button>`)
+  const host = page.locator('c2-split-button').first()
+  await expect(host).toHaveCSS('opacity', '1')
+  await expect(host).not.toHaveState('selected')
+  await expect(page.locator('#plain')).not.toHaveState('selected')
+  await expect(page.locator('#plain').locator('.main')).not.toHaveAttribute('aria-pressed')
 })
 
 test('show(), hide() and the open property drive the menu', async ({ page, renderScenario }) => {

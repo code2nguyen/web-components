@@ -190,13 +190,32 @@ export class SplitButton extends LitElement {
 
   private formDisabled = false
 
-  /** Which row the menu should focus when it next opens. */
-  private pendingFocus: 'first' | 'last' | 'none' = 'first'
+  /** Which row the menu should focus when it next opens. `open` set from code moves no focus; `show()` does. */
+  private pendingFocus: 'first' | 'last' | 'none' = 'none'
+
+  /** Row text, row `label`/`disabled`/`value` and the main label change without a slotchange. */
+  private readonly contentObserver = isServer ? undefined : new MutationObserver(() => this.handleContentChange())
 
   constructor() {
     super()
     // On the host, not inside the shadow root, so the app's own listeners have run by the time the pick is decided.
     if (!isServer) this.addEventListener('menu-select', this.handleMenuSelect)
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    this.contentObserver?.observe(this, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['label', 'disabled', 'value'],
+    })
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.contentObserver?.disconnect()
   }
 
   /** The `c2-menu-item` rows slotted into `menu`. */
@@ -258,6 +277,7 @@ export class SplitButton extends LitElement {
 
   formDisabledCallback(disabled: boolean) {
     this.formDisabled = disabled
+    if (disabled) this.open = false
     this.syncStates()
     queueMicrotask(() => this.requestUpdate())
   }
@@ -267,6 +287,8 @@ export class SplitButton extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
+    // A disabled control has no open menu, whichever way `open` was set.
+    if (this.open && this.bothDisabled) this.open = false
     // Not on the first update: the rows are read once they are slotted, so a server render and its hydration agree.
     if (this.hasUpdated && (changed.has('mode') || changed.has('value'))) this.syncChoices()
   }
@@ -278,7 +300,7 @@ export class SplitButton extends LitElement {
         if (this.open) menu.show(this.pendingFocus)
         else menu.hide()
       }
-      this.pendingFocus = 'first'
+      this.pendingFocus = 'none'
     }
     this.syncStates()
   }
@@ -289,6 +311,7 @@ export class SplitButton extends LitElement {
     const states: Record<string, boolean> = {
       open: this.open,
       running: this.running,
+      selected: this.toggle && this.selected,
       'main-disabled': this.mainDisabled && !this.bothDisabled,
       disabled: this.bothDisabled,
       choice: this.mode === 'choice',
@@ -316,6 +339,9 @@ export class SplitButton extends LitElement {
       if (item.choice?.checked !== checked) item.choice = { checked }
     }
     this.chosenLabel = chosen ? rowText(chosen) : ''
+    // `value` names what the main half shows and submits, so a bindings layer (v-model, a ControlValueAccessor) reads
+    // the same choice the user sees. Not an attribute, and no event: the author did not pick anything.
+    if (chosen && chosen.value !== this.value) this.value = chosen.value
   }
 
   private handleMainClick = () => {
@@ -352,7 +378,6 @@ export class SplitButton extends LitElement {
     queueMicrotask(() => {
       if (event.defaultPrevented || item.value === this.effectiveValue) return
       this.value = item.value
-      this.syncChoices()
       this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
     })
@@ -365,7 +390,7 @@ export class SplitButton extends LitElement {
     // In choice mode the menu opens on the current choice, the way a select does.
     if (isOpen && this.mode === 'choice') {
       const chosen = this.chosenItem
-      const active = document.activeElement
+      const active = (this.getRootNode() as Document | ShadowRoot).activeElement
       if (chosen && active instanceof MenuItem && this.menuItems.includes(active)) chosen.focus()
     }
     redispatchEvent(this, event)
@@ -375,8 +400,17 @@ export class SplitButton extends LitElement {
     this.syncChoices()
   }
 
+  private handleContentChange() {
+    this.syncChoices()
+    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot:not([name])')
+    if (slot) this.readMainText(slot)
+  }
+
   private handleDefaultSlotChange = (event: Event) => {
-    const slot = event.target as HTMLSlotElement
+    this.readMainText(event.target as HTMLSlotElement)
+  }
+
+  private readMainText(slot: HTMLSlotElement) {
     this.mainText = slot
       .assignedNodes({ flatten: true })
       .map((node) => node.textContent ?? '')
