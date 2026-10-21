@@ -1416,6 +1416,12 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-skip-link",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned link text inside the link; the link's own colour and font come from its public variables."
+    },
+    {
       "tag": "c2-trace-waterfall",
       "slot": "empty",
       "decision": "assigned-content",

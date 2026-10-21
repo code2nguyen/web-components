@@ -102,6 +102,7 @@ import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
+import skipLink from '@c2n/skip-link/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
 import splitPanel from '@c2n/split-panel/custom-elements.json'
@@ -242,6 +243,7 @@ export const componentManifests = (function () {
     shortcut,
     sideNav,
     skeleton,
+    skipLink,
     slider,
     spinner,
     splitPanel,

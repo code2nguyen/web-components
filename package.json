@@ -198,6 +198,7 @@
         "./packages/components/shortcut:build",
         "./packages/components/side-nav:build",
         "./packages/components/skeleton:build",
+        "./packages/components/skip-link:build",
         "./packages/components/slider:build",
         "./packages/components/spinner:build",
         "./packages/components/split-panel:build",
