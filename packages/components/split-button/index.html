@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-split-button</title>
+    <script type="module" src="/src/split-button.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+        justify-items: start;
+      }
+      .outlined {
+        --c2-split-button__main--background-color: transparent;
+        --c2-split-button__main--color: #18181b;
+        --c2-split-button__main--border: 1px solid #d4d4d8;
+        --c2-split-button__main--border-right: none;
+        --c2-split-button__main__hover--background-color: #f4f4f5;
+        --c2-split-button__caret--background-color: transparent;
+        --c2-split-button__caret--color: #18181b;
+        --c2-split-button__caret--border: 1px solid #d4d4d8;
+        --c2-split-button__caret__hover--background-color: #f4f4f5;
+        --c2-split-button__caret__open--background-color: #e4e4e7;
+        --c2-split-button__divider--color: transparent;
+      }
+      .split {
+        --c2-split-button--gap: 2px;
+        --c2-split-button--border-radius: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-split-button>
+      Send
+      <c2-menu-item slot="menu" value="schedule">Schedule send<span slot="description">Pick a date and time</span></c2-menu-item>
+      <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+      <hr slot="menu" />
+      <c2-menu-item slot="menu" value="template">Save as template</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button main-disabled>
+      Send
+      <c2-menu-item slot="menu" value="template">Save as template</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button running>
+      Sending
+      <c2-menu-item slot="menu" value="cancel">Cancel</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button mode="choice" value="squash" caret-label="Choose merge method">
+      <c2-menu-item slot="menu" value="merge">Create a merge commit</c2-menu-item>
+      <c2-menu-item slot="menu" value="squash">Squash and merge</c2-menu-item>
+      <c2-menu-item slot="menu" value="rebase">Rebase and merge</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button class="outlined">
+      Export
+      <c2-menu-item slot="menu" value="csv">CSV</c2-menu-item>
+      <c2-menu-item slot="menu" value="pdf">PDF</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button class="split">
+      Compose
+      <c2-menu-item slot="menu" value="event">New event</c2-menu-item>
+    </c2-split-button>
+
+    <c2-split-button disabled>
+      Send
+      <c2-menu-item slot="menu" value="template">Save as template</c2-menu-item>
+    </c2-split-button>
+  </body>
+</html>

@@ -657,6 +657,10 @@
       "types": "./dist/spinner.d.ts",
       "default": "./dist/spinner.js"
     },
+    "./split-button": {
+      "types": "./dist/split-button.d.ts",
+      "default": "./dist/split-button.js"
+    },
     "./split-panel": {
       "types": "./dist/split-panel.d.ts",
       "default": "./dist/split-panel.js"
@@ -1012,6 +1016,7 @@
     "@c2n/skip-link": "*",
     "@c2n/slider": "*",
     "@c2n/spinner": "*",
+    "@c2n/split-button": "*",
     "@c2n/split-panel": "*",
     "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",

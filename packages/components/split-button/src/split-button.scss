@@ -1,0 +1,268 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-split-button,
+  $theme: (
+    height: 36px,
+    width: auto,
+    border-radius: 6px,
+    gap: 0px,
+    inner-border-radius: null,
+    font-size: 14px,
+    font-weight: 500,
+    transition--duration: 150ms,
+
+    main--padding-left: 16px,
+    main--padding-right: 16px,
+    main--gap: 8px,
+    main--background-color: variables.$color-blue,
+    main--color: #ffffff,
+    main--border: 1px solid transparent,
+    main--border-right: null,
+    main__hover--background-color: rgb(1, 84, 184),
+    main__hover--color: null,
+    main__active--background-color: rgb(1, 70, 154),
+    main__selected--background-color: null,
+    main__selected--color: null,
+    icon--size: 18px,
+
+    caret--min-width: 36px,
+    caret--min-width-coarse: 44px,
+    caret--padding: 0 8px,
+    caret--background-color: variables.$color-blue,
+    caret--color: #ffffff,
+    caret--border: 1px solid transparent,
+    caret__hover--background-color: rgb(1, 84, 184),
+    caret__active--background-color: rgb(1, 70, 154),
+    caret__open--background-color: rgb(1, 70, 154),
+    caret__open--border-radius: null,
+    caret__icon--size: 16px,
+    caret__icon__open--rotate: 180deg,
+
+    divider--width: 1px,
+    divider--color: color-mix(in srgb, currentColor 40%, transparent),
+    divider--inset: 0px,
+
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    menu--min-width: 128px,
+  )
+);
+
+$_radius: css.cssVar(border-radius);
+// Square inner corners while the halves touch, the outer radius as soon as there is a gap (as in c2-button-group).
+$_inner: var(--c2-split-button--inner-border-radius, min(#{$_radius}, calc(#{css.cssVar(gap)} * 10000)));
+// The divider only exists while the halves touch.
+$_divider: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10000));
+$_duration: css.cssVar(transition--duration);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+  gap: css.cssVar(gap);
+  width: css.cssVar(width);
+  height: css.cssVar(height);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]),
+:host(:state(disabled)) {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+.main,
+.caret {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color $_duration ease,
+    color $_duration ease,
+    border-color $_duration ease,
+    border-radius $_duration ease;
+
+  &:focus-visible {
+    // Raised so the ring is not covered by the other half.
+    z-index: 1;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: css.cssVar(main--gap);
+  padding-left: css.cssVar(main--padding-left);
+  padding-right: css.cssVar(main--padding-right);
+  border: css.cssVar(main--border);
+  border-right: css.cssVar(main--border-right, main--border);
+  border-radius: #{$_radius} #{$_inner} #{$_inner} #{$_radius};
+  background-color: css.cssVar(main--background-color);
+  color: css.cssVar(main--color);
+
+  &:hover:not(:disabled):not([aria-disabled]) {
+    background-color: css.cssVar(main__hover--background-color, main--background-color);
+    color: css.cssVar(main__hover--color, main--color);
+  }
+
+  &:active:not(:disabled):not([aria-disabled]) {
+    background-color: css.cssVar(main__active--background-color, main__hover--background-color, main--background-color);
+  }
+}
+
+:host([selected]) .main,
+:host([selected]) .main:hover:not(:disabled):not([aria-disabled]) {
+  background-color: css.cssVar(main__selected--background-color, main__hover--background-color, main--background-color);
+  color: css.cssVar(main__selected--color, main--color);
+}
+
+:host(:state(main-disabled)) .main {
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+}
+
+:host([running]) .main {
+  cursor: progress;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon::slotted(*) {
+  flex-shrink: 0;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.running-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  animation: c2-split-button-spin 800ms linear infinite;
+
+  ::slotted(*),
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// The c2-menu host takes part in the row; it holds the caret.
+.menu {
+  display: flex;
+  --c2-menu--min-width: #{css.cssVar(menu--min-width)};
+}
+
+.caret {
+  min-width: css.cssVar(caret--min-width);
+  padding: css.cssVar(caret--padding);
+  border: css.cssVar(caret--border);
+  border-radius: #{$_inner} #{$_radius} #{$_radius} #{$_inner};
+  background-color: css.cssVar(caret--background-color);
+  color: css.cssVar(caret--color);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: css.cssVar(divider--inset);
+    bottom: css.cssVar(divider--inset);
+    width: $_divider;
+    background: css.cssVar(divider--color);
+    pointer-events: none;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: css.cssVar(caret__hover--background-color, caret--background-color);
+  }
+
+  &:active:not(:disabled) {
+    background-color: css.cssVar(caret__active--background-color, caret__hover--background-color, caret--background-color);
+  }
+}
+
+@media (pointer: coarse) {
+  .caret {
+    min-width: css.cssVar(caret--min-width-coarse);
+  }
+}
+
+:host(:state(open)) .caret {
+  background-color: css.cssVar(caret__open--background-color, caret__active--background-color, caret--background-color);
+  border-radius: var(--c2-split-button__caret__open--border-radius, #{$_inner} #{$_radius} #{$_radius} #{$_inner});
+}
+
+.caret-icon {
+  display: inline-flex;
+  width: css.cssVar(caret__icon--size);
+  height: css.cssVar(caret__icon--size);
+  --c2-feather-icon--size: #{css.cssVar(caret__icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(caret__icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(caret__icon--size)};
+  transition: transform $_duration ease;
+
+  ::slotted(*),
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host(:state(open)) .caret-icon {
+  transform: rotate(#{css.cssVar(caret__icon__open--rotate)});
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main,
+  .caret,
+  .caret-icon {
+    transition-duration: 0s;
+  }
+}
+
+@media (forced-colors: active) {
+  .main,
+  .caret {
+    border-color: ButtonText;
+  }
+
+  .caret::before {
+    background: ButtonText;
+  }
+}
+
+@keyframes c2-split-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
