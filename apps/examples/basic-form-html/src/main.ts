@@ -21,11 +21,11 @@ const country = document.querySelector<Select>('#country')!
 const postcode = document.querySelector<MaskInput>('#postcode')!
 const unsaved = document.querySelector<HTMLElement>('#unsaved')!
 
-// Each country's postcode shape. The UK's varies in length in the middle (SW1A 1AA, M1 1AE), which one mask cannot
-// say, so it stays free text.
+// Each country's postcode shape. The UK's varies in length in the middle (SW1A 1AA, M1 1AE): its optional groups
+// are filled or skipped by what is typed.
 const postcodeMasks: Record<string, { mask: string; placeholder: string }> = {
   US: { mask: '99999?-9999', placeholder: '94103' },
-  GB: { mask: '', placeholder: 'SW1A 1AA' },
+  GB: { mask: 'A[A]9[X] 9AA', placeholder: 'SW1A 1AA' },
   FR: { mask: '99999', placeholder: '75008' },
   DE: { mask: '99999', placeholder: '10115' },
   VN: { mask: '999999', placeholder: '700000' },

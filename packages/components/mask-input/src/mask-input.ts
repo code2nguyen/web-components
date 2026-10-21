@@ -42,8 +42,9 @@ const digitsOnly = (parts: MaskPart[]) =>
  * A text input that fits what is typed to a pattern: postcodes, IBANs, tax IDs, card expiry dates, licence plates. The
  * `mask` names what each position accepts: `9` a digit, `a` a letter, `A` a letter in upper case, `*` a letter or digit
  * and `X` a letter or digit in upper case; any other character is a literal the field inserts itself (`\` escapes a mask
- * character, and `?` makes the rest of the mask optional, for values of varying length). `tokens` adds characters of
- * your own from script.
+ * character, and `?` makes the rest of the mask optional, for values of varying length). `[` `]` wrap an optional group
+ * anywhere in the mask, filled or skipped as a whole: `A[A]9[X] 9AA` takes every UK postcode, `M1 1AE` as well as
+ * `SW1A 1AA`. `tokens` adds characters of your own from script.
  *
  * Characters a position does not accept are dropped, so typing, pasting a formatted or unformatted value and deleting
  * across a literal all work. While the field has focus or a value, the rest of the mask shows behind the text in
@@ -116,8 +117,8 @@ export class MaskInput extends LitElement {
 
   /**
    * The pattern: `9` digit, `a` letter, `A` upper-case letter, `*` letter or digit, `X` upper-case letter or digit,
-   * `\` escapes the next character, `?` makes the rest optional. Anything else is a literal. Empty, the field takes any
-   * text, like a plain input.
+   * `\` escapes the next character, `?` makes the rest optional, `[` `]` wrap an optional group. Anything else is a
+   * literal. Empty, the field takes any text, like a plain input.
    */
   @property({ type: String }) mask = ''
 
