@@ -130,6 +130,14 @@ test('applies consumer theme variables to size, shadow, hover, focus and selecte
   await expect(button).toHaveCSS('outline-color', 'rgb(100, 20, 150)')
   await page.locator('c2-button').evaluate((element) => element.setAttribute('selected', ''))
   await expect(button).toHaveCSS('background-color', 'rgb(60, 70, 80)')
+  await button.hover()
+  await expect(button).toHaveCSS('box-shadow', 'rgb(7, 8, 9) 0px 1px 2px 0px')
+  await page.locator('c2-button').evaluate((element) => {
+    element.removeAttribute('selected')
+    element.setAttribute('disabled', '')
+  })
+  await button.hover()
+  await expect(button).toHaveCSS('box-shadow', 'rgb(1, 2, 3) 0px 2px 4px 0px')
 })
 
 test('submits and resets its associated form with native button types', async ({ page, scenario }) => {

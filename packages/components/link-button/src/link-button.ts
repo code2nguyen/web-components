@@ -43,6 +43,7 @@ import styles from './link-button.scss?inline'
  *
  * @cssproperty {color} [--c2-link-button__container__selected--color=rgb(2, 101, 220)]
  * @cssproperty {color} --c2-link-button__container__selected--background-color
+ * @cssproperty {border} --c2-link-button__container__selected--border
  * @cssproperty {font-weight} [--c2-link-button__container__selected--font-weight=600]
  * @cssproperty {text-decoration} --c2-link-button__container__selected--text-decoration
  *

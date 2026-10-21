@@ -28,6 +28,7 @@
     container__selected--background-color: null,
     container__selected--color: null,
     container__selected--border: null,
+    container__selected--box-shadow: null,
     container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     container__focus--outline-offset: 2px,
 
@@ -76,7 +77,7 @@
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  will-change: background-color, color, border-color, box-shadow;
+  will-change: background-color, color, border-color;
   transition: animation.standard(background-color), animation.standard(color), animation.standard(border-color), animation.standard(box-shadow);
 
   &:hover:not(:disabled) {
@@ -102,6 +103,7 @@
   background-color: css.cssVar(container__selected--background-color, container__hover--background-color, container--background-color);
   color: css.cssVar(container__selected--color, container--color);
   border: css.cssVar(container__selected--border, container--border);
+  box-shadow: css.cssVar(container__selected--box-shadow, container--box-shadow);
 }
 
 :host([disabled]) .c2-button,

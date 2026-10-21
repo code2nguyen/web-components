@@ -29,6 +29,7 @@
 
     container__selected--color: variables.$color-blue,
     container__selected--background-color: null,
+    container__selected--border: null,
     container__selected--font-weight: 600,
     container__selected--text-decoration: null,
 
@@ -73,7 +74,7 @@
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  will-change: color, background-color, border-color, text-decoration-color;
+  will-change: color, background-color, text-decoration-color;
   transition: animation.standard(color), animation.standard(background-color), animation.standard(border-color), animation.standard(text-decoration-color);
 
   &:hover:not(:disabled) {
@@ -93,12 +94,14 @@
 :host([selected]) .c2-link-button {
   color: css.cssVar(container__selected--color, container--color);
   background-color: css.cssVar(container__selected--background-color, container--background-color);
+  border: css.cssVar(container__selected--border, container--border);
   font-weight: css.cssVar(container__selected--font-weight, container--font-weight);
   text-decoration: css.cssVar(container__selected--text-decoration, container--text-decoration);
 
   &:hover:not(:disabled) {
     color: css.cssVar(container__selected--color, container__hover--color, container--color);
     background-color: css.cssVar(container__selected--background-color, container__hover--background-color, container--background-color);
+    border: css.cssVar(container__selected--border, container__hover--border, container--border);
   }
 }
 

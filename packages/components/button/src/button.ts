@@ -42,6 +42,7 @@ import styles from './button.scss?inline'
  * @cssproperty {color} --c2-button__container__selected--background-color - Pressed state of a toggle button (see `selected`).
  * @cssproperty {color} --c2-button__container__selected--color
  * @cssproperty {border} --c2-button__container__selected--border
+ * @cssproperty {box-shadow} --c2-button__container__selected--box-shadow
  *
  * @cssproperty {outline} [--c2-button__container__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-button__container__focus--outline-offset=2px]
