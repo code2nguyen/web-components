@@ -24,17 +24,14 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### `c2-log-viewer` can follow the end but cannot be sent to the start, or tell the app which entry was chosen
+### `c2-log-viewer` entries cannot be chosen from the keyboard
 
 - **Severity:** gap
-- **Hit while:** building the raw-log view of the Log Lens Next.js example (`apps/examples/log-lens-nextjs`), 2026-09-28.
-- **What happens:** replacing the buffer (`clear()` + `appendEntries()`) leaves the viewer following the newest
-  entry, because an empty viewport counts as "at the bottom". An analysis view wants to open at the first record;
-  the only public way there is calling `setFilter(null, 'filter')` afterwards for its anchor-reset side effect. The
-  viewer also fires no event for an entry, so a record cannot open a detail panel or be added to a filter from the
-  viewport — the app has to offer those actions somewhere else.
-- **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
-  to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
+- **Hit while:** adding `entry-click`, 2026-10-21.
+- **What happens:** the viewport is one focus stop that scrolls with the arrow keys; there is no current entry, so
+  `entry-click` (and anything an app hangs on it, such as a detail panel) is pointer-only.
+- **Where the fix belongs:** `packages/components/log-viewer` — a roving active entry (`aria-activedescendant` on the
+  viewport) moved by the arrow keys, and an `entry-activate` event on Enter, like `c2-table`'s `row-activate`.
 
 ### Charts have no time markers or annotated ranges
 
@@ -108,6 +105,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-table`                      | Wrapping took a row-height variable and two `::part` overrides. The `wrap` attribute does it in one, turns windowing off, and pads top-aligned text with `--c2-table__cell__wrap--padding`.                                                                                                                                     | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | A `cell-slot` column needed a child per row. Slots are now named by display line, `cell:{line}:{field}` (breaking), and `range-change`/`renderedRange` report the rendered `rows` (`line`, `key`, `row`), so a framework renders children only for the window.                                                                  | 2026-10-03                                                                                                                                                                                                   |
 | `c2-table`                      | The grid's keydown handler cancelled Enter/Space on any control inside a cell, so slotted buttons could not be pressed from the keyboard, and it stole arrow keys from text inputs. Controls now own those keys. No upgrade-order race reproduced (pre-upgrade properties, children before and after rows).                     | 2026-10-03                                                                                                                                                                                                   |
+| `c2-log-viewer`                 | Could follow the end but not be sent to the start (replacing the buffer left it following the newest entry), and fired no event for an entry, so a record could not open a detail panel.                                                                                                                                        | 2026-10-21, `scrollToStart()` (holds the top through appends until the reader scrolls) and a bubbling `entry-click` with `{ entry, index }`, each with a regression test.                                    |
 | `@c2n/theme`                    | The OS dark fallback (`:root:not([data-theme='light']):not(.c2-light)`, specificity 0,3,0) beat an app's `:root` token overrides, so a bridged palette turned stock dark whenever the OS was dark. `tokens.css` and `base.css` now sit in the `c2n-theme` cascade layer, which any unlayered rule beats.                        | 2026-10-21                                                                                                                                                                                                   |
 
 ## Won't fix

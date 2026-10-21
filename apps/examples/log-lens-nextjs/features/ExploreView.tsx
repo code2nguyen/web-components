@@ -61,6 +61,8 @@ export function ExploreView({ analysis, records, lens, actions }: Readonly<{ ana
       if (!active) return
       viewer.clear()
       if (entries.length) viewer.appendEntries(entries)
+      // A lens is read from its first record, not followed like a live tail.
+      viewer.scrollToStart()
     })
     return () => {
       active = false
