@@ -795,7 +795,8 @@ test('focus() moves focus to the roving cell, so an app can hand focus back to t
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowDown')
   expect(await active()).toBe('Grace Hopper')
-  await host.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  // Blur the focused cell itself: Firefox does not blur a shadow root's focus through its host.
+  await host.evaluate((element) => (element.shadowRoot!.activeElement as HTMLElement | null)?.blur())
   expect(await active()).toBeUndefined()
   await host.evaluate((element) => element.focus())
   expect(await active()).toBe('Grace Hopper')
