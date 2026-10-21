@@ -22,3 +22,16 @@ test('external links protect the opener and forward download', async ({ page, re
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   await expect(link).toHaveAttribute('download', 'example.txt')
 })
+test('draws no border by default and the themed border on hover', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-link-button>Plain</c2-link-button>
+    <c2-link-button
+      style="--c2-link-button__container--border: 1px solid rgb(10, 20, 30); --c2-link-button__container__hover--border: 2px dashed rgb(40, 50, 60)"
+    >Outlined</c2-link-button>
+  `)
+  await expect(page.getByRole('button', { name: 'Plain' })).toHaveCSS('border-top-style', 'none')
+  const outlined = page.getByRole('button', { name: 'Outlined' })
+  await expect(outlined).toHaveCSS('border-top', '1px solid rgb(10, 20, 30)')
+  await outlined.hover()
+  await expect(outlined).toHaveCSS('border-top', '2px dashed rgb(40, 50, 60)')
+})
