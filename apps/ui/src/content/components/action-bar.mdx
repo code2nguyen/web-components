@@ -87,8 +87,9 @@ The examples set `--c2-action-bar--position: relative` so the bar sits inside it
 `sticky` in an app, or use `fixed` to pin it to the viewport. Leave some bottom padding on the collection so the bar
 never covers its last row.
 
-On a narrow screen the actions stay on one line and scroll sideways, so the count and the clear button keep their
-place. Set `--c2-action-bar__actions--flex-wrap: wrap` to stack them onto further lines instead.
+The actions always stay on one line. On a phone (the bar 480px wide or less) the count and the clear button share the
+top row and the actions get a full-width row below; actions that still do not fit scroll sideways, with a fade on the
+edge that has more past it. Set `--c2-action-bar__actions--flex-wrap: wrap` to wrap them onto further lines instead.
 
 ## In an application
 

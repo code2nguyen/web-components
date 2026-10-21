@@ -1,0 +1,240 @@
+---
+// A store's search results page, the kind of page skip links exist for: a header with a dozen stops (brand, menu,
+// search, account, cart) and a filter column sit in front of the results. Two skip links come first: "Skip to results"
+// and "Skip to filters". The status line counts Tab presses and names what has focus, so the saving is visible.
+// Written as an HTML string: as tags, Astro would server-render each c2-* element and leave it waiting for an island
+// hydration that never comes.
+const markup = `
+<section class="sl-demo" data-sl-demo>
+  <div class="sl-shop" data-sl-page tabindex="-1">
+    <c2-skip-link class="sl-skip" href="#sl-results">Skip to results</c2-skip-link>
+    <c2-skip-link class="sl-skip" href="#sl-filters">Skip to filters</c2-skip-link>
+
+    <header class="sl-header">
+      <a class="sl-brand" href="#sl-home">Stride</a>
+      <nav class="sl-nav" aria-label="Departments">
+        <a href="#sl-women">Women</a>
+        <a href="#sl-men">Men</a>
+        <a href="#sl-kids">Kids</a>
+        <a href="#sl-trail">Trail</a>
+        <a href="#sl-sale">Sale</a>
+      </nav>
+      <c2-search-field class="sl-search" aria-label="Search the store" value="running shoes"></c2-search-field>
+      <nav class="sl-nav" aria-label="Account">
+        <a href="#sl-account">Account</a>
+        <a href="#sl-cart">Cart (2)</a>
+      </nav>
+    </header>
+
+    <div class="sl-body">
+      <aside class="sl-filters" id="sl-filters" aria-label="Filters">
+        <p class="sl-heading">Filters</p>
+        <c2-checkbox-group class="sl-group" aria-label="Size">
+          <span slot="label">Size</span>
+          <c2-checkbox value="40">EU 40</c2-checkbox>
+          <c2-checkbox value="41">EU 41</c2-checkbox>
+          <c2-checkbox value="42">EU 42</c2-checkbox>
+        </c2-checkbox-group>
+        <c2-checkbox-group class="sl-group" aria-label="Terrain">
+          <span slot="label">Terrain</span>
+          <c2-checkbox value="road">Road</c2-checkbox>
+          <c2-checkbox value="trail">Trail</c2-checkbox>
+        </c2-checkbox-group>
+      </aside>
+
+      <main class="sl-results" id="sl-results" aria-labelledby="sl-results-title">
+        <p class="sl-heading" id="sl-results-title">24 results for “running shoes”</p>
+        <ul class="sl-grid">
+          <li><a href="#sl-p1"><strong>Cloudline 3</strong><span>€129</span></a></li>
+          <li><a href="#sl-p2"><strong>Tempo Racer</strong><span>€149</span></a></li>
+          <li><a href="#sl-p3"><strong>Ridge Trail GTX</strong><span>€165</span></a></li>
+          <li><a href="#sl-p4"><strong>Daily Glide</strong><span>€99</span></a></li>
+        </ul>
+      </main>
+    </div>
+  </div>
+
+  <p class="sl-status" role="status" data-sl-status>Click inside the page above, then press Tab.</p>
+</section>
+`
+---
+
+<Fragment set:html={markup} />
+
+<!-- Global: the markup above is a string, which Astro's scoped styles do not reach. Every class is prefixed. -->
+<style lang="scss" is:global>
+  .sl-demo {
+    display: grid;
+    gap: 8px;
+    margin-block: 16px 24px;
+  }
+  // The page under test. The skip links are positioned against it instead of the viewport.
+  .sl-shop {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+    background: var(--site-color-surface);
+    color: var(--site-color-on-surface);
+    font-size: 14px;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    a:focus-visible {
+      outline: 2px solid var(--site-color-primary);
+      outline-offset: 2px;
+    }
+  }
+  .sl-shop:focus {
+    outline: none;
+  }
+  .sl-skip {
+    --c2-skip-link--position: absolute;
+    --c2-skip-link--top: 12px;
+    --c2-skip-link--inset-inline-start: 12px;
+    --c2-skip-link--background-color: var(--site-color-primary);
+    --c2-skip-link--color: var(--site-color-on-primary);
+  }
+  .sl-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--site-color-outline-variant);
+  }
+  .sl-brand {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .sl-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .sl-search {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+  .sl-body {
+    display: grid;
+    grid-template-columns: minmax(130px, 180px) 1fr;
+  }
+  .sl-filters {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 16px;
+    border-right: 1px solid var(--site-color-outline-variant);
+  }
+  .sl-heading {
+    margin: 0;
+    font-weight: 600;
+  }
+  .sl-results {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 16px;
+
+    // Focus lands on the region itself; the first Tab after that reaches the first product.
+    &:focus {
+      outline: none;
+    }
+  }
+  .sl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a {
+      display: grid;
+      gap: 4px;
+      padding: 12px;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: 8px;
+    }
+    a::before {
+      content: '';
+      display: block;
+      aspect-ratio: 4 / 3;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      background: var(--site-color-surface-container-1);
+    }
+    span {
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+  .sl-status {
+    margin: 0;
+    font-size: 13px;
+    color: var(--site-color-on-surface-variant);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 560px) {
+    .sl-body {
+      grid-template-columns: 1fr;
+    }
+    .sl-filters {
+      border-right: none;
+      border-bottom: 1px solid var(--site-color-outline-variant);
+    }
+  }
+</style>
+
+<script>
+  import '@c2n/components/skip-link'
+  import '@c2n/components/search-field'
+  import '@c2n/components/checkbox'
+
+  // What the status line calls the focused element: a link's text, a control's label, or a region's name.
+  const describe = (element: Element) => {
+    const label =
+      element.getAttribute('aria-label') ??
+      (element.getAttribute('aria-labelledby') && document.getElementById(element.getAttribute('aria-labelledby')!)?.textContent) ??
+      (element as HTMLElement).innerText?.replace(/\s+/g, ' ').trim()
+    return label || element.tagName.toLowerCase()
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-sl-demo]').forEach((demo) => {
+    const page = demo.querySelector<HTMLElement>('[data-sl-page]')!
+    const status = demo.querySelector<HTMLElement>('[data-sl-status]')!
+    let presses = 0
+
+    // The product links and the in-page navigation are placeholders: keep them from scrolling the docs page.
+    page.addEventListener('click', (event) => {
+      const link = (event.target as Element).closest('a')
+      if (link) event.preventDefault()
+    })
+    // Clicking the page starts a fresh count, as if the page had just loaded.
+    // A click on the page, outside its controls, starts over as a fresh page load would: focus goes to the page itself,
+    // so the next Tab reaches the first skip link. Left alone, the browser would start from the clicked spot.
+    page.addEventListener('mousedown', (event) => {
+      if ((event.target as Element).closest('a, c2-search-field, c2-checkbox, c2-checkbox-group, c2-skip-link')) return
+      event.preventDefault()
+      page.focus({ preventScroll: true })
+      presses = 0
+      status.textContent = 'Press Tab: the first stop is “Skip to results”.'
+    })
+    page.addEventListener('keydown', (event) => {
+      if (event.key === 'Tab') presses++
+    })
+    page.addEventListener('focusin', (event) => {
+      const target = event.composedPath()[0] as Element
+      if (target === page) return
+      const host = (target.getRootNode() as ShadowRoot).host ?? target
+      const name = describe(host.matches('c2-skip-link, c2-search-field, c2-checkbox') ? host : target)
+      status.textContent = `Tab presses: ${presses} · Focus: ${name}`
+    })
+  })
+</script>

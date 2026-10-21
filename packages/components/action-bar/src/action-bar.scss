@@ -21,6 +21,7 @@
     divider--height: 20px,
     actions--gap: 8px,
     actions--flex-wrap: nowrap,
+    actions__fade--size: 24px,
     clear--size: 28px,
     clear--border-radius: 6px,
     clear--color: #71717a,
@@ -43,6 +44,8 @@
   z-index: css.cssVar(z-index);
   height: 0;
   pointer-events: none;
+  // The bar's layout follows the width it has to work with (see the narrow layout at the end).
+  container-type: inline-size;
 }
 
 :host([hidden]) {
@@ -120,10 +123,37 @@
   padding: 4px;
   margin: -4px;
   scrollbar-width: none;
+  // The end that has more actions past it fades out, so a cut-off row reads as one that scrolls.
+  --_fade-direction: to right;
+  --_fade-start: #000;
+  --_fade-end: #000;
 
   &::-webkit-scrollbar {
     display: none;
   }
+
+  &.fade-start {
+    --_fade-start: transparent;
+  }
+
+  &.fade-end {
+    --_fade-end: transparent;
+  }
+
+  &.fade-start,
+  &.fade-end {
+    mask-image: linear-gradient(
+      var(--_fade-direction),
+      var(--_fade-start),
+      #000 css.cssVar(actions__fade--size),
+      #000 calc(100% - #{css.cssVar(actions__fade--size)}),
+      var(--_fade-end)
+    );
+  }
+}
+
+:host(:dir(rtl)) .actions {
+  --_fade-direction: to left;
 }
 
 .clear {
@@ -155,6 +185,36 @@
   ::slotted(*) {
     width: css.cssVar(clear-icon--size);
     height: css.cssVar(clear-icon--size);
+  }
+}
+
+// Narrow (a phone): the count and the clear button share the top row, and the actions get a row of their own, full
+// width and still one line, so two or three actions show in full instead of scrolling behind the count.
+@container (max-width: 480px) {
+  .bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: calc(100% - 16px);
+    max-width: none;
+    row-gap: 8px;
+    padding: 6px;
+  }
+
+  .label {
+    padding-inline-start: 10px;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  ::slotted(:not([slot])) {
+    flex: 1 0 auto;
   }
 }
 

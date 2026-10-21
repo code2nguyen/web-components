@@ -2,8 +2,9 @@
 // Two working screens built around `c2-action-bar`: an orders table whose bulk actions change, export and delete
 // the selected rows, and an inbox list whose actions mark messages read and archive them. Each one owns its
 // selection, sets the bar's `count` from the collection's `selection-change`, and empties it on `clear`.
----
-
+// The c2-* markup goes in as an HTML string: written as tags here, Astro would server-render each element and
+// leave it waiting for an island hydration that never comes (a table that never reads its columns).
+const ordersMarkup = `
 <section class="ab-demo" data-ab-orders>
   <header class="ab-demo__header">
     <div>
@@ -27,7 +28,9 @@
     </c2-action-bar>
   </div>
 </section>
+`
 
+const inboxMarkup = `
 <section class="ab-demo" data-ab-inbox>
   <header class="ab-demo__header">
     <div>
@@ -44,8 +47,14 @@
     </c2-action-bar>
   </div>
 </section>
+`
+---
 
-<style lang="scss">
+<Fragment set:html={ordersMarkup} />
+<Fragment set:html={inboxMarkup} />
+
+<!-- Global: the markup above is a string, which Astro's scoped styles do not reach. Every class is prefixed. -->
+<style lang="scss" is:global>
   .ab-demo {
     display: grid;
     gap: 12px;
@@ -101,6 +110,18 @@
   }
   .ab-demo__ghost {
     flex: none;
+  }
+  // A phone has room for three compact buttons next to the count; anything more scrolls behind a fade.
+  @media (max-width: 560px) {
+    // The bar stacks on a phone (count above the actions), so it needs more room under the last row.
+    .ab-demo__scroller {
+      padding-bottom: 112px;
+    }
+    .ab-demo__bar c2-button {
+      --c2-button__container--height: 32px;
+      --c2-button__container--padding-left: 12px;
+      --c2-button__container--padding-right: 12px;
+    }
   }
   .ab-demo__danger {
     --c2-button__container--background-color: light-dark(#dc2626, #f87171);

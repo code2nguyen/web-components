@@ -125,19 +125,48 @@ test('with position: fixed the bar centres in the viewport', async ({ page, rend
   expect(Math.round(viewport.height - (box.y + box.height))).toBe(16)
 })
 
-test('on a narrow screen the actions stay on one line and scroll, clear of the count and the clear button', async ({ page, renderScenario }) => {
+const narrowBar = (actions: string) =>
+  `<div style="position: relative; height: 200px"><c2-action-bar count="12" style="--c2-action-bar--position: absolute"><span slot="label">12 orders selected</span>${actions}</c2-action-bar></div>`
+const top = (box: { y: number } | null) => Math.round(box!.y)
+
+test('on a wide screen the count, the actions and the clear button share one row', async ({ page, renderScenario }) => {
+  await renderScenario(narrowBar('<c2-button>Mark paid</c2-button><c2-button>Export CSV</c2-button>'))
+  const label = await bar(page).locator('.bar > span.label').boundingBox()
+  const button = await page.locator('c2-button').first().boundingBox()
+  expect(Math.abs(label!.y + label!.height / 2 - (button!.y + button!.height / 2))).toBeLessThan(2)
+})
+
+test('on a phone the actions get a full-width row of their own, under the count and the clear button', async ({ page, renderScenario }) => {
+  await page.setViewportSize({ width: 420, height: 640 })
+  await renderScenario(narrowBar('<c2-button>Mark paid</c2-button><c2-button>Export CSV</c2-button><c2-button>Refund</c2-button>'))
+  const label = await bar(page).locator('.bar > span.label').boundingBox()
+  const clear = await clearButton(page).boundingBox()
+  const tops = await page.locator('c2-button').evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().top)))
+  // One line of actions, below the row that holds the count and the clear button.
+  expect(new Set(tops).size).toBe(1)
+  expect(tops[0]).toBeGreaterThan(top(label) + label!.height - 1)
+  expect(Math.abs(top(clear) + clear!.height / 2 - (top(label) + label!.height / 2))).toBeLessThan(2)
+  expect(Math.round(clear!.width)).toBe(28)
+  // All three show in full.
+  const actions = bar(page).locator('.actions')
+  expect(await actions.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await expect(actions).not.toHaveClass(/fade-/)
+})
+
+test('actions that still do not fit scroll sideways, fading the edge that has more past it', async ({ page, renderScenario }) => {
   await page.setViewportSize({ width: 360, height: 640 })
-  await renderScenario(
-    `<div style="position: relative; height: 200px"><c2-action-bar count="12" style="--c2-action-bar--position: absolute"><span slot="label">12 orders selected</span><c2-button>Mark paid</c2-button><c2-button>Export CSV</c2-button><c2-button>Refund</c2-button></c2-action-bar></div>`,
-  )
-  const buttons = page.locator('c2-button')
-  const tops = await buttons.evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().top)))
+  await renderScenario(narrowBar(['Mark paid', 'Export CSV', 'Refund', 'Print labels', 'Archive'].map((name) => `<c2-button>${name}</c2-button>`).join('')))
+  const tops = await page.locator('c2-button').evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().top)))
   expect(new Set(tops).size).toBe(1)
   const actions = bar(page).locator('.actions')
-  expect(await actions.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
-  // The clear button sits past the end of the actions box, not over an action.
-  const actionsBox = (await actions.boundingBox())!
-  const clearBox = (await clearButton(page).boundingBox())!
-  expect(clearBox.x).toBeGreaterThanOrEqual(actionsBox.x + actionsBox.width - 4)
-  expect(clearBox.x + clearBox.width).toBeLessThanOrEqual(360)
+  await expect(actions).toHaveClass(/fade-end/)
+  await expect(actions).not.toHaveClass(/fade-start/)
+  await actions.evaluate((element) => element.scrollTo({ left: element.scrollWidth }))
+  await expect(actions).toHaveClass(/fade-start/)
+  await expect(actions).not.toHaveClass(/fade-end/)
+})
+
+test('actions that fit are not faded', async ({ page, renderScenario }) => {
+  await renderScenario(owned(2))
+  await expect(bar(page).locator('.actions')).not.toHaveClass(/fade-/)
 })
