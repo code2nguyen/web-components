@@ -368,6 +368,7 @@ price: .price
   <c2-skeleton variant="circle"></c2-skeleton>
   <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>
 </div>`,
+  'skip-link': `<c2-skip-link class="preview-skip-link"></c2-skip-link>`,
   slider: `<div style="display:grid;gap:12px;width:220px">
   <c2-slider value="40"></c2-slider>
   <c2-slider value="60" ticks step="20"></c2-slider>

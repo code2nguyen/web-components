@@ -1,0 +1,72 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-skip-link,
+  $theme: (
+    position: fixed,
+    top: 8px,
+    inset-inline-start: 8px,
+    z-index: 1000,
+    padding: 8px 16px,
+    background-color: rgb(2, 101, 220),
+    color: #ffffff,
+    border: none,
+    border-radius: 6px,
+    box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    font-family: inherit,
+    font-size: 14px,
+    font-weight: 600,
+    text-decoration: none,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    transition-duration: 150ms,
+  )
+);
+
+:host {
+  display: contents;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-skip-link {
+  position: css.cssVar(position);
+  top: css.cssVar(top);
+  inset-inline-start: css.cssVar(inset-inline-start);
+  z-index: css.cssVar(z-index);
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  box-shadow: css.cssVar(box-shadow);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  line-height: 1.4;
+  text-decoration: css.cssVar(text-decoration);
+  white-space: nowrap;
+  transition-property: opacity, translate;
+  transition-duration: css.cssVar(transition-duration);
+  transition-timing-function: ease-out;
+
+  // Out of sight but still in the tab order and the accessibility tree.
+  &:not(:focus) {
+    clip-path: inset(50%);
+    opacity: 0;
+    translate: 0 -8px;
+    pointer-events: none;
+  }
+
+  &:focus {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-skip-link {
+    transition-duration: 0s;
+  }
+}

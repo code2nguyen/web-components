@@ -1,0 +1,70 @@
+---
+title: 'Skip Link'
+description: 'A "Skip to main content" link that appears when a keyboard user tabs onto it and moves focus into the main content.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SkipLink } from '@c2n/components/skip-link'
+
+`c2-skip-link` lets a keyboard or screen-reader user jump past the header and navigation that open every page. Put it first in the `<body>`: it stays out of sight until Tab reaches it, then appears in the top-start corner, and pressing Enter moves focus to its target so the next Tab continues inside the main content.
+
+`href` names the target (`#main`); without it the link targets the page's first `<main>`. A target that cannot take focus by itself, such as `<main>` or `<section>`, gets `tabindex="-1"` only while it holds focus, so it never turns into a Tab stop. The page URL is left alone, which keeps the link safe in an app with hash routing. The default text, "Skip to main content", is translatable; slot your own text for any other target.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/skip-link'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/skip-link
+<style>
+  .page {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    padding: 48px 16px 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 14px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .page nav {
+    display: flex;
+    gap: 12px;
+  }
+  .page a {
+    color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .in-frame {
+    --c2-skip-link--position: absolute;
+  }
+  .shown::part(link) {
+    position: static;
+    clip-path: none;
+    opacity: 1;
+    translate: none;
+  }
+</style>
+<div data-label="Click the frame, then press Tab">
+  <div class="page">
+    <c2-skip-link class="in-frame" href="#skip-link-demo-main"></c2-skip-link>
+    <nav aria-label="Demo"><a href="#home">Home</a> <a href="#products">Products</a> <a href="#pricing">Pricing</a></nav>
+    <section id="skip-link-demo-main" aria-label="Demo content">Main content. Enter on the link lands focus here.</section>
+  </div>
+</div>
+<div data-label="Focused look">
+  <c2-skip-link class="shown" href="#skip-link-demo-main"></c2-skip-link>
+  <c2-skip-link class="shown" href="#skip-link-demo-main">Skip to results</c2-skip-link>
+</div>
+```
+
+The examples above set `--c2-skip-link--position: absolute` so the link appears inside the frame rather than in the corner of this page, and the "Focused look" row shows the link without focus through `::part(link)`. In an app, leave both alone: the default `position: fixed` keeps the link in view wherever the page is scrolled.
+
+A page with several landmarks can offer several links (`Skip to search`, `Skip to results`): each one shows only while it holds focus, so they share the same corner.

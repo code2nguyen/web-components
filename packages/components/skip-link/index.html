@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skip Link</title>
+    <script type="module" src="/src/skip-link.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        font: 14px system-ui;
+        color: #18181b;
+      }
+      header,
+      main,
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 24px 32px;
+      }
+      header {
+        border-bottom: 1px solid #e4e4e7;
+      }
+      .outlined {
+        --c2-skip-link--background-color: #ffffff;
+        --c2-skip-link--color: #18181b;
+        --c2-skip-link--border: 1px solid #bcbcc6;
+        --c2-skip-link--inset-inline-start: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Press Tab: the first link appears top-left; Shift+Tab back and Tab twice for the second. -->
+    <c2-skip-link href="#main"></c2-skip-link>
+    <c2-skip-link class="outlined" href="#filters">Skip to filters</c2-skip-link>
+    <header>
+      <a href="#">Home</a>
+      <a href="#">Products</a>
+      <a href="#">Pricing</a>
+      <a href="#">Docs</a>
+    </header>
+    <section id="filters" aria-label="Filters">
+      <label><input type="checkbox" /> In stock</label>
+      <label><input type="checkbox" /> On sale</label>
+    </section>
+    <main id="main">
+      <p>Main content.</p>
+      <button>First control in main</button>
+    </main>
+  </body>
+</html>

@@ -155,6 +155,7 @@
         "../../components/shortcut:build",
         "../../components/side-nav:build",
         "../../components/skeleton:build",
+        "../../components/skip-link:build",
         "../../components/slider:build",
         "../../components/spinner:build",
         "../../components/split-panel:build",

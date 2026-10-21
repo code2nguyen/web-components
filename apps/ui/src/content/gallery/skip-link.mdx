@@ -1,0 +1,58 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SkipLink } from '@c2n/components/skip-link'
+
+## Presets
+
+Looks for `c2-skip-link`, shown as they appear when focused (each card reveals the link through `::part(link)`; in an app the link stays hidden until Tab reaches it). `--c2-skip-link--background-color`, `--c2-skip-link--color` and `--c2-skip-link--border` do most of the work; `--c2-skip-link--top` and `--c2-skip-link--inset-inline-start` move it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .shown::part(link) {
+    position: static;
+    clip-path: none;
+    opacity: 1;
+    translate: none;
+  }
+</style>
+<c2-skip-link class="shown"></c2-skip-link>
+```
+
+```html tag=MdxCodeBlock,label=Surface
+<style>
+  .surface {
+    --c2-skip-link--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-skip-link--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-skip-link--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+  }
+  .surface::part(link) {
+    position: static;
+    clip-path: none;
+    opacity: 1;
+    translate: none;
+  }
+</style>
+<c2-skip-link class="surface"></c2-skip-link>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-skip-link--border-radius: 999px;
+    --c2-skip-link--padding: 10px 20px;
+    --c2-skip-link--text-decoration: underline;
+  }
+  .pill::part(link) {
+    position: static;
+    clip-path: none;
+    opacity: 1;
+    translate: none;
+  }
+</style>
+<c2-skip-link class="pill">Skip to results</c2-skip-link>
+```
+
+</GalleryGrid>
