@@ -33,33 +33,52 @@ function declarations(entries: [string, string][], indent = '  '): string {
 export function renderTokensCss(tokens: TokenDef[]): string {
   const light = tokens.filter((tk) => tk.light !== null).map((tk): [string, string] => [tk.name, tk.light as string])
   const dark = tokens.filter((tk) => tk.dark !== undefined).map((tk): [string, string] => [tk.name, tk.dark as string])
-  const body = `:root,
+  // `color-scheme` stays outside the layer: it must follow `data-theme`, not lose to an app's `html { color-scheme: light }`,
+  // or the tokens turn dark while native controls, scrollbars and every `light-dark()` pair stay light.
+  const scheme = `:root,
 :host,
 [data-theme='light'],
 .c2-light {
   color-scheme: light;
-${declarations(light)}
 }
 
 [data-theme='dark'],
 .c2-dark {
   color-scheme: dark;
-${declarations(dark)}
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not(.c2-light) {
     color-scheme: dark;
+  }
+}`
+  const values = `:root,
+:host,
+[data-theme='light'],
+.c2-light {
+${declarations(light)}
+}
+
+[data-theme='dark'],
+.c2-dark {
+${declarations(dark)}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not(.c2-light) {
 ${declarations(dark, '    ')}
   }
 }`
   return `${GENERATED}
 /*
  * Design tokens of @c2n/theme. Light values on the root, dark values under [data-theme='dark'] / .c2-dark and
- * as the OS preference fallback. Everything sits in the \`${THEME_LAYER}\` cascade layer: override any token on :root
- * (or on a subtree) with an unlayered rule to theme every component, in light and dark mode alike.
+ * as the OS preference fallback. The values sit in the \`${THEME_LAYER}\` cascade layer: override any token on :root
+ * (or on a subtree) with an unlayered rule to theme every component, in light and dark mode alike. color-scheme
+ * is set outside the layer so it keeps following data-theme.
  */
-${layered(body)}
+${scheme}
+
+${layered(values)}
 `
 }
 

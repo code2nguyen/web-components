@@ -44,7 +44,7 @@ Dark mode then follows the app's own switch because the bridged values flip.
 
 `tokens.css` sets light values on `:root` and dark values under `[data-theme='dark']` and `.c2-dark`, with `prefers-color-scheme: dark` as the fallback when no `data-theme` attribute is present. `data-theme="light"` / `.c2-light` opts a subtree out. Selectors are not tied to the root element, so any subtree can be inverted.
 
-Both `tokens.css` and `base.css` sit in the `c2n-theme` cascade layer, so an unlayered override always wins: set a token once on `:root` and it holds in light mode, under `[data-theme='dark']` and under the OS dark fallback; to give it a different dark value, set it again under your dark selector. Do not raise specificity to beat the theme. An app that layers its own CSS declares `c2n-theme` first (`@layer c2n-theme, base, components;`).
+Both `tokens.css` and `base.css` sit in the `c2n-theme` cascade layer, so an unlayered override always wins: set a token once on `:root` and it holds in light mode, under `[data-theme='dark']` and under the OS dark fallback; to give it a different dark value, set it again under your dark selector. Do not raise specificity to beat the theme. An app that layers its own CSS declares `c2n-theme` first, in a `@layer` statement before any import (`@layer c2n-theme, base, components;`); otherwise a layered framework imported before the theme leaves `c2n-theme` on top.
 
 ## Token groups
 

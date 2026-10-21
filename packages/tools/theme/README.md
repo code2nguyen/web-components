@@ -38,7 +38,7 @@ Set `data-theme="dark"` (or the `c2-dark` class) on `<html>` or on any subtree; 
 
 ## Cascade layer
 
-`tokens.css` and `base.css` put every rule in the `c2n-theme` [cascade layer](https://developer.mozilla.org/docs/Web/CSS/@layer). An unlayered rule beats a layered one whatever its specificity or source order, so a plain `:root { --c2-theme--color-primary: … }` overrides the token in light mode, under `data-theme="dark"` and under the OS dark fallback alike, and so does a component variable you set yourself. If your app puts its own styles in layers, declare `c2n-theme` first so it stays the lowest: `@layer c2n-theme, base, components;`.
+`tokens.css` and `base.css` put every rule in the `c2n-theme` [cascade layer](https://developer.mozilla.org/docs/Web/CSS/@layer). An unlayered rule beats a layered one whatever its specificity or source order, so a plain `:root { --c2-theme--color-primary: … }` overrides the token in light mode, under `data-theme="dark"` and under the OS dark fallback alike, and so does a component variable you set yourself. If your app puts its own styles in layers, declare `c2n-theme` first, in a `@layer` statement before any import, so it stays the lowest: `@layer c2n-theme, base, components;`. A layered framework imported before the theme otherwise leaves `c2n-theme` on top of its layers.
 
 ## Layers
 
