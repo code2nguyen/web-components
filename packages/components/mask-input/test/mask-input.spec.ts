@@ -67,6 +67,10 @@ test('a pasted formatted or unformatted value is fitted to the mask', async ({ p
   await input.click()
   await page.keyboard.insertText('5551234567')
   await expect(input).toHaveValue('+1 (555) 123-4567')
+  // Typed after the leading literals, a 1 fills the first slot rather than matching the 1 of `+1` again.
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('41')
+  await expect(input).toHaveValue('+1 (41')
   await page.keyboard.press('ControlOrMeta+a')
   await page.keyboard.insertText('+1 (212) 555-0100')
   await expect(input).toHaveValue('+1 (212) 555-0100')
@@ -108,6 +112,65 @@ test('complete fires once the required part is filled; the optional part may sta
   await page.keyboard.type('d')
   expect(await events(page)).toEqual([{ value: 'FR76AB1C', formattedValue: 'FR76 AB1C' }])
   await expect(input).toHaveValue('FR76 AB1CD')
+})
+
+test('an optional group in the middle is filled or skipped by what is typed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-mask-input mask="A[A]9[X] 9AA" aria-label="Postcode"></c2-mask-input>')
+  const host = page.locator('c2-mask-input')
+  const input = page.getByRole('textbox', { name: 'Postcode' })
+  const slots = page.locator('c2-mask-input .slots')
+  await input.click()
+  // Groups not started yet are left out of the hint.
+  await expect(slots).toHaveText('__ ___')
+  await page.keyboard.type('sw')
+  await expect(slots).toHaveText('SW_ ___')
+  await page.keyboard.type('1a1aa')
+  await expect(input).toHaveValue('SW1A 1AA')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('m11')
+  await expect(input).toHaveValue('M11')
+  // `A` does not fit the digit after the second group, so the 1 moves past it: both groups are skipped.
+  await page.keyboard.type('a')
+  await expect(input).toHaveValue('M1 1A')
+  expect(await host.evaluate((el) => (el as MaskInputElement).checkValidity())).toBe(false)
+  await page.keyboard.type('e')
+  await expect(input).toHaveValue('M1 1AE')
+  expect(await value(page)).toBe('M11AE')
+  expect(await host.evaluate((el) => (el as MaskInputElement).checkValidity())).toBe(true)
+
+  await host.evaluate(async (el) => {
+    const field = el as MaskInputElement & { updateComplete: Promise<boolean> }
+    field.value = 'EC1A1BB'
+    await field.updateComplete
+  })
+  await expect(input).toHaveValue('EC1A 1BB')
+})
+
+test('a group being filled must be finished', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-mask-input mask="99[-99]" aria-label="Range"></c2-mask-input>')
+  const host = page.locator('c2-mask-input')
+  const input = page.getByRole('textbox', { name: 'Range' })
+  await input.click()
+  await page.keyboard.type('12')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+  await page.keyboard.type('3')
+  await expect(input).toHaveValue('12-3')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(false)
+  await expect(page.locator('c2-mask-input .slots')).toHaveText('12-3_')
+  await page.keyboard.type('4')
+  expect(await host.evaluate((el) => (el as MaskInputElement).complete)).toBe(true)
+})
+
+test('a value that is complete only with a group skipped skips it', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-mask-input mask="9[9]9" value="12" aria-label="Code"></c2-mask-input>')
+  const host = page.locator('c2-mask-input')
+  expect(await host.evaluate((el) => (el as MaskInputElement).checkValidity())).toBe(true)
+  await page.getByRole('textbox', { name: 'Code' }).click()
+  await page.keyboard.press('End')
+  await page.keyboard.type('3')
+  await expect(page.getByRole('textbox', { name: 'Code' })).toHaveValue('123')
 })
 
 test('an incomplete value is invalid, and required checks for a value', async ({ page, renderScenario }) => {

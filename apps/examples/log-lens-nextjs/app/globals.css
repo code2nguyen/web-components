@@ -59,12 +59,8 @@
   --ll-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 28%);
 }
 
-/*
- * Bridge onto the @c2n/theme tokens: every c2 component follows from here. The two :not() raise specificity to
- * that of the theme's own prefers-color-scheme fallback (:root:not([data-theme='light']):not(.c2-light)), which
- * would otherwise win in dark mode and replace the bridge with the stock dark palette.
- */
-:root:not(.ll-a):not(.ll-b) {
+/* Bridge onto the @c2n/theme tokens: every c2 component follows from here. */
+:root {
   --c2-theme--color-primary: var(--ll-accent);
   --c2-theme--color-primary-hover: var(--ll-accent-hover);
   --c2-theme--color-primary-active: var(--ll-accent-hover);
