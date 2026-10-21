@@ -169,3 +169,58 @@ test('charts without an x axis ignore annotations', async ({ page, scenario }) =
   await annotate(page, [{ x: 0, label: 'Nothing to mark' }])
   await expect(page.locator('#chart').locator('.annotation')).toHaveCount(0)
 })
+
+test('names follow a data-only update that relabels the row', async ({ page, scenario }) => {
+  await scenario('bar')
+  await annotate(page, [{ x: 1, label: 'Reorg' }])
+  await expect(page.getByRole('button', { name: 'Reorg, Web' })).toHaveCount(1)
+  await page.locator('#chart').evaluate((element) => {
+    ;(element as HTMLElement & { data: unknown }).data = [
+      { team: 'Core', shipped: 18 },
+      { team: 'Mobile', shipped: 9 },
+      { team: 'Infra', shipped: 11 },
+    ]
+  })
+  await expect(page.getByRole('button', { name: 'Reorg, Mobile' })).toHaveCount(1)
+})
+
+test('a range whose start is outside the window keeps its marker at the visible edge', async ({ page, scenario }) => {
+  await scenario('two-series')
+  await annotate(page, [{ x: -10, x2: 10, label: 'Started before the data' }])
+  const {
+    boxes: [box],
+  } = await boxes(page)
+  expect(box.hidden).toBe(false)
+  expect(box.left).toBeCloseTo(0, 0)
+  expect(box.marker?.x).toBeCloseTo(0, 0)
+  await expect(page.getByRole('button', { name: /^Started before the data, / })).toHaveCount(1)
+})
+
+test('a null x2 from JSON is a single marker, and the marker is drawn inside the plot area', async ({ page, scenario }) => {
+  await scenario('sparkline')
+  await page.locator('#chart').evaluate(async (element) => {
+    element.setAttribute('annotations', '[{"x":2,"x2":null,"label":"Spike"}]')
+    await (element as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+  })
+  const result = await page.locator('#chart').evaluate((element) => {
+    const root = element.shadowRoot as ShadowRoot
+    const area = (root.querySelector('.plot-area') as HTMLElement).getBoundingClientRect()
+    const dot = (root.querySelector('.annotation-marker') as HTMLElement).getBoundingClientRect()
+    return { ranges: root.querySelectorAll('.annotation-range').length, inside: dot.top >= area.top && dot.bottom <= area.bottom }
+  })
+  expect(result).toEqual({ ranges: 0, inside: true })
+  await expect(page.getByRole('button', { name: /^Spike, / })).toHaveCount(1)
+})
+
+test('changing annotations does not report a legend change', async ({ page, scenario }) => {
+  await scenario('two-series')
+  const fired = await page.locator('#chart').evaluate(async (element) => {
+    let count = 0
+    element.addEventListener('legend-change', () => (count += 1))
+    const chart = element as HTMLElement & { annotations?: unknown; updateComplete: Promise<boolean> }
+    chart.annotations = [{ x: 3, label: 'One' }]
+    await chart.updateComplete
+    return count
+  })
+  expect(fired).toBe(0)
+})

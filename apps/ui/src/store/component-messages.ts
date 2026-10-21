@@ -62,6 +62,14 @@ for (const module of Object.values(modules)) {
 }
 
 /**
+ * Catalogs shared by sibling elements whose tags do not start with the catalog's name: every cartesian chart draws its
+ * annotations with the text of `chart`. A shared catalog is never a prefix parent, so `c2-chart-series` does not get it.
+ */
+const SHARED: Record<string, readonly string[]> = {
+  chart: ['area-chart', 'bar-chart', 'bubble-chart', 'candlestick-chart', 'line-chart', 'scatter-chart', 'sparkline'],
+}
+
+/**
  * The interface text of a component tag: its own catalog (`c2-todo-list` → `todo-list`), or the catalog of the element
  * it belongs to (`c2-checkbox-group` → `checkbox`, `c2-toast-region` → `toast`) unless `orParent` is false.
  */
@@ -69,6 +77,8 @@ export function componentMessages(tag: string, orParent = true): ComponentMessag
   const name = tag.replace(/^c2-/, '')
   if (byName.has(name)) return byName.get(name)
   if (!orParent) return undefined
-  const parent = [...byName.keys()].filter((candidate) => name.startsWith(`${candidate}-`)).sort((a, b) => b.length - a.length)[0]
+  const shared = Object.keys(SHARED).find((catalog) => SHARED[catalog].includes(name))
+  if (shared) return byName.get(shared)
+  const parent = [...byName.keys()].filter((candidate) => !(candidate in SHARED) && name.startsWith(`${candidate}-`)).sort((a, b) => b.length - a.length)[0]
   return parent ? byName.get(parent) : undefined
 }

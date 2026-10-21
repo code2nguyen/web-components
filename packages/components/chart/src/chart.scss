@@ -264,8 +264,7 @@
   box-sizing: border-box;
 }
 
-.annotation[hidden],
-.annotation-marker[hidden] {
+.annotation[hidden] {
   display: none;
 }
 
@@ -302,9 +301,10 @@
   transform: translateX(-50%);
 }
 
+/* Just inside the plot's top edge, leaving room for the focus ring: the plot area clips whatever crosses it. */
 .annotation-marker {
   position: absolute;
-  top: 0;
+  top: calc(#{css.cssVar(annotation-marker--size)} / 2 + 4px);
   left: var(--_marker, 0);
   box-sizing: border-box;
   width: css.cssVar(annotation-marker--size);
@@ -344,7 +344,7 @@
 
 .annotation--vertical .annotation-marker {
   top: var(--_marker, 0);
-  left: 0;
+  left: calc(#{css.cssVar(annotation-marker--size)} / 2 + 4px);
 }
 
 .actions {

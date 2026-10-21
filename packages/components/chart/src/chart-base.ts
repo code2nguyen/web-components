@@ -91,6 +91,12 @@ function humanize(field: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
+/** Where a range annotation ends, or `undefined` for a single marker: `x2` may arrive as `null` from JSON. */
+function annotationEnd(annotation: ChartAnnotation): number | undefined {
+  const end = annotation.x2
+  return typeof end === 'number' && Number.isFinite(end) && end !== annotation.x ? end : undefined
+}
+
 /** Pixels a resize must exceed before the engine is told; a canvas resize is a full redraw. */
 const RESIZE_EPSILON = 1
 
@@ -341,8 +347,8 @@ export abstract class ChartBase extends LitElement {
    * Markers at an x value and shaded x ranges, drawn over the plot of a cartesian chart (line, area, bar, sparkline,
    * scatter, bubble, candlestick) and placed by the engine's own x scale, so they follow the axes, a resize and a
    * zoom. `x`/`x2` are x values: what `x-field` holds (epoch milliseconds on a time chart), else the row index. Each
-   * marker is a button, reachable with Tab and named by its label and x, that fires `annotation-click`. Charts
-   * without an x axis ignore it.
+   * marker is a button, reachable with Tab and named by its label and x, that fires `annotation-click`. The
+   * other charts (pie, gauge, radar, pyramid, butterfly, heatmap, overlap, chord, map) ignore it.
    */
   @property({ converter: jsonPropertyConverter }) annotations?: ChartAnnotation[]
 
@@ -363,7 +369,12 @@ export abstract class ChartBase extends LitElement {
   @state() private themeRevision = 0
 
   protected themeController = new ChartThemeController(this, () => this.handleThemeChange())
-  protected readonly chartMsg = new LocalizeController(this, chartMessages, () => this.locale)
+  /** The annotation text. Only a chart that draws annotations watches `lang` for it. */
+  protected readonly chartMsg = this.drawsAnnotations ? new LocalizeController(this, chartMessages, () => this.locale) : undefined
+  /** The annotations the current template was rendered from, which `#placeAnnotations` pairs with its boxes. */
+  #renderedAnnotations: ChartAnnotation[] = []
+  /** Row labels by x value, for the markers' names; rebuilt only when the frame changes. */
+  #xLabels?: { frame: ChartFrame; revision: number; length: number; labels: Map<number, string> }
   protected frameBuilder = new ChartFrameBuilder()
   protected frame?: ChartFrame
 
@@ -567,8 +578,9 @@ export abstract class ChartBase extends LitElement {
     }
     this.#syncTooltipPopover()
     this.#renderLegendEntries()
-    if (changed.has('annotations')) this.#placeAnnotations()
-    if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
+    // A hover-only render moves nothing; any other one may have new boxes or a new language for their names.
+    if (!(changed.size === 1 && changed.has('hoverContext'))) this.#placeAnnotations()
+    if ([...changed.keys()].some((key) => key !== 'hoverContext' && key !== 'annotations')) this.notifyLegendChange()
   }
 
   // ----------------------------------------------------------- public API ---
@@ -1116,46 +1128,58 @@ export abstract class ChartBase extends LitElement {
     `
   }
 
-  /** The annotation layer. Every box starts hidden; `#placeAnnotations` shows and positions it once the engine can say where. */
+  /** The annotation layer. Every box starts hidden; `#placeAnnotations` shows, positions and names it once the engine can say where. */
   private renderAnnotations(): TemplateResult | typeof nothing {
     const annotations = this.drawsAnnotations ? (this.annotations ?? []) : []
+    this.#renderedAnnotations = annotations
     if (annotations.length === 0) return nothing
     return html`
-      <div class="annotations" part="annotations" role="group" aria-label=${this.chartMsg.t('annotations')}>
-        ${annotations.map((annotation, index) => {
-          const ranged = annotation.x2 !== undefined && annotation.x2 !== annotation.x
-          return html`
+      <div class="annotations" part="annotations" role="group" aria-label=${this.chartMsg?.t('annotations') ?? ''}>
+        ${annotations.map(
+          (annotation, index) => html`
             <div class="annotation annotation--${annotation.tone ?? 'neutral'}" part="annotation" hidden>
-              ${ranged ? html`<div class="annotation-range" part="annotation-range"></div>` : nothing}
+              ${annotationEnd(annotation) !== undefined ? html`<div class="annotation-range" part="annotation-range"></div>` : nothing}
               <div class="annotation-line" part="annotation-line"></div>
               <button
                 class="annotation-marker"
                 part="annotation-marker"
                 type="button"
                 title=${annotation.label}
-                aria-label=${this.annotationName(annotation)}
                 @click=${() => this.#handleAnnotationClick(annotation, index)}
               ></button>
             </div>
-          `
-        })}
+          `,
+        )}
       </div>
     `
   }
 
-  /** The marker's accessible name: its label, then where it sits, in the tooltip's x format. */
+  /**
+   * The marker's accessible name: its label, then where it sits, a row's label when the x is a labelled row's (as on
+   * the axis), else in the tooltip's x format.
+   */
   protected annotationName(annotation: ChartAnnotation): string {
-    // A row's label names its x, as on the axis; any other value is formatted the way the tooltip formats x.
-    const at = (value: number) => {
-      const frame = this.frame
-      if (frame?.labels) {
-        for (let index = 0; index < frame.length; index += 1) if (frame.x[index] === value && frame.labels[index] !== undefined) return frame.labels[index]
-      }
-      return this.formatX(value)
+    const labels = this.#labelsByX()
+    const at = (value: number) => labels?.get(value) ?? this.formatX(value)
+    const end = annotationEnd(annotation)
+    if (end === undefined) return this.chartMsg?.t('annotationAt', annotation.label, at(annotation.x)) ?? annotation.label
+    const [from, to] = end < annotation.x ? [end, annotation.x] : [annotation.x, end]
+    return this.chartMsg?.t('annotationRange', annotation.label, at(from), at(to)) ?? annotation.label
+  }
+
+  #labelsByX(): Map<number, string> | undefined {
+    const frame = this.frame
+    if (!frame?.labels) return undefined
+    const cached = this.#xLabels
+    if (cached && cached.frame === frame && cached.revision === frame.revision && cached.length === frame.length) return cached.labels
+    const labels = new Map<number, string>()
+    for (let index = 0; index < frame.length; index += 1) {
+      const x = columnValue(frame.x, index)
+      const label = frame.labels[index]
+      if (x !== null && label !== undefined && !labels.has(x)) labels.set(x, label)
     }
-    if (annotation.x2 === undefined || annotation.x2 === annotation.x) return this.chartMsg.t('annotationAt', annotation.label, at(annotation.x))
-    const [from, to] = annotation.x2 < annotation.x ? [annotation.x2, annotation.x] : [annotation.x, annotation.x2]
-    return this.chartMsg.t('annotationRange', annotation.label, at(from), at(to))
+    this.#xLabels = { frame, revision: frame.revision, length: frame.length, labels }
+    return labels
   }
 
   #handleAnnotationClick(annotation: ChartAnnotation, index: number): void {
@@ -1163,20 +1187,23 @@ export abstract class ChartBase extends LitElement {
   }
 
   /**
-   * Positions every annotation box from the engine's scale. Runs after each engine draw, so a streaming tick, a resize
-   * or a zoom moves the markers with the data; it writes styles straight to the nodes and never schedules an update.
-   * A box wholly outside the visible x window is hidden, and a range that crosses an edge is clipped to the plot.
+   * Positions and names every annotation box from the engine's scale. Runs after each engine draw, so a streaming tick,
+   * a resize or a zoom moves the markers with the data — and renames them, since new rows can relabel an x — and it
+   * writes straight to the nodes, never scheduling an update. A box wholly outside the visible x window is hidden, and
+   * a range that crosses an edge is clipped to the plot.
    */
   #placeAnnotations(): void {
     const boxes = this.renderRoot?.querySelectorAll<HTMLElement>('.annotations > .annotation')
-    const annotations = this.annotations ?? []
+    // The array the boxes were rendered from, not `annotations`: that may already hold the next list, not yet rendered.
+    const annotations = this.#renderedAnnotations
     if (!boxes || boxes.length === 0) return
-    const values = annotations.flatMap((annotation) => [annotation.x, annotation.x2 ?? annotation.x])
+    const values = annotations.flatMap((annotation) => [annotation.x, annotationEnd(annotation) ?? annotation.x])
     const geometry = this.adapter?.xGeometry?.(values) ?? null
     boxes.forEach((box, index) => {
+      const annotation = annotations[index]
       const start = geometry?.offsets[index * 2]
       const end = geometry?.offsets[index * 2 + 1]
-      if (!geometry || start === null || start === undefined || end === null || end === undefined) {
+      if (!annotation || !geometry || start === null || start === undefined || end === null || end === undefined) {
         box.hidden = true
         return
       }
@@ -1193,10 +1220,11 @@ export abstract class ChartBase extends LitElement {
       const size = Math.min(extent, high) - from
       box.hidden = false
       box.classList.toggle('annotation--vertical', !horizontal)
-      // The marker belongs to the annotation's own `x`; a range clipped at that edge loses it rather than misplace it.
-      const marker = box.querySelector<HTMLElement>('.annotation-marker')
-      if (marker) marker.hidden = start < -0.5 || start > extent + 0.5
-      box.style.setProperty('--_marker', `${start - from}px`)
+      box.querySelector<HTMLElement>('.annotation-marker')?.setAttribute('aria-label', this.annotationName(annotation))
+      // The marker sits at the annotation's own `x`; a range whose `x` is outside the window keeps it at the visible edge,
+      // so the shading never loses the one element that names it and can be reached from the keyboard.
+      const markerAt = Math.min(extent, Math.max(0, start))
+      box.style.setProperty('--_marker', `${markerAt - from}px`)
       if (horizontal) {
         box.style.left = `${plot.left + from}px`
         box.style.top = `${plot.top}px`
