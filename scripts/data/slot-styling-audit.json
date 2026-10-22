@@ -3480,6 +3480,13 @@
       "decision": "part",
       "parts": ["placeholder"],
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-image-cropper",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["frame"],
+      "reason": "The empty frame (background, border, minimum height) owns the placeholder slot's component-side presentation."
     }
   ]
 }

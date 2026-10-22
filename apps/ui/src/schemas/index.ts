@@ -54,7 +54,7 @@ export const guideSchema = z.object({
   order: z.number().default(100),
 })
 
-export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'nextjs', 'angular', 'vue'] as const
+export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'nextjs', 'angular', 'vue', 'sveltekit'] as const
 
 export type ExampleFramework = (typeof EXAMPLE_FRAMEWORKS)[number]
 
@@ -65,6 +65,7 @@ export const EXAMPLE_FRAMEWORK_LABELS: Record<ExampleFramework, string> = {
   nextjs: 'Next.js',
   angular: 'Angular',
   vue: 'Vue',
+  sveltekit: 'SvelteKit',
 }
 
 /**

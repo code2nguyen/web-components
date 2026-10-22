@@ -149,6 +149,7 @@
         "./packages/components/highlight:build",
         "./packages/components/hover-card:build",
         "./packages/components/icon-button:build",
+        "./packages/components/image-cropper:build",
         "./packages/components/image:build",
         "./packages/components/indicator:build",
         "./packages/components/inline-edit:build",
@@ -242,6 +243,7 @@
     "examples:build": {
       "dependencies": [
         "./apps/examples/basic-form-html:build",
+        "./apps/examples/close-workbench-sveltekit:build",
         "./apps/examples/data-platform-html:build",
         "./apps/examples/log-lens-nextjs:build",
         "./apps/examples/observability-nextjs:build",

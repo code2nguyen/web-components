@@ -198,6 +198,7 @@ price: .price
   </c2-icon-button>
 </div>`,
   image: `<div class="preview-row"><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" loading="click" src="/web-components/images/image-chart.svg" alt="Chart" width="640" height="480"></c2-image></div>`,
+  'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
   <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>

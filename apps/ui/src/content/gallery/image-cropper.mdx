@@ -1,0 +1,61 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ImageCropper } from '@c2n/components/image-cropper'
+
+## Presets
+
+Croppers for the usual jobs. `--c2-image-cropper__overlay--color` and the handle variables do most of the work; `aspect-ratio` and `shape` set the job itself.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-image-cropper src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>
+```
+
+```html tag=MdxCodeBlock,label=Avatar
+<style>
+  .cropper-avatar {
+    --c2-image-cropper__overlay--color: rgba(9, 9, 11, 0.7);
+    --c2-image-cropper__guides--display: none;
+    --c2-image-cropper__selection--border: 2px solid #ffffff;
+    --c2-image-cropper__frame--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-image-cropper__frame--border: none;
+    --c2-image-cropper__frame--border-radius: 14px;
+  }
+</style>
+<c2-image-cropper class="cropper-avatar" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>
+```
+
+```html tag=MdxCodeBlock,label=Accent handles
+<style>
+  .cropper-accent {
+    --c2-image-cropper__overlay--color: rgba(2, 101, 220, 0.35);
+    --c2-image-cropper__selection--border: 2px solid rgb(2, 101, 220);
+    --c2-image-cropper__handle--size: 10px;
+    --c2-image-cropper__handle--background: rgb(2, 101, 220);
+    --c2-image-cropper__handle--border: 2px solid #ffffff;
+    --c2-image-cropper__handle--border-radius: 2px;
+    --c2-image-cropper__frame--padding: 8px;
+  }
+</style>
+<c2-image-cropper class="cropper-accent" aspect-ratio="16/9" src="/web-components/images/image-workspace.svg" alt="A desk with a laptop"></c2-image-cropper>
+```
+
+```html tag=MdxCodeBlock,label=Document scan
+<style>
+  .cropper-scan {
+    --c2-image-cropper__overlay--color: rgba(255, 255, 255, 0.7);
+    --c2-image-cropper__selection--border: 1px dashed #18181b;
+    --c2-image-cropper__guides--color: rgba(24, 24, 27, 0.35);
+    --c2-image-cropper__handle--size: 14px;
+    --c2-image-cropper__handle--background: #18181b;
+    --c2-image-cropper__handle--border: 2px solid #ffffff;
+    --c2-image-cropper__handle--box-shadow: none;
+    --c2-image-cropper__frame--padding: 12px;
+  }
+</style>
+<c2-image-cropper class="cropper-scan" src="/web-components/images/image-chart.svg" alt="Revenue by month, bar chart"></c2-image-cropper>
+```
+
+</GalleryGrid>

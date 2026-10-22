@@ -106,6 +106,7 @@
         "../../components/highlight:build",
         "../../components/hover-card:build",
         "../../components/icon-button:build",
+        "../../components/image-cropper:build",
         "../../components/image:build",
         "../../components/indicator:build",
         "../../components/inline-edit:build",

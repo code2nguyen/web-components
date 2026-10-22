@@ -920,6 +920,46 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Stacked', description: 'Panels on top of each other.', attributes: { orientation: 'vertical' } },
     ],
   },
+  'c2-image-cropper': {
+    html: `<c2-image-cropper style="width: 280px; --c2-image-cropper__image--max-height: 180px" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
+    presets: [
+      {
+        name: 'Avatar',
+        description: 'A round 1:1 selection without guides on a darker surround.',
+        attributes: { 'aspect-ratio': '1', shape: 'ellipse' },
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(9, 9, 11, 0.7)',
+          '--c2-image-cropper__guides--display': 'none',
+          '--c2-image-cropper__selection--border': '2px solid #ffffff',
+        },
+      },
+      {
+        name: 'Accent handles',
+        description: 'Square accent handles and a tinted surround for a 16:9 banner.',
+        attributes: { 'aspect-ratio': '16/9' },
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(2, 101, 220, 0.35)',
+          '--c2-image-cropper__selection--border': '2px solid rgb(2, 101, 220)',
+          '--c2-image-cropper__handle--background': 'rgb(2, 101, 220)',
+          '--c2-image-cropper__handle--border': '2px solid #ffffff',
+          '--c2-image-cropper__handle--border-radius': '2px',
+          '--c2-image-cropper__frame--padding': '8px',
+        },
+      },
+      {
+        name: 'Document scan',
+        description: 'A light surround and dark dashed outline for scanned pages.',
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(255, 255, 255, 0.7)',
+          '--c2-image-cropper__selection--border': '1px dashed #18181b',
+          '--c2-image-cropper__guides--color': 'rgba(24, 24, 27, 0.35)',
+          '--c2-image-cropper__handle--background': '#18181b',
+          '--c2-image-cropper__handle--border': '2px solid #ffffff',
+          '--c2-image-cropper__handle--box-shadow': 'none',
+        },
+      },
+    ],
+  },
   'c2-sheet': {
     html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
     presets: [

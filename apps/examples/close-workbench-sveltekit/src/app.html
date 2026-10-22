@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Runs before first paint. `?theme=` is how the docs site hands its theme to the embedded demo; otherwise the
+      // mode c2-theme-select remembered wins, then the OS preference. The key is the app's own: the demo shares its
+      // origin with the docs site, whose switcher stores `c2n-theme`.
+      ;(function () {
+        var key = 'close-workbench-theme'
+        var dark = matchMedia('(prefers-color-scheme: dark)').matches
+        try {
+          var query = new URLSearchParams(location.search).get('theme')
+          if (query === 'light' || query === 'dark') localStorage.setItem(key, query)
+          var mode = localStorage.getItem(key) || 'system'
+          dark = mode === 'dark' || (mode !== 'light' && dark)
+        } catch (e) {
+          /* storage blocked: follow the OS */
+        }
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
+    <link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>
