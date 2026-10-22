@@ -47,6 +47,10 @@ test('dragging the selection moves it and reports the change once released', asy
   expect(await crop(page)).toEqual({ x: 20, y: 20, width: 320, height: 240 })
   await expect(events(page)).toHaveText(/input:\d+ change:1$/)
   await expect(selection(page)).toBeFocused()
+  // Focus taken by a drag draws no ring; the next key press brings it back.
+  await expect(selection(page)).toHaveCSS('outline-style', 'none')
+  await page.keyboard.press('ArrowLeft')
+  await expect(selection(page)).toHaveCSS('outline-style', 'solid')
 })
 
 test('keeps the selection inside the image', async ({ page, scenario }) => {

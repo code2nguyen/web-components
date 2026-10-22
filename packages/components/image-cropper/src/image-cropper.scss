@@ -86,7 +86,8 @@
   cursor: move;
 }
 
-[part~='selection']:focus-visible {
+// Focused from script by a drag, so Chromium would match :focus-visible; the ring is for keyboard focus only.
+.stage:not(.pointer-focus) [part~='selection']:focus-visible {
   outline: css.cssVar(selection__focus--outline);
   outline-offset: 2px;
 }
@@ -117,7 +118,7 @@
 }
 
 .dragging .guides,
-[part~='selection']:focus-visible .guides {
+.stage:not(.pointer-focus) [part~='selection']:focus-visible .guides {
   opacity: 1;
 }
 

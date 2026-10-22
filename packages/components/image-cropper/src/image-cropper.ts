@@ -154,6 +154,8 @@ export class ImageCropper extends LitElement {
   @state() private loaded = false
   @state() private dragging = false
   @state() private announcement = ''
+  /** The selection was focused by a pointer: no focus ring until a key is pressed. */
+  @state() private pointerFocus = false
 
   @query('img') private image?: HTMLImageElement
   @query('.stage') private stage?: HTMLElement
@@ -358,6 +360,7 @@ export class ImageCropper extends LitElement {
     this.stage!.setPointerCapture(event.pointerId)
     this.gesture = { pointerId: event.pointerId, kind, start: this.pointFrom(event), startCrop: this.crop, moved: false }
     this.dragging = true
+    this.pointerFocus = true
     // The selection takes focus so Escape cancels the drag and the keyboard carries on from it.
     this.selection?.focus({ preventScroll: true })
   }
@@ -386,6 +389,7 @@ export class ImageCropper extends LitElement {
   }
 
   private handleKeyDown(event: KeyboardEvent) {
+    this.pointerFocus = false
     if (this.disabled || !this.crop) return
     if (event.key === 'Escape' && this.gesture) {
       event.preventDefault()
@@ -475,6 +479,7 @@ export class ImageCropper extends LitElement {
         aria-disabled=${this.disabled ? 'true' : 'false'}
         style=${styleMap(box)}
         @keydown=${this.handleKeyDown}
+        @blur=${() => (this.pointerFocus = false)}
       >
         <span class="guides" aria-hidden="true"></span>
         ${this.disabled ? nothing : handles.map((handle) => html`<span part="handle" class="handle ${handle}" data-handle=${handle} aria-hidden="true"></span>`)}
@@ -486,7 +491,14 @@ export class ImageCropper extends LitElement {
     if (!this.src) {
       return html`<div part="frame" class="frame empty"><slot name="placeholder"></slot></div>`
     }
-    const classes = { stage: true, dragging: this.dragging, ellipse: this.shape === 'ellipse', disabled: this.disabled, loaded: this.loaded }
+    const classes = {
+      stage: true,
+      dragging: this.dragging,
+      ellipse: this.shape === 'ellipse',
+      disabled: this.disabled,
+      loaded: this.loaded,
+      'pointer-focus': this.pointerFocus,
+    }
     return html`
       <div part="frame" class="frame">
         <div
