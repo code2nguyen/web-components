@@ -387,3 +387,59 @@ test('skip-delay reads minutes, hours, weeks and bare days', async ({ page, rend
     else await expect(panel(page), `${delay} after ${ago}ms`).toBeHidden()
   }
 })
+
+test('an arrow key on the last step does not finish the tour', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await record(page)
+  await launch(page, 2)
+  await page.keyboard.press('ArrowRight')
+  await expect(dialog(page, 'Filters')).toBeVisible()
+  expect(await events(page)).toEqual(['show'])
+})
+
+test('Escape skips the tour while focus is on the page', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await record(page)
+  await launch(page, 1)
+  await page.locator('#filters').click()
+  await expect(page.locator('#filters')).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(panel(page)).toBeHidden()
+  expect(await events(page)).toEqual(['show', 'skip:{"index":1}', 'hide'])
+})
+
+test('skipping a replay of a finished tour keeps it finished', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.setItem('demo-tour', JSON.stringify({ status: 'finished', step: 2, skips: 0 })))
+  await renderScenario(markup('storage-key="demo-tour" autostart skip-limit="3"'))
+  await expect(panel(page)).toBeHidden()
+  await launch(page)
+  await button(page, 'Skip').click()
+  await expect.poll(() => stored(page)).toEqual({ status: 'finished', step: 2, skips: 0 })
+})
+
+test('length variables in any unit place the spotlight and the panel', async ({ page, renderScenario }) => {
+  await renderScenario(`<style>c2-tour { --c2-tour__spotlight--padding: 0.75rem; --c2-tour--offset: calc(10px + 0.5rem) }</style>${markup()}`)
+  await launch(page, 1)
+  await expect(dialog(page, 'Search')).toBeVisible()
+  const target = (await page.locator('#search').boundingBox())!
+  await expect
+    .poll(async () => {
+      const box = (await spotlight(page).boundingBox())!
+      return [Math.round(box.x - target.x), Math.round(box.width - target.width)]
+    })
+    .toEqual([-12, 24])
+  // Panel below the spotlight: 12px padding + 18px offset + half the 10px arrow.
+  const panelBox = (await panel(page).boundingBox())!
+  expect(Math.round(panelBox.y - (target.y + target.height))).toBe(12 + 18 + 5)
+})
+
+test('an open tour that is moved in the page shows again', async ({ page, renderScenario }) => {
+  await renderScenario(`<section id="elsewhere"></section>${markup()}`)
+  await launch(page, 1)
+  await expect(dialog(page, 'Search')).toBeVisible()
+  await host(page).evaluate((element) => document.querySelector('#elsewhere')!.append(element))
+  await expect(dialog(page, 'Search')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(panel(page)).toBeHidden()
+})

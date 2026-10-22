@@ -65,7 +65,7 @@ export interface Tour {
  * whose target is missing, shows centred over the dimmed page.
  *
  * The tour is a non-modal `dialog` in the top layer: the page stays interactive, so a step can ask the user to try
- * the highlighted control. Opening moves focus to Next; Escape and the close button end the tour early, and the
+ * the highlighted control. Opening moves focus to Next; Escape (wherever focus is) and the close button end the tour early, and the
  * arrow keys move between steps while focus is in the panel. When it closes, focus returns to where it was before.
  *
  * With a `storage-key`, the tour remembers in `localStorage` whether the user finished it, skipped it or got part
@@ -210,6 +210,7 @@ export class Tour extends LitElement {
   @query('.spotlight') private spotlight?: HTMLElement
   @query('.arrow') private arrowElement?: HTMLElement
   @query('.next') private nextButton?: HTMLButtonElement
+  @query('.measure') private measure?: HTMLElement
 
   private readonly msg = new LocalizeController(this, tourMessages)
   private readonly childObserver = isServer ? null : new MutationObserver(() => this.requestUpdate())
@@ -221,13 +222,17 @@ export class Tour extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.childObserver?.observe(this, { childList: true })
+    // Removing the element closed its popovers; an open tour that is moved shows again where it lands.
+    if (this.hasUpdated && this.open) this.requestUpdate()
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.childObserver?.disconnect()
     this.stopPositioning()
+    document.removeEventListener('keydown', this.handleDocumentKeydown)
     this.shownStep = null
+    this.shownTarget = null
   }
 
   /** The progress stored under `storage-key`: `new` when nothing is stored, the key is empty or storage is unavailable. */
@@ -267,7 +272,8 @@ export class Tour extends LitElement {
   private saveProgress(status: TourStatus) {
     if (!this.storageKey) return
     const stored = this.progress
-    // Replaying a settled tour from its trigger does not make `autostart` open it again.
+    // Replaying a settled tour from its trigger does not make `autostart` open it again, and finishing is final.
+    if (stored.status === 'finished' && status !== 'finished') return
     if (status === 'in-progress' && this.settled(stored)) return
     const progress: TourProgress = { status, step: this.currentIndex(), skips: stored.skips }
     if (status === 'skipped') {
@@ -293,11 +299,13 @@ export class Tour extends LitElement {
   }
 
   private get triggers(): Element[] {
+    if (isServer || !this.children) return []
     return [...this.children].filter((child) => child.getAttribute('slot') === 'trigger')
   }
 
   /** The `c2-tour-step` children, in order. */
   get steps(): TourStep[] {
+    if (isServer || !this.children) return []
     return [...this.children].filter((child): child is TourStep => child.localName === 'c2-tour-step')
   }
 
@@ -363,24 +371,32 @@ export class Tour extends LitElement {
     if (this.currentIndex() === 0) void this.updateComplete.then(() => this.nextButton?.focus())
   }
 
+  /** Escape ends the tour wherever focus is: the page stays usable, so it is often outside the panel. */
+  private handleDocumentKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return
+    event.preventDefault()
+    this.skip()
+  }
+
   private handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      event.stopPropagation()
-      this.skip()
-      return
-    }
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
     // Leave the arrow keys to a control inside the step's content.
     const origin = event.composedPath()[0]
     if (origin instanceof HTMLElement && origin.closest('input, textarea, select, [contenteditable]')) return
     event.preventDefault()
-    if (event.key === 'ArrowRight') this.next()
+    // Only Done finishes the tour; an arrow key on the last step does nothing.
+    if (event.key === 'ArrowRight') this.goTo(this.currentIndex() + 1)
     else if (this.currentIndex() > 0) this.handlePrevious()
   }
 
-  private readPixels(name: string, fallback: number) {
-    const value = Number.parseFloat(getComputedStyle(this).getPropertyValue(name))
-    return Number.isNaN(value) ? fallback : value
+  /** The length variables, resolved to pixels by CSS (any unit, `calc()`) on the hidden `.measure` box. */
+  private lengths() {
+    const style = this.measure ? getComputedStyle(this.measure) : null
+    const read = (value: string | undefined) => {
+      const pixels = Number.parseFloat(value ?? '')
+      return Number.isNaN(pixels) ? 0 : pixels
+    }
+    return { offset: read(style?.paddingTop), padding: read(style?.paddingRight), arrow: read(style?.paddingBottom) }
   }
 
   /** The target when it is rendered, else `null` so the step shows centred. */
@@ -391,8 +407,7 @@ export class Tour extends LitElement {
     return rect.width || rect.height ? target : null
   }
 
-  private spotlightRect(target: HTMLElement) {
-    const padding = this.readPixels('--c2-tour__spotlight--padding', 8)
+  private spotlightRect(target: HTMLElement, padding: number) {
     const rect = target.getBoundingClientRect()
     return new DOMRect(rect.left - padding, rect.top - padding, rect.width + padding * 2, rect.height + padding * 2)
   }
@@ -426,13 +441,14 @@ export class Tour extends LitElement {
   }
 
   private async updatePosition(step: TourStep | null, target: HTMLElement, panel: HTMLElement, spotlight: HTMLElement) {
-    const rect = this.spotlightRect(target)
+    const lengths = this.lengths()
+    const rect = this.spotlightRect(target, lengths.padding)
     Object.assign(spotlight.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` })
     // The spotlight animates between steps, so the panel is placed against the rectangle it is heading for.
-    const reference: VirtualElement = { getBoundingClientRect: () => this.spotlightRect(target), contextElement: target }
+    const reference: VirtualElement = { getBoundingClientRect: () => rect, contextElement: target }
     const arrowElement = this.arrowElement
-    const arrowSize = arrowElement ? this.readPixels('--c2-tour__arrow--size', 10) : 0
-    const middleware = [offset(this.readPixels('--c2-tour--offset', 8) + arrowSize / 2), flip({ padding: 8 }), shift({ padding: 8 })]
+    const arrowSize = arrowElement ? lengths.arrow : 0
+    const middleware = [offset(lengths.offset + arrowSize / 2), flip({ padding: 8 }), shift({ padding: 8 })]
     if (arrowElement && arrowSize > 0) middleware.push(arrow({ element: arrowElement, padding: 8 }))
     const { x, y, placement, middlewareData } = await computePosition(reference, panel, {
       placement: step?.placement || this.placement,
@@ -469,6 +485,7 @@ export class Tour extends LitElement {
       return /* not connected yet */
     }
     this.returnFocus = deepActiveElement()
+    document.addEventListener('keydown', this.handleDocumentKeydown)
     this.enterStep(this.currentStep)
     this.nextButton?.focus()
     this.dispatchEvent(new Event('show'))
@@ -477,6 +494,7 @@ export class Tour extends LitElement {
   private hide() {
     const panel = this.panel
     this.stopPositioning()
+    document.removeEventListener('keydown', this.handleDocumentKeydown)
     this.shownStep = null
     this.shownTarget = null
     if (!panel?.matches(':popover-open')) return
@@ -514,6 +532,7 @@ export class Tour extends LitElement {
     const heading = step?.heading ?? ''
     return html`
       <slot name="trigger" ${assignSlot(this.triggers)} @click=${() => !this.open && this.start()}></slot>
+      <span class="measure" aria-hidden="true"></span>
       <div class="spotlight" part="spotlight" popover="manual" aria-hidden="true"></div>
       <div
         class="panel"
@@ -550,10 +569,11 @@ export class Tour extends LitElement {
     `
   }
 
-  override firstUpdated() {
-    this.autostartFromProgress()
-    // A declarative shadow root routes by `slot` attribute; fall back to writing it on the shown step only.
-    if ((this.renderRoot as ShadowRoot).slotAssignment === 'manual') return
+  constructor() {
+    super()
+    // A declarative shadow root (server-rendered) routes by `slot` attribute and ignores `assignSlot`; fall back to
+    // writing it on the shown step only, from the first update on.
+    if (isServer || !this.shadowRoot || this.shadowRoot.slotAssignment === 'manual') return
     this.addController({
       hostUpdated: () => {
         const step = this.open ? this.currentStep : null
@@ -563,6 +583,10 @@ export class Tour extends LitElement {
         }
       },
     })
+  }
+
+  override firstUpdated() {
+    this.autostartFromProgress()
   }
 }
 

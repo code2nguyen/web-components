@@ -76,6 +76,18 @@
   display: none !important;
 }
 
+// Never seen: CSS resolves the length variables on it (any unit, `calc()`) for the script to read in pixels.
+.measure {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  padding: css.cssVar(offset) css.cssVar(spotlight--padding) css.cssVar(arrow--size) 0;
+}
+
 // Both layers live in the top layer as manual popovers; reset the UA popover box.
 .spotlight,
 .panel {

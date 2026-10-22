@@ -25,7 +25,7 @@ import '@c2n/components/tour'
 - Start it with the `trigger` slot, the `open` attribute or `start(index)`; move with `next()`, `previous()`,
   `goTo(index)`; end it with `finish()` or `skip()`.
 - Events: `step-change` (`{ index, previous }`), `finish`, `skip` (`{ index }`), `show`, `hide`.
-- `storage-key="…"` remembers the progress in `localStorage` (`{ status, step }`, read it from `progress`);
+- `storage-key="…"` remembers the progress in `localStorage` (`{ status, step, skips, skippedAt }`, read it from `progress`);
   `autostart` then opens the tour on the first visit, resumes the stored step after a reload and stays closed once
   finished or skipped `skip-limit` times (default 1; below it a skipped tour reopens from the first step, `0` never
   gives up), waiting `skip-delay` (`30m`, `12h`, `7d`, `2w`) after each skip. `reset()` forgets it.
