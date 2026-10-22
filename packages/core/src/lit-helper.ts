@@ -31,6 +31,21 @@ export const booleanPropertyConverter = {
   fromAttribute: (value: string | null) => value !== null && value !== 'false' && value !== '0',
 }
 
+/**
+ * Converter for `type: Number` properties: Lit's own attribute parsing, plus a numeric **string assigned to the
+ * property** parsed the same way.
+ *
+ * A framework that sees a property of the same name assigns the property rather than the attribute, and a static
+ * value arrives as the string the author wrote: Svelte 5 turns `<c2-comparison-bar precision="0">` into
+ * `bar.precision = "0"`. Lit's `type: Number` only converts attributes, so the property held `"0"` and every
+ * `Number.isFinite` check on it failed. Any other value (a number, `null`, `undefined`) passes through.
+ */
+export const numberPropertyConverter = {
+  toAttribute: (value: unknown) => value,
+  fromAttribute: (value: string | null) => (value === null ? null : Number(value)),
+  fromProperty: (value: unknown) => (typeof value === 'string' ? Number(value) : value),
+} satisfies StringTolerantConverter & Record<string, unknown>
+
 export const arrayPropertyConverter = {
   toAttribute: (value: string[]) => {
     return Array.isArray(value) ? value.join(';') : ''
@@ -105,10 +120,19 @@ function wrapPropertySetter(prototype: object, name: PropertyKey, coerce: (value
   })
 }
 
+/** The converter {@link property} installs for a `type` when the declaration names none. */
+function defaultConverter(type: unknown) {
+  if (type === Boolean) return booleanPropertyConverter
+  if (type === Number) return numberPropertyConverter
+  return undefined
+}
+
 /**
- * `@property`, but with the two conversions a component library needs and Lit's defaults do not provide.
+ * `@property`, but with the conversions a component library needs and Lit's defaults do not provide.
  *
  * - `type: Boolean` gets {@link booleanPropertyConverter}, so `disabled="false"` is false rather than true.
+ * - `type: Number` gets {@link numberPropertyConverter}, so `precision = "0"` (what Svelte 5 assigns for a static
+ *   attribute) is stored as `0`.
  * - A converter that declares `fromProperty` ({@link jsonPropertyConverter}, {@link arrayPropertyConverter})
  *   also parses a string assigned directly to the property, so the same value works as an attribute on the
  *   server and as a property on the client.
@@ -117,7 +141,8 @@ function wrapPropertySetter(prototype: object, name: PropertyKey, coerce: (value
  * it. Import this instead of `property` from `lit/decorators.js` in every c2n component.
  */
 export function property(options?: PropertyDeclaration): LitPropertyDecorator {
-  const declaration = options?.type === Boolean && options.converter === undefined ? { ...options, converter: booleanPropertyConverter } : options
+  const converter = options?.converter === undefined ? defaultConverter(options?.type) : undefined
+  const declaration = converter ? { ...options, converter } : options
   const decorate = litProperty(declaration)
   const coerce = propertyCoercion(declaration)
   if (!coerce) return decorate

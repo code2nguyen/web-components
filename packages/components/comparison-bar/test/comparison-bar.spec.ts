@@ -116,3 +116,13 @@ test('segments touch by default, with no gap between them', async ({ page, scena
   expect(Math.abs(middle.x - (start.x + start.width))).toBeLessThan(0.5)
   expect(Math.abs(end.x - (middle.x + middle.width))).toBeLessThan(0.5)
 })
+
+test('a numeric string assigned to precision is read as a number', async ({ page, scenario }) => {
+  // Svelte 5 assigns `precision="0"` to the property as the string "0"; Lit's `type: Number` only converts attributes.
+  await scenario('locale')
+  await page.locator('c2-comparison-bar').evaluate((bar) => {
+    ;(bar as unknown as { precision: unknown }).precision = '0'
+  })
+  await expect(page.locator('c2-comparison-bar')).toHaveJSProperty('precision', 0)
+  await expect(page.locator('[part="start-value"]')).toHaveText(/^\s*33\s?%\s*$/)
+})
