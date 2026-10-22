@@ -6,7 +6,7 @@ order: 15
 
 import CodeBlock from '../../components/CodeBlock.astro'
 
-Every `c2-*` component is a standard custom element, so nothing here is a wrapper: the same element runs in every framework. What differs is how each one decides between an attribute and a property, and how it binds an event whose name has a hyphen in it. This guide is the short version of the three example apps — [React](../examples/trading-dashboard-react), [Vue](../examples/support-inbox-vue) and [Angular](../examples/orders-admin-angular) — which are complete applications built the way an outside project would build one.
+Every `c2-*` component is a standard custom element, so nothing here is a wrapper: the same element runs in every framework. What differs is how each one decides between an attribute and a property, and how it binds an event whose name has a hyphen in it. This guide is the short version of the example apps — [React](../examples/trading-dashboard-react), [Vue](../examples/support-inbox-vue), [Angular](../examples/orders-admin-angular) and [SvelteKit](../examples/close-workbench-sveltekit) — which are complete applications built the way an outside project would build one.
 
 ## Styling slots and public parts
 
@@ -365,6 +365,19 @@ A route that server-renders its data hits both conversions above. Svelte writes 
 
 ```html tag=CodeBlock
 <c2-text-field value={draft} oninput={(event) => (draft = event.currentTarget.value)}></c2-text-field>
+```
+
+In SvelteKit, register the elements from the client `init` hook rather than a layout script: `src/hooks.client.ts` exports `init`, which SvelteKit awaits before it hydrates, so every element is defined by the time the first binding runs, and the server never imports the components. A function property such as `renderItem` or `rowPart` must not reach the server at all (it would stringify its source into an attribute), so set it from an attachment, which runs only in the browser. For an array property whose converter does not parse a string assigned as a property, return JSON on the server and the value in the browser (`browser ? rows : JSON.stringify(rows)`). The [Month-End Close Workbench](../examples/close-workbench-sveltekit) prerenders every route this way:
+
+```ts tag=CodeBlock
+// src/hooks.client.ts
+export const init = async () => {
+  await import('#lib/c2n.ts') // the side-effect imports of every element the app renders
+}
+```
+
+```html tag=CodeBlock
+<c2-kanban editable items={data(items)} oncard-move={onCardMove} {@attach (board) => (board.renderItem = renderCard)}>
 ```
 
 There is no JSX-style declaration file to maintain, because Svelte accepts unknown elements. Point the editor at the generated `html-custom-data.json` below for attribute completion, and take event detail types from each package's event map.

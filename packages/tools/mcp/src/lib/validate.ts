@@ -27,6 +27,7 @@ export interface ValidationResult {
 const CSS_FILE = /\.(css|scss|sass|less)$/i
 /** MDX is JSX with Markdown around it: a prop is a property and `onClick` is React's. */
 const JSX_FILE = /\.(jsx|tsx|mdx)$/i
+const SVELTE_FILE = /\.svelte$/i
 const HTML_FILE = /\.html?$/i
 const SCRIPT_FILE = /\.(jsx|tsx|[cm]?[jt]s)$/i
 /** Markup with script inside: `<script>` blocks, Astro frontmatter and `{/* *\/}` expression comments. */
@@ -91,6 +92,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
   const lines = lineStarts(source)
   const isCss = CSS_FILE.test(filename)
   const jsx = JSX_FILE.test(filename)
+  const svelte = SVELTE_FILE.test(filename)
   // Comments render nothing: blank them out, keeping offsets, so only code and markup are checked.
   const masked = maskComments(source, isCss ? 'css' : MIXED_FILE.test(filename) ? 'mixed' : SCRIPT_FILE.test(filename) ? 'script' : 'markup')
   const ignored = ignoredLines(source, masked, lines)
@@ -113,7 +115,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
         continue
       }
       const parent = stack.at(-1)
-      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, jsx, report, used)
+      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, jsx, svelte, report, used)
       else {
         checkNative(registry, tag, report)
         const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
@@ -155,7 +157,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
 
 type Report = (index: number, severity: Severity, rule: Finding['rule'], message: string) => void
 
-function checkElement(registry: Registry, tag: Tag, parent: string | undefined, jsx: boolean, report: Report, used: Map<string, string>) {
+function checkElement(registry: Registry, tag: Tag, parent: string | undefined, jsx: boolean, svelte: boolean, report: Report, used: Map<string, string>) {
   const resolved = resolveElement(registry, tag.name)
   if (!resolved || (resolved.tag !== tag.name && !resolved.element.tag.includes('{name}'))) {
     const hint = suggest(Object.keys(registry.tagIndex), tag.name, 3)
@@ -164,13 +166,13 @@ function checkElement(registry: Registry, tag: Tag, parent: string | undefined, 
   }
   used.set(resolved.tag, resolved.modulePath)
   const element = resolved.element
-  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, jsx, report)
+  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, jsx, svelte, report)
   const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
   if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
 }
 
-function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attributes'][number], jsx: boolean, report: Report) {
-  const binding = readBinding(attribute.name, jsx)
+function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attributes'][number], jsx: boolean, svelte: boolean, report: Report) {
+  const binding = readBinding(attribute.name, jsx, svelte)
   if (!binding) return
   const events = element.events.map((e) => e.name)
   const list = events.length ? ` Its events: ${events.map((e) => `\`${e}\``).join(', ')}.` : ''
@@ -234,7 +236,11 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
 }
 
 /** Reads the framework binding syntaxes down to the attribute, property or event they name. */
-function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property' | 'event' | 'react-event' | 'handler'; name: string } | undefined {
+function readBinding(
+  raw: string,
+  jsx: boolean,
+  svelte = false,
+): { kind: 'attribute' | 'property' | 'event' | 'react-event' | 'handler'; name: string } | undefined {
   if (raw.startsWith('@')) return { kind: 'event', name: raw.slice(1).split('.')[0] }
   if (raw.startsWith('v-on:')) return { kind: 'event', name: raw.slice(5).split('.')[0] }
   if (raw.startsWith('on:')) return { kind: 'event', name: raw.slice(3).split('|')[0] }
@@ -256,6 +262,8 @@ function readBinding(raw: string, jsx: boolean): { kind: 'attribute' | 'property
   if (raw.startsWith('bind:')) return raw === 'bind:this' ? undefined : { kind: 'property', name: raw.slice(5) }
   // Other prefixed names are directives (`v-model`, `client:load`, `#header`, `*ngIf`, `let-x`, spreads).
   if (/^(v-|#|\*|let-|\{|\.\.\.)/.test(raw) || raw.includes(':')) return undefined
+  // Svelte 5 event attributes listen for the event named after `on`, as written: `onselection-change={…}`.
+  if (svelte && /^on[a-z]/i.test(raw)) return { kind: 'event', name: raw.slice(2) }
   if (jsx && /^on[A-Za-z]/.test(raw)) return { kind: 'react-event', name: raw.slice(2) }
   if (!jsx && /^on[a-z]/i.test(raw)) return { kind: 'handler', name: raw.slice(2).toLowerCase() }
   return { kind: jsx ? 'property' : 'attribute', name: raw }
