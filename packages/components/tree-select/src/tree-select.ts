@@ -315,7 +315,8 @@ export class TreeSelect extends LitElement {
       this.defaultValueCaptured = true
     }
     if (!isServer) {
-      this.rowObserver ??= new MutationObserver(() => this.syncRows())
+      // The host's own reflected `value` is not a row change.
+      this.rowObserver ??= new MutationObserver((records) => records.some((record) => record.target !== this) && this.syncRows())
       this.rowObserver.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['label', 'value'] })
       this.syncRows()
     }
@@ -916,7 +917,7 @@ export class TreeSelect extends LitElement {
     </div>`
   }
 
-  private renderBody() {
+  private renderBody(index: Map<string, Entry>) {
     const empty = !this.hasMarkupRows && (!Array.isArray(this.items) || this.items.length === 0)
     const query = this.searchQuery.trim()
     const noMatch = !!query && this.matchCount === 0
@@ -928,7 +929,7 @@ export class TreeSelect extends LitElement {
           id="tree"
           aria-label=${this.triggerLabel || nothing}
           .items=${this.hasMarkupRows ? [] : this.items}
-          .value=${this.#treeValue(this.#index())}
+          .value=${this.#treeValue(index)}
           .loadChildren=${this.loadChildren}
           .renderLabel=${this.labelRenderer}
           selection=${this.isMultiple ? 'multiple' : 'single'}
@@ -1003,7 +1004,7 @@ export class TreeSelect extends LitElement {
         @toggle=${this.handleOverlayToggle}
         @focusout=${this.handleOverlayFocusOut}
       >
-        <div class="panel" part="panel">${this.renderSearch()} ${this.renderBody()} ${this.renderFooter()}</div>
+        <div class="panel" part="panel">${this.renderSearch()} ${this.renderBody(index)} ${this.renderFooter()}</div>
       </c2-overlay>
       ${this.field.renderDescription()}
     </div>`
