@@ -77,6 +77,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.
 - **Flow** — `c2-flow` · `@c2n/components/flow` — A pipeline, dependency graph or database schema on a pannable canvas: steps with a status, smooth edges, rows joined row to row, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
+- **Image Cropper** — `c2-image-cropper` · `@c2n/components/image-cropper` — Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.
 - **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.

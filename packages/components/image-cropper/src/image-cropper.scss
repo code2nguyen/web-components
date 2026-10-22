@@ -1,0 +1,222 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-image-cropper,
+  $theme: (
+    image--max-height: 360px,
+    frame--min-height: 160px,
+    frame--background: #f4f4f5,
+    frame--border: 1px solid #e4e4e7,
+    frame--border-radius: 8px,
+    frame--padding: 0px,
+    overlay--color: rgba(0, 0, 0, 0.55),
+    selection--border: 1px solid #ffffff,
+    selection__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    guides--display: block,
+    guides--color: rgba(255, 255, 255, 0.5),
+    handle--size: 12px,
+    handle--background: #ffffff,
+    handle--border: 1px solid #a1a1aa,
+    handle--border-radius: 999px,
+    handle--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[part~='frame'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: css.cssVar(frame--padding);
+  background: css.cssVar(frame--background);
+  border: css.cssVar(frame--border);
+  border-radius: css.cssVar(frame--border-radius);
+}
+
+[part~='frame'].empty {
+  min-height: css.cssVar(frame--min-height);
+}
+
+.stage {
+  position: relative;
+  max-width: 100%;
+  line-height: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stage.loaded:not(.disabled) {
+  cursor: crosshair;
+}
+
+[part~='image'] {
+  display: block;
+  max-width: 100%;
+  max-height: css.cssVar(image--max-height);
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+// The dimmed surround is one huge shadow around a hole the size of the selection, clipped to the image.
+.shade {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hole {
+  position: absolute;
+  box-shadow: 0 0 0 100vmax css.cssVar(overlay--color);
+}
+
+[part~='selection'] {
+  position: absolute;
+  box-sizing: border-box;
+  border: css.cssVar(selection--border);
+  outline: none;
+  cursor: move;
+}
+
+[part~='selection']:focus-visible {
+  outline: css.cssVar(selection__focus--outline);
+  outline-offset: 2px;
+}
+
+.ellipse .hole,
+.ellipse [part~='selection'] {
+  border-radius: 50%;
+}
+
+.disabled [part~='selection'] {
+  cursor: default;
+}
+
+// Rule-of-thirds lines, shown while the selection is dragged.
+.guides {
+  position: absolute;
+  inset: 0;
+  display: css.cssVar(guides--display);
+  pointer-events: none;
+  opacity: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(to right, transparent calc(100% / 3 - 0.5px), css.cssVar(guides--color) 0 calc(100% / 3 + 0.5px), transparent 0),
+    linear-gradient(to right, transparent calc(200% / 3 - 0.5px), css.cssVar(guides--color) 0 calc(200% / 3 + 0.5px), transparent 0),
+    linear-gradient(to bottom, transparent calc(100% / 3 - 0.5px), css.cssVar(guides--color) 0 calc(100% / 3 + 0.5px), transparent 0),
+    linear-gradient(to bottom, transparent calc(200% / 3 - 0.5px), css.cssVar(guides--color) 0 calc(200% / 3 + 0.5px), transparent 0);
+  transition: opacity 120ms ease;
+}
+
+.dragging .guides,
+[part~='selection']:focus-visible .guides {
+  opacity: 1;
+}
+
+[part~='handle'] {
+  --_size: #{css.cssVar(handle--size)};
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--_size);
+  height: var(--_size);
+  margin: calc(var(--_size) / -2);
+  background: css.cssVar(handle--background);
+  border: css.cssVar(handle--border);
+  border-radius: css.cssVar(handle--border-radius);
+  box-shadow: css.cssVar(handle--box-shadow);
+}
+
+// An invisible grab area larger than the visible dot, for touch.
+[part~='handle']::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.nw,
+.n,
+.ne {
+  top: 0;
+}
+.sw,
+.s,
+.se {
+  top: 100%;
+}
+.nw,
+.w,
+.sw {
+  left: 0;
+}
+.ne,
+.e,
+.se {
+  left: 100%;
+}
+.n,
+.s {
+  left: 50%;
+}
+.e,
+.w {
+  top: 50%;
+}
+.nw,
+.se {
+  cursor: nwse-resize;
+}
+.ne,
+.sw {
+  cursor: nesw-resize;
+}
+.n,
+.s {
+  cursor: ns-resize;
+}
+.e,
+.w {
+  cursor: ew-resize;
+}
+
+// On an ellipse the corners sit on the bounding box, away from the outline: pull them onto it.
+.ellipse {
+  .nw,
+  .ne,
+  .sw,
+  .se {
+    --_inset: 14.64%;
+  }
+  .nw,
+  .ne {
+    top: var(--_inset);
+  }
+  .sw,
+  .se {
+    top: calc(100% - var(--_inset));
+  }
+  .nw,
+  .sw {
+    left: var(--_inset);
+  }
+  .ne,
+  .se {
+    left: calc(100% - var(--_inset));
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
