@@ -32,6 +32,9 @@ jobs:
           # Vite dev server on 127.0.0.1:4176; it resolves the components through their built `dist/`.
           - example: support-inbox-vue
             test: npm run test:browser -w apps/examples/support-inbox-vue
+          # Vite dev server on 127.0.0.1:4178.
+          - example: trading-dashboard-react
+            test: npm run test:browser -w apps/examples/trading-dashboard-react
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
