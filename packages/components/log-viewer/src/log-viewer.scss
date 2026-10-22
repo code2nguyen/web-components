@@ -320,7 +320,6 @@
   transform: translateX(calc(-100% - #{css.cssVar(copy--inset)}));
   pointer-events: none;
   z-index: 1;
-  user-select: none;
 }
 [part='copy-button'] {
   position: sticky;
