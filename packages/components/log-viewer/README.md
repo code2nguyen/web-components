@@ -34,6 +34,10 @@ viewer.setFilter(null)
 - `setFilter({ attributes?, search? } | null, mode = 'filter')`: `filter` displays only matches; `highlight` keeps all entries visible and marks matches. exact, case sensitive attribute matches; OR within value arrays, AND between attributes; case insensitive substring search across all attributes. Criteria preserve stored entries and apply to future appends.
 - `clear()`: remove entries, preserve criteria.
 - `scrollToEnd()`: jump to the end and follow later appends.
+- `activeIndex`: the active entry's index among the retained entries, or -1; set it to move the active entry and scroll it into view.
+- `find(query, { matchCase })`, `findNext()`, `findPrevious()`, `closeFind()`, `findMatchCount`, `findMatchIndex`: the find bar from code.
+- `find-shortcut`: default true. `find-shortcut="false"` leaves Ctrl/Command+F to the page.
+- Events: `entry-click` (a click on an entry) and `entry-activate` (Enter on the active entry), both with `{ entry, index }`.
 - `entryCount`, `filteredCount`: read-only counts; wait for `updateComplete` for matching count, including in highlight mode.
 - `tabular`: default true. Set `tabular="false"` for continuous text.
 - `wrap`: default false. Measured wrapping breaks long tokens and retains explicit newlines.
@@ -43,7 +47,9 @@ Each visible entry has a transparent copy-message icon revealed when the pointer
 
 No slots, toolbar, filter editor, statistics bar, fetching, persistence or built-in retention policy. Controls belong to the application.
 
-Exports: `LogViewer`, `LogEntry`, `LogFilter`, and `LogFilterMode` (`filter | highlight`).
+Ctrl/Command+F inside the viewer opens its find bar (`c2-search-field` and `c2-icon-button`, loaded on first focus): it searches every displayed entry, not only the rendered ones, marks matches and moves the active entry to the current one. Enter/Shift+Enter, F3 or Ctrl/Command+G step through matches; Alt+C toggles match case; Escape closes.
+
+Exports: `LogViewer`, `LogEntry`, `LogFilter`, `LogFilterMode` (`filter | highlight`), `LogViewerEntryEventDetail` and `LogViewerFindOptions`.
 
 ## Default appearance
 
@@ -61,44 +67,48 @@ Cumulative row offsets and binary lookup select a visible window plus overscan. 
 
 All variables have usable defaults. Change colors, typography and measured spacing through these hooks. The `--c2-log-viewer__copy--icon-size` and `--c2-log-viewer__copy--stroke-width` variables affect both the copy and success icons.
 
-| CSS custom property                               | Default                   | Purpose                                                       |
-| ------------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| `--c2-log-viewer--height`                         | `480px`                   | Viewport height                                               |
-| `--c2-log-viewer--background`                     | `#0b1220`                 | Terminal surface                                              |
-| `--c2-log-viewer--color`                          | `#d3deee`                 | Text color                                                    |
-| `--c2-log-viewer--font-family`                    | `ui-monospace, monospace` | Text font                                                     |
-| `--c2-log-viewer--font-size`                      | `13px`                    | Text size                                                     |
-| `--c2-log-viewer--line-height`                    | `1.65`                    | Line spacing                                                  |
-| `--c2-log-viewer--border`                         | `1px solid #263449`       | Outer edge                                                    |
-| `--c2-log-viewer--border-radius`                  | `12px`                    | Outer corners                                                 |
-| `--c2-log-viewer__message--min-width`             | `240px`                   | Minimum primary column width                                  |
-| `--c2-log-viewer__cell--padding`                  | `8px 12px`                | Attribute cell inset included in row measurements             |
-| `--c2-log-viewer__text--inset`                    | `12px`                    | Horizontal inset for continuous text                          |
-| `--c2-log-viewer__empty--padding`                 | `24px`                    | Empty state inset                                             |
-| `--c2-log-viewer__empty--color`                   | `#94a3b8`                 | Empty state text                                              |
-| `--c2-log-viewer__viewport__focus--outline`       | `2px solid #60a5fa`       | Keyboard focus indicator                                      |
-| `--c2-log-viewer__timestamp--color`               | `#94a3b8`                 | Timestamp text                                                |
-| `--c2-log-viewer__attribute--color`               | `#a5b4cc`                 | Secondary attribute text                                      |
-| `--c2-log-viewer__level--color`                   | `#c4b5fd`                 | Unclassified level text                                       |
-| `--c2-log-viewer__level__info--color`             | `#6ee7b7`                 | Info level text                                               |
-| `--c2-log-viewer__level__warning--color`          | `#fcd34d`                 | Warn and warning level text                                   |
-| `--c2-log-viewer__level__error--color`            | `#fda4af`                 | Error and fatal level text                                    |
-| `--c2-log-viewer__entry--box-shadow`              | `inset 0 -1px 0 #1b293d`  | Subtle row divider without changing measured geometry         |
-| `--c2-log-viewer__entry__hover--background`       | `#142238`                 | Hovered row surface                                           |
-| `--c2-log-viewer__entry__highlighted--background` | `#17304c`                 | Matching entry surface in highlight mode                      |
-| `--c2-log-viewer__entry__highlighted--box-shadow` | `inset 3px 0 0 #60a5fa`   | Matching entry accent without changing measured geometry      |
-| `--c2-log-viewer__copy--size`                     | `28px`                    | Copy button size                                              |
-| `--c2-log-viewer__copy--icon-size`                | `55%`                     | Copy and success icon width and height                        |
-| `--c2-log-viewer__copy--stroke-width`             | `1.8`                     | Copy and success SVG stroke width                             |
-| `--c2-log-viewer__copy--inset`                    | `8px`                     | Copy button offset from viewport edges                        |
-| `--c2-log-viewer__copy--padding-top`              | `4px`                     | Space above the copy button within an entry                   |
-| `--c2-log-viewer__copy--background`               | `transparent`             | Copy button surface                                           |
-| `--c2-log-viewer__copy--color`                    | `#dbeafe`                 | Copy icon color                                               |
-| `--c2-log-viewer__copy--border`                   | `none`                    | Copy button edge                                              |
-| `--c2-log-viewer__copy--border-radius`            | `6px`                     | Copy button corners                                           |
-| `--c2-log-viewer__copy__hover--background`        | `#2a4263`                 | Hovered copy button surface                                   |
-| `--c2-log-viewer__copy__focus--outline`           | `2px solid #60a5fa`       | Copy button keyboard focus                                    |
-| `--c2-log-viewer__token--color`                   | `#93c5fd`                 | Quoted values, numbers, URLs and recognizable IDs in log text |
+| CSS custom property                                | Default                    | Purpose                                                       |
+| -------------------------------------------------- | -------------------------- | ------------------------------------------------------------- |
+| `--c2-log-viewer--height`                          | `480px`                    | Viewport height                                               |
+| `--c2-log-viewer--background`                      | `#0b1220`                  | Terminal surface                                              |
+| `--c2-log-viewer--color`                           | `#d3deee`                  | Text color                                                    |
+| `--c2-log-viewer--font-family`                     | `ui-monospace, monospace`  | Text font                                                     |
+| `--c2-log-viewer--font-size`                       | `13px`                     | Text size                                                     |
+| `--c2-log-viewer--line-height`                     | `1.65`                     | Line spacing                                                  |
+| `--c2-log-viewer--border`                          | `1px solid #263449`        | Outer edge                                                    |
+| `--c2-log-viewer--border-radius`                   | `12px`                     | Outer corners                                                 |
+| `--c2-log-viewer__message--min-width`              | `240px`                    | Minimum primary column width                                  |
+| `--c2-log-viewer__cell--padding`                   | `8px 12px`                 | Attribute cell inset included in row measurements             |
+| `--c2-log-viewer__text--inset`                     | `12px`                     | Horizontal inset for continuous text                          |
+| `--c2-log-viewer__empty--padding`                  | `24px`                     | Empty state inset                                             |
+| `--c2-log-viewer__empty--color`                    | `#94a3b8`                  | Empty state text                                              |
+| `--c2-log-viewer__viewport__focus--outline`        | `2px solid #60a5fa`        | Keyboard focus indicator                                      |
+| `--c2-log-viewer__timestamp--color`                | `#94a3b8`                  | Timestamp text                                                |
+| `--c2-log-viewer__attribute--color`                | `#a5b4cc`                  | Secondary attribute text                                      |
+| `--c2-log-viewer__level--color`                    | `#c4b5fd`                  | Unclassified level text                                       |
+| `--c2-log-viewer__level__info--color`              | `#6ee7b7`                  | Info level text                                               |
+| `--c2-log-viewer__level__warning--color`           | `#fcd34d`                  | Warn and warning level text                                   |
+| `--c2-log-viewer__level__error--color`             | `#fda4af`                  | Error and fatal level text                                    |
+| `--c2-log-viewer__entry--box-shadow`               | `inset 0 -1px 0 #1b293d`   | Subtle row divider without changing measured geometry         |
+| `--c2-log-viewer__entry__hover--background`        | `#142238`                  | Hovered row surface                                           |
+| `--c2-log-viewer__entry__highlighted--background`  | `#17304c`                  | Matching entry surface in highlight mode                      |
+| `--c2-log-viewer__entry__highlighted--box-shadow`  | `inset 3px 0 0 #60a5fa`    | Matching entry accent without changing measured geometry      |
+| `--c2-log-viewer__entry__active--background`       | `#1b2d47`                  | Active entry surface                                          |
+| `--c2-log-viewer__entry__active--box-shadow`       | `inset 0 0 0 1px #60a5fa`  | Active entry ring while the viewport has keyboard focus       |
+| `--c2-log-viewer__find-match--background`          | `rgba(250, 204, 21, 0.26)` | Find match surface                                            |
+| `--c2-log-viewer__find-match__current--background` | `#fbbf24`                  | Current find match surface                                    |
+| `--c2-log-viewer__copy--size`                      | `28px`                     | Copy button size                                              |
+| `--c2-log-viewer__copy--icon-size`                 | `55%`                      | Copy and success icon width and height                        |
+| `--c2-log-viewer__copy--stroke-width`              | `1.8`                      | Copy and success SVG stroke width                             |
+| `--c2-log-viewer__copy--inset`                     | `8px`                      | Copy button offset from viewport edges                        |
+| `--c2-log-viewer__copy--padding-top`               | `4px`                      | Space above the copy button within an entry                   |
+| `--c2-log-viewer__copy--background`                | `transparent`              | Copy button surface                                           |
+| `--c2-log-viewer__copy--color`                     | `#dbeafe`                  | Copy icon color                                               |
+| `--c2-log-viewer__copy--border`                    | `none`                     | Copy button edge                                              |
+| `--c2-log-viewer__copy--border-radius`             | `6px`                      | Copy button corners                                           |
+| `--c2-log-viewer__copy__hover--background`         | `#2a4263`                  | Hovered copy button surface                                   |
+| `--c2-log-viewer__copy__focus--outline`            | `2px solid #60a5fa`        | Copy button keyboard focus                                    |
+| `--c2-log-viewer__token--color`                    | `#93c5fd`                  | Quoted values, numbers, URLs and recognizable IDs in log text |
 
 ### CSS parts
 
@@ -106,6 +116,8 @@ All variables have usable defaults. Change colors, typography and measured spaci
 - `copy-icon`: Copy and success SVG icon.
 - `copy-button`: Copy the complete message of a visible entry; revealed on hover, tap or keyboard focus.
 - `highlight`: Matching visible entry or plain text slice in highlight mode.
+- `active`: The active entry (tabular) or its plain text slice.
+- `find-bar`, `find-match`, `current`, `ruler`: The find bar, a match in the text (`current` on the current one) and the match ticks along the right edge.
 - `viewport`: Keyboard accessible scroll surface.
 - `content`: Virtual content and its total scroll extent.
 - `entry`: Visible tabular entry.
@@ -117,6 +129,6 @@ Avoid changing measured text geometry via parts; use the documented font, cell p
 
 ## Accessibility and limits
 
-The viewport is a keyboard-focusable named region; set `aria-label` to describe your stream. After focusing it, Home jumps to the first entry and End jumps to the latest entry and resumes following appends. Ctrl/Command with Home or End works too. PageUp/PageDown move by a viewport with one line of overlap; Up/Down move by one measured text line. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Copy buttons are keyboard accessible and announce success/failure through a live status region. The copy icon part and variables style both action and success states. No animation is required for state changes.
+The viewport is one Tab stop, a named grid with an active entry announced through `aria-activedescendant`; set `aria-label` to describe your stream. Up/Down move the active entry (a tall entry scrolls line by line first), PageUp/PageDown by a viewport, Home/End to the first and last entry (End resumes following appends; Ctrl/Command variants work too), Enter fires `entry-activate`. Left/Right retain native horizontal scrolling. Interface text is English and translatable through `addTranslations` (`log-viewer`). Copy buttons are keyboard accessible and announce success/failure through a live status region. The copy icon part and variables style both action and success states. No animation is required for state changes.
 
-Virtual content supports only selection/find/printing within the rendered window. Application data should power complete export and search.
+Selection and printing only see the rendered window (find does not: use the viewer's own). Application data should power complete export.
