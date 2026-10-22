@@ -731,6 +731,10 @@ export const overrides: Record<string, Override> = {
   '--c2-timeline-item__marker__success--color': { exclude: 'success status colour' },
   '--c2-timeline-item__marker__warning--border-color': { exclude: 'warning status colour' },
   '--c2-timeline-item__marker__warning--color': { exclude: 'warning status colour' },
+  // The image cropper draws its selection outline and handles over the photo being cropped, white in both modes: a
+  // dark-mode surface colour would vanish into the dimmed image.
+  '--c2-image-cropper__selection--border': { exclude: 'white outline drawn over the image' },
+  '--c2-image-cropper__handle--background': { exclude: 'white handle drawn over the image' },
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },

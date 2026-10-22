@@ -1,0 +1,46 @@
+---
+title: 'Image Cropper'
+description: 'Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ImageCropper } from '@c2n/components/image-cropper'
+
+`c2-image-cropper` draws a selection over an image and dims the rest. Drag the selection to move it, drag a handle to resize it, or drag on the image outside it to draw a new one; Escape cancels a drag. The selection is one tab stop: Arrow keys move it (Shift for ten times the step), Alt + Arrow keys move its right or bottom edge, `+`/`-` scale it, and the new size is announced.
+
+`crop` is the selection in the image's natural pixels, whatever size the image renders at; leave it unset and the cropper selects the centred 80% once the image loads. `aspect-ratio` locks the proportions (`1`, `16/9`, `4:3`), and `shape="ellipse"` rounds the selection for avatars. `crop-input` fires on every step of a drag and `crop-change` when the reader lets go. `toCanvas()` and `toBlob()` hand you the selected part at its natural size or the size you ask for, clipped to the ellipse when there is one. A cross-origin image needs `crossorigin` and CORS headers, or the browser refuses to read the canvas back.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/image-cropper'
+```
+
+```typescript tag=CodeBlock
+const cropper = document.querySelector('c2-image-cropper')!
+cropper.addEventListener('crop-change', (event) => console.log(event.detail.crop)) // { x, y, width, height }
+const avatar = await cropper.toBlob('image/webp', 0.9, { width: 256 })
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/image-cropper
+<style>
+  .cropper-demo {
+    width: 420px;
+    --c2-image-cropper__image--max-height: 240px;
+  }
+</style>
+<div data-label="Free selection">
+  <c2-image-cropper class="cropper-demo" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>
+</div>
+<div data-label="16:9 banner">
+  <c2-image-cropper class="cropper-demo" aspect-ratio="16/9" src="/web-components/images/image-workspace.svg" alt="A desk with a laptop"></c2-image-cropper>
+</div>
+<div data-label="Round avatar">
+  <c2-image-cropper class="cropper-demo" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>
+</div>
+```
