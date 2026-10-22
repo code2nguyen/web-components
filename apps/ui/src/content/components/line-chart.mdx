@@ -233,6 +233,17 @@ A canvas has no intrinsic size, so a chart is sized by its host rather than by i
 canvas in step, and the plot box is `contain: strict` so a resize can never feed back into itself. Use
 `lazy-render` to defer loading the engine until the chart first scrolls into view.
 
+Every chart in the package sizes the same way. Set the height through the variable and leave the host's
+`display` alone: the host is a flex column whose plot area grows into the height left after the legend, so a rule
+such as `display: block; height: 260px` collapses the plot to nothing. The legend still shows, the canvas stays
+empty, and the chart logs a warning once per page.
+
+```css tag=CodeBlock
+.balance-chart {
+  --c2-chart--height: 260px;
+}
+```
+
 ## Theming
 
 Every chart in the package reads the same variables, so setting them once themes all of them. The series

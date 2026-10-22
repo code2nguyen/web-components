@@ -100,6 +100,23 @@ function annotationEnd(annotation: ChartAnnotation): number | undefined {
 /** Pixels a resize must exceed before the engine is told; a canvas resize is a full redraw. */
 const RESIZE_EPSILON = 1
 
+let warnedCollapsedPlot = false
+
+/**
+ * Warns once per page when a laid-out chart has a plot area of zero size, which leaves the canvas undrawn without an
+ * error. A host that is itself 0×0 (inside `display: none`, a closed tab) is skipped: that chart draws once shown.
+ */
+function warnIfPlotCollapsed(host: HTMLElement): void {
+  if (warnedCollapsedPlot) return
+  const box = host.getBoundingClientRect()
+  if (box.width === 0 || box.height === 0) return
+  warnedCollapsedPlot = true
+  console.warn(
+    `<${host.localName}> has a ${Math.round(box.width)}×${Math.round(box.height)}px box but no room for its plot, so nothing is drawn. ` +
+      `The host is a flex column whose plot grows into its height: size it with --c2-chart--height and do not override its display.`,
+  )
+}
+
 /** Events fired by every chart, keyed for `addEventListener`. */
 export interface ChartEventMap {
   'chart-ready': CustomEvent<{ engine: 'uplot' | 'echarts' }>
@@ -137,8 +154,10 @@ export interface ChartBase {
  * expensive. That is what makes a streaming tick cost one engine redraw and nothing more.
  *
  * **Sizing.** A canvas has no intrinsic size, so the host is sized by `--c2-chart--height` (320px by
- * default) rather than by its content. Give the host a height — through the variable, a CSS rule, or a
- * flex parent — or the plot area collapses.
+ * default) rather than by its content. Set the height with `--c2-chart--height` (or a `height` rule, or a
+ * flex parent), and leave the host's `display` alone: it is a flex column whose plot area grows into the
+ * height left after the legend, so `display: block` collapses the plot area to nothing and the chart draws
+ * an empty box. A console warning says so once per page.
  *
  * **States.** The host never carries an attribute the author did not write. Once the engine has drawn, it matches the
  * custom states `:state(ready)` and `:state(engine-uplot)` or `:state(engine-echarts)` (`c2-line-chart:state(ready)` in
@@ -838,6 +857,7 @@ export abstract class ChartBase extends LitElement {
   #handleResize(entries: ResizeObserverEntry[]): void {
     const rect = entries[entries.length - 1]?.contentRect
     if (!rect) return
+    if (rect.width === 0 || rect.height === 0) warnIfPlotCollapsed(this)
     if (Math.abs(rect.width - this.#measured.width) < RESIZE_EPSILON && Math.abs(rect.height - this.#measured.height) < RESIZE_EPSILON) return
     this.#measured = { width: rect.width, height: rect.height }
     // Straight to the engine, never `requestUpdate()`: that would be the observe/render/layout loop.
