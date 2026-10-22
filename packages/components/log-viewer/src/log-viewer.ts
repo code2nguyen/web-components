@@ -763,11 +763,20 @@ export class LogViewer extends LitElement {
   /** Text selected inside the viewer, when it is one line: what Ctrl/Command+F looks for. */
   private selectedText(): string | null {
     const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const selection = root.getSelection?.() ?? document.getSelection()
-    // Without ShadowRoot.getSelection the document's selection may lie anywhere on the page.
-    const anchor = selection?.anchorNode
-    if (!selection || !anchor || !(this.renderRoot.contains(anchor) || this.contains(anchor) || anchor === this)) return null
-    const text = String(selection)
+    let text = ''
+    if (root.getSelection) text = String(root.getSelection() ?? '')
+    else {
+      // WebKit and Firefox: the document's selection, read through the shadow root with getComposedRanges; it may lie
+      // anywhere on the page, so only a range inside this viewer counts.
+      const selection = document.getSelection() as (Selection & { getComposedRanges?: (options: { shadowRoots: ShadowRoot[] }) => StaticRange[] }) | null
+      const composed = selection?.getComposedRanges?.({ shadowRoots: [root] })[0]
+      if (composed && root.contains(composed.startContainer) && root.contains(composed.endContainer)) {
+        const range = document.createRange()
+        range.setStart(composed.startContainer, composed.startOffset)
+        range.setEnd(composed.endContainer, composed.endOffset)
+        text = range.toString()
+      } else if (selection?.anchorNode && root.contains(selection.anchorNode)) text = String(selection)
+    }
     return text && !text.includes('\n') ? text : null
   }
 
@@ -960,8 +969,11 @@ export class LogViewer extends LitElement {
     const page = Math.max(this.lineHeight, height - this.lineHeight)
     const top = offsets[position]
     const bottom = offsets[position + 1]
-    const below = bottom > this.viewTop + height + 0.5
-    const above = top < this.viewTop - 0.5
+    // Only an entry taller than the view is read through: browsers round scroll offsets, so a fitting entry can sit a
+    // fraction of a pixel outside it after being revealed, which must not swallow the key.
+    const tall = bottom - top > height
+    const below = tall && bottom > this.viewTop + height + 2
+    const above = tall && top < this.viewTop - 2
     let target: number
     // An entry taller than the rest of the view is read through before the next one becomes active.
     if (key === 'ArrowDown') {
@@ -1104,7 +1116,8 @@ export class LogViewer extends LitElement {
     const viewport = this.viewport
     const right = (viewport?.scrollLeft ?? 0) + (viewport?.clientWidth ?? this.textWidth) - leftOffset
     const copied = this.copiedSource === source
-    return html`<div class="copy-area" style=${`left:${right}px`}>
+    // A cell of its own, so its button is a valid descendant of the row.
+    return html`<div class="copy-area" role="gridcell" style=${`left:${right}px`}>
       <button
         part="copy-button"
         type="button"
@@ -1232,7 +1245,6 @@ export class LogViewer extends LitElement {
         role=${rows ? 'treegrid' : 'region'}
         aria-label=${this.getAttribute('aria-label') ?? this.msg.t('content')}
         aria-rowcount=${rows ? this.layout.length : nothing}
-        aria-colcount=${rows ? (this.tabular ? this.keys.length : 1) : nothing}
         aria-activedescendant=${activeRendered ? `entry-${this.active}` : nothing}
         aria-describedby=${rows ? nothing : 'empty'}
         @scroll=${this.onScroll}
@@ -1249,8 +1261,7 @@ export class LogViewer extends LitElement {
             const top = this.index.offsets[position]
             const marks = this.entryMarks(entry, position)
             const active = entry.source === this.active
-            if (this.tabular) {
-              const lastCell = entry.cells.length - 1
+            if (this.tabular)
               return html`<div
                 part=${['entry', entry.highlighted && 'highlight', active && 'active'].filter(Boolean).join(' ')}
                 role="row"
@@ -1262,16 +1273,14 @@ export class LogViewer extends LitElement {
                 data-level=${this.entries[entry.source].level?.trim().toLowerCase() ?? ''}
                 style=${`top:${top}px;height:${entry.height}px;grid-template-columns:${template}`}
               >
-                ${entry.cells.map(
-                  (cell, column) =>
-                    html`<div part="cell" role="gridcell" data-attribute=${this.keys[column]}>
-                      ${column === lastCell ? this.renderCopy(entry.source, top, entry.height) : nothing}<span part="text"
-                        >${this.keys[column] === 'message' ? this.renderLogText(cell, marks[column]) : this.renderAttribute(cell, marks[column])}</span
-                      >
-                    </div>`,
-                )}
+                ${this.renderCopy(entry.source, top, entry.height)}
+                ${entry.cells.map((cell, column) => {
+                  const key = this.keys[column]
+                  // One line: whitespace between the cell and its text would join a drag selection's text.
+                  const text = key === 'message' ? this.renderLogText(cell, marks[column]) : this.renderAttribute(cell, marks[column])
+                  return html`<div part="cell" role="gridcell" data-attribute=${key}><span part="text">${text}</span></div>`
+                })}
               </div>`
-            }
             const cell = entry.cells[0]
             const lines = cell.lines
             const first = Math.max(0, Math.floor((this.viewTop - 200 - top) / this.lineHeight))
@@ -1287,15 +1296,15 @@ export class LogViewer extends LitElement {
               data-copy-hover=${this.hoveredSource === entry.source ? 'true' : 'false'}
               style=${`top:${sliceTop}px;height:${sliceHeight}px;left:${this.inset}px;width:${this.extent - this.inset * 2}px`}
             >
-              <div class="plain-cell" role="gridcell">
-                ${this.renderCopy(entry.source, sliceTop, sliceHeight, this.inset)}<span
-                  class="plain"
-                  part=${['text', entry.highlighted && 'highlight', active && 'active'].filter(Boolean).join(' ')}
-                  data-index=${entry.source}
-                  style=${`top:0;left:0;min-width:${this.textWidth}px;min-height:${sliceHeight}px`}
-                  >${this.renderLogText(cell, marks[0], first, last)}</span
-                >
-              </div>
+              <span
+                class="plain"
+                role="gridcell"
+                part=${['text', entry.highlighted && 'highlight', active && 'active'].filter(Boolean).join(' ')}
+                data-index=${entry.source}
+                style=${`top:0;left:0;min-width:${this.textWidth}px;min-height:${sliceHeight}px`}
+                >${this.renderLogText(cell, marks[0], first, last)}</span
+              >
+              ${this.renderCopy(entry.source, sliceTop, sliceHeight, this.inset)}
             </div>`
           })}
         </div>
