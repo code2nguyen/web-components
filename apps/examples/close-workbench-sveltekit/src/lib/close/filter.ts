@@ -84,6 +84,25 @@ function holds(row: ReconRow, term: FilterTerm): boolean {
   }
 }
 
+/**
+ * Splits a query's terms into its `OR` alternatives, by where each term sits in the query text: `channel:check OR
+ * channel:wire amount:>500` is two groups, `[channel:check]` and `[channel:wire, amount:>500]`. Parentheses are not
+ * read; `NOT` already arrives as a negated term.
+ */
+export function orGroups<T extends FilterTerm & { start: number }>(query: string, terms: T[]): T[][] {
+  const cuts = [...query.matchAll(/\sOR\s/g)].map((match) => match.index)
+  const groups: T[][] = Array.from({ length: cuts.length + 1 }, () => [])
+  for (const term of terms) groups[cuts.filter((cut) => cut < term.start).length].push(term)
+  return groups.filter((group) => group.length > 0)
+}
+
+/** Rows that satisfy every term of at least one group (a query with no `OR` is one group). */
+export function filterRowsAny<T extends ReconRow>(rows: T[], groups: FilterTerm[][]): T[] {
+  const active = groups.map((group) => group.filter((term) => term.value !== '')).filter((group) => group.length > 0)
+  if (active.length <= 1) return filterRows(rows, active[0] ?? [])
+  return rows.filter((row) => active.some((group) => filterRows([row], group).length === 1))
+}
+
 export function filterRows<T extends ReconRow>(rows: T[], terms: FilterTerm[]): T[] {
   const active = terms.filter((term) => term.value !== '')
   if (!active.length) return rows

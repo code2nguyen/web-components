@@ -20,7 +20,7 @@
 
   const differenceAfter = $derived(workbench.recon.difference - journal.cashEffect)
   const edited = $derived(workbench.draft !== null && JSON.stringify(workbench.draft) !== JSON.stringify(workbench.proposedSheet))
-  const canPost = $derived(journal.lines.length > 0 && journal.errors.length === 0)
+  const canPost = $derived(journal.lines.length > 0 && journal.errors.length === 0 && !workbench.draftStale)
 
   // What the spreadsheet is given. It follows the workbench (proposals, a rebuild, a restored draft) but not the
   // reader's own edits: those are already in the element, and handing them back would reset its selection and undo.
@@ -35,16 +35,22 @@
   function onCellChange(event: SpreadsheetEventMap['cell-change']) {
     // The element keeps `data` current with every edit; the draft is a copy of it.
     ownEdit = true
-    workbench.draft = structuredClone((event.currentTarget as Spreadsheet).data)
+    workbench.editDraft(structuredClone((event.currentTarget as Spreadsheet).data))
   }
 
   function post() {
-    const lines = workbench.post()
+    const { lines, unresolved } = workbench.post()
     workbench.notify({
       variant: 'success',
       heading: 'Journal posted',
       message: `${lines.length} lines, ${formatSigned(lines.filter((line) => line.account === '1010').reduce((total, line) => total + line.debit - line.credit, 0))} to cash.`,
     })
+    if (unresolved.length)
+      workbench.notify({
+        variant: 'warning',
+        heading: `${unresolved.length} card${unresolved.length === 1 ? '' : 's'} still need an entry`,
+        message: 'Their entry was not in the posted draft, so they stay in Needs adjustment.',
+      })
   }
 </script>
 
@@ -56,7 +62,7 @@
     </div>
     <div class="toolbar">
       {#if edited}
-        <c2-button class="button-quiet" onclick={() => (workbench.draft = null)}>
+        <c2-button class="button-quiet" onclick={() => workbench.discardDraft()}>
           <c2-feather-refresh-cw slot="prefix-icon"></c2-feather-refresh-cw>
           Rebuild from the board
         </c2-button>
@@ -70,6 +76,13 @@
       </c2-popconfirm>
     </div>
   </div>
+
+  {#if workbench.draftStale}
+    <c2-banner variant="warning" heading="The board changed since you edited this draft">
+      Cards moved in or out of Needs adjustment after your edits, so this draft would miss or repeat entries. Rebuild it from the board, then make your edits
+      again.
+    </c2-banner>
+  {/if}
 
   {#if !journal.lines.length && !edited}
     <c2-status-panel
@@ -97,7 +110,7 @@
         currency="USD"
         locale="en-US"
         columns={data(SHEET_COLUMNS)}
-        rows={source.length + 2}
+        rows={source.length}
         data={data(source)}
         oncell-change={onCellChange}
       ></c2-spreadsheet>

@@ -62,20 +62,32 @@ export function proposeEntry(exception: ReconException, ref: string, bank: Map<s
       const entry = ledger.get(exception.ledgerIds[0])!
       return cashPair(ref, `Reverse duplicate ${entry.docNo}`, exception.cashEffect, entry.amount < 0 ? '2000' : '1200')
     }
+    case 'unmatched': {
+      const entry = ledger.get(exception.ledgerIds[0])!
+      return cashPair(ref, `Reverse ${entry.docNo || entry.description}: not on the statement`, exception.cashEffect, entry.amount < 0 ? '2000' : '1200')
+    }
     default:
       return []
   }
 }
 
-export function proposeJournal(exceptions: ReconException[], bank: BankLine[], ledger: LedgerEntry[]): JournalLine[] {
+export interface ProposedJournal {
+  lines: JournalLine[]
+  /** Which exception each entry's ref resolves, so posting resolves only the exceptions whose entry was posted. */
+  refs: Map<string, string>
+}
+
+export function proposeJournal(exceptions: ReconException[], bank: BankLine[], ledger: LedgerEntry[]): ProposedJournal {
   const bankById = new Map(bank.map((line) => [line.id, line]))
   const ledgerById = new Map(ledger.map((entry) => [entry.id, entry]))
-  let next = 1
-  return exceptions.flatMap((exception) => {
-    const lines = proposeEntry(exception, `ADJ-${String(next).padStart(2, '0')}`, bankById, ledgerById)
-    if (lines.length) next++
-    return lines
+  const refs = new Map<string, string>()
+  const lines = exceptions.flatMap((exception) => {
+    const ref = `ADJ-${String(refs.size + 1).padStart(2, '0')}`
+    const entry = proposeEntry(exception, ref, bankById, ledgerById)
+    if (entry.length) refs.set(ref, exception.id)
+    return entry
   })
+  return { lines, refs }
 }
 
 /** What posting the lines does to the cash account. */
@@ -98,7 +110,13 @@ export const SHEET_COLUMNS = [
 
 const TOTAL_LABEL = 'Total'
 
-/** Lines to spreadsheet rows, with a totals row of formulas the reader can watch recalculate. */
+/** Blank rows left between the proposed lines and the totals, for lines the reader adds by hand. */
+export const SPARE_ROWS = 2
+
+/**
+ * Lines to spreadsheet rows, then {@link SPARE_ROWS} blank rows, then a totals row of formulas the reader can watch
+ * recalculate. The sums cover the blank rows too, so a line typed into them is counted, and never their own row.
+ */
 export function toSheet(lines: JournalLine[]): SheetData {
   const rows: SheetData = lines.map((line) => [
     line.ref,
@@ -107,7 +125,8 @@ export function toSheet(lines: JournalLine[]): SheetData {
     line.debit ? toDollars(line.debit) : null,
     line.credit ? toDollars(line.credit) : null,
   ])
-  const last = Math.max(rows.length, 1)
+  for (let spare = 0; spare < SPARE_ROWS; spare++) rows.push([null, null, null, null, null])
+  const last = rows.length
   rows.push(['', '', TOTAL_LABEL, `=SUM(D1:D${last})`, `=SUM(E1:E${last})`])
   return rows
 }
@@ -136,9 +155,14 @@ export function parseSheet(data: SheetData): ParsedJournal {
   const errors: string[] = []
   data.forEach((row, index) => {
     const [ref, account, memo, debitCell, creditCell] = row
-    if (String(memo ?? '') === TOTAL_LABEL || row.some((cell) => typeof cell === 'string' && cell.startsWith('='))) return
+    if (String(memo ?? '') === TOTAL_LABEL) return
     if (row.every((cell) => cell === null || cell === '' || cell === undefined)) return
     const where = `Row ${index + 1}`
+    // The draft holds raw inputs, so a formula's result is not known here: say so rather than drop the line.
+    if ([debitCell, creditCell].some((cell) => typeof cell === 'string' && cell.startsWith('='))) {
+      errors.push(`${where}: type the amount; a formula in a journal line is not posted`)
+      return
+    }
     const code = /^\s*(\d{4})/.exec(String(account ?? ''))?.[1]
     const debit = readAmount(debitCell)
     const credit = readAmount(creditCell)

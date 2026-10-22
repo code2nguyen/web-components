@@ -2,7 +2,7 @@
   import type { QueryInputEventMap } from '@c2n/components/query-input'
   import type { Table, TableColumnConfig, TableEventMap, TableRowContext } from '@c2n/components/table'
 
-  import { FILTER_FIELDS, filterRows, type FilterTerm } from '#lib/close/filter.ts'
+  import { FILTER_FIELDS, filterRowsAny, orGroups, type FilterTerm } from '#lib/close/filter.ts'
   import { daysBetween } from '#lib/close/dates.ts'
   import { checkManualMatch, normalizeReference } from '#lib/close/matching.ts'
   import { formatMoney } from '#lib/close/money.ts'
@@ -12,7 +12,8 @@
   const workbench = getWorkbench()
 
   const INITIAL_QUERY = 'status:unmatched'
-  let terms = $state<FilterTerm[]>([{ key: 'status', value: 'unmatched', negated: false }])
+  // The query's terms, in its `OR` alternatives (a query without `OR` is one group whose terms must all hold).
+  let groups = $state<FilterTerm[][]>([[{ key: 'status', value: 'unmatched', negated: false }]])
   let tab = $state('open')
   let selectedBank = $state<string[]>([])
   let selectedLedger = $state<string[]>([])
@@ -21,8 +22,8 @@
   let viewportWidth = $state(1280)
   const stacked = $derived(viewportWidth < 760)
 
-  const bankRows = $derived(filterRows(workbench.rows.bank, terms))
-  const ledgerRows = $derived(filterRows(workbench.rows.ledger, terms))
+  const bankRows = $derived(filterRowsAny(workbench.rows.bank, groups))
+  const ledgerRows = $derived(filterRowsAny(workbench.rows.ledger, groups))
 
   // One month on screen, so the day is enough: `09-12` sorts like the full date.
   const lineColumns = (text: string): TableColumnConfig[] => [
@@ -107,7 +108,7 @@
     const days = Number((event.currentTarget as HTMLInputElement).value)
     if (!Number.isInteger(days) || days < 0 || days === workbench.dateWindowDays) return
     const before = workbench.result.matches.length
-    workbench.dateWindowDays = days
+    workbench.setDateWindow(days)
     const delta = workbench.result.matches.length - before
     workbench.notify({
       variant: delta > 0 ? 'success' : 'neutral',
@@ -141,7 +142,7 @@
     placeholder="Filter: status:unmatched amount:>1000 channel:check, or any text"
     value={INITIAL_QUERY}
     fields={data(FILTER_FIELDS)}
-    onsearch={(event: QueryInputEventMap['search']) => (terms = event.detail.terms)}
+    onsearch={(event: QueryInputEventMap['search']) => (groups = orGroups(event.detail.value, event.detail.terms))}
   ></c2-query-input>
 
   <c2-tabs aria-label="Lines and matches" selected-tab={tab} onselection-change={(event: CustomEvent<{ value: string }>) => (tab = event.detail.value)}>

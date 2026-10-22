@@ -5,7 +5,7 @@
 import { daysBetween } from './dates.ts'
 import { formatMoney } from './money.ts'
 import { normalizeReference } from './matching.ts'
-import type { BankLine, Day, ExceptionKind, LedgerEntry, MatchResult, ReconException } from './types.ts'
+import type { BankLine, Channel, Day, ExceptionKind, LedgerEntry, MatchResult, ReconException } from './types.ts'
 
 /** Ledger-only checks and deposits this close to the period end are timing differences, not errors. */
 export const TIMING_DAYS = 3
@@ -39,6 +39,19 @@ export function exceptionId(kind: ExceptionKind, bankIds: string[], ledgerIds: s
   return `X:${kind}:${[...bankIds, ...ledgerIds].join('+')}`
 }
 
+/** What a same-reference, different-amount pair most likely is, read from which side of the books it is on and which way it is off. */
+function mismatchHint(entry: LedgerEntry, difference: number): string {
+  const amount = formatMoney(Math.abs(difference))
+  if (entry.amount > 0)
+    return difference < 0
+      ? `${entry.counterparty} paid ${amount} less than invoiced, likely an early-payment discount.`
+      : `${entry.counterparty} paid ${amount} more than invoiced: an overpayment to refund or apply to the next invoice.`
+  return difference < 0 ? `The bank paid out ${amount} more than was booked.` : `The bank paid out ${amount} less than was booked.`
+}
+
+/** Book entries that reach the bank days after they are written: checks, card settlements and deposits. */
+const IN_TRANSIT: ReadonlySet<Channel> = new Set(['check', 'card', 'deposit'])
+
 export function classifyExceptions(bank: BankLine[], ledger: LedgerEntry[], result: MatchResult, periodEnd: Day): ReconException[] {
   const bankById = new Map(bank.map((line) => [line.id, line]))
   const ledgerById = new Map(ledger.map((entry) => [entry.id, entry]))
@@ -57,9 +70,7 @@ export function classifyExceptions(bank: BankLine[], ledger: LedgerEntry[], resu
       title: `${entry.docNo}: bank ${formatMoney(line.amount)}, books ${formatMoney(entry.amount)}`,
       hint: transposed
         ? `The difference of ${formatMoney(Math.abs(difference))} is divisible by 9, which usually means transposed digits in the entry.`
-        : entry.amount > 0
-          ? `${entry.counterparty} paid ${formatMoney(Math.abs(difference))} less than invoiced, likely an early-payment discount.`
-          : `The bank paid out ${formatMoney(Math.abs(difference))} more than was booked.`,
+        : mismatchHint(entry, difference),
       cashEffect: difference,
       amount: difference,
       date: line.date,
@@ -96,14 +107,17 @@ export function classifyExceptions(bank: BankLine[], ledger: LedgerEntry[], resu
     const entry = ledgerById.get(id)!
     const reference = normalizeReference(entry.docNo)
     let kind: ExceptionKind = 'unmatched'
-    let hint = 'In the books but not on the statement. Look for it on the bank side, or find out why it is missing.'
-    let cashEffect = 0
+    // Unexplained, it is a posting the bank never saw: reversing it is the entry that would square the books. The
+    // likelier answer is a bank line under another date or amount, which a manual match resolves instead.
+    let hint = 'In the books but not on the statement. Look for it on the bank side and match the two by hand; if it never happened, reverse it.'
+    let cashEffect = -entry.amount
     if (reference && matchedDocNos.has(reference)) {
       kind = 'duplicate'
       hint = `${entry.docNo} is already matched to the statement; this second posting doubles it. Reverse it.`
       cashEffect = -entry.amount
-    } else if ((entry.channel === 'check' || entry.channel === 'card') && daysBetween(entry.date, periodEnd) < TIMING_DAYS) {
+    } else if (IN_TRANSIT.has(entry.channel) && daysBetween(entry.date, periodEnd) < TIMING_DAYS) {
       kind = 'timing'
+      cashEffect = 0
       hint =
         entry.amount < 0
           ? 'An outstanding check: written at month end, not cleared yet. It reconciles without an entry.'

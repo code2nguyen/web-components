@@ -3,6 +3,7 @@
   import { html } from '@c2n/core/lit-helper.js'
   import type { Kanban, KanbanEventMap, KanbanRenderContext } from '@c2n/components/kanban'
   import type { SelectEventMap } from '@c2n/components/select'
+  import type { TableColumnConfig } from '@c2n/components/table'
 
   import { formatDay } from '#lib/close/dates.ts'
   import { accountLabel, proposeEntry } from '#lib/close/journal.ts'
@@ -76,6 +77,8 @@
 
   /** The board's rules: an entry for what changes cash, an explanation for what does not. */
   function moveProblem(exception: ReconException, to: ExceptionStage): string | null {
+    if (workbench.isPosted(exception) && to !== 'resolved')
+      return 'Its entry is already posted. Moving it back would propose and post the same entry a second time.'
     if (to === 'adjust' && exception.cashEffect === 0) return 'This one changes nothing in the books: explain it and move it to Resolved.'
     if (to === 'resolved' && exception.cashEffect !== 0 && workbench.stageOf(exception) !== 'resolved')
       return `It changes cash by ${formatSigned(exception.cashEffect)}: move it to Needs adjustment and post the entry.`
@@ -102,12 +105,25 @@
   }
 
   const proposal = $derived(open ? proposeEntry(open, 'ADJ', workbench.bankById, workbench.ledgerById) : [])
+  const proposalRows = $derived(
+    proposal.map((line, index) => ({
+      id: index,
+      account: accountLabel(line.account),
+      debit: line.debit ? line.debit / 100 : null,
+      credit: line.credit ? line.credit / 100 : null,
+    })),
+  )
+  const ENTRY_COLUMNS: TableColumnConfig[] = [
+    { field: 'account', header: 'Account', width: '1fr' },
+    { field: 'debit', header: 'Debit', width: '110px', align: 'end', format: 'currency' },
+    { field: 'credit', header: 'Credit', width: '110px', align: 'end', format: 'currency' },
+  ]
 
   /** The one move that resolves the open card: an entry for what changes cash, an explanation for what does not. */
   const next = $derived.by((): ExceptionStage | 'journal' | null => {
     if (!open) return null
     const stage = workbench.stageOf(open)
-    if (stage === 'resolved') return null
+    if (stage === 'resolved' || workbench.isPosted(open)) return null
     if (open.cashEffect === 0) return 'resolved'
     return stage === 'adjust' ? 'journal' : 'adjust'
   })
@@ -163,18 +179,8 @@
       {#if proposal.length}
         <div>
           <h3>Proposed entry</h3>
-          <table class="entry">
-            <thead><tr><th>Account</th><th>Debit</th><th>Credit</th></tr></thead>
-            <tbody>
-              {#each proposal as line, index (index)}
-                <tr>
-                  <td>{accountLabel(line.account)}</td>
-                  <td class="amount">{line.debit ? formatMoney(line.debit) : ''}</td>
-                  <td class="amount">{line.credit ? formatMoney(line.credit) : ''}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
+          <c2-table class="entry" aria-label="Proposed entry" rows={data(proposalRows)} columns={data(ENTRY_COLUMNS)} resizable={false} virtual="never"
+          ></c2-table>
         </div>
       {/if}
 
@@ -210,7 +216,9 @@
       {:else if next}
         <c2-button onclick={() => moveOpen(next)}>Move to {COLUMNS.find((column) => column.id === next)?.label}</c2-button>
       {/if}
-      {#if workbench.stageOf(open) === 'new'}
+      {#if workbench.isPosted(open)}
+        <span class="muted">Its entry is posted.</span>
+      {:else if workbench.stageOf(open) === 'new'}
         <c2-button class="button-quiet" onclick={() => moveOpen('investigating')}>Mark as investigating</c2-button>
       {:else}
         <c2-button class="button-quiet" onclick={() => moveOpen('new')}>Back to Unreviewed</c2-button>
@@ -311,21 +319,8 @@
   }
 
   .entry {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  .entry th,
-  .entry td {
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--cw-border);
-    text-align: left;
-  }
-
-  .entry th:not(:first-child),
-  .entry td:not(:first-child) {
-    text-align: right;
+    --c2-table__row--height: 34px;
+    --c2-table--max-height: 160px;
   }
 
   .field {

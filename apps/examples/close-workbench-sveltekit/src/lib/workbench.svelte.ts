@@ -11,7 +11,7 @@ import { createContext } from 'svelte'
 import type { ToastOptions } from '@c2n/components/toast'
 
 import { classifyExceptions } from './close/exceptions.ts'
-import { parseSheet, proposeJournal, toSheet, type SheetData } from './close/journal.ts'
+import { CASH_ACCOUNT, parseSheet, proposeJournal, toSheet, type SheetData } from './close/journal.ts'
 import { applyManualMatches, autoMatch, DEFAULT_MATCH_OPTIONS, manualMatch, withoutMatches } from './close/matching.ts'
 import { reconcile } from './close/reconciliation.ts'
 import type { ReconRow } from './close/filter.ts'
@@ -33,7 +33,9 @@ interface Saved {
   notes: Record<string, string>
   owners: Record<string, string>
   draft: SheetData | null
+  draftBase: string | null
   posted: JournalLine[]
+  postedIds: string[]
   signOff: SignOff | null
 }
 
@@ -54,7 +56,11 @@ export class Workbench {
   owners = $state<Record<string, string>>({})
   /** The journal spreadsheet's raw inputs once someone edited them; `null` follows the proposals. */
   draft = $state<SheetData | null>(null)
+  /** The proposals the draft was started from, to tell when the board has moved on since. */
+  draftBase = $state<string | null>(null)
   posted = $state<JournalLine[]>([])
+  /** Exceptions whose adjusting entry has been posted. Their cards stay resolved: a second entry would double it. */
+  postedIds = $state<string[]>([])
   signOff = $state<SignOff | null>(null)
   /** Saving starts once the saved state has been read back, or the first save would overwrite it with the defaults. */
   private restored = $state(false)
@@ -71,7 +77,9 @@ export class Workbench {
 
   readonly toAdjust = $derived(this.exceptions.filter((item) => this.stageOf(item) === 'adjust'))
   readonly proposed = $derived(proposeJournal(this.toAdjust, this.month.bank, this.month.ledger))
-  readonly proposedSheet = $derived(toSheet(this.proposed))
+  readonly proposedSheet = $derived(toSheet(this.proposed.lines))
+  /** An edited draft written before the cards in Needs adjustment changed: posting it would miss or repeat entries. */
+  readonly draftStale = $derived(this.draft !== null && this.draftBase !== JSON.stringify(this.proposedSheet))
   readonly sheet = $derived(this.draft ?? this.proposedSheet)
   readonly journal = $derived(parseSheet(this.sheet))
 
@@ -120,7 +128,9 @@ export class Workbench {
         notes: this.notes,
         owners: this.owners,
         draft: this.draft,
+        draftBase: this.draftBase,
         posted: this.posted,
+        postedIds: this.postedIds,
         signOff: this.signOff,
       }
       try {
@@ -148,7 +158,9 @@ export class Workbench {
     this.notes = saved.notes ?? {}
     this.owners = saved.owners ?? {}
     this.draft = saved.draft ?? null
+    this.draftBase = saved.draftBase ?? null
     this.posted = saved.posted ?? []
+    this.postedIds = saved.postedIds ?? []
     this.signOff = saved.signOff ?? null
   }
 
@@ -160,7 +172,9 @@ export class Workbench {
     this.notes = {}
     this.owners = {}
     this.draft = null
+    this.draftBase = null
     this.posted = []
+    this.postedIds = []
     this.signOff = null
   }
 
@@ -168,6 +182,27 @@ export class Workbench {
 
   stageOf(exception: ReconException): ExceptionStage {
     return this.stages[exception.id] ?? 'new'
+  }
+
+  isPosted(exception: ReconException): boolean {
+    return this.postedIds.includes(exception.id)
+  }
+
+  /** Re-runs auto-match with another date window; the matches change, so a sign-off no longer holds. */
+  setDateWindow(days: number) {
+    this.dateWindowDays = days
+    this.signOff = null
+  }
+
+  /** Records the reader's edit of the journal spreadsheet, remembering which proposals it started from. */
+  editDraft(data: SheetData) {
+    if (this.draft === null) this.draftBase = JSON.stringify(this.proposedSheet)
+    this.draft = data
+  }
+
+  discardDraft() {
+    this.draft = null
+    this.draftBase = null
   }
 
   setStage(id: string, stage: ExceptionStage) {
@@ -193,15 +228,24 @@ export class Workbench {
     this.signOff = null
   }
 
-  /** Posts the journal as it stands and resolves the exceptions it adjusted. */
-  post() {
+  /**
+   * Posts the journal as it stands and resolves the exceptions whose entry it carries (by ref). A card whose entry the
+   * reader deleted stays in Needs adjustment, and a stale draft is not posted at all.
+   */
+  post(): { lines: JournalLine[]; resolved: string[]; unresolved: string[] } {
+    if (this.draftStale || this.journal.errors.length) return { lines: [], resolved: [], unresolved: [] }
     const { lines } = this.journal
+    const refs = new Set(lines.filter((line) => line.account === CASH_ACCOUNT).map((line) => line.ref))
+    const resolved = [...this.proposed.refs].filter(([ref]) => refs.has(ref)).map(([, id]) => id)
+    const unresolved = this.toAdjust.map((item) => item.id).filter((id) => !resolved.includes(id))
     this.posted = [...this.posted, ...lines]
+    this.postedIds = [...this.postedIds, ...resolved]
     const stages = { ...this.stages }
-    for (const item of this.toAdjust) stages[item.id] = 'resolved'
+    for (const id of resolved) stages[id] = 'resolved'
     this.stages = stages
-    this.draft = null
-    return lines
+    this.discardDraft()
+    this.signOff = null
+    return { lines, resolved, unresolved }
   }
 
   sign(by: string) {

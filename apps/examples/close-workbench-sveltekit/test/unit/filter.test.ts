@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { filterRows, type FilterTerm, type ReconRow } from '../../src/lib/close/filter.ts'
+import { filterRows, filterRowsAny, orGroups, type FilterTerm, type ReconRow } from '../../src/lib/close/filter.ts'
 
 const row = (overrides: Partial<ReconRow>): ReconRow => ({
   id: 'B-1',
@@ -51,4 +51,30 @@ test('terms combine with AND, and a negated term excludes', () => {
 
 test('an unknown key filters nothing out', () => {
   assert.deepEqual(ids([term('colour', 'red')]), ['a', 'b', 'c'])
+})
+
+test('OR splits a query into alternatives, by where each term sits', () => {
+  const query = 'channel:check OR channel:fee amount:<100'
+  const terms = [
+    { ...term('channel', 'check'), start: 0 },
+    { ...term('channel', 'fee'), start: 17 },
+    { ...term('amount', '100', { comparator: '<' }), start: 29 },
+  ]
+  const groups = orGroups(query, terms)
+  assert.deepEqual(
+    groups.map((group) => group.map((item) => item.value)),
+    [['check'], ['fee', '100']],
+  )
+  assert.deepEqual(
+    filterRowsAny(rows, groups).map((item) => item.id),
+    ['b', 'c'],
+  )
+  assert.deepEqual(
+    filterRowsAny(rows, [[term('channel', 'check')]]).map((item) => item.id),
+    ['c'],
+  )
+  assert.deepEqual(
+    filterRowsAny(rows, []).map((item) => item.id),
+    ['a', 'b', 'c'],
+  )
 })

@@ -125,6 +125,21 @@ test('the whole close: match, work the board, post, sign off', async ({ page }) 
   await page.getByRole('button', { name: 'Sign off', exact: true }).click()
   await expect(page.getByText('Signed off by Priya Raman.')).toBeVisible()
 
+  // A posted card stays put: moving it back would post its entry twice.
+  await page.goto('./exceptions/')
+  await page.getByRole('button', { name: 'Open MONTHLY SERVICE CHARGE' }).click()
+  await expect(page.locator('c2-sheet')).toContainText('Its entry is posted.')
+  await expect(page.locator('c2-sheet').getByRole('button', { name: 'Back to Unreviewed' })).toHaveCount(0)
+  await page.keyboard.press('Escape')
+
+  // Re-running auto-match changes the matches, so the sign-off no longer holds.
+  await page.goto('./reconcile/')
+  const window = page.locator('c2-number-input').locator('input')
+  await window.fill('0')
+  await window.press('Enter')
+  await page.goto('./')
+  await expect(page.getByText('Signed off by Priya Raman.')).toHaveCount(0)
+
   expect(errors).toEqual([])
 })
 
@@ -146,4 +161,16 @@ test('the theme the docs site hands over survives the theme switcher upgrading',
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   // The docs site's own switcher key, on the same origin, is left alone.
   expect(await page.evaluate(() => localStorage.getItem('c2n-theme'))).toBeNull()
+})
+
+test('OR in the query shows either kind of line', async ({ page }) => {
+  await page.goto('./reconcile/')
+  const table = page.locator('c2-table[aria-label="Bank statement lines"]')
+  await expect.poll(() => table.evaluate((element) => (element as unknown as { rows: unknown[] }).rows.length)).toBe(9)
+  const field = page.locator('c2-query-input').locator('input')
+  await field.click()
+  await field.pressSequentially('channel:check OR channel:fee')
+  await field.press('Enter')
+  // status:unmatched AND channel:check (check 10244), or any fee line (wire fee, return fee, service charge).
+  await expect.poll(() => table.evaluate((element) => (element as unknown as { rows: unknown[] }).rows.length)).toBe(4)
 })
