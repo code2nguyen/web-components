@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { extname, join } from 'node:path'
 
 const SOURCE_EXTENSIONS = new Set(['.astro', '.css', '.html', '.md', '.mdx', '.scss', '.ts', '.tsx', '.vue'])
-const IGNORED_DIRECTORIES = new Set(['.astro', '.next', 'dist', 'node_modules', 'out', 'playwright-report', 'test-results'])
+const IGNORED_DIRECTORIES = new Set(['.astro', '.next', '.svelte-kit', 'dist', 'node_modules', 'out', 'playwright-report', 'test-results'])
 const IGNORED_FILE = /\.(?:test|spec)\.[cm]?[jt]sx?$/
 const VARIABLE = /--c2-[a-z0-9-]+(?:__[a-z0-9-]+)*--[a-z0-9-]+/g
 /** A variable a component writes on its own host at runtime (an output for slotted content, not a theming input). */

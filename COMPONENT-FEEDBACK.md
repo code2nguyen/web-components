@@ -24,6 +24,62 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### A static numeric attribute from Svelte reaches a `type: Number` property as a string
+
+- **Severity:** papercut
+- **Hit while:** building the SvelteKit close workbench (`apps/examples/close-workbench-sveltekit`), 2026-10-22.
+- **What happens:** for an attribute whose name is also a property (`precision`, `position`, `min`, `max`), Svelte 5
+  assigns the property rather than the attribute, and a static value is the string as written. Lit's `type: Number`
+  converter only runs for attributes, so `<c2-comparison-bar precision="0">` sets `precision = "0"`;
+  `Number.isFinite("0")` is false and the bar printed `50.00%`. Nothing warns. `c2-split-panel`'s `position`, `min` and
+  `max` take the same path and work only because their arithmetic happens to coerce. Writing the number in braces
+  (`precision={0}`) avoids it, but nothing tells an author they need to.
+- **Where the fix belongs:** `@c2n/core/lit-helper.js` — give every `type: Number` property a converter with
+  `fromProperty` (as `property()` already does for `Boolean` and the JSON/array converters), so a numeric string
+  assigned to the property is parsed like the attribute.
+
+### `c2-line-chart` clips wide y-axis labels
+
+- **Severity:** bug
+- **Hit while:** charting daily bank and book balances (around $150,000) in the SvelteKit close workbench
+  (`apps/examples/close-workbench-sveltekit`), 2026-10-22.
+- **What happens:** the y-axis gutter is not sized to the tick labels, so six-digit values lose their leading
+  characters: `150,000` renders as `0,000`. No variable or attribute widens the axis. The example works around it by
+  plotting in thousands (`$k`).
+- **Where the fix belongs:** `packages/components/chart/src/engines/uplot-adapter.ts`: size the y axis from its widest
+  formatted tick (uPlot's `axes[].size` accepts a function), or expose the gutter as a documented variable.
+
+### `c2-line-chart` draws nothing, silently, when the app overrides the host's `display`
+
+- **Severity:** docs
+- **Hit while:** sizing the balance chart in the same example, 2026-10-22.
+- **What happens:** the host is a flex column whose plot area grows to fill it. An app rule of `display: block; height:
+260px` on the element (a common way to size a block) collapses the plot area to zero height, so the engine never
+  draws: the legend shows, the plot stays empty, and nothing is logged. Sizing through `--c2-chart--height` works.
+- **Where the fix belongs:** the chart docs (`apps/ui/src/content/components/line-chart.mdx` and siblings, and the
+  host's JSDoc): say that the host stays `display: flex` and is sized with `--c2-chart--height`. Optionally, a
+  development-mode `console.warn` when the plot area measures 0×0 after the data arrives.
+
+### `c2-gantt` bar labels spill over the task list
+
+- **Severity:** bug
+- **Hit while:** drawing a nine-day close calendar in the same example, 2026-10-22.
+- **What happens:** at the default `--c2-gantt__column-day--width` (28px), a label too long for its bar is drawn to the
+  bar's left and runs across the task list, where it is cut off (`821`, `tatement`, `g review`). The example works
+  around it with `--c2-gantt__column-day--width: 104px`.
+- **Where the fix belongs:** `packages/components/gantt`: clip labels to the timeline area, and put a label that does not
+  fit inside or left of its bar on the bar's right instead.
+
+### `c2-kanban-column` empty state sits at the bottom of a stretched lane
+
+- **Severity:** papercut
+- **Hit while:** building the exceptions board in the same example, 2026-10-22.
+- **What happens:** when one lane holds many cards, the empty lanes stretch to its height and their `empty` slot
+  (default "No cards") is drawn at the bottom of the lane instead of under the header, far from where a card would be
+  dropped.
+- **Where the fix belongs:** `packages/components/kanban/src/kanban-column.scss`: align the empty state to the start of
+  the cards area.
+
 ### `c2-search-field` Escape always clears; a find bar wants it to close
 
 - **Severity:** papercut

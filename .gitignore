@@ -4,6 +4,7 @@
 **/dist
 **/build/
 **/.next/
+**/.svelte-kit/
 **/out/
 **/types
 !apps/examples/observability-nextjs/types/

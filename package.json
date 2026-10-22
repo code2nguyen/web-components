@@ -241,6 +241,7 @@
     "examples:build": {
       "dependencies": [
         "./apps/examples/basic-form-html:build",
+        "./apps/examples/close-workbench-sveltekit:build",
         "./apps/examples/data-platform-html:build",
         "./apps/examples/log-lens-nextjs:build",
         "./apps/examples/observability-nextjs:build",

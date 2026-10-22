@@ -1,0 +1,310 @@
+@import '@c2n/components/theme.css';
+
+/* ------------------------------------------------------------------------------------------------------------
+ * App tokens. Light on :root, dark under [data-theme='dark'], which the app.html script writes before first paint
+ * (from `?theme=`, the stored choice, or the OS preference) and c2-theme-select rewrites when the reader switches.
+ * ---------------------------------------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --cw-canvas: #f4f6f5;
+  --cw-surface: #ffffff;
+  --cw-surface-2: #eef1f0;
+  --cw-surface-3: #e2e7e5;
+  --cw-text: #14201c;
+  --cw-muted: #5c6b66;
+  --cw-border: #dde3e1;
+  --cw-border-strong: #c3ccc9;
+  --cw-accent: #0f6b5f;
+  --cw-accent-hover: #0b5a50;
+  --cw-accent-soft: #e2f2ee;
+  --cw-danger: #b42335;
+  --cw-danger-soft: #fbe8ea;
+  --cw-warning: #9a5b00;
+  --cw-warning-soft: #fcefd8;
+  --cw-success: #17794a;
+  --cw-success-soft: #e1f3e8;
+  --cw-info: #2a5d9f;
+  --cw-info-soft: #e5eefa;
+  --cw-neutral-soft: #eceeed;
+  --cw-shadow: 0 1px 2px rgb(20 32 28 / 5%), 0 8px 24px rgb(20 32 28 / 6%);
+  --cw-radius: 12px;
+  --cw-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cw-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --cw-canvas: #0d1312;
+  --cw-surface: #141c1a;
+  --cw-surface-2: #1b2522;
+  --cw-surface-3: #25312e;
+  --cw-text: #e6ecea;
+  --cw-muted: #94a39e;
+  --cw-border: #26322f;
+  --cw-border-strong: #3a4844;
+  --cw-accent: #5fd3bf;
+  --cw-accent-hover: #86e0d0;
+  --cw-accent-soft: #143530;
+  --cw-danger: #ff8a98;
+  --cw-danger-soft: #3c1b21;
+  --cw-warning: #f0b555;
+  --cw-warning-soft: #372a12;
+  --cw-success: #6bd49b;
+  --cw-success-soft: #16301f;
+  --cw-info: #8ab8f0;
+  --cw-info-soft: #172a40;
+  --cw-neutral-soft: #212b28;
+  --cw-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 28%);
+}
+
+/* Bridge onto the @c2n/theme tokens: every c2 component follows from here. */
+:root {
+  --c2-theme--color-primary: var(--cw-accent);
+  --c2-theme--color-primary-hover: var(--cw-accent-hover);
+  --c2-theme--color-primary-active: var(--cw-accent-hover);
+  --c2-theme--color-primary-container: var(--cw-accent-soft);
+  --c2-theme--color-primary-glow: color-mix(in srgb, var(--cw-accent) 25%, transparent);
+  --c2-theme--color-on-primary: var(--cw-surface);
+  --c2-theme--color-surface: var(--cw-surface);
+  --c2-theme--color-surface-container-low: var(--cw-surface-2);
+  --c2-theme--color-surface-container: var(--cw-surface-2);
+  --c2-theme--color-on-surface: var(--cw-text);
+  --c2-theme--color-on-surface-variant: var(--cw-muted);
+  --c2-theme--color-outline: var(--cw-border-strong);
+  --c2-theme--color-outline-variant: var(--cw-border);
+  --c2-theme--color-outline-strong: var(--cw-border-strong);
+  --c2-theme--color-error: var(--cw-danger);
+  --c2-theme--focus-ring: 2px solid color-mix(in srgb, var(--cw-accent) 55%, transparent);
+  --c2-theme--radius-xl: var(--cw-radius);
+  --c2-theme--shadow-md: var(--cw-shadow);
+  --c2-theme--chart-series-1: var(--cw-accent);
+  --c2-theme--chart-series-2: var(--cw-warning);
+}
+
+/* Badge and stat tones have no shared token; keep them readable in both themes. */
+c2-badge {
+  --c2-badge__neutral--background: var(--cw-neutral-soft);
+  --c2-badge__neutral--color: var(--cw-muted);
+  --c2-badge__primary--background: var(--cw-accent-soft);
+  --c2-badge__primary--color: var(--cw-accent);
+  --c2-badge__success--background: var(--cw-success-soft);
+  --c2-badge__success--color: var(--cw-success);
+  --c2-badge__warning--background: var(--cw-warning-soft);
+  --c2-badge__warning--color: var(--cw-warning);
+  --c2-badge__danger--background: var(--cw-danger-soft);
+  --c2-badge__danger--color: var(--cw-danger);
+  --c2-badge__info--background: var(--cw-info-soft);
+  --c2-badge__info--color: var(--cw-info);
+}
+
+/* Until hooks.client.ts has registered them, the prerendered tags are inert text: keep them from flashing. */
+:is(
+  c2-header,
+  c2-navigation-menu,
+  c2-card,
+  c2-stat,
+  c2-table,
+  c2-tabs,
+  c2-kanban,
+  c2-spreadsheet,
+  c2-diff-viewer,
+  c2-gantt,
+  c2-state-timeline,
+  c2-line-chart,
+  c2-steps,
+  c2-split-panel,
+  c2-query-input,
+  c2-description-list,
+  c2-button,
+  c2-theme-select
+):not(:defined) {
+  visibility: hidden;
+}
+
+/* ------------------------------------------------------------------------------------------------------------
+ * Base
+ * ---------------------------------------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--cw-canvas);
+  color: var(--cw-text);
+  font-family: var(--cw-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cw-canvas);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 650;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--cw-accent);
+}
+
+.muted {
+  color: var(--cw-muted);
+}
+
+.mono,
+.amount {
+  font-family: var(--cw-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.page {
+  display: grid;
+  gap: 20px;
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.page-head p {
+  margin-top: 4px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* Every panel is a c2-card; the variables give it the app's surface. */
+c2-card {
+  --c2-card--background: var(--cw-surface);
+  --c2-card--border-top: 1px solid var(--cw-border);
+  --c2-card--border-right: 1px solid var(--cw-border);
+  --c2-card--border-bottom: 1px solid var(--cw-border);
+  --c2-card--border-left: 1px solid var(--cw-border);
+  --c2-card--border-top-left-radius: var(--cw-radius);
+  --c2-card--border-top-right-radius: var(--cw-radius);
+  --c2-card--border-bottom-left-radius: var(--cw-radius);
+  --c2-card--border-bottom-right-radius: var(--cw-radius);
+  --c2-card--padding-top: 16px;
+  --c2-card--padding-right: 18px;
+  --c2-card--padding-bottom: 18px;
+  --c2-card--padding-left: 18px;
+  min-width: 0;
+}
+
+/* KPI tiles: the icon takes the tone's soft tint, the value is large. `.stat-accent` gives a neutral tile the accent. */
+c2-stat {
+  --c2-stat--background: var(--cw-surface);
+  --c2-stat--border: 1px solid var(--cw-border);
+  --c2-stat--border-radius: var(--cw-radius);
+  --c2-stat--padding: 16px 18px;
+  --c2-stat__icon--background: var(--cw-neutral-soft);
+  --c2-stat__icon--color: var(--cw-muted);
+  --c2-stat__icon--border-radius: 10px;
+  --c2-stat__icon__positive--background: var(--cw-success-soft);
+  --c2-stat__icon__positive--color: var(--cw-success);
+  --c2-stat__icon__negative--background: var(--cw-danger-soft);
+  --c2-stat__icon__negative--color: var(--cw-danger);
+  --c2-stat__icon__warning--background: var(--cw-warning-soft);
+  --c2-stat__icon__warning--color: var(--cw-warning);
+  --c2-stat__value--font-size: 26px;
+  --c2-stat__value--font-weight: 650;
+  --c2-stat__label--color: var(--cw-muted);
+  --c2-stat__label--font-size: 13px;
+  --c2-stat__description--color: var(--cw-muted);
+  --c2-stat__description--font-size: 12px;
+}
+
+.stat-accent {
+  --c2-stat__icon--background: var(--cw-accent-soft);
+  --c2-stat__icon--color: var(--cw-accent);
+}
+
+/* Tables: muted header, selected rows in the accent's tint. */
+c2-table {
+  --c2-table__header--color: var(--cw-muted);
+  --c2-table__header--font-weight: 500;
+  --c2-table__cell--font-size: 13px;
+  --c2-table__row__selected--background: var(--cw-accent-soft);
+  --c2-table__row__selected--color: var(--cw-text);
+  --c2-table__row__selected__hover--background: var(--cw-accent-soft);
+}
+
+c2-table::part(cell-content-amount) {
+  font-family: var(--cw-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-head {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.card-head p {
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------------------------------------------------------
+ * Button variants (a class on the c2-button; the default look is the filled primary button)
+ * ---------------------------------------------------------------------------------------------------------- */
+.button-quiet {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--cw-text);
+  --c2-button__container--border: 1px solid var(--cw-border-strong);
+  --c2-button__container__hover--background-color: var(--cw-surface-2);
+  --c2-button__container__hover--color: var(--cw-text);
+  --c2-button__container__active--background-color: var(--cw-surface-3);
+}
+
+.button-danger {
+  --c2-button__container--background-color: var(--cw-danger);
+  --c2-button__container__hover--background-color: color-mix(in srgb, var(--cw-danger) 85%, black);
+}
