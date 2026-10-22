@@ -239,6 +239,13 @@ test('only a c2n-ignore inside a comment counts, and comments in an inline style
   assert.deepEqual(rules('<c2-button style="color: red; /* note */ padding: 4px">Go</c2-button>'), ['1:host-box-style'])
 })
 
+test('reads Svelte 5 event attributes as listeners for the event they name', () => {
+  assert.deepEqual(rules('<c2-table onselection-change={f} onclick={g}></c2-table>', 'a.svelte'), [])
+  assert.deepEqual(rules('<c2-table onselection-chang={f}></c2-table>', 'a.svelte'), ['1:unknown-event'])
+  // Outside Svelte an inline handler for a custom event still does nothing.
+  assert.deepEqual(rules('<c2-table onselection-change="f()"></c2-table>', 'a.html'), ['1:unknown-event'])
+})
+
 test('checks Svelte event modifiers against the events the element fires', () => {
   assert.deepEqual(rules('<c2-text-field on:nope|once={f} on:clear|preventDefault={g}></c2-text-field>', 'a.svelte'), ['1:unknown-event'])
 })
