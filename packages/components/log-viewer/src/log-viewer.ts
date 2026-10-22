@@ -8,7 +8,7 @@ import { columnOrder, matchesFilter, validateEntries, validateFilter } from './l
 import type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
 import { LineIndex, textLayout, type TextLayout } from './log-position.js'
 import { LogTokenLines, type LogPiece } from './log-tokens.js'
-import { cellMatches, countMatches, findPattern, markPieces, type FindMark } from './log-find.js'
+import { cellMatches, countMatches, findPattern, markPieces, type FindMark, type FindMatch } from './log-find.js'
 import { logViewerMessages } from './messages.js'
 import styles from './log-viewer.scss?inline'
 
@@ -141,7 +141,7 @@ export interface LogViewer {
  * @csspart find-match - A find match in the text; the current one also has the `current` part
  * @csspart current - The current find match, or its tick on the ruler
  * @csspart ruler - Find match ticks along the right edge
- * @csspart viewport - Keyboard accessible scroll surface: a grid of entries with an active entry
+ * @csspart viewport - Keyboard accessible scroll surface: a tree grid of entries with an active entry
  * @csspart content - Virtual content and its total scroll extent
  * @csspart entry - Visible tabular entry
  * @csspart cell - Attribute column containing its sticky text
@@ -224,6 +224,16 @@ export class LogViewer extends LitElement {
   private findStatus = ''
   // A new query is matched in the next update, after any pending layout, so a filter change and a query can arrive together.
   private findPending = false
+  // Each open or close takes a number, so a close (or a newer open) made while the controls load cancels the open.
+  private findRequest = 0
+  private findLoading = false
+  // An activeIndex set before its entry is laid out is resolved in the next update.
+  private revealActive = false
+  // Match counts per source entry, valid while the pattern and the displayed columns stay the same: a resize or a
+  // font load rebuilds the layout but not the text being searched.
+  private countCache = new Map<number, number>()
+  private countKey = ''
+  private matchCache = new WeakMap<LayoutEntry, { pattern: RegExp; matches: FindMatch[] }>()
   private ruler: number[] | null = null
 
   /** Number of retained entries, including entries hidden by the current filter. */
@@ -237,15 +247,15 @@ export class LogViewer extends LitElement {
 
   /**
    * Index of the active entry among the retained entries (as in `entry-click`), or -1. Setting it to a displayed
-   * entry makes that entry active and scrolls it into view; any other value clears it.
+   * entry makes that entry active and scrolls it into view; any other value clears it (after `updateComplete` for an
+   * entry the filter hides).
    */
   get activeIndex(): number {
     return this.active
   }
   set activeIndex(index: number) {
-    const position = Number.isInteger(index) ? this.layoutPosition(index) : -1
-    this.active = position < 0 ? -1 : index
-    if (position >= 0 && this.hasUpdated) this.revealEntry(position)
+    this.active = Number.isInteger(index) && index >= 0 && index < this.entries.length ? index : -1
+    this.revealActive = this.active >= 0
     this.requestUpdate()
   }
 
@@ -264,6 +274,8 @@ export class LogViewer extends LitElement {
     if (typeof query !== 'string') throw new TypeError('query must be a string')
     if (options.matchCase !== undefined) this.matchCase = Boolean(options.matchCase)
     await this.openFind(query, false)
+    // Matching waits for the first layout, which can take one more update than the open itself.
+    for (let attempt = 0; this.findPending && attempt < 3; attempt++) await this.updateComplete
   }
 
   /** Move to the next find match, wrapping after the last. Returns false when there is none. */
@@ -278,6 +290,7 @@ export class LogViewer extends LitElement {
 
   /** Close the find bar and remove its marks. The query is kept for the next time it opens. */
   closeFind(): void {
+    this.findRequest++
     if (!this.findOpen) return
     const focused = this.renderRoot.querySelector('[part="find-bar"]')?.matches(':focus-within')
     this.findOpen = false
@@ -321,6 +334,7 @@ export class LogViewer extends LitElement {
   /** Clear retained entries; the current filter remains active. */
   clear(): void {
     this.entries = []
+    this.countCache.clear()
     this.active = -1
     this.findCurrent = null
     this.discoveredKeys.clear()
@@ -426,6 +440,12 @@ export class LogViewer extends LitElement {
     if (this.findPending && this.hasUpdated) {
       this.findPending = false
       this.selectFirstMatch()
+    }
+    if (this.revealActive && this.hasUpdated) {
+      this.revealActive = false
+      const position = this.active >= 0 ? this.layoutPosition(this.active) : -1
+      if (position < 0) this.active = -1
+      else this.revealEntry(position)
     }
   }
 
@@ -584,8 +604,18 @@ export class LogViewer extends LitElement {
       this.findCounts = []
       this.findTotal = 0
     }
+    const key = `${this.pattern.source}/${this.pattern.flags}/${this.tabular}/${this.keys.join('\u0000')}`
+    if (key !== this.countKey) {
+      this.countCache.clear()
+      this.countKey = key
+    }
     for (let position = from; position < this.layout.length; position++) {
-      const count = countMatches(this.layout[position].cells, this.pattern)
+      const entry = this.layout[position]
+      let count = this.countCache.get(entry.source)
+      if (count === undefined) {
+        count = countMatches(entry.cells, this.pattern)
+        this.countCache.set(entry.source, count)
+      }
       this.findCounts[position] = count
       this.findTotal += count
     }
@@ -663,7 +693,8 @@ export class LogViewer extends LitElement {
   }
 
   private stepFind(step: 1 | -1): boolean {
-    if (!this.findOpen || !this.findTotal) return false
+    // A query not matched yet has no counts to step through: they belong to the previous one.
+    if (!this.findOpen || this.findPending || !this.findTotal) return false
     const total = this.findTotal
     const current = this.findCurrent ? this.globalIndex(this.findCurrent) : -1
     let next = current < 0 ? (step > 0 ? 0 : total - 1) : current + step
@@ -691,7 +722,18 @@ export class LogViewer extends LitElement {
   }
 
   private async openFind(query: string | null, focus: boolean): Promise<void> {
-    await loadFindModules()
+    const request = ++this.findRequest
+    this.findLoading = true
+    try {
+      await loadFindModules()
+    } catch (error) {
+      // A failed load (offline, a deploy in between) is retried by the next open rather than cached.
+      findModules = undefined
+      throw error
+    } finally {
+      if (request === this.findRequest) this.findLoading = false
+    }
+    if (request !== this.findRequest) return
     const opening = !this.findOpen
     this.findOpen = true
     if (query !== null) this.findQuery = query
@@ -721,8 +763,23 @@ export class LogViewer extends LitElement {
   /** Text selected inside the viewer, when it is one line: what Ctrl/Command+F looks for. */
   private selectedText(): string | null {
     const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const text = String((root.getSelection?.() ?? document.getSelection()) || '')
+    const selection = root.getSelection?.() ?? document.getSelection()
+    // Without ShadowRoot.getSelection the document's selection may lie anywhere on the page.
+    const anchor = selection?.anchorNode
+    if (!selection || !anchor || !(this.renderRoot.contains(anchor) || this.contains(anchor) || anchor === this)) return null
+    const text = String(selection)
     return text && !text.includes('\n') ? text : null
+  }
+
+  /** The find matches of a laid-out entry, computed once per pattern. */
+  private entryMatches(entry: LayoutEntry): FindMatch[] {
+    if (!this.pattern) return []
+    let cached = this.matchCache.get(entry)
+    if (cached?.pattern !== this.pattern) {
+      cached = { pattern: this.pattern, matches: cellMatches(entry.cells, this.pattern) }
+      this.matchCache.set(entry, cached)
+    }
+    return cached.matches
   }
 
   /** Ruler tick offsets as fractions of the content height, one per RULER_STEP pixels of viewport. */
@@ -815,11 +872,11 @@ export class LogViewer extends LitElement {
     // Anywhere inside the viewport, a copy button included: the viewer renders only part of the log, so browser find cannot search it.
     if (this.findShortcut && modifier && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'f') {
       event.preventDefault()
-      void this.openFind(this.selectedText(), true)
+      this.openFind(this.selectedText(), true).catch(reportError)
       return
     }
     if (this.onFindStepKey(event)) return
-    if (event.key === 'Escape' && this.findOpen && !modifier) {
+    if (event.key === 'Escape' && (this.findOpen || this.findLoading) && !modifier) {
       event.preventDefault()
       this.closeFind()
       return
@@ -860,7 +917,7 @@ export class LogViewer extends LitElement {
     if (!this.findOpen && !this.findQuery) return false
     event.preventDefault()
     if (this.findOpen) this.stepFind(event.shiftKey ? -1 : 1)
-    else void this.openFind(null, false)
+    else this.openFind(null, false).catch(reportError)
     return true
   }
 
@@ -941,7 +998,7 @@ export class LogViewer extends LitElement {
   private revealMatch(position: number, ordinal: number): void {
     const viewport = this.viewport
     const entry = this.layout[position]
-    const match = this.pattern && viewport ? cellMatches(entry.cells, this.pattern)[ordinal] : undefined
+    const match = viewport ? this.entryMatches(entry)[ordinal] : undefined
     if (!match || !viewport) return this.revealEntry(position)
     const cell = entry.cells[match.cell]
     let line = 0
@@ -1099,7 +1156,7 @@ export class LogViewer extends LitElement {
     const marks: FindMark[][] = entry.cells.map(() => [])
     if (!this.findOpen || !this.pattern || !this.findCounts[position]) return marks
     const current = this.findCurrent?.source === entry.source ? this.findCurrent.ordinal : -1
-    cellMatches(entry.cells, this.pattern).forEach((match, ordinal) =>
+    this.entryMatches(entry).forEach((match, ordinal) =>
       marks[match.cell].push({ line: match.line, start: match.start, end: match.end, current: ordinal === current }),
     )
     return marks
@@ -1163,7 +1220,8 @@ export class LogViewer extends LitElement {
     const template = this.widths.map((width) => `${width}px`).join(' ')
     const rows = this.layout.length > 0
     const activePosition = this.active >= 0 ? this.layoutPosition(this.active) : -1
-    // The active entry is announced through aria-activedescendant only while it is rendered: the id must resolve.
+    // The active entry is announced through aria-activedescendant only while it is rendered: the id must resolve. The
+    // viewport is a treegrid rather than a grid because there a row, the whole entry, may be the active descendant.
     const activeRendered = activePosition >= start && activePosition < end
     return html` <div class="probe" aria-hidden="true">
         <span class="message-probe">M</span><span class="cell-probe">MMMMMMMMMMMMMMMM</span><span class="inset-probe"></span>
@@ -1171,7 +1229,7 @@ export class LogViewer extends LitElement {
       <div
         part="viewport"
         tabindex="0"
-        role=${rows ? 'grid' : 'region'}
+        role=${rows ? 'treegrid' : 'region'}
         aria-label=${this.getAttribute('aria-label') ?? this.msg.t('content')}
         aria-rowcount=${rows ? this.layout.length : nothing}
         aria-colcount=${rows ? (this.tabular ? this.keys.length : 1) : nothing}

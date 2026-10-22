@@ -3,13 +3,13 @@ import { test, expect } from './fixture'
 import { accessible } from '../../../../tests/component-fixture'
 
 for (const tabular of [true, false]) {
-  test(`named grid keeps an active entry and the edge keys (${tabular ? 'tabular' : 'plain'})`, async ({ page, scenario }) => {
+  test(`named tree grid keeps an active entry and the edge keys (${tabular ? 'tabular' : 'plain'})`, async ({ page, scenario }) => {
     await scenario('many')
     const viewer = page.locator('c2-log-viewer')
     await viewer.evaluate((element, mode) => {
       ;(element as LogViewer).tabular = mode
     }, tabular)
-    const grid = viewer.getByRole('grid', { name: 'Worker logs' })
+    const grid = viewer.getByRole('treegrid', { name: 'Worker logs' })
     const active = () => viewer.evaluate((element) => (element as LogViewer).activeIndex)
     const atStart = () => expect.poll(() => grid.evaluate((element) => element.scrollTop)).toBe(0)
     const atEnd = () => expect.poll(() => grid.evaluate((element) => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThanOrEqual(2)

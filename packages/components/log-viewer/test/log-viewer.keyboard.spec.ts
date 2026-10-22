@@ -108,4 +108,20 @@ test('activeIndex moves to a displayed entry and scrolls it into view; anything 
   await expect(viewer.locator('#entry-5000')).toBeInViewport()
   await viewer.evaluate((element) => ((element as LogViewer).activeIndex = 20000))
   expect(await active(page)).toBe(-1)
+  // An entry appended in the same task is not laid out yet; it becomes active once it is.
+  await viewer.evaluate((element) => {
+    const viewer = element as LogViewer
+    viewer.appendEntries({ message: 'just appended' })
+    viewer.activeIndex = 10000
+  })
+  await expect(viewer.locator('[part="viewport"]')).toHaveAttribute('aria-activedescendant', 'entry-10000')
+  expect(await active(page)).toBe(10000)
+  // A hidden entry is cleared once the update finds it is not displayed.
+  await viewer.evaluate(async (element) => {
+    const viewer = element as LogViewer
+    viewer.setFilter({ attributes: { level: 'error' } })
+    viewer.activeIndex = 1
+    await viewer.updateComplete
+  })
+  expect(await active(page)).toBe(-1)
 })

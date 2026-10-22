@@ -137,6 +137,18 @@ test('the selection is the query, appends extend the count and the current match
   await expect(viewer.locator('.find-count')).toHaveText('1 of 3')
 })
 
+test('find() resolves with its matches even before the first layout', async ({ page, scenario }) => {
+  await scenario('default')
+  const result = await page.evaluate(async () => {
+    const viewer = document.createElement('c2-log-viewer') as LogViewer
+    document.querySelector('main')!.append(viewer)
+    viewer.appendEntries([{ message: 'one error' }, { message: 'fine' }, { message: 'two errors' }])
+    await viewer.find('error')
+    return [viewer.findMatchCount, viewer.findMatchIndex, viewer.activeIndex]
+  })
+  expect(result).toEqual([2, 0, 0])
+})
+
 test('a filter re-runs find over the displayed entries only', async ({ page, scenario }) => {
   await scenario('entries')
   const viewer = page.locator('c2-log-viewer')
