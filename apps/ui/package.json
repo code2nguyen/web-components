@@ -150,6 +150,7 @@
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
+    "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
     "@c2n/tree": "*",
     "@c2n/truncate": "*",

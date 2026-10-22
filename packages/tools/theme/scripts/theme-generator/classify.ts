@@ -94,6 +94,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-theme-select',
   'c2-view-options',
   'c2-skip-link',
+  'c2-tour',
 ])
 const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-sheet', 'c2-side-nav'])
 

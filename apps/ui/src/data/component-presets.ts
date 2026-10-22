@@ -2790,6 +2790,50 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-tour': {
+    html: `<c2-button id="preset-tour-target">Share</c2-button><c2-tour><c2-button slot="trigger">Take the tour</c2-button><c2-tour-step heading="Welcome">One quick stop shows you around.</c2-tour-step><c2-tour-step target="#preset-tour-target" heading="Share your work">Invite your team or copy a link.</c2-tour-step></c2-tour>`,
+    presets: [
+      {
+        name: 'No dimming',
+        description: 'The page stays visible; a ring marks the target.',
+        css: {
+          '--c2-tour__backdrop--color': 'transparent',
+          '--c2-tour__spotlight--outline': '2px solid rgb(2, 101, 220)',
+        },
+      },
+      {
+        name: 'Branded',
+        description: 'Indigo panel with pill buttons.',
+        css: {
+          '--c2-tour--background-color': '#4f46e5',
+          '--c2-tour--color': '#ffffff',
+          '--c2-tour--border': '1px solid #4f46e5',
+          '--c2-tour--border-radius': '14px',
+          '--c2-tour__body--color': '#e0e7ff',
+          '--c2-tour__progress--color': '#c7d2fe',
+          '--c2-tour__close--color': '#e0e7ff',
+          '--c2-tour__next--background-color': '#ffffff',
+          '--c2-tour__next--color': '#4338ca',
+          '--c2-tour__previous--color': '#ffffff',
+          '--c2-tour__previous--border': '1px solid #a5b4fc',
+          '--c2-tour__button--border-radius': '999px',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow panel with small type and buttons.',
+        css: {
+          '--c2-tour--width': '240px',
+          '--c2-tour--padding': '12px',
+          '--c2-tour--font-size': '12px',
+          '--c2-tour__heading--font-size': '12px',
+          '--c2-tour__button--height': '24px',
+          '--c2-tour__button--font-size': '12px',
+          '--c2-tour__spotlight--padding': '4px',
+        },
+      },
+    ],
+  },
   'c2-tooltip': {
     html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
     presets: [

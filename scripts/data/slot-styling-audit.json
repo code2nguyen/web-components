@@ -1503,6 +1503,25 @@
       "reason": "The menu slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tour",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The body region holds the current step and sets its text colour through its part and --c2-tour__body--* variables."
+    },
+    {
+      "tag": "c2-tour",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tour-step",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; its text inherits the tour body colour, and the assigned nodes are styled through their own class or public contract."
+    },
+    {
       "tag": "c2-trace-waterfall",
       "slot": "empty",
       "decision": "assigned-content",
