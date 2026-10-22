@@ -49,6 +49,17 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/chart/src/engines/uplot-adapter.ts`: size the y axis from its widest
   formatted tick (uPlot's `axes[].size` accepts a function), or expose the gutter as a documented variable.
 
+### `c2-line-chart` draws nothing, silently, when the app overrides the host's `display`
+
+- **Severity:** docs
+- **Hit while:** sizing the balance chart in the same example, 2026-10-22.
+- **What happens:** the host is a flex column whose plot area grows to fill it. An app rule of `display: block; height:
+260px` on the element (a common way to size a block) collapses the plot area to zero height, so the engine never
+  draws: the legend shows, the plot stays empty, and nothing is logged. Sizing through `--c2-chart--height` works.
+- **Where the fix belongs:** the chart docs (`apps/ui/src/content/components/line-chart.mdx` and siblings, and the
+  host's JSDoc): say that the host stays `display: flex` and is sized with `--c2-chart--height`. Optionally, a
+  development-mode `console.warn` when the plot area measures 0×0 after the data arrives.
+
 ### `c2-gantt` bar labels spill over the task list
 
 - **Severity:** bug
