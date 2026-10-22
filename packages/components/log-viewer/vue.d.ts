@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-log-viewer': DefineComponent<
       C2Props<LogViewer> & {
+        onEntryActivate?: (event: EventOf<LogViewer, 'entry-activate'>) => void
         onEntryClick?: (event: EventOf<LogViewer, 'entry-click'>) => void
       }
     >

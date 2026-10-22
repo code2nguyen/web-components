@@ -408,6 +408,38 @@ test('entry-click reports the clicked entry and its retained index, not the copy
   expect(await clicks()).toHaveLength(1)
 })
 
+test('the arrow keys move the active entry and Enter fires entry-activate', async ({ page, scenario }) => {
+  await scenario('entries')
+  const viewer = page.locator('c2-log-viewer')
+  await page.evaluate(() => {
+    const events: unknown[] = []
+    ;(window as unknown as { activations: unknown[] }).activations = events
+    document.addEventListener('entry-activate', (event) => events.push((event as CustomEvent).detail))
+  })
+  const activations = () => page.evaluate(() => (window as unknown as { activations: unknown[] }).activations)
+  const viewport = viewer.locator('[part="viewport"]')
+  await viewport.focus()
+  // Nothing is active until the keyboard (or a click) picks an entry, so Enter does nothing yet.
+  await page.keyboard.press('Enter')
+  await expect(viewport).not.toHaveAttribute('aria-activedescendant')
+  await page.keyboard.press('ArrowDown')
+  await expect(viewport).toHaveAttribute('aria-activedescendant', 'entry-0')
+  await expect(viewer.locator('#entry-0')).toHaveAttribute('data-active', '')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowUp')
+  await expect(viewport).toHaveAttribute('aria-activedescendant', 'entry-1')
+  await page.keyboard.press('Enter')
+  const entry = await viewer.evaluate((element) => ({ ...(element as unknown as { entries: object[] }).entries[1] }))
+  await expect.poll(activations).toEqual([{ entry, index: 1 }])
+
+  // A click makes that entry the active one, so the keyboard carries on from it.
+  await viewer.locator('[data-index="3"] [data-attribute="message"]').click()
+  await expect(viewport).toHaveAttribute('aria-activedescendant', 'entry-3')
+  await page.keyboard.press('ArrowUp')
+  await expect(viewport).toHaveAttribute('aria-activedescendant', 'entry-2')
+})
+
 test('a drag that selects text inside an entry does not report entry-click', async ({ page, scenario }) => {
   await scenario('entries')
   const viewer = page.locator('c2-log-viewer')

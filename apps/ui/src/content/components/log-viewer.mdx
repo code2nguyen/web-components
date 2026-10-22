@@ -192,13 +192,14 @@ viewer.scrollToEnd()
 
 ## Choose an entry
 
-Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a drag or text selection, are not reported. Entries cannot yet be chosen from the keyboard, so offer the same action somewhere a keyboard reaches too.
+Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a drag or text selection, are not reported.
+
+From the keyboard, the arrow keys move an active entry through the shown entries (it is the viewport's `aria-activedescendant`, outlined while the viewport has keyboard focus) and Enter fires `entry-activate` with the same detail. A clicked entry becomes the active one. Listen for both events so the action works either way:
 
 ```ts tag=CodeBlock
-viewer.addEventListener('entry-click', (event) => {
-  const { entry, index } = event.detail
-  openDetails(entry, index)
-})
+const choose = (event: CustomEvent<LogViewerEntryEventDetail>) => openDetails(event.detail.entry, event.detail.index)
+viewer.addEventListener('entry-click', choose)
+viewer.addEventListener('entry-activate', choose)
 ```
 
 ## Filter or highlight
@@ -230,4 +231,4 @@ Rows use a cumulative height index and binary viewport lookup. Wrapped text uses
 
 Each attribute column is automatically sized to its widest value, including cell padding. Only the message column takes the remaining viewport width, with `--c2-log-viewer__message--min-width` as its minimum. Widths are measured across all retained entries, so filtering keeps the columns aligned. With wrap disabled, long messages scroll horizontally without changing attribute column widths. In narrow viewports, columns remain aligned and can scroll horizontally. Cell padding, plain text inset and empty state padding are also exposed as CSS variables and included in layout measurement.
 
-Virtual content is available through the keyboard focusable, named scroll region. Home jumps to the first entry; End jumps to the latest and resumes following appends. Ctrl/Command with Home or End also works, while PageUp/PageDown move by a viewport with one line of overlap; Up/Down move by one measured text line. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Browser find, selection across unrendered content and printing only see the rendered window; use application data for complete exports or searches.
+The host is a named region (from its `aria-label`), and the keyboard focusable scroll viewport inside it is a group carrying the active entry. Home jumps to the first entry; End jumps to the latest and resumes following appends. Ctrl/Command with Home or End also works, while PageUp/PageDown move by a viewport with one line of overlap; Up/Down move the active entry by one entry, starting from the first or last entry in view and scrolling only as far as it takes to show it. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Browser find, selection across unrendered content and printing only see the rendered window; use application data for complete exports or searches.
