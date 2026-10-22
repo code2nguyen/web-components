@@ -200,3 +200,86 @@ test('a button in the trigger slot starts the tour from its first step', async (
   await button(page, 'Next').click()
   await expect(dialog(page, 'Second')).toBeVisible()
 })
+
+test('Skip ends the tour early and is hidden on the last step', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await record(page)
+  await launch(page)
+  await button(page, 'Next').click()
+  await button(page, 'Skip').click()
+  await expect(panel(page)).toBeHidden()
+  await launch(page, 2)
+  await expect(button(page, 'Done')).toBeVisible()
+  await expect(button(page, 'Skip')).toBeHidden()
+  expect(await events(page)).toEqual(['show', 'step-change:{"index":1,"previous":0}', 'skip:{"index":1}', 'hide', 'show'])
+})
+
+test('--c2-tour__skip--display: none removes the Skip button', async ({ page, renderScenario }) => {
+  await renderScenario(`<style>.no-skip { --c2-tour__skip--display: none }</style>${markup('class="no-skip"')}`)
+  await launch(page)
+  await expect(button(page, 'Next')).toBeVisible()
+  await expect(button(page, 'Skip')).toBeHidden()
+})
+
+const stored = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem('demo-tour') ?? 'null'))
+
+test('storage-key remembers the step and how the tour ended', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.removeItem('demo-tour'))
+  await renderScenario(markup('storage-key="demo-tour"'))
+  expect(await stored(page)).toBeNull()
+  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'new', step: 0 })
+  await launch(page)
+  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 0 })
+  await button(page, 'Next').click()
+  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 1 })
+  await page.keyboard.press('Escape')
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1 })
+
+  // Replaying a skipped tour keeps it marked as skipped until it is finished.
+  await launch(page, 2)
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1 })
+  await button(page, 'Done').click()
+  await expect.poll(() => stored(page)).toEqual({ status: 'finished', step: 2 })
+
+  await host(page).evaluate((element) => element.reset())
+  expect(await stored(page)).toBeNull()
+})
+
+test('autostart opens on the first visit, resumes the stored step and stays closed once ended', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.removeItem('demo-tour'))
+  const autostart = markup('storage-key="demo-tour" autostart')
+
+  await renderScenario(autostart)
+  await expect(dialog(page, 'Welcome')).toBeVisible()
+  await button(page, 'Next').click()
+  await expect(dialog(page, 'Search')).toBeVisible()
+
+  // A reload resumes where the user left off.
+  await renderScenario(autostart)
+  await expect(dialog(page, 'Search')).toBeVisible()
+  await button(page, 'Skip').click()
+
+  await renderScenario(autostart)
+  await expect(panel(page)).toBeHidden()
+  await expect(host(page)).not.toHaveAttribute('open')
+
+  await page.evaluate(() => localStorage.setItem('demo-tour', JSON.stringify({ status: 'finished', step: 2 })))
+  await renderScenario(autostart)
+  await expect(panel(page)).toBeHidden()
+})
+
+test('storage that throws leaves the tour working', async ({ page, renderScenario }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new DOMException('blocked', 'SecurityError')
+      },
+    })
+  })
+  await renderScenario(markup('storage-key="demo-tour" autostart'))
+  await expect(dialog(page, 'Welcome')).toBeVisible()
+  await button(page, 'Skip').click()
+  await expect(panel(page)).toBeHidden()
+})

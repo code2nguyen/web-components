@@ -9,6 +9,8 @@ const en = {
   previous: 'Back',
   /** The button on the last step that ends the tour. */
   done: 'Done',
+  /** The footer button that ends the tour early. */
+  skip: 'Skip',
   /** Accessible name of the close button, which ends the tour early. */
   close: 'Close tour',
   /** The progress line, e.g. "2 of 5". */

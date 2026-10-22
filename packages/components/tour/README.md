@@ -25,6 +25,10 @@ import '@c2n/components/tour'
 - Start it with the `trigger` slot, the `open` attribute or `start(index)`; move with `next()`, `previous()`,
   `goTo(index)`; end it with `finish()` or `skip()`.
 - Events: `step-change` (`{ index, previous }`), `finish`, `skip` (`{ index }`), `show`, `hide`.
+- `storage-key="…"` remembers the progress in `localStorage` (`{ status, step }`, read it from `progress`);
+  `autostart` then opens the tour on the first visit, resumes the stored step after a reload and stays closed once
+  finished or skipped. `reset()` forgets it.
+- Skip, the close button and Escape all end the tour early; `--c2-tour__skip--display: none` hides the Skip button.
 - A step without a target, or whose target is missing, shows centred over the dimmed page.
 - Style the panel through `--c2-tour--*`, the dimming through `--c2-tour__backdrop--color` and the cut-out through
   `--c2-tour__spotlight--*`. The API page lists every variable.

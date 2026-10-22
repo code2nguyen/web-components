@@ -12,6 +12,16 @@ import './tour-step.js'
 
 export type { Placement }
 
+/** Where a user is with a tour, as remembered under its `storage-key`. */
+export type TourStatus = 'new' | 'in-progress' | 'finished' | 'skipped'
+
+/** What a tour keeps in `localStorage` under its `storage-key`. */
+export interface TourProgress {
+  status: TourStatus
+  /** Index of the step shown last. */
+  step: number
+}
+
 /** Detail of the `step-change` event. */
 export interface TourStepChangeDetail {
   /** Index of the step now shown. */
@@ -54,7 +64,12 @@ export interface Tour {
  * the highlighted control. Opening moves focus to Next; Escape and the close button end the tour early, and the
  * arrow keys move between steps while focus is in the panel. When it closes, focus returns to where it was before.
  *
- * Every tour a user ends fires exactly one `finish` (Done on the last step) or `skip` (the close button or Escape).
+ * With a `storage-key`, the tour remembers in `localStorage` whether the user finished it, skipped it or got part
+ * way, and on which step (`progress`). Add `autostart` to open it by itself on the first visit: it then resumes on the
+ * step it was left on, and stays closed once finished or skipped. `start()` and the trigger always open it; `reset()`
+ * forgets the stored progress.
+ *
+ * Every tour a user ends fires exactly one `finish` (Done on the last step) or `skip` (Skip, the close button or Escape).
  * Moving between steps with the buttons, the keys or the methods fires `step-change`; setting `open` or `current`
  * from code fires only `show` / `hide`.
  *
@@ -65,7 +80,7 @@ export interface Tour {
  *
  * @event {CustomEvent<TourStepChangeDetail>} step-change - The user, or a method, moved to another step. `detail.index` is the new step, `detail.previous` the old one.
  * @event {Event} finish - The user completed the tour with Done on the last step.
- * @event {CustomEvent<TourSkipDetail>} skip - The user ended the tour early with the close button or Escape. `detail.index` is the step it was closed on.
+ * @event {CustomEvent<TourSkipDetail>} skip - The user ended the tour early with Skip, the close button or Escape. `detail.index` is the step it was closed on.
  * @event {Event} show - The tour opened.
  * @event {Event} hide - The tour closed.
  *
@@ -78,6 +93,7 @@ export interface Tour {
  * @csspart body - The region wrapping the default slot: it shows the current `c2-tour-step`, assigned to it, and has no fallback content.
  * @csspart footer - The row holding the progress and the navigation buttons.
  * @csspart progress - The "2 of 5" progress text.
+ * @csspart skip - The Skip button, which ends the tour early. Hidden on the last step.
  * @csspart previous - The Back button. Hidden on the first step.
  * @csspart next - The Next button, which reads Done on the last step.
  *
@@ -128,6 +144,10 @@ export interface Tour {
  * @cssproperty {outline} [--c2-tour__button__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Also the close button's focus ring.
  * @cssproperty {pixel} [--c2-tour__button__focus--outline-offset=2px]
  *
+ * @cssproperty {display} [--c2-tour__skip--display=inline-flex] - `none` removes the Skip button; the close button still skips.
+ * @cssproperty {color} [--c2-tour__skip--color=#71717a]
+ * @cssproperty {background-color} [--c2-tour__skip__hover--background-color=#f4f4f5]
+ *
  * @cssproperty {background-color} [--c2-tour__previous--background-color=transparent]
  * @cssproperty {color} [--c2-tour__previous--color=#18181b]
  * @cssproperty {border} [--c2-tour__previous--border=1px solid #bcbcc6]
@@ -154,6 +174,18 @@ export class Tour extends LitElement {
   /** Preferred side of the target for the panel; a step's own `placement` wins. Flips when there is no room. */
   @property() placement: Placement = 'bottom'
 
+  /**
+   * `localStorage` key under which the tour remembers its progress (`{ "status", "step" }`). Empty, nothing is stored.
+   * Use one key per tour, and a new key when a tour changes enough to be worth showing again.
+   */
+  @property({ attribute: 'storage-key' }) storageKey = ''
+
+  /**
+   * Opens the tour by itself when it is connected, unless the progress under `storage-key` says it was finished or
+   * skipped. It resumes on the stored step. Without a `storage-key` it opens on every page load.
+   */
+  @property({ type: Boolean }) autostart = false
+
   @query('.panel') private panel?: HTMLElement
   @query('.spotlight') private spotlight?: HTMLElement
   @query('.arrow') private arrowElement?: HTMLElement
@@ -176,6 +208,48 @@ export class Tour extends LitElement {
     this.childObserver?.disconnect()
     this.stopPositioning()
     this.shownStep = null
+  }
+
+  /** The progress stored under `storage-key`: `new` when nothing is stored, the key is empty or storage is unavailable. */
+  get progress(): TourProgress {
+    const fallback: TourProgress = { status: 'new', step: 0 }
+    if (!this.storageKey || isServer) return fallback
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as Partial<TourProgress> | null
+      if (!stored || !['in-progress', 'finished', 'skipped'].includes(stored.status ?? '')) return fallback
+      return { status: stored.status as TourStatus, step: Number.isInteger(stored.step) ? (stored.step as number) : 0 }
+    } catch {
+      return fallback /* storage blocked or the value is not ours */
+    }
+  }
+
+  /** Forgets the progress stored under `storage-key`, so `autostart` opens the tour again on the next load. */
+  reset() {
+    if (!this.storageKey) return
+    try {
+      localStorage.removeItem(this.storageKey)
+    } catch {
+      /* storage blocked */
+    }
+  }
+
+  private saveProgress(status: TourStatus) {
+    if (!this.storageKey) return
+    // Replaying a finished or skipped tour from its trigger does not make `autostart` open it again.
+    const stored = this.progress.status
+    if (status === 'in-progress' && (stored === 'finished' || stored === 'skipped')) return
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify({ status, step: this.currentIndex() } satisfies TourProgress))
+    } catch {
+      /* storage blocked or full: the tour works without it */
+    }
+  }
+
+  private autostartFromProgress() {
+    if (!this.autostart || this.open) return
+    const { status, step } = this.progress
+    if (status === 'finished' || status === 'skipped') return
+    this.start(step)
   }
 
   private get triggers(): Element[] {
@@ -230,6 +304,7 @@ export class Tour extends LitElement {
   finish() {
     if (!this.open) return
     this.open = false
+    this.saveProgress('finished')
     this.dispatchEvent(new Event('finish'))
   }
 
@@ -238,6 +313,7 @@ export class Tour extends LitElement {
     if (!this.open) return
     const index = this.currentIndex()
     this.open = false
+    this.saveProgress('skipped')
     this.dispatchEvent(new CustomEvent<TourSkipDetail>('skip', { detail: { index } }))
   }
 
@@ -283,6 +359,7 @@ export class Tour extends LitElement {
 
   private enterStep(step: TourStep | null) {
     this.stopPositioning()
+    if (step !== this.shownStep) this.saveProgress('in-progress')
     this.shownStep = step
     const target = this.visibleTarget(step)
     this.shownTarget = target
@@ -378,10 +455,9 @@ export class Tour extends LitElement {
 
   override updated(changed: PropertyValues<this>) {
     if (isServer) return
-    if (changed.has('open')) {
-      if (this.open && this.steps.length) this.show()
-      else this.hide()
-    }
+    // Every update, not only when `open` changes: the steps of an open tour may be added after it.
+    if (this.open && this.steps.length) this.show()
+    else this.hide()
     if (!this.open || !this.panel?.matches(':popover-open')) return
     const step = this.currentStep
     if (step !== this.shownStep || this.visibleTarget(step) !== this.shownTarget) this.enterStep(step)
@@ -426,6 +502,7 @@ export class Tour extends LitElement {
         </div>
         <div class="footer" part="footer">
           <span class="progress" part="progress">${steps.length > 1 ? this.msg.t('progress', index + 1, steps.length) : nothing}</span>
+          <button class="button skip" part="skip" type="button" ?hidden=${last} @click=${() => this.skip()}>${this.msg.t('skip')}</button>
           <button class="button previous" part="previous" type="button" ?hidden=${index === 0} @click=${this.handlePrevious}>${this.msg.t('previous')}</button>
           <button class="button next" part="next" type="button" @click=${() => this.next()}>${last ? this.msg.t('done') : this.msg.t('next')}</button>
         </div>
@@ -434,6 +511,7 @@ export class Tour extends LitElement {
   }
 
   override firstUpdated() {
+    this.autostartFromProgress()
     // A declarative shadow root routes by `slot` attribute; fall back to writing it on the shown step only.
     if ((this.renderRoot as ShadowRoot).slotAssignment === 'manual') return
     this.addController({

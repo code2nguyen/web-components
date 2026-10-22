@@ -18,11 +18,15 @@ import type { TourStep } from '@c2n/tour/tour-step.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-tour': C2Props<Tour>
+      'c2-tour': C2Props<Tour> & {
+        'storage-key'?: Attribute
+      }
       'c2-tour-step': C2Props<TourStep>
     }
   }

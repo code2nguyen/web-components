@@ -48,6 +48,10 @@
     button__focus--outline: '2px solid rgba(2, 101, 220, 0.4)',
     button__focus--outline-offset: 2px,
 
+    skip--display: inline-flex,
+    skip--color: #71717a,
+    skip__hover--background-color: #f4f4f5,
+
     previous--background-color: transparent,
     previous--color: #18181b,
     previous--border: 1px solid #bcbcc6,
@@ -279,6 +283,17 @@
   &:focus-visible {
     outline: css.cssVar(button__focus--outline);
     outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+}
+
+.skip {
+  display: css.cssVar(skip--display);
+  border: 1px solid transparent;
+  background: transparent;
+  color: css.cssVar(skip--color);
+
+  &:hover {
+    background: css.cssVar(skip__hover--background-color);
   }
 }
 
