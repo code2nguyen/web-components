@@ -1,5 +1,6 @@
 import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { Tour } from '../src/tour'
 
 const markup = (attributes = '') => `
   <button id="launch">Take the tour</button>
@@ -228,7 +229,7 @@ test('storage-key remembers the step and how the tour ended', async ({ page, ren
   await page.evaluate(() => localStorage.removeItem('demo-tour'))
   await renderScenario(markup('storage-key="demo-tour"'))
   expect(await stored(page)).toBeNull()
-  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'new', step: 0, skips: 0 })
+  await expect.poll(() => host(page).evaluate((element: Tour) => element.progress)).toEqual({ status: 'new', step: 0, skips: 0 })
   await launch(page)
   await expect.poll(() => stored(page)).toMatchObject({ status: 'in-progress', step: 0, skips: 0 })
   await button(page, 'Next').click()
@@ -242,7 +243,7 @@ test('storage-key remembers the step and how the tour ended', async ({ page, ren
   await button(page, 'Done').click()
   await expect.poll(() => stored(page)).toMatchObject({ status: 'finished', step: 2, skips: 1 })
 
-  await host(page).evaluate((element) => element.reset())
+  await host(page).evaluate((element: Tour) => element.reset())
   expect(await stored(page)).toBeNull()
 })
 
@@ -307,7 +308,7 @@ test('below skip-limit a skipped tour autostarts again from its first step, then
   await expect(panel(page)).toBeHidden()
 
   // Replaying it from code keeps it settled.
-  await host(page).evaluate((element) => element.start())
+  await host(page).evaluate((element: Tour) => element.start())
   await expect(dialog(page, 'Welcome')).toBeVisible()
   await expect.poll(() => stored(page)).toMatchObject({ status: 'skipped', step: 0, skips: 2 })
 })
@@ -319,7 +320,7 @@ test('skip-limit="0" keeps autostarting until the tour is finished', async ({ pa
 
   await renderScenario(autostart)
   await expect(dialog(page, 'Welcome')).toBeVisible()
-  await host(page).evaluate((element) => element.goTo(2))
+  await host(page).evaluate((element: Tour) => element.goTo(2))
   await button(page, 'Done').click()
   await expect.poll(() => stored(page)).toMatchObject({ status: 'finished', step: 2, skips: 5 })
 
@@ -332,7 +333,7 @@ test('progress stored before skips were counted reads a skipped tour as skipped 
   await page.evaluate(() => localStorage.setItem('demo-tour', JSON.stringify({ status: 'skipped', step: 1 })))
   await renderScenario(markup('storage-key="demo-tour" autostart'))
   await expect(panel(page)).toBeHidden()
-  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'skipped', step: 1, skips: 1 })
+  await expect.poll(() => host(page).evaluate((element: Tour) => element.progress)).toEqual({ status: 'skipped', step: 1, skips: 1 })
 })
 
 test('skip-delay keeps a skipped tour closed until the delay has passed', async ({ page, renderScenario }) => {
