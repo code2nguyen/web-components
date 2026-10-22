@@ -191,7 +191,7 @@ export class KanbanColumn extends LitElement {
               </p>`
             : nothing
         }
-        <div part="cards" class="cards" role="list" aria-label=${this.label || this.columnId}>
+        <div part="cards" class=${classMap({ cards: true, 'cards--empty': count === 0 })} role="list" aria-label=${this.label || this.columnId}>
           ${repeat(
             this.cards,
             (card) => card.key,
