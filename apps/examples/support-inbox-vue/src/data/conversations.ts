@@ -1,4 +1,5 @@
 import type { BadgeTone } from '@c2n/components/badge'
+import { findMatches } from '@c2n/components/highlight'
 
 export type Status = 'open' | 'waiting' | 'closed'
 
@@ -23,14 +24,25 @@ export interface Conversation {
   messages: Message[]
 }
 
-// `BadgeTone` rather than `string`: the generated Vue types check `:tone`, so the union is what keeps a typo here
-// from reaching the template.
 /** The sample is dated relative to page load, so its times always read as recent. */
 const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000)
 
 /** A conversation was last active when its latest message was sent. */
 export const lastActivity = (conversation: Conversation) => conversation.messages[conversation.messages.length - 1].at
 
+/**
+ * How the search matches. `findMatches` is the matcher `c2-highlight` marks text with, and the list binds these same
+ * options onto its highlights, so a row is listed exactly when one of its highlights shows a match: "bergstrom"
+ * finds "Bergström" because both ignore accents.
+ */
+export const MATCH_OPTIONS = { ignoreAccents: true } as const
+
+/** The customer and the subject are separate highlights, so each is matched on its own. */
+export const matchesQuery = (conversation: Conversation, query: string) =>
+  [conversation.customer, conversation.subject].some((text) => findMatches(text, query, MATCH_OPTIONS).length > 0)
+
+// `BadgeTone` rather than `string`: the generated Vue types check `:tone`, so the union is what keeps a typo here
+// from reaching the template.
 export const STATUS_TONE: Record<Status, BadgeTone> = {
   open: 'primary',
   waiting: 'warning',

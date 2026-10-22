@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import type { Form, FormEventMap, FormValidator } from '@c2n/components/form'
 import { STATUS_LABEL, STATUS_TONE, type Conversation } from '../data/conversations'
 
@@ -14,12 +14,14 @@ const form = ref<Form>()
 const validator: FormValidator = (values) => (String(values.reply ?? '').trim() ? {} : { reply: 'Write a reply before sending.' })
 
 // `valid-submit` only fires once every check passed, so there is nothing to re-validate here.
-function send(event: FormEventMap['valid-submit']) {
+async function send(event: FormEventMap['valid-submit']) {
   emit('reply', String(event.detail.values.reply).trim())
   // Clearing the state clears the field: `v-model` keeps the two in step, so Vue's next patch writes the empty
-  // string back onto the element. The form is marked pristine so the emptied field reads as untouched again.
+  // string back onto the element. Once it has, a form reset puts the field back to untouched — no "required" error
+  // on the empty composer, and the form no longer dirty.
   draft.value = ''
-  form.value?.markPristine()
+  await nextTick()
+  form.value?.reset()
 }
 </script>
 
@@ -88,7 +90,15 @@ function send(event: FormEventMap['valid-submit']) {
                `value` property and re-emit the inner control's native `input` event through `redispatchEvent`, so
                they satisfy that contract without a wrapper. An element that only emitted a custom event would need
                `:value` plus an explicit listener instead. -->
-          <c2-textarea v-model="draft" name="reply" :rows="3" :maxlength="2000" required placeholder="Write a reply…" @keydown.enter.meta="form?.submit()" />
+          <c2-textarea
+            v-model="draft"
+            name="reply"
+            :rows="3"
+            :maxlength="2000"
+            required
+            placeholder="Write a reply…"
+            @keydown.enter.meta.prevent="form?.submit()"
+          />
         </c2-form-field>
         <div class="thread__composer-foot">
           <c2-button type="submit">Send reply</c2-button>

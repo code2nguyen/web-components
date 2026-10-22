@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { findMatches } from '@c2n/components/highlight'
 import type { SelectEventMap } from '@c2n/components/select'
 import { toast } from '@c2n/components/toast'
 import ConversationList from './components/ConversationList.vue'
 import ThreadPanel from './components/ThreadPanel.vue'
-import { CONVERSATIONS, STATUS_LABEL, type Conversation, type Status } from './data/conversations'
+import { CONVERSATIONS, STATUS_LABEL, matchesQuery, type Conversation, type Status } from './data/conversations'
 
 type Filter = 'all' | Status
 
@@ -22,15 +21,11 @@ const filter = ref<Filter>('all')
 const activeId = ref(conversations.value[0].id)
 const detailsOpen = ref(false)
 
-// `findMatches` is the matcher `c2-highlight` marks the rows with, so a row is listed exactly when it shows a match:
-// "bergstrom" finds "Bergström" because both ignore accents.
-const MATCH_OPTIONS = { ignoreAccents: true }
-
 const visible = computed(() => {
   const needle = query.value.trim()
   return conversations.value
     .filter((conversation) => filter.value === 'all' || conversation.status === filter.value)
-    .filter((conversation) => !needle || findMatches(`${conversation.customer} ${conversation.subject}`, needle, MATCH_OPTIONS).length > 0)
+    .filter((conversation) => !needle || matchesQuery(conversation, needle))
 })
 
 const active = computed(() => conversations.value.find((conversation) => conversation.id === activeId.value) ?? null)

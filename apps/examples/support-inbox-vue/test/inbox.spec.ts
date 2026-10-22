@@ -34,4 +34,24 @@ test('c2-form rejects a blank reply and sends a written one', async ({ page }) =
   await expect(messages).toHaveCount(before + 1)
   await expect(page.locator('c2-textarea textarea')).toHaveValue('')
   await expect(page.getByText('Write a reply before sending.', { exact: true })).toBeHidden()
+
+  // The emptied composer reads as untouched: visiting it shows no "required" error, and the form is not dirty.
+  await page.locator('c2-textarea textarea').focus()
+  await page.locator('c2-textarea textarea').blur()
+  const field = page.locator('.thread__composer c2-form-field')
+  expect(await field.evaluate((el) => el.matches(':state(user-invalid)'))).toBe(false)
+  expect(await page.locator('.thread__composer').evaluate((el) => el.matches(':state(dirty)'))).toBe(false)
+})
+
+test('Cmd+Enter sends the reply and empties the composer', async ({ page }) => {
+  await page.goto('./')
+
+  const messages = page.locator('c2-chat-message')
+  const before = await messages.count()
+  const textarea = page.locator('c2-textarea textarea')
+  await textarea.fill('Thanks, closing this out.')
+  await textarea.press('Meta+Enter')
+
+  await expect(messages).toHaveCount(before + 1)
+  await expect(textarea).toHaveValue('')
 })
