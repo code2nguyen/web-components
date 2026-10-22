@@ -24,6 +24,20 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### A static numeric attribute from Svelte reaches a `type: Number` property as a string
+
+- **Severity:** papercut
+- **Hit while:** building the SvelteKit close workbench (`apps/examples/close-workbench-sveltekit`), 2026-10-22.
+- **What happens:** for an attribute whose name is also a property (`precision`, `position`, `min`, `max`), Svelte 5
+  assigns the property rather than the attribute, and a static value is the string as written. Lit's `type: Number`
+  converter only runs for attributes, so `<c2-comparison-bar precision="0">` sets `precision = "0"`;
+  `Number.isFinite("0")` is false and the bar printed `50.00%`. Nothing warns. `c2-split-panel`'s `position`, `min` and
+  `max` take the same path and work only because their arithmetic happens to coerce. Writing the number in braces
+  (`precision={0}`) avoids it, but nothing tells an author they need to.
+- **Where the fix belongs:** `@c2n/core/lit-helper.js` — give every `type: Number` property a converter with
+  `fromProperty` (as `property()` already does for `Boolean` and the JSON/array converters), so a numeric string
+  assigned to the property is parsed like the attribute.
+
 ### `c2-log-viewer` entries cannot be chosen from the keyboard
 
 - **Severity:** gap

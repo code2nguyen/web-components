@@ -146,6 +146,8 @@ binding on a tag that has not upgraded yet silently falls back to an attribute.
   them into attributes. For an array property whose converter does not parse a string property, pass
   `browser ? value : JSON.stringify(value)`. See the `close-workbench-sveltekit` example app.
 - **camelCase properties**: spell the attribute the component declares (`row-key`, not `rowKey`).
+- **Numbers**: write them in braces. For an attribute that is also a property (`precision`, `position`, `min`),
+  Svelte assigns the property, so `precision="0"` hands a `Number` property the string `"0"`; `precision={0}` is right.
 - **Two-way binding**: `bind:value` applies to form elements and Svelte components, not to a custom element, so
   bind by hand. Every c2n form control re-emits the inner control's native `input` and `change`, which is what
   makes `value={draft} oninput={(event) => (draft = event.currentTarget.value)}` enough.

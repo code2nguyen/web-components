@@ -123,7 +123,7 @@ test('the trial balance foots before and after the adjustments', () => {
   assert.equal(footing(before), 0)
   const after = trialBalance(book, proposeJournal(exceptions, bank, ledger))
   assert.equal(footing(after), 0)
-  const text = formatTrialBalance(before).split('\n')
+  const text = formatTrialBalance(before).trimEnd().split('\n')
   assert.equal(text.length, before.size + 4)
   assert.equal(new Set(text.map((line) => line.length)).size, 1, 'every line has the same width')
 })

@@ -52,11 +52,12 @@ When both sides share a reference but not an amount, the pair is not matched. It
 
 ## SvelteKit notes
 
-Every route is prerendered by `@sveltejs/adapter-static`, so the HTML the server writes and the page the browser hydrates have to agree. Four things make that work:
+Every route is prerendered by `@sveltejs/adapter-static`, so the HTML the server writes and the page the browser hydrates have to agree. Five things make that work:
 
 - **Register before hydration.** `src/hooks.client.ts` exports `init`, which SvelteKit awaits before hydrating, and imports `src/lib/c2n.ts` from it. Svelte picks between a property and an attribute with `key in element`, so the elements have to be defined by the time the first binding runs; `init` makes that ordering a guarantee. The server never imports the components.
 - **Arrays and objects: `data()`.** On the server Svelte can only write attributes, and `rows={rows}` prerenders as `rows="[object Object]"`. `data(value)` from `src/lib/ssr.ts` returns JSON on the server (which the component's attribute converter parses) and the value itself in the browser (which Svelte assigns as a property).
 - **Functions: `{@attach}`.** A function prop is never an attribute: the server would stringify its source into the HTML. `renderItem` on the board and `rowPart` on the tables are set from attachments, which run only in the browser.
+- **Numbers in braces.** For an attribute that is also a property (`precision`, `position`, `min`), Svelte assigns the property, and a static `precision="0"` is the string `"0"`, which a `Number` property does not convert. Write `precision={0}`.
 - **Events.** Svelte 5 event attributes listen for the name as written, so `onselection-change`, `oncard-move` and `oncell-change` bind kebab-case custom events directly; type the handler with the component's event map (`TableEventMap['selection-change']`).
 
 Two smaller things:

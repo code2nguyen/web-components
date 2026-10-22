@@ -92,7 +92,7 @@ export function trialBalance(bookBalance: Cents, adjustments: JournalLine[] = []
   return new Map([...balances].sort(([a], [b]) => a.localeCompare(b)))
 }
 
-/** One line per account, debit and credit columns aligned: the text the diff viewer compares. */
+/** One line per account, debit and credit columns aligned, ending in a newline: the text the diff viewer compares. */
 export function formatTrialBalance(balances: Map<string, Cents>): string {
   const width = 34
   const column = 16
@@ -104,11 +104,13 @@ export function formatTrialBalance(balances: Map<string, Cents>): string {
   const debits = sum([...balances.values()].filter((value) => value > 0))
   const credits = -sum([...balances.values()].filter((value) => value < 0))
   const rule = '-'.repeat(width + column * 2)
-  return [
-    `${'Account'.padEnd(width)}${'Debit'.padStart(column)}${'Credit'.padStart(column)}`,
-    rule,
-    ...lines,
-    rule,
-    `${'Total'.padEnd(width)}${formatAmount(debits).padStart(column)}${formatAmount(credits).padStart(column)}`,
-  ].join('\n')
+  return (
+    [
+      `${'Account'.padEnd(width)}${'Debit'.padStart(column)}${'Credit'.padStart(column)}`,
+      rule,
+      ...lines,
+      rule,
+      `${'Total'.padEnd(width)}${formatAmount(debits).padStart(column)}${formatAmount(credits).padStart(column)}`,
+    ].join('\n') + '\n'
+  )
 }

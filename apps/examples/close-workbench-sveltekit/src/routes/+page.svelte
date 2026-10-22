@@ -29,8 +29,9 @@
 
   const balances = dailyBalances(OPENING_BALANCE, workbench.month.bank, workbench.month.ledger, PERIOD.start, PERIOD.end).map((point) => ({
     t: Date.parse(`${point.day}T12:00:00Z`),
-    bank: point.bank / 100,
-    book: point.book / 100,
+    // In thousands, so the axis reads 150 rather than a clipped 150,000.
+    bank: point.bank / 100_000,
+    book: point.book / 100_000,
   }))
 
   const closeDay = CLOSE_DAYS.indexOf(CLOSE_TODAY) + 1
@@ -185,8 +186,8 @@
         <p class="muted">Daily closing balance in September</p>
       </div>
       <c2-line-chart class="balances" x-type="time" x-field="t" data={data(balances)} legend="bottom" points="never">
-        <c2-chart-series field="bank" label="Bank statement"></c2-chart-series>
-        <c2-chart-series field="book" label="Books"></c2-chart-series>
+        <c2-chart-series field="bank" label="Bank statement ($k)"></c2-chart-series>
+        <c2-chart-series field="book" label="Books ($k)"></c2-chart-series>
       </c2-line-chart>
     </c2-card>
   </div>
@@ -225,6 +226,7 @@
   }
 
   .checklist {
+    --c2-step__label--font-family: var(--cw-sans);
     --c2-step__trailing--color: var(--cw-muted);
     --c2-step__trailing--font-size: 13px;
     --c2-step__row--padding-block: 6px;
@@ -248,12 +250,15 @@
     font-size: 13px;
   }
 
+  /* The close is nine days wide: give each day room so the bars, and the labels beside them, fit the card. */
   .calendar {
-    display: block;
+    --c2-gantt__column-day--width: 104px;
+    --c2-gantt__today--color: var(--cw-accent);
+    --c2-gantt__header__today--color: var(--cw-surface);
   }
 
+  /* The host is a flex column whose plot grows to fill it: size it through the variable, never `display`. */
   .balances {
-    display: block;
-    height: 260px;
+    --c2-chart--height: 260px;
   }
 </style>

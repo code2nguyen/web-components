@@ -226,6 +226,9 @@
 
   /* Columns are tinted lanes, cards white tiles on them; the drop gap is a dashed tint of the accent. */
   .board c2-kanban-column {
+    /* Four lanes share the page (the board scrolls sideways below ~1000px), and a long lane scrolls its own cards. */
+    --c2-kanban-column--width: max(240px, calc(25% - 9px));
+    --c2-kanban-column--max-height: 720px;
     --c2-kanban-column--background-color: var(--cw-surface-2);
     --c2-kanban-column--border: 0;
     --c2-kanban-column--border-radius: var(--cw-radius);

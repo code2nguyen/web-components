@@ -149,14 +149,16 @@
     <c2-tab for="matches">Matches ({workbench.result.matches.length})</c2-tab>
 
     <section id="open" class="panel">
+      <!-- Numbers in braces: `position="50"` would make Svelte assign the string "50" to the Number property, which
+           Lit converts only when it comes in as an attribute. -->
       <c2-card class="split-card">
         <c2-split-panel
           class="split"
           class:stacked
           orientation={stacked ? 'vertical' : 'horizontal'}
-          position="50"
-          min="25"
-          max="75"
+          position={50}
+          min={25}
+          max={75}
           label="Resize bank and ledger"
         >
           <div slot="start" class="side">
@@ -215,7 +217,7 @@
             start-value={Math.abs(check.bankTotal)}
             end-value={Math.abs(check.ledgerTotal)}
             show-value
-            precision="0"
+            precision={0}
           ></c2-comparison-bar>
           <div class="selection-actions">
             {#if alreadyMatched}
@@ -357,6 +359,9 @@
     display: block;
     --c2-comparison-bar__start-segment--background-color: var(--cw-accent);
     --c2-comparison-bar__end-segment--background-color: var(--cw-warning);
+    --c2-comparison-bar--height: 8px;
+    --c2-comparison-bar__start-value--color: var(--cw-accent);
+    --c2-comparison-bar__end-value--color: var(--cw-warning);
   }
 
   .agree {

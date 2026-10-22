@@ -97,6 +97,7 @@
         currency="USD"
         locale="en-US"
         columns={data(SHEET_COLUMNS)}
+        rows={source.length + 2}
         data={data(source)}
         oncell-change={onCellChange}
       ></c2-spreadsheet>
