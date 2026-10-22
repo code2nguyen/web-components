@@ -51,3 +51,27 @@ test('the action bar clears the selection', async ({ page }) => {
   await expect(bar).toHaveJSProperty('count', 0)
   await expect(page.locator('c2-stat', { hasText: 'Selected' })).toContainText('—')
 })
+
+test('a checked row the filter hides leaves the action bar', async ({ page }) => {
+  await page.goto('./')
+  await check(page, 0).click()
+  const bar = page.locator('c2-action-bar')
+  await expect(bar).toHaveJSProperty('count', 1)
+
+  await page.locator('c2-text-field input').fill('BLTZ')
+  await expect(bar).toHaveJSProperty('count', 0)
+})
+
+test('selling a whole position closes it', async ({ page }) => {
+  await page.goto('./')
+  await page.locator('c2-switch').click()
+  await check(page, 0).click()
+  await page.locator('c2-action-bar').getByRole('button', { name: 'Trade…' }).click()
+
+  await ticket(page).locator('c2-button', { hasText: 'Sell' }).click()
+  await ticket(page).locator('c2-number-input input').fill('1400')
+  await ticket(page).locator('c2-button', { hasText: 'Place order' }).click()
+
+  await expect(page.locator('c2-toast').filter({ hasText: 'Sold 1,400 ACME' })).toBeVisible()
+  await expect(table(page).getByText('ACME', { exact: true })).toHaveCount(0)
+})

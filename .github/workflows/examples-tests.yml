@@ -1,9 +1,7 @@
 name: Example app tests
 
 # Runs the browser suite of every example app that has one, against a production build of the app and the
-# component packages it consumes. orders-admin-angular, trading-dashboard-react and the two HTML examples have no
-# suite yet; they are still built (and the Angular templates type-checked by `ng build`) by `npm run ui:build` in
-# deploy.yml.
+# component packages it consumes. An example without a suite is still built by `npm run ui:build` in deploy.yml.
 on:
   pull_request:
     branches: [develop, main]

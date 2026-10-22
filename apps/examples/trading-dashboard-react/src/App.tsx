@@ -34,8 +34,8 @@ export function App() {
   const [query, setQuery] = useState('')
   const [sector, setSector] = useState('')
   const [selected, setSelected] = useState<string[]>([])
-  // Bumped on every open, so the ticket mounts afresh and prices itself from the current quotes.
-  const [ticket, setTicket] = useState(0)
+  // The ticket mounts on open, so it prices itself from the current quotes each time.
+  const [ticketOpen, setTicketOpen] = useState(false)
 
   const tableRef = useRef<Table>(null)
   const searchRef = useRef<TextField>(null)
@@ -63,31 +63,34 @@ export function App() {
     return { value, change: open ? (value - open) / open : 0, count: rows.length }
   }, [rows])
 
+  // The table keeps a hidden row's key selected, so the bar, the total and the ticket count the checked rows the
+  // filter still shows: a search must not leave a holding the user cannot see in an order.
   const selectedRows = useMemo(() => rows.filter((row) => selected.includes(row.symbol)), [rows, selected])
-  const selectedPositions = useMemo(() => positions.filter((position) => selected.includes(position.symbol)), [positions, selected])
 
   // Emptying the selection hides the action bar and the buttons in it, so focus goes back to the table's current
   // cell rather than dropping to the page.
   const clearSelection = () => {
+    // `clearSelection()` fires `selection-change`, which empties `selected` through the listener below.
     tableRef.current?.clearSelection()
     tableRef.current?.focus()
-    setSelected([])
   }
 
   // A filled order moves the holding at the limit price; selling a whole position closes it.
   const place = (order: Order) => {
     setPositions((current) =>
-      current.map((position) =>
-        position.symbol === order.symbol
-          ? { ...position, quantity: position.quantity + (order.side === 'buy' ? order.quantity : -order.quantity), price: order.limit / 100 }
-          : position,
-      ),
+      current
+        .map((position) =>
+          position.symbol === order.symbol
+            ? { ...position, quantity: position.quantity + (order.side === 'buy' ? order.quantity : -order.quantity), price: order.limit / 100 }
+            : position,
+        )
+        .filter((position) => position.quantity > 0),
     )
   }
 
   // The selection is cleared once the ticket has closed: focus then returns to the table, not to the hidden bar.
   const closeTicket = (placed: boolean) => {
-    setTicket(0)
+    setTicketOpen(false)
     if (placed) clearSelection()
   }
 
@@ -137,12 +140,12 @@ export function App() {
         </div>
       </header>
 
-      {/* `c2-format-number` formats in the page's locale (the nearest `lang`), so the app keeps no formatters. */}
+      {/* `c2-format-number` formats in the page's locale (the nearest `lang`), so the stats need no formatter of their own. */}
       <section className="stats">
         <c2-stat label="Market value">
           <c2-format-number slot="value" value={totals.value} type="currency" currency="USD" maximumFractionDigits={0} />
         </c2-stat>
-        <c2-stat label="Day change" tone={totals.change >= 0 ? 'positive' : 'negative'}>
+        <c2-stat label="Day change">
           <c2-format-number
             slot="value"
             className={totals.change >= 0 ? 'delta delta--up' : 'delta delta--down'}
@@ -198,17 +201,17 @@ export function App() {
 
       <footer className="app__foot">
         <c2-button className="ghost" onClick={() => setPositions(initialPositions)}>
-          Reset prices
+          Reset portfolio
         </c2-button>
       </footer>
 
       {/* Shows while rows are checked and floats over the bottom of the page. The app owns the selection: the bar's
           × button and Escape fire `clear`, and emptying the selection there hides it again. */}
-      <c2-action-bar ref={actionBarRef} count={selected.length}>
-        <c2-button onClick={() => setTicket((n) => n + 1)}>Trade…</c2-button>
+      <c2-action-bar ref={actionBarRef} count={selectedRows.length}>
+        <c2-button onClick={() => setTicketOpen(true)}>Trade…</c2-button>
       </c2-action-bar>
 
-      {ticket > 0 && <OrderTicket key={ticket} open positions={selectedPositions} onClose={closeTicket} onPlace={place} />}
+      {ticketOpen && <OrderTicket open positions={selectedRows} onClose={closeTicket} onPlace={place} />}
     </div>
   )
 }
