@@ -202,6 +202,9 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   --c2-button__container__selected--background-color: transparent !important;
   --c2-button__container__selected--color: #{css.cssVar(segmented-item__selected--color)} !important;
   --c2-button__container__selected--border: 1px solid transparent !important;
+  --c2-button__container--box-shadow: none !important;
+  --c2-button__container__hover--box-shadow: none !important;
+  --c2-button__container__selected--box-shadow: none !important;
   --c2-icon-button--border: 1px solid transparent !important;
   --c2-icon-button--border-radius: #{css.cssVar(indicator--border-radius)} !important;
   --c2-icon-button--background-color: transparent !important;

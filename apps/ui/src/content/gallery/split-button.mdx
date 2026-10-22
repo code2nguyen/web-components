@@ -1,0 +1,195 @@
+---
+description: 'Ready-made looks for c2-split-button: filled, outlined, tonal, subtle, destructive, success, pill, split and full width. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SplitButton } from '@c2n/components/split-button'
+import { MenuItem } from '@c2n/components/menu'
+
+## Looks
+
+Every look is a set of `--c2-split-button__*` variables. The main half and the caret have separate colour variables, so they can differ, and `--c2-split-button--gap` switches between a joined control with a divider and two separate halves.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-split-button>
+  Send
+  <c2-menu-item slot="menu" value="schedule">Schedule send</c2-menu-item>
+  <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-split-button__main--background-color: transparent;
+    --c2-split-button__main--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-split-button__main--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-split-button__main--border-right: none;
+    --c2-split-button__main__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-button__main__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__caret--background-color: transparent;
+    --c2-split-button__caret--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-split-button__caret--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-split-button__caret__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-button__caret__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__caret__open--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__divider--color: transparent;
+  }
+</style>
+<c2-split-button class="outlined">
+  Export
+  <c2-menu-item slot="menu" value="csv">Export as CSV</c2-menu-item>
+  <c2-menu-item slot="menu" value="pdf">Export as PDF</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Tonal
+<style>
+  .tonal {
+    --c2-split-button__main--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-split-button__main--color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-split-button__main__hover--background-color: color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe) 85%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-split-button__main__active--background-color: color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe) 75%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-split-button__caret--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-split-button__caret--color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-split-button__caret__hover--background-color: color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe) 85%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-split-button__caret__active--background-color: color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe) 75%, var(--c2-theme--color-on-surface, #18181b));
+    --c2-split-button__caret__open--background-color: color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe) 75%, var(--c2-theme--color-on-surface, #18181b));
+  }
+</style>
+<c2-split-button class="tonal">
+  New
+  <c2-menu-item slot="menu" value="doc">Document</c2-menu-item>
+  <c2-menu-item slot="menu" value="sheet">Spreadsheet</c2-menu-item>
+  <c2-menu-item slot="menu" value="folder">Folder</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Subtle toolbar
+<style>
+  .subtle {
+    --c2-split-button--height: 32px;
+    --c2-split-button__main--padding-left: 10px;
+    --c2-split-button__main--padding-right: 10px;
+    --c2-split-button__main--background-color: transparent;
+    --c2-split-button__main--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-split-button__main__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-button__main__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__caret--min-width: 28px;
+    --c2-split-button__caret--padding: 0 6px;
+    --c2-split-button__caret--background-color: transparent;
+    --c2-split-button__caret--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-split-button__caret__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-button__caret__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__caret__open--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__divider--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-button__divider--inset: 8px;
+  }
+</style>
+<c2-split-button class="subtle">
+  Insert
+  <c2-menu-item slot="menu" value="image">Image</c2-menu-item>
+  <c2-menu-item slot="menu" value="table">Table</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Destructive
+<style>
+  .destructive {
+    --c2-split-button__main--background-color: var(--c2-theme--color-error, #dc2626);
+    --c2-split-button__main--color: light-dark(#ffffff, #450a0a);
+    --c2-split-button__main__hover--background-color: light-dark(#b91c1c, #fca5a5);
+    --c2-split-button__main__active--background-color: light-dark(#991b1b, #fecaca);
+    --c2-split-button__caret--background-color: var(--c2-theme--color-error, #dc2626);
+    --c2-split-button__caret--color: light-dark(#ffffff, #450a0a);
+    --c2-split-button__caret__hover--background-color: light-dark(#b91c1c, #fca5a5);
+    --c2-split-button__caret__active--background-color: light-dark(#991b1b, #fecaca);
+    --c2-split-button__caret__open--background-color: light-dark(#991b1b, #fecaca);
+    --c2-split-button__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
+  }
+</style>
+<c2-split-button class="destructive">
+  Delete
+  <c2-menu-item slot="menu" value="archive">Archive instead</c2-menu-item>
+  <c2-menu-item slot="menu" value="forever" destructive>Delete forever</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Merge box
+<style>
+  .merge {
+    --c2-split-button__main--background-color: #1f883d;
+    --c2-split-button__main__hover--background-color: #1a7f37;
+    --c2-split-button__main__active--background-color: #116329;
+    --c2-split-button__caret--background-color: #1f883d;
+    --c2-split-button__caret__hover--background-color: #1a7f37;
+    --c2-split-button__caret__active--background-color: #116329;
+    --c2-split-button__caret__open--background-color: #116329;
+    --c2-split-button__focus--outline: 2px solid rgba(31, 136, 61, 0.4);
+  }
+</style>
+<c2-split-button class="merge" mode="choice" value="squash" caret-label="Choose merge method">
+  <c2-menu-item slot="menu" value="merge">Create a merge commit<span slot="description">All commits are added to the base branch</span></c2-menu-item>
+  <c2-menu-item slot="menu" value="squash">Squash and merge<span slot="description">The commits are combined into one</span></c2-menu-item>
+  <c2-menu-item slot="menu" value="rebase">Rebase and merge<span slot="description">The commits are rebased onto the base branch</span></c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-split-button--border-radius: 999px;
+    --c2-split-button__main--padding-left: 20px;
+    --c2-split-button__caret--padding: 0 12px 0 8px;
+  }
+</style>
+<c2-split-button class="pill">
+  Publish
+  <c2-menu-item slot="menu" value="schedule">Schedule</c2-menu-item>
+  <c2-menu-item slot="menu" value="draft">Save draft</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Split
+<style>
+  .split {
+    --c2-split-button--gap: 2px;
+    --c2-split-button--border-radius: 20px;
+    --c2-split-button--height: 40px;
+    --c2-split-button__caret__open--border-radius: 20px;
+  }
+</style>
+<c2-split-button class="split">
+  Compose
+  <c2-menu-item slot="menu" value="event">New event</c2-menu-item>
+  <c2-menu-item slot="menu" value="task">New task</c2-menu-item>
+</c2-split-button>
+```
+
+```html tag=MdxCodeBlock,label=Full width
+<style>
+  .full {
+    --c2-split-button--width: 100%;
+    --c2-split-button--height: 44px;
+    --c2-split-button--font-size: 15px;
+    --c2-split-button--font-weight: 600;
+    --c2-split-button__caret--min-width: 44px;
+  }
+  .full-frame {
+    width: 280px;
+  }
+</style>
+<div class="full-frame">
+  <c2-split-button class="full">
+    Pay $1,240.00
+    <c2-menu-item slot="menu" value="split">Split the payment</c2-menu-item>
+    <c2-menu-item slot="menu" value="later">Pay later</c2-menu-item>
+  </c2-split-button>
+</div>
+```
+
+</GalleryGrid>

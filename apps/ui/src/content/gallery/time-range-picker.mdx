@@ -1,0 +1,59 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TimeRangePicker } from '@c2n/components/time-range-picker'
+
+## Presets
+
+Curated looks for `c2-time-range-picker`. Open any card in the studio to start from it. The `__control--*` variables shape every box in the bar at once, `__preset__selected--*` and `__apply--*` carry the accent inside the popup, and `__refresh__active--*` marks a running auto-refresh.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-time-range-picker></c2-time-range-picker>
+```
+
+```html tag=MdxCodeBlock,label=Dashboard toolbar
+<style>
+  .range-toolbar {
+    --c2-time-range-picker--gap: 6px;
+    --c2-time-range-picker__control--height: 32px;
+    --c2-time-range-picker__control--font-size: 13px;
+  }
+</style>
+<c2-time-range-picker class="range-toolbar" nav from="now-6h" refresh-intervals="10s 30s 1m 5m" refresh-interval="30s"></c2-time-range-picker>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .range-pill {
+    --c2-time-range-picker__control--border-radius: 999px;
+    --c2-time-range-picker__control--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-time-range-picker__control--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-time-range-picker__trigger--padding: 0 14px 0 16px;
+  }
+</style>
+<c2-time-range-picker class="range-pill" from="now/w" to="now"></c2-time-range-picker>
+```
+
+```html tag=MdxCodeBlock,label=Violet accent
+<style>
+  .range-violet {
+    --c2-time-range-picker__control__focus--outline: 2px solid rgba(124, 58, 237, 0.4);
+    --c2-time-range-picker__refresh__active--border: 1px solid #7c3aed;
+    --c2-time-range-picker__refresh__active--background: light-dark(#f3e8ff, #26153c);
+    --c2-time-range-picker__refresh__active--color: light-dark(#7e22ce, #a76cdc);
+    --c2-time-range-picker__preset__selected--background: light-dark(#f3e8ff, #26153c);
+    --c2-time-range-picker__preset__selected--color: light-dark(#7e22ce, #a76cdc);
+    --c2-time-range-picker__apply--background: #7c3aed;
+    --c2-time-range-picker__apply__hover--background: #6d28d9;
+  }
+</style>
+<c2-time-range-picker class="range-violet" from="now-24h" refresh-intervals="10s 1m 5m" refresh-interval="1m"></c2-time-range-picker>
+```
+
+```html tag=MdxCodeBlock,label=UTC incident window
+<c2-time-range-picker from="2026-10-20T13:40" to="2026-10-20T14:25" time-zone="UTC"></c2-time-range-picker>
+```
+
+</GalleryGrid>

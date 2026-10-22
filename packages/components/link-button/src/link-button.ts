@@ -22,6 +22,7 @@ import styles from './link-button.scss?inline'
  * @cssproperty {padding} [--c2-link-button__container--padding-right=4px]
  * @cssproperty {padding} [--c2-link-button__container--padding-bottom=4px]
  * @cssproperty {padding} [--c2-link-button__container--padding-left=4px]
+ * @cssproperty {border} [--c2-link-button__container--border=none]
  * @cssproperty {border-radius} [--c2-link-button__container--border-radius=4px]
  * @cssproperty {color} --c2-link-button__container--background-color
  * @cssproperty {color} [--c2-link-button__container--color=currentColor]
@@ -33,6 +34,7 @@ import styles from './link-button.scss?inline'
  *
  * @cssproperty {color} [--c2-link-button__container__hover--color=rgb(2, 101, 220)]
  * @cssproperty {color} --c2-link-button__container__hover--background-color
+ * @cssproperty {border} --c2-link-button__container__hover--border
  * @cssproperty {text-decoration} [--c2-link-button__container__hover--text-decoration=underline]
  * @cssproperty {color} --c2-link-button__container__hover--text-decoration-color
  *
@@ -41,6 +43,7 @@ import styles from './link-button.scss?inline'
  *
  * @cssproperty {color} [--c2-link-button__container__selected--color=rgb(2, 101, 220)]
  * @cssproperty {color} --c2-link-button__container__selected--background-color
+ * @cssproperty {border} --c2-link-button__container__selected--border
  * @cssproperty {font-weight} [--c2-link-button__container__selected--font-weight=600]
  * @cssproperty {text-decoration} --c2-link-button__container__selected--text-decoration
  *

@@ -105,6 +105,7 @@ import skeleton from '@c2n/skeleton/custom-elements.json'
 import skipLink from '@c2n/skip-link/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
+import splitButton from '@c2n/split-button/custom-elements.json'
 import splitPanel from '@c2n/split-panel/custom-elements.json'
 import spreadsheet from '@c2n/spreadsheet/custom-elements.json'
 import stat from '@c2n/stat/custom-elements.json'
@@ -122,6 +123,7 @@ import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
 import timeInput from '@c2n/time-input/custom-elements.json'
+import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
@@ -246,6 +248,7 @@ export const componentManifests = (function () {
     skipLink,
     slider,
     spinner,
+    splitButton,
     splitPanel,
     spreadsheet,
     stat,
@@ -263,6 +266,7 @@ export const componentManifests = (function () {
     textarea,
     themeSelect,
     timeInput,
+    timeRangePicker,
     timeline,
     toast,
     todoList,

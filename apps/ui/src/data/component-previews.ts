@@ -380,6 +380,11 @@ price: .price
   <c2-spinner value="65" style="--c2-spinner--size: 32px"></c2-spinner>
   <c2-spinner>Loading…</c2-spinner>
 </div>`,
+  'split-button': `<c2-split-button>
+  Send
+  <c2-menu-item slot="menu" value="schedule">Schedule send</c2-menu-item>
+  <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+</c2-split-button>`,
   'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
@@ -437,6 +442,7 @@ price: .price
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
   'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
+  'time-range-picker': `<c2-time-range-picker nav from="now-6h" refresh-intervals="10s 30s 1m" refresh-interval="30s"></c2-time-range-picker>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,

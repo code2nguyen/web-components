@@ -657,6 +657,10 @@
       "types": "./dist/spinner.d.ts",
       "default": "./dist/spinner.js"
     },
+    "./split-button": {
+      "types": "./dist/split-button.d.ts",
+      "default": "./dist/split-button.js"
+    },
     "./split-panel": {
       "types": "./dist/split-panel.d.ts",
       "default": "./dist/split-panel.js"
@@ -732,6 +736,10 @@
     "./time-input": {
       "types": "./dist/time-input.d.ts",
       "default": "./dist/time-input.js"
+    },
+    "./time-range-picker": {
+      "types": "./dist/time-range-picker.d.ts",
+      "default": "./dist/time-range-picker.js"
     },
     "./timeline": {
       "types": "./dist/timeline.d.ts",
@@ -1012,6 +1020,7 @@
     "@c2n/skip-link": "*",
     "@c2n/slider": "*",
     "@c2n/spinner": "*",
+    "@c2n/split-button": "*",
     "@c2n/split-panel": "*",
     "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",
@@ -1027,6 +1036,7 @@
     "@c2n/textarea": "*",
     "@c2n/theme-select": "*",
     "@c2n/time-input": "*",
+    "@c2n/time-range-picker": "*",
     "@c2n/timeline": "*",
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",

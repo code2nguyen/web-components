@@ -22,3 +22,25 @@ test('external links protect the opener and forward download', async ({ page, re
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   await expect(link).toHaveAttribute('download', 'example.txt')
 })
+test('draws no border by default and the themed border on hover, when selected and not when disabled', async ({ page, renderScenario }) => {
+  const border =
+    '--c2-link-button__container--border: 1px solid rgb(10, 20, 30); --c2-link-button__container__hover--border: 1px solid rgb(40, 50, 60); --c2-link-button__container__selected--border: 1px solid rgb(70, 80, 90)'
+  await renderScenario(`
+    <c2-link-button>Plain</c2-link-button>
+    <c2-link-button style="${border}">Outlined</c2-link-button>
+    <c2-link-button style="${border}" selected>Current</c2-link-button>
+    <c2-link-button style="${border}" disabled>Off</c2-link-button>
+  `)
+  await expect(page.getByRole('button', { name: 'Plain' })).toHaveCSS('border-top-style', 'none')
+  const outlined = page.getByRole('button', { name: 'Outlined' })
+  await expect(outlined).toHaveCSS('border-top', '1px solid rgb(10, 20, 30)')
+  await outlined.hover()
+  await expect(outlined).toHaveCSS('border-top', '1px solid rgb(40, 50, 60)')
+  const current = page.getByRole('button', { name: 'Current' })
+  await expect(current).toHaveCSS('border-top', '1px solid rgb(70, 80, 90)')
+  await current.hover()
+  await expect(current).toHaveCSS('border-top', '1px solid rgb(70, 80, 90)')
+  const off = page.getByRole('button', { name: 'Off' })
+  await off.hover({ force: true })
+  await expect(off).toHaveCSS('border-top', '1px solid rgb(10, 20, 30)')
+})

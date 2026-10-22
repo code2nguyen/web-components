@@ -150,6 +150,22 @@ export class MenuItem extends LitElement {
   /** Private: set by the parent menu on every row while any sibling is checkable, so the labels line up. */
   @property({ type: Boolean, attribute: 'reserve-indicator' }) reserveIndicator = false
 
+  /**
+   * Private: set by a `c2-split-button` in choice mode. The row is drawn and announced as a radio checked when
+   * `choice.checked` is, without touching `type` or `checked`, which reflect onto the author's markup.
+   */
+  @property({ attribute: false }) choice: { checked: boolean } | undefined = undefined
+
+  /** `type` as drawn and announced: a choice row is a radio. */
+  private get effectiveType(): MenuItemType {
+    return this.choice ? 'radio' : this.type
+  }
+
+  /** `checked` as drawn and announced. */
+  private get effectiveChecked(): boolean {
+    return this.choice ? this.choice.checked : this.checked
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     // Moved into or out of a c2-menu-row: its look and its name follow.
@@ -212,15 +228,18 @@ export class MenuItem extends LitElement {
   }
 
   private select(): void {
-    if (this.type === 'checkbox') this.checked = !this.checked
-    else if (this.type === 'radio') this.checked = true
+    // A choice row leaves its own state alone: the split button decides after the event whether the pick sticks.
+    if (!this.choice) {
+      if (this.type === 'checkbox') this.checked = !this.checked
+      else if (this.type === 'radio') this.checked = true
+    }
 
     this.dispatchEvent(
       new CustomEvent<MenuSelectEventDetail>('menu-select', {
         bubbles: true,
         composed: true,
         cancelable: true,
-        detail: { value: this.value, checked: this.checked, data: this.data },
+        detail: { value: this.value, checked: this.choice ? true : this.checked, data: this.data },
       }),
     )
   }
@@ -250,8 +269,9 @@ export class MenuItem extends LitElement {
 
   private syncAria() {
     // An author-set `role` on the host wins in the accessibility tree over this one.
-    this.internals.role = this.href ? 'menuitem' : this.type === 'checkbox' ? 'menuitemcheckbox' : this.type === 'radio' ? 'menuitemradio' : 'menuitem'
-    this.internals.ariaChecked = this.type === 'checkbox' || this.type === 'radio' ? String(this.checked) : null
+    const type = this.effectiveType
+    this.internals.role = this.href ? 'menuitem' : type === 'checkbox' ? 'menuitemcheckbox' : type === 'radio' ? 'menuitemradio' : 'menuitem'
+    this.internals.ariaChecked = type === 'checkbox' || type === 'radio' ? String(this.effectiveChecked) : null
     this.internals.ariaHasPopup = this.hasSubmenu ? 'menu' : null
     this.internals.ariaExpanded = this.hasSubmenu ? String(this.expanded) : null
     this.internals.ariaDisabled = this.disabled ? 'true' : null
@@ -267,12 +287,13 @@ export class MenuItem extends LitElement {
   }
 
   private renderIndicator() {
-    if (this.compact || (this.type === 'item' && !this.reserveIndicator)) return nothing
+    const type = this.effectiveType
+    if (this.compact || (type === 'item' && !this.reserveIndicator)) return nothing
     const glyph =
-      this.type === 'radio'
+      type === 'radio'
         ? svg`<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"></circle></svg>`
         : svg`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg>`
-    return html`<span class="indicator" ?data-checked=${this.checked}>${this.type === 'item' ? nothing : glyph}</span>`
+    return html`<span class="indicator" ?data-checked=${this.effectiveChecked}>${type === 'item' ? nothing : glyph}</span>`
   }
 
   private renderSubmenuIcon() {

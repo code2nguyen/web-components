@@ -25,6 +25,8 @@ The menu never writes attributes on its own host or its rows, so server-rendered
 
 Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
 
+For a main action with a caret menu of alternatives in one control ("Send ▾", a remembered merge method), use [`c2-split-button`](../split-button): it anchors this menu to the whole control and names the caret.
+
 ## Import
 
 ```typescript tag=CodeBlock

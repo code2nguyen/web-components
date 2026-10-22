@@ -75,6 +75,10 @@
     "./stream-reveal.js": {
       "types": "./dist/stream-reveal.d.ts",
       "default": "./dist/stream-reveal.js"
+    },
+    "./zoned-time.js": {
+      "types": "./dist/zoned-time.d.ts",
+      "default": "./dist/zoned-time.js"
     }
   },
   "files": [

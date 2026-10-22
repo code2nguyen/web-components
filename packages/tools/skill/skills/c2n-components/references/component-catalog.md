@@ -9,6 +9,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Button Group** — `c2-button-group` · `@c2n/components/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`.
 - **Copy Button** — `c2-copy-button` · `@c2n/components/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
 - **Icon Button** — `c2-icon-button` · `@c2n/components/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
+- **Split Button** — `c2-split-button` · `@c2n/components/split-button` — A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method. Children: `c2-menu-item`.
 
 ## Chart
 
@@ -147,6 +148,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Textarea** — `c2-textarea` · `@c2n/components/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
+- **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 - **View Options** — `c2-view-options, c2-view-field, c2-view-toggle` · `@c2n/components/view-options` — The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value. Children: `c2-view-field`, `c2-view-toggle`.
 
