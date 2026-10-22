@@ -22,6 +22,8 @@ import { FeatherUnderlineIcon as FeatherUnderline } from '@c2n/feather-icons/ico
 
 `c2-button-group` attaches related `c2-button` or `c2-icon-button` elements into one control. The default `joined` appearance shares borders and outside corners. Use `appearance="segmented"` for an inset track with an animated single-selection surface; it selects the first enabled item when `value` is omitted and supports arrow, Home and End keys. Both appearances support `orientation="vertical"`; vertical selectable groups use Up/Down while horizontal groups use Left/Right. Set `selection="single"` or `selection="multiple"` explicitly for selectable joined groups.
 
+For a main action joined to a caret that opens a menu of alternatives ("Send ▾"), use [`c2-split-button`](../split-button) instead of combining a group with a `c2-menu`.
+
 ## Import
 
 ```typescript tag=CodeBlock

@@ -1470,6 +1470,39 @@
       "reason": "The default slot projects consumer-owned link text inside the link; the link's own colour and font come from its public variables."
     },
     {
+      "tag": "c2-split-button",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "prefix-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__icon--size"],
+      "reason": "The main half sizes the slotted prefix icon through the icon size variable."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "running-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__icon--size"],
+      "reason": "The spinning wrapper sizes the slotted running icon and its spinner fallback through the icon size variable."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "caret-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__caret__icon--size", "--c2-split-button__caret__icon__open--rotate"],
+      "reason": "The caret wrapper sizes the slotted icon and its chevron fallback and turns it while the menu is open."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "menu",
+      "decision": "assigned-content",
+      "reason": "The menu slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-trace-waterfall",
       "slot": "empty",
       "decision": "assigned-content",

@@ -201,6 +201,7 @@
         "./packages/components/skip-link:build",
         "./packages/components/slider:build",
         "./packages/components/spinner:build",
+        "./packages/components/split-button:build",
         "./packages/components/split-panel:build",
         "./packages/components/spreadsheet:build",
         "./packages/components/stat:build",

@@ -1,6 +1,6 @@
 # Feature: `c2-split-button` — a main action with a caret menu of alternates
 
-**Status**: Design (not started)
+**Status**: Implemented (`packages/components/split-button`)
 **Roadmap**: #121, section L, P1 (wave 1)
 **Research**: [research.md](./research.md)
 **Mock**: [c2-split-button mock](https://claude.ai/artifact/HJ5edEDyBAv81KUJng64Mg) — anatomy, looks × states, the three menu modes, in-context screens (composer, PR merge box, meeting bar, page header) and an interactive prototype with an event log.

@@ -380,6 +380,11 @@ price: .price
   <c2-spinner value="65" style="--c2-spinner--size: 32px"></c2-spinner>
   <c2-spinner>Loading…</c2-spinner>
 </div>`,
+  'split-button': `<c2-split-button>
+  Send
+  <c2-menu-item slot="menu" value="schedule">Schedule send</c2-menu-item>
+  <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+</c2-split-button>`,
   'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>

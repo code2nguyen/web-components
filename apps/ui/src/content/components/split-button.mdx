@@ -1,0 +1,66 @@
+---
+title: 'Split Button'
+description: 'A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SplitButton } from '@c2n/components/split-button'
+import { MenuItem } from '@c2n/components/menu'
+import { FeatherMicIcon as FeatherMic } from '@c2n/feather-icons/icons/mic.js'
+
+`c2-split-button` is one control made of two buttons: the action people usually want, and a caret that opens a menu of alternatives. The rows are `c2-menu-item` elements slotted into `menu`, with `<hr>` separators and `<h1>`–`<h6>` headings between them. The menu is anchored to the whole control and is never narrower than it. The control has two tab stops: the main half is a plain button, and the caret is a menu button (Enter, Space or ArrowDown open the menu on the first row, ArrowUp on the last, Escape closes it).
+
+In the default `fixed` mode the main action never changes: activating it fires `action`, and picking a row fires `menu-select`. With `mode="choice"` the rows are radios: the checked one names the main half and is the control's `value`, and picking another row changes the choice (`input`, then `change`) instead of running it. That is how a merge box remembers the merge method. `main-disabled` disables only the main half ("Send" on an empty draft), `running` shows a spinner on it, and `toggle` with `selected` makes it a toggle button, such as a microphone with its device menu.
+
+Use a split button only when one action is clearly the most common. When the actions are equal, a `c2-button-group` or a `c2-menu` with a button trigger is clearer. Listen for `action` rather than `click`, because clicks on the menu rows bubble through the host.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/split-button'
+```
+
+Importing `@c2n/components/split-button` also registers `c2-menu` and `c2-menu-item`. The icon toggle example uses the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/split-button
+<style>
+  .mic {
+    --c2-split-button__main--padding-left: 10px;
+    --c2-split-button__main--padding-right: 10px;
+    --c2-split-button__main__selected--background-color: light-dark(#dc2626, #f87171);
+  }
+</style>
+<div data-label="Fixed">
+  <c2-split-button>
+    Send
+    <c2-menu-item slot="menu" value="schedule">Schedule send<span slot="description">Pick a date and time</span></c2-menu-item>
+    <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+    <hr slot="menu" />
+    <c2-menu-item slot="menu" value="template">Save as template</c2-menu-item>
+  </c2-split-button>
+  <c2-split-button main-disabled>
+    Send
+    <c2-menu-item slot="menu" value="template">Save as template</c2-menu-item>
+  </c2-split-button>
+</div>
+<div data-label="Remember choice">
+  <c2-split-button mode="choice" value="squash" caret-label="Choose merge method">
+    <c2-menu-item slot="menu" value="merge">Create a merge commit</c2-menu-item>
+    <c2-menu-item slot="menu" value="squash">Squash and merge</c2-menu-item>
+    <c2-menu-item slot="menu" value="rebase">Rebase and merge</c2-menu-item>
+  </c2-split-button>
+</div>
+<div data-label="Icon toggle">
+  <c2-split-button class="mic" toggle label="Mute microphone" caret-label="Microphone settings" placement="top-end">
+    <c2-feather-mic slot="prefix-icon"></c2-feather-mic>
+    <h3 slot="menu">Microphone</h3>
+    <c2-menu-item slot="menu" type="radio" name="mic" value="builtin" checked>MacBook Pro Microphone</c2-menu-item>
+    <c2-menu-item slot="menu" type="radio" name="mic" value="headset">AirPods Pro</c2-menu-item>
+  </c2-split-button>
+</div>
+```

@@ -158,6 +158,7 @@
         "../../components/skip-link:build",
         "../../components/slider:build",
         "../../components/spinner:build",
+        "../../components/split-button:build",
         "../../components/split-panel:build",
         "../../components/spreadsheet:build",
         "../../components/stat:build",

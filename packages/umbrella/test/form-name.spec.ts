@@ -58,6 +58,7 @@ const submitted: Record<string, string[]> = {
 // Form-associated elements that reflect `name` but are not an entry of `new FormData(form)` on their own.
 const reflectOnly: Record<string, string> = {
   'c2-button': 'a submit button is an entry of the submission it triggers only',
+  'c2-split-button': 'its main half is a submit button: an entry of the submission it triggers only',
 }
 
 test('every form-associated element has a FormData case', async ({ page, renderScenario }) => {
@@ -115,6 +116,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-time-input': (e) => (e.value = '09:30'),
         'c2-upload': (e) => (e.value = [new File(['hello'], 'notes.txt', { type: 'text/plain' })]),
         'c2-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
+        'c2-split-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
       }
       const form = document.querySelector('form')!
       const results: Record<string, { attribute: string | null; entries: string[] } | { error: string }> = {}
