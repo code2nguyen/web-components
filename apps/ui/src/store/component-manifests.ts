@@ -123,6 +123,7 @@ import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
 import timeInput from '@c2n/time-input/custom-elements.json'
+import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
@@ -265,6 +266,7 @@ export const componentManifests = (function () {
     textarea,
     themeSelect,
     timeInput,
+    timeRangePicker,
     timeline,
     toast,
     todoList,

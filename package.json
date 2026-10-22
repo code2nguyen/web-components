@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node scripts/run-changed-component-tests.mjs --project=chromium",
     "test:changed": "node scripts/run-changed-component-tests.mjs",
-    "test:changed:unit": "node --test scripts/*.test.mjs apps/ui/plugin/*.test.mjs apps/ui/src/utils/*.test.ts packages/core/src/*.test.ts",
+    "test:changed:unit": "node --test scripts/*.test.mjs apps/ui/plugin/*.test.mjs apps/ui/src/utils/*.test.ts packages/core/src/*.test.ts packages/components/*/src/*.test.ts",
     "test:button": "playwright test packages/components/button/test --project=chromium",
     "test:all": "playwright test",
     "test:serve": "vite --config tests/vite.config.ts",
@@ -217,6 +217,7 @@
         "./packages/components/textarea:build",
         "./packages/components/theme-select:build",
         "./packages/components/time-input:build",
+        "./packages/components/time-range-picker:build",
         "./packages/components/timeline:build",
         "./packages/components/toast:build",
         "./packages/components/todo-list:build",

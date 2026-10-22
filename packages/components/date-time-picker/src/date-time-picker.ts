@@ -24,7 +24,7 @@ import {
   wallClockAt,
   zoneLabel,
   type WallClock,
-} from './zoned-time'
+} from '@c2n/core/zoned-time.js'
 import styles from './date-time-picker.scss?inline'
 
 import '@c2n/overlay'

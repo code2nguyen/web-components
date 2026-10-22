@@ -1,0 +1,531 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-time-range-picker,
+  $theme: (
+    gap: 8px,
+    control--height: 36px,
+    control--border: 1px solid #bcbcc6,
+    control--border-radius: 6px,
+    control--background: #ffffff,
+    control--color: #18181b,
+    control--font-size: 14px,
+    control--font-family: inherit,
+    control__hover--border: 1px solid #a1a1aa,
+    control__hover--background: #f4f4f5,
+    control__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control__focus--outline-offset: 2px,
+    control__error--border: 1px solid #dc2626,
+    control__disabled--opacity: variables.$disabled-content-opacity,
+    divider--border: 1px solid #e4e4e7,
+    trigger--padding: 0 10px 0 12px,
+    trigger--gap: 8px,
+    icon--size: 16px,
+    icon--color: #71717a,
+    icon__error--color: #dc2626,
+    time-zone--color: #52525b,
+    time-zone--background: #f4f4f5,
+    time-zone--font-size: 12px,
+    time-zone--border-radius: 4px,
+    refresh__active--border: 1px solid #0265dc,
+    refresh__active--background: #edf1fe,
+    refresh__active--color: #0265dc,
+    live--color: #16a34a,
+    popup--width: 720px,
+    popup--background: #ffffff,
+    popup--color: #18181b,
+    popup--border: 1px solid #e4e4e7,
+    popup--border-radius: 8px,
+    popup--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    popup--padding: 16px,
+    popup--font-size: 14px,
+    section-title--color: #71717a,
+    section-title--font-size: 12px,
+    section-title--font-weight: 600,
+    input--height: 34px,
+    input--border: 1px solid #bcbcc6,
+    input--border-radius: 6px,
+    input--background: #ffffff,
+    input--font-family: #{ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace},
+    input__focus--border: 1px solid #0265dc,
+    input__error--border: 1px solid #dc2626,
+    hint--color: #71717a,
+    hint--font-size: 12px,
+    error--color: #dc2626,
+    preset--border-radius: 6px,
+    preset--padding: 6px 8px,
+    preset__hover--background: #f4f4f5,
+    preset__selected--background: #edf1fe,
+    preset__selected--color: #0265dc,
+    preset__selected--font-weight: 600,
+    preset-list--max-height: 320px,
+    apply--background: #0265dc,
+    apply--color: #ffffff,
+    apply__hover--background: #0154b8,
+    apply--border-radius: 6px,
+    apply--font-weight: 500,
+    popup-divider--border: 1px solid #e4e4e7,
+    footer--color: #71717a,
+    footer--font-size: 12px,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  min-width: 0;
+  max-width: 100%;
+
+  &.disabled {
+    opacity: css.cssVar(control__disabled--opacity);
+  }
+}
+
+.icon {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// ---- controls -------------------------------------------------------------------------------------------------------
+
+.control {
+  display: inline-flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  height: css.cssVar(control--height);
+  margin: 0;
+  padding: 0;
+  border: css.cssVar(control--border);
+  border-radius: css.cssVar(control--border-radius);
+  color: css.cssVar(control--color);
+  background: css.cssVar(control--background);
+  font-size: css.cssVar(control--font-size);
+  font-family: css.cssVar(control--font-family);
+  transition: animation.standard(border), animation.standard(background);
+
+  &:hover:not(:has(:disabled:hover)) {
+    border: css.cssVar(control__hover--border);
+  }
+
+  &.error,
+  &.error:hover {
+    border: css.cssVar(control__error--border);
+  }
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+
+  &:first-child {
+    border-start-start-radius: inherit;
+    border-end-start-radius: inherit;
+  }
+
+  &:last-child {
+    border-start-end-radius: inherit;
+    border-end-end-radius: inherit;
+  }
+
+  & + & {
+    border-inline-start: css.cssVar(divider--border);
+  }
+}
+
+button,
+select {
+  &:focus-visible {
+    outline: css.cssVar(control__focus--outline);
+    outline-offset: css.cssVar(control__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.icon-button {
+  justify-content: center;
+  flex: none;
+  aspect-ratio: 1;
+  height: 100%;
+  color: css.cssVar(icon--color);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(control__hover--background);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(control__disabled--opacity);
+  }
+}
+
+.control.icon-button {
+  align-items: center;
+  height: css.cssVar(control--height);
+}
+
+.trigger {
+  gap: css.cssVar(trigger--gap);
+  padding: css.cssVar(trigger--padding);
+  white-space: nowrap;
+
+  .icon {
+    color: css.cssVar(icon--color);
+  }
+
+  &.error .icon:first-child {
+    color: css.cssVar(icon__error--color);
+  }
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time-zone {
+  padding: 1px 6px;
+  border-radius: css.cssVar(time-zone--border-radius);
+  color: css.cssVar(time-zone--color);
+  background: css.cssVar(time-zone--background);
+  font-size: css.cssVar(time-zone--font-size);
+}
+
+.refresh.active {
+  border: css.cssVar(refresh__active--border);
+  color: css.cssVar(refresh__active--color);
+  background: css.cssVar(refresh__active--background);
+
+  .icon-button,
+  .icon {
+    color: inherit;
+  }
+
+  select {
+    font-weight: 600;
+  }
+}
+
+.interval {
+  position: relative;
+  gap: 6px;
+  padding: 0 8px 0 10px;
+
+  select {
+    appearance: none;
+    margin: 0;
+    padding: 0 18px 0 0;
+    border: 0;
+    border-radius: 2px;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .chevron {
+    position: absolute;
+    inset-inline-end: 8px;
+    color: css.cssVar(icon--color);
+    pointer-events: none;
+  }
+}
+
+.live {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: css.cssVar(live--color);
+}
+
+// ---- popup ----------------------------------------------------------------------------------------------------------
+
+.popup {
+  box-sizing: border-box;
+  width: min(#{css.cssVar(popup--width)}, calc(100vw - 16px));
+  max-height: var(--c2-overlay--available-height, none);
+  overflow: auto;
+  border: css.cssVar(popup--border);
+  border-radius: css.cssVar(popup--border-radius);
+  color: css.cssVar(popup--color);
+  background: css.cssVar(popup--background);
+  box-shadow: css.cssVar(popup--box-shadow);
+  font-size: css.cssVar(popup--font-size);
+  font-family: css.cssVar(control--font-family);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+.absolute {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: css.cssVar(popup--padding);
+  border-inline-end: css.cssVar(popup-divider--border);
+}
+
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+}
+
+@media (max-width: 640px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quick {
+    order: -1;
+  }
+
+  .absolute {
+    border-inline-end: 0;
+    border-top: css.cssVar(popup-divider--border);
+  }
+}
+
+.section-title {
+  margin: 0;
+  padding: 6px 8px 2px;
+  color: css.cssVar(section-title--color);
+  font-size: css.cssVar(section-title--font-size);
+  font-weight: css.cssVar(section-title--font-weight);
+
+  .absolute & {
+    padding: 0;
+  }
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field-label {
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+.draft,
+.search {
+  box-sizing: border-box;
+  height: css.cssVar(input--height);
+  border: css.cssVar(input--border);
+  border-radius: css.cssVar(input--border-radius);
+  background: css.cssVar(input--background);
+}
+
+.draft {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 10px;
+  color: inherit;
+  font: inherit;
+  font-family: css.cssVar(input--font-family);
+  outline: none;
+
+  &:focus {
+    border: css.cssVar(input__focus--border);
+  }
+
+  &.invalid {
+    border: css.cssVar(input__error--border);
+  }
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: css.cssVar(icon--color);
+
+  &:focus-within {
+    border: css.cssVar(input__focus--border);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: none;
+    color: css.cssVar(popup--color);
+    background: transparent;
+    font: inherit;
+  }
+}
+
+.hint {
+  margin: 0;
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+.resolved {
+  min-height: 1lh;
+}
+
+.no-match {
+  padding: 6px 8px;
+}
+
+.error-text {
+  color: css.cssVar(error--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+c2-date-selector {
+  --c2-date-selector--border: 0;
+  --c2-date-selector--box-shadow: none;
+  --c2-date-selector--padding: 0;
+  --c2-date-selector--min-width: 0;
+  --c2-date-selector__day--size: 34px;
+  display: block;
+}
+
+.apply-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apply {
+  flex: none;
+  height: 32px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: css.cssVar(apply--border-radius);
+  color: css.cssVar(apply--color);
+  background: css.cssVar(apply--background);
+  font: inherit;
+  font-weight: css.cssVar(apply--font-weight);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(apply__hover--background);
+  }
+}
+
+.presets {
+  display: flex;
+  flex-direction: column;
+  max-height: css.cssVar(preset-list--max-height);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.preset {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: css.cssVar(preset--padding);
+  border: 0;
+  border-radius: css.cssVar(preset--border-radius);
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(preset__hover--background);
+  }
+
+  &.selected {
+    color: css.cssVar(preset__selected--color);
+    background: css.cssVar(preset__selected--background);
+    font-weight: css.cssVar(preset__selected--font-weight);
+  }
+
+  &:focus-visible {
+    outline-offset: -2px;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px css.cssVar(popup--padding);
+  border-top: css.cssVar(popup-divider--border);
+  color: css.cssVar(footer--color);
+  font-size: css.cssVar(footer--font-size);
+
+  strong {
+    color: css.cssVar(popup--color);
+    font-weight: 600;
+  }
+}
+
+.zone-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  select {
+    max-width: 100%;
+    height: 28px;
+    border: css.cssVar(input--border);
+    border-radius: css.cssVar(input--border-radius);
+    color: css.cssVar(popup--color);
+    background: css.cssVar(input--background);
+    font: inherit;
+  }
+}

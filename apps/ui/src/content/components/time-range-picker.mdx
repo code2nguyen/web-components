@@ -1,0 +1,47 @@
+---
+title: 'Time Range Picker'
+description: 'Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TimeRangePicker } from '@c2n/components/time-range-picker'
+
+`c2-time-range-picker` is the time range control of an observability or analytics dashboard, after Grafana and Datadog. The trigger shows the active range; its popup offers searchable quick ranges ("Last 15 minutes", "Yesterday"), an absolute range typed into From and To or picked as two days on a calendar, the ranges used recently and the time zone. `nav` adds buttons that move the range one span earlier or later and zoom out to twice its span, and `refresh-intervals` adds a refresh button with an auto-refresh interval.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/time-range-picker'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/time-range-picker
+<div data-label="Default">
+  <c2-time-range-picker></c2-time-range-picker>
+  <c2-time-range-picker from="now/d" to="now"></c2-time-range-picker>
+</div>
+<div data-label="Shift and zoom">
+  <c2-time-range-picker nav from="now-6h"></c2-time-range-picker>
+</div>
+<div data-label="Absolute, in a time zone">
+  <c2-time-range-picker nav from="2026-10-20T09:00" to="2026-10-21T09:00" time-zone="UTC" time-zones="UTC Europe/Paris America/New_York"></c2-time-range-picker>
+</div>
+<div data-label="Auto-refresh">
+  <c2-time-range-picker from="now-24h" refresh-intervals="10s 30s 1m 5m"></c2-time-range-picker>
+  <c2-time-range-picker from="now-15m" refresh-intervals="10s 30s 1m 5m" refresh-interval="30s"></c2-time-range-picker>
+</div>
+<div data-label="States">
+  <c2-time-range-picker from="2026-10-22" to="2026-10-21"></c2-time-range-picker>
+  <c2-time-range-picker disabled nav from="now-7d"></c2-time-range-picker>
+</div>
+```
+
+Each end of the range is a string, so a range goes into a URL as it is and comes back unchanged. Relative ends follow Grafana's notation: `now`, `now-15m`, `now+1h` with the units `s m h d w M y`, and `/unit` rounds to the start of that unit, so `now/d` is midnight and `now-1d/d` midnight yesterday. As the end of a range, a rounded expression covers its whole unit (`now-1d/d` to `now-1d/d` is all of yesterday). Absolute ends are a date (`2026-10-20`, the whole day when it is the end), a wall clock read in `time-zone` (`2026-10-20T09:00`) or an ISO instant with an offset (`2026-10-20T07:00:00Z`). Days and longer units count on the calendar of the time zone, so `now-1d` across a daylight-saving change is still the same time yesterday.
+
+`change` fires whenever a range is applied (a quick range, the absolute range, a shift, a zoom or another time zone) with `from`, `to` and `timeZone` in its `detail`. `resolve()`, `fromDate` and `toDate` give the instants the range covers at that moment, and the same parser is exported as `resolveTime` and `resolveRange` for code that reads a range back from a URL before any element exists. `refresh` fires from the refresh button and on each auto-refresh tick with the resolved range; auto-refresh pauses while the page is hidden and refreshes once when it is shown again, and `refresh-interval-change` reports an interval chosen in the control.
+
+`presets` replaces the quick ranges with a JSON array of `{ from, to, label? }`; without a `label`, one is written from the range in the nearest language. In the popup, typing a span such as `3d` or `15 min` in the search offers "Last 3 days", Enter applies the first match, and the arrow keys move through the list. Below 640px of viewport width the popup stacks its two columns, quick ranges first.

@@ -17,8 +17,8 @@ test('dashboard renders a coherent scoped baseline and deterministic panel state
   await expect(page.getByText('Operations · staging')).toBeVisible()
   await expect(page.locator('[data-update-key^="staging:"]')).toHaveCount(7)
 
-  await page.locator('c2-select[aria-label="Relative time range"]').click()
-  await page.locator('c2-list-item[value="30m"]').click()
+  await page.getByRole('button', { name: 'Time range: Last 2 hours' }).click()
+  await page.getByRole('dialog', { name: 'Choose a time range' }).getByRole('button', { name: 'Last 30 minutes' }).click()
   await expect(page.getByText(/30 minutes · desktop layout/)).toBeVisible()
 
   await page.getByRole('button', { name: 'Play', exact: true }).click()

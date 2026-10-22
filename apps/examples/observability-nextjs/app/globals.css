@@ -297,15 +297,43 @@ c2-select {
   --c2-list-item__selected--background: var(--sf-accent-soft);
 }
 
-c2-date-input {
-  width: 9.5rem;
-  --c2-date-input--min-height: 34px;
-  --c2-date-input--background: var(--sf-surface-raised);
-  --c2-date-input--color: var(--sf-text);
-  --c2-date-input--border: 1px solid var(--sf-border);
-  --c2-date-input__hover--border: 1px solid var(--sf-text-muted);
-  --c2-date-input__focus--border: 1px solid var(--sf-accent-strong);
-  --c2-date-input__focus--outline: 3px solid color-mix(in srgb, var(--sf-focus) 50%, transparent);
+c2-time-range-picker {
+  --c2-time-range-picker__control--height: 34px;
+  --c2-time-range-picker__control--background: var(--sf-surface-raised);
+  --c2-time-range-picker__control--color: var(--sf-text);
+  --c2-time-range-picker__control--border: 1px solid var(--sf-border);
+  --c2-time-range-picker__control__hover--border: 1px solid var(--sf-text-muted);
+  --c2-time-range-picker__control__hover--background: var(--sf-surface-muted);
+  --c2-time-range-picker__control__focus--outline: 3px solid color-mix(in srgb, var(--sf-focus) 50%, transparent);
+  --c2-time-range-picker__divider--border: 1px solid var(--sf-border);
+  --c2-time-range-picker__icon--color: var(--sf-text-muted);
+  --c2-time-range-picker__time-zone--color: var(--sf-text-muted);
+  --c2-time-range-picker__time-zone--background: var(--sf-surface-muted);
+  --c2-time-range-picker__popup--background: var(--sf-surface-raised);
+  --c2-time-range-picker__popup--color: var(--sf-text);
+  --c2-time-range-picker__popup--border: 1px solid var(--sf-border);
+  --c2-time-range-picker__popup--box-shadow: var(--sf-shadow);
+  --c2-time-range-picker__popup-divider--border: 1px solid var(--sf-border);
+  --c2-time-range-picker__section-title--color: var(--sf-text-muted);
+  --c2-time-range-picker__input--background: var(--sf-surface);
+  --c2-time-range-picker__input--border: 1px solid var(--sf-border);
+  --c2-time-range-picker__input__focus--border: 1px solid var(--sf-accent-strong);
+  --c2-time-range-picker__hint--color: var(--sf-text-muted);
+  --c2-time-range-picker__footer--color: var(--sf-text-muted);
+  --c2-time-range-picker__preset__hover--background: var(--sf-surface-muted);
+  --c2-time-range-picker__preset__selected--background: var(--sf-accent-soft);
+  --c2-time-range-picker__preset__selected--color: var(--sf-accent-strong);
+  --c2-time-range-picker__apply--background: var(--sf-accent-strong);
+  --c2-time-range-picker__apply__hover--background: var(--sf-accent);
+  --c2-date-selector--background: transparent;
+  --c2-date-selector--color: var(--sf-text);
+  --c2-date-selector__day__hover--background: var(--sf-surface-muted);
+  --c2-date-selector__day__today--color: var(--sf-accent-strong);
+  --c2-date-selector__day__selected--background: var(--sf-accent-strong);
+  --c2-date-selector__range--background: var(--sf-accent-soft);
+  --c2-date-selector__range--color: var(--sf-text);
+  --c2-date-selector__weekday--color: var(--sf-text-muted);
+  --c2-date-selector__navigation__hover--background: var(--sf-surface-muted);
 }
 
 c2-theme-select {
@@ -352,14 +380,6 @@ c2-theme-select {
   --c2-icon-button__state-layer--size: 34px;
 }
 
-.scope-time {
-  grid-template-columns: auto auto;
-}
-
-.scope-time .scope-label {
-  grid-column: 1 / -1;
-}
-
 .scope-label {
   color: var(--sf-text-muted);
   font-size: 0.67rem;
@@ -367,12 +387,6 @@ c2-theme-select {
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
-}
-
-.absolute-range {
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
 }
 
 .replay-controls {
@@ -883,10 +897,6 @@ c2-table:defined + .table-fallback {
     display: none;
   }
 
-  .absolute-range {
-    flex-wrap: wrap;
-  }
-
   .page-content {
     padding: 20px 14px 32px;
   }
@@ -923,15 +933,6 @@ c2-table:defined + .table-fallback {
 
   .scope-field > c2-select {
     width: 100%;
-  }
-
-  .scope-time {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .scope-time > * {
-    grid-column: 1;
   }
 }
 
