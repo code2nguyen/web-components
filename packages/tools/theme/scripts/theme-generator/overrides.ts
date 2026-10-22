@@ -272,6 +272,9 @@ export const overrides: Record<string, Override> = {
   '--c2-gantt__series-6--color': { token: 'chart-series-6' },
   '--c2-gantt__series-7--color': { token: 'chart-series-7' },
   '--c2-gantt__series-8--color': { token: 'chart-series-8' },
+  // A tour dims the page with the dialog scrim and rings its spotlight with the focus ring.
+  '--c2-tour__backdrop--color': { token: 'color-scrim' },
+  '--c2-tour__spotlight--outline': { token: 'focus-ring' },
   // A trace waterfall colours each service with the same categorical palette, so its bars match a chart of the same services.
   '--c2-trace-waterfall__series-1--color': { token: 'chart-series-1' },
   '--c2-trace-waterfall__series-2--color': { token: 'chart-series-2' },

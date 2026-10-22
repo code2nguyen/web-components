@@ -1,0 +1,121 @@
+---
+description: 'Ready-made looks for c2-tour: default, no dimming, branded panel, compact and roomy. Click the button in a card to start its tour.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Button } from '@c2n/components/button'
+import { Tour } from '@c2n/components/tour'
+
+## Presets
+
+Curated looks for `c2-tour`. Click the button in a card to start its tour. The panel is styled through `--c2-tour--*` (`background-color`, `color`, `border`, `border-radius`, `box-shadow`, `padding`, `width`), the page dimming through `--c2-tour__backdrop--color` and the cut-out through `--c2-tour__spotlight--*`. `--c2-tour__next--*` and `--c2-tour__previous--*` style the buttons.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-button id="gallery-tour-default">Save</c2-button>
+<c2-tour client:only="lit">
+  <c2-button slot="trigger">Start tour</c2-button>
+  <c2-tour-step heading="Welcome">Here is a quick look around.</c2-tour-step>
+  <c2-tour-step target="#gallery-tour-default" heading="Save your work">Changes are kept as a draft until you save.</c2-tour-step>
+</c2-tour>
+```
+
+```html tag=MdxCodeBlock,label=No dimming
+<style>
+  .tour-undimmed {
+    --c2-tour__backdrop--color: transparent;
+    --c2-tour__spotlight--outline: 2px solid rgb(2, 101, 220);
+  }
+</style>
+<c2-button id="gallery-tour-undimmed">Filters</c2-button>
+<c2-tour class="tour-undimmed" client:only="lit">
+  <c2-button slot="trigger">Show me</c2-button>
+  <c2-tour-step target="#gallery-tour-undimmed" heading="Filters moved here">The page stays fully visible; only a ring marks the control.</c2-tour-step>
+</c2-tour>
+```
+
+```html tag=MdxCodeBlock,label=Branded
+<style>
+  .tour-branded {
+    --c2-tour--background-color: #4f46e5;
+    --c2-tour--color: #ffffff;
+    --c2-tour--border: 1px solid #4f46e5;
+    --c2-tour--border-radius: 14px;
+    --c2-tour__body--color: #e0e7ff;
+    --c2-tour__progress--color: #c7d2fe;
+    --c2-tour__close--color: #e0e7ff;
+    --c2-tour__close__hover--background-color: #4338ca;
+    --c2-tour__next--background-color: #ffffff;
+    --c2-tour__next--color: #4338ca;
+    --c2-tour__next__hover--background-color: #e0e7ff;
+    --c2-tour__previous--color: #ffffff;
+    --c2-tour__previous--border: 1px solid #a5b4fc;
+    --c2-tour__previous__hover--background-color: #4338ca;
+    --c2-tour__button--border-radius: 999px;
+    --c2-tour__spotlight--border-radius: 999px;
+    --c2-tour__spotlight--outline: 2px solid #a5b4fc;
+  }
+</style>
+<c2-button id="gallery-tour-branded">Upgrade</c2-button>
+<c2-tour class="tour-branded" client:only="lit">
+  <c2-button slot="trigger">Start tour</c2-button>
+  <c2-tour-step heading="Meet Pro">Everything you have, with more room to grow.</c2-tour-step>
+  <c2-tour-step target="#gallery-tour-branded" heading="Upgrade any time" placement="right">Your trial carries over.</c2-tour-step>
+</c2-tour>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .tour-compact {
+    --c2-tour--width: 240px;
+    --c2-tour--padding: 12px;
+    --c2-tour--font-size: 12px;
+    --c2-tour--border-radius: 6px;
+    --c2-tour__heading--font-size: 12px;
+    --c2-tour__footer--margin-top: 10px;
+    --c2-tour__button--height: 24px;
+    --c2-tour__button--padding-left: 8px;
+    --c2-tour__button--padding-right: 8px;
+    --c2-tour__button--font-size: 12px;
+    --c2-tour__button--border-radius: 4px;
+    --c2-tour__arrow--size: 8px;
+    --c2-tour__spotlight--padding: 4px;
+    --c2-tour__spotlight--border-radius: 6px;
+  }
+</style>
+<c2-button id="gallery-tour-compact">Sync</c2-button>
+<c2-tour class="tour-compact" client:only="lit">
+  <c2-button slot="trigger">Tip</c2-button>
+  <c2-tour-step target="#gallery-tour-compact" heading="Sync now" placement="top">Pulls the latest changes from your team.</c2-tour-step>
+</c2-tour>
+```
+
+```html tag=MdxCodeBlock,label=Roomy
+<style>
+  .tour-roomy {
+    --c2-tour--width: 380px;
+    --c2-tour--padding: 24px;
+    --c2-tour--border-radius: 14px;
+    --c2-tour--box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    --c2-tour__heading--font-size: 18px;
+    --c2-tour__body--margin-top: 8px;
+    --c2-tour__footer--margin-top: 24px;
+    --c2-tour__button--height: 36px;
+    --c2-tour__button--padding-left: 16px;
+    --c2-tour__button--padding-right: 16px;
+    --c2-tour__spotlight--padding: 12px;
+    --c2-tour__spotlight--border-radius: 14px;
+  }
+</style>
+<c2-button id="gallery-tour-roomy">Invite</c2-button>
+<c2-tour class="tour-roomy" client:only="lit">
+  <c2-button slot="trigger">Start tour</c2-button>
+  <c2-tour-step heading="Set up your workspace">Three steps, about a minute.</c2-tour-step>
+  <c2-tour-step target="#gallery-tour-roomy" heading="Invite your team">Teammates join with the role you pick, and you can change it later.</c2-tour-step>
+</c2-tour>
+```
+
+</GalleryGrid>

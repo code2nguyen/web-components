@@ -180,6 +180,7 @@
         "../../components/toast:build",
         "../../components/todo-list:build",
         "../../components/tooltip:build",
+        "../../components/tour:build",
         "../../components/trace-waterfall:build",
         "../../components/tree:build",
         "../../components/truncate:build",

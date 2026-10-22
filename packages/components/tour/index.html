@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-tour</title>
+    <script type="module" src="/src/tour.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .card {
+        max-width: 480px;
+        margin-top: 120vh;
+        padding: 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      .branded {
+        --c2-tour--background-color: #4f46e5;
+        --c2-tour--color: #ffffff;
+        --c2-tour--border: 1px solid #4f46e5;
+        --c2-tour--border-radius: 14px;
+        --c2-tour__body--color: #e0e7ff;
+        --c2-tour__progress--color: #c7d2fe;
+        --c2-tour__close--color: #e0e7ff;
+        --c2-tour__next--background-color: #ffffff;
+        --c2-tour__next--color: #4338ca;
+        --c2-tour__previous--color: #ffffff;
+        --c2-tour__previous--border: 1px solid #a5b4fc;
+        --c2-tour__button--border-radius: 999px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="toolbar">
+      <button id="new">New report</button>
+      <button id="share">Share</button>
+      <button id="settings">Settings</button>
+    </div>
+
+    <h2>Default</h2>
+    <c2-tour id="onboarding">
+      <button slot="trigger">Take the tour</button>
+      <c2-tour-step heading="Welcome to Reports">Three quick stops show you where everything is.</c2-tour-step>
+      <c2-tour-step target="#new" heading="Start a report">Pick a template or begin from a blank page.</c2-tour-step>
+      <c2-tour-step target="#share" heading="Share it" placement="right">Invite your team, or copy a read-only link.</c2-tour-step>
+      <c2-tour-step target="#history" heading="Version history" placement="top">Scrolled into view: every save is kept here.</c2-tour-step>
+      <c2-tour-step heading="You're all set">Restart the tour from the help menu at any time.</c2-tour-step>
+    </c2-tour>
+
+    <h2>Branded, single step</h2>
+    <c2-tour class="branded">
+      <button slot="trigger">What's new?</button>
+      <c2-tour-step target="#settings" heading="Settings moved">Everything that was under your avatar now lives here.</c2-tour-step>
+    </c2-tour>
+
+    <pre id="log"></pre>
+
+    <div class="card" id="history">Version history</div>
+
+    <script type="module">
+      const log = document.querySelector('#log')
+      const tour = document.querySelector('#onboarding')
+      for (const name of ['step-change', 'finish', 'skip', 'show', 'hide']) {
+        tour.addEventListener(name, (event) => (log.textContent += `${name} ${event.detail ? JSON.stringify(event.detail) : ''}\n`))
+      }
+    </script>
+  </body>
+</html>
