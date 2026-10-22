@@ -1,7 +1,12 @@
 {
   "title": "Orders Admin",
-  "description": "A zoneless Angular 22 console over c2-table, c2-tabs, c2-modal and c2-toast — property and event bindings straight onto the custom elements.",
+  "description": "A zoneless Angular 22 console over c2-table, c2-tabs, c2-modal and c2-toast — property and event bindings straight onto the custom elements, with a c2-view-options Display popover driving the table and a c2-split-button of bulk actions in a c2-action-bar.",
   "framework": "angular",
-  "tags": ["table", "modal", "tabs"],
+  "tags": [
+    "table",
+    "modal",
+    "tabs",
+    "view options"
+  ],
   "order": 30
 }

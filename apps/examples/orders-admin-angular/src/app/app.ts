@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
+import type { SplitButtonEventMap } from '@c2n/components/split-button'
 import type { Table, TableEventMap } from '@c2n/components/table'
 import type { TabsEventMap } from '@c2n/components/tabs'
+import type { ViewFieldConfig, ViewOptionsEventMap, ViewOptionsValue, ViewToggleConfig } from '@c2n/components/view-options'
 import { C2_FORM_ACCESSORS } from '@c2n/angular'
 import { toast } from '@c2n/components/toast'
 import { ORDERS, STATUS_TONE, type Order, type OrderStatus } from './orders'
@@ -15,6 +17,28 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: 'shipped', label: 'Shipped' },
   { id: 'refunded', label: 'Refunded' },
 ]
+
+/** What the Display popover offers. One array, so the popover and the table columns cannot drift apart. */
+const VIEW_FIELDS: ViewFieldConfig[] = [
+  { id: 'customer', label: 'Customer', orderable: true, property: true },
+  { id: 'status', label: 'Status', groupable: true, orderable: true, property: true },
+  { id: 'items', label: 'Items', orderable: true, property: true },
+  { id: 'total', label: 'Total', orderable: true, property: true },
+  { id: 'placed', label: 'Placed', groupable: true, orderable: true, property: true },
+]
+
+const VIEW_TOGGLES: ViewToggleConfig[] = [{ key: 'refunded', label: 'Refunded orders', checked: true }]
+
+const DEFAULT_VIEW: ViewOptionsValue = {
+  layout: 'table',
+  groupBy: null,
+  subGroupBy: null,
+  orderBy: [{ field: 'placed', direction: 'desc' }],
+  show: { refunded: true },
+  properties: VIEW_FIELDS.map((field) => field.id),
+}
+
+const NEXT_STATUS: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: 'shipped', shipped: 'shipped', refunded: 'refunded' }
 
 @Component({
   selector: 'app-root',
@@ -31,7 +55,11 @@ const FILTERS: { id: Filter; label: string }[] = [
       <header class="app__head">
         <div>
           <h1>Orders</h1>
-          <p>{{ visible().length }} of {{ orders().length }} orders · {{ currency.format(revenue()) }} in revenue</p>
+          <!-- c2-format-number formats in the page's language: the app keeps no Intl formatter of its own. -->
+          <p>
+            {{ visible().length }} of {{ orders().length }} orders · <c2-format-number type="currency" currency="USD" [value]="revenue()"></c2-format-number> in
+            revenue
+          </p>
         </div>
         <div class="app__controls">
           <!-- Two-way binding through the ControlValueAccessor in @c2n/angular. A banana-in-a-box needs a plain
@@ -45,6 +73,17 @@ const FILTERS: { id: Filter; label: string }[] = [
             name="query"
           ></c2-text-field>
           <c2-switch [ngModel]="openOnly()" (ngModelChange)="openOnly.set($any($event))" name="openOnly">Unshipped only</c2-switch>
+
+          <!-- The "Display" popover edits one value — grouping, ordering, which columns show — and fires view-change
+               with the whole of it. It renders no rows itself: the table below is bound to the value. Reset returns
+               to [defaultValue], and the trigger shows a dot while the view differs from it. -->
+          <c2-view-options
+            [fields]="viewFields"
+            [toggles]="viewToggles"
+            [value]="view()"
+            [defaultValue]="defaultView"
+            (view-change)="handleViewChange($event)"
+          ></c2-view-options>
         </div>
       </header>
 
@@ -76,25 +115,37 @@ const FILTERS: { id: Filter; label: string }[] = [
         [rows]="visible()"
         [rowKey]="'id'"
         [emptyMessage]="'No orders match this filter'"
+        [groupBy]="groupBy()"
+        [sortModel]="view().orderBy"
         selection="multiple"
         checkbox-selection
         sortable
         stripe
         (selection-change)="handleSelectionChange($event)"
+        (sort-change)="handleSortChange($event)"
       >
+        <!-- The view's orderBy is the table's own sortModel, and a header click reports back through (sort-change),
+             so the popover and the headers always show the same ordering. -->
         <c2-table-column field="id" header="Order" width="130px" pinned="start" [renderCell]="renderOrderLink"></c2-table-column>
-        <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
-        <c2-table-column field="status" header="Status" width="130px" [renderCell]="renderStatus"></c2-table-column>
-        <c2-table-column field="items" header="Items" width="90px" align="end" format="number"></c2-table-column>
-        <c2-table-column field="total" header="Total" width="130px" align="end" format="currency" currency="USD"></c2-table-column>
-        <c2-table-column field="placed" header="Placed" width="130px" format="date"></c2-table-column>
+        <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)" [hidden]="!shows('customer')"></c2-table-column>
+        <c2-table-column field="status" header="Status" width="130px" [renderCell]="renderStatus" [hidden]="!shows('status')"></c2-table-column>
+        <c2-table-column field="items" header="Items" width="90px" align="end" format="number" [hidden]="!shows('items')"></c2-table-column>
+        <c2-table-column field="total" header="Total" width="130px" align="end" format="currency" currency="USD" [hidden]="!shows('total')"></c2-table-column>
+        <c2-table-column field="placed" header="Placed" width="130px" format="date" [hidden]="!shows('placed')"></c2-table-column>
       </c2-table>
 
       <!-- The bar shows while count is above zero and floats over the bottom of the page. It does not own the
            selection: (clear), its × button or Escape, is where the table's selection is emptied. -->
       <c2-action-bar [count]="checkedVisible().length" (clear)="clearChecked(table)">
-        <c2-button class="ghost" (click)="refundChecked(table)">Refund</c2-button>
-        <c2-button (click)="advanceChecked(table)">Advance status</c2-button>
+        <!-- One common action and its alternatives: the main half fires (action), a row fires (menu-select) with
+             its value. Listen for (action) rather than (click), since clicks on the menu rows bubble through. -->
+        <c2-split-button (action)="advanceChecked(table)" (menu-select)="handleBulkStatus($event, table)">
+          Advance status
+          <c2-menu-item slot="menu" value="paid">Mark as paid</c2-menu-item>
+          <c2-menu-item slot="menu" value="shipped">Mark as shipped</c2-menu-item>
+          <hr slot="menu" />
+          <c2-menu-item slot="menu" value="refunded">Refund</c2-menu-item>
+        </c2-split-button>
       </c2-action-bar>
 
       <!-- open is a plain property, so the dialog is driven by state rather than by calling show() on an element ref. -->
@@ -113,7 +164,7 @@ const FILTERS: { id: Filter; label: string }[] = [
             <dt>Items</dt>
             <dd>{{ order.items }}</dd>
             <dt>Total</dt>
-            <dd>{{ currency.format(order.total) }}</dd>
+            <dd><c2-format-number type="currency" currency="USD" [value]="order.total"></c2-format-number></dd>
           </dl>
         }
         <c2-button slot="footer" class="ghost" (click)="selected.set(null)">Close</c2-button>
@@ -129,7 +180,12 @@ const FILTERS: { id: Filter; label: string }[] = [
 })
 export class App {
   protected readonly filters = FILTERS
-  protected readonly currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' })
+  protected readonly viewFields = VIEW_FIELDS
+  protected readonly viewToggles = VIEW_TOGGLES
+  protected readonly defaultView = DEFAULT_VIEW
+  /** The Display settings. A real app would keep them with the user's preferences; the popover stores nothing. */
+  protected readonly view = signal<ViewOptionsValue>(DEFAULT_VIEW)
+  protected readonly groupBy = computed(() => [this.view().groupBy, this.view().subGroupBy].filter((field): field is string => field !== null))
 
   protected readonly orders = signal<Order[]>(ORDERS)
   protected readonly filter = signal<Filter>('all')
@@ -153,6 +209,7 @@ export class App {
     return this.orders()
       .filter((order) => status === 'all' || order.status === status)
       .filter((order) => !this.openOnly() || order.status === 'pending' || order.status === 'paid')
+      .filter((order) => this.view().show['refunded'] !== false || order.status !== 'refunded')
       .filter((order) => !needle || `${order.id} ${order.customer}`.toLowerCase().includes(needle))
   })
 
@@ -164,6 +221,24 @@ export class App {
 
   protected handleFilterChange(event: Event): void {
     this.filter.set((event as TabsEventMap['selection-change']).detail.value as Filter)
+  }
+
+  protected shows(field: string): boolean {
+    return this.view().properties.includes(field)
+  }
+
+  protected handleViewChange(event: Event): void {
+    this.view.set((event as ViewOptionsEventMap['view-change']).detail.value)
+  }
+
+  protected handleSortChange(event: Event): void {
+    const orderBy = (event as TableEventMap['sort-change']).detail.sort
+    this.view.update((view) => ({ ...view, orderBy }))
+  }
+
+  protected handleBulkStatus(event: Event, table: HTMLElement): void {
+    const status = (event as SplitButtonEventMap['menu-select']).detail.value as OrderStatus
+    this.updateChecked(table, () => status, status === 'refunded' ? 'refunded' : `marked ${status}`)
   }
 
   protected handleSelectionChange(event: Event): void {
@@ -202,8 +277,7 @@ export class App {
     const order = this.selected()
     if (!order) return
 
-    const next: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: 'shipped', shipped: 'shipped', refunded: 'refunded' }
-    const status = next[order.status]
+    const status = NEXT_STATUS[order.status]
 
     this.orders.update((orders) => orders.map((candidate) => (candidate.id === order.id ? { ...candidate, status } : candidate)))
     this.selected.set(null)
@@ -211,12 +285,7 @@ export class App {
   }
 
   protected advanceChecked(table: HTMLElement): void {
-    const next: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: 'shipped', shipped: 'shipped', refunded: 'refunded' }
-    this.updateChecked(table, (order) => next[order.status], 'advanced')
-  }
-
-  protected refundChecked(table: HTMLElement): void {
-    this.updateChecked(table, () => 'refunded', 'refunded')
+    this.updateChecked(table, (order) => NEXT_STATUS[order.status], 'advanced')
   }
 
   /**
