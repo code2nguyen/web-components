@@ -1,7 +1,7 @@
 {
   "title": "Trading Dashboard",
-  "description": "A React 19 app driving c2-table with live-ticking state, plus c2-card, c2-badge, c2-select, c2-text-field and c2-switch.",
+  "description": "A React 19 app driving c2-table with live-ticking state: c2-stat and c2-format-number for the totals, a c2-action-bar for the checked rows, and an order ticket built on c2-form, c2-form-field, c2-money-input and c2-number-input.",
   "framework": "react",
-  "tags": ["table", "live data", "filtering"],
+  "tags": ["table", "live data", "filtering", "forms"],
   "order": 20
 }

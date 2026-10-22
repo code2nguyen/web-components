@@ -6,12 +6,11 @@ import type { Switch } from '@c2n/components/switch'
 import { useCustomEvent } from './hooks/useCustomEvent'
 import { useRenderedRows } from '@c2n/components/react'
 import { SECTORS, changePct, initialPositions, marketValue, tick, type Position } from './data/positions'
+import { OrderTicket, type Order } from './OrderTicket'
+import type { ActionBar } from '@c2n/components/action-bar'
 
 // `TableRow` is `Record<string, unknown>`, so a row type handed to `rows` has to carry an index signature.
 type Row = Position & { value: number; change: number } & Record<string, unknown>
-
-const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
-const percent = new Intl.NumberFormat(undefined, { style: 'percent', minimumFractionDigits: 2 })
 
 /**
  * A cell rendered by React rather than by the table.
@@ -24,7 +23,7 @@ const percent = new Intl.NumberFormat(undefined, { style: 'percent', minimumFrac
 function Delta({ line, row }: { line: number; row: Row }) {
   return (
     <span slot={`cell:${line}:change`} className={row.change >= 0 ? 'delta delta--up' : 'delta delta--down'}>
-      {row.change >= 0 ? '▲' : '▼'} {percent.format(Math.abs(row.change))}
+      {row.change >= 0 ? '▲' : '▼'} <c2-format-number value={Math.abs(row.change)} type="percent" minimumFractionDigits={2} />
     </span>
   )
 }
@@ -35,11 +34,14 @@ export function App() {
   const [query, setQuery] = useState('')
   const [sector, setSector] = useState('')
   const [selected, setSelected] = useState<string[]>([])
+  // Bumped on every open, so the ticket mounts afresh and prices itself from the current quotes.
+  const [ticket, setTicket] = useState(0)
 
   const tableRef = useRef<Table>(null)
   const searchRef = useRef<TextField>(null)
   const sectorRef = useRef<Select>(null)
   const liveRef = useRef<Switch>(null)
+  const actionBarRef = useRef<ActionBar>(null)
 
   useEffect(() => {
     if (!live) return
@@ -62,6 +64,32 @@ export function App() {
   }, [rows])
 
   const selectedRows = useMemo(() => rows.filter((row) => selected.includes(row.symbol)), [rows, selected])
+  const selectedPositions = useMemo(() => positions.filter((position) => selected.includes(position.symbol)), [positions, selected])
+
+  // Emptying the selection hides the action bar and the buttons in it, so focus goes back to the table's current
+  // cell rather than dropping to the page.
+  const clearSelection = () => {
+    tableRef.current?.clearSelection()
+    tableRef.current?.focus()
+    setSelected([])
+  }
+
+  // A filled order moves the holding at the limit price; selling a whole position closes it.
+  const place = (order: Order) => {
+    setPositions((current) =>
+      current.map((position) =>
+        position.symbol === order.symbol
+          ? { ...position, quantity: position.quantity + (order.side === 'buy' ? order.quantity : -order.quantity), price: order.limit / 100 }
+          : position,
+      ),
+    )
+  }
+
+  // The selection is cleared once the ticket has closed: focus then returns to the table, not to the hidden bar.
+  const closeTicket = (placed: boolean) => {
+    setTicket(0)
+    if (placed) clearSelection()
+  }
 
   // The lines the table rendered, and which row sits on each. The row is looked up in this render's `rows` by key,
   // so a price tick shows straight away rather than one `range-change` later.
@@ -78,6 +106,7 @@ export function App() {
   useCustomEvent(searchRef, 'input', () => setQuery(searchRef.current?.value ?? ''))
   useCustomEvent(sectorRef, 'selection-change', (event) => setSector(event.detail.value[0] ?? ''))
   useCustomEvent(liveRef, 'change', () => setLive(liveRef.current?.checked ?? false))
+  useCustomEvent(actionBarRef, 'clear', clearSelection)
 
   return (
     <div className="app">
@@ -108,21 +137,34 @@ export function App() {
         </div>
       </header>
 
+      {/* `c2-format-number` formats in the page's locale (the nearest `lang`), so the app keeps no formatters. */}
       <section className="stats">
-        <c2-card>
-          <span className="stats__label">Market value</span>
-          <strong className="stats__value">{currency.format(totals.value)}</strong>
-        </c2-card>
-        <c2-card>
-          <span className="stats__label">Day change</span>
-          <strong className="stats__value" style={{ color: totals.change >= 0 ? 'var(--delta-up)' : 'var(--delta-down)' }}>
-            {percent.format(totals.change)}
-          </strong>
-        </c2-card>
-        <c2-card>
-          <span className="stats__label">Selected</span>
-          <strong className="stats__value">{selectedRows.length ? currency.format(selectedRows.reduce((sum, row) => sum + row.value, 0)) : '—'}</strong>
-        </c2-card>
+        <c2-stat label="Market value">
+          <c2-format-number slot="value" value={totals.value} type="currency" currency="USD" maximumFractionDigits={0} />
+        </c2-stat>
+        <c2-stat label="Day change" tone={totals.change >= 0 ? 'positive' : 'negative'}>
+          <c2-format-number
+            slot="value"
+            className={totals.change >= 0 ? 'delta delta--up' : 'delta delta--down'}
+            value={totals.change}
+            type="percent"
+            signDisplay="exceptZero"
+            minimumFractionDigits={2}
+          />
+        </c2-stat>
+        <c2-stat label="Selected">
+          {selectedRows.length ? (
+            <c2-format-number
+              slot="value"
+              value={selectedRows.reduce((sum, row) => sum + row.value, 0)}
+              type="currency"
+              currency="USD"
+              maximumFractionDigits={0}
+            />
+          ) : (
+            <span slot="value">—</span>
+          )}
+        </c2-stat>
       </section>
 
       {/* `rows` is an array of objects. React 19 assigns a prop as a *property* when the property exists on the
@@ -155,11 +197,18 @@ export function App() {
       </c2-table>
 
       <footer className="app__foot">
-        <c2-button onClick={() => setPositions(initialPositions)}>Reset prices</c2-button>
-        <c2-button className="ghost" onClick={() => tableRef.current && (tableRef.current.value = [])}>
-          Clear selection
+        <c2-button className="ghost" onClick={() => setPositions(initialPositions)}>
+          Reset prices
         </c2-button>
       </footer>
+
+      {/* Shows while rows are checked and floats over the bottom of the page. The app owns the selection: the bar's
+          × button and Escape fire `clear`, and emptying the selection there hides it again. */}
+      <c2-action-bar ref={actionBarRef} count={selected.length}>
+        <c2-button onClick={() => setTicket((n) => n + 1)}>Trade…</c2-button>
+      </c2-action-bar>
+
+      {ticket > 0 && <OrderTicket key={ticket} open positions={selectedPositions} onClose={closeTicket} onPlace={place} />}
     </div>
   )
 }
