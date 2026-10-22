@@ -22,6 +22,8 @@ export interface TourProgress {
   step: number
   /** How many times the user has skipped the tour. */
   skips: number
+  /** When the user last skipped the tour, in milliseconds since the epoch. */
+  skippedAt?: number
 }
 
 /** Detail of the `step-change` event. */
@@ -69,7 +71,8 @@ export interface Tour {
  * With a `storage-key`, the tour remembers in `localStorage` whether the user finished it, skipped it or got part
  * way, on which step, and how many times it was skipped (`progress`). Add `autostart` to open it by itself on the
  * first visit: it then resumes on the step it was left on, opens again from the first step after a skip, and stays
- * closed once finished or skipped `skip-limit` times (once, by default). `start()` and the trigger always open it;
+ * closed once finished or skipped `skip-limit` times (once, by default). `skip-delay` makes a skipped tour wait, say
+ * a week, before it opens again. `start()` and the trigger always open it;
  * `reset()` forgets the stored progress.
  *
  * Every tour a user ends fires exactly one `finish` (Done on the last step) or `skip` (Skip, the close button or Escape).
@@ -197,6 +200,12 @@ export class Tour extends LitElement {
    */
   @property({ type: Number, attribute: 'skip-limit' }) skipLimit = 1
 
+  /**
+   * How long a skipped tour waits before `autostart` opens it again: a number and a unit, `30m`, `12h`, `7d` or `2w`
+   * (a bare number is days). Empty, it opens on the next load. Only matters while `skip-limit` allows another skip.
+   */
+  @property({ attribute: 'skip-delay' }) skipDelay = ''
+
   @query('.panel') private panel?: HTMLElement
   @query('.spotlight') private spotlight?: HTMLElement
   @query('.arrow') private arrowElement?: HTMLElement
@@ -232,7 +241,9 @@ export class Tour extends LitElement {
       const step = Number.isInteger(stored.step) ? (stored.step as number) : 0
       // A count stored before skips were counted: a skipped tour was skipped once.
       const skips = Number.isInteger(stored.skips) ? Math.max(stored.skips as number, 0) : status === 'skipped' ? 1 : 0
-      return { status, step, skips }
+      const progress: TourProgress = { status, step, skips }
+      if (Number.isFinite(stored.skippedAt)) progress.skippedAt = stored.skippedAt
+      return progress
     } catch {
       return fallback /* storage blocked or the value is not ours */
     }
@@ -258,9 +269,13 @@ export class Tour extends LitElement {
     const stored = this.progress
     // Replaying a settled tour from its trigger does not make `autostart` open it again.
     if (status === 'in-progress' && this.settled(stored)) return
-    const skips = stored.skips + (status === 'skipped' ? 1 : 0)
+    const progress: TourProgress = { status, step: this.currentIndex(), skips: stored.skips }
+    if (status === 'skipped') {
+      progress.skips++
+      progress.skippedAt = Date.now()
+    } else if (stored.skippedAt !== undefined) progress.skippedAt = stored.skippedAt
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({ status, step: this.currentIndex(), skips } satisfies TourProgress))
+      localStorage.setItem(this.storageKey, JSON.stringify(progress))
     } catch {
       /* storage blocked or full: the tour works without it */
     }
@@ -270,7 +285,11 @@ export class Tour extends LitElement {
     if (!this.autostart || this.open) return
     const progress = this.progress
     if (this.settled(progress)) return
-    this.start(progress.status === 'skipped' ? 0 : progress.step)
+    if (progress.status === 'skipped') {
+      // Still waiting out `skip-delay` since the last skip.
+      if (progress.skippedAt !== undefined && Date.now() - progress.skippedAt < parseDuration(this.skipDelay)) return
+      this.start(0)
+    } else this.start(progress.step)
   }
 
   private get triggers(): Element[] {
@@ -545,6 +564,14 @@ export class Tour extends LitElement {
       },
     })
   }
+}
+
+const DURATION_UNITS: Record<string, number> = { m: 60_000, h: 3_600_000, d: 86_400_000, w: 604_800_000 }
+
+/** `30m`, `12h`, `7d`, `2w` or a bare number of days, in milliseconds; anything else is 0. */
+function parseDuration(value: string): number {
+  const match = /^\s*(\d+(?:\.\d+)?)\s*([mhdw])?\s*$/i.exec(value)
+  return match ? Number(match[1]) * DURATION_UNITS[(match[2] ?? 'd').toLowerCase()] : 0
 }
 
 function deepActiveElement(): HTMLElement | null {

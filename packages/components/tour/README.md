@@ -28,7 +28,7 @@ import '@c2n/components/tour'
 - `storage-key="…"` remembers the progress in `localStorage` (`{ status, step }`, read it from `progress`);
   `autostart` then opens the tour on the first visit, resumes the stored step after a reload and stays closed once
   finished or skipped `skip-limit` times (default 1; below it a skipped tour reopens from the first step, `0` never
-  gives up). `reset()` forgets it.
+  gives up), waiting `skip-delay` (`30m`, `12h`, `7d`, `2w`) after each skip. `reset()` forgets it.
 - Skip, the close button and Escape all end the tour early; `--c2-tour__skip--display: none` hides the Skip button.
 - A step without a target, or whose target is missing, shows centred over the dimmed page.
 - Style the panel through `--c2-tour--*`, the dimming through `--c2-tour__backdrop--color` and the cut-out through

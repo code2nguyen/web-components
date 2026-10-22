@@ -27,6 +27,7 @@ declare module 'react' {
       'c2-tour': C2Props<Tour> & {
         'storage-key'?: Attribute
         'skip-limit'?: Attribute
+        'skip-delay'?: Attribute
       }
       'c2-tour-step': C2Props<TourStep>
     }
