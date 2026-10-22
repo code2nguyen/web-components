@@ -8,7 +8,8 @@ export interface Message {
   from: 'customer' | 'agent'
   author: string
   body: string
-  at: string
+  /** When the message was sent. A real instant rather than display text: the UI formats it in the reader's language. */
+  at: Date
 }
 
 export interface Conversation {
@@ -19,12 +20,17 @@ export interface Conversation {
   subject: string
   status: Status
   unread: number
-  updated: string
   messages: Message[]
 }
 
 // `BadgeTone` rather than `string`: the generated Vue types check `:tone`, so the union is what keeps a typo here
 // from reaching the template.
+/** The sample is dated relative to page load, so its times always read as recent. */
+const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000)
+
+/** A conversation was last active when its latest message was sent. */
+export const lastActivity = (conversation: Conversation) => conversation.messages[conversation.messages.length - 1].at
+
 export const STATUS_TONE: Record<Status, BadgeTone> = {
   open: 'primary',
   waiting: 'warning',
@@ -46,28 +52,27 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'SSO login loops back to the sign-in page',
     status: 'open',
     unread: 2,
-    updated: '9:12',
     messages: [
       {
         id: 'm1',
         from: 'customer',
         author: 'Mireille Dufort',
         body: 'Since this morning our SAML sign-in bounces everyone back to the login page. The IdP says the assertion was sent.',
-        at: '08:55',
+        at: minutesAgo(47),
       },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: 'Thanks — I can see the failed callbacks on our side. Did anything change in the IdP certificate?',
-        at: '09:02',
+        at: minutesAgo(40),
       },
       {
         id: 'm3',
         from: 'customer',
         author: 'Mireille Dufort',
         body: 'Our security team rotated it on Friday. Should we send you the new metadata?',
-        at: '09:12',
+        at: minutesAgo(30),
       },
     ],
   },
@@ -79,15 +84,20 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'Invoice 2291 charged twice',
     status: 'waiting',
     unread: 0,
-    updated: 'Yest.',
     messages: [
-      { id: 'm1', from: 'customer', author: 'Tobias Renner', body: 'We were charged twice for invoice 2291. Same amount, two minutes apart.', at: 'Tue 16:40' },
+      {
+        id: 'm1',
+        from: 'customer',
+        author: 'Tobias Renner',
+        body: 'We were charged twice for invoice 2291. Same amount, two minutes apart.',
+        at: minutesAgo(1560),
+      },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: '**Confirmed** — the second charge was a retry after a timeout.\n\n- Refunded `INV-2291-B` just now\n- It shows on your statement within 1–2 days\n\nCould you check tomorrow?',
-        at: 'Tue 17:05',
+        at: minutesAgo(1535),
       },
     ],
   },
@@ -99,23 +109,22 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'Export API returns 429 under load',
     status: 'open',
     unread: 1,
-    updated: 'Mon',
     messages: [
       {
         id: 'm1',
         from: 'customer',
         author: 'Aiko Tanaka',
         body: 'Our nightly export hits 429 after roughly 300 requests. The docs mention 1000/hour.',
-        at: 'Mon 22:14',
+        at: minutesAgo(2950),
       },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: 'The burst limit is lower than the hourly one. I can raise it for your workspace — what concurrency do you need?',
-        at: 'Mon 22:48',
+        at: minutesAgo(2916),
       },
-      { id: 'm3', from: 'customer', author: 'Aiko Tanaka', body: 'Eight workers, so about 20 requests per second at the peak.', at: 'Mon 23:01' },
+      { id: 'm3', from: 'customer', author: 'Aiko Tanaka', body: 'Eight workers, so about 20 requests per second at the peak.', at: minutesAgo(2903) },
     ],
   },
   {
@@ -126,23 +135,22 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'How do I move a project to another workspace?',
     status: 'closed',
     unread: 0,
-    updated: 'Mon',
     messages: [
       {
         id: 'm1',
         from: 'customer',
         author: 'Paulo Marques',
         body: 'Is there a way to move a project between workspaces without exporting everything?',
-        at: 'Mon 11:20',
+        at: minutesAgo(3600),
       },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: 'Yes — project settings, then "Move workspace". Members keep their roles if they belong to both.',
-        at: 'Mon 11:34',
+        at: minutesAgo(3586),
       },
-      { id: 'm3', from: 'customer', author: 'Paulo Marques', body: 'Worked perfectly, thank you!', at: 'Mon 11:41' },
+      { id: 'm3', from: 'customer', author: 'Paulo Marques', body: 'Worked perfectly, thank you!', at: minutesAgo(3579) },
     ],
   },
   {
@@ -153,21 +161,20 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'Webhook signatures fail after key rotation',
     status: 'waiting',
     unread: 0,
-    updated: 'Fri',
     messages: [
       {
         id: 'm1',
         from: 'customer',
         author: 'Hanna Bergström',
         body: 'After rotating the signing key every webhook fails verification, including replays of old events.',
-        at: 'Fri 14:02',
+        at: minutesAgo(7200),
       },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: 'Old events are signed with the old key — both stay valid for 24h. Are you verifying against the key id in the header?',
-        at: 'Fri 14:26',
+        at: minutesAgo(7176),
       },
     ],
   },
@@ -179,23 +186,22 @@ export const CONVERSATIONS: Conversation[] = [
     subject: 'Request: audit log retention beyond 90 days',
     status: 'open',
     unread: 3,
-    updated: 'Fri',
     messages: [
       {
         id: 'm1',
         from: 'customer',
         author: 'Dmitri Volkov',
         body: 'Compliance needs 12 months of audit logs. Is longer retention available on our plan?',
-        at: 'Fri 09:30',
+        at: minutesAgo(7500),
       },
       {
         id: 'm2',
         from: 'agent',
         author: 'You',
         body: 'Enterprise can go to 12 months. I will check whether it can be enabled on the current contract.',
-        at: 'Fri 10:05',
+        at: minutesAgo(7465),
       },
-      { id: 'm3', from: 'customer', author: 'Dmitri Volkov', body: 'Any update? Our audit starts in two weeks.', at: 'Fri 16:48' },
+      { id: 'm3', from: 'customer', author: 'Dmitri Volkov', body: 'Any update? Our audit starts in two weeks.', at: minutesAgo(7062) },
     ],
   },
 ]

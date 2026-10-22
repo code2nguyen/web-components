@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { findMatches } from '@c2n/components/highlight'
 import type { SelectEventMap } from '@c2n/components/select'
 import { toast } from '@c2n/components/toast'
 import ConversationList from './components/ConversationList.vue'
@@ -21,11 +22,15 @@ const filter = ref<Filter>('all')
 const activeId = ref(conversations.value[0].id)
 const detailsOpen = ref(false)
 
+// `findMatches` is the matcher `c2-highlight` marks the rows with, so a row is listed exactly when it shows a match:
+// "bergstrom" finds "Bergström" because both ignore accents.
+const MATCH_OPTIONS = { ignoreAccents: true }
+
 const visible = computed(() => {
-  const needle = query.value.trim().toLowerCase()
+  const needle = query.value.trim()
   return conversations.value
     .filter((conversation) => filter.value === 'all' || conversation.status === filter.value)
-    .filter((conversation) => !needle || `${conversation.customer} ${conversation.subject}`.toLowerCase().includes(needle))
+    .filter((conversation) => !needle || findMatches(`${conversation.customer} ${conversation.subject}`, needle, MATCH_OPTIONS).length > 0)
 })
 
 const active = computed(() => conversations.value.find((conversation) => conversation.id === activeId.value) ?? null)
@@ -52,8 +57,7 @@ function reply(body: string) {
 
   update(conversation.id, {
     status: 'waiting',
-    updated: 'now',
-    messages: [...conversation.messages, { id: `m${conversation.messages.length + 1}`, from: 'agent', author: 'You', body, at: 'now' }],
+    messages: [...conversation.messages, { id: `m${conversation.messages.length + 1}`, from: 'agent', author: 'You', body, at: new Date() }],
   })
   toast.show({ variant: 'success', heading: conversation.customer, message: 'Reply sent.' })
 }
@@ -121,7 +125,7 @@ onMounted(() => {
     </header>
 
     <main class="app__body">
-      <ConversationList :conversations="visible" :active-id="activeId" @select="open" />
+      <ConversationList :conversations="visible" :active-id="activeId" :query="query.trim()" @select="open" />
 
       <ThreadPanel v-if="active" :key="active.id" :conversation="active" @reply="reply" @resolve="resolve" @archive="archive" @details="detailsOpen = true" />
       <section v-else class="thread thread--empty">Pick a conversation on the left.</section>

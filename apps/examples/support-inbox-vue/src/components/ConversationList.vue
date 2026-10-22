@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { ListEventMap } from '@c2n/components/list'
-import { STATUS_LABEL, STATUS_TONE, type Conversation } from '../data/conversations'
+import { STATUS_LABEL, STATUS_TONE, lastActivity, type Conversation } from '../data/conversations'
 
-defineProps<{ conversations: Conversation[]; activeId: string }>()
+defineProps<{ conversations: Conversation[]; activeId: string; query: string }>()
 const emit = defineEmits<{ select: [id: string] }>()
 
 /**
@@ -40,11 +40,14 @@ function handleSelection(event: ListEventMap['selection-change']) {
       >
         <c2-avatar auto-color :name="conversation.customer" />
       </c2-indicator>
+      <!-- `c2-highlight` marks what the search matched in its own text content, so the text stays Vue's to render.
+           `c2-relative-time` takes a `Date` as a property, reads "5 minutes ago" in the page's language and keeps
+           itself current: one timer per element, no polling in the app. `min-unit` stops it counting seconds. -->
       <span class="inbox__row">
-        <span class="inbox__customer">{{ conversation.customer }}</span>
-        <span class="inbox__time">{{ conversation.updated }}</span>
+        <c2-highlight class="inbox__customer" :query="query" ignore-accents>{{ conversation.customer }}</c2-highlight>
+        <c2-relative-time class="inbox__time" :date="lastActivity(conversation)" format="narrow" min-unit="minute" />
       </span>
-      <span slot="description" class="inbox__subject">{{ conversation.subject }}</span>
+      <c2-highlight slot="description" class="inbox__subject" :query="query" ignore-accents>{{ conversation.subject }}</c2-highlight>
       <span slot="suffix-icon" class="inbox__marks">
         <c2-badge v-if="conversation.unread" :count="conversation.unread" tone="primary" />
       </span>
