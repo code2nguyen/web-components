@@ -50,5 +50,33 @@ test('the main half of the split button runs the common action', async ({ page }
   await check(page, 0).click()
   await page.locator('c2-action-bar').getByRole('button', { name: 'Advance status', exact: true }).click()
 
-  await expect(page.locator('c2-toast').filter({ hasText: '1 orders advanced' })).toBeVisible()
+  await expect(page.locator('c2-toast').filter({ hasText: '1 order advanced' })).toBeVisible()
+})
+
+test('a menu status never moves an order backwards or undoes a refund', async ({ page }) => {
+  await page.goto('./')
+  // Sorted by id, ORD-4822 (shipped) and ORD-4825 (refunded) sit at lines 1 and 4.
+  await header(page, 'Order').click()
+  await check(page, 1).click() // ORD-4822, shipped
+  await check(page, 4).click() // ORD-4825, refunded
+
+  await page
+    .locator('c2-action-bar')
+    .getByRole('button', { name: /More .* options/ })
+    .click()
+  await page.locator('c2-menu-item[value="paid"]').click()
+
+  await expect(page.locator('c2-toast').filter({ hasText: '0 orders marked paid' })).toContainText('2 left as they were')
+  await expect(table(page).getByText('shipped', { exact: true }).first()).toBeVisible()
+})
+
+test('the Refunded tab shows refunded orders even while Display hides them', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Display' }).click()
+  await page.getByRole('dialog', { name: 'Display options' }).getByRole('switch', { name: 'Refunded orders' }).click()
+  await page.keyboard.press('Escape')
+  await expect(table(page).getByText('refunded', { exact: true })).toHaveCount(0)
+
+  await page.locator('c2-tab', { hasText: 'Refunded' }).click()
+  await expect(table(page).getByText('refunded', { exact: true }).first()).toBeVisible()
 })

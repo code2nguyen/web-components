@@ -34,11 +34,18 @@ const DEFAULT_VIEW: ViewOptionsValue = {
   groupBy: null,
   subGroupBy: null,
   orderBy: [{ field: 'placed', direction: 'desc' }],
-  show: { refunded: true },
+  show: Object.fromEntries(VIEW_TOGGLES.map((toggle) => [toggle.key, toggle.checked ?? false])),
   properties: VIEW_FIELDS.map((field) => field.id),
 }
 
 const NEXT_STATUS: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: 'shipped', shipped: 'shipped', refunded: 'refunded' }
+
+/** An order only moves forward (pending → paid → shipped), any order can be refunded, and a refund is final. */
+const STATUS_RANK: Record<OrderStatus, number> = { pending: 0, paid: 1, shipped: 2, refunded: 3 }
+const moveTo = (target: OrderStatus) => (order: Order) =>
+  order.status !== 'refunded' && (target === 'refunded' || STATUS_RANK[target] > STATUS_RANK[order.status]) ? target : order.status
+
+const sameFields = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((field, index) => field === b[index])
 
 @Component({
   selector: 'app-root',
@@ -120,12 +127,14 @@ const NEXT_STATUS: Record<OrderStatus, OrderStatus> = { pending: 'paid', paid: '
         selection="multiple"
         checkbox-selection
         sortable
+        multi-sort
         stripe
         (selection-change)="handleSelectionChange($event)"
         (sort-change)="handleSortChange($event)"
       >
         <!-- The view's orderBy is the table's own sortModel, and a header click reports back through (sort-change),
-             so the popover and the headers always show the same ordering. -->
+             so the popover and the headers always show the same ordering. A plain click sorts by that column alone;
+             multi-sort lets a Shift+click add a level, like the popover's Add sort. -->
         <c2-table-column field="id" header="Order" width="130px" pinned="start" [renderCell]="renderOrderLink"></c2-table-column>
         <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)" [hidden]="!shows('customer')"></c2-table-column>
         <c2-table-column field="status" header="Status" width="130px" [renderCell]="renderStatus" [hidden]="!shows('status')"></c2-table-column>
@@ -185,7 +194,10 @@ export class App {
   protected readonly defaultView = DEFAULT_VIEW
   /** The Display settings. A real app would keep them with the user's preferences; the popover stores nothing. */
   protected readonly view = signal<ViewOptionsValue>(DEFAULT_VIEW)
-  protected readonly groupBy = computed(() => [this.view().groupBy, this.view().subGroupBy].filter((field): field is string => field !== null))
+  // Only a change of the grouping fields hands the table a new array: a new one on every view edit would regroup it.
+  protected readonly groupBy = computed(() => [this.view().groupBy, this.view().subGroupBy].filter((field): field is string => field !== null), {
+    equal: sameFields,
+  })
 
   protected readonly orders = signal<Order[]>(ORDERS)
   protected readonly filter = signal<Filter>('all')
@@ -206,11 +218,14 @@ export class App {
   protected readonly visible = computed(() => {
     const needle = this.query().trim().toLowerCase()
     const status = this.filter()
-    return this.orders()
-      .filter((order) => status === 'all' || order.status === status)
-      .filter((order) => !this.openOnly() || order.status === 'pending' || order.status === 'paid')
-      .filter((order) => this.view().show['refunded'] !== false || order.status !== 'refunded')
-      .filter((order) => !needle || `${order.id} ${order.customer}`.toLowerCase().includes(needle))
+    return (
+      this.orders()
+        .filter((order) => status === 'all' || order.status === status)
+        .filter((order) => !this.openOnly() || order.status === 'pending' || order.status === 'paid')
+        // The Refunded tab asks for refunded orders, so it wins over the Display switch that hides them elsewhere.
+        .filter((order) => status === 'refunded' || this.view().show['refunded'] || order.status !== 'refunded')
+        .filter((order) => !needle || `${order.id} ${order.customer}`.toLowerCase().includes(needle))
+    )
   })
 
   protected readonly revenue = computed(() => this.visible().reduce((sum, order) => sum + order.total, 0))
@@ -238,7 +253,7 @@ export class App {
 
   protected handleBulkStatus(event: Event, table: HTMLElement): void {
     const status = (event as SplitButtonEventMap['menu-select']).detail.value as OrderStatus
-    this.updateChecked(table, () => status, status === 'refunded' ? 'refunded' : `marked ${status}`)
+    this.updateChecked(table, moveTo(status), status === 'refunded' ? 'refunded' : `marked ${status}`)
   }
 
   protected handleSelectionChange(event: Event): void {
@@ -297,10 +312,27 @@ export class App {
     table.focus()
   }
 
+  /** Applies a status to the checked orders; an order the rule leaves where it is does not count as changed. */
   private updateChecked(table: HTMLElement, status: (order: Order) => OrderStatus, verb: string): void {
-    const keys = new Set(this.checkedVisible().map((order) => order.id))
-    this.orders.update((orders) => orders.map((order) => (keys.has(order.id) ? { ...order, status: status(order) } : order)))
+    const changes = new Map(
+      this.checkedVisible()
+        .map((order) => [order.id, status(order)] as const)
+        .filter(([id, next]) => next !== this.orders().find((order) => order.id === id)?.status),
+    )
+    const skipped = this.checkedVisible().length - changes.size
+    this.orders.update((orders) =>
+      orders.map((order) => {
+        const next = changes.get(order.id)
+        return next ? { ...order, status: next } : order
+      }),
+    )
     this.clearChecked(table)
-    toast.show({ variant: 'success', heading: `${keys.size} orders ${verb}`, message: 'The table shows their new status.' })
+    toast.show({
+      variant: changes.size ? 'success' : 'neutral',
+      heading: `${changes.size} ${changes.size === 1 ? 'order' : 'orders'} ${verb}`,
+      message: skipped
+        ? `${skipped} left as ${skipped === 1 ? 'it was' : 'they were'}: an order only moves forward, and a refund is final.`
+        : 'The table shows their new status.',
+    })
   }
 }
