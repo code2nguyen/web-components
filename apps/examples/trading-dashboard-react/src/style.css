@@ -25,7 +25,8 @@ body {
 .app {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 16px 40px;
+  /* Room for the action bar, which floats over the bottom of the page while rows are checked. */
+  padding: 24px 16px 96px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -75,31 +76,22 @@ body {
   gap: 12px;
 }
 
-/* Written as flat selectors on purpose: this is plain CSS, and native nesting has no Sass-style `&__label`
-   concatenation — `&` is a standalone compound selector, so such a rule is invalid and silently dropped. */
-.stats__label {
-  display: block;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--c2-theme--color-on-surface-variant, #52525b);
-}
-
-.stats__value {
-  display: block;
-  margin-top: 6px;
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
 .positions {
   height: 420px;
 }
 
 .app__foot {
   display: flex;
+  gap: 8px;
+}
+
+.ticket {
+  --c2-modal--width: 420px;
+}
+
+.ticket__actions {
+  display: flex;
+  justify-content: flex-end;
   gap: 8px;
 }
 
