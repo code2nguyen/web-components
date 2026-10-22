@@ -33,17 +33,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/log-viewer` — a roving active entry (`aria-activedescendant` on the
   viewport) moved by the arrow keys, and an `entry-activate` event on Enter, like `c2-table`'s `row-activate`.
 
-### Charts have no time markers or annotated ranges
-
-- **Severity:** gap
-- **Hit while:** marking the detected story chapters (error surge, recovery, silent service) on the Log Lens rhythm
-  chart, 2026-09-28.
-- **What happens:** `c2-area-chart`/`c2-line-chart` cannot draw a vertical marker at an x value or shade an x range.
-  The example renders a separate strip of positioned `c2-icon-button` markers under the chart, which only
-  approximates the plot's x scale (axes and padding shift it) and does not follow zoom.
-- **Where the fix belongs:** `packages/components/chart` — an `annotations` property (`{ x, x2?, label, tone }[]`)
-  drawn by both engines, with the markers reachable from the keyboard and announced in the chart's description.
-
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                                                                                                         |

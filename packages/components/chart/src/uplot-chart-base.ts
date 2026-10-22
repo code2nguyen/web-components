@@ -50,6 +50,10 @@ export abstract class UplotChartBase extends ChartBase {
   /** The cursor crosshair. */
   @property({ type: String }) cursor: 'x' | 'none' = 'x'
 
+  protected override get drawsAnnotations(): boolean {
+    return true
+  }
+
   /** How one series of this chart type is drawn. The only thing a concrete uPlot chart must supply. */
   protected abstract seriesStyle(series: ChartSeriesConfig, index: number, context: ChartBuildContext): UplotSeriesStyle
 

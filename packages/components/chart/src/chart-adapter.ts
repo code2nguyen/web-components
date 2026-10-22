@@ -35,6 +35,18 @@ export interface ChartAdapterEvents {
   rangeChange(detail: { min: number; max: number }): void
   /** The reader zoomed or panned a map. `zoom` is the engine's current zoom factor, `1` at the initial fit. */
   viewChange?(detail: { zoom: number }): void
+  /** The engine drew a frame: new data, a resize, a zoom. Whatever is laid over the plot follows it from here. */
+  draw?(): void
+}
+
+/** Where x values land on a cartesian plot, in CSS pixels from the top-left of the engine's container. */
+export interface ChartXGeometry {
+  /** The plotting box inside the axes. */
+  plot: { left: number; top: number; width: number; height: number }
+  /** Whether the x axis runs along the bottom. `false` when a horizontal bar chart lays its categories down the side. */
+  horizontal: boolean
+  /** Each requested value's offset along the x axis from the plot box's own edge, or `null` when it cannot be placed. */
+  offsets: (number | null)[]
 }
 
 /**
@@ -78,6 +90,12 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
 
   /** Runs an engine action, such as ECharts' `geoRoam` for a map's zoom buttons. Only ECharts implements it. */
   dispatchAction?(payload: Record<string, unknown>): void
+
+  /**
+   * The plot box and the offsets of `values` along the x axis, or `null` when the engine has no x axis to measure
+   * against. What annotations are positioned from, so they sit exactly where the engine draws that x.
+   */
+  xGeometry?(values: readonly number[]): ChartXGeometry | null
 
   /** Converts a value in a coordinate system (a map's `[lon, lat]`) to a pixel inside the plot. */
   convertToPixel?(finder: Record<string, unknown>, value: number[]): [number, number] | null

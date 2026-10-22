@@ -97,6 +97,9 @@ export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest', pick
           events?.rangeChange({ min, max })
         },
       ],
+      // Fires after every redraw: new data, a resize, a zoom, a rebuild. Annotations re-place themselves from it. Appended
+      // to the chart's own draw hooks (the bar chart prints its value labels there), never in place of them.
+      draw: [...(options.hooks?.draw ?? []), () => events?.draw?.()],
       setScale: [
         (self: uPlot, key: string) => {
           if (restoring || key !== 'x') return
@@ -169,6 +172,29 @@ export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest', pick
 
     resize(width, height) {
       if (width > 0 && height > 0) instance?.setSize({ width, height })
+    },
+
+    xGeometry(values) {
+      const scale = instance?.scales.x
+      if (!instance || !scale || scale.min === undefined || scale.max === undefined) return null
+      // uPlot writes the plotting box onto its overlay in CSS pixels, relative to the root it puts in our container.
+      const over = instance.over
+      const plot = {
+        left: parseFloat(over.style.left) || 0,
+        top: parseFloat(over.style.top) || 0,
+        width: parseFloat(over.style.width) || over.clientWidth,
+        height: parseFloat(over.style.height) || over.clientHeight,
+      }
+      const self = instance
+      return {
+        plot,
+        // `ori` 1 is a horizontal bar chart: the x scale runs down the left edge.
+        horizontal: scale.ori !== 1,
+        offsets: values.map((value) => {
+          const offset = self.valToPos(value, 'x', false)
+          return Number.isFinite(offset) ? offset : null
+        }),
+      }
     },
 
     destroy() {

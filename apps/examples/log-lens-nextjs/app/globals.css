@@ -571,50 +571,14 @@ code {
   --c2-chart__series-2--color: var(--ll-warning);
   --c2-chart__series-3--color: color-mix(in srgb, var(--ll-muted) 45%, var(--ll-surface-3));
   --c2-chart__bar--border-radius: 0.15;
+  --c2-chart__annotation--color: var(--ll-info);
+  --c2-chart__annotation__info--color: var(--ll-info);
+  --c2-chart__annotation__success--color: var(--ll-success);
+  --c2-chart__annotation__warning--color: var(--ll-warning);
+  --c2-chart__annotation__danger--color: var(--ll-danger);
+  --c2-chart__annotation-marker--size: 12px;
+  --c2-chart__annotation-marker--border-color: var(--ll-surface);
   display: block;
-}
-
-.ll-chapter-strip {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  color: var(--ll-muted);
-  font-family: var(--ll-mono);
-  font-size: 11px;
-}
-
-.ll-chapter-strip__track {
-  position: relative;
-  height: 34px;
-  border-radius: 999px;
-  background: linear-gradient(var(--ll-border), var(--ll-border)) center / 100% 2px no-repeat;
-}
-
-.ll-marker {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  --c2-feather-icon--size: 14px;
-  --c2-feather-icon--color: var(--tone);
-  border-radius: 50%;
-  background: var(--ll-surface);
-  box-shadow: 0 0 0 2px var(--tone);
-}
-
-.ll-marker--danger {
-  --tone: var(--ll-danger);
-}
-.ll-marker--warning {
-  --tone: var(--ll-warning);
-}
-.ll-marker--success {
-  --tone: var(--ll-success);
-}
-.ll-marker--info,
-.ll-marker--neutral {
-  --tone: var(--ll-info);
 }
 
 .ll-chapters {

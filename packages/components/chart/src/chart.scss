@@ -61,6 +61,18 @@
     tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
     tooltip--gap: 6px,
 
+    annotation--color: #71717a,
+    annotation__info--color: #0265dc,
+    annotation__success--color: #16a34a,
+    annotation__warning--color: #d97706,
+    annotation__danger--color: #dc2626,
+    annotation-range--opacity: 0.12,
+    annotation-line--border-width: 1px,
+    annotation-line--border-style: dashed,
+    annotation-marker--size: 10px,
+    annotation-marker--border-color: #ffffff,
+    annotation-marker__focus--outline: 2px solid #0265dc,
+
     state--color: #71717a,
     state--font-size: 14px,
   )
@@ -236,6 +248,103 @@
 .tooltip-value {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+/* Annotations: boxes positioned in CSS pixels by the element from the engine's x scale. The layer lets the pointer
+   through to the plot, so hovering and zooming work across a shaded range; only the markers take it. */
+.annotations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.annotation {
+  --_tone: #{css.cssVar(annotation--color)};
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.annotation[hidden] {
+  display: none;
+}
+
+.annotation--info {
+  --_tone: #{css.cssVar(annotation__info--color)};
+}
+
+.annotation--success {
+  --_tone: #{css.cssVar(annotation__success--color)};
+}
+
+.annotation--warning {
+  --_tone: #{css.cssVar(annotation__warning--color)};
+}
+
+.annotation--danger {
+  --_tone: #{css.cssVar(annotation__danger--color)};
+}
+
+.annotation-range {
+  position: absolute;
+  inset: 0;
+  background: var(--_tone);
+  opacity: css.cssVar(annotation-range--opacity);
+}
+
+/* The rule and the marker sit at the annotation's own x, which `--_marker` offsets from the box's start edge. */
+.annotation-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--_marker, 0);
+  border-left: css.cssVar(annotation-line--border-width) css.cssVar(annotation-line--border-style) var(--_tone);
+  transform: translateX(-50%);
+}
+
+/* Just inside the plot's top edge, leaving room for the focus ring: the plot area clips whatever crosses it. */
+.annotation-marker {
+  position: absolute;
+  top: calc(#{css.cssVar(annotation-marker--size)} / 2 + 4px);
+  left: var(--_marker, 0);
+  box-sizing: border-box;
+  width: css.cssVar(annotation-marker--size);
+  height: css.cssVar(annotation-marker--size);
+  margin: 0;
+  padding: 0;
+  border: 2px solid css.cssVar(annotation-marker--border-color);
+  border-radius: 50%;
+  background: var(--_tone);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* A larger hit area than the dot itself, without changing how it looks. */
+.annotation-marker::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.annotation-marker:focus-visible {
+  outline: css.cssVar(annotation-marker__focus--outline);
+  outline-offset: 2px;
+}
+
+/* A horizontal bar chart runs its x axis down the side: the rule turns horizontal and the marker sits on the left. */
+.annotation--vertical .annotation-line {
+  top: var(--_marker, 0);
+  right: 0;
+  bottom: auto;
+  left: 0;
+  border-left: 0;
+  border-top: css.cssVar(annotation-line--border-width) css.cssVar(annotation-line--border-style) var(--_tone);
+  transform: translateY(-50%);
+}
+
+.annotation--vertical .annotation-marker {
+  top: var(--_marker, 0);
+  left: calc(#{css.cssVar(annotation-marker--size)} / 2 + 4px);
 }
 
 .actions {

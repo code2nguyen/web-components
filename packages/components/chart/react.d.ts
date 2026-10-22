@@ -42,7 +42,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-area-chart': Omit<C2Props<AreaChart>, 'series'> & {
+      'c2-area-chart': Omit<C2Props<AreaChart>, 'series' | 'annotations'> & {
         'fill-opacity'?: Attribute
         'y-min'?: Attribute
         'y-max'?: Attribute
@@ -54,8 +54,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: AreaChart['series'] | string
+        annotations?: AreaChart['annotations'] | string
       }
-      'c2-bar-chart': Omit<C2Props<BarChart>, 'series'> & {
+      'c2-bar-chart': Omit<C2Props<BarChart>, 'series' | 'annotations'> & {
         'bar-width'?: Attribute
         'bar-gap'?: Attribute
         'value-labels'?: Attribute
@@ -69,8 +70,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: BarChart['series'] | string
+        annotations?: BarChart['annotations'] | string
       }
-      'c2-bubble-chart': Omit<C2Props<BubbleChart>, 'series'> & {
+      'c2-bubble-chart': Omit<C2Props<BubbleChart>, 'series' | 'annotations'> & {
         'y-field'?: Attribute
         'size-field'?: Attribute
         'series-field'?: Attribute
@@ -90,8 +92,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: BubbleChart['series'] | string
+        annotations?: BubbleChart['annotations'] | string
       }
-      'c2-butterfly-chart': Omit<C2Props<ButterflyChart>, 'series'> & {
+      'c2-butterfly-chart': Omit<C2Props<ButterflyChart>, 'series' | 'annotations'> & {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
@@ -100,8 +103,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: ButterflyChart['series'] | string
+        annotations?: ButterflyChart['annotations'] | string
       }
-      'c2-candlestick-chart': Omit<C2Props<CandlestickChart>, 'series'> & {
+      'c2-candlestick-chart': Omit<C2Props<CandlestickChart>, 'series' | 'annotations'> & {
         'open-field'?: Attribute
         'close-field'?: Attribute
         'low-field'?: Attribute
@@ -114,6 +118,7 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: CandlestickChart['series'] | string
+        annotations?: CandlestickChart['annotations'] | string
       }
       'c2-chart-legend': C2Props<ChartLegend>
       'c2-chart-series': C2Props<ChartSeries> & {
@@ -121,7 +126,7 @@ declare module 'react' {
         'span-gaps'?: Attribute
       }
       'c2-chart-tooltip': C2Props<ChartTooltip>
-      'c2-chord-chart': Omit<C2Props<ChordChart>, 'series'> & {
+      'c2-chord-chart': Omit<C2Props<ChordChart>, 'series' | 'annotations'> & {
         'source-field'?: Attribute
         'target-field'?: Attribute
         'value-field'?: Attribute
@@ -134,8 +139,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: ChordChart['series'] | string
+        annotations?: ChordChart['annotations'] | string
       }
-      'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series'> & {
+      'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series' | 'annotations'> & {
         'start-angle'?: Attribute
         'end-angle'?: Attribute
         'split-number'?: Attribute
@@ -148,8 +154,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: GaugeChart['series'] | string
+        annotations?: GaugeChart['annotations'] | string
       }
-      'c2-heatmap-chart': Omit<C2Props<HeatmapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scalePoles' | 'series'> & {
+      'c2-heatmap-chart': Omit<C2Props<HeatmapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scalePoles' | 'series' | 'annotations'> & {
         'y-field'?: Attribute
         'value-field'?: Attribute
         'value-label'?: Attribute
@@ -180,8 +187,9 @@ declare module 'react' {
         scaleColors?: HeatmapChart['scaleColors'] | string
         scalePoles?: HeatmapChart['scalePoles'] | string
         series?: HeatmapChart['series'] | string
+        annotations?: HeatmapChart['annotations'] | string
       }
-      'c2-line-chart': Omit<C2Props<LineChart>, 'series'> & {
+      'c2-line-chart': Omit<C2Props<LineChart>, 'series' | 'annotations'> & {
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -192,8 +200,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: LineChart['series'] | string
+        annotations?: LineChart['annotations'] | string
       }
-      'c2-map-chart': Omit<C2Props<MapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scaleLabels' | 'value' | 'series'> & {
+      'c2-map-chart': Omit<C2Props<MapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scaleLabels' | 'value' | 'series' | 'annotations'> & {
         'region-key'?: Attribute
         'region-field'?: Attribute
         'value-field'?: Attribute
@@ -214,6 +223,7 @@ declare module 'react' {
         scaleLabels?: MapChart['scaleLabels'] | string
         value?: MapChart['value'] | string
         series?: MapChart['series'] | string
+        annotations?: MapChart['annotations'] | string
       }
       'c2-map-layer': Omit<C2Props<MapLayer>, 'data'> & {
         'lon-field'?: Attribute
@@ -228,7 +238,7 @@ declare module 'react' {
         'width-label'?: Attribute
         data?: MapLayer['data'] | string
       }
-      'c2-overlap-chart': Omit<C2Props<OverlapChart>, 'selected' | 'series'> & {
+      'c2-overlap-chart': Omit<C2Props<OverlapChart>, 'selected' | 'series' | 'annotations'> & {
         'sets-field'?: Attribute
         'size-field'?: Attribute
         'set-labels'?: Attribute
@@ -242,8 +252,9 @@ declare module 'react' {
         'lazy-render'?: Attribute
         selected?: OverlapChart['selected'] | string
         series?: OverlapChart['series'] | string
+        annotations?: OverlapChart['annotations'] | string
       }
-      'c2-pie-chart': Omit<C2Props<PieChart>, 'series'> & {
+      'c2-pie-chart': Omit<C2Props<PieChart>, 'series' | 'annotations'> & {
         'inner-radius'?: Attribute
         'outer-radius'?: Attribute
         'start-angle'?: Attribute
@@ -256,8 +267,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: PieChart['series'] | string
+        annotations?: PieChart['annotations'] | string
       }
-      'c2-pyramid-chart': Omit<C2Props<PyramidChart>, 'series'> & {
+      'c2-pyramid-chart': Omit<C2Props<PyramidChart>, 'series' | 'annotations'> & {
         'label-content'?: Attribute
         'x-field'?: Attribute
         'label-field'?: Attribute
@@ -267,8 +279,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: PyramidChart['series'] | string
+        annotations?: PyramidChart['annotations'] | string
       }
-      'c2-radar-chart': Omit<C2Props<RadarChart>, 'series'> & {
+      'c2-radar-chart': Omit<C2Props<RadarChart>, 'series' | 'annotations'> & {
         'start-angle'?: Attribute
         'split-number'?: Attribute
         'fill-opacity'?: Attribute
@@ -280,8 +293,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: RadarChart['series'] | string
+        annotations?: RadarChart['annotations'] | string
       }
-      'c2-scatter-chart': Omit<C2Props<ScatterChart>, 'series'> & {
+      'c2-scatter-chart': Omit<C2Props<ScatterChart>, 'series' | 'annotations'> & {
         'symbol-size'?: Attribute
         'large-threshold'?: Attribute
         'x-field'?: Attribute
@@ -292,8 +306,9 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: ScatterChart['series'] | string
+        annotations?: ScatterChart['annotations'] | string
       }
-      'c2-sparkline': Omit<C2Props<Sparkline>, 'series'> & {
+      'c2-sparkline': Omit<C2Props<Sparkline>, 'series' | 'annotations'> & {
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -304,6 +319,7 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: Sparkline['series'] | string
+        annotations?: Sparkline['annotations'] | string
       }
     }
   }
