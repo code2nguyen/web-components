@@ -22,6 +22,7 @@ declare module 'vue' {
     'c2-tour': DefineComponent<
       C2Props<Tour> & {
         'storage-key'?: unknown
+        'skip-limit'?: unknown
         onStepChange?: (event: EventOf<Tour, 'step-change'>) => void
         onFinish?: (event: EventOf<Tour, 'finish'>) => void
         onSkip?: (event: EventOf<Tour, 'skip'>) => void

@@ -26,6 +26,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-tour': C2Props<Tour> & {
         'storage-key'?: Attribute
+        'skip-limit'?: Attribute
       }
       'c2-tour-step': C2Props<TourStep>
     }

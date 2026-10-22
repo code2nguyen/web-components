@@ -20,6 +20,8 @@ export interface TourProgress {
   status: TourStatus
   /** Index of the step shown last. */
   step: number
+  /** How many times the user has skipped the tour. */
+  skips: number
 }
 
 /** Detail of the `step-change` event. */
@@ -65,9 +67,10 @@ export interface Tour {
  * arrow keys move between steps while focus is in the panel. When it closes, focus returns to where it was before.
  *
  * With a `storage-key`, the tour remembers in `localStorage` whether the user finished it, skipped it or got part
- * way, and on which step (`progress`). Add `autostart` to open it by itself on the first visit: it then resumes on the
- * step it was left on, and stays closed once finished or skipped. `start()` and the trigger always open it; `reset()`
- * forgets the stored progress.
+ * way, on which step, and how many times it was skipped (`progress`). Add `autostart` to open it by itself on the
+ * first visit: it then resumes on the step it was left on, opens again from the first step after a skip, and stays
+ * closed once finished or skipped `skip-limit` times (once, by default). `start()` and the trigger always open it;
+ * `reset()` forgets the stored progress.
  *
  * Every tour a user ends fires exactly one `finish` (Done on the last step) or `skip` (Skip, the close button or Escape).
  * Moving between steps with the buttons, the keys or the methods fires `step-change`; setting `open` or `current`
@@ -175,16 +178,24 @@ export class Tour extends LitElement {
   @property() placement: Placement = 'bottom'
 
   /**
-   * `localStorage` key under which the tour remembers its progress (`{ "status", "step" }`). Empty, nothing is stored.
+   * `localStorage` key under which the tour remembers its progress (`{ "status", "step", "skips" }`). Empty, nothing is
+   * stored.
    * Use one key per tour, and a new key when a tour changes enough to be worth showing again.
    */
   @property({ attribute: 'storage-key' }) storageKey = ''
 
   /**
    * Opens the tour by itself when it is connected, unless the progress under `storage-key` says it was finished or
-   * skipped. It resumes on the stored step. Without a `storage-key` it opens on every page load.
+   * skipped `skip-limit` times. It resumes on the stored step, or on the first after a skip. Without a `storage-key`
+   * it opens on every page load.
    */
   @property({ type: Boolean }) autostart = false
+
+  /**
+   * How many skips turn `autostart` off for good. Below it, a skipped tour opens again from its first step on the next
+   * load. `0` never gives up: the tour keeps opening until it is finished.
+   */
+  @property({ type: Number, attribute: 'skip-limit' }) skipLimit = 1
 
   @query('.panel') private panel?: HTMLElement
   @query('.spotlight') private spotlight?: HTMLElement
@@ -212,12 +223,16 @@ export class Tour extends LitElement {
 
   /** The progress stored under `storage-key`: `new` when nothing is stored, the key is empty or storage is unavailable. */
   get progress(): TourProgress {
-    const fallback: TourProgress = { status: 'new', step: 0 }
+    const fallback: TourProgress = { status: 'new', step: 0, skips: 0 }
     if (!this.storageKey || isServer) return fallback
     try {
       const stored = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as Partial<TourProgress> | null
       if (!stored || !['in-progress', 'finished', 'skipped'].includes(stored.status ?? '')) return fallback
-      return { status: stored.status as TourStatus, step: Number.isInteger(stored.step) ? (stored.step as number) : 0 }
+      const status = stored.status as TourStatus
+      const step = Number.isInteger(stored.step) ? (stored.step as number) : 0
+      // A count stored before skips were counted: a skipped tour was skipped once.
+      const skips = Number.isInteger(stored.skips) ? Math.max(stored.skips as number, 0) : status === 'skipped' ? 1 : 0
+      return { status, step, skips }
     } catch {
       return fallback /* storage blocked or the value is not ours */
     }
@@ -233,13 +248,19 @@ export class Tour extends LitElement {
     }
   }
 
+  /** Whether `autostart` has given up: the tour was finished, or skipped as often as `skip-limit` allows. */
+  private settled({ status, skips }: TourProgress) {
+    return status === 'finished' || (status === 'skipped' && this.skipLimit > 0 && skips >= this.skipLimit)
+  }
+
   private saveProgress(status: TourStatus) {
     if (!this.storageKey) return
-    // Replaying a finished or skipped tour from its trigger does not make `autostart` open it again.
-    const stored = this.progress.status
-    if (status === 'in-progress' && (stored === 'finished' || stored === 'skipped')) return
+    const stored = this.progress
+    // Replaying a settled tour from its trigger does not make `autostart` open it again.
+    if (status === 'in-progress' && this.settled(stored)) return
+    const skips = stored.skips + (status === 'skipped' ? 1 : 0)
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({ status, step: this.currentIndex() } satisfies TourProgress))
+      localStorage.setItem(this.storageKey, JSON.stringify({ status, step: this.currentIndex(), skips } satisfies TourProgress))
     } catch {
       /* storage blocked or full: the tour works without it */
     }
@@ -247,9 +268,9 @@ export class Tour extends LitElement {
 
   private autostartFromProgress() {
     if (!this.autostart || this.open) return
-    const { status, step } = this.progress
-    if (status === 'finished' || status === 'skipped') return
-    this.start(step)
+    const progress = this.progress
+    if (this.settled(progress)) return
+    this.start(progress.status === 'skipped' ? 0 : progress.step)
   }
 
   private get triggers(): Element[] {

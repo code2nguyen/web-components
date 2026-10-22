@@ -228,19 +228,19 @@ test('storage-key remembers the step and how the tour ended', async ({ page, ren
   await page.evaluate(() => localStorage.removeItem('demo-tour'))
   await renderScenario(markup('storage-key="demo-tour"'))
   expect(await stored(page)).toBeNull()
-  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'new', step: 0 })
+  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'new', step: 0, skips: 0 })
   await launch(page)
-  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 0 })
+  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 0, skips: 0 })
   await button(page, 'Next').click()
-  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 1 })
+  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 1, skips: 0 })
   await page.keyboard.press('Escape')
-  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1 })
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1, skips: 1 })
 
   // Replaying a skipped tour keeps it marked as skipped until it is finished.
   await launch(page, 2)
-  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1 })
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1, skips: 1 })
   await button(page, 'Done').click()
-  await expect.poll(() => stored(page)).toEqual({ status: 'finished', step: 2 })
+  await expect.poll(() => stored(page)).toEqual({ status: 'finished', step: 2, skips: 1 })
 
   await host(page).evaluate((element) => element.reset())
   expect(await stored(page)).toBeNull()
@@ -282,4 +282,55 @@ test('storage that throws leaves the tour working', async ({ page, renderScenari
   await expect(dialog(page, 'Welcome')).toBeVisible()
   await button(page, 'Skip').click()
   await expect(panel(page)).toBeHidden()
+})
+
+test('below skip-limit a skipped tour autostarts again from its first step, then stops', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.removeItem('demo-tour'))
+  const autostart = markup('storage-key="demo-tour" autostart skip-limit="2"')
+
+  await renderScenario(autostart)
+  await button(page, 'Next').click()
+  await expect(dialog(page, 'Search')).toBeVisible()
+  await button(page, 'Skip').click()
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 1, skips: 1 })
+
+  // One skip of two: the next load opens it again, from the start.
+  await renderScenario(autostart)
+  await expect(dialog(page, 'Welcome')).toBeVisible()
+  await expect.poll(() => stored(page)).toEqual({ status: 'in-progress', step: 0, skips: 1 })
+  await page.keyboard.press('Escape')
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 0, skips: 2 })
+
+  // The second skip reaches the limit.
+  await renderScenario(autostart)
+  await expect(panel(page)).toBeHidden()
+
+  // Replaying it from code keeps it settled.
+  await host(page).evaluate((element) => element.start())
+  await expect(dialog(page, 'Welcome')).toBeVisible()
+  await expect.poll(() => stored(page)).toEqual({ status: 'skipped', step: 0, skips: 2 })
+})
+
+test('skip-limit="0" keeps autostarting until the tour is finished', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.setItem('demo-tour', JSON.stringify({ status: 'skipped', step: 1, skips: 5 })))
+  const autostart = markup('storage-key="demo-tour" autostart skip-limit="0"')
+
+  await renderScenario(autostart)
+  await expect(dialog(page, 'Welcome')).toBeVisible()
+  await host(page).evaluate((element) => element.goTo(2))
+  await button(page, 'Done').click()
+  await expect.poll(() => stored(page)).toEqual({ status: 'finished', step: 2, skips: 5 })
+
+  await renderScenario(autostart)
+  await expect(panel(page)).toBeHidden()
+})
+
+test('progress stored before skips were counted reads a skipped tour as skipped once', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tour/test/scenarios.html')
+  await page.evaluate(() => localStorage.setItem('demo-tour', JSON.stringify({ status: 'skipped', step: 1 })))
+  await renderScenario(markup('storage-key="demo-tour" autostart'))
+  await expect(panel(page)).toBeHidden()
+  await expect.poll(() => host(page).evaluate((element) => element.progress)).toEqual({ status: 'skipped', step: 1, skips: 1 })
 })
