@@ -18,7 +18,7 @@ interface LayoutEntry {
   height: number
 }
 
-/** Detail of `entry-click` and `entry-activate`: the entry and its position among the retained entries (`entryCount`), whatever the filter. */
+/** Detail of `entry-click`: the clicked entry and its position among the retained entries (`entryCount`), whatever the filter. */
 export interface LogViewerEntryEventDetail {
   entry: LogEntry
   index: number
@@ -27,7 +27,6 @@ export interface LogViewerEntryEventDetail {
 /** Events fired by {@link LogViewer}, keyed for `addEventListener`. */
 export interface LogViewerEventMap {
   'entry-click': CustomEvent<LogViewerEntryEventDetail>
-  'entry-activate': CustomEvent<LogViewerEntryEventDetail>
 }
 
 export interface LogViewer {
@@ -37,12 +36,9 @@ export interface LogViewer {
 
 /**
  * A text-only, variable-height virtual log viewport. Filters and search are controlled by the application.
- * With the viewport focused, the arrow keys move the active entry (scrolling it into view) and Enter activates it, Page Up
- * and Page Down scroll by a page, Home jumps to the first entry and End follows the latest; Ctrl/Command variants of
- * Home and End also work. The active entry is the viewport's `aria-activedescendant`, and a clicked entry becomes it.
+ * With the viewport focused, Home jumps to the first entry and End follows the latest; Ctrl/Command variants also work.
  * @tag c2-log-viewer
  * @event {CustomEvent<LogViewerEntryEventDetail>} entry-click - Fired when an entry is clicked, except on its copy button or at the end of a drag or text selection. Bubbles.
- * @event {CustomEvent<LogViewerEntryEventDetail>} entry-activate - Fired when Enter is pressed on the active entry: the keyboard counterpart of `entry-click`. Bubbles.
  * @cssproperty {CSS value} [--c2-log-viewer--height=480px] - Viewport height
  * @cssproperty {color} [--c2-log-viewer--background=#0b1220] - Terminal surface
  * @cssproperty {color} [--c2-log-viewer--color=#d3deee] - Text color
@@ -57,7 +53,6 @@ export interface LogViewer {
  * @cssproperty {CSS value} [--c2-log-viewer__empty--padding=24px] - Empty state inset
  * @cssproperty {color} [--c2-log-viewer__empty--color=#94a3b8] - Empty state text
  * @cssproperty {CSS value} [--c2-log-viewer__viewport__focus--outline=2px solid #60a5fa] - Keyboard focus indicator
- * @cssproperty {CSS value} [--c2-log-viewer__entry__active--outline=2px solid #60a5fa] - Active entry indicator, shown while the viewport has keyboard focus
  * @cssproperty {color} [--c2-log-viewer__timestamp--color=#94a3b8] - Timestamp text
  * @cssproperty {color} [--c2-log-viewer__attribute--color=#a5b4cc] - Secondary attribute text
  * @cssproperty {color} [--c2-log-viewer__level--color=#c4b5fd] - Unclassified level text
@@ -86,7 +81,7 @@ export interface LogViewer {
  * @csspart highlight - Matching visible entry or plain text slice in highlight mode
  * @csspart viewport - Keyboard accessible scroll surface
  * @csspart content - Virtual content and its total scroll extent
- * @csspart entry - Visible tabular entry; the active one also carries `data-active`
+ * @csspart entry - Visible tabular entry
  * @csspart cell - Attribute column containing its sticky text
  * @csspart text - Plain text content
  * @csspart empty - Empty state
@@ -94,10 +89,6 @@ export interface LogViewer {
 @customElement('c2-log-viewer')
 export class LogViewer extends LitElement {
   static override styles = unsafeCSS(styles)
-
-  // The host is the named landmark (from the author's `aria-label`); the focusable viewport inside it cannot be,
-  // because `aria-activedescendant` is not allowed on a region.
-  private readonly internals = this.attachInternals()
 
   /** Align attributes vertically in columns; false displays concatenated entry text. */
   @property({ type: Boolean, reflect: true }) tabular = true
@@ -149,8 +140,6 @@ export class LogViewer extends LitElement {
   private copyStatus = ''
   private copyVersion = 0
   private copyTimer?: ReturnType<typeof setTimeout>
-  // Source index of the entry the arrow keys move and Enter activates; null until the keyboard or a click picks one.
-  private activeSource: number | null = null
 
   /** Number of retained entries, including entries hidden by the current filter. */
   get entryCount(): number {
@@ -198,7 +187,6 @@ export class LogViewer extends LitElement {
     this.copiedSource = null
     this.copyStatus = ''
     clearTimeout(this.copyTimer)
-    this.activeSource = null
     // Text widths depend on the font, not the entries: an application that replaces its whole snapshot reuses them.
     this.rebuild = true
     this.resetAnchor = true
@@ -235,8 +223,6 @@ export class LogViewer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.internals.role = 'region'
-    if (!this.hasAttribute('aria-label')) this.internals.ariaLabel = 'Log content'
     if (this.hasUpdated) this.observe()
   }
 
@@ -512,26 +498,8 @@ export class LogViewer extends LitElement {
       return
     }
     if (event.ctrlKey || event.metaKey) return
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault()
-      this.moveActive(event.key === 'ArrowDown' ? 1 : -1)
-      return
-    }
-    if (event.key === 'Enter') {
-      const entry = this.activeSource === null || this.layoutPosition(this.activeSource) < 0 ? undefined : this.entries[this.activeSource]
-      if (!entry) return
-      event.preventDefault()
-      this.dispatchEvent(
-        new CustomEvent<LogViewerEntryEventDetail>('entry-activate', {
-          detail: { entry: { ...entry }, index: this.activeSource! },
-          bubbles: true,
-          composed: true,
-        }),
-      )
-      return
-    }
     const page = Math.max(this.lineHeight, viewport.clientHeight - this.lineHeight)
-    const distances: Record<string, number> = { PageUp: -page, PageDown: page }
+    const distances: Record<string, number> = { PageUp: -page, PageDown: page, ArrowUp: -this.lineHeight, ArrowDown: this.lineHeight }
     const distance = distances[event.key]
     if (distance === undefined) return
     event.preventDefault()
@@ -540,40 +508,6 @@ export class LogViewer extends LitElement {
     this.viewTop = Math.max(0, Math.min(viewport.scrollTop + distance, viewport.scrollHeight - viewport.clientHeight))
     this.follow = viewport.scrollHeight - this.viewTop - viewport.clientHeight <= 2
     viewport.scrollTo({ top: this.viewTop, behavior: 'instant' })
-    this.requestUpdate()
-  }
-
-  /**
-   * Steps the active entry by one shown entry and scrolls it into view. An active entry scrolled out of sight (or
-   * filtered out) is not stepped from: the keyboard picks up from the viewport instead, at its first entry going down
-   * and its last going up.
-   */
-  private moveActive(step: 1 | -1): void {
-    const count = this.layout.length
-    if (!count) return
-    const offsets = this.index.offsets
-    const bottom = this.viewTop + this.viewportHeight
-    const current = this.activeSource === null ? -1 : this.layoutPosition(this.activeSource)
-    const inView = current >= 0 && offsets[current + 1] > this.viewTop && offsets[current] < bottom
-    let position = current + step
-    if (!inView) {
-      // The first (going down) or last (going up) entry the viewport shows whole, else the one it cuts.
-      const fits = (at: number) => at >= 0 && at < count && offsets[at] >= this.viewTop && offsets[at + 1] <= bottom
-      position = step > 0 ? this.index.at(this.viewTop) : this.index.at(Math.max(0, bottom - 1))
-      if (!fits(position) && fits(position + step)) position += step
-    }
-    position = Math.max(0, Math.min(count - 1, position))
-    this.activeSource = this.layout[position].source
-    const top = offsets[position]
-    const end = offsets[position + 1]
-    const viewport = this.viewport
-    if (viewport && (top < this.viewTop || end > bottom)) {
-      // The smallest scroll that shows the entry; one taller than the viewport is shown from its start.
-      this.viewTop = top < this.viewTop || end - top > this.viewportHeight ? top : end - this.viewportHeight
-      this.pinned = false
-      this.follow = viewport.scrollHeight - this.viewTop - viewport.clientHeight <= 2
-      viewport.scrollTo({ top: this.viewTop, behavior: 'instant' })
-    }
     this.requestUpdate()
   }
 
@@ -595,11 +529,6 @@ export class LogViewer extends LitElement {
     }
     const entry = this.entries[index]
     if (!entry) return
-    // The keyboard carries on from the entry the pointer chose.
-    if (this.activeSource !== index) {
-      this.activeSource = index
-      this.requestUpdate()
-    }
     this.dispatchEvent(new CustomEvent<LogViewerEntryEventDetail>('entry-click', { detail: { entry: { ...entry }, index }, bubbles: true, composed: true }))
   }
 
@@ -689,18 +618,14 @@ export class LogViewer extends LitElement {
     const start = this.index.at(Math.max(0, this.viewTop - 200))
     const end = Math.min(this.layout.length, this.index.at(this.viewTop + this.viewportHeight + 200) + 1)
     const template = this.widths.map((width) => `${width}px`).join(' ')
-    // Only a rendered entry can be the active descendant: one scrolled out of the virtual window has no element.
-    const activePosition = this.activeSource === null ? -1 : this.layoutPosition(this.activeSource)
-    const activeId = activePosition >= start && activePosition < end ? `entry-${this.activeSource}` : undefined
     return html` <div class="probe" aria-hidden="true">
         <span class="message-probe">M</span><span class="cell-probe">MMMMMMMMMMMMMMMM</span><span class="inset-probe"></span>
       </div>
       <div
         part="viewport"
         tabindex="0"
-        role="group"
+        role="region"
         aria-label=${this.getAttribute('aria-label') ?? 'Log content'}
-        aria-activedescendant=${activeId ?? nothing}
         @scroll=${this.onScroll}
         @keydown=${this.onKeyDown}
         @click=${this.onClick}
@@ -711,12 +636,9 @@ export class LogViewer extends LitElement {
         <div part="content" style=${`height:${this.index.total}px;min-width:${this.extent}px`}>
           ${this.layout.slice(start, end).map((entry, offset) => {
             const top = this.index.offsets[start + offset]
-            const active = entry.source === this.activeSource
             if (this.tabular)
               return html`<div
                 part=${entry.highlighted ? 'entry highlight' : 'entry'}
-                id=${`entry-${entry.source}`}
-                ?data-active=${active}
                 data-copy-source=${entry.source}
                 data-copy-hover=${this.hoveredSource === entry.source ? 'true' : 'false'}
                 data-index=${entry.source}
@@ -734,8 +656,6 @@ export class LogViewer extends LitElement {
             const sliceHeight = (last - first) * this.lineHeight
             return html`<div
               class="plain-entry"
-              id=${`entry-${entry.source}`}
-              ?data-active=${active}
               data-copy-source=${entry.source}
               data-copy-hover=${this.hoveredSource === entry.source ? 'true' : 'false'}
               style=${`top:${sliceTop}px;height:${sliceHeight}px;left:${this.inset}px;width:${this.extent - this.inset * 2}px`}

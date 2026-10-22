@@ -40,7 +40,6 @@
     copy__hover--background: #2a4263,
     copy__focus--outline: 2px solid #60a5fa,
     viewport__focus--outline: 2px solid #60a5fa,
-    entry__active--outline: 2px solid #60a5fa,
   )
 );
 
@@ -159,10 +158,6 @@
 .plain-entry {
   position: absolute;
 }
-[part='viewport']:focus-visible [data-active] {
-  outline: css.cssVar(entry__active--outline);
-  outline-offset: -2px;
-}
 .copy-area {
   position: absolute;
   top: 0;
@@ -207,7 +202,6 @@
   }
 }
 [data-copy-hover='true'] [part='copy-button'],
-[part='viewport']:focus-visible [data-active] [part='copy-button'],
 [part~='entry']:focus-within [part='copy-button'],
 .plain-entry:focus-within [part='copy-button'] {
   opacity: 1;
