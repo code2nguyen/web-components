@@ -20,9 +20,9 @@ npm install @c2n/components
 </script>
 ```
 
-- **Selection**: `crop` is `{ x, y, width, height }` in the image's natural pixels (JSON in markup). Left unset, the cropper selects the centred 80% of the image once it loads; `reset()` does that again.
+- **Selection**: `crop` is `{ x, y, width, height }` in the image's natural pixels (JSON in markup). Left unset, the cropper selects the centred 80% of the image once it loads; `reset()` does that again. A `crop` off `aspect-ratio` is refitted around its centre.
 - **Proportions**: `aspect-ratio` locks them (`1`, `16/9`, `4:3`, `1.5`); changing it refits the selection around its centre. `shape="ellipse"` rounds the selection and clips the output to it.
-- **Input**: drag the selection to move it, a handle to resize it, or the image outside it to draw a new one; Escape cancels a drag. The selection is one tab stop: Arrow keys move it (Shift for 10×), Alt + Arrow keys move its right or bottom edge, `+`/`-` scale it, and the result is announced. `disabled` locks it.
+- **Input**: drag the selection to move it, a handle to resize it, or the image outside it to draw a new one; Escape (or a cancelled pointer) undoes a drag. The selection is one tab stop: Arrow keys move it (Shift for 10×), Alt + Arrow keys move its right or bottom edge, `+`/`-` scale it, and the result is announced. `disabled` locks it.
 - **Output**: `toCanvas({ width?, height? })` and `toBlob(type?, quality?, { width?, height? })` draw the selection at its natural size or the size you give. A cross-origin image needs `crossorigin="anonymous"` and CORS headers, or the canvas cannot be read.
 - **Events**: `crop-input` on every step of a drag, `crop-change` when the reader lets go or presses a key; neither bubbles, and neither fires for changes made by script. `load` and `error` are re-dispatched from the image.
 - **Empty state**: the `placeholder` slot shows while there is no `src`.

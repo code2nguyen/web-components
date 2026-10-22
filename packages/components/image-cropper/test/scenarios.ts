@@ -25,6 +25,8 @@ const attributes: Record<string, string> = {
   authored: `crop='{"x":10,"y":20,"width":100,"height":50}'`,
   disabled: 'disabled',
   french: 'lang="fr"',
+  'authored-square': `aspect-ratio="1" crop='{"x":0,"y":0,"width":200,"height":100}'`,
+  rtl: 'dir="rtl"',
 }
 const src = scenario === 'empty' ? '' : quadrants()
 main.innerHTML = `<button id="before">Before</button>

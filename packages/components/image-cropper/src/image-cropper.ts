@@ -79,7 +79,7 @@ const ratioConverter = {
 /**
  * Lets the reader choose the part of an image to keep — an avatar from a photo, a banner from a screenshot — and
  * hands the app that part as a canvas or a blob. The selection is drawn over the image with the rest dimmed; drag it
- * to move it, drag a handle to resize it, or drag on the image outside it to draw a new one. Escape cancels a drag.
+ * to move it, drag a handle to resize it, or drag on the image outside it to draw a new one. Escape, or the browser taking the pointer away, cancels a drag.
  *
  * The selection is one tab stop. Arrow keys move it (Shift for ten times the step), Alt + Arrow keys move its right or
  * bottom edge, and `+`/`-` scale it around its centre; the new size and position are announced.
@@ -142,7 +142,7 @@ export class ImageCropper extends LitElement {
   /** `ellipse` rounds the selection and makes `toCanvas`/`toBlob` clip to it (transparent corners in a PNG). */
   @property() shape: ImageCropperShape = 'rectangle'
 
-  /** The selection, in the image's natural pixels (JSON in markup). Set by the cropper once the image loads when left unset. */
+  /** The selection, in the image's natural pixels (JSON in markup). Set by the cropper once the image loads when left unset; kept inside the image and refitted around its centre when it is off `aspect-ratio`. */
   @property({ converter: jsonPropertyConverter }) crop: CropRect | undefined = undefined
 
   /** Locks the selection: no dragging, no keyboard, not focusable. */
@@ -174,15 +174,16 @@ export class ImageCropper extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    // A drag cannot outlive the image it started on, or carry on once the cropper is locked.
+    if (this.gesture && changed.has('src')) this.endGesture(this.gesture.pointerId)
+    else if (this.gesture && this.disabled) this.cancelGesture()
     if (changed.has('src') && changed.get('src')) {
       this.loaded = false
       if (!changed.has('crop')) this.crop = undefined
     }
     if (!this.loaded) return
-    if (changed.has('aspectRatio') && changed.get('aspectRatio') !== undefined && this.aspectRatio && this.crop) {
-      this.crop = this.fitRatio(this.crop)
-    } else if (changed.has('crop')) {
-      const crop = this.crop ? this.bounded(this.crop) : this.initialCrop()
+    if (changed.has('crop') || changed.has('aspectRatio')) {
+      const crop = this.fitted(this.crop)
       if (!this.crop || !sameRect(crop, this.crop)) this.crop = crop
     }
   }
@@ -194,8 +195,7 @@ export class ImageCropper extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.gesture = undefined
-    this.dragging = false
+    this.cancelGesture()
   }
 
   /** Selects the centred 80% of the image again, at the current `aspect-ratio`. */
@@ -243,7 +243,7 @@ export class ImageCropper extends LitElement {
 
   private handleLoad(event?: Event) {
     this.loaded = true
-    this.crop = this.crop ? this.bounded(this.crop) : this.initialCrop()
+    this.crop = this.fitted(this.crop)
     if (event) redispatchEvent(this, event)
   }
 
@@ -274,6 +274,17 @@ export class ImageCropper extends LitElement {
     const width = clamp(Number(crop.width) || 0, 1, W)
     const height = clamp(Number(crop.height) || 0, 1, H)
     return { x: clamp(Number(crop.x) || 0, 0, W - width), y: clamp(Number(crop.y) || 0, 0, H - height), width, height }
+  }
+
+  /** `crop` kept inside the image and at `aspect-ratio`, or the initial selection when there is none. */
+  private fitted(crop: CropRect | undefined): CropRect {
+    if (!crop) return this.initialCrop()
+    const ratio = this.aspectRatio
+    const width = Number(crop.width) || 0
+    const height = Number(crop.height) || 0
+    // Gestures already keep the ratio; only refit a rectangle that is visibly off it, so float noise is left alone.
+    if (ratio && height > 0 && Math.abs(width / height - ratio) > ratio * 1e-6) return this.fitRatio(crop)
+    return this.bounded(crop)
   }
 
   /** The rectangle at `aspect-ratio` with the same area and centre as `crop`, made to fit the image. */
@@ -372,7 +383,7 @@ export class ImageCropper extends LitElement {
     // A press on the image is a click until the pointer travels a few pixels.
     if (gesture.kind === 'draw' && !gesture.moved && Math.hypot(point.x - gesture.start.x, point.y - gesture.start.y) < 3 * this.scale()) return
     gesture.moved = true
-    this.commit(this.cropFor(gesture, point), 'crop-input')
+    this.commit(this.cropFor(gesture, point))
   }
 
   private handlePointerUp(event: PointerEvent) {
@@ -380,6 +391,19 @@ export class ImageCropper extends LitElement {
     if (!gesture || event.pointerId !== gesture.pointerId) return
     this.endGesture(event.pointerId)
     if (gesture.moved && this.crop && !sameRect(this.crop, gesture.startCrop)) this.emit('crop-change')
+  }
+
+  /** The browser took the pointer away (a system gesture, palm rejection): undo the drag rather than commit it. */
+  private handlePointerCancel(event: PointerEvent) {
+    if (this.gesture?.pointerId === event.pointerId) this.cancelGesture()
+  }
+
+  /** Ends the current drag and puts the selection back where it started. */
+  private cancelGesture() {
+    const gesture = this.gesture
+    if (!gesture) return
+    this.endGesture(gesture.pointerId)
+    if (gesture.moved) this.commit(gesture.startCrop)
   }
 
   private endGesture(pointerId: number) {
@@ -391,27 +415,28 @@ export class ImageCropper extends LitElement {
   private handleKeyDown(event: KeyboardEvent) {
     this.pointerFocus = false
     if (this.disabled || !this.crop) return
-    if (event.key === 'Escape' && this.gesture) {
-      event.preventDefault()
-      const { startCrop, pointerId, moved } = this.gesture
-      this.endGesture(pointerId)
-      if (moved) this.commit(startCrop, 'crop-input')
+    if (this.gesture) {
+      // The pointer owns the selection until it is released: Escape cancels the drag, other keys wait.
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        this.cancelGesture()
+      }
       return
     }
     const crop = this.keyboardCrop(event, this.crop)
     if (!crop) return
     event.preventDefault()
-    if (this.commit(crop, 'crop-input')) this.emit('crop-change')
+    if (this.commit(crop)) this.emit('crop-change')
     const c = this.crop
     this.announcement = this.msg.t('status', Math.round(c.width), Math.round(c.height), Math.round(c.x), Math.round(c.y))
   }
 
   private keyboardCrop(event: KeyboardEvent, crop: CropRect): CropRect | undefined {
     const step = (event.shiftKey ? 10 : 1) * this.scale()
-    const rtl = getComputedStyle(this).direction === 'rtl'
+    // An image is not mirrored in a right-to-left context, so neither are the keys.
     const directions: Record<string, Point> = {
-      ArrowLeft: { x: rtl ? step : -step, y: 0 },
-      ArrowRight: { x: rtl ? -step : step, y: 0 },
+      ArrowLeft: { x: -step, y: 0 },
+      ArrowRight: { x: step, y: 0 },
       ArrowUp: { x: 0, y: -step },
       ArrowDown: { x: 0, y: step },
     }
@@ -441,11 +466,11 @@ export class ImageCropper extends LitElement {
     return this.bounded({ x: crop.x + (crop.width - width) / 2, y: crop.y + (crop.height - height) / 2, width, height })
   }
 
-  /** Sets the selection and fires `type` when it changed. */
-  private commit(crop: CropRect, type: 'crop-input'): boolean {
+  /** Sets the selection and fires `crop-input` when it changed. */
+  private commit(crop: CropRect): boolean {
     if (this.crop && sameRect(crop, this.crop)) return false
     this.crop = crop
-    this.emit(type)
+    this.emit('crop-input')
     return true
   }
 
@@ -506,8 +531,8 @@ export class ImageCropper extends LitElement {
           @pointerdown=${this.handlePointerDown}
           @pointermove=${this.handlePointerMove}
           @pointerup=${this.handlePointerUp}
-          @pointercancel=${this.handlePointerUp}
-          @lostpointercapture=${this.handlePointerUp}
+          @pointercancel=${this.handlePointerCancel}
+          @lostpointercapture=${this.handlePointerCancel}
         >
           <img
             part="image"

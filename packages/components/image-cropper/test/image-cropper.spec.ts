@@ -148,6 +148,46 @@ test('authored crop is kept', async ({ page, scenario }) => {
   expect(await crop(page)).toEqual({ x: 10, y: 20, width: 100, height: 50 })
 })
 
+test('an authored crop off aspect-ratio is refitted around its centre', async ({ page, scenario }) => {
+  await scenario('authored-square')
+  // The same area (200 × 100) as a square centred on (100, 50), then moved down to stay inside the image.
+  expect(await crop(page)).toEqual({ x: 29, y: 0, width: 141, height: 141 })
+})
+
+test('keys wait while the pointer drags the selection', async ({ page, scenario }) => {
+  await scenario()
+  const image = await origin(page)
+  await page.mouse.move(image.x + 200, image.y + 150)
+  await page.mouse.down()
+  await page.mouse.move(image.x + 190, image.y + 150, { steps: 2 })
+  await page.keyboard.press('ArrowRight')
+  expect((await crop(page)).x).toBe(30)
+  await page.keyboard.press('Escape')
+  await page.mouse.up()
+  expect(await crop(page)).toEqual({ x: 40, y: 30, width: 320, height: 240 })
+  await expect(events(page)).toHaveText(/change:0$/)
+})
+
+test('disabling the cropper mid-drag cancels the drag', async ({ page, scenario }) => {
+  await scenario()
+  const image = await origin(page)
+  await page.mouse.move(image.x + 200, image.y + 150)
+  await page.mouse.down()
+  await page.mouse.move(image.x + 150, image.y + 150, { steps: 2 })
+  await page.locator('c2-image-cropper').evaluate((element: ImageCropper) => (element.disabled = true))
+  await page.mouse.move(image.x + 100, image.y + 150, { steps: 2 })
+  await page.mouse.up()
+  expect(await crop(page)).toEqual({ x: 40, y: 30, width: 320, height: 240 })
+  await expect(events(page)).toHaveText(/change:0$/)
+})
+
+test('arrow keys follow the image, which is not mirrored right to left', async ({ page, scenario }) => {
+  await scenario('rtl')
+  await selection(page).focus()
+  await page.keyboard.press('ArrowLeft')
+  expect((await crop(page)).x).toBe(39)
+})
+
 test('toBlob returns the selection as a PNG at its natural size', async ({ page, scenario }) => {
   await scenario('authored')
   const size = await page.locator('c2-image-cropper').evaluate(async (element: ImageCropper) => {
