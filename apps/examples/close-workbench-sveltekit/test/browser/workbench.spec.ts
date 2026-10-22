@@ -52,7 +52,7 @@ test('a manual match survives a reload', async ({ page }) => {
   await page.goto('./reconcile/')
   await page.locator('c2-table[aria-label="Bank statement lines"]').getByText('MOBILE DEPOSIT').click()
   await page.locator('c2-table[aria-label="Ledger entries"]').getByText('Receipt Lindqvist Catering · INV-1059').click()
-  await expect(page.getByText('The two sides agree.')).toBeVisible()
+  await expect(page.getByText('The two sides agree: 9 days apart, no shared reference.')).toBeVisible()
   await page.getByRole('button', { name: 'Match selected' }).click()
   await expect(page.getByText(/^43 matches/)).toBeVisible()
 
@@ -62,8 +62,13 @@ test('a manual match survives a reload', async ({ page }) => {
 
 test('the board refuses a move that would break the books', async ({ page }) => {
   await page.goto('./exceptions/')
-  await page.getByRole('button', { name: 'Open Check 10251 · Alder Electric' }).click()
-  await page.locator('c2-sheet').getByRole('button', { name: 'Move to Needs adjustment' }).click()
+  // Pick the timing card up with the keyboard and drop it two columns over, on Needs adjustment.
+  const card = page.locator('c2-kanban').locator('[part~="card"]', { hasText: 'Check 10251 · Alder Electric' })
+  await card.focus()
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Space')
   await expect(page.locator('c2-toast-region')).toContainText('changes nothing in the books')
 })
 

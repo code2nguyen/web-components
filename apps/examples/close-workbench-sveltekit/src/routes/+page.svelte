@@ -43,30 +43,30 @@
     const posted = workbench.posted.length > 0 && pendingAdjustments === 0
     const status = (done: boolean, active: boolean): StepStatus => (done ? 'success' : active ? 'current' : 'pending')
     return [
-      { id: 'import', label: 'Statement imported', detail: `${workbench.month.bank.length} bank lines`, status: 'success' as StepStatus },
-      { id: 'match', label: 'Lines matched', detail: `${matched} of ${workbench.lineCount}`, status: 'success' as StepStatus },
+      { id: 'import', label: 'Statement imported', trailing: `${workbench.month.bank.length} bank lines`, status: 'success' as StepStatus },
+      { id: 'match', label: 'Lines matched', trailing: `${matched} of ${workbench.lineCount}`, status: 'success' as StepStatus },
       {
         id: 'exceptions',
         label: 'Exceptions worked',
-        detail: openCount ? `${openCount} open` : 'all resolved',
+        trailing: openCount ? `${openCount} open` : 'all resolved',
         status: status(openCount === 0, true),
       },
       {
         id: 'post',
         label: 'Adjustments posted',
-        detail: workbench.posted.length ? `${formatSigned(recon.adjustmentsPosted)} to cash` : 'none yet',
+        trailing: workbench.posted.length ? `${formatSigned(recon.adjustmentsPosted)} to cash` : 'none yet',
         status: status(posted, pendingAdjustments > 0),
       },
       {
         id: 'difference',
         label: 'Difference is zero',
-        detail: recon.difference === 0 ? 'adjusted bank = adjusted book' : `${formatMoney(recon.difference)} unexplained`,
+        trailing: recon.difference === 0 ? 'adjusted bank = adjusted book' : `${formatMoney(recon.difference)} unexplained`,
         status: recon.difference === 0 ? ('success' as StepStatus) : ('warning' as StepStatus),
       },
       {
         id: 'sign',
         label: 'Preparer sign-off',
-        detail: workbench.signOff ? `${workbench.signOff.by}` : 'waiting',
+        trailing: workbench.signOff ? `${workbench.signOff.by}` : 'waiting',
         status: status(!!workbench.signOff, workbench.readyToSignOff),
       },
     ]
@@ -85,20 +85,22 @@
   </div>
 
   <section class="stats" aria-label="Reconciliation at a glance">
-    <c2-stat label="Lines reconciled" value={`${Math.round(workbench.reconciledShare * 100)}%`} tone="primary">
+    <c2-stat class="stat-accent" label="Lines reconciled" value={`${Math.round(workbench.reconciledShare * 100)}%`}>
       <c2-feather-git-merge slot="icon"></c2-feather-git-merge>
       <span slot="description">{workbench.matchedLineCount} of {workbench.lineCount} matched, the rest explained</span>
     </c2-stat>
-    <c2-stat label="Unreconciled difference" value={formatMoney(recon.difference)} tone={recon.difference === 0 ? 'success' : 'danger'}>
+    <c2-stat label="Unreconciled difference" tone={recon.difference === 0 ? 'positive' : 'negative'}>
       <c2-feather-dollar-sign slot="icon"></c2-feather-dollar-sign>
+      <span slot="value" class="amount">{formatMoney(recon.difference)}</span>
       <span slot="description">adjusted bank minus adjusted book</span>
     </c2-stat>
-    <c2-stat label="Open exceptions" value={String(openCount)} tone={openCount ? 'warning' : 'success'}>
+    <c2-stat label="Open exceptions" value={String(openCount)} tone={openCount ? 'warning' : 'positive'}>
       <c2-feather-alert-triangle slot="icon"></c2-feather-alert-triangle>
       <span slot="description">{pendingAdjustments} waiting for an adjusting entry</span>
     </c2-stat>
-    <c2-stat label="Adjustments posted" value={formatSigned(recon.adjustmentsPosted)} tone="neutral">
+    <c2-stat label="Adjustments posted">
       <c2-feather-layers slot="icon"></c2-feather-layers>
+      <span slot="value" class="amount">{formatSigned(recon.adjustmentsPosted)}</span>
       <span slot="description">{workbench.posted.length} journal lines</span>
     </c2-stat>
   </section>
@@ -110,15 +112,17 @@
         <c2-badge tone={recon.difference === 0 ? 'success' : 'danger'}>{recon.difference === 0 ? 'Reconciled' : 'Not reconciled'}</c2-badge>
       </div>
       <c2-description-list class="recon" aria-label="Bank reconciliation">
-        <c2-description-item label="Balance per bank statement"><span class="amount">{formatMoney(recon.statementBalance)}</span></c2-description-item>
-        <c2-description-item label="+ Deposits in transit"><span class="amount">{formatMoney(recon.depositsInTransit)}</span></c2-description-item>
-        <c2-description-item label="− Outstanding checks"><span class="amount">{formatMoney(recon.outstandingChecks)}</span></c2-description-item>
-        <c2-description-item label="Adjusted bank balance"><strong class="amount">{formatMoney(recon.adjustedBank)}</strong></c2-description-item>
-        <c2-description-item label="Balance per books"><span class="amount">{formatMoney(recon.bookBalance)}</span></c2-description-item>
-        <c2-description-item label="± Adjustments posted"><span class="amount">{formatSigned(recon.adjustmentsPosted)}</span></c2-description-item>
-        <c2-description-item label="Adjusted book balance"><strong class="amount">{formatMoney(recon.adjustedBook)}</strong></c2-description-item>
-        <c2-description-item label="Difference">
-          <strong class="amount" class:bad={recon.difference !== 0}>{formatMoney(recon.difference)}</strong>
+        <c2-description-item label="Balance per bank statement"><span class="figure">{formatMoney(recon.statementBalance)}</span></c2-description-item>
+        <c2-description-item label="+ Deposits in transit"><span class="figure">{formatMoney(recon.depositsInTransit)}</span></c2-description-item>
+        <c2-description-item label="− Outstanding checks" class="rule"><span class="figure">{formatMoney(recon.outstandingChecks)}</span></c2-description-item>
+        <c2-description-item label="Adjusted bank balance" class="subtotal gap"
+          ><span class="figure">{formatMoney(recon.adjustedBank)}</span></c2-description-item
+        >
+        <c2-description-item label="Balance per books"><span class="figure">{formatMoney(recon.bookBalance)}</span></c2-description-item>
+        <c2-description-item label="± Adjustments posted" class="rule"><span class="figure">{formatSigned(recon.adjustmentsPosted)}</span></c2-description-item>
+        <c2-description-item label="Adjusted book balance" class="subtotal"><span class="figure">{formatMoney(recon.adjustedBook)}</span></c2-description-item>
+        <c2-description-item label="Difference" class="subtotal">
+          <span class="figure" class:bad={recon.difference !== 0}>{formatMoney(recon.difference)}</span>
         </c2-description-item>
       </c2-description-list>
     </c2-card>
@@ -130,7 +134,7 @@
           <c2-badge tone="success">Signed {new Date(workbench.signOff.at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</c2-badge>
         {/if}
       </div>
-      <c2-steps aria-label="Sign-off checklist" steps={data(steps)}></c2-steps>
+      <c2-steps class="checklist" aria-label="Sign-off checklist" steps={data(steps)}></c2-steps>
       <div slot="footer" class="sign-footer">
         {#if workbench.signOff}
           <p class="muted">Signed off by {workbench.signOff.by}. Any change to the reconciliation clears the sign-off.</p>
@@ -189,9 +193,41 @@
 </main>
 
 <style>
+  /* The reconciliation as an accountant writes it: amounts right-aligned, a rule above each subtotal. */
   .recon {
     --c2-description-list__grid--columns: 1;
-    --c2-description-item__label--width: 220px;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__label--width: 240px;
+    --c2-description-item__label--color: var(--cw-muted);
+    --c2-description-item__label--font-weight: 400;
+    --c2-description-item__container--padding: 5px 0;
+  }
+
+  .recon .rule {
+    --c2-description-item__container--border-bottom: 1px solid var(--cw-border);
+  }
+
+  .recon .subtotal {
+    --c2-description-item__label--color: var(--cw-text);
+    --c2-description-item__label--font-weight: 600;
+    --c2-description-item__value--font-weight: 600;
+  }
+
+  .recon .gap {
+    --c2-description-item__container--padding: 5px 0 14px;
+  }
+
+  .figure {
+    display: block;
+    font-family: var(--cw-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .checklist {
+    --c2-step__trailing--color: var(--cw-muted);
+    --c2-step__trailing--font-size: 13px;
+    --c2-step__row--padding-block: 6px;
   }
 
   .bad {

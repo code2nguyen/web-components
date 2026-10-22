@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths'
   import { html } from '@c2n/core/lit-helper.js'
   import type { Kanban, KanbanEventMap, KanbanRenderContext } from '@c2n/components/kanban'
   import type { SelectEventMap } from '@c2n/components/select'
@@ -19,7 +20,7 @@
     { id: 'resolved', label: 'Resolved', hint: 'Posted or explained' },
   ]
 
-  const KINDS: Record<ExceptionKind, { label: string; tone: string }> = {
+  const KINDS: Record<ExceptionKind, { label: string; tone: 'danger' | 'warning' | 'info' | 'neutral' }> = {
     unrecorded: { label: 'Not in books', tone: 'danger' },
     'amount-mismatch': { label: 'Amount mismatch', tone: 'warning' },
     duplicate: { label: 'Duplicate', tone: 'warning' },
@@ -101,6 +102,15 @@
   }
 
   const proposal = $derived(open ? proposeEntry(open, 'ADJ', workbench.bankById, workbench.ledgerById) : [])
+
+  /** The one move that resolves the open card: an entry for what changes cash, an explanation for what does not. */
+  const next = $derived.by((): ExceptionStage | 'journal' | null => {
+    if (!open) return null
+    const stage = workbench.stageOf(open)
+    if (stage === 'resolved') return null
+    if (open.cashEffect === 0) return 'resolved'
+    return stage === 'adjust' ? 'journal' : 'adjust'
+  })
 </script>
 
 <main class="page">
@@ -111,19 +121,13 @@
     </div>
   </div>
 
-  <section class="totals" aria-label="Board totals">
-    {#each totals as column (column.id)}
-      <div class="total">
-        <span class="muted">{column.label}</span>
-        <strong>{column.count}</strong>
-        <span class="amount muted">{formatSigned(column.effect)} cash</span>
-      </div>
-    {/each}
-  </section>
-
   <c2-kanban class="board" aria-label="Reconciliation exceptions" editable items={data(items)} oncard-move={onCardMove} {@attach cardRenderer}>
-    {#each COLUMNS as column (column.id)}
+    {#each totals as column (column.id)}
       <c2-kanban-column column-id={column.id} label={column.label}>
+        <div slot="header" class="column-head">
+          <h2>{column.label} <span class="muted">{column.count}</span></h2>
+          <span class="amount muted" title="Effect on cash">{formatSigned(column.effect)}</span>
+        </div>
         <span slot="empty" class="muted empty">{column.hint}</span>
       </c2-kanban-column>
     {/each}
@@ -138,7 +142,7 @@
         <c2-badge tone={KINDS[open.kind].tone}>{KINDS[open.kind].label}</c2-badge>
         <c2-badge tone="neutral">{COLUMNS.find((column) => column.id === workbench.stageOf(open!))?.label}</c2-badge>
       </div>
-      <p>{open.hint}</p>
+      <p class="callout callout-{KINDS[open.kind].tone}">{open.hint}</p>
 
       <c2-description-list aria-label="Lines involved" class="lines">
         {#each open.bankIds as id (id)}
@@ -201,39 +205,83 @@
       </div>
     </div>
     <div slot="footer" class="detail-actions">
-      {#each COLUMNS.filter((column) => column.id !== workbench.stageOf(open!)) as column (column.id)}
-        <c2-button class="button-quiet" onclick={() => moveOpen(column.id)}>Move to {column.label}</c2-button>
-      {/each}
+      {#if next === 'journal'}
+        <c2-link-button href={resolve('/journal')}>Post it from the journal →</c2-link-button>
+      {:else if next}
+        <c2-button onclick={() => moveOpen(next)}>Move to {COLUMNS.find((column) => column.id === next)?.label}</c2-button>
+      {/if}
+      {#if workbench.stageOf(open) === 'new'}
+        <c2-button class="button-quiet" onclick={() => moveOpen('investigating')}>Mark as investigating</c2-button>
+      {:else}
+        <c2-button class="button-quiet" onclick={() => moveOpen('new')}>Back to Unreviewed</c2-button>
+      {/if}
     </div>
   {/if}
 </c2-sheet>
 
 <style>
-  .totals {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+  .board {
+    display: block;
   }
 
-  .total {
-    display: grid;
-    gap: 2px;
-    padding: 12px 14px;
-    border: 1px solid var(--cw-border);
-    border-radius: var(--cw-radius);
-    background: var(--cw-surface);
+  /* Columns are tinted lanes, cards white tiles on them; the drop gap is a dashed tint of the accent. */
+  .board c2-kanban-column {
+    --c2-kanban-column--background-color: var(--cw-surface-2);
+    --c2-kanban-column--border: 0;
+    --c2-kanban-column--border-radius: var(--cw-radius);
+    --c2-kanban-column--padding: 12px;
+    --c2-kanban-column--gap: 10px;
+    --c2-kanban-column__cards--gap: 10px;
+    --c2-kanban-column__card--background-color: var(--cw-surface);
+    --c2-kanban-column__card--border: 1px solid var(--cw-border);
+    --c2-kanban-column__card--border-radius: 10px;
+    --c2-kanban-column__card--padding: 12px;
+    --c2-kanban-column__card--box-shadow: none;
+    --c2-kanban-column__card__hover--border-color: var(--cw-border-strong);
+    --c2-kanban-column__card__picked--box-shadow: 0 6px 18px color-mix(in srgb, var(--cw-accent) 16%, transparent);
+    --c2-kanban-column__placeholder--border: 2px dashed color-mix(in srgb, var(--cw-accent) 45%, transparent);
+    --c2-kanban-column__placeholder--background-color: var(--cw-accent-soft);
+    --c2-kanban-column__target--background-color: var(--cw-accent-soft);
+    --c2-kanban-column__empty--border: 1px dashed var(--cw-border-strong);
+    --c2-kanban-column__empty--background-color: transparent;
   }
 
-  .total strong {
-    font-size: 20px;
+  .column-head {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
   }
 
-  .total .amount {
+  .column-head h2 {
+    font-size: 14px;
+  }
+
+  .column-head h2 .muted {
+    font-weight: 500;
+  }
+
+  .column-head .amount {
     font-size: 12px;
   }
 
-  .board {
-    display: block;
+  .callout {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--cw-neutral-soft);
+  }
+
+  .callout-danger {
+    background: var(--cw-danger-soft);
+  }
+
+  .callout-warning {
+    background: var(--cw-warning-soft);
+  }
+
+  .callout-info {
+    background: var(--cw-info-soft);
   }
 
   .empty {

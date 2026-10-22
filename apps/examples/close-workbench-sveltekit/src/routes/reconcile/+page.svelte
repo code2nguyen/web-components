@@ -3,7 +3,8 @@
   import type { Table, TableColumnConfig, TableEventMap, TableRowContext } from '@c2n/components/table'
 
   import { FILTER_FIELDS, filterRows, type FilterTerm } from '#lib/close/filter.ts'
-  import { checkManualMatch } from '#lib/close/matching.ts'
+  import { daysBetween } from '#lib/close/dates.ts'
+  import { checkManualMatch, normalizeReference } from '#lib/close/matching.ts'
   import { formatMoney } from '#lib/close/money.ts'
   import { data } from '#lib/ssr.ts'
   import { getWorkbench } from '#lib/workbench.svelte.ts'
@@ -23,13 +24,14 @@
   const bankRows = $derived(filterRows(workbench.rows.bank, terms))
   const ledgerRows = $derived(filterRows(workbench.rows.ledger, terms))
 
-  const lineColumns: TableColumnConfig[] = [
-    { field: 'date', header: 'Date', width: '104px' },
-    { field: 'description', header: 'Description', width: 'minmax(200px, 2fr)' },
-    { field: 'reference', header: 'Ref', width: '96px' },
+  // One month on screen, so the day is enough: `09-12` sorts like the full date.
+  const lineColumns = (text: string): TableColumnConfig[] => [
+    { field: 'day', header: 'Date', width: '84px' },
+    { field: 'description', header: text, width: 'minmax(200px, 1fr)' },
     { field: 'amount', header: 'Amount', width: '124px', align: 'end', format: 'currency' },
-    { field: 'status', header: 'Status', width: '96px' },
   ]
+  const bankColumns = lineColumns('Description')
+  const ledgerColumns = lineColumns('Entry')
 
   // Matched lines fade so the open ones stand out. `rowPart` is a function, so it is set on the element in the
   // browser (an attachment) rather than written into the prerendered HTML as an attribute.
@@ -43,6 +45,16 @@
       selectedLedger.map((id) => workbench.ledgerById.get(id)!).filter(Boolean),
     ),
   )
+  /** Why the selection agrees, in the reader's terms: how far apart the lines are, and whether they share a reference. */
+  const agreement = $derived.by(() => {
+    const bank = selectedBank.map((id) => workbench.bankById.get(id)).filter((line) => line !== undefined)
+    const ledger = selectedLedger.map((id) => workbench.ledgerById.get(id)).filter((entry) => entry !== undefined)
+    const days = [...bank, ...ledger].map((line) => line.date).sort()
+    const gap = days.length ? daysBetween(days[0], days[days.length - 1]) : 0
+    const references = new Set([...bank.map((line) => line.reference), ...ledger.map((entry) => entry.docNo)].map(normalizeReference).filter(Boolean))
+    const shared = references.size === 1 && bank.every((line) => line.reference) && ledger.every((entry) => entry.docNo)
+    return `${gap === 0 ? 'same day' : `${gap} day${gap === 1 ? '' : 's'} apart`}, ${shared ? 'same reference' : 'no shared reference'}`
+  })
   const alreadyMatched = $derived(
     [...selectedBank, ...selectedLedger].some((id) => workbench.result.matches.some((match) => [...match.bankIds, ...match.ledgerIds].includes(id))),
   )
@@ -116,15 +128,9 @@
         {workbench.result.unmatchedLedger.length} ledger lines open
       </p>
     </div>
-    <div class="toolbar">
-      <c2-number-input
-        class="window"
-        aria-label="Date window in days"
-        help="Date window (days)"
-        min="0"
-        max="31"
-        value={String(workbench.dateWindowDays)}
-        onchange={setWindow}
+    <div class="window-field">
+      <span class="window-label" aria-hidden="true">Date window (days)</span>
+      <c2-number-input class="window" aria-label="Date window in days" min="0" max="31" value={String(workbench.dateWindowDays)} onchange={setWindow}
       ></c2-number-input>
     </div>
   </div>
@@ -143,54 +149,56 @@
     <c2-tab for="matches">Matches ({workbench.result.matches.length})</c2-tab>
 
     <section id="open" class="panel">
-      <c2-split-panel
-        class="split"
-        class:stacked
-        orientation={stacked ? 'vertical' : 'horizontal'}
-        position="50"
-        min="25"
-        max="75"
-        label="Resize bank and ledger"
-      >
-        <div slot="start" class="side">
-          <div class="side-head">
-            <h2>Bank statement</h2>
-            <span class="muted">{bankRows.length} of {workbench.rows.bank.length}</span>
+      <c2-card class="split-card">
+        <c2-split-panel
+          class="split"
+          class:stacked
+          orientation={stacked ? 'vertical' : 'horizontal'}
+          position="50"
+          min="25"
+          max="75"
+          label="Resize bank and ledger"
+        >
+          <div slot="start" class="side">
+            <div class="side-head">
+              <h2>Bank statement</h2>
+              <span class="muted">{bankRows.length} of {workbench.rows.bank.length}</span>
+            </div>
+            <c2-table
+              class="lines"
+              aria-label="Bank statement lines"
+              row-key="id"
+              selection="multiple"
+              checkbox-selection
+              sortable
+              rows={data(bankRows)}
+              columns={data(bankColumns)}
+              value={data(selectedBank)}
+              onselection-change={(event: TableEventMap['selection-change']) => (selectedBank = event.detail.value)}
+              {@attach fadeMatched}
+            ></c2-table>
           </div>
-          <c2-table
-            class="lines"
-            aria-label="Bank statement lines"
-            row-key="id"
-            selection="multiple"
-            checkbox-selection
-            sortable
-            rows={data(bankRows)}
-            columns={data(lineColumns)}
-            value={data(selectedBank)}
-            onselection-change={(event: TableEventMap['selection-change']) => (selectedBank = event.detail.value)}
-            {@attach fadeMatched}
-          ></c2-table>
-        </div>
-        <div slot="end" class="side">
-          <div class="side-head">
-            <h2>General ledger · 1010 Cash</h2>
-            <span class="muted">{ledgerRows.length} of {workbench.rows.ledger.length}</span>
+          <div slot="end" class="side">
+            <div class="side-head">
+              <h2>General ledger · 1010 Cash</h2>
+              <span class="muted">{ledgerRows.length} of {workbench.rows.ledger.length}</span>
+            </div>
+            <c2-table
+              class="lines"
+              aria-label="Ledger entries"
+              row-key="id"
+              selection="multiple"
+              checkbox-selection
+              sortable
+              rows={data(ledgerRows)}
+              columns={data(ledgerColumns)}
+              value={data(selectedLedger)}
+              onselection-change={(event: TableEventMap['selection-change']) => (selectedLedger = event.detail.value)}
+              {@attach fadeMatched}
+            ></c2-table>
           </div>
-          <c2-table
-            class="lines"
-            aria-label="Ledger entries"
-            row-key="id"
-            selection="multiple"
-            checkbox-selection
-            sortable
-            rows={data(ledgerRows)}
-            columns={data(lineColumns)}
-            value={data(selectedLedger)}
-            onselection-change={(event: TableEventMap['selection-change']) => (selectedLedger = event.detail.value)}
-            {@attach fadeMatched}
-          ></c2-table>
-        </div>
-      </c2-split-panel>
+        </c2-split-panel>
+      </c2-card>
 
       <c2-card class="selection" aria-live="polite">
         <div class="selection-body">
@@ -210,15 +218,13 @@
             precision="0"
           ></c2-comparison-bar>
           <div class="selection-actions">
-            <span class="muted">
-              {#if alreadyMatched}
-                Some selected lines are already matched. Undo their match on the Matches tab first.
-              {:else if !check.ok}
-                {check.reason}
-              {:else}
-                The two sides agree.
-              {/if}
-            </span>
+            {#if alreadyMatched}
+              <span class="muted">Some selected lines are already matched. Undo their match on the Matches tab first.</span>
+            {:else if !check.ok}
+              <span class="muted">{check.reason}</span>
+            {:else}
+              <span class="agree">The two sides agree: {agreement}.</span>
+            {/if}
             <c2-button disabled={!check.ok || alreadyMatched} onclick={matchSelected}>
               <c2-feather-link slot="prefix-icon"></c2-feather-link>
               Match selected
@@ -261,8 +267,25 @@
 </main>
 
 <style>
+  .window-field {
+    display: grid;
+    gap: 4px;
+  }
+
+  .window-label {
+    color: var(--cw-muted);
+    font-size: 12px;
+  }
+
   .window {
-    width: 180px;
+    width: 150px;
+  }
+
+  .split-card {
+    --c2-card--padding-top: 14px;
+    --c2-card--padding-right: 10px;
+    --c2-card--padding-bottom: 10px;
+    --c2-card--padding-left: 10px;
   }
 
   .query {
@@ -302,16 +325,21 @@
   .lines {
     height: 100%;
     min-height: 0;
-    --c2-table__cell--font-size: 13px;
   }
 
   .lines::part(row-matched) {
     opacity: 0.55;
   }
 
+  /* Pinned to the bottom of the viewport while the tables scroll, so the totals stay in sight. */
   .selection {
     position: sticky;
-    bottom: 12px;
+    bottom: 16px;
+    --c2-card--border-top: 1px solid var(--cw-border-strong);
+    --c2-card--border-right: 1px solid var(--cw-border-strong);
+    --c2-card--border-bottom: 1px solid var(--cw-border-strong);
+    --c2-card--border-left: 1px solid var(--cw-border-strong);
+    --c2-card--box-shadow: var(--cw-shadow);
   }
 
   .selection-body {
@@ -327,6 +355,13 @@
 
   .balance-bar {
     display: block;
+    --c2-comparison-bar__start-segment--background-color: var(--cw-accent);
+    --c2-comparison-bar__end-segment--background-color: var(--cw-warning);
+  }
+
+  .agree {
+    color: var(--cw-success);
+    font-weight: 500;
   }
 
   .selection-actions {

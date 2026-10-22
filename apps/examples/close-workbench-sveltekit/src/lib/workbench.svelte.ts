@@ -90,10 +90,17 @@ export class Workbench {
   readonly rows = $derived.by(() => {
     const matched = new Set(this.result.matches.flatMap((match) => [...match.bankIds, ...match.ledgerIds]))
     const status = (id: string) => (matched.has(id) ? ('matched' as const) : ('unmatched' as const))
-    const bank: ReconRow[] = this.month.bank.map((line) => ({ ...line, side: 'bank', amount: line.amount / 100, status: status(line.id) }))
+    const bank: ReconRow[] = this.month.bank.map((line) => ({
+      ...line,
+      side: 'bank',
+      day: line.date.slice(5),
+      amount: line.amount / 100,
+      status: status(line.id),
+    }))
     const ledger: ReconRow[] = this.month.ledger.map((entry) => ({
       ...entry,
       side: 'ledger',
+      day: entry.date.slice(5),
       amount: entry.amount / 100,
       reference: entry.docNo,
       status: status(entry.id),

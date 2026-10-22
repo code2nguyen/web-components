@@ -153,7 +153,7 @@ h3 {
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 650;
 }
 
@@ -185,7 +185,7 @@ a {
   gap: 20px;
   width: min(1320px, 100%);
   margin: 0 auto;
-  padding: 24px 20px 64px;
+  padding: 28px 24px 64px;
 }
 
 .page-head {
@@ -235,8 +235,50 @@ c2-card {
   --c2-card--padding-right: 18px;
   --c2-card--padding-bottom: 18px;
   --c2-card--padding-left: 18px;
-  --c2-card--box-shadow: var(--cw-shadow);
   min-width: 0;
+}
+
+/* KPI tiles: the icon takes the tone's soft tint, the value is large. `.stat-accent` gives a neutral tile the accent. */
+c2-stat {
+  --c2-stat--background: var(--cw-surface);
+  --c2-stat--border: 1px solid var(--cw-border);
+  --c2-stat--border-radius: var(--cw-radius);
+  --c2-stat--padding: 16px 18px;
+  --c2-stat__icon--background: var(--cw-neutral-soft);
+  --c2-stat__icon--color: var(--cw-muted);
+  --c2-stat__icon--border-radius: 10px;
+  --c2-stat__icon__positive--background: var(--cw-success-soft);
+  --c2-stat__icon__positive--color: var(--cw-success);
+  --c2-stat__icon__negative--background: var(--cw-danger-soft);
+  --c2-stat__icon__negative--color: var(--cw-danger);
+  --c2-stat__icon__warning--background: var(--cw-warning-soft);
+  --c2-stat__icon__warning--color: var(--cw-warning);
+  --c2-stat__value--font-size: 26px;
+  --c2-stat__value--font-weight: 650;
+  --c2-stat__label--color: var(--cw-muted);
+  --c2-stat__label--font-size: 13px;
+  --c2-stat__description--color: var(--cw-muted);
+  --c2-stat__description--font-size: 12px;
+}
+
+.stat-accent {
+  --c2-stat__icon--background: var(--cw-accent-soft);
+  --c2-stat__icon--color: var(--cw-accent);
+}
+
+/* Tables: muted header, selected rows in the accent's tint. */
+c2-table {
+  --c2-table__header--color: var(--cw-muted);
+  --c2-table__header--font-weight: 500;
+  --c2-table__cell--font-size: 13px;
+  --c2-table__row__selected--background: var(--cw-accent-soft);
+  --c2-table__row__selected--color: var(--cw-text);
+  --c2-table__row__selected__hover--background: var(--cw-accent-soft);
+}
+
+c2-table::part(cell-content-amount) {
+  font-family: var(--cw-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .card-head {

@@ -77,6 +77,24 @@
     --c2-header--border-bottom: 1px solid var(--cw-border);
   }
 
+  /* The current section is a tinted pill rather than an underline. */
+  .app-header c2-navigation-menu-item {
+    --c2-navigation-menu-item--padding-top: 8px;
+    --c2-navigation-menu-item--padding-right: 12px;
+    --c2-navigation-menu-item--padding-bottom: 8px;
+    --c2-navigation-menu-item--padding-left: 12px;
+    --c2-navigation-menu-item--border-top-left-radius: 8px;
+    --c2-navigation-menu-item--border-top-right-radius: 8px;
+    --c2-navigation-menu-item--border-bottom-left-radius: 8px;
+    --c2-navigation-menu-item--border-bottom-right-radius: 8px;
+    --c2-navigation-menu-item--color: var(--cw-text);
+    --c2-navigation-menu-item__hover--background: var(--cw-surface-2);
+    --c2-navigation-menu-item__current--background: var(--cw-accent-soft);
+    --c2-navigation-menu-item__current--color: var(--cw-accent);
+    --c2-navigation-menu-item__current--font-weight: 600;
+    --c2-navigation-menu-item__indicator--height: 0px;
+  }
+
   .brand {
     display: flex;
     gap: 10px;
