@@ -19,7 +19,12 @@
   workbench.notify = (options) => toasts?.show({ duration: 5000, ...options })
 
   // The prerendered page is the untouched month; the saved decisions come back once the browser has hydrated it.
-  onMount(() => workbench.restore())
+  // `data-hydrated` then says the page is interactive: until now the prerendered markup shows, but no handler is
+  // attached yet, so a click or a typed value would be lost (the browser tests wait for it).
+  onMount(() => {
+    workbench.restore()
+    document.documentElement.dataset.hydrated = ''
+  })
 
   const nav = [
     { route: '/', label: 'Overview' },

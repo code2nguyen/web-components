@@ -12,11 +12,20 @@ function trackErrors(page: Page) {
 
 const header = (page: Page) => page.locator('c2-header')
 
+/**
+ * Navigates and waits until SvelteKit has hydrated the prerendered page. Before that the markup is visible but no
+ * handler is attached, so an interaction would be lost.
+ */
+async function open(page: Page, path: string) {
+  await page.goto(path)
+  await page.locator('html[data-hydrated]').waitFor({ state: 'attached' })
+}
+
 // `index.html` is the URL the docs site's iframe loads.
 for (const route of ['./', './index.html', './reconcile/', './exceptions/', './journal/']) {
   test(`${route} hydrates the prerendered page without errors`, async ({ page }) => {
     const errors = trackErrors(page)
-    await page.goto(route)
+    await open(page, route)
     await expect(page.locator('h1')).toBeVisible()
     // hooks.client.ts registers the elements before hydration; the toast region is the layout's last element.
     await page.waitForFunction(() => customElements.get('c2-toast-region') !== undefined)
@@ -32,14 +41,14 @@ for (const route of ['./', './index.html', './reconcile/', './exceptions/', './j
 }
 
 test('arrays reach the components as data, not as "[object Object]"', async ({ page }) => {
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
   const table = page.locator('c2-table[aria-label="Bank statement lines"]')
   // The query starts at status:unmatched, which leaves the nine open bank lines.
   await expect.poll(() => table.evaluate((element) => (element as unknown as { rows?: unknown }).rows)).toHaveLength(9)
 })
 
 test('widening the date window catches the late mobile deposit', async ({ page }) => {
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
   await expect(page.getByText(/^42 matches/)).toBeVisible()
   const window = page.locator('c2-number-input').locator('input')
   await window.fill('10')
@@ -49,7 +58,7 @@ test('widening the date window catches the late mobile deposit', async ({ page }
 })
 
 test('a manual match survives a reload', async ({ page }) => {
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
   await page.locator('c2-table[aria-label="Bank statement lines"]').getByText('MOBILE DEPOSIT').click()
   await page.locator('c2-table[aria-label="Ledger entries"]').getByText('Receipt Lindqvist Catering · INV-1059').click()
   await expect(page.getByText('The two sides agree: 9 days apart, no shared reference.')).toBeVisible()
@@ -61,7 +70,7 @@ test('a manual match survives a reload', async ({ page }) => {
 })
 
 test('the board refuses a move that would break the books', async ({ page }) => {
-  await page.goto('./exceptions/')
+  await open(page, './exceptions/')
   // Pick the timing card up with the keyboard and drop it two columns over, on Needs adjustment.
   const card = page.locator('c2-kanban').locator('[part~="card"]', { hasText: 'Check 10251 · Alder Electric' })
   await card.focus()
@@ -97,22 +106,22 @@ test('the whole close: match, work the board, post, sign off', async ({ page }) 
   test.slow()
   const errors = trackErrors(page)
 
-  await page.goto('./')
+  await open(page, './')
   await expect(header(page)).toContainText('Off by $623.74')
 
   // 1. The one pairing the engine cannot make on its own.
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
   await page.locator('c2-table[aria-label="Bank statement lines"]').getByText('MOBILE DEPOSIT').click()
   await page.locator('c2-table[aria-label="Ledger entries"]').getByText('Receipt Lindqvist Catering · INV-1059').click()
   await page.getByRole('button', { name: 'Match selected' }).click()
 
   // 2. Every exception that changes cash gets an entry; the timing differences are explained.
-  await page.goto('./exceptions/')
+  await open(page, './exceptions/')
   for (const title of NEEDS_ENTRY) await move(page, title, 'Needs adjustment')
   for (const title of TIMING) await move(page, title, 'Resolved')
 
   // 3. Post the proposed journal.
-  await page.goto('./journal/')
+  await open(page, './journal/')
   await expect(page.locator('c2-card').first()).toContainText('Difference after posting $0.00')
   await page.getByRole('button', { name: 'Post journal' }).click()
   await page.getByRole('button', { name: 'Post', exact: true }).click()
@@ -120,31 +129,31 @@ test('the whole close: match, work the board, post, sign off', async ({ page }) 
   await expect(header(page)).toContainText('Balanced')
 
   // 4. Sign off.
-  await page.goto('./')
+  await open(page, './')
   await page.getByRole('button', { name: 'Sign off as Priya Raman' }).click()
   await page.getByRole('button', { name: 'Sign off', exact: true }).click()
   await expect(page.getByText('Signed off by Priya Raman.')).toBeVisible()
 
   // A posted card stays put: moving it back would post its entry twice.
-  await page.goto('./exceptions/')
+  await open(page, './exceptions/')
   await page.getByRole('button', { name: 'Open MONTHLY SERVICE CHARGE' }).click()
   await expect(page.locator('c2-sheet')).toContainText('Its entry is posted.')
   await expect(page.locator('c2-sheet').getByRole('button', { name: 'Back to Unreviewed' })).toHaveCount(0)
   await page.keyboard.press('Escape')
 
   // Re-running auto-match changes the matches, so the sign-off no longer holds.
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
   const window = page.locator('c2-number-input').locator('input')
   await window.fill('0')
   await window.press('Enter')
-  await page.goto('./')
+  await open(page, './')
   await expect(page.getByText('Signed off by Priya Raman.')).toHaveCount(0)
 
   expect(errors).toEqual([])
 })
 
 test('the navigation menu routes client-side through its shadow root', async ({ page }) => {
-  await page.goto('./')
+  await open(page, './')
   await page.waitForFunction(() => customElements.get('c2-navigation-menu-item') !== undefined)
   await page.evaluate(() => ((window as unknown as { marker: boolean }).marker = true))
   await page.locator('c2-navigation-menu-item', { hasText: 'Exceptions' }).click()
@@ -156,7 +165,7 @@ test('the navigation menu routes client-side through its shadow root', async ({ 
 
 test('the theme the docs site hands over survives the theme switcher upgrading', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' })
-  await page.goto('./?theme=dark')
+  await open(page, './?theme=dark')
   await page.waitForFunction(() => customElements.get('c2-theme-select') !== undefined)
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   // The docs site's own switcher key, on the same origin, is left alone.
@@ -164,13 +173,16 @@ test('the theme the docs site hands over survives the theme switcher upgrading',
 })
 
 test('OR in the query shows either kind of line', async ({ page }) => {
-  await page.goto('./reconcile/')
+  await open(page, './reconcile/')
+  await page.waitForFunction(() => customElements.get('c2-table') !== undefined && customElements.get('c2-query-input') !== undefined)
   const table = page.locator('c2-table[aria-label="Bank statement lines"]')
-  await expect.poll(() => table.evaluate((element) => (element as unknown as { rows: unknown[] }).rows.length)).toBe(9)
+  // `rows` is undefined until the element has upgraded: read it as -1 then, so the poll retries instead of throwing.
+  const rowCount = () => table.evaluate((element) => (element as unknown as { rows?: unknown[] }).rows?.length ?? -1)
+  await expect.poll(rowCount).toBe(9)
   const field = page.locator('c2-query-input').locator('input')
   await field.click()
   await field.pressSequentially('channel:check OR channel:fee')
   await field.press('Enter')
   // status:unmatched AND channel:check (check 10244), or any fee line (wire fee, return fee, service charge).
-  await expect.poll(() => table.evaluate((element) => (element as unknown as { rows: unknown[] }).rows.length)).toBe(4)
+  await expect.poll(rowCount).toBe(4)
 })
