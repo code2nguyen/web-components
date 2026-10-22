@@ -224,6 +224,7 @@
         "./packages/components/todo-list:build",
         "./packages/components/tooltip:build",
         "./packages/components/trace-waterfall:build",
+        "./packages/components/tree-select:build",
         "./packages/components/tree:build",
         "./packages/components/truncate:build",
         "./packages/components/upload:build",

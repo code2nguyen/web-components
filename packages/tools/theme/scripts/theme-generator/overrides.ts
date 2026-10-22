@@ -16,6 +16,7 @@ export const overrides: Record<string, Override> = {
   '--c2-highlight__mark--background-color': { exclude: 'translucent highlighter hue' },
   '--c2-highlight__mark__active--background-color': { exclude: 'translucent highlighter hue' },
   '--c2-highlight__mark__active--box-shadow': { exclude: 'outline in the current-match hue' },
+  '--c2-tree-select__match--background': { exclude: 'translucent highlighter hue' },
   // A mark is a run of inline text, not a box: no padding and a hairline radius so it never shifts the line.
   '--c2-highlight__mark--padding': { exclude: 'inline text run' },
   '--c2-highlight__mark--border-radius': { exclude: 'inline text run' },

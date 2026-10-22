@@ -1,0 +1,69 @@
+---
+title: 'Tree Select'
+description: 'A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TreeSelect } from '@c2n/components/tree-select'
+
+`c2-tree-select` is a form-associated trigger with a `c2-tree` inside a `c2-overlay` popover, so everything the tree does — expansion, its keyboard model, checkboxes and how a tick travels to parents and children, lazy branches through `loadChildren` — works here unchanged. Hand it rows as an `items` array of `{ value, label, children }` nodes, or nest `c2-tree-item` elements in it. A single select closes on a pick and can write the row's ancestors before its label with `show-path`; `leaf-only` lets only rows without children be picked, a branch row then opening instead. `multiple` keeps the dropdown open, toggles a row on each click and shows the values as chips, up to `max-chips` and then a `+n` count (`max-chips="0"` shows a count instead); `checkbox-selection` adds the tree's checkboxes, and `value-display` picks which ticked rows the value holds: `parent` (a fully ticked branch stands for its descendants), `leaves` or `all`. `searchable` adds a field that keeps the matches and their ancestors, and `clearable` a button that clears the selection. The element submits its value under `name` like a native select (one entry per value when it is multiple), supports `required`, form reset and `c2-form-field`, and fires `selection-change` with `input` and `change`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/tree-select'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tree-select
+<style>
+  .team {
+    width: 260px;
+  }
+</style>
+<div data-label="Single, with path">
+  <c2-tree-select client:only="lit" class="team" aria-label="Owning team" show-path value="platform" placeholder="Select a team">
+    <c2-tree-item value="eng" label="Engineering">
+      <c2-tree-item value="platform" label="Platform"></c2-tree-item>
+      <c2-tree-item value="frontend" label="Frontend"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="design" label="Design">
+      <c2-tree-item value="product-design" label="Product design"></c2-tree-item>
+      <c2-tree-item value="brand" label="Brand"></c2-tree-item>
+    </c2-tree-item>
+  </c2-tree-select>
+</div>
+<div data-label="Checkboxes">
+  <c2-tree-select client:only="lit" class="team" aria-label="Visible to" checkbox-selection value="eng;brand" placeholder="Visible to">
+    <c2-tree-item value="eng" label="Engineering">
+      <c2-tree-item value="platform" label="Platform"></c2-tree-item>
+      <c2-tree-item value="frontend" label="Frontend"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="design" label="Design">
+      <c2-tree-item value="product-design" label="Product design"></c2-tree-item>
+      <c2-tree-item value="brand" label="Brand"></c2-tree-item>
+    </c2-tree-item>
+  </c2-tree-select>
+</div>
+<div data-label="Searchable, leaf only">
+  <c2-tree-select client:only="lit" class="team" aria-label="Region" searchable leaf-only clearable placeholder="Select a region">
+    <c2-tree-item value="europe" label="Europe">
+      <c2-tree-item value="paris" label="Paris"></c2-tree-item>
+      <c2-tree-item value="berlin" label="Berlin"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="asia" label="Asia">
+      <c2-tree-item value="hanoi" label="Hanoi"></c2-tree-item>
+      <c2-tree-item value="tokyo" label="Tokyo"></c2-tree-item>
+    </c2-tree-item>
+  </c2-tree-select>
+</div>
+<div data-label="Disabled">
+  <c2-tree-select client:only="lit" class="team" aria-label="Team" disabled placeholder="Select a team">
+    <c2-tree-item value="eng" label="Engineering"></c2-tree-item>
+  </c2-tree-select>
+</div>
+```

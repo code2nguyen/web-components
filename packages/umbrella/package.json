@@ -777,6 +777,10 @@
       "types": "./dist/tree/tree-item.d.ts",
       "default": "./dist/tree/tree-item.js"
     },
+    "./tree-select": {
+      "types": "./dist/tree-select.d.ts",
+      "default": "./dist/tree-select.js"
+    },
     "./truncate": {
       "types": "./dist/truncate.d.ts",
       "default": "./dist/truncate.js"
@@ -1048,6 +1052,7 @@
     "@c2n/tooltip": "*",
     "@c2n/trace-waterfall": "*",
     "@c2n/tree": "*",
+    "@c2n/tree-select": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
     "@c2n/view-options": "*",

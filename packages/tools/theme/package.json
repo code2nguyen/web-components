@@ -181,6 +181,7 @@
         "../../components/todo-list:build",
         "../../components/tooltip:build",
         "../../components/trace-waterfall:build",
+        "../../components/tree-select:build",
         "../../components/tree:build",
         "../../components/truncate:build",
         "../../components/upload:build",

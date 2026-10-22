@@ -3286,6 +3286,12 @@
       "reason": "The toggle-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tree-select",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned c2-tree-item rows into the inner c2-tree; style them through the --c2-tree-item--* contract."
+    },
+    {
       "tag": "c2-truncate",
       "slot": "",
       "decision": "part",
