@@ -47,7 +47,8 @@ const STORAGE_PREFIX = 'c2n-search-history:'
 /**
  * A search box: the query field of GitHub, Linear and Carbon. Typing fires a debounced `search` event (`debounce`
  * milliseconds after the last keystroke, 300 by default), **Enter** fires it at once, and the clear button or
- * **Escape** empties the field and fires it with an empty query. `input` and `change` are re-dispatched from the
+ * **Escape** empties the field and fires it with an empty query (`escape="none"` leaves Escape to the container, as a find
+ * bar that closes on it wants). `input` and `change` are re-dispatched from the
  * inner input like any text field, so `v-model` and form bindings work, and the element is form-associated (`name`).
  *
  * `shortcut` focuses the field from anywhere on the page and shows the key as a hint while the field is empty and
@@ -179,6 +180,13 @@ export class SearchField extends LitElement {
 
   /** Most recent searches shown, and kept under `history-key`. */
   @property({ type: Number, attribute: 'recent-limit' }) recentLimit = 5
+
+  /**
+   * What Escape does once the recent-searches panel is closed: `clear` empties the field, `none` keeps the query and
+   * lets the key bubble on to a container that closes on Escape, such as a find bar. The browser's own clearing of a
+   * search input is cancelled either way, so the container sees `defaultPrevented`.
+   */
+  @property({ type: String }) escape: 'clear' | 'none' = 'clear'
 
   /** Heading of the recent-searches panel. Defaults to "Recent searches" in the nearest `lang` (English, or a language the app adds). */
   @property({ attribute: 'recent-label' }) recentLabel = ''
@@ -443,12 +451,15 @@ export class SearchField extends LitElement {
       }
       case 'Escape': {
         if (this.open) {
+          // Closing the panel is all this Escape does: a dialog or find bar around the field must not close with it.
           event.preventDefault()
+          event.stopPropagation()
           this.dismissed = true
           this.activeIndex = -1
         } else if (this.value) {
+          // A native search input empties itself on Escape unless the default is prevented.
           event.preventDefault()
-          this.clear()
+          if (this.escape !== 'none') this.clear()
         }
         return
       }
@@ -471,6 +482,7 @@ export class SearchField extends LitElement {
   private handlePanelKeydown(event: KeyboardEvent) {
     if (event.key !== 'Escape') return
     event.preventDefault()
+    event.stopPropagation()
     // Focusing the input runs handleFocusin, which reopens the panel: dismiss after it.
     this.input?.focus()
     this.dismissed = true

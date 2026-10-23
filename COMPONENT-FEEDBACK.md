@@ -24,76 +24,18 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### A static numeric attribute from Svelte reaches a `type: Number` property as a string
-
-- **Severity:** papercut
-- **Hit while:** building the SvelteKit close workbench (`apps/examples/close-workbench-sveltekit`), 2026-10-22.
-- **What happens:** for an attribute whose name is also a property (`precision`, `position`, `min`, `max`), Svelte 5
-  assigns the property rather than the attribute, and a static value is the string as written. Lit's `type: Number`
-  converter only runs for attributes, so `<c2-comparison-bar precision="0">` sets `precision = "0"`;
-  `Number.isFinite("0")` is false and the bar printed `50.00%`. Nothing warns. `c2-split-panel`'s `position`, `min` and
-  `max` take the same path and work only because their arithmetic happens to coerce. Writing the number in braces
-  (`precision={0}`) avoids it, but nothing tells an author they need to.
-- **Where the fix belongs:** `@c2n/core/lit-helper.js` — give every `type: Number` property a converter with
-  `fromProperty` (as `property()` already does for `Boolean` and the JSON/array converters), so a numeric string
-  assigned to the property is parsed like the attribute.
-
-### `c2-line-chart` clips wide y-axis labels
-
-- **Severity:** bug
-- **Hit while:** charting daily bank and book balances (around $150,000) in the SvelteKit close workbench
-  (`apps/examples/close-workbench-sveltekit`), 2026-10-22.
-- **What happens:** the y-axis gutter is not sized to the tick labels, so six-digit values lose their leading
-  characters: `150,000` renders as `0,000`. No variable or attribute widens the axis. The example works around it by
-  plotting in thousands (`$k`).
-- **Where the fix belongs:** `packages/components/chart/src/engines/uplot-adapter.ts`: size the y axis from its widest
-  formatted tick (uPlot's `axes[].size` accepts a function), or expose the gutter as a documented variable.
-
-### `c2-line-chart` draws nothing, silently, when the app overrides the host's `display`
-
-- **Severity:** docs
-- **Hit while:** sizing the balance chart in the same example, 2026-10-22.
-- **What happens:** the host is a flex column whose plot area grows to fill it. An app rule of `display: block; height:
-260px` on the element (a common way to size a block) collapses the plot area to zero height, so the engine never
-  draws: the legend shows, the plot stays empty, and nothing is logged. Sizing through `--c2-chart--height` works.
-- **Where the fix belongs:** the chart docs (`apps/ui/src/content/components/line-chart.mdx` and siblings, and the
-  host's JSDoc): say that the host stays `display: flex` and is sized with `--c2-chart--height`. Optionally, a
-  development-mode `console.warn` when the plot area measures 0×0 after the data arrives.
-
-### `c2-gantt` bar labels spill over the task list
-
-- **Severity:** bug
-- **Hit while:** drawing a nine-day close calendar in the same example, 2026-10-22.
-- **What happens:** at the default `--c2-gantt__column-day--width` (28px), a label too long for its bar is drawn to the
-  bar's left and runs across the task list, where it is cut off (`821`, `tatement`, `g review`). The example works
-  around it with `--c2-gantt__column-day--width: 104px`.
-- **Where the fix belongs:** `packages/components/gantt`: clip labels to the timeline area, and put a label that does not
-  fit inside or left of its bar on the bar's right instead.
-
-### `c2-kanban-column` empty state sits at the bottom of a stretched lane
-
-- **Severity:** papercut
-- **Hit while:** building the exceptions board in the same example, 2026-10-22.
-- **What happens:** when one lane holds many cards, the empty lanes stretch to its height and their `empty` slot
-  (default "No cards") is drawn at the bottom of the lane instead of under the header, far from where a card would be
-  dropped.
-- **Where the fix belongs:** `packages/components/kanban/src/kanban-column.scss`: align the empty state to the start of
-  the cards area.
-
-### `c2-search-field` Escape always clears; a find bar wants it to close
-
-- **Severity:** papercut
-- **Hit while:** building the `c2-log-viewer` find bar, 2026-10-22.
-- **What happens:** with text in the field, Escape empties it (and fires `clear`/`search`). In a find bar, as in VS Code
-  or the browser's own, Escape closes the bar and keeps the query for next time. The log viewer catches Escape (and
-  Enter / Shift+Enter, which mean next / previous there) in the capture phase before the field sees them.
-- **Where the fix belongs:** `packages/components/search-field` — an option such as `escape="none"` that leaves Escape
-  to the container, so a composing component needs no capture listener.
+_Nothing open._
 
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                                                                                                         |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `c2-search-field`               | Escape always emptied the field, so the `c2-log-viewer` find bar (where Escape closes the bar and keeps the query) caught it in the capture phase.                                                                                                                                                                              | 2026-10-23, `escape="none"` keeps the query and lets Escape bubble to the container; the find bar uses it with a plain listener; tested.                                                                                                                                                         |
+| `@c2n/core` (`property()`)      | A static numeric attribute from Svelte 5 (`precision="0"`) is assigned to the property as a string, which Lit's `type: Number` does not convert, so `c2-comparison-bar` printed `50.00%` with no warning.                                                                                                                       | 2026-10-22, `numberPropertyConverter`: a numeric string assigned to any `type: Number` property is parsed like the attribute; tested on `c2-comparison-bar`.                                                                                                                                     |
+| `c2-line-chart` and siblings    | The y-axis gutter was uPlot's fixed 50px, so six-digit values lost their leading digits (`150,000` drew as `0,000`) and the close workbench plotted in thousands.                                                                                                                                                               | 2026-10-22, value axes are sized from their widest formatted tick (50px floor); tested on seven-digit values.                                                                                                                                                                                    |
+| `c2-line-chart` and siblings    | `display: block; height: 260px` on the host collapsed the flex-grown plot area to zero, so nothing was drawn and nothing was logged.                                                                                                                                                                                            | 2026-10-22, the JSDoc and the line chart's Sizing section say to use `--c2-chart--height` and leave `display` alone; a laid-out chart with a 0×0 plot warns once per page; tested.                                                                                                               |
+| `c2-gantt`                      | A label too long for its bar near the start of a short timeline was drawn left of the bar and ran under the task list (`821`, `tatement`, `g review`).                                                                                                                                                                          | 2026-10-22, beside-labels go right of the mark, else left, else on the roomier side with an ellipsis, never past the timeline; tested on a nine-day calendar at 28px a day.                                                                                                                      |
+| `c2-kanban-column`              | An empty lane stretched to a full neighbour's height drew its `empty` hint at the bottom, because the empty card list still grew.                                                                                                                                                                                               | 2026-10-22, the card list does not grow while the column is empty, so the hint sits under the header; tested.                                                                                                                                                                                    |
 | `c2-log-viewer`                 | Entries could not be chosen from the keyboard: the viewport was one focus stop that scrolled with the arrow keys, so `entry-click` (and a detail panel hung on it) was pointer-only.                                                                                                                                            | 2026-10-22, an active entry moved by the arrow keys (`aria-activedescendant` on the viewport) and `entry-activate` on Enter, with browser tests; also Ctrl/Command+F find.                                                                                                                       |
 | `c2-mask-input`                 | `?` only made the _rest_ of a mask optional, so a format whose variable part sits in the middle (UK postcodes, `M1 1AE` / `SW1A 1AA`) could not be masked and the Account Form example left the UK postcode as free text.                                                                                                       | 2026-10-21, optional groups (`A[A]9[X] 9AA`), with browser tests; the example now masks UK postcodes.                                                                                                                                                                                            |
 | `c2-sparkline`                  | `decorateOptions` passed `axes: []`; uPlot pads a short array back up to two _visible_ axes, so a 120×32 sparkline spent 52px on a y-axis gutter and drew its line in a 66px sliver.                                                                                                                                            | 2026-09-14, with a regression test asserting no axis element and a 116px plot.                                                                                                                                                                                                                   |

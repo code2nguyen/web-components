@@ -597,6 +597,39 @@ test('draws a second y axis for a series bound to `axis="right"`', async ({ page
   if (scales) expect(scales).toEqual(['x', 'y', 'y2'])
 })
 
+test('sizes the y axis to its widest tick label', async ({ page, scenario }) => {
+  await scenario('wide-values')
+  const chart = page.locator('c2-line-chart')
+  await expect(chart).toHaveState('ready')
+
+  // uPlot's fixed 50px gutter cut the leading digits off seven-digit values (`1,500,000` drew as `,500,000`).
+  const { axisWidth, labelWidth } = await chart.evaluate((element) => {
+    const root = element.shadowRoot!
+    // The y axis is the tall one: uPlot gives each axis its size as the width (y) or the height (x).
+    const yAxis = [...root.querySelectorAll<HTMLElement>('.u-axis')].find((axis) => parseFloat(axis.style.height) > parseFloat(axis.style.width))!
+    const chartEl = element as unknown as { formatValue: (value: number) => string }
+    const context = document.createElement('canvas').getContext('2d')!
+    context.font = getComputedStyle(element).font
+    return { axisWidth: parseFloat(yAxis.style.width), labelWidth: context.measureText(chartEl.formatValue(1_520_000)).width }
+  })
+  expect(axisWidth).toBeGreaterThan(50)
+  expect(axisWidth).toBeGreaterThanOrEqual(labelWidth + 15)
+})
+
+test('warns once when an app rule collapses the plot area', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('no room for its plot')) warnings.push(message.text())
+  })
+  await scenario('default')
+  const chart = page.locator('c2-line-chart')
+  await expect(chart).toHaveState('ready')
+  // A block host never hands its height to the plot area, which grows as a flex item: the canvas silently stays empty.
+  await chart.evaluate((element) => element.setAttribute('style', 'display: block; height: 260px'))
+  await expect.poll(() => warnings.length).toBe(1)
+  expect(warnings[0]).toContain('--c2-chart--height')
+})
+
 test('labels a time axis by the span it covers, not always by date', async ({ page, scenario }) => {
   await scenario('intraday')
   const chart = page.locator('c2-line-chart')
