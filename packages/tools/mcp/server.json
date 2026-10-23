@@ -1,0 +1,32 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.code2nguyen/c2n",
+  "title": "c2n Web Components",
+  "description": "Exact APIs, examples, theme tokens and markup validation for the c2n (c2-*) Lit web components.",
+  "version": "1.0.15",
+  "websiteUrl": "https://code2nguyen.github.io/web-components/guides/ai-tools",
+  "repository": {
+    "url": "https://github.com/code2nguyen/web-components",
+    "source": "github",
+    "subfolder": "packages/tools/mcp"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@c2n/mcp",
+      "version": "1.0.15",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "C2N_PROJECT_ROOT",
+          "description": "Project whose installed @c2n/* packages the server reports. Defaults to the working directory.",
+          "isRequired": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ]
+}
