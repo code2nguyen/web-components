@@ -26,7 +26,8 @@ function valueAxisSize(self: uPlot, values: string[] | null, axisIndex: number, 
   const context = self.ctx
   context.save()
   context.font = font
-  const widest = Math.max(...values.map((value) => context.measureText(String(value)).width))
+  // A filtered tick is `null`; measuring it as the text "null" would widen the gutter for a label never drawn.
+  const widest = Math.max(0, ...values.map((value) => (value == null ? 0 : context.measureText(String(value)).width)))
   context.restore()
   return Math.max(MIN_AXIS_SIZE, Math.ceil(widest) + 18)
 }
