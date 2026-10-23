@@ -49,11 +49,9 @@ Domain patterns with no design-system home come from the products that made them
 | --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
 | 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
 | 12  | `c2-month-picker`     | Month or year granularity (billing periods, card expiry)                                            | Mantine MonthPicker / YearPicker                                                | P2       | Proposed |
-| 13  | `c2-tree-select`      | Select from a hierarchy, single or multiple                                                         | antd TreeSelect, Mantine TreeSelect, PrimeVue treeselect                        | P2       | Proposed |
 | 14  | `c2-transfer-list`    | Move items between two lists (roles, permissions)                                                   | antd Transfer, PrimeVue PickList                                                | P3       | Proposed |
 | 15  | `c2-mention-input`    | `@user` and `#tag` suggestions inside text                                                          | antd Mentions; Slack, GitHub                                                    | P2       | Proposed |
 | 17  | `c2-rich-text-editor` | Compact formatted-text field for comments and emails (`c2-page-editor` stays the full block editor) | PrimeVue Editor, Mantine Tiptap; Gmail, Linear comments                         | P2       | Proposed |
-| 18  | `c2-image-cropper`    | Crop, zoom and rotate before upload (avatars, logos)                                                | Ark image cropper                                                               | P2       | Proposed |
 | 19  | `c2-signature-pad`    | Draw a signature, export SVG or PNG                                                                 | Ark signature pad; DocuSign                                                     | P3       | Proposed |
 | 20  | `c2-angle-slider`     | Circular knob for angles and dials                                                                  | Ark/Mantine angle slider, PrimeVue Knob                                         | P3       | Proposed |
 | 21  | `c2-emoji-picker`     | Searchable emoji grid with skin tones and recents                                                   | Slack, GitHub, Discord                                                          | P2       | Proposed |
@@ -112,15 +110,14 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 
 These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which already exist.
 
-| #   | Component                | What it adds                                                               | Real-world model                                                      | Priority | Decision |
-| --- | ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------- | -------- |
-| 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                            | P2       | Proposed |
-| 74  | `c2-tour`                | Step-by-step onboarding with spotlight, anchored steps and progress        | antd Tour, Ark tour, Carbon and Spectrum coachmark; Intercom, Appcues | P2       | Proposed |
-| 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications         | P2       | Proposed |
-| 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                              | P2       | Proposed |
-| 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps                       | P2       | Proposed |
-| 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings             | P2       | Proposed |
-| 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                        | P3       | Proposed |
+| #   | Component                | What it adds                                                               | Real-world model                                              | Priority | Decision |
+| --- | ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
+| 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                    | P2       | Proposed |
+| 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications | P2       | Proposed |
+| 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                      | P2       | Proposed |
+| 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps               | P2       | Proposed |
+| 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings     | P2       | Proposed |
+| 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                | P3       | Proposed |
 
 ### F. Collaboration
 
