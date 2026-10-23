@@ -1,0 +1,85 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TreeSelect } from '@c2n/components/tree-select'
+
+## Presets
+
+Curated looks for `c2-tree-select`. Open any card in the studio to start from it. The trigger is the `__button--*`
+group, the dropdown the `__list--*` group, and the chips `__chip--*`; the rows themselves are `c2-tree-item`s, styled
+with the `--c2-tree-item--*` variables on the same element.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 240px;
+  }
+</style>
+<c2-tree-select class="default" aria-label="Team" placeholder="Select a team" client:only="lit">
+  <c2-tree-item value="eng" label="Engineering">
+    <c2-tree-item value="platform" label="Platform"></c2-tree-item>
+    <c2-tree-item value="frontend" label="Frontend"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="design" label="Design"></c2-tree-item>
+</c2-tree-select>
+```
+
+```html tag=MdxCodeBlock,label=Soft filled
+<style>
+  .soft {
+    width: 240px;
+    --c2-tree-select__button--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-tree-select__button__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree-select__button--border-top: 1px solid transparent;
+    --c2-tree-select__button--border-right: 1px solid transparent;
+    --c2-tree-select__button--border-bottom: 1px solid transparent;
+    --c2-tree-select__button--border-left: 1px solid transparent;
+    --c2-tree-select__button__hover--border-top: 1px solid transparent;
+    --c2-tree-select__button__hover--border-right: 1px solid transparent;
+    --c2-tree-select__button__hover--border-bottom: 1px solid transparent;
+    --c2-tree-select__button__hover--border-left: 1px solid transparent;
+    --c2-tree-select__button--border-top-left-radius: 10px;
+    --c2-tree-select__button--border-top-right-radius: 10px;
+    --c2-tree-select__button--border-bottom-left-radius: 10px;
+    --c2-tree-select__button--border-bottom-right-radius: 10px;
+    --c2-tree-select__list--border-top-left-radius: 12px;
+    --c2-tree-select__list--border-top-right-radius: 12px;
+    --c2-tree-select__list--border-bottom-left-radius: 12px;
+    --c2-tree-select__list--border-bottom-right-radius: 12px;
+  }
+</style>
+<c2-tree-select class="soft" aria-label="Folder" show-path value="app" client:only="lit">
+  <c2-tree-item value="src" label="src">
+    <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+    <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+</c2-tree-select>
+```
+
+```html tag=MdxCodeBlock,label=Tag chips
+<style>
+  .tags {
+    width: 280px;
+    --c2-tree-select__chip--background: light-dark(#f3e8ff, #26153c);
+    --c2-tree-select__chip--color: light-dark(#7e22ce, #a76cdc);
+    --c2-tree-select__chip__remove--color: light-dark(#7e22ce, #a76cdc);
+    --c2-tree-select__chip--border-radius: 999px;
+    --c2-tree-select__chip--padding: 0 2px 0 10px;
+  }
+</style>
+<c2-tree-select class="tags" aria-label="Labels" multiple value="bug;ui" client:only="lit">
+  <c2-tree-item value="type" label="Type">
+    <c2-tree-item value="bug" label="Bug"></c2-tree-item>
+    <c2-tree-item value="feature" label="Feature"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="area" label="Area">
+    <c2-tree-item value="ui" label="UI"></c2-tree-item>
+    <c2-tree-item value="api" label="API"></c2-tree-item>
+  </c2-tree-item>
+</c2-tree-select>
+```
+
+</GalleryGrid>

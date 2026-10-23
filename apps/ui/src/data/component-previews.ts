@@ -464,6 +464,13 @@ price: .price
   </c2-tree-item>
   <c2-tree-item value="readme" label="README.md"></c2-tree-item>
 </c2-tree>`,
+  'tree-select': `<c2-tree-select aria-label="Owning team" show-path value="platform" style="width: 220px">
+  <c2-tree-item value="eng" label="Engineering">
+    <c2-tree-item value="platform" label="Platform"></c2-tree-item>
+    <c2-tree-item value="frontend" label="Frontend"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="design" label="Design"></c2-tree-item>
+</c2-tree-select>`,
   truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
   'view-options': `<c2-view-options layouts="list board table" value='{"groupBy":"status"}' fields='[{"id":"status","label":"Status","groupable":true,"orderable":true,"property":true},{"id":"priority","label":"Priority","groupable":true,"orderable":true,"property":true}]'></c2-view-options>`,

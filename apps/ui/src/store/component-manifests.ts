@@ -131,6 +131,7 @@ import todoList from '@c2n/todo-list/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
+import treeSelect from '@c2n/tree-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
@@ -277,6 +278,7 @@ export const componentManifests = (function () {
     tour,
     traceWaterfall,
     tree,
+    treeSelect,
     truncate,
     upload,
     viewOptions,
