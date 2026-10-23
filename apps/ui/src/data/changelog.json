@@ -2,6 +2,328 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.15",
+      "date": "2026-10-23",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["mask-input"],
+              "text": "Search only the group choices when fitting a mask",
+              "hash": "33f0a38"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["search-field"],
+              "text": "Escape=\"none\" leaves Escape to the container",
+              "hash": "fc7dfb6"
+            },
+            {
+              "scopes": ["tree-select"],
+              "text": "Add c2-tree-select, a form-associated dropdown over c2-tree",
+              "hash": "336b902"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Add a keyboard active entry and entry-activate",
+              "hash": "9393fad"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Skip-delay waits before a skipped tour autostarts again",
+              "hash": "bada9cd"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Skip-limit sets how many skips turn autostart off",
+              "hash": "eaf0eb7"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Remember progress in localStorage, autostart and a Skip button",
+              "hash": "0b40df5"
+            },
+            {
+              "scopes": ["image-cropper"],
+              "text": "Add c2-image-cropper",
+              "hash": "bbbd1f6"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Add c2-tour guided product tour",
+              "hash": "f63ea8d"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Keyboard active entry with entry-activate, and Ctrl/Command+F find",
+              "hash": "c44a50b"
+            },
+            {
+              "scopes": ["time-range-picker"],
+              "text": "Add c2-time-range-picker",
+              "hash": "27cc778"
+            },
+            {
+              "scopes": ["split-button"],
+              "text": "Add c2-split-button, a main action with a caret menu of alternatives",
+              "hash": "93f243a"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Let a split button mark rows as choices without writing their attributes",
+              "hash": "fb533ed"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add annotations, markers at an x value and shaded x ranges",
+              "hash": "a0e8ea4"
+            },
+            {
+              "scopes": ["button", "link-button"],
+              "text": "Add selected states for the new shadow and border variables",
+              "hash": "0cdbb34"
+            },
+            {
+              "scopes": ["link-button"],
+              "text": "Add --c2-link-button__container--border and its hover state",
+              "hash": "fdcab5f"
+            },
+            {
+              "scopes": ["button"],
+              "text": "Add --c2-button__container--box-shadow and its hover state",
+              "hash": "f67e8e1"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Add scrollToStart() and an entry-click event",
+              "hash": "0a5060a"
+            },
+            {
+              "scopes": ["mask-input"],
+              "text": "Add optional groups anywhere in a mask",
+              "hash": "73c085a"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["chart"],
+              "text": "Skip filtered ticks when sizing a value axis",
+              "hash": "9e0e190"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Cap beside-labels at their side's room, and pick the roomier side",
+              "hash": "845e00c"
+            },
+            {
+              "scopes": ["search-field"],
+              "text": "Escape that closes the recent searches does not reach the container",
+              "hash": "aec537b"
+            },
+            {
+              "scopes": ["core"],
+              "text": "A blank string assigned to a Number property unsets it",
+              "hash": "a799cb5"
+            },
+            {
+              "scopes": ["tree-select"],
+              "text": "Address review findings",
+              "hash": "1398fa5"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Keep an empty lane's hint under its header",
+              "hash": "7401528"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Keep labels beside short bars inside the timeline",
+              "hash": "b4bbf24"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Size value axes to their widest label, warn when the plot collapses",
+              "hash": "214846b"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Parse a numeric string assigned to a Number property",
+              "hash": "07ef5f4"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Code-review findings",
+              "hash": "6c237b9"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Leave the copy area selectable, as before",
+              "hash": "237c91f"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Cross-browser keyboard, selection and copy-cell fixes",
+              "hash": "8c7d89e"
+            },
+            {
+              "scopes": ["image-cropper"],
+              "text": "Cancel interrupted drags, fit authored crops to aspect-ratio",
+              "hash": "c658b60"
+            },
+            {
+              "scopes": ["image-cropper"],
+              "text": "No focus ring on the selection after a pointer drag",
+              "hash": "e93951b"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Address review findings on keyboard and find",
+              "hash": "f76aaff"
+            },
+            {
+              "scopes": ["time-range-picker"],
+              "text": "Centre the zoom icon and shorten same-day labels",
+              "hash": "2df9ba3"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Address review findings on annotations",
+              "hash": "c1fdca5"
+            },
+            {
+              "scopes": ["split-button"],
+              "text": "Address code review findings",
+              "hash": "0f674c1"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Keep scrollToStart() instant and pinned, ignore drag clicks",
+              "hash": "f196699"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Keep app-wide button shadows off segmented items",
+              "hash": "74c3dc2"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Keep color-scheme outside the theme layer",
+              "hash": "90ea833"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Ship tokens.css and base.css in the c2n-theme cascade layer",
+              "hash": "ae2e2ae"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "Stack the count above the actions on a phone",
+              "hash": "6163d17"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "Keep the actions on one line on narrow screens",
+              "hash": "0e5dca1"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["tree-select"],
+              "text": "Skip the host's own value attribute in the row observer, build the row index once per render",
+              "hash": "6aa21ea"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Revert \"feat(log-viewer): add a keyboard active entry and entry-activate\"",
+              "hash": "943cb70"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Swiss cross logo built from the four brand-colour parts",
+              "hash": "7e1baac"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Close workbench code-review findings",
+              "hash": "3603d4a"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Visual pass on the close workbench against the mockups",
+              "hash": "2a9e52f"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Carry the close workbench mockups into the SvelteKit app",
+              "hash": "5573d37"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Address code review findings on the Angular orders admin",
+              "hash": "67a9f74"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add a SvelteKit month-end close workbench",
+              "hash": "df462f5"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Address code review findings on the Vue support inbox",
+              "hash": "19ed825"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Address code review findings on the React trading dashboard",
+              "hash": "560d58d"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Relative times, highlighted search and a validated reply in the Vue support inbox",
+              "hash": "c6d799d"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Order ticket, action bar and formatted totals in the React trading dashboard",
+              "hash": "36b9024"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Display popover and split-button bulk actions in the Angular orders admin",
+              "hash": "e3f05e6"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.14",
       "date": "2026-10-21",
       "sections": [
