@@ -3,6 +3,22 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.16](https://github.com/code2nguyen/web-components/releases/tag/v1.0.16) — 2026-10-23
+
+### Features
+
+- **sheet:** Style the body's scrollbar through CSS variables ([ae63bcc](https://github.com/code2nguyen/web-components/commit/ae63bcc))
+- **page-editor, notepad:** Paste, drop, copy and resize images ([ef0edcb](https://github.com/code2nguyen/web-components/commit/ef0edcb))
+- **split-panel:** Style the panels' scrollbars through CSS variables ([39010c0](https://github.com/code2nguyen/web-components/commit/39010c0))
+
+### Fixes
+
+- **flow:** A node being dragged shows the closed hand ([dd1a939](https://github.com/code2nguyen/web-components/commit/dd1a939))
+- **page-editor:** A table's frame and outline end with its last column ([e98a300](https://github.com/code2nguyen/web-components/commit/e98a300))
+- **page-editor, notepad:** Images pasted, copied and resized hold up across apps and edits ([2298461](https://github.com/code2nguyen/web-components/commit/2298461))
+- **flow:** A node shows the default cursor, not the pointer, over its title and rows ([85071e9](https://github.com/code2nguyen/web-components/commit/85071e9))
+- **action-bar:** No scrollbar on a container the content just fills, open or closed ([74b73f3](https://github.com/code2nguyen/web-components/commit/74b73f3))
+
 ## [1.0.15](https://github.com/code2nguyen/web-components/releases/tag/v1.0.15) — 2026-10-23
 
 ### Breaking changes
