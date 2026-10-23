@@ -1047,15 +1047,20 @@ test('a flexible column keeps its min-width when fixed columns fill a narrow tab
   expect(layout.scrolls).toBe(true)
 })
 
-test('its pinned cells stay under a positioned element the page puts after the table', async ({ page, renderScenario }) => {
+test('its sticky header and pinned cells stay under a positioned element the page puts after the table', async ({ page, renderScenario }) => {
   await renderScenario(`<div style="position:relative">
   ${table('selection="multiple" checkbox-selection')}
-  <div id="overlay" style="position:absolute;inset:40px 0 0 0;background:#fff">Totals</div>
+  <div id="overlay" style="position:absolute;inset:0;background:#fff">Totals</div>
 </div>`)
   await expect(page.getByRole('row')).toHaveCount(4)
-  const top = await page.evaluate(() => {
-    const box = document.getElementById('overlay')!.getBoundingClientRect()
-    return document.elementFromPoint(box.left + 12, box.top + 12)?.id
+  const hits = await page.evaluate(() => {
+    const grid = document.querySelector('c2-table')!.shadowRoot!
+    // The selection column's header cell (sticky row and pinned column at once) and a pinned body cell.
+    const cells = [grid.querySelector('.row--header .cell--pinned')!, grid.querySelector('.row--body .cell--pinned')!]
+    return cells.map((cell) => {
+      const box = cell.getBoundingClientRect()
+      return document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)?.id
+    })
   })
-  expect(top).toBe('overlay')
+  expect(hits).toEqual(['overlay', 'overlay'])
 })

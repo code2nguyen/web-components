@@ -112,9 +112,6 @@
   flex-direction: column;
   box-sizing: border-box;
   min-height: 0;
-  /* The sticky header, pinned columns and summary row stack with z-index; keep that stacking inside the table so
-     they never paint over a sticky or positioned element the page puts after it. */
-  isolation: isolate;
   max-height: css.cssVar(max-height);
   overflow: hidden;
   background: css.cssVar(background);
@@ -169,6 +166,10 @@
   // Virtualization replaces the rows above the viewport and resizes the spacer that stands in for them, which is
   // exactly what the browser's scroll anchoring tries to compensate for. Left on, the two fight during fast scrolling.
   overflow-anchor: none;
+  // The sticky header, pinned columns, summary row and group echoes stack with z-index; keep that stacking inside the
+  // grid so they never paint over a sticky or positioned element the page puts after the table. The toolbar and
+  // footer stay in the page's stacking context.
+  isolation: isolate;
 }
 
 .grid {
