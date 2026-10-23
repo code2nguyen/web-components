@@ -97,6 +97,34 @@ test('sticks to the bottom of its scroll container, over the content', async ({ 
   expect(await bar(page).evaluate((element) => element.getBoundingClientRect().height)).toBe(0)
 })
 
+test('gives no scrollbar to a container its content just fills, open or closed', async ({ page, renderScenario }) => {
+  // The content ends at the container's bottom edge, where the bar's zero-height host then sits (a list that fills
+  // its pane): anything of the bar reaching below the host would scroll the container.
+  await renderScenario(`<div class="scroller"><div style="height: 100%"></div><c2-action-bar count="0">${actions}</c2-action-bar></div>`)
+  const overflow = () => page.locator('.scroller').evaluate((element) => element.scrollHeight - element.clientHeight)
+  // Neither the hidden live region nor the closed bar reaches past the end of the container.
+  expect(await overflow()).toBe(0)
+  await props(bar(page), { count: 2 })
+  await expect(surface(page)).toBeVisible()
+  await expect.poll(() => surface(page).evaluate((element) => element.getAnimations().length)).toBe(0)
+  expect(await overflow()).toBe(0)
+  await props(bar(page), { count: 0 })
+  await expect(surface(page)).toBeHidden()
+  await expect.poll(() => surface(page).evaluate((element) => element.getAnimations().length)).toBe(0)
+  expect(await overflow()).toBe(0)
+})
+
+test('slides as it shows and hides, but not when it first renders open', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-action-bar count="1">${actions}</c2-action-bar>`)
+  const slides = () => surface(page).evaluate((element) => element.getAnimations().filter((a) => !('transitionProperty' in a)).length)
+  expect(await slides()).toBe(0)
+  await props(bar(page), { count: 0 })
+  expect(await slides()).toBe(1)
+  await expect(surface(page)).toBeHidden()
+  await props(bar(page), { count: 3 })
+  expect(await slides()).toBe(1)
+})
+
 test('the built-in text follows the nearest lang, with plurals', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr"><c2-action-bar count="1">${actions}</c2-action-bar></div>`)
   await expect(page.getByRole('status')).toHaveText('1 sélectionné')

@@ -70,24 +70,29 @@
   box-shadow: css.cssVar(container--box-shadow);
   pointer-events: auto;
   translate: -50% 0;
+  // Read by the slide (an animation run as the bar shows or hides), resolved to the values the theme gives.
+  --_offset: #{css.cssVar(container--offset)};
+  --_duration: #{css.cssVar(container--transition-duration)};
   transition:
     opacity css.cssVar(container--transition-duration) ease,
-    translate css.cssVar(container--transition-duration) ease,
     visibility 0s linear;
 }
 
-// Closed: faded, slid down and invisible, which also takes the bar and its slotted actions out of the Tab order.
-// Visibility flips only once the fade has finished.
+// Closed: faded and invisible, which also takes the bar and its slotted actions out of the Tab order. Visibility flips
+// only once the fade has finished. It rests where it shows: lower down, it would reach past the bottom of its scroll
+// container and give it a scrollbar; it only slides there and back while it hides and shows.
 :host(:not(:state(open))) .bar {
   opacity: 0;
-  translate: -50% css.cssVar(container--offset);
   visibility: hidden;
   pointer-events: none;
-  transition-delay: 0s, 0s, css.cssVar(container--transition-duration);
+  transition-delay: 0s, css.cssVar(container--transition-duration);
 }
 
 .announcer {
   position: absolute;
+  // Upwards from the zero-height host, as the bar is: from its top, it would reach 1px past the bottom of the scroll
+  // container the host sits at the end of, and scroll it.
+  bottom: 0;
   width: 1px;
   height: 1px;
   overflow: hidden;
@@ -218,6 +223,7 @@
   }
 }
 
+// The slide is skipped there too (see `slide()`); the bar only fades.
 @media (prefers-reduced-motion: reduce) {
   .bar,
   :host(:not(:state(open))) .bar {
