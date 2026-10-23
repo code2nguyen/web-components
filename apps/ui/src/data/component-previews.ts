@@ -136,6 +136,7 @@ greet('world')"></c2-code-editor>`,
   <c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
   <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6); --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5)">Copy</c2-copy-button>
 </div>`,
+  countdown: `<c2-countdown units="hours minutes seconds" duration="7384" style="--c2-countdown__segment--min-width:56px;--c2-countdown__value--font-size:26px"></c2-countdown>`,
   dashboard: `<c2-dashboard columns="1fr 1fr" rows="1fr 1fr" style="width:260px;height:150px;--c2-dashboard--gap:6px;--c2-dashboard--padding:6px;--c2-dashboard--background:var(--c2-theme--color-surface-container);--c2-dashboard--border-radius:10px;--c2-dash-card--background:var(--c2-theme--color-surface);--c2-dash-card--border:var(--c2-theme--border);--c2-dash-card--border-radius:6px;--c2-dash-card__header--font-size:11px;--c2-dash-card__header--min-height:0;--c2-dash-card__header--padding-block:6px;--c2-dash-card__header--padding-inline:8px">
   <c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card>
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>

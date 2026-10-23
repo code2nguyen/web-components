@@ -1,0 +1,130 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-countdown,
+  $theme: (
+    color: inherit,
+    font-size: inherit,
+    font-weight: inherit,
+    font-variant-numeric: tabular-nums,
+    gap: 8px,
+    segment--background-color: #f4f4f5,
+    segment--border: 1px solid #e4e4e7,
+    segment--border-radius: 8px,
+    segment--padding: 12px,
+    segment--min-width: 64px,
+    segment--gap: 4px,
+    value--color: #18181b,
+    value--font-size: 32px,
+    value--font-weight: 600,
+    value--font-family: inherit,
+    value--animation-duration: 0ms,
+    label--color: #52525b,
+    label--font-size: 12px,
+    label--font-weight: normal,
+    label--text-transform: none,
+    label--letter-spacing: normal,
+    separator--display: none,
+    separator--color: #a1a1aa,
+    separator--font-size: 32px,
+    warning--color: #dc2626,
+    paused--color: #71717a,
+  )
+);
+
+:host {
+  display: inline-block;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-variant-numeric: css.cssVar(font-variant-numeric);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.text {
+  white-space: nowrap;
+}
+
+.segments {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: css.cssVar(gap);
+}
+
+.segment {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: css.cssVar(segment--gap);
+  box-sizing: border-box;
+  min-width: css.cssVar(segment--min-width);
+  padding: css.cssVar(segment--padding);
+  border: css.cssVar(segment--border);
+  border-radius: css.cssVar(segment--border-radius);
+  background-color: css.cssVar(segment--background-color);
+  overflow: hidden;
+}
+
+.value {
+  display: block;
+  color: css.cssVar(value--color);
+  font-family: css.cssVar(value--font-family);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  line-height: 1;
+  animation: c2-countdown-roll css.cssVar(value--animation-duration) ease-out;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  text-transform: css.cssVar(label--text-transform);
+  letter-spacing: css.cssVar(label--letter-spacing);
+  white-space: nowrap;
+}
+
+.separator {
+  display: css.cssVar(separator--display);
+  align-self: center;
+  color: css.cssVar(separator--color);
+  font-size: css.cssVar(separator--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  line-height: 1;
+}
+
+:host(:state(paused)) .text,
+:host(:state(paused)) .value {
+  color: css.cssVar(paused--color);
+}
+
+:host(:state(warning)) .text,
+:host(:state(warning)) .value {
+  color: css.cssVar(warning--color);
+}
+
+@keyframes c2-countdown-roll {
+  from {
+    opacity: 0;
+    transform: translateY(-40%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .value {
+    animation: none;
+  }
+}

@@ -665,6 +665,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-countdown': {
+    html: `<c2-countdown date="2030-01-01T00:00:00Z"></c2-countdown>`,
+    presets: [
+      {
+        name: 'Launch',
+        description: 'Large tinted segments with uppercase labels for a launch page',
+        css: {
+          '--c2-countdown__segment--min-width': '72px',
+          '--c2-countdown__segment--background-color': '#edf1fe',
+          '--c2-countdown__segment--border-radius': '14px',
+          '--c2-countdown__value--font-size': '36px',
+          '--c2-countdown__label--text-transform': 'uppercase',
+          '--c2-countdown__label--letter-spacing': '0.06em',
+          '--c2-countdown__value--animation-duration': '240ms',
+        },
+      },
+      {
+        name: 'Colons',
+        description: 'Separated hours, minutes and seconds',
+        css: {
+          '--c2-countdown__separator--display': 'inline',
+        },
+        attributes: { units: 'hours minutes seconds', format: 'short' },
+      },
+      {
+        name: 'Minimal',
+        description: 'Bare digits over short labels, no boxes',
+        css: {
+          '--c2-countdown__segment--background-color': 'transparent',
+          '--c2-countdown__segment--border': 'none',
+          '--c2-countdown__segment--padding': '0',
+          '--c2-countdown__value--font-weight': '500',
+        },
+        attributes: { format: 'short' },
+      },
+    ],
+  },
   'c2-format-date': {
     html: `<c2-format-date date-style="long" date="2026-10-14T15:05:09Z"></c2-format-date>`,
     presets: [

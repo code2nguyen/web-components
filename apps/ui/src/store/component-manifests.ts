@@ -31,6 +31,7 @@ import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import confirmDialog from '@c2n/confirm-dialog/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
+import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
@@ -177,6 +178,7 @@ export const componentManifests = (function () {
     confirmDialog,
     contextMenu,
     copyButton,
+    countdown,
     dashboard,
     dateInput,
     dateSelector,
