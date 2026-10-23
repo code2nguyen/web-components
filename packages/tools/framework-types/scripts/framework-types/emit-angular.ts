@@ -4,7 +4,8 @@ import { formControlModel, type DiscoveredPackage } from './manifests.ts'
  * The `ControlValueAccessor` directives of `@c2n/angular`.
  *
  * Angular's built-in accessors match `input`, `select` and `textarea` only, so a form-associated custom element
- * is invisible to `ngModel` and `formControlName` however correct its `ElementInternals` are. One directive per
+ * gets no accessor from `ngModel` or `formControlName` (Angular throws NG01203) however correct its `ElementInternals`
+ * are. One directive per
  * value shape — `value` for the text-like controls, `checked` for the toggles — restores that, and the tag lists
  * come from the manifests so a new form control is covered as soon as it ships.
  *
