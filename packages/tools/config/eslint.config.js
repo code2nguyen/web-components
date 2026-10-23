@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/build/**',
       '**/.next/**',
+      '**/.svelte-kit/**',
       '**/out/**',
       '**/coverage/**',
       '**/types/**',

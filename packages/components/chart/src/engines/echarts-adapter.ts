@@ -15,6 +15,11 @@ export interface EchartsOptions extends EChartsCoreOption {
   series?: Record<string, unknown>[]
 }
 
+/** The slice of ECharts' internal model `xGeometry` reads: the first grid's rectangle. */
+interface GridOwner {
+  getComponent?(type: string, index: number): { coordinateSystem?: { getRect?(): { x: number; y: number; width: number; height: number } } } | undefined
+}
+
 /**
  * `lazy` (the default) coalesces updates into the next frame. A chart whose updates are rare and follow the pointer
  * (a hover highlight) passes `false`: ECharts swaps its data at once but redraws only on that frame, and a pointer
@@ -84,6 +89,8 @@ export async function createEchartsAdapter(
         events?.viewChange?.({ zoom: model?.geo?.[0]?.zoom ?? 1 })
       })
       instance.on('mouseout', () => events?.hover(null))
+      // `finished` follows every render that settles, including the data-only updates and a zoom.
+      instance.on('finished', () => events?.draw?.())
       instance.on('dataZoom', () => {
         const model = instance?.getOption() as { dataZoom?: { startValue?: number; endValue?: number }[] } | undefined
         const zoom = model?.dataZoom?.[0]
@@ -140,6 +147,24 @@ export async function createEchartsAdapter(
     convertToPixel(finder, value) {
       const pixel = instance?.convertToPixel(finder as Parameters<ECharts['convertToPixel']>[0], value) as number[] | null | undefined
       return Array.isArray(pixel) && pixel.length >= 2 && Number.isFinite(pixel[0]) && Number.isFinite(pixel[1]) ? [pixel[0], pixel[1]] : null
+    },
+
+    xGeometry(values) {
+      if (!instance) return null
+      // The grid's rectangle is not part of the public API, but every cartesian chart has exactly one grid, and its
+      // coordinate system has carried `getRect()` since ECharts 4. Without it there is no x axis to place against.
+      const model = (instance as unknown as { getModel?: () => GridOwner }).getModel?.()
+      const rect = model?.getComponent?.('grid', 0)?.coordinateSystem?.getRect?.()
+      if (!rect) return null
+      const owner = instance
+      return {
+        plot: { left: rect.x, top: rect.y, width: rect.width, height: rect.height },
+        horizontal: true,
+        offsets: values.map((value) => {
+          const pixel = owner.convertToPixel({ xAxisIndex: 0 }, value) as unknown
+          return typeof pixel === 'number' && Number.isFinite(pixel) ? pixel - rect.x : null
+        }),
+      }
     },
 
     /** ECharts leaks its global resize and event handlers without an explicit dispose. */

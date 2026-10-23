@@ -96,8 +96,11 @@ export { ChartLegend } from './chart-legend.js'
 export { ChartTooltip } from './chart-tooltip.js'
 export { ChartFrameBuilder, columnValue, type NormalizeContext } from './chart-data.js'
 export { ChartThemeController, PALETTE_SIZE, PROBE_COLORS, type ChartTheme } from './chart-theme.js'
-export type { ChartAdapter, ChartAdapterEvents, ChartBuildContext } from './chart-adapter.js'
+export type { ChartAdapter, ChartAdapterEvents, ChartBuildContext, ChartXGeometry } from './chart-adapter.js'
 export type {
+  ChartAnnotation,
+  ChartAnnotationEventDetail,
+  ChartAnnotationTone,
   ChartColumn,
   ChartColumnarInput,
   ChartDataSource,

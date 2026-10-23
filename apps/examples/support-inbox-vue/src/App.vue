@@ -4,7 +4,7 @@ import type { SelectEventMap } from '@c2n/components/select'
 import { toast } from '@c2n/components/toast'
 import ConversationList from './components/ConversationList.vue'
 import ThreadPanel from './components/ThreadPanel.vue'
-import { CONVERSATIONS, STATUS_LABEL, type Conversation, type Status } from './data/conversations'
+import { CONVERSATIONS, STATUS_LABEL, matchesQuery, type Conversation, type Status } from './data/conversations'
 
 type Filter = 'all' | Status
 
@@ -22,10 +22,10 @@ const activeId = ref(conversations.value[0].id)
 const detailsOpen = ref(false)
 
 const visible = computed(() => {
-  const needle = query.value.trim().toLowerCase()
+  const needle = query.value.trim()
   return conversations.value
     .filter((conversation) => filter.value === 'all' || conversation.status === filter.value)
-    .filter((conversation) => !needle || `${conversation.customer} ${conversation.subject}`.toLowerCase().includes(needle))
+    .filter((conversation) => !needle || matchesQuery(conversation, needle))
 })
 
 const active = computed(() => conversations.value.find((conversation) => conversation.id === activeId.value) ?? null)
@@ -52,8 +52,7 @@ function reply(body: string) {
 
   update(conversation.id, {
     status: 'waiting',
-    updated: 'now',
-    messages: [...conversation.messages, { id: `m${conversation.messages.length + 1}`, from: 'agent', author: 'You', body, at: 'now' }],
+    messages: [...conversation.messages, { id: `m${conversation.messages.length + 1}`, from: 'agent', author: 'You', body, at: new Date() }],
   })
   toast.show({ variant: 'success', heading: conversation.customer, message: 'Reply sent.' })
 }
@@ -121,7 +120,7 @@ onMounted(() => {
     </header>
 
     <main class="app__body">
-      <ConversationList :conversations="visible" :active-id="activeId" @select="open" />
+      <ConversationList :conversations="visible" :active-id="activeId" :query="query.trim()" @select="open" />
 
       <ThreadPanel v-if="active" :key="active.id" :conversation="active" @reply="reply" @resolve="resolve" @archive="archive" @details="detailsOpen = true" />
       <section v-else class="thread thread--empty">Pick a conversation on the left.</section>

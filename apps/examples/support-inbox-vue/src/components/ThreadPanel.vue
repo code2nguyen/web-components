@@ -1,19 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
+import type { Form, FormEventMap, FormValidator } from '@c2n/components/form'
 import { STATUS_LABEL, STATUS_TONE, type Conversation } from '../data/conversations'
 
 const props = defineProps<{ conversation: Conversation }>()
 const emit = defineEmits<{ reply: [body: string]; resolve: []; archive: []; details: [] }>()
 
 const draft = ref('')
+const form = ref<Form>()
 
-function send() {
-  const body = draft.value.trim()
-  if (!body) return
-  emit('reply', body)
+// `required` alone accepts a reply of spaces; the form runs this after the controls' own checks and shows the
+// message on the field whose control has that `name`.
+const validator: FormValidator = (values) => (String(values.reply ?? '').trim() ? {} : { reply: 'Write a reply before sending.' })
+
+// `valid-submit` only fires once every check passed, so there is nothing to re-validate here.
+async function send(event: FormEventMap['valid-submit']) {
+  emit('reply', String(event.detail.values.reply).trim())
   // Clearing the state clears the field: `v-model` keeps the two in step, so Vue's next patch writes the empty
-  // string back onto the element.
+  // string back onto the element. Once it has, a form reset puts the field back to untouched — no "required" error
+  // on the empty composer, and the form no longer dirty.
   draft.value = ''
+  await nextTick()
+  form.value?.reset()
 }
 </script>
 
@@ -58,7 +66,8 @@ function send() {
         <c2-chat-message :align.attr="message.from === 'agent' ? 'right' : 'left'" :class="`thread__message thread__message--${message.from}`">
           <c2-avatar slot="avatar" auto-color :name="message.author" class="thread__nested-avatar" />
           <span slot="title">{{ message.author }}</span>
-          <span slot="header-time">{{ message.at }}</span>
+          <!-- The day and time in the reader's language and time zone; the exact instant is the inner <time>. -->
+          <c2-format-date slot="header-time" :date="message.at" weekday="short" hour="numeric" minute="2-digit" />
           <!-- This node belongs to Vue's light DOM, so its scoped class works normally. The global
                `::part(content)` rule styles the component-owned region around it independently.
                Message bodies are markdown: `:value` lands as a property (the element is registered first),
@@ -69,18 +78,33 @@ function send() {
       </li>
     </ol>
 
-    <footer class="thread__composer">
-      <!-- `v-model` works here, and for a reason worth knowing: on a custom element Vue compiles it to the
-           plain-text model directive, which sets `el.value` and listens for `input`. These components expose a
-           `value` property and re-emit the inner control's native `input` event through `redispatchEvent`, so
-           they satisfy that contract without a wrapper. An element that only emitted a custom event would need
-           `:value` plus an explicit listener instead. -->
-      <c2-textarea v-model="draft" :rows="3" aria-label="Write a reply" placeholder="Write a reply…" @keydown.enter.meta="send" />
-      <div class="thread__composer-foot">
-        <span class="thread__hint">⌘ + Enter to send</span>
-        <c2-button :disabled="!draft.trim()" @click="send">Send reply</c2-button>
-      </div>
-    </footer>
+    <!-- `c2-form` wraps a native <form>: a submit runs validation, shows the error under the field and focuses it,
+         then fires `valid-submit` instead of navigating. `c2-form-field` labels the textarea and draws the hint, the
+         error and the character counter, which reads `maxlength` from the control. `:validator` is a function, so
+         Vue sets it as a property: the element is registered before the app mounts. -->
+    <c2-form ref="form" class="thread__composer" necessity="none" :validator="validator" @valid-submit="send">
+      <form>
+        <c2-form-field label="Reply" hint="⌘ + Enter to send" counter>
+          <!-- `v-model` works here, and for a reason worth knowing: on a custom element Vue compiles it to the
+               plain-text model directive, which sets `el.value` and listens for `input`. These components expose a
+               `value` property and re-emit the inner control's native `input` event through `redispatchEvent`, so
+               they satisfy that contract without a wrapper. An element that only emitted a custom event would need
+               `:value` plus an explicit listener instead. -->
+          <c2-textarea
+            v-model="draft"
+            name="reply"
+            :rows="3"
+            :maxlength="2000"
+            required
+            placeholder="Write a reply…"
+            @keydown.enter.meta.prevent="form?.submit()"
+          />
+        </c2-form-field>
+        <div class="thread__composer-foot">
+          <c2-button type="submit">Send reply</c2-button>
+        </div>
+      </form>
+    </c2-form>
   </section>
 </template>
 

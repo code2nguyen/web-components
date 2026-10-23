@@ -16,6 +16,7 @@ export const overrides: Record<string, Override> = {
   '--c2-highlight__mark--background-color': { exclude: 'translucent highlighter hue' },
   '--c2-highlight__mark__active--background-color': { exclude: 'translucent highlighter hue' },
   '--c2-highlight__mark__active--box-shadow': { exclude: 'outline in the current-match hue' },
+  '--c2-tree-select__match--background': { exclude: 'translucent highlighter hue' },
   // A mark is a run of inline text, not a box: no padding and a hairline radius so it never shifts the line.
   '--c2-highlight__mark--padding': { exclude: 'inline text run' },
   '--c2-highlight__mark--border-radius': { exclude: 'inline text run' },
@@ -241,6 +242,18 @@ export const overrides: Record<string, Override> = {
   '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The date-time popup floats over the page like any popover.
   '--c2-date-time-picker__picker--box-shadow': { token: 'shadow-md' },
+  // The time range popup floats over the page like any popover; a running auto-refresh is outlined in the accent
+  // and marked by a semantic "live" green, which has no token.
+  '--c2-time-range-picker__popup--box-shadow': { token: 'shadow-md' },
+  '--c2-time-range-picker__refresh__active--border': { token: 'color-primary', value: '1px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-time-range-picker__live--color': { exclude: 'semantic success colour' },
+  // The From and To fields hold expressions such as now-1d/d, which read best in a monospace face whatever the app font.
+  '--c2-time-range-picker__input--font-family': { exclude: 'monospace for typed expressions' },
+  // The zone chip sits on a muted fill, where the muted text role drops below 4.5:1; a deeper mix of the ink keeps it.
+  '--c2-time-range-picker__time-zone--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
+  },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -260,6 +273,9 @@ export const overrides: Record<string, Override> = {
   '--c2-gantt__series-6--color': { token: 'chart-series-6' },
   '--c2-gantt__series-7--color': { token: 'chart-series-7' },
   '--c2-gantt__series-8--color': { token: 'chart-series-8' },
+  // A tour dims the page with the dialog scrim and rings its spotlight with the focus ring.
+  '--c2-tour__backdrop--color': { token: 'color-scrim' },
+  '--c2-tour__spotlight--outline': { token: 'focus-ring' },
   // A trace waterfall colours each service with the same categorical palette, so its bars match a chart of the same services.
   '--c2-trace-waterfall__series-1--color': { token: 'chart-series-1' },
   '--c2-trace-waterfall__series-2--color': { token: 'chart-series-2' },
@@ -719,6 +735,10 @@ export const overrides: Record<string, Override> = {
   '--c2-timeline-item__marker__success--color': { exclude: 'success status colour' },
   '--c2-timeline-item__marker__warning--border-color': { exclude: 'warning status colour' },
   '--c2-timeline-item__marker__warning--color': { exclude: 'warning status colour' },
+  // The image cropper draws its selection outline and handles over the photo being cropped, white in both modes: a
+  // dark-mode surface colour would vanish into the dimmed image.
+  '--c2-image-cropper__selection--border': { exclude: 'white outline drawn over the image' },
+  '--c2-image-cropper__handle--background': { exclude: 'white handle drawn over the image' },
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },

@@ -530,3 +530,22 @@ test('in a menu that is one row, ArrowUp and ArrowDown step through its choices'
   await page.keyboard.press('ArrowUp')
   await expect(row(page, 'green')).toBeFocused()
 })
+
+test('a choice row is drawn and announced as a radio without writing type or checked', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-menu>${trigger}<c2-menu-item value="a">A</c2-menu-item><c2-menu-item value="b">B</c2-menu-item></c2-menu>`)
+  await page.locator('c2-menu-item').evaluateAll(async (items) => {
+    items.forEach((item, index) => ((item as HTMLElement & { choice: { checked: boolean } }).choice = { checked: index === 1 }))
+    await Promise.all(items.map((item) => (item as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete))
+  })
+  await expect(row(page, 'a')).toHaveHostAria('role', 'menuitemradio')
+  await expect(row(page, 'a')).toHaveHostAria('aria-checked', 'false')
+  await expect(row(page, 'b')).toHaveHostAria('aria-checked', 'true')
+  await watch(page.locator('c2-menu'), 'menu-select')
+  await page.getByRole('button', { name: 'Actions' }).click()
+  await row(page, 'a').click()
+  expect(JSON.parse((await page.locator('c2-menu').getAttribute('data-events'))!)).toEqual([{ value: 'a', checked: true }])
+  // The pick does not stick on its own: whoever set `choice` decides.
+  await expect(row(page, 'a')).toHaveHostAria('aria-checked', 'false')
+  for (const value of ['a', 'b'])
+    expect(await row(page, value).evaluate((element) => [element.hasAttribute('type'), element.hasAttribute('checked')])).toEqual([false, false])
+})

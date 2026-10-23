@@ -1,0 +1,437 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tree-select,
+  $theme: (
+    button--min-height: 36px,
+    button--padding: 5px 10px 5px 12px,
+    button--gap: 8px,
+    button--background: #ffffff,
+    button--color: #18181b,
+    button--font-size: 14px,
+    button--font-weight: null,
+    button--font-family: null,
+
+    button--border-top: 1px solid #bcbcc6,
+    button--border-right: 1px solid #bcbcc6,
+    button--border-bottom: 1px solid #bcbcc6,
+    button--border-left: 1px solid #bcbcc6,
+    button--border-top-left-radius: 6px,
+    button--border-top-right-radius: 6px,
+    button--border-bottom-left-radius: 6px,
+    button--border-bottom-right-radius: 6px,
+
+    button__hover--border-top: 1px solid #a1a1aa,
+    button__hover--border-right: 1px solid #a1a1aa,
+    button__hover--border-bottom: 1px solid #a1a1aa,
+    button__hover--border-left: 1px solid #a1a1aa,
+    button__hover--background: #fafafa,
+
+    button__open--border-top: 1px solid #476ef9,
+    button__open--border-right: 1px solid #476ef9,
+    button__open--border-bottom: 1px solid #476ef9,
+    button__open--border-left: 1px solid #476ef9,
+
+    button__error--border-top: 1px solid #dc2626,
+    button__error--border-right: 1px solid #dc2626,
+    button__error--border-bottom: 1px solid #dc2626,
+    button__error--border-left: 1px solid #dc2626,
+
+    button__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    button__focus--outline-offset: 0px,
+    button__disabled--opacity: variables.$disabled-content-opacity,
+    button__icon--size: 16px,
+    button__icon--color: #71717a,
+
+    placeholder--color: #71717a,
+    path--color: #71717a,
+
+    chip--height: 24px,
+    chip--padding: 0 2px 0 8px,
+    chip--background: #f4f4f5,
+    chip--color: #18181b,
+    chip--font-size: 12px,
+    chip--border-radius: 4px,
+    chip__remove--color: #71717a,
+    chip__more--background: #edf1fe,
+    chip__more--color: #0154b8,
+
+    list--background: #ffffff,
+    list--border-top: 1px solid #e4e4e7,
+    list--border-right: 1px solid #e4e4e7,
+    list--border-bottom: 1px solid #e4e4e7,
+    list--border-left: 1px solid #e4e4e7,
+    list--border-top-left-radius: 8px,
+    list--border-top-right-radius: 8px,
+    list--border-bottom-left-radius: 8px,
+    list--border-bottom-right-radius: 8px,
+    list--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    list--padding: 4px,
+    list--min-width: auto,
+    list--max-height: 320px,
+
+    search--height: 40px,
+    search--color: #18181b,
+    search--border-bottom: 1px solid #e4e4e7,
+    search__icon--color: #71717a,
+    match--background: rgba(250, 204, 21, 0.4),
+    match--font-weight: 600,
+    status--color: #71717a,
+
+    footer--background: #fafafa,
+    footer--border-top: 1px solid #e4e4e7,
+    footer--color: #52525b,
+    footer__clear--color: #0265dc,
+    footer__done--background: #0265dc,
+    footer__done--color: #ffffff,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-tree-select {
+  display: contents;
+}
+
+// The trigger box. The button inside it fills the space the chips leave; the chips, the clear button and the chevron
+// sit beside it because a button may not hold other buttons.
+.field {
+  display: flex;
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: css.cssVar(button--min-height);
+  align-items: center;
+  gap: css.cssVar(button--gap);
+  padding: css.cssVar(button--padding);
+  cursor: pointer;
+  user-select: none;
+
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  font-family: css.cssVar(button--font-family);
+  line-height: 1.4;
+  color: css.cssVar(button--color);
+  background: css.cssVar(button--background);
+
+  border-top: css.cssVar(button--border-top);
+  border-right: css.cssVar(button--border-right);
+  border-bottom: css.cssVar(button--border-bottom);
+  border-left: css.cssVar(button--border-left);
+  border-top-left-radius: css.cssVar(button--border-top-left-radius);
+  border-top-right-radius: css.cssVar(button--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(button--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(button--border-bottom-right-radius);
+  transition: animation.standard(background), animation.standard(border);
+
+  &:hover {
+    border-top: css.cssVar(button__hover--border-top);
+    border-right: css.cssVar(button__hover--border-right);
+    border-bottom: css.cssVar(button__hover--border-bottom);
+    border-left: css.cssVar(button__hover--border-left);
+    background: css.cssVar(button__hover--background);
+  }
+
+  &:has(.button:focus-visible) {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+
+  &:has(.button:disabled) {
+    cursor: default;
+    pointer-events: none;
+    opacity: css.cssVar(button__disabled--opacity);
+  }
+}
+
+:host([open]) .field {
+  border-top: css.cssVar(button__open--border-top);
+  border-right: css.cssVar(button__open--border-right);
+  border-bottom: css.cssVar(button__open--border-bottom);
+  border-left: css.cssVar(button__open--border-left);
+
+  .chevron {
+    transform: rotate(180deg);
+  }
+}
+
+:host(:state(error):not([open])) .field {
+  border-top: css.cssVar(button__error--border-top);
+  border-right: css.cssVar(button__error--border-right);
+  border-bottom: css.cssVar(button__error--border-bottom);
+  border-left: css.cssVar(button__error--border-left);
+}
+
+:host([readonly]) .field {
+  cursor: default;
+}
+
+.button {
+  display: flex;
+  flex: 1;
+  align-self: stretch;
+  align-items: center;
+  min-width: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: inherit;
+  outline: none;
+}
+
+.text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.placeholder {
+  color: css.cssVar(placeholder--color);
+}
+
+.path {
+  color: css.cssVar(path--color);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: css.cssVar(button__icon--size);
+  height: css.cssVar(button__icon--size);
+  color: css.cssVar(button__icon--color);
+  transition: animation.standard(transform);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  // Pulls the first chip towards the edge, which reads as one inset with the chip's own padding.
+  margin-inline-start: -7px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: css.cssVar(chip--height);
+  padding: css.cssVar(chip--padding);
+  border-radius: css.cssVar(chip--border-radius);
+  background: css.cssVar(chip--background);
+  color: css.cssVar(chip--color);
+  font-size: css.cssVar(chip--font-size);
+  cursor: default;
+
+  &.more {
+    padding: 0 8px;
+    background: css.cssVar(chip__more--background);
+    color: css.cssVar(chip__more--color);
+    font-weight: 500;
+  }
+}
+
+.chip-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chip-remove,
+.clear,
+.search-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(chip__remove--color);
+  cursor: pointer;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  &:hover {
+    background: rgba(24, 24, 27, 0.08);
+  }
+}
+
+.clear {
+  color: css.cssVar(button__icon--color);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: css.cssVar(list--min-width);
+  max-height: css.cssVar(list--max-height);
+  overflow: hidden;
+
+  font-size: css.cssVar(button--font-size);
+  font-family: css.cssVar(button--font-family);
+  color: css.cssVar(button--color);
+  background: css.cssVar(list--background);
+  box-shadow: css.cssVar(list--box-shadow);
+
+  border-top: css.cssVar(list--border-top);
+  border-right: css.cssVar(list--border-right);
+  border-bottom: css.cssVar(list--border-bottom);
+  border-left: css.cssVar(list--border-left);
+  border-top-left-radius: css.cssVar(list--border-top-left-radius);
+  border-top-right-radius: css.cssVar(list--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(list--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(list--border-bottom-right-radius);
+}
+
+.search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: css.cssVar(search--height);
+  padding: 0 8px 0 12px;
+  border-bottom: css.cssVar(search--border-bottom);
+  color: css.cssVar(search__icon--color);
+}
+
+.search-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font: inherit;
+  color: css.cssVar(search--color);
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+.search-clear {
+  color: css.cssVar(search__icon--color);
+}
+
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: css.cssVar(list--padding);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+c2-tree {
+  display: block;
+}
+
+.message {
+  padding: 18px 16px;
+  text-align: center;
+  color: css.cssVar(status--color);
+}
+
+.status {
+  flex: none;
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  color: css.cssVar(status--color);
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border-top: css.cssVar(footer--border-top);
+  background: css.cssVar(footer--background);
+  font-size: 12px;
+  color: css.cssVar(footer--color);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.footer-clear,
+.footer-done {
+  height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid rgba(2, 101, 220, 0.4);
+    outline-offset: 1px;
+  }
+}
+
+.footer-clear {
+  background: none;
+  color: css.cssVar(footer__clear--color);
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(button__disabled--opacity);
+  }
+}
+
+.footer-done {
+  background: css.cssVar(footer__done--background);
+  color: css.cssVar(footer__done--color);
+}

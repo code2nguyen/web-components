@@ -1,0 +1,338 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tour,
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
+    font-size: 14px,
+    font-family: null,
+    line-height: 1.5,
+    padding: 16px,
+    width: 320px,
+    offset: 8px,
+    transition-duration: 200ms,
+    enter-transform: scale(0.96),
+    arrow--size: 10px,
+
+    backdrop--color: 'rgba(9, 9, 11, 0.45)',
+    spotlight--padding: 8px,
+    spotlight--border-radius: 8px,
+    spotlight--outline: '2px solid rgba(2, 101, 220, 0.4)',
+
+    heading--color: null,
+    heading--font-size: 14px,
+    heading--font-weight: 600,
+
+    body--color: #71717a,
+    body--margin-top: 4px,
+
+    close--size: 24px,
+    close--color: #71717a,
+    close--border-radius: 4px,
+    close__hover--background-color: #f4f4f5,
+
+    footer--margin-top: 16px,
+    footer--gap: 8px,
+    progress--color: #71717a,
+    progress--font-size: 12px,
+
+    button--height: 32px,
+    button--padding-left: 12px,
+    button--padding-right: 12px,
+    button--border-radius: 6px,
+    button--font-size: 14px,
+    button--font-weight: 500,
+    button__focus--outline: '2px solid rgba(2, 101, 220, 0.4)',
+    button__focus--outline-offset: 2px,
+
+    skip--display: inline-flex,
+    skip--color: #71717a,
+    skip__hover--background-color: #f4f4f5,
+
+    previous--background-color: transparent,
+    previous--color: #18181b,
+    previous--border: 1px solid #bcbcc6,
+    previous__hover--background-color: #f4f4f5,
+
+    next--background-color: 'rgb(2, 101, 220)',
+    next--color: #ffffff,
+    next--border: 1px solid transparent,
+    next__hover--background-color: 'rgb(1, 84, 184)',
+  )
+);
+
+:host {
+  display: contents;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+// Never seen: CSS resolves the length variables on it (any unit, `calc()`) for the script to read in pixels.
+.measure {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  padding: css.cssVar(offset) css.cssVar(spotlight--padding) css.cssVar(arrow--size) 0;
+}
+
+// Both layers live in the top layer as manual popovers; reset the UA popover box.
+.spotlight,
+.panel {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+// The cut-out around the target. Its huge shadow is what dims the page; a shadow is not hit-tested and the box
+// ignores the pointer, so the page under it stays interactive.
+.spotlight {
+  background: transparent;
+  border-radius: css.cssVar(spotlight--border-radius);
+  outline: css.cssVar(spotlight--outline);
+  box-shadow: 0 0 0 200vmax css.cssVar(backdrop--color);
+  pointer-events: none;
+  transition:
+    left css.cssVar(transition-duration) animation.$standard-easing,
+    top css.cssVar(transition-duration) animation.$standard-easing,
+    width css.cssVar(transition-duration) animation.$standard-easing,
+    height css.cssVar(transition-duration) animation.$standard-easing,
+    outline-color css.cssVar(transition-duration) animation.$standard-easing;
+
+  &[data-placement='center'] {
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    outline-color: transparent;
+  }
+}
+
+.panel {
+  width: min(#{css.cssVar(width)}, calc(100vw - 16px));
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background-color);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  font-weight: 400;
+  line-height: css.cssVar(line-height);
+  text-align: left;
+  overflow-wrap: break-word;
+
+  opacity: 0;
+  transform: css.cssVar(enter-transform);
+  transition:
+    opacity css.cssVar(transition-duration) animation.$standard-easing,
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
+
+  &:focus {
+    outline: none;
+  }
+
+  &[data-placement='center'] {
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+
+    .arrow {
+      display: none;
+    }
+  }
+}
+
+.panel:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .panel:popover-open {
+    opacity: 0;
+    transform: css.cssVar(enter-transform);
+  }
+}
+
+// A rotated square sharing the panel's background and border; the clip keeps only the two outer edges.
+.arrow {
+  position: absolute;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  background: css.cssVar(background-color);
+  border: css.cssVar(border);
+  box-sizing: border-box;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.panel[data-placement^='top'] .arrow {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+.panel[data-placement^='bottom'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.panel[data-placement^='left'] .arrow {
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.panel[data-placement^='right'] .arrow {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.heading {
+  flex: 1;
+  min-width: 0;
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+}
+
+.body {
+  margin-top: css.cssVar(body--margin-top);
+  color: css.cssVar(body--color);
+}
+
+.header:has(.heading[hidden]) + .body {
+  margin-top: 0;
+}
+
+.close {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(close--size);
+  height: css.cssVar(close--size);
+  margin-left: auto;
+  border-radius: css.cssVar(close--border-radius);
+  color: css.cssVar(close--color);
+  cursor: pointer;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: css.cssVar(close__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+}
+
+// Without a heading the close button floats over the body's first line.
+.header:has(.heading[hidden]) {
+  float: right;
+  margin-left: 8px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(footer--gap);
+  margin-top: css.cssVar(footer--margin-top);
+  clear: both;
+}
+
+.progress {
+  margin-right: auto;
+  color: css.cssVar(progress--color);
+  font-size: css.cssVar(progress--font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: css.cssVar(button--height);
+  padding-left: css.cssVar(button--padding-left);
+  padding-right: css.cssVar(button--padding-right);
+  border-radius: css.cssVar(button--border-radius);
+  font-family: inherit;
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color css.cssVar(transition-duration) animation.$standard-easing;
+
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+}
+
+.skip {
+  display: css.cssVar(skip--display);
+  border: 1px solid transparent;
+  background: transparent;
+  color: css.cssVar(skip--color);
+
+  &:hover {
+    background: css.cssVar(skip__hover--background-color);
+  }
+}
+
+.previous {
+  border: css.cssVar(previous--border);
+  background: css.cssVar(previous--background-color);
+  color: css.cssVar(previous--color);
+
+  &:hover {
+    background: css.cssVar(previous__hover--background-color);
+  }
+}
+
+.next {
+  border: css.cssVar(next--border);
+  background: css.cssVar(next--background-color);
+  color: css.cssVar(next--color);
+
+  &:hover {
+    background: css.cssVar(next__hover--background-color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight,
+  .panel,
+  .button {
+    transition: none;
+  }
+}

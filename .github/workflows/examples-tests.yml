@@ -1,9 +1,7 @@
 name: Example app tests
 
 # Runs the browser suite of every example app that has one, against a production build of the app and the
-# component packages it consumes. orders-admin-angular, trading-dashboard-react and the two HTML examples have no
-# suite yet; they are still built (and the Angular templates type-checked by `ng build`) by `npm run ui:build` in
-# deploy.yml.
+# component packages it consumes. An example without a suite is still built by `npm run ui:build` in deploy.yml.
 on:
   pull_request:
     branches: [develop, main]
@@ -26,12 +24,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Angular dev server (`ng serve`) on 127.0.0.1:4177.
+          - example: orders-admin-angular
+            test: npm run test:browser -w apps/examples/orders-admin-angular
           # Static export served by test/serve-static.mjs on 127.0.0.1:4180 (the Playwright webServer).
           - example: observability-nextjs
             test: npm run test:e2e -w apps/examples/observability-nextjs
           # Vite dev server on 127.0.0.1:4176; it resolves the components through their built `dist/`.
           - example: support-inbox-vue
             test: npm run test:browser -w apps/examples/support-inbox-vue
+          # Vite dev server on 127.0.0.1:4178.
+          - example: trading-dashboard-react
+            test: npm run test:browser -w apps/examples/trading-dashboard-react
+          # Domain unit tests (node --test), then the prerendered build served by `vite preview` on 127.0.0.1:4182.
+          - example: close-workbench-sveltekit
+            test: npm run test:unit -w apps/examples/close-workbench-sveltekit && npm run test:browser -w apps/examples/close-workbench-sveltekit
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

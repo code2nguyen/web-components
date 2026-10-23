@@ -31,6 +31,12 @@ export function logTokens(text: string): LogToken[] {
   return tokens
 }
 
+/** A token cut to one visual line, with the logical line it came from and its UTF-16 offset there. A line break has neither. */
+export interface LogPiece extends LogToken {
+  line?: number
+  start?: number
+}
+
 interface TokenRange extends LogToken {
   start: number
   end: number
@@ -42,8 +48,8 @@ export class LogTokenLines {
 
   constructor(private readonly layout: TextLayout) {}
 
-  slice(first = 0, last = this.layout.lines.length): LogToken[] {
-    const result: LogToken[] = []
+  slice(first = 0, last = this.layout.lines.length): LogPiece[] {
+    const result: LogPiece[] = []
     for (let line = first; line < last; line++) {
       if (line > first) result.push({ text: '\n' })
       const source = this.layout.sources[line]
@@ -69,7 +75,8 @@ export class LogTokenLines {
       }
       for (let index = low; index < ranges.length && ranges[index].start < end; index++) {
         const token = ranges[index]
-        result.push({ text: token.text.slice(Math.max(start - token.start, 0), Math.min(end - token.start, token.text.length)), kind: token.kind })
+        const from = Math.max(start - token.start, 0)
+        result.push({ text: token.text.slice(from, Math.min(end - token.start, token.text.length)), kind: token.kind, line: source, start: token.start + from })
       }
     }
     return result

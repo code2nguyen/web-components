@@ -3,6 +3,82 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.15](https://github.com/code2nguyen/web-components/releases/tag/v1.0.15) — 2026-10-23
+
+### Breaking changes
+
+- **mask-input:** Search only the group choices when fitting a mask ([33f0a38](https://github.com/code2nguyen/web-components/commit/33f0a38))
+
+### Features
+
+- **search-field:** Escape="none" leaves Escape to the container ([fc7dfb6](https://github.com/code2nguyen/web-components/commit/fc7dfb6))
+- **tree-select:** Add c2-tree-select, a form-associated dropdown over c2-tree ([336b902](https://github.com/code2nguyen/web-components/commit/336b902))
+- **log-viewer:** Add a keyboard active entry and entry-activate ([9393fad](https://github.com/code2nguyen/web-components/commit/9393fad))
+- **tour:** Skip-delay waits before a skipped tour autostarts again ([bada9cd](https://github.com/code2nguyen/web-components/commit/bada9cd))
+- **tour:** Skip-limit sets how many skips turn autostart off ([eaf0eb7](https://github.com/code2nguyen/web-components/commit/eaf0eb7))
+- **tour:** Remember progress in localStorage, autostart and a Skip button ([0b40df5](https://github.com/code2nguyen/web-components/commit/0b40df5))
+- **image-cropper:** Add c2-image-cropper ([bbbd1f6](https://github.com/code2nguyen/web-components/commit/bbbd1f6))
+- **tour:** Add c2-tour guided product tour ([f63ea8d](https://github.com/code2nguyen/web-components/commit/f63ea8d))
+- **log-viewer:** Keyboard active entry with entry-activate, and Ctrl/Command+F find ([c44a50b](https://github.com/code2nguyen/web-components/commit/c44a50b))
+- **time-range-picker:** Add c2-time-range-picker ([27cc778](https://github.com/code2nguyen/web-components/commit/27cc778))
+- **split-button:** Add c2-split-button, a main action with a caret menu of alternatives ([93f243a](https://github.com/code2nguyen/web-components/commit/93f243a))
+- **menu:** Let a split button mark rows as choices without writing their attributes ([fb533ed](https://github.com/code2nguyen/web-components/commit/fb533ed))
+- **chart:** Add annotations, markers at an x value and shaded x ranges ([a0e8ea4](https://github.com/code2nguyen/web-components/commit/a0e8ea4))
+- **button, link-button:** Add selected states for the new shadow and border variables ([0cdbb34](https://github.com/code2nguyen/web-components/commit/0cdbb34))
+- **link-button:** Add --c2-link-button__container--border and its hover state ([fdcab5f](https://github.com/code2nguyen/web-components/commit/fdcab5f))
+- **button:** Add --c2-button__container--box-shadow and its hover state ([f67e8e1](https://github.com/code2nguyen/web-components/commit/f67e8e1))
+- **log-viewer:** Add scrollToStart() and an entry-click event ([0a5060a](https://github.com/code2nguyen/web-components/commit/0a5060a))
+- **mask-input:** Add optional groups anywhere in a mask ([73c085a](https://github.com/code2nguyen/web-components/commit/73c085a))
+
+### Fixes
+
+- **chart:** Skip filtered ticks when sizing a value axis ([9e0e190](https://github.com/code2nguyen/web-components/commit/9e0e190))
+- **gantt:** Cap beside-labels at their side's room, and pick the roomier side ([845e00c](https://github.com/code2nguyen/web-components/commit/845e00c))
+- **search-field:** Escape that closes the recent searches does not reach the container ([aec537b](https://github.com/code2nguyen/web-components/commit/aec537b))
+- **core:** A blank string assigned to a Number property unsets it ([a799cb5](https://github.com/code2nguyen/web-components/commit/a799cb5))
+- **tree-select:** Address review findings ([1398fa5](https://github.com/code2nguyen/web-components/commit/1398fa5))
+- **kanban:** Keep an empty lane's hint under its header ([7401528](https://github.com/code2nguyen/web-components/commit/7401528))
+- **gantt:** Keep labels beside short bars inside the timeline ([b4bbf24](https://github.com/code2nguyen/web-components/commit/b4bbf24))
+- **chart:** Size value axes to their widest label, warn when the plot collapses ([214846b](https://github.com/code2nguyen/web-components/commit/214846b))
+- **core:** Parse a numeric string assigned to a Number property ([07ef5f4](https://github.com/code2nguyen/web-components/commit/07ef5f4))
+- **tour:** Code-review findings ([6c237b9](https://github.com/code2nguyen/web-components/commit/6c237b9))
+- **log-viewer:** Leave the copy area selectable, as before ([237c91f](https://github.com/code2nguyen/web-components/commit/237c91f))
+- **log-viewer:** Cross-browser keyboard, selection and copy-cell fixes ([8c7d89e](https://github.com/code2nguyen/web-components/commit/8c7d89e))
+- **image-cropper:** Cancel interrupted drags, fit authored crops to aspect-ratio ([c658b60](https://github.com/code2nguyen/web-components/commit/c658b60))
+- **image-cropper:** No focus ring on the selection after a pointer drag ([e93951b](https://github.com/code2nguyen/web-components/commit/e93951b))
+- **log-viewer:** Address review findings on keyboard and find ([f76aaff](https://github.com/code2nguyen/web-components/commit/f76aaff))
+- **time-range-picker:** Centre the zoom icon and shorten same-day labels ([2df9ba3](https://github.com/code2nguyen/web-components/commit/2df9ba3))
+- **chart:** Address review findings on annotations ([c1fdca5](https://github.com/code2nguyen/web-components/commit/c1fdca5))
+- **split-button:** Address code review findings ([0f674c1](https://github.com/code2nguyen/web-components/commit/0f674c1))
+- **log-viewer:** Keep scrollToStart() instant and pinned, ignore drag clicks ([f196699](https://github.com/code2nguyen/web-components/commit/f196699))
+- **button-group:** Keep app-wide button shadows off segmented items ([74c3dc2](https://github.com/code2nguyen/web-components/commit/74c3dc2))
+- **theme:** Keep color-scheme outside the theme layer ([90ea833](https://github.com/code2nguyen/web-components/commit/90ea833))
+- **theme:** Ship tokens.css and base.css in the c2n-theme cascade layer ([ae2e2ae](https://github.com/code2nguyen/web-components/commit/ae2e2ae))
+- **action-bar:** Stack the count above the actions on a phone ([6163d17](https://github.com/code2nguyen/web-components/commit/6163d17))
+- **action-bar:** Keep the actions on one line on narrow screens ([0e5dca1](https://github.com/code2nguyen/web-components/commit/0e5dca1))
+
+### Performance
+
+- **tree-select:** Skip the host's own value attribute in the row observer, build the row index once per render ([6aa21ea](https://github.com/code2nguyen/web-components/commit/6aa21ea))
+
+### Improvements
+
+- Revert "feat(log-viewer): add a keyboard active entry and entry-activate" ([943cb70](https://github.com/code2nguyen/web-components/commit/943cb70))
+
+### Docs site & examples
+
+- **ui:** Swiss cross logo built from the four brand-colour parts ([7e1baac](https://github.com/code2nguyen/web-components/commit/7e1baac))
+- **examples:** Close workbench code-review findings ([3603d4a](https://github.com/code2nguyen/web-components/commit/3603d4a))
+- **examples:** Visual pass on the close workbench against the mockups ([2a9e52f](https://github.com/code2nguyen/web-components/commit/2a9e52f))
+- **examples:** Carry the close workbench mockups into the SvelteKit app ([5573d37](https://github.com/code2nguyen/web-components/commit/5573d37))
+- **examples:** Address code review findings on the Angular orders admin ([67a9f74](https://github.com/code2nguyen/web-components/commit/67a9f74))
+- **examples:** Add a SvelteKit month-end close workbench ([df462f5](https://github.com/code2nguyen/web-components/commit/df462f5))
+- **examples:** Address code review findings on the Vue support inbox ([19ed825](https://github.com/code2nguyen/web-components/commit/19ed825))
+- **examples:** Address code review findings on the React trading dashboard ([560d58d](https://github.com/code2nguyen/web-components/commit/560d58d))
+- **examples:** Relative times, highlighted search and a validated reply in the Vue support inbox ([c6d799d](https://github.com/code2nguyen/web-components/commit/c6d799d))
+- **examples:** Order ticket, action bar and formatted totals in the React trading dashboard ([36b9024](https://github.com/code2nguyen/web-components/commit/36b9024))
+- **examples:** Display popover and split-button bulk actions in the Angular orders admin ([e3f05e6](https://github.com/code2nguyen/web-components/commit/e3f05e6))
+
 ## [1.0.14](https://github.com/code2nguyen/web-components/releases/tag/v1.0.14) — 2026-10-21
 
 ### Features

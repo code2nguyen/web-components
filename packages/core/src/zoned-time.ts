@@ -1,4 +1,4 @@
-/** Wall-clock and time-zone arithmetic for `c2-date-time-picker`, on `Intl` only. */
+/** Wall-clock and time-zone arithmetic on `Intl` only, shared by `c2-date-time-picker` and `c2-time-range-picker`. */
 
 export interface WallClock {
   year: number

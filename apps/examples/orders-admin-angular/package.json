@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "ng serve",
-    "build": "wireit"
+    "build": "wireit",
+    "test:browser": "playwright test --config playwright.config.ts"
   },
   "wireit": {
     "build": {

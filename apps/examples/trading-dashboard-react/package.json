@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "wireit",
-    "type-check": "wireit"
+    "type-check": "wireit",
+    "test:browser": "playwright test --config playwright.config.ts"
   },
   "wireit": {
     "type-check": {

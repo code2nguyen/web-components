@@ -80,6 +80,21 @@ test('the clear button and Escape empty the field and search for nothing', async
   expect(await events(page)).toHaveLength(3)
 })
 
+test('escape="none" keeps the query and leaves Escape to the container', async ({ page, renderScenario }) => {
+  await renderScenario('<div class="find-bar"><c2-search-field value="draft" escape="none" aria-label="Find"></c2-search-field></div>')
+  await page.locator('.find-bar').evaluate((bar) => {
+    bar.addEventListener('keydown', (event) => {
+      if ((event as KeyboardEvent).key === 'Escape') bar.dataset.escape = 'reached'
+    })
+  })
+  const input = page.getByRole('searchbox', { name: 'Find' })
+  await input.focus()
+  await page.keyboard.press('Escape')
+  await expect(input).toHaveValue('draft')
+  // The key bubbled on to the container, so a find bar can close on it without a capture listener.
+  await expect(page.locator('.find-bar')).toHaveAttribute('data-escape', 'reached')
+})
+
 test('a shortcut focuses the field and shows a hint while it is empty and unfocused', async ({ page, renderScenario }) => {
   await renderScenario('<input aria-label="Other"><c2-search-field shortcut="/, mod+k"></c2-search-field>')
   const input = page.getByRole('searchbox', { name: 'Search' })
@@ -100,6 +115,26 @@ test('a shortcut focuses the field and shows a hint while it is empty and unfocu
   // A chord works from anywhere.
   await page.keyboard.press('ControlOrMeta+k')
   await expect(input).toBeFocused()
+})
+
+test('Escape that closes the recent searches stops there, and the next one reaches the container', async ({ page, renderScenario }) => {
+  await renderScenario('<div class="bar"><c2-search-field value="draft" escape="none" recent="draft one;draft two" aria-label="Find"></c2-search-field></div>')
+  await page.locator('.bar').evaluate((bar) => {
+    bar.dataset.escapes = '0'
+    bar.addEventListener('keydown', (event) => {
+      if ((event as KeyboardEvent).key === 'Escape') bar.dataset.escapes = String(Number(bar.dataset.escapes) + 1)
+    })
+  })
+  const input = page.getByRole('combobox', { name: 'Find' })
+  await input.click()
+  await expect(input).toHaveAttribute('aria-expanded', 'true')
+  // A find bar or dialog around the field must not close with the panel.
+  await page.keyboard.press('Escape')
+  await expect(input).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('.bar')).toHaveAttribute('data-escapes', '0')
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.bar')).toHaveAttribute('data-escapes', '1')
+  await expect(input).toHaveValue('draft')
 })
 
 test('recent searches open on focus, follow the arrow keys and run on Enter', async ({ page, renderScenario }) => {

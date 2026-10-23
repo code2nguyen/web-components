@@ -45,12 +45,15 @@ test('segmented appearance selects the first enabled item by default', async ({ 
 
 test('segmented surface is not overridden by app-wide button presentation variables', async ({ page, renderScenario }) => {
   await renderScenario(`<style>
-      c2-button { --c2-button__container--background-color: rgb(200, 10, 10); --c2-button__container--color: rgb(0, 0, 0); }
+      c2-button { --c2-button__container--background-color: rgb(200, 10, 10); --c2-button__container--color: rgb(0, 0, 0); --c2-button__container--box-shadow: 0 4px 18px rgb(200, 10, 10); --c2-button__container__hover--box-shadow: 0 8px 28px rgb(200, 10, 10); }
     </style>
     <c2-button-group appearance="segmented" aria-label="View">${items}</c2-button-group>`)
   const left = page.getByRole('button', { name: 'Left', exact: true })
   await expect(left).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(left).toHaveCSS('color', 'rgb(24, 24, 27)')
+  await expect(left).toHaveCSS('box-shadow', 'none')
+  await left.hover()
+  await expect(left).toHaveCSS('box-shadow', 'none')
 })
 
 test('single selection supports arrow, Home and End keys and skips disabled items', async ({ page, renderScenario }) => {

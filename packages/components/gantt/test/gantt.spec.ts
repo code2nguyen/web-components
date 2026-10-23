@@ -261,6 +261,31 @@ test('hide-list keeps the rows for assistive technology but not on screen', asyn
   await expect(page.locator('c2-gantt .outside', { hasText: 'Design' }).first()).toBeVisible()
 })
 
+test('labels beside short bars stay inside the timeline, never under the task list', async ({ page, renderScenario }) => {
+  // A nine-day close calendar at the default 28px day: no label fits in its bar, and those near the start used to be
+  // drawn left of the bar, running across the task list (`821`, `tatement`, `g review`).
+  const close = [
+    { id: 'cut', label: 'Cut-off and accrual 821', start: '2026-10-01', end: '2026-10-01' },
+    { id: 'bank', label: 'Bank statement import', start: '2026-10-02', end: '2026-10-03' },
+    { id: 'rec', label: 'Reconciliation and variance review', start: '2026-10-03', end: '2026-10-07' },
+    { id: 'sign', label: 'Controller sign-off', start: '2026-10-09', milestone: true },
+  ]
+  await renderScenario(
+    `<c2-gantt aria-label="Close" scale="day" today="2026-10-01" start="2026-10-01" end="2026-10-09" tasks='${JSON.stringify(close)}'></c2-gantt>`,
+  )
+  const timeline = (await page.locator('c2-gantt .timeline').boundingBox())!
+  const labels = page.locator('c2-gantt .outside')
+  await expect(labels).toHaveCount(4)
+  for (const box of await labels.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON() as DOMRect))) {
+    expect(box.left).toBeGreaterThanOrEqual(timeline.x - 0.5)
+    expect(box.right).toBeLessThanOrEqual(timeline.x + timeline.width + 0.5)
+  }
+  // The first bar starts at the timeline's edge, so its label goes right of the bar.
+  const cut = (await barOf(page, 'cut').boundingBox())!
+  const cutLabel = (await page.locator('c2-gantt .outside', { hasText: 'Cut-off' }).boundingBox())!
+  expect(cutLabel.x).toBeGreaterThan(cut.x + cut.width)
+})
+
 test('invalid tasks are skipped with one warning', async ({ page, renderScenario }) => {
   const warnings: string[] = []
   page.on('console', (message) => message.type() === 'warning' && warnings.push(message.text()))

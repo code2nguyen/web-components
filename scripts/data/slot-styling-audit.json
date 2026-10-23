@@ -1470,6 +1470,58 @@
       "reason": "The default slot projects consumer-owned link text inside the link; the link's own colour and font come from its public variables."
     },
     {
+      "tag": "c2-split-button",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "prefix-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__icon--size"],
+      "reason": "The main half sizes the slotted prefix icon through the icon size variable."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "running-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__icon--size"],
+      "reason": "The spinning wrapper sizes the slotted running icon and its spinner fallback through the icon size variable."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "caret-icon",
+      "decision": "variables",
+      "variables": ["--c2-split-button__caret__icon--size", "--c2-split-button__caret__icon__open--rotate"],
+      "reason": "The caret wrapper sizes the slotted icon and its chevron fallback and turns it while the menu is open."
+    },
+    {
+      "tag": "c2-split-button",
+      "slot": "menu",
+      "decision": "assigned-content",
+      "reason": "The menu slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tour",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The body region holds the current step and sets its text colour through its part and --c2-tour__body--* variables."
+    },
+    {
+      "tag": "c2-tour",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tour-step",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; its text inherits the tour body colour, and the assigned nodes are styled through their own class or public contract."
+    },
+    {
       "tag": "c2-trace-waterfall",
       "slot": "empty",
       "decision": "assigned-content",
@@ -3253,6 +3305,12 @@
       "reason": "The toggle-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tree-select",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned c2-tree-item rows into the inner c2-tree; style them through the --c2-tree-item--* contract."
+    },
+    {
       "tag": "c2-truncate",
       "slot": "",
       "decision": "part",
@@ -3428,6 +3486,13 @@
       "decision": "part",
       "parts": ["placeholder"],
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-image-cropper",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["frame"],
+      "reason": "The empty frame (background, border, minimum height) owns the placeholder slot's component-side presentation."
     }
   ]
 }

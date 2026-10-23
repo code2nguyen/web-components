@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { MaskInput } from '@c2n/components/mask-input'
 
-`c2-mask-input` is a text field for values with a fixed shape. The `mask` says what each position accepts: `9` a digit, `a` a letter, `A` a letter in upper case, `*` a letter or digit and `X` a letter or digit in upper case. Any other character is a literal the field inserts itself, `\` turns a mask character into a literal (`\9`), and `?` makes the rest of the mask optional, for values whose length varies. From script, `tokens` adds mask characters of your own, such as `{ H: { pattern: /^[0-9a-f]$/i } }` for hex digits.
+`c2-mask-input` is a text field for values with a fixed shape. The `mask` says what each position accepts: `9` a digit, `a` a letter, `A` a letter in upper case, `*` a letter or digit and `X` a letter or digit in upper case. Any other character is a literal the field inserts itself, `\` turns a mask character into a literal (`\9`), `?` makes the rest of the mask optional, for values whose length varies, and `[` `]` wrap an optional group anywhere in the mask, filled or skipped as a whole: `A[A]9[X] 9AA` takes every UK postcode, `M1 1AE` as well as `SW1A 1AA`, and the field picks the groups to skip from what is typed, so `m11ae` becomes `M1 1AE`. Groups do not nest; write `\[` and `\]` for a literal bracket. From script, `tokens` adds mask characters of your own, such as `{ H: { pattern: /^[0-9a-f]$/i } }` for hex digits.
 
 Characters a position does not accept are dropped, so the user can type with or without the separators, paste a formatted or unformatted value, or backspace across a separator, which deletes the character before it. While the field has focus or a value, the rest of the mask shows behind the text in `slot-char`s (`_` by default); `placeholder` shows while it is empty and blurred. A mask of digits only brings up the numeric keyboard (`inputmode` overrides it).
 
@@ -38,6 +38,7 @@ import '@c2n/components/mask-input'
 <div data-label="Postcodes">
   <c2-mask-input class="mask-short" mask="99999?-9999" placeholder="ZIP code" autocomplete="postal-code"></c2-mask-input>
   <c2-mask-input class="mask-short" mask="A9A 9A9" placeholder="Postal code" autocomplete="postal-code"></c2-mask-input>
+  <c2-mask-input class="mask-short" mask="A[A]9[X] 9AA" placeholder="UK postcode" autocomplete="postal-code"></c2-mask-input>
 </div>
 <div data-label="Tax ID and expiry">
   <c2-mask-input class="mask-short" mask="99-9999999" placeholder="EIN"></c2-mask-input>

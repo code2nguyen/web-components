@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-image-cropper</title>
+    <script type="module" src="/src/image-cropper.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      main {
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .accent {
+        --c2-image-cropper__overlay--color: rgba(2, 101, 220, 0.35);
+        --c2-image-cropper__selection--border: 2px solid rgb(2, 101, 220);
+        --c2-image-cropper__handle--background: rgb(2, 101, 220);
+        --c2-image-cropper__handle--border: 2px solid #ffffff;
+        --c2-image-cropper__handle--border-radius: 2px;
+        --c2-image-cropper__frame--padding: 8px;
+      }
+      output img {
+        display: block;
+        margin-top: 8px;
+        max-width: 160px;
+        border: 1px solid #e4e4e7;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <h2>Free selection</h2>
+        <c2-image-cropper id="free" src="../../../apps/ui/public/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>
+        <output for="free"></output>
+      </section>
+      <section>
+        <h2>Round avatar</h2>
+        <c2-image-cropper
+          id="avatar"
+          aspect-ratio="1"
+          shape="ellipse"
+          src="../../../apps/ui/public/images/image-mountains.svg"
+          alt="Mountains at sunset"
+        ></c2-image-cropper>
+        <output for="avatar"></output>
+      </section>
+      <section>
+        <h2>16:9 with accent handles</h2>
+        <c2-image-cropper
+          class="accent"
+          aspect-ratio="16/9"
+          src="../../../apps/ui/public/images/image-workspace.svg"
+          alt="A desk with a laptop"
+        ></c2-image-cropper>
+      </section>
+      <section>
+        <h2>Authored crop, disabled</h2>
+        <c2-image-cropper
+          disabled
+          crop='{"x":100,"y":80,"width":300,"height":200}'
+          src="../../../apps/ui/public/images/image-chart.svg"
+          alt="Revenue by month"
+        ></c2-image-cropper>
+      </section>
+      <section>
+        <h2>No image yet</h2>
+        <c2-image-cropper><p slot="placeholder">Choose an image to crop</p></c2-image-cropper>
+      </section>
+    </main>
+    <script type="module">
+      for (const cropper of document.querySelectorAll('#free, #avatar')) {
+        const output = document.querySelector(`output[for="${cropper.id}"]`)
+        cropper.addEventListener('crop-change', async () => {
+          const url = URL.createObjectURL(await cropper.toBlob())
+          output.innerHTML = `<img src="${url}" alt="Cropped preview" />`
+        })
+      }
+    </script>
+  </body>
+</html>

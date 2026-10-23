@@ -920,6 +920,46 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Stacked', description: 'Panels on top of each other.', attributes: { orientation: 'vertical' } },
     ],
   },
+  'c2-image-cropper': {
+    html: `<c2-image-cropper style="width: 280px; --c2-image-cropper__image--max-height: 180px" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
+    presets: [
+      {
+        name: 'Avatar',
+        description: 'A round 1:1 selection without guides on a darker surround.',
+        attributes: { 'aspect-ratio': '1', shape: 'ellipse' },
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(9, 9, 11, 0.7)',
+          '--c2-image-cropper__guides--display': 'none',
+          '--c2-image-cropper__selection--border': '2px solid #ffffff',
+        },
+      },
+      {
+        name: 'Accent handles',
+        description: 'Square accent handles and a tinted surround for a 16:9 banner.',
+        attributes: { 'aspect-ratio': '16/9' },
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(2, 101, 220, 0.35)',
+          '--c2-image-cropper__selection--border': '2px solid rgb(2, 101, 220)',
+          '--c2-image-cropper__handle--background': 'rgb(2, 101, 220)',
+          '--c2-image-cropper__handle--border': '2px solid #ffffff',
+          '--c2-image-cropper__handle--border-radius': '2px',
+          '--c2-image-cropper__frame--padding': '8px',
+        },
+      },
+      {
+        name: 'Document scan',
+        description: 'A light surround and dark dashed outline for scanned pages.',
+        css: {
+          '--c2-image-cropper__overlay--color': 'rgba(255, 255, 255, 0.7)',
+          '--c2-image-cropper__selection--border': '1px dashed #18181b',
+          '--c2-image-cropper__guides--color': 'rgba(24, 24, 27, 0.35)',
+          '--c2-image-cropper__handle--background': '#18181b',
+          '--c2-image-cropper__handle--border': '2px solid #ffffff',
+          '--c2-image-cropper__handle--box-shadow': 'none',
+        },
+      },
+    ],
+  },
   'c2-sheet': {
     html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
     presets: [
@@ -2787,6 +2827,50 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-popconfirm--offset': '4px',
         },
         attributes: { placement: 'bottom' },
+      },
+    ],
+  },
+  'c2-tour': {
+    html: `<c2-button id="preset-tour-target">Share</c2-button><c2-tour><c2-button slot="trigger">Take the tour</c2-button><c2-tour-step heading="Welcome">One quick stop shows you around.</c2-tour-step><c2-tour-step target="#preset-tour-target" heading="Share your work">Invite your team or copy a link.</c2-tour-step></c2-tour>`,
+    presets: [
+      {
+        name: 'No dimming',
+        description: 'The page stays visible; a ring marks the target.',
+        css: {
+          '--c2-tour__backdrop--color': 'transparent',
+          '--c2-tour__spotlight--outline': '2px solid rgb(2, 101, 220)',
+        },
+      },
+      {
+        name: 'Branded',
+        description: 'Indigo panel with pill buttons.',
+        css: {
+          '--c2-tour--background-color': '#4f46e5',
+          '--c2-tour--color': '#ffffff',
+          '--c2-tour--border': '1px solid #4f46e5',
+          '--c2-tour--border-radius': '14px',
+          '--c2-tour__body--color': '#e0e7ff',
+          '--c2-tour__progress--color': '#c7d2fe',
+          '--c2-tour__close--color': '#e0e7ff',
+          '--c2-tour__next--background-color': '#ffffff',
+          '--c2-tour__next--color': '#4338ca',
+          '--c2-tour__previous--color': '#ffffff',
+          '--c2-tour__previous--border': '1px solid #a5b4fc',
+          '--c2-tour__button--border-radius': '999px',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Narrow panel with small type and buttons.',
+        css: {
+          '--c2-tour--width': '240px',
+          '--c2-tour--padding': '12px',
+          '--c2-tour--font-size': '12px',
+          '--c2-tour__heading--font-size': '12px',
+          '--c2-tour__button--height': '24px',
+          '--c2-tour__button--font-size': '12px',
+          '--c2-tour__spotlight--padding': '4px',
+        },
       },
     ],
   },

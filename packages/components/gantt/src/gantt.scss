@@ -406,6 +406,8 @@
   }
 }
 .outside {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: css.cssVar(label--color);
   pointer-events: none;

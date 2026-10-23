@@ -11,6 +11,8 @@ Every `c2-*` component is styled exclusively through its own CSS custom properti
 
 `@c2n/theme` adds a convenience layer on top: a small set of **design tokens** and a **generated base theme** that maps every component variable onto them. Set ~35 tokens and every component follows; any component variable you set yourself still wins.
 
+Both stylesheets put their values in the `c2n-theme` [cascade layer](https://developer.mozilla.org/docs/Web/CSS/@layer), and a rule outside any layer beats a layered one whatever its specificity or source order. So your overrides never need a stronger selector than `:root`.
+
 ## Installation
 
 ```bash tag=CodeBlock
@@ -38,7 +40,7 @@ Then override the tokens that differ in your brand:
 
 1. **Tokens** — `--c2-theme--<name>`. Shared colours, type, shape, focus ring, motion and elevation. Defined by `tokens.css`, overridden by your app.
 2. **Base theme** — `base.css` sets each component variable to `var(--c2-theme--<token>, <component default>)` on `:root`. It is generated from the components' manifests, so coverage grows with the library.
-3. **Component variables** — the fine-grained escape hatch. `--c2-button__container--background-color: crimson` on an element or class beats the base theme because the base theme only sets `:root` values.
+3. **Component variables** — the fine-grained escape hatch. `--c2-button__container--background-color: crimson` on an element, a class or `:root` beats the base theme, which sits in the `c2n-theme` layer.
 4. **Application variant components** — repeated looks wrapped in your own components (a class, a wrapper, or a Lit subclass) built from the two layers above.
 
 ```css tag=CodeBlock
@@ -51,6 +53,24 @@ Composite tokens such as `--c2-theme--border` and `--c2-theme--focus-ring` wrap 
 ## Dark mode
 
 `tokens.css` defines light values on `:root` and dark values under `[data-theme='dark']` and the `.c2-dark` class, with the OS preference as fallback when no `data-theme` attribute is present. `data-theme="light"` / `.c2-light` opts a subtree out.
+
+A token you override on `:root` holds in both modes, the OS fallback included. When your brand needs a different dark value, set the token again under your dark selector:
+
+```css tag=CodeBlock
+:root {
+  --c2-theme--color-primary: #7c3aed;
+}
+[data-theme='dark'] {
+  --c2-theme--color-primary: #a78bfa;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --c2-theme--color-primary: #a78bfa;
+  }
+}
+```
+
+If your app puts its own CSS in cascade layers (Tailwind v4 does), the layer declared first is the weakest, so declare `c2n-theme` before any import: `@layer c2n-theme, theme, base, components, utilities;`. Otherwise a framework imported before the theme leaves `c2n-theme` on top of its layers.
 
 ```html tag=CodeBlock
 <html data-theme="dark">

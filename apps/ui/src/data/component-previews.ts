@@ -198,6 +198,7 @@ price: .price
   </c2-icon-button>
 </div>`,
   image: `<div class="preview-row"><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" loading="click" src="/web-components/images/image-chart.svg" alt="Chart" width="640" height="480"></c2-image></div>`,
+  'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
   <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>
@@ -380,6 +381,11 @@ price: .price
   <c2-spinner value="65" style="--c2-spinner--size: 32px"></c2-spinner>
   <c2-spinner>Loading…</c2-spinner>
 </div>`,
+  'split-button': `<c2-split-button>
+  Send
+  <c2-menu-item slot="menu" value="schedule">Schedule send</c2-menu-item>
+  <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
+</c2-split-button>`,
   'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
@@ -437,10 +443,19 @@ price: .price
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
   'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
+  'time-range-picker': `<c2-time-range-picker nav from="now-6h" refresh-intervals="10s 30s 1m" refresh-interval="30s"></c2-time-range-picker>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  tour: `<div class="preview-row">
+  <c2-button id="preview-tour-target">Share</c2-button>
+  <c2-tour>
+    <c2-button slot="trigger">Take the tour</c2-button>
+    <c2-tour-step heading="Welcome">One quick stop shows you around.</c2-tour-step>
+    <c2-tour-step target="#preview-tour-target" heading="Share your work">Invite your team or copy a link.</c2-tour-step>
+  </c2-tour>
+</div>`,
   'trace-waterfall': `<c2-trace-waterfall style="width: 100%; --c2-trace-waterfall__name--width: 140px; --c2-trace-waterfall__row--height: 22px; --c2-trace-waterfall__bar--height: 8px" spans='[{"id":"a","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b","parentId":"a","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c","parentId":"b","name":"SELECT items","service":"postgres","start":56,"duration":71},{"id":"d","parentId":"a","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"e","parentId":"a","name":"orders.create","service":"orders","start":702,"duration":118}]'></c2-trace-waterfall>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
@@ -449,6 +464,13 @@ price: .price
   </c2-tree-item>
   <c2-tree-item value="readme" label="README.md"></c2-tree-item>
 </c2-tree>`,
+  'tree-select': `<c2-tree-select aria-label="Owning team" show-path value="platform" style="width: 220px">
+  <c2-tree-item value="eng" label="Engineering">
+    <c2-tree-item value="platform" label="Platform"></c2-tree-item>
+    <c2-tree-item value="frontend" label="Frontend"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="design" label="Design"></c2-tree-item>
+</c2-tree-select>`,
   truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
   'view-options': `<c2-view-options layouts="list board table" value='{"groupBy":"status"}' fields='[{"id":"status","label":"Status","groupable":true,"orderable":true,"property":true},{"id":"priority","label":"Priority","groupable":true,"orderable":true,"property":true}]'></c2-view-options>`,

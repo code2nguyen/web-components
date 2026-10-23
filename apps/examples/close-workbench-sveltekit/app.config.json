@@ -1,0 +1,8 @@
+{
+  "title": "Month-End Close Workbench",
+  "description": "A SvelteKit bank reconciliation for a month-end close: a matching engine pairs the statement with the ledger, an exceptions board turns what is left into adjusting entries, a spreadsheet journal posts them, and the close calendar and sign-off follow live.",
+  "framework": "sveltekit",
+  "sourcePath": "apps/examples/close-workbench-sveltekit",
+  "tags": ["finance", "reconciliation", "sveltekit", "ssr", "kanban", "spreadsheet", "gantt", "tables"],
+  "order": 70
+}

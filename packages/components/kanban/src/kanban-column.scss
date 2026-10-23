@@ -135,6 +135,12 @@
   &:empty {
     display: none;
   }
+
+  // An empty lane stretched to a full neighbour's height keeps its hint under the header, where a card would land,
+  // rather than pushed to the bottom by an empty, growing list.
+  &.cards--empty {
+    flex-grow: 0;
+  }
 }
 
 .card {

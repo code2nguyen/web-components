@@ -1,4 +1,5 @@
 import { property } from '@c2n/core/lit-helper.js'
+import type uPlot from 'uplot'
 import type { AlignedData, Axis, Options, Series } from 'uplot'
 import { ChartBase } from './chart-base.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
@@ -10,6 +11,26 @@ const YEAR = 365 * DAY
 
 /** uPlot scale key for the secondary y axis, which `c2-chart-series[axis=right]` draws against. */
 const RIGHT_SCALE = 'y2'
+
+/** uPlot's own axis size, kept as the floor so a chart with short labels lays out as it always did. */
+const MIN_AXIS_SIZE = 50
+
+/**
+ * The size of a value axis: wide enough for its widest tick label on a vertical axis, plus uPlot's 10px ticks,
+ * 5px gap and a little room at the canvas edge. A horizontal one (a horizontal bar chart's value axis) is a
+ * text height, so it keeps uPlot's default. `values` is `null` until uPlot has computed the splits once.
+ */
+function valueAxisSize(self: uPlot, values: string[] | null, axisIndex: number, font: string): number {
+  const side = self.axes[axisIndex]?.side
+  if (!values?.length || side === 0 || side === 2) return MIN_AXIS_SIZE
+  const context = self.ctx
+  context.save()
+  context.font = font
+  // A filtered tick is `null`; measuring it as the text "null" would widen the gutter for a label never drawn.
+  const widest = Math.max(0, ...values.map((value) => (value == null ? 0 : context.measureText(String(value)).width)))
+  context.restore()
+  return Math.max(MIN_AXIS_SIZE, Math.ceil(widest) + 18)
+}
 
 /** The per-series drawing options a concrete uPlot chart contributes. */
 export type UplotSeriesStyle = Omit<Series, 'label' | 'show'>
@@ -50,6 +71,10 @@ export abstract class UplotChartBase extends ChartBase {
   /** The cursor crosshair. */
   @property({ type: String }) cursor: 'x' | 'none' = 'x'
 
+  protected override get drawsAnnotations(): boolean {
+    return true
+  }
+
   /** How one series of this chart type is drawn. The only thing a concrete uPlot chart must supply. */
   protected abstract seriesStyle(series: ChartSeriesConfig, index: number, context: ChartBuildContext): UplotSeriesStyle
 
@@ -83,11 +108,14 @@ export abstract class UplotChartBase extends ChartBase {
     // The tick marks along each axis are the rules uPlot draws at the plot edges; their colour has its own variable,
     // resolved through a scratch probe because the shared probe block carries only the variables every chart reads.
     const axisLineColor = this.themeController.resolveColor('var(--c2-chart__axis-line--color, #e4e4e7)', theme.gridColor)
+    const font = `${theme.axisFontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`
     const axis = (show: boolean, isX: boolean, scale?: string): Axis => ({
       ...(scale ? { scale, side: 1 as const } : {}),
       show,
       stroke: theme.axisColor,
-      font: `${theme.axisFontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`,
+      font,
+      // uPlot's fixed 50px gutter cuts the leading digits off a wide value axis (`150,000` drew as `0,000`).
+      ...(isX ? {} : { size: (self: uPlot, values: string[] | null, axisIndex: number) => valueAxisSize(self, values, axisIndex, font) }),
       ticks: { show, stroke: axisLineColor, width: 1 },
       // Only the left axis contributes grid lines; a second set from the right one would not line up with it.
       grid:

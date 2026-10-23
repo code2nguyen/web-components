@@ -235,6 +235,22 @@ test('follows a new items array from the application', async ({ page, renderScen
   await expect(column(page, 'doing').locator('[part="empty"]')).toBeVisible()
 })
 
+test("an empty lane stretched to a full neighbour's height keeps its hint under the header", async ({ page, renderScenario }) => {
+  const many = Array.from({ length: 8 }, (_, index) => ({ id: `t${index}`, column: 'todo', title: `Task ${index}` }))
+  await renderScenario(`
+    <c2-kanban aria-label="Board" items='${JSON.stringify(many)}'>
+      <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+      <c2-kanban-column column-id="done" label="Done"></c2-kanban-column>
+    </c2-kanban>`)
+  const done = column(page, 'done')
+  const lane = (await done.boundingBox())!
+  const header = (await done.locator('.header').boundingBox())!
+  const empty = (await done.locator('[part="empty"]').boundingBox())!
+  // The lane does stretch, so the hint used to sit at its bottom, a full column of cards away from the header.
+  expect(lane.height).toBeGreaterThan(300)
+  expect(empty.y - (header.y + header.height)).toBeLessThan(24)
+})
+
 test('the dragged card stays under the pointer inside a transformed ancestor', async ({ page, renderScenario }) => {
   await renderScenario(`<div style="transform: translateX(0); margin: 40px 0 0 120px">${board()}</div>`)
   const source = await card(page, 'Alpha').boundingBox()

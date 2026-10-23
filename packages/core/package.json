@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -75,6 +75,10 @@
     "./stream-reveal.js": {
       "types": "./dist/stream-reveal.d.ts",
       "default": "./dist/stream-reveal.js"
+    },
+    "./zoned-time.js": {
+      "types": "./dist/zoned-time.d.ts",
+      "default": "./dist/zoned-time.js"
     }
   },
   "files": [

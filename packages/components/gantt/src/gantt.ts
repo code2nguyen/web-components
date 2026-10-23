@@ -67,6 +67,21 @@ const MILESTONE_HALF = 7
 /** Gap between the tooltip and its row, and between the tooltip and the edges it is kept inside. */
 const TOOLTIP_GAP = 4
 
+/**
+ * Where a label drawn beside a mark goes: right of it (`after`) when it fits there, else left of it (`before`) when
+ * it fits there, else on whichever side has more room. Its width is capped at that side's room either way, so a label
+ * wider than `textWidth` estimates is cut with an ellipsis rather than run past the timeline, under the task list.
+ */
+function besideLabelStyle(textWidth: number, before: number, after: number, width: number): Record<string, string> {
+  const roomAfter = width - after
+  const roomBefore = before
+  const right = { left: `${after}px`, maxWidth: `${Math.max(0, roomAfter)}px` }
+  const left = { right: `${width - before}px`, maxWidth: `${Math.max(0, roomBefore)}px` }
+  if (textWidth <= roomAfter) return right
+  if (textWidth <= roomBefore) return left
+  return roomAfter >= roomBefore ? right : left
+}
+
 const chevron = html`<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
   <path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`
@@ -725,7 +740,10 @@ export class Gantt extends LitElement {
             let beside: TemplateResult | typeof nothing = nothing
             if (row.group) {
               mark = html`<div class="summary" part="summary" data-id=${row.id} style=${styleMap({ left: `${left}px`, width: `${barWidth}px` })}></div>`
-              if (this.hideList && !compact) beside = html`<div class="outside" style=${styleMap({ left: `${left + barWidth + 8}px` })}>${row.label}</div>`
+              if (this.hideList && !compact) {
+                const pos = besideLabelStyle(row.label.length * charWidth, left - 8, left + barWidth + 8, width)
+                beside = html`<div class="outside" style=${styleMap(pos)}>${row.label}</div>`
+              }
             } else if (row.milestone) {
               const at = left + column / 2
               mark = html`<div
@@ -736,8 +754,7 @@ export class Gantt extends LitElement {
               ></div>`
               if (!compact) {
                 const text = `${row.label} · ${shortDate(row.start)}`
-                const pos = at + 14 + text.length * charWidth > width ? { right: `${width - at + 14}px` } : { left: `${at + 14}px` }
-                beside = html`<div class="outside" style=${styleMap(pos)}>${text}</div>`
+                beside = html`<div class="outside" style=${styleMap(besideLabelStyle(text.length * charWidth, at - 14, at + 14, width))}>${text}</div>`
               }
             } else {
               const fits = !compact && row.label.length * charWidth + 18 <= barWidth
@@ -751,8 +768,7 @@ export class Gantt extends LitElement {
                 ${fits ? html`<span class="bar-label">${row.label}</span>` : nothing}
               </div>`
               if (!fits && !compact) {
-                const after = left + barWidth + 8
-                const pos = after + row.label.length * charWidth > width ? { right: `${width - left + 8}px` } : { left: `${after}px` }
+                const pos = besideLabelStyle(row.label.length * charWidth, left - 8, left + barWidth + 8, width)
                 beside = html`<div class="outside" style=${styleMap(pos)}>${row.label}</div>`
               }
             }

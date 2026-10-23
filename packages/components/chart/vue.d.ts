@@ -57,6 +57,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<AreaChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<AreaChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<AreaChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<AreaChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<AreaChart, 'point-click'>) => void
       }
     >
@@ -82,6 +83,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<BarChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<BarChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<BarChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<BarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<BarChart, 'point-click'>) => void
       }
     >
@@ -113,6 +115,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<BubbleChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<BubbleChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<BubbleChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
       }
     >
@@ -133,6 +136,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<ButterflyChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ButterflyChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<ButterflyChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<ButterflyChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ButterflyChart, 'point-click'>) => void
       }
     >
@@ -157,6 +161,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<CandlestickChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<CandlestickChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<CandlestickChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<CandlestickChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<CandlestickChart, 'point-click'>) => void
       }
     >
@@ -193,6 +198,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<ChordChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ChordChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<ChordChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<ChordChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ChordChart, 'point-click'>) => void
       }
     >
@@ -217,6 +223,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<GaugeChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<GaugeChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<GaugeChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<GaugeChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<GaugeChart, 'point-click'>) => void
       }
     >
@@ -258,6 +265,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<HeatmapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<HeatmapChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<HeatmapChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<HeatmapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<HeatmapChart, 'point-click'>) => void
       }
     >
@@ -280,6 +288,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<LineChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<LineChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<LineChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<LineChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
       }
     >
@@ -312,6 +321,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<MapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<MapChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<MapChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<MapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<MapChart, 'point-click'>) => void
       }
     >
@@ -355,6 +365,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<OverlapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<OverlapChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<OverlapChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<OverlapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<OverlapChart, 'point-click'>) => void
       }
     >
@@ -379,6 +390,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<PieChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<PieChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<PieChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<PieChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<PieChart, 'point-click'>) => void
       }
     >
@@ -400,6 +412,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<PyramidChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<PyramidChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<PyramidChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<PyramidChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<PyramidChart, 'point-click'>) => void
       }
     >
@@ -423,6 +436,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<RadarChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<RadarChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<RadarChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<RadarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<RadarChart, 'point-click'>) => void
       }
     >
@@ -445,6 +459,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<ScatterChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ScatterChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<ScatterChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<ScatterChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ScatterChart, 'point-click'>) => void
       }
     >
@@ -467,6 +482,7 @@ declare module 'vue' {
         onChartReady?: (event: EventOf<Sparkline, 'chart-ready'>) => void
         onChartError?: (event: EventOf<Sparkline, 'chart-error'>) => void
         onPointHover?: (event: EventOf<Sparkline, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<Sparkline, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<Sparkline, 'point-click'>) => void
       }
     >

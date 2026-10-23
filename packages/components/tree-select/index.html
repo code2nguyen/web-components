@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-tree-select</title>
+    <script type="module" src="/src/tree-select.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+      }
+      c2-tree-select {
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Single, from items, with path</h2>
+      <c2-tree-select id="teams" aria-label="Owning team" show-path clearable placeholder="Select a team"></c2-tree-select>
+    </section>
+    <section>
+      <h2>Checkboxes, value-display="parent"</h2>
+      <c2-tree-select id="visible" aria-label="Visible to" checkbox-selection searchable placeholder="Visible to"></c2-tree-select>
+    </section>
+    <section>
+      <h2>Multiple without checkboxes, max-chips="0"</h2>
+      <c2-tree-select id="summary" aria-label="Teams" multiple max-chips="0" placeholder="Teams"></c2-tree-select>
+    </section>
+    <section>
+      <h2>Markup rows, leaf-only</h2>
+      <c2-tree-select aria-label="File" leaf-only placeholder="Pick a file">
+        <c2-tree-item value="src" label="src">
+          <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+          <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+        </c2-tree-item>
+        <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+      </c2-tree-select>
+    </section>
+    <section>
+      <h2>Lazy branch (loadChildren)</h2>
+      <c2-tree-select id="lazy" aria-label="Cost centre" placeholder="Cost centre"></c2-tree-select>
+    </section>
+    <section>
+      <h2>Disabled</h2>
+      <c2-tree-select aria-label="Team" disabled placeholder="Select a team"></c2-tree-select>
+    </section>
+    <script type="module">
+      const teams = [
+        {
+          value: 'eng',
+          label: 'Engineering',
+          children: [
+            { value: 'platform', label: 'Platform' },
+            { value: 'frontend', label: 'Frontend' },
+            {
+              value: 'data',
+              label: 'Data',
+              children: [
+                { value: 'data-platform', label: 'Data platform' },
+                { value: 'analytics', label: 'Analytics' },
+              ],
+            },
+          ],
+        },
+        {
+          value: 'design',
+          label: 'Design',
+          children: [
+            { value: 'product-design', label: 'Product design' },
+            { value: 'brand', label: 'Brand' },
+          ],
+        },
+        {
+          value: 'sales',
+          label: 'Sales',
+          children: [
+            { value: 'emea', label: 'EMEA' },
+            { value: 'americas', label: 'Americas' },
+          ],
+        },
+        { value: 'legal', label: 'Legal (archived)', disabled: true },
+      ]
+      for (const id of ['teams', 'visible', 'summary']) document.getElementById(id).items = teams
+      document.getElementById('teams').value = ['platform']
+      document.getElementById('visible').value = ['eng', 'brand']
+      const lazy = document.getElementById('lazy')
+      lazy.items = [
+        { value: 'sales', label: 'Sales', hasChildren: true },
+        { value: 'ops', label: 'Operations', hasChildren: true },
+      ]
+      lazy.loadChildren = ({ node }) =>
+        new Promise((resolve) => setTimeout(() => resolve([1, 2, 3].map((n) => ({ value: `${node.value}-${n}`, label: `${node.label} ${n}` }))), 600))
+    </script>
+  </body>
+</html>

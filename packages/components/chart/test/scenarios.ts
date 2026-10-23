@@ -184,6 +184,9 @@ function build(): void {
           <c2-chart-series field="rate" label="Rate" axis="right"></c2-chart-series>
         </c2-line-chart>`
       break
+    case 'wide-values':
+      main.innerHTML = `<c2-line-chart id="chart" x-field="t" legend="none" animation="none"><c2-chart-series field="balance"></c2-chart-series></c2-line-chart>`
+      break
     case 'intraday':
       main.innerHTML = `<c2-line-chart id="chart" x-type="time" x-field="at" legend="none"><c2-chart-series field="v"></c2-chart-series></c2-line-chart>`
       break
@@ -416,6 +419,12 @@ function build(): void {
       { t: 1, revenue: 1200, rate: 3.1 },
       { t: 2, revenue: 1450, rate: 3.4 },
       { t: 3, revenue: 1310, rate: 2.9 },
+    ]
+  } else if (scenario === 'wide-values') {
+    chart.data = [
+      { t: 1, balance: 1_480_000 },
+      { t: 2, balance: 1_520_000 },
+      { t: 3, balance: 1_505_000 },
     ]
   } else if (scenario === 'intraday') {
     const base = Date.UTC(2024, 0, 1, 9)

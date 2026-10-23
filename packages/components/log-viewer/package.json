@@ -48,7 +48,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../icon-button:build",
+        "../search-field:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -61,6 +63,8 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/icon-button": "*",
+    "@c2n/search-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
