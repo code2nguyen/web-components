@@ -21,9 +21,19 @@ export interface Mermaid {
 type MermaidApi = (typeof import('mermaid'))['default']
 
 let mermaidModule: Promise<MermaidApi> | undefined
-/** Mermaid is large: it loads on the first diagram of the page, never with the element. */
+/**
+ * Mermaid is large: it loads on the first diagram of the page, never with the element. It is an optional peer
+ * dependency, so an application that never draws a diagram does not install it; without it the import fails and the
+ * diagram shows its source with a message saying what to install.
+ */
 function loadMermaid(): Promise<MermaidApi> {
-  return (mermaidModule ??= import('mermaid').then((module) => module.default))
+  return (mermaidModule ??= import('mermaid').then(
+    (module) => module.default,
+    () => {
+      mermaidModule = undefined
+      throw new Error('Mermaid is not installed: add the `mermaid` package to the application to draw diagrams')
+    },
+  ))
 }
 
 /**
@@ -77,7 +87,7 @@ function stripIndent(text: string): string {
  * A [Mermaid](https://mermaid.js.org) diagram (flowchart, sequence, class, state, ER, gantt, pie, …) drawn from its
  * text source, with colours taken from `--c2-mermaid…` variables that map onto the `@c2n/theme` tokens, so diagrams
  * follow light and dark mode and re-render when those colours change. Mermaid itself is loaded on the first diagram of
- * the page, not with the element.
+ * the page, not with the element. `mermaid` is an optional peer dependency: install it next to the component.
  *
  * The source is treated as untrusted: Mermaid runs at `securityLevel: 'strict'` with plain-text labels, a diagram's
  * `%%{init}%%` directive cannot change those settings or the theme, and the returned SVG is parsed and stripped of
