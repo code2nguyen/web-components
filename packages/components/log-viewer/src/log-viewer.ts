@@ -930,8 +930,9 @@ export class LogViewer extends LitElement {
     return true
   }
 
-  // Capture phase: Enter, Shift+Enter and Escape mean "next", "previous" and "close" here, before the search field's own handling.
-  private readonly findBarKeys = { handleEvent: (event: KeyboardEvent) => this.onFindBarKeydown(event), capture: true }
+  // Enter, Shift+Enter and Escape mean "next", "previous" and "close" here. The field runs first: it leaves Escape alone
+  // (`escape="none"`), and its own Enter handling only fires a `search` event nothing listens for.
+  private readonly findBarKeys = (event: KeyboardEvent) => this.onFindBarKeydown(event)
 
   private onFindBarKeydown(event: KeyboardEvent): void {
     if (this.onFindStepKey(event)) return
@@ -1185,6 +1186,7 @@ export class LogViewer extends LitElement {
     return html`<div part="find-bar" role="search" aria-label=${this.msg.t('find')} @keydown=${this.findBarKeys}>
       <c2-search-field
         class="find-field"
+        escape="none"
         debounce="0"
         .value=${this.findQuery}
         placeholder=${this.msg.t('find')}
