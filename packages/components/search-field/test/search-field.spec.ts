@@ -117,6 +117,26 @@ test('a shortcut focuses the field and shows a hint while it is empty and unfocu
   await expect(input).toBeFocused()
 })
 
+test('Escape that closes the recent searches stops there, and the next one reaches the container', async ({ page, renderScenario }) => {
+  await renderScenario('<div class="bar"><c2-search-field value="draft" escape="none" recent="draft one;draft two" aria-label="Find"></c2-search-field></div>')
+  await page.locator('.bar').evaluate((bar) => {
+    bar.dataset.escapes = '0'
+    bar.addEventListener('keydown', (event) => {
+      if ((event as KeyboardEvent).key === 'Escape') bar.dataset.escapes = String(Number(bar.dataset.escapes) + 1)
+    })
+  })
+  const input = page.getByRole('combobox', { name: 'Find' })
+  await input.click()
+  await expect(input).toHaveAttribute('aria-expanded', 'true')
+  // A find bar or dialog around the field must not close with the panel.
+  await page.keyboard.press('Escape')
+  await expect(input).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('.bar')).toHaveAttribute('data-escapes', '0')
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.bar')).toHaveAttribute('data-escapes', '1')
+  await expect(input).toHaveValue('draft')
+})
+
 test('recent searches open on focus, follow the arrow keys and run on Enter', async ({ page, renderScenario }) => {
   await renderScenario('<c2-search-field recent="label:bug;assignee:me;is:open"></c2-search-field>')
   const host = page.locator('c2-search-field')

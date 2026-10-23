@@ -451,7 +451,9 @@ export class SearchField extends LitElement {
       }
       case 'Escape': {
         if (this.open) {
+          // Closing the panel is all this Escape does: a dialog or find bar around the field must not close with it.
           event.preventDefault()
+          event.stopPropagation()
           this.dismissed = true
           this.activeIndex = -1
         } else if (this.value) {
@@ -480,6 +482,7 @@ export class SearchField extends LitElement {
   private handlePanelKeydown(event: KeyboardEvent) {
     if (event.key !== 'Escape') return
     event.preventDefault()
+    event.stopPropagation()
     // Focusing the input runs handleFocusin, which reopens the panel: dismiss after it.
     this.input?.focus()
     this.dismissed = true
