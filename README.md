@@ -1,8 +1,8 @@
 # c2n/web-components
 
-[![npm version](https://img.shields.io/npm/v/%40c2n%2Fcore?label=npm%20packages)](https://www.npmjs.com/org/c2n)
+[![npm version](https://img.shields.io/npm/v/%40c2n%2Fcomponents?label=%40c2n%2Fcomponents)](https://www.npmjs.com/package/@c2n/components)
 [![Component tests](https://github.com/code2nguyen/web-components/actions/workflows/component-tests.yml/badge.svg)](https://github.com/code2nguyen/web-components/actions/workflows/component-tests.yml)
-[![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcore?label=core%20downloads)](https://www.npmjs.com/package/@c2n/core)
+[![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcomponents?label=downloads)](https://www.npmjs.com/package/@c2n/components)
 [![License](https://img.shields.io/github/license/code2nguyen/web-components)](LICENSE)
 
 **Every building block your AI needs to ship a web app.** 100+ components and 700+ ready-made variants, built with AI and for AI. Your coding agent reads the exact API of every element over MCP and composes it into real apps, in plain HTML, React, Vue, Angular, Astro or anything that speaks the DOM.
