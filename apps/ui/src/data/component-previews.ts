@@ -448,6 +448,14 @@ price: .price
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  tour: `<div class="preview-row">
+  <c2-button id="preview-tour-target">Share</c2-button>
+  <c2-tour>
+    <c2-button slot="trigger">Take the tour</c2-button>
+    <c2-tour-step heading="Welcome">One quick stop shows you around.</c2-tour-step>
+    <c2-tour-step target="#preview-tour-target" heading="Share your work">Invite your team or copy a link.</c2-tour-step>
+  </c2-tour>
+</div>`,
   'trace-waterfall': `<c2-trace-waterfall style="width: 100%; --c2-trace-waterfall__name--width: 140px; --c2-trace-waterfall__row--height: 22px; --c2-trace-waterfall__bar--height: 8px" spans='[{"id":"a","name":"POST /checkout","service":"web","start":0,"duration":842},{"id":"b","parentId":"a","name":"cart.load","service":"cart","start":48,"duration":126},{"id":"c","parentId":"b","name":"SELECT items","service":"postgres","start":56,"duration":71},{"id":"d","parentId":"a","name":"payments.charge","service":"payments","start":182,"duration":512,"status":"error"},{"id":"e","parentId":"a","name":"orders.create","service":"orders","start":702,"duration":118}]'></c2-trace-waterfall>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
