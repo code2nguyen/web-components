@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/scrollbar';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-sheet,
   $theme: (
@@ -26,7 +27,12 @@
     body--font-size: 14px,
     body--line-height: 1.6,
     body--color: null,
-
+    // Derived from the text colour so the thumb reads on a light or a dark surface without a theme.
+    body__scrollbar--width: thin,
+    body__scrollbar--size: 8px,
+    body__scrollbar__track--color: transparent,
+    body__scrollbar__thumb--color: color-mix(in srgb, currentColor 22%, transparent),
+    body__scrollbar__thumb__hover--color: color-mix(in srgb, currentColor 40%, transparent),
     footer--padding-top: 12px,
     footer--padding-right: 24px,
     footer--padding-bottom: 20px,
@@ -228,6 +234,14 @@
   font-size: css.cssVar(body--font-size);
   line-height: css.cssVar(body--line-height);
   color: css.cssVar(body--color);
+  // Scrolls inside the shadow root, out of reach of a page's own scrollbar styles: it takes these.
+  @include scrollbar.themed(
+    css.cssVar(body__scrollbar--width),
+    css.cssVar(body__scrollbar--size),
+    css.cssVar(body__scrollbar__track--color),
+    css.cssVar(body__scrollbar__thumb--color),
+    css.cssVar(body__scrollbar__thumb__hover--color)
+  );
 }
 
 .c2-sheet__footer {

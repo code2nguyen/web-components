@@ -1,4 +1,5 @@
 @use '@c2n/sass/variables';
+@use '@c2n/sass/scrollbar';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-split-panel,
   $theme: (
@@ -61,35 +62,14 @@
   min-width: 0;
   min-height: 0;
   overflow: css.cssVar(panel--overflow);
-  // The panels scroll inside the shadow root, out of reach of a page's own scrollbar styles: they take these.
-  scrollbar-width: css.cssVar(scrollbar--width);
-  scrollbar-color: css.cssVar(scrollbar__thumb--color) css.cssVar(scrollbar__track--color);
-
-  &:hover {
-    scrollbar-color: css.cssVar(scrollbar__thumb__hover--color) css.cssVar(scrollbar__track--color);
-  }
-}
-
-@supports not (scrollbar-color: auto) {
-  .panel {
-    &::-webkit-scrollbar {
-      width: css.cssVar(scrollbar--size);
-      height: css.cssVar(scrollbar--size);
-    }
-
-    &::-webkit-scrollbar-track {
-      background: css.cssVar(scrollbar__track--color);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: 999px;
-      background: css.cssVar(scrollbar__thumb--color);
-    }
-
-    &:hover::-webkit-scrollbar-thumb {
-      background: css.cssVar(scrollbar__thumb__hover--color);
-    }
-  }
+  // Scrolls inside the shadow root, out of reach of a page's own scrollbar styles: it takes these.
+  @include scrollbar.themed(
+    css.cssVar(scrollbar--width),
+    css.cssVar(scrollbar--size),
+    css.cssVar(scrollbar__track--color),
+    css.cssVar(scrollbar__thumb--color),
+    css.cssVar(scrollbar__thumb__hover--color)
+  );
 }
 
 [part~='start'] {
