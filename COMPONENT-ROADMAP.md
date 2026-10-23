@@ -64,19 +64,18 @@ Domain patterns with no design-system home come from the products that made them
 
 ### B. Data display
 
-| #   | Component           | What it adds                                                        | Real-world model                                                                 | Priority | Decision |
-| --- | ------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
-| 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)    | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
-| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes               | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
-| 37  | `c2-rolling-number` | Digits that roll when a value changes                               | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed |
-| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip    | PrimeVue Galleria, antd Image preview group                                      | P2       | Proposed |
-| 43  | `c2-image-compare`  | Before/after slider                                                 | Web Awesome comparison, PrimeVue ImageCompare                                    | P3       | Proposed |
-| 44  | `c2-video-player`   | Themed controls, captions, chapters                                 | Loom, YouTube                                                                    | P3       | Proposed |
-| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                    | Slack clips, WhatsApp voice notes                                                | P3       | Proposed |
-| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                              | DocuSign, Gmail attachment preview                                               | P3       | Proposed |
-| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse               | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
-| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                         | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
+| #   | Component           | What it adds                                                     | Real-world model                                              | Priority | Decision |
+| --- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
+| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota) | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar | P2       | Proposed |
+| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes            | Ark timer, antd Statistic.Countdown                           | P2       | Proposed |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers                      | P3       | Proposed |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group                   | P2       | Proposed |
+| 43  | `c2-image-compare`  | Before/after slider                                              | Web Awesome comparison, PrimeVue ImageCompare                 | P3       | Proposed |
+| 44  | `c2-video-player`   | Themed controls, captions, chapters                              | Loom, YouTube                                                 | P3       | Proposed |
+| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                 | Slack clips, WhatsApp voice notes                             | P3       | Proposed |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview                            | P3       | Proposed |
+| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse            | PrimeVue OrganizationChart; Rippling, BambooHR                | P3       | Proposed |
+| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                      | Chakra, Mantine and Ark marquee; stock ticker tapes           | P3       | Proposed |
 
 ### C. Charts
 

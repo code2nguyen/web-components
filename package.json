@@ -207,6 +207,7 @@
         "./packages/components/spreadsheet:build",
         "./packages/components/stat:build",
         "./packages/components/state-timeline:build",
+        "./packages/components/status-light:build",
         "./packages/components/status-panel:build",
         "./packages/components/steps:build",
         "./packages/components/streaming-text:build",

@@ -63,6 +63,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.
+- **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed.
 - **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`.
 - **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.

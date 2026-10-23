@@ -1,0 +1,63 @@
+---
+title: 'Status Light'
+description: 'Coloured dot plus a short label for the state of something, such as Live, Building or Failed.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { StatusLight } from '@c2n/components/status-light'
+
+`c2-status-light` shows the state of a deployment, a service, a job or an invoice as a coloured dot followed by its label. The label in the default slot carries the meaning, so the colour is never the only signal. `tone` picks one of six colours (`neutral`, `primary`, `info`, `success`, `warning`, `danger`) and `pulse` adds a soft ring for a state in progress, stilled under reduced motion. With an empty label the light is a bare dot: give it an `accessible-label` and it is read as an image of that name. Size, spacing and shape are CSS variables, and an icon in the `dot` slot replaces the dot and takes the tone colour.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/status-light'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/status-light
+<style>
+  .small {
+    --c2-status-light--font-size: 12px;
+    --c2-status-light--line-height: 16px;
+    --c2-status-light--gap: 6px;
+    --c2-status-light__dot--size: 6px;
+  }
+  .large {
+    --c2-status-light--font-size: 16px;
+    --c2-status-light--line-height: 24px;
+    --c2-status-light--gap: 10px;
+    --c2-status-light__dot--size: 10px;
+  }
+</style>
+<div data-label="Tones">
+  <c2-status-light>Queued</c2-status-light>
+  <c2-status-light tone="primary">Building</c2-status-light>
+  <c2-status-light tone="info">Scheduled</c2-status-light>
+  <c2-status-light tone="success">Live</c2-status-light>
+  <c2-status-light tone="warning">Degraded</c2-status-light>
+  <c2-status-light tone="danger">Failed</c2-status-light>
+</div>
+<div data-label="Pulse">
+  <c2-status-light tone="primary" pulse>Building</c2-status-light>
+  <c2-status-light tone="danger" pulse>Incident in progress</c2-status-light>
+</div>
+<div data-label="Sizes">
+  <c2-status-light class="small" tone="success">Small</c2-status-light>
+  <c2-status-light tone="success">Default</c2-status-light>
+  <c2-status-light class="large" tone="success">Large</c2-status-light>
+</div>
+<div data-label="Dot only">
+  <c2-status-light tone="success" accessible-label="Live"></c2-status-light>
+  <c2-status-light tone="warning" accessible-label="Degraded" pulse></c2-status-light>
+  <c2-status-light tone="danger" accessible-label="Failed"></c2-status-light>
+</div>
+<div data-label="Icon">
+  <c2-status-light tone="success"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Checks passed</c2-status-light>
+  <c2-status-light tone="danger"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>2 checks failed</c2-status-light>
+</div>
+```
