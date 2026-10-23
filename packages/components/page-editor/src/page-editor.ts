@@ -53,6 +53,8 @@ import {
   type TableAttrs,
 } from './schema'
 import { CodeBlockView, ItemView, TableView, tableViewOf, type Localizable, type TableExit, type ViewText } from './views'
+import { imageFiles, isOnlyImages, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
+import { adoptPastedImages, copySelectedImage, ImageView, insertImages, resizeSelectedImage, savedImages, type ImageHost } from './images'
 import { pageEditorMessages } from './messages'
 import styles from './page-editor.scss?inline'
 
@@ -70,6 +72,7 @@ export interface PageEditorEventMap {
   input: Event
   change: Event
   'format-change': CustomEvent<PageEditorFormat>
+  'image-error': CustomEvent<{ error: unknown }>
 }
 
 export interface PageEditor {
@@ -157,11 +160,19 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * cells from a sheet makes a table. ArrowDown on the line above enters it, ArrowUp on its first row leaves it, and
  * Escape selects it as a block, which Enter goes back into and Backspace removes.
  *
+ * An image pasted (a screenshot, a copied image) or dropped (a file) becomes an image block, written `![alt](src)`,
+ * or `![alt|320](src)` once resized. `imageUpload` saves the file and gives the `src` to store, so an application can
+ * keep the image out of the text (an id in the Markdown, the bytes in its own store) and `imageResolver` turns that
+ * `src` back into a URL to draw; without them the image is stored in the page as a data URL. Clicking an image selects
+ * it and shows a handle on its edge: drag it to resize the image (double-click it for the natural size), or use
+ * Alt+ArrowLeft and Alt+ArrowRight. Copying a selected image puts the image itself on the clipboard.
+ *
  * @tag c2-page-editor
  * @slot header - Content above the page, such as a title field or a breadcrumb.
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the editor loses focus after its value changed.
  * @event {CustomEvent<PageEditorFormat>} format-change - Fired when the block or the formatting at the selection changes. Does not bubble.
+ * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its block is removed. Does not bubble.
  * @csspart content - The editable page.
  * @csspart toolbar - The formatting toolbar over selected text.
  * @csspart slash-menu - The menu opened by `/` and the `+` button.
@@ -193,6 +204,11 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @cssproperty {border-radius} [--c2-page-editor__checkbox--border-radius=4px]
  * @cssproperty {color} [--c2-page-editor__todo__checked--color=#71717a] - Text of a ticked to-do.
  * @cssproperty {border} [--c2-page-editor__divider--border-top=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-page-editor__image--border-radius=6px]
+ * @cssproperty {outline} [--c2-page-editor__image__selected--outline=2px solid rgb(2, 101, 220)] - Around a selected image.
+ * @cssproperty {color} [--c2-page-editor__image-handle--background=rgb(2, 101, 220)] - The resize handle of a selected image.
+ * @cssproperty {color} [--c2-page-editor__image-missing--background=#f4f4f5] - Placeholder of an image that cannot be drawn on this device.
+ * @cssproperty {color} [--c2-page-editor__image-missing--color=#71717a]
  * @cssproperty {font-family} [--c2-page-editor__code--font-family=ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace]
  * @cssproperty {color} [--c2-page-editor__inline-code--background=rgba(135, 131, 120, 0.15)]
  * @cssproperty {color} [--c2-page-editor__inline-code--color=#eb5757]
@@ -268,7 +284,7 @@ export class PageEditor extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
   /** Shown while the page is empty. */
   @property() placeholder = ''
-  /** Space-separated block types the writer may use (`paragraph heading1 heading2 heading3 bullet ordered todo quote code divider table`). The menus and Markdown shortcuts offer only these, and pasted blocks outside the list become text. Empty allows all. */
+  /** Space-separated block types the writer may use (`paragraph heading1 heading2 heading3 bullet ordered todo quote code divider table image`). The menus and Markdown shortcuts offer only these, and pasted blocks outside the list become text. Empty allows all. */
   @property() blocks = ''
   /** Prevents editing and removes the page from keyboard navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
@@ -276,6 +292,13 @@ export class PageEditor extends LitElement {
   @property({ type: Boolean, reflect: true }) readOnly = false
   /** Requires some text for form validation. */
   @property({ type: Boolean, reflect: true }) required = false
+  /**
+   * Saves a pasted or dropped image and resolves to the `src` the page stores for it (an id, a URL). Unset, the image
+   * is stored in the page as a data URL. A rejection fires `image-error`.
+   */
+  @property({ attribute: false }) imageUpload: ImageUploader | null = null
+  /** Turns a stored image `src` into a URL to draw (an object URL from the application's store). Unset, the `src` is drawn as it is. */
+  @property({ attribute: false }) imageResolver: ImageResolver | null = null
 
   @state() private format: PageEditorFormat = emptyFormat()
   @state() private disabledByForm = false
@@ -315,6 +338,21 @@ export class PageEditor extends LitElement {
   private paletteAnchor?: HTMLElement
   private turnAnchor?: HTMLElement
   private modKey = 'Ctrl+'
+  private readonly imageHost: ImageHost = {
+    image: schema.nodes.image,
+    line: schema.nodes.paragraph,
+    uploader: () => this.imageUpload,
+    resolver: () => this.imageResolver,
+    text: () => ({ resize: this.msg.t('resizeImage'), missing: this.msg.t('imageMissing'), saving: this.msg.t('imageSaving') }),
+    maxWidth: () => {
+      const surface = this.surface?.querySelector<HTMLElement>('.ProseMirror') ?? this.surface
+      if (!surface) return 0
+      const style = getComputedStyle(surface)
+      return surface.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    },
+    accepts: () => this.editable && this.allowedBlocks.has('image'),
+    failed: (error) => this.dispatchEvent(new CustomEvent('image-error', { detail: { error } })),
+  }
   private viewportFrame = 0
   private followingViewport = false
 
@@ -491,6 +529,16 @@ export class PageEditor extends LitElement {
           item: (node, view, getPos, decorations) => new ItemView(node, view, getPos, decorations, (pos) => this.toggleTodo(pos), this.viewText),
           code_block: (node, view, getPos) => new CodeBlockView(node, view, getPos, { ...this.viewText, modKey: this.modKey }),
           table: (node, view, getPos) => new TableView(node, view, getPos, { ...this.viewText, onLeave: (pos, exit) => this.leaveTable(pos, exit) }),
+          image: (node, view, getPos) => {
+            const image = new ImageView(node, view, getPos, this.imageHost)
+            this.liveViews.add(image)
+            const destroy = image.destroy.bind(image)
+            image.destroy = () => {
+              this.liveViews.delete(image)
+              destroy()
+            }
+            return image
+          },
         },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleTextInput: (view, from, _to, text) => {
@@ -521,6 +569,8 @@ export class PageEditor extends LitElement {
             })
             return false
           },
+          copy: (view, event) => copySelectedImage(view, schema.nodes.image, event, false),
+          cut: (view, event) => copySelectedImage(view, schema.nodes.image, event, true),
           mousedown: (_view, event) => {
             // ⌘/Ctrl-click follows a link while editing.
             const link = (event.target as Element).closest?.('a[href]')
@@ -539,9 +589,20 @@ export class PageEditor extends LitElement {
         transformPasted: (slice, view, plain) => {
           const own = this.pastingOwnHtml || plain || Boolean(view.dragging)
           this.pastingOwnHtml = false
-          return this.filterSlice(own ? slice : splitPastedLines(slice))
+          const filtered = this.filterSlice(own ? slice : splitPastedLines(slice))
+          if (view.dragging) return filtered
+          const nodes: ProseNode[] = []
+          filtered.content.forEach((node) => nodes.push(node))
+          return new Slice(Fragment.fromArray(adoptPastedImages(view, this.imageHost, nodes)), filtered.openStart, filtered.openEnd)
         },
         handlePaste: (view, event, slice) => this.handlePaste(view, event, slice),
+        // A dropped image file becomes an image block where it is dropped; a block dragged within the page moves.
+        handleDrop: (view, event, _slice, moved) => {
+          const files = moved ? [] : imageFiles(event.dataTransfer)
+          if (!files.length) return false
+          event.preventDefault()
+          return insertImages(view, this.imageHost, files, view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos)
+        },
         clipboardTextParser: (text) => this.parsePastedText(text),
         clipboardTextSerializer: (slice) => {
           try {
@@ -565,6 +626,9 @@ export class PageEditor extends LitElement {
     else this.internals.states.delete('error')
     const view = this.view
     if (!view) return
+    // Images drawn before the resolver was set are drawn again through it.
+    if (changed.has('imageResolver') && changed.get('imageResolver') !== undefined)
+      for (const live of this.liveViews) if (live instanceof ImageView) live.reload()
     if (changed.has('value') && this.value !== this.serialized) {
       view.updateState(this.createState(this.value))
       this.serialized = toMarkdown(view.state.doc)
@@ -596,7 +660,7 @@ export class PageEditor extends LitElement {
   private createState(markdown: string) {
     let doc = fromMarkdown(markdown)
     const last = doc.lastChild
-    if (last && (last.type === schema.nodes.code_block || last.type === schema.nodes.divider || last.type === schema.nodes.table)) {
+    if (last && [schema.nodes.code_block, schema.nodes.divider, schema.nodes.table, schema.nodes.image].includes(last.type)) {
       doc = doc.copy(doc.content.append(Fragment.from(schema.nodes.paragraph.create())))
     }
     return EditorState.create({ schema, doc, plugins: this.plugins() })
@@ -709,6 +773,8 @@ export class PageEditor extends LitElement {
         Tab: chainCommands(indentCode(1), indentItems(1)),
         'Shift-Tab': chainCommands(indentCode(-1), indentItems(-1)),
         'Alt-F10': focusToolbar,
+        'Alt-ArrowLeft': resizeSelectedImage(this.imageHost, -1),
+        'Alt-ArrowRight': resizeSelectedImage(this.imageHost, 1),
         Escape: dismissToolbar,
       }),
       keymap(baseKeymap),
@@ -718,6 +784,7 @@ export class PageEditor extends LitElement {
       ),
       listNumbering,
       normalize,
+      savedImages(schema.nodes.image),
       highlightPlugin(),
       focusDecorations,
     ]
@@ -894,6 +961,11 @@ export class PageEditor extends LitElement {
   }
 
   private handlePaste(view: EditorView, event: ClipboardEvent, slice: Slice): boolean {
+    // A screenshot or a copied image is saved and inserted as an image block. HTML a page editor copied an image with
+    // brings that same image back instead, and a document copied with its pictures is pasted as its text.
+    const files = imageFiles(event.clipboardData)
+    const html = event.clipboardData?.getData('text/html') ?? ''
+    if (files.length && !html.includes('data-c2-image-src') && isOnlyImages(html)) return insertImages(view, this.imageHost, files)
     const text = event.clipboardData?.getData('text/plain').trim() ?? ''
     const { $from, empty } = view.state.selection
     // A link pasted over selected text links it.

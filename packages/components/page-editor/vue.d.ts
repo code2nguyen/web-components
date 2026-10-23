@@ -25,6 +25,7 @@ declare module 'vue' {
         onInput?: (event: EventOf<PageEditor, 'input'>) => void
         onFormatChange?: (event: EventOf<PageEditor, 'format-change'>) => void
         onChange?: (event: EventOf<PageEditor, 'change'>) => void
+        onImageError?: (event: EventOf<PageEditor, 'image-error'>) => void
       }
     >
   }

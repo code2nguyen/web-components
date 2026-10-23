@@ -1,4 +1,5 @@
 import { Fragment, type Mark, type Node as ProseNode } from 'prosemirror-model'
+import { imageFromMarkdown, imageToMarkdown, pendingImages, type EditorImageAttrs } from '@c2n/core/image-helper.js'
 import { MAX_INDENT, isColor, listNumbers, safeHref, schema, squareRows, tableCellRef, type TableAlign, type TableAttrs, type TableCellStyle } from './schema'
 
 /**
@@ -202,8 +203,26 @@ function tableToMarkdown({ rows, align, formulaBar, summary, styles = {} }: Tabl
   return lines.join('\n')
 }
 
+/**
+ * The page as it is saved: a pasted image still being saved is left out until its upload gives its `src` (and written
+ * with that `src` once it has, though the node has not heard yet).
+ */
+function savedPage(doc: ProseNode): ProseNode {
+  let pending = false
+  doc.forEach((block) => (pending ||= block.type === schema.nodes.image && !!block.attrs.pending))
+  if (!pending) return doc
+  const blocks: ProseNode[] = []
+  doc.forEach((block) => {
+    if (block.type !== schema.nodes.image || !block.attrs.pending) return void blocks.push(block)
+    const src = pendingImages.src(block.attrs.pending as string)
+    if (src) blocks.push(schema.nodes.image.create({ ...block.attrs, src, pending: null }))
+  })
+  return doc.copy(Fragment.fromArray(blocks))
+}
+
 /** Serializes a page to Markdown. */
-export function toMarkdown(doc: ProseNode): string {
+export function toMarkdown(page: ProseNode): string {
+  const doc = savedPage(page)
   const blocks: ProseNode[] = []
   doc.forEach((block) => blocks.push(block))
   // Empty lines at the end of the page are where the caret rests, not content.
@@ -251,6 +270,9 @@ export function toMarkdown(doc: ProseNode): string {
         break
       case 'table':
         out += tableToMarkdown(block.attrs as TableAttrs)
+        break
+      case 'image':
+        out += imageToMarkdown(block.attrs as EditorImageAttrs)
         break
       default: {
         const body = serializeInline(block)
@@ -591,6 +613,12 @@ export function fromMarkdown(markdown: string): ProseNode {
     }
     if (DIVIDER.test(line)) {
       blocks.push(schema.nodes.divider.create())
+      levels = []
+      continue
+    }
+    const image = imageFromMarkdown(line)
+    if (image) {
+      blocks.push(schema.nodes.image.create(image))
       levels = []
       continue
     }

@@ -12,6 +12,14 @@
       "types": "./dist/css-helper.d.ts",
       "default": "./dist/css-helper.js"
     },
+    "./image-block.js": {
+      "types": "./dist/image-block.d.ts",
+      "default": "./dist/image-block.js"
+    },
+    "./image-helper.js": {
+      "types": "./dist/image-helper.d.ts",
+      "default": "./dist/image-helper.js"
+    },
     "./dom-helper.js": {
       "types": "./dist/dom-helper.d.ts",
       "default": "./dist/dom-helper.js"

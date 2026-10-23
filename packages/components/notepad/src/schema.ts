@@ -37,6 +37,14 @@ export type NotepadMark = (typeof MARK_NAMES)[number]
 const inkIndex = (value: unknown) => colorIndex(value, INKS)
 const highlightIndex = (value: unknown) => colorIndex(value, HIGHLIGHTS)
 
+/** An `<img>` read from pasted HTML: the stored `src` an editor copied it with, else what it shows. */
+function imageFromDOM(dom: HTMLImageElement) {
+  const src = dom.dataset.c2ImageSrc || dom.getAttribute('src') || ''
+  if (!src) return false
+  const width = Number(dom.getAttribute('width')) || null
+  return { src, alt: dom.getAttribute('alt') ?? '', width }
+}
+
 const tagMark = (tags: string[], tag: string): MarkSpec => ({
   parseDOM: tags.map((name) => ({ tag: name })),
   toDOM: () => [tag, 0],
@@ -50,7 +58,7 @@ const tagMark = (tags: string[], tag: string): MarkSpec => ({
  */
 export const schema = new Schema({
   nodes: {
-    doc: { content: '(line | task)+' },
+    doc: { content: '(line | task | image)+' },
     line: {
       content: 'text*',
       marks: '_',
@@ -73,6 +81,20 @@ export const schema = new Schema({
         },
       ],
       toDOM: (node) => ['li', { 'data-checked': String(node.attrs.checked) }, 0],
+    },
+    // A picture between the lines, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
+    // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
+    // for yet.
+    image: {
+      atom: true,
+      selectable: true,
+      draggable: true,
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
+      toDOM: (node) => {
+        const { src, alt, width } = node.attrs
+        return ['img', { src, alt, 'data-c2-image-src': src, ...(width ? { width: String(width) } : {}) }]
+      },
     },
     text: {},
   },

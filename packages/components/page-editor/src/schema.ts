@@ -5,7 +5,7 @@ export const COLORS = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'pu
 export type PageEditorColor = (typeof COLORS)[number]
 
 /** Block types accepted by `blocks`, `setBlock()` and reported by `format-change`. */
-export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider', 'table'] as const
+export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider', 'table', 'image'] as const
 export type PageEditorBlock = (typeof BLOCK_NAMES)[number]
 
 /** Inline formats accepted by `toggleMark()`. */
@@ -97,6 +97,14 @@ function tableFromDOM(table: HTMLElement): TableAttrs | false {
 }
 
 const TEXT_ALIGN = { start: 'left', center: 'center', end: 'right' } as const
+
+/** An `<img>` read from pasted HTML: the stored `src` an editor copied it with, else what it shows. */
+function imageFromDOM(dom: HTMLImageElement) {
+  const src = dom.dataset.c2ImageSrc || dom.getAttribute('src') || ''
+  if (!src) return false
+  const width = Number(dom.getAttribute('width')) || null
+  return { src, alt: dom.getAttribute('alt') ?? '', width }
+}
 
 const listDepth = (dom: HTMLElement) => {
   let depth = 0
@@ -238,6 +246,21 @@ export const schema = new Schema({
         ] as unknown as DOMOutputSpec
       },
     },
+    // A picture on a line of its own, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
+    // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
+    // for yet.
+    image: {
+      group: 'block',
+      atom: true,
+      selectable: true,
+      draggable: true,
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
+      toDOM: (node) => {
+        const { src, alt, width } = node.attrs
+        return ['img', { src, alt, 'data-c2-image-src': src, ...(width ? { width: String(width) } : {}) }]
+      },
+    },
     text: { group: 'inline' },
     hard_break: {
       group: 'inline',
@@ -332,6 +355,8 @@ export function blockOf(node: ProseNode): PageEditorBlock {
       return 'divider'
     case 'table':
       return 'table'
+    case 'image':
+      return 'image'
     default:
       return 'paragraph'
   }

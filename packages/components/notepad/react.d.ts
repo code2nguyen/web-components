@@ -27,6 +27,7 @@ declare module 'react' {
         'aria-label'?: Attribute
         readonly?: Attribute
         maxlength?: Attribute
+        'no-images'?: Attribute
         'error-text'?: Attribute
         'paper-color'?: Attribute
         'paper-picker'?: Attribute
