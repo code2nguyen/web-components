@@ -192,14 +192,30 @@ viewer.scrollToEnd()
 
 ## Choose an entry
 
-Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a drag or text selection, are not reported. Entries cannot yet be chosen from the keyboard, so offer the same action somewhere a keyboard reaches too.
+Clicking an entry fires `entry-click` with the entry and its `index` among the retained entries (the same position whatever the filter). Use it to open a detail panel or add the entry's attributes to a filter. Clicks on the copy button, and the click that ends a drag or text selection, are not reported.
+
+The keyboard reaches the same entries. The viewport keeps an **active entry**: Up/Down move it one entry at a time, PageUp/PageDown by a viewport, Home/End to the first and last, and Enter fires `entry-activate` with the same detail as `entry-click`. The first key starts from the entry at the top of the view, so focusing a log you have scrolled never jumps away from it. An entry taller than the view is read line by line before the next one becomes active. A click makes its entry active too, and `activeIndex` reads or moves it from code.
 
 ```ts tag=CodeBlock
-viewer.addEventListener('entry-click', (event) => {
-  const { entry, index } = event.detail
-  openDetails(entry, index)
-})
+const open = (event: CustomEvent<LogViewerEntryEventDetail>) => openDetails(event.detail.entry, event.detail.index)
+viewer.addEventListener('entry-click', open)
+viewer.addEventListener('entry-activate', open)
 ```
+
+## Find in the log
+
+The viewer renders only the entries near the view, so the browser's own find cannot see the rest. Press **Ctrl/Command+F** with focus in the viewer to open its find bar instead: it searches every displayed entry, marks the matches, moves the active entry to the current one and shows "3 of 128". Enter and Shift+Enter (or F3, Ctrl/Command+G) step through the matches and wrap at the ends; Alt+C toggles match case; Escape closes the bar and returns focus to the log, on the last match. Text selected in the viewer becomes the query. Pressing Ctrl/Command+F again inside the bar is left to the browser.
+
+Find is plain text, case-insensitive unless match case is on, across the columns on screen. It is the viewer's own and independent of `setFilter`: it searches what the filter displays, and re-runs when the filter or the entries change. The bar is built from `c2-search-field` and `c2-icon-button`, loaded the first time the viewer is focused; `--c2-log-viewer__find-*` variables theme it, and a ruler along the right edge shows where the matches are.
+
+```ts tag=CodeBlock
+await viewer.find('timeout') // open the bar on a query
+viewer.findNext() // or findPrevious()
+console.log(viewer.findMatchIndex, viewer.findMatchCount)
+viewer.closeFind()
+```
+
+Set `find-shortcut="false"` when the page has its own Ctrl/Command+F; the methods still work.
 
 ## Filter or highlight
 
@@ -230,4 +246,4 @@ Rows use a cumulative height index and binary viewport lookup. Wrapped text uses
 
 Each attribute column is automatically sized to its widest value, including cell padding. Only the message column takes the remaining viewport width, with `--c2-log-viewer__message--min-width` as its minimum. Widths are measured across all retained entries, so filtering keeps the columns aligned. With wrap disabled, long messages scroll horizontally without changing attribute column widths. In narrow viewports, columns remain aligned and can scroll horizontally. Cell padding, plain text inset and empty state padding are also exposed as CSS variables and included in layout measurement.
 
-Virtual content is available through the keyboard focusable, named scroll region. Home jumps to the first entry; End jumps to the latest and resumes following appends. Ctrl/Command with Home or End also works, while PageUp/PageDown move by a viewport with one line of overlap; Up/Down move by one measured text line. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Browser find, selection across unrendered content and printing only see the rendered window; use application data for complete exports or searches.
+The viewport is one Tab stop: a named tree grid (`aria-rowcount`, `aria-rowindex` on each rendered row) whose active entry is announced through `aria-activedescendant`, so focus never leaves the scroll area. Home jumps to the first entry; End jumps to the latest and resumes following appends. Ctrl/Command with Home or End also works. Movement is immediate, and Left/Right retain native horizontal scrolling. Find announces "Match 3 of 128" through a live region. Selection across unrendered content and printing only see the rendered window; use application data for complete exports.
