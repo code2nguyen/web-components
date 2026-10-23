@@ -262,3 +262,83 @@ test('fires input and change with selection-change, and keeps the tree event ins
   await row(page, 'sales').click()
   await expect(host(page)).toHaveJSProperty('seen', ['selection-change:value,nodes', 'input:', 'change:'])
 })
+
+test('rows added after the select connected are picked up', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Folder" placeholder="Pick a folder"></c2-tree-select>`)
+  await host(page).evaluate((element) => {
+    element.innerHTML = '<c2-tree-item value="src" label="src"></c2-tree-item><c2-tree-item value="docs" label="docs"></c2-tree-item>'
+  })
+  await trigger(page).click()
+  await page.locator('c2-tree-item[value="docs"] [part="row"]').first().click()
+  await expect(host(page)).toHaveJSProperty('value', ['docs'])
+  await expect(trigger(page)).toHaveText('docs')
+})
+
+test('checkbox-selection with leaf-only keeps branches out of the value', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Teams" checkbox-selection leaf-only ${items}></c2-tree-select>`)
+  await trigger(page).click()
+  await item(page, 'design').locator('input[type="checkbox"]').first().click()
+  await expect(host(page)).toHaveJSProperty('value', ['product-design', 'brand'])
+  await expect(tree(page)).toHaveJSProperty('value', ['design', 'product-design', 'brand'])
+})
+
+test('with one-way propagation the value is every ticked row, and ticks survive', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Teams" checkbox-selection selection-propagation="parents" ${items}></c2-tree-select>`)
+  await trigger(page).click()
+  await toggle(page, 'design').click()
+  await item(page, 'brand').locator('input[type="checkbox"]').first().click()
+  await expect(host(page)).toHaveJSProperty('value', ['brand'])
+  // Ticking the last child ticks the branch, and the value keeps both.
+  await item(page, 'product-design').locator('input[type="checkbox"]').first().click()
+  await expect(host(page)).toHaveJSProperty('value', ['design', 'product-design', 'brand'])
+  await expect(tree(page)).toHaveJSProperty('value', ['design', 'product-design', 'brand'])
+})
+
+test('Enter in the search ticks the first match through the tree', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Teams" checkbox-selection searchable ${items}></c2-tree-select>`)
+  await trigger(page).click()
+  await page.getByRole('textbox', { name: 'Search' }).fill('design')
+  await page.keyboard.press('Enter')
+  // "Design" is the first match; ticking it ticks its children, and the value holds the branch.
+  await expect(host(page)).toHaveJSProperty('value', ['design'])
+  await expect(tree(page)).toHaveJSProperty('value', ['design', 'product-design', 'brand'])
+})
+
+test('search leaves a row the author hid hidden', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Folder" searchable>
+    <c2-tree-item value="src" label="src"></c2-tree-item>
+    <c2-tree-item value="archive" label="src-archive" hidden></c2-tree-item>
+  </c2-tree-select>`)
+  await trigger(page).click()
+  const search = page.getByRole('textbox', { name: 'Search' })
+  await search.fill('src')
+  await expect(page.locator('c2-tree-select .status')).toHaveText('1 match')
+  await search.fill('')
+  await expect(page.locator('c2-tree-item[value="src"]')).toBeVisible()
+  await expect(page.locator('c2-tree-item[value="archive"]')).toBeHidden()
+})
+
+test('rows loaded during a search are filtered too', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Cost centre" searchable></c2-tree-select>`)
+  await host(page).evaluate((element) => {
+    const select = element as HTMLElement & { items: unknown; loadChildren: unknown }
+    select.items = [{ value: 'sales', label: 'Sales', hasChildren: true }]
+    select.loadChildren = async () => [
+      { value: 'sales-emea', label: 'Sales EMEA' },
+      { value: 'support', label: 'Support desk' },
+    ]
+  })
+  await trigger(page).click()
+  await page.getByRole('textbox', { name: 'Search' }).fill('sales')
+  await toggle(page, 'sales').click()
+  await expect(row(page, 'sales-emea')).toBeVisible()
+  // "Support desk" sits under a matching branch, so it stays reachable; the filter only recounts the matches.
+  await expect(page.locator('c2-tree-select .status')).toHaveText('2 matches')
+})
+
+test('open on a read-only select does not stay set', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree-select aria-label="Team" readonly open ${items}></c2-tree-select>`)
+  await expect(host(page)).toHaveJSProperty('open', false)
+  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false')
+  await expect(tree(page)).not.toBeVisible()
+})

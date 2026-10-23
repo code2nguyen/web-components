@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, isServer, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { guard } from 'lit/directives/guard.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -200,12 +201,16 @@ export class TreeSelect extends LitElement {
   @property({ type: String, attribute: 'selection-propagation' }) selectionPropagation: TreeSelectionPropagation = 'both'
 
   /**
-   * Which ticked rows `value` holds while checkboxes propagate: `parent` holds a fully ticked branch instead of its
-   * descendants, `leaves` only the rows without children, `all` every ticked row.
+   * Which ticked rows `value` holds while checkboxes propagate both ways (`selection-propagation="both"`): `parent`
+   * holds a fully ticked branch instead of its descendants, `leaves` only the rows without children, `all` every
+   * ticked row. With any other propagation `value` is every ticked row.
    */
   @property({ type: String, attribute: 'value-display' }) valueDisplay: TreeSelectValueDisplay = 'parent'
 
-  /** Only rows without children can be picked; clicking a branch row expands or collapses it. */
+  /**
+   * Only rows without children can be picked; clicking a branch row expands or collapses it. With checkboxes, `value`
+   * then holds the ticked leaves.
+   */
   @property({ type: Boolean, attribute: 'leaf-only' }) leafOnly = false
 
   /** Adds a search field at the top of the dropdown that filters the rows. */
@@ -316,7 +321,7 @@ export class TreeSelect extends LitElement {
     }
     if (!isServer) {
       // The host's own reflected `value` is not a row change.
-      this.rowObserver ??= new MutationObserver((records) => records.some((record) => record.target !== this) && this.syncRows())
+      this.rowObserver ??= new MutationObserver((records) => records.some((record) => record.type === 'childList' || record.target !== this) && this.syncRows())
       this.rowObserver.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['label', 'value'] })
       this.syncRows()
     }
@@ -359,6 +364,8 @@ export class TreeSelect extends LitElement {
     const isOpen = this.menu.matches(':popover-open')
     if (this.readonly || this.effectiveDisabled) {
       if (isOpen) this.menu.hidePopover()
+      // `open` set on a select that cannot open must not keep reporting an open dropdown.
+      if (this.open) this.open = false
       return
     }
     const next = force ?? !isOpen
@@ -379,14 +386,32 @@ export class TreeSelect extends LitElement {
     return this.multiple || this.checkboxSelection
   }
 
-  /** Whether `value` is a projection of the ticked rows rather than the ticked rows themselves. */
+  /** What `value` holds of the ticked rows. `leaf-only` keeps branches out of it, whatever `value-display` says. */
+  private get display(): TreeSelectValueDisplay {
+    return this.leafOnly ? 'leaves' : this.valueDisplay
+  }
+
+  /**
+   * Whether `value` is a projection of the ticked rows rather than the ticked rows themselves. Only when a tick travels
+   * both ways: then the ticked rows follow from the projection alone, so turning `value` back into ticks loses nothing.
+   */
   private get projectsValue() {
-    return this.checkboxSelection && this.selectionPropagation !== 'none' && this.valueDisplay !== 'all'
+    return this.checkboxSelection && this.selectionPropagation === 'both' && this.display !== 'all'
   }
 
   private syncRows = (): void => {
     this.hasMarkupRows = [...this.children].some((child) => !child.hasAttribute('slot'))
     this.rowsVersion += 1
+    // Rows that arrive during a search (a lazy branch, new `items`) are filtered like the rest.
+    if (this.searchQuery) void this.tree?.updateComplete.then(() => this.refilterIfRowsChanged())
+  }
+
+  /** The values of the tree's rows when the filter last ran, so an expansion alone does not re-run it. */
+  private filteredRows = ''
+
+  private refilterIfRowsChanged() {
+    const rows = this.tree?.allItems.map((row) => row.value).join('\n') ?? ''
+    if (this.searchQuery && rows !== this.filteredRows) this.applyFilter(true)
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -397,6 +422,17 @@ export class TreeSelect extends LitElement {
    * markup rows and children a lazy branch loaded; from `items` before the tree has rendered (and on the server).
    */
   #index(): Map<string, Entry> {
+    // Rebuilt only when the rows may have changed: `rowsVersion` covers markup, expansion and lazy loads.
+    const key = [this.rowsVersion, this.items, this.hasMarkupRows, this.tree?.items]
+    if (this.indexCache && key.every((part, at) => part === this.indexCache!.key[at])) return this.indexCache.index
+    const index = this.#buildIndex()
+    if (!isServer && this.tree) this.indexCache = { key, index }
+    return index
+  }
+
+  private indexCache?: { key: unknown[]; index: Map<string, Entry> }
+
+  #buildIndex(): Map<string, Entry> {
     const index = new Map<string, Entry>()
     // Event details hand back the caller's own node (its `data`, its `children`), not the one a row synthesizes. The
     // tree's `items` rather than this element's, so children a lazy branch loaded are found too.
@@ -473,9 +509,9 @@ export class TreeSelect extends LitElement {
 
   /** The `value` for the rows the tree shows ticked. */
   #valueOf(ticked: string[], index: Map<string, Entry>): string[] {
-    if (!this.projectsValue) return ticked
+    if (!this.projectsValue) return this.leafOnly ? ticked.filter((value) => !index.get(value)?.branch) : ticked
     const set = new Set(ticked)
-    if (this.valueDisplay === 'leaves') return ticked.filter((value) => !index.get(value)?.children.length)
+    if (this.display === 'leaves') return ticked.filter((value) => !index.get(value)?.children.length)
     return ticked.filter((value) => {
       const entry = index.get(value)
       return !entry || !this.#ancestors(entry).some((ancestor) => set.has(ancestor.value))
@@ -545,9 +581,12 @@ export class TreeSelect extends LitElement {
     this.commit(next)
   }
 
+  // The tree handles a click or key in the same dispatch, so the flag is cleared in the next task, once that dispatch
+  // is over (a microtask would run between the listeners): a click that selects nothing must not leave it set.
   private handleTreeClickCapture = {
     handleEvent: (event: MouseEvent) => {
       this.plainActivation = !(event.ctrlKey || event.metaKey || event.shiftKey)
+      setTimeout(() => (this.plainActivation = false))
     },
     capture: true,
   }
@@ -555,6 +594,7 @@ export class TreeSelect extends LitElement {
   private handleTreeKeydownCapture = {
     handleEvent: (event: KeyboardEvent) => {
       this.plainActivation = event.key === 'Enter'
+      setTimeout(() => (this.plainActivation = false))
       this.spacePressedInTree = event.key === ' '
     },
     capture: true,
@@ -582,13 +622,16 @@ export class TreeSelect extends LitElement {
    * Hides every row that neither matches nor leads to a match, and expands the ancestors of the matches. The tree
    * drops a `hidden` row from its keyboard order, so the arrows only walk what is shown.
    */
-  private applyFilter() {
+  private applyFilter(keepExpansion = false) {
     const tree = this.tree
     if (!tree) return
     const needle = this.searchQuery.trim().toLowerCase()
+    // Only the rows the filter hid come back: a row the author hid stays hidden, and is never a match.
+    for (const row of this.filterHidden) row.hidden = false
+    this.filterHidden.clear()
     const rows = tree.allItems
+    this.filteredRows = rows.map((row) => row.value).join('\n')
     if (!needle) {
-      for (const row of rows) row.hidden = false
       if (this.expandedBeforeSearch) tree.expandedItems = this.expandedBeforeSearch
       this.expandedBeforeSearch = undefined
       this.labelRenderer = undefined
@@ -601,7 +644,7 @@ export class TreeSelect extends LitElement {
     const expand = new Set<string>()
     let matches = 0
     for (const row of rows) {
-      if (!row.resolvedLabel.toLowerCase().includes(needle)) continue
+      if (row.hidden || !row.resolvedLabel.toLowerCase().includes(needle)) continue
       matches += 1
       shown.add(row)
       // The descendants of a matching branch stay reachable under it, collapsed.
@@ -611,13 +654,20 @@ export class TreeSelect extends LitElement {
         expand.add((parent as TreeItem).value)
       }
     }
-    for (const row of rows) row.hidden = !shown.has(row)
-    tree.expandedItems = [...expand]
+    for (const row of rows) {
+      if (shown.has(row) || row.hidden) continue
+      row.hidden = true
+      this.filterHidden.add(row)
+    }
+    // Re-filtering new rows keeps what the user opened since; a new query starts from the matches' ancestors.
+    tree.expandedItems = keepExpansion ? [...new Set([...tree.expandedItems, ...expand])] : [...expand]
     this.matchCount = matches
     // Marks are drawn through the tree's label renderer, which only exists for rows that come from `items`.
     this.labelRenderer = this.hasMarkupRows ? undefined : ({ node }) => highlight(node.label ?? node.value, needle)
     tree.requestUpdate()
   }
+
+  private readonly filterHidden = new Set<TreeItem>()
 
   /** The first row a search would pick: shown, enabled, and pickable under `leaf-only`. */
   private firstMatch(): TreeItem | undefined {
@@ -643,35 +693,14 @@ export class TreeSelect extends LitElement {
         this.toggle(false)
         return
       }
-      const index = this.#index()
-      const ticked = new Set(this.#treeValue(index))
-      if (ticked.has(match.value)) ticked.delete(match.value)
-      else ticked.add(match.value)
-      // Through the tree's checkbox propagation, so a branch ticks the way clicking its checkbox would.
-      this.commit(this.checkboxSelection ? this.#valueOf(this.#propagate(match.value, ticked.has(match.value), index), index) : this.#ordered(ticked, index))
-    }
-  }
-
-  /** What clicking `value`'s checkbox would leave ticked. */
-  #propagate(value: string, checked: boolean, index: Map<string, Entry>): string[] {
-    const ticked = new Set(this.#treeValue(index))
-    const entry = index.get(value)
-    if (!entry) return [...ticked]
-    const down = this.selectionPropagation === 'descendants' || this.selectionPropagation === 'both'
-    const up = this.selectionPropagation === 'parents' || this.selectionPropagation === 'both'
-    for (const row of [entry, ...(down ? this.#descendants(entry) : [])]) {
-      if (row.disabled) continue
-      if (checked) ticked.add(row.value)
-      else ticked.delete(row.value)
-    }
-    if (up) {
-      for (const ancestor of this.#ancestors(entry).reverse()) {
-        const rows = this.#descendants(ancestor).filter((row) => !row.disabled)
-        if (rows.length > 0 && rows.every((row) => ticked.has(row.value))) ticked.add(ancestor.value)
-        else ticked.delete(ancestor.value)
+      if (this.checkboxSelection) {
+        // Ticks the row's own checkbox, so the tree propagates it exactly as a click would.
+        match.renderRoot.querySelector('c2-checkbox')?.shadowRoot?.querySelector('input')?.click()
+        return
       }
+      const index = this.#index()
+      this.commit(this.value.includes(match.value) ? this.value.filter((value) => value !== match.value) : this.#ordered([...this.value, match.value], index))
     }
-    return this.#ordered(ticked, index)
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -917,6 +946,16 @@ export class TreeSelect extends LitElement {
     </div>`
   }
 
+  private lastTreeValue: string[] = []
+
+  /** The tree's value, as the same array while its contents do not change, so the tree is not re-synced for nothing. */
+  private stableTreeValue(index: Map<string, Entry>): string[] {
+    const next = this.#treeValue(index)
+    const last = this.lastTreeValue
+    if (next.length !== last.length || next.some((value, at) => value !== last[at])) this.lastTreeValue = next
+    return this.lastTreeValue
+  }
+
   private renderBody(index: Map<string, Entry>) {
     const empty = !this.hasMarkupRows && (!Array.isArray(this.items) || this.items.length === 0)
     const query = this.searchQuery.trim()
@@ -928,8 +967,12 @@ export class TreeSelect extends LitElement {
         <c2-tree
           id="tree"
           aria-label=${this.triggerLabel || nothing}
-          .items=${this.hasMarkupRows ? [] : this.items}
-          .value=${this.#treeValue(index)}
+          .items=${
+            // Lit re-sets an object binding on every render, which would put back the `items` the tree replaced when a
+            // lazy branch loaded. Only hand the tree new rows when this element's own change.
+            guard([this.items, this.hasMarkupRows], () => (this.hasMarkupRows ? NO_ITEMS : this.items))
+          }
+          .value=${guard([this.stableTreeValue(index)], () => this.lastTreeValue)}
           .loadChildren=${this.loadChildren}
           .renderLabel=${this.labelRenderer}
           selection=${this.isMultiple ? 'multiple' : 'single'}
@@ -1010,6 +1053,8 @@ export class TreeSelect extends LitElement {
     </div>`
   }
 }
+
+const NO_ITEMS: TreeNode[] = []
 
 function closeIcon(): TemplateResult {
   return html`${svg`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l6 6M11 5l-6 6"></path></svg>`}`
