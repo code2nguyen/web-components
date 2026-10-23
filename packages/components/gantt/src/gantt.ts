@@ -67,21 +67,19 @@ const MILESTONE_HALF = 7
 /** Gap between the tooltip and its row, and between the tooltip and the edges it is kept inside. */
 const TOOLTIP_GAP = 4
 
-/** Smallest room worth drawing a clipped label into; below it the label would be an ellipsis and little else. */
-const MIN_LABEL_ROOM = 40
-
 /**
  * Where a label drawn beside a mark goes: right of it (`after`) when it fits there, else left of it (`before`) when
- * it fits there, else on whichever side has more room, cut to that room with an ellipsis. It never extends past the
- * timeline, which would run it under the task list.
+ * it fits there, else on whichever side has more room. Its width is capped at that side's room either way, so a label
+ * wider than `textWidth` estimates is cut with an ellipsis rather than run past the timeline, under the task list.
  */
 function besideLabelStyle(textWidth: number, before: number, after: number, width: number): Record<string, string> {
   const roomAfter = width - after
   const roomBefore = before
-  if (textWidth <= roomAfter) return { left: `${after}px` }
-  if (textWidth <= roomBefore) return { right: `${width - before}px` }
-  if (roomAfter >= Math.min(roomBefore, MIN_LABEL_ROOM)) return { left: `${after}px`, maxWidth: `${Math.max(0, roomAfter)}px` }
-  return { right: `${width - before}px`, maxWidth: `${Math.max(0, roomBefore)}px` }
+  const right = { left: `${after}px`, maxWidth: `${Math.max(0, roomAfter)}px` }
+  const left = { right: `${width - before}px`, maxWidth: `${Math.max(0, roomBefore)}px` }
+  if (textWidth <= roomAfter) return right
+  if (textWidth <= roomBefore) return left
+  return roomAfter >= roomBefore ? right : left
 }
 
 const chevron = html`<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
