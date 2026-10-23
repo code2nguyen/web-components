@@ -23,6 +23,7 @@ declare module 'vue' {
         'aria-label'?: unknown
         readonly?: unknown
         maxlength?: unknown
+        'no-images'?: unknown
         'error-text'?: unknown
         'paper-color'?: unknown
         'paper-picker'?: unknown
@@ -33,6 +34,7 @@ declare module 'vue' {
         onCheckChange?: (event: EventOf<Notepad, 'check-change'>) => void
         onFormatChange?: (event: EventOf<Notepad, 'format-change'>) => void
         onPaperChange?: (event: EventOf<Notepad, 'paper-change'>) => void
+        onImageError?: (event: EventOf<Notepad, 'image-error'>) => void
       }
     >
   }

@@ -332,6 +332,7 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  * @cssproperty {border} [--c2-spreadsheet--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-spreadsheet--border-radius=8px]
  * @cssproperty {pixel} --c2-spreadsheet--max-height - The grid scrolls when it is taller than this.
+ * @cssproperty {width} [--c2-spreadsheet--width=auto] - Width of the frame: `auto` fills the line; `fit-content` ends it with the last column, a sheet wider than its container still scrolling inside it.
  * @cssproperty {outline} [--c2-spreadsheet__grid__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Ring around the grid when it has keyboard focus.
  *
  * @cssproperty {pixel} [--c2-spreadsheet__cell--width=112px] - Width of a column without its own `width`.

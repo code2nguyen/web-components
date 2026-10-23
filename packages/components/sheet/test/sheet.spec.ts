@@ -141,3 +141,29 @@ test('the close button is named in the nearest lang and follows a lang change', 
   await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
   await expect(page.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
 })
+
+test("the body takes the scrollbar variables, a page's own scrollbar styles not reaching into the shadow root", async ({
+  page,
+  renderScenario,
+  browserName,
+}) => {
+  await renderScenario('<c2-sheet label="Long" open><div style="height: 3000px">Long content</div></c2-sheet>')
+  const body = page.locator('c2-sheet .c2-sheet__body')
+  // Playwright's Firefox hides every scrollbar (scrollbar-width computes to none even inline), so only the other browsers check the width.
+  const width = (expected: string) => (browserName === 'firefox' ? 'none' : expected)
+  const scrollbar = () =>
+    body.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { width: style.getPropertyValue('scrollbar-width'), color: style.getPropertyValue('scrollbar-color') }
+    })
+  expect((await scrollbar()).width).toBe(width('thin'))
+  await page.locator('c2-sheet').evaluate((element) => {
+    element.style.setProperty('--c2-sheet__body__scrollbar--width', 'auto')
+    element.style.setProperty('--c2-sheet__body__scrollbar__thumb--color', 'rgb(255, 0, 0)')
+    element.style.setProperty('--c2-sheet__body__scrollbar__thumb__hover--color', 'rgb(0, 128, 0)')
+    element.style.setProperty('--c2-sheet__body__scrollbar__track--color', 'rgb(0, 0, 255)')
+  })
+  expect(await scrollbar()).toEqual({ width: width('auto'), color: 'rgb(255, 0, 0) rgb(0, 0, 255)' })
+  await body.hover()
+  expect((await scrollbar()).color).toBe('rgb(0, 128, 0) rgb(0, 0, 255)')
+})

@@ -79,6 +79,11 @@ export interface Sheet {
  * @cssproperty {font-size} [--c2-sheet__body--font-size=14px]
  * @cssproperty {line-height} [--c2-sheet__body--line-height=1.6]
  * @cssproperty {color} --c2-sheet__body--color - Defaults to the sheet colour.
+ * @cssproperty {scrollbar-width} [--c2-sheet__body__scrollbar--width=thin] - `scrollbar-width` of the body: `thin`, `auto` or `none`.
+ * @cssproperty {pixel} [--c2-sheet__body__scrollbar--size=8px] - Scrollbar thickness in browsers without `scrollbar-color` (Safari before 26).
+ * @cssproperty {color} [--c2-sheet__body__scrollbar__track--color=transparent]
+ * @cssproperty {color} [--c2-sheet__body__scrollbar__thumb--color=color-mix(in srgb, currentColor 22%, transparent)]
+ * @cssproperty {color} [--c2-sheet__body__scrollbar__thumb__hover--color=color-mix(in srgb, currentColor 40%, transparent)] - While the pointer is over the body.
  *
  * @cssproperty {padding} [--c2-sheet__footer--padding-top=12px]
  * @cssproperty {padding} [--c2-sheet__footer--padding-right=24px]

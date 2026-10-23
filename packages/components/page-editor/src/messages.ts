@@ -28,6 +28,11 @@ const en = {
   divider: 'Divider',
   dividerDescription: 'Separate sections',
   table: 'Table',
+  image: 'Image',
+  imageDescription: 'A picture, pasted or dropped',
+  resizeImage: 'Drag to resize, double-click for the natural size (Alt+← and Alt+→ on a selected image)',
+  imageMissing: 'Image not available on this device',
+  imageSaving: 'Saving image…',
   tableDescription: 'Rows and columns, with sums and formulas',
 
   // Slash menu.

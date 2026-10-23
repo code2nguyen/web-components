@@ -1,4 +1,5 @@
-import type { Mark, Node as ProseNode } from 'prosemirror-model'
+import { Fragment, type Mark, type Node as ProseNode } from 'prosemirror-model'
+import { imageFromMarkdown, imageToMarkdown, pendingImages, type EditorImageAttrs } from '@c2n/core/image-helper.js'
 import { schema, highlightIndex, inkIndex } from './schema'
 
 /**
@@ -7,6 +8,7 @@ import { schema, highlightIndex, inkIndex } from './schema'
  *
  * - one line of the page is one line of the value, so a blank line is a blank ruled line;
  * - `- [ ] task` / `- [x] done` are checklist lines;
+ * - `![alt](src)` on a line of its own is an image, `![alt|320](src)` one resized to 320px;
  * - `**bold**`, `*italic*`, `~~strike~~` and `==highlight==` (the first highlighter) are the usual delimiters;
  * - what Markdown has no syntax for is written as inline HTML, which Markdown passes through:
  *   `<u>underline</u>`, `<span data-ink="3">ink</span>`, `<mark data-color="2">highlight</mark>`. An ink or a
@@ -109,10 +111,37 @@ function serializeInline(block: ProseNode): string {
   return out
 }
 
-/** Serializes a page to the notepad Markdown dialect. */
-export function toMarkdown(doc: ProseNode): string {
-  const lines: string[] = []
+/**
+ * The page as it is saved: a pasted image still being saved is left out until its upload gives its `src` (and written
+ * with that `src` once it has, though the node has not heard yet).
+ */
+function savedPage(doc: ProseNode): ProseNode {
+  let pending = false
+  doc.forEach((block) => (pending ||= block.type === schema.nodes.image && !!block.attrs.pending))
+  if (!pending) return doc
+  const blocks: ProseNode[] = []
   doc.forEach((block) => {
+    if (block.type !== schema.nodes.image || !block.attrs.pending) return void blocks.push(block)
+    const src = pendingImages.src(block.attrs.pending as string)
+    if (src) blocks.push(schema.nodes.image.create({ ...block.attrs, src, pending: null }))
+  })
+  return blocks.length ? doc.copy(Fragment.fromArray(blocks)) : schema.nodes.doc.create(null, schema.nodes.line.create())
+}
+
+/** Serializes a page to the notepad Markdown dialect. */
+export function toMarkdown(page: ProseNode): string {
+  // The empty line after an image that ends the page is where the caret rests, not a line of the value (nor while
+  // that image is still being saved).
+  const last = page.lastChild
+  const caretLine = page.childCount > 1 && last?.type === schema.nodes.line && !last.content.size && page.child(page.childCount - 2).type === schema.nodes.image
+  const doc = savedPage(page)
+  const lines: string[] = []
+  doc.forEach((block, _offset, index) => {
+    if (block.type === schema.nodes.image) {
+      lines.push(imageToMarkdown(block.attrs as EditorImageAttrs))
+      return
+    }
+    if (caretLine && index > 0 && index === doc.childCount - 1) return
     let body = serializeInline(block)
     if (block.type.name === 'task') {
       lines.push((block.attrs.checked ? '- [x]' : '- [ ]') + (body ? ' ' + body : ''))
@@ -120,6 +149,8 @@ export function toMarkdown(doc: ProseNode): string {
     }
     // A written line that happens to look like a checklist item stays a written line.
     if (TASK.test(body)) body = body.replace('[', '\\[')
+    // And one that reads as an image stays text.
+    else if (imageFromMarkdown(body)) body = body.replace('!', '\\!')
     lines.push(body)
   })
   // A page that holds one empty line is an empty page.
@@ -245,6 +276,8 @@ export function fromMarkdown(markdown: string): ProseNode {
     .replace(/\r\n?/g, '\n')
     .split('\n')
     .map((line) => {
+      const image = imageFromMarkdown(line)
+      if (image) return schema.nodes.image.create(image)
       const task = TASK.exec(line)
       if (task) return schema.nodes.task.create({ checked: task[1] !== ' ' }, parseInline(line.slice(task[0].length)))
       return schema.nodes.line.create(null, parseInline(line))
