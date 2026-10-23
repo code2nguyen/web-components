@@ -21,6 +21,12 @@
     handle--color: #71717a,
 
     panel--overflow: auto,
+    // Derived from the text colour so the thumb reads on a light or a dark surface without a theme.
+    scrollbar--width: thin,
+    scrollbar--size: 8px,
+    scrollbar__track--color: transparent,
+    scrollbar__thumb--color: color-mix(in srgb, currentColor 22%, transparent),
+    scrollbar__thumb__hover--color: color-mix(in srgb, currentColor 40%, transparent),
     start--background: transparent,
     end--background: transparent,
   )
@@ -55,6 +61,35 @@
   min-width: 0;
   min-height: 0;
   overflow: css.cssVar(panel--overflow);
+  // The panels scroll inside the shadow root, out of reach of a page's own scrollbar styles: they take these.
+  scrollbar-width: css.cssVar(scrollbar--width);
+  scrollbar-color: css.cssVar(scrollbar__thumb--color) css.cssVar(scrollbar__track--color);
+
+  &:hover {
+    scrollbar-color: css.cssVar(scrollbar__thumb__hover--color) css.cssVar(scrollbar__track--color);
+  }
+}
+
+@supports not (scrollbar-color: auto) {
+  .panel {
+    &::-webkit-scrollbar {
+      width: css.cssVar(scrollbar--size);
+      height: css.cssVar(scrollbar--size);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: css.cssVar(scrollbar__track--color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: css.cssVar(scrollbar__thumb--color);
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: css.cssVar(scrollbar__thumb__hover--color);
+    }
+  }
 }
 
 [part~='start'] {

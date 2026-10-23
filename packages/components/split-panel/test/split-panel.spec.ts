@@ -148,6 +148,29 @@ for (const state of ['default', 'vertical', 'disabled']) {
   })
 }
 
+test("the panels take the scrollbar variables, a page's own scrollbar styles not reaching into the shadow root", async ({ page, scenario, browserName }) => {
+  await scenario()
+  const start = page.locator('c2-split-panel [part="start"]')
+  // Playwright's Firefox hides every scrollbar (scrollbar-width computes to none even inline), so only the other browsers check the width.
+  const width = (expected: string) => (browserName === 'firefox' ? 'none' : expected)
+  const scrollbar = () =>
+    start.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { width: style.getPropertyValue('scrollbar-width'), color: style.getPropertyValue('scrollbar-color') }
+    })
+  // Thin, with a thumb drawn from the text colour, by default.
+  expect((await scrollbar()).width).toBe(width('thin'))
+  await page.locator('c2-split-panel').evaluate((element) => {
+    element.style.setProperty('--c2-split-panel__scrollbar--width', 'auto')
+    element.style.setProperty('--c2-split-panel__scrollbar__thumb--color', 'rgb(255, 0, 0)')
+    element.style.setProperty('--c2-split-panel__scrollbar__thumb__hover--color', 'rgb(0, 128, 0)')
+    element.style.setProperty('--c2-split-panel__scrollbar__track--color', 'rgb(0, 0, 255)')
+  })
+  expect(await scrollbar()).toEqual({ width: width('auto'), color: 'rgb(255, 0, 0) rgb(0, 0, 255)' })
+  await start.hover()
+  expect((await scrollbar()).color).toBe('rgb(0, 128, 0) rgb(0, 0, 255)')
+})
+
 test('the divider is named in the nearest lang and follows a lang change', async ({ page, scenario }) => {
   await scenario()
   const main = page.locator('main')
