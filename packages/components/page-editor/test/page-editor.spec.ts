@@ -729,3 +729,20 @@ test('the interface follows the nearest lang, including placeholders and code bl
   await expect(content.locator('.code-language')).toHaveAttribute('aria-label', 'Language: JavaScript')
   await expect(content.locator('.code-hint')).toContainText('leave the block')
 })
+
+test('a table frame ends with its last column, and a table wider than the page scrolls inside it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" style="width: 700px" value="| A | B |\n| --- | --- |\n| 1 | 2 |"></c2-page-editor>`)
+  const frame = page.locator('c2-page-editor .table-sheet .spreadsheet')
+  const grid = page.locator('c2-page-editor .table-sheet .grid')
+  const [frameBox, gridBox] = [await frame.boundingBox(), await grid.boundingBox()]
+  // The frame's 1px border on each side, no more; the block (its outline, its tools) is as wide.
+  expect(frameBox!.width - gridBox!.width).toBeLessThanOrEqual(2)
+  expect(Math.round((await page.locator('c2-page-editor .table-block').boundingBox())!.width)).toBe(Math.round(frameBox!.width))
+  await page.locator('c2-page-editor').evaluate((element: HTMLElement & { value: string }) => {
+    const header = Array.from({ length: 12 }, (_, index) => `C${index}`)
+    element.value = `| ${header.join(' | ')} |\n| ${header.map(() => '---').join(' | ')} |\n| ${header.map(() => 'x').join(' | ')} |`
+  })
+  const content = await page.locator('c2-page-editor .ProseMirror').boundingBox()
+  await expect.poll(async () => (await frame.boundingBox())!.width).toBeLessThanOrEqual(content!.width)
+  expect(await page.locator('c2-page-editor .table-sheet .scroller').evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
+})

@@ -17,6 +17,8 @@ import { InputRule, inputRules, textblockTypeInputRule, undoInputRule } from 'pr
 import { fromMarkdown, toMarkdown } from './markdown'
 import { HIGHLIGHTS, INKS, MARK_NAMES, colorIndex, emptyFormat, formatOf, schema, type NotepadColor, type NotepadFormat, type NotepadMark } from './schema'
 import { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
+import { imageFiles, readPastedHtml, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
+import { adoptPastedImages, copySelectedImage, ImageView, insertImages, resizeSelectedImage, savedImages, type ImageHost } from './images'
 import { notepadMessages } from './messages'
 import styles from './notepad.scss?inline'
 
@@ -69,6 +71,7 @@ export interface NotepadEventMap {
   'check-change': CustomEvent<NotepadCheckChangeEventDetail>
   'page-tear': CustomEvent<NotepadPageTearEventDetail>
   'paper-change': CustomEvent<NotepadPaperChangeEventDetail>
+  'image-error': CustomEvent<{ error: unknown }>
 }
 
 export interface Notepad {
@@ -167,6 +170,11 @@ const BOX = `<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 4.2c4.6-.
 
 const textLength = (doc: ProseNode) => doc.textContent.length
 
+/** A page that ends with an image gets an empty line after it, where the caret can go. */
+function withLineAfterImage(doc: ProseNode): ProseNode {
+  return doc.lastChild?.type === schema.nodes.image ? doc.copy(doc.content.append(Fragment.from(schema.nodes.line.create()))) : doc
+}
+
 /** Wraps `inner` in the mark when the typed delimiter closes it: `**bold**`, `*italic*`, `~~strike~~`, `==hi==`. */
 function markRule(pattern: RegExp, open: number, mark: () => Mark, enabled: () => boolean): InputRule {
   return new InputRule(pattern, (state, match, start, end) => {
@@ -251,6 +259,14 @@ class TaskView implements NodeView {
  * preset of those variables (notebook, legal pad, sticky note, index card); a variable set on the element
  * still wins over the preset.
  *
+ * An image pasted (a screenshot, a copied image) or dropped (a file) goes between the lines, written `![alt](src)` on
+ * a line of its own, or `![alt|320](src)` once resized, and its height is rounded up to whole rules so the writing
+ * after it stays on the lines. `imageUpload` saves the file and gives the `src` to store, so an application can keep
+ * the image out of the text, and `imageResolver` turns that `src` back into a URL to draw; without them the image is
+ * stored in the page as a data URL. `no-images` turns images off. Clicking an image selects it and shows a handle on
+ * its edge: drag it to resize the image (double-click it for the natural size), or use Alt+ArrowLeft and
+ * Alt+ArrowRight. Copying a selected image puts the image itself on the clipboard.
+ *
  * The handwriting face is Patrick Hand (SIL Open Font License 1.1), bundled and registered with `document.fonts`
  * only when the writing surface uses it.
  *
@@ -265,6 +281,7 @@ class TaskView implements NodeView {
  * @event {CustomEvent<NotepadCheckChangeEventDetail>} check-change - Fired when a checklist item is ticked or unticked. Does not bubble.
  * @event {CustomEvent<NotepadPageTearEventDetail>} page-tear - Fired before a page is torn off; cancel it to keep the page. Does not bubble.
  * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another pad, ruling or paper colour in the paper picker. Does not bubble.
+ * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its image is removed. Does not bubble.
  * @csspart sheet - The paper sheet.
  * @csspart writing - The editable writing surface.
  * @csspart toolbar - The selection formatting toolbar.
@@ -313,6 +330,10 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__highlight-green--background=rgba(110, 220, 120, 0.4)]
  * @cssproperty {color} [--c2-notepad__highlight-pink--background=rgba(255, 120, 170, 0.38)]
  * @cssproperty {number} [--c2-notepad__task__checked--opacity=0.55] - Opacity of a ticked checklist item.
+ * @cssproperty {border-radius} [--c2-notepad__image--border-radius=2px]
+ * @cssproperty {outline} [--c2-notepad__image__selected--outline=2px solid rgba(2, 101, 220, 0.7)] - Around a selected image.
+ * @cssproperty {color} [--c2-notepad__image-handle--background=rgb(2, 101, 220)] - The resize handle of a selected image.
+ * @cssproperty {color} [--c2-notepad__image-missing--background=rgba(60, 50, 30, 0.08)] - Placeholder of an image that cannot be drawn on this device.
  * @cssproperty {color} [--c2-notepad__toolbar--background] - The washi tape of the selection toolbar and the paper picker. Unset, it is cut from the page's paper, a shade towards its ink, so it follows the paper colour; set it for one tape on every paper.
  * @cssproperty {color} [--c2-notepad__toolbar--color] - Text and icons on the tape. Unset, the page's ink.
  * @cssproperty {color} [--c2-notepad__toolbar__button__active--background=rgba(60, 50, 30, 0.14)]
@@ -368,6 +389,15 @@ export class Notepad extends LitElement {
   @property({ type: Boolean, reflect: true }) required = false
   /** Maximum number of characters of plain text; -1 means unlimited. */
   @property({ type: Number }) maxLength = -1
+  /** Turns images off: a pasted or dropped image is ignored, and one in pasted HTML is left out. */
+  @property({ type: Boolean, attribute: 'no-images', reflect: true }) noImages = false
+  /**
+   * Saves a pasted or dropped image and resolves to the `src` the page stores for it (an id, a URL). Unset, the image
+   * is stored in the page as a data URL. A rejection fires `image-error`.
+   */
+  @property({ attribute: false }) imageUpload: ImageUploader | null = null
+  /** Turns a stored image `src` into a URL to draw (an object URL from the application's store). Unset, the `src` is drawn as it is. */
+  @property({ attribute: false }) imageResolver: ImageResolver | null = null
   /** Shows the error margin and error note. */
   @property({ type: Boolean, reflect: true }) error = false
   /** Note written in red pen when `error` is set. */
@@ -425,6 +455,23 @@ export class Notepad extends LitElement {
   private followingViewport = false
 
   private view?: EditorView
+  /** The image views drawn, to rename and to show or hide their handle with the page. */
+  private readonly imageViews = new Set<ImageView>()
+  private readonly imageHost: ImageHost = {
+    image: schema.nodes.image,
+    line: schema.nodes.line,
+    uploader: () => this.imageUpload,
+    resolver: () => this.imageResolver,
+    text: () => ({ resize: this.msg.t('resizeImage'), missing: this.msg.t('imageMissing'), saving: this.msg.t('imageSaving') }),
+    maxWidth: () => {
+      if (!this.surface) return 0
+      const style = getComputedStyle(this.surface)
+      return this.surface.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    },
+    lineHeight: () => (this.surface ? parseFloat(getComputedStyle(this.surface).lineHeight) || 0 : 0),
+    accepts: () => this.editable && !this.noImages,
+    failed: (error) => this.dispatchEvent(new CustomEvent('image-error', { detail: { error } })),
+  }
   private readonly slotPresence = new SlotPresenceController(this, ['header', 'actions'])
   /** The value the editor last produced, so writing it back (v-model) does not reset the page. */
   private serialized = ''
@@ -622,7 +669,19 @@ export class Notepad extends LitElement {
         state: this.createState(this.value),
         editable: () => this.editable,
         attributes: () => this.surfaceAttributes(),
-        nodeViews: { task: (node, _view, getPos) => new TaskView(node, getPos, (pos) => this.toggleTask(pos), this.msg.t('done')) },
+        nodeViews: {
+          task: (node, _view, getPos) => new TaskView(node, getPos, (pos) => this.toggleTask(pos), this.msg.t('done')),
+          image: (node, view, getPos) => {
+            const image = new ImageView(node, view, getPos, this.imageHost)
+            this.imageViews.add(image)
+            const destroy = image.destroy.bind(image)
+            image.destroy = () => {
+              this.imageViews.delete(image)
+              destroy()
+            }
+            return image
+          },
+        },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleDOMEvents: {
           keydown: (view, event) => {
@@ -634,9 +693,31 @@ export class Notepad extends LitElement {
             this.updateToolbar()
             return false
           },
+          copy: (view, event) => copySelectedImage(view, schema.nodes.image, event, false),
+          cut: (view, event) => copySelectedImage(view, schema.nodes.image, event, true),
         },
-        transformPasted: (slice) => this.filterSlice(slice),
-        handlePaste: (view, _event, slice) => {
+        transformPasted: (slice, view) => {
+          const filtered = this.filterSlice(slice)
+          if (view.dragging) return filtered
+          const nodes: ProseNode[] = []
+          filtered.content.forEach((node) => nodes.push(node))
+          return new Slice(Fragment.fromArray(adoptPastedImages(view, this.imageHost, nodes)), filtered.openStart, filtered.openEnd)
+        },
+        // A dropped image file goes in where it is dropped; an image dragged within the page moves.
+        handleDrop: (view, event, _slice, moved) => {
+          const files = moved ? [] : imageFiles(event.dataTransfer)
+          if (!files.length) return false
+          event.preventDefault()
+          return insertImages(view, this.imageHost, files, view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos)
+        },
+        handlePaste: (view, event, slice) => {
+          // A screenshot or a copied image goes in as an image. HTML an editor copied an image with brings that same
+          // image back instead, and a document copied with its pictures is pasted as its text.
+          const files = imageFiles(event.clipboardData)
+          if (files.length) {
+            const pasted = readPastedHtml(event.clipboardData?.getData('text/html') ?? '')
+            if (!pasted.ownImage && pasted.onlyImages) return insertImages(view, this.imageHost, files)
+          }
           // Pasted onto an empty line, the pasted lines replace it whole, so a checklist item stays a checklist item.
           const { $from, empty } = view.state.selection
           if (!empty || $from.parent.content.size > 0 || slice.content.firstChild?.type !== schema.nodes.task) return false
@@ -673,6 +754,8 @@ export class Notepad extends LitElement {
     const view = this.view
     if (!view) return
     this.renameBoxes()
+    // Images drawn before the resolver was set are drawn again through it.
+    if (changed.has('imageResolver') && changed.get('imageResolver') !== undefined) for (const image of this.imageViews) image.reload()
     if (changed.has('value') && this.value !== this.serialized) {
       view.updateState(this.createState(this.value))
       this.serialized = this.value
@@ -684,6 +767,7 @@ export class Notepad extends LitElement {
       this.appliedSurfaceAttributes = surfaceAttributes
       // Re-reads `editable`, the surface attributes and the placeholder decoration.
       view.setProps({})
+      for (const image of this.imageViews) image.refresh()
       if (!this.editable) this.hideToolbar()
     }
     if (changed.has('toolbar') || changed.has('marks')) this.updateToolbar()
@@ -696,10 +780,11 @@ export class Notepad extends LitElement {
     this.boxLocale = this.msg.locale
     const label = this.msg.t('done')
     for (const box of this.surface.querySelectorAll('.task > .box')) box.setAttribute('aria-label', label)
+    for (const image of this.imageViews) image.localize()
   }
 
   private createState(markdown: string) {
-    return EditorState.create({ schema, doc: fromMarkdown(markdown), plugins: this.plugins() })
+    return EditorState.create({ schema, doc: withLineAfterImage(fromMarkdown(markdown)), plugins: this.plugins() })
   }
 
   private plugins(): Plugin[] {
@@ -762,6 +847,14 @@ export class Notepad extends LitElement {
       },
     })
 
+    // An image that ends the page has a line after it for the caret.
+    const lineAfterImage = new Plugin({
+      appendTransaction: (transactions, _old, state) => {
+        if (!transactions.some((tr) => tr.docChanged) || state.doc.lastChild?.type !== schema.nodes.image) return null
+        return state.tr.insert(state.doc.content.size, line.create()).setMeta('addToHistory', false)
+      },
+    })
+
     const limit = new Plugin({
       filterTransaction: (tr) => !(this.maxLength >= 0 && tr.docChanged && textLength(tr.doc) > this.maxLength && textLength(tr.doc) > textLength(tr.before)),
     })
@@ -784,11 +877,15 @@ export class Notepad extends LitElement {
         Enter: enterTask,
         Backspace: chainCommands(undoInputRule, backspaceTask),
         'Alt-F10': focusToolbar,
+        'Alt-ArrowLeft': resizeSelectedImage(this.imageHost, -1),
+        'Alt-ArrowRight': resizeSelectedImage(this.imageHost, 1),
         Escape: dismissToolbar,
       }),
       keymap(baseKeymap),
       placeholder,
       limit,
+      lineAfterImage,
+      savedImages(schema.nodes.image),
     ]
   }
 
@@ -920,11 +1017,13 @@ export class Notepad extends LitElement {
   /** Drops the formats `marks` does not allow from pasted content. */
   private filterSlice(slice: Slice): Slice {
     const allowed = this.allowedMarks
-    if (allowed.size === MARK_NAMES.length) return slice
+    if (allowed.size === MARK_NAMES.length && !this.noImages) return slice
     const strip = (fragment: Fragment): Fragment => {
       const nodes: ProseNode[] = []
       fragment.forEach((node) => {
-        if (node.isText) nodes.push(node.mark(node.marks.filter((mark) => allowed.has(mark.type.name as NotepadMark))))
+        if (node.type === schema.nodes.image) {
+          if (!this.noImages) nodes.push(node)
+        } else if (node.isText) nodes.push(node.mark(node.marks.filter((mark) => allowed.has(mark.type.name as NotepadMark))))
         else nodes.push(node.copy(strip(node.content)))
       })
       return Fragment.fromArray(nodes)

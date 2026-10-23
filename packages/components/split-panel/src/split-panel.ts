@@ -67,6 +67,11 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
  * @cssproperty {color} [--c2-split-panel__handle--color=#71717a] - Colour of the grip dots.
  *
  * @cssproperty {overflow} [--c2-split-panel__panel--overflow=auto] - Overflow of both panels.
+ * @cssproperty {scrollbar-width} [--c2-split-panel__scrollbar--width=thin] - `scrollbar-width` of both panels: `thin`, `auto` or `none`.
+ * @cssproperty {pixel} [--c2-split-panel__scrollbar--size=8px] - Scrollbar thickness in browsers without `scrollbar-color` (Safari before 26).
+ * @cssproperty {color} [--c2-split-panel__scrollbar__track--color=transparent]
+ * @cssproperty {color} [--c2-split-panel__scrollbar__thumb--color=color-mix(in srgb, currentColor 22%, transparent)]
+ * @cssproperty {color} [--c2-split-panel__scrollbar__thumb__hover--color=color-mix(in srgb, currentColor 40%, transparent)] - While the pointer is over the panel.
  * @cssproperty {background} [--c2-split-panel__start--background=transparent]
  * @cssproperty {background} [--c2-split-panel__end--background=transparent]
  */

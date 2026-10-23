@@ -54,8 +54,8 @@ const sameFields = (a: readonly string[], b: readonly string[]) => a.length === 
   // configuration these components need; property and event bindings then work with no wrapper at all.
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   // `C2_FORM_ACCESSORS` is what lets `ngModel` reach a c2 form control. Angular's built-in value accessors match
-  // `input`, `select` and `textarea` only, so without them the components are invisible to Angular forms however
-  // correct their `ElementInternals` are — the binding silently does nothing.
+  // `input`, `select` and `textarea` only, so without them `ngModel` finds no accessor on a c2 control however
+  // correct its `ElementInternals` are, and Angular throws NG01203 ("No value accessor for form control").
   imports: [FormsModule, ...C2_FORM_ACCESSORS],
   template: `
     <div class="app">

@@ -1,4 +1,5 @@
 import { Schema, type Mark, type MarkSpec } from 'prosemirror-model'
+import { imageFromHtml, isDataUrl } from '@c2n/core/image-helper.js'
 
 /**
  * The default inks, in order: ink `1` is blue, `2` black and so on. Each resolves to `--c2-notepad__ink-<name>--color`.
@@ -37,6 +38,9 @@ export type NotepadMark = (typeof MARK_NAMES)[number]
 const inkIndex = (value: unknown) => colorIndex(value, INKS)
 const highlightIndex = (value: unknown) => colorIndex(value, HIGHLIGHTS)
 
+/** An `<img>` read from pasted HTML, or nothing for an inline icon or an image only the copying application can open. */
+const imageFromDOM = (dom: HTMLImageElement) => imageFromHtml(dom) ?? false
+
 const tagMark = (tags: string[], tag: string): MarkSpec => ({
   parseDOM: tags.map((name) => ({ tag: name })),
   toDOM: () => [tag, 0],
@@ -50,7 +54,7 @@ const tagMark = (tags: string[], tag: string): MarkSpec => ({
  */
 export const schema = new Schema({
   nodes: {
-    doc: { content: '(line | task)+' },
+    doc: { content: '(line | task | image)+' },
     line: {
       content: 'text*',
       marks: '_',
@@ -73,6 +77,22 @@ export const schema = new Schema({
         },
       ],
       toDOM: (node) => ['li', { 'data-checked': String(node.attrs.checked) }, 0],
+    },
+    // A picture between the lines, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
+    // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
+    // for yet.
+    image: {
+      atom: true,
+      selectable: true,
+      draggable: true,
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
+      toDOM: (node) => {
+        const { src, alt, width } = node.attrs
+        // Copied, it keeps its stored `src` and where it was copied (see `ownImageSrc`); a data URL is its own `src`.
+        const own = isDataUrl(src) ? {} : { 'data-c2-image-src': src, 'data-c2-image-origin': location.origin }
+        return ['img', { src, alt, ...own, ...(width ? { width: String(width) } : {}) }]
+      },
     },
     text: {},
   },

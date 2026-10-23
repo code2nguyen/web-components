@@ -98,6 +98,10 @@ export class ActionBar extends LitElement {
   @state() private overflow = { start: false, end: false }
 
   @query('.actions') private actionsElement?: HTMLElement
+  @query('.bar') private barElement?: HTMLElement
+
+  /** Whether the bar was open at the last update: it slides only when that changes, never on the first render. */
+  private wasOpen?: boolean
 
   private resizeObserver?: ResizeObserver
 
@@ -157,8 +161,27 @@ export class ActionBar extends LitElement {
 
   protected override updated(): void {
     this.internals.ariaLabel = this.msg.t('actions')
-    if (this.count > 0) this.internals.states.add('open')
+    const open = this.count > 0
+    if (open) this.internals.states.add('open')
     else this.internals.states.delete('open')
+    if (this.wasOpen !== undefined && open !== this.wasOpen) this.slide(open)
+    this.wasOpen = open
+  }
+
+  /**
+   * Slides the bar up into place as it shows, and down as it hides, while it fades (a CSS transition). An animation
+   * rather than a transition, so the closed bar rests in place: only while it moves does it reach below its spot.
+   */
+  private slide(open: boolean): void {
+    const bar = this.barElement
+    if (!bar?.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const style = getComputedStyle(bar)
+    const offset = style.getPropertyValue('--_offset').trim() || '0px'
+    const duration = milliseconds(style.getPropertyValue('--_duration'))
+    if (!(duration > 0) || parseFloat(offset) === 0) return
+    const down = `-50% ${offset}`
+    const rest = '-50% 0'
+    bar.animate({ translate: open ? [down, rest] : [rest, down] }, { duration, easing: 'ease' })
   }
 
   override render() {
@@ -186,4 +209,10 @@ declare global {
   interface HTMLElementTagNameMap {
     'c2-action-bar': ActionBar
   }
+}
+
+/** A CSS time (`150ms`, `0.2s`) in milliseconds; NaN for anything else. */
+function milliseconds(time: string): number {
+  const value = parseFloat(time)
+  return time.trim().endsWith('ms') ? value : value * 1000
 }

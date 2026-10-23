@@ -1,0 +1,31 @@
+// A scrollbar themed through a component's variables, for a part that scrolls inside its shadow root, out of reach of
+// a page's own scrollbar styles: `scrollbar-width` and `scrollbar-color`, and the WebKit pseudo-elements where
+// `scrollbar-color` is not supported (Safari before 26). The thumb takes `$thumb-hover` while the pointer is over it.
+@mixin themed($width, $size, $track, $thumb, $thumb-hover) {
+  scrollbar-width: $width;
+  scrollbar-color: $thumb $track;
+
+  &:hover {
+    scrollbar-color: $thumb-hover $track;
+  }
+
+  @supports not (scrollbar-color: auto) {
+    &::-webkit-scrollbar {
+      width: $size;
+      height: $size;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: $track;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: $thumb;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: $thumb-hover;
+    }
+  }
+}

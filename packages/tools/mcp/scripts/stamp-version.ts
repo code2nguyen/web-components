@@ -1,5 +1,6 @@
 /**
- * Rewrites `c2nVersion` in the generated `data/registry.json` to the version in `lerna.json`.
+ * Rewrites `c2nVersion` in the generated `data/registry.json` to the version in `lerna.json`, and the two versions
+ * in the committed `server.json` (the MCP Registry entry, which must name a published `@c2n/mcp` version).
  *
  * `lerna version` writes the new version into `lerna.json` and every `package.json`, then runs the `version`
  * lifecycle script of each package. Rebuilding the whole registry there is too heavy, so the release workflow
@@ -27,3 +28,10 @@ if (registry.c2nVersion === version) {
   writeFileSync(registryFile, JSON.stringify(registry, null, 2) + '\n')
   console.log(`[stamp-version] registry ${previous} -> ${version}`)
 }
+
+const serverFile = join(packageRoot, 'server.json')
+const server = JSON.parse(readFileSync(serverFile, 'utf8')) as { version: string; packages: { version: string }[] }
+server.version = version
+for (const entry of server.packages) entry.version = version
+writeFileSync(serverFile, JSON.stringify(server, null, 2) + '\n')
+console.log(`[stamp-version] server.json -> ${version}`)

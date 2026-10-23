@@ -30,6 +30,11 @@
     checkbox--border-radius: 4px,
     todo__checked--color: #71717a,
     divider--border-top: 1px solid #e4e4e7,
+    image--border-radius: 6px,
+    image__selected--outline: 2px solid rgb(2, 101, 220),
+    image-handle--background: rgb(2, 101, 220),
+    image-missing--background: #f4f4f5,
+    image-missing--color: #71717a,
     // One unquoted string, so 'SF Mono' keeps its quotes when the list is interpolated into the fallback.
     code--font-family: string.unquote("ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace"),
     inline-code--background: rgba(135, 131, 120, 0.15),
@@ -214,10 +219,111 @@ hr {
   }
 }
 
+// ---- images --------------------------------------------------------------------------------------------------------
+
+// An image on its own line, at its natural size or the width it was resized to, never wider than the page.
+.image-block {
+  position: relative;
+  display: flex;
+  // Above the image, a block whose end is caught for a drop or a click between blocks.
+  padding-block: 2px;
+}
+
+.image-frame {
+  position: relative;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.image-block img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: css.cssVar(image--border-radius);
+  cursor: default;
+}
+
+.image-block.is-selected img,
+.image-block.ProseMirror-selectednode img {
+  outline: css.cssVar(image__selected--outline);
+  outline-offset: 2px;
+}
+
+// Drawn from its local preview while it is being saved.
+.image-block.is-pending img {
+  opacity: 0.6;
+}
+
+// Shown only once the image is clicked (selected), on an editable page: a bar on its trailing edge.
+.image-handle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -7px;
+  display: none;
+  width: 14px;
+  cursor: ew-resize;
+  touch-action: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 5px;
+    top: 50%;
+    width: 4px;
+    height: min(48px, 40%);
+    min-height: 20px;
+    translate: 0 -50%;
+    border-radius: 999px;
+    background: css.cssVar(image-handle--background);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+  }
+}
+
+.image-block.is-selected .image-handle:not([hidden]),
+.image-block.is-resizing .image-handle:not([hidden]) {
+  display: block;
+}
+
+.image-missing {
+  display: none;
+}
+
+.image-block.is-missing {
+  img {
+    display: none;
+  }
+
+  .image-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 240px;
+    max-width: 100%;
+    min-height: 96px;
+    padding: 12px 16px;
+    border-radius: css.cssVar(image--border-radius);
+    background: css.cssVar(image-missing--background);
+    color: css.cssVar(image-missing--color);
+    font-size: 0.875em;
+    line-height: 1.4;
+  }
+
+  &.is-selected .image-missing {
+    outline: css.cssVar(image__selected--outline);
+    outline-offset: 2px;
+  }
+}
+
 // ---- tables --------------------------------------------------------------------------------------------------------
 
 .table-block {
   position: relative;
+  // As wide as its table, so its outline and tools wrap the table, not the line; a wider table scrolls inside it,
+  // stopping short of the page's edge by its outline (4px offset, 2px thick), which an overflowing page would clip.
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: calc(100% - 6px);
   white-space: normal;
   cursor: default;
   .content > & {
@@ -232,6 +338,8 @@ hr {
 // The sheet marks its current cell and range even unfocused; in a page, only the table being edited shows them.
 // Cells take the page's named colours, so a table's text and highlights match the page's (dark pages too).
 .table-sheet {
+  // The frame ends with the last column, rather than leaving an empty bordered area across the page.
+  --c2-spreadsheet--width: fit-content;
   @each $color in $colors {
     --c2-spreadsheet--color-#{$color}: var(--_color-#{$color});
     --c2-spreadsheet--background-#{$color}: var(--_background-#{$color});

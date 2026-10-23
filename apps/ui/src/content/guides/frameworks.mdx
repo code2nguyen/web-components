@@ -319,7 +319,7 @@ Kebab-case events bind by their real name (`@selection-change`), and the handler
 
 `[rows]="…"` writes a property through `setProperty`, and `(selection-change)` / `(row-click)` bind kebab-case events by their real name. The trap is the reverse of React's: a **static** attribute in a template stays an attribute, so `rowKey="id"` sets `rowkey`, which the component does not declare — use `[rowKey]="'id'"` or the real attribute name, `row-key`. The component forwards one of those lookalikes to the real attribute and warns in the console, instead of dropping the value in silence.
 
-Angular's built-in value accessors match `input`, `select` and `textarea` only, so a form-associated custom element is invisible to `ngModel` and reactive forms however correct its `ElementInternals` are. `@c2n/angular` supplies the missing half:
+Angular's built-in value accessors match `input`, `select` and `textarea` only, so `ngModel` or `formControlName` on a form-associated custom element finds no accessor, however correct its `ElementInternals` are. Angular then throws `NG01203: No value accessor for form control` in development, and fails on `writeValue` in a production build. `ngDefaultControl` borrows the `<input>` accessor, which never reads a toggle's `checked` and resets an array value to `''`. `@c2n/angular` supplies the missing half:
 
 ```bash tag=CodeBlock
 npm install @c2n/angular

@@ -4,7 +4,7 @@ import { Decoration, DecorationSet } from 'prosemirror-view'
 import { InputRule } from 'prosemirror-inputrules'
 import { MAX_INDENT, blockOf, listNumbers, schema, type ListKind, type PageEditorBlock } from './schema'
 
-const { paragraph, heading, item, quote, code_block: codeBlock, divider, table, hard_break: hardBreak } = schema.nodes
+const { paragraph, heading, item, quote, code_block: codeBlock, divider, table, image, hard_break: hardBreak } = schema.nodes
 
 /** A top-level block and where it starts. */
 interface Located {
@@ -80,6 +80,8 @@ export function setBlock(block: PageEditorBlock): Command {
     const blocks = selectedBlocks(state)
     if (block === 'divider') return insertDivider(state, dispatch)
     if (block === 'table') return insertTable(state, dispatch)
+    // An image comes from a paste or a drop, not from turning a block into one.
+    if (block === 'image') return false
     if (block === 'code') {
       const textblocks = blocks.filter(({ node }) => node.isTextblock)
       if (!textblocks.length) return false
@@ -547,7 +549,7 @@ function numbering(doc: ProseNode): DecorationSet {
 
 /**
  * Keeps the page well formed after any change: an item is never more than one level deeper than the item above it,
- * and a code block, divider or table at the end always has a line after it for the caret.
+ * and a code block, divider, table or image at the end always has a line after it for the caret.
  */
 export const normalize = new Plugin({
   appendTransaction(transactions, _old, state) {
@@ -562,7 +564,8 @@ export const normalize = new Plugin({
       } else previousIndent = -1
     })
     const last = state.doc.lastChild
-    if (last && (last.type === codeBlock || last.type === divider || last.type === table)) tr.insert(state.doc.content.size, paragraph.create())
+    if (last && (last.type === codeBlock || last.type === divider || last.type === table || last.type === image))
+      tr.insert(state.doc.content.size, paragraph.create())
     return tr.docChanged ? tr.setMeta('addToHistory', false) : null
   },
 })

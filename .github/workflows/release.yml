@@ -41,7 +41,8 @@ permissions:
   # Creating the skip-review label and adding it to the version PR go through the issues API.
   issues: write
   # npm provenance: lerna turns it on by itself for a public repo running in GitHub Actions, but only
-  # if it can mint an OIDC token. Without this the publish still works, just unattested.
+  # if it can mint an OIDC token. Without this the publish still works, just unattested. The same token logs
+  # `mcp-publisher` in to the MCP Registry as the repository owner.
   id-token: write
 
 # Two releases at once would race on tags and on the registry.
@@ -244,6 +245,32 @@ jobs:
             git_head="$(git rev-list -n 1 "v$VERSION")"
           fi
           npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --git-head "$git_head" --no-private --yes
+
+      # Lists this @c2n/mcp version in the MCP Registry (packages/tools/mcp/server.json, version stamped by the
+      # root `version` script). The registry checks the published package's `mcpName`, so this runs after npm.
+      # Skipped for a non-latest dist-tag so a prerelease does not become the listed version, and when the
+      # version is already listed so a rerun is a no-op. Best effort: the packages are already on npm.
+      - name: Publish to the MCP Registry
+        if: ${{ !inputs.dry_run && inputs.dist_tag == 'latest' }}
+        continue-on-error: true
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        working-directory: packages/tools/mcp
+        run: |
+          name="$(node -p "require('./server.json').name")"
+          listed="$(node -p "require('./server.json').version")"
+          if [ "$listed" != "$VERSION" ]; then
+            echo "::warning::server.json lists $listed, expected $VERSION; not publishing to the MCP Registry."
+            exit 1
+          fi
+          status="$(curl -s -o /dev/null -w '%{http_code}' "https://registry.modelcontextprotocol.io/v0.1/servers/${name/\//%2F}/versions/$VERSION")"
+          if [ "$status" = 200 ]; then
+            echo "$name $VERSION is already in the MCP Registry."
+            exit 0
+          fi
+          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz" | tar xz -C "$RUNNER_TEMP" mcp-publisher
+          "$RUNNER_TEMP/mcp-publisher" login github-oidc
+          "$RUNNER_TEMP/mcp-publisher" publish
 
       - name: Prepare version sync for an existing tag
         if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}

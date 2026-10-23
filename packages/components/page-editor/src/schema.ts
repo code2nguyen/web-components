@@ -1,11 +1,12 @@
 import { Schema, type DOMOutputSpec, type Mark, type Node as ProseNode } from 'prosemirror-model'
+import { imageFromHtml, isDataUrl } from '@c2n/core/image-helper.js'
 
 /** The named colours a writer can give text or its background. Each resolves to a CSS variable, so themes and dark mode recolour them. */
 export const COLORS = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'red'] as const
 export type PageEditorColor = (typeof COLORS)[number]
 
 /** Block types accepted by `blocks`, `setBlock()` and reported by `format-change`. */
-export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider', 'table'] as const
+export const BLOCK_NAMES = ['paragraph', 'heading1', 'heading2', 'heading3', 'bullet', 'ordered', 'todo', 'quote', 'code', 'divider', 'table', 'image'] as const
 export type PageEditorBlock = (typeof BLOCK_NAMES)[number]
 
 /** Inline formats accepted by `toggleMark()`. */
@@ -97,6 +98,9 @@ function tableFromDOM(table: HTMLElement): TableAttrs | false {
 }
 
 const TEXT_ALIGN = { start: 'left', center: 'center', end: 'right' } as const
+
+/** An `<img>` read from pasted HTML, or nothing for an inline icon or an image only the copying application can open. */
+const imageFromDOM = (dom: HTMLImageElement) => imageFromHtml(dom) ?? false
 
 const listDepth = (dom: HTMLElement) => {
   let depth = 0
@@ -238,6 +242,23 @@ export const schema = new Schema({
         ] as unknown as DOMOutputSpec
       },
     },
+    // A picture on a line of its own, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
+    // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
+    // for yet.
+    image: {
+      group: 'block',
+      atom: true,
+      selectable: true,
+      draggable: true,
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
+      toDOM: (node) => {
+        const { src, alt, width } = node.attrs
+        // Copied, it keeps its stored `src` and where it was copied (see `ownImageSrc`); a data URL is its own `src`.
+        const own = isDataUrl(src) ? {} : { 'data-c2-image-src': src, 'data-c2-image-origin': location.origin }
+        return ['img', { src, alt, ...own, ...(width ? { width: String(width) } : {}) }]
+      },
+    },
     text: { group: 'inline' },
     hard_break: {
       group: 'inline',
@@ -332,6 +353,8 @@ export function blockOf(node: ProseNode): PageEditorBlock {
       return 'divider'
     case 'table':
       return 'table'
+    case 'image':
+      return 'image'
     default:
       return 'paragraph'
   }

@@ -1,4 +1,5 @@
 @use '@c2n/sass/variables';
+@use '@c2n/sass/scrollbar';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-split-panel,
   $theme: (
@@ -21,6 +22,12 @@
     handle--color: #71717a,
 
     panel--overflow: auto,
+    // Derived from the text colour so the thumb reads on a light or a dark surface without a theme.
+    scrollbar--width: thin,
+    scrollbar--size: 8px,
+    scrollbar__track--color: transparent,
+    scrollbar__thumb--color: color-mix(in srgb, currentColor 22%, transparent),
+    scrollbar__thumb__hover--color: color-mix(in srgb, currentColor 40%, transparent),
     start--background: transparent,
     end--background: transparent,
   )
@@ -55,6 +62,14 @@
   min-width: 0;
   min-height: 0;
   overflow: css.cssVar(panel--overflow);
+  // Scrolls inside the shadow root, out of reach of a page's own scrollbar styles: it takes these.
+  @include scrollbar.themed(
+    css.cssVar(scrollbar--width),
+    css.cssVar(scrollbar--size),
+    css.cssVar(scrollbar__track--color),
+    css.cssVar(scrollbar__thumb--color),
+    css.cssVar(scrollbar__thumb__hover--color)
+  );
 }
 
 [part~='start'] {

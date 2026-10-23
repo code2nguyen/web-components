@@ -407,6 +407,7 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {border} [--c2-flow__node--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-flow__node--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-flow__node--box-shadow=0 1px 2px rgba(24, 24, 27, 0.06)]
+ * @cssproperty {cursor} [--c2-flow__node--cursor=default] - Pointer over a node that can be moved, its label and rows included; `grab` shows the hand there. A row's grip shows `grab`, a node being dragged `grabbing`, a node of a `locked` flow `pointer`.
  * @cssproperty {color} [--c2-flow__node__hover--border-color=#a1a1aa]
  * @cssproperty {color} [--c2-flow__node__selected--border-color=rgb(2, 101, 220)]
  * @cssproperty {box-shadow} [--c2-flow__node__selected--box-shadow=0 0 0 3px rgba(2, 101, 220, 0.2)]

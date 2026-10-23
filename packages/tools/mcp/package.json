@@ -1,7 +1,8 @@
 {
   "name": "@c2n/mcp",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
+  "mcpName": "io.github.code2nguyen/c2n",
   "type": "module",
   "bin": {
     "c2n-mcp": "dist/cli.js"
