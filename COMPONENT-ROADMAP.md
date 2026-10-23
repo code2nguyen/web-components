@@ -75,7 +75,6 @@ Domain patterns with no design-system home come from the products that made them
 | 44  | `c2-video-player`   | Themed controls, captions, chapters                                 | Loom, YouTube                                                                    | P3       | Proposed |
 | 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                    | Slack clips, WhatsApp voice notes                                                | P3       | Proposed |
 | 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                              | DocuSign, Gmail attachment preview                                               | P3       | Proposed |
-| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse               | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
 | 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                         | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
 
 ### C. Charts

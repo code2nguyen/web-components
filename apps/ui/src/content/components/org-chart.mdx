@@ -1,0 +1,46 @@
+---
+title: 'Org Chart'
+description: 'A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { OrgChart } from '@c2n/components/org-chart'
+
+`c2-org-chart` draws a hierarchy as cards joined by connector lines, after the org charts of Rippling, BambooHR and PrimeVue's OrganizationChart. Each card shows an avatar, a label and a description, and a manager's card carries a toggle on its connector that hides the people below it and shows how many there are. Hand it the hierarchy as `items`; `collapsed-items` lists the managers whose reports start hidden, and `orientation="horizontal"` draws reports beside their manager rather than below.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/org-chart'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/org-chart
+<style>
+  .usage-chart {
+    width: 100%;
+    --c2-org-chart__card--width: 168px;
+  }
+</style>
+<div data-label="Default">
+  <c2-org-chart client:only="lit" class="usage-chart" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"Chief Executive Officer","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead"},{"id":"kim","label":"Kim Lee","description":"Design lead"}]},{"id":"maya","label":"Maya Cohen","description":"CFO","children":[{"id":"joe","label":"Joe Park","description":"Controller"}]},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+</div>
+<div data-label="Collapsed and selectable">
+  <c2-org-chart client:only="lit" class="usage-chart" selectable value="maya" collapsed-items="li;maya" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"Chief Executive Officer","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead"},{"id":"kim","label":"Kim Lee","description":"Design lead"}]},{"id":"maya","label":"Maya Cohen","description":"CFO","children":[{"id":"joe","label":"Joe Park","description":"Controller"}]},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+</div>
+<div data-label="Horizontal">
+  <c2-org-chart client:only="lit" class="usage-chart" orientation="horizontal" aria-label="Reporting line" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead","children":[{"id":"ines","label":"Inès Martin","description":"Engineer"},{"id":"tom","label":"Tom Berg","description":"Engineer"}]},{"id":"kim","label":"Kim Lee","description":"Design lead"}]}]}]'></c2-org-chart>
+</div>
+```
+
+Every node is `{ id, label, description, image, children, disabled, data }`. Without an `image` the avatar shows the label's initials in a colour picked from the name; set `--c2-org-chart__avatar--display: none` for a chart of teams rather than people. The chart grows to its content, centred while it fits, and scrolls inside the host once it is wider or taller.
+
+`item-click` fires for every card, which is where an app opens a profile or a side panel. With `selectable`, one card at a time can be selected: `value` holds its id and `selection-change` reports it. `expansion-change` fires when the user collapses or expands a card, with the new `collapsedItems`. `reveal(id)` expands the managers above a node and scrolls its card into view (the result of a people search), `focusItem(id)` also moves focus to it, and `expandAll()` and `collapseAll()` open and close the whole chart.
+
+`renderItem` replaces the content of every card with a Lit template or a DOM node, handed the node, its parent, its level and whether it is expanded and selected; the card frame, its focus ring and the toggle stay.
+
+The chart is an ARIA tree with a single Tab stop, and the arrow keys follow the drawing. Vertically, Arrow Down expands a collapsed card, then moves to its first report; Arrow Up collapses an expanded card, then moves to its manager; Arrow Left and Right move along the row, across managers. Horizontally the same keys turn a quarter. Home and End jump to the first and last card, and Enter or Space activates the focused one.

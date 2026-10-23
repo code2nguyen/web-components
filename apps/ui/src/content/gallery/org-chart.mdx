@@ -1,0 +1,127 @@
+---
+description: 'Ready-made looks for c2-org-chart: soft people cards, stacked profiles, a department map, a reporting line and a compact outline. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { OrgChart } from '@c2n/components/org-chart'
+
+## Presets
+
+Curated looks for `c2-org-chart`. Open any card in the studio to start from it. The card is `--c2-org-chart__card--*` (`width`, `flex-direction` and `text-align` decide its shape), the lines are `__connector--*` (`border-radius` rounds the corners towards the outer reports, `border-style` dashes them), and `__level--gap` and `__sibling--gap` space the drawing. `__avatar--display: none` turns a chart of people into a chart of teams.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-org-chart client:only="lit" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Soft cards
+<style>
+  .soft-chart {
+    --c2-org-chart__card--width: 168px;
+    --c2-org-chart__card--border: 1px solid transparent;
+    --c2-org-chart__card--border-radius: 14px;
+    --c2-org-chart__card--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06), 0 4px 12px rgba(24, 24, 27, 0.06);
+    --c2-org-chart__card__hover--border-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-org-chart__connector--border-radius: 12px;
+    --c2-org-chart__connector--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-org-chart__level--gap: 48px;
+    --c2-org-chart__toggle--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+</style>
+<c2-org-chart client:only="lit" class="soft-chart" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Stacked profiles
+<style>
+  .profile-chart {
+    --c2-org-chart__card--width: 128px;
+    --c2-org-chart__card--flex-direction: column;
+    --c2-org-chart__card--text-align: center;
+    --c2-org-chart__card--gap: 8px;
+    --c2-org-chart__card--padding: 16px 8px 12px;
+    --c2-org-chart__card--border-radius: 14px;
+    --c2-org-chart__avatar--size: 48px;
+    --c2-org-chart__sibling--gap: 12px;
+  }
+</style>
+<c2-org-chart client:only="lit" class="profile-chart" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Departments
+<style>
+  .department-chart {
+    --c2-org-chart__avatar--display: none;
+    --c2-org-chart__card--width: 132px;
+    --c2-org-chart__card--text-align: center;
+    --c2-org-chart__card--align-items: stretch;
+    --c2-org-chart__card--padding: 10px 12px;
+    --c2-org-chart__card--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-org-chart__card--border: 1px solid light-dark(#e9d5ff, #3b2259);
+    --c2-org-chart__card__hover--border-color: #a855f7;
+    --c2-org-chart__label--color: light-dark(#6b21a8, #c79bf0);
+    --c2-org-chart__description--color: light-dark(#7e22ce, #b98ae6);
+    --c2-org-chart__connector--border-style: dashed;
+    --c2-org-chart__connector--color: #c084fc;
+    --c2-org-chart__toggle--border: 1px solid #c084fc;
+    --c2-org-chart__toggle--color: light-dark(#7e22ce, #b98ae6);
+    --c2-org-chart__sibling--gap: 12px;
+  }
+</style>
+<c2-org-chart client:only="lit" class="department-chart" aria-label="Departments" items='[{"id":"co","label":"Northwind","description":"412 people","children":[{"id":"eng","label":"Engineering","description":"186 people","children":[{"id":"web","label":"Web","description":"42 people"},{"id":"mob","label":"Mobile","description":"31 people"}]},{"id":"ops","label":"Operations","description":"94 people"},{"id":"gtm","label":"Go to market","description":"132 people"}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Reporting line
+<style>
+  .line-chart {
+    --c2-org-chart__card--width: 176px;
+    --c2-org-chart__level--gap: 32px;
+    --c2-org-chart__sibling--gap: 10px;
+    --c2-org-chart__avatar--size: 32px;
+    --c2-org-chart__card--padding: 8px 10px;
+    --c2-org-chart__card--gap: 10px;
+    --c2-org-chart__connector--border-radius: 8px;
+  }
+</style>
+<c2-org-chart client:only="lit" class="line-chart" orientation="horizontal" aria-label="Reporting line" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead","children":[{"id":"ines","label":"Inès Martin","description":"Engineer"},{"id":"tom","label":"Tom Berg","description":"Engineer"}]},{"id":"kim","label":"Kim Lee","description":"Design lead"}]}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Compact outline
+<style>
+  .compact-chart {
+    --c2-org-chart__avatar--display: none;
+    --c2-org-chart__card--width: auto;
+    --c2-org-chart__card--padding: 4px 10px;
+    --c2-org-chart__card--border-radius: 999px;
+    --c2-org-chart__label--font-size: 12px;
+    --c2-org-chart__label--font-weight: 500;
+    --c2-org-chart__label--line-height: 16px;
+    --c2-org-chart__description--font-size: 11px;
+    --c2-org-chart__level--gap: 32px;
+    --c2-org-chart__sibling--gap: 8px;
+    --c2-org-chart__toggle--size: 16px;
+    --c2-org-chart__toggle--font-size: 11px;
+  }
+</style>
+<c2-org-chart client:only="lit" class="compact-chart" collapsed-items="maya" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"Chief Executive Officer","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead"},{"id":"kim","label":"Kim Lee","description":"Design lead"}]},{"id":"maya","label":"Maya Cohen","description":"CFO","children":[{"id":"joe","label":"Joe Park","description":"Controller"}]},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+```
+
+```html tag=MdxCodeBlock,label=Selected
+<style>
+  .selected-chart {
+    --c2-org-chart__card--width: 168px;
+    --c2-org-chart__card__selected--background-color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-org-chart__card__selected--box-shadow: 0 4px 12px rgba(2, 101, 220, 0.25);
+    --c2-org-chart__card__selected--border-color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+  }
+  .selected-chart::part(card-selected) {
+    --c2-org-chart__label--color: #ffffff;
+    --c2-org-chart__description--color: #ffffff;
+  }
+</style>
+<c2-org-chart client:only="lit" class="selected-chart" selectable value="li" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
+```
+
+</GalleryGrid>

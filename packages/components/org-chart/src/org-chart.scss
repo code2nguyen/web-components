@@ -1,0 +1,382 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-org-chart,
+  $theme: (
+    padding: 16px,
+    font-family: inherit,
+    level--gap: 40px,
+    sibling--gap: 16px,
+    root--gap: 48px,
+    connector--color: #bcbcc6,
+    connector--width: 1px,
+    connector--border-style: solid,
+    connector--border-radius: 0px,
+    card--width: 200px,
+    card--min-height: 0px,
+    card--padding: 12px,
+    card--flex-direction: row,
+    card--align-items: center,
+    card--text-align: start,
+    card--gap: 12px,
+    card--background-color: #ffffff,
+    card--border: 1px solid #e4e4e7,
+    card--border-radius: 8px,
+    card--box-shadow: none,
+    card__hover--border-color: #a1a1aa,
+    card__selected--border-color: rgb(2, 101, 220),
+    card__selected--background-color: #ffffff,
+    card__selected--box-shadow: 0 0 0 1px rgb(2, 101, 220),
+    card__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    card__focus--outline-offset: 2px,
+    card__disabled--opacity: 0.38,
+    card--transition-duration: 150ms,
+    avatar--display: flex,
+    avatar--size: 40px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 600,
+    label--line-height: 20px,
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 16px,
+    toggle--size: 20px,
+    toggle--background-color: #ffffff,
+    toggle--color: #71717a,
+    toggle--border: 1px solid #bcbcc6,
+    toggle--border-radius: 999px,
+    toggle--font-size: 12px,
+    toggle--font-weight: 500,
+    toggle__hover--border-color: #a1a1aa,
+    toggle__hover--color: #18181b,
+    empty--color: #71717a,
+    empty--padding: 18px,
+  )
+);
+
+:host {
+  display: block;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  font-family: css.cssVar(font-family);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.empty {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  text-align: center;
+}
+
+.c2-org-chart {
+  --_half: calc(#{css.cssVar(level--gap)} / 2);
+  --_sibling: calc(#{css.cssVar(sibling--gap)} / 2);
+  --_line: #{css.cssVar(connector--width)} #{css.cssVar(connector--border-style)} #{css.cssVar(connector--color)};
+  --_shift: calc(#{css.cssVar(connector--width)} / -2);
+  --_radius: #{css.cssVar(connector--border-radius)};
+  --_toggle: #{css.cssVar(toggle--size)};
+
+  // Centred while it fits, and scrollable from its start edge once it is wider than the host.
+  width: max-content;
+  margin-inline: auto;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roots {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(root--gap);
+}
+
+.node {
+  display: flex;
+  position: relative;
+  align-items: center;
+  outline: none;
+}
+
+.box {
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  display: flex;
+  flex-direction: css.cssVar(card--flex-direction);
+  align-items: css.cssVar(card--align-items);
+  gap: css.cssVar(card--gap);
+  box-sizing: border-box;
+  width: css.cssVar(card--width);
+  min-height: css.cssVar(card--min-height);
+  padding: css.cssVar(card--padding);
+  border: css.cssVar(card--border);
+  border-radius: css.cssVar(card--border-radius);
+  background-color: css.cssVar(card--background-color);
+  box-shadow: css.cssVar(card--box-shadow);
+  text-align: css.cssVar(card--text-align);
+  cursor: pointer;
+  transition-property: border-color, background-color, box-shadow;
+  transition-duration: css.cssVar(card--transition-duration);
+
+  &:hover {
+    border-color: css.cssVar(card__hover--border-color);
+  }
+
+  &.selected {
+    border-color: css.cssVar(card__selected--border-color);
+    background-color: css.cssVar(card__selected--background-color);
+    box-shadow: css.cssVar(card__selected--box-shadow);
+  }
+
+  &.disabled {
+    opacity: css.cssVar(card__disabled--opacity);
+  }
+}
+
+.node:focus-visible > .box > .card {
+  outline: css.cssVar(card__focus--outline);
+  outline-offset: css.cssVar(card__focus--outline-offset);
+}
+
+.avatar {
+  --c2-avatar--size: #{css.cssVar(avatar--size)};
+
+  display: css.cssVar(avatar--display);
+  flex: none;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+}
+
+.description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+}
+
+.toggle {
+  display: inline-flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--_toggle);
+  height: var(--_toggle);
+  padding-inline: 4px;
+  border: css.cssVar(toggle--border);
+  border-radius: css.cssVar(toggle--border-radius);
+  background-color: css.cssVar(toggle--background-color);
+  color: css.cssVar(toggle--color);
+  font-size: css.cssVar(toggle--font-size);
+  font-weight: css.cssVar(toggle--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    border-color: css.cssVar(toggle__hover--border-color);
+    color: css.cssVar(toggle__hover--color);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Connectors. Each report draws its half of the bar that joins it to its siblings (`::before` towards the start,
+// `::after` towards the end, which also carries the stub down to the card), and the group draws the line from the
+// manager down to that bar. The first and last report drop their outer half, so the bar spans exactly the reports.
+
+.children {
+  display: flex;
+  position: relative;
+}
+
+.children::before,
+.children > .node::before,
+.children > .node::after {
+  position: absolute;
+  box-sizing: border-box;
+  content: '';
+}
+
+// Vertical: reports below their manager.
+
+.vertical {
+  .node {
+    flex-direction: column;
+  }
+
+  .toggle {
+    top: 100%;
+    // Physical on purpose: the centre is the same in both directions, and `translateX` does not flip in RTL.
+    left: 50%;
+    margin-top: calc(var(--_toggle) / -2);
+    transform: translateX(-50%);
+  }
+
+  .children {
+    align-items: flex-start;
+    padding-top: var(--_half);
+  }
+
+  .children::before {
+    top: 0;
+    inset-inline-start: 50%;
+    height: var(--_half);
+    margin-inline-start: var(--_shift);
+    border-inline-start: var(--_line);
+  }
+
+  .children > .node {
+    padding: var(--_half) var(--_sibling) 0;
+  }
+
+  .children > .node::before,
+  .children > .node::after {
+    top: 0;
+    width: 50%;
+    height: var(--_half);
+    border-top: var(--_line);
+  }
+
+  .children > .node::before {
+    inset-inline-end: 50%;
+  }
+
+  .children > .node::after {
+    inset-inline-start: 50%;
+    margin-inline-start: var(--_shift);
+    border-inline-start: var(--_line);
+  }
+
+  .children > .node:first-child::before {
+    border-top: 0;
+  }
+
+  .children > .node:first-child::after {
+    border-start-start-radius: var(--_radius);
+  }
+
+  .children > .node:last-child::before {
+    margin-inline-end: var(--_shift);
+    border-inline-end: var(--_line);
+    border-start-end-radius: var(--_radius);
+  }
+
+  .children > .node:last-child::after {
+    border: 0;
+  }
+
+  .children > .node:only-child::before {
+    border: 0;
+  }
+
+  .children > .node:only-child::after {
+    border: 0;
+    border-inline-start: var(--_line);
+    border-radius: 0;
+  }
+}
+
+// Horizontal: reports beside their manager, so every rule turns a quarter.
+
+.horizontal {
+  .roots {
+    flex-direction: column;
+  }
+
+  .node {
+    flex-direction: row;
+  }
+
+  .toggle {
+    top: 50%;
+    inset-inline-start: 100%;
+    margin-top: calc(var(--_toggle) / -2);
+    margin-inline-start: calc(var(--_toggle) / -2);
+  }
+
+  .children {
+    flex-direction: column;
+    padding-inline-start: var(--_half);
+  }
+
+  .children::before {
+    top: 50%;
+    inset-inline-start: 0;
+    width: var(--_half);
+    margin-top: var(--_shift);
+    border-top: var(--_line);
+  }
+
+  .children > .node {
+    padding-block: var(--_sibling);
+    padding-inline: var(--_half) 0;
+  }
+
+  .children > .node::before,
+  .children > .node::after {
+    inset-inline-start: 0;
+    width: var(--_half);
+    height: 50%;
+    border-inline-start: var(--_line);
+  }
+
+  .children > .node::before {
+    bottom: 50%;
+  }
+
+  .children > .node::after {
+    top: 50%;
+    margin-top: var(--_shift);
+    border-top: var(--_line);
+  }
+
+  .children > .node:first-child::before {
+    border-inline-start: 0;
+  }
+
+  .children > .node:first-child::after {
+    border-start-start-radius: var(--_radius);
+  }
+
+  .children > .node:last-child::before {
+    margin-bottom: var(--_shift);
+    border-bottom: var(--_line);
+    border-end-start-radius: var(--_radius);
+  }
+
+  .children > .node:last-child::after {
+    border: 0;
+  }
+
+  .children > .node:only-child::before {
+    border: 0;
+  }
+
+  .children > .node:only-child::after {
+    border: 0;
+    border-top: var(--_line);
+    border-radius: 0;
+  }
+}

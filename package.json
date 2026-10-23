@@ -177,6 +177,7 @@
         "./packages/components/navigation-menu:build",
         "./packages/components/notepad:build",
         "./packages/components/number-input:build",
+        "./packages/components/org-chart:build",
         "./packages/components/otp-input:build",
         "./packages/components/overlay:build",
         "./packages/components/page-editor:build",

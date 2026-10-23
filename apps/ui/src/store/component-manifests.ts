@@ -80,6 +80,7 @@ import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
+import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
@@ -226,6 +227,7 @@ export const componentManifests = (function () {
     navigationMenu,
     notepad,
     numberInput,
+    orgChart,
     otpInput,
     overlay,
     pageEditor,
