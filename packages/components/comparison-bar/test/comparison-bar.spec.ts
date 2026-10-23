@@ -125,4 +125,11 @@ test('a numeric string assigned to precision is read as a number', async ({ page
   })
   await expect(page.locator('c2-comparison-bar')).toHaveJSProperty('precision', 0)
   await expect(page.locator('[part="start-value"]')).toHaveText(/^\s*33\s?%\s*$/)
+
+  // A blank string unsets it, as a framework clearing the binding means, rather than reading as 0.
+  await page.locator('c2-comparison-bar').evaluate((bar) => {
+    ;(bar as unknown as { precision: unknown }).precision = ''
+  })
+  await expect(page.locator('c2-comparison-bar')).toHaveJSProperty('precision', undefined)
+  await expect(page.locator('[part="start-value"]')).toHaveText(/^\s*33,33\s?%\s*$/)
 })

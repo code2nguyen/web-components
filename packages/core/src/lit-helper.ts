@@ -38,12 +38,13 @@ export const booleanPropertyConverter = {
  * A framework that sees a property of the same name assigns the property rather than the attribute, and a static
  * value arrives as the string the author wrote: Svelte 5 turns `<c2-comparison-bar precision="0">` into
  * `bar.precision = "0"`. Lit's `type: Number` only converts attributes, so the property held `"0"` and every
- * `Number.isFinite` check on it failed. Any other value (a number, `null`, `undefined`) passes through.
+ * `Number.isFinite` check on it failed. A blank string unsets the property (`undefined`), as a framework clearing an
+ * optional bound means it, rather than becoming `0`. Any other value (a number, `null`, `undefined`) passes through.
  */
 export const numberPropertyConverter = {
   toAttribute: (value: unknown) => value,
   fromAttribute: (value: string | null) => (value === null ? null : Number(value)),
-  fromProperty: (value: unknown) => (typeof value === 'string' ? Number(value) : value),
+  fromProperty: (value: unknown) => (typeof value !== 'string' ? value : value.trim() === '' ? undefined : Number(value)),
 } satisfies StringTolerantConverter & Record<string, unknown>
 
 export const arrayPropertyConverter = {
