@@ -1,0 +1,60 @@
+---
+title: 'Tour'
+description: 'A guided product tour that spotlights one element at a time and explains it in a panel beside it.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/components/button'
+import { Tour } from '@c2n/components/tour'
+
+`c2-tour` walks a user through a page one element at a time: it dims everything else, cuts a spotlight around the current element and explains it in a panel with an arrow pointing at it. Each stop is a `c2-tour-step` child with a `target` (a CSS selector), a `heading` and its explanation as content. A step without a target, or whose target is not on the page, shows centred, which suits a welcome or closing step. The panel is placed beside the target (`placement` on the tour or on a step, default `bottom`) and flips when there is no room; an off-screen target is scrolled into view first.
+
+Start it with a button in the `trigger` slot, by setting `open`, or by calling `start(index)`. The panel offers Back, Next (Done on the last step), a close button and a "2 of 5" progress line; the arrow keys move between steps and Escape closes. The tour is a non-modal dialog in the top layer, so the highlighted control stays usable, and focus returns to where it was when the tour closes. Every tour a user ends fires exactly one event: `finish` for Done, `skip` (with the step index) for Skip, the close button or Escape (`--c2-tour__skip--display: none` removes the Skip button). `step-change` reports each move between steps. `--c2-tour__backdrop--color` sets the dimming (`transparent` turns it off) and `--c2-tour__spotlight--*` the cut-out.
+
+Give the tour a `storage-key` and it remembers in `localStorage` how far the user got: `{ "status": "in-progress" | "finished" | "skipped", "step": 2, "skips": 1 }`, readable from the `progress` property. Add `autostart` to open it by itself on the first visit: after a reload it resumes on the stored step, and once finished it stays closed. A skip stops it too, unless `skip-limit` allows more: with `skip-limit="3"` a skipped tour opens again from its first step on the next visit, and gives up after the third skip (`0` keeps it opening until it is finished). `skip-delay` spaces those reminders out: with `skip-delay="7d"` a skipped tour waits a week before it opens again (`30m`, `12h`, `7d`, `2w`; a bare number is days), and the stored progress records the time of the last skip as `skippedAt`. The trigger and `start()` still open it on demand, and `reset()` forgets the progress. Change the key when the tour changes enough to be worth showing again.
+
+```html tag=CodeBlock
+<c2-tour storage-key="reports-onboarding-v1" autostart skip-limit="3" skip-delay="7d">
+  <c2-tour-step heading="Welcome to Reports">Two quick stops show you where everything is.</c2-tour-step>
+  <c2-tour-step target="#new-report" heading="Start a report">Pick a template or begin from a blank page.</c2-tour-step>
+</c2-tour>
+```
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/tour'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tour
+<style>
+  .usage-tour-toolbar {
+    display: flex;
+    gap: 8px;
+  }
+</style>
+<div data-label="Onboarding">
+  <div class="usage-tour-toolbar">
+    <c2-button id="usage-tour-new">New report</c2-button>
+    <c2-button id="usage-tour-share">Share</c2-button>
+  </div>
+  <c2-tour client:only="lit">
+    <c2-button slot="trigger">Take the tour</c2-button>
+    <c2-tour-step heading="Welcome to Reports">Two quick stops show you where everything is.</c2-tour-step>
+    <c2-tour-step target="#usage-tour-new" heading="Start a report">Pick a template or begin from a blank page.</c2-tour-step>
+    <c2-tour-step target="#usage-tour-share" heading="Share it" placement="right">Invite your team, or copy a read-only link.</c2-tour-step>
+  </c2-tour>
+</div>
+<div data-label="Single feature">
+  <c2-button id="usage-tour-export">Export</c2-button>
+  <c2-tour client:only="lit">
+    <c2-button slot="trigger">What's new?</c2-button>
+    <c2-tour-step target="#usage-tour-export" heading="Export to CSV" placement="top">Download any view as a spreadsheet.</c2-tour-step>
+  </c2-tour>
+</div>
+```

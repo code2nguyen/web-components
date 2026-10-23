@@ -80,19 +80,21 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/kanban/src/kanban-column.scss`: align the empty state to the start of
   the cards area.
 
-### `c2-log-viewer` entries cannot be chosen from the keyboard
+### `c2-search-field` Escape always clears; a find bar wants it to close
 
-- **Severity:** gap
-- **Hit while:** adding `entry-click`, 2026-10-21.
-- **What happens:** the viewport is one focus stop that scrolls with the arrow keys; there is no current entry, so
-  `entry-click` (and anything an app hangs on it, such as a detail panel) is pointer-only.
-- **Where the fix belongs:** `packages/components/log-viewer` — a roving active entry (`aria-activedescendant` on the
-  viewport) moved by the arrow keys, and an `entry-activate` event on Enter, like `c2-table`'s `row-activate`.
+- **Severity:** papercut
+- **Hit while:** building the `c2-log-viewer` find bar, 2026-10-22.
+- **What happens:** with text in the field, Escape empties it (and fires `clear`/`search`). In a find bar, as in VS Code
+  or the browser's own, Escape closes the bar and keeps the query for next time. The log viewer catches Escape (and
+  Enter / Shift+Enter, which mean next / previous there) in the capture phase before the field sees them.
+- **Where the fix belongs:** `packages/components/search-field` — an option such as `escape="none"` that leaves Escape
+  to the container, so a composing component needs no capture listener.
 
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                                                                                                         |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `c2-log-viewer`                 | Entries could not be chosen from the keyboard: the viewport was one focus stop that scrolled with the arrow keys, so `entry-click` (and a detail panel hung on it) was pointer-only.                                                                                                                                            | 2026-10-22, an active entry moved by the arrow keys (`aria-activedescendant` on the viewport) and `entry-activate` on Enter, with browser tests; also Ctrl/Command+F find.                                                                                                                       |
 | `c2-mask-input`                 | `?` only made the _rest_ of a mask optional, so a format whose variable part sits in the middle (UK postcodes, `M1 1AE` / `SW1A 1AA`) could not be masked and the Account Form example left the UK postcode as free text.                                                                                                       | 2026-10-21, optional groups (`A[A]9[X] 9AA`), with browser tests; the example now masks UK postcodes.                                                                                                                                                                                            |
 | `c2-sparkline`                  | `decorateOptions` passed `axes: []`; uPlot pads a short array back up to two _visible_ axes, so a 120×32 sparkline spent 52px on a y-axis gutter and drew its line in a 66px sliver.                                                                                                                                            | 2026-09-14, with a regression test asserting no axis element and a 116px plot.                                                                                                                                                                                                                   |
 | `c2-line-chart`, `c2-bar-chart` | `linePaths`/`barPaths` filled their cache from `loadUplot().then(…)` and returned synchronously, so the builder always arrived one microtask after uPlot read `paths`: every chart drew its first frame straight and `curve` only applied on a later rebuild.                                                                   | 2026-09-14, `loadedUplot()` + a test that the first frame of a `curve="step"` chart differs from linear.                                                                                                                                                                                         |

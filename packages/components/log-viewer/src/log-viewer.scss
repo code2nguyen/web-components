@@ -27,6 +27,40 @@
     entry__hover--background: #142238,
     entry__highlighted--background: #17304c,
     entry__highlighted--box-shadow: inset 3px 0 0 #60a5fa,
+    entry__active--background: #1b2d47,
+    entry__active--box-shadow: inset 0 0 0 1px #60a5fa,
+    find-match--background: rgba(250, 204, 21, 0.26),
+    find-match--color: #fef3c7,
+    find-match__current--background: #fbbf24,
+    find-match__current--color: #1c1300,
+    find--inset: 8px,
+    find--padding: 6px,
+    find--gap: 4px,
+    find--background: #142238,
+    find--border: 1px solid #2c4366,
+    find--border-radius: 8px,
+    find--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45),
+    find--font-family: (
+      system-ui,
+      sans-serif,
+    ),
+    find--font-size: 12px,
+    find--color: #a5b4cc,
+    find__empty--color: #fda4af,
+    find-field--width: 200px,
+    find-field--background: #0b1220,
+    find-field--color: #e5edf8,
+    find-field--border: 1px solid #2c4366,
+    find-field__focus--border: 1px solid #60a5fa,
+    find-icon--color: #8aa0bd,
+    find-button--size: 28px,
+    find-button--color: #dbeafe,
+    find-button__hover--background: #2a4263,
+    find-button__selected--background: #2a4263,
+    find-button__focus--outline: 2px solid #60a5fa,
+    ruler--width: 6px,
+    ruler--color: rgba(250, 204, 21, 0.55),
+    ruler__current--color: #fbbf24,
     empty--color: #94a3b8,
     copy--size: 28px,
     copy--icon-size: 55%,
@@ -114,6 +148,9 @@
   left: css.cssVar(text--inset);
 }
 [part='empty'] {
+  position: absolute;
+  inset: 0 0 auto 0;
+  pointer-events: none;
   padding: css.cssVar(empty--padding);
   color: css.cssVar(empty--color);
 }
@@ -153,6 +190,121 @@
 [part~='highlight']:hover {
   background: css.cssVar(entry__highlighted--background);
   box-shadow: css.cssVar(entry__highlighted--box-shadow);
+}
+
+// The active entry always shows its surface; the ring marks it only while the viewport has keyboard focus.
+[part~='active'],
+[part~='active']:hover {
+  background: css.cssVar(entry__active--background);
+}
+[part='viewport']:focus-visible {
+  [part~='active'] {
+    box-shadow: css.cssVar(entry__active--box-shadow);
+  }
+  [part~='active'][part~='highlight'] {
+    box-shadow: css.cssVar(entry__active--box-shadow), css.cssVar(entry__highlighted--box-shadow);
+  }
+}
+
+// Marks only paint: no padding or border, so measured line widths and heights stay exact.
+[part~='find-match'] {
+  padding: 0;
+  font: inherit;
+  background: css.cssVar(find-match--background);
+  color: css.cssVar(find-match--color);
+  [part='token'] {
+    color: inherit;
+  }
+}
+[part~='find-match'][part~='current'] {
+  background: css.cssVar(find-match__current--background);
+  color: css.cssVar(find-match__current--color);
+}
+
+[part='find-bar'] {
+  position: absolute;
+  z-index: 2;
+  top: css.cssVar(find--inset);
+  right: calc(#{css.cssVar(find--inset)} + #{css.cssVar(ruler--width)});
+  max-width: calc(100% - 2 * #{css.cssVar(find--inset)});
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(find--gap);
+  padding: css.cssVar(find--padding);
+  background: css.cssVar(find--background);
+  border: css.cssVar(find--border);
+  border-radius: css.cssVar(find--border-radius);
+  box-shadow: css.cssVar(find--box-shadow);
+  font-family: css.cssVar(find--font-family);
+  font-size: css.cssVar(find--font-size);
+  line-height: 1.4;
+  color: css.cssVar(find--color);
+  // The controls are themed through their own variables, so they follow the viewer's dark surface by default.
+  --c2-search-field--min-height: #{css.cssVar(find-button--size)};
+  --c2-search-field--padding: 2px 8px;
+  --c2-search-field--font-size: 13px;
+  --c2-search-field--font-family: #{css.cssVar(find--font-family)};
+  --c2-search-field--background: #{css.cssVar(find-field--background)};
+  --c2-search-field--color: #{css.cssVar(find-field--color)};
+  --c2-search-field--border: #{css.cssVar(find-field--border)};
+  --c2-search-field__hover--border: #{css.cssVar(find-field--border)};
+  --c2-search-field__focus--border: #{css.cssVar(find-field__focus--border)};
+  --c2-search-field__placeholder--color: #{css.cssVar(find-icon--color)};
+  --c2-search-field__icon--color: #{css.cssVar(find-icon--color)};
+  --c2-search-field__clear-icon--color: #{css.cssVar(find-icon--color)};
+  --c2-search-field__clear-icon__hover--color: #{css.cssVar(find-field--color)};
+  --c2-icon-button__state-layer--size: #{css.cssVar(find-button--size)};
+  --c2-icon-button--border-radius: 6px;
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+  --c2-icon-button__icon--color: #{css.cssVar(find-button--color)};
+  --c2-icon-button__hover--background-color: #{css.cssVar(find-button__hover--background)};
+  --c2-icon-button__selected--background-color: #{css.cssVar(find-button__selected--background)};
+  --c2-icon-button__focus--outline: #{css.cssVar(find-button__focus--outline)};
+  --c2-icon-button__focus--outline-offset: 0px;
+}
+.find-field {
+  width: css.cssVar(find-field--width);
+  max-width: 100%;
+}
+.find-count {
+  min-width: 6.5em;
+  padding: 0 4px;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  &[data-empty] {
+    color: css.cssVar(find__empty--color);
+  }
+}
+.find-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 2px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+[part='ruler'] {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: css.cssVar(ruler--width);
+  pointer-events: none;
+  span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: css.cssVar(ruler--color);
+  }
+  [part='current'] {
+    background: css.cssVar(ruler__current--color);
+  }
 }
 
 .plain-entry {

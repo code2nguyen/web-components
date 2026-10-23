@@ -765,6 +765,14 @@
       "types": "./dist/tooltip.d.ts",
       "default": "./dist/tooltip.js"
     },
+    "./tour": {
+      "types": "./dist/tour.d.ts",
+      "default": "./dist/tour.js"
+    },
+    "./tour/tour-step": {
+      "types": "./dist/tour/tour-step.d.ts",
+      "default": "./dist/tour/tour-step.js"
+    },
     "./trace-waterfall": {
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"
@@ -1050,6 +1058,7 @@
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
     "@c2n/tooltip": "*",
+    "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
     "@c2n/tree": "*",
     "@c2n/tree-select": "*",
