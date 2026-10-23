@@ -409,6 +409,10 @@
 // reads as a link. The hand is the row grip's, and the drag's (`is-dragging`); a locked node is only clicked.
 .stage:not(.is-locked) .node {
   cursor: css.cssVar(node--cursor);
+
+  &.is-dragging {
+    cursor: grabbing;
+  }
 }
 
 .node:hover {

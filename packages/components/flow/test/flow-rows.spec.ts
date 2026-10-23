@@ -231,6 +231,14 @@ test('a node shows the plain arrow over its label and rows, the hand only on a r
   expect(await cursor(row(page, 'orders', 'customer_id'))).toBe('default')
   expect(await cursor(row(page, 'orders', 'customer_id').locator('.row-grip'))).toBe('grab')
   expect(await host(page).evaluate((element) => getComputedStyle(element.shadowRoot!.querySelector('.stage')!).cursor)).toBe('grab')
+  // Dragged, it is held in the closed hand.
+  const box = (await label.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2 + 40, box.y + box.height / 2 + 20, { steps: 4 })
+  await expect(node(page, 'orders')).toHaveClass(/is-dragging/)
+  expect(await cursor(node(page, 'orders'))).toBe('grabbing')
+  await page.mouse.up()
   // An application that wants the hand on the whole node says so.
   await host(page).evaluate((element) => element.style.setProperty('--c2-flow__node--cursor', 'grab'))
   expect(await cursor(label)).toBe('grab')
