@@ -101,7 +101,7 @@ With Emulated encapsulation, keep host `::part(name)` rules in a global styleshe
 
 `CUSTOM_ELEMENTS_SCHEMA` on the component is the only required configuration. `[rows]="…"` writes a property with `setProperty`; `(selection-change)` binds the event by its real name. A **static** attribute stays an attribute, so a camelCase property needs `[rowKey]="'id'"` or the real attribute name (`row-key`) — the lowercase spelling `rowkey` is forwarded to `row-key` with a warning.
 
-Forms: Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` and `formControlName` do nothing on a c2 control without `@c2n/angular`. Add `imports: [FormsModule, ...C2_FORM_ACCESSORS]`.
+Forms: Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` or `formControlName` on a c2 control without `@c2n/angular` throws `NG01203: No value accessor for form control`. Do not reach for `ngDefaultControl`: it never reads a toggle's `checked`. Add `imports: [FormsModule, ...C2_FORM_ACCESSORS]`.
 
 The schema turns off template type checking, so `$event` is a bare `Event`: take the component's event-map type in the handler rather than `$any` at the call site.
 
