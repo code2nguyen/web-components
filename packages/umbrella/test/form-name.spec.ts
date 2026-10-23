@@ -52,6 +52,7 @@ const submitted: Record<string, string[]> = {
   'c2-text-field-clear': ['Ada'],
   'c2-textarea': ['Long text'],
   'c2-time-input': ['09:30'],
+  'c2-tree-select': ['eu'],
   'c2-upload': ['notes.txt'],
 }
 
@@ -114,6 +115,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-text-field-clear': (e) => (e.value = 'Ada'),
         'c2-textarea': (e) => (e.value = 'Long text'),
         'c2-time-input': (e) => (e.value = '09:30'),
+        'c2-tree-select': (e) => (e.value = ['eu']),
         'c2-upload': (e) => (e.value = [new File(['hello'], 'notes.txt', { type: 'text/plain' })]),
         'c2-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
         'c2-split-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
