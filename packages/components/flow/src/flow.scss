@@ -36,6 +36,7 @@
     node--border: 1px solid #bcbcc6,
     node--border-radius: 8px,
     node--box-shadow: '0 1px 2px rgba(24, 24, 27, 0.06)',
+    node--cursor: default,
     node__hover--border-color: #a1a1aa,
     node__selected--border-color: rgb(2, 101, 220),
     node__selected--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
@@ -404,8 +405,10 @@
     box-shadow 150ms;
 }
 
+// A node that moves shows the plain arrow over its label and its rows, as a shape does in a drawing tool: a hand there
+// reads as a link. The hand is the row grip's, and the drag's (`is-dragging`); a locked node is only clicked.
 .stage:not(.is-locked) .node {
-  cursor: grab;
+  cursor: css.cssVar(node--cursor);
 }
 
 .node:hover {

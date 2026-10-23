@@ -223,6 +223,25 @@ test('a custom body marks its own ports with data-flow-port', async ({ page, ren
     .toBe(true)
 })
 
+test('a node shows the plain arrow over its label and rows, the hand only on a row grip, the canvas and a drag', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, flow({ attributes: 'editable edge-type="step"' }))
+  const cursor = (locator: Locator) => locator.evaluate((element) => getComputedStyle(element).cursor)
+  const label = node(page, 'orders').locator('.label')
+  await expect.poll(() => cursor(label)).toBe('default')
+  expect(await cursor(row(page, 'orders', 'customer_id'))).toBe('default')
+  expect(await cursor(row(page, 'orders', 'customer_id').locator('.row-grip'))).toBe('grab')
+  expect(await host(page).evaluate((element) => getComputedStyle(element.shadowRoot!.querySelector('.stage')!).cursor)).toBe('grab')
+  // An application that wants the hand on the whole node says so.
+  await host(page).evaluate((element) => element.style.setProperty('--c2-flow__node--cursor', 'grab'))
+  expect(await cursor(label)).toBe('grab')
+  // A locked node is only clicked.
+  await host(page).evaluate(async (element: Flow) => {
+    element.locked = true
+    await element.updateComplete
+  })
+  expect(await cursor(node(page, 'orders'))).toBe('pointer')
+})
+
 test.describe('row limit', () => {
   // `orders` has four rows; with a limit of 2, `id` and `customer_id` show, `billing_id` too since an edge meets it.
   const markup = (attributes = 'row-limit="2" open-delay="0" storage-key="flow-test:rows"') => flow({ attributes: `edge-type="step" ${attributes}` })
