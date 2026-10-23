@@ -23,15 +23,15 @@ type MermaidApi = (typeof import('mermaid'))['default']
 let mermaidModule: Promise<MermaidApi> | undefined
 /**
  * Mermaid is large: it loads on the first diagram of the page, never with the element. It is an optional peer
- * dependency, so an application that never draws a diagram does not install it; without it the import fails and the
- * diagram shows its source with a message saying what to install.
+ * dependency, so an application that never draws a diagram does not install it; without it the import fails once per
+ * page and every diagram shows its source with the loader's message and a hint naming the package.
  */
 function loadMermaid(): Promise<MermaidApi> {
   return (mermaidModule ??= import('mermaid').then(
     (module) => module.default,
-    () => {
-      mermaidModule = undefined
-      throw new Error('Mermaid is not installed: add the `mermaid` package to the application to draw diagrams')
+    (cause: unknown) => {
+      const reason = cause instanceof Error ? cause.message : String(cause)
+      throw new Error(`Mermaid could not be loaded (${reason}). Is the optional \`mermaid\` package installed?`)
     },
   ))
 }
