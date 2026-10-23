@@ -276,7 +276,8 @@ export function toMarkdown(page: ProseNode): string {
         break
       default: {
         const body = serializeInline(block)
-        out += body ? escapeBlockStart(body) : '<br>'
+        // A line of text that reads as an image (`!` before a link) stays text.
+        out += body ? (imageFromMarkdown(body) ? body.replace('!', '\\!') : escapeBlockStart(body)) : '<br>'
       }
     }
   })

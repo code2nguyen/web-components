@@ -9,6 +9,8 @@ test('an image reads back from the Markdown line it is written as', () => {
     { src: 'https://example.com/a.png', alt: 'A chart', width: 320 },
     { src: 'data:image/png;base64,iVBORw0KGgo=', alt: 'tricky [alt] | with \\ marks', width: 480 },
     { src: 'images/my photo (1).png', alt: 'spaces', width: null },
+    { src: 'notes/a <draft>.png', alt: 'angle brackets', width: null },
+    { src: 'files/a%3Cb c.png', alt: 'a percent sign', width: null },
   ]) {
     const line = imageToMarkdown(image)
     assert.deepEqual(imageFromMarkdown(line), image, line)

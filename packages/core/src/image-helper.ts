@@ -42,9 +42,21 @@ export function imageFiles(data: DataTransfer | null | undefined): File[] {
  * the one to keep; a document copied with its pictures has text, and is pasted as such.
  */
 export function isOnlyImages(html: string): boolean {
-  if (!html.trim()) return true
+  return readPastedHtml(html).onlyImages
+}
+
+/**
+ * What a paste's HTML holds, read once: whether it is only images (`isOnlyImages`), and whether one of them was copied
+ * in this application (`hasOwnImage`), to bring back as the same stored image.
+ */
+export function readPastedHtml(html: string): { onlyImages: boolean; ownImage: boolean } {
+  if (!html.trim()) return { onlyImages: true, ownImage: false }
   const doc = new DOMParser().parseFromString(html, 'text/html')
-  return !!doc.body.querySelector('img') && !doc.body.textContent?.trim()
+  const images = Array.from(doc.body.querySelectorAll('img'))
+  return {
+    onlyImages: images.length > 0 && !doc.body.textContent?.trim(),
+    ownImage: html.includes('data-c2-image-src') && images.some((image) => ownImageSrc(image) !== null),
+  }
 }
 
 /** The stored form when there is no uploader: the image itself, as a data URL. */
@@ -62,6 +74,39 @@ export async function dataUrlToBlob(url: string): Promise<Blob> {
   return (await fetch(url)).blob()
 }
 
+/**
+ * The stored `src` an editor copied an image with (`data-c2-image-src`), when it was copied in this application (same
+ * origin), whose store has it. From elsewhere it is the image itself that is pasted, not an id this store lacks.
+ */
+export function ownImageSrc(image: Element): string | null {
+  const src = image.getAttribute('data-c2-image-src')
+  // Every opaque origin (a file: page, a sandboxed frame) reads as "null": two of them are not the same application.
+  const origin = image.getAttribute('data-c2-image-origin')
+  return src && origin && origin !== 'null' && origin === location.origin ? src : null
+}
+
+/** Whether pasted HTML holds an image copied in this application, to bring back as the same stored image. */
+export function hasOwnImage(html: string): boolean {
+  return readPastedHtml(html).ownImage
+}
+
+/**
+ * The image an `<img>` of pasted HTML is, or `null` for one not worth a block: an icon or emoji inline in the text
+ * (drawn under 48px), or one only the copying application can open (`file:`, `cid:`, `blob:`).
+ */
+export function imageFromHtml(image: HTMLImageElement): EditorImageAttrs | null {
+  const own = ownImageSrc(image)
+  const src = own ?? image.getAttribute('src') ?? ''
+  if (!own && !/^(data:image\/|https?:)/i.test(src)) return null
+  // Its size from its attributes, else its inline style (as mail and chat write an emoji's). Small both ways, or
+  // narrow, it is an icon; a wide, short banner is still an image.
+  const size = (name: 'width' | 'height') => Number(image.getAttribute(name)) || parseFloat(image.style[name]) || null
+  const width = size('width')
+  const height = size('height')
+  if ((width !== null && width < MIN_IMAGE_WIDTH) || (width === null && height !== null && height < MIN_IMAGE_WIDTH)) return null
+  return { src, alt: image.getAttribute('alt') ?? '', width: Number(image.getAttribute('width')) || null }
+}
+
 /** Whether a `src` is an image held in the text itself. */
 export const isDataUrl = (src: string) => /^data:image\//i.test(src)
 
@@ -70,6 +115,11 @@ export const isDataUrl = (src: string) => /^data:image\//i.test(src)
 let pendingCount = 0
 const previews = new Map<string, string>()
 const saved = new Map<string, string>()
+/**
+ * How many saved data URLs are kept for an undone paste to find on redo: the latest ones, as each can be megabytes. An
+ * uploader's `src` (an id, a URL) is small and always kept.
+ */
+const SAVED_DATA_URLS_KEPT = 20
 
 /**
  * Images pasted or dropped while their upload runs. The editor inserts the block at once, marked with an id and drawn
@@ -93,6 +143,10 @@ export const pendingImages = {
   },
   finish(id: string, src: string) {
     saved.set(id, src)
+    if (isDataUrl(src)) {
+      const dataUrls = [...saved].filter(([, value]) => isDataUrl(value))
+      for (const [oldest] of dataUrls.slice(0, Math.max(0, dataUrls.length - SAVED_DATA_URLS_KEPT))) saved.delete(oldest)
+    }
     const preview = previews.get(id)
     previews.delete(id)
     // Left a moment for the saved image to take over the drawing.
@@ -122,7 +176,8 @@ const IMAGE_LINE = /^ {0,3}!\[((?:\\.|[^\]\\])*)\]\(\s*(<[^>\n]*>|[^\s()]+)\s*\)
 export function imageToMarkdown({ src, alt, width }: EditorImageAttrs): string {
   const text = (alt ?? '').replace(/[\\[\]|]/g, (char) => `\\${char}`).replace(/\r?\n/g, ' ')
   const size = width ? `|${Math.round(width)}` : ''
-  const target = /[\s()<>]/.test(src) ? `<${src.replace(/[<>]/g, encodeURIComponent)}>` : src
+  // In the angle form `<`, `>` and `%` itself are percent-encoded, so a `src` holding `%3C` reads back as it was.
+  const target = /[\s()<>]/.test(src) ? `<${src.replace(/[%<>]/g, encodeURIComponent)}>` : src
   return `![${text}${size}](${target})`
 }
 
@@ -131,7 +186,8 @@ export function imageFromMarkdown(line: string): EditorImageAttrs | null {
   const match = IMAGE_LINE.exec(line)
   if (!match) return null
   let [, label, target] = match
-  if (target.startsWith('<')) target = target.slice(1, -1)
+  // The angle form, which `imageToMarkdown` writes with `<` and `>` percent-encoded.
+  if (target.startsWith('<')) target = target.slice(1, -1).replace(/%3C/gi, '<').replace(/%3E/gi, '>').replace(/%25/g, '%')
   if (!target) return null
   let width: number | null = null
   const size = /^((?:\\.|[^|\\])*)\|(\d{1,5})$/.exec(label)
@@ -146,14 +202,16 @@ export function imageFromMarkdown(line: string): EditorImageAttrs | null {
 
 /** An image re-encoded as PNG, the one image type every clipboard takes. */
 export async function toPngBlob(url: string): Promise<Blob> {
-  const image = new Image()
-  image.crossOrigin = 'anonymous'
-  image.src = url
-  await image.decode()
+  // Fetched again with CORS, past the cache: the image was drawn without CORS, and a cached answer without its
+  // Access-Control headers would taint the canvas. A blob: or data: URL is read as it is.
+  const response = await fetch(url, /^https?:/i.test(url) ? { mode: 'cors', cache: 'no-store', credentials: 'omit' } : undefined)
+  if (!response.ok) throw new DOMException('The image could not be read', 'NotReadableError')
+  const bitmap = await createImageBitmap(await response.blob())
   const canvas = document.createElement('canvas')
-  canvas.width = image.naturalWidth
-  canvas.height = image.naturalHeight
-  canvas.getContext('2d')!.drawImage(image, 0, 0)
+  canvas.width = bitmap.width
+  canvas.height = bitmap.height
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0)
+  bitmap.close()
   return new Promise((resolve, reject) =>
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new DOMException('The image could not be encoded', 'EncodingError'))), 'image/png'),
   )
@@ -171,7 +229,10 @@ export async function copyImage(url: string, attrs: EditorImageAttrs, markdown: 
     const data = await readAsDataUrl(blob)
     const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
     const width = attrs.width ? ` width="${Math.round(attrs.width)}"` : ''
-    return new Blob([`<img src="${data}" alt="${escape(attrs.alt)}" data-c2-image-src="${escape(attrs.src)}"${width}>`], { type: 'text/html' })
+    return new Blob(
+      [`<img src="${data}" alt="${escape(attrs.alt)}" data-c2-image-src="${escape(attrs.src)}" data-c2-image-origin="${escape(location.origin)}"${width}>`],
+      { type: 'text/html' },
+    )
   })
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': png, 'text/html': html, 'text/plain': new Blob([markdown], { type: 'text/plain' }) })])
 }

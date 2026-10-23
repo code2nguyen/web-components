@@ -53,7 +53,7 @@ import {
   type TableAttrs,
 } from './schema'
 import { CodeBlockView, ItemView, TableView, tableViewOf, type Localizable, type TableExit, type ViewText } from './views'
-import { imageFiles, isOnlyImages, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
+import { imageFiles, readPastedHtml, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
 import { adoptPastedImages, copySelectedImage, ImageView, insertImages, resizeSelectedImage, savedImages, type ImageHost } from './images'
 import { pageEditorMessages } from './messages'
 import styles from './page-editor.scss?inline'
@@ -964,8 +964,10 @@ export class PageEditor extends LitElement {
     // A screenshot or a copied image is saved and inserted as an image block. HTML a page editor copied an image with
     // brings that same image back instead, and a document copied with its pictures is pasted as its text.
     const files = imageFiles(event.clipboardData)
-    const html = event.clipboardData?.getData('text/html') ?? ''
-    if (files.length && !html.includes('data-c2-image-src') && isOnlyImages(html)) return insertImages(view, this.imageHost, files)
+    if (files.length) {
+      const pasted = readPastedHtml(event.clipboardData?.getData('text/html') ?? '')
+      if (!pasted.ownImage && pasted.onlyImages) return insertImages(view, this.imageHost, files)
+    }
     const text = event.clipboardData?.getData('text/plain').trim() ?? ''
     const { $from, empty } = view.state.selection
     // A link pasted over selected text links it.

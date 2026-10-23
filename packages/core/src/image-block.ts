@@ -34,6 +34,11 @@ export interface ImageBlockOptions {
 /** Resolved URLs by resolver and `src`, so a block redrawn (an undo, a node replaced) does not ask again. */
 const resolved = new WeakMap<ImageResolver, Map<string, Promise<string>>>()
 
+/** A resolved URL that failed to draw (revoked, expired) is asked for again next time. */
+function forgetUrl(resolver: ImageResolver | null | undefined, src: string) {
+  if (resolver) resolved.get(resolver)?.delete(src)
+}
+
 function resolveUrl(resolver: ImageResolver | null | undefined, src: string): Promise<string> {
   if (!resolver) return Promise.resolve(src)
   let cache = resolved.get(resolver)
@@ -64,6 +69,8 @@ export class ImageBlock {
   private url = ''
   /** Which `src` the last resolution was for, so a late answer for an older one is dropped. */
   private resolving = ''
+  /** The `src` the URL being drawn was resolved for, to forget that URL if it fails to load (revoked, expired). */
+  private drawnFor = ''
 
   constructor(
     attrs: EditorImageAttrs,
@@ -81,7 +88,10 @@ export class ImageBlock {
     this.image.draggable = false
     this.image.decoding = 'async'
     this.image.addEventListener('load', () => this.dom.classList.remove('is-missing'))
-    this.image.addEventListener('error', () => this.showMissing())
+    this.image.addEventListener('error', () => {
+      if (this.drawnFor) forgetUrl(this.options.resolve(), this.drawnFor)
+      this.showMissing()
+    })
     this.missing = document.createElement('div')
     this.missing.className = 'image-missing'
     this.handle = document.createElement('div')
@@ -184,16 +194,16 @@ export class ImageBlock {
     }
     void resolveUrl(this.options.resolve(), src).then((url) => {
       if (this.resolving !== src) return
-      if (url) this.draw(url)
+      if (url) this.draw(url, src)
       else this.showMissing()
     })
   }
 
-  private draw(url: string) {
+  private draw(url: string, src = '') {
+    this.drawnFor = src
     this.url = this.preview ? '' : url
-    // A remote image is fetched with CORS, so it can be copied (read back into a canvas as a PNG).
-    if (/^https?:/i.test(url)) this.image.crossOrigin = 'anonymous'
-    else this.image.removeAttribute('crossorigin')
+    // Drawn without CORS, which most image hosts do not answer; copying it fetches it again with CORS, and falls back
+    // to its Markdown when the host refuses.
     if (this.image.src !== url) this.image.src = url
   }
 

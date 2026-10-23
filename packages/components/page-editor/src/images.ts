@@ -226,8 +226,21 @@ export function adoptPastedImages(view: EditorView, host: ImageHost, nodes: read
     jobs.push({ id, file: () => dataUrlToBlob(src) })
     return host.image.create({ ...node.attrs, src: '', pending: id })
   })
-  // Once the paste has gone in.
-  if (jobs.length) queueMicrotask(() => save(view, host, jobs))
+  // Once the paste has gone in, and only for the images that did: a paste the editor handles otherwise (the image file
+  // beside the same image in the HTML) drops this slice, and its images are not uploaded.
+  if (jobs.length)
+    queueMicrotask(() => {
+      const inserted = new Set<string>()
+      view.state.doc.forEach((node) => {
+        if (node.type === host.image && node.attrs.pending) inserted.add(node.attrs.pending as string)
+      })
+      for (const job of jobs) if (!inserted.has(job.id)) pendingImages.fail(job.id)
+      save(
+        view,
+        host,
+        jobs.filter((job) => inserted.has(job.id)),
+      )
+    })
   return adopted
 }
 
@@ -249,8 +262,24 @@ export function copySelectedImage(view: EditorView, image: NodeType, event: Clip
   event.preventDefault()
   const attrs = attrsOf(selected.node)
   const markdown = imageToMarkdown(attrs)
-  copyImage(url, attrs, markdown).catch(() => navigator.clipboard.writeText?.(markdown).catch(() => undefined))
-  if (cut && view.editable) view.dispatch(view.state.tr.deleteSelection().scrollIntoView())
+  const copied = copyImage(url, attrs, markdown)
+    .then(() => true)
+    .catch(() =>
+      navigator.clipboard.writeText(markdown).then(
+        () => true,
+        () => false,
+      ),
+    )
+  // Cut takes the image out once it is on the clipboard, not before: a refused copy leaves it where it was.
+  if (cut && view.editable)
+    void copied.then((ok) => {
+      if (!ok || view.isDestroyed) return
+      let at = -1
+      view.state.doc.forEach((node, pos) => {
+        if (node === selected.node) at = pos
+      })
+      if (at >= 0) view.dispatch(view.state.tr.delete(at, at + selected.node.nodeSize).scrollIntoView())
+    })
   return true
 }
 

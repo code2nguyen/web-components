@@ -17,7 +17,7 @@ import { InputRule, inputRules, textblockTypeInputRule, undoInputRule } from 'pr
 import { fromMarkdown, toMarkdown } from './markdown'
 import { HIGHLIGHTS, INKS, MARK_NAMES, colorIndex, emptyFormat, formatOf, schema, type NotepadColor, type NotepadFormat, type NotepadMark } from './schema'
 import { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
-import { imageFiles, isOnlyImages, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
+import { imageFiles, readPastedHtml, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
 import { adoptPastedImages, copySelectedImage, ImageView, insertImages, resizeSelectedImage, savedImages, type ImageHost } from './images'
 import { notepadMessages } from './messages'
 import styles from './notepad.scss?inline'
@@ -714,8 +714,10 @@ export class Notepad extends LitElement {
           // A screenshot or a copied image goes in as an image. HTML an editor copied an image with brings that same
           // image back instead, and a document copied with its pictures is pasted as its text.
           const files = imageFiles(event.clipboardData)
-          const html = event.clipboardData?.getData('text/html') ?? ''
-          if (files.length && !html.includes('data-c2-image-src') && isOnlyImages(html)) return insertImages(view, this.imageHost, files)
+          if (files.length) {
+            const pasted = readPastedHtml(event.clipboardData?.getData('text/html') ?? '')
+            if (!pasted.ownImage && pasted.onlyImages) return insertImages(view, this.imageHost, files)
+          }
           // Pasted onto an empty line, the pasted lines replace it whole, so a checklist item stays a checklist item.
           const { $from, empty } = view.state.selection
           if (!empty || $from.parent.content.size > 0 || slice.content.firstChild?.type !== schema.nodes.task) return false

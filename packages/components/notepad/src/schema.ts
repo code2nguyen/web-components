@@ -1,4 +1,5 @@
 import { Schema, type Mark, type MarkSpec } from 'prosemirror-model'
+import { imageFromHtml, isDataUrl } from '@c2n/core/image-helper.js'
 
 /**
  * The default inks, in order: ink `1` is blue, `2` black and so on. Each resolves to `--c2-notepad__ink-<name>--color`.
@@ -37,13 +38,8 @@ export type NotepadMark = (typeof MARK_NAMES)[number]
 const inkIndex = (value: unknown) => colorIndex(value, INKS)
 const highlightIndex = (value: unknown) => colorIndex(value, HIGHLIGHTS)
 
-/** An `<img>` read from pasted HTML: the stored `src` an editor copied it with, else what it shows. */
-function imageFromDOM(dom: HTMLImageElement) {
-  const src = dom.dataset.c2ImageSrc || dom.getAttribute('src') || ''
-  if (!src) return false
-  const width = Number(dom.getAttribute('width')) || null
-  return { src, alt: dom.getAttribute('alt') ?? '', width }
-}
+/** An `<img>` read from pasted HTML, or nothing for an inline icon or an image only the copying application can open. */
+const imageFromDOM = (dom: HTMLImageElement) => imageFromHtml(dom) ?? false
 
 const tagMark = (tags: string[], tag: string): MarkSpec => ({
   parseDOM: tags.map((name) => ({ tag: name })),
@@ -93,7 +89,9 @@ export const schema = new Schema({
       parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
       toDOM: (node) => {
         const { src, alt, width } = node.attrs
-        return ['img', { src, alt, 'data-c2-image-src': src, ...(width ? { width: String(width) } : {}) }]
+        // Copied, it keeps its stored `src` and where it was copied (see `ownImageSrc`); a data URL is its own `src`.
+        const own = isDataUrl(src) ? {} : { 'data-c2-image-src': src, 'data-c2-image-origin': location.origin }
+        return ['img', { src, alt, ...own, ...(width ? { width: String(width) } : {}) }]
       },
     },
     text: {},

@@ -211,7 +211,8 @@ test('HTML an editor copied an image with brings the same image back, not a copy
   await pasteImage(page)
   await expect.poll(() => value(page)).toBe('![](app:1)')
   await page.keyboard.press('Enter')
-  await pasteImage(page, { 'text/html': '<img src="data:image/png;base64,AAAA" data-c2-image-src="app:1" width="80">' })
+  const origin = await page.evaluate(() => location.origin)
+  await pasteImage(page, { 'text/html': `<img src="data:image/png;base64,AAAA" data-c2-image-src="app:1" data-c2-image-origin="${origin}" width="80">` })
   await expect.poll(() => value(page)).toBe('![](app:1)\n![|80](app:1)')
   expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toHaveLength(1)
 })
@@ -331,4 +332,28 @@ test('a resolver set after the value draws the images already there', async ({ p
   })
   await expect.poll(() => drawn(page)).toBe(400)
   await expect(block(page)).not.toHaveClass(/is-missing/)
+})
+
+test('an image copied in another application is pasted as the image itself, not as an id this store lacks', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await content(page).click()
+  await pasteImage(page, { 'text/html': '<img src="data:image/png;base64,AAAA" data-c2-image-src="other:7" data-c2-image-origin="https://elsewhere.example">' })
+  // The file on the clipboard is saved here, once.
+  await expect.poll(() => value(page)).toBe('![](app:1)')
+  expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toEqual(['app:1 image/png'])
+})
+
+test('an icon inline in pasted text, or an image only the copying application can open, is left out', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await content(page).click()
+  await paste(page, {
+    'text/html':
+      '<p>Great <img src="https://example.com/emoji.png" width="16" height="16" alt="👍"> work</p><img src="file:///C:/clip_image001.png"><img src="cid:image002">',
+    'text/plain': 'Great work',
+  })
+  await expect.poll(() => value(page)).toBe('Great work')
+  await expect(block(page)).toHaveCount(0)
+  expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toEqual([])
 })

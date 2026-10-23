@@ -211,7 +211,8 @@ test('HTML an editor copied an image with brings the same image back, not a copy
   await pasteImage(page)
   await expect.poll(() => value(page)).toBe('![](app:1)')
   await page.keyboard.press('Enter')
-  await pasteImage(page, { 'text/html': '<img src="data:image/png;base64,AAAA" data-c2-image-src="app:1" width="80">' })
+  const origin = await page.evaluate(() => location.origin)
+  await pasteImage(page, { 'text/html': `<img src="data:image/png;base64,AAAA" data-c2-image-src="app:1" data-c2-image-origin="${origin}" width="80">` })
   await expect.poll(() => value(page)).toBe('![](app:1)\n\n![|80](app:1)')
   expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toHaveLength(1)
 })
@@ -319,4 +320,84 @@ test('the text after an image stays put while the image is dragged narrower, and
   await page.mouse.up()
   await expect.poll(() => value(page)).toBe('![|300](app:1)\n\nAfter the image')
   await expect.poll(top).toBeCloseTo(start - 50, 0)
+})
+
+test('an image copied in another application is pasted as the image itself, not as an id this store lacks', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  await withStore(page)
+  await content(page).click()
+  await pasteImage(page, { 'text/html': '<img src="data:image/png;base64,AAAA" data-c2-image-src="other:7" data-c2-image-origin="https://elsewhere.example">' })
+  // The file on the clipboard is saved here, once.
+  await expect.poll(() => value(page)).toBe('![](app:1)')
+  expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toEqual(['app:1 image/png'])
+})
+
+test('an icon inline in pasted text, or an image only the copying application can open, is left out', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  await withStore(page)
+  await content(page).click()
+  await paste(page, {
+    'text/html':
+      '<p>Great <img src="https://example.com/emoji.png" width="16" height="16" alt="👍"> work</p><img src="file:///C:/clip_image001.png"><img src="cid:image002">',
+    'text/plain': 'Great work',
+  })
+  await expect.poll(() => value(page)).toBe('Great work')
+  await expect(block(page)).toHaveCount(0)
+  expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toEqual([])
+})
+
+test('an image file pasted with the same image in the HTML as a data URL is saved once', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  await withStore(page)
+  await content(page).click()
+  await pasteImage(page, {
+    'text/html': '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">',
+  })
+  await expect.poll(() => value(page)).toBe('![](app:1)')
+  await page.waitForTimeout(200)
+  expect(await page.evaluate(() => (window as unknown as { store: { uploads: string[] } }).store.uploads)).toEqual(['app:1 image/png'])
+})
+
+test('a line of text that reads as an image, "!" before a link, stays text', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes" value="\\![x](https://example.com/a.png)"></c2-page-editor>`)
+  await expect(block(page)).toHaveCount(0)
+  await expect(content(page).locator('a')).toHaveText('x')
+  const written = await value(page)
+  await host(page).evaluate((element: Editor, markdown) => {
+    element.value = ''
+    element.value = markdown
+  }, written)
+  await expect(block(page)).toHaveCount(0)
+  await expect(content(page)).toHaveText('!x')
+})
+
+test('text and an image copied together and pasted back keep the image, as the same stored src', async ({ page, renderScenario, browserName, context }) => {
+  test.skip(browserName !== 'chromium', 'Only Chromium lets a test read HTML off the clipboard.')
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  await withStore(page)
+  await host(page).evaluate((element: Editor) => (element.value = 'Before\n\n![](app:1)\n\nAfter'))
+  await content(page).locator('p').last().click()
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('ControlOrMeta+c')
+  const html = await page.evaluate(async () => {
+    const [item] = await navigator.clipboard.read()
+    return (await item.getType('text/html')).text()
+  })
+  expect(html).toContain('data-c2-image-src="app:1"')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Enter')
+  await paste(page, { 'text/html': html, 'text/plain': 'Before After' })
+  await expect.poll(() => value(page)).toBe('Before\n\n![](app:1)\n\nAfter\n\nBefore\n\n![](app:1)\n\nAfter')
+})
+
+test('an emoji sized by its style is left out of a paste, and a wide, short banner kept', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-page-editor label="Notes"></c2-page-editor>`)
+  await content(page).click()
+  await paste(page, {
+    'text/html':
+      '<p>Thanks <img src="https://example.com/emoji.png" style="width:18px;height:18px"> team</p><img src="https://example.com/banner.png" width="600" height="40" alt="Banner">',
+    'text/plain': 'Thanks team',
+  })
+  await expect.poll(() => value(page)).toBe('Thanks team\n\n![Banner|600](https://example.com/banner.png)')
 })
