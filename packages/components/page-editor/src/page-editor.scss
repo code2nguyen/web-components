@@ -319,6 +319,11 @@ hr {
 
 .table-block {
   position: relative;
+  // As wide as its table, so its outline and tools wrap the table, not the line; a wider table scrolls inside it,
+  // stopping short of the page's edge by its outline (4px offset, 2px thick), which an overflowing page would clip.
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: calc(100% - 6px);
   white-space: normal;
   cursor: default;
   .content > & {
@@ -333,6 +338,8 @@ hr {
 // The sheet marks its current cell and range even unfocused; in a page, only the table being edited shows them.
 // Cells take the page's named colours, so a table's text and highlights match the page's (dark pages too).
 .table-sheet {
+  // The frame ends with the last column, rather than leaving an empty bordered area across the page.
+  --c2-spreadsheet--width: fit-content;
   @each $color in $colors {
     --c2-spreadsheet--color-#{$color}: var(--_color-#{$color});
     --c2-spreadsheet--background-#{$color}: var(--_background-#{$color});

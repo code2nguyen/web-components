@@ -10,6 +10,7 @@
     border: 1px solid #bcbcc6,
     border-radius: 8px,
     max-height: null,
+    width: auto,
     grid__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     cell--width: 112px,
     cell--height: 32px,
@@ -111,6 +112,9 @@
 .spreadsheet {
   display: flex;
   flex-direction: column;
+  // `fit-content` hugs the columns: no empty frame beside a narrow sheet, and a wide one still scrolls inside it.
+  width: css.cssVar(width);
+  max-width: 100%;
   max-height: css.cssVar(max-height);
   overflow: hidden;
   background-color: css.cssVar(background-color);
