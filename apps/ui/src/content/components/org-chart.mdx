@@ -23,7 +23,7 @@ import '@c2n/components/org-chart'
 <style>
   .usage-chart {
     width: 100%;
-    --c2-org-chart__card--width: 168px;
+    --c2-org-chart__card--width: 140px;
   }
 </style>
 <div data-label="Default">
@@ -33,7 +33,7 @@ import '@c2n/components/org-chart'
   <c2-org-chart client:only="lit" class="usage-chart" selectable value="maya" collapsed-items="li;maya" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"Chief Executive Officer","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead"},{"id":"kim","label":"Kim Lee","description":"Design lead"}]},{"id":"maya","label":"Maya Cohen","description":"CFO","children":[{"id":"joe","label":"Joe Park","description":"Controller"}]},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>
 </div>
 <div data-label="Horizontal">
-  <c2-org-chart client:only="lit" class="usage-chart" orientation="horizontal" aria-label="Reporting line" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead","children":[{"id":"ines","label":"Inès Martin","description":"Engineer"},{"id":"tom","label":"Tom Berg","description":"Engineer"}]},{"id":"kim","label":"Kim Lee","description":"Design lead"}]}]}]'></c2-org-chart>
+  <c2-org-chart client:only="lit" class="usage-chart" orientation="horizontal" aria-label="Reporting line" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO","children":[{"id":"sam","label":"Sam Patel","description":"Platform lead"},{"id":"kim","label":"Kim Lee","description":"Design lead"}]},{"id":"maya","label":"Maya Cohen","description":"CFO"}]}]'></c2-org-chart>
 </div>
 ```
 
