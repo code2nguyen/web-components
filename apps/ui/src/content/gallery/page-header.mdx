@@ -10,13 +10,22 @@ import { Avatar } from '@c2n/components/avatar'
 
 ## Looks
 
-The title scale, the surface and the divider set the tone: `--c2-page-header__title--font-size`, `--c2-page-header--background-color` and `--c2-page-header--border-bottom`.
+Each card resets the site's global heading styles on its `h1` (`font: inherit`) so the title takes the page header's typography. The title scale, the surface and the divider set the tone: `--c2-page-header__title--font-size`, `--c2-page-header--background-color` and `--c2-page-header--border-bottom`.
 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
+<style>
+  /* A page that styles headings globally hands the title back to the page header. */
+  .page-title {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+</style>
 <c2-page-header>
-  <h1>Beneficiaries</h1>
+  <h1 class="page-title">Beneficiaries</h1>
   <p slot="description">People and companies Acme EU pays.</p>
   <c2-button slot="actions" primary>Add beneficiary</c2-button>
 </c2-page-header>
@@ -30,6 +39,9 @@ The title scale, the surface and the divider set the tone: `--c2-page-header__ti
   }
   .record-header h1 {
     margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
   }
 </style>
 <c2-page-header class="record-header">
@@ -57,6 +69,9 @@ The title scale, the surface and the divider set the tone: `--c2-page-header__ti
   }
   .compact-header h1 {
     margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
   }
 </style>
 <c2-page-header class="compact-header">
@@ -75,6 +90,9 @@ The title scale, the surface and the divider set the tone: `--c2-page-header__ti
   }
   .tinted-header h1 {
     margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
   }
 </style>
 <c2-page-header class="tinted-header">

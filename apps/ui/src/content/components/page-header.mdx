@@ -51,8 +51,19 @@ The narrow frames show the parent link and folded actions; open **More actions**
   .demo-page-header {
     --c2-page-header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
+  /* The site styles headings globally; hand the title back to the page header's own typography. */
   .demo-page-header h1 {
     margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+  .secondary {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
   }
   .lead {
     color: var(--c2-theme--color-primary, #0265dc);
@@ -87,8 +98,8 @@ The narrow frames show the parent link and folded actions; open **More actions**
       <c2-badge slot="title-suffix" tone="warning">Awaiting approval</c2-badge>
       <p slot="description">Batch B-0412 · 12 payouts to EU suppliers, due before the 15:30 CET SEPA cut-off.</p>
       <span slot="meta">Total €1,284,300.00 · 1 of 2 approvals · Created by V. Nguyen</span>
-      <c2-button slot="actions" overflow-priority="1">Export</c2-button>
-      <c2-button slot="actions" overflow-priority="2">Reject</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="1">Export</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="2">Reject</c2-button>
       <c2-button slot="actions" primary>Approve batch</c2-button>
       <nav slot="navigation" class="tabs" aria-label="Batch">
         <a href="#usage" aria-current="page">Payouts</a>
@@ -103,7 +114,7 @@ The narrow frames show the parent link and folded actions; open **More actions**
     <c2-page-header class="demo-page-header">
       <h1>Beneficiaries</h1>
       <p slot="description">People and companies Acme EU pays. Verified accounts can receive SEPA Instant.</p>
-      <c2-button slot="actions">Import CSV</c2-button>
+      <c2-button slot="actions" class="secondary">Import CSV</c2-button>
       <c2-button slot="actions" primary>Add beneficiary</c2-button>
       <c2-search-field slot="toolbar" aria-label="Search beneficiaries" placeholder="Search name or IBAN"></c2-search-field>
     </c2-page-header>
@@ -119,8 +130,9 @@ The narrow frames show the parent link and folded actions; open **More actions**
       </c2-breadcrumb>
       <h1>October supplier run</h1>
       <c2-badge slot="title-suffix" tone="warning">Awaiting approval</c2-badge>
-      <c2-button slot="actions" overflow-priority="1">Export</c2-button>
-      <c2-button slot="actions" overflow-priority="2">Reject</c2-button>
+      <c2-button slot="actions" class="secondary">Duplicate</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="1">Export</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="2">Reject</c2-button>
       <c2-button slot="actions" primary>Approve batch</c2-button>
     </c2-page-header>
   </div>

@@ -216,6 +216,8 @@ export class PageHeader extends LitElement {
   private foldScheduled = false
   private sheet?: CSSStyleSheet
   private observedTop = 0
+  private actionObserver?: ResizeObserver
+  private actionWidths = new WeakMap<Element, number>()
   private collapseOffset = -1
   /** `aria-hidden` copies of the title badges for the condensed bar, rebuilt only when the badges change. */
   @state() private suffixCopies: Node[] = []
@@ -282,6 +284,7 @@ export class PageHeader extends LitElement {
     this.mutationObserver?.disconnect()
     this.breadcrumbObserver?.disconnect()
     this.resizeObserver?.disconnect()
+    this.actionObserver?.disconnect()
     this.intersectionObserver?.disconnect()
     this.intersectionObserver = undefined
   }
@@ -310,9 +313,30 @@ export class PageHeader extends LitElement {
     this.groups = groups
     this.folded = this.folded.filter((action) => this.actions.includes(action))
     this.observeBreadcrumb()
+    this.observeActions()
     this.deriveParent()
     if (this.sticky) this.refreshCondensedCopy()
     this.scheduleFold()
+  }
+
+  /**
+   * Re-folds when an action's own width changes: a `c2-button` measured before its module loaded is a line of plain
+   * text, and a label can change. An action leaving the row (folded, so unassigned) reports 0 and is ignored, so
+   * folding does not trigger itself.
+   */
+  private observeActions() {
+    this.actionObserver ??= new ResizeObserver((entries) => {
+      let changed = false
+      for (const entry of entries) {
+        const width = entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width
+        if (width <= 0) continue
+        if (Math.abs((this.actionWidths.get(entry.target) ?? -1) - width) > 0.5) changed = true
+        this.actionWidths.set(entry.target, width)
+      }
+      if (changed) this.scheduleFold()
+    })
+    this.actionObserver.disconnect()
+    for (const action of this.actions) this.actionObserver.observe(action)
   }
 
   /** The parent link: the breadcrumb's second-to-last item, overridden by `parent-href` / `parent-label`. */

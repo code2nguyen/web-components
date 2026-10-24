@@ -49,6 +49,9 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
   --_closed-shift: -100%;
 
   display: block;
+  // A size container has no intrinsic width: without this it collapses to nothing in a centring flex or grid parent.
+  width: 100%;
+  box-sizing: border-box;
   container-type: inline-size;
   min-width: 0;
 }

@@ -241,3 +241,20 @@ test('inside a shell that scrolls the page, the bar sits under the shell header'
   await expect(host).toHaveState('condensed')
   await expect.poll(async () => Math.round((await host.locator('[part="condensed"]').boundingBox())?.y ?? -1)).toBe(56)
 })
+
+test('actions that grow after the first measurement (a late upgrade) fold', async ({ page, renderScenario }) => {
+  await renderScenario(
+    header(
+      '',
+      '',
+      '<button slot="actions" class="late">A</button><button slot="actions" class="late">B</button><button slot="actions" primary>Approve</button>',
+    ),
+  )
+  const host = page.locator('c2-page-header')
+  await host.evaluate((element) => ((element as HTMLElement).style.width = '420px'))
+  await expect(host).toHaveState('narrow')
+  await expect(page.getByRole('button', { name: 'More actions' })).toBeHidden()
+  await page.locator('.late').evaluateAll((buttons) => buttons.forEach((button) => ((button as HTMLElement).style.width = '200px')))
+  await expect(host).toHaveState('has-folded')
+  await expect(page.getByRole('button', { name: 'More actions' })).toBeVisible()
+})

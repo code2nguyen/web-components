@@ -57,6 +57,9 @@ $_duration: css.cssVar(transition-duration);
 // The layout follows the page header's own width.
 :host {
   display: block;
+  // A size container has no intrinsic width: without this it collapses to nothing in a centring flex or grid parent.
+  width: 100%;
+  box-sizing: border-box;
   container-type: inline-size;
   min-width: 0;
 }
@@ -161,9 +164,15 @@ $_duration: css.cssVar(transition-duration);
   min-width: 0;
 }
 
+// The title typography sits on the wrapper and the slotted heading inherits it, so it beats the browser's heading
+// defaults; a page stylesheet that styles headings globally can opt back in with `h1 { font: inherit; color: inherit }`.
 .heading {
   min-width: 0;
   max-width: 100%;
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: css.cssVar(title--line-height);
 }
 
 .heading ::slotted(*) {
@@ -173,10 +182,9 @@ $_duration: css.cssVar(transition-duration);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: css.cssVar(title--line-clamp);
   line-clamp: css.cssVar(title--line-clamp);
-  color: css.cssVar(title--color);
-  font-size: css.cssVar(title--font-size);
-  font-weight: css.cssVar(title--font-weight);
-  line-height: css.cssVar(title--line-height);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
   overflow-wrap: anywhere;
 }
 
@@ -300,8 +308,9 @@ $_duration: css.cssVar(transition-duration);
     display: flex;
   }
 
-  .heading ::slotted(*) {
-    font-size: css.cssVar(title__narrow--font-size);
+  // Narrow widths only ever shrink the title: a page header already set smaller keeps its own size.
+  .heading {
+    font-size: min(#{css.cssVar(title--font-size)}, #{css.cssVar(title__narrow--font-size)});
   }
 
   .title-row {

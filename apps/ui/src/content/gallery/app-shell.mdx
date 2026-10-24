@@ -11,41 +11,33 @@ import { FeatherUsersIcon as FeatherUsers } from '@c2n/feather-icons/icons/users
 
 ## Looks
 
-The navigation surface, the dividers and the widths do most of the work: `--c2-app-shell__navigation--background-color`, `--c2-app-shell__divider--color` and `--c2-app-shell__navigation--width`. Every card keeps its drawer inside the frame with `--c2-app-shell__over--position: absolute`.
+The navigation surface, the dividers and the widths do most of the work: `--c2-app-shell__navigation--background-color`, `--c2-app-shell__divider--color` and `--c2-app-shell__navigation--width`. Each card is tablet-width, so it sets `tablet-mode="side"` to show the navigation beside main.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
-  .gallery-frame {
-    height: 240px;
-    overflow: auto;
-  }
   .gallery-page {
     padding: 16px;
   }
 </style>
-<div class="gallery-frame">
-  <c2-app-shell scrolling="main">
-    <c2-header slot="header">
-      <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
-      <strong slot="brand">Ledgerline</strong>
-    </c2-header>
-    <c2-list slot="navigation" aria-label="Sections">
-      <c2-list-item href="#">Overview</c2-list-item>
-      <c2-list-item href="#" selected>Batches</c2-list-item>
-    </c2-list>
-    <div class="gallery-page">Batches</div>
-  </c2-app-shell>
-</div>
+<c2-app-shell tablet-mode="side">
+  <c2-header slot="header">
+    <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
+    <strong slot="brand">Ledgerline</strong>
+  </c2-header>
+  <c2-list slot="navigation" aria-label="Sections">
+    <c2-list-item href="#">Overview</c2-list-item>
+    <c2-list-item href="#" selected>Batches</c2-list-item>
+  </c2-list>
+  <div class="gallery-page">Batches</div>
+</c2-app-shell>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark navigation
 <style>
   .dark-shell {
-    height: 240px;
     --c2-app-shell--height: 240px;
-    --c2-app-shell__over--position: absolute;
     --c2-app-shell__navigation--width: 188px;
     --c2-app-shell__navigation--background-color: #18181b;
     --c2-app-shell__navigation--color: #f4f4f5;
@@ -67,7 +59,7 @@ The navigation surface, the dividers and the widths do most of the work: `--c2-a
     padding: 16px;
   }
 </style>
-<c2-app-shell class="dark-shell" layout="navigation-first" scrolling="main">
+<c2-app-shell class="dark-shell" layout="navigation-first" scrolling="main" tablet-mode="side">
   <div slot="navigation-header" class="brand">Ledgerline</div>
   <c2-list slot="navigation" class="nav" aria-label="Sections">
     <c2-list-item href="#"><c2-feather-home slot="prefix-icon"></c2-feather-home>Overview</c2-list-item>
@@ -81,9 +73,7 @@ The navigation surface, the dividers and the widths do most of the work: `--c2-a
 ```html tag=MdxCodeBlock,label=Inset panels
 <style>
   .inset-shell {
-    height: 240px;
     --c2-app-shell--height: 240px;
-    --c2-app-shell__over--position: absolute;
     --c2-app-shell__navigation--width: 180px;
     --c2-app-shell__navigation--padding: 12px;
     --c2-app-shell__navigation--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
@@ -103,7 +93,7 @@ The navigation surface, the dividers and the widths do most of the work: `--c2-a
     --c2-list--background: transparent;
   }
 </style>
-<c2-app-shell class="inset-shell" layout="navigation-first" scrolling="main">
+<c2-app-shell class="inset-shell" layout="navigation-first" scrolling="main" tablet-mode="side">
   <c2-list slot="navigation" class="nav" aria-label="Sections">
     <c2-list-item href="#"><c2-feather-home slot="prefix-icon"></c2-feather-home>Overview</c2-list-item>
     <c2-list-item href="#" selected><c2-feather-layers slot="prefix-icon"></c2-feather-layers>Batches</c2-list-item>
