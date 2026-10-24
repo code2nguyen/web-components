@@ -23,6 +23,24 @@ export interface List {
   removeEventListener: TypedRemoveEventListener<List, ListEventMap>
 }
 
+/** How deep a row's `c2-list-item` may sit inside its wrapper: an island around a `c2-swipe-action` around an island. */
+const ROW_WRAPPER_DEPTH = 3
+
+/**
+ * The `c2-list-item` a slotted element stands for: itself, or the first one inside it within a few levels, which is
+ * how a row is wrapped by a framework island or a `c2-swipe-action`. Text nodes between tags are skipped.
+ */
+function rowItem(element: Element, depth = 0): ListItem | undefined {
+  if (element instanceof ListItem) return element
+  // A list nested in a row owns its own items.
+  if (depth >= ROW_WRAPPER_DEPTH || element instanceof List) return undefined
+  for (const child of element.children) {
+    const item = rowItem(child, depth + 1)
+    if (item) return item
+  }
+  return undefined
+}
+
 /**
  * A vertical list of `c2-list-item` rows with single or multiple selection. The list owns the selection: it reads the
  * `value` of the clicked row, updates its own `value` (a `;`-separated list in the attribute, an array in the property)
@@ -41,7 +59,7 @@ export interface List {
  *
  * @tag c2-list
  *
- * @slot default - The rows: `c2-list-item` elements (or wrappers whose first child is a `c2-list-item`), plus `<hr>` dividers and heading elements.
+ * @slot default - The rows: `c2-list-item` elements, or wrappers around one (a framework island, a `c2-swipe-action` for swipe actions), plus `<hr>` dividers and heading elements.
  *
  * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected values, `detail.data` the matching `data` of each row. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
@@ -122,7 +140,7 @@ export class List extends LitElement {
   /** Slotted rows, in DOM order (dividers and headings excluded). */
   get items(): ListItem[] {
     return (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
-      .map((slotItem) => (slotItem instanceof ListItem ? slotItem : slotItem.firstChild))
+      .map((slotItem) => rowItem(slotItem))
       .filter((item): item is ListItem => item instanceof ListItem)
   }
 
