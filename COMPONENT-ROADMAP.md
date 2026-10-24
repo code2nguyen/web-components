@@ -84,7 +84,6 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 | --- | -------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
 | 51  | `c2-treemap-chart`   | Nested rectangles sized by value                     | Finviz market map, disk-usage tools            | P2       | Proposed |
 | 52  | `c2-waterfall-chart` | Running total bridged by positive and negative steps | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
-| 53  | `c2-sankey-chart`    | Flows between stages                                 | Money-flow and user-journey reports            | P3       | Proposed |
 | 54  | `c2-boxplot-chart`   | Distribution summary (median, quartiles, outliers)   | Datadog and Grafana latency views              | P3       | Proposed |
 | 55  | `c2-bullet-chart`    | One measure against a target and qualitative bands   | KPI scorecards                                 | P3       | Proposed |
 | 56  | `c2-depth-chart`     | Cumulative bid and ask volume around the mid price   | Binance, Coinbase Advanced                     | P3       | Proposed |

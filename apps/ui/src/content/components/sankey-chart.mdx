@@ -1,0 +1,118 @@
+---
+title: 'Sankey chart'
+description: 'Quantities moving through stages, where one row is one flow and each band is as wide as what it carries.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-sankey-chart'
+apiTags: ['c2-sankey-chart', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SankeyChart } from '@c2n/components/chart/sankey-chart'
+
+A sankey diagram shows a quantity moving through stages: revenue into profit and costs, visitors through a signup
+funnel, energy from sources to uses. One row is one flow, read through `source-field`, `target-field` and
+`value-field`. Each node is a bar as long as the larger of what reaches it and what leaves it, and each flow is a
+band from one node to the next, as wide as the flow. Rows for the same pair are summed. It is drawn by ECharts'
+sankey series. For flows that go both ways between the same groups, use the [chord chart](../chord-chart), which
+reads the same rows.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/sankey-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .sankey-plot {
+    width: 100%;
+    --c2-chart--height: 340px;
+  }
+</style>
+
+<div data-label="Where the revenue went">
+  <c2-sankey-chart
+    class="sankey-plot"
+    source-field="from"
+    target-field="to"
+    value-field="amount"
+    node-align="left"
+    link-color="target"
+    nodes='[{"id":"Gross profit","color":"#0f766e"},{"id":"Operating profit","color":"#0f766e"},{"id":"Net profit","color":"#0f766e"},{"id":"Cost of revenue","color":"#dc4a26"},{"id":"Operating expenses","color":"#dc4a26"},{"id":"Hosting","color":"#dc4a26"},{"id":"Support","color":"#dc4a26"},{"id":"Tax","color":"#dc4a26"},{"id":"R&D","color":"#dc4a26"},{"id":"Sales & marketing","color":"#dc4a26"},{"id":"G&A","color":"#dc4a26"}]'
+    data='[{"from":"Subscriptions","to":"Revenue","amount":840},{"from":"Services","to":"Revenue","amount":160},{"from":"Interest","to":"Revenue","amount":20},{"from":"Revenue","to":"Gross profit","amount":690},{"from":"Revenue","to":"Cost of revenue","amount":330},{"from":"Cost of revenue","to":"Hosting","amount":210},{"from":"Cost of revenue","to":"Support","amount":120},{"from":"Gross profit","to":"Operating profit","amount":170},{"from":"Gross profit","to":"Operating expenses","amount":520},{"from":"Operating profit","to":"Net profit","amount":130},{"from":"Operating profit","to":"Tax","amount":40},{"from":"Operating expenses","to":"R&D","amount":280},{"from":"Operating expenses","to":"Sales & marketing","amount":170},{"from":"Operating expenses","to":"G&A","amount":70}]'
+  ></c2-sankey-chart>
+</div>
+
+<div data-label="Signup journey">
+  <c2-sankey-chart
+    class="sankey-plot"
+    emphasis="trajectory"
+    link-color="gradient"
+    data='[{"source":"Search","target":"Landing page","value":5200},{"source":"Paid ads","target":"Landing page","value":3100},{"source":"Referral","target":"Landing page","value":1700},{"source":"Landing page","target":"Signed up","value":3400},{"source":"Landing page","target":"Left","value":6600},{"source":"Signed up","target":"Onboarded","value":2300},{"source":"Signed up","target":"Abandoned","value":1100},{"source":"Onboarded","target":"Activated","value":1500},{"source":"Onboarded","target":"Inactive","value":800}]'
+  ></c2-sankey-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects, and the three fields may be dotted paths. A row is left out when it has no source or no
+target, or when its value is not a positive number. A node whose inflow and outflow differ is drawn as long as the
+larger of the two, and its tooltip shows both.
+
+The `nodeTotals` and `flows` getters return what the chart drew (each node's incoming, outgoing, column and share,
+each flow with its share of its source and of the total), for a table beside the chart or an export.
+`buildSankeyModel(rows, options)` is the same computation as a plain function.
+
+### Columns
+
+Each node is placed by the longest path that reaches it. `node-align` decides where the ends go: `justify` (the
+default) moves every node nothing leaves to the last column, `left` leaves it where its path puts it, and `right`
+places every node by the longest path from it to an end. Within a column, ECharts orders the nodes to keep the bands
+from crossing.
+
+The `nodes` property names what the rows cannot say about a node, by key: a `label` drawn in place of the key, a
+`color`, and a `column` (counted from `0`) that pins the node in place of the one `node-align` gives it.
+
+### Loops
+
+A sankey draws flows in one direction, so it cannot draw a loop. When the flows form one (`Triage → Billing →
+Triage`, or a flow from a node to itself), nothing is drawn and the error state names the loop. Remove the flow
+that closes it, or use the chord chart.
+
+### Colour
+
+Each node takes the next colour of `--c2-chart__series-1…8--color` in order of first appearance, and keeps it when
+another node is hidden. A `color` in `nodes` overrides it with any CSS colour, `var()` included. `link-color`
+decides which end of a flow its band shows: `source` (the default) makes it easy to follow where something went,
+`target` where it came from, and `gradient` blends the two.
+
+### Interaction
+
+Hovering a node fires `node-hover`; hovering a band fires `link-hover`. `emphasis` decides what the hover lights up:
+`adjacency` (the default), the node's own bands and the nodes at their other ends, or `trajectory`, every flow
+upstream and downstream of it, so a whole path reads at once. Clicking a node fires `node-click` and highlights it
+(its key goes to `highlighted` and `series-highlight` fires), dimming what it does not light up; a second click
+clears it, and `preventDefault()` on `node-click` keeps the highlight as it is. Clicking a band fires `link-click`.
+
+The labels already name every node, so the legend is off by default. With `legend="bottom"` and
+`legend-action="toggle"`, an entry hides its node and every flow that touches it (`setNodeVisible(key, false)` does
+the same from code); the last two nodes stay on.
+
+The plot is one tab stop: the up and down arrows move within a column, left and right follow the largest flow to
+the previous or next column, Enter highlights the focused node and Escape clears. A visually hidden table lists every
+flow for screen readers.
+
+### Styling
+
+`orient="vertical"` runs the flows from top to bottom. `labels="outside"` (the default) names the first and last
+columns outside the plot and keeps room for them; `labels="inside"` turns those labels towards the middle so the
+plot takes the whole width; `labels="none"` draws none. `--c2-chart__node--width` (`12px`),
+`--c2-chart__node--gap` (`8px`) and `--c2-chart__node--border-radius` (`2px`) shape the nodes;
+`--c2-chart__link--opacity`, `--c2-chart__link__hover--opacity` and `--c2-chart__link--curveness` the bands.

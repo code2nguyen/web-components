@@ -1,0 +1,45 @@
+---
+title: 'Sankey chart gallery'
+description: 'An income statement, a signup funnel, an energy balance, a budget and ticket outcomes drawn as sankey diagrams.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SankeyChart } from '@c2n/components/chart/sankey-chart'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-sankey-chart source-field="from" target-field="to" value-field="amount" data='[{"from":"Subscriptions","to":"Revenue","amount":840},{"from":"Services","to":"Revenue","amount":160},{"from":"Revenue","to":"Gross profit","amount":690},{"from":"Revenue","to":"Cost of revenue","amount":310},{"from":"Gross profit","to":"Operating expenses","amount":520},{"from":"Gross profit","to":"Net profit","amount":170}]'></c2-sankey-chart>
+```
+
+```html tag=MdxCodeBlock,label=Funnel with drop-off
+<style>
+  .sankey-funnel { width: 100%; --c2-chart--height: 300px; --c2-chart__link--opacity: 0.45; --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #2563eb; --c2-chart__series-3--color: #059669; --c2-chart__series-4--color: #7c3aed; --c2-chart__series-5--color: #0891b2; --c2-chart__series-6--color: #059669; --c2-chart__series-7--color: #a1a1aa; --c2-chart__series-8--color: #a1a1aa; }
+</style>
+<c2-sankey-chart class="sankey-funnel" emphasis="trajectory" link-color="gradient" node-align="left" data='[{"source":"Search","target":"Landing page","value":5200},{"source":"Landing page","target":"Signed up","value":3400},{"source":"Paid ads","target":"Landing page","value":3100},{"source":"Referral","target":"Landing page","value":1700},{"source":"Signed up","target":"Activated","value":2300},{"source":"Landing page","target":"Left","value":6600},{"source":"Signed up","target":"Abandoned","value":1100}]'></c2-sankey-chart>
+```
+
+```html tag=MdxCodeBlock,label=Vertical energy balance
+<style>
+  .sankey-energy { width: 100%; --c2-chart--height: 320px; --c2-chart__node--width: 10px; --c2-chart__node--gap: 16px; --c2-chart__link--curveness: 0.6; }
+</style>
+<c2-sankey-chart class="sankey-energy" orient="vertical" data='[{"source":"Solar","target":"Grid","value":62},{"source":"Wind","target":"Grid","value":118},{"source":"Gas","target":"Grid","value":74},{"source":"Nuclear","target":"Grid","value":146},{"source":"Grid","target":"Homes","value":168},{"source":"Grid","target":"Industry","value":204},{"source":"Grid","target":"Losses","value":28}]'></c2-sankey-chart>
+```
+
+```html tag=MdxCodeBlock,label=Thin nodes
+<style>
+  .sankey-budget { width: 100%; --c2-chart--height: 320px; --c2-chart__node--width: 4px; --c2-chart__node--gap: 10px; --c2-chart__node--border-radius: 2px; --c2-chart__link--opacity: 0.22; --c2-chart__link__hover--opacity: 0.5; }
+</style>
+<c2-sankey-chart class="sankey-budget" link-color="target" data='[{"source":"Salary","target":"Take-home","value":3200},{"source":"Freelance","target":"Take-home","value":600},{"source":"Take-home","target":"Needs","value":1900},{"source":"Take-home","target":"Wants","value":1100},{"source":"Take-home","target":"Savings","value":800},{"source":"Needs","target":"Rent","value":1250},{"source":"Needs","target":"Groceries","value":450},{"source":"Needs","target":"Transport","value":200},{"source":"Wants","target":"Dining out","value":600},{"source":"Wants","target":"Hobbies","value":500},{"source":"Savings","target":"ETF","value":500},{"source":"Savings","target":"Emergency fund","value":300}]'></c2-sankey-chart>
+```
+
+```html tag=MdxCodeBlock,label=Labels inside
+<style>
+  .sankey-tickets { width: 100%; --c2-chart--height: 300px; --c2-chart__node--width: 20px; --c2-chart__node--gap: 12px; --c2-chart__node--border-radius: 4px; }
+</style>
+<c2-sankey-chart class="sankey-tickets" labels="inside" link-color="target" data='[{"source":"Email","target":"Tier 1","value":420},{"source":"Chat","target":"Tier 1","value":610},{"source":"Phone","target":"Tier 1","value":170},{"source":"Tier 1","target":"Solved","value":880},{"source":"Tier 1","target":"Tier 2","value":320},{"source":"Tier 2","target":"Solved","value":210},{"source":"Tier 2","target":"Refunded","value":80},{"source":"Tier 2","target":"Churned","value":30}]'></c2-sankey-chart>
+```
+
+</GalleryGrid>

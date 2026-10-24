@@ -31,6 +31,7 @@ import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
+import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
@@ -294,6 +295,23 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: RadarChart['series'] | string
         annotations?: RadarChart['annotations'] | string
+      }
+      'c2-sankey-chart': Omit<C2Props<SankeyChart>, 'nodes' | 'series' | 'annotations'> & {
+        'source-field'?: Attribute
+        'target-field'?: Attribute
+        'value-field'?: Attribute
+        'node-align'?: Attribute
+        'link-color'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        nodes?: SankeyChart['nodes'] | string
+        series?: SankeyChart['series'] | string
+        annotations?: SankeyChart['annotations'] | string
       }
       'c2-scatter-chart': Omit<C2Props<ScatterChart>, 'series' | 'annotations'> & {
         'symbol-size'?: Attribute
