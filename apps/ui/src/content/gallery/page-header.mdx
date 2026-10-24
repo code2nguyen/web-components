@@ -1,0 +1,87 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PageHeader } from '@c2n/components/page-header'
+import { Breadcrumb } from '@c2n/components/breadcrumb'
+import { LinkButton } from '@c2n/components/link-button'
+import { Button } from '@c2n/components/button'
+import { Badge } from '@c2n/components/badge'
+import { Avatar } from '@c2n/components/avatar'
+
+## Looks
+
+The title scale, the surface and the divider set the tone: `--c2-page-header__title--font-size`, `--c2-page-header--background-color` and `--c2-page-header--border-bottom`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-page-header>
+  <h1>Beneficiaries</h1>
+  <p slot="description">People and companies Acme EU pays.</p>
+  <c2-button slot="actions" primary>Add beneficiary</c2-button>
+</c2-page-header>
+```
+
+```html tag=MdxCodeBlock,label=Record
+<style>
+  .record-header {
+    --c2-page-header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-page-header__leading--size: 48px;
+  }
+  .record-header h1 {
+    margin: 0;
+  }
+</style>
+<c2-page-header class="record-header">
+  <c2-breadcrumb slot="breadcrumb">
+    <c2-link-button href="#">Beneficiaries</c2-link-button>
+    <c2-link-button>Northwind GmbH</c2-link-button>
+  </c2-breadcrumb>
+  <c2-avatar slot="leading" name="Northwind GmbH"></c2-avatar>
+  <h1>Northwind GmbH</h1>
+  <c2-badge slot="title-suffix" tone="success">Verified</c2-badge>
+  <span slot="meta">DE89 3704 0044 0532 0130 00 · 214 payouts</span>
+  <c2-button slot="actions">Edit</c2-button>
+  <c2-button slot="actions" primary>New payout</c2-button>
+</c2-page-header>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact-header {
+    --c2-page-header--padding-top: 12px;
+    --c2-page-header--padding-bottom: 12px;
+    --c2-page-header--gap: 6px;
+    --c2-page-header__title--font-size: 18px;
+    --c2-page-header__description--font-size: 13px;
+  }
+  .compact-header h1 {
+    margin: 0;
+  }
+</style>
+<c2-page-header class="compact-header">
+  <h1>Statements</h1>
+  <p slot="description">Monthly account statements, ready on the 2nd.</p>
+  <c2-button slot="actions" primary>Download</c2-button>
+</c2-page-header>
+```
+
+```html tag=MdxCodeBlock,label=Tinted surface
+<style>
+  .tinted-header {
+    --c2-page-header--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-page-header__title--color: light-dark(#581c87, #d8b4fe);
+    --c2-page-header__description--color: light-dark(#7e22ce, #a76cdc);
+  }
+  .tinted-header h1 {
+    margin: 0;
+  }
+</style>
+<c2-page-header class="tinted-header">
+  <h1>Payout rules</h1>
+  <p slot="description">Limits and approvals that apply to every batch.</p>
+  <c2-button slot="actions" primary>Add rule</c2-button>
+</c2-page-header>
+```
+
+</GalleryGrid>

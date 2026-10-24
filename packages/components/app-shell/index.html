@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-app-shell</title>
+    <script type="module" src="/src/app-shell.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        font:
+          15px system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-bottom: 1px solid #e4e4e7;
+        background: #ffffff;
+      }
+      nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      nav a {
+        display: block;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: inherit;
+        text-decoration: none;
+      }
+      nav a:hover {
+        background: #f4f4f5;
+      }
+      c2-app-shell:state(rail):not(:state(navigation-opened)) .label {
+        display: none;
+      }
+      .page {
+        padding: 24px;
+        height: 1600px;
+      }
+      .details {
+        padding: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-app-shell close-on-navigate aside-label="Details">
+      <p slot="banner" style="margin: 0; padding: 6px 12px; background: #fff4d6; text-align: center">Test mode</p>
+      <div slot="header" class="bar">
+        <c2-app-shell-toggle></c2-app-shell-toggle>
+        <strong>Ledgerline</strong>
+        <span style="flex: 1"></span>
+        <button app-shell-toggle="aside">Details</button>
+      </div>
+      <ul slot="navigation">
+        <li>
+          <a href="#overview">O<span class="label">verview</span></a>
+        </li>
+        <li>
+          <a href="#batches">B<span class="label">atches</span></a>
+        </li>
+        <li>
+          <a href="#rules">R<span class="label">ules</span></a>
+        </li>
+      </ul>
+      <a slot="navigation-footer" href="#settings">S<span class="label">ettings</span></a>
+      <div class="page">
+        <h1>Batches</h1>
+        <p>Resize the window: side from 960px, rail from 600px, drawer below.</p>
+      </div>
+      <section slot="aside" class="details">
+        <c2-app-shell-toggle for="aside"></c2-app-shell-toggle>
+        <p>B-0412 · 12 payouts</p>
+      </section>
+      <p slot="footer" style="margin: 0; padding: 6px 12px; border-top: 1px solid #e4e4e7">Synced 12s ago</p>
+    </c2-app-shell>
+  </body>
+</html>

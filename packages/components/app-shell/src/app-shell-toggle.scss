@@ -1,0 +1,62 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-app-shell-toggle,
+  $theme: (
+    size: 40px,
+    icon--size: 20px,
+    border-radius: 8px,
+    color: #18181b,
+    background-color: transparent,
+    hover--background-color: rgba(24, 24, 27, 0.08),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-app-shell-toggle {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font: inherit;
+  cursor: pointer;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:hover {
+    background-color: css.cssVar(hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+@media (forced-colors: active) {
+  .c2-app-shell-toggle {
+    border: 1px solid ButtonText;
+  }
+}

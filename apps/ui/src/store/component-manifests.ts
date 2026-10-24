@@ -1,6 +1,7 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
+import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
@@ -85,6 +86,7 @@ import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
+import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
@@ -151,6 +153,7 @@ export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
     actionBar,
+    appShell,
     attachment,
     autocomplete,
     avatar,
@@ -235,6 +238,7 @@ export const componentManifests = (function () {
     otpInput,
     overlay,
     pageEditor,
+    pageHeader,
     pagination,
     passwordField,
     phoneInput,

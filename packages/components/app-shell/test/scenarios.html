@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>app-shell scenarios</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      .frame {
+        width: 1200px;
+      }
+      .frame.tablet {
+        width: 800px;
+      }
+      .frame.phone {
+        width: 480px;
+      }
+      .tall {
+        height: 2000px;
+      }
+      c2-app-shell:state(rail):not(:state(navigation-opened)) .label {
+        display: none;
+      }
+    </style>
+    <script type="module">
+      import '../src/app-shell.ts'
+      import '../../header/src/header.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

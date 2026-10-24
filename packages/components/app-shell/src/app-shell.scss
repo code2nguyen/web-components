@@ -1,0 +1,517 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-app-shell,
+  $theme: (
+    height: 100dvh,
+    transition-duration: 250ms,
+
+    header--z-index: 10,
+
+    navigation--width: 240px,
+    navigation__rail--width: 64px,
+    navigation__over--width: min(280px, 85%),
+    navigation--background-color: #fafafa,
+    navigation--color: null,
+    navigation--padding: 8px,
+
+    aside--width: 320px,
+    aside--background-color: #ffffff,
+    aside--padding: 0px,
+
+    main--background-color: transparent,
+    main--padding: 0px,
+
+    divider--width: 1px,
+    divider--color: #e4e4e7,
+    scrollbar--color: rgba(0, 0, 0, 0.2),
+    over--position: fixed,
+    over--box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18),
+    backdrop--background-color: rgba(0, 0, 0, 0.32),
+    backdrop--z-index: 1000,
+
+    skip-link--background-color: rgb(2, 101, 220),
+    skip-link--color: #ffffff,
+    skip-link--padding: 8px 16px,
+    skip-link--border-radius: 6px,
+    skip-link--font-size: 14px,
+    skip-link--font-weight: 600,
+    skip-link__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+$_duration: css.cssVar(transition-duration);
+$_easing: animation.$standard-deceleration-easing;
+$_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
+
+// The layout follows the shell's own width: the host is the query container for every rule below.
+:host {
+  // Which way a closed drawer slides out: towards the start edge, the aside towards the end edge.
+  --_closed-shift: -100%;
+
+  display: block;
+  container-type: inline-size;
+  min-width: 0;
+}
+
+:host(:dir(rtl)) {
+  --_closed-shift: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([scrolling='main']) {
+  height: css.cssVar(height);
+}
+
+.c2-app-shell {
+  // Track widths of the navigation and the aside columns, set by the state rules below.
+  --_navigation-column: 0px;
+  --_aside-column: 0px;
+  // Where the sticky navigation and aside start: under the header, which sticks to the top of the page.
+  --_panel-top: var(--_header-height, 0px);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--_navigation-column) minmax(0, 1fr) var(--_aside-column);
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    'banner banner banner'
+    'header header header'
+    'navigation main aside'
+    'footer footer footer';
+  min-height: 100%;
+  transition: grid-template-columns $_duration $_easing;
+
+  &.navigation-first {
+    --_panel-top: 0px;
+    grid-template-areas:
+      'navigation banner banner'
+      'navigation header header'
+      'navigation main aside'
+      'navigation footer footer';
+  }
+
+  &.scroll-main {
+    height: 100%;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  // No transition until the first width has been measured, so the page does not animate on load.
+  &:not(.ready) {
+    transition: none;
+
+    .navigation,
+    .aside,
+    .backdrop {
+      transition: none;
+    }
+  }
+}
+
+// ------------------------------------
+// Skip link: out of sight until focused, first in the tab order.
+.skip-link {
+  position: fixed;
+  top: 8px;
+  inset-inline-start: 8px;
+  z-index: calc(#{css.cssVar(backdrop--z-index)} + 2);
+  box-sizing: border-box;
+  padding: css.cssVar(skip-link--padding);
+  border-radius: css.cssVar(skip-link--border-radius);
+  background-color: css.cssVar(skip-link--background-color);
+  color: css.cssVar(skip-link--color);
+  font-size: css.cssVar(skip-link--font-size);
+  font-weight: css.cssVar(skip-link--font-weight);
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:not(:focus) {
+    clip-path: inset(50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:focus {
+    outline: css.cssVar(skip-link__focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+// ------------------------------------
+// Regions
+.banner {
+  grid-area: banner;
+  min-width: 0;
+}
+
+.header {
+  grid-area: header;
+  z-index: css.cssVar(header--z-index);
+  min-width: 0;
+}
+
+// With the page scrolling, the header region sticks; a sticky element inside the header's own grid cell could not.
+.c2-app-shell:not(.scroll-main) .header {
+  position: sticky;
+  top: 0;
+}
+
+.main {
+  grid-area: main;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: css.cssVar(main--padding);
+  background-color: css.cssVar(main--background-color);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.scroll-main .main {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.footer {
+  grid-area: footer;
+  min-width: 0;
+}
+
+// ------------------------------------
+// Navigation: a grid cell that carries the background and the divider; its inner column keeps the open width (so the
+// content does not reflow while it collapses) and sticks under the header while the page scrolls.
+.navigation {
+  grid-area: navigation;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: css.cssVar(navigation--background-color);
+  color: css.cssVar(navigation--color);
+  border-inline-end: $_divider;
+  transition:
+    transform $_duration $_easing,
+    box-shadow $_duration $_easing,
+    visibility 0s linear 0s;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.navigation-inner {
+  position: sticky;
+  top: var(--_panel-top);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: css.cssVar(navigation--width);
+  max-height: calc(100dvh - var(--_panel-top));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: css.cssVar(scrollbar--color) transparent;
+}
+
+.scroll-main .navigation-inner {
+  position: static;
+  height: 100%;
+  max-height: none;
+}
+
+.navigation-header,
+.navigation-body,
+.navigation-footer {
+  box-sizing: border-box;
+  padding: css.cssVar(navigation--padding);
+}
+
+.navigation-header.empty,
+.navigation-footer.empty {
+  display: none;
+}
+
+.navigation-body {
+  flex: 1 1 auto;
+}
+
+.navigation-footer {
+  margin-top: auto;
+}
+
+// ------------------------------------
+// Aside
+.aside {
+  grid-area: aside;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: css.cssVar(aside--background-color);
+  border-inline-start: $_divider;
+  transition:
+    transform $_duration $_easing,
+    box-shadow $_duration $_easing,
+    visibility 0s linear 0s;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.aside-inner {
+  position: sticky;
+  top: var(--_panel-top);
+  box-sizing: border-box;
+  width: css.cssVar(aside--width);
+  max-height: calc(100dvh - var(--_panel-top));
+  padding: css.cssVar(aside--padding);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: css.cssVar(scrollbar--color) transparent;
+}
+
+.navigation-first .aside-inner {
+  top: var(--_header-height, 0px);
+  max-height: calc(100dvh - var(--_header-height, 0px));
+}
+
+.scroll-main .aside-inner {
+  position: static;
+  height: 100%;
+  max-height: none;
+}
+
+// ------------------------------------
+// Backdrop behind an open drawer or aside sheet
+.backdrop {
+  position: css.cssVar(over--position);
+  inset: 0;
+  z-index: css.cssVar(backdrop--z-index);
+  background-color: css.cssVar(backdrop--background-color);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity $_duration $_easing,
+    visibility 0s linear $_duration;
+}
+
+.drawer-open .backdrop,
+.sheet-open .backdrop {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity $_duration $_easing,
+    visibility 0s linear 0s;
+}
+
+// ------------------------------------
+// Presentations. Each mixin is one state of the navigation; the measured state (classes set after the first
+// ResizeObserver callback) and the server-rendered first paint (container queries + attributes) share them.
+@mixin side-open {
+  --_navigation-column: #{css.cssVar(navigation--width)};
+}
+
+@mixin side-closed {
+  --_navigation-column: 0px;
+
+  .navigation {
+    visibility: hidden;
+    border-inline-end-width: 0;
+    transition: visibility 0s linear $_duration;
+  }
+}
+
+@mixin rail-collapsed {
+  --_navigation-column: #{css.cssVar(navigation__rail--width)};
+}
+
+@mixin over {
+  --_navigation-column: 0px;
+
+  .navigation {
+    position: css.cssVar(over--position);
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: calc(#{css.cssVar(backdrop--z-index)} + 1);
+    width: css.cssVar(navigation__over--width);
+    border-inline-end: 0;
+    transform: translateX(var(--_closed-shift));
+    visibility: hidden;
+    transition:
+      transform $_duration $_easing,
+      box-shadow $_duration $_easing,
+      visibility 0s linear $_duration;
+  }
+
+  .navigation-inner {
+    position: static;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+}
+
+@mixin over-open {
+  .navigation {
+    transform: none;
+    visibility: visible;
+    box-shadow: css.cssVar(over--box-shadow);
+    transition:
+      transform $_duration $_easing,
+      box-shadow $_duration $_easing,
+      visibility 0s linear 0s;
+  }
+}
+
+@mixin aside-column {
+  --_aside-column: #{css.cssVar(aside--width)};
+}
+
+@mixin aside-closed {
+  .aside {
+    visibility: hidden;
+    border-inline-start-width: 0;
+    transition: visibility 0s linear $_duration;
+  }
+}
+
+@mixin aside-sheet {
+  --_aside-column: 0px;
+
+  .aside {
+    position: css.cssVar(over--position);
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: calc(#{css.cssVar(backdrop--z-index)} + 1);
+    width: min(#{css.cssVar(aside--width)}, 92%);
+    border-inline-start: 0;
+    transform: translateX(calc(-1 * var(--_closed-shift)));
+    visibility: hidden;
+    transition:
+      transform $_duration $_easing,
+      box-shadow $_duration $_easing,
+      visibility 0s linear $_duration;
+  }
+
+  .aside-inner {
+    position: static;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+}
+
+@mixin aside-sheet-open {
+  .aside {
+    transform: none;
+    visibility: visible;
+    box-shadow: css.cssVar(over--box-shadow);
+    transition:
+      transform $_duration $_easing,
+      box-shadow $_duration $_easing,
+      visibility 0s linear 0s;
+  }
+}
+
+// Measured
+.c2-app-shell.measured {
+  &.mode-side.navigation-opened {
+    @include side-open;
+  }
+  &.mode-side:not(.navigation-opened) {
+    @include side-closed;
+  }
+  &.mode-rail.navigation-opened {
+    @include side-open;
+  }
+  &.mode-rail:not(.navigation-opened) {
+    @include rail-collapsed;
+  }
+  &.mode-over {
+    @include over;
+  }
+  &.mode-over.navigation-opened {
+    @include over-open;
+  }
+
+  &.bp-desktop.aside-opened {
+    @include aside-column;
+  }
+  &.bp-desktop:not(.aside-opened) {
+    @include aside-closed;
+  }
+  &:not(.bp-desktop) {
+    @include aside-sheet;
+  }
+  &:not(.bp-desktop).aside-opened {
+    @include aside-sheet-open;
+  }
+}
+
+// Server-rendered first paint: the same states from the width alone, the mode attributes and their defaults.
+@container (max-width: 599.98px) {
+  .c2-app-shell:not(.measured) {
+    @include over;
+    @include aside-sheet;
+  }
+}
+
+@container (min-width: 600px) and (max-width: 959.98px) {
+  .c2-app-shell:not(.measured) {
+    @include rail-collapsed;
+    @include aside-sheet;
+  }
+  :host([tablet-mode='side']) .c2-app-shell:not(.measured) {
+    @include side-open;
+  }
+  :host([tablet-mode='over']) .c2-app-shell:not(.measured) {
+    @include over;
+  }
+}
+
+@container (min-width: 960px) {
+  .c2-app-shell:not(.measured) {
+    @include side-open;
+    @include aside-closed;
+  }
+  :host([desktop-mode='rail']) .c2-app-shell:not(.measured) {
+    @include rail-collapsed;
+  }
+  :host([desktop-mode='over']) .c2-app-shell:not(.measured) {
+    @include over;
+  }
+  :host([aside-opened]) .c2-app-shell:not(.measured) {
+    @include aside-column;
+
+    .aside {
+      visibility: visible;
+      border-inline-start: $_divider;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-app-shell,
+  .navigation,
+  .aside,
+  .backdrop {
+    transition-duration: 0s !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .navigation,
+  .aside {
+    border-color: CanvasText;
+  }
+}
