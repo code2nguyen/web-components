@@ -74,6 +74,22 @@ export async function dataUrlToBlob(url: string): Promise<Blob> {
   return (await fetch(url)).blob()
 }
 
+/** How long a pasted web image is waited for before it keeps its address. */
+const WEB_IMAGE_TIMEOUT_MS = 30_000
+
+/**
+ * A web image's bytes, to upload an image pasted from a site: fetched without cookies, so only an image its site lets
+ * other pages read (CORS) comes back. Rejects for one it does not, an error, an answer that is not an image, or no
+ * answer in time.
+ */
+export async function fetchWebImage(url: string): Promise<Blob> {
+  const response = await fetch(url, { credentials: 'omit', signal: AbortSignal.timeout(WEB_IMAGE_TIMEOUT_MS) })
+  if (!response.ok) throw new DOMException(`The image could not be fetched (${response.status})`, 'NetworkError')
+  const blob = await response.blob()
+  if (!blob.type.startsWith('image/')) throw new DOMException('The address is not an image', 'NotSupportedError')
+  return blob
+}
+
 /**
  * The stored `src` an editor copied an image with (`data-c2-image-src`), when it was copied in this application (same
  * origin), whose store has it. From elsewhere it is the image itself that is pasted, not an id this store lacks.
@@ -92,23 +108,33 @@ export function hasOwnImage(html: string): boolean {
 
 /**
  * The image an `<img>` of pasted HTML is, or `null` for one not worth a block: an icon or emoji inline in the text
- * (drawn under 48px), or one only the copying application can open (`file:`, `cid:`, `blob:`).
+ * (drawn under 48px), or one only the copying application can open (`file:`, `cid:`, `blob:`). `web` marks one copied
+ * from another page with its web address, which an editor with an uploader copies into the application's store; an
+ * image copied in this application keeps its stored `src`, whatever it is.
  */
-export function imageFromHtml(image: HTMLImageElement): EditorImageAttrs | null {
+export function imageFromHtml(image: HTMLImageElement): (EditorImageAttrs & { web?: true }) | null {
   const own = ownImageSrc(image)
   const src = own ?? image.getAttribute('src') ?? ''
-  if (!own && !/^(data:image\/|https?:)/i.test(src)) return null
+  if (!own && !isDataUrl(src) && !isWebUrl(src)) return null
   // Its size from its attributes, else its inline style (as mail and chat write an emoji's). Small both ways, or
   // narrow, it is an icon; a wide, short banner is still an image.
   const size = (name: 'width' | 'height') => Number(image.getAttribute(name)) || parseFloat(image.style[name]) || null
   const width = size('width')
   const height = size('height')
   if ((width !== null && width < MIN_IMAGE_WIDTH) || (width === null && height !== null && height < MIN_IMAGE_WIDTH)) return null
-  return { src, alt: image.getAttribute('alt') ?? '', width: Number(image.getAttribute('width')) || null }
+  return {
+    src,
+    alt: image.getAttribute('alt') ?? '',
+    width: Number(image.getAttribute('width')) || null,
+    ...(!own && isWebUrl(src) ? { web: true as const } : {}),
+  }
 }
 
 /** Whether a `src` is an image held in the text itself. */
 export const isDataUrl = (src: string) => /^data:image\//i.test(src)
+
+/** Whether a `src` is an image on the web. */
+export const isWebUrl = (src: string) => /^https?:\/\//i.test(src)
 
 // ---- images being saved -------------------------------------------------------------------------------------------
 
