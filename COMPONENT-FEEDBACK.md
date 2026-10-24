@@ -24,7 +24,9 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-_Nothing open._
+| Component       | Severity | What happened                                                                                                                                                                                                                                                                                                                                                                                                       | Smallest fix                                                                                                                                                                    |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `c2-breadcrumb` | bug      | Rendered on the server (an Astro island without `client:only`, building the `c2-page-header` docs), `render()` reads `this.children` for the separator slot and the build fails with `TypeError: this.children is not iterable`; the server render also has no items, so hydration could not match the client's. The page-header pages use `client:only="lit"` on their breadcrumbs, like the breadcrumb page does. | Render the items without reading the light DOM on the server (or render nothing in the list until the first client update), and guard the `this.children` read with `isServer`. |
 
 ## Fixed
 

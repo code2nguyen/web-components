@@ -96,13 +96,13 @@ function isNavigation(path: EventTarget[]): boolean {
  * @slot footer - A status bar or page footer below main.
  * @slot skip-link - Replaces the built-in "Skip to main content" link.
  *
- * @csspart skip-link - The built-in skip link.
- * @csspart banner - Container of the `banner` slot.
- * @csspart header - Container of the `header` slot.
- * @csspart navigation - The navigation panel (the drawer in `over` mode).
- * @csspart main - The `<main>` element around the default slot.
- * @csspart aside - The aside panel (a sheet below 960px).
- * @csspart footer - Container of the `footer` slot.
+ * @csspart skip-link - The built-in skip link, the fallback content of the `skip-link` slot.
+ * @csspart banner - Container wrapping the `banner` slot.
+ * @csspart header - Container wrapping the `header` slot; it sticks to the top while the page scrolls.
+ * @csspart navigation - The navigation panel (the drawer in `over` mode), containing the `navigation-header`, `navigation` and `navigation-footer` slots.
+ * @csspart main - The `<main>` landmark region wrapping the default slot.
+ * @csspart aside - The aside panel (a sheet below 960px) containing the `aside` slot.
+ * @csspart footer - Container wrapping the `footer` slot.
  * @csspart backdrop - The backdrop behind an open drawer or aside sheet.
  *
  * @event {CustomEvent<NavigationOpenedChangeEventDetail>} navigation-opened-change - The user (a toggle, the backdrop, Escape, a link with `close-on-navigate`) or a width change opened or closed the navigation. Not fired when `navigationOpened` is set from code. Does not bubble.
@@ -317,13 +317,14 @@ export class AppShell extends LitElement {
     const opened = mode === 'over' ? false : this.preferred[mode]
     if (opened !== this.navigationOpened) {
       this.navigationOpened = opened
-      this.emit('navigation-opened-change', { opened, mode })
+      this.emitNavigation(opened, mode)
     }
     if (this.breakpoint !== 'desktop' && this.asideOpened) {
       this.asideOpened = false
-      this.emit('aside-opened-change', { opened: false })
+      this.emitAside(false)
     }
-    if (modeChanged || emitModeChange) this.emit('mode-change', { breakpoint: this.breakpoint, mode })
+    if (modeChanged || emitModeChange)
+      this.dispatchEvent(new CustomEvent<ModeChangeEventDetail>('mode-change', { detail: { breakpoint: this.breakpoint, mode } }))
   }
 
   private setNavigation(opened: boolean) {
@@ -334,17 +335,21 @@ export class AppShell extends LitElement {
       this.preferred[mode] = opened
       this.storePreference()
     }
-    this.emit('navigation-opened-change', { opened, mode })
+    this.emitNavigation(opened, mode)
   }
 
   private setAside(opened: boolean) {
     if (opened === this.asideOpened) return
     this.asideOpened = opened
-    this.emit('aside-opened-change', { opened })
+    this.emitAside(opened)
   }
 
-  private emit<K extends keyof AppShellEventMap>(type: K, detail: AppShellEventMap[K]['detail']) {
-    this.dispatchEvent(new CustomEvent(type, { detail }))
+  private emitNavigation(opened: boolean, mode: AppShellMode) {
+    this.dispatchEvent(new CustomEvent<NavigationOpenedChangeEventDetail>('navigation-opened-change', { detail: { opened, mode } }))
+  }
+
+  private emitAside(opened: boolean) {
+    this.dispatchEvent(new CustomEvent<AsideOpenedChangeEventDetail>('aside-opened-change', { detail: { opened } }))
   }
 
   private restorePreference() {

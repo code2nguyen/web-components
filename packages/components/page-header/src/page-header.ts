@@ -110,15 +110,15 @@ function foldOrder(actions: Action[]): Action[] {
  * @slot navigation - Tabs below the title, usually links with `aria-current="page"` on the current one.
  * @slot toolbar - A row of search and filters at the bottom of the header.
  *
- * @csspart base - The `<header>` element.
- * @csspart context - Container of the breadcrumb.
- * @csspart parent - Container of the parent link.
- * @csspart title-row - The row holding the title area and the actions.
- * @csspart leading - Container of the leading visual.
- * @csspart actions - Container of the actions.
+ * @csspart base - The `<header>` element containing every region.
+ * @csspart context - Container wrapping the `breadcrumb` slot; hidden below 600px.
+ * @csspart parent - Container wrapping the `parent` slot, whose fallback is the link derived from the breadcrumb; shown below 600px.
+ * @csspart title-row - The row containing the title area and the actions.
+ * @csspart leading - Box wrapping the `leading` slot; it sizes the slotted visual.
+ * @csspart actions - Container wrapping the `actions` slot, the More actions button and the primary action.
  * @csspart more-actions - The "More actions" button.
- * @csspart navigation - Container of the tabs.
- * @csspart toolbar - Container of the toolbar.
+ * @csspart navigation - Container wrapping the `navigation` slot.
+ * @csspart toolbar - Container wrapping the `toolbar` slot.
  * @csspart condensed - The condensed bar of a sticky page header.
  *
  * @event {CustomEvent<CondensedChangeEventDetail>} condensed-change - A sticky page header's title scrolled out of view or back in. Does not bubble.
