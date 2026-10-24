@@ -1,0 +1,141 @@
+---
+title: 'Master Detail'
+description: 'A list beside the record it opens, one pane at a time with a Back step when the element is narrow.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/components/button'
+import { List } from '@c2n/components/list'
+import { ListItem } from '@c2n/components/list-item'
+import { MasterDetail } from '@c2n/components/master-detail'
+import { StatusPanel } from '@c2n/components/status-panel'
+
+`c2-master-detail` lays out a list and the record it opens: an inbox and the open message, orders and the order, files and the preview. The layout follows the element's **own width**, not the window's, so it is right inside a dialog, a split panel or a narrow column. From `breakpoint` (720px) up it is a **split**: the `master` slot in a column beside the `detail` slot, with the `placeholder` slot in the detail pane while nothing is open. Below it, `collapse="stack"` (the default) shows one pane at a time: opening slides the detail over the list and moves focus into it, and the built-in Back bar returns to the list and to the row the user came from. `collapse="overlay"` instead slides the detail over the list, which stays visible behind a backdrop; Back, Escape or a click on the backdrop closes it. The element owns no selection: listen to your list, fill the `detail` slot and set `open`. Every user close fires a cancelable `close-request` first (cancel it to keep unsaved changes), and the layout in use is the `layout` property, the `layout-change` event and the `:state(split)` / `:state(stack)` / `:state(overlay)` custom states. Any element with a `master-detail-back` attribute inside the detail works as a Back button. Give the host a height (each pane scrolls on its own) and, in a flex or other shrink-to-fit parent, a width: it sizes from its container, not from its content.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/master-detail'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/master-detail
+<style>
+  .md-frame {
+    width: 100%;
+    height: 340px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .md-narrow {
+    max-width: 360px;
+  }
+  .md-medium {
+    max-width: 460px;
+  }
+  .md-record {
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .md-record h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .md-meta {
+    margin: 2px 0 12px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .md-record p {
+    margin: 0 0 16px;
+  }
+</style>
+<div data-label="Split (breakpoint 480px)">
+  <c2-master-detail class="md-frame md-inbox" breakpoint="480">
+    <c2-list slot="master" required aria-label="Inbox">
+      <c2-list-item value="ana">Ana Ruiz<span slot="description">Invoice 2041 charged twice</span></c2-list-item>
+      <c2-list-item value="kenji">Kenji Watanabe<span slot="description">SSO login loops back to sign-in</span></c2-list-item>
+      <c2-list-item value="priya">Priya Natarajan<span slot="description">Export to CSV drops a column</span></c2-list-item>
+      <c2-list-item value="lukas">Lukas Becker<span slot="description">Add a second admin seat</span></c2-list-item>
+    </c2-list>
+    <article slot="detail" class="md-record">
+      <h3 class="md-subject"></h3>
+      <div class="md-meta"></div>
+      <p class="md-body"></p>
+      <c2-button>Reply</c2-button>
+    </article>
+    <c2-status-panel slot="placeholder" heading="Select a conversation" description="The open message shows here."></c2-status-panel>
+  </c2-master-detail>
+</div>
+<div data-label="Stack (narrow)">
+  <c2-master-detail class="md-frame md-narrow md-inbox">
+    <c2-list slot="master" required aria-label="Inbox">
+      <c2-list-item value="ana">Ana Ruiz<span slot="description">Invoice 2041 charged twice</span></c2-list-item>
+      <c2-list-item value="kenji">Kenji Watanabe<span slot="description">SSO login loops back to sign-in</span></c2-list-item>
+      <c2-list-item value="priya">Priya Natarajan<span slot="description">Export to CSV drops a column</span></c2-list-item>
+      <c2-list-item value="lukas">Lukas Becker<span slot="description">Add a second admin seat</span></c2-list-item>
+    </c2-list>
+    <article slot="detail" class="md-record">
+      <h3 class="md-subject"></h3>
+      <div class="md-meta"></div>
+      <p class="md-body"></p>
+      <c2-button>Reply</c2-button>
+    </article>
+  </c2-master-detail>
+</div>
+<div data-label="Overlay">
+  <c2-master-detail class="md-frame md-medium md-inbox" collapse="overlay">
+    <c2-list slot="master" required aria-label="Inbox">
+      <c2-list-item value="ana">Ana Ruiz<span slot="description">Invoice 2041 charged twice</span></c2-list-item>
+      <c2-list-item value="kenji">Kenji Watanabe<span slot="description">SSO login loops back to sign-in</span></c2-list-item>
+      <c2-list-item value="priya">Priya Natarajan<span slot="description">Export to CSV drops a column</span></c2-list-item>
+      <c2-list-item value="lukas">Lukas Becker<span slot="description">Add a second admin seat</span></c2-list-item>
+    </c2-list>
+    <article slot="detail" class="md-record">
+      <h3 class="md-subject"></h3>
+      <div class="md-meta"></div>
+      <p class="md-body"></p>
+      <c2-button>Reply</c2-button>
+    </article>
+  </c2-master-detail>
+</div>
+
+<script type="module">
+  const records = new Map([
+    ['ana', ['Invoice 2041 charged twice', 'Ana Ruiz · 09:42', 'Our card was charged twice for the March invoice. Could you refund the duplicate charge?']],
+    ['kenji', ['SSO login loops back to sign-in', 'Kenji Watanabe · 09:10', 'After enabling Okta SSO every user lands back on the sign-in page.']],
+    ['priya', ['Export to CSV drops a column', 'Priya Natarajan · Yesterday', 'The CSV export of the orders table is missing the Region column since Tuesday.']],
+    ['lukas', ['Add a second admin seat', 'Lukas Becker · Yesterday', 'We need one more admin seat for our finance lead.']],
+  ])
+  // Fill the detail from the picked row, then open it.
+  const show = (layout, [subject, meta, body]) => (
+    (layout.querySelector('.md-subject').textContent = subject),
+    (layout.querySelector('.md-meta').textContent = meta),
+    (layout.querySelector('.md-body').textContent = body),
+    (layout.open = true)
+  )
+  document.querySelectorAll('.md-inbox').forEach((layout) =>
+    layout.querySelector('c2-list').addEventListener('selection-change', (event) => show(layout, records.get(event.detail.value[0]))),
+  )
+</script>
+```
+
+The app decides what "open" means: fill the `detail` slot from the selected row, then set `open`. In the split layout the selection stays visible and focus stays in the list, so the arrow keys and Enter walk through records; in the other two, Back clears `open` and puts focus back on the row.
+
+```typescript tag=CodeBlock
+const layout = document.querySelector('c2-master-detail')
+list.addEventListener('selection-change', (event) => {
+  showRecord(event.detail.value[0])
+  layout.open = true
+})
+layout.addEventListener('close-request', (event) => {
+  if (form.dirty && !confirm('Discard your changes?')) event.preventDefault()
+})
+```

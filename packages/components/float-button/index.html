@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-float-button</title>
+    <script type="module" src="/src/float-button.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        grid-template-columns: repeat(2, 320px);
+        gap: 24px;
+      }
+      .stage {
+        contain: layout;
+        position: relative;
+        height: 260px;
+        border: 1px dashed #d4d4d8;
+        border-radius: 8px;
+      }
+      .extended {
+        --c2-float-button__label--display: inline;
+        --c2-float-button__button--padding-inline: 20px;
+      }
+      .square {
+        --c2-float-button__button--border-radius: 16px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="stage">
+      <c2-float-button label="Create">
+        <c2-float-button-action label="Upload file" value="upload">⬆</c2-float-button-action>
+        <c2-float-button-action label="New note" value="note">✎</c2-float-button-action>
+        <c2-float-button-action label="Share link" value="link">🔗</c2-float-button-action>
+      </c2-float-button>
+    </div>
+    <div class="stage">
+      <c2-float-button label="Share" direction="left" trigger="hover" class="square">
+        <c2-float-button-action label="Copy" value="copy">⧉</c2-float-button-action>
+        <c2-float-button-action label="Mail" value="mail">✉</c2-float-button-action>
+      </c2-float-button>
+    </div>
+    <div class="stage">
+      <c2-float-button label="Compose" class="extended"></c2-float-button>
+    </div>
+    <div class="stage">
+      <c2-float-button label="Menu" direction="down" style="--c2-float-button--inset: 24px 24px auto auto">
+        <c2-float-button-action label="Settings" value="settings">⚙</c2-float-button-action>
+        <c2-float-button-action label="Help" value="help" disabled>?</c2-float-button-action>
+      </c2-float-button>
+    </div>
+    <script type="module">
+      for (const fab of document.querySelectorAll('c2-float-button')) {
+        fab.addEventListener('action-select', (event) => console.log('action-select', event.detail.value))
+        fab.addEventListener('toggle', (event) => console.log('toggle', event.newState))
+      }
+    </script>
+  </body>
+</html>
