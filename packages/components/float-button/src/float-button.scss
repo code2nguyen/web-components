@@ -1,0 +1,278 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-float-button,
+  $theme: (
+    position: fixed,
+    inset: auto 24px 24px auto,
+    z-index: 100,
+
+    button--size: 56px,
+    button--padding-inline: 16px,
+    button--gap: 8px,
+    button--border-radius: 999px,
+    button--border: none,
+    button--background-color: rgb(2, 101, 220),
+    button__hover--background-color: #0154b8,
+    button__open--background-color: #0154b8,
+    button--color: #ffffff,
+    button--box-shadow: (
+      0 6px 16px rgba(24, 24, 27, 0.2),
+      0 2px 4px rgba(24, 24, 27, 0.12),
+    ),
+    button__hover--box-shadow: (
+      0 10px 24px rgba(24, 24, 27, 0.24),
+      0 3px 6px rgba(24, 24, 27, 0.14),
+    ),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 3px,
+    disabled--opacity: 0.38,
+
+    icon--size: 24px,
+    icon__open--transform: rotate(45deg),
+    label--display: none,
+    label--font-size: 14px,
+    label--font-weight: 600,
+
+    actions--gap: 12px,
+    actions--offset: 16px,
+    actions--transition-duration: 200ms,
+    actions--stagger: 30ms,
+  )
+);
+
+$duration: css.cssVar(actions--transition-duration);
+$stagger: css.cssVar(actions--stagger);
+
+:host {
+  position: css.cssVar(position);
+  inset: css.cssVar(inset);
+  z-index: css.cssVar(z-index);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.root {
+  position: relative;
+  display: inline-flex;
+}
+
+// Button
+
+.button {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(button--gap);
+  min-width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+  padding: 0 css.cssVar(button--padding-inline);
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  background-color: css.cssVar(button--background-color);
+  color: css.cssVar(button--color);
+  box-shadow: css.cssVar(button--box-shadow);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: animation.standard(background-color), animation.standard(box-shadow), animation.standard(transform, 150ms);
+
+  &:hover {
+    background-color: css.cssVar(button__hover--background-color);
+    box-shadow: css.cssVar(button__hover--box-shadow);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+.open .button {
+  background-color: css.cssVar(button__open--background-color);
+}
+
+.icons {
+  display: grid;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+
+  > * {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: animation.standard(transform), animation.standard(opacity);
+  }
+}
+
+.icon svg,
+::slotted([slot='icon']),
+::slotted([slot='open-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.has-actions.open .icon {
+  transform: css.cssVar(icon__open--transform);
+}
+
+.open-icon {
+  opacity: 0;
+  transform: rotate(-45deg);
+}
+
+.has-actions.has-open-icon.open {
+  .icon {
+    opacity: 0;
+  }
+  .open-icon {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.label {
+  display: css.cssVar(label--display);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// Speed dial. The container is as wide (or tall) as the button, so the actions centre on its axis.
+
+.actions {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear $duration;
+}
+
+.has-actions.open .actions {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.root:not(.has-actions) .actions {
+  display: none;
+}
+
+.direction-up .actions,
+.direction-down .actions {
+  left: 0;
+  right: 0;
+}
+
+.direction-left .actions,
+.direction-right .actions {
+  top: 0;
+  bottom: 0;
+  // Horizontal dials put the label chip above the button, shown only for the hovered or focused action: the
+  // buttons are closer together than the labels are wide.
+  --_c2-float-button-action-label-inset: auto auto calc(100% + 8px) 50%;
+  --_c2-float-button-action-label-transform: translateX(-50%);
+  --_c2-float-button-action-label-opacity: 0;
+  --_c2-float-button-action-label-pointer-events: none;
+}
+
+.direction-up .actions {
+  bottom: 100%;
+  flex-direction: column-reverse;
+  padding-bottom: css.cssVar(actions--offset);
+}
+
+.direction-down .actions {
+  top: 100%;
+  flex-direction: column;
+  padding-top: css.cssVar(actions--offset);
+}
+
+.direction-left .actions {
+  right: 100%;
+  flex-direction: row-reverse;
+  padding-right: css.cssVar(actions--offset);
+}
+
+.direction-right .actions {
+  left: 100%;
+  flex-direction: row;
+  padding-left: css.cssVar(actions--offset);
+}
+
+// Each action animates itself from these inherited private properties (see float-button-action.scss), so the
+// animation still reaches actions a framework wraps in a `display: contents` element.
+.actions {
+  --_c2-float-button-action-duration: #{$duration};
+  --_c2-float-button-action-opacity: 0;
+  --_c2-float-button-action-transform: scale(0.6);
+}
+
+.direction-up .actions {
+  --_c2-float-button-action-transform: translateY(12px) scale(0.6);
+}
+.direction-down .actions {
+  --_c2-float-button-action-transform: translateY(-12px) scale(0.6);
+}
+.direction-left .actions {
+  --_c2-float-button-action-transform: translateX(12px) scale(0.6);
+}
+.direction-right .actions {
+  --_c2-float-button-action-transform: translateX(-12px) scale(0.6);
+}
+
+.has-actions.open .actions {
+  --_c2-float-button-action-opacity: 1;
+  --_c2-float-button-action-transform: none;
+}
+
+// Stagger the opening, nearest action first.
+@for $i from 2 through 8 {
+  .has-actions.open ::slotted(:nth-child(#{$i})) {
+    --_c2-float-button-action-delay: calc(#{$stagger} * #{$i - 1});
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .icons > * {
+    transition-duration: 0s !important;
+  }
+  .actions,
+  .direction-up .actions,
+  .direction-down .actions,
+  .direction-left .actions,
+  .direction-right .actions {
+    --_c2-float-button-action-duration: 0s;
+    --_c2-float-button-action-transform: none;
+  }
+  ::slotted(*) {
+    --_c2-float-button-action-delay: 0s !important;
+  }
+}

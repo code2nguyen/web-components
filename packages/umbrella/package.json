@@ -349,6 +349,14 @@
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
     },
+    "./float-button": {
+      "types": "./dist/float-button.d.ts",
+      "default": "./dist/float-button.js"
+    },
+    "./float-button/float-button-action": {
+      "types": "./dist/float-button/float-button-action.d.ts",
+      "default": "./dist/float-button/float-button-action.js"
+    },
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
@@ -973,6 +981,7 @@
     "@c2n/diff-viewer": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
+    "@c2n/float-button": "*",
     "@c2n/flow": "*",
     "@c2n/form": "*",
     "@c2n/form-field": "*",

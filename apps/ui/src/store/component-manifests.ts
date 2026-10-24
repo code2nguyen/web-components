@@ -41,6 +41,7 @@ import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
+import floatButton from '@c2n/float-button/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
@@ -187,6 +188,7 @@ export const componentManifests = (function () {
     featherIcons,
     fieldset,
     filterBuilder,
+    floatButton,
     flow,
     form,
     formField,

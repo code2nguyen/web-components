@@ -8,6 +8,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Button** — `c2-button` · `@c2n/components/button` — Themeable button with slots for text, prefix, suffix and running icons.
 - **Button Group** — `c2-button-group` · `@c2n/components/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`.
 - **Copy Button** — `c2-copy-button` · `@c2n/components/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
+- **Float Button** — `c2-float-button, c2-float-button-action` · `@c2n/components/float-button` — A floating action button for the main action of a screen, which can expand into a speed dial of related actions. Children: `c2-float-button-action`.
 - **Icon Button** — `c2-icon-button` · `@c2n/components/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
 - **Split Button** — `c2-split-button` · `@c2n/components/split-button` — A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method. Children: `c2-menu-item`.
 

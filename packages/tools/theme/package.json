@@ -95,6 +95,7 @@
         "../../components/diff-viewer:build",
         "../../components/fieldset:build",
         "../../components/filter-builder:build",
+        "../../components/float-button:build",
         "../../components/flow:build",
         "../../components/form-field:build",
         "../../components/form:build",
