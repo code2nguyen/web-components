@@ -1,0 +1,140 @@
+---
+title: 'Page Header'
+description: 'The top of a page: breadcrumb or parent link, your heading with status badges, description, metadata, page actions that fold into a menu, tabs and a toolbar.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PageHeader } from '@c2n/components/page-header'
+import { Breadcrumb } from '@c2n/components/breadcrumb'
+import { LinkButton } from '@c2n/components/link-button'
+import { Button } from '@c2n/components/button'
+import { Badge } from '@c2n/components/badge'
+import { SearchField } from '@c2n/components/search-field'
+import { FeatherLayersIcon as FeatherLayers } from '@c2n/feather-icons/icons/layers.js'
+
+`c2-page-header` is the top of a page. Write your heading in the default slot (usually an `<h1>`: the header styles it and never chooses its level), then fill what the page needs: `breadcrumb` (a `c2-breadcrumb`), a `leading` visual, `title-suffix` badges, a `description`, `meta` facts, page `actions`, `navigation` tabs and a `toolbar` for search and filters.
+
+It lays out from its **own width**. Below 600px the breadcrumb gives way to a parent link ("Back to Batches", taken from the breadcrumb's second-to-last item or from the `parent` slot), the leading visual hides and the actions take their own row. Actions that do not fit fold into a **More actions** menu: those without `overflow-priority` first, from the end of the row, then by ascending priority. The action marked `primary` never folds. A folded link stays a link and a folded submit button still submits its form; other elements, such as a `c2-split-button`, never fold.
+
+With `sticky`, once the title has scrolled away a condensed bar keeps the parent link, the title, its badges and the primary action in view. Inside a `c2-app-shell` it sits right under the shell's header with no extra CSS. A page header rendered on the server cannot fold its actions, so they wrap instead.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/page-header'
+```
+
+The examples use an icon from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+The narrow frames show the parent link and folded actions; open **More actions** to see them.
+
+```html tag=UsageBlock,package=@c2n/page-header
+<style>
+  .header-frame {
+    width: 100%;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .header-frame.narrow {
+    max-width: 380px;
+  }
+  .header-frame.medium {
+    max-width: 640px;
+  }
+  .demo-page-header {
+    --c2-page-header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  /* The site styles headings globally; hand the title back to the page header's own typography. */
+  .demo-page-header h1 {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+  .secondary {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .lead {
+    color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .tabs a {
+    padding: 8px 10px 10px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .tabs a[aria-current='page'] {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    border-bottom-color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<div data-label="Record with tabs">
+  <div class="header-frame">
+    <c2-page-header class="demo-page-header">
+      <c2-breadcrumb client:only="lit" slot="breadcrumb">
+        <c2-link-button href="#usage">Payouts</c2-link-button>
+        <c2-link-button href="#usage">Batches</c2-link-button>
+        <c2-link-button>B-0412</c2-link-button>
+      </c2-breadcrumb>
+      <c2-feather-layers slot="leading" class="lead"></c2-feather-layers>
+      <h1>October supplier run</h1>
+      <c2-badge slot="title-suffix" tone="warning">Awaiting approval</c2-badge>
+      <p slot="description">Batch B-0412 · 12 payouts to EU suppliers, due before the 15:30 CET SEPA cut-off.</p>
+      <span slot="meta">Total €1,284,300.00 · 1 of 2 approvals · Created by V. Nguyen</span>
+      <c2-button slot="actions" class="secondary" overflow-priority="1">Export</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="2">Reject</c2-button>
+      <c2-button slot="actions" primary>Approve batch</c2-button>
+      <nav slot="navigation" class="tabs" aria-label="Batch">
+        <a href="#usage" aria-current="page">Payouts</a>
+        <a href="#usage">Approvals</a>
+        <a href="#usage">Activity</a>
+      </nav>
+    </c2-page-header>
+  </div>
+</div>
+<div data-label="List page with toolbar">
+  <div class="header-frame">
+    <c2-page-header class="demo-page-header">
+      <h1>Beneficiaries</h1>
+      <p slot="description">People and companies Acme EU pays. Verified accounts can receive SEPA Instant.</p>
+      <c2-button slot="actions" class="secondary">Import CSV</c2-button>
+      <c2-button slot="actions" primary>Add beneficiary</c2-button>
+      <c2-search-field slot="toolbar" aria-label="Search beneficiaries" placeholder="Search name or IBAN"></c2-search-field>
+    </c2-page-header>
+  </div>
+</div>
+<div data-label="Narrow · parent link and More actions">
+  <div class="header-frame narrow">
+    <c2-page-header client:only="lit" class="demo-page-header">
+      <c2-breadcrumb slot="breadcrumb">
+        <c2-link-button href="#usage">Payouts</c2-link-button>
+        <c2-link-button href="#usage">Batches</c2-link-button>
+        <c2-link-button>B-0412</c2-link-button>
+      </c2-breadcrumb>
+      <h1>October supplier run</h1>
+      <c2-badge slot="title-suffix" tone="warning">Awaiting approval</c2-badge>
+      <c2-button slot="actions" class="secondary">Duplicate</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="1">Export</c2-button>
+      <c2-button slot="actions" class="secondary" overflow-priority="2">Reject</c2-button>
+      <c2-button slot="actions" primary>Approve batch</c2-button>
+    </c2-page-header>
+  </div>
+</div>
+```

@@ -7,6 +7,7 @@ import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem, isFromInteractiveContent } from '@c2n/list-item'
 import { provide } from '@lit/context'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
 
 export interface SelectionChangeEventDetail {
   value: string[]
@@ -23,6 +24,24 @@ export interface List {
   removeEventListener: TypedRemoveEventListener<List, ListEventMap>
 }
 
+/** How deep a row's `c2-list-item` may sit inside its wrapper: an island around a `c2-swipe-action` around an island. */
+const ROW_WRAPPER_DEPTH = 3
+
+/**
+ * The `c2-list-item` a slotted element stands for: itself, or the first one inside it within a few levels, which is
+ * how a row is wrapped by a framework island or a `c2-swipe-action`. Text nodes between tags are skipped.
+ */
+function rowItem(element: Element, depth = 0): ListItem | undefined {
+  if (element instanceof ListItem) return element
+  // A list nested in a row owns its own items.
+  if (depth >= ROW_WRAPPER_DEPTH || element instanceof List) return undefined
+  for (const child of element.children) {
+    const item = rowItem(child, depth + 1)
+    if (item) return item
+  }
+  return undefined
+}
+
 /**
  * A vertical list of `c2-list-item` rows with single or multiple selection. The list owns the selection: it reads the
  * `value` of the clicked row, updates its own `value` (a `;`-separated list in the attribute, an array in the property)
@@ -35,13 +54,16 @@ export interface List {
  * Besides rows, the default slot accepts `<hr>` dividers and `<h1>`–`<h6>` group headings; both are styled by the
  * `__divider` and `__heading` tokens and skipped by selection and keyboard.
  *
+ * Swipe actions: wrap a row in a `c2-swipe-action` and set `swipeable` to let it slide sideways to reveal its actions.
+ * Swiping is off by default: without `swipeable`, a wrapped row stays still and its actions are hidden and inert.
+ *
  * The list never writes classes or attributes on its host or its rows. A list with no top (bottom) padding matches
  * `c2-list:state(padding-top-0)` (`:state(padding-bottom-0)`) and hands its corner radius to the first (last) row; a
  * selected row next to another selected row matches `c2-list-item:state(joined-before)` / `:state(joined-after)`.
  *
  * @tag c2-list
  *
- * @slot default - The rows: `c2-list-item` elements (or wrappers whose first child is a `c2-list-item`), plus `<hr>` dividers and heading elements.
+ * @slot default - The rows: `c2-list-item` elements, or wrappers around one (a framework island, a `c2-swipe-action` for swipe actions), plus `<hr>` dividers and heading elements.
  *
  * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected values, `detail.data` the matching `data` of each row. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
@@ -110,6 +132,12 @@ export class List extends LitElement {
   /** Keep at least one row selected: clicking the only selected row does nothing. */
   @property({ type: Boolean }) required: boolean = false
 
+  /**
+   * Lets rows wrapped in a `c2-swipe-action` swipe to reveal their actions, and run them by their shortcut keys. Off by
+   * default: a wrapped row then stays still, and its actions are hidden and out of the Tab order.
+   */
+  @property({ type: Boolean }) swipeable: boolean = false
+
   @query('slot')
   private listItemSlot!: HTMLSlotElement
 
@@ -122,7 +150,7 @@ export class List extends LitElement {
   /** Slotted rows, in DOM order (dividers and headings excluded). */
   get items(): ListItem[] {
     return (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
-      .map((slotItem) => (slotItem instanceof ListItem ? slotItem : slotItem.firstChild))
+      .map((slotItem) => rowItem(slotItem))
       .filter((item): item is ListItem => item instanceof ListItem)
   }
 
@@ -137,6 +165,41 @@ export class List extends LitElement {
       }
     }
     this.syncRows()
+    this.pushSwipeable()
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.addEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
+    this.addEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+  }
+
+  override disconnectedCallback(): void {
+    this.removeEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
+    this.removeEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+    super.disconnectedCallback()
+  }
+
+  /**
+   * A swipe row inside the list connected after the list and asks whether it may swipe. Only a row wrapper is the
+   * list's to answer: a swipe row inside a row's own content (its description, say) is left alone.
+   */
+  private handleSwipeRequest = (event: Event): void => {
+    for (let node = (event.target as Element).parentElement; node && node !== this; node = node.parentElement) {
+      if (node instanceof ListItem) return
+    }
+    event.stopPropagation()
+    ;(event as CustomEvent<SwipeRequestEventDetail>).detail.respond(this.swipeable)
+  }
+
+  /** A row that is not wrapped lets the setting bubble back up to the list: it ends here. */
+  private stopOwnSwipeEvent = (event: Event): void => event.stopPropagation()
+
+  /** Tells the swipe row around each `c2-list-item` whether it may swipe; the event bubbles from the item to its row. */
+  private pushSwipeable(): void {
+    for (const item of this.items) {
+      item.dispatchEvent(new CustomEvent<SwipeContainerEventDetail>(SWIPE_CONTAINER_EVENT, { bubbles: true, detail: { swipeable: this.swipeable } }))
+    }
   }
 
   /**
@@ -197,7 +260,9 @@ export class List extends LitElement {
     if (this.disabled) return
     // Keys typed into a control inside a row (Enter on a delete button, letters in a text field) belong to it.
     const row = this.items.find((item) => item.contains(event.target as Node))
-    if (row && isFromInteractiveContent(event, row)) return
+    // A key pressed outside every row (on a swipe action beside its row, say) belongs to whatever has focus.
+    if (!row) return
+    if (isFromInteractiveContent(event, row)) return
     const enabled = this.enabledItems
     if (enabled.length === 0) return
     const current = event.target instanceof ListItem ? event.target : this.focusedItem
@@ -282,6 +347,7 @@ export class List extends LitElement {
     if (changedProperties.has('value') || changedProperties.has('disabled')) {
       this.syncRows()
     }
+    if (changedProperties.has('swipeable')) this.pushSwipeable()
     this.internals.role = 'listbox'
     this.internals.ariaMultiSelectable = String(this.multiple)
     this.internals.ariaDisabled = this.disabled ? 'true' : null

@@ -30,6 +30,75 @@
       "reason": "The count line sets the type the slotted label inherits."
     },
     {
+      "tag": "c2-app-shell",
+      "slot": "",
+      "decision": "part",
+      "parts": ["main"],
+      "reason": "The main landmark owns the default slot's background and padding."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "aside",
+      "decision": "part",
+      "parts": ["aside"],
+      "reason": "The aside panel owns the aside slot's surface and width."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "banner",
+      "decision": "part",
+      "parts": ["banner"],
+      "reason": "The banner region owns the banner slot's component-side presentation."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header region owns the header slot's position and stacking."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "navigation",
+      "decision": "part",
+      "parts": ["navigation"],
+      "reason": "The navigation panel owns the navigation slot's surface, width and padding."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "navigation-footer",
+      "decision": "part",
+      "parts": ["navigation"],
+      "reason": "The navigation panel owns the navigation-footer slot's surface, width and padding."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "navigation-header",
+      "decision": "part",
+      "parts": ["navigation"],
+      "reason": "The navigation panel owns the navigation-header slot's surface, width and padding."
+    },
+    {
+      "tag": "c2-app-shell",
+      "slot": "skip-link",
+      "decision": "assigned-content",
+      "reason": "The skip-link slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-app-shell-toggle",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-app-shell-toggle__icon--size"],
+      "reason": "The button sizes the slotted icon and its default glyph through the icon size variable."
+    },
+    {
       "tag": "c2-area-chart",
       "slot": "actions",
       "decision": "part",
@@ -1564,6 +1633,81 @@
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-page-header",
+      "slot": "",
+      "decision": "variables",
+      "variables": [
+        "--c2-page-header__title--font-size",
+        "--c2-page-header__title--font-weight",
+        "--c2-page-header__title--line-height",
+        "--c2-page-header__title--line-clamp",
+        "--c2-page-header__title--color"
+      ],
+      "reason": "The slotted heading takes the title typography and line clamp through the title variables."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions region owns the actions slot's layout, folding and the More actions button."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "breadcrumb",
+      "decision": "part",
+      "parts": ["context"],
+      "reason": "The context region owns the breadcrumb slot's layout and narrow-width hiding."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "description",
+      "decision": "variables",
+      "variables": ["--c2-page-header__description--color", "--c2-page-header__description--font-size"],
+      "reason": "The description slot's text colour and size come from the description variables."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "leading",
+      "decision": "part",
+      "parts": ["leading"],
+      "reason": "The leading region sizes the slotted visual."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "meta",
+      "decision": "variables",
+      "variables": ["--c2-page-header__meta--color", "--c2-page-header__meta--font-size", "--c2-page-header__meta--gap"],
+      "reason": "The meta row's colour, size and spacing come from the meta variables."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "navigation",
+      "decision": "part",
+      "parts": ["navigation"],
+      "reason": "The navigation region owns the navigation slot's layout."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "parent",
+      "decision": "part",
+      "parts": ["parent"],
+      "reason": "The parent region owns the parent slot's layout and shows it below 600px."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "title-suffix",
+      "decision": "assigned-content",
+      "reason": "The title-suffix slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-page-header",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The toolbar region owns the toolbar slot's layout."
+    },
+    {
       "tag": "c2-sankey-chart",
       "slot": "actions",
       "decision": "part",
@@ -1690,6 +1834,27 @@
       "decision": "part",
       "parts": ["surface"],
       "reason": "The surface owns the slotted content's padding, background, shadow and the retract transform, through its part and --c2-sticky--* variables."
+    },
+    {
+      "tag": "c2-swipe-action",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The sliding content box around the default slot owns its background, padding and colour."
+    },
+    {
+      "tag": "c2-swipe-action",
+      "slot": "end",
+      "decision": "variables",
+      "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
+      "reason": "The end actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-swipe-action",
+      "slot": "start",
+      "decision": "variables",
+      "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
+      "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
     },
     {
       "tag": "c2-tour",
