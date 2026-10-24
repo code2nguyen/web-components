@@ -9,7 +9,7 @@ import depthStyles from './depth-chart.scss?inline'
 import { ChartBase, type ChartEventMap } from './chart-base.js'
 import { UplotChartBase, type UplotSeriesStyle } from './uplot-chart-base.js'
 import { steppedPaths, withAlpha } from './engines/uplot-paths.js'
-import { depthMessages } from './messages.js'
+import { depthMessages } from './depth-messages.js'
 import {
   buildDepthBook,
   depthAt,
