@@ -19,7 +19,7 @@ import { Button } from '@c2n/components/button'
 
 The family contains [line](../line-chart), [area](../area-chart), [bar](../bar-chart), [scatter](../scatter-chart), [bubble](../bubble-chart),
 [candlestick](../candlestick-chart), [gauge](../gauge-chart), [radar](../radar-chart), [pie](../pie-chart), [pyramid](../pyramid-chart), [butterfly](../butterfly-chart),
-[overlap](../overlap-chart), [heatmap](../heatmap-chart), [chord](../chord-chart) and
+[overlap](../overlap-chart), [heatmap](../heatmap-chart), [chord](../chord-chart), [depth](../depth-chart) and
 [sparkline](../sparkline). They are separate custom elements, but they inherit the same `ChartBase` and use the same
 normalized frame, series definitions, theme tokens, presenters, state UI, events and update pipeline.
 
@@ -43,7 +43,7 @@ The shared architecture keeps application code independent from the drawing engi
 
 ## Engines
 
-The components lazy-load optional peer engines only when first rendered. Line, area, bar and sparkline use
+The components lazy-load optional peer engines only when first rendered. Line, area, bar, sparkline and depth use
 [uPlot](https://github.com/leeoniya/uPlot) for a small, fast Cartesian path. Pie, gauge, scatter and candlestick use modular
 [Apache ECharts](https://echarts.apache.org/) for specialized series, labels, visual maps and canvas/SVG renderers.
 `chart-ready` reports the active engine; application code still sees the same chart API.
@@ -89,7 +89,7 @@ entrance animation. Both paths respect the user's reduced-motion preference.
 Install only the engine your selected elements need:
 
 ```bash tag=CodeBlock
-npm install @c2n/components uplot          # line, area, bar, sparkline
+npm install @c2n/components uplot          # line, area, bar, sparkline, depth
 npm install @c2n/components echarts        # pie, gauge, scatter, candlestick
 npm install @c2n/components uplot echarts  # the full family
 ```

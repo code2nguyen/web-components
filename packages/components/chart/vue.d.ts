@@ -18,6 +18,7 @@ import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { ChordChart } from '@c2n/chart/chord-chart.js'
+import type { DepthChart } from '@c2n/chart/depth-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
@@ -53,9 +54,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<AreaChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<AreaChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<AreaChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<AreaChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<AreaChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<AreaChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<AreaChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<AreaChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<AreaChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<AreaChart, 'point-click'>) => void
@@ -79,9 +80,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<BarChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<BarChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<BarChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<BarChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<BarChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<BarChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<BarChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<BarChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<BarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<BarChart, 'point-click'>) => void
@@ -111,9 +112,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<BubbleChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<BubbleChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<BubbleChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<BubbleChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<BubbleChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<BubbleChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<BubbleChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<BubbleChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
@@ -132,9 +133,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<ButterflyChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<ButterflyChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<ButterflyChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<ButterflyChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<ButterflyChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ButterflyChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<ButterflyChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<ButterflyChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<ButterflyChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ButterflyChart, 'point-click'>) => void
@@ -157,9 +158,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<CandlestickChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<CandlestickChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<CandlestickChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<CandlestickChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<CandlestickChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<CandlestickChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<CandlestickChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<CandlestickChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<CandlestickChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<CandlestickChart, 'point-click'>) => void
@@ -194,12 +195,40 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<ChordChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<ChordChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<ChordChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<ChordChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<ChordChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ChordChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<ChordChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<ChordChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<ChordChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ChordChart, 'point-click'>) => void
+      }
+    >
+    'c2-depth-chart': DefineComponent<
+      C2Props<DepthChart> & {
+        'base-label'?: unknown
+        'quote-label'?: unknown
+        'price-precision'?: unknown
+        'size-precision'?: unknown
+        'y-min'?: unknown
+        'y-max'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onPriceSelect?: (event: EventOf<DepthChart, 'price-select'>) => void
+        onRangeChange?: (event: EventOf<DepthChart, 'range-change'>) => void
+        onTooltipChange?: (event: EventOf<DepthChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<DepthChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<DepthChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<DepthChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<DepthChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<DepthChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<DepthChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<DepthChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<DepthChart, 'point-click'>) => void
       }
     >
     'c2-gauge-chart': DefineComponent<
@@ -219,9 +248,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<GaugeChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<GaugeChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<GaugeChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<GaugeChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<GaugeChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<GaugeChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<GaugeChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<GaugeChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<GaugeChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<GaugeChart, 'point-click'>) => void
@@ -261,9 +290,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<HeatmapChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<HeatmapChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<HeatmapChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<HeatmapChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<HeatmapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<HeatmapChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<HeatmapChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<HeatmapChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<HeatmapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<HeatmapChart, 'point-click'>) => void
@@ -284,9 +313,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<LineChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<LineChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<LineChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<LineChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<LineChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<LineChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<LineChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<LineChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<LineChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
@@ -317,9 +346,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<MapChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<MapChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<MapChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<MapChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<MapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<MapChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<MapChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<MapChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<MapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<MapChart, 'point-click'>) => void
@@ -361,9 +390,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<OverlapChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<OverlapChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<OverlapChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<OverlapChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<OverlapChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<OverlapChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<OverlapChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<OverlapChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<OverlapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<OverlapChart, 'point-click'>) => void
@@ -386,9 +415,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<PieChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<PieChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<PieChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<PieChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<PieChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<PieChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<PieChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<PieChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<PieChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<PieChart, 'point-click'>) => void
@@ -408,9 +437,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<PyramidChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<PyramidChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<PyramidChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<PyramidChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<PyramidChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<PyramidChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<PyramidChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<PyramidChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<PyramidChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<PyramidChart, 'point-click'>) => void
@@ -432,9 +461,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<RadarChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<RadarChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<RadarChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<RadarChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<RadarChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<RadarChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<RadarChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<RadarChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<RadarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<RadarChart, 'point-click'>) => void
@@ -455,9 +484,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<ScatterChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<ScatterChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<ScatterChart, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<ScatterChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<ScatterChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<ScatterChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<ScatterChart, 'range-change'>) => void
         onPointHover?: (event: EventOf<ScatterChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<ScatterChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<ScatterChart, 'point-click'>) => void
@@ -478,9 +507,9 @@ declare module 'vue' {
         onSeriesToggle?: (event: EventOf<Sparkline, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<Sparkline, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<Sparkline, 'legend-change'>) => void
-        onRangeChange?: (event: EventOf<Sparkline, 'range-change'>) => void
         onChartReady?: (event: EventOf<Sparkline, 'chart-ready'>) => void
         onChartError?: (event: EventOf<Sparkline, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<Sparkline, 'range-change'>) => void
         onPointHover?: (event: EventOf<Sparkline, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<Sparkline, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<Sparkline, 'point-click'>) => void

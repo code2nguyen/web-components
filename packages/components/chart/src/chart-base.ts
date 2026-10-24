@@ -468,6 +468,20 @@ export abstract class ChartBase extends LitElement {
     return false
   }
 
+  /**
+   * Whether a property only moves data, so a change confined to such properties takes the fast path. `data` and
+   * `revision` for every chart; a chart that reads its data from other properties (the depth chart's `bids` and
+   * `asks`) adds them, together with {@link buildFrame}.
+   */
+  protected isDataKey(key: string): boolean {
+    return DATA_KEYS.has(key)
+  }
+
+  /** Normalises the chart's data into a frame. A chart whose input is not `data` overrides it. */
+  protected buildFrame(): ChartFrame | undefined {
+    return this.frameBuilder.build(this.data, this.normalizeContext())
+  }
+
   /** Whether this chart type has an x axis to place `annotations` against. The cartesian charts turn it on. */
   protected get drawsAnnotations(): boolean {
     return false
@@ -551,8 +565,8 @@ export abstract class ChartBase extends LitElement {
    */
   protected override shouldUpdate(changed: PropertyValues): boolean {
     if (!this.hasUpdated || !this.adapter) return true
-    for (const key of changed.keys()) if (!DATA_KEYS.has(key as string)) return true
-    this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
+    for (const key of changed.keys()) if (!this.isDataKey(key as string)) return true
+    this.frame = this.buildFrame()
     this.#flushData()
     return false
   }
@@ -570,14 +584,14 @@ export abstract class ChartBase extends LitElement {
       changed.has('xType') ||
       this.reshapesFrame(changed)
     ) {
-      this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
+      this.frame = this.buildFrame()
       this.#dataDirty = true
     }
     if (changed.has('dataSource')) this.#bindDataSource()
 
     for (const key of changed.keys()) {
       const name = key as string
-      if (!DATA_KEYS.has(name) && !VIEW_ONLY_KEYS.has(name)) {
+      if (!this.isDataKey(name) && !VIEW_ONLY_KEYS.has(name)) {
         this.#optionsDirty = true
         break
       }
@@ -820,7 +834,7 @@ export abstract class ChartBase extends LitElement {
       await adapter.create(this.plotElement, this.buildOptions(context), this.projectData(this.frame, context), {
         hover: (detail) => this.handleEngineHover(detail),
         click: (detail) => this.handleEngineClick(detail),
-        rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
+        rangeChange: (detail) => this.handleEngineRangeChange(detail),
         viewChange: (detail) => this.handleEngineViewChange(detail),
         draw: () => this.#placeAnnotations(),
       })
@@ -931,6 +945,11 @@ export abstract class ChartBase extends LitElement {
     } else {
       this.#unsubscribe = () => controller.abort()
     }
+  }
+
+  /** The engine reports a new x window, from a zoom or a brush. A chart that owns its window itself overrides it. */
+  protected handleEngineRangeChange(detail: ChartRangeEventDetail): void {
+    this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail }))
   }
 
   /** The engine reports a zoom or pan of the view. Only the map chart has one. */
@@ -1137,6 +1156,7 @@ export abstract class ChartBase extends LitElement {
             ${this.renderAnnotations()}
             <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
             <div class="actions" part="actions">${this.renderActionsExtras()}<slot name="actions"></slot></div>
+            ${this.renderOverlayExtras()}
           </div>
           ${this.renderState()}
         </div>
@@ -1323,6 +1343,11 @@ export abstract class ChartBase extends LitElement {
 
   /** Controls drawn before the `actions` slot, such as the map chart's zoom buttons. */
   protected renderActionsExtras(): unknown {
+    return nothing
+  }
+
+  /** Marks laid over the plot below the tooltip, positioned by the chart itself, such as the depth chart's markers. */
+  protected renderOverlayExtras(): unknown {
     return nothing
   }
 

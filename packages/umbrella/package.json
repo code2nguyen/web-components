@@ -169,6 +169,10 @@
       "types": "./dist/chart/chord-chart.d.ts",
       "default": "./dist/chart/chord-chart.js"
     },
+    "./chart/depth-chart": {
+      "types": "./dist/chart/depth-chart.d.ts",
+      "default": "./dist/chart/depth-chart.js"
+    },
     "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"

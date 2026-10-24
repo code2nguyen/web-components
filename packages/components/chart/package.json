@@ -85,6 +85,10 @@
       "types": "./types/src/chord-chart.d.ts",
       "default": "./dist/chord-chart.js"
     },
+    "./depth-chart.js": {
+      "types": "./types/src/depth-chart.d.ts",
+      "default": "./dist/depth-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"
@@ -171,6 +175,9 @@
     "calendar heatmap",
     "chord diagram",
     "chord chart",
+    "depth chart",
+    "market depth",
+    "order book",
     "sparkline",
     "uplot",
     "echarts",
