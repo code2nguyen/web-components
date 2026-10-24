@@ -42,7 +42,7 @@ import '@c2n/components/table' // one entry per component: registers c2-table an
 import '@c2n/components/select'
 ```
 
-`import '@c2n/components'` registers every component at once. That suits a prototype or an internal tool, but no bundler can tree-shake a registration away, so an application you ship should import the entries it uses. The icon sets are not included (Phosphor alone has 1,512 elements); install `@c2n/feather-icons`, `@c2n/phosphor-icons` or `@c2n/symbols` next to it. Optional engines such as `uplot`, `echarts` and CodeMirror are optional peer dependencies: install the ones you use.
+`import '@c2n/components'` registers every component at once. That suits a prototype or an internal tool, but no bundler can tree-shake a registration away, so an application you ship should import the entries it uses. The icon sets are not included (Phosphor alone has 1,512 elements); install `@c2n/feather-icons`, `@c2n/phosphor-icons` or `@c2n/symbols` next to it. Optional engines such as `uplot`, `echarts`, CodeMirror and `mermaid` (the diagrams in `c2-mermaid` and `c2-markdown`) are optional peer dependencies: install the ones you use.
 
 ## Attributes and properties
 

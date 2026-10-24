@@ -157,3 +157,23 @@ test('mermaid loads only once a diagram has a source', async ({ page, renderScen
   await rendered(page.locator('c2-mermaid')).toBe(true)
   expect(urls.length).toBeGreaterThan(0)
 })
+
+test('without the mermaid package, a diagram keeps its source and says what to install', async ({ page, renderScenario }) => {
+  // The optional peer is missing: the module request fails as it would in an app that did not install it.
+  await page.route(/\/mermaid\.js(\?|$)/, (route) => route.abort())
+  await renderScenario('<c2-mermaid id="first"></c2-mermaid><c2-mermaid id="second"></c2-mermaid>')
+  const diagrams = page.locator('c2-mermaid')
+  await watch(diagrams.first(), 'mermaid-error')
+  await diagrams.evaluateAll((elements: Mermaid[]) => {
+    for (const element of elements) element.value = 'flowchart LR\n  A --> B'
+  })
+  for (const diagram of await diagrams.all()) {
+    await expect
+      .poll(() => diagram.evaluate((element) => element.shadowRoot!.querySelector('[part="error"]')?.textContent ?? ''))
+      .toContain('optional `mermaid` package')
+    expect(await diagram.evaluate((element) => element.shadowRoot!.querySelector('[part="source"]')?.textContent ?? '')).toContain('A --> B')
+  }
+  const events = JSON.parse((await diagrams.first().getAttribute('data-events')) ?? '[]') as { message: string }[]
+  expect(events).toHaveLength(1)
+  expect(events[0].message).toContain('could not be loaded')
+})
