@@ -57,7 +57,15 @@ test('in right-to-left, swiping right reveals the end actions on the left', asyn
 
 test('a short slow drag springs back closed', async ({ page, scenario }) => {
   await scenario()
-  await drag(page, -30, { steps: 30 })
+  // Slow means slow in time: Playwright's steps arrive a millisecond apart, which is a flick, so pace each one a frame.
+  const box = (await subject(page).boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  for (let dx = -3; dx >= -30; dx -= 3) {
+    await page.mouse.move(box.x + box.width / 2 + dx, box.y + box.height / 2)
+    await page.waitForTimeout(16)
+  }
+  await page.mouse.up()
   await expect(subject(page)).toHaveJSProperty('open', '')
   expect(await contentOffset(page)).toBe(0)
   await expect(log(page)).toHaveText('')
@@ -284,7 +292,8 @@ test.describe('rows of a c2-list without swipeable', () => {
 })
 
 test.describe('regressions', () => {
-  test('a touch drag, which no click follows, does not swallow the next tap on the content', async ({ page, scenario }) => {
+  test('a touch drag, which no click follows, does not swallow the next tap on the content', async ({ page, scenario, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Real touch input goes through DevTools, which only Chromium has')
     await scenario()
     const box = (await subject(page).boundingBox())!
     const y = box.y + box.height / 2

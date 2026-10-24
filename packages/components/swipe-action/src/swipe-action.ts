@@ -67,7 +67,11 @@ function isDisabledAction(element: HTMLElement): boolean {
 const DRAG_SLOP = 6
 /** A release faster than this (px/ms) settles in the direction of the flick, whatever the distance. */
 const FLICK_VELOCITY = 0.4
-/** A pointer held still this long (ms) before release is no longer flicking, however fast it last moved. */
+/**
+ * The speed of a release is the distance covered over this last stretch of the drag (ms). Averaging over a stretch
+ * rather than the last two samples keeps two events that land a millisecond apart from reading as a flick, and a
+ * pointer held still for this long before release is not flicking at all.
+ */
 const FLICK_WINDOW = 100
 /** Share of the row's width a full swipe has to cross before release triggers the outermost action. */
 const FULL_SWIPE_RATIO = 0.6
@@ -171,9 +175,8 @@ export class SwipeAction extends LitElement {
     startY: number
     base: number
     dragging: boolean
-    lastX: number
-    lastTime: number
-    velocity: number
+    /** Recent positions along the drag, in logical pixels, for the release speed. */
+    samples: { x: number; t: number }[]
   }
 
   /** Set after a drag or a tap that closed the row, so the click that follows does not reach the content. */
@@ -320,9 +323,7 @@ export class SwipeAction extends LitElement {
       startY: event.clientY,
       base: this.restOffset,
       dragging: false,
-      lastX: event.clientX,
-      lastTime: event.timeStamp,
-      velocity: 0,
+      samples: [],
     }
   }
 
@@ -342,10 +343,8 @@ export class SwipeAction extends LitElement {
       this.contentBox?.setPointerCapture(event.pointerId)
     }
     event.preventDefault()
-    const elapsed = event.timeStamp - gesture.lastTime
-    if (elapsed > 0) gesture.velocity = ((event.clientX - gesture.lastX) / elapsed) * this.direction
-    gesture.lastX = event.clientX
-    gesture.lastTime = event.timeStamp
+    gesture.samples.push({ x: event.clientX * this.direction, t: event.timeStamp })
+    while (gesture.samples.length > 2 && event.timeStamp - gesture.samples[0].t > FLICK_WINDOW) gesture.samples.shift()
     this.dragOffset = this.constrain(gesture.base + dx * this.direction)
   }
 
@@ -369,8 +368,15 @@ export class SwipeAction extends LitElement {
       this.triggerFullSwipe(offset > 0 ? 'start' : 'end')
       return
     }
-    const velocity = event.timeStamp - gesture.lastTime > FLICK_WINDOW ? 0 : gesture.velocity
-    this.setOpen(this.settle(offset, velocity))
+    this.setOpen(this.settle(offset, this.releaseVelocity(gesture.samples, event)))
+  }
+
+  /** Logical pixels per millisecond over the last `FLICK_WINDOW` of the drag, up to the release; 0 if it held still. */
+  private releaseVelocity(samples: { x: number; t: number }[], release: PointerEvent): number {
+    const recent = [...samples.filter((sample) => release.timeStamp - sample.t <= FLICK_WINDOW), { x: release.clientX * this.direction, t: release.timeStamp }]
+    const first = recent[0]
+    const last = recent[recent.length - 1]
+    return last.t > first.t ? (last.x - first.x) / (last.t - first.t) : 0
   }
 
   /** Where a released drag comes to rest: the direction of a flick, else past halfway opens. */
