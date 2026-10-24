@@ -32,14 +32,35 @@ test('tone picks the dot colour, and the dot variable wins over it', async ({ pa
 
 test('pulse draws an animated ring that reduced motion stills', async ({ page, renderScenario }) => {
   await renderScenario('<c2-status-light tone="primary" pulse>Building</c2-status-light>')
-  const ring = (host: Locator) => host.locator('[part="dot"]').evaluate((element) => getComputedStyle(element, '::after').animationName)
   const host = page.locator('c2-status-light')
-  expect(await ring(host)).toBe('c2-status-light-pulse')
+  const ring = host.locator('.pulse')
+  expect(await ring.evaluate((element) => getComputedStyle(element).animationName)).toBe('c2-status-light-pulse')
+  expect(await background(ring)).toBe('rgb(2, 101, 220)')
   await props(host, { pulse: false })
-  expect(await ring(host)).toBe('none')
+  await expect(ring).toHaveCount(0)
   await props(host, { pulse: true })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  expect(await host.locator('[part="dot"]').evaluate((element) => getComputedStyle(element, '::after').display)).toBe('none')
+  await expect(ring).toBeHidden()
+})
+
+test('the pulse ring survives a clipped shape, a transparent ring-style dot and an icon', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-status-light id="shape" tone="danger" pulse style="--c2-status-light__dot--clip-path: polygon(50% 0, 100% 100%, 0 100%)">Critical</c2-status-light>
+    <c2-status-light id="ring" pulse style="--c2-status-light__dot--background: transparent; --c2-status-light__dot--box-shadow: inset 0 0 0 2px #71717a">Paused</c2-status-light>
+    <c2-status-light id="icon" tone="success" pulse><svg slot="dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>Deploying</c2-status-light>
+  `)
+  for (const [id, colour] of [
+    ['shape', 'rgb(220, 38, 38)'],
+    ['ring', 'rgb(113, 113, 122)'],
+    ['icon', 'rgb(22, 163, 74)'],
+  ]) {
+    const ring = page.locator(`#${id} .pulse`)
+    await expect(ring).toBeVisible()
+    expect(await background(ring)).toBe(colour)
+    // Not inside the dot, so the dot's clip-path cannot cut it.
+    expect(await ring.evaluate((element) => element.closest('.icon'))).toBeNull()
+  }
+  expect(await page.locator('#icon .pulse').evaluate((element) => (element as HTMLElement).offsetWidth)).toBe(14)
 })
 
 test('a bare dot is an image named by accessible-label, and drops the gap', async ({ page, renderScenario }) => {
@@ -73,7 +94,7 @@ test('an icon in the dot slot replaces the dot and takes the tone colour', async
   const icon = host.locator('svg')
   expect(await icon.evaluate((element) => getComputedStyle(element).color)).toBe('rgb(22, 163, 74)')
   expect((await icon.boundingBox())!.width).toBe(14)
-  expect(await background(dot(host))).toBe('rgba(0, 0, 0, 0)')
+  await expect(dot(host)).toBeHidden()
   await accessible(page)
 })
 
@@ -85,6 +106,15 @@ test('the label adds and removes its gap as content comes and goes', async ({ pa
   await expect.poll(async () => (await host.boundingBox())!.width).toBeGreaterThan(20)
   await host.evaluate((element) => (element.textContent = ''))
   await expect.poll(async () => (await host.boundingBox())!.width).toBe(8)
+})
+
+test('before the client knows its label slot, an empty host is a bare dot', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-status-light id="bare" tone="danger" accessible-label="Failed"></c2-status-light>
+  `)
+  // A server-rendered light starts without the class: the slot is unknown until it hydrates.
+  await page.locator('#bare').evaluate((element) => element.shadowRoot!.querySelector('.c2-status-light')!.classList.remove('is-bare'))
+  expect((await page.locator('#bare').boundingBox())!.width).toBe(8)
 })
 
 test('a long label truncates inside a narrow container', async ({ page, renderScenario }) => {

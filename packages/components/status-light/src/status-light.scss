@@ -35,8 +35,8 @@
 );
 
 :host {
-  // The tone colour, shared by the dot, its pulse ring and a slotted icon; `__dot--background` wins over the tone.
-  --_tone: #{css.cssVar(dot--background, dot__neutral--background)};
+  // The tone colour, shared by the pulse ring and, unless `__dot--background` overrides it, the dot and a slotted icon.
+  --_tone: #{css.cssVar(dot__neutral--background)};
   display: inline-flex;
   vertical-align: middle;
   max-width: 100%;
@@ -44,7 +44,7 @@
 
 @each $tone in primary, info, success, warning, danger {
   :host([tone='#{$tone}']) {
-    --_tone: #{css.cssVar(dot--background, dot__#{$tone}--background)};
+    --_tone: #{css.cssVar(dot__#{$tone}--background)};
   }
 }
 
@@ -70,34 +70,42 @@
   line-height: css.cssVar(line-height);
 }
 
-.c2-status-light.is-bare {
+// The class follows the label slot once the client knows it; `:host(:empty)` gives a server-rendered bare dot the
+// same first paint.
+.c2-status-light.is-bare,
+:host(:empty) .c2-status-light {
   gap: 0;
 }
 
-.c2-status-light.is-bare .label {
+.c2-status-light.is-bare .label,
+:host(:empty) .label {
   display: none;
 }
 
-.dot {
+.mark {
   position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+// The slot's wrapper: a slotted icon drawn with `currentColor` takes the tone.
+.icon {
+  position: relative;
+  display: inline-flex;
+  color: var(--c2-status-light__dot--background, var(--_tone));
+}
+
+// The `dot` slot's fallback, so the browser drops it as soon as an icon is assigned, server-rendered markup included.
+.dot {
   flex: none;
   width: css.cssVar(dot--size);
   height: css.cssVar(dot--size);
   border-radius: css.cssVar(dot--border-radius);
   clip-path: css.cssVar(dot--clip-path);
   box-shadow: css.cssVar(dot--box-shadow);
-  background: var(--_tone);
-}
-
-.has-icon .dot {
-  display: inline-flex;
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  clip-path: none;
-  box-shadow: none;
-  background: none;
-  color: var(--_tone);
+  background: var(--c2-status-light__dot--background, var(--_tone));
 }
 
 ::slotted(svg[slot='dot']) {
@@ -113,12 +121,12 @@
   white-space: nowrap;
 }
 
-.is-pulse:not(.has-icon) .dot::after {
-  content: '';
+// A sibling of the dot rather than its pseudo-element, so a clipped shape or a transparent ring-style dot does not hide it.
+.pulse {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background: inherit;
+  border-radius: 999px;
+  background: var(--_tone);
   animation: c2-status-light-pulse css.cssVar(pulse--animation-duration) cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -134,7 +142,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .is-pulse .dot::after {
+  .pulse {
     display: none;
   }
 }

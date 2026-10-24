@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -28,7 +28,7 @@ export type StatusLightTone = 'neutral' | 'primary' | 'info' | 'success' | 'warn
  * @slot - The status label, such as `Live` or `Failed`. Leave it empty for a bare dot and set `accessible-label`.
  * @slot dot - Replaces the dot with an icon or any other mark. An `<svg>` is sized by `--c2-status-light__icon--size` and coloured with the tone through `currentColor`.
  *
- * @csspart dot - The coloured dot, or the wrapper of the `dot` slot.
+ * @csspart dot - The coloured dot, drawn while the `dot` slot is empty.
  * @csspart label - The wrapper of the default slot.
  *
  * @cssproperty {pixel} [--c2-status-light--gap=8px] - Space between the dot and the label.
@@ -50,7 +50,7 @@ export type StatusLightTone = 'neutral' | 'primary' | 'info' | 'success' | 'warn
  * @cssproperty {border-radius} [--c2-status-light__dot--border-radius=999px] - `2px` gives a square dot.
  * @cssproperty {clip-path} [--c2-status-light__dot--clip-path=none] - Cuts the dot to a shape, such as `polygon(50% 0, 100% 100%, 0 100%)` for a triangle.
  * @cssproperty {box-shadow} --c2-status-light__dot--box-shadow - An inset shadow with a transparent background draws a ring.
- * @cssproperty {background} --c2-status-light__dot--background - Overrides the tone colour of the dot, its pulse and a slotted icon.
+ * @cssproperty {background} --c2-status-light__dot--background - Overrides the tone colour of the dot and a slotted icon. The pulse ring keeps the tone colour, so a transparent ring-style dot still pulses.
  * @cssproperty {pixel} [--c2-status-light__icon--size=14px] - Size of an `<svg>` in the `dot` slot.
  *
  * @cssproperty {background} [--c2-status-light__dot__neutral--background=#71717a]
@@ -69,7 +69,10 @@ export class StatusLight extends LitElement {
   /** Colour role of the dot. */
   @property({ reflect: true }) tone: StatusLightTone = 'neutral'
 
-  /** Animates a fading ring around the dot, for a state in progress such as Building or an open incident. */
+  /**
+   * Animates a fading ring around the dot, or around an icon in the `dot` slot, for a state in progress such as Building
+   * or an open incident. The ring is a circle in the tone colour whatever the dot's shape.
+   */
   @property({ type: Boolean, reflect: true }) pulse = false
 
   /**
@@ -80,7 +83,7 @@ export class StatusLight extends LitElement {
 
   private readonly internals = this.attachInternals()
 
-  private readonly slotPresence = new SlotPresenceController(this, ['', 'dot'])
+  private readonly slotPresence = new SlotPresenceController(this, [''])
 
   protected override willUpdate(changed: Map<PropertyKey, unknown>): void {
     if (changed.has('accessibleLabel')) {
@@ -92,14 +95,17 @@ export class StatusLight extends LitElement {
   override render() {
     const classes = classMap({
       'c2-status-light': true,
-      // Only known-empty content drops the gap: on the server the slot is `unknown`, and a label is the common case.
+      // On the server the label slot is `unknown`; the stylesheet's `:host(:empty)` covers a bare dot until then.
       'is-bare': this.slotPresence.state('') === 'empty',
-      'has-icon': this.slotPresence.state('dot') === 'present',
-      'is-pulse': this.pulse,
     })
     return html`
       <span class=${classes}>
-        <span class="dot" part="dot" aria-hidden="true"><slot name="dot" @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
+        <span class="mark" aria-hidden="true">
+          ${this.pulse ? html`<span class="pulse"></span>` : nothing}
+          <span class="icon"
+            ><slot name="dot"><span class="dot" part="dot"></span></slot
+          ></span>
+        </span>
         <span class="label" part="label"><slot @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
       </span>
     `
