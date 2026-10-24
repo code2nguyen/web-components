@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyDeclaration, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { provide } from '@lit/context'
@@ -195,7 +195,9 @@ export class AppShell extends LitElement {
 
   /** The open state the user last chose for `side` and `rail`, restored when the width comes back to that mode. */
   private preferred: Record<'side' | 'rail', boolean> = { side: true, rail: false }
-  private authorOpened = false
+  /** `navigationOpened` as the author set it before the first measurement; undefined when they left it alone. */
+  // Initialized after the `navigationOpened` default, whose own set would otherwise count as the author's.
+  private authorOpened: boolean | undefined = undefined
   /** The modes whose open state came from `storage-key`. */
   private restored = new Set<'side' | 'rail'>()
   private lastMode: AppShellMode | undefined
@@ -249,7 +251,6 @@ export class AppShell extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.authorOpened = this.navigationOpened
     this.restorePreference()
     if (isServer) return
     this.sizeObserver ??= new ResizeObserver((entries) => {
@@ -307,7 +308,7 @@ export class AppShell extends LitElement {
     if (first) {
       // The author's `navigation-opened` describes the layout they designed for; a drawer never starts open.
       // A choice the user saved under `storage-key` wins over the author's default.
-      if (mode !== 'over' && this.authorOpened && !this.restored.has(mode)) this.preferred[mode] = true
+      if (mode !== 'over' && this.authorOpened !== undefined && !this.restored.has(mode)) this.preferred[mode] = this.authorOpened
       this.navigationOpened = mode === 'over' ? false : this.preferred[mode]
       if (this.breakpoint !== 'desktop') this.asideOpened = false
       this.lastMode = mode
@@ -422,6 +423,12 @@ export class AppShell extends LitElement {
   private handleSkip(event: Event) {
     event.preventDefault()
     this.focusMain()
+  }
+
+  override requestUpdate(name?: PropertyKey, oldValue?: unknown, options?: PropertyDeclaration, useNewValue?: boolean, newValue?: unknown): void {
+    // Even a set that changes nothing (`false` before the first measurement) is the author's choice for the mode to come.
+    if (name === 'navigationOpened' && this.measuredBreakpoint === undefined) this.authorOpened = this.navigationOpened
+    super.requestUpdate(name, oldValue, options, useNewValue, newValue)
   }
 
   protected override willUpdate(changed: PropertyValues): void {

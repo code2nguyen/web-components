@@ -156,6 +156,7 @@ test('an app-shell-toggle attribute opens the aside: a column on desktop, a shee
 test('setting a property fires no event; nothing is written on the host', async ({ page, renderScenario }) => {
   await renderScenario(shell())
   const host = page.locator('c2-app-shell')
+  await expect(host).toHaveState('navigation-opened')
   await watch(host, 'navigation-opened-change')
   const before = await host.evaluate((element) =>
     element
@@ -177,6 +178,18 @@ test('setting a property fires no event; nothing is written on the host', async 
         .sort(),
     ),
   ).toEqual(before)
+})
+
+test('navigationOpened set from code before the first measurement wins over the side default', async ({ page, renderScenario }) => {
+  await renderScenario('<div class="frame"></div>')
+  await page.locator('.frame').evaluate((frame) => {
+    const element = document.createElement('c2-app-shell') as HTMLElement & { navigationOpened: boolean }
+    element.navigationOpened = false
+    frame.append(element)
+  })
+  const host = page.locator('c2-app-shell')
+  await expect(host).toHaveState('side')
+  await expect(host).not.toHaveState('navigation-opened')
 })
 
 test('a toggle belongs to the nearest shell', async ({ page, renderScenario }) => {
