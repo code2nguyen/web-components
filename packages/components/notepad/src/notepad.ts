@@ -281,7 +281,7 @@ class TaskView implements NodeView {
  * @event {CustomEvent<NotepadCheckChangeEventDetail>} check-change - Fired when a checklist item is ticked or unticked. Does not bubble.
  * @event {CustomEvent<NotepadPageTearEventDetail>} page-tear - Fired before a page is torn off; cancel it to keep the page. Does not bubble.
  * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another pad, ruling or paper colour in the paper picker. Does not bubble.
- * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its image is removed. Does not bubble.
+ * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its image is removed, but a pasted web image keeps its address. Does not bubble.
  * @csspart sheet - The paper sheet.
  * @csspart writing - The editable writing surface.
  * @csspart toolbar - The selection formatting toolbar.
@@ -393,7 +393,9 @@ export class Notepad extends LitElement {
   @property({ type: Boolean, attribute: 'no-images', reflect: true }) noImages = false
   /**
    * Saves a pasted or dropped image and resolves to the `src` the page stores for it (an id, a URL). Unset, the image
-   * is stored in the page as a data URL. A rejection fires `image-error`.
+   * is stored in the page as a data URL. A rejection fires `image-error`. Set, an image pasted from another page with
+   * its web address is copied through it too, when its site lets the page read it (CORS); otherwise it keeps its
+   * address.
    */
   @property({ attribute: false }) imageUpload: ImageUploader | null = null
   /** Turns a stored image `src` into a URL to draw (an object URL from the application's store). Unset, the `src` is drawn as it is. */

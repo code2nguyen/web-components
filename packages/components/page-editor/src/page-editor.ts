@@ -175,7 +175,7 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the editor loses focus after its value changed.
  * @event {CustomEvent<PageEditorFormat>} format-change - Fired when the block or the formatting at the selection changes. Does not bubble.
- * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its block is removed. Does not bubble.
+ * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its block is removed, but a pasted web image keeps its address. Does not bubble.
  * @csspart content - The editable page.
  * @csspart toolbar - The formatting toolbar over selected text.
  * @csspart slash-menu - The menu opened by `/` and the `+` button.
@@ -297,7 +297,9 @@ export class PageEditor extends LitElement {
   @property({ type: Boolean, reflect: true }) required = false
   /**
    * Saves a pasted or dropped image and resolves to the `src` the page stores for it (an id, a URL). Unset, the image
-   * is stored in the page as a data URL. A rejection fires `image-error`.
+   * is stored in the page as a data URL. A rejection fires `image-error`. Set, an image pasted from another page with
+   * its web address is copied through it too, when its site lets the page read it (CORS); otherwise it keeps its
+   * address.
    */
   @property({ attribute: false }) imageUpload: ImageUploader | null = null
   /** Turns a stored image `src` into a URL to draw (an object URL from the application's store). Unset, the `src` is drawn as it is. */
