@@ -222,7 +222,9 @@ export class Menu extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!isServer && this.renderRoot.hasChildNodes()) {
+    // A declarative shadow root (server rendering). Read it as `shadowRoot`: a menu rendered in another component's
+    // shadow root connects with `defer-hydration`, before Lit has set `renderRoot`.
+    if (!isServer && this.shadowRoot?.hasChildNodes()) {
       void this.updateComplete.then(() => {
         this.syncAnchor()
         this.syncItems()
