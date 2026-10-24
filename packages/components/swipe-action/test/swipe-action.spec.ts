@@ -289,7 +289,8 @@ test.describe('regressions', () => {
     const box = (await subject(page).boundingBox())!
     const y = box.y + box.height / 2
     const cdp = await page.context().newCDPSession(page)
-    const touch = (type: string, x: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] })
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number) =>
+      cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] })
     await touch('touchStart', box.x + 200)
     for (let x = 200; x >= 40; x -= 20) await touch('touchMove', box.x + x)
     await touch('touchEnd', box.x + 40)
