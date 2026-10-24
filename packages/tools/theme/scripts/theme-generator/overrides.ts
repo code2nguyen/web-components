@@ -292,6 +292,11 @@ export const overrides: Record<string, Override> = {
   '--c2-trace-waterfall__series-7--color': { token: 'chart-series-7' },
   '--c2-trace-waterfall__series-8--color': { token: 'chart-series-8' },
   '--c2-trace-waterfall__bar__error--background': { token: 'color-error' },
+  '--c2-save-bar__container--box-shadow': { token: 'shadow-md' },
+  '--c2-save-bar__indicator__invalid--background': { token: 'color-error' },
+  '--c2-save-bar__indicator--background': { exclude: 'unsaved-changes warning hue; the theme has no warning token' },
+  '--c2-save-bar__indicator--box-shadow': { exclude: 'halo in the indicator hue' },
+  '--c2-save-bar__indicator__invalid--box-shadow': { exclude: 'halo in the indicator hue' },
   // Row dividers and axis lines are fainter than a hairline border: the surface-container grey.
   '--c2-trace-waterfall__grid-line--color': { token: 'color-surface-container' },
   '--c2-trace-waterfall__row--border-bottom': {
