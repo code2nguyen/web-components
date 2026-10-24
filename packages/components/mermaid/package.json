@@ -61,11 +61,19 @@
   },
   "dependencies": {
     "@c2n/core": "*",
-    "lit": "3.3.3",
-    "mermaid": "12.1.0"
+    "lit": "3.3.3"
+  },
+  "peerDependencies": {
+    "mermaid": "^12.1.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "*",
+    "mermaid": "12.1.0"
   },
   "customElements": "custom-elements.json"
 }

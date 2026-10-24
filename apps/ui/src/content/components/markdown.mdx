@@ -29,7 +29,7 @@ import { Markdown } from '@c2n/components/markdown'
 - The unfinished end is repaired as it grows: `**bold` already renders bold, a half-typed link shows only its label, an unfinished image is held back, and an open code fence stays plain code until it closes.
 - `reveal-end` fires once the stream has ended and the display has caught up.
 
-**Built from other c2 components.** Closed code fences render through [`c2-code-viewer`](/web-components/components/code-viewer), `mermaid` fences through [`c2-mermaid`](/web-components/components/mermaid), and `$…$`, `$$…$$`, `\(…\)` and `\[…\]` through [`c2-math`](/web-components/components/math). Each one loads on first use. `math="bracket"` turns off the dollar forms for text full of prices; prices such as `$5 and $10` stay text anyway.
+**Built from other c2 components.** Closed code fences render through [`c2-code-viewer`](/web-components/components/code-viewer), `mermaid` fences through [`c2-mermaid`](/web-components/components/mermaid), and `$…$`, `$$…$$`, `\(…\)` and `\[…\]` through [`c2-math`](/web-components/components/math). Each one loads on first use; diagrams need the optional `mermaid` package installed (`npm install mermaid`). `math="bracket"` turns off the dollar forms for text full of prices; prices such as `$5 and $10` stay text anyway.
 
 ## Import
 

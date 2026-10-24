@@ -28,6 +28,12 @@ A source that does not parse keeps its text, shows the message and fires `mermai
 import '@c2n/components/mermaid'
 ```
 
+Mermaid itself is an optional peer dependency, so apps that draw no diagram do not download it. Install it next to `@c2n/components`; without it, a diagram shows its source and a message saying so.
+
+```bash tag=CodeBlock
+npm install mermaid
+```
+
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/mermaid

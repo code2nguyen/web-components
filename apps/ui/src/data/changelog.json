@@ -2,6 +2,64 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.16",
+      "date": "2026-10-23",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["sheet"],
+              "text": "Style the body's scrollbar through CSS variables",
+              "hash": "ae63bcc"
+            },
+            {
+              "scopes": ["page-editor", "notepad"],
+              "text": "Paste, drop, copy and resize images",
+              "hash": "ef0edcb"
+            },
+            {
+              "scopes": ["split-panel"],
+              "text": "Style the panels' scrollbars through CSS variables",
+              "hash": "39010c0"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "A node being dragged shows the closed hand",
+              "hash": "dd1a939"
+            },
+            {
+              "scopes": ["page-editor"],
+              "text": "A table's frame and outline end with its last column",
+              "hash": "e98a300"
+            },
+            {
+              "scopes": ["page-editor", "notepad"],
+              "text": "Images pasted, copied and resized hold up across apps and edits",
+              "hash": "2298461"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "A node shows the default cursor, not the pointer, over its title and rows",
+              "hash": "85071e9"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "No scrollbar on a container the content just fills, open or closed",
+              "hash": "74b73f3"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.15",
       "date": "2026-10-23",
       "sections": [
