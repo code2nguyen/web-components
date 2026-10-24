@@ -24,7 +24,9 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-_Nothing open._
+| Component | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `c2-menu` | gap      | Building `c2-menubar`: in a right-to-left page, ArrowRight still opens a submenu and ArrowLeft closes it, and submenus still open on the right (`right-start`). Expected the keys and the placement to mirror with `dir="rtl"`. The menubar mirrors only its triggers so that its rows agree with `c2-menu`. Smallest change: read the direction in `c2-menu`, swap the two keys and use `left-start` for submenus. |
 
 ## Fixed
 

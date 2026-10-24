@@ -108,11 +108,31 @@ export class Menubar extends LitElement {
     return !isServer && getComputedStyle(this).direction === 'rtl'
   }
 
-  /** Keeps a single Tab stop: the active menu's trigger, else the first enabled one. */
-  private syncTabStops() {
-    const enabled = this.enabledMenus
-    if (!this.activeMenu || !enabled.includes(this.activeMenu)) this.activeMenu = enabled[0]
-    for (const menu of this.menus) menu.tabStop = menu === this.activeMenu
+  /**
+   * Keeps a single Tab stop: the active menu's trigger, else the first enabled one, else the first menu (a disabled
+   * trigger stays focusable, so the bar never drops out of the Tab order). The menus call it when they upgrade or
+   * change `disabled`.
+   */
+  syncTabStops(): void {
+    const menus = this.menus
+    const enabled = menus.filter((menu) => !menu.disabled)
+    if (!this.activeMenu || !enabled.includes(this.activeMenu)) this.activeMenu = enabled[0] ?? menus[0]
+    for (const menu of menus) {
+      const tabStop = menu === this.activeMenu
+      // A menu still waiting to hydrate must render what the server did first; it takes its stop once it has.
+      if (menu.hasUpdated) menu.tabStop = tabStop
+      else void menu.updateComplete.then(() => (menu.tabStop = menu === this.activeMenu))
+    }
+  }
+
+  protected override firstUpdated(): void {
+    // A server-rendered slot is assigned before its slotchange listener exists, so the first count happens here.
+    this.syncTabStops()
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    clearTimeout(this.typeaheadTimer)
   }
 
   private setActive(menu: MenubarMenu) {
@@ -130,12 +150,15 @@ export class Menubar extends LitElement {
     return { menu, onTrigger: !!trigger && path.includes(trigger) }
   }
 
+  /** The next enabled menu from `menu` in direction `step`, wrapping; `menu` may itself be disabled. */
   private neighbour(menu: MenubarMenu, step: 1 | -1): MenubarMenu | undefined {
-    const enabled = this.enabledMenus
-    if (!enabled.length) return undefined
-    const index = enabled.indexOf(menu)
-    if (index < 0) return enabled[0]
-    return enabled[(index + step + enabled.length) % enabled.length]
+    const menus = this.menus
+    const index = menus.indexOf(menu)
+    for (let i = 1; i <= menus.length; i++) {
+      const candidate = menus[(((index + step * i) % menus.length) + menus.length) % menus.length]
+      if (candidate && !candidate.disabled) return candidate
+    }
+    return undefined
   }
 
   /**
@@ -162,8 +185,11 @@ export class Menubar extends LitElement {
     const source = this.menuFromEvent(event)
     if (!source) return
     const { menu, onTrigger } = source
-    const forward = this.isRtl ? 'ArrowLeft' : 'ArrowRight'
-    const backward = this.isRtl ? 'ArrowRight' : 'ArrowLeft'
+    // The triggers follow the reading direction. Inside a menu the keys stay as c2-menu reads them (ArrowRight opens a
+    // submenu, so it also goes on to the next menu), or a row with a submenu and a plain row would disagree.
+    const rtl = onTrigger && this.isRtl
+    const forward = rtl ? 'ArrowLeft' : 'ArrowRight'
+    const backward = rtl ? 'ArrowRight' : 'ArrowLeft'
 
     if (event.key === forward || event.key === backward) {
       event.preventDefault()

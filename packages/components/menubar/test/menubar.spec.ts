@@ -204,3 +204,36 @@ test('menus wrapped in an element of their own (an Astro island) still share one
   await page.keyboard.press('ArrowRight')
   await expect(trigger(page, 'Edit')).toBeFocused()
 })
+
+for (const key of ['ArrowDown', 'Enter', 'ArrowUp']) {
+  test(`${key} on the trigger of a menu opened under the pointer moves into its rows`, async ({ page, renderScenario }) => {
+    await renderScenario(bar)
+    await trigger(page, 'File').click()
+    await trigger(page, 'Edit').hover()
+    await expect(row(page, 'undo')).toBeVisible()
+    await expect(trigger(page, 'Edit')).toBeFocused()
+    await page.keyboard.press(key)
+    await expect(row(page, key === 'ArrowUp' ? 'redo' : 'undo')).toBeFocused()
+  })
+}
+
+test('a disabled menu passes its tab stop on, and a bar with every menu disabled stays reachable', async ({ page, renderScenario, tab }) => {
+  await renderScenario(bar)
+  await trigger(page, 'Edit').focus()
+  await page.locator('c2-menubar-menu[label="Edit"]').evaluate((menu: HTMLElement & { disabled: boolean }) => (menu.disabled = true))
+  await expect(trigger(page, 'Edit')).toHaveAttribute('tabindex', '-1')
+  await expect(trigger(page, 'File')).toHaveAttribute('tabindex', '0')
+
+  await page.locator('c2-menubar-menu').evaluateAll((menus) => menus.forEach((menu) => ((menu as HTMLElement & { disabled: boolean }).disabled = true)))
+  await page.getByRole('button', { name: 'Before' }).focus()
+  await tab()
+  await expect(trigger(page, 'File')).toBeFocused()
+})
+
+test('right-to-left: inside a menu ArrowRight still goes to the next menu, as it opens a submenu', async ({ page, renderScenario }) => {
+  await renderScenario(`<div dir="rtl">${bar}</div>`)
+  await trigger(page, 'Edit').focus()
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowRight')
+  await expect(row(page, 'ruler')).toBeFocused()
+})

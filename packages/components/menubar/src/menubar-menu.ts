@@ -136,7 +136,34 @@ export class MenubarMenu extends LitElement {
     if (this.open && this.disabled) this.open = false
   }
 
+  protected override firstUpdated(): void {
+    // A menu that upgrades (or hydrates) after its bar starts as a Tab stop; the bar puts it back in line.
+    this.syncBar()
+  }
+
+  /** Asks the bar around this menu to recount its Tab stops, without importing it. */
+  private syncBar() {
+    const bar = this.closest('c2-menubar') as (HTMLElement & { syncTabStops?: () => void }) | null
+    bar?.syncTabStops?.()
+  }
+
+  /**
+   * On a menu that is already open (the bar opened it under the pointer, or moved it along with focus left on the
+   * trigger), the opening keys move into the rows. c2-menu would only re-open it, and Enter or Space would close it.
+   */
+  private handleTriggerKeydown = (event: KeyboardEvent) => {
+    if (!this.open || event.ctrlKey || event.metaKey || event.altKey) return
+    let focus: 'first' | 'last'
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') focus = 'first'
+    else if (event.key === 'ArrowUp') focus = 'last'
+    else return
+    event.preventDefault()
+    event.stopPropagation()
+    this.show(focus)
+  }
+
   protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('disabled') && changed.get('disabled') !== undefined) this.syncBar()
     if (changed.has('open')) {
       const menu = this.menu
       if (menu && menu.open !== this.open) {
@@ -185,6 +212,7 @@ export class MenubarMenu extends LitElement {
         role="menuitem"
         tabindex=${this.tabStop ? 0 : -1}
         aria-disabled=${this.disabled ? 'true' : nothing}
+        @keydown=${this.handleTriggerKeydown}
       >
         ${this.label}
       </button>

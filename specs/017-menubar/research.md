@@ -23,7 +23,7 @@ Takeaways:
 ## 2. Accessibility
 
 - APG keyboard on the bar: ArrowLeft/Right (wrapping), Home/End, a letter, Enter/Space/ArrowDown open on the first item, ArrowUp on the last.
-- In a menu: ArrowRight opens a submenu or moves to the next bar menu; ArrowLeft closes a submenu or moves to the previous bar menu; Escape closes and returns focus to the trigger. Right-to-left mirrors the arrows.
+- In a menu: ArrowRight opens a submenu or moves to the next bar menu; ArrowLeft closes a submenu or moves to the previous bar menu; Escape closes and returns focus to the trigger. Right-to-left mirrors the arrows on the triggers; inside a menu the keys follow `c2-menu`, which has no right-to-left mode yet (ArrowRight always opens a submenu).
 - The trigger is a native `<button role="menuitem">` in the shadow root, so `aria-haspopup`/`aria-expanded` sit on the element that has the role (c2-menu already writes them on its slotted trigger). The `c2-menubar-menu` host is `role="none"` through `ElementInternals`, and the menu's name goes in as a property: an `aria-label` attribute on the inner `c2-menu` host made axe report `aria-required-children` on the menubar.
 - Disabled bar menus: APG keeps disabled items focusable; here the arrows skip them (as `c2-menu` skips disabled rows), and the trigger carries `aria-disabled`.
 
