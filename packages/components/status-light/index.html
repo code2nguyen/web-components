@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-status-light</title>
+    <script type="module" src="/src/status-light.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: #52525b;
+      }
+      .pill {
+        --c2-status-light--background: #dcfce7;
+        --c2-status-light--color: #166534;
+        --c2-status-light--padding-left: 8px;
+        --c2-status-light--padding-right: 10px;
+        --c2-status-light--padding-top: 2px;
+        --c2-status-light--padding-bottom: 2px;
+        --c2-status-light--font-size: 12px;
+        --c2-status-light--font-weight: 500;
+        --c2-status-light--gap: 6px;
+        --c2-status-light__dot--size: 6px;
+      }
+      .triangle {
+        --c2-status-light__dot--size: 10px;
+        --c2-status-light__dot--border-radius: 0;
+        --c2-status-light__dot--clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Tones</h2>
+    <section>
+      <c2-status-light>Queued</c2-status-light>
+      <c2-status-light tone="primary">Building</c2-status-light>
+      <c2-status-light tone="info">Scheduled</c2-status-light>
+      <c2-status-light tone="success">Live</c2-status-light>
+      <c2-status-light tone="warning">Degraded</c2-status-light>
+      <c2-status-light tone="danger">Failed</c2-status-light>
+    </section>
+
+    <h2>Pulse</h2>
+    <section>
+      <c2-status-light tone="primary" pulse>Building</c2-status-light>
+      <c2-status-light tone="danger" pulse>Incident</c2-status-light>
+    </section>
+
+    <h2>Dot only</h2>
+    <section>
+      <c2-status-light tone="success" accessible-label="Live"></c2-status-light>
+      <c2-status-light tone="danger" accessible-label="Failed"></c2-status-light>
+    </section>
+
+    <h2>Icon in the dot slot</h2>
+    <section>
+      <c2-status-light tone="success"
+        ><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"></path></svg
+        >Checks passed</c2-status-light
+      >
+    </section>
+
+    <h2>Themed</h2>
+    <section>
+      <c2-status-light class="pill" tone="success">Paid</c2-status-light>
+      <c2-status-light class="triangle" tone="danger">Critical</c2-status-light>
+    </section>
+  </body>
+</html>

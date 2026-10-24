@@ -462,6 +462,13 @@ export const overrides: Record<string, Override> = {
   '--c2-indicator__danger--color': { token: 'color-on-fill' },
   '--c2-indicator__info--background': { exclude: 'solid status fill' },
   '--c2-indicator__info--color': { token: 'color-on-fill' },
+  // Status light dots carry no text, so the grey and red follow the theme (both lighten on a dark page); the other
+  // status hues have no token.
+  '--c2-status-light__dot__neutral--background': { token: 'color-on-surface-variant' },
+  '--c2-status-light__dot__danger--background': { token: 'color-error' },
+  '--c2-status-light__dot__info--background': { exclude: 'status colour' },
+  '--c2-status-light__dot__success--background': { exclude: 'status colour' },
+  '--c2-status-light__dot__warning--background': { exclude: 'status colour' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },

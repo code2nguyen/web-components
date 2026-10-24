@@ -89,6 +89,10 @@
       "types": "./types/src/depth-chart.d.ts",
       "default": "./dist/depth-chart.js"
     },
+    "./sankey-chart.js": {
+      "types": "./types/src/sankey-chart.d.ts",
+      "default": "./dist/sankey-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"
@@ -178,6 +182,8 @@
     "depth chart",
     "market depth",
     "order book",
+    "sankey diagram",
+    "sankey chart",
     "sparkline",
     "uplot",
     "echarts",

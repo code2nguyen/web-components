@@ -1855,6 +1855,28 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Counter', attributes: { tone: 'danger', count: '120' } },
     ],
   },
+  'c2-status-light': {
+    html: `<c2-status-light tone="success">Live</c2-status-light>`,
+    presets: [
+      { name: 'Building', attributes: { tone: 'primary', pulse: '' } },
+      {
+        name: 'Subtle pill',
+        css: {
+          '--c2-status-light--background': 'light-dark(#dcfce7, #0f2e1b)',
+          '--c2-status-light--color': 'light-dark(#166534, #6fd596)',
+          '--c2-status-light--padding-left': '8px',
+          '--c2-status-light--padding-right': '10px',
+          '--c2-status-light--padding-top': '2px',
+          '--c2-status-light--padding-bottom': '2px',
+          '--c2-status-light--gap': '6px',
+          '--c2-status-light--font-size': '12px',
+          '--c2-status-light--font-weight': '500',
+          '--c2-status-light__dot--size': '6px',
+        },
+      },
+      { name: 'Square dot', css: { '--c2-status-light__dot--size': '10px', '--c2-status-light__dot--border-radius': '2px' } },
+    ],
+  },
   'c2-indicator': {
     html: `<c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>`,
     presets: [
