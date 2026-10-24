@@ -2200,6 +2200,25 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-overflow-list",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned children into the row; they keep their own public contracts, and the gap between them is the list's gap variable."
+    },
+    {
+      "tag": "c2-overflow-list",
+      "slot": "menu",
+      "decision": "assigned-content",
+      "reason": "The menu slot projects consumer-owned c2-menu-item rows; style them through the c2-menu-item variables."
+    },
+    {
+      "tag": "c2-overflow-list",
+      "slot": "more",
+      "decision": "variables",
+      "variables": ["--c2-overflow-list__more--gap", "--c2-overflow-list__more--icon-size"],
+      "reason": "The trigger lays out slotted content with its gap variable and sizes the default icon fallback through the icon size variable."
+    },
+    {
       "tag": "c2-pagination",
       "slot": "first-icon",
       "decision": "assigned-content",

@@ -83,6 +83,7 @@ import notepad from '@c2n/notepad/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
+import overflowList from '@c2n/overflow-list/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
@@ -233,6 +234,7 @@ export const componentManifests = (function () {
     numberInput,
     orgChart,
     otpInput,
+    overflowList,
     overlay,
     pageEditor,
     pagination,

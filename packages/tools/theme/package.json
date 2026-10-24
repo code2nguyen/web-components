@@ -137,6 +137,7 @@
         "../../components/number-input:build",
         "../../components/org-chart:build",
         "../../components/otp-input:build",
+        "../../components/overflow-list:build",
         "../../components/overlay:build",
         "../../components/page-editor:build",
         "../../components/pagination:build",
