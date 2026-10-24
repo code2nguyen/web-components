@@ -278,3 +278,26 @@ test('size auto fits a bottom sheet to its content, up to max-size, past which t
   expect(Math.round(capped.height)).toBe(Math.round(capped.viewport.height / 2))
   expect(Math.round(capped.y + capped.height)).toBe(capped.viewport.height)
 })
+
+test("swipe-close: a part named header inside the body is not the sheet's header", async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-sheet side="bottom" swipe-close open style="--c2-sheet--size: 300px"><h2 slot="title">Share</h2><div id="card" part="header">Card header</div></c2-sheet>',
+  )
+  await panel(page)
+  await drag(page, await center(page.locator('#card')), 200)
+  await expect(page.locator('c2-sheet')).toHaveJSProperty('open', true)
+})
+
+test('swipe-close: the handle never covers the footer of a top sheet or the body of a headerless bottom sheet', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-sheet side="top" swipe-close open label="Notice" style="--c2-sheet--size: 300px">Body<button slot="footer">OK</button></c2-sheet>')
+  const handle = page.locator('[part="handle"]')
+  await panel(page)
+  const footer = (await page.locator('[part="footer"]').boundingBox())!
+  expect((await handle.boundingBox())!.y).toBeGreaterThanOrEqual(footer.y + footer.height - 1)
+
+  await props(page.locator('c2-sheet'), { side: 'bottom', hideClose: true })
+  await panel(page)
+  const body = (await page.locator('[part="body"]').boundingBox())!
+  const box = (await handle.boundingBox())!
+  expect(box.y + box.height).toBeLessThanOrEqual(body.y + 1)
+})

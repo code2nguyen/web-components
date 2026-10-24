@@ -176,26 +176,24 @@
   min-height: 0;
 }
 
-// Pressing here drags the sheet rather than scrolling or zooming the page.
+// Pressing here drags the sheet rather than scrolling, zooming or selecting the title.
 .c2-sheet__panel.is-swipeable > .c2-sheet__header,
 .c2-sheet__handle {
   touch-action: none;
+  user-select: none;
 }
 
 .c2-sheet.is-dragging .c2-sheet__panel {
   user-select: none;
 }
 
-// Laid over the header's padding on the edge facing the page, so showing it moves nothing.
+// A row of its own on the edge facing the page: under the footer of a top sheet, above the body of a bottom sheet
+// that has no header.
 .c2-sheet__handle {
   display: css.cssVar(handle--display);
-  position: absolute;
-  left: 50%;
-  z-index: 1;
-  translate: -50% 0;
-  // A taller hit area than the bar it draws.
+  flex: none;
+  align-self: center;
   padding: 8px 14px;
-  margin: -8px 0;
   cursor: grab;
 
   &::before {
@@ -208,12 +206,21 @@
   }
 }
 
-:host([side='bottom']) .c2-sheet__handle {
-  top: css.cssVar(handle--offset);
+:host([side='top']) .c2-sheet__handle {
+  padding-bottom: css.cssVar(handle--offset);
 }
 
-:host([side='top']) .c2-sheet__handle {
-  bottom: css.cssVar(handle--offset);
+:host([side='bottom']) .c2-sheet__handle {
+  padding-top: css.cssVar(handle--offset);
+}
+
+// Over a bottom sheet's header it is laid on the header's top padding instead, so showing it moves nothing.
+:host([side='bottom']) .has-header > .c2-sheet__handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  translate: -50% 0;
 }
 
 .c2-sheet.is-dragging .c2-sheet__handle {

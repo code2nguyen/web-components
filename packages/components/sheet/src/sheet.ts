@@ -17,6 +17,8 @@ const DRAG_THRESHOLD = 6
 const CLOSE_DISTANCE = 0.35
 /** A flick toward the edge faster than this (px/ms) closes it however short it was. */
 const CLOSE_VELOCITY = 0.5
+/** A pointer held still this long (ms) before it is released is a placed drop, not a flick. */
+const FLICK_WINDOW = 100
 
 /** Events fired by {@link Sheet}, keyed for `addEventListener`. */
 export interface SheetEventMap {
@@ -119,7 +121,7 @@ export interface Sheet {
  * @cssproperty {pixel} [--c2-sheet__handle--height=4px]
  * @cssproperty {border-radius} [--c2-sheet__handle--border-radius=999px]
  * @cssproperty {background} [--c2-sheet__handle--background=#d4d4d8]
- * @cssproperty {pixel} [--c2-sheet__handle--offset=8px] - Distance from the panel's edge facing the page; it sits in the header's top padding.
+ * @cssproperty {pixel} [--c2-sheet__handle--offset=8px] - Space between the handle and the panel's edge facing the page. A bottom sheet's handle sits in the header's top padding; a top sheet's has its own row under the footer.
  *
  * @cssproperty {background} [--c2-sheet__backdrop--background=rgba(9, 9, 11, 0.45)]
  * @cssproperty {backdrop-filter} --c2-sheet__backdrop--backdrop-filter - e.g. `blur(4px)`.
@@ -151,7 +153,8 @@ export class Sheet extends LitElement {
 
   /**
    * Let the user drag the sheet toward its edge by the header (or the grab handle a top or bottom sheet then shows) to
-   * close it. Released past a third of its depth, or flicked, it closes; otherwise it springs back.
+   * close it. Released past 35% of its depth, or flicked, it closes; otherwise it springs back. A left or right sheet
+   * drags by its header only, so it needs a title or the close button to be swipeable.
    */
   @property({ type: Boolean, attribute: 'swipe-close' }) swipeClose = false
 
@@ -164,6 +167,8 @@ export class Sheet extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['title', 'footer'])
 
   @query('dialog') private dialog!: HTMLDialogElement
+  @query('.c2-sheet__header') private header!: HTMLElement
+  @query('.c2-sheet__handle') private handle!: HTMLElement | null
 
   private releaseScroll: (() => void) | undefined
 
@@ -171,6 +176,7 @@ export class Sheet extends LitElement {
   private drag: { pointerId: number; x: number; y: number; offset: number; time: number; velocity: number; moved: boolean } | null = null
 
   private suppressClick = false
+  private suppressClickTimer: ReturnType<typeof setTimeout> | undefined
 
   override disconnectedCallback() {
     super.disconnectedCallback()
@@ -251,7 +257,8 @@ export class Sheet extends LitElement {
   private handlePointerDown = (event: PointerEvent) => {
     if (!this.swipeClose || !event.isPrimary || event.button !== 0) return
     const path = event.composedPath()
-    const grab = path.find((node) => node instanceof HTMLElement && (node.part.contains('header') || node.part.contains('handle')))
+    // Only this sheet's own header and handle: a `header` part of a component in the body is not a grab area.
+    const grab = path.find((node) => node === this.header || (this.handle !== null && node === this.handle))
     // The close button and a field in the title keep their own press.
     const control = path.find((node) => node instanceof HTMLElement && node.matches('button, input, textarea, select, a[href], [contenteditable]'))
     if (!grab || (control && path.indexOf(control) < path.indexOf(grab))) return
@@ -261,6 +268,11 @@ export class Sheet extends LitElement {
   private handlePointerMove = (event: PointerEvent) => {
     const drag = this.drag
     if (!drag || event.pointerId !== drag.pointerId) return
+    // A press released outside the panel before it became a drag never reaches pointerup here.
+    if (event.buttons === 0) {
+      this.drag = null
+      return
+    }
     const distance = this.towardEdge(event, drag)
     if (!drag.moved) {
       if (Math.abs(distance) < DRAG_THRESHOLD) return
@@ -285,10 +297,12 @@ export class Sheet extends LitElement {
     if (!drag.moved) return
     this.suppressClick = true
     // A click that does not follow (the pointer left the page) must not swallow the next real one.
-    setTimeout(() => (this.suppressClick = false))
+    clearTimeout(this.suppressClickTimer)
+    this.suppressClickTimer = setTimeout(() => (this.suppressClick = false))
     const rect = this.dialog.getBoundingClientRect()
     const depth = this.side === 'top' || this.side === 'bottom' ? rect.height : rect.width
-    const dismiss = event.type === 'pointerup' && (drag.offset > depth * CLOSE_DISTANCE || (drag.velocity > CLOSE_VELOCITY && drag.offset > DRAG_THRESHOLD))
+    const flick = drag.velocity > CLOSE_VELOCITY && drag.offset > DRAG_THRESHOLD && event.timeStamp - drag.time < FLICK_WINDOW
+    const dismiss = event.type === 'pointerup' && (drag.offset > depth * CLOSE_DISTANCE || flick)
     // Both in one style change: the panel then slides from where it was let go, off-screen or back into place.
     this.clearDrag()
     if (dismiss) this.close()
@@ -329,6 +343,8 @@ export class Sheet extends LitElement {
     const hasTitle = this.slotPresence.has('title')
     const hasFooter = this.slotPresence.has('footer')
     const handle = this.swipeClose && (this.side === 'top' || this.side === 'bottom')
+    const headerHidden = !hasTitle && this.hideClose
+    const handleTemplate = handle ? html`<div class="c2-sheet__handle" part="handle" aria-hidden="true"></div>` : nothing
     return html`
       <dialog
         class="c2-sheet"
@@ -340,15 +356,21 @@ export class Sheet extends LitElement {
         @click=${this.handleDialogClick}
       >
         <div
-          class=${classMap({ 'c2-sheet__panel': true, 'has-title': hasTitle, 'has-footer': hasFooter, 'is-swipeable': this.swipeClose })}
+          class=${classMap({
+            'c2-sheet__panel': true,
+            'has-title': hasTitle,
+            'has-footer': hasFooter,
+            'is-swipeable': this.swipeClose,
+            'has-header': !headerHidden,
+          })}
           @pointerdown=${this.handlePointerDown}
           @pointermove=${this.handlePointerMove}
           @pointerup=${this.handlePointerUp}
           @pointercancel=${this.handlePointerUp}
           @click=${this.handlePanelClick}
         >
-          ${handle ? html`<div class="c2-sheet__handle" part="handle" aria-hidden="true"></div>` : nothing}
-          <header class="c2-sheet__header" part="header" ?hidden=${!hasTitle && this.hideClose}>
+          ${this.side === 'bottom' ? handleTemplate : nothing}
+          <header class="c2-sheet__header" part="header" ?hidden=${headerHidden}>
             <div class="c2-sheet__title" id="title"><slot name="title" @slotchange=${this.handleSlotChange}></slot></div>
             ${
               this.hideClose
@@ -366,6 +388,7 @@ export class Sheet extends LitElement {
           <footer class="c2-sheet__footer" part="footer" ?hidden=${!hasFooter}>
             <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
           </footer>
+          ${this.side === 'top' ? handleTemplate : nothing}
         </div>
       </dialog>
     `
