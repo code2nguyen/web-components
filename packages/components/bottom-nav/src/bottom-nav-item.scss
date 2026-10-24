@@ -1,0 +1,199 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-bottom-nav-item,
+  $theme: (
+    flex-direction: column,
+    gap: 4px,
+    min-height: 48px,
+    padding-top: 8px,
+    padding-right: 2px,
+    padding-bottom: 6px,
+    padding-left: 2px,
+    color: #71717a,
+    font-family: inherit,
+    font-size: 12px,
+    font-weight: 500,
+    line-height: 16px,
+    letter-spacing: null,
+
+    current--color: rgb(2, 101, 220),
+    current--font-weight: 600,
+
+    indicator--width: 56px,
+    indicator--height: 32px,
+    indicator--border-radius: 999px,
+    indicator--background: transparent,
+    indicator__hover--background: #f4f4f5,
+    indicator__active--background: #e4e4e7,
+    indicator__current--background: #edf1fe,
+    indicator--transition-duration: 0.2s,
+
+    icon--size: 24px,
+
+    line--height: 0px,
+    line--width: 50%,
+    line--border-radius: 0 0 3px 3px,
+    line__current--background: rgb(2, 101, 220),
+    badge--top: 0px,
+    badge--inset-inline-start: calc(50% + 4px),
+    badge--box-shadow: 0 0 0 2px #ffffff,
+    dot--top: 3px,
+    dot--inset-inline-start: calc(50% + 7px),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.item {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: css.cssVar(flex-direction);
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(gap);
+  width: 100%;
+  height: 100%;
+  min-height: css.cssVar(min-height);
+  margin: 0;
+  padding: css.cssVar(padding-top) css.cssVar(padding-right) css.cssVar(padding-bottom) css.cssVar(padding-left);
+  border: 0;
+  background: none;
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  line-height: css.cssVar(line-height);
+  letter-spacing: css.cssVar(letter-spacing);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: css.cssVar(line--width);
+    height: css.cssVar(line--height);
+    border-radius: css.cssVar(line--border-radius);
+    background: transparent;
+    transform: translateX(-50%);
+  }
+}
+
+.item.is-current {
+  color: css.cssVar(current--color);
+  font-weight: css.cssVar(current--font-weight);
+
+  &::before {
+    background: css.cssVar(line__current--background);
+  }
+}
+
+.indicator {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(indicator--width);
+  height: css.cssVar(indicator--height);
+  border-radius: css.cssVar(indicator--border-radius);
+  background: css.cssVar(indicator--background);
+  transition: background-color css.cssVar(indicator--transition-duration) ease;
+}
+
+@media (hover: hover) {
+  .item:hover .indicator {
+    background: css.cssVar(indicator__hover--background);
+  }
+}
+
+.item:active .indicator {
+  background: css.cssVar(indicator__active--background);
+}
+
+.item.is-current .indicator {
+  background: css.cssVar(indicator__current--background);
+}
+
+.item:focus-visible .indicator {
+  outline: css.cssVar(focus--outline);
+  outline-offset: css.cssVar(focus--outline-offset);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  font-size: css.cssVar(icon--size);
+
+  ::slotted(*) {
+    --c2-feather-icon--size: #{css.cssVar(icon--size)};
+    --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: css.cssVar(badge--top);
+  inset-inline-start: css.cssVar(badge--inset-inline-start);
+  --c2-badge--box-shadow: #{css.cssVar(badge--box-shadow)};
+  pointer-events: none;
+
+  &.is-dot {
+    top: css.cssVar(dot--top);
+    inset-inline-start: css.cssVar(dot--inset-inline-start);
+  }
+}
+
+.label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .item.is-current {
+    color: Highlight;
+  }
+
+  .item.is-current .indicator {
+    outline: 2px solid Highlight;
+  }
+}

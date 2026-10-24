@@ -105,6 +105,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-bottom-nav': {
+    html: `<c2-bottom-nav value="home" style="width:380px;max-width:100%;--c2-bottom-nav--position:relative"><c2-bottom-nav-item value="home" label="Home"></c2-bottom-nav-item><c2-bottom-nav-item value="search" label="Search"></c2-bottom-nav-item><c2-bottom-nav-item value="inbox" label="Inbox" count="4"></c2-bottom-nav-item><c2-bottom-nav-item value="profile" label="Profile" dot></c2-bottom-nav-item></c2-bottom-nav>`,
+    presets: [
+      {
+        name: 'Floating dock',
+        description: 'A rounded bar lifted off the screen edges with a soft shadow, as in iOS apps with a floating tab bar.',
+        css: {
+          '--c2-bottom-nav--margin': '0 12px 12px',
+          '--c2-bottom-nav--padding-bottom': '0px',
+          '--c2-bottom-nav--border-top': 'none',
+          '--c2-bottom-nav--border-radius': '28px',
+          '--c2-bottom-nav--box-shadow': '0 8px 24px rgb(15 20 30 / 0.14)',
+        },
+      },
+      {
+        name: 'Tint only',
+        description: 'No indicator shape: the current item is shown by its colour and filled icon, like the classic iOS tab bar.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__current--font-weight': '500',
+        },
+      },
+      {
+        name: 'Top line',
+        description: 'A short line on the top edge of the current item instead of an indicator fill.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__line--height': '3px',
+          '--c2-bottom-nav-item__line--width': '40%',
+        },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [

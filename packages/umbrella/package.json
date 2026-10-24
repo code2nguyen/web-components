@@ -105,6 +105,14 @@
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
     },
+    "./bottom-nav": {
+      "types": "./dist/bottom-nav.d.ts",
+      "default": "./dist/bottom-nav.js"
+    },
+    "./bottom-nav/bottom-nav-item": {
+      "types": "./dist/bottom-nav/bottom-nav-item.d.ts",
+      "default": "./dist/bottom-nav/bottom-nav-item.js"
+    },
     "./breadcrumb": {
       "types": "./dist/breadcrumb.d.ts",
       "default": "./dist/breadcrumb.js"
@@ -966,6 +974,7 @@
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/border-beam": "*",
+    "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",

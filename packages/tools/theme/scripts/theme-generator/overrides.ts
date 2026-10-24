@@ -957,4 +957,14 @@ export const overrides: Record<string, Override> = {
   '--c2-form-field__warning--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__counter__near-limit--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__icon-glyph--color': { exclude: 'glyph on the error or warning disc' },
+  // Bottom nav: the pressed indicator is the hover surface tinted a step further (as on the copy button), and the badge
+  // ring cuts the badge out of the bar, so it is drawn in the bar's surface colour like the avatar-group ring.
+  '--c2-bottom-nav-item__indicator__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  '--c2-bottom-nav-item__badge--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
 }
