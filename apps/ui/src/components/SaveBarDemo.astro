@@ -1,0 +1,115 @@
+---
+// A working settings screen built around `c2-save-bar`: edit the fields and the bar appears; Save waits a moment
+// (`saving`), Discard restores the saved values, an invalid email blocks Save (`invalid`), and Ctrl+S / ⌘S saves
+// (`shortcut`). The c2-* markup goes in as an HTML string: written as tags here, Astro would server-render each
+// element and leave it waiting for an island hydration that never comes.
+const markup = `
+<section class="sb-demo" data-sb-demo>
+  <header class="sb-demo__header">
+    <p class="sb-demo__title">Store settings</p>
+    <p class="sb-demo__note" data-sb-status role="status">Edit a field to see the save bar.</p>
+  </header>
+  <div class="sb-demo__scroller">
+    <form class="sb-demo__form" novalidate>
+      <c2-form-field label="Store name"><c2-text-field name="store" value="Nguyen Coffee Roasters"></c2-text-field></c2-form-field>
+      <c2-form-field label="Contact email" data-sb-email-field><c2-text-field name="email" type="email" value="hello@nguyen.coffee"></c2-text-field></c2-form-field>
+      <c2-form-field label="Order prefix" hint="Shown before every order number, e.g. NCR-1042."><c2-text-field name="prefix" value="NCR"></c2-text-field></c2-form-field>
+      <c2-switch name="notify" checked>Email me about new orders</c2-switch>
+    </form>
+    <c2-save-bar class="sb-demo__bar" shortcut></c2-save-bar>
+  </div>
+</section>
+`
+---
+
+<Fragment set:html={markup} />
+
+<!-- Global: the markup above is a string, which Astro's scoped styles do not reach. Every class is prefixed. -->
+<style lang="scss" is:global>
+  .sb-demo {
+    display: grid;
+    gap: 12px;
+    margin-block: 16px 24px;
+    padding: 16px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+  }
+  .sb-demo__title {
+    margin: 0;
+    font-weight: 600;
+  }
+  .sb-demo__note {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--site-color-on-surface-variant);
+  }
+  .sb-demo__scroller {
+    max-height: 360px;
+    overflow: auto;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 8px;
+  }
+  .sb-demo__form {
+    display: grid;
+    gap: 16px;
+    max-width: 420px;
+    padding: 16px 16px 80px;
+  }
+</style>
+
+<script>
+  import '@c2n/components/save-bar'
+  import '@c2n/components/form-field'
+  import '@c2n/components/text-field'
+  import '@c2n/components/switch'
+  import type { SaveBar } from '@c2n/components/save-bar'
+  import type { FormField } from '@c2n/components/form-field'
+  import type { TextField } from '@c2n/components/text-field'
+  import type { Switch } from '@c2n/components/switch'
+
+  document.querySelectorAll<HTMLElement>('[data-sb-demo]').forEach((demo) => {
+    const bar = demo.querySelector<SaveBar>('c2-save-bar')!
+    const fields = [...demo.querySelectorAll<TextField>('c2-text-field')]
+    const notify = demo.querySelector<Switch>('c2-switch')!
+    const emailField = demo.querySelector<FormField>('[data-sb-email-field]')!
+    // Slotted only while there is something to fix; otherwise the bar shows its own message.
+    const message = Object.assign(document.createElement('span'), { slot: 'message', textContent: 'Unsaved changes · 1 field to fix' })
+    const status = demo.querySelector<HTMLElement>('[data-sb-status]')!
+
+    const read = () => ({ ...Object.fromEntries(fields.map((field) => [field.name, field.value])), notify: notify.checked })
+    let saved = read()
+
+    const sync = () => {
+      const current = read()
+      bar.open = JSON.stringify(current) !== JSON.stringify(saved)
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(current.email))
+      bar.invalid = !emailOk
+      emailField.errorText = emailOk ? '' : 'Enter a valid email address'
+      if (emailOk) message.remove()
+      else bar.append(message)
+    }
+
+    demo.addEventListener('input', sync)
+    demo.addEventListener('change', sync)
+
+    bar.addEventListener('save', async () => {
+      // What is sent is what counts as saved: an edit made while it saves keeps the bar open.
+      const sending = read()
+      bar.saving = true
+      await new Promise((resolve) => setTimeout(resolve, 900))
+      saved = sending
+      bar.saving = false
+      sync()
+      status.textContent = `Saved at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`
+      fields[0].focus()
+    })
+
+    bar.addEventListener('discard', () => {
+      for (const field of fields) field.value = String(saved[field.name as keyof typeof saved])
+      notify.checked = Boolean(saved.notify)
+      sync()
+      status.textContent = 'Changes discarded.'
+      fields[0].focus()
+    })
+  })
+</script>
