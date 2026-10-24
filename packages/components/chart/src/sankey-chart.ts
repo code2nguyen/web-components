@@ -86,7 +86,7 @@ interface SankeyEngineNode {
   name: string
   depth: number
   itemStyle: { color: string; opacity?: number }
-  label: { position: string; formatter: () => string }
+  label: { position: string; formatter: () => string; width?: number; overflow?: 'truncate'; ellipsis?: string }
 }
 
 /** One link as the engine receives it. */
@@ -267,10 +267,20 @@ export class SankeyChart extends EchartsChartBase {
 
   // ------------------------------------------------------ chart overrides ---
 
-  /** Nodes are hidden by leaving them out of the data. */
+  /** Nodes are hidden by leaving them out of the data, and the label room follows the plot size. */
   protected override async createAdapter(): Promise<ChartAdapter> {
     const adapter = await super.createAdapter()
-    return { ...adapter, setSeriesVisibility: () => undefined }
+    return {
+      ...adapter,
+      setSeriesVisibility: () => undefined,
+      // The label room and widths are in pixels; a resize does not rebuild the options, so they are pushed here.
+      resize: (width, height) => {
+        adapter.resize(width, height)
+        if (width <= 0 || height <= 0 || this.#computeModel().cycle) return
+        const context = { ...this.buildContext(), width, height }
+        adapter.setOptions({ series: [{ ...this.#margins(context), data: this.#nodes(context), links: this.#links(context) }] }, 'merge')
+      },
+    }
   }
 
   /** The base fast path sends the data alone; a sankey's links, columns and label room ride on the options too. */
@@ -662,11 +672,18 @@ export class SankeyChart extends EchartsChartBase {
     const model = this.#computeModel()
     if (model.cycle) return []
     const lit = this.#litByHighlight()
+    const widths = this.#labelWidths(context)
     return model.nodes.map((node) => {
       const itemStyle: SankeyEngineNode['itemStyle'] = { color: this.#colorOf(node.key, context) }
       if (lit && !lit.nodes.has(node.key)) itemStyle.opacity = context.theme.dimmedOpacity
-      const label = node.label
-      return { name: node.key, depth: node.column, itemStyle, label: { position: this.#labelPosition(node.column, model.columns), formatter: () => label } }
+      const text = node.label
+      const position = this.#labelPosition(node.column, model.columns)
+      const label: SankeyEngineNode['label'] = { position, formatter: () => text }
+      // An outside label longer than the room kept for it is cut with an ellipsis rather than clipped by the plot; the
+      // tooltip and the flow table still carry the whole name.
+      const width = position === 'left' && node.column === 0 ? widths.start : position === 'right' && node.column === model.columns - 1 ? widths.end : undefined
+      if (width !== undefined) Object.assign(label, { width: Math.max(16, width), overflow: 'truncate', ellipsis: '…' })
+      return { name: node.key, depth: node.column, itemStyle, label }
     })
   }
 
@@ -713,7 +730,7 @@ export class SankeyChart extends EchartsChartBase {
     if (this.labels === 'none') return { left: EDGE, right: EDGE, top: EDGE, bottom: EDGE }
     const font = `${theme.fontSize}px ${theme.fontFamily === 'inherit' ? (typeof getComputedStyle === 'function' ? getComputedStyle(this).fontFamily : '') || 'sans-serif' : theme.fontFamily}`
     const widest = (nodes: SankeyNodeDetail[]) => Math.max(0, ...nodes.map((node) => measureText(node.label, font, theme.fontSize)))
-    const room = (nodes: SankeyNodeDetail[], size: number) => (nodes.length === 0 ? EDGE : Math.min(size / 4, widest(nodes) + LABEL_DISTANCE + EDGE))
+    const room = (nodes: SankeyNodeDetail[], size: number) => (nodes.length === 0 ? EDGE : Math.min(size * 0.3, widest(nodes) + LABEL_DISTANCE + EDGE))
     const first = model.nodes.filter((node) => node.column === 0)
     const last = model.columns > 1 ? model.nodes.filter((node) => node.column === model.columns - 1) : []
     const middle = model.nodes.filter((node) => node.column > 0 && node.column < model.columns - 1)
@@ -724,6 +741,16 @@ export class SankeyChart extends EchartsChartBase {
     }
     if (this.labels === 'inside') return { left: EDGE, right: EDGE, top: half, bottom: half }
     return { left: room(first, context.width), right: room(last, context.width), top: half, bottom: half }
+  }
+
+  /**
+   * How wide an outside label may be: the room kept for it, which is capped. Labels between columns are left whole:
+   * cut to the gap between two columns they would often read as a bare ellipsis, and they keep a halo over the bands.
+   */
+  #labelWidths(context: ChartBuildContext): { start?: number; end?: number } {
+    if (this.orient === 'vertical' || this.labels !== 'outside' || context.width <= 0) return {}
+    const margins = this.#margins(context)
+    return { start: margins.left - LABEL_DISTANCE - EDGE, end: margins.right - LABEL_DISTANCE - EDGE }
   }
 
   #linkAt(index: number): SankeyLinkDetail | undefined {

@@ -338,3 +338,24 @@ test('sends the links with the nodes when data arrives through updateData', asyn
   })
   expect(links).toEqual(['Left>Middle', 'Middle>Right'])
 })
+
+test('cuts a label longer than its room with an ellipsis instead of letting the plot clip it', async ({ page, scenario }) => {
+  await scenario('sankey')
+  const chart = page.locator('c2-sankey-chart')
+  await expect(chart).toHaveState('ready')
+
+  const labels = await chart.evaluate(async (element) => {
+    const sankey = element as SankeyElement
+    sankey.style.width = '320px'
+    sankey.nodes = [{ id: 'Subscriptions', label: 'Subscriptions and recurring licence revenue' }]
+    await sankey.updateComplete
+    const context = { ...(sankey.buildContext() as Record<string, unknown>), width: 300 }
+    const series = sankey.seriesOption(0, context) as { left: number; data: (EngineNode & { label: { width?: number; overflow?: string } })[] }
+    const first = series.data.find((node) => node.name === 'Subscriptions')?.label
+    const middle = series.data.find((node) => node.name === 'Revenue')?.label
+    return { left: series.left, first: [first?.overflow, first?.width], middle: [middle?.overflow, middle?.width] }
+  })
+  // Outside labels get at most 30% of the width (90px here), and the label is cut to what is left of that room.
+  // Labels between columns are left whole.
+  expect(labels).toEqual({ left: 90, first: ['truncate', 80], middle: [undefined, undefined] })
+})
