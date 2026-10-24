@@ -183,6 +183,7 @@
         "./packages/components/number-input:build",
         "./packages/components/org-chart:build",
         "./packages/components/otp-input:build",
+        "./packages/components/overflow-list:build",
         "./packages/components/overlay:build",
         "./packages/components/page-editor:build",
         "./packages/components/pagination:build",

@@ -1,0 +1,125 @@
+---
+description: 'Ready-made looks for c2-overflow-list: outlined actions, a text "More" trigger, link tabs that mark a folded current page, and a pill icon toolbar. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { OverflowList } from '@c2n/components/overflow-list'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
+import { LinkButton } from '@c2n/components/link-button'
+import { FeatherBoldIcon as FeatherBold } from '@c2n/feather-icons/icons/bold.js'
+import { FeatherItalicIcon as FeatherItalic } from '@c2n/feather-icons/icons/italic.js'
+import { FeatherLinkIcon as FeatherLink } from '@c2n/feather-icons/icons/link.js'
+import { FeatherPrinterIcon as FeatherPrinter } from '@c2n/feather-icons/icons/printer.js'
+import { FeatherShare2Icon as FeatherShare_2 } from '@c2n/feather-icons/icons/share-2.js'
+import { FeatherUnderlineIcon as FeatherUnderline } from '@c2n/feather-icons/icons/underline.js'
+
+## Looks
+
+The list's own look is its trigger and its gap: `--c2-overflow-list__more--*` and `--c2-overflow-list--gap`. The children keep their own variables, and the menu rows inherit the `--c2-menu*` variables set on the list.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-overflow-list aria-label="Actions">
+  <c2-button>Edit</c2-button>
+  <c2-button>Assign</c2-button>
+  <c2-button>Label</c2-button>
+  <c2-button>Duplicate</c2-button>
+  <c2-button>Move</c2-button>
+  <c2-button>Archive</c2-button>
+</c2-overflow-list>
+```
+
+```html tag=MdxCodeBlock,label=Text trigger
+<style>
+  .more-text {
+    --c2-overflow-list--gap: 6px;
+    --c2-overflow-list__more--padding-left: 12px;
+    --c2-overflow-list__more--padding-right: 10px;
+    --c2-overflow-list__more--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-overflow-list__more__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-overflow-list__more__hover--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+  }
+  .more-text c2-button {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+  }
+</style>
+<c2-overflow-list class="more-text" aria-label="Document actions">
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"></path></svg>Share</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Copy link</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>Print</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>Archive</c2-button>
+  <span slot="more">More</span>
+  <svg slot="more" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+</c2-overflow-list>
+```
+
+```html tag=MdxCodeBlock,label=Link tabs
+<style>
+  .tabs {
+    width: 100%;
+    --c2-overflow-list--gap: 2px;
+    --c2-overflow-list__more--border: 1px solid transparent;
+    --c2-overflow-list__more__hover--border: 1px solid transparent;
+    --c2-overflow-list__more__current--border: 1px solid transparent;
+    --c2-overflow-list__more__current--color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<nav class="tabs" aria-label="Repository">
+  <c2-overflow-list>
+    <c2-link-button href="#code">Code</c2-link-button>
+    <c2-link-button href="#issues">Issues</c2-link-button>
+    <c2-link-button href="#pulls">Pull requests</c2-link-button>
+    <c2-link-button href="#actions">Actions</c2-link-button>
+    <c2-link-button href="#wiki">Wiki</c2-link-button>
+    <c2-link-button href="#insights" aria-current="page" selected>Insights</c2-link-button>
+  </c2-overflow-list>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Pill toolbar
+<style>
+  .pill {
+    --c2-overflow-list--gap: 2px;
+    --c2-overflow-list__more--height: 32px;
+    --c2-overflow-list__more--min-width: 32px;
+    --c2-overflow-list__more--padding-left: 0;
+    --c2-overflow-list__more--padding-right: 0;
+    --c2-overflow-list__more--border: 1px solid transparent;
+    --c2-overflow-list__more--border-radius: 999px;
+    --c2-overflow-list__more__hover--border: 1px solid transparent;
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    max-width: 180px;
+    padding: 4px;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 999px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    box-shadow: 0 4px 12px rgba(24, 24, 27, 0.08);
+  }
+</style>
+<div class="pill">
+  <c2-overflow-list aria-label="Formatting">
+    <c2-icon-button aria-label="Bold" toggle selected><c2-feather-bold></c2-feather-bold></c2-icon-button>
+    <c2-icon-button aria-label="Italic" toggle><c2-feather-italic></c2-feather-italic></c2-icon-button>
+    <c2-icon-button aria-label="Underline" toggle><c2-feather-underline></c2-feather-underline></c2-icon-button>
+    <hr />
+    <c2-icon-button aria-label="Link"><c2-feather-link></c2-feather-link></c2-icon-button>
+    <c2-icon-button aria-label="Share"><c2-feather-share-2></c2-feather-share-2></c2-icon-button>
+    <c2-icon-button aria-label="Print"><c2-feather-printer></c2-feather-printer></c2-icon-button>
+  </c2-overflow-list>
+</div>
+```
+
+</GalleryGrid>

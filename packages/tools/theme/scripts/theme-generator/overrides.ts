@@ -254,6 +254,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
   },
+  // The "More" trigger of an overflow list is outlined in the accent while it holds the current page.
+  '--c2-overflow-list__more__current--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
   // Org chart: the connector lines are the resting border grey, hovering a card or a toggle takes the hover border,
   // and the selection ring doubles the accent border.
   '--c2-org-chart__connector--color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
