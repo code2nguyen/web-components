@@ -254,8 +254,11 @@ export class SankeyChart extends EchartsChartBase {
   setNodeVisible(key: string, visible: boolean): void {
     const next = new Set(this.hiddenNodes)
     if (visible) next.delete(key)
-    else if (this.#computeModel().nodes.length > 2) next.add(key)
-    else return
+    else {
+      next.add(key)
+      // Hiding a node can strand its neighbours with no flow left, so count what would still be drawn.
+      if (this.#buildModel(next).nodes.length < 2) return
+    }
     this.hiddenNodes = next
     if (!visible && this.highlighted === key) this.highlight(null)
     if (!visible && this.focusedNode === key) this.#focusNode(null)
@@ -301,12 +304,15 @@ export class SankeyChart extends EchartsChartBase {
     return cycle ? this.msg.t('cycle', cycle.map((key) => this.#labelOf(key)).join(' → ')) : ''
   }
 
-  /** One legend entry per node, as a pie lists its slices. */
+  /** One legend entry per drawn node, as a pie lists its slices, plus the hidden ones so they can be switched back on. */
   protected override legendItems(): ChartLegendItem[] {
     const model = this.#computeModel()
     const series = this.resolvedSeries[0] ?? { field: this.valueField }
-    return model.keys.map((key, index) => {
+    const drawn = new Set(model.nodes.map((node) => node.key))
+    return model.keys.flatMap((key, index) => {
       const visible = !this.hiddenNodes.has(key)
+      // A node stranded by hiding a neighbour, or one whose only row flows to itself, has nothing to toggle.
+      if (visible && !drawn.has(key)) return []
       return {
         label: this.#labelOf(key),
         color: this.#colorOf(key),
@@ -366,7 +372,14 @@ export class SankeyChart extends EchartsChartBase {
 
   /** The nodes are the series' data. The links ride on the series option, which every data change rebuilds. */
   protected override projectData(_frame: ChartFrame, context: ChartBuildContext): unknown {
-    return [this.#nodes(context)]
+    // `updateData()` and a data source reach the engine through here alone, without rebuilding the options: the links
+    // go with the nodes, or the engine would draw the new nodes against the old links.
+    this.#model = undefined
+    const nodes = this.#nodes(context)
+    this.adapter?.setOptions({ series: [{ data: nodes, links: this.#links(context) }] }, 'merge')
+    // That path also skips Lit's update, so the flow table is refreshed here too.
+    this.#renderAccessibleSummary()
+    return [nodes]
   }
 
   /** A highlight names a node; nothing else on the chart is highlighted by a click. */
@@ -490,8 +503,13 @@ export class SankeyChart extends EchartsChartBase {
   #handleKeydown = (event: KeyboardEvent): void => {
     const model = this.#computeModel()
     if (model.nodes.length === 0 || model.cycle) return
-    // Reading order: column by column, each in data order.
-    const walk = [...model.nodes].sort((a, b) => a.column - b.column)
+    // Reading order: column by column, each top to bottom as the engine placed it (it reorders a column to keep the
+    // bands from crossing), or in data order before it has.
+    const across = (node: SankeyNodeDetail) => {
+      const layout = this.adapter?.itemLayout?.(0, model.nodes.indexOf(node))
+      return layout ? (this.orient === 'vertical' ? layout.x : layout.y) : model.nodes.indexOf(node)
+    }
+    const walk = [...model.nodes].sort((a, b) => a.column - b.column || across(a) - across(b))
     const current = model.nodes.find((node) => node.key === this.focusedNode)
     let next: SankeyNodeDetail | undefined
     switch (event.key) {
@@ -624,16 +642,20 @@ export class SankeyChart extends EchartsChartBase {
     if (this.#model && this.#model.signature === signature && this.#modelData === this.data && this.#modelNodes === this.nodes) return this.#model
     this.#modelData = this.data
     this.#modelNodes = this.nodes
-    this.#model = buildSankeyModel(Array.isArray(this.data) ? (this.data as unknown[]) : [], {
+    this.#model = this.#buildModel(this.hiddenNodes, signature)
+    return this.#model
+  }
+
+  #buildModel(hidden: ReadonlySet<string>, signature?: string): SankeyModel {
+    return buildSankeyModel(Array.isArray(this.data) ? (this.data as unknown[]) : [], {
       sourceField: this.sourceField,
       targetField: this.targetField,
       valueField: this.valueField,
       nodeAlign: this.nodeAlign,
       nodes: this.nodes,
-      hidden: this.hiddenNodes,
+      hidden,
       signature,
     })
-    return this.#model
   }
 
   #nodes(context: ChartBuildContext): SankeyEngineNode[] {
@@ -724,17 +746,31 @@ export class SankeyChart extends EchartsChartBase {
   }
 
   #labelOf(key: string): string {
-    const label = this.nodes?.find((node) => String(node?.id) === key)?.label
+    const label = this.#lookups().config.get(key)?.label
     return label === undefined || label === null || label === '' ? key : String(label)
   }
 
   /** A node's colour: its `nodes` colour, or else its palette slot in order of first appearance, so hiding never recolours it. */
   #colorOf(key: string, context?: ChartBuildContext): string {
     const palette = (context?.theme ?? this.themeController.theme).palette
-    const fallback = palette[Math.max(0, this.#computeModel().keys.indexOf(key)) % palette.length]
-    const color = this.nodes?.find((node) => String(node?.id) === key)?.color
+    const { config, slots } = this.#lookups()
+    const fallback = palette[(slots.get(key) ?? 0) % palette.length]
+    const color = config.get(key)?.color
     return color ? this.themeController.resolveColor(color, fallback) : fallback
   }
+
+  /** The `nodes` entries and the palette slots by key, built once per model and `nodes` list rather than searched per node. */
+  #lookups(): { config: Map<string, SankeyNodeConfig>; slots: Map<string, number> } {
+    const model = this.#computeModel()
+    if (this.#lookupCache?.model !== model || this.#lookupCache.nodes !== this.nodes) {
+      const config = new Map<string, SankeyNodeConfig>()
+      for (const entry of this.nodes ?? []) if (entry && typeof entry === 'object' && entry.id !== undefined) config.set(String(entry.id), entry)
+      this.#lookupCache = { model, nodes: this.nodes, config, slots: new Map(model.keys.map((key, index) => [key, index])) }
+    }
+    return this.#lookupCache
+  }
+
+  #lookupCache?: { model: SankeyModel; nodes: unknown; config: Map<string, SankeyNodeConfig>; slots: Map<string, number> }
 
   #readStyle(): { nodeWidth: number; nodeGap: number; radius: number; linkOpacity: number; hoverOpacity: number; curveness: number } {
     const style = typeof getComputedStyle === 'function' ? getComputedStyle(this) : undefined
@@ -889,8 +925,8 @@ export function buildSankeyModel(rows: readonly unknown[], options: SankeyModelO
   for (const entry of options.nodes ?? []) if (entry && typeof entry === 'object' && entry.id !== undefined) config.set(String(entry.id), entry)
 
   const columnOf = (name: string): number => {
-    const fixed = Number(config.get(name)?.column)
-    if (Number.isInteger(fixed) && fixed >= 0) return fixed
+    const fixed = config.get(name)?.column
+    if (typeof fixed === 'number' && Number.isInteger(fixed) && fixed >= 0) return fixed
     if (cycle) return 0
     if (options.nodeAlign === 'right') return maxDepth - (toEnd.get(name) ?? 0)
     if (options.nodeAlign === 'justify' && !outgoing.has(name)) return maxDepth

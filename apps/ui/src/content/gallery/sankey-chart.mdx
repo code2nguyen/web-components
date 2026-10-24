@@ -16,7 +16,7 @@ import { SankeyChart } from '@c2n/components/chart/sankey-chart'
 
 ```html tag=MdxCodeBlock,label=Funnel with drop-off
 <style>
-  .sankey-funnel { width: 100%; --c2-chart--height: 300px; --c2-chart__link--opacity: 0.45; --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #2563eb; --c2-chart__series-3--color: #059669; --c2-chart__series-4--color: #7c3aed; --c2-chart__series-5--color: #0891b2; --c2-chart__series-6--color: #059669; --c2-chart__series-7--color: #a1a1aa; --c2-chart__series-8--color: #a1a1aa; }
+  .sankey-funnel { width: 100%; --c2-chart--height: 300px; --c2-chart__link--opacity: 0.45; --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #2563eb; --c2-chart__series-3--color: #059669; --c2-chart__series-4--color: #7c3aed; --c2-chart__series-5--color: #0891b2; --c2-chart__series-6--color: #059669; --c2-chart__series-7--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff)); --c2-chart__series-8--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff)); }
 </style>
 <c2-sankey-chart class="sankey-funnel" emphasis="trajectory" link-color="gradient" node-align="left" data='[{"source":"Search","target":"Landing page","value":5200},{"source":"Landing page","target":"Signed up","value":3400},{"source":"Paid ads","target":"Landing page","value":3100},{"source":"Referral","target":"Landing page","value":1700},{"source":"Signed up","target":"Activated","value":2300},{"source":"Landing page","target":"Left","value":6600},{"source":"Signed up","target":"Abandoned","value":1100}]'></c2-sankey-chart>
 ```

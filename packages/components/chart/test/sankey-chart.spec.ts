@@ -17,6 +17,10 @@ interface SankeyElement extends HTMLElement {
   buildContext(): unknown
   seriesOption(index: number, context: unknown): Record<string, unknown>
   handleEngineClick(detail: { index: number; seriesIndex: number; dataType?: string }): void
+  setNodeVisible(key: string, visible: boolean): void
+  getLegendItems(): { label: string; visible: boolean }[]
+  updateData(rows: unknown): void
+  adapter?: { setData(data: unknown): void; setOptions(options: unknown, mode: string): void }
 }
 
 test('sums the rows into one flow per pair and places the nodes in columns', async ({ page, scenario }) => {
@@ -260,4 +264,77 @@ test('walks the nodes from the keyboard and lists every flow for screen readers'
   await expect.poll(() => chart.evaluate((element) => (element as SankeyElement).highlighted)).toBe('Revenue')
   await page.keyboard.press('Escape')
   await expect.poll(() => chart.evaluate((element) => (element as SankeyElement).highlighted)).toBeNull()
+})
+
+test('keeps two nodes drawn when hiding one would strand the rest, and lists only drawn or hidden nodes', async ({ page, scenario }) => {
+  await scenario('sankey')
+  const chart = page.locator('c2-sankey-chart')
+  await expect(chart).toHaveState('ready')
+
+  const result = await chart.evaluate(async (element) => {
+    const sankey = element as SankeyElement
+    sankey.data = [
+      { from: 'A', to: 'B', amount: 2 },
+      { from: 'B', to: 'C', amount: 1 },
+      { from: 'D', to: 'B', amount: 1 },
+    ]
+    await sankey.updateComplete
+    // Hiding B would leave A, C and D with no flow at all: refused.
+    sankey.setNodeVisible('B', false)
+    await sankey.updateComplete
+    const kept = sankey.nodeTotals.map((node) => node.key)
+    // Hiding D leaves A → B → C; D stays in the legend, switched off, so it can come back.
+    sankey.setNodeVisible('D', false)
+    await sankey.updateComplete
+    const legend = sankey.getLegendItems().map((item) => `${item.label}:${item.visible}`)
+    return { kept, legend }
+  })
+  expect(result).toEqual({ kept: ['A', 'B', 'C', 'D'], legend: ['A:true', 'B:true', 'C:true', 'D:false'] })
+})
+
+test('leaves a nodes entry whose column is null to node-align, and resolves a color-mix() colour for the engine', async ({ page, scenario }) => {
+  await scenario('sankey')
+  const chart = page.locator('c2-sankey-chart')
+  await expect(chart).toHaveState('ready')
+
+  const result = await chart.evaluate(async (element) => {
+    const sankey = element as SankeyElement
+    sankey.nodes = [{ id: 'Net profit', column: null, color: 'color-mix(in srgb, #000000 50%, #ffffff)' }]
+    await sankey.updateComplete
+    const series = sankey.seriesOption(0, sankey.buildContext()) as { data: EngineNode[] }
+    const profit = series.data.find((node) => node.name === 'Net profit')
+    return { column: profit?.depth, color: profit?.itemStyle.color }
+  })
+  expect(result).toEqual({ column: 4, color: 'rgb(128, 128, 128)' })
+})
+
+test('sends the links with the nodes when data arrives through updateData', async ({ page, scenario }) => {
+  await scenario('sankey')
+  const chart = page.locator('c2-sankey-chart')
+  await expect(chart).toHaveState('ready')
+
+  const links = await chart.evaluate((element) => {
+    const sankey = element as SankeyElement
+    const adapter = sankey.adapter
+    if (!adapter) return null
+    let latest: string[] = []
+    const setOptions = adapter.setOptions.bind(adapter)
+    adapter.setOptions = (options, mode) => {
+      const series = (options as { series?: { links?: EngineLink[] }[] }).series?.[0]
+      if (series?.links) latest = series.links.map((link) => `${link.source}>${link.target}`)
+      setOptions(options, mode)
+    }
+    let atData: string[] = []
+    const setData = adapter.setData.bind(adapter)
+    adapter.setData = (data) => {
+      atData = latest
+      setData(data)
+    }
+    sankey.updateData([
+      { from: 'Left', to: 'Middle', amount: 3 },
+      { from: 'Middle', to: 'Right', amount: 2 },
+    ])
+    return atData
+  })
+  expect(links).toEqual(['Left>Middle', 'Middle>Right'])
 })

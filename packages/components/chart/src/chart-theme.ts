@@ -146,7 +146,7 @@ export class ChartThemeController implements ReactiveController {
     const probe = document.createElement('i')
     probe.style.color = expression
     block.append(probe)
-    const value = getComputedStyle(probe).color || fallback
+    const value = engineColor(getComputedStyle(probe).color) || fallback
     probe.remove()
     this.#colors.set(expression, value)
     return value
@@ -209,7 +209,7 @@ export class ChartThemeController implements ReactiveController {
     const at = (name: (typeof PROBE_COLORS)[number], fallback: string): string => {
       const index = PROBE_COLORS.indexOf(name)
       const probe = probes[index]
-      const value = probe ? getComputedStyle(probe).color : ''
+      const value = probe ? engineColor(getComputedStyle(probe).color) : ''
       return value || fallback
     }
     const scalar = (name: string, fallback: number): number => {
@@ -243,4 +243,19 @@ export class ChartThemeController implements ReactiveController {
       dimmedOpacity: Math.min(1, Math.max(0, scalar('--c2-chart__series__dimmed--opacity', FALLBACK.dimmedOpacity))),
     }
   }
+}
+
+/**
+ * A computed colour as a string every engine parses. Browsers serialize `color-mix(in srgb, …)` and other colours
+ * outside the legacy syntax as `color(srgb r g b [/ a])` with 0–1 channels, which ECharts and uPlot do not read;
+ * those are turned back into `rgb()`/`rgba()`. Anything else is returned as it is.
+ */
+export function engineColor(value: string): string {
+  const match = /^color\(srgb\s+([\d.e+-]+)\s+([\d.e+-]+)\s+([\d.e+-]+)(?:\s*\/\s*([\d.e+-]+%?))?\s*\)$/i.exec(value.trim())
+  if (!match) return value
+  const channel = (text: string) => Math.round(Math.min(1, Math.max(0, Number(text))) * 255)
+  const [r, g, b] = [match[1], match[2], match[3]].map(channel)
+  if (match[4] === undefined) return `rgb(${r}, ${g}, ${b})`
+  const alpha = match[4].endsWith('%') ? Number(match[4].slice(0, -1)) / 100 : Number(match[4])
+  return `rgba(${r}, ${g}, ${b}, ${Math.min(1, Math.max(0, alpha))})`
 }
