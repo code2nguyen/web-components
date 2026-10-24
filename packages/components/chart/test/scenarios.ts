@@ -23,6 +23,7 @@ import '../src/candlestick-chart'
 import '../src/overlap-chart'
 import * as overlapLayout from '../src/overlap-layout'
 import '../src/chord-chart'
+import '../src/sankey-chart'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -257,6 +258,9 @@ function build(): void {
     case 'chord-bipartite':
       main.innerHTML = `<c2-chord-chart id="chart" layout="bipartite" legend="bottom" legend-action="toggle"></c2-chord-chart>`
       break
+    case 'sankey':
+      main.innerHTML = `<c2-sankey-chart id="chart" source-field="from" target-field="to" value-field="amount"></c2-sankey-chart>`
+      break
     case 'family':
       main.innerHTML = `
         <c2-line-chart style="--c2-chart--color:rgb(1,2,3)" x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-line-chart>
@@ -329,7 +333,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -375,6 +379,21 @@ function build(): void {
       { source: 'Q2', target: 'France', value: 2 },
       { source: 'Q2', target: 'Canada', value: 4 },
       { source: 'Q3', target: 'Japan', value: 5 },
+    ]
+  } else if (scenario === 'sankey') {
+    chart.data = [
+      { from: 'Subscriptions', to: 'Revenue', amount: 840 },
+      { from: 'Services', to: 'Revenue', amount: 160 },
+      { from: 'Revenue', to: 'Gross profit', amount: 690 },
+      { from: 'Revenue', to: 'Cost of revenue', amount: 290 },
+      { from: 'Gross profit', to: 'Operating expenses', amount: 520 },
+      { from: 'Gross profit', to: 'Net profit', amount: 170 },
+      { from: 'Operating expenses', to: 'R&D', amount: 280 },
+      { from: 'Operating expenses', to: 'Sales', amount: 240 },
+      // A second row for the same pair is summed, and rows that cannot be a link are left out.
+      { from: 'Revenue', to: 'Cost of revenue', amount: 20 },
+      { from: 'Services', to: 'Revenue', amount: 0 },
+      { from: 'Tax', amount: 3 },
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
@@ -496,7 +515,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart',
     ),
   ),
 ).then(() => {

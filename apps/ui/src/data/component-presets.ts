@@ -180,6 +180,48 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-org-chart': {
+    html: `<c2-org-chart aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"}]}]'></c2-org-chart>`,
+    presets: [
+      {
+        name: 'Soft cards',
+        description: 'Borderless, shadowed cards joined by lines with rounded corners.',
+        css: {
+          '--c2-org-chart__card--width': '168px',
+          '--c2-org-chart__card--border': '1px solid transparent',
+          '--c2-org-chart__card--border-radius': '14px',
+          '--c2-org-chart__card--box-shadow': '0 1px 2px rgba(24, 24, 27, 0.06), 0 4px 12px rgba(24, 24, 27, 0.06)',
+          '--c2-org-chart__connector--border-radius': '12px',
+          '--c2-org-chart__level--gap': '48px',
+        },
+      },
+      {
+        name: 'Stacked profiles',
+        description: 'Narrow cards with the avatar above a centred name, for a chart of people.',
+        css: {
+          '--c2-org-chart__card--width': '128px',
+          '--c2-org-chart__card--flex-direction': 'column',
+          '--c2-org-chart__card--text-align': 'center',
+          '--c2-org-chart__card--gap': '8px',
+          '--c2-org-chart__card--padding': '16px 8px 12px',
+          '--c2-org-chart__avatar--size': '48px',
+        },
+      },
+      {
+        name: 'Compact outline',
+        description: 'Pill-shaped text-only cards and dashed lines, for a dense team map.',
+        css: {
+          '--c2-org-chart__avatar--display': 'none',
+          '--c2-org-chart__card--width': 'auto',
+          '--c2-org-chart__card--padding': '4px 10px',
+          '--c2-org-chart__card--border-radius': '999px',
+          '--c2-org-chart__connector--border-style': 'dashed',
+          '--c2-org-chart__level--gap': '32px',
+          '--c2-org-chart__sibling--gap': '8px',
+        },
+      },
+    ],
+  },
   'c2-line-chart': {
     html: `<c2-line-chart style="width:420px;height:220px" x-field="month" legend="bottom" data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series><c2-chart-series field="cost" label="Cost"></c2-chart-series></c2-line-chart>`,
     presets: [
@@ -662,6 +704,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-relative-time--font-size': '12px',
         },
         attributes: { format: 'narrow' },
+      },
+    ],
+  },
+  'c2-countdown': {
+    html: `<c2-countdown date="2030-01-01T00:00:00Z"></c2-countdown>`,
+    presets: [
+      {
+        name: 'Launch',
+        description: 'Large tinted segments with uppercase labels for a launch page',
+        css: {
+          '--c2-countdown__segment--min-width': '72px',
+          '--c2-countdown__segment--background-color': '#edf1fe',
+          '--c2-countdown__segment--border-radius': '14px',
+          '--c2-countdown__value--font-size': '36px',
+          '--c2-countdown__label--text-transform': 'uppercase',
+          '--c2-countdown__label--letter-spacing': '0.06em',
+          '--c2-countdown__value--animation-duration': '240ms',
+        },
+      },
+      {
+        name: 'Colons',
+        description: 'Separated hours, minutes and seconds',
+        css: {
+          '--c2-countdown__separator--display': 'inline',
+        },
+        attributes: { units: 'hours minutes seconds', format: 'short' },
+      },
+      {
+        name: 'Minimal',
+        description: 'Bare digits over short labels, no boxes',
+        css: {
+          '--c2-countdown__segment--background-color': 'transparent',
+          '--c2-countdown__segment--border': 'none',
+          '--c2-countdown__segment--padding': '0',
+          '--c2-countdown__value--font-weight': '500',
+        },
+        attributes: { format: 'short' },
       },
     ],
   },
@@ -1774,6 +1853,28 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         },
       },
       { name: 'Counter', attributes: { tone: 'danger', count: '120' } },
+    ],
+  },
+  'c2-status-light': {
+    html: `<c2-status-light tone="success">Live</c2-status-light>`,
+    presets: [
+      { name: 'Building', attributes: { tone: 'primary', pulse: '' } },
+      {
+        name: 'Subtle pill',
+        css: {
+          '--c2-status-light--background': 'light-dark(#dcfce7, #0f2e1b)',
+          '--c2-status-light--color': 'light-dark(#166534, #6fd596)',
+          '--c2-status-light--padding-left': '8px',
+          '--c2-status-light--padding-right': '10px',
+          '--c2-status-light--padding-top': '2px',
+          '--c2-status-light--padding-bottom': '2px',
+          '--c2-status-light--gap': '6px',
+          '--c2-status-light--font-size': '12px',
+          '--c2-status-light--font-weight': '500',
+          '--c2-status-light__dot--size': '6px',
+        },
+      },
+      { name: 'Square dot', css: { '--c2-status-light__dot--size': '10px', '--c2-status-light__dot--border-radius': '2px' } },
     ],
   },
   'c2-indicator': {

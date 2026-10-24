@@ -85,6 +85,10 @@
       "types": "./types/src/chord-chart.d.ts",
       "default": "./dist/chord-chart.js"
     },
+    "./sankey-chart.js": {
+      "types": "./types/src/sankey-chart.d.ts",
+      "default": "./dist/sankey-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"
@@ -171,6 +175,8 @@
     "calendar heatmap",
     "chord diagram",
     "chord chart",
+    "sankey diagram",
+    "sankey chart",
     "sparkline",
     "uplot",
     "echarts",

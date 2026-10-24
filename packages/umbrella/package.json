@@ -205,6 +205,10 @@
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
     },
+    "./chart/sankey-chart": {
+      "types": "./dist/chart/sankey-chart.d.ts",
+      "default": "./dist/chart/sankey-chart.js"
+    },
     "./chart/scatter-chart": {
       "types": "./dist/chart/scatter-chart.d.ts",
       "default": "./dist/chart/scatter-chart.js"
@@ -300,6 +304,10 @@
     "./copy-button": {
       "types": "./dist/copy-button.d.ts",
       "default": "./dist/copy-button.js"
+    },
+    "./countdown": {
+      "types": "./dist/countdown.d.ts",
+      "default": "./dist/countdown.js"
     },
     "./dashboard": {
       "types": "./dist/dashboard.d.ts",
@@ -553,6 +561,10 @@
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
     },
+    "./org-chart": {
+      "types": "./dist/org-chart.d.ts",
+      "default": "./dist/org-chart.js"
+    },
     "./otp-input": {
       "types": "./dist/otp-input.d.ts",
       "default": "./dist/otp-input.js"
@@ -684,6 +696,10 @@
     "./state-timeline": {
       "types": "./dist/state-timeline.d.ts",
       "default": "./dist/state-timeline.js"
+    },
+    "./status-light": {
+      "types": "./dist/status-light.d.ts",
+      "default": "./dist/status-light.js"
     },
     "./status-panel": {
       "types": "./dist/status-panel.d.ts",
@@ -971,6 +987,7 @@
     "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
+    "@c2n/countdown": "*",
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
@@ -1019,6 +1036,7 @@
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
     "@c2n/number-input": "*",
+    "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
@@ -1050,6 +1068,7 @@
     "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",
     "@c2n/state-timeline": "*",
+    "@c2n/status-light": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/streaming-text": "*",

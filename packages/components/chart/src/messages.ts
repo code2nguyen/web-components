@@ -55,3 +55,21 @@ const chartEn = {
 
 /** The interface text every chart shares, in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const chartMessages = defineMessages('chart', chartEn)
+
+const sankeyEn = {
+  flow: 'Flow',
+  from: 'From',
+  to: 'To',
+  incoming: 'Incoming',
+  outgoing: 'Outgoing',
+  share: 'Share of total',
+  shareOfSource: (source: string) => `Share of ${source}`,
+  flowName: (source: string, target: string) => `${source} → ${target}`,
+  summary: (nodes: string) => `Sankey diagram of ${nodes}`,
+  roleDescription: 'sankey diagram',
+  nodeAnnouncement: (node: string, incoming: string, outgoing: string) => `${node}: incoming ${incoming}, outgoing ${outgoing}`,
+  cycle: (path: string) => `These flows form a loop, which a sankey diagram cannot draw: ${path}`,
+}
+
+/** The sankey chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const sankeyMessages = defineMessages('sankey-chart', sankeyEn)
