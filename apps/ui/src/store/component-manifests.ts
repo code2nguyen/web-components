@@ -121,6 +121,7 @@ import statusLight from '@c2n/status-light/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
 import streamingText from '@c2n/streaming-text/custom-elements.json'
+import swipeAction from '@c2n/swipe-action/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
 import tableOfContents from '@c2n/table-of-contents/custom-elements.json'
@@ -275,6 +276,7 @@ export const componentManifests = (function () {
     statusPanel,
     steps,
     streamingText,
+    swipeAction,
     switchManifest,
     symbols,
     table,

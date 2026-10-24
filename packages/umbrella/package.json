@@ -741,6 +741,10 @@
       "types": "./dist/streaming-text.d.ts",
       "default": "./dist/streaming-text.js"
     },
+    "./swipe-action": {
+      "types": "./dist/swipe-action.d.ts",
+      "default": "./dist/swipe-action.js"
+    },
     "./switch": {
       "types": "./dist/switch.d.ts",
       "default": "./dist/switch.js"
@@ -1103,6 +1107,7 @@
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/streaming-text": "*",
+    "@c2n/swipe-action": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
     "@c2n/table-of-contents": "*",
