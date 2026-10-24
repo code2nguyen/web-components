@@ -1,0 +1,58 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-sticky,
+  $theme: (
+    position: sticky,
+    offset: 0px,
+    z-index: 10,
+    background: transparent,
+    box-shadow: none,
+    padding: 0px,
+    border-radius: 0px,
+    stuck--background: #ffffff,
+    stuck--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18),
+    stuck--backdrop-filter: none,
+    transition-duration: 200ms,
+  )
+);
+
+:host {
+  display: block;
+  position: css.cssVar(position);
+  z-index: css.cssVar(z-index);
+  top: css.cssVar(offset);
+}
+:host([edge='bottom']) {
+  top: auto;
+  bottom: css.cssVar(offset);
+}
+.surface {
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+  transition-property: background, box-shadow, transform;
+  transition-duration: css.cssVar(transition-duration);
+  transition-timing-function: ease;
+}
+:host(:state(stuck)) .surface {
+  background: css.cssVar(stuck--background);
+  box-shadow: css.cssVar(stuck--box-shadow);
+  backdrop-filter: css.cssVar(stuck--backdrop-filter);
+  -webkit-backdrop-filter: css.cssVar(stuck--backdrop-filter);
+}
+/* The surface slides out rather than the host, so the host keeps the box the stuck check measures. */
+:host(:state(retracted)) {
+  pointer-events: none;
+}
+:host(:state(retracted)) .surface {
+  transform: translateY(calc(-100% - #{css.cssVar(offset)}));
+}
+:host([edge='bottom']:state(retracted)) .surface {
+  transform: translateY(calc(100% + #{css.cssVar(offset)}));
+}
+@media (prefers-reduced-motion: reduce) {
+  .surface {
+    transition-duration: 0s;
+  }
+}

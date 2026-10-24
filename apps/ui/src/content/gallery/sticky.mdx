@@ -1,0 +1,159 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Sticky } from '@c2n/components/sticky'
+
+## Presets
+
+Curated looks for `c2-sticky`. Scroll inside each card to see the stuck state. The `__stuck--background`, `__stuck--box-shadow` and `__stuck--backdrop-filter` variables do most of the work: they decide how the surface separates from the content running beneath it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .sticky-box {
+    height: 200px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .sticky-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .sticky-box .bar {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>
+<div class="sticky-box">
+  <p>Scroll down.</p>
+  <c2-sticky><div class="bar">Pinned toolbar</div></c2-sticky>
+  <p>First paragraph of content.</p>
+  <p>Second paragraph of content.</p>
+  <p>Third paragraph of content.</p>
+  <p>Fourth paragraph of content.</p>
+  <p>Fifth paragraph of content.</p>
+  <p>Sixth paragraph of content.</p>
+  <p>Seventh paragraph of content.</p>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Frosted glass
+<style>
+  .glass-box {
+    height: 200px;
+    overflow: auto;
+    background: linear-gradient(160deg, light-dark(#e0e7ff, #131f47), light-dark(#fce7f3, #36142a));
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .glass-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .glass-sticky {
+    --c2-sticky__stuck--background: light-dark(rgba(255, 255, 255, 0.6), rgba(24, 24, 27, 0.6));
+    --c2-sticky__stuck--backdrop-filter: blur(12px) saturate(1.4);
+    --c2-sticky__stuck--box-shadow: 0 1px 0 rgba(24, 24, 27, 0.08);
+    --c2-sticky--padding: 10px 12px;
+  }
+  .glass-sticky strong {
+    font-size: 14px;
+  }
+</style>
+<div class="glass-box">
+  <c2-sticky class="glass-sticky"><strong>Frosted header</strong></c2-sticky>
+  <p>The content blurs behind the bar once it is stuck.</p>
+  <p>Second paragraph of content.</p>
+  <p>Third paragraph of content.</p>
+  <p>Fourth paragraph of content.</p>
+  <p>Fifth paragraph of content.</p>
+  <p>Sixth paragraph of content.</p>
+  <p>Seventh paragraph of content.</p>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Floating pill
+<style>
+  .pill-box {
+    height: 200px;
+    overflow: auto;
+    padding: 0 12px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .pill-box p {
+    margin: 0;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  .pill-sticky {
+    --c2-sticky--offset: 12px;
+    --c2-sticky--border-radius: 999px;
+    --c2-sticky--padding: 8px 16px;
+    --c2-sticky--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-sticky__stuck--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-sticky__stuck--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08);
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>
+<div class="pill-box">
+  <p>The pill floats 12px below the top edge.</p>
+  <c2-sticky class="pill-sticky">Filters · 3 active</c2-sticky>
+  <p>First result.</p>
+  <p>Second result.</p>
+  <p>Third result.</p>
+  <p>Fourth result.</p>
+  <p>Fifth result.</p>
+  <p>Sixth result.</p>
+  <p>Seventh result.</p>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Section headings
+<style>
+  .sections-box {
+    height: 200px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .sections-box section p {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  .section-heading {
+    --c2-sticky--padding: 4px 12px;
+    --c2-sticky--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-sticky__stuck--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-sticky__stuck--box-shadow: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="sections-box">
+  <section>
+    <c2-sticky class="section-heading">A</c2-sticky>
+    <p>Ada Lovelace</p>
+    <p>Alan Turing</p>
+    <p>Anita Borg</p>
+  </section>
+  <section>
+    <c2-sticky class="section-heading">B</c2-sticky>
+    <p>Barbara Liskov</p>
+    <p>Bjarne Stroustrup</p>
+    <p>Brian Kernighan</p>
+  </section>
+  <section>
+    <c2-sticky class="section-heading">D</c2-sticky>
+    <p>Dennis Ritchie</p>
+    <p>Donald Knuth</p>
+    <p>Dorothy Vaughan</p>
+  </section>
+</div>
+```
+
+</GalleryGrid>

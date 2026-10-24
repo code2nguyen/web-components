@@ -72,6 +72,10 @@
       "types": "./dist/controllers/virtual-scroll.d.ts",
       "default": "./dist/controllers/virtual-scroll.js"
     },
+    "./controllers/sticky.js": {
+      "types": "./dist/controllers/sticky.d.ts",
+      "default": "./dist/controllers/sticky.js"
+    },
     "./locale-helper.js": {
       "types": "./dist/locale-helper.d.ts",
       "default": "./dist/locale-helper.js"

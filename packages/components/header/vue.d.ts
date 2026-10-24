@@ -8,16 +8,22 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Header } from '@c2n/header'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-header': DefineComponent<
       C2Props<Header> & {
+        'hide-on-scroll'?: unknown
         'navigation-label'?: unknown
+        onStuckChange?: (event: EventOf<Header, 'stuck-change'>) => void
+        onRetractChange?: (event: EventOf<Header, 'retract-change'>) => void
       }
     >
   }

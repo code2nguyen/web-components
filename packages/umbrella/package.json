@@ -737,6 +737,10 @@
       "types": "./dist/steps/step.d.ts",
       "default": "./dist/steps/step.js"
     },
+    "./sticky": {
+      "types": "./dist/sticky.d.ts",
+      "default": "./dist/sticky.js"
+    },
     "./streaming-text": {
       "types": "./dist/streaming-text.d.ts",
       "default": "./dist/streaming-text.js"
@@ -1102,6 +1106,7 @@
     "@c2n/status-light": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/sticky": "*",
     "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",

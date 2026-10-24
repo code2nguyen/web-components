@@ -142,6 +142,7 @@
     "@c2n/status-light": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/sticky": "*",
     "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/symbols": "*",

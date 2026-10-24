@@ -429,6 +429,13 @@ price: .price
   </c2-step>
   <c2-step status="pending" label="ship"></c2-step>
 </c2-steps>`,
+  sticky: `<div style="width:220px;height:120px;overflow:auto;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px">
+  <c2-sticky style="--c2-sticky--padding:6px 10px"><strong>Pinned toolbar</strong></c2-sticky>
+  <div style="padding:6px 10px">Scroll: the bar stays in view and gains a shadow once content runs beneath it.</div>
+  <div style="padding:6px 10px">Second paragraph.</div>
+  <div style="padding:6px 10px">Third paragraph.</div>
+  <div style="padding:6px 10px">Fourth paragraph.</div>
+</div>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>

@@ -173,6 +173,7 @@
         "../../components/status-light:build",
         "../../components/status-panel:build",
         "../../components/steps:build",
+        "../../components/sticky:build",
         "../../components/streaming-text:build",
         "../../components/switch:build",
         "../../components/table-of-contents:build",

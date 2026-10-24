@@ -1645,6 +1645,13 @@
       "reason": "The dot wrapper sizes a slotted SVG and colours it with the tone through currentColor."
     },
     {
+      "tag": "c2-sticky",
+      "slot": "",
+      "decision": "part",
+      "parts": ["surface"],
+      "reason": "The surface owns the slotted content's padding, background, shadow and the retract transform, through its part and --c2-sticky--* variables."
+    },
+    {
       "tag": "c2-tour",
       "slot": "",
       "decision": "part",

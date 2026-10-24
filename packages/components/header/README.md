@@ -17,3 +17,5 @@ npm install @c2n/components
   <button slot="actions">Sign in</button>
 </c2-header>
 ```
+
+A `sticky` header matches `:state(stuck)` and fires `stuck-change` once page content scrolls beneath it (style it with `--c2-header__stuck--box-shadow`). Add `hide-on-scroll` to slide it away while the reader scrolls down and bring it back on the way up; `:state(retracted)` and `retract-change` report that. For anything other than a header, use `c2-sticky`.

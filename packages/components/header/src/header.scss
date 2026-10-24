@@ -8,6 +8,8 @@
     color: #18181b,
     border-bottom: 1px solid #e4e4e7,
     box-shadow: none,
+    stuck--box-shadow: none,
+    transition-duration: 200ms,
     sticky-top: 0px,
     backdrop-filter: blur(16px),
     blurred--background: rgba(255, 255, 255, 0.82),
@@ -32,6 +34,24 @@
   background: css.cssVar(background);
   border-bottom: css.cssVar(border-bottom);
   box-shadow: css.cssVar(box-shadow);
+  transition-property: box-shadow, transform;
+  transition-duration: css.cssVar(transition-duration);
+  transition-timing-function: ease;
+}
+:host(:state(stuck)) .c2-header {
+  box-shadow: css.cssVar(stuck--box-shadow, box-shadow);
+}
+/* The surface slides out rather than the host, so the host keeps the box the stuck check measures. */
+:host(:state(retracted)) {
+  pointer-events: none;
+}
+:host(:state(retracted)) .c2-header {
+  transform: translateY(calc(-100% - #{css.cssVar(sticky-top)}));
+}
+@media (prefers-reduced-motion: reduce) {
+  .c2-header {
+    transition-duration: 0s;
+  }
 }
 .content {
   display: flex;
