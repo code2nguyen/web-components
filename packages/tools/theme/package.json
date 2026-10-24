@@ -86,6 +86,7 @@
         "../../components/confirm-dialog:build",
         "../../components/context-menu:build",
         "../../components/copy-button:build",
+        "../../components/countdown:build",
         "../../components/dashboard:build",
         "../../components/date-input:build",
         "../../components/date-selector:build",

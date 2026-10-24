@@ -129,6 +129,7 @@
         "./packages/components/confirm-dialog:build",
         "./packages/components/context-menu:build",
         "./packages/components/copy-button:build",
+        "./packages/components/countdown:build",
         "./packages/components/dashboard:build",
         "./packages/components/date-input:build",
         "./packages/components/date-selector:build",
