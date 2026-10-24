@@ -265,15 +265,9 @@ export class PageHeader extends LitElement {
     this.resizeObserver ??= new ResizeObserver((entries) => {
       const entry = entries[entries.length - 1]
       const width = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width
-      // Any height change moves the point where a sticky header stops sliding up.
-      if (this.sticky) {
-        this.syncCondensedGeometry()
-        this.observeTitle()
-      }
-      if (Math.abs(width - this.measuredWidth) < 0.5) return
-      this.measuredWidth = width
-      this.narrow = width < NARROW_MAX
-      this.scheduleFold()
+      // In the next frame: changing the layout inside the callback is a ResizeObserver loop, which WebKit reports as an
+      // uncaught error.
+      requestAnimationFrame(() => this.handleResize(width))
     })
     this.resizeObserver.observe(this)
     this.observeTitle()
@@ -319,6 +313,18 @@ export class PageHeader extends LitElement {
     this.scheduleFold()
   }
 
+  private handleResize(width: number) {
+    // Any height change moves the point where a sticky header stops sliding up.
+    if (this.sticky) {
+      this.syncCondensedGeometry()
+      this.observeTitle()
+    }
+    if (Math.abs(width - this.measuredWidth) < 0.5) return
+    this.measuredWidth = width
+    this.narrow = width < NARROW_MAX
+    this.scheduleFold()
+  }
+
   /**
    * Re-folds when an action's own width changes: a `c2-button` measured before its module loaded is a line of plain
    * text, and a label can change. An action leaving the row (folded, so unassigned) reports 0 and is ignored, so
@@ -333,7 +339,7 @@ export class PageHeader extends LitElement {
         if (Math.abs((this.actionWidths.get(entry.target) ?? -1) - width) > 0.5) changed = true
         this.actionWidths.set(entry.target, width)
       }
-      if (changed) this.scheduleFold()
+      if (changed) requestAnimationFrame(() => this.scheduleFold())
     })
     this.actionObserver.disconnect()
     for (const action of this.actions) this.actionObserver.observe(action)
@@ -611,7 +617,7 @@ export class PageHeader extends LitElement {
         part="base"
       >
         <div class="context" part="context" ?hidden=${!has('breadcrumb')}>${this.renderSlot('breadcrumb')}</div>
-        <div class="parent" part="parent">${this.renderSlot('parent', undefined, this.renderParentLink())}</div>
+        <div class="parent" part="parent">${this.renderSlot('parent')}${(this.groups.get('parent')?.length ?? 0) > 0 ? nothing : this.renderParentLink()}</div>
         <div class="title-row" part="title-row">
           <div class="title-area">
             <div class="title-line">

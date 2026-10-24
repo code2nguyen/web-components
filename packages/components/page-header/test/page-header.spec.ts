@@ -159,8 +159,8 @@ test('inside a shell that scrolls main, the bar sticks to the top of main', asyn
       ${header('sticky', '', undefined, '<div class="tall"></div>')}
     </c2-app-shell>`)
   const host = page.locator('c2-page-header')
-  await host.hover()
-  await page.mouse.wheel(0, 700)
+  // Scroll main itself: a wheel over the header reaches main later in WebKit.
+  await page.locator('c2-app-shell').evaluate((shell) => (shell.shadowRoot!.querySelector('main')!.scrollTop = 700))
   await expect(host).toHaveState('condensed')
   await expect.poll(async () => Math.round((await host.locator('[part="condensed"]').boundingBox())?.y ?? -1)).toBe(56)
   await expect(page.getByRole('button', { name: 'Approve batch' })).toBeInViewport()
