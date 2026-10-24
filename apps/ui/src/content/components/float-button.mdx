@@ -1,0 +1,89 @@
+---
+title: 'Float Button'
+description: 'A floating action button for the main action of a screen, which can expand into a speed dial of related actions.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FloatButton, FloatButtonAction } from '@c2n/components/float-button'
+import { FeatherEdit2Icon as FeatherEdit_2 } from '@c2n/feather-icons/icons/edit-2.js'
+import { FeatherUploadIcon as FeatherUpload } from '@c2n/feather-icons/icons/upload.js'
+import { FeatherFileTextIcon as FeatherFileText } from '@c2n/feather-icons/icons/file-text.js'
+import { FeatherImageIcon as FeatherImage } from '@c2n/feather-icons/icons/image.js'
+import { FeatherLinkIcon as FeatherLink } from '@c2n/feather-icons/icons/link.js'
+import { FeatherMessageCircleIcon as FeatherMessageCircle } from '@c2n/feather-icons/icons/message-circle.js'
+
+`c2-float-button` is the raised round button that sits in a corner of the screen for its main action: "Compose", "New task", "Chat with us". On its own it is a plain button and fires `click`. Give it `c2-float-button-action` children and it becomes a speed dial: the button opens a short menu of related actions that fan out in `direction` (`up`, `down`, `left` or `right`), and its plus turns into a cross. Each action is a small round button with a label chip beside it; activating one fires `action-select` with its `value` and closes the dial.
+
+The dial follows the menu-button pattern: Enter, Space or an arrow key opens it on the first action, the arrow keys move between actions (back past the first returns to the button), Escape closes it and returns focus, and Tab or a click outside closes it. `trigger="hover"` also opens it while a mouse pointer is over it. Hidden actions are out of the tab order and the accessibility tree.
+
+The button is `position: fixed`, 24px from the bottom-right corner of the viewport. `--c2-float-button--position` and `--c2-float-button--inset` move it, or keep it in the flow with `static`. A container with `contain: layout` also holds a fixed button, which is how the examples below keep it in their frame. Setting `--c2-float-button__label--display: inline` shows the `label` next to the icon, which makes an extended button.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/float-button'
+```
+
+Importing `@c2n/components/float-button` also registers `c2-float-button-action`. The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/float-button
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 100%;
+    min-width: 280px;
+    height: 320px;
+  }
+  .stage.short {
+    height: 96px;
+  }
+  .extended {
+    --c2-float-button__label--display: inline;
+    --c2-float-button__button--padding-inline: 20px;
+  }
+  .left {
+    --c2-float-button--inset: auto auto 24px 24px;
+  }
+  .left c2-float-button-action {
+    --c2-float-button-action__label--inset: 50% auto auto calc(100% + 12px);
+  }
+</style>
+<div data-label="Speed dial">
+  <div class="stage">
+    <c2-float-button label="Create" open>
+      <c2-float-button-action label="Upload file" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+      <c2-float-button-action label="New document" value="document"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+      <c2-float-button-action label="Add image" value="image"><c2-feather-image></c2-feather-image></c2-float-button-action>
+      <c2-float-button-action label="Share link" value="link"><c2-feather-link></c2-feather-link></c2-float-button-action>
+    </c2-float-button>
+  </div>
+</div>
+<div data-label="Plain and extended">
+  <div class="stage short">
+    <c2-float-button class="left" label="Compose"><c2-feather-edit-2 slot="icon"></c2-feather-edit-2></c2-float-button>
+    <c2-float-button class="extended" label="Chat with us"><c2-feather-message-circle slot="icon"></c2-feather-message-circle></c2-float-button>
+  </div>
+</div>
+<div data-label="Horizontal, on hover">
+  <div class="stage short">
+    <c2-float-button label="Share" direction="left" trigger="hover">
+      <c2-float-button-action label="Copy link" value="link"><c2-feather-link></c2-feather-link></c2-float-button-action>
+      <c2-float-button-action label="Image" value="image"><c2-feather-image></c2-feather-image></c2-float-button-action>
+      <c2-float-button-action label="Upload" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+    </c2-float-button>
+  </div>
+</div>
+```
+
+Listen for `action-select` on the button rather than `click` on each action. `preventDefault()` keeps the dial open, for instance while a confirmation runs.
+
+```typescript tag=CodeBlock
+fab.addEventListener('action-select', (event) => openComposer(event.detail.value))
+fab.addEventListener('toggle', (event) => analytics.track('speed-dial', event.newState))
+```
