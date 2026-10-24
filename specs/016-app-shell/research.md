@@ -1,6 +1,6 @@
 # Research: `c2-app-shell` and `c2-page-header`
 
-Roadmap #57 and #58 (section D, both P1). Collected 2026-10-23 before design. Mock: [c2-app-shell mock](https://claude.ai/artifact/PQgz6gegX8J4ByoctSR4X1) (findings, anatomy of both, an interactive prototype across desktop / tablet / phone, page header variants, API sketch).
+Roadmap #57 and #58 (section D, both P1). Collected 2026-10-23 before design; decisions and API in [spec.md](./spec.md). Mock: [c2-app-shell mock](https://claude.ai/artifact/PQgz6gegX8J4ByoctSR4X1) (findings, anatomy of both, an interactive prototype across desktop / tablet / phone, page header variants, API sketch).
 
 The two belong together: the shell is the frame (header, navigation, main, aside), the page header is the top of `main` on every page (breadcrumb, title, status, metadata, page actions, tabs). The shell's header region takes the existing `c2-header`; no new application header is proposed.
 
