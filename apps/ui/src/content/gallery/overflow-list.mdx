@@ -9,7 +9,6 @@ import { OverflowList } from '@c2n/components/overflow-list'
 import { Button } from '@c2n/components/button'
 import { IconButton } from '@c2n/components/icon-button'
 import { LinkButton } from '@c2n/components/link-button'
-import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
 import { FeatherBoldIcon as FeatherBold } from '@c2n/feather-icons/icons/bold.js'
 import { FeatherItalicIcon as FeatherItalic } from '@c2n/feather-icons/icons/italic.js'
 import { FeatherLinkIcon as FeatherLink } from '@c2n/feather-icons/icons/link.js'
@@ -54,10 +53,10 @@ The list's own look is its trigger and its gap: `--c2-overflow-list__more--*` an
   }
 </style>
 <c2-overflow-list class="more-text" aria-label="Document actions">
-  <c2-button><c2-feather-share-2 slot="prefix-icon"></c2-feather-share-2>Share</c2-button>
-  <c2-button><c2-feather-link slot="prefix-icon"></c2-feather-link>Copy link</c2-button>
-  <c2-button><c2-feather-printer slot="prefix-icon"></c2-feather-printer>Print</c2-button>
-  <c2-button><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"></path></svg>Share</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Copy link</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>Print</c2-button>
+  <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>Archive</c2-button>
   <span slot="more">More</span>
   <svg slot="more" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
 </c2-overflow-list>
@@ -66,6 +65,7 @@ The list's own look is its trigger and its gap: `--c2-overflow-list__more--*` an
 ```html tag=MdxCodeBlock,label=Link tabs
 <style>
   .tabs {
+    width: 100%;
     --c2-overflow-list--gap: 2px;
     --c2-overflow-list__more--border: 1px solid transparent;
     --c2-overflow-list__more__hover--border: 1px solid transparent;

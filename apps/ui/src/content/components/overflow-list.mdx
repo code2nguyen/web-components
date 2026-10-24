@@ -14,7 +14,6 @@ import { MenuItem } from '@c2n/components/menu'
 import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
 import { FeatherClockIcon as FeatherClock } from '@c2n/feather-icons/icons/clock.js'
 import { FeatherCornerUpLeftIcon as FeatherCornerUpLeft } from '@c2n/feather-icons/icons/corner-up-left.js'
-import { FeatherEdit2Icon as FeatherEdit_2 } from '@c2n/feather-icons/icons/edit-2.js'
 import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
 import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
 import { FeatherStarIcon as FeatherStar } from '@c2n/feather-icons/icons/star.js'
@@ -80,13 +79,13 @@ Drag the corner of each frame to resize it.
 <div data-label="Actions">
   <div class="frame">
     <c2-overflow-list aria-label="Issue actions">
-      <c2-button class="ghost" data-overflow="pinned"><c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>Edit</c2-button>
+      <c2-button class="ghost" data-overflow="pinned"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>Edit</c2-button>
       <c2-button class="ghost">Assign</c2-button>
       <c2-button class="ghost">Label</c2-button>
       <hr />
       <c2-button class="ghost">Duplicate</c2-button>
       <c2-button class="ghost">Move</c2-button>
-      <c2-button class="ghost"><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+      <c2-button class="ghost"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>Archive</c2-button>
       <c2-button class="ghost" disabled>Delete</c2-button>
       <c2-menu-item slot="menu" value="copy-link">Copy link</c2-menu-item>
     </c2-overflow-list>

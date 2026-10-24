@@ -93,10 +93,13 @@ function labelOf(element: Element): string {
 
 /** The icon a folded child shows, if any: its `prefix-icon`, or the content of an icon button. */
 function iconSourceOf(element: Element): Element | null {
-  const prefix = element.querySelector(':scope > [slot="prefix-icon"]')
-  if (prefix) return prefix
-  if (element.localName === 'c2-icon-button') return [...element.children].find((child) => !child.hasAttribute('slot')) ?? null
-  return null
+  let icon =
+    element.querySelector(':scope > [slot="prefix-icon"]') ??
+    (element.localName === 'c2-icon-button' ? ([...element.children].find((child) => !child.hasAttribute('slot')) ?? null) : null)
+  // A framework may wrap the icon in a box that does not render (an Astro island, a `display: contents` span): copy
+  // the icon itself, since a copy of the wrapper is not hydrated again.
+  while (icon && icon.childElementCount === 1 && getComputedStyle(icon).display === 'contents') icon = icon.firstElementChild
+  return icon
 }
 
 /**
@@ -184,7 +187,7 @@ export class OverflowList extends LitElement {
   static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
 
   /** The edge whose children fold first; the trigger sits on that edge. */
-  @property({ attribute: 'collapse-from', reflect: true }) collapseFrom: 'end' | 'start' = 'end'
+  @property({ attribute: 'collapse-from' }) collapseFrom: 'end' | 'start' = 'end'
 
   /** Children kept in the row even when they do not fit. */
   @property({ type: Number, attribute: 'min-visible' }) minVisible = 0
@@ -292,9 +295,10 @@ export class OverflowList extends LitElement {
     }
     for (const entry of this.entries) if (!entries.includes(entry)) this.resizeObserver?.unobserve(entry)
     for (const entry of entries) this.resizeObserver?.observe(entry)
-    this.entries = entries
-    this.menuChildren = menuChildren
-    this.moreChildren = moreChildren
+    const same = (a: Element[], b: Element[]) => a.length === b.length && a.every((element, index) => element === b[index])
+    if (!same(entries, this.entries)) this.entries = entries
+    if (!same(menuChildren, this.menuChildren)) this.menuChildren = menuChildren
+    if (!same(moreChildren, this.moreChildren)) this.moreChildren = moreChildren
     const folded = new Set([...this.folded].filter((entry) => entries.includes(entry)))
     if (folded.size !== this.folded.size) this.folded = folded
     this.queueFit()
@@ -399,8 +403,10 @@ export class OverflowList extends LitElement {
   private assignNamedSlots() {
     const shown = new Set(this.shownEntries(this.folded))
     for (const entry of this.entries) {
-      if (!shown.has(entry)) entry.setAttribute('slot', HIDDEN_SLOT)
-      else if (entry.getAttribute('slot') === HIDDEN_SLOT) entry.removeAttribute('slot')
+      // Setting an attribute to the value it has is still a mutation, which would re-read the children in a loop.
+      if (!shown.has(entry)) {
+        if (entry.getAttribute('slot') !== HIDDEN_SLOT) entry.setAttribute('slot', HIDDEN_SLOT)
+      } else if (entry.getAttribute('slot') === HIDDEN_SLOT) entry.removeAttribute('slot')
     }
   }
 

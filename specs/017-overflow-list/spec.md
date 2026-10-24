@@ -76,7 +76,7 @@ A list with zero width (not rendered) keeps its last fit.
 
 | Attribute / property      | Type               | Default | Notes                                                                    |
 | ------------------------- | ------------------ | ------- | ------------------------------------------------------------------------ |
-| `collapse-from`           | `'end' \| 'start'` | `'end'` | Reflects. The trigger sits on that edge.                                 |
+| `collapse-from`           | `'end' \| 'start'` | `'end'` | The trigger sits on that edge.                                           |
 | `min-visible`             | number             | `0`     | Children kept even when they overflow.                                   |
 | `max-visible`             | number             | unset   | Cap whatever the room.                                                   |
 | `placement`               | `Placement`        | unset   | Menu placement; defaults to `bottom-end`, `bottom-start` from the start. |

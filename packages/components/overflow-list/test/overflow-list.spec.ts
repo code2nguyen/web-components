@@ -225,3 +225,19 @@ test('slotted more content replaces the icon and keeps the counted name', async 
   await trigger(page).click()
   await accessible(page)
 })
+
+test('in a declarative shadow root (server rendering) it folds by slot attribute and settles', async ({ page, renderScenario }) => {
+  await renderScenario('')
+  // `setHTMLUnsafe` parses the declarative shadow root, so the element upgrades into a named-mode root as it does
+  // after server rendering, where manual slot assignment has no effect.
+  await page.locator('main').evaluate(async (main, markup) => {
+    main.setHTMLUnsafe(markup.replace('<c2-overflow-list >', '<c2-overflow-list><template shadowrootmode="open"></template>'))
+    await customElements.whenDefined('c2-overflow-list')
+  }, list(400))
+  expect(await host(page).evaluate((element) => element.shadowRoot?.slotAssignment)).toBe('named')
+  await expect.poll(() => visibleItems(page)).toEqual(['Item 1', 'Item 2', 'Item 3', 'Item 4'])
+  await expect(page.getByRole('button', { name: '4 more items' })).toBeVisible()
+  await resize(page, 720)
+  await expect.poll(() => visibleItems(page)).toHaveLength(8)
+  expect(await host(page).evaluate((element) => [...element.children].map((child) => child.getAttribute('slot')))).toEqual(Array(8).fill(null))
+})
