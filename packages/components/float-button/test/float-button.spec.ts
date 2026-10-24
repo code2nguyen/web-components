@@ -208,6 +208,58 @@ test('trigger="hover" opens while the mouse is over it and closes after it leave
   await expect(page.locator('c2-float-button')).not.toHaveAttribute('open')
 })
 
+test('a hover-opened dial stays open when the mouse then clicks the button', async ({ page, renderScenario }) => {
+  await renderScenario(dial('trigger="hover"'))
+  await trigger(page).hover()
+  await expect(page.locator('c2-float-button')).toHaveAttribute('open', '')
+  await trigger(page).click()
+  await expect(page.locator('c2-float-button')).toHaveAttribute('open', '')
+  // A second click closes it as usual.
+  await trigger(page).click()
+  await expect(page.locator('c2-float-button')).not.toHaveAttribute('open')
+})
+
+test('an open dial moved in the document still closes on a click outside', async ({ page, renderScenario }) => {
+  await renderScenario(`${dial('open')}<section id="elsewhere"></section>`)
+  await page.locator('c2-float-button').evaluate(async (element) => {
+    document.querySelector('#elsewhere')!.append(element)
+    await (element as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+  })
+  await expect(page.locator('c2-float-button')).toHaveAttribute('open', '')
+  await page.mouse.click(5, 5)
+  await expect(page.locator('c2-float-button')).not.toHaveAttribute('open')
+})
+
+test('notices actions added inside a wrapper element later', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-float-button label="Create"><span id="wrapper" style="display: contents"></span></c2-float-button>`)
+  await expect(page.getByRole('button', { name: 'Create' })).not.toHaveAttribute('aria-haspopup')
+  await page.locator('#wrapper').evaluate((wrapper) => {
+    wrapper.innerHTML = '<c2-float-button-action label="Upload file" value="upload">U</c2-float-button-action>'
+  })
+  await expect(page.getByRole('button', { name: 'Create' })).toHaveAttribute('aria-haspopup', 'menu')
+  await page.getByRole('button', { name: 'Create' }).click()
+  await expect(action(page, 'upload')).toBeVisible()
+})
+
+test("staggers the opening by each action's place in the dial, ignoring icon children", async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-float-button label="Help" open>
+    <span slot="icon">?</span>
+    <span slot="open-icon">×</span>
+    <c2-float-button-action label="Chat" value="chat">C</c2-float-button-action>
+    <c2-float-button-action label="Docs" value="docs">D</c2-float-button-action>
+  </c2-float-button>`)
+  const delay = (value: string) => action(page, value).evaluate((element) => getComputedStyle(element).transitionDelay.split(',')[0].trim())
+  expect(await delay('chat')).toBe('0s')
+  expect(await delay('docs')).toBe('0.03s')
+})
+
+test('the back arrow on the button of an open dial moves to the last action', async ({ page, renderScenario }) => {
+  await renderScenario(dial('open'))
+  await page.getByRole('button', { name: 'Create' }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(action(page, 'link')).toBeFocused()
+})
+
 test('disabled closes the dial and ignores clicks', async ({ page, renderScenario }) => {
   await renderScenario(dial('open disabled'))
   await expect(page.locator('c2-float-button')).not.toHaveAttribute('open')

@@ -136,6 +136,12 @@ export class FloatButton extends LitElement {
 
   private readonly msg = new LocalizeController(this, floatButtonMessages)
   private hoverTimer: ReturnType<typeof setTimeout> | undefined
+  /** The dial was opened by the mouse entering it, so the click that usually follows must not close it again. */
+  private openedByHover = false
+  /** The actions as last read, kept current by {@link refreshActions}. */
+  private actionList: FloatButtonAction[] = []
+  // Actions may be added inside a wrapper element, which fires no slotchange.
+  private readonly observer = isServer ? undefined : new MutationObserver(() => this.refreshActions())
 
   /**
    * The actions in DOM order, nearest the button first. They may sit in a framework's wrapper element (an Astro
@@ -154,8 +160,17 @@ export class FloatButton extends LitElement {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback()
+    this.observer?.observe(this, { childList: true, subtree: true })
+    // A dial moved while open still closes on an outside click.
+    if (this.open) document.addEventListener('pointerdown', this.onDocumentPointerDown, true)
+    if (this.hasUpdated) this.refreshActions()
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.observer?.disconnect()
     document.removeEventListener('pointerdown', this.onDocumentPointerDown, true)
     clearTimeout(this.hoverTimer)
   }
@@ -168,6 +183,7 @@ export class FloatButton extends LitElement {
   /** Closes the speed dial. */
   hide() {
     this.open = false
+    this.openedByHover = false
   }
 
   /** Opens or closes the speed dial. */
@@ -183,8 +199,7 @@ export class FloatButton extends LitElement {
 
   protected override firstUpdated() {
     // A server-rendered shadow root has its slots filled before hydration, so no slotchange follows: read them now.
-    this.onSlotChange()
-    this.hasOpenIcon = this.querySelector(':scope > [slot="open-icon"]') !== null
+    this.refreshActions()
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -194,7 +209,9 @@ export class FloatButton extends LitElement {
     else document.removeEventListener('pointerdown', this.onDocumentPointerDown, true)
     // The first render is not a change.
     if (previous === undefined) return
-    this.dispatchEvent(new ToggleEvent('toggle', { oldState: this.open ? 'closed' : 'open', newState: this.open ? 'open' : 'closed' }))
+    const states = { oldState: this.open ? 'closed' : 'open', newState: this.open ? 'open' : 'closed' }
+    // Safari before 17 has no ToggleEvent constructor: hand listeners the same two fields on a plain event.
+    this.dispatchEvent(typeof ToggleEvent === 'function' ? new ToggleEvent('toggle', states) : Object.assign(new Event('toggle'), states))
   }
 
   override render() {
@@ -220,7 +237,7 @@ export class FloatButton extends LitElement {
           @click=${this.onActionClick}
           @keydown=${this.onActionKeyDown}
         >
-          <slot @slotchange=${this.onSlotChange}></slot>
+          <slot @slotchange=${this.refreshActions}></slot>
         </div>
         <button
           class="button"
@@ -242,7 +259,7 @@ export class FloatButton extends LitElement {
                 </svg>
               </slot>
             </span>
-            <span class="open-icon"><slot name="open-icon" @slotchange=${this.onOpenIconSlotChange}></slot></span>
+            <span class="open-icon"><slot name="open-icon" @slotchange=${this.refreshActions}></slot></span>
           </span>
           ${this.label ? html`<span class="label" part="label" aria-hidden="true">${this.label}</span>` : nothing}
         </button>
@@ -250,20 +267,26 @@ export class FloatButton extends LitElement {
     `
   }
 
-  private onSlotChange() {
+  private refreshActions() {
     const actions = this.actions
+    this.actionList = actions
     this.hasActions = actions.length > 0
-    // Actions are reached with the arrow keys only, so Tab leaves the dial.
-    for (const action of actions) if (action.getAttribute('tabindex') !== '-1') action.tabIndex = -1
+    this.hasOpenIcon = this.querySelector(':scope > [slot="open-icon"]') !== null
+    actions.forEach((action, index) => {
+      // Like a menu's rows, actions are reached with the arrow keys only, so Tab leaves the dial.
+      if (action.getAttribute('tabindex') !== '-1') action.tabIndex = -1
+      action.setDialIndex(index)
+    })
     if (!this.hasActions) this.open = false
-  }
-
-  private onOpenIconSlotChange(event: Event) {
-    this.hasOpenIcon = (event.target as HTMLSlotElement).assignedNodes({ flatten: true }).length > 0
   }
 
   private onButtonClick(event: MouseEvent) {
     if (!this.hasActions) return
+    // The mouse that just opened a hover dial clicks it next, as on any button: keep it open.
+    if (this.openedByHover && event.detail > 0) {
+      this.openedByHover = false
+      return
+    }
     this.toggle()
     // A click from Enter or Space has no pointer position: move into the dial like a menu button.
     if (this.open && event.detail === 0) void this.focusAction(0)
@@ -277,7 +300,7 @@ export class FloatButton extends LitElement {
       return
     }
     const step = ARROW_STEPS[this.direction]?.[event.key]
-    if (step === 1 || (step === -1 && !this.open)) {
+    if (step !== undefined) {
       event.preventDefault()
       this.show()
       void this.focusAction(step === 1 ? 0 : this.enabledActions().length - 1)
@@ -343,7 +366,7 @@ export class FloatButton extends LitElement {
   }
 
   private enabledActions() {
-    return this.actions.filter((action) => !action.disabled)
+    return this.actionList.filter((action) => !action.disabled)
   }
 
   private async focusAction(index: number) {
@@ -354,6 +377,8 @@ export class FloatButton extends LitElement {
 
   private readonly onFocusOut = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
+    // Focus leaving the window (another app, a notification) is not focus leaving the dial.
+    if (!next && !document.hasFocus()) return
     if (this.open && (!next || (next !== this && !this.contains(next) && !this.shadowRoot?.contains(next)))) this.hide()
   }
 
@@ -364,7 +389,10 @@ export class FloatButton extends LitElement {
   private readonly onPointerEnter = (event: PointerEvent) => {
     if (this.trigger !== 'hover' || event.pointerType !== 'mouse') return
     clearTimeout(this.hoverTimer)
-    this.show()
+    if (!this.open) {
+      this.show()
+      this.openedByHover = this.open
+    }
   }
 
   private readonly onPointerLeave = (event: PointerEvent) => {

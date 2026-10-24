@@ -252,11 +252,9 @@ $stagger: css.cssVar(actions--stagger);
   --_c2-float-button-action-transform: none;
 }
 
-// Stagger the opening, nearest action first.
-@for $i from 2 through 8 {
-  .has-actions.open ::slotted(:nth-child(#{$i})) {
-    --_c2-float-button-action-delay: calc(#{$stagger} * #{$i - 1});
-  }
+// Stagger the opening, nearest action first: each action multiplies this by its place in the dial.
+.has-actions.open .actions {
+  --_c2-float-button-action-stagger: #{$stagger};
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -268,11 +266,10 @@ $stagger: css.cssVar(actions--stagger);
   .direction-up .actions,
   .direction-down .actions,
   .direction-left .actions,
-  .direction-right .actions {
+  .direction-right .actions,
+  .has-actions.open .actions {
     --_c2-float-button-action-duration: 0s;
+    --_c2-float-button-action-stagger: 0s;
     --_c2-float-button-action-transform: none;
-  }
-  ::slotted(*) {
-    --_c2-float-button-action-delay: 0s !important;
   }
 }

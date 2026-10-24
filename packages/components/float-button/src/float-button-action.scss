@@ -26,13 +26,16 @@
   )
 );
 
+// The owner sets the stagger while its dial opens; the action knows its own place in it.
+$delay: calc(var(--_c2-float-button-action-stagger, 0s) * var(--_c2-float-button-action-index, 0));
+
 :host {
   // Set by the owning c2-float-button while its dial opens and closes; a lone action is simply shown.
   opacity: var(--_c2-float-button-action-opacity, 1);
   transform: var(--_c2-float-button-action-transform, none);
   transition:
-    opacity var(--_c2-float-button-action-duration, 0s) ease-out var(--_c2-float-button-action-delay, 0s),
-    transform var(--_c2-float-button-action-duration, 0s) animation.$emphasized-deceleration-easing var(--_c2-float-button-action-delay, 0s);
+    opacity var(--_c2-float-button-action-duration, 0s) ease-out $delay,
+    transform var(--_c2-float-button-action-duration, 0s) animation.$emphasized-deceleration-easing $delay;
   position: relative;
   display: inline-flex;
   flex: none;

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './float-button-action.scss?inline'
@@ -53,6 +53,29 @@ export class FloatButtonAction extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   private readonly internals = this.attachInternals()
+  // Holds the action's place in the dial. A stylesheet rather than a host style or a rendered <style>, so nothing
+  // is written on the host and a server-rendered action hydrates without a mismatch.
+  private readonly indexSheet = isServer ? undefined : new CSSStyleSheet()
+
+  /**
+   * Called by the owning `c2-float-button`: the action's place in the dial, nearest the button first, which staggers
+   * its opening.
+   * @internal
+   */
+  setDialIndex(index: number) {
+    this.indexSheet?.replaceSync(`:host { --_c2-float-button-action-index: ${index}; }`)
+    this.adoptIndexSheet()
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    this.adoptIndexSheet()
+  }
+
+  private adoptIndexSheet() {
+    const root = this.shadowRoot
+    if (root && this.indexSheet && !root.adoptedStyleSheets.includes(this.indexSheet)) root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.indexSheet]
+  }
 
   constructor() {
     super()
