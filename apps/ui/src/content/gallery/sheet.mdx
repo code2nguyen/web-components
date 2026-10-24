@@ -46,14 +46,15 @@ Curated looks for `c2-sheet`. Each card shows a trigger; open the sheet to see t
 ```html tag=MdxCodeBlock,label=Bottom sheet
 <style>
   .sg-bottom {
-    --c2-sheet--size: 320px;
+    --c2-sheet--size: auto;
+    --c2-sheet--max-size: 90dvh;
     --c2-sheet--border-radius: 16px;
   }
 </style>
 <c2-button onclick="document.getElementById('sg-bottom').show()">Open</c2-button>
-<c2-sheet id="sg-bottom" class="sg-bottom" side="bottom">
+<c2-sheet id="sg-bottom" class="sg-bottom" side="bottom" swipe-close>
   <span slot="title">Share</span>
-  <div>The phone pattern, with rounded top corners.</div>
+  <div>The phone pattern: as tall as its content, rounded on top, and dragged down by the handle to dismiss.</div>
 </c2-sheet>
 ```
 
