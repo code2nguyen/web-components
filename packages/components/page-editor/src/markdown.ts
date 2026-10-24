@@ -205,7 +205,8 @@ function tableToMarkdown({ rows, align, formulaBar, summary, styles = {} }: Tabl
 
 /**
  * The page as it is saved: a pasted image still being saved is left out until its upload gives its `src` (and written
- * with that `src` once it has, though the node has not heard yet).
+ * with that `src` once it has, though the node has not heard yet). A web image being copied is written with its address
+ * meanwhile, so a page closed before the copy ends keeps it.
  */
 function savedPage(doc: ProseNode): ProseNode {
   let pending = false
@@ -214,7 +215,7 @@ function savedPage(doc: ProseNode): ProseNode {
   const blocks: ProseNode[] = []
   doc.forEach((block) => {
     if (block.type !== schema.nodes.image || !block.attrs.pending) return void blocks.push(block)
-    const src = pendingImages.src(block.attrs.pending as string)
+    const src = pendingImages.src(block.attrs.pending as string) ?? (block.attrs.src as string)
     if (src) blocks.push(schema.nodes.image.create({ ...block.attrs, src, pending: null }))
   })
   return doc.copy(Fragment.fromArray(blocks))

@@ -123,7 +123,10 @@ test('requests older messages once at the top and keeps the reading position whe
   })
   await expect.poll(() => distanceFromBottom(list)).toBe(0)
 
-  await scrollUpUntil(list, () => expect(list).toHaveAttribute('data-events', '[null]', { timeout: 500 }))
+  // Jump to the top in one step rather than with the wheel: WebKit animates a wheel scroll, and the animation carrying
+  // on past the prepend would move the reader away from the position the list just restored.
+  await scroller(list).evaluate((element) => element.scrollTo({ top: 0, behavior: 'instant' }))
+  await expect(list).toHaveAttribute('data-events', '[null]')
   await expect(page.getByText('Message 1', { exact: true })).toBeAttached()
   // Message 11 was at the top of the viewport before the prepend and stays there instead of being pushed down.
   await expect(page.getByText('Message 11')).toBeInViewport()

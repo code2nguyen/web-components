@@ -176,12 +176,15 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
+- **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.
 - **Page Header** — `c2-page-header` · `@c2n/components/page-header` — The top of a page: breadcrumb or parent link, your heading with status badges, description, metadata, page actions that fold into a menu, tabs and a toolbar.
+- **Save Bar** — `c2-save-bar` · `@c2n/components/save-bar` — A floating bar that appears while a form has unsaved changes, with Discard and Save.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 
 ## Navigation
 
+- **Bottom Nav** — `c2-bottom-nav, c2-bottom-nav-item` · `@c2n/components/bottom-nav` — The mobile tab bar: three to five destinations along the bottom of the screen, each an icon over a short label with a count or dot badge. Children: `c2-bottom-nav-item`.
 - **Breadcrumb** — `c2-breadcrumb` · `@c2n/components/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
 - **Command** — `c2-command, c2-command-item, c2-command-group, c2-command-separator` · `@c2n/components/command` — A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette. Children: `c2-command-group`, `c2-command-item`, `c2-command-separator`.
 - **Context Menu** — `c2-context-menu` · `@c2n/components/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.

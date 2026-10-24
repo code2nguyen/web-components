@@ -8,6 +8,7 @@ import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
+import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
@@ -87,6 +88,7 @@ import notepad from '@c2n/notepad/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
+import overflowList from '@c2n/overflow-list/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pageHeader from '@c2n/page-header/custom-elements.json'
@@ -104,6 +106,7 @@ import rate from '@c2n/rate/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
+import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
@@ -164,6 +167,7 @@ export const componentManifests = (function () {
     badge,
     banner,
     borderBeam,
+    bottomNav,
     breadcrumb,
     button,
     buttonGroup,
@@ -243,6 +247,7 @@ export const componentManifests = (function () {
     numberInput,
     orgChart,
     otpInput,
+    overflowList,
     overlay,
     pageEditor,
     pageHeader,
@@ -260,6 +265,7 @@ export const componentManifests = (function () {
     relativeTime,
     reorderList,
     richTextEditor,
+    saveBar,
     searchField,
     select,
     separator,
