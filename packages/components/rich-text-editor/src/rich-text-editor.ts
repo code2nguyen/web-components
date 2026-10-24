@@ -274,9 +274,9 @@ class ItemView implements NodeView {
  * @slot footer-end - Content at the end of the footer, after the character counter, such as Cancel and Comment buttons.
  *
  * @csspart container - The box around the toolbar, the text and the footer.
- * @csspart toolbar - The formatting toolbar.
+ * @csspart toolbar - The formatting toolbar region: its buttons, then the `toolbar-end` slot, which projects the app's own tools after them (it has no fallback content).
  * @csspart content - The editable text.
- * @csspart footer - The row under the text holding the footer slots and the counter.
+ * @csspart footer - The row under the text: the `footer-start` slot, then the toolbar when it sits at the bottom, the counter, and the `footer-end` slot. Both slots project assigned content only, without fallback; the row is hidden while it has nothing to show.
  * @csspart link-popover - The popover that edits a link.
  *
  * @event {Event} input - Fired on each edit, after `value` is updated.
