@@ -19,6 +19,11 @@ const article = `
 const toc = (page: Page) => page.locator('c2-table-of-contents')
 const link = (page: Page, name: string) => page.getByRole('link', { name, exact: true })
 const current = (page: Page) => toc(page).locator('a[aria-current="true"]')
+/** Whether a heading's top settles on `top`, within the pixel an engine that scrolls by whole pixels (WebKit) may miss by. */
+// One huge wheel delta does not scroll in Firefox, so the end of the page is reached by setting the scroll position.
+const scrollToEnd = (page: Page) => page.evaluate(() => document.scrollingElement!.scrollTo(0, document.scrollingElement!.scrollHeight))
+const settlesAt = (page: Page, selector: string, top: number) =>
+  expect.poll(() => page.locator(selector).evaluate((el, expected) => Math.abs(el.getBoundingClientRect().top - expected) <= 1, top)).toBe(true)
 
 test('lists the headings of the page, nested by level', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table-of-contents></c2-table-of-contents>${article}`)
@@ -54,7 +59,7 @@ test('follows the reader as the page scrolls', async ({ page, renderScenario }) 
 
 test('the last section is current at the end of the page', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table-of-contents></c2-table-of-contents>${article}<div style="height: 120px"></div>`)
-  await page.mouse.wheel(0, 100000)
+  await scrollToEnd(page)
   await expect(current(page)).toHaveText('FAQ')
 })
 
@@ -74,7 +79,7 @@ test('activating a link scrolls to its section, focuses it and updates the URL',
   await expect(heading).toBeFocused()
   await expect(heading).toHaveAttribute('tabindex', '-1')
   await expect(current(page)).toHaveText('Theming')
-  await expect.poll(() => heading.evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBe(0)
+  await settlesAt(page, '#theming', 0)
   await expect.poll(() => new URL(page.url()).hash).toBe('#theming')
   // Sections passed on the way never become current, and the temporary tabindex leaves with focus.
   await expect(current(page)).toHaveText('Theming')
@@ -113,9 +118,9 @@ test('works from the keyboard', async ({ page, renderScenario, tab }) => {
 test('offset accounts for a sticky header, for the spy and for the scroll', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table-of-contents offset="60"></c2-table-of-contents><article><header class="sticky">Header</header>${article}</article>`)
   await link(page, 'FAQ').click()
-  await expect.poll(() => page.locator('#faq').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBe(60)
+  await settlesAt(page, '#faq', 60)
   await page.mouse.wheel(0, -40)
-  await expect.poll(() => page.locator('#faq').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBeGreaterThan(61)
+  await expect.poll(() => page.locator('#faq').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBeGreaterThan(62)
   await expect(current(page)).not.toHaveText('FAQ')
 })
 
@@ -228,7 +233,7 @@ test('follows a heading level change through aria-level', async ({ page, renderS
 test('at the end of the page a hidden last section is not current', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table-of-contents></c2-table-of-contents>${article}`)
   await page.locator('#faq').evaluate((heading) => (heading.parentElement!.hidden = true))
-  await page.mouse.wheel(0, 100000)
+  await scrollToEnd(page)
   await expect(current(page)).toHaveText('Theming')
 })
 
@@ -238,7 +243,7 @@ test('a scroll ending elsewhere does not end the lock of a link', async ({ page,
   await link(page, 'Theming').click()
   // Another scroller settling mid-jump must not hand the list back to the spy.
   await toc(page).evaluate((el) => el.dispatchEvent(new Event('scrollend', { bubbles: true })))
-  await expect.poll(() => page.locator('#theming').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBe(0)
+  await settlesAt(page, '#theming', 0)
   const events = JSON.parse((await toc(page).getAttribute('data-events')) ?? '[]') as { id: string }[]
   expect(events.map((event) => event.id)).toEqual(['theming'])
 })

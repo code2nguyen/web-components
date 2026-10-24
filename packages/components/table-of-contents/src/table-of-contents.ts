@@ -283,7 +283,8 @@ export class TableOfContents extends LitElement {
     }
     const scroller = scrollParent(first)
     const areaTop = scroller ? scroller.getBoundingClientRect().top : 0
-    const line = areaTop + this.offset + 1
+    // A little slack: an engine that scrolls by whole pixels (WebKit) can stop a linked heading just past the line.
+    const line = areaTop + this.offset + 2
     let index = -1
     targets.forEach((target, i) => {
       if (target && target.getBoundingClientRect().top <= line) index = i
