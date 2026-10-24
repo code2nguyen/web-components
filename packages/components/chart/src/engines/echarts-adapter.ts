@@ -15,9 +15,10 @@ export interface EchartsOptions extends EChartsCoreOption {
   series?: Record<string, unknown>[]
 }
 
-/** The slice of ECharts' internal model `xGeometry` reads: the first grid's rectangle. */
+/** The slice of ECharts' internal model `xGeometry` and `itemLayout` read: the first grid's rectangle and a series' laid-out data. */
 interface GridOwner {
   getComponent?(type: string, index: number): { coordinateSystem?: { getRect?(): { x: number; y: number; width: number; height: number } } } | undefined
+  getSeriesByIndex?(index: number): { getData?(): { getItemLayout?(index: number): { x?: number; y?: number } | null | undefined } } | undefined
 }
 
 /**
@@ -165,6 +166,13 @@ export async function createEchartsAdapter(
           return typeof pixel === 'number' && Number.isFinite(pixel) ? pixel - rect.x : null
         }),
       }
+    },
+
+    itemLayout(seriesIndex, dataIndex) {
+      // Like the grid's rectangle, a series' laid-out data is not public API; a sankey's nodes carry `x` and `y` there.
+      const model = (instance as unknown as { getModel?: () => GridOwner } | undefined)?.getModel?.()
+      const layout = model?.getSeriesByIndex?.(seriesIndex)?.getData?.()?.getItemLayout?.(dataIndex)
+      return layout && Number.isFinite(layout.x) && Number.isFinite(layout.y) ? { x: layout.x as number, y: layout.y as number } : null
     },
 
     /** ECharts leaks its global resize and event handlers without an explicit dispose. */

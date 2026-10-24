@@ -27,6 +27,7 @@ import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
+import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
@@ -438,6 +439,36 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<RadarChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<RadarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<RadarChart, 'point-click'>) => void
+      }
+    >
+    'c2-sankey-chart': DefineComponent<
+      C2Props<SankeyChart> & {
+        'source-field'?: unknown
+        'target-field'?: unknown
+        'value-field'?: unknown
+        'node-align'?: unknown
+        'link-color'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onNodeHover?: (event: EventOf<SankeyChart, 'node-hover'>) => void
+        onLinkHover?: (event: EventOf<SankeyChart, 'link-hover'>) => void
+        onLinkClick?: (event: EventOf<SankeyChart, 'link-click'>) => void
+        onNodeClick?: (event: EventOf<SankeyChart, 'node-click'>) => void
+        onTooltipChange?: (event: EventOf<SankeyChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<SankeyChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<SankeyChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<SankeyChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<SankeyChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<SankeyChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<SankeyChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<SankeyChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<SankeyChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<SankeyChart, 'point-click'>) => void
       }
     >
     'c2-scatter-chart': DefineComponent<

@@ -205,6 +205,10 @@
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
     },
+    "./chart/sankey-chart": {
+      "types": "./dist/chart/sankey-chart.d.ts",
+      "default": "./dist/chart/sankey-chart.js"
+    },
     "./chart/scatter-chart": {
       "types": "./dist/chart/scatter-chart.d.ts",
       "default": "./dist/chart/scatter-chart.js"
