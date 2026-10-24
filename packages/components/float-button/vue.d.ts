@@ -21,8 +21,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-float-button': DefineComponent<
       C2Props<FloatButton> & {
-        onToggle?: (event: EventOf<FloatButton, 'toggle'>) => void
         onActionSelect?: (event: EventOf<FloatButton, 'action-select'>) => void
+        onToggle?: (event: EventOf<FloatButton, 'toggle'>) => void
       }
     >
     'c2-float-button-action': DefineComponent<C2Props<FloatButtonAction>>
