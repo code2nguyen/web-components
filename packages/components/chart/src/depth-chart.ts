@@ -50,6 +50,12 @@ export interface DepthChart {
 type EngineHoverDetail = { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string; dataType?: string }
 
 /** The zoom steps `+` and `-` (and ctrl or ⌘ + wheel) move between, as a share of the mid price either side. */
+/** The properties that change the drawn points. */
+const BOOK_KEYS = ['bids', 'asks', 'mid', 'range', 'unit']
+
+/** Wheel travel, in pixels, that zooms one step. */
+const WHEEL_STEP = 60
+
 const RANGE_STEPS = [0.001, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25]
 
 /**
@@ -137,6 +143,9 @@ export class DepthChart extends UplotChartBase {
   #yMax = 1
   /** The point reached with the arrow keys, or `-1`. */
   #focused = -1
+  /** The price of the focused point, which is what keyboard focus follows when a new book shifts the points. */
+  #focusedPrice?: number
+  #wheelTravel = 0
   #announceTimer?: ReturnType<typeof setTimeout>
   #formats = new Map<string, Intl.NumberFormat>()
 
@@ -158,11 +167,12 @@ export class DepthChart extends UplotChartBase {
   }
 
   protected override isDataKey(key: string): boolean {
-    return key === 'bids' || key === 'asks' || super.isDataKey(key)
+    // `mid` and `range` only move the window: the x scale reads it from a function, so a new one is a redraw too.
+    return key === 'bids' || key === 'asks' || key === 'mid' || key === 'range' || super.isDataKey(key)
   }
 
   protected override reshapesFrame(changed: PropertyValues): boolean {
-    return ['bids', 'asks', 'range', 'mid', 'unit'].some((key) => changed.has(key)) || super.reshapesFrame(changed)
+    return BOOK_KEYS.some((key) => changed.has(key)) || super.reshapesFrame(changed)
   }
 
   protected override buildFrame(): ChartFrame | undefined {
@@ -228,16 +238,14 @@ export class DepthChart extends UplotChartBase {
         ...scales,
         x: { ...scales.x, range: () => [this.#window.min, this.#window.max] },
         // Depth starts at zero; the top leaves room for the mid price label.
-        y:
-          this.yMin === undefined && this.yMax === undefined
-            ? {
-                ...scales.y,
-                range: (_self: uPlot, _min: number, max: number) => {
-                  this.#yMax = max > 0 ? max * 1.12 : 1
-                  return [0, this.#yMax]
-                },
-              }
-            : scales.y,
+        // `y-min`/`y-max` still win; the top is recorded either way, since the markers are placed against it.
+        y: {
+          ...scales.y,
+          range: (_self: uPlot, _min: number, max: number) => {
+            this.#yMax = this.yMax ?? (max > 0 ? max * 1.12 : 1)
+            return [this.yMin ?? 0, this.#yMax]
+          },
+        },
       },
       hooks: { ...options.hooks, draw: [...(options.hooks?.draw ?? []), (self: uPlot) => this.#drawMid(self)] },
     }
@@ -308,7 +316,8 @@ export class DepthChart extends UplotChartBase {
   }
 
   #formatNotional(value: number): string {
-    const text = this.#format('notional', { notation: Math.abs(value) >= 1e5 ? 'compact' : 'standard', maximumFractionDigits: 2 }).format(value)
+    const notation = Math.abs(value) >= 1e5 ? 'compact' : 'standard'
+    const text = this.#format(`notional:${notation}`, { notation, maximumFractionDigits: 2 }).format(value)
     return this.quoteLabel ? `${text} ${this.quoteLabel}` : text
   }
 
@@ -322,7 +331,8 @@ export class DepthChart extends UplotChartBase {
   }
 
   protected override formatValue(value: number): string {
-    return this.#format('value', { notation: Math.abs(value) >= 1e5 ? 'compact' : 'standard', maximumFractionDigits: 2 }).format(value)
+    const notation = Math.abs(value) >= 1e5 ? 'compact' : 'standard'
+    return this.#format(`value:${notation}`, { notation, maximumFractionDigits: 2 }).format(value)
   }
 
   protected override formatX(value: number): string {
@@ -419,7 +429,9 @@ export class DepthChart extends UplotChartBase {
     const offset = geometry?.offsets[0]
     if (!geometry || offset === null || offset === undefined || offset < -0.5 || offset > geometry.plot.width + 0.5) return undefined
     const { plot } = geometry
-    return { x: plot.left + offset, y: plot.top + plot.height * (1 - Math.min(1, value / this.#yMax)) }
+    const bottom = this.yMin ?? 0
+    const share = this.#yMax > bottom ? (value - bottom) / (this.#yMax - bottom) : 0
+    return { x: plot.left + offset, y: plot.top + plot.height * (1 - Math.min(1, Math.max(0, share))) }
   }
 
   /** Zooms in (`1`, a narrower window) or out (`-1`) to the next step; a range between two steps moves to the nearer one that way. */
@@ -483,15 +495,24 @@ export class DepthChart extends UplotChartBase {
     // A bare wheel scrolls the page; ctrl or ⌘ (and a trackpad pinch, which arrives as ctrl + wheel) zooms.
     if (!event.ctrlKey && !event.metaKey) return
     event.preventDefault()
-    if (event.deltaY !== 0) this.#zoom(event.deltaY < 0 ? 1 : -1)
+    // A pinch arrives as dozens of small events: zoom one step per notch's worth of travel, not per event.
+    this.#wheelTravel += event.deltaMode === 0 ? event.deltaY : event.deltaY * 40
+    if (Math.abs(this.#wheelTravel) < WHEEL_STEP) return
+    const direction = this.#wheelTravel < 0 ? 1 : -1
+    this.#wheelTravel = 0
+    this.#zoom(direction)
   }
 
-  #handleBlur = (): void => this.#focus(-1)
+  // Only a keyboard focus ends with the blur; a pointer still over the plot keeps its hover.
+  #handleBlur = (): void => {
+    if (this.#focused >= 0) this.#focus(-1)
+  }
 
   /** Moves the keyboard focus to a point: the tooltip and markers follow it, and the readout is announced. */
-  #focus(index: number): void {
+  #focus(index: number, announce = true): void {
     this.#focused = index
     const point = this.#series.points[index]
+    this.#focusedPrice = point?.price
     if (!point) {
       this.handleEngineHover(null)
       this.#placeMarker('focus', undefined)
@@ -503,6 +524,7 @@ export class DepthChart extends UplotChartBase {
     const position = this.#position(point.price, value) ?? { x: 0, y: 0 }
     this.handleEngineHover({ index, seriesIndex: point.side === 'ask' ? 1 : 0, px: position.x, py: position.y })
     this.#placeMarker('focus', readout)
+    if (!announce) return
     if (readout) {
       this.#announce(
         this.msg.t(
@@ -550,6 +572,8 @@ export class DepthChart extends UplotChartBase {
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
     this.#describe()
+    // A new book that arrived with other changes took the full path; a held focus or hover still has to follow it.
+    if (BOOK_KEYS.some((key) => changed.has(key)) && (this.#focused >= 0 || this.hoverContext)) this.#followBook()
   }
 
   override disconnectedCallback(): void {
@@ -578,10 +602,33 @@ export class DepthChart extends UplotChartBase {
     // The fast path returned false and skipped `updated`: the new book still needs its name, and a held marker moves.
     if (!update) {
       this.#describe()
-      if (this.#focused >= this.#series.points.length) this.#focused = -1
-      if (this.#focused >= 0) this.#focus(this.#focused)
+      // After this cycle: Lit drops property changes made while `shouldUpdate` returns false, so the tooltip would not redraw.
+      void this.updateComplete.then(() => this.#followBook())
     }
     return update
+  }
+
+  /**
+   * After a data-only update: keyboard focus stays on its price (the nearest point when that level is gone), and a hover
+   * re-reads its point, since the base keeps the tooltip of an unchanged index as it was. Neither is announced again.
+   */
+  #followBook(): void {
+    const points = this.#series.points
+    const hovered = this.hoverContext
+    // Cleared first, or the base would keep the old tooltip for an index that did not change.
+    this.hoverContext = null
+    if (this.#focused >= 0 && this.#focusedPrice !== undefined) {
+      const price = this.#focusedPrice
+      let nearest = -1
+      for (let index = 0; index < points.length; index += 1) {
+        if (nearest < 0 || Math.abs(points[index].price - price) < Math.abs(points[nearest].price - price)) nearest = index
+      }
+      this.#focus(nearest, false)
+      return
+    }
+    if (!hovered) return
+    const point = points[hovered.index]
+    this.handleEngineHover(point ? { index: hovered.index, seriesIndex: point.side === 'ask' ? 1 : 0, px: hovered.px, py: hovered.py } : null)
   }
 
   protected override renderOverlayExtras(): unknown {

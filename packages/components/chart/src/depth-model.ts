@@ -156,11 +156,17 @@ export function depthWindow(book: DepthBook, range: number): { min: number; max:
 
 /**
  * The points drawn for a window, x ascending: the bid edge, the bid levels inside the window, the mid price (a zero
- * on both sides, so each curve drops to the baseline at its best price and the spread reads as a gap), the ask levels
+ * on both sides, so each curve drops to the baseline at its best price and the spread reads as a gap; with an explicit
+ * `mid` past a side's best price, that side starts at the depth already behind it), the ask levels
  * and the ask edge. Each side is extended flat to the window edge, so a thin book does not stop mid-chart.
  */
 export function depthSeries(book: DepthBook, window: { min: number; max: number }, unit: 'base' | 'quote'): DepthSeries {
   const valueOf = (level: DepthLevel) => (unit === 'quote' ? level.notional : level.cumulative)
+  // An explicit `mid` inside a side (a mark price beyond the touch) leaves that side's best levels past it. They are not
+  // drawn as steps, but the depth they hold starts that side's curve at the mid price, so the totals still add up.
+  const bidsPastMid = depthAt(book, 'bid', book.mid)
+  const asksPastMid = depthAt(book, 'ask', book.mid)
+  const atMid = (level: DepthLevel | undefined) => (level ? valueOf(level) : 0)
   const points: DepthPoint[] = []
 
   const bids = book.bids.filter((level) => level.price >= window.min && level.price < book.mid)
@@ -178,8 +184,8 @@ export function depthSeries(book: DepthBook, window: { min: number; max: number 
   return {
     points,
     x: points.map((point) => point.price),
-    bids: points.map((point) => (point.side === 'bid' && point.level ? valueOf(point.level) : point.side === 'mid' ? 0 : null)),
-    asks: points.map((point) => (point.side === 'ask' && point.level ? valueOf(point.level) : point.side === 'mid' ? 0 : null)),
+    bids: points.map((point) => (point.side === 'bid' && point.level ? valueOf(point.level) : point.side === 'mid' ? atMid(bidsPastMid) : null)),
+    asks: points.map((point) => (point.side === 'ask' && point.level ? valueOf(point.level) : point.side === 'mid' ? atMid(asksPastMid) : null)),
   }
 }
 

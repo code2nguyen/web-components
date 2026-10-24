@@ -232,6 +232,56 @@ test('draws, redraws and zooms without page errors', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
+test('an explicit mid past the best ask starts the ask curve at the depth behind it', async ({ page }) => {
+  await open(page)
+  const asks = await page.evaluate(() => {
+    const { buildDepthBook, depthSeries, depthWindow } = window.depthScenario.model
+    const book = buildDepthBook(
+      [[99, 1]],
+      [
+        [100, 2],
+        [101, 3],
+      ],
+      100.5,
+    )
+    return depthSeries(book, depthWindow(book, 0.05), 'base').asks
+  })
+  // Points: bid edge, 99, mid 100.5, 101, ask edge. The 100 ask lies behind the mid, so the curve starts at 2 there.
+  expect(asks).toEqual([null, null, 2, 5, 5])
+})
+
+test('mid and range changes redraw through setData, and keyboard focus stays on its price', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-depth-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.locator('[part="plot"]').focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await expect(chart.locator('.tooltip')).toContainText('Bid · 99.0')
+  const result = await chart.evaluate(async (element) => {
+    const depth = element as DepthInternals & { mid?: number }
+    const before = window.depthScenario.counts()
+    depth.mid = 100.4
+    depth.range = 0.04
+    await depth.updateComplete
+    // A new book with a level added near the touch shifts every index; focus must stay on 99.0.
+    depth.bids = [
+      [100.2, 1],
+      [100, 2],
+      [99, 2],
+      [98, 4],
+    ]
+    await depth.updateComplete
+    await new Promise(requestAnimationFrame)
+    const after = window.depthScenario.counts()
+    return { setOptions: after.setOptions - before.setOptions, window: depth.visibleRange }
+  })
+  expect(result.setOptions).toBe(0)
+  expect(result.window.min).toBeCloseTo(100.4 * 0.96)
+  await expect(chart.locator('.tooltip')).toContainText('Bid · 99.0')
+  await expect(chart.locator('.tooltip')).toContainText('5.00 BTC')
+})
+
 test('an empty book shows the empty state', async ({ page }) => {
   await open(page, 'empty')
   await expect(page.locator('c2-depth-chart').locator('[part="state"]')).toHaveText('No data')
