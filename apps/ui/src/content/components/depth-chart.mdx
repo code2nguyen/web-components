@@ -1,0 +1,152 @@
+---
+title: 'Depth chart'
+description: 'Cumulative bid and ask size around the mid price of an order book, as trading screens show market depth.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-depth-chart'
+apiTags: ['c2-depth-chart']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import DepthChartDemo from '../../components/DepthChartDemo.astro'
+
+import { DepthChart } from '@c2n/components/chart/depth-chart'
+import { Button } from '@c2n/components/button'
+
+<DepthChartDemo />
+
+A depth chart draws an order book as two curves meeting at the mid price. Left of it, the height at a price is every bid
+resting at that price or higher: what a sell order would have to take to push the price down that far. Right of it, every
+ask at that price or lower. A flat curve is a deep market, a steep one a thin market, and a cliff is one large order. The
+chart takes the levels as an exchange sends them and does the sorting and summing itself; it is drawn by uPlot, so a live
+feed can hand it a new book on every message.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/depth-chart'
+```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .depth-plot {
+    width: 100%;
+    --c2-chart--height: 320px;
+  }
+  .depth-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .depth-live__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<div data-label="BTC-USD, ±2%">
+  <c2-depth-chart
+    class="depth-plot"
+    range="0.02"
+    base-label="BTC"
+    quote-label="USD"
+    bids='[[67410.5,0.153],[67408.5,0.729],[67406,0.055],[67402.5,0.288],[67402,0.059],[67392.5,1.795],[67385,0.431],[67375,0.74],[67356,1.221],[67343,0.492],[67310,0.321],[67287,0.075],[67244.5,1.562],[67220.5,0.132],[67143.5,0.101],[67102,0.581],[67090.5,0.101],[67017.5,1.652],[67006,1.053],[67000,14.464],[66902.5,0.44],[66845.5,0.874],[66702.5,0.41],[66667.5,2.686],[66517,0.637],[66500,10.584],[66449.5,0.355],[66167.5,1.666]]'
+    asks='[[67414.5,0.105],[67415.5,0.108],[67416,0.915],[67419,0.088],[67422.5,1.053],[67431,0.305],[67436.5,0.806],[67452,0.53],[67464,1.232],[67493.5,0.262],[67528,0.145],[67541.5,1.93],[67582,0.154],[67585.5,0.248],[67650,1.397],[67669,0.674],[67747.5,0.508],[67786.5,0.395],[67814,2.089],[67844.5,1.33],[67960,0.658],[68000,13.723],[68068,0.121],[68153,0.828],[68333.5,2.9],[68400,7.818],[68594.5,1.6],[68618,2.533]]'
+  ></c2-depth-chart>
+</div>
+
+<div data-label="Notional in USD, ±1%">
+  <c2-depth-chart
+    class="depth-plot"
+    range="0.01"
+    unit="quote"
+    base-label="BTC"
+    quote-label="USD"
+    bids='[[67410.5,0.153],[67408.5,0.729],[67406,0.055],[67402.5,0.288],[67402,0.059],[67392.5,1.795],[67385,0.431],[67375,0.74],[67356,1.221],[67343,0.492],[67310,0.321],[67287,0.075],[67244.5,1.562],[67220.5,0.132],[67143.5,0.101],[67102,0.581],[67090.5,0.101],[67017.5,1.652],[67006,1.053],[67000,14.464],[66902.5,0.44],[66845.5,0.874],[66702.5,0.41],[66667.5,2.686],[66517,0.637],[66500,10.584],[66449.5,0.355],[66167.5,1.666]]'
+    asks='[[67414.5,0.105],[67415.5,0.108],[67416,0.915],[67419,0.088],[67422.5,1.053],[67431,0.305],[67436.5,0.806],[67452,0.53],[67464,1.232],[67493.5,0.262],[67528,0.145],[67541.5,1.93],[67582,0.154],[67585.5,0.248],[67650,1.397],[67669,0.674],[67747.5,0.508],[67786.5,0.395],[67814,2.089],[67844.5,1.33],[67960,0.658],[68000,13.723],[68068,0.121],[68153,0.828],[68333.5,2.9],[68400,7.818],[68594.5,1.6],[68618,2.533]]'
+  ></c2-depth-chart>
+</div>
+
+<div data-label="Live feed" data-depth-live>
+  <div class="depth-live">
+    <c2-depth-chart
+      class="depth-plot"
+      range="0.005"
+      base-label="BTC"
+      quote-label="USD"
+      bids='[[67410.5,0.153],[67408.5,0.729],[67406,0.055],[67402.5,0.288],[67402,0.059],[67392.5,1.795],[67385,0.431],[67375,0.74],[67356,1.221],[67343,0.492],[67310,0.321],[67287,0.075],[67244.5,1.562],[67220.5,0.132],[67143.5,0.101],[67102,0.581],[67090.5,0.101],[67017.5,1.652],[67006,1.053],[67000,14.464],[66902.5,0.44],[66845.5,0.874],[66702.5,0.41],[66667.5,2.686],[66517,0.637],[66500,10.584],[66449.5,0.355],[66167.5,1.666]]'
+      asks='[[67414.5,0.105],[67415.5,0.108],[67416,0.915],[67419,0.088],[67422.5,1.053],[67431,0.305],[67436.5,0.806],[67452,0.53],[67464,1.232],[67493.5,0.262],[67528,0.145],[67541.5,1.93],[67582,0.154],[67585.5,0.248],[67650,1.397],[67669,0.674],[67747.5,0.508],[67786.5,0.395],[67814,2.089],[67844.5,1.33],[67960,0.658],[68000,13.723],[68068,0.121],[68153,0.828],[68333.5,2.9],[68400,7.818],[68594.5,1.6],[68618,2.533]]'
+    ></c2-depth-chart>
+    <div class="depth-live__controls">
+      <c2-button size="sm">Pause feed</c2-button>
+      <span data-depth-status>Click the chart, or press Enter on a level, to pick a price</span>
+    </div>
+  </div>
+</div>
+```
+
+### Data
+
+`bids` and `asks` each take a list of price levels: `[price, size]` pairs or `{ "price", "size" }` objects, numbers or numeric
+strings, in any order. That is the shape Binance, Coinbase and Kraken send, so a REST snapshot can go straight in:
+
+```typescript tag=CodeBlock
+const depth = document.querySelector('c2-depth-chart')
+const book = await fetch('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=500').then((response) => response.json())
+depth.bids = book.bids // [["67410.50", "0.153"], …]
+depth.asks = book.asks
+```
+
+Levels with the same price are summed and a size of 0 is dropped, which is how a diff feed deletes a level. The chart
+draws snapshots: keep the book from a diff stream in your own code and assign the result. Assigning `bids` and `asks` is a
+data-only update, so it redraws without rebuilding the chart; set both in the same task and they draw once.
+
+Prices print with as many decimals as the input carries (strings keep their trailing zeros), and sizes the same up to
+eight; `price-precision` and `size-precision` fix them. `base-label` and `quote-label` name the two currencies.
+
+### Window and units
+
+`range` is how far the chart reaches either side of the mid price, as a fraction of it: `0.02` shows ±2%. Each curve
+runs flat to the edge of that window when the book is thinner than it. The mid price is the midpoint of the best bid and
+best ask; set `mid` to centre on an index or mark price instead. `unit="quote"` sums notional (`price × size`, in the quote
+currency) instead of size, and `curve="linear"` joins the levels directly instead of stepping between them.
+
+### Reading it
+
+Hovering a price shows the cumulative size and notional to it, the average price a market order that far would fill at,
+and its price impact against the mid price. With `mirror` (on by default) the chart also marks the same distance on the
+other side and adds that side's depth to the tooltip, so the two can be compared at a glance. Between the two sides the
+tooltip shows the best bid, the best ask and the spread.
+
+### Picking a price and zooming
+
+A click fires `price-select` with the price, its side and the readout, which is how an order ticket can take a limit
+price from the chart. The plot is one tab stop: the arrow keys walk the levels (Home and End jump to the window edges),
+Enter or Space picks the focused level, and Escape leaves it. `+` and `-`, or ctrl or ⌘ with the wheel (a trackpad
+pinch), zoom between preset windows by setting `range` and fire `range-change` with the new price bounds. A plain wheel
+still scrolls the page.
+
+```typescript tag=CodeBlock
+depth.addEventListener('price-select', (event) => {
+  ticket.side = event.detail.side === 'bid' ? 'sell' : 'buy'
+  ticket.price = event.detail.price
+})
+```
+
+### Styling
+
+The two sides take `--c2-chart__bid--color` and `--c2-chart__ask--color`, which fall back to the shared
+`--c2-chart__positive--color` and `--c2-chart__negative--color`; their fills use `--c2-chart__area--opacity`. The mid
+price line and label, and the mirror marker, have their own variables, listed on the API tab. The legend is off by
+default, since the colours and the tooltip name each side; `legend="bottom"` shows it. `annotations` work on the price axis,
+for marking your own resting orders.

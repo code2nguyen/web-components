@@ -22,6 +22,7 @@ import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { ChordChart } from '@c2n/chart/chord-chart.js'
+import type { DepthChart } from '@c2n/chart/depth-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
@@ -141,6 +142,25 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: ChordChart['series'] | string
         annotations?: ChordChart['annotations'] | string
+      }
+      'c2-depth-chart': Omit<C2Props<DepthChart>, 'bids' | 'asks' | 'series' | 'annotations'> & {
+        'base-label'?: Attribute
+        'quote-label'?: Attribute
+        'price-precision'?: Attribute
+        'size-precision'?: Attribute
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        bids?: DepthChart['bids'] | string
+        asks?: DepthChart['asks'] | string
+        series?: DepthChart['series'] | string
+        annotations?: DepthChart['annotations'] | string
       }
       'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series' | 'annotations'> & {
         'start-angle'?: Attribute

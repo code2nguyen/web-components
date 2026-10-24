@@ -83,7 +83,6 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 | 52  | `c2-waterfall-chart` | Running total bridged by positive and negative steps | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
 | 54  | `c2-boxplot-chart`   | Distribution summary (median, quartiles, outliers)   | Datadog and Grafana latency views              | P3       | Proposed |
 | 55  | `c2-bullet-chart`    | One measure against a target and qualitative bands   | KPI scorecards                                 | P3       | Proposed |
-| 56  | `c2-depth-chart`     | Cumulative bid and ask volume around the mid price   | Binance, Coinbase Advanced                     | P3       | Proposed |
 
 ### D. Navigation and layout
 
@@ -128,14 +127,14 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 ### G. Business apps
 
-| #   | Component             | What it adds                                                                           | Real-world model                                | Priority | Decision |
-| --- | --------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                           | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
-| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                         | Calendly, Cal.com                               | P2       | Proposed |
-| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                            | Google Drive, Dropbox                           | P2       | Proposed |
-| 90  | `c2-order-book`       | Live bids and asks with depth bars and grouping                                        | Binance, Coinbase Advanced                      | P2       | Proposed |
-| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                          | XMind, Miro mind map                            | P3       | Proposed |
-| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only) | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
+| #   | Component             | What it adds                                                                                                                                                                                                                                                                           | Real-world model                                | Priority | Decision |
+| --- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
+| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                                                                                                                                                                                                           | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
+| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                                                                                                                                                                                                         | Calendly, Cal.com                               | P2       | Proposed |
+| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                                                                                                                                                                                                            | Google Drive, Dropbox                           | P2       | Proposed |
+| 90  | `c2-order-book`       | Live bids and asks with depth bars, price grouping and spread row. Keeps the book from an exchange diff feed (size 0 deletes a level), the state `c2-depth-chart` leaves to the app since it draws snapshots; sums with the chart's `depth-model.ts` and fires the same `price-select` | Binance, Coinbase Advanced, Kraken Pro          | P2       | Proposed |
+| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                                                                                                                                                                                                          | XMind, Miro mind map                            | P3       | Proposed |
+| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                                                                                                                                                                                                 | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
 
 ### H. AI interfaces
 
