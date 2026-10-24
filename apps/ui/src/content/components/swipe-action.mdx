@@ -28,8 +28,9 @@ width arms the outermost action, and releasing there clicks it: the "swipe all t
 import '@c2n/components/swipe-action'
 ```
 
-**In a list.** Wrap each `c2-list-item` of a `c2-list` in a `c2-swipe-action`: the list finds the row inside the
-wrapper, so arrow keys, typeahead and selection work as before. Give each action a shortcut with
+**In a list.** Wrap each `c2-list-item` of a `c2-list` in a `c2-swipe-action` and set `swipeable` on the list:
+swiping in a list is opt-in, and without `swipeable` the rows stay still with their actions hidden. The list finds
+the row inside the wrapper, so arrow keys, typeahead and selection work as before. Give each action a shortcut with
 `aria-keyshortcuts`: the key runs that action while its row has focus, and a row with shortcuts takes its hidden
 actions out of the Tab order, so the list stays one Tab stop. Name the shortcuts where a screen reader reads them,
 such as the row's description.
@@ -131,7 +132,7 @@ row.addEventListener('full-swipe', (event) => {
 </div>
 <div data-label="In a list">
   <div class="swipe-list">
-    <c2-list client:only="lit" aria-label="Inbox" class="swipe-inbox">
+    <c2-list client:only="lit" swipeable aria-label="Inbox" class="swipe-inbox">
       <c2-swipe-action class="swipe-blocks">
         <c2-list-item value="ada">Ada Lovelace<span slot="description">Delete key deletes, A archives</span></c2-list-item>
         <c2-button slot="start" class="swipe-archive" aria-keyshortcuts="A">Archive</c2-button>

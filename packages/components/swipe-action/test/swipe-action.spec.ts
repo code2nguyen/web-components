@@ -224,3 +224,61 @@ test.describe('rows of a c2-list', () => {
     expect(results.violations).toEqual([])
   })
 })
+
+test.describe('rows of a c2-list without swipeable', () => {
+  const row = (page: Page, label: string) => page.locator('c2-list-item', { hasText: label })
+
+  test('a row does not swipe, its shortcut keys do nothing, and the list keeps working', async ({ page, scenario }) => {
+    await scenario('list-off')
+    const subject = page.locator('c2-swipe-action').nth(1)
+    const box = (await subject.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 - 140, box.y + box.height / 2, { steps: 12 })
+    await page.mouse.up()
+    await expect(subject).toHaveJSProperty('open', '')
+    // A drag on a row that cannot swipe is a plain click, which selects it.
+    await expect(row(page, 'Banana')).toBeFocused()
+    await page.keyboard.press('Delete')
+    await page.keyboard.press('ArrowDown')
+    await expect(row(page, 'Cherry')).toBeFocused()
+    await expect(log(page)).toHaveText('select:b')
+  })
+
+  test('the hidden actions are inert: out of the Tab order and the accessibility tree', async ({ page, scenario, tab }) => {
+    await scenario('list-off')
+    await row(page, 'Apple').click()
+    await tab()
+    await expect(page.locator('#outside')).toBeFocused()
+    // An inert element cannot take focus even from code.
+    await page.locator('#delete-a').focus()
+    await expect(page.locator('#delete-a')).not.toBeFocused()
+  })
+
+  test('turning swipeable on lets the rows swipe', async ({ page, scenario }) => {
+    await scenario('list-off')
+    await page.locator('c2-list').evaluate((list) => ((list as HTMLElement & { swipeable: boolean }).swipeable = true))
+    await row(page, 'Apple').click()
+    await page.keyboard.press('Delete')
+    await expect(log(page)).toHaveText('select:a,click:delete-a')
+  })
+
+  test('a row added to a list that does not swipe is held still too', async ({ page, scenario }) => {
+    await scenario('list-off')
+    await page.locator('c2-list').evaluate((list) => {
+      list.insertAdjacentHTML(
+        'beforeend',
+        '<c2-swipe-action><c2-list-item value="d">Date</c2-list-item><button slot="end" aria-keyshortcuts="Delete">Delete</button></c2-swipe-action>',
+      )
+    })
+    await expect(page.locator('c2-swipe-action').last().locator('button')).toHaveJSProperty('inert', false)
+    await expect
+      .poll(() =>
+        page
+          .locator('c2-swipe-action')
+          .last()
+          .evaluate((row) => row.shadowRoot!.querySelector('.end')!.hasAttribute('inert')),
+      )
+      .toBe(true)
+  })
+})

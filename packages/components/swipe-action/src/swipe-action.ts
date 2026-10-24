@@ -5,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
 import styles from './swipe-action.scss?inline'
 
 /** Which side's actions are revealed: `start` (swiped toward the end edge), `end` (swiped toward the start edge), or none. */
@@ -76,7 +77,9 @@ const FULL_SWIPE_RATIO = 0.6
  * opens its side. Give an action `aria-keyshortcuts` (`Delete`, `E`, `Shift+Delete`) and that key runs it while focus
  * is on the row's content; a row with shortcuts takes its closed actions out of the Tab order, so a list of rows (each
  * wrapping a `c2-list-item` in a `c2-list`) stays one Tab stop with arrow keys between rows, as in `c2-reorder-list`.
- * Name the shortcuts somewhere a screen reader reads them, such as the row's description.
+ * Name the shortcuts somewhere a screen reader reads them, such as the row's description. A `c2-list` lets its rows
+ * swipe only with its `swipeable` attribute: without it a row inside the list stays still, and its actions are hidden
+ * and inert.
  *
  * With `full-swipe`, dragging past 60% of the row's width arms the outermost action of that side (the first `start`
  * action, the last `end` action), which grows to fill the row; releasing there fires a cancelable `full-swipe` event
@@ -136,6 +139,17 @@ export class SwipeAction extends LitElement {
   /** Whether an action declares `aria-keyshortcuts`: then the closed actions leave the Tab order. */
   @state() private hasShortcuts = false
 
+  /**
+   * What a container around the row (a `c2-list`) allows: `false` turns swiping off and hides the actions, `undefined`
+   * means there is no container and the row swipes on its own.
+   */
+  @state() private containerSwipeable: boolean | undefined = undefined
+
+  /** Whether the row is held still: `disabled`, or in a container that does not let its rows swipe. */
+  private get swipeOff(): boolean {
+    return this.disabled || this.containerSwipeable === false
+  }
+
   @query('.start') private startBox?: HTMLElement
   @query('.end') private endBox?: HTMLElement
   @query('.content') private contentBox?: HTMLElement
@@ -171,12 +185,23 @@ export class SwipeAction extends LitElement {
     this.addEventListener('keydown', this.handleKeydown)
     this.addEventListener('focusin', this.handleFocusIn)
     this.addEventListener('focusout', this.handleFocusOut)
+    this.addEventListener(SWIPE_CONTAINER_EVENT, this.handleContainerSetting)
+    // A container that upgraded before this row answers now; one that upgrades later pushes its setting instead.
+    this.dispatchEvent(
+      new CustomEvent<SwipeRequestEventDetail>(SWIPE_REQUEST_EVENT, {
+        bubbles: true,
+        composed: true,
+        detail: { respond: (swipeable) => (this.containerSwipeable = swipeable) },
+      }),
+    )
   }
 
   override disconnectedCallback(): void {
     this.removeEventListener('keydown', this.handleKeydown)
     this.removeEventListener('focusin', this.handleFocusIn)
     this.removeEventListener('focusout', this.handleFocusOut)
+    this.removeEventListener(SWIPE_CONTAINER_EVENT, this.handleContainerSetting)
+    this.containerSwipeable = undefined
     document.removeEventListener('pointerdown', this.handleOutsidePointerDown, true)
     this.resizeObserver?.disconnect()
     this.resizeObserver = undefined
@@ -196,8 +221,13 @@ export class SwipeAction extends LitElement {
     }
   }
 
+  private handleContainerSetting = (event: Event): void => {
+    event.stopPropagation()
+    this.containerSwipeable = (event as CustomEvent<SwipeContainerEventDetail>).detail.swipeable
+  }
+
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('disabled') && this.disabled) {
+    if ((changed.has('disabled') || (changed as PropertyValues).has('containerSwipeable')) && this.swipeOff) {
       this.open = ''
       this.dragOffset = null
       this.gesture = undefined
@@ -270,7 +300,7 @@ export class SwipeAction extends LitElement {
   }
 
   private handlePointerDown = (event: PointerEvent): void => {
-    if (this.disabled || (event.pointerType === 'mouse' && event.button !== 0)) return
+    if (this.swipeOff || (event.pointerType === 'mouse' && event.button !== 0)) return
     this.measure()
     this.gesture = {
       pointerId: event.pointerId,
@@ -384,7 +414,7 @@ export class SwipeAction extends LitElement {
       this.setOpen('')
       return
     }
-    if (this.disabled || !this.isFromContent(event)) return
+    if (this.swipeOff || !this.isFromContent(event)) return
     const action = this.shortcutActions().find((element) => matchesShortcut(event, element.getAttribute('aria-keyshortcuts') ?? ''))
     if (!action) return
     // The key is the action's: a list around the row must not also read it (as typeahead, say).
@@ -413,7 +443,7 @@ export class SwipeAction extends LitElement {
 
   /** Focus moving onto an action shows its side, so the hidden actions are usable from the keyboard. */
   private handleFocusIn = (event: FocusEvent): void => {
-    if (this.disabled) return
+    if (this.swipeOff) return
     let child = event.target as Element | null
     while (child && child.parentElement !== this) child = child.parentElement
     const slot = child?.getAttribute('slot')
@@ -447,7 +477,7 @@ export class SwipeAction extends LitElement {
         <div
           class=${classMap({ actions: true, start: true, revealed: revealed === 'start' })}
           part="start"
-          ?inert=${this.hasShortcuts && revealed !== 'start' && this.open !== 'start'}
+          ?inert=${this.containerSwipeable === false || (this.hasShortcuts && revealed !== 'start' && this.open !== 'start')}
           style=${styleMap({ width: stretch('start') })}
           @click=${this.handleActionClick}
         >
@@ -456,7 +486,7 @@ export class SwipeAction extends LitElement {
         <div
           class=${classMap({ actions: true, end: true, revealed: revealed === 'end' })}
           part="end"
-          ?inert=${this.hasShortcuts && revealed !== 'end' && this.open !== 'end'}
+          ?inert=${this.containerSwipeable === false || (this.hasShortcuts && revealed !== 'end' && this.open !== 'end')}
           style=${styleMap({ width: stretch('end') })}
           @click=${this.handleActionClick}
         >

@@ -7,6 +7,7 @@ import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem, isFromInteractiveContent } from '@c2n/list-item'
 import { provide } from '@lit/context'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
 
 export interface SelectionChangeEventDetail {
   value: string[]
@@ -52,6 +53,9 @@ function rowItem(element: Element, depth = 0): ListItem | undefined {
  *
  * Besides rows, the default slot accepts `<hr>` dividers and `<h1>`–`<h6>` group headings; both are styled by the
  * `__divider` and `__heading` tokens and skipped by selection and keyboard.
+ *
+ * Swipe actions: wrap a row in a `c2-swipe-action` and set `swipeable` to let it slide sideways to reveal its actions.
+ * Swiping is off by default: without `swipeable`, a wrapped row stays still and its actions are hidden and inert.
  *
  * The list never writes classes or attributes on its host or its rows. A list with no top (bottom) padding matches
  * `c2-list:state(padding-top-0)` (`:state(padding-bottom-0)`) and hands its corner radius to the first (last) row; a
@@ -128,6 +132,12 @@ export class List extends LitElement {
   /** Keep at least one row selected: clicking the only selected row does nothing. */
   @property({ type: Boolean }) required: boolean = false
 
+  /**
+   * Lets rows wrapped in a `c2-swipe-action` swipe to reveal their actions, and run them by their shortcut keys. Off by
+   * default: a wrapped row then stays still, and its actions are hidden and out of the Tab order.
+   */
+  @property({ type: Boolean }) swipeable: boolean = false
+
   @query('slot')
   private listItemSlot!: HTMLSlotElement
 
@@ -155,6 +165,35 @@ export class List extends LitElement {
       }
     }
     this.syncRows()
+    this.pushSwipeable()
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.addEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
+    this.addEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+  }
+
+  override disconnectedCallback(): void {
+    this.removeEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
+    this.removeEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+    super.disconnectedCallback()
+  }
+
+  /** A swipe row inside the list connected after the list and asks whether it may swipe. */
+  private handleSwipeRequest = (event: Event): void => {
+    event.stopPropagation()
+    ;(event as CustomEvent<SwipeRequestEventDetail>).detail.respond(this.swipeable)
+  }
+
+  /** A row that is not wrapped lets the setting bubble back up to the list: it ends here. */
+  private stopOwnSwipeEvent = (event: Event): void => event.stopPropagation()
+
+  /** Tells the swipe row around each `c2-list-item` whether it may swipe; the event bubbles from the item to its row. */
+  private pushSwipeable(): void {
+    for (const item of this.items) {
+      item.dispatchEvent(new CustomEvent<SwipeContainerEventDetail>(SWIPE_CONTAINER_EVENT, { bubbles: true, detail: { swipeable: this.swipeable } }))
+    }
   }
 
   /**
@@ -300,6 +339,7 @@ export class List extends LitElement {
     if (changedProperties.has('value') || changedProperties.has('disabled')) {
       this.syncRows()
     }
+    if (changedProperties.has('swipeable')) this.pushSwipeable()
     this.internals.role = 'listbox'
     this.internals.ariaMultiSelectable = String(this.multiple)
     this.internals.ariaDisabled = this.disabled ? 'true' : null

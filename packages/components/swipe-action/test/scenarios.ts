@@ -20,9 +20,10 @@ main.innerHTML = `
   <output id="log"></output>
 `
 
-if (scenario === 'list') {
+if (scenario === 'list' || scenario === 'list-off') {
   await Promise.all([import('@c2n/list'), import('@c2n/list-item')])
-  // Rows of a c2-list, formatted with whitespace, each with keyboard shortcuts for its actions.
+  // Rows of a c2-list, formatted with whitespace, each with keyboard shortcuts for its actions. `list-off` leaves out
+  // `swipeable`, which is how a list keeps its rows still.
   const row = (value: string, label: string) => `
     <c2-swipe-action>
       <c2-list-item value="${value}">${label}</c2-list-item>
@@ -30,7 +31,7 @@ if (scenario === 'list') {
       <button slot="end" id="delete-${value}" aria-keyshortcuts="Delete Backspace">Delete</button>
     </c2-swipe-action>`
   main.innerHTML = `
-    <c2-list aria-label="Inbox">${row('a', 'Apple')}${row('b', 'Banana')}${row('c', 'Cherry')}</c2-list>
+    <c2-list aria-label="Inbox" ${scenario === 'list' ? 'swipeable' : ''}>${row('a', 'Apple')}${row('b', 'Banana')}${row('c', 'Cherry')}</c2-list>
     <button id="outside">Outside</button>
     <output id="log"></output>`
 }
