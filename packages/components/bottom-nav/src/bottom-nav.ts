@@ -48,6 +48,7 @@ export interface BottomNav {
 const SCROLL_TRAVEL = 24
 
 const ITEM_TAG = 'c2-bottom-nav-item'
+const BAR_TAG = 'c2-bottom-nav'
 
 /**
  * The mobile tab bar: three to five `c2-bottom-nav-item` destinations along the bottom of the screen, each an icon
@@ -99,7 +100,10 @@ const ITEM_TAG = 'c2-bottom-nav-item'
 export class BottomNav extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** Value of the current item. Empty: the item marked `current` decides, and `value` reads it back. */
+  /**
+   * Value of the current item. Left empty, the item marked `current` when the bar first renders provides it, and so does
+   * an item that gets the `current` attribute later. Set it to `''` for a page that is none of the items.
+   */
   @property() value = ''
 
   /** Which labels show: all (`labeled`), all up to three items and the current one from four (`auto`), the current one (`selected`) or none (`unlabeled`). */
@@ -108,7 +112,10 @@ export class BottomNav extends LitElement {
   /** Slides the bar away while the page scrolls down and brings it back on scroll up, at the top or on focus. */
   @property({ type: Boolean, attribute: 'hide-on-scroll' }) hideOnScroll = false
 
-  /** Id of the element whose scrolling `hide-on-scroll` follows, looked up in the bar's document or shadow root. Empty: the window. */
+  /**
+   * Id of the element whose scrolling `hide-on-scroll` follows, looked up in the bar's document or shadow root when the
+   * attribute is set or the bar connects, so that element must exist by then. Empty: the window.
+   */
   @property({ attribute: 'scroll-target' }) scrollTarget = ''
 
   @state() private away = false
@@ -116,6 +123,9 @@ export class BottomNav extends LitElement {
   private readonly internals = isServer ? undefined : this.attachInternals()
 
   private readonly msg = new LocalizeController(this, bottomNavMessages)
+
+  /** Follows items added inside wrappers, which no `slotchange` reports, and `current` attributes the app moves. */
+  private observer?: MutationObserver
 
   private scroller: Window | HTMLElement | null = null
   private lastScrollTop = 0
@@ -128,7 +138,8 @@ export class BottomNav extends LitElement {
 
   /** The bar's `c2-bottom-nav-item` elements, in order. */
   get items(): BottomNavItem[] {
-    return BottomNav.collectItems(this)
+    // The server DOM shim has no `children`; items render their own `current` there.
+    return isServer ? [] : BottomNav.collectItems(this)
   }
 
   /**
@@ -157,18 +168,28 @@ export class BottomNav extends LitElement {
     super.connectedCallback()
     if (this.internals) this.internals.role = 'navigation'
     if (this.hasUpdated) this.listenToScroll()
+    if (!isServer) {
+      this.observer ??= new MutationObserver(this.handleMutations)
+      this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['current'] })
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.stopListeningToScroll()
+    this.observer?.disconnect()
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
     super.willUpdate(changed)
     // Recomputed on every update, which the localize controller requests when the language changes.
     if (this.internals) this.internals.ariaLabel = this.msg.t('navigationLabel')
-    if (changed.has('value')) this.adoptMarkedValue()
+    // Only the first render adopts an item's `current`: afterwards that property is the bar's own output, and reading it
+    // back would make `value = ''` impossible.
+    if (!this.hasUpdated && !this.value) {
+      const marked = this.items.find((item) => item.current)
+      if (marked) this.value = marked.effectiveValue
+    }
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -177,23 +198,8 @@ export class BottomNav extends LitElement {
     if (changed.has('hideOnScroll') || changed.has('scrollTarget')) this.listenToScroll()
   }
 
-  /** Without a `value`, the item the author marked `current` provides it. */
-  private adoptMarkedValue() {
-    if (this.value) return
-    const marked = this.items.find((item) => item.current)
-    if (marked) this.value = marked.effectiveValue
-  }
-
   private syncItems() {
     const items = this.items
-    // Items load in their own module (an island each, on the docs site) and may not be upgraded yet.
-    if (!customElements.get(ITEM_TAG) && items.length) {
-      void customElements.whenDefined(ITEM_TAG).then(() => {
-        this.adoptMarkedValue()
-        this.syncItems()
-      })
-      return
-    }
     for (const item of items) {
       const current = !!this.value && item.effectiveValue === this.value
       const labelHidden = this.labelHiddenFor(current, items.length)
@@ -223,17 +229,23 @@ export class BottomNav extends LitElement {
     else Object.assign(item, values)
   }
 
-  private handleSlotChange() {
-    this.adoptMarkedValue()
-    this.syncItems()
+  private readonly handleMutations = (records: MutationRecord[]) => {
+    // The bar never writes the `current` attribute, so one appearing is the app choosing the current item.
+    const marked = records.find(
+      (record) =>
+        record.type === 'attributes' && record.target instanceof Element && record.target.localName === ITEM_TAG && record.target.hasAttribute('current'),
+    )?.target as BottomNavItem | undefined
+    if (marked && marked.effectiveValue !== this.value) this.value = marked.effectiveValue
+    else this.syncItems()
   }
 
   private readonly handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented) return
     const item = event.composedPath().find((node): node is BottomNavItem => node instanceof Element && node.localName === ITEM_TAG)
-    if (!item || !this.items.includes(item)) return
-    // A modified click on a link opens it elsewhere and leaves this page where it is.
+    if (!item || item.closest(BAR_TAG) !== this) return
+    // A modified click, or a link to another browsing context, opens elsewhere and leaves this page where it is.
     if (item.href && (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return
+    if (item.href && item.target && item.target !== '_self') return
     const value = item.effectiveValue
     const previous = this.value
     if (value === previous) {
@@ -300,7 +312,7 @@ export class BottomNav extends LitElement {
   }
 
   override render() {
-    return html`<div part="bar" class="bar ${this.away ? 'is-away' : ''}"><slot @slotchange=${this.handleSlotChange}></slot></div>`
+    return html`<div part="bar" class="bar ${this.away ? 'is-away' : ''}"><slot></slot></div>`
   }
 }
 

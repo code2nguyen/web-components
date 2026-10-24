@@ -112,7 +112,16 @@ export class BottomNavItem extends LitElement {
 
   /** The value the bar compares with its own: `value`, else `href`, else the label. */
   get effectiveValue(): string {
-    return this.value || this.href || this.label || this.textContent?.trim() || ''
+    return this.value || this.href || this.label || this.labelText
+  }
+
+  /** Text of the default slot only: an icon's text is not part of the item's identity. */
+  private get labelText(): string {
+    return Array.from(this.childNodes)
+      .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
+      .map((node) => node.textContent ?? '')
+      .join('')
+      .trim()
   }
 
   private get countText(): string {

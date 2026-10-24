@@ -200,3 +200,44 @@ test('finds items inside wrapper elements, such as the islands Astro wraps them 
   const widths = await page.locator('c2-bottom-nav-item').evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().width)))
   expect(new Set(widths).size).toBe(1)
 })
+
+test('value can be cleared for a page that is none of the items', async ({ page, renderScenario }) => {
+  await renderScenario(links)
+  await props(page.locator('c2-bottom-nav'), { value: '' })
+  await expect(page.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
+  expect(await page.locator('c2-bottom-nav').evaluate((element) => (element as HTMLElement & { value: string }).value)).toBe('')
+})
+
+test('an item given the current attribute later becomes the current item', async ({ page, renderScenario }) => {
+  await renderScenario(links)
+  await page.locator('c2-bottom-nav-item[value="cards"]').evaluate((item) => item.setAttribute('current', ''))
+  await expect(page.getByRole('link', { name: 'Cards' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
+  expect(await page.locator('c2-bottom-nav').evaluate((element) => (element as HTMLElement & { value: string }).value)).toBe('cards')
+})
+
+test('an item added inside a wrapper is synced', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-bottom-nav value="new" label-visibility="auto"><span id="wrapper" style="display: contents">
+  <c2-bottom-nav-item value="a">A</c2-bottom-nav-item><c2-bottom-nav-item value="b">B</c2-bottom-nav-item><c2-bottom-nav-item value="c">C</c2-bottom-nav-item>
+</span></c2-bottom-nav>`)
+  expect(await labelShown(page)).toEqual([true, true, true])
+  await page.locator('#wrapper').evaluate((wrapper) => wrapper.insertAdjacentHTML('beforeend', '<c2-bottom-nav-item value="new">New</c2-bottom-nav-item>'))
+  await expect(page.getByRole('button', { name: 'New' })).toHaveAttribute('aria-current', 'page')
+  await expect.poll(() => labelShown(page)).toEqual([false, false, false, true])
+})
+
+test('a link that opens in another tab does not become current', async ({ page, renderScenario }) => {
+  await renderScenario(links.replace('href="#cards"', 'href="#cards" target="_blank"'))
+  const nav = page.locator('c2-bottom-nav')
+  await watch(nav, 'change')
+  const popup = page.waitForEvent('popup')
+  await page.getByRole('link', { name: 'Cards' }).click()
+  await (await popup).close()
+  expect(await events(page)).toEqual([])
+  await expect(page.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
+})
+
+test('without value, href or label an item is identified by its label text alone', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-bottom-nav><c2-bottom-nav-item><span slot="icon">★</span>Saved</c2-bottom-nav-item></c2-bottom-nav>`)
+  expect(await page.locator('c2-bottom-nav-item').evaluate((item) => (item as HTMLElement & { effectiveValue: string }).effectiveValue)).toBe('Saved')
+})
