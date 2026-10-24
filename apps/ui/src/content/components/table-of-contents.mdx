@@ -11,7 +11,7 @@ import { TableOfContents } from '@c2n/components/table-of-contents'
 
 `c2-table-of-contents` turns the headings of a long page into a navigation landmark. It reads the `h2` and `h3` elements of the page's `<main>` (or of the element named by `for`, with any `selector`), nests them by level, and keeps up with the reader: the section at the top of the scroll area becomes current, its link gets `aria-current="true"`, and an indicator slides to it along the rail. Activating a link scrolls to the section, moves focus to its heading so the next Tab continues there, and updates the URL fragment (`keep-url` leaves the URL alone, for an app that routes on it).
 
-A heading needs an `id` to be listed. `data-toc-label` gives it a shorter entry and `data-toc-ignore` leaves it out, and the list follows the page as headings are added, renamed or removed. When the sections are known in advance, hand them over as `items` (`[{ id, label, level }]`) instead: the list then renders on the server as well. This documentation site does exactly that for the **On this page** column on the right.
+A heading needs an `id` to be listed. `data-toc-label` gives it a shorter entry and `data-toc-ignore` leaves it out, and the list follows the page as headings are added, renamed or removed. When the sections are known in advance, hand them over as `items` (`[{ id, label, level }]`) instead: the list then renders on the server as well. This documentation site does that for the **On this page** column on the right, with plain links inside the tag as a fallback: the element's shadow root has no slot, so they show only until it upgrades (or when JavaScript is off).
 
 ## Import
 
@@ -100,10 +100,16 @@ At the very bottom of the page the last section is current, even when its headin
 
 ## Long lists
 
-The element is a plain block. Give it the sticky position and, for a long list, a maximum height with `overflow: auto` in your layout; it then scrolls itself to keep the current entry in view.
+Put the list in a sticky column of your layout and give that column, for a long list, a maximum height with `overflow: auto`. The element scrolls the nearest scrolling box around it to keep the current entry in view, never the box the content scrolls in.
+
+```html tag=CodeBlock
+<aside class="page-toc">
+  <c2-table-of-contents offset="80"></c2-table-of-contents>
+</aside>
+```
 
 ```css tag=CodeBlock
-c2-table-of-contents {
+.page-toc {
   position: sticky;
   top: 96px;
   max-height: calc(100vh - 120px);

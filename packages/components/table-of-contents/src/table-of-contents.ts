@@ -131,9 +131,13 @@ export class TableOfContents extends LitElement {
   private mutationObserver?: MutationObserver
   private resizeObserver?: ResizeObserver
   private observedRoot?: Element
+  /** What the MutationObserver watches: the headings of `observedRoot`, or the document for a `for` not there yet. */
+  private observing: 'headings' | 'for' | null = null
+  private mutationRoot?: Element
   private frame = 0
   private scanFrame = 0
   private scrollingTo: string | null = null
+  private lockScroller: HTMLElement | null = null
   private unlockTimer = 0
 
   /** `id` of the current section. */
@@ -163,6 +167,8 @@ export class TableOfContents extends LitElement {
     window.removeEventListener('resize', this.handleScroll)
     this.mutationObserver?.disconnect()
     this.mutationObserver = undefined
+    this.observing = null
+    this.mutationRoot = undefined
     this.observedRoot = undefined
     this.resizeObserver?.disconnect()
     cancelAnimationFrame(this.frame)
@@ -182,7 +188,7 @@ export class TableOfContents extends LitElement {
   }
 
   protected override willUpdate(changed: Map<PropertyKey, unknown>) {
-    if (this.hasUpdated && (changed.has('for') || changed.has('selector'))) this.scheduleScan()
+    if (this.hasUpdated && (changed.has('for') || changed.has('selector') || changed.has('items'))) this.scheduleScan()
     // The spy reads the page, not this element's render, so the current entry is settled before rendering.
     // Not before the first render, so a server-rendered list hydrates as it was rendered.
     if (this.hasUpdated && (changed.has('items') || changed.has('scanned') || changed.has('offset'))) this.spy()
@@ -236,7 +242,7 @@ export class TableOfContents extends LitElement {
     const target = this.resolveTarget(id)
     if (!target) return false
     this.setCurrent(id)
-    this.lock(id)
+    this.lock(id, scrollParent(target))
     scrollTarget(target, this.offset)
     if (options.focus !== false) focusTarget(target)
     return true
@@ -252,6 +258,8 @@ export class TableOfContents extends LitElement {
   }
 
   private readonly handleScroll = () => {
+    // While a link's scroll runs, each of its frames pushes the end of the lock back.
+    if (this.scrollingTo) this.armUnlock(SCROLL_IDLE)
     if (this.frame) return
     this.frame = requestAnimationFrame(() => {
       this.frame = 0
@@ -280,8 +288,13 @@ export class TableOfContents extends LitElement {
     targets.forEach((target, i) => {
       if (target && target.getBoundingClientRect().top <= line) index = i
     })
-    // At the very end the last sections may never reach the line: the one the reader scrolled to see is the last.
-    if (isAtEnd(scroller)) index = targets.length - 1
+    // At the very end the last sections may never reach the line: the one the reader scrolled to see is the last
+    // section on show, as long as it is in view (content may go on well past the listed sections).
+    let lastIndex = targets.length - 1
+    while (lastIndex > 0 && !targets[lastIndex]) lastIndex--
+    const last = targets[lastIndex]
+    const areaBottom = scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight
+    if (last && isAtEnd(scroller) && last.getBoundingClientRect().top < areaBottom) index = Math.max(index, lastIndex)
     this.setCurrent(entries[Math.max(index, 0)]?.id ?? null)
   }
 
@@ -293,20 +306,34 @@ export class TableOfContents extends LitElement {
   }
 
   /** Holds the clicked section current while the page scrolls to it, so the sections passed on the way do not flash. */
-  private lock(id: string) {
+  private lock(id: string, scroller: HTMLElement | null) {
     this.unlock()
     this.scrollingTo = id
+    this.lockScroller = scroller
     document.addEventListener('scrollend', this.handleScrollEnd, { capture: true })
-    // No scrollend fires when nothing had to scroll, or in an engine without the event.
-    this.unlockTimer = window.setTimeout(this.handleScrollEnd, 1000)
+    // No scrollend fires when nothing had to scroll, or in an engine without the event: the lock then ends once no
+    // scroll frame has come for a while.
+    this.armUnlock(SCROLL_START)
   }
 
-  // No spy here: a section near the end of the page may stop below the line, and the reader asked for that one. The
-  // next scroll of their own hands the list back to the spy.
-  private readonly handleScrollEnd = () => this.unlock()
+  private armUnlock(delay: number) {
+    clearTimeout(this.unlockTimer)
+    this.unlockTimer = window.setTimeout(() => this.unlock(), delay)
+  }
+
+  // Only the end of the scroll the link started counts, not a carousel or code block settling elsewhere. No spy here: a
+  // section near the end of the page may stop below the line, and the reader asked for that one. The next scroll of
+  // their own hands the list back to the spy.
+  private readonly handleScrollEnd = (event: Event) => {
+    const scroller = this.lockScroller
+    const target = event.target
+    if (scroller ? target !== scroller : target !== document && target !== document.scrollingElement && target !== window) return
+    this.unlock()
+  }
 
   private unlock() {
     this.scrollingTo = null
+    this.lockScroller = null
     clearTimeout(this.unlockTimer)
     document.removeEventListener('scrollend', this.handleScrollEnd, { capture: true })
   }
@@ -324,12 +351,15 @@ export class TableOfContents extends LitElement {
     indicator.style.transform = `translateY(${top}px)`
     indicator.style.blockSize = `${link.offsetHeight}px`
     progress.style.blockSize = `${top + link.offsetHeight}px`
-    // A list taller than its box keeps the current entry in view.
-    if (this.scrollHeight > this.clientHeight) {
-      const box = this.getBoundingClientRect()
+    // A list taller than its box keeps the current entry in view, whether the element or a wrapper of it scrolls; never
+    // the scroller of the content itself, which is the reader's.
+    const box = scrollParent(link)
+    const content = this.observedRoot
+    if (box && !(content && box.contains(content))) {
+      const area = box.getBoundingClientRect()
       const rect = link.getBoundingClientRect()
-      if (rect.top < box.top) this.scrollTop -= box.top - rect.top
-      else if (rect.bottom > box.bottom) this.scrollTop += rect.bottom - box.bottom
+      if (rect.top < area.top) box.scrollTop -= area.top - rect.top
+      else if (rect.bottom > area.bottom) box.scrollTop += rect.bottom - area.bottom
     }
   }
 
@@ -344,20 +374,35 @@ export class TableOfContents extends LitElement {
   private scan() {
     const root = this.resolveRoot()
     if (root !== this.observedRoot) {
-      this.mutationObserver?.disconnect()
       if (this.observedRoot) this.resizeObserver?.unobserve(this.observedRoot)
       this.observedRoot = root ?? undefined
-      if (root) {
+      // Content that is shown, hidden or reflowed moves its headings without a scroll.
+      if (root) this.resizeObserver?.observe(root)
+    }
+    // Headings are only watched while they are read; a `for` element that is not on the page yet is waited for.
+    const observing = !root ? 'for' : Array.isArray(this.items) ? null : 'headings'
+    if (observing !== this.observing || root !== this.mutationRoot) {
+      this.mutationObserver?.disconnect()
+      this.mutationObserver = undefined
+      this.observing = observing
+      this.mutationRoot = root ?? undefined
+      if (observing === 'for') {
+        this.mutationObserver = new MutationObserver(() => this.scheduleScan())
+        this.mutationObserver.observe(this.getRootNode() as Document | ShadowRoot, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['id'],
+        })
+      } else if (observing === 'headings' && root) {
         this.mutationObserver = new MutationObserver(() => this.scheduleScan())
         this.mutationObserver.observe(root, {
           childList: true,
           subtree: true,
           characterData: true,
           attributes: true,
-          attributeFilter: ['id', 'data-toc-label', 'data-toc-ignore'],
+          attributeFilter: ['id', 'aria-level', 'data-toc-label', 'data-toc-ignore'],
         })
-        // Content that is shown, hidden or reflowed moves its headings without a scroll.
-        this.resizeObserver?.observe(root)
       }
     }
     if (Array.isArray(this.items) || !root) {
@@ -394,6 +439,10 @@ export class TableOfContents extends LitElement {
     return root.getElementById?.(id) ?? scope?.getElementById?.(id) ?? document.getElementById(id)
   }
 }
+
+/** How long a link's scroll may take to start, and how long a pause in its frames means it has ended (ms). */
+const SCROLL_START = 300
+const SCROLL_IDLE = 200
 
 function buildTree(items: TableOfContentsItem[]): TocNode[] {
   const levels = items.map((item) => Math.max(1, Math.floor(Number(item.level) || 1)))

@@ -190,6 +190,76 @@ test('content shown after the list settles is followed from its top', async ({ p
   await expect(current(page)).toHaveText('Usage')
 })
 
+test('removing items goes back to reading the headings', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table-of-contents items='[{"id":"faq","label":"Questions"}]'></c2-table-of-contents>${article}`)
+  await expect(toc(page).getByRole('link')).toHaveText(['Questions'])
+  await toc(page).evaluate((el) => el.removeAttribute('items'))
+  await expect(toc(page).getByRole('link')).toHaveText(['Install', 'Usage', 'With forms', 'Tables', 'Theming', 'FAQ'])
+})
+
+test('waits for the element named by for when it is added later', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-table-of-contents for="late"></c2-table-of-contents><article id="holder"></article>')
+  await expect(page.getByRole('navigation')).toHaveCount(0)
+  await page.locator('#holder').evaluate((holder) => (holder.innerHTML = '<div id="late"><h2 id="arrived">Arrived</h2></div>'))
+  await expect(toc(page).getByRole('link')).toHaveText(['Arrived'])
+})
+
+test('follows a heading level change through aria-level', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-table-of-contents selector="[role=heading]"></c2-table-of-contents>
+    <article><div role="heading" aria-level="2" id="a">A</div><div role="heading" aria-level="2" id="b">B</div></article>
+  `)
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ has: link(page, 'A') })
+      .getByRole('list'),
+  ).toHaveCount(0)
+  await page.locator('#b').evaluate((heading) => heading.setAttribute('aria-level', '3'))
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ has: link(page, 'A') })
+      .getByRole('list')
+      .getByRole('link'),
+  ).toHaveText(['B'])
+})
+
+test('at the end of the page a hidden last section is not current', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table-of-contents></c2-table-of-contents>${article}`)
+  await page.locator('#faq').evaluate((heading) => (heading.parentElement!.hidden = true))
+  await page.mouse.wheel(0, 100000)
+  await expect(current(page)).toHaveText('Theming')
+})
+
+test('a scroll ending elsewhere does not end the lock of a link', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table-of-contents></c2-table-of-contents>${article}`)
+  await watch(toc(page), 'active-change')
+  await link(page, 'Theming').click()
+  // Another scroller settling mid-jump must not hand the list back to the spy.
+  await toc(page).evaluate((el) => el.dispatchEvent(new Event('scrollend', { bubbles: true })))
+  await expect.poll(() => page.locator('#theming').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBe(0)
+  const events = JSON.parse((await toc(page).getAttribute('data-events')) ?? '[]') as { id: string }[]
+  expect(events.map((event) => event.id)).toEqual(['theming'])
+})
+
+test('keeps the current entry in view inside a scrolling wrapper', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div id="wrap" style="position: sticky; top: 0; align-self: start; grid-column: 2; grid-row: 1; max-height: 60px; overflow: auto"><c2-table-of-contents></c2-table-of-contents></div>${article}`,
+  )
+  await page.locator('#faq').evaluate((heading) => heading.scrollIntoView({ block: 'start' }))
+  await expect(current(page)).toHaveText('FAQ')
+  const wrap = page.locator('#wrap')
+  await expect.poll(() => wrap.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
+  await expect
+    .poll(async () => {
+      const box = (await wrap.boundingBox())!
+      const entry = (await link(page, 'FAQ').boundingBox())!
+      return entry.y >= box.y - 1 && entry.y + entry.height <= box.y + box.height + 1
+    })
+    .toBe(true)
+})
+
 test('renders nothing without sections', async ({ page, renderScenario }) => {
   await renderScenario('<c2-table-of-contents></c2-table-of-contents><article><p>No headings.</p></article>')
   await expect(page.getByRole('navigation')).toHaveCount(0)

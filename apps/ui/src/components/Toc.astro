@@ -1,6 +1,6 @@
 ---
 import type { MarkdownHeading } from 'astro'
-import { rawElement } from '../utils/raw-element'
+import { escapeHtml, rawElement } from '../utils/raw-element'
 
 interface Props {
   headings: MarkdownHeading[]
@@ -13,8 +13,13 @@ const items = headings
 // Raw markup rather than JSX: `@astrojs/lit` would server-render the tag with `items` and `offset` set as properties
 // behind `defer-hydration`, which nothing removes outside an island (see utils/raw-element.ts). chrome-modules.ts
 // upgrades the plain tag. The headings are known at build time, so they are handed over as `items` rather than read
-// from the page; `offset` is the sticky header plus the headings' scroll-margin-top.
-const tocHtml = items.length > 0 ? rawElement('c2-table-of-contents', { class: 'toc', items, offset: 80 }) : ''
+// from the page. The plain links inside are what shows before the upgrade (and without JavaScript); the element's
+// shadow root has no slot, so they disappear once it renders.
+// `offset` is --site-header-height (56px, tokens.scss) plus the headings' scroll-margin-top gap (24px, global.scss).
+const fallback = `<ul class="toc__fallback">${items
+  .map((item) => `<li class="toc__level-${item.level}"><a href="#${escapeHtml(item.id)}">${escapeHtml(item.label)}</a></li>`)
+  .join('')}</ul>`
+const tocHtml = items.length > 0 ? rawElement('c2-table-of-contents', { class: 'toc', items, offset: 80 }, fallback) : ''
 ---
 
 <div class="toc-wrapper"><Fragment set:html={tocHtml} /></div>
@@ -32,5 +37,29 @@ const tocHtml = items.length > 0 ? rawElement('c2-table-of-contents', { class: '
     --c2-table-of-contents__nested--font-size: 12.5px;
     --c2-table-of-contents__track--background-color: var(--site-color-outline-variant);
     --c2-table-of-contents__indicator--background-color: var(--site-color-primary);
+  }
+
+  // Before the upgrade: the same rail and spacing as the rendered list (title aside), so nothing jumps.
+  .toc-wrapper :global(c2-table-of-contents:not(:defined)) {
+    display: block;
+    padding-top: 26px;
+    font-size: 13px;
+  }
+  .toc-wrapper :global(.toc__fallback) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-left: 1px solid var(--site-color-outline-variant);
+
+    :global(a) {
+      display: block;
+      padding: 4px 12px;
+      color: var(--site-color-on-surface-variant);
+      line-height: 1.4;
+    }
+    :global(.toc__level-3 a) {
+      padding-left: 24px;
+      font-size: 12.5px;
+    }
   }
 </style>
