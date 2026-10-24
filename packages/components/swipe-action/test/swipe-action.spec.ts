@@ -3,10 +3,14 @@ import type { Page } from '@playwright/test'
 import type { SwipeAction } from '../src/swipe-action'
 import { test, expect } from './fixture'
 
-/** Drags the row's content horizontally by `dx` with a real mouse, in steps so the component sees a gesture. */
+/**
+ * Drags the row's content horizontally by `dx` with a real mouse, in steps so the component sees a gesture. It starts
+ * near the edge the drag moves away from, so a long drag stays inside the window: Firefox drops a synthetic `mouseup`
+ * outside it, and the drag would never end.
+ */
 async function drag(page: Page, dx: number, { steps = 12, dy = 0 } = {}) {
   const box = (await page.locator('c2-swipe-action').boundingBox())!
-  const x = box.x + box.width / 2
+  const x = dx < 0 ? box.x + box.width - 8 : box.x + 8
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
