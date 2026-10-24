@@ -196,6 +196,8 @@ export class AppShell extends LitElement {
   /** The open state the user last chose for `side` and `rail`, restored when the width comes back to that mode. */
   private preferred: Record<'side' | 'rail', boolean> = { side: true, rail: false }
   private authorOpened = false
+  /** The modes whose open state came from `storage-key`. */
+  private restored = new Set<'side' | 'rail'>()
   private lastMode: AppShellMode | undefined
   private sizeObserver?: ResizeObserver
   private headerObserver?: ResizeObserver
@@ -256,6 +258,8 @@ export class AppShell extends LitElement {
       requestAnimationFrame(() => this.handleWidth(width))
     })
     this.sizeObserver.observe(this)
+    // Reattached after a move: the header observer was disconnected with the shell.
+    if (this.hasUpdated) this.observeHeader()
   }
 
   override disconnectedCallback(): void {
@@ -269,8 +273,12 @@ export class AppShell extends LitElement {
     this.offsetSheet = new CSSStyleSheet()
     const root = this.renderRoot as ShadowRoot
     root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.offsetSheet]
+    this.observeHeader()
+  }
+
+  private observeHeader() {
     // Read in the next frame: changing the offset re-renders the shell, which would resize the header in the same loop.
-    this.headerObserver = new ResizeObserver(() => requestAnimationFrame(() => (this.headerHeight = this.headerElement.getBoundingClientRect().height)))
+    this.headerObserver ??= new ResizeObserver(() => requestAnimationFrame(() => (this.headerHeight = this.headerElement.getBoundingClientRect().height)))
     this.headerObserver.observe(this.headerElement)
   }
 
@@ -298,7 +306,8 @@ export class AppShell extends LitElement {
     const mode = this.mode
     if (first) {
       // The author's `navigation-opened` describes the layout they designed for; a drawer never starts open.
-      if (mode !== 'over' && this.authorOpened) this.preferred[mode] = true
+      // A choice the user saved under `storage-key` wins over the author's default.
+      if (mode !== 'over' && this.authorOpened && !this.restored.has(mode)) this.preferred[mode] = true
       this.navigationOpened = mode === 'over' ? false : this.preferred[mode]
       if (this.breakpoint !== 'desktop') this.asideOpened = false
       this.lastMode = mode
@@ -356,8 +365,12 @@ export class AppShell extends LitElement {
     if (!this.storageKey || isServer) return
     try {
       const saved = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as Partial<Record<'side' | 'rail', unknown>> | null
-      if (saved && typeof saved.side === 'boolean') this.preferred.side = saved.side
-      if (saved && typeof saved.rail === 'boolean') this.preferred.rail = saved.rail
+      for (const mode of ['side', 'rail'] as const) {
+        const value = saved?.[mode]
+        if (typeof value !== 'boolean') continue
+        this.preferred[mode] = value
+        this.restored.add(mode)
+      }
     } catch {
       // Storage blocked or a value written by something else: keep the defaults.
     }
@@ -416,7 +429,17 @@ export class AppShell extends LitElement {
     if (changed.has('navigationOpened') && this.mode !== 'over' && this.measuredBreakpoint !== undefined) {
       this.preferred[this.mode as 'side' | 'rail'] = this.navigationOpened
     }
-    this.shellContext = this.createContext()
+    // A new object only when a shared field changed: every toggle re-renders on a new context.
+    const next = this.createContext()
+    const current = this.shellContext
+    if (
+      next.mode !== current.mode ||
+      next.breakpoint !== current.breakpoint ||
+      next.navigationOpened !== current.navigationOpened ||
+      next.asideOpened !== current.asideOpened
+    ) {
+      this.shellContext = next
+    }
   }
 
   protected override updated(changed: PropertyValues): void {

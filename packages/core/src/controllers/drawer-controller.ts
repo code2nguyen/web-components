@@ -13,6 +13,19 @@ if (!isServer) {
   document.addEventListener('pointerdown', () => (keyboardModality = false), true)
 }
 
+// How many open overlays hold the page's scroll lock: `smartFixedPosition` is global, so the first lock takes it and
+// the last unlock releases it (a shell can have its drawer and its aside sheet open at the same time).
+let scrollLocks = 0
+
+/** Whether `node` is `host` or inside it, through any shadow roots in between. */
+function isWithin(node: Node | null, host: Element): boolean {
+  while (node) {
+    if (node === host) return true
+    node = node.parentNode ?? (node instanceof ShadowRoot ? node.host : null)
+  }
+  return false
+}
+
 /** The focused element, looked up through shadow roots: `document.activeElement` stops at the outermost host. */
 function deepActiveElement(): Element | null {
   let active = document.activeElement
@@ -71,8 +84,9 @@ export class DrawerController implements ReactiveController {
       this.focusPanel()
     } else {
       this.lockScroll(false)
-      const focused = document.activeElement
-      if (focused && this.previouslyFocused instanceof HTMLElement && (focused === this.host || this.host.contains(focused))) {
+      // Only while focus is still inside the host: a click elsewhere that closed the overlay keeps its own focus.
+      const focused = deepActiveElement()
+      if (this.previouslyFocused instanceof HTMLElement && (focused === null || focused === document.body || isWithin(focused, this.host))) {
         this.previouslyFocused.focus()
       }
       this.previouslyFocused = null
@@ -92,7 +106,8 @@ export class DrawerController implements ReactiveController {
     // Only lock the page when the overlay really covers the viewport (not when it is kept inside a positioned parent).
     if (lock && (isServer || !panel || getComputedStyle(panel).position !== 'fixed')) return
     this.scrollLocked = lock
-    smartFixedPosition(lock)
+    scrollLocks += lock ? 1 : -1
+    if (lock ? scrollLocks === 1 : scrollLocks === 0) smartFixedPosition(lock)
   }
 
   private focusPanel() {

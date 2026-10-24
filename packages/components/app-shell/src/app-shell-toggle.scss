@@ -16,7 +16,8 @@
   flex: none;
 }
 
-:host([hidden]) {
+:host([hidden]),
+:host(:not(:state(in-shell))) {
   display: none;
 }
 
@@ -34,10 +35,6 @@
   color: css.cssVar(color);
   font: inherit;
   cursor: pointer;
-
-  &[hidden] {
-    display: none;
-  }
 
   &:hover {
     background-color: css.cssVar(hover--background-color);

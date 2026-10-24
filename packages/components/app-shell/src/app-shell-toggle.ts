@@ -1,5 +1,6 @@
-import { LitElement, html, svg, unsafeCSS } from 'lit'
-import { consume } from '@lit/context'
+import { LitElement, html, isServer, svg, unsafeCSS } from 'lit'
+import { state } from 'lit/decorators.js'
+import { ContextConsumer } from '@lit/context'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -44,10 +45,42 @@ export class AppShellToggle extends LitElement {
   /** Accessible name. Empty: "Open navigation" / "Close navigation" (or "Show details" / "Close details") in the page language. */
   @property() label = ''
 
-  @consume({ context: appShellContext, subscribe: true })
-  private shell?: AppShellContext
-
+  private readonly consumer = new ContextConsumer(this, { context: appShellContext, subscribe: true })
+  private readonly internals = isServer ? undefined : this.attachInternals()
   private readonly msg = new LocalizeController(this, appShellMessages)
+
+  /**
+   * False for the first render, on the server and in the browser alike: a server renderer has no shell to ask, and
+   * hydration keeps the attributes the server wrote, so the first client render must match it.
+   */
+  @state() private hydrated = false
+
+  private get shell(): AppShellContext | undefined {
+    return this.hydrated ? this.consumer.value : undefined
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    // In static markup the toggle can upgrade before `c2-app-shell` is defined, when no shell answers its request;
+    // ask again once the shell exists.
+    if (!isServer && !this.consumer.value) {
+      customElements.whenDefined('c2-app-shell').then(() => {
+        if (!this.isConnected || this.consumer.value) return
+        this.consumer.hostDisconnected()
+        this.consumer.hostConnected()
+      })
+    }
+  }
+
+  protected override firstUpdated(): void {
+    this.hydrated = true
+  }
+
+  protected override updated(): void {
+    // Outside a shell there is nothing to toggle: the host hides itself through a custom state, not an attribute.
+    if (this.shell) this.internals?.states.add('in-shell')
+    else this.internals?.states.delete('in-shell')
+  }
 
   private get opened(): boolean {
     if (!this.shell) return false
@@ -74,7 +107,6 @@ export class AppShellToggle extends LitElement {
       class="c2-app-shell-toggle"
       part="button"
       type="button"
-      ?hidden=${!this.shell}
       aria-expanded=${this.opened ? 'true' : 'false'}
       aria-label=${this.label || this.defaultName}
       @click=${this.handleClick}

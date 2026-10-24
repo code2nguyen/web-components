@@ -226,3 +226,14 @@ test('accessible on desktop and with the drawer open', async ({ page, renderScen
   await expect(page.locator('c2-app-shell')).toHaveState('navigation-opened')
   await accessible(page)
 })
+
+test('a toggle that upgrades before the shell is defined still finds it', async ({ page }) => {
+  await page.goto('/packages/components/app-shell/test/late.html')
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.toggleReady)).toBe('true')
+  await expect(page.locator('c2-app-shell-toggle')).toBeHidden()
+  await page.evaluate(() => (window as unknown as { loadShell: () => Promise<unknown> }).loadShell())
+  const toggle = page.getByRole('button', { name: 'Close navigation' })
+  await expect(toggle).toBeVisible()
+  await toggle.click()
+  await expect(page.locator('c2-app-shell')).not.toHaveState('navigation-opened')
+})

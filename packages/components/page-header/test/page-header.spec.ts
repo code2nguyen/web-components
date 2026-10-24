@@ -219,3 +219,25 @@ test('a server-rendered (declarative) shadow root shows every part, wraps instea
   ])
   expect(await host.evaluate((element) => element.getAttributeNames())).toEqual([])
 })
+
+test('the condensed bar follows a title that changes', async ({ page, renderScenario }) => {
+  await renderScenario(header('sticky', '', undefined, '<div class="tall"></div>'))
+  const host = page.locator('c2-page-header')
+  await page.mouse.wheel(0, 600)
+  await expect(host).toHaveState('condensed')
+  await page.locator('h1').evaluate((h1) => (h1.textContent = 'November supplier run'))
+  await expect(host.locator('[part="condensed"]')).toContainText('November supplier run')
+})
+
+test('inside a shell that scrolls the page, the bar sits under the shell header', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-app-shell>
+      <header slot="header" style="height: 56px; background: white">App</header>
+      ${header('sticky', '', undefined, '<div class="tall"></div>')}
+    </c2-app-shell>`)
+  const host = page.locator('c2-page-header')
+  await expect.poll(() => host.evaluate((element) => getComputedStyle(element).getPropertyValue('--c2-app-shell--sticky-offset').trim())).toBe('56px')
+  await page.mouse.wheel(0, 700)
+  await expect(host).toHaveState('condensed')
+  await expect.poll(async () => Math.round((await host.locator('[part="condensed"]').boundingBox())?.y ?? -1)).toBe(56)
+})

@@ -216,6 +216,9 @@ export class PageHeader extends LitElement {
   private foldScheduled = false
   private sheet?: CSSStyleSheet
   private observedTop = 0
+  private collapseOffset = -1
+  /** `aria-hidden` copies of the title badges for the condensed bar, rebuilt only when the badges change. */
+  @state() private suffixCopies: Node[] = []
 
   /** Whether the condensed bar is showing. */
   get condensed(): boolean {
@@ -247,10 +250,13 @@ export class PageHeader extends LitElement {
     this.mutationObserver ??= new MutationObserver((records) => {
       const own = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
       if (records.some(own)) this.collectChildren()
+      // Text inside the heading or the badges changed: the condensed bar repeats both.
+      else if (this.sticky) this.refreshCondensedCopy()
     })
     this.mutationObserver.observe(this, {
       childList: true,
       subtree: true,
+      characterData: true,
       attributes: true,
       attributeFilter: ['slot', 'primary', 'overflow-priority', 'hidden'],
     })
@@ -305,6 +311,7 @@ export class PageHeader extends LitElement {
     this.folded = this.folded.filter((action) => this.actions.includes(action))
     this.observeBreadcrumb()
     this.deriveParent()
+    if (this.sticky) this.refreshCondensedCopy()
     this.scheduleFold()
   }
 
@@ -326,8 +333,11 @@ export class PageHeader extends LitElement {
     this.breadcrumbObserver.observe(breadcrumb, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['href'] })
   }
 
+  /** The sticky offset as the stylesheet resolves it: the page header's own variable, else the enclosing shell's. */
   private get stickyTop(): number {
-    return Math.round(Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-page-header--sticky-top')) || 0)
+    const style = getComputedStyle(this)
+    const value = style.getPropertyValue('--c2-page-header--sticky-top').trim() || style.getPropertyValue('--c2-app-shell--sticky-offset').trim()
+    return Math.round(Number.parseFloat(value) || 0)
   }
 
   /**
@@ -352,6 +362,19 @@ export class PageHeader extends LitElement {
       { rootMargin: `${-top}px 0px 0px 0px` },
     )
     this.intersectionObserver.observe(this.titleLine)
+  }
+
+  private refreshCondensedCopy() {
+    const copies = (this.groups.get('title-suffix') ?? [])
+      .filter((node): node is Element => node instanceof Element)
+      .map((node) => {
+        const copy = node.cloneNode(true) as Element
+        // A copy must not repeat an id the page relies on.
+        for (const element of [copy, ...copy.querySelectorAll('[id]')]) element.removeAttribute('id')
+        return copy
+      })
+    this.suffixCopies = copies
+    this.requestUpdate()
   }
 
   private setCondensed(condensed: boolean) {
@@ -428,8 +451,10 @@ export class PageHeader extends LitElement {
     if (changed.has('sticky')) {
       this.intersectionObserver?.disconnect()
       this.intersectionObserver = undefined
-      if (this.sticky) this.observeTitle()
-      else this.setCondensed(false)
+      if (this.sticky) {
+        this.observeTitle()
+        this.refreshCondensedCopy()
+      } else this.setCondensed(false)
     }
     if (this.sticky && !this.isServerRendered) this.syncCondensedGeometry()
     const internals = this.internals
@@ -453,7 +478,10 @@ export class PageHeader extends LitElement {
   private syncCondensedGeometry() {
     const condensedHeight = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-page-header__condensed--height')) || 48
     const offset = Math.max(0, Math.round(this.offsetHeight - condensedHeight))
-    this.sheet?.replaceSync(`:host { --_collapse-offset: ${offset}px; }`)
+    if (offset !== this.collapseOffset) {
+      this.collapseOffset = offset
+      this.sheet?.replaceSync(`:host { --_collapse-offset: ${offset}px; }`)
+    }
     const primary = this.primaryElement
     if (!primary || !this.isCondensed) {
       if (this.primaryShift.x || this.primaryShift.y) this.primaryShift = { x: 0, y: 0, width: primary?.offsetWidth ?? 0 }
@@ -531,7 +559,7 @@ export class PageHeader extends LitElement {
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim()
-    const suffix = (this.groups.get('title-suffix') ?? []).filter((node): node is Element => node instanceof Element).map((node) => node.cloneNode(true))
+    const suffix = this.suffixCopies
     return html`<div class="condensed-bar" part="condensed" style=${styleMap({ '--_primary-width': `${this.primaryShift.width}px` })}>
       ${this.renderParentLink(true)}
       <span class="condensed-title" aria-hidden="true">${title}</span>
