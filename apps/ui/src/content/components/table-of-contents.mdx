@@ -1,0 +1,118 @@
+---
+title: 'Table Of Contents'
+description: 'An "On this page" navigation that lists the headings of a document, nests them by level and highlights the section being read.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TableOfContents } from '@c2n/components/table-of-contents'
+
+`c2-table-of-contents` turns the headings of a long page into a navigation landmark. It reads the `h2` and `h3` elements of the page's `<main>` (or of the element named by `for`, with any `selector`), nests them by level, and keeps up with the reader: the section at the top of the scroll area becomes current, its link gets `aria-current="true"`, and an indicator slides to it along the rail. Activating a link scrolls to the section, moves focus to its heading so the next Tab continues there, and updates the URL fragment (`keep-url` leaves the URL alone, for an app that routes on it).
+
+A heading needs an `id` to be listed. `data-toc-label` gives it a shorter entry and `data-toc-ignore` leaves it out, and the list follows the page as headings are added, renamed or removed. When the sections are known in advance, hand them over as `items` (`[{ id, label, level }]`) instead: the list then renders on the server as well. This documentation site does that for the **On this page** column on the right, with plain links inside the tag as a fallback: the element's shadow root has no slot, so they show only until it upgrades (or when JavaScript is off).
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/table-of-contents'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/table-of-contents
+<style>
+  .toc-demo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 24px;
+    width: 100%;
+    max-width: 620px;
+  }
+  .toc-demo article {
+    height: 280px;
+    overflow: auto;
+    padding: 0 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 14px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .toc-demo h4,
+  .toc-demo h5 {
+    margin: 20px 0 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .toc-demo h4 {
+    font-size: 16px;
+  }
+  .toc-demo h5 {
+    font-size: 14px;
+  }
+  .toc-demo p {
+    margin: 0 0 12px;
+    line-height: 1.6;
+  }
+  .toc-demo article > :last-child {
+    margin-bottom: 160px;
+  }
+</style>
+<div data-label="Scroll the article, or pick a section">
+  <div class="toc-demo">
+    <article id="toc-demo-article">
+      <h4 id="toc-demo-overview">Overview</h4>
+      <p>A table of contents gives a long page a map. Readers skim it to decide whether the page answers their question, then jump straight to the part that does.</p>
+      <h4 id="toc-demo-install">Installation</h4>
+      <p>Install the package once, then import each element where it is used. Nothing else has to be configured.</p>
+      <h5 id="toc-demo-npm">With npm</h5>
+      <p>Run the install command at the root of the project, next to its package.json.</p>
+      <h5 id="toc-demo-cdn">From a CDN</h5>
+      <p>A module script pointing at a CDN works as well for a prototype or a static page.</p>
+      <h4 id="toc-demo-theming">Theming</h4>
+      <p>Every colour, size and spacing value is a CSS custom property, so the look follows the application theme.</p>
+      <h4 id="toc-demo-faq">FAQ</h4>
+      <p>Headings without an id are not listed. Give each heading a stable id so links to it keep working.</p>
+    </article>
+    <c2-table-of-contents for="toc-demo-article" selector="h4, h5" keep-url></c2-table-of-contents>
+  </div>
+</div>
+<div data-label="Sections given as items">
+  <c2-table-of-contents
+    label="Contents"
+    keep-url
+    items='[{"id":"toc-demo-overview","label":"Overview","level":1},{"id":"toc-demo-install","label":"Installation","level":1},{"id":"toc-demo-npm","label":"With npm","level":2},{"id":"toc-demo-cdn","label":"From a CDN","level":2},{"id":"toc-demo-theming","label":"Theming","level":1}]'
+  ></c2-table-of-contents>
+</div>
+```
+
+The first row reads the `h4` and `h5` headings of the scrolling article next to it (`for="toc-demo-article" selector="h4, h5"`); levels are relative, so the outermost heading level found is the top of the list. On a page, place the list in a sticky column and leave `for` out: it reads the page's `<main>`.
+
+## Sticky headers
+
+A section becomes current when its heading reaches the top of the scroll area, and a link scrolls its heading to the same line. Under a sticky header, set `offset` to the header's height (plus any breathing room) so both happen below it:
+
+```html tag=CodeBlock
+<c2-table-of-contents offset="80"></c2-table-of-contents>
+```
+
+At the very bottom of the page the last section is current, even when its heading never reached that line. Sections passed on the way to a clicked link never flash current: the list holds the clicked one until the scroll ends.
+
+## Long lists
+
+Put the list in a sticky column of your layout and give that column, for a long list, a maximum height with `overflow: auto`. The element scrolls the nearest scrolling box around it to keep the current entry in view, never the box the content scrolls in.
+
+```html tag=CodeBlock
+<aside class="page-toc">
+  <c2-table-of-contents offset="80"></c2-table-of-contents>
+</aside>
+```
+
+```css tag=CodeBlock
+.page-toc {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+```

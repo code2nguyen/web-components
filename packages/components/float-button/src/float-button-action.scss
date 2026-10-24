@@ -1,0 +1,121 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-float-button-action,
+  $theme: (
+    button--size: 40px,
+    button--border-radius: 999px,
+    button--background-color: #ffffff,
+    button__hover--background-color: #f4f4f5,
+    button--color: #18181b,
+    button--border: 1px solid #e4e4e7,
+    button--box-shadow: 0 2px 6px rgba(24, 24, 27, 0.16),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    disabled--opacity: 0.38,
+    icon--size: 20px,
+
+    label--display: block,
+    label--background-color: #ffffff,
+    label--color: #18181b,
+    label--border: 1px solid #e4e4e7,
+    label--font-size: 12px,
+    label--font-weight: 500,
+    label--padding: 4px 10px,
+    label--border-radius: 6px,
+    label--box-shadow: 0 2px 6px rgba(24, 24, 27, 0.12),
+  )
+);
+
+// The owner sets the stagger while its dial opens; the action knows its own place in it.
+$delay: calc(var(--_c2-float-button-action-stagger, 0s) * var(--_c2-float-button-action-index, 0));
+
+:host {
+  // Set by the owning c2-float-button while its dial opens and closes; a lone action is simply shown.
+  opacity: var(--_c2-float-button-action-opacity, 1);
+  transform: var(--_c2-float-button-action-transform, none);
+  transition:
+    opacity var(--_c2-float-button-action-duration, 0s) ease-out $delay,
+    transform var(--_c2-float-button-action-duration, 0s) animation.$emphasized-deceleration-easing $delay;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  cursor: default;
+  pointer-events: none;
+}
+
+.button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  background-color: css.cssVar(button--background-color);
+  color: css.cssVar(button--color);
+  box-shadow: css.cssVar(button--box-shadow);
+  line-height: 0;
+  transition: animation.standard(background-color);
+}
+
+:host(:hover) .button {
+  background-color: css.cssVar(button__hover--background-color);
+}
+
+:host(:focus-visible) .button {
+  outline: css.cssVar(focus--outline);
+  outline-offset: css.cssVar(focus--outline-offset);
+}
+
+:host([disabled]) .button,
+:host([disabled]) .label {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+::slotted(*) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+// The chip is outside the host's box so the round buttons line up on the owner's axis whatever the label length.
+// The owner sets the private properties for its direction; the documented ones win over them.
+.label {
+  position: absolute;
+  inset: var(--c2-float-button-action__label--inset, var(--_c2-float-button-action-label-inset, 50% calc(100% + 12px) auto auto));
+  transform: var(--c2-float-button-action__label--transform, var(--_c2-float-button-action-label-transform, translateY(-50%)));
+  display: css.cssVar(label--display);
+  box-sizing: border-box;
+  white-space: nowrap;
+  padding: css.cssVar(label--padding);
+  border: css.cssVar(label--border);
+  border-radius: css.cssVar(label--border-radius);
+  background-color: css.cssVar(label--background-color);
+  color: css.cssVar(label--color);
+  box-shadow: css.cssVar(label--box-shadow);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.4;
+  opacity: var(--_c2-float-button-action-label-opacity, 1);
+  pointer-events: var(--_c2-float-button-action-label-pointer-events, auto);
+  transition: animation.standard(opacity, 150ms);
+}
+
+:host(:hover) .label,
+:host(:focus-visible) .label {
+  opacity: 1;
+}

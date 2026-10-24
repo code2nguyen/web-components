@@ -1,0 +1,106 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Menubar, MenubarMenu } from '@c2n/components/menubar'
+import { MenuItem } from '@c2n/components/menu'
+
+## Presets
+
+Looks for `c2-menubar`. The bar's frame comes from `--c2-menubar--*` (background, border, radius, padding). The triggers come from `--c2-menubar-menu__trigger--*`, which you can set on the bar because they inherit. The open trigger is `__open`, and the menus underneath take `--c2-menu--*`.
+
+<GalleryGrid columns="2">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-menubar aria-label="Application">
+  <c2-menubar-menu label="File">
+    <c2-menu-item value="new">New</c2-menu-item>
+    <c2-menu-item value="open">Open…</c2-menu-item>
+  </c2-menubar-menu>
+  <c2-menubar-menu label="Edit">
+    <c2-menu-item value="undo">Undo</c2-menu-item>
+    <c2-menu-item value="redo">Redo</c2-menu-item>
+  </c2-menubar-menu>
+  <c2-menubar-menu label="View">
+    <c2-menu-item value="zoom">Zoom</c2-menu-item>
+  </c2-menubar-menu>
+  <c2-menubar-menu label="Help">
+    <c2-menu-item value="docs">Documentation</c2-menu-item>
+  </c2-menubar-menu>
+</c2-menubar>
+```
+
+```html tag=MdxCodeBlock,label=Flat document bar
+<style>
+  .flat-bar {
+    --c2-menubar--border: none;
+    --c2-menubar--background-color: transparent;
+    --c2-menubar--padding-left: 0px;
+    --c2-menubar--menus-gap: 0px;
+    --c2-menubar-menu__trigger--height: 26px;
+    --c2-menubar-menu__trigger--padding-left: 8px;
+    --c2-menubar-menu__trigger--padding-right: 8px;
+    --c2-menubar-menu__trigger--border-radius: 4px;
+  }
+</style>
+<c2-menubar class="flat-bar" aria-label="Document">
+  <c2-menubar-menu label="File"><c2-menu-item value="share">Share…</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Edit"><c2-menu-item value="undo">Undo</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="View"><c2-menu-item value="outline">Show outline</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Insert"><c2-menu-item value="image">Image</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Format"><c2-menu-item value="bold">Bold</c2-menu-item></c2-menubar-menu>
+</c2-menubar>
+```
+
+```html tag=MdxCodeBlock,label=Accent open state
+<style>
+  .accent-bar {
+    --c2-menubar--border-radius: 999px;
+    --c2-menubar-menu__trigger--border-radius: 999px;
+    --c2-menubar-menu__trigger--padding-left: 14px;
+    --c2-menubar-menu__trigger--padding-right: 14px;
+    --c2-menubar-menu__trigger__open--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-menubar-menu__trigger__open--color: light-dark(#0265dc, #8ab4f8);
+    --c2-menubar-menu__trigger__open--font-weight: 600;
+  }
+</style>
+<c2-menubar class="accent-bar" aria-label="Workspace">
+  <c2-menubar-menu label="Workspace"><c2-menu-item value="settings">Settings</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Projects"><c2-menu-item value="new">New project</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Team"><c2-menu-item value="invite">Invite people</c2-menu-item></c2-menubar-menu>
+</c2-menubar>
+```
+
+```html tag=MdxCodeBlock,label=Title bar
+<style>
+  .title-bar {
+    width: 100%;
+    --c2-menubar--background-color: #27272a;
+    --c2-menubar--border: 1px solid #3f3f46;
+    --c2-menubar--border-radius: 6px;
+    --c2-menubar--padding-top: 0px;
+    --c2-menubar--padding-bottom: 0px;
+    --c2-menubar--menus-gap: 0px;
+    --c2-menubar-menu__trigger--height: 34px;
+    --c2-menubar-menu__trigger--border-radius: 0px;
+    --c2-menubar-menu__trigger--font-size: 13px;
+    --c2-menubar-menu__trigger--color: #d4d4d8;
+    --c2-menubar-menu__trigger__hover--background-color: #3f3f46;
+    --c2-menubar-menu__trigger__open--background-color: #3f3f46;
+    --c2-menubar-menu__trigger__open--color: #ffffff;
+  }
+  .title-bar .title {
+    color: #a1a1aa;
+    font-size: 12px;
+    padding-right: 12px;
+  }
+</style>
+<c2-menubar class="title-bar" aria-label="Code editor">
+  <c2-menubar-menu label="File"><c2-menu-item value="new">New text file</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Edit"><c2-menu-item value="undo">Undo</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Selection"><c2-menu-item value="all">Select all</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="View"><c2-menu-item value="palette">Command palette</c2-menu-item></c2-menubar-menu>
+  <span slot="end" class="title">menubar.ts</span>
+</c2-menubar>
+```
+
+</GalleryGrid>

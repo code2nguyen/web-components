@@ -23,6 +23,7 @@ declare module 'vue' {
         'no-backdrop-close'?: unknown
         'no-escape'?: unknown
         'hide-close'?: unknown
+        'swipe-close'?: unknown
         'no-scroll-lock'?: unknown
         onOpen?: (event: EventOf<Sheet, 'open'>) => void
         onClose?: (event: EventOf<Sheet, 'close'>) => void
