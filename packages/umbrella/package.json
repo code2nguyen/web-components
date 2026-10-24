@@ -77,6 +77,14 @@
       "types": "./dist/action-bar.d.ts",
       "default": "./dist/action-bar.js"
     },
+    "./app-shell": {
+      "types": "./dist/app-shell.d.ts",
+      "default": "./dist/app-shell.js"
+    },
+    "./app-shell/app-shell-toggle": {
+      "types": "./dist/app-shell/app-shell-toggle.d.ts",
+      "default": "./dist/app-shell/app-shell-toggle.js"
+    },
     "./attachment": {
       "types": "./dist/attachment.d.ts",
       "default": "./dist/attachment.js"
@@ -613,6 +621,10 @@
       "types": "./dist/page-editor.d.ts",
       "default": "./dist/page-editor.js"
     },
+    "./page-header": {
+      "types": "./dist/page-header.d.ts",
+      "default": "./dist/page-header.js"
+    },
     "./pagination": {
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
@@ -1000,6 +1012,7 @@
   "devDependencies": {
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
+    "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
@@ -1089,6 +1102,7 @@
     "@c2n/overflow-list": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
+    "@c2n/page-header": "*",
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
     "@c2n/phone-input": "*",

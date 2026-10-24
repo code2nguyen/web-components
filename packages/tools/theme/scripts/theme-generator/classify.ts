@@ -97,7 +97,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-skip-link',
   'c2-tour',
 ])
-const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-sheet', 'c2-side-nav'])
+const SHADOW_LG_PREFIXES = new Set(['c2-app-shell', 'c2-modal', 'c2-sheet', 'c2-side-nav'])
 
 const EXCLUDED_PARTS = new Set(['theme', 'auto-color'])
 const KEYWORDS = new Set(['transparent', 'none', 'inherit', 'initial', 'unset', 'currentcolor', 'auto'])
