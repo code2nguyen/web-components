@@ -175,7 +175,8 @@ for (const [name, root] of roots) {
   merged.schemaVersion = manifest.schemaVersion ?? merged.schemaVersion
   for (const module of manifest.modules ?? []) merged.modules!.push({ ...module, path: `${name.slice('@c2n/'.length)}/${module.path ?? ''}` })
 }
-writeFileSync(join(packageDir, 'custom-elements.json'), `${JSON.stringify(merged, null, 2)}\n`)
+// Unindented: the merged manifest of every component is the largest file in the package, and half of it was indentation.
+writeFileSync(join(packageDir, 'custom-elements.json'), `${JSON.stringify(merged)}\n`)
 
 // A dependency the bundle still imports but the package does not list would install nowhere.
 const imported = new Set<string>()

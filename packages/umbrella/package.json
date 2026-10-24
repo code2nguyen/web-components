@@ -305,6 +305,10 @@
       "types": "./dist/copy-button.d.ts",
       "default": "./dist/copy-button.js"
     },
+    "./countdown": {
+      "types": "./dist/countdown.d.ts",
+      "default": "./dist/countdown.js"
+    },
     "./dashboard": {
       "types": "./dist/dashboard.d.ts",
       "default": "./dist/dashboard.js"
@@ -556,6 +560,10 @@
     "./number-input": {
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
+    },
+    "./org-chart": {
+      "types": "./dist/org-chart.d.ts",
+      "default": "./dist/org-chart.js"
     },
     "./otp-input": {
       "types": "./dist/otp-input.d.ts",
@@ -856,7 +864,6 @@
     "d3-geo": "3.1.1",
     "lit": "3.3.3",
     "marked": "18.1.0",
-    "mermaid": "12.1.0",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
     "prosemirror-inputrules": "^1.5.1",
@@ -883,6 +890,7 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
+    "mermaid": "^12.1.0",
     "react": ">=18.0.0",
     "uplot": "^1.6.31",
     "vue": "^3.3.0"
@@ -922,6 +930,9 @@
       "optional": true
     },
     "echarts": {
+      "optional": true
+    },
+    "mermaid": {
       "optional": true
     },
     "react": {
@@ -968,6 +979,7 @@
     "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
+    "@c2n/countdown": "*",
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
@@ -1016,6 +1028,7 @@
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
     "@c2n/number-input": "*",
+    "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
