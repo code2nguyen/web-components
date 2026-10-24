@@ -1,83 +1,36 @@
 ---
 import type { MarkdownHeading } from 'astro'
+import { rawElement } from '../utils/raw-element'
 
 interface Props {
   headings: MarkdownHeading[]
 }
 const { headings } = Astro.props
-const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
+const items = headings
+  .filter((heading) => heading.depth === 2 || heading.depth === 3)
+  .map((heading) => ({ id: heading.slug, label: heading.text, level: heading.depth }))
+
+// Raw markup rather than JSX: `@astrojs/lit` would server-render the tag with `items` and `offset` set as properties
+// behind `defer-hydration`, which nothing removes outside an island (see utils/raw-element.ts). chrome-modules.ts
+// upgrades the plain tag. The headings are known at build time, so they are handed over as `items` rather than read
+// from the page; `offset` is the sticky header plus the headings' scroll-margin-top.
+const tocHtml = items.length > 0 ? rawElement('c2-table-of-contents', { class: 'toc', items, offset: 80 }) : ''
 ---
 
-{
-  items.length > 0 && (
-    <nav class="toc" aria-label="On this page">
-      <div class="toc__title">On this page</div>
-      <ul>
-        {items.map((heading) => (
-          <li class={`toc__level-${heading.depth}`}>
-            <a href={`#${heading.slug}`} data-slug={heading.slug}>
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  )
-}
+<div class="toc-wrapper"><Fragment set:html={tocHtml} /></div>
 
 <style lang="scss">
-  .toc {
-    font-size: 13px;
-    &__title {
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--site-color-on-surface-muted);
-      margin-bottom: 8px;
-    }
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border-left: 1px solid var(--site-color-outline-variant);
-    }
-    a {
-      display: block;
-      padding: 4px 0 4px 12px;
-      margin-left: -1px;
-      border-left: 1px solid transparent;
-      color: var(--site-color-on-surface-variant);
-      &:hover {
-        text-decoration: none;
-        color: var(--site-color-on-surface);
-      }
-      &.active {
-        color: var(--site-color-primary);
-        border-left-color: var(--site-color-primary);
-      }
-    }
-    &__level-3 a {
-      padding-left: 24px;
-      font-size: 12.5px;
-    }
+  // The list is raw markup (set:html), which scoped styles do not reach without :global().
+  .toc-wrapper :global(.toc) {
+    --c2-table-of-contents--font-size: 13px;
+    --c2-table-of-contents__title--font-size: 11.5px;
+    --c2-table-of-contents__title--color: var(--site-color-on-surface-muted);
+    --c2-table-of-contents__link--color: var(--site-color-on-surface-variant);
+    --c2-table-of-contents__link__passed--color: var(--site-color-on-surface-variant);
+    --c2-table-of-contents__link__hover--color: var(--site-color-on-surface);
+    --c2-table-of-contents__link__active--color: var(--site-color-primary);
+    --c2-table-of-contents__nested--font-size: 12.5px;
+    --c2-table-of-contents__track--background-color: var(--site-color-outline-variant);
+    --c2-table-of-contents__indicator--background-color: var(--site-color-primary);
   }
 </style>
-
-<script>
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc a[data-slug]'))
-  if (links.length > 0) {
-    const headings = links.map((link) => document.getElementById(link.dataset.slug!)).filter((el): el is HTMLElement => !!el)
-    const setActive = (id: string) => links.forEach((link) => link.classList.toggle('active', link.dataset.slug === id))
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-        if (visible[0]) setActive(visible[0].target.id)
-      },
-      { rootMargin: '-64px 0px -70% 0px', threshold: 0 },
-    )
-    headings.forEach((heading) => observer.observe(heading))
-    if (headings[0]) setActive(headings[0].id)
-  }
-</script>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-table-of-contents</title>
+    <script type="module" src="/src/table-of-contents.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        height: 56px;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        background: #f4f4f5;
+        font-weight: 600;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 220px;
+        gap: 48px;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .layout > c2-table-of-contents {
+        position: sticky;
+        top: 96px;
+        align-self: start;
+      }
+      section {
+        min-height: 60vh;
+      }
+      .themed {
+        --c2-table-of-contents__track--width: 0px;
+        --c2-table-of-contents__link--border-radius: 6px;
+        --c2-table-of-contents__link__active--background-color: #edf1fe;
+        --c2-table-of-contents__marker--content: counters(c2-toc, '.') '  ';
+      }
+    </style>
+  </head>
+  <body>
+    <header>Docs</header>
+    <div class="layout">
+      <main>
+        <h1 id="top">Getting started</h1>
+        <section>
+          <h2 id="overview">Overview</h2>
+          <p>Scroll the page: the list follows the section at the top, under the sticky header.</p>
+        </section>
+        <section>
+          <h2 id="install">Installation</h2>
+          <p>…</p>
+        </section>
+        <section>
+          <h3 id="install-npm">With npm</h3>
+          <p>…</p>
+        </section>
+        <section>
+          <h3 id="install-cdn" data-toc-label="CDN">From a content delivery network</h3>
+          <p>…</p>
+        </section>
+        <section>
+          <h2 id="theming">Theming</h2>
+          <p>…</p>
+        </section>
+        <section>
+          <h2 id="faq">FAQ</h2>
+          <p>…</p>
+        </section>
+      </main>
+      <c2-table-of-contents offset="80"></c2-table-of-contents>
+    </div>
+    <div class="layout">
+      <div></div>
+      <c2-table-of-contents
+        class="themed"
+        label="From items"
+        items='[{"id":"overview","label":"Overview","level":1},{"id":"install","label":"Installation","level":1},{"id":"install-npm","label":"With npm","level":2},{"id":"faq","label":"FAQ","level":1}]'
+      ></c2-table-of-contents>
+    </div>
+  </body>
+</html>

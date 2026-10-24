@@ -187,6 +187,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Pagination** — `c2-pagination` · `@c2n/components/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/components/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
 - **Skip Link** — `c2-skip-link` · `@c2n/components/skip-link` — A "Skip to main content" link that appears when a keyboard user tabs onto it and moves focus into the main content.
+- **Table Of Contents** — `c2-table-of-contents` · `@c2n/components/table-of-contents` — An "On this page" navigation that lists the headings of a document, nests them by level and highlights the section being read.
 - **Tabs** — `c2-tabs, c2-tab` · `@c2n/components/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
 
 ## Planning

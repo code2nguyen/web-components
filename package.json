@@ -215,6 +215,7 @@
         "./packages/components/steps:build",
         "./packages/components/streaming-text:build",
         "./packages/components/switch:build",
+        "./packages/components/table-of-contents:build",
         "./packages/components/table:build",
         "./packages/components/tabs:build",
         "./packages/components/tag-input:build",

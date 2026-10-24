@@ -172,6 +172,7 @@
         "../../components/steps:build",
         "../../components/streaming-text:build",
         "../../components/switch:build",
+        "../../components/table-of-contents:build",
         "../../components/table:build",
         "../../components/tabs:build",
         "../../components/tag-input:build",
