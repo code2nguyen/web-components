@@ -1829,6 +1829,27 @@
       "reason": "The dot wrapper sizes a slotted SVG and colours it with the tone through currentColor."
     },
     {
+      "tag": "c2-swipe-action",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The sliding content box around the default slot owns its background, padding and colour."
+    },
+    {
+      "tag": "c2-swipe-action",
+      "slot": "end",
+      "decision": "variables",
+      "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
+      "reason": "The end actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-swipe-action",
+      "slot": "start",
+      "decision": "variables",
+      "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
+      "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
+    },
+    {
       "tag": "c2-tour",
       "slot": "",
       "decision": "part",

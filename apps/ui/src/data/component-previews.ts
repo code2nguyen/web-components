@@ -452,6 +452,7 @@ price: .price
   <c2-step status="pending" label="ship"></c2-step>
 </c2-steps>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
+  'swipe-action': `<c2-swipe-action open="end" style="width:280px;border:1px solid #e4e4e7;border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>
   <c2-switch></c2-switch>

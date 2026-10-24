@@ -148,6 +148,7 @@
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/streaming-text": "*",
+    "@c2n/swipe-action": "*",
     "@c2n/switch": "*",
     "@c2n/symbols": "*",
     "@c2n/table-of-contents": "*",

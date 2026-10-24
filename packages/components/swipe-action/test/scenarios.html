@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Swipe Action test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 400px;
+      }
+      /* Full-bleed actions keep the expected offsets equal to the button widths. */
+      c2-swipe-action {
+        --c2-swipe-action__actions--padding: 0;
+        --c2-swipe-action__actions--gap: 0px;
+        --c2-swipe-action__actions--align-items: stretch;
+      }
+      button[slot] {
+        border: 0;
+        color: #ffffff;
+        background: #3f3f46;
+      }
+      #delete {
+        background: #b91c1c;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Swipe Action scenario"></main>
+  </body>
+</html>
