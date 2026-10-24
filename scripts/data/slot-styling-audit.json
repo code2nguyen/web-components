@@ -2009,6 +2009,27 @@
       "reason": "The header slot only places consumer-owned light DOM above the page; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-rich-text-editor",
+      "slot": "toolbar-end",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The toolbar part and its padding and gap variables place the app's own tools after the formatting buttons."
+    },
+    {
+      "tag": "c2-rich-text-editor",
+      "slot": "footer-start",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer part and its padding and gap variables own the row the footer slots are laid out in."
+    },
+    {
+      "tag": "c2-rich-text-editor",
+      "slot": "footer-end",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer part and its padding and gap variables own the row the footer slots are laid out in."
+    },
+    {
       "tag": "c2-number-input",
       "slot": "decrement-icon",
       "decision": "assigned-content",

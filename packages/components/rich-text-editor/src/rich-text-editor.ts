@@ -353,6 +353,7 @@ export class RichTextEditor extends LitElement {
   @property({ reflect: true }) name = ''
   /** Accessible name when the field is not inside a `c2-form-field` and has no `aria-label`. */
   @property() label = ''
+  /** Accessible name of the text, when there is no visible label to point at. Wins over an enclosing field's label. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
   /** Shown while the field is empty. */
   @property() placeholder = ''
@@ -366,9 +367,11 @@ export class RichTextEditor extends LitElement {
   @property({ attribute: 'toolbar-position' }) toolbarPosition: RichTextToolbarPosition = 'top'
   /** Space-separated characters that start a `trigger` when typed at the start of a word, e.g. `"@ #"`. */
   @property() triggers = ''
+  /** Not focusable, not editable and left out of the form data; the toolbar is inert. A disabled `<fieldset>` does the same. */
   @property({ type: Boolean, reflect: true }) disabled = false
   /** Selectable and focusable, without a toolbar; the value is still submitted. */
   @property({ type: Boolean, reflect: true }) readOnly = false
+  /** The field is invalid (`valueMissing`) while its text is empty or only whitespace. */
   @property({ type: Boolean, reflect: true }) required = false
   /** Most characters of text (not Markdown) the field accepts: past it, a counter turns red and the field is invalid. `-1` for no limit. */
   @property({ type: Number, attribute: 'maxlength' }) maxLength = -1
