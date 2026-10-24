@@ -4,6 +4,7 @@
   $prefix: c2-sheet,
   $theme: (
     size: 380px,
+    max-size: 100%,
     background: #ffffff,
     color: #18181b,
     border: none,
@@ -48,6 +49,12 @@
     close__hover--background: #f4f4f5,
     close__hover--color: #18181b,
     close__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    handle--display: block,
+    handle--width: 36px,
+    handle--height: 4px,
+    handle--border-radius: 999px,
+    handle--background: #d4d4d8,
+    handle--offset: 8px,
     backdrop--background: 'rgba(9, 9, 11, 0.45)',
     backdrop--backdrop-filter: null,
   )
@@ -80,7 +87,16 @@
     overlay css.cssVar(transition-duration) allow-discrete;
 
   &[open] {
+    // A column, so a content-sized panel (`size: auto`) stops at `max-size` and its body scrolls past that.
+    display: flex;
+    flex-direction: column;
     transform: none;
+  }
+
+  // The panel follows the pointer without easing; letting go restores the transition, so it slides on from there.
+  &[open].is-dragging {
+    transform: var(--_c2-sheet-drag);
+    transition: none;
   }
 
   &::backdrop {
@@ -105,6 +121,7 @@
 :host(:not([side])) .c2-sheet {
   inset: 0 0 0 auto;
   width: css.cssVar(size);
+  max-width: css.cssVar(max-size);
   height: 100dvh;
   --_c2-sheet-enter: translateX(100%);
   border-top-left-radius: css.cssVar(border-radius);
@@ -114,6 +131,7 @@
 :host([side='left']) .c2-sheet {
   inset: 0 auto 0 0;
   width: css.cssVar(size);
+  max-width: css.cssVar(max-size);
   height: 100dvh;
   --_c2-sheet-enter: translateX(-100%);
   border-top-right-radius: css.cssVar(border-radius);
@@ -124,6 +142,7 @@
   inset: 0 0 auto 0;
   width: 100vw;
   height: css.cssVar(size);
+  max-height: css.cssVar(max-size);
   --_c2-sheet-enter: translateY(-100%);
   border-bottom-left-radius: css.cssVar(border-radius);
   border-bottom-right-radius: css.cssVar(border-radius);
@@ -133,6 +152,7 @@
   inset: auto 0 0 0;
   width: 100vw;
   height: css.cssVar(size);
+  max-height: css.cssVar(max-size);
   --_c2-sheet-enter: translateY(100%);
   border-top-left-radius: css.cssVar(border-radius);
   border-top-right-radius: css.cssVar(border-radius);
@@ -149,10 +169,55 @@
 }
 
 .c2-sheet__panel {
+  position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
+}
+
+// Pressing here drags the sheet rather than scrolling or zooming the page.
+.c2-sheet__panel.is-swipeable > .c2-sheet__header,
+.c2-sheet__handle {
+  touch-action: none;
+}
+
+.c2-sheet.is-dragging .c2-sheet__panel {
+  user-select: none;
+}
+
+// Laid over the header's padding on the edge facing the page, so showing it moves nothing.
+.c2-sheet__handle {
+  display: css.cssVar(handle--display);
+  position: absolute;
+  left: 50%;
+  z-index: 1;
+  translate: -50% 0;
+  // A taller hit area than the bar it draws.
+  padding: 8px 14px;
+  margin: -8px 0;
+  cursor: grab;
+
+  &::before {
+    content: '';
+    display: block;
+    width: css.cssVar(handle--width);
+    height: css.cssVar(handle--height);
+    border-radius: css.cssVar(handle--border-radius);
+    background: css.cssVar(handle--background);
+  }
+}
+
+:host([side='bottom']) .c2-sheet__handle {
+  top: css.cssVar(handle--offset);
+}
+
+:host([side='top']) .c2-sheet__handle {
+  bottom: css.cssVar(handle--offset);
+}
+
+.c2-sheet.is-dragging .c2-sheet__handle {
+  cursor: grabbing;
 }
 
 .c2-sheet__header {
