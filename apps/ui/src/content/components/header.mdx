@@ -17,6 +17,8 @@ import { FeatherGithubIcon as FeatherGithub } from '@c2n/feather-icons/icons/git
 
 `c2-header` owns site-shell layout without owning navigation state. Put a `c2-navigation-menu` in the default slot, use a real `c2-link-button` for navigation actions, and add as many end controls as needed to the `actions` slot. The action area handles spacing and alignment; `sticky` pins the shell and `blurred` adds its translucent backdrop treatment.
 
+A `sticky` header knows when page content scrolls beneath it: the host matches `:state(stuck)`, fires `stuck-change`, and `--c2-header__stuck--box-shadow` applies, so the shell can stay flat at the top of the page and lift once it overlaps content. Add `hide-on-scroll` to slide it away while the reader scrolls down and bring it back on the way up or when focus moves into it (`:state(retracted)`, `retract-change`). The behaviour is shared with `c2-sticky`, which does the same for a toolbar, tabs or an action bar further down the page.
+
 ## Import
 
 ```typescript tag=CodeBlock
@@ -55,6 +57,24 @@ The navigation menu owns desktop panels and its responsive trigger, while the he
     gap: 2px;
     width: 240px;
   }
+  .header-scroller {
+    width: min(920px, 100%);
+    height: 260px;
+    overflow: auto;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .header-scroller p {
+    margin: 0;
+    padding: 10px 24px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .stuck-header {
+    --c2-header--border-bottom: 1px solid transparent;
+    --c2-header__stuck--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08);
+  }
   .glass-header {
     --c2-header--background: rgba(255, 255, 255, 0.72);
     --c2-header__blurred--background: rgba(255, 255, 255, 0.72);
@@ -87,6 +107,23 @@ The navigation menu owns desktop panels and its responsive trigger, while the he
     </c2-icon-button>
     <c2-button class="header-sign-in" slot="actions">Sign in</c2-button>
   </c2-header>
+</div>
+<div data-label="Lifts once stuck, hides while scrolling down">
+  <div class="header-scroller">
+    <c2-header class="header-demo stuck-header" sticky hide-on-scroll>
+      <c2-link-button class="brand-link" slot="brand" href="#home">Northstar</c2-link-button>
+      <c2-link-button href="#markets">Markets</c2-link-button>
+      <c2-button class="header-sign-in" slot="actions">Sign in</c2-button>
+    </c2-header>
+    <p>Scroll inside this box: the header gains a shadow once the article runs beneath it, slides away while you read on, and returns as soon as you scroll back up.</p>
+    <p>Markets opened higher on Tuesday as technology shares extended their rally.</p>
+    <p>Bond yields eased after the central bank signalled a pause in rate rises.</p>
+    <p>Oil prices slipped as inventories rose for a third straight week.</p>
+    <p>The dollar weakened against most major currencies.</p>
+    <p>Analysts expect earnings season to show resilient consumer demand.</p>
+    <p>Small caps lagged the broader market for the second session in a row.</p>
+    <p>Gold held steady near its record high.</p>
+  </div>
 </div>
 <div data-label="Sticky glass with several actions">
   <c2-header class="header-demo glass-header" sticky blurred>

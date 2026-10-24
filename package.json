@@ -221,6 +221,7 @@
         "./packages/components/status-light:build",
         "./packages/components/status-panel:build",
         "./packages/components/steps:build",
+        "./packages/components/sticky:build",
         "./packages/components/streaming-text:build",
         "./packages/components/swipe-action:build",
         "./packages/components/switch:build",

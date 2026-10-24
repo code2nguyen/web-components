@@ -451,6 +451,13 @@ price: .price
   </c2-step>
   <c2-step status="pending" label="ship"></c2-step>
 </c2-steps>`,
+  sticky: `<div style="width:220px;height:120px;overflow:auto;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px">
+  <c2-sticky style="--c2-sticky--padding:6px 10px"><strong>Pinned toolbar</strong></c2-sticky>
+  <div style="padding:6px 10px">Scroll: the bar stays in view and gains a shadow once content runs beneath it.</div>
+  <div style="padding:6px 10px">Second paragraph.</div>
+  <div style="padding:6px 10px">Third paragraph.</div>
+  <div style="padding:6px 10px">Fourth paragraph.</div>
+</div>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
   'swipe-action': `<c2-swipe-action open="end" style="width:280px;border:1px solid #e4e4e7;border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
   switch: `<div class="preview-row">
