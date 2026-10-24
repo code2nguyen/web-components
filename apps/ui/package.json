@@ -94,6 +94,7 @@
     "@c2n/marker": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
+    "@c2n/master-detail": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",

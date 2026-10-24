@@ -126,6 +126,7 @@
         "../../components/marker:build",
         "../../components/mask-input:build",
         "../../components/masonry:build",
+        "../../components/master-detail:build",
         "../../components/mat-icon:build",
         "../../components/math:build",
         "../../components/menu:build",

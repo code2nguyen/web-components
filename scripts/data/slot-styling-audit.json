@@ -1472,6 +1472,41 @@
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-master-detail",
+      "slot": "back-icon",
+      "decision": "variables",
+      "variables": ["--c2-master-detail__back--icon-size", "--c2-master-detail__back--color"],
+      "reason": "The Back button sizes the slotted icon and its chevron fallback through the icon size variable and colours it with the button colour."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "detail",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The scrolling detail body owns the detail slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "master",
+      "decision": "part",
+      "parts": ["master"],
+      "reason": "The master pane owns the master slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["placeholder"],
+      "reason": "The placeholder pane owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The Back bar owns the toolbar slot's component-side presentation."
+    },
+    {
       "tag": "c2-money-input",
       "slot": "symbol",
       "decision": "variables",

@@ -252,6 +252,14 @@ price: .price
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
+  'master-detail': `<c2-master-detail open breakpoint="0" style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px;--c2-master-detail__master--width:110px">
+  <div slot="master" style="display:grid">
+    <span style="padding:8px 10px;background:var(--c2-theme--color-primary-container, #edf1fe);font-weight:600">Ana Ruiz</span>
+    <span style="padding:8px 10px">Kenji W.</span>
+    <span style="padding:8px 10px">Priya N.</span>
+  </div>
+  <div slot="detail" style="padding:10px"><strong>Invoice 2041</strong><br>Charged twice for March.</div>
+</c2-master-detail>`,
   'mat-icon': `<div class="preview-row" style="gap:18px;font-size:26px">
   <c2-mat-icon>home</c2-mat-icon>
   <c2-mat-icon>favorite</c2-mat-icon>

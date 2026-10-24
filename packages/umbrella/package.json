@@ -517,6 +517,10 @@
       "types": "./dist/masonry/masonry-item.d.ts",
       "default": "./dist/masonry/masonry-item.js"
     },
+    "./master-detail": {
+      "types": "./dist/master-detail.d.ts",
+      "default": "./dist/master-detail.js"
+    },
     "./mat-icon": {
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
@@ -1039,6 +1043,7 @@
     "@c2n/marker": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
+    "@c2n/master-detail": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
