@@ -41,7 +41,7 @@ These declare every tag, with props and events typed from the element classes. T
 ## Not included
 
 - **Icon sets.** `@c2n/feather-icons`, `@c2n/phosphor-icons` and `@c2n/symbols` are one element per icon (Phosphor alone is 1,512), so they stay their own install.
-- **Optional engines.** `c2-*-chart` renders with `uplot` or `echarts` and `c2-code-editor` with CodeMirror. They are optional peer dependencies: install the ones you use.
+- **Optional engines.** `c2-*-chart` renders with `uplot` or `echarts`, `c2-code-editor` with CodeMirror and `c2-mermaid` (with the diagrams in `c2-markdown`) with `mermaid`. They are optional peer dependencies: install the ones you use.
 
 ## Maintaining this package
 
