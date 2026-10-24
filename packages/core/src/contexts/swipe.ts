@@ -5,7 +5,11 @@
  * when it renders, when its rows change and when its setting changes. A row with no container swipes on its own terms.
  */
 
-/** Fired by a row when it connects, so a container around it can answer. Bubbles and is composed; the container stops it. */
+/**
+ * Fired by a row when it connects, so a container around it can answer. Bubbles but is not composed: a row inside
+ * another component's shadow root belongs to that component, not to a container outside it. The container answers
+ * only a row of its own and stops the event.
+ */
 export const SWIPE_REQUEST_EVENT = 'c2-swipe-request'
 
 export interface SwipeRequestEventDetail {

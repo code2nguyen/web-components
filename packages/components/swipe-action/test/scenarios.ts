@@ -20,18 +20,20 @@ main.innerHTML = `
   <output id="log"></output>
 `
 
-if (scenario === 'list' || scenario === 'list-off') {
+if (scenario === 'list' || scenario === 'list-off' || scenario === 'list-plain') {
   await Promise.all([import('@c2n/list'), import('@c2n/list-item')])
   // Rows of a c2-list, formatted with whitespace, each with keyboard shortcuts for its actions. `list-off` leaves out
   // `swipeable`, which is how a list keeps its rows still.
+  // `list-plain` gives the actions no shortcuts, so they stay in the Tab order.
+  const shortcuts = scenario !== 'list-plain'
   const row = (value: string, label: string) => `
     <c2-swipe-action>
       <c2-list-item value="${value}">${label}</c2-list-item>
-      <button slot="start" id="archive-${value}" aria-keyshortcuts="A">Archive</button>
-      <button slot="end" id="delete-${value}" aria-keyshortcuts="Delete Backspace">Delete</button>
+      <button slot="start" id="archive-${value}" ${shortcuts ? 'aria-keyshortcuts="A"' : ''}>Archive</button>
+      <button slot="end" id="delete-${value}" ${shortcuts ? 'aria-keyshortcuts="Delete Backspace"' : ''}>Delete</button>
     </c2-swipe-action>`
   main.innerHTML = `
-    <c2-list aria-label="Inbox" ${scenario === 'list' ? 'swipeable' : ''}>${row('a', 'Apple')}${row('b', 'Banana')}${row('c', 'Cherry')}</c2-list>
+    <c2-list aria-label="Inbox" ${scenario === 'list-off' ? '' : 'swipeable'}>${row('a', 'Apple')}${row('b', 'Banana')}${row('c', 'Cherry')}</c2-list>
     <button id="outside">Outside</button>
     <output id="log"></output>`
 }

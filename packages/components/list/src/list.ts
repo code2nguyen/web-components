@@ -180,8 +180,14 @@ export class List extends LitElement {
     super.disconnectedCallback()
   }
 
-  /** A swipe row inside the list connected after the list and asks whether it may swipe. */
+  /**
+   * A swipe row inside the list connected after the list and asks whether it may swipe. Only a row wrapper is the
+   * list's to answer: a swipe row inside a row's own content (its description, say) is left alone.
+   */
   private handleSwipeRequest = (event: Event): void => {
+    for (let node = (event.target as Element).parentElement; node && node !== this; node = node.parentElement) {
+      if (node instanceof ListItem) return
+    }
     event.stopPropagation()
     ;(event as CustomEvent<SwipeRequestEventDetail>).detail.respond(this.swipeable)
   }
@@ -254,7 +260,9 @@ export class List extends LitElement {
     if (this.disabled) return
     // Keys typed into a control inside a row (Enter on a delete button, letters in a text field) belong to it.
     const row = this.items.find((item) => item.contains(event.target as Node))
-    if (row && isFromInteractiveContent(event, row)) return
+    // A key pressed outside every row (on a swipe action beside its row, say) belongs to whatever has focus.
+    if (!row) return
+    if (isFromInteractiveContent(event, row)) return
     const enabled = this.enabledItems
     if (enabled.length === 0) return
     const current = event.target instanceof ListItem ? event.target : this.focusedItem

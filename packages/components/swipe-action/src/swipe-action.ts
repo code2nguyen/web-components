@@ -5,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { KEY_ALIASES, matchesStroke, type ShortcutStroke } from '@c2n/core/shortcut-helper.js'
 import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
 import styles from './swipe-action.scss?inline'
 
@@ -32,34 +33,42 @@ export interface SwipeAction {
   removeEventListener: TypedRemoveEventListener<SwipeAction, SwipeActionEventMap>
 }
 
-const MODIFIERS = ['alt', 'control', 'meta', 'shift'] as const
-
 /**
  * Whether a key press matches one of the space-separated shortcuts of an `aria-keyshortcuts` value (`Delete`,
- * `Shift+Delete`, `E`). Modifiers must match exactly; the key compares case-insensitively, and `Space` is the space bar.
+ * `Shift+Delete`, `A`). Each token is `+`-joined ARIA modifier names (`Alt`, `Control`, `Meta`, `Shift`) and a key;
+ * the comparison is the library's own (`matchesStroke`), so modifiers match exactly as `c2-shortcut` matches them.
  */
 function matchesShortcut(event: KeyboardEvent, value: string): boolean {
-  const pressed = { alt: event.altKey, control: event.ctrlKey, meta: event.metaKey, shift: event.shiftKey }
-  const key = event.key === ' ' ? 'space' : event.key.toLowerCase()
   return value
     .split(/\s+/)
     .filter(Boolean)
-    .some((shortcut) => {
-      const parts = shortcut.toLowerCase().split('+')
-      const wanted = parts.pop()
-      const modifiers = new Set(parts)
-      // Shift is part of a printable key ("E" is Shift+e), so it only has to match when the shortcut names it or the key is not printable.
-      return (
-        wanted === key &&
-        MODIFIERS.every((name) => (name === 'shift' && key.length === 1 && !modifiers.has('shift') ? true : modifiers.has(name) === pressed[name]))
-      )
+    .some((token) => {
+      const stroke: ShortcutStroke = { key: '', ctrl: false, meta: false, alt: false, shift: false, mod: false }
+      // A trailing `++` is the plus key itself, as in `Shift++`.
+      const parts = token.endsWith('++') ? [...token.slice(0, -2).split('+'), '+'] : token.split('+')
+      for (const part of parts) {
+        const name = part.toLowerCase()
+        if (name === 'control') stroke.ctrl = true
+        else if (name === 'meta') stroke.meta = true
+        else if (name === 'alt') stroke.alt = true
+        else if (name === 'shift') stroke.shift = true
+        else if (name) stroke.key = KEY_ALIASES[name] ?? name
+      }
+      return !!stroke.key && matchesStroke(stroke, event)
     })
+}
+
+/** Whether an action is disabled, natively, as a form-associated element, or by `aria-disabled`. */
+function isDisabledAction(element: HTMLElement): boolean {
+  return element.matches(':disabled') || element.getAttribute('aria-disabled') === 'true' || (element as { disabled?: unknown }).disabled === true
 }
 
 /** How far the pointer moves before a press becomes a swipe (or is left to the page as a scroll). */
 const DRAG_SLOP = 6
 /** A release faster than this (px/ms) settles in the direction of the flick, whatever the distance. */
 const FLICK_VELOCITY = 0.4
+/** A pointer held still this long (ms) before release is no longer flicking, however fast it last moved. */
+const FLICK_WINDOW = 100
 /** Share of the row's width a full swipe has to cross before release triggers the outermost action. */
 const FULL_SWIPE_RATIO = 0.6
 
@@ -186,11 +195,12 @@ export class SwipeAction extends LitElement {
     this.addEventListener('focusin', this.handleFocusIn)
     this.addEventListener('focusout', this.handleFocusOut)
     this.addEventListener(SWIPE_CONTAINER_EVENT, this.handleContainerSetting)
+    // Moved while open (a keyed list reordering its rows): `updated` sees no change to `open`, so listen again here.
+    if (this.open) document.addEventListener('pointerdown', this.handleOutsidePointerDown, true)
     // A container that upgraded before this row answers now; one that upgrades later pushes its setting instead.
     this.dispatchEvent(
       new CustomEvent<SwipeRequestEventDetail>(SWIPE_REQUEST_EVENT, {
         bubbles: true,
-        composed: true,
         detail: { respond: (swipeable) => (this.containerSwipeable = swipeable) },
       }),
     )
@@ -301,6 +311,8 @@ export class SwipeAction extends LitElement {
 
   private handlePointerDown = (event: PointerEvent): void => {
     if (this.swipeOff || (event.pointerType === 'mouse' && event.button !== 0)) return
+    // A touch drag or a canceled pointer is never followed by a click, so a flag left from one must not swallow this one.
+    this.swallowClick = false
     this.measure()
     this.gesture = {
       pointerId: event.pointerId,
@@ -349,15 +361,16 @@ export class SwipeAction extends LitElement {
       }
       return
     }
-    this.swallowClick = true
     const offset = this.dragOffset ?? 0
     this.dragOffset = null
     if (event.type === 'pointercancel') return
+    this.swallowClick = true
     if (offset !== 0 && this.isArmed(offset)) {
       this.triggerFullSwipe(offset > 0 ? 'start' : 'end')
       return
     }
-    this.setOpen(this.settle(offset, gesture.velocity))
+    const velocity = event.timeStamp - gesture.lastTime > FLICK_WINDOW ? 0 : gesture.velocity
+    this.setOpen(this.settle(offset, velocity))
   }
 
   /** Where a released drag comes to rest: the direction of a flick, else past halfway opens. */
@@ -379,7 +392,8 @@ export class SwipeAction extends LitElement {
     const actions = this.actionsOf(side)
     const outermost = side === 'start' ? actions[0] : actions[actions.length - 1]
     this.setOpen('')
-    if (proceed) SwipeAction.actionElement(outermost)?.click()
+    const action = SwipeAction.actionElement(outermost)
+    if (proceed && action && !isDisabledAction(action)) action.click()
   }
 
   /** The element to click for a slotted action, looking through `display: contents` wrappers (an Astro island, a framework's). */
@@ -428,7 +442,7 @@ export class SwipeAction extends LitElement {
   private shortcutActions(): HTMLElement[] {
     return [...this.actionsOf('start'), ...this.actionsOf('end')]
       .map((element) => SwipeAction.actionElement(element))
-      .filter((element): element is HTMLElement => !!element?.getAttribute('aria-keyshortcuts')?.trim())
+      .filter((element): element is HTMLElement => !!element?.getAttribute('aria-keyshortcuts')?.trim() && !isDisabledAction(element))
   }
 
   /** Whether a key was pressed on the row's content itself, not in one of its actions or a text field inside it. */
@@ -474,6 +488,19 @@ export class SwipeAction extends LitElement {
     const revealed: SwipeActionOpen = offset > 0 ? 'start' : offset < 0 ? 'end' : ''
     return html`
       <div class=${classMap({ container: true, dragging, armed, moved: offset !== 0 })}>
+        <!-- The content comes first so Tab reaches a row's content, then its start and end actions; z-index stacks them. -->
+        <div
+          class="content"
+          part="content"
+          style=${styleMap({ transform: `translateX(${physical}px)` })}
+          @pointerdown=${this.handlePointerDown}
+          @pointermove=${this.handlePointerMove}
+          @pointerup=${this.handlePointerUp}
+          @pointercancel=${this.handlePointerUp}
+          @click=${this.handleContentClick}
+        >
+          <slot></slot>
+        </div>
         <div
           class=${classMap({ actions: true, start: true, revealed: revealed === 'start' })}
           part="start"
@@ -491,18 +518,6 @@ export class SwipeAction extends LitElement {
           @click=${this.handleActionClick}
         >
           <slot name="end" @slotchange=${this.handleSlotChange}></slot>
-        </div>
-        <div
-          class="content"
-          part="content"
-          style=${styleMap({ transform: `translateX(${physical}px)` })}
-          @pointerdown=${this.handlePointerDown}
-          @pointermove=${this.handlePointerMove}
-          @pointerup=${this.handlePointerUp}
-          @pointercancel=${this.handlePointerUp}
-          @click=${this.handleContentClick}
-        >
-          <slot></slot>
         </div>
       </div>
     `

@@ -282,3 +282,69 @@ test.describe('rows of a c2-list without swipeable', () => {
       .toBe(true)
   })
 })
+
+test.describe('regressions', () => {
+  test('a touch drag, which no click follows, does not swallow the next tap on the content', async ({ page, scenario }) => {
+    await scenario()
+    const box = (await subject(page).boundingBox())!
+    const y = box.y + box.height / 2
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type: string, x: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] })
+    await touch('touchStart', box.x + 200)
+    for (let x = 200; x >= 40; x -= 20) await touch('touchMove', box.x + x)
+    await touch('touchEnd', box.x + 40)
+    await expect(subject(page)).toHaveJSProperty('open', 'end')
+    await subject(page).evaluate((host) => (host as SwipeAction).close())
+    await page.getByText('Quarterly report').click()
+    await expect(log(page)).toHaveText('open:end,click:content')
+  })
+
+  test('a drag that stops before release is not a flick', async ({ page, scenario }) => {
+    await scenario()
+    const box = (await subject(page).boundingBox())!
+    await page.mouse.move(box.x + 200, box.y + 20)
+    await page.mouse.down()
+    // A fast short drag, then holding still: the release must judge the distance, not the earlier speed.
+    await page.mouse.move(box.x + 140, box.y + 20, { steps: 2 })
+    await page.waitForTimeout(250)
+    await page.mouse.up()
+    await expect(subject(page)).toHaveJSProperty('open', '')
+  })
+
+  test('a row moved in the page while open still closes on a press outside', async ({ page, scenario }) => {
+    await scenario()
+    await drag(page, -140)
+    await expect(subject(page)).toHaveJSProperty('open', 'end')
+    await page.locator('main').evaluate((main) => main.prepend(main.querySelector('c2-swipe-action')!))
+    await page.locator('#outside').click()
+    await expect(subject(page)).toHaveJSProperty('open', '')
+  })
+
+  test('a disabled action does not run from its shortcut key', async ({ page, scenario }) => {
+    await scenario('list')
+    await page.locator('#delete-a').evaluate((button) => ((button as HTMLButtonElement).disabled = true))
+    await page.locator('c2-list-item', { hasText: 'Apple' }).click()
+    await page.keyboard.press('Delete')
+    await expect(log(page)).toHaveText('select:a')
+  })
+
+  test('Tab goes from a row to its own actions, and Enter on one runs it rather than selecting the row', async ({ page, scenario, tab }) => {
+    await scenario('list-plain')
+    await page.locator('c2-list-item', { hasText: 'Apple' }).click()
+    await tab()
+    await expect(page.locator('#archive-a')).toBeFocused()
+    await page.keyboard.press('Enter')
+    // Focusing the action opened its side; Enter ran it (not a row selection) and the row closed again.
+    await expect(log(page)).toHaveText('select:a,open:start,click:archive-a,open:none')
+    await tab(true)
+    await expect(page.locator('c2-list-item', { hasText: 'Apple' })).toBeFocused()
+  })
+
+  test("a swipe row inside a row's own content is not held still by the list", async ({ page, scenario }) => {
+    await scenario('list-off')
+    await page.locator('c2-list-item', { hasText: 'Apple' }).evaluate((item) => {
+      item.insertAdjacentHTML('beforeend', '<c2-swipe-action slot="description" id="inner">Inner<button slot="end">Pin</button></c2-swipe-action>')
+    })
+    await expect.poll(() => page.locator('#inner').evaluate((row) => row.shadowRoot?.querySelector('.end')?.hasAttribute('inert'))).toBe(false)
+  })
+})
