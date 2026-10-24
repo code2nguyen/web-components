@@ -182,6 +182,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Navigation
 
+- **Bottom Nav** — `c2-bottom-nav, c2-bottom-nav-item` · `@c2n/components/bottom-nav` — The mobile tab bar: three to five destinations along the bottom of the screen, each an icon over a short label with a count or dot badge. Children: `c2-bottom-nav-item`.
 - **Breadcrumb** — `c2-breadcrumb` · `@c2n/components/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
 - **Command** — `c2-command, c2-command-item, c2-command-group, c2-command-separator` · `@c2n/components/command` — A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette. Children: `c2-command-group`, `c2-command-item`, `c2-command-separator`.
 - **Context Menu** — `c2-context-menu` · `@c2n/components/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.

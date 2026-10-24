@@ -282,6 +282,32 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-bottom-nav",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the c2-bottom-nav-item children; style them through their own --c2-bottom-nav-item__* variables, which inherit from the bar."
+    },
+    {
+      "tag": "c2-bottom-nav-item",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned label text; the label part sets its type through the item's font variables."
+    },
+    {
+      "tag": "c2-bottom-nav-item",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-bottom-nav-item__icon--size"],
+      "reason": "The icon wrapper sizes the slotted icon, and hands the size to Feather and Phosphor icons, through the icon size variable."
+    },
+    {
+      "tag": "c2-bottom-nav-item",
+      "slot": "current-icon",
+      "decision": "variables",
+      "variables": ["--c2-bottom-nav-item__icon--size"],
+      "reason": "The current icon shares the icon wrapper and its size variable."
+    },
+    {
       "tag": "c2-breadcrumb",
       "slot": "",
       "decision": "assigned-content",

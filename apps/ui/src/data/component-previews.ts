@@ -31,6 +31,12 @@ export const componentPreviews: Record<string, string> = {
   banner: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
   'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:12px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b)"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam style="--c2-border-beam__beam--width:2px;--c2-border-beam__beam--size:140px;--c2-border-beam__beam--color-from:#3b82f6;--c2-border-beam__beam--color-to:#a5b4fc;--c2-border-beam__beam--opacity:1;--c2-border-beam__beam--filter:drop-shadow(0 0 6px rgba(59, 130, 246, 0.75));--c2-border-beam__beam--duration:4s"></c2-border-beam></div>`,
+  'bottom-nav': `<c2-bottom-nav value="home" style="width:300px;max-width:100%;--c2-bottom-nav--position:relative;--c2-bottom-nav--border-radius:14px;--c2-bottom-nav--border-top:none;--c2-bottom-nav--box-shadow:0 0 0 1px var(--c2-theme--color-outline-variant, #e4e4e7)">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>`,
   breadcrumb: `<c2-breadcrumb>
   <c2-link-button href="#">Home</c2-link-button>
   <c2-link-button href="#">Library</c2-link-button>
