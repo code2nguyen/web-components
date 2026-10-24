@@ -218,7 +218,8 @@ test('swipe-close: a right sheet drags toward the right edge', async ({ page, re
   const start = await center(page.locator('[part="header"]'))
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
-  await page.mouse.move(start.x + 200, start.y, { steps: 8 })
+  // 150px is past 35% of the 380px panel and keeps the pointer inside the viewport, which Firefox needs to deliver it.
+  await page.mouse.move(start.x + 150, start.y, { steps: 8 })
   await page.mouse.up()
   await expect(page.locator('c2-sheet')).toHaveJSProperty('open', false)
 })
