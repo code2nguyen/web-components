@@ -180,13 +180,9 @@ test('localised More actions and Back to', async ({ page, renderScenario }) => {
   await renderScenario(
     `<div lang="fr">${header('', 'narrow', '<c2-button slot="actions">Un</c2-button><c2-button slot="actions">Deux</c2-button><c2-button slot="actions">Trois</c2-button><c2-button slot="actions">Quatre</c2-button><c2-button slot="actions" primary>Valider</c2-button>')}</div>`,
   )
-  await page.evaluate(async () => {
-    const { addTranslations } = await import('/packages/core/src/localize.ts')
-    addTranslations({ fr: { 'page-header': { moreActions: "Plus d'actions", backTo: 'Retour à {0}' } } })
-  })
   await expect(page.getByRole('link', { name: 'Retour à Batches' })).toBeVisible()
   await page.locator('c2-page-header').evaluate((element) => ((element as HTMLElement).style.width = '300px'))
-  await expect(page.getByRole('button', { name: "Plus d'actions" })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Plus d’actions' })).toBeVisible()
 })
 
 test('accessible, wide and narrow', async ({ page, renderScenario }) => {

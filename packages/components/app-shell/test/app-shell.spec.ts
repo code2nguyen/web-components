@@ -210,10 +210,6 @@ test('storage-key keeps the side choice across reloads', async ({ page, renderSc
 
 test('localised names follow lang', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr">${shell()}</div>`)
-  await page.evaluate(async () => {
-    const { addTranslations } = await import('/packages/core/src/localize.ts')
-    addTranslations({ fr: { 'app-shell': { navigation: 'Principale', closeNavigation: 'Fermer la navigation' } } })
-  })
   await expect(page.getByRole('navigation', { name: 'Principale' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Fermer la navigation' })).toBeVisible()
 })
