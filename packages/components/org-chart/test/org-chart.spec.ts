@@ -162,6 +162,39 @@ test('collapsing the manager of the focused card hands it the Tab stop', async (
   await expect(item(page, 'Li Wei')).toHaveAttribute('tabindex', '0')
 })
 
+test('collapsing from code moves focus from a hidden card to its drawn manager', async ({ page, renderScenario }) => {
+  await renderScenario(chart())
+  await item(page, 'Sam Patel').focus()
+  await page.locator('c2-org-chart').evaluate((el: OrgChart) => el.collapseAll())
+  await expect(item(page, 'Ana Ruiz')).toBeFocused()
+  await page.locator('c2-org-chart').evaluate((el: OrgChart) => el.focusItem('joe'))
+  await expect(item(page, 'Joe Park')).toBeFocused()
+  await page.locator('c2-org-chart').evaluate((el: OrgChart) => (el.collapsedItems = ['maya']))
+  await expect(item(page, 'Maya Cohen')).toBeFocused()
+})
+
+test('a duplicated id is drawn once', async ({ page, renderScenario }) => {
+  const items = [
+    {
+      id: 'ana',
+      label: 'Ana Ruiz',
+      children: [
+        { id: 'x', label: 'First' },
+        { id: 'x', label: 'Second' },
+      ],
+    },
+  ]
+  await renderScenario(`<c2-org-chart items='${JSON.stringify(items)}'></c2-org-chart>`)
+  await expect(page.getByRole('treeitem')).toHaveCount(2)
+  await expect(item(page, 'Second')).toHaveCount(0)
+})
+
+test('items that are not an array draw the empty state instead of throwing', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-org-chart items='{"id":"ana","children":{}}'><p slot="empty">Nothing</p></c2-org-chart>`)
+  await expect(page.getByText('Nothing')).toBeVisible()
+  expect(await page.locator('c2-org-chart').evaluate((el: OrgChart) => el.allNodes.length)).toBe(0)
+})
+
 test('a selectable chart selects one card at a time, never a disabled one', async ({ page, renderScenario }) => {
   await renderScenario(chart('selectable'))
   const host = page.locator('c2-org-chart')
@@ -213,6 +246,9 @@ test('renderItem replaces the content of every card', async ({ page, renderScena
 test('an empty chart shows the empty slot', async ({ page, renderScenario }) => {
   await renderScenario('<c2-org-chart><p slot="empty">No one here yet</p></c2-org-chart>')
   await expect(page.getByText('No one here yet')).toBeVisible()
+  // Not announced as an empty tree.
+  await expect(page.locator('c2-org-chart')).toHaveHostAria('role', null)
+  await accessible(page)
   await props(page.locator('c2-org-chart'), { items: team })
   await expect(page.getByText('No one here yet')).toBeHidden()
   await expect(page.getByRole('treeitem')).toHaveCount(6)

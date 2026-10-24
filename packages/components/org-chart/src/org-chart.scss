@@ -39,6 +39,7 @@
     description--font-size: 12px,
     description--line-height: 16px,
     toggle--size: 20px,
+    toggle--padding-inline: 4px,
     toggle--background-color: #ffffff,
     toggle--color: #71717a,
     toggle--border: 1px solid #bcbcc6,
@@ -125,7 +126,7 @@ ul {
   transition-property: border-color, background-color, box-shadow;
   transition-duration: css.cssVar(card--transition-duration);
 
-  &:hover {
+  &:hover:not(.disabled) {
     border-color: css.cssVar(card__hover--border-color);
   }
 
@@ -137,6 +138,7 @@ ul {
 
   &.disabled {
     opacity: css.cssVar(card__disabled--opacity);
+    cursor: default;
   }
 }
 
@@ -180,7 +182,7 @@ ul {
   box-sizing: border-box;
   min-width: var(--_toggle);
   height: var(--_toggle);
-  padding-inline: 4px;
+  padding-inline: css.cssVar(toggle--padding-inline);
   border: css.cssVar(toggle--border);
   border-radius: css.cssVar(toggle--border-radius);
   background-color: css.cssVar(toggle--background-color);

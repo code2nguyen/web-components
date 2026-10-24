@@ -130,6 +130,7 @@ const chevron = svg`<svg viewBox="0 0 16 16" width="12" height="12" fill="none" 
  * @cssproperty {font-size} [--c2-org-chart__description--font-size=12px]
  * @cssproperty {line-height} [--c2-org-chart__description--line-height=16px]
  * @cssproperty {pixel} [--c2-org-chart__toggle--size=20px] - Height of the toggle, and its smallest width.
+ * @cssproperty {padding} [--c2-org-chart__toggle--padding-inline=4px] - Space either side of the count.
  * @cssproperty {color} [--c2-org-chart__toggle--background-color=#ffffff]
  * @cssproperty {color} [--c2-org-chart__toggle--color=#71717a]
  * @cssproperty {border} [--c2-org-chart__toggle--border=1px solid #bcbcc6]
@@ -174,6 +175,10 @@ export class OrgChart extends LitElement {
 
   #indexed: OrgChartNode[] | undefined
   #map = new Map<string, NodeEntry>()
+  /** `collapsedItems` as a set, for the render that is in progress. */
+  #collapsed = new Set<string>()
+  /** Whether a card held focus when the update started, so a card that disappears hands focus on. */
+  #focusWithin = false
 
   /** Where every node sits, rebuilt whenever `items` is replaced, so the methods work before the first render. */
   get #entries(): Map<string, NodeEntry> {
@@ -218,20 +223,28 @@ export class OrgChart extends LitElement {
     this.#focus(id)
   }
 
+  protected override willUpdate() {
+    this.#focusWithin = !!this.shadowRoot?.activeElement
+  }
+
   protected override updated() {
-    this.internals.role = 'tree'
-    this.internals.ariaLabel = this.msg.t('label')
-    this.internals.ariaOrientation = this.orientation === 'horizontal' ? 'horizontal' : 'vertical'
+    // An empty chart shows only its `empty` slot: a tree with no items would be announced as an empty tree.
+    const empty = !list(this.items).length
+    this.internals.role = empty ? null : 'tree'
+    this.internals.ariaLabel = empty ? null : this.msg.t('label')
+    this.internals.ariaOrientation = empty ? null : this.orientation === 'horizontal' ? 'horizontal' : 'vertical'
+    // Collapsing from code (collapseAll, a new collapsed-items) can remove the focused card: focus its manager.
+    if (this.#focusWithin && !this.shadowRoot?.activeElement) this.renderRoot.querySelector<HTMLElement>('li.node[tabindex="0"]')?.focus()
   }
 
   override render() {
-    const roots = this.items ?? []
+    const roots = this.#drawn(this.items)
     if (!roots.length) return html`<div class="empty" part="empty"><slot name="empty"></slot></div>`
-    const visible = this.#visible()
-    const tabStop = visible.some((node) => node.id === this.focusedId) ? this.focusedId : visible[0]?.id
+    this.#collapsed = new Set(this.collapsedItems)
+    const tabStop = this.#tabStop()
     const classes = { 'c2-org-chart': true, horizontal: this.orientation === 'horizontal', vertical: this.orientation !== 'horizontal' }
     return html`<div class=${classMap(classes)} part="chart">
-      <ul class="roots" role="none" @keydown=${this.#handleKeydown} @focusin=${this.#handleFocusin}>
+      <ul class="roots" role="none" @keydown=${this.#handleKeydown} @focusin=${this.#handleFocusin} @click=${this.#handleClick}>
         ${repeat(
           roots,
           (node) => node.id,
@@ -241,11 +254,23 @@ export class OrgChart extends LitElement {
     </div>`
   }
 
+  /** The focused card while it is drawn, else its nearest drawn manager, else the first card. */
+  #tabStop(): string | undefined {
+    const visible = new Set(this.#visible().map((node) => node.id))
+    if (visible.has(this.focusedId)) return this.focusedId
+    const manager = this.#ancestors(this.focusedId).find((node) => visible.has(node.id))
+    return manager?.id ?? visible.values().next().value
+  }
+
+  /** The nodes of a list that are drawn: a node whose id an earlier node already took is left out. */
+  #drawn(nodes: OrgChartNode[] | undefined): OrgChartNode[] {
+    return list(nodes).filter((node) => this.#entries.get(node.id)?.node === node)
+  }
+
   #renderNode(node: OrgChartNode, tabStop: string | undefined): unknown {
-    const entry = this.#entries.get(node.id)
-    if (!entry) return nothing
+    const entry = this.#entries.get(node.id)!
     const branch = hasChildren(node)
-    const expanded = !branch || !this.collapsedItems.includes(node.id)
+    const expanded = !branch || !this.#collapsed.has(node.id)
     const selected = this.selectable && this.value === node.id
     const context = { node, parent: entry.parent, level: entry.level, expanded, selected }
     const cardId = `card-${entry.key}`
@@ -264,12 +289,7 @@ export class OrgChart extends LitElement {
       aria-disabled=${node.disabled ? 'true' : nothing}
     >
       <div class="box">
-        <div
-          id=${cardId}
-          class=${classMap({ card: true, selected, disabled: !!node.disabled })}
-          part=${selected ? 'card card-selected' : 'card'}
-          @click=${() => this.#activate(node)}
-        >
+        <div id=${cardId} class=${classMap({ card: true, selected, disabled: !!node.disabled })} part=${selected ? 'card card-selected' : 'card'}>
           ${
             this.renderItem
               ? this.renderItem(context)
@@ -287,7 +307,6 @@ export class OrgChart extends LitElement {
                 part="toggle"
                 aria-hidden="true"
                 title=${expanded ? this.msg.t('collapse') : this.msg.t('expand', node.children!.length)}
-                @click=${() => this.#toggle(node)}
                 >${expanded ? chevron : node.children!.length}</span
               >`
             : nothing
@@ -297,7 +316,7 @@ export class OrgChart extends LitElement {
         branch && expanded
           ? html`<ul class="children" role="group">
               ${repeat(
-                node.children!,
+                this.#drawn(node.children),
                 (child) => child.id,
                 (child) => this.#renderNode(child, tabStop),
               )}
@@ -312,16 +331,16 @@ export class OrgChart extends LitElement {
     const entries = (this.#map = new Map<string, NodeEntry>())
     let key = 0
     const walk = (nodes: OrgChartNode[], parent: OrgChartNode | undefined, level: number) => {
-      nodes.forEach((node, index) => {
+      list(nodes).forEach((node, index) => {
         if (entries.has(node.id)) {
           console.warn(`c2-org-chart: the id "${node.id}" is used by more than one node; only the first is drawn.`)
           return
         }
         entries.set(node.id, { node, parent, level, posInSet: index + 1, setSize: nodes.length, key: key++ })
-        if (node.children) walk(node.children, node, level + 1)
+        walk(list(node.children), node, level + 1)
       })
     }
-    walk(this.items ?? [], undefined, 0)
+    walk(list(this.items), undefined, 0)
   }
 
   /** The drawn nodes in drawing order: a collapsed node's reports are left out. */
@@ -332,10 +351,10 @@ export class OrgChart extends LitElement {
       for (const node of nodes) {
         if (this.#entries.get(node.id)?.node !== node) continue
         result.push(node)
-        if (node.children && !collapsed.has(node.id)) walk(node.children)
+        if (!collapsed.has(node.id)) walk(list(node.children))
       }
     }
-    walk(this.items ?? [])
+    walk(list(this.items))
     return result
   }
 
@@ -350,7 +369,7 @@ export class OrgChart extends LitElement {
   }
 
   #itemOf(id: string): HTMLElement | undefined {
-    return [...this.renderRoot.querySelectorAll<HTMLElement>('li.node')].find((item) => item.dataset.id === id)
+    return this.renderRoot.querySelector<HTMLElement>(`li.node[data-id="${CSS.escape(id)}"]`) ?? undefined
   }
 
   #cardOf(id: string): HTMLElement | undefined {
@@ -361,6 +380,15 @@ export class OrgChart extends LitElement {
     this.focusedId = id
     await this.updateComplete
     this.#itemOf(id)?.focus()
+  }
+
+  #handleClick(event: MouseEvent) {
+    const target = event.target as HTMLElement
+    const id = target.closest<HTMLElement>('li.node')?.dataset.id
+    const node = id ? this.#entries.get(id)?.node : undefined
+    if (!node) return
+    if (target.closest('.toggle')) this.#toggle(node)
+    else if (target.closest('.card')) this.#activate(node)
   }
 
   #handleFocusin(event: FocusEvent) {
@@ -387,7 +415,7 @@ export class OrgChart extends LitElement {
     if (!expanded && this.#ancestors(this.focusedId).includes(node)) this.#focus(node.id)
     this.dispatchEvent(
       new CustomEvent<OrgChartExpansionChangeEventDetail>('expansion-change', {
-        detail: { collapsedItems: this.collapsedItems, node, expanded },
+        detail: { collapsedItems: [...this.collapsedItems], node, expanded },
         bubbles: false,
       }),
     )
@@ -413,7 +441,7 @@ export class OrgChart extends LitElement {
       case inward:
         if (!hasChildren(node)) break
         if (this.collapsedItems.includes(node.id)) this.#setExpanded(node, true)
-        else target = node.children![0]
+        else target = this.#drawn(node.children)[0]
         break
       case outward:
         if (hasChildren(node) && !this.collapsedItems.includes(node.id)) this.#setExpanded(node, false)
@@ -445,7 +473,12 @@ export class OrgChart extends LitElement {
 }
 
 function hasChildren(node: OrgChartNode): boolean {
-  return !!node.children?.length
+  return list(node.children).length > 0
+}
+
+/** Reads an `items` or `children` value that may not be an array, as JSON from an attribute can be. */
+function list(nodes: OrgChartNode[] | undefined): OrgChartNode[] {
+  return Array.isArray(nodes) ? nodes : []
 }
 
 declare global {
