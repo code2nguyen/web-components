@@ -825,6 +825,15 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
   '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },
   '--c2-notepad__sheet__focus--box-shadow': { exclude: 'paper elevation over the desk' },
+  // Rich text editor: its popovers and selection follow the page editor's; the quote bar keeps its own width.
+  '--c2-rich-text-editor__popover--box-shadow': { token: 'shadow-md' },
+  '--c2-rich-text-editor__selection--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
+  '--c2-rich-text-editor__quote--border-left': { token: 'color-outline', value: '3px solid var(--c2-theme--color-outline, #d4d4d8)' },
+  '--c2-rich-text-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
+  '--c2-rich-text-editor__code--font-family': { exclude: 'monospace code face' },
   // Page editor: the floating toolbar and menus are popovers, and the caret's code block and selection follow the accent.
   '--c2-page-editor__popover--box-shadow': { token: 'shadow-md' },
   '--c2-page-editor__selection--background': {

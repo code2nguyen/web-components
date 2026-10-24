@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-rich-text-editor</title>
+    <script type="module" src="/src/rich-text-editor.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+        padding: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .composer {
+        --c2-rich-text-editor__container--border-radius: 12px;
+        --c2-rich-text-editor__content--min-height: 56px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Comment, with a counter and a footer button</h2>
+      <c2-rich-text-editor
+        label="Reply"
+        placeholder="Leave a comment…"
+        maxlength="500"
+        value="Thanks **Mai**, the fix looks right.
+
+- Rename `retryCount`
+- Add a test for the *empty* response"
+      >
+        <button slot="footer-end">Comment</button>
+      </c2-rich-text-editor>
+    </section>
+    <section>
+      <h2>Composer: toolbar at the bottom, mentions with @</h2>
+      <c2-rich-text-editor
+        id="composer"
+        class="composer"
+        label="Message"
+        toolbar-position="bottom"
+        triggers="@"
+        formats="bold italic underline | link | bullet ordered quote"
+        placeholder="Type @ to mention someone…"
+      >
+        <button slot="footer-end">Send</button>
+      </c2-rich-text-editor>
+      <p id="mention-hint"></p>
+    </section>
+    <section>
+      <h2>Floating toolbar</h2>
+      <c2-rich-text-editor label="Note" toolbar-position="floating" value="Select some of this text to format it."></c2-rich-text-editor>
+    </section>
+    <section>
+      <h2>Limited formats, read-only, disabled</h2>
+      <c2-rich-text-editor label="Description" formats="bold italic | bullet" value="Light trail shoe."></c2-rich-text-editor>
+      <br />
+      <c2-rich-text-editor label="Published" readonly value="Approved by **Finance**. See [policy](https://example.com)."></c2-rich-text-editor>
+      <br />
+      <c2-rich-text-editor label="Locked" disabled value="Locked while the ticket is closed."></c2-rich-text-editor>
+    </section>
+    <script type="module">
+      const composer = document.querySelector('#composer')
+      const hint = document.querySelector('#mention-hint')
+      composer.addEventListener('trigger', (event) => {
+        hint.textContent = event.detail.active ? `Mention "${event.detail.query}" (press Enter to pick Mai Tran)` : ''
+      })
+      composer.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key === 'Enter' && hint.textContent) {
+            event.preventDefault()
+            composer.completeTrigger('@Mai Tran', { href: 'https://example.com/people/mai' })
+          }
+        },
+        { capture: true },
+      )
+      composer.addEventListener('submit', () => console.log('submit', composer.value))
+    </script>
+  </body>
+</html>

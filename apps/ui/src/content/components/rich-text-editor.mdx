@@ -1,0 +1,73 @@
+---
+title: 'Rich Text Editor'
+description: 'A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RichTextEditor } from '@c2n/components/rich-text-editor'
+import { Button } from '@c2n/components/button'
+
+`c2-rich-text-editor` is a form field for a few paragraphs of formatted text: a comment, a reply, an email body, a product description. It offers bold, italic, underline, strikethrough, inline code, links, bulleted and numbered lists, quotes and code blocks, and nothing more. For long documents with headings, tables, colours and images, use [`c2-page-editor`](/web-components/components/page-editor).
+
+- **`formats`** picks the buttons, their order and their groups (`"bold italic | link | bullet ordered"`). It is also what the keyboard shortcuts, the Markdown typed as you go (`- `, `1. `, `> `, `**bold**`) and paste may produce: a pasted heading becomes a line, pasted colours are dropped, and styles pasted from Google Docs or Word become the formats they show.
+- **`toolbar-position`** puts the toolbar at the `top`, at the `bottom` next to the app's own buttons (a composer), `floating` over selected text, or `none`. Buttons that do not fit move into a "More" menu.
+- **Keyboard**: the toolbar is one tab stop (arrow keys move inside it, Alt+F10 jumps to it from the text, Escape goes back). Tab leaves the field, except in a list or a code block, where it indents; Escape there gives Tab back. ⌘/Ctrl+Enter fires `submit`, which also submits an enclosing form.
+- **Value**: GitHub-flavoured Markdown, `''` when the field is empty. `toHTML()` gives clean HTML for an email body.
+- **Mentions and tags** are the app's: list the characters in `triggers`, draw a picker on the `trigger` event, and finish with `completeTrigger(text, { href })`.
+
+The element is a form control (`name`, `required`, `maxlength` with a counter, reset, disabled fieldsets) and takes its label, hint and error from an enclosing `c2-form-field`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/rich-text-editor'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/rich-text-editor
+<style>
+  .reply { width: 520px; max-width: 100%; }
+  .composer {
+    width: 520px;
+    max-width: 100%;
+    --c2-rich-text-editor__container--border-radius: 12px;
+    --c2-rich-text-editor__content--min-height: 64px;
+  }
+  .description { width: 360px; max-width: 100%; --c2-rich-text-editor__content--min-height: 64px; }
+</style>
+<div data-label="Comment">
+  <c2-rich-text-editor class="reply" label="Reply" name="body" placeholder="Leave a comment…" maxlength="2000" value="Thanks **Mai**, the fix looks right. Two things before we merge:
+
+- Rename `retryCount` to match the API
+- Add a test for the *empty* response, see [the incident notes](https://example.com)">
+    <c2-button slot="footer-end">Comment</c2-button>
+  </c2-rich-text-editor>
+</div>
+<div data-label="Composer">
+  <c2-rich-text-editor class="composer" label="Message" toolbar-position="bottom" formats="bold italic underline | link | bullet ordered quote" placeholder="Write a message…">
+    <c2-button slot="footer-end">Send</c2-button>
+  </c2-rich-text-editor>
+</div>
+<div data-label="Limited formats">
+  <c2-rich-text-editor class="description" label="Description" formats="bold italic | bullet" value="Light trail shoe with a *rock plate*.
+
+- 270 g
+- 6 mm drop"></c2-rich-text-editor>
+</div>
+<div data-label="Floating toolbar">
+  <c2-rich-text-editor class="reply" label="Note" toolbar-position="floating" value="Select some of this text to format it."></c2-rich-text-editor>
+</div>
+```
+
+## When to use which editor
+
+| Need                                                   | Use                   |
+| ------------------------------------------------------ | --------------------- |
+| Plain text, no formatting                              | `c2-textarea`         |
+| A comment, reply, email body or short description      | `c2-rich-text-editor` |
+| A long document with headings, tables, colours, images | `c2-page-editor`      |
+| A chat message with attachments and a send button      | `c2-chat-input`       |

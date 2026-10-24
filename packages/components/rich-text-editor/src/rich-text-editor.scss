@@ -1,0 +1,455 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-rich-text-editor,
+  $theme: (
+    container--border: 1px solid #bcbcc6,
+    container__hover--border: 1px solid #a1a1aa,
+    container__focus--border: 1px solid #476ef9,
+    container__focus--box-shadow: none,
+    container__error--border: 1px solid #dc2626,
+    container--border-radius: 6px,
+    container--background: #ffffff,
+    container--color: #18181b,
+    container__read-only--background: #fafafa,
+    container__disabled--opacity: 0.38,
+    toolbar--padding: 6px,
+    toolbar--gap: 2px,
+    toolbar--border: 1px solid #e4e4e7,
+    tool--size: 32px,
+    tool--border-radius: 4px,
+    tool--color: #52525b,
+    tool__hover--background: #f4f4f5,
+    tool__pressed--background: #edf1fe,
+    tool__pressed--color: #0265dc,
+    tool__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    separator--color: #e4e4e7,
+    content--padding: 10px 12px,
+    content--min-height: 80px,
+    content--max-height: none,
+    content--font-family: inherit,
+    content--font-size: 14px,
+    content--line-height: 22px,
+    block--margin-top: 6px,
+    placeholder--color: #71717a,
+    selection--background: rgba(2, 101, 220, 0.18),
+    link--color: #0265dc,
+    quote--border-left: 3px solid #d4d4d8,
+    quote--color: #52525b,
+    item--indent: 22px,
+    code--font-family: string.unquote("ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace"),
+    inline-code--background: rgba(135, 131, 120, 0.15),
+    inline-code--border-radius: 4px,
+    code-block--background: #f4f4f5,
+    code-block--border-radius: 4px,
+    footer--padding: 8px 10px 10px 12px,
+    footer--gap: 8px,
+    counter--font-size: 12px,
+    counter--color: #71717a,
+    counter__error--color: #dc2626,
+    popover--background: #ffffff,
+    popover--border: 1px solid #e4e4e7,
+    popover--border-radius: 8px,
+    popover--box-shadow: (0 8px 24px rgba(24, 24, 27, 0.12), 0 2px 6px rgba(24, 24, 27, 0.06)),
+    link-input--border: 1px solid #bcbcc6,
+    button--background: #0265dc,
+    button--color: #ffffff,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+// ---- the box -------------------------------------------------------------------------------------------------------
+
+.container {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    border: css.cssVar(container__hover--border);
+  }
+  &:focus-within {
+    border: css.cssVar(container__focus--border);
+    box-shadow: css.cssVar(container__focus--box-shadow);
+  }
+}
+:host(:state(error)) .container {
+  border: css.cssVar(container__error--border);
+}
+:host([readonly]) .container {
+  background: css.cssVar(container__read-only--background);
+}
+:host([disabled]) .container,
+.container.form-disabled {
+  opacity: css.cssVar(container__disabled--opacity);
+  pointer-events: none;
+}
+
+// ---- toolbar -------------------------------------------------------------------------------------------------------
+
+.toolbar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(toolbar--gap);
+  min-width: 0;
+  padding: css.cssVar(toolbar--padding);
+
+  &.top {
+    border-bottom: css.cssVar(toolbar--border);
+  }
+  &.bottom {
+    flex: 1;
+    padding: 0;
+  }
+  &.floating {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: 4px;
+    border: css.cssVar(popover--border);
+    border-radius: css.cssVar(popover--border-radius);
+    background: css.cssVar(popover--background);
+    box-shadow: css.cssVar(popover--box-shadow);
+    color: css.cssVar(container--color);
+    &:not(:popover-open) {
+      display: none;
+    }
+  }
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(toolbar--gap);
+  flex: 1;
+  min-width: 0;
+}
+.toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(toolbar--gap);
+  flex: none;
+}
+
+.tool {
+  --_size: #{css.cssVar(tool--size)};
+  box-sizing: border-box;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--_size);
+  height: var(--_size);
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(tool--border-radius);
+  background: transparent;
+  color: css.cssVar(tool--color);
+  font: inherit;
+  cursor: pointer;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  &:hover:not(:disabled) {
+    background: css.cssVar(tool__hover--background);
+  }
+  &[aria-pressed='true'] {
+    background: css.cssVar(tool__pressed--background);
+    color: css.cssVar(tool__pressed--color);
+  }
+  &:focus-visible {
+    outline: css.cssVar(tool__focus--outline);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    cursor: default;
+  }
+}
+@media (pointer: coarse) {
+  .tool {
+    --_size: max(44px, #{css.cssVar(tool--size)});
+  }
+}
+.glyph {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+}
+b.glyph {
+  font-weight: 700;
+}
+
+.separator {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: css.cssVar(separator--color);
+}
+
+c2-menu {
+  flex: none;
+}
+
+// ---- the text ------------------------------------------------------------------------------------------------------
+
+.editor {
+  max-height: css.cssVar(content--max-height);
+  overflow-y: auto;
+}
+
+.content {
+  box-sizing: border-box;
+  min-height: css.cssVar(content--min-height);
+  padding: css.cssVar(content--padding);
+  font-family: css.cssVar(content--font-family);
+  font-size: css.cssVar(content--font-size);
+  line-height: css.cssVar(content--line-height);
+  outline: none;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+  caret-color: currentColor;
+  font-variant-ligatures: none;
+
+  &::selection,
+  *::selection {
+    background: css.cssVar(selection--background);
+  }
+
+  > * {
+    margin: css.cssVar(block--margin-top) 0 0;
+  }
+  > :first-child {
+    margin-top: 0;
+  }
+  > .item + .item {
+    margin-top: 2px;
+  }
+}
+:host([readonly]) .content {
+  caret-color: transparent;
+}
+
+p {
+  min-height: 1lh;
+}
+
+a {
+  color: css.cssVar(link--color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+blockquote {
+  margin-left: 2px;
+  padding-left: 12px;
+  border-left: css.cssVar(quote--border-left);
+  color: css.cssVar(quote--color);
+}
+
+code {
+  font-family: css.cssVar(code--font-family);
+}
+:not(pre) > code {
+  padding: 0.15em 0.35em;
+  border-radius: css.cssVar(inline-code--border-radius);
+  background: css.cssVar(inline-code--background);
+  font-size: 0.9em;
+}
+pre {
+  padding: 8px 12px;
+  border-radius: css.cssVar(code-block--border-radius);
+  background: css.cssVar(code-block--background);
+  font-size: 0.93em;
+  white-space: pre-wrap;
+}
+
+.placeholder::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: css.cssVar(placeholder--color);
+  pointer-events: none;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  padding-left: calc(var(--_level, 0) * #{css.cssVar(item--indent)});
+  &[data-indent='1'] {
+    --_level: 1;
+  }
+  &[data-indent='2'] {
+    --_level: 2;
+  }
+  &[data-indent='3'] {
+    --_level: 3;
+  }
+}
+.item-text {
+  flex: 1;
+  min-width: 0;
+}
+.marker {
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(item--indent);
+  height: 1lh;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.item[data-kind='bullet'] > .marker::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.item[data-kind='bullet'][data-indent='1'] > .marker::before,
+.item[data-kind='bullet'][data-indent='3'] > .marker::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.item[data-kind='bullet'][data-indent='2'] > .marker::before {
+  border-radius: 1px;
+}
+.item[data-kind='ordered'] > .marker {
+  padding-left: 2px;
+}
+
+// ---- footer --------------------------------------------------------------------------------------------------------
+
+.footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: css.cssVar(footer--gap);
+  padding: css.cssVar(footer--padding);
+  min-width: 0;
+}
+.spacer {
+  flex: 1;
+}
+.toolbar.bottom + .spacer {
+  display: none;
+}
+::slotted([slot='footer-start']),
+::slotted([slot='footer-end']) {
+  flex: none;
+}
+.counter {
+  color: css.cssVar(counter--color);
+  font-size: css.cssVar(counter--font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.over-limit .counter {
+  color: css.cssVar(counter__error--color);
+  font-weight: 500;
+}
+
+// ---- link popover --------------------------------------------------------------------------------------------------
+
+.link-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 16px));
+  padding: 8px;
+  border: css.cssVar(popover--border);
+  border-radius: css.cssVar(popover--border-radius);
+  background: css.cssVar(popover--background);
+  box-shadow: css.cssVar(popover--box-shadow);
+  color: css.cssVar(container--color);
+  font: 14px/20px system-ui, sans-serif;
+  &:popover-open {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+.link-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: css.cssVar(link-input--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  &:focus {
+    outline: css.cssVar(tool__focus--outline);
+    outline-offset: 0;
+  }
+}
+.link-save {
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: css.cssVar(button--background);
+  color: css.cssVar(button--color);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  &:focus-visible {
+    outline: css.cssVar(tool__focus--outline);
+    outline-offset: 2px;
+  }
+}
+.link-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: css.cssVar(tool--color);
+  cursor: pointer;
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  &:hover {
+    background: css.cssVar(tool__hover--background);
+  }
+  &:focus-visible {
+    outline: css.cssVar(tool__focus--outline);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .tool[aria-pressed='true'] {
+    outline: 1px solid ButtonText;
+  }
+}

@@ -1,6 +1,6 @@
 # Feature: `c2-rich-text-editor` — a compact formatted-text field for comments and emails
 
-**Status**: Draft (design review)
+**Status**: Implemented (`packages/components/rich-text-editor`)
 **Roadmap**: #17, section A, P2
 **Research**: [research.md](./research.md)
 **Mock**: [c2-rich-text-editor mock](https://claude.ai/artifact/LT66A633VSXMByH2LPfweD): anatomy and keyboard, toolbar placements × states, in-context screens (email composer, comment thread, form field) and an interactive prototype with an event log.
@@ -77,31 +77,31 @@ The footer row is not rendered while it is empty (no slotted content, no counter
 | `required`        | `required`         | `boolean`                                   | `false` | `valueMissing` when the text is empty or whitespace.                                                                                                                                                                            |
 | `maxLength`       | `maxlength`        | `number`                                    | `-1`    | Counts text characters (not Markdown). Shows the counter; `tooLong` past it. Input is not blocked.                                                                                                                              |
 
-Read-only getters: `text` (plain text), `form`, `labels`, `validity`, `validationMessage`, `willValidate`, `format` (current `RichTextFormat` at the selection).
+Read-only getters: `text` (plain text), `form`, `labels`, `validity`, `validationMessage`, `willValidate`, `currentFormat` (the `RichTextFormat` at the selection).
 
-Methods: `toHTML()`, `toggleMark(mark)`, `setBlock('paragraph' | 'bullet' | 'ordered' | 'quote' | 'code-block')`, `setLink(href | null)`, `clearFormatting()`, `insertText(text)`, `insertMention({ id, label })`, `focus(options)`, `reset()`, `checkValidity()`, `reportValidity()`, `setCustomValidity(message)`.
+Methods: `toHTML()`, `toggleMark(mark)`, `setBlock('paragraph' | 'bullet' | 'ordered' | 'quote' | 'code-block')`, `setLink(href | null)`, `clearFormatting()`, `insertText(text)`, `completeTrigger(text, { href? })`, `focus(options)`, `reset()`, `checkValidity()`, `reportValidity()`, `setCustomValidity(message)`.
 
 Events (`RichTextEditorEventMap`, merged via `TypedAddEventListener`):
 
-| Event           | Detail                         | Bubbles | Notes                                                                                                                                         |
-| --------------- | ------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `input`         | —                              | yes     | Each edit, after `value` updated.                                                                                                             |
-| `change`        | —                              | yes     | On blur after the value changed.                                                                                                              |
-| `format-change` | `RichTextFormat`               | no      | Marks and block at the selection changed (same shape as `PageEditorFormat`, minus colours).                                                   |
-| `submit`        | —                              | no      | Mod+Enter. Cancelable; when not cancelled and the editor is in a form, the form is `requestSubmit()`ed.                                       |
-| `trigger`       | `{ char, query, rect, range }` | no      | Opt-in through `triggers="@ #"`: typing a trigger character starts a query; fires on each keystroke until Space/Escape. App draws the picker. |
+| Event           | Detail                          | Bubbles | Notes                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | ------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`         | —                               | yes     | Each edit, after `value` updated.                                                                                                                                                                                                                                                                                                                                 |
+| `change`        | —                               | yes     | On blur after the value changed.                                                                                                                                                                                                                                                                                                                                  |
+| `format-change` | `RichTextFormat`                | no      | Marks and block at the selection changed (same shape as `PageEditorFormat`, minus colours).                                                                                                                                                                                                                                                                       |
+| `submit`        | —                               | no      | Mod+Enter. Cancelable; when not cancelled and the editor is in a form, the form is `requestSubmit()`ed.                                                                                                                                                                                                                                                           |
+| `trigger`       | `{ active, char, query, rect }` | no      | Opt-in through `triggers="@ #"`: a trigger character typed at the start of a word starts a query; fires on each change of the word, then once with `active: false` when it ends (Space, Escape, caret moved away, blur). The app draws the picker under `rect` and takes the keys it needs with a capture-phase `keydown` listener that calls `preventDefault()`. |
 
-Slots: `toolbar-end` (app tools on the same roving row), `footer-start`, `footer-end`. Parts: `toolbar`, `content`, `footer`.
+Slots: `toolbar-end` (app tools after the toolbar's buttons, each its own tab stop), `footer-start`, `footer-end`. Parts: `container`, `toolbar`, `content`, `footer`, `link-popover`.
 
 ### Value format
 
 The subset of `c2-page-editor`'s Markdown that the formats need: paragraphs, `-` bullets and `1.` numbers (nested by indentation, up to 3 levels), `>` quotes, fenced code blocks; `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, `[links](…)`, `<u>underline</u>` and `<br>` for a soft break. Parsing never throws; anything outside `formats` is read as text. `toHTML()` emits only `p br strong em u s code pre a[href] ul ol li blockquote`, with `href` through `safeHref`.
 
-The Markdown codec and `safeHref` move from `@c2n/page-editor` to a shared module rather than being copied (open question 2).
+The schema, Markdown codec, block commands, input rules, `safeHref` and the HTML export are shared with `c2-page-editor` through its non-public `@c2n/page-editor/prose` subpath (see open question 2), not copied. The editor restricts that schema: blocks and marks outside `formats` are turned into text when a value is set or something is pasted, and their shortcuts and input rules do nothing.
 
 ## Behaviour
 
-- **Toolbar**: APG toolbar, one tab stop, Left/Right/Home/End, wraps. Mark and list buttons are toggles (`aria-pressed`), link and clear are buttons, `toolbar-end` children join the roving order. Buttons do not take focus on pointer down, so the selection survives. Items that do not fit move into a "More" `c2-menu` at the end (ResizeObserver), which is `menuitemcheckbox` for toggles.
+- **Toolbar**: APG toolbar, one tab stop, Left/Right/Home/End, wraps. Mark and list buttons are toggles (`aria-pressed`), link and clear are buttons, `toolbar-end` children are tab stops of their own after the toolbar (a slotted `c2-icon-button` cannot take part in a roving `tabindex` without the editor writing attributes on author elements). Buttons do not take focus on pointer down, so the selection survives. Items that do not fit move into a "More" `c2-menu` at the end (ResizeObserver), which is `menuitemcheckbox` for toggles.
 - **Keyboard** (mock board 1): Mod+B/I/U, Mod+Shift+X strike, Mod+E code, Mod+K link, Mod+Shift+7/8 lists, Mod+Shift+9 quote, Mod+Alt+C code block, Shift+Enter soft break, Enter on an empty list item leaves the list, Tab/Shift+Tab indent in lists only, Escape releases a list's Tab capture, Alt+F10 to the toolbar and Escape back, Mod+Enter submit, Mod+Shift+V plain paste.
 - **Markdown input rules** as in `c2-page-editor` (`- `, `1. `, `> `, three backticks, `**x**`), with Backspace right after undoing the conversion; only for allowed formats.
 - **Link popover**: Mod+K or the button. With a selection: URL field; on a link: URL, open, remove. Enter applies, Escape closes and restores the selection. A pasted URL over a selection links it.
@@ -112,32 +112,34 @@ The Markdown codec and `safeHref` move from `@c2n/page-editor` to a shared modul
 
 Defaults are `c2-textarea`'s literals for the box and `c2-page-editor`'s for the content, so the theme generator maps them to the same tokens.
 
-| Variable                                                                                   | Default                                     | Notes                                  |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------- | -------------------------------------- |
-| `--c2-rich-text-editor__container--border` / `__hover--border` / `__focus--border`         | `1px solid #bcbcc6` / `#a1a1aa` / `#476ef9` | As `c2-textarea`.                      |
-| `--c2-rich-text-editor__container__focus--box-shadow`                                      | `none`                                      | The mock's focus ring is a preset.     |
-| `--c2-rich-text-editor__container--border-radius` / `--background` / `--color`             | `6px` / `#ffffff` / `#18181b`               |                                        |
-| `--c2-rich-text-editor__container__error--border`                                          | `1px solid #dc2626`                         |                                        |
-| `--c2-rich-text-editor__container__read-only--background`, `__disabled--opacity`           | `#fafafa`, `0.38`                           |                                        |
-| `--c2-rich-text-editor__toolbar--padding` / `--gap` / `--border-bottom`                    | `6px` / `2px` / `1px solid #e4e4e7`         | `--border-top` when at the bottom.     |
-| `--c2-rich-text-editor__tool--size` / `--border-radius` / `--color`                        | `32px` / `4px` / `#3f3f46`                  | 44px under `(pointer: coarse)`.        |
-| `--c2-rich-text-editor__tool__hover--background`                                           | `#f4f4f5`                                   |                                        |
-| `--c2-rich-text-editor__tool__pressed--background` / `--color`                             | `#edf1fe` / `#0265dc`                       | `color-primary-container` / `primary`. |
-| `--c2-rich-text-editor__separator--color`                                                  | `#e4e4e7`                                   |                                        |
-| `--c2-rich-text-editor__content--padding` / `--min-height` / `--max-height`                | `10px 12px` / `80px` / `none`               | Auto-grow bounds.                      |
-| `--c2-rich-text-editor__content--font-family` / `--font-size` / `--line-height`            | `inherit` / `14px` / `22px`                 |                                        |
-| `--c2-rich-text-editor__placeholder--color`                                                | `#71717a`                                   |                                        |
-| `--c2-rich-text-editor__link--color`, `__quote--border-left`, `__inline-code--background`… | as `c2-page-editor`                         |                                        |
-| `--c2-rich-text-editor__footer--padding` / `__counter--color` / `__counter__error--color`  | `8px 10px` / `#71717a` / `#dc2626`          |                                        |
-| `--c2-rich-text-editor__popover--background` / `--border` / `--box-shadow`                 | as `c2-page-editor`'s popover               | Floating toolbar, link popover.        |
+| Variable                                                                                   | Default                                      | Notes                                  |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------- | -------------------------------------- |
+| `--c2-rich-text-editor__container--border` / `__hover--border` / `__focus--border`         | `1px solid #bcbcc6` / `#a1a1aa` / `#476ef9`  | As `c2-textarea`.                      |
+| `--c2-rich-text-editor__container__focus--box-shadow`                                      | `none`                                       | The mock's focus ring is a preset.     |
+| `--c2-rich-text-editor__container--border-radius` / `--background` / `--color`             | `6px` / `#ffffff` / `#18181b`                |                                        |
+| `--c2-rich-text-editor__container__error--border`                                          | `1px solid #dc2626`                          |                                        |
+| `--c2-rich-text-editor__container__read-only--background`, `__disabled--opacity`           | `#fafafa`, `0.38`                            |                                        |
+| `--c2-rich-text-editor__toolbar--padding` / `--gap` / `--border`                           | `6px` / `2px` / `1px solid #e4e4e7`          | The line under a top toolbar.          |
+| `--c2-rich-text-editor__tool--size` / `--border-radius` / `--color`                        | `32px` / `4px` / `#3f3f46`                   | 44px under `(pointer: coarse)`.        |
+| `--c2-rich-text-editor__tool__hover--background`                                           | `#f4f4f5`                                    |                                        |
+| `--c2-rich-text-editor__tool__pressed--background` / `--color`                             | `#edf1fe` / `#0265dc`                        | `color-primary-container` / `primary`. |
+| `--c2-rich-text-editor__separator--color`                                                  | `#e4e4e7`                                    |                                        |
+| `--c2-rich-text-editor__content--padding` / `--min-height` / `--max-height`                | `10px 12px` / `80px` / `none`                | Auto-grow bounds.                      |
+| `--c2-rich-text-editor__content--font-family` / `--font-size` / `--line-height`            | `inherit` / `14px` / `22px`                  |                                        |
+| `--c2-rich-text-editor__placeholder--color`                                                | `#71717a`                                    |                                        |
+| `--c2-rich-text-editor__link--color`, `__quote--border-left`, `__inline-code--background`… | as `c2-page-editor`                          |                                        |
+| `--c2-rich-text-editor__footer--padding` / `__counter--color` / `__counter__error--color`  | `8px 10px 10px 12px` / `#71717a` / `#dc2626` |                                        |
+| `--c2-rich-text-editor__popover--background` / `--border` / `--box-shadow`                 | as `c2-page-editor`'s popover                | Floating toolbar, link popover.        |
 
-Gallery presets: Default (top), Composer (bottom, rounded 10px, send button), Floating, Minimal (none), Borderless inline (comment edit in place), Dark block.
+The full list, with the link, quote, list, code, footer and popover variables, is in the manifest (`custom-elements.json`).
+
+Gallery presets: Default, Composer (bottom, rounded, send button), Focus ring, Soft, Inline edit (borderless until hovered, floating toolbar) and Notebook. No dark card: every card already renders in both themes.
 
 ## Rendering constraints
 
 - No attribute written on the host: `internals` for role-free host state; `aria-*` lives on the content element in the shadow root, which is named by `this.field.label` / `label` / `aria-label`.
 - `FieldContextConsumer(this, { kind: 'text' })`; counter and hint hidden while `field.managed`. Added to the form-field matrix test.
-- SSR: the server renders the toolbar and the value as static HTML in the content element (from the same `toHTML()`), and ProseMirror mounts over it on the client, so there is no layout shift and no hydration mismatch.
+- SSR: the server renders the box, the toolbar and an empty text region, as `c2-page-editor` does; ProseMirror mounts on the client. (Rendering the value as static HTML on the server was dropped: `toHTML()` needs a DOM.)
 - `customElement` from `@c2n/core/element-helper.js`, `property` from `@c2n/core/lit-helper.js`; text in `src/messages.ts` (`defineMessages('rich-text-editor', en)`): tool names, "Formatting", "More formatting", link popover labels, counter announcement.
 - Dependencies: the ProseMirror packages already used by `page-editor`/`notepad`, `@c2n/menu`, `@c2n/overlay`. Add `../menu:build` and `../overlay:build` to `type-check`.
 - Size budget: the ProseMirror chunks are shared with the other editors; the entry itself should stay under ~25 kB gzipped.
@@ -152,15 +154,15 @@ Gallery presets: Default (top), Composer (bottom, rounded 10px, send button), Fl
 - Paste: Google Docs fixture (bold span, wrapper `<b>`), Word fixture, plain paste.
 - Form: submit value, reset, required whitespace, `maxlength` counter and `tooLong`, disabled fieldset, `submit` event cancel, Mod+Enter `requestSubmit`.
 - Positions: bottom, floating (appears on selection, gone on collapse), none, coarse-pointer fallback, overflow into More.
-- Localisation from `test/translations.ts`; SSR hydration with a value; form-field matrix entry.
+- Localisation from `test/translations.ts`; form-field matrix entry.
 
 ## Docs and wiring
 
 `npm run generate` (category Inputs), doc page with rows "Comment", "Composer" and "Limited formats", gallery presets above, preview card, module import, manifest registration, `size:add`. `page-editor.mdx` and `textarea.mdx` get a one-line pointer.
 
-## Open questions
+## Decisions
 
-1. **Value format.** Markdown (consistent with `c2-page-editor` / `c2-notepad`, safe to store, diff-friendly; `toHTML()` for email) vs HTML (what PrimeVue, Mantine, Trix and Gmail use). Proposal: Markdown, plus `toHTML()`; add a `value-format="html"` later only if apps ask.
-2. **Shared codec.** Extract the Markdown codec, schema pieces and `safeHref` from `@c2n/page-editor` into a shared module (`@c2n/core/prose/*.js`, which would make core depend on ProseMirror) or a new private `@c2n/prose` package. Proposal: a new package, so `@c2n/core` stays dependency-free.
-3. **Mentions.** A `trigger` event + `insertMention()` (proposed) vs composing `c2-mention-input` (roadmap #15) inside it once that exists. The event keeps the editor independent of a user directory.
-4. **`submit` name.** It shadows the meaning of the form's own `submit` for listeners on the element; `send` or `submit-request` are alternatives.
+1. **Value format.** Decided: Markdown (consistent with `c2-page-editor` / `c2-notepad`, safe to store, diff-friendly; `toHTML()` for email) vs HTML (what PrimeVue, Mantine, Trix and Gmail use). Proposal: Markdown, plus `toHTML()`; add a `value-format="html"` later only if apps ask.
+2. **Shared codec.** Proposed: a new private `@c2n/prose` package. Not done: `@c2n/components` bundles only component packages and lists every other `@c2n` import as an npm dependency, so a private library package would have had to be published. Instead `@c2n/page-editor` exports its editing core at `@c2n/page-editor/prose` (no `.js` suffix, so the umbrella neither re-exports it nor makes it public API), and the bundle inlines it like the rest of the page editor.
+3. **Mentions.** Decided: the `trigger` event and `completeTrigger(text, { href })`, which replaces the typed word with the text, linked when given an address. The schema has no mention node, so a mention is stored as a link (`[@Mai Tran](https://…/people/mai)`). Composing `c2-mention-input` (roadmap #15) can come later.
+4. **`submit` name.** Decided: `submit`, cancelable and not bubbling, so it never reaches a form's own `submit` listener.

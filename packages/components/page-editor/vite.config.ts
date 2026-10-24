@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/page-editor.ts'],
+      entry: ['src/page-editor.ts', 'src/prose.ts'],
       formats: ['es'],
     },
     minify: false,

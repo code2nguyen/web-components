@@ -33,6 +33,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-code-editor', markup: '<c2-code-editor></c2-code-editor>' },
   { tag: 'c2-notepad', markup: '<c2-notepad></c2-notepad>' },
   { tag: 'c2-page-editor', markup: '<c2-page-editor></c2-page-editor>' },
+  { tag: 'c2-rich-text-editor', markup: '<c2-rich-text-editor></c2-rich-text-editor>' },
   { tag: 'c2-chat-input', markup: '<c2-chat-input></c2-chat-input>' },
   { tag: 'c2-inline-edit', markup: '<c2-inline-edit value="Ada"></c2-inline-edit>' },
   { tag: 'c2-key-value-editor', markup: '<c2-key-value-editor></c2-key-value-editor>' },
