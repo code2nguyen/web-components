@@ -46,7 +46,7 @@ button {
 }
 
 // A document rule beats a component's ::slotted(hr), so separators slotted into a menu or list are left to it.
-:not(c2-menu, c2-list) > hr {
+:not(c2-menu, c2-menubar-menu, c2-list) > hr {
   border: none;
   border-top: 1px solid var(--site-color-outline-variant);
   margin: 32px 0;

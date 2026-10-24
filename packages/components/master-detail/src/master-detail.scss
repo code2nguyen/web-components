@@ -1,0 +1,294 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-master-detail,
+  $theme: (
+    transition-duration: 280ms,
+
+    master--width: 320px,
+    master--background: transparent,
+    detail--background: #ffffff,
+    detail--color: #18181b,
+    divider--border: 1px solid #e4e4e7,
+    pane--overflow: auto,
+
+    placeholder--color: #71717a,
+    placeholder--background: transparent,
+    placeholder--padding: 24px,
+
+    overlay--width: 420px,
+    overlay--box-shadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+    backdrop--background: 'rgba(9, 9, 11, 0.45)',
+
+    toolbar--display: flex,
+    toolbar--min-height: 44px,
+    toolbar--padding: 4px 8px,
+    toolbar--gap: 8px,
+    toolbar--border-bottom: 1px solid #e4e4e7,
+    toolbar--background: transparent,
+
+    back--height: 36px,
+    back--padding: 0 12px 0 6px,
+    back--gap: 4px,
+    back--icon-size: 20px,
+    back--color: rgb(2, 101, 220),
+    back--background: transparent,
+    back__hover--background: #f4f4f5,
+    back--font-size: 14px,
+    back--font-weight: 500,
+    back--border-radius: 6px,
+    back__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// The breakpoint a server-rendered (not yet measured) element is laid out at. A container query cannot read the
+// `breakpoint` property, so this is the property's default; once measured, the custom states take over.
+$fallback-breakpoint: 720px;
+
+:host {
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  container-type: inline-size;
+  --_c2-master-detail-enter: translateX(100%);
+}
+
+:host(:dir(rtl)) {
+  --_c2-master-detail-enter: translateX(-100%);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+}
+
+.master,
+.detail,
+.placeholder,
+.backdrop {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.master {
+  overflow: css.cssVar(pane--overflow);
+  background: css.cssVar(master--background);
+  outline: none;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: css.cssVar(detail--background);
+  color: css.cssVar(detail--color);
+  outline: none;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: css.cssVar(pane--overflow);
+}
+
+.placeholder {
+  display: none;
+  overflow: auto;
+  padding: css.cssVar(placeholder--padding);
+  background: css.cssVar(placeholder--background);
+  color: css.cssVar(placeholder--color);
+}
+
+.backdrop {
+  display: none;
+  background: css.cssVar(backdrop--background);
+}
+
+.toolbar {
+  display: css.cssVar(toolbar--display);
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(toolbar--gap);
+  min-height: css.cssVar(toolbar--min-height);
+  padding: css.cssVar(toolbar--padding);
+  border-bottom: css.cssVar(toolbar--border-bottom);
+  background: css.cssVar(toolbar--background);
+  box-sizing: border-box;
+}
+
+.back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(back--gap);
+  height: css.cssVar(back--height);
+  margin: 0;
+  padding: css.cssVar(back--padding);
+  border: 0;
+  border-radius: css.cssVar(back--border-radius);
+  background: css.cssVar(back--background);
+  color: css.cssVar(back--color);
+  font: inherit;
+  font-size: css.cssVar(back--font-size);
+  font-weight: css.cssVar(back--font-weight);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(back__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(back__focus--outline);
+    outline-offset: 0;
+  }
+}
+
+.back-icon {
+  display: inline-flex;
+  width: css.cssVar(back--icon-size);
+  height: css.cssVar(back--icon-size);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host(:dir(rtl)) .back-icon {
+  transform: scaleX(-1);
+}
+
+// Master and detail side by side; the placeholder fills the detail column while nothing is open.
+@mixin split($when) {
+  :host(#{$when}) .layout {
+    grid-template-columns: min(#{css.cssVar(master--width)}, 50%) minmax(0, 1fr);
+  }
+
+  :host(#{$when}) .master {
+    grid-area: 1 / 1;
+    border-inline-end: css.cssVar(divider--border);
+  }
+
+  :host(#{$when}) .detail,
+  :host(#{$when}) .placeholder {
+    grid-area: 1 / 2;
+  }
+
+  :host(#{$when}) .detail {
+    display: none;
+  }
+
+  :host(#{$when}[open]) .detail {
+    display: flex;
+  }
+
+  :host(#{$when}:not([open])) .placeholder {
+    display: block;
+  }
+
+  :host(#{$when}) .toolbar {
+    display: none;
+  }
+}
+
+// One cell: the detail rests off the inline-end edge and slides over the master when open.
+@mixin collapsed($when) {
+  :host(#{$when}) .detail {
+    transform: var(--_c2-master-detail-enter);
+    visibility: hidden;
+    transition:
+      transform css.cssVar(transition-duration) animation.$standard-easing,
+      visibility 0s linear css.cssVar(transition-duration);
+  }
+
+  :host(#{$when}[open]) .detail {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform css.cssVar(transition-duration) animation.$standard-easing,
+      visibility 0s;
+  }
+}
+
+@mixin stack($when) {
+  @include collapsed($when);
+
+  // The master hides once the detail has covered it, so it neither shows through nor takes a find-in-page hit.
+  :host(#{$when}) .master {
+    transition: visibility 0s;
+  }
+
+  :host(#{$when}[open]) .master {
+    visibility: hidden;
+    transition: visibility 0s linear css.cssVar(transition-duration);
+  }
+}
+
+@mixin overlay($when) {
+  @include collapsed($when);
+
+  :host(#{$when}) .detail {
+    justify-self: end;
+    width: min(#{css.cssVar(overlay--width)}, 100%);
+    box-shadow: css.cssVar(overlay--box-shadow);
+    z-index: 1;
+  }
+
+  :host(#{$when}:not([open])) .detail {
+    box-shadow: none;
+  }
+
+  :host(#{$when}) .backdrop {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity css.cssVar(transition-duration) animation.$standard-easing;
+  }
+
+  :host(#{$when}[open]) .backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// Measured: the layout the element computed from its width and `breakpoint`.
+@include split(':state(split)');
+@include stack(':state(stack)');
+@include overlay(':state(overlay)');
+
+// Not measured yet (server-rendered, or before the first resize observation): a container query at the default.
+@container (min-width: #{$fallback-breakpoint}) {
+  @include split(':not(:state(measured))');
+}
+
+@container (max-width: #{$fallback-breakpoint - 0.02px}) {
+  @include stack(':not(:state(measured)):not([collapse="overlay"])');
+  @include overlay(':not(:state(measured))[collapse="overlay"]');
+}
+
+// A layout change made by the width, not the user, does not slide.
+:host(:state(instant)) {
+  .detail,
+  .master,
+  .backdrop {
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail,
+  .master,
+  .backdrop {
+    transition: none !important;
+  }
+}

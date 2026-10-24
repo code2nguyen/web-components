@@ -156,6 +156,10 @@ const { componentId, currentId = componentId, section = 'components', headings =
     &__toc {
       position: sticky;
       top: calc(var(--site-header-height) + 40px);
+      // A long list scrolls in its column; c2-table-of-contents keeps the current entry in view.
+      max-height: calc(100vh - var(--site-header-height) - 64px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
     &__panel {
       display: none;

@@ -369,6 +369,14 @@
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
     },
+    "./float-button": {
+      "types": "./dist/float-button.d.ts",
+      "default": "./dist/float-button.js"
+    },
+    "./float-button/float-button-action": {
+      "types": "./dist/float-button/float-button-action.d.ts",
+      "default": "./dist/float-button/float-button-action.js"
+    },
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
@@ -517,6 +525,10 @@
       "types": "./dist/masonry/masonry-item.d.ts",
       "default": "./dist/masonry/masonry-item.js"
     },
+    "./master-detail": {
+      "types": "./dist/master-detail.d.ts",
+      "default": "./dist/master-detail.js"
+    },
     "./mat-icon": {
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
@@ -536,6 +548,14 @@
     "./menu/menu-row": {
       "types": "./dist/menu/menu-row.d.ts",
       "default": "./dist/menu/menu-row.js"
+    },
+    "./menubar": {
+      "types": "./dist/menubar.d.ts",
+      "default": "./dist/menubar.js"
+    },
+    "./menubar/menubar-menu": {
+      "types": "./dist/menubar/menubar-menu.d.ts",
+      "default": "./dist/menubar/menubar-menu.js"
     },
     "./mermaid": {
       "types": "./dist/mermaid.d.ts",
@@ -744,6 +764,10 @@
     "./table/table-column": {
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
+    },
+    "./table-of-contents": {
+      "types": "./dist/table-of-contents.d.ts",
+      "default": "./dist/table-of-contents.js"
     },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
@@ -1014,6 +1038,7 @@
     "@c2n/diff-viewer": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
+    "@c2n/float-button": "*",
     "@c2n/flow": "*",
     "@c2n/form": "*",
     "@c2n/form-field": "*",
@@ -1043,9 +1068,11 @@
     "@c2n/marker": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
+    "@c2n/master-detail": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
+    "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
@@ -1092,6 +1119,7 @@
     "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
+    "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
     "@c2n/text-field": "*",
