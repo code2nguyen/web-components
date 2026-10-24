@@ -31,6 +31,30 @@ export interface SwipeAction {
   removeEventListener: TypedRemoveEventListener<SwipeAction, SwipeActionEventMap>
 }
 
+const MODIFIERS = ['alt', 'control', 'meta', 'shift'] as const
+
+/**
+ * Whether a key press matches one of the space-separated shortcuts of an `aria-keyshortcuts` value (`Delete`,
+ * `Shift+Delete`, `E`). Modifiers must match exactly; the key compares case-insensitively, and `Space` is the space bar.
+ */
+function matchesShortcut(event: KeyboardEvent, value: string): boolean {
+  const pressed = { alt: event.altKey, control: event.ctrlKey, meta: event.metaKey, shift: event.shiftKey }
+  const key = event.key === ' ' ? 'space' : event.key.toLowerCase()
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .some((shortcut) => {
+      const parts = shortcut.toLowerCase().split('+')
+      const wanted = parts.pop()
+      const modifiers = new Set(parts)
+      // Shift is part of a printable key ("E" is Shift+e), so it only has to match when the shortcut names it or the key is not printable.
+      return (
+        wanted === key &&
+        MODIFIERS.every((name) => (name === 'shift' && key.length === 1 && !modifiers.has('shift') ? true : modifiers.has(name) === pressed[name]))
+      )
+    })
+}
+
 /** How far the pointer moves before a press becomes a swipe (or is left to the page as a scroll). */
 const DRAG_SLOP = 6
 /** A release faster than this (px/ms) settles in the direction of the flick, whatever the distance. */
@@ -45,9 +69,14 @@ const FULL_SWIPE_RATIO = 0.6
  * it, Escape, or activating one of its actions closes it again.
  *
  * Put `c2-button`s (or any focusable element) in the `start` and `end` slots; they sit centred at their own height, or
- * fill the row with `--c2-swipe-action__actions--align-items: stretch`. The
- * actions stay in the Tab order and in the accessibility tree while hidden, and focusing one opens its side, so the
- * row works without a pointer. Only one side can be open; vertical drags are left to the page so a list still scrolls.
+ * fill the row with `--c2-swipe-action__actions--align-items: stretch`. Only one side can be open; vertical drags are
+ * left to the page so a list still scrolls.
+ *
+ * Keyboard: by default the actions stay in the Tab order and in the accessibility tree while hidden, and focusing one
+ * opens its side. Give an action `aria-keyshortcuts` (`Delete`, `E`, `Shift+Delete`) and that key runs it while focus
+ * is on the row's content; a row with shortcuts takes its closed actions out of the Tab order, so a list of rows (each
+ * wrapping a `c2-list-item` in a `c2-list`) stays one Tab stop with arrow keys between rows, as in `c2-reorder-list`.
+ * Name the shortcuts somewhere a screen reader reads them, such as the row's description.
  *
  * With `full-swipe`, dragging past 60% of the row's width arms the outermost action of that side (the first `start`
  * action, the last `end` action), which grows to fill the row; releasing there fires a cancelable `full-swipe` event
@@ -104,6 +133,9 @@ export class SwipeAction extends LitElement {
 
   @state() private hasActions = { start: false, end: false }
 
+  /** Whether an action declares `aria-keyshortcuts`: then the closed actions leave the Tab order. */
+  @state() private hasShortcuts = false
+
   @query('.start') private startBox?: HTMLElement
   @query('.end') private endBox?: HTMLElement
   @query('.content') private contentBox?: HTMLElement
@@ -157,8 +189,11 @@ export class SwipeAction extends LitElement {
       if (this.startBox) this.resizeObserver.observe(this.startBox)
       if (this.endBox) this.resizeObserver.observe(this.endBox)
       if (this.contentBox) this.resizeObserver.observe(this.contentBox)
+      // Observing reports every box once after layout, which is the first measurement: measuring here instead would
+      // set state from inside an update and render twice.
+    } else {
+      this.measure()
     }
-    this.measure()
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -187,6 +222,8 @@ export class SwipeAction extends LitElement {
     // Read the slots here rather than only on `slotchange`, which does not fire when a server-rendered shadow root hydrates.
     const hasActions = { start: this.actionsOf('start').length > 0, end: this.actionsOf('end').length > 0 }
     if (hasActions.start !== this.hasActions.start || hasActions.end !== this.hasActions.end) this.hasActions = hasActions
+    const hasShortcuts = this.shortcutActions().length > 0
+    if (hasShortcuts !== this.hasShortcuts) this.hasShortcuts = hasShortcuts
     const next = { ...this.widths }
     for (const side of ['start', 'end'] as const) {
       const box = side === 'start' ? this.startBox : this.endBox
@@ -340,9 +377,38 @@ export class SwipeAction extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent): void => {
-    if (event.key !== 'Escape' || !this.open || event.defaultPrevented) return
+    if (event.defaultPrevented) return
+    if (event.key === 'Escape') {
+      if (!this.open) return
+      event.preventDefault()
+      this.setOpen('')
+      return
+    }
+    if (this.disabled || !this.isFromContent(event)) return
+    const action = this.shortcutActions().find((element) => matchesShortcut(event, element.getAttribute('aria-keyshortcuts') ?? ''))
+    if (!action) return
+    // The key is the action's: a list around the row must not also read it (as typeahead, say).
     event.preventDefault()
+    event.stopPropagation()
     this.setOpen('')
+    action.click()
+  }
+
+  /** The actions of both sides that declare `aria-keyshortcuts`, looked up through `display: contents` wrappers. */
+  private shortcutActions(): HTMLElement[] {
+    return [...this.actionsOf('start'), ...this.actionsOf('end')]
+      .map((element) => SwipeAction.actionElement(element))
+      .filter((element): element is HTMLElement => !!element?.getAttribute('aria-keyshortcuts')?.trim())
+  }
+
+  /** Whether a key was pressed on the row's content itself, not in one of its actions or a text field inside it. */
+  private isFromContent(event: KeyboardEvent): boolean {
+    const origin = event.composedPath()[0]
+    if (origin instanceof HTMLElement && (origin.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(origin.tagName))) return false
+    let child = event.target as Element | null
+    while (child && child.parentElement !== this) child = child.parentElement
+    const slot = child?.getAttribute('slot')
+    return !!child && slot !== 'start' && slot !== 'end'
   }
 
   /** Focus moving onto an action shows its side, so the hidden actions are usable from the keyboard. */
@@ -381,6 +447,7 @@ export class SwipeAction extends LitElement {
         <div
           class=${classMap({ actions: true, start: true, revealed: revealed === 'start' })}
           part="start"
+          ?inert=${this.hasShortcuts && revealed !== 'start' && this.open !== 'start'}
           style=${styleMap({ width: stretch('start') })}
           @click=${this.handleActionClick}
         >
@@ -389,6 +456,7 @@ export class SwipeAction extends LitElement {
         <div
           class=${classMap({ actions: true, end: true, revealed: revealed === 'end' })}
           part="end"
+          ?inert=${this.hasShortcuts && revealed !== 'end' && this.open !== 'end'}
           style=${styleMap({ width: stretch('end') })}
           @click=${this.handleActionClick}
         >

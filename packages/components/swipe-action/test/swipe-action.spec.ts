@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
+import type { SwipeAction } from '../src/swipe-action'
 import { test, expect } from './fixture'
 
 /** Drags the row's content horizontally by `dx` with a real mouse, in steps so the component sees a gesture. */
@@ -151,7 +152,7 @@ test('disabled does not move', async ({ page, scenario }) => {
 
 test('setting open from code reveals that side without an event', async ({ page, scenario }) => {
   await scenario()
-  await subject(page).evaluate((host) => host.show('start'))
+  await subject(page).evaluate((host) => (host as SwipeAction).show('start'))
   expect(await contentOffset(page)).toBe(80)
   await expect(log(page)).toHaveText('')
 })
@@ -164,3 +165,62 @@ for (const state of ['closed', 'open']) {
     expect(results.violations).toEqual([])
   })
 }
+
+test.describe('rows of a c2-list', () => {
+  const row = (page: Page, label: string) => page.locator('c2-list-item', { hasText: label })
+
+  test('the list finds each wrapped row, and arrow keys move between rows', async ({ page, scenario }) => {
+    await scenario('list')
+    await row(page, 'Apple').click()
+    await expect(log(page)).toHaveText('select:a')
+    await page.keyboard.press('ArrowDown')
+    await expect(row(page, 'Banana')).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(row(page, 'Cherry')).toBeFocused()
+  })
+
+  test("a shortcut key runs that row's action without selecting the row or reaching typeahead", async ({ page, scenario }) => {
+    await scenario('list')
+    await row(page, 'Apple').click()
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Delete')
+    await expect(log(page)).toHaveText('select:a,click:delete-b')
+    // "a" is Archive's shortcut: it must not also move focus back to Apple through typeahead.
+    await page.keyboard.press('a')
+    await expect(log(page)).toHaveText('select:a,click:delete-b,click:archive-b')
+    await expect(row(page, 'Banana')).toBeFocused()
+  })
+
+  test('the closed actions are out of the Tab order, so the list stays one Tab stop', async ({ page, scenario, tab }) => {
+    await scenario('list')
+    await row(page, 'Apple').click()
+    await tab()
+    await expect(page.locator('#outside')).toBeFocused()
+    await tab(true)
+    await expect(row(page, 'Apple')).toBeFocused()
+  })
+
+  test('a swiped row still opens, its actions take focus, and leaving them closes it', async ({ page, scenario, tab }) => {
+    await scenario('list')
+    const subject = page.locator('c2-swipe-action').nth(1)
+    const box = (await subject.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 - 140, box.y + box.height / 2, { steps: 12 })
+    await page.mouse.up()
+    await expect(subject).toHaveJSProperty('open', 'end')
+    await expect(log(page)).toHaveText('')
+    await page.locator('#delete-b').focus()
+    await expect(page.locator('#delete-b')).toBeFocused()
+    // Shift+Tab goes back to the list's one Tab stop, and the row closes as focus leaves it.
+    await tab(true)
+    await expect(row(page, 'Apple')).toBeFocused()
+    await expect(subject).toHaveJSProperty('open', '')
+  })
+
+  test('has no axe violations', async ({ page, scenario }) => {
+    await scenario('list')
+    const results = await new AxeBuilder({ page }).include('c2-list').analyze()
+    expect(results.violations).toEqual([])
+  })
+})

@@ -9,6 +9,8 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { SwipeAction } from '@c2n/components/swipe-action'
 import { Button } from '@c2n/components/button'
+import { List } from '@c2n/components/list'
+import { ListItem } from '@c2n/components/list-item'
 import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
 import { FeatherFlagIcon as FeatherFlag } from '@c2n/feather-icons/icons/flag.js'
 import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
@@ -25,6 +27,12 @@ width arms the outermost action, and releasing there clicks it: the "swipe all t
 ```typescript tag=CodeBlock
 import '@c2n/components/swipe-action'
 ```
+
+**In a list.** Wrap each `c2-list-item` of a `c2-list` in a `c2-swipe-action`: the list finds the row inside the
+wrapper, so arrow keys, typeahead and selection work as before. Give each action a shortcut with
+`aria-keyshortcuts`: the key runs that action while its row has focus, and a row with shortcuts takes its hidden
+actions out of the Tab order, so the list stays one Tab stop. Name the shortcuts where a screen reader reads them,
+such as the row's description.
 
 The icons below come from `npm install @c2n/feather-icons`. `open` reflects the side that is shown; listen to
 `open-change` to follow it, and to `full-swipe` (cancelable) to confirm a destructive full swipe:
@@ -66,6 +74,9 @@ row.addEventListener('full-swipe', (event) => {
     --c2-button__container--border-radius: 0px;
     --c2-button__container__focus--outline: 2px solid #ffffff;
     --c2-button__container__focus--outline-offset: -4px;
+  }
+  .swipe-inbox {
+    --c2-swipe-action__content--padding: 0;
   }
   .swipe-archive {
     --c2-button__container--background-color: #15803d;
@@ -116,6 +127,27 @@ row.addEventListener('full-swipe', (event) => {
       <c2-button slot="end" class="swipe-flag"><c2-feather-flag slot="prefix-icon"></c2-feather-flag>Flag</c2-button>
       <c2-button slot="end" class="swipe-delete"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-button>
     </c2-swipe-action>
+  </div>
+</div>
+<div data-label="In a list">
+  <div class="swipe-list">
+    <c2-list client:only="lit" aria-label="Inbox" class="swipe-inbox">
+      <c2-swipe-action class="swipe-blocks">
+        <c2-list-item value="ada">Ada Lovelace<span slot="description">Delete key deletes, A archives</span></c2-list-item>
+        <c2-button slot="start" class="swipe-archive" aria-keyshortcuts="A">Archive</c2-button>
+        <c2-button slot="end" class="swipe-delete" aria-keyshortcuts="Delete Backspace">Delete</c2-button>
+      </c2-swipe-action>
+      <c2-swipe-action class="swipe-blocks">
+        <c2-list-item value="grace">Grace Hopper<span slot="description">Delete key deletes, A archives</span></c2-list-item>
+        <c2-button slot="start" class="swipe-archive" aria-keyshortcuts="A">Archive</c2-button>
+        <c2-button slot="end" class="swipe-delete" aria-keyshortcuts="Delete Backspace">Delete</c2-button>
+      </c2-swipe-action>
+      <c2-swipe-action class="swipe-blocks">
+        <c2-list-item value="alan">Alan Turing<span slot="description">Delete key deletes, A archives</span></c2-list-item>
+        <c2-button slot="start" class="swipe-archive" aria-keyshortcuts="A">Archive</c2-button>
+        <c2-button slot="end" class="swipe-delete" aria-keyshortcuts="Delete Backspace">Delete</c2-button>
+      </c2-swipe-action>
+    </c2-list>
   </div>
 </div>
 <div data-label="Full swipe">
