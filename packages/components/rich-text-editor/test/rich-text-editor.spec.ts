@@ -197,6 +197,8 @@ test('Mod+K edits a link; an unsafe address is refused', async ({ page, renderSc
   await page.keyboard.press('ControlOrMeta+k')
   const address = page.getByRole('textbox', { name: 'Link address' })
   await expect(address).toBeFocused()
+  // The text being linked stays highlighted while focus is in the popover.
+  await expect(text$(page).locator('.link-target')).toHaveText('plan')
   await address.fill('example.com/plan')
   await page.keyboard.press('Enter')
   await expect(host(page)).toHaveJSProperty('value', 'Read the [plan](https://example.com/plan)')
@@ -208,6 +210,7 @@ test('Mod+K edits a link; an unsafe address is refused', async ({ page, renderSc
   await expect(address).toHaveValue('https://example.com/plan')
   await page.getByRole('button', { name: 'Remove link' }).click()
   await expect(host(page)).toHaveJSProperty('value', 'Read the plan')
+  await expect(text$(page).locator('.link-target')).toHaveCount(0)
 
   expect(await host(page).evaluate((element) => element.setLink('javascript:alert(1)'))).toBe(false)
   await expect(host(page)).toHaveJSProperty('value', 'Read the plan')
@@ -330,6 +333,12 @@ test('tools that do not fit move into a More menu', async ({ page, renderScenari
   await more.click()
   await host(page).locator('c2-menu-item', { hasText: 'Code block' }).click()
   await expect(text$(page).locator('pre')).toHaveText('Word')
+
+  // The menu ticks the formats the selection already has.
+  await more.click()
+  await expect(host(page).locator('c2-menu-item', { hasText: 'Code block' })).toHaveHostAria('aria-checked', 'true')
+  await expect(host(page).locator('c2-menu-item', { hasText: 'Quote' })).toHaveHostAria('aria-checked', 'false')
+  await page.keyboard.press('Escape')
 
   await props(host(page), { style: 'width: 600px' })
   await expect(more).toHaveCount(0)

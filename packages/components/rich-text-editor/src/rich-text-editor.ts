@@ -7,7 +7,7 @@ import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { Fragment, Slice, type Mark, type Node as ProseNode } from 'prosemirror-model'
-import { EditorState, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
+import { EditorState, Plugin, PluginKey, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView, type NodeView } from 'prosemirror-view'
 import { keymap } from 'prosemirror-keymap'
 import { baseKeymap, chainCommands, toggleMark as toggleMarkCommand } from 'prosemirror-commands'
@@ -89,6 +89,9 @@ export interface RichTextEditor {
   addEventListener: TypedAddEventListener<RichTextEditor, RichTextEditorEventMap>
   removeEventListener: TypedRemoveEventListener<RichTextEditor, RichTextEditorEventMap>
 }
+
+/** The text a link is being edited for, kept highlighted while focus is in the link popover. */
+const linkTarget = new PluginKey<DecorationSet>('c2-rich-text-editor-link-target')
 
 const DEFAULT_TOOLBAR = 'bold italic underline strike | link code | bullet ordered quote code-block'
 
@@ -774,6 +777,20 @@ export class RichTextEditor extends LitElement {
       },
     })
 
+    const linkTargetPlugin = new Plugin<DecorationSet>({
+      key: linkTarget,
+      state: {
+        init: () => DecorationSet.empty,
+        apply: (tr, set) => {
+          const range = tr.getMeta(linkTarget) as { from: number; to: number } | null | undefined
+          if (range === null) return DecorationSet.empty
+          if (range && range.from < range.to) return DecorationSet.create(tr.doc, [Decoration.inline(range.from, range.to, { class: 'link-target' })])
+          return set.map(tr.mapping, tr.doc)
+        },
+      },
+      props: { decorations: (state) => linkTarget.getState(state) },
+    })
+
     return [
       history(),
       inputRules({
@@ -807,6 +824,7 @@ export class RichTextEditor extends LitElement {
       listNumbering,
       normalize,
       placeholder,
+      linkTargetPlugin,
     ]
   }
 
@@ -1010,6 +1028,7 @@ export class RichTextEditor extends LitElement {
     if (range.from !== from || range.to !== to) view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, range.from, range.to)))
     this.linkRange = range
     this.linkOpen = true
+    view.dispatch(view.state.tr.setMeta(linkTarget, range).setMeta('addToHistory', false))
     void this.updateComplete.then(() => {
       const popover = this.linkPopover
       if (!popover.matches(':popover-open')) popover.showPopover()
@@ -1027,6 +1046,8 @@ export class RichTextEditor extends LitElement {
     if (!this.linkOpen) return
     this.linkOpen = false
     this.linkRange = null
+    const view = this.view
+    if (view && !view.isDestroyed) view.dispatch(view.state.tr.setMeta(linkTarget, null).setMeta('addToHistory', false))
     if (this.linkPopover?.matches(':popover-open')) this.linkPopover.hidePopover()
     if (refocus) this.view?.focus()
   }
