@@ -7,6 +7,7 @@ import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
+import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
@@ -161,6 +162,7 @@ export const componentManifests = (function () {
     badge,
     banner,
     borderBeam,
+    bottomNav,
     breadcrumb,
     button,
     buttonGroup,

@@ -63,6 +63,7 @@
         "../../components/badge:build",
         "../../components/banner:build",
         "../../components/border-beam:build",
+        "../../components/bottom-nav:build",
         "../../components/breadcrumb:build",
         "../../components/button-group:build",
         "../../components/button:build",

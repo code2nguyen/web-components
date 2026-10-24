@@ -106,6 +106,7 @@
         "./packages/components/badge:build",
         "./packages/components/banner:build",
         "./packages/components/border-beam:build",
+        "./packages/components/bottom-nav:build",
         "./packages/components/breadcrumb:build",
         "./packages/components/button-group:build",
         "./packages/components/button:build",
