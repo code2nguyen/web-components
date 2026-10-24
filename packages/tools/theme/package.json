@@ -171,6 +171,7 @@
         "../../components/status-panel:build",
         "../../components/steps:build",
         "../../components/streaming-text:build",
+        "../../components/swipe-action:build",
         "../../components/switch:build",
         "../../components/table:build",
         "../../components/tabs:build",

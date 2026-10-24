@@ -1,0 +1,105 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-swipe-action,
+  $theme: (
+    container--background: #f4f4f5,
+    container--border-radius: 0px,
+    container--border: none,
+    content--background: #ffffff,
+    content--color: #18181b,
+    content--padding: 12px 16px,
+    content--min-height: 48px,
+    content__open--box-shadow: 0 0 12px rgba(24, 24, 27, 0.12),
+    content--transition-duration: 200ms,
+    content--transition-timing-function: cubic-bezier(0.2, 0, 0, 1),
+    actions--gap: 8px,
+    actions--padding: 0 8px,
+    actions--align-items: center,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+}
+
+.container {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  background: css.cssVar(container--background);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+}
+
+.actions {
+  position: absolute;
+  inset-block: 0;
+  z-index: 0;
+  display: flex;
+  align-items: css.cssVar(actions--align-items);
+  gap: css.cssVar(actions--gap);
+  box-sizing: border-box;
+  padding: css.cssVar(actions--padding);
+  width: max-content;
+  max-width: 100%;
+  transition: width css.cssVar(content--transition-duration) css.cssVar(content--transition-timing-function);
+}
+
+.start {
+  inset-inline-start: 0;
+}
+
+.end {
+  inset-inline-end: 0;
+  justify-content: flex-end;
+}
+
+// While stretched, the actions share the extra room; an armed full swipe hands all of it to the outermost action.
+.actions ::slotted(*) {
+  flex: 1 1 auto;
+  transition: flex-grow css.cssVar(content--transition-duration) css.cssVar(content--transition-timing-function);
+}
+
+.armed .start.revealed ::slotted(:not(:first-child)),
+.armed .end.revealed ::slotted(:not(:last-child)) {
+  flex-grow: 0;
+}
+
+.armed .start.revealed ::slotted(:first-child),
+.armed .end.revealed ::slotted(:last-child) {
+  flex-grow: 100;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-height: css.cssVar(content--min-height);
+  padding: css.cssVar(content--padding);
+  background: css.cssVar(content--background);
+  color: css.cssVar(content--color);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    transform css.cssVar(content--transition-duration) css.cssVar(content--transition-timing-function),
+    box-shadow css.cssVar(content--transition-duration) css.cssVar(content--transition-timing-function);
+}
+
+.moved .content {
+  box-shadow: css.cssVar(content__open--box-shadow);
+}
+
+.dragging .content,
+.dragging .actions {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .actions,
+  .actions ::slotted(*) {
+    transition: none;
+  }
+}

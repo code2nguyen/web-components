@@ -175,6 +175,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
+- **Swipe Action** — `c2-swipe-action` · `@c2n/components/swipe-action` — A list row that slides sideways to reveal actions behind it, as in a mail or task list on a phone.
 
 ## Navigation
 

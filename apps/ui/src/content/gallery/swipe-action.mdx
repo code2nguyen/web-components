@@ -1,0 +1,103 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SwipeAction } from '@c2n/components/swipe-action'
+import { Button } from '@c2n/components/button'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+## Presets
+
+Curated looks for `c2-swipe-action`. Open any card in the studio to start from it. The `__actions--*` variables decide
+how the actions sit: `padding: 0`, `gap: 0px` and `align-items: stretch` turn buttons into full-bleed blocks, while the
+defaults keep them as buttons at their own height. `__content--*` styles the sliding row and `__container--*` what
+shows behind it. Each card is opened so the actions are visible; swipe it to try the gesture.
+
+<GalleryGrid min="380">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .swipe-default {
+    width: 360px;
+    max-width: 100%;
+  }
+</style>
+<c2-swipe-action class="swipe-default" open="end">
+  Quarterly report, due Friday
+  <c2-button slot="start">Archive</c2-button>
+  <c2-button slot="end">Delete</c2-button>
+</c2-swipe-action>
+```
+
+```html tag=MdxCodeBlock,label=Mail
+<style>
+  .swipe-mail {
+    width: 360px;
+    max-width: 100%;
+    --c2-swipe-action__actions--padding: 0;
+    --c2-swipe-action__actions--gap: 0px;
+    --c2-swipe-action__actions--align-items: stretch;
+    --c2-swipe-action__content--padding: 12px 16px;
+    --c2-button__container--height: 100%;
+    --c2-button__container--border-radius: 0px;
+    --c2-button__container__focus--outline: 2px solid #ffffff;
+    --c2-button__container__focus--outline-offset: -4px;
+  }
+  .swipe-mail-from {
+    display: block;
+    font-weight: 600;
+  }
+  .swipe-mail-subject {
+    display: block;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .swipe-mail-read {
+    --c2-button__container--background-color: #2563eb;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #1d4ed8;
+  }
+  .swipe-mail-archive {
+    --c2-button__container--background-color: #7c3aed;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #6d28d9;
+  }
+  .swipe-mail-delete {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+</style>
+<c2-swipe-action class="swipe-mail" open="end" full-swipe>
+  <span class="swipe-mail-from">Ada Lovelace</span>
+  <span class="swipe-mail-subject">Notes on the analytical engine</span>
+  <c2-button slot="start" class="swipe-mail-read"><c2-feather-mail slot="prefix-icon"></c2-feather-mail>Unread</c2-button>
+  <c2-button slot="end" class="swipe-mail-archive"><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+  <c2-button slot="end" class="swipe-mail-delete"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-button>
+</c2-swipe-action>
+```
+
+```html tag=MdxCodeBlock,label=Card
+<style>
+  .swipe-card {
+    width: 360px;
+    max-width: 100%;
+    --c2-swipe-action__container--border-radius: 14px;
+    --c2-swipe-action__container--background: light-dark(#fee2e2, #3b1212);
+    --c2-swipe-action__content--padding: 16px 20px;
+    --c2-swipe-action__content--min-height: 64px;
+    --c2-swipe-action__actions--padding: 0 12px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+</style>
+<c2-swipe-action class="swipe-card" open="end">
+  Lisbon trip, 12–16 May
+  <c2-button slot="end"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Remove</c2-button>
+</c2-swipe-action>
+```
+
+</GalleryGrid>

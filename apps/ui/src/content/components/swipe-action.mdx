@@ -1,0 +1,130 @@
+---
+title: 'Swipe Action'
+description: 'A list row that slides sideways to reveal actions behind it, as in a mail or task list on a phone.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SwipeAction } from '@c2n/components/swipe-action'
+import { Button } from '@c2n/components/button'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherFlagIcon as FeatherFlag } from '@c2n/feather-icons/icons/flag.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+`c2-swipe-action` wraps one row of a list. Drag the row toward the end edge to reveal the `start` actions, toward the
+start edge to reveal the `end` actions; release past halfway (or flick) and the row stays open, short of it and it
+slides back. A tap on the open row, a press outside it, Escape or activating an action closes it. Vertical drags are
+left to the page, so a list of rows still scrolls. The actions stay in the Tab order while hidden, and focusing one
+opens its side, so every action is reachable from the keyboard. With `full-swipe`, dragging past 60% of the row's
+width arms the outermost action, and releasing there clicks it: the "swipe all the way to delete" gesture.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/swipe-action'
+```
+
+The icons below come from `npm install @c2n/feather-icons`. `open` reflects the side that is shown; listen to
+`open-change` to follow it, and to `full-swipe` (cancelable) to confirm a destructive full swipe:
+
+```typescript tag=CodeBlock
+row.addEventListener('full-swipe', (event) => {
+  if (!confirm('Delete this message?')) event.preventDefault()
+})
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/swipe-action
+<style>
+  .swipe-list {
+    width: 380px;
+    max-width: 100%;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .swipe-list c2-swipe-action + c2-swipe-action {
+    border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .swipe-row-title {
+    display: block;
+    font-weight: 600;
+  }
+  .swipe-row-meta {
+    display: block;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .swipe-blocks {
+    --c2-swipe-action__actions--padding: 0;
+    --c2-swipe-action__actions--gap: 0px;
+    --c2-swipe-action__actions--align-items: stretch;
+    --c2-button__container--height: 100%;
+    --c2-button__container--border-radius: 0px;
+    --c2-button__container__focus--outline: 2px solid #ffffff;
+    --c2-button__container__focus--outline-offset: -4px;
+  }
+  .swipe-archive {
+    --c2-button__container--background-color: #15803d;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #166534;
+  }
+  .swipe-flag {
+    --c2-button__container--background-color: #d97706;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #b45309;
+  }
+  .swipe-delete {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+</style>
+<div data-label="Buttons">
+  <div class="swipe-list">
+    <c2-swipe-action open="end">
+      <span class="swipe-row-title">Design review</span>
+      <span class="swipe-row-meta">Opened: swipe left on any row</span>
+      <c2-button slot="end">Edit</c2-button>
+      <c2-button slot="end">Delete</c2-button>
+    </c2-swipe-action>
+    <c2-swipe-action>
+      <span class="swipe-row-title">Quarterly report</span>
+      <span class="swipe-row-meta">Swipe right to archive, left to edit or delete</span>
+      <c2-button slot="start">Archive</c2-button>
+      <c2-button slot="end">Edit</c2-button>
+      <c2-button slot="end">Delete</c2-button>
+    </c2-swipe-action>
+  </div>
+</div>
+<div data-label="Full-bleed">
+  <div class="swipe-list">
+    <c2-swipe-action class="swipe-blocks" open="start">
+      <span class="swipe-row-title">Lunch with Ada</span>
+      <span class="swipe-row-meta">Archive on the start side</span>
+      <c2-button slot="start" class="swipe-archive"><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+      <c2-button slot="end" class="swipe-flag"><c2-feather-flag slot="prefix-icon"></c2-feather-flag>Flag</c2-button>
+      <c2-button slot="end" class="swipe-delete"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-button>
+    </c2-swipe-action>
+    <c2-swipe-action class="swipe-blocks" open="end">
+      <span class="swipe-row-title">Invoice #4821</span>
+      <span class="swipe-row-meta">Flag and delete on the end side</span>
+      <c2-button slot="start" class="swipe-archive"><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-button>
+      <c2-button slot="end" class="swipe-flag"><c2-feather-flag slot="prefix-icon"></c2-feather-flag>Flag</c2-button>
+      <c2-button slot="end" class="swipe-delete"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-button>
+    </c2-swipe-action>
+  </div>
+</div>
+<div data-label="Full swipe">
+  <div class="swipe-list">
+    <c2-swipe-action class="swipe-blocks" full-swipe>
+      <span class="swipe-row-title">Newsletter</span>
+      <span class="swipe-row-meta">Swipe all the way left to delete</span>
+      <c2-button slot="end" class="swipe-delete"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-button>
+    </c2-swipe-action>
+  </div>
+</div>
+```
