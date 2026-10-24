@@ -27,6 +27,7 @@ declare module 'react' {
         'no-backdrop-close'?: Attribute
         'no-escape'?: Attribute
         'hide-close'?: Attribute
+        'swipe-close'?: Attribute
         'no-scroll-lock'?: Attribute
       }
     }
