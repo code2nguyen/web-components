@@ -1,0 +1,119 @@
+---
+title: 'Overflow List'
+description: 'One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { OverflowList } from '@c2n/components/overflow-list'
+import { Button } from '@c2n/components/button'
+import { IconButton } from '@c2n/components/icon-button'
+import { MenuItem } from '@c2n/components/menu'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherClockIcon as FeatherClock } from '@c2n/feather-icons/icons/clock.js'
+import { FeatherCornerUpLeftIcon as FeatherCornerUpLeft } from '@c2n/feather-icons/icons/corner-up-left.js'
+import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+import { FeatherStarIcon as FeatherStar } from '@c2n/feather-icons/icons/star.js'
+import { FeatherTagIcon as FeatherTag } from '@c2n/feather-icons/icons/tag.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+`c2-overflow-list` lays its children out on one row that never wraps. The children that do not fit fold into a "More" menu at the end, and come back as soon as there is room. It is the "priority+" pattern behind page header actions, mail and editor toolbars, and repository tabs. The row refits when the list is resized, a child's size changes, or children are added and removed. It works in a single pass over sizes it already knows, because folded children stay laid out out of sight.
+
+The menu is built from the folded children, in document order. Each row is named after its child (`data-overflow-label`, then `aria-label`, then its text) and shows a copy of the child's icon. A disabled child gives a disabled row, and a toggle gives a checkbox row. Activating a row clicks the child itself, so its click listeners, form submission and link navigation work as they do in the row. `<hr>` and `c2-separator` children divide groups, both in the row and in the menu. `c2-menu-item` rows slotted into `menu` are always listed after the folded children.
+
+The list reads its children and never writes to them:
+
+- `data-overflow="pinned"` keeps a child in the row whatever the room.
+- `data-overflow-priority="2"` makes a child outlast the ones around it.
+- `collapse-from="start"` folds from the other end, for example for a long path.
+- `min-visible` and `max-visible` bound how many children show.
+
+When the child that has focus folds, focus moves to the trigger. The trigger is named after the count ("3 more items"). It says "including current item" when a folded child carries `aria-current` or is a `selected` link.
+
+Give the list a width: it is a block, so it fills its container. In a flex row, set `flex: 1` and `min-width: 0` on it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/overflow-list'
+```
+
+Importing `@c2n/components/overflow-list` also registers `c2-menu` and `c2-menu-item`. The examples use the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+Drag the corner of each frame to resize it.
+
+```html tag=UsageBlock,package=@c2n/overflow-list
+<style>
+  .frame {
+    width: 420px;
+    max-width: 100%;
+    min-width: 140px;
+    padding: 4px;
+    resize: horizontal;
+    overflow: hidden;
+    border: 1px dashed var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+  }
+  .ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+  }
+  .icons {
+    --c2-overflow-list--gap: 2px;
+    --c2-overflow-list__more--border: 1px solid transparent;
+    --c2-overflow-list__more--border-radius: 999px;
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+  }
+</style>
+<div data-label="Actions">
+  <div class="frame">
+    <c2-overflow-list aria-label="Issue actions">
+      <c2-button class="ghost" data-overflow="pinned"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>Edit</c2-button>
+      <c2-button class="ghost">Assign</c2-button>
+      <c2-button class="ghost">Label</c2-button>
+      <hr />
+      <c2-button class="ghost">Duplicate</c2-button>
+      <c2-button class="ghost">Move</c2-button>
+      <c2-button class="ghost"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>Archive</c2-button>
+      <c2-button class="ghost" disabled>Delete</c2-button>
+      <c2-menu-item slot="menu" value="copy-link">Copy link</c2-menu-item>
+    </c2-overflow-list>
+  </div>
+</div>
+<div data-label="Icon toolbar">
+  <div class="frame" style="width: 220px">
+    <c2-overflow-list class="icons" aria-label="Message actions">
+      <c2-icon-button aria-label="Reply"><c2-feather-corner-up-left></c2-feather-corner-up-left></c2-icon-button>
+      <c2-icon-button aria-label="Archive"><c2-feather-archive></c2-feather-archive></c2-icon-button>
+      <c2-icon-button aria-label="Delete"><c2-feather-trash-2></c2-feather-trash-2></c2-icon-button>
+      <c2-icon-button aria-label="Mark as unread"><c2-feather-mail></c2-feather-mail></c2-icon-button>
+      <c2-icon-button aria-label="Snooze"><c2-feather-clock></c2-feather-clock></c2-icon-button>
+      <c2-icon-button aria-label="Move to"><c2-feather-folder></c2-feather-folder></c2-icon-button>
+      <c2-icon-button aria-label="Labels"><c2-feather-tag></c2-feather-tag></c2-icon-button>
+      <c2-icon-button aria-label="Star" toggle selected><c2-feather-star></c2-feather-star></c2-icon-button>
+    </c2-overflow-list>
+  </div>
+</div>
+<div data-label="From the start">
+  <div class="frame" style="width: 300px">
+    <c2-overflow-list collapse-from="start" aria-label="Path">
+      <c2-button class="ghost">web-components</c2-button>
+      <c2-button class="ghost">packages</c2-button>
+      <c2-button class="ghost">components</c2-button>
+      <c2-button class="ghost">overflow-list</c2-button>
+      <c2-button class="ghost" data-overflow="pinned">src</c2-button>
+    </c2-overflow-list>
+  </div>
+</div>
+```

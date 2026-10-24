@@ -1,0 +1,120 @@
+---
+title: 'Save Bar'
+description: 'A floating bar that appears while a form has unsaved changes, with Discard and Save.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import SaveBarDemo from '../../components/SaveBarDemo.astro'
+
+import { SaveBar } from '@c2n/components/save-bar'
+import { Button } from '@c2n/components/button'
+
+`c2-save-bar` appears once a settings page or a form differs from what was saved: "Unsaved changes", then Discard
+and Save. Place it after the form, in the same scroll container: it sticks to the bottom of that container and floats
+over the content, taking no room in the layout. The app owns the changes. Set `open` while there are some, and save or
+restore them on the `save` and `discard` events. Set `saving` while the save runs, and `invalid` while the changes
+cannot be saved. The message is a live region, so the bar is announced as it shows.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/save-bar'
+```
+
+Wire it to a form:
+
+```typescript tag=CodeBlock
+const form = document.querySelector('form')
+const bar = document.querySelector('c2-save-bar')
+const snapshot = () => Object.fromEntries(new FormData(form))
+let saved = snapshot()
+const sync = () => (bar.open = JSON.stringify(snapshot()) !== JSON.stringify(saved))
+form.addEventListener('input', sync)
+
+bar.addEventListener('save', async () => {
+  // What is sent is what counts as saved: an edit made while the request runs keeps the bar open.
+  const sending = snapshot()
+  bar.saving = true
+  await api.save(sending)
+  saved = sending
+  bar.saving = false
+  sync()
+})
+bar.addEventListener('discard', () => {
+  // Back to the last save, not to the values the page loaded with (which is what form.reset() restores).
+  for (const [name, value] of Object.entries(saved)) form.elements.namedItem(name).value = value
+  sync()
+})
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/save-bar
+<style>
+  .save-bar-frame {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 560px;
+    max-width: 100%;
+    height: 96px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .save-bar-inline {
+    --c2-save-bar--position: relative;
+    --c2-save-bar--inset-bottom: 12px;
+  }
+  .save-bar-secondary {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+</style>
+<div data-label="Unsaved changes">
+  <div class="save-bar-frame">
+    <c2-save-bar class="save-bar-inline" open></c2-save-bar>
+  </div>
+</div>
+<div data-label="Saving">
+  <div class="save-bar-frame">
+    <c2-save-bar class="save-bar-inline" open saving></c2-save-bar>
+  </div>
+</div>
+<div data-label="Invalid, with a message">
+  <div class="save-bar-frame">
+    <c2-save-bar class="save-bar-inline" open invalid>
+      <span slot="message">Unsaved changes · 1 field to fix</span>
+    </c2-save-bar>
+  </div>
+</div>
+<div data-label="Extra action and labels">
+  <div class="save-bar-frame">
+    <c2-save-bar class="save-bar-inline" open save-label="Publish" discard-label="Revert">
+      <c2-button class="save-bar-secondary">Preview</c2-button>
+    </c2-save-bar>
+  </div>
+</div>
+```
+
+The examples set `--c2-save-bar--position: relative` so the bar sits inside its frame; leave it at the default
+`sticky` in an app, or use `fixed` to pin it to the viewport. Leave some bottom padding on the form so the bar never
+covers its last field. On a phone (the bar 480px wide or less) the message takes the top row and the buttons share a
+full-width row below.
+
+`shortcut` makes Ctrl+S (⌘S on a Mac) fire `save` while the bar is open, and `warn-on-leave` has the browser ask
+before the page is closed or reloaded with unsaved changes.
+
+## In an application
+
+A settings screen as it appears in a real app. Edit a field or flip the switch and the bar slides in; change the field
+back and it goes away. Save waits a moment with `saving` set, Discard restores the saved values, and an invalid email
+blocks Save with `invalid` and a slotted message. With `shortcut` set, Ctrl+S / ⌘S saves too. After either action the
+demo moves focus back into the form, since the bar hides.
+
+<SaveBarDemo />

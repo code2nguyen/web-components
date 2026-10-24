@@ -233,6 +233,99 @@ test('a data-URL image in pasted HTML is saved through imageUpload rather than k
   await expect.poll(() => value(page)).toBe('Chart\n![chart](app:1)')
 })
 
+/** A 1×1 PNG a site serves, readable by other pages (`open`) or by its own only; and a page that is not an image. */
+async function serveWebImages(page: Page) {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+  await page.route('https://images.test/**', (route) => {
+    const url = route.request().url()
+    return route.fulfill({
+      body: url.endsWith('.html') ? '<p>Sign in</p>' : png,
+      contentType: url.endsWith('.html') ? 'text/html' : 'image/png',
+      headers: { 'access-control-allow-origin': url.includes('open') ? '*' : 'https://images.test' },
+    })
+  })
+}
+
+/** Records `image-error` on the window, as `error`. */
+const recordImageErrors = (page: Page) =>
+  host(page).evaluate((element) =>
+    element.addEventListener('image-error', (event) => ((window as unknown as { error: string }).error = String((event as CustomEvent).detail.error))),
+  )
+/** What the store and `recordImageErrors` leave on the window. */
+type Recorded = { store: { uploads: string[]; fail: boolean; hold: boolean; waiting: (() => void)[] }; error?: string }
+const store = (page: Page) =>
+  page.evaluate(() => {
+    const { store, error } = window as unknown as Recorded
+    return { uploads: store.uploads, error }
+  })
+
+test('a web image in pasted HTML is copied through imageUpload, written with its address meanwhile', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await serveWebImages(page)
+  await page.evaluate(() => ((window as unknown as Recorded).store.hold = true))
+  await content(page).click()
+  await paste(page, { 'text/html': '<p>Chart</p><img src="https://images.test/open.png" alt="chart">', 'text/plain': 'Chart' })
+  // Closed before its copy is saved, the page keeps the image by its address.
+  await expect.poll(() => value(page)).toBe('Chart\n![chart](https://images.test/open.png)')
+  await page.evaluate(() => {
+    const { store } = window as unknown as { store: { uploads: string[]; fail: boolean; hold: boolean; waiting: (() => void)[] }; error?: string }
+    store.hold = false
+    store.waiting.forEach((release) => release())
+  })
+  await expect.poll(() => value(page)).toBe('Chart\n![chart](app:1)')
+  expect((await store(page)).uploads).toEqual(['app:1 image/png'])
+})
+
+test('a web image the site does not let the page read, or that is not an image, keeps its address, with no image-error', async ({
+  page,
+  renderScenario,
+  browserName,
+}) => {
+  test.skip(browserName === 'webkit', 'WebKit reports a refused cross-origin fetch as a page error even when it is caught.')
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await serveWebImages(page)
+  await recordImageErrors(page)
+  await content(page).click()
+  await paste(page, {
+    'text/html': '<p>Chart</p><img src="https://images.test/closed.png" alt="chart"><img src="https://images.test/open.html" alt="login">',
+    'text/plain': 'Chart',
+  })
+  await expect.poll(() => value(page)).toBe('Chart\n![chart](https://images.test/closed.png)\n![login](https://images.test/open.html)')
+  await expect(block(page).first()).not.toHaveClass(/is-pending/)
+  await expect(block(page).last()).not.toHaveClass(/is-pending/)
+  expect((await store(page)).uploads).toEqual([])
+  expect((await store(page)).error).toBeUndefined()
+})
+
+test('a web image the upload refuses keeps its address, and fires image-error', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await serveWebImages(page)
+  await recordImageErrors(page)
+  await page.evaluate(() => ((window as unknown as Recorded).store.fail = true))
+  await content(page).click()
+  await paste(page, { 'text/html': '<p>Chart</p><img src="https://images.test/open.png" alt="chart">', 'text/plain': 'Chart' })
+  await expect.poll(async () => (await store(page)).error).toBe('Error: Quota exceeded')
+  await expect.poll(() => value(page)).toBe('Chart\n![chart](https://images.test/open.png)')
+})
+
+test('an image copied in this application with a web address is pasted as it is, not copied again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await serveWebImages(page)
+  const origin = await page.evaluate(() => location.origin)
+  await content(page).click()
+  await paste(page, {
+    'text/html': `<p>Chart</p><img src="https://images.test/open.png" data-c2-image-src="https://images.test/open.png" data-c2-image-origin="${origin}" alt="chart">`,
+    'text/plain': 'Chart',
+  })
+  await expect.poll(() => value(page)).toBe('Chart\n![chart](https://images.test/open.png)')
+  await expect(block(page)).not.toHaveClass(/is-pending/)
+  expect((await store(page)).uploads).toEqual([])
+})
+
 test('an image the resolver cannot draw shows a placeholder', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
   await withStore(page)

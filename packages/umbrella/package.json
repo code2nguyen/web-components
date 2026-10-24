@@ -105,6 +105,14 @@
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
     },
+    "./bottom-nav": {
+      "types": "./dist/bottom-nav.d.ts",
+      "default": "./dist/bottom-nav.js"
+    },
+    "./bottom-nav/bottom-nav-item": {
+      "types": "./dist/bottom-nav/bottom-nav-item.d.ts",
+      "default": "./dist/bottom-nav/bottom-nav-item.js"
+    },
     "./breadcrumb": {
       "types": "./dist/breadcrumb.d.ts",
       "default": "./dist/breadcrumb.js"
@@ -593,6 +601,10 @@
       "types": "./dist/otp-input.d.ts",
       "default": "./dist/otp-input.js"
     },
+    "./overflow-list": {
+      "types": "./dist/overflow-list.d.ts",
+      "default": "./dist/overflow-list.js"
+    },
     "./overlay": {
       "types": "./dist/overlay.d.ts",
       "default": "./dist/overlay.js"
@@ -660,6 +672,10 @@
     "./rich-text-editor": {
       "types": "./dist/rich-text-editor.d.ts",
       "default": "./dist/rich-text-editor.js"
+    },
+    "./save-bar": {
+      "types": "./dist/save-bar.d.ts",
+      "default": "./dist/save-bar.js"
     },
     "./search-field": {
       "types": "./dist/search-field.d.ts",
@@ -994,6 +1010,7 @@
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/border-beam": "*",
+    "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",
@@ -1073,6 +1090,7 @@
     "@c2n/number-input": "*",
     "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
+    "@c2n/overflow-list": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
     "@c2n/pagination": "*",
@@ -1088,6 +1106,7 @@
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
+    "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",

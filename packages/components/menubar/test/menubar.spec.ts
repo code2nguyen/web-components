@@ -117,6 +117,8 @@ test('in a submenu ArrowLeft closes it, and ArrowRight on a plain row moves to t
   await renderScenario(bar)
   await trigger(page, 'File').focus()
   await page.keyboard.press('ArrowDown')
+  // The menu takes focus once its popover has opened; a key pressed before that still lands on the trigger.
+  await expect(row(page, 'new')).toBeFocused()
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowDown')
   await expect(row(page, 'recent')).toBeFocused()
@@ -234,6 +236,7 @@ test('right-to-left: inside a menu ArrowRight still goes to the next menu, as it
   await renderScenario(`<div dir="rtl">${bar}</div>`)
   await trigger(page, 'Edit').focus()
   await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'undo')).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(row(page, 'ruler')).toBeFocused()
 })

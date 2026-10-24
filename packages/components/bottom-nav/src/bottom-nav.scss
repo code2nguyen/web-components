@@ -1,0 +1,67 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-bottom-nav,
+  $theme: (
+    position: sticky,
+    z-index: 10,
+    background: #ffffff,
+    border-top: 1px solid #e4e4e7,
+    border-radius: 0px,
+    box-shadow: none,
+    backdrop-filter: none,
+    margin: 0px,
+    max-width: none,
+    min-height: 64px,
+    padding-top: 0px,
+    padding-right: 0px,
+    padding-bottom: env(safe-area-inset-bottom, 0px),
+    padding-left: 0px,
+    gap: 0px,
+    away--transform: translateY(calc(100% + 32px)),
+    away--transition-duration: 0.2s,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  position: css.cssVar(position);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: css.cssVar(z-index);
+}
+
+.bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: css.cssVar(gap);
+  max-width: css.cssVar(max-width);
+  min-height: css.cssVar(min-height);
+  margin: css.cssVar(margin);
+  padding: css.cssVar(padding-top) css.cssVar(padding-right) css.cssVar(padding-bottom) css.cssVar(padding-left);
+  border-top: css.cssVar(border-top);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+  -webkit-backdrop-filter: css.cssVar(backdrop-filter);
+  backdrop-filter: css.cssVar(backdrop-filter);
+  transition: transform css.cssVar(away--transition-duration) ease;
+
+  &.is-away {
+    transform: css.cssVar(away--transform);
+    pointer-events: none;
+  }
+}
+
+::slotted(*) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
+}

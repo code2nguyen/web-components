@@ -105,6 +105,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-bottom-nav': {
+    html: `<c2-bottom-nav value="home" style="width:380px;max-width:100%;--c2-bottom-nav--position:relative"><c2-bottom-nav-item value="home" label="Home"></c2-bottom-nav-item><c2-bottom-nav-item value="search" label="Search"></c2-bottom-nav-item><c2-bottom-nav-item value="inbox" label="Inbox" count="4"></c2-bottom-nav-item><c2-bottom-nav-item value="profile" label="Profile" dot></c2-bottom-nav-item></c2-bottom-nav>`,
+    presets: [
+      {
+        name: 'Floating dock',
+        description: 'A rounded bar lifted off the screen edges with a soft shadow, as in iOS apps with a floating tab bar.',
+        css: {
+          '--c2-bottom-nav--margin': '0 12px 12px',
+          '--c2-bottom-nav--padding-bottom': '0px',
+          '--c2-bottom-nav--border-top': 'none',
+          '--c2-bottom-nav--border-radius': '28px',
+          '--c2-bottom-nav--box-shadow': '0 8px 24px rgb(15 20 30 / 0.14)',
+        },
+      },
+      {
+        name: 'Tint only',
+        description: 'No indicator shape: the current item is shown by its colour and filled icon, like the classic iOS tab bar.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__current--font-weight': '500',
+        },
+      },
+      {
+        name: 'Top line',
+        description: 'A short line on the top edge of the current item instead of an indicator fill.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__line--height': '3px',
+          '--c2-bottom-nav-item__line--width': '40%',
+        },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [
@@ -396,6 +429,49 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-autocomplete__option--padding-bottom': '5px',
           '--c2-autocomplete__option--padding-left': '8px',
           '--c2-autocomplete__description--font-size': '11px',
+        },
+      },
+    ],
+  },
+  'c2-save-bar': {
+    html: `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:520px;max-width:100%;height:112px;padding-bottom:16px;box-sizing:border-box"><c2-save-bar open></c2-save-bar></div>`,
+    presets: [
+      {
+        name: 'Inverse',
+        description: 'A dark bar with a light Save button that stands apart from a light settings page, as in Shopify admin.',
+        css: {
+          '--c2-save-bar__container--background': '#18181b',
+          '--c2-save-bar__container--border': '1px solid #18181b',
+          '--c2-save-bar__message--color': '#fafafa',
+          '--c2-save-bar__indicator--size': '0px',
+          '--c2-save-bar__indicator--box-shadow': 'none',
+          '--c2-save-bar__discard--color': '#fafafa',
+          '--c2-save-bar__discard--border': '1px solid #3f3f46',
+          '--c2-save-bar__discard__hover--background-color': '#27272a',
+          '--c2-save-bar__save--background-color': '#fafafa',
+          '--c2-save-bar__save--color': '#18181b',
+          '--c2-save-bar__save__hover--background-color': '#e4e4e7',
+        },
+      },
+      {
+        name: 'Full width',
+        description: 'A strip across the bottom of the page, the actions pushed to the far edge.',
+        css: {
+          '--c2-save-bar--inset-bottom': '0px',
+          '--c2-save-bar__container--width': '100%',
+          '--c2-save-bar__container--max-width': '100%',
+          '--c2-save-bar__container--border-radius': '0',
+          '--c2-save-bar__container--justify-content': 'space-between',
+          '--c2-save-bar__container--padding': '10px 16px',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded surface and buttons.',
+        css: {
+          '--c2-save-bar__container--border-radius': '999px',
+          '--c2-save-bar__container--padding': '5px 5px 5px 18px',
+          '--c2-save-bar__button--border-radius': '999px',
         },
       },
     ],
