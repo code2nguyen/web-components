@@ -1,5 +1,6 @@
 import { test, expect, watch, accessible, props } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { RichTextEditor } from '../src/rich-text-editor'
 
 const text$ = (page: Page, name = 'Comment') => page.getByRole('textbox', { name })
 const host = (page: Page) => page.locator('c2-rich-text-editor')
@@ -212,7 +213,7 @@ test('Mod+K edits a link; an unsafe address is refused', async ({ page, renderSc
   await expect(host(page)).toHaveJSProperty('value', 'Read the plan')
   await expect(text$(page).locator('.link-target')).toHaveCount(0)
 
-  expect(await host(page).evaluate((element) => element.setLink('javascript:alert(1)'))).toBe(false)
+  expect(await host(page).evaluate((element: RichTextEditor) => element.setLink('javascript:alert(1)'))).toBe(false)
   await expect(host(page)).toHaveJSProperty('value', 'Read the plan')
 })
 
@@ -242,16 +243,16 @@ test('takes part in a form: value, reset, required, maxlength and a disabled fie
   await page.keyboard.type(' world, again')
   await expect(host(page).locator('.counter')).toHaveText('18 / 10')
   await expect(host(page)).toHaveState('error')
-  expect(await host(page).evaluate((element) => element.validity.tooLong)).toBe(true)
+  expect(await host(page).evaluate((element: RichTextEditor) => element.validity.tooLong)).toBe(true)
   await expect(text$(page)).toHaveAttribute('aria-invalid', 'true')
 
   await page.keyboard.press('ControlOrMeta+a')
   await page.keyboard.press('Backspace')
-  expect(await host(page).evaluate((element) => element.validity.valueMissing)).toBe(true)
+  expect(await host(page).evaluate((element: RichTextEditor) => element.validity.valueMissing)).toBe(true)
 
   await page.locator('main > form').evaluate((form: HTMLFormElement) => form.reset())
   await expect(host(page)).toHaveJSProperty('value', 'Hello')
-  expect(await host(page).evaluate((element) => element.checkValidity())).toBe(true)
+  expect(await host(page).evaluate((element: RichTextEditor) => element.checkValidity())).toBe(true)
 
   await page.locator('fieldset').evaluate((fieldset: HTMLFieldSetElement) => (fieldset.disabled = true))
   await expect(text$(page)).toHaveAttribute('contenteditable', 'false')
@@ -266,11 +267,13 @@ test('Mod+Enter fires a cancelable submit that submits the form', async ({ page,
       form.setAttribute('data-submitted', String(Number(form.getAttribute('data-submitted') ?? 0) + 1))
     })
   })
-  await host(page).evaluate((element) => element.addEventListener('submit', (event) => element.hasAttribute('data-block') && event.preventDefault()))
+  await host(page).evaluate((element: RichTextEditor) =>
+    element.addEventListener('submit', (event) => element.hasAttribute('data-block') && event.preventDefault()),
+  )
   await text$(page).click()
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(page.locator('main > form')).toHaveAttribute('data-submitted', '1')
-  await host(page).evaluate((element) => element.setAttribute('data-block', ''))
+  await host(page).evaluate((element: RichTextEditor) => element.setAttribute('data-block', ''))
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(page.locator('main > form')).toHaveAttribute('data-submitted', '1')
   await expect(host(page)).toHaveJSProperty('value', 'Ship')
@@ -360,7 +363,7 @@ test('a trigger character reports the word typed after it, and completeTrigger r
   await text$(page).click()
   await page.keyboard.type('Hi @ma')
   await expect.poll(() => events(page)).toContainEqual(expect.objectContaining({ active: true, char: '@', query: 'ma' }))
-  await host(page).evaluate((element) => element.completeTrigger('@Mai Tran', { href: 'https://example.com/u/mai' }))
+  await host(page).evaluate((element: RichTextEditor) => element.completeTrigger('@Mai Tran', { href: 'https://example.com/u/mai' }))
   await expect(host(page)).toHaveJSProperty('value', 'Hi [@Mai Tran](https://example.com/u/mai) ')
   expect((await events(page)).at(-1)).toEqual(expect.objectContaining({ active: false }))
 
@@ -376,7 +379,7 @@ test('a trigger character reports the word typed after it, and completeTrigger r
 test('toHTML gives clean HTML with real lists', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-rich-text-editor label="Comment"></c2-rich-text-editor>`)
   await props(host(page), { value: 'Hi **there** <u>u</u>\n\n- a\n  - b\n\n[x](https://example.com)' })
-  const html = await host(page).evaluate((element) => element.toHTML())
+  const html = await host(page).evaluate((element: RichTextEditor) => element.toHTML())
   expect(html).toBe(
     '<p>Hi <strong>there</strong> <u>u</u></p><ul><li>a<ul><li>b</li></ul></li></ul><p><a href="https://example.com" rel="noopener noreferrer nofollow">x</a></p>',
   )
@@ -388,7 +391,7 @@ test('speaks the language of the page', async ({ page, renderScenario }) => {
   await expect(page.getByRole('button', { name: 'Gras', exact: true })).toBeVisible()
   await text$(page, 'Commentaire').click()
   await page.keyboard.type('Bonjour')
-  expect(await host(page).evaluate((element) => element.validationMessage)).toBe('Utilisez 5 caractères au maximum.')
+  expect(await host(page).evaluate((element: RichTextEditor) => element.validationMessage)).toBe('Utilisez 5 caractères au maximum.')
 })
 
 test('passes an accessibility scan in a field with a value and in the floating layout', async ({ page, renderScenario }) => {
@@ -457,7 +460,7 @@ test('a link that browsers would read as javascript: is never kept', async ({ pa
   // A tab hidden in the scheme by percent-encoding, in the value.
   await props(host(page), { value: '[x](java%09script:alert(1)) [y](%01javascript:alert(1))' })
   await expect(links).toHaveCount(0)
-  expect(await host(page).evaluate((element) => element.toHTML())).not.toContain('<a')
+  expect(await host(page).evaluate((element: RichTextEditor) => element.toHTML())).not.toContain('<a')
 
   // The same as an entity in pasted HTML.
   await props(host(page), { value: '' })
@@ -468,10 +471,10 @@ test('a link that browsers would read as javascript: is never kept', async ({ pa
 
   // And through the API an app hands mention or picker data to.
   await page.keyboard.press('ControlOrMeta+a')
-  expect(await host(page).evaluate((element) => element.setLink('java\nscript:alert(1)'))).toBe(false)
+  expect(await host(page).evaluate((element: RichTextEditor) => element.setLink('java\nscript:alert(1)'))).toBe(false)
   await page.keyboard.press('End')
   await page.keyboard.type(' @ma')
-  await host(page).evaluate((element) => element.completeTrigger('@Mai', { href: '\u0001javascript:alert(1)' }))
+  await host(page).evaluate((element: RichTextEditor) => element.completeTrigger('@Mai', { href: '\u0001javascript:alert(1)' }))
   await expect(text$(page)).toContainText('@Mai')
   await expect(links).toHaveCount(0)
 })
