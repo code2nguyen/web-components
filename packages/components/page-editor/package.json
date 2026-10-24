@@ -9,6 +9,10 @@
       "types": "./types/src/page-editor.d.ts",
       "default": "./dist/page-editor.js"
     },
+    "./prose": {
+      "types": "./types/src/prose.d.ts",
+      "default": "./dist/prose.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

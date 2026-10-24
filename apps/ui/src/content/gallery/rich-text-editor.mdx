@@ -1,0 +1,94 @@
+---
+title: 'Rich Text Editor gallery'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { RichTextEditor } from '@c2n/components/rich-text-editor'
+import { Button } from '@c2n/components/button'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-editor { width: 320px; }
+</style>
+<c2-rich-text-editor class="default-editor" label="Comment" placeholder="Leave a comment…" value="Release notes go out **Friday**."></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Composer
+<style>
+  .composer-editor {
+    width: 320px;
+    --c2-rich-text-editor__container--border-radius: 14px;
+    --c2-rich-text-editor__content--min-height: 56px;
+    --c2-rich-text-editor__footer--padding: 4px 8px 8px;
+    --c2-rich-text-editor__tool--size: 28px;
+    --c2-rich-text-editor__tool--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-rich-text-editor class="composer-editor" label="Message" toolbar-position="bottom" formats="bold italic | link bullet" placeholder="Message #design…">
+  <c2-button slot="footer-end">Send</c2-button>
+</c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Focus ring
+<style>
+  .ring-editor {
+    width: 320px;
+    --c2-rich-text-editor__container--border-radius: 8px;
+    --c2-rich-text-editor__container__focus--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+    --c2-rich-text-editor__container__focus--box-shadow: 0 0 0 3px var(--c2-theme--color-primary-glow, rgba(2, 101, 220, 0.2));
+  }
+</style>
+<c2-rich-text-editor class="ring-editor" label="Reply" maxlength="500" value="Can we pair on this *after* standup?"></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft-editor {
+    width: 320px;
+    --c2-rich-text-editor__container--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-rich-text-editor__container--border: 1px solid transparent;
+    --c2-rich-text-editor__container__hover--border: 1px solid transparent;
+    --c2-rich-text-editor__container--border-radius: 12px;
+    --c2-rich-text-editor__toolbar--border: 1px solid transparent;
+    --c2-rich-text-editor__tool__hover--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-rich-text-editor class="soft-editor" label="Notes" formats="bold italic underline | bullet ordered" placeholder="Add your notes…"></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Inline edit
+<style>
+  .inline-editor {
+    width: 320px;
+    --c2-rich-text-editor__container--border: 1px solid transparent;
+    --c2-rich-text-editor__container__hover--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-rich-text-editor__content--min-height: 0px;
+    --c2-rich-text-editor__content--padding: 6px 8px;
+  }
+</style>
+<c2-rich-text-editor class="inline-editor" label="Description" toolbar-position="floating" value="Select text to format it: **bold**, *italic*, [links](https://example.com)."></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Notebook
+<style>
+  .notebook-editor {
+    width: 320px;
+    --c2-rich-text-editor__container--background: light-dark(#fffbeb, #352f18);
+    --c2-rich-text-editor__container--color: light-dark(#78350f, #d6b98a);
+    --c2-rich-text-editor__container--border: 1px solid #fcd34d;
+    --c2-rich-text-editor__container__focus--border: 1px solid #d97706;
+    --c2-rich-text-editor__toolbar--border: 1px dashed #fcd34d;
+    --c2-rich-text-editor__tool--color: light-dark(#92400e, #d6b98a);
+    --c2-rich-text-editor__tool__pressed--background: light-dark(#fef3c7, #4a3d14);
+    --c2-rich-text-editor__tool__pressed--color: light-dark(#92400e, #f6d27a);
+    --c2-rich-text-editor__placeholder--color: light-dark(#92400e, #be9176);
+  }
+</style>
+<c2-rich-text-editor class="notebook-editor" label="Ideas" formats="bold italic | bullet" placeholder="Capture an idea…"></c2-rich-text-editor>
+```
+
+</GalleryGrid>

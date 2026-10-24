@@ -151,6 +151,7 @@
         "../../components/rate:build",
         "../../components/relative-time:build",
         "../../components/reorder-list:build",
+        "../../components/rich-text-editor:build",
         "../../components/search-field:build",
         "../../components/select:build",
         "../../components/separator:build",

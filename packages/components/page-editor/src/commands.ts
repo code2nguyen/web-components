@@ -1,4 +1,4 @@
-import { Fragment, type Node as ProseNode, type NodeType } from 'prosemirror-model'
+import { Fragment, type Mark, type MarkType, type Node as ProseNode, type NodeType, type ResolvedPos } from 'prosemirror-model'
 import { NodeSelection, Plugin, PluginKey, TextSelection, type Command, type EditorState, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet } from 'prosemirror-view'
 import { InputRule } from 'prosemirror-inputrules'
@@ -425,7 +425,8 @@ function blockRule(pattern: RegExp, make: (match: RegExpMatchArray, node: ProseN
   })
 }
 
-export function buildInputRules(allowed: Allowed, markAllowed: () => boolean): InputRule[] {
+/** `markAllowed` is asked before a Markdown mark rule applies, with the mark it would apply. */
+export function buildInputRules(allowed: Allowed, markAllowed: (mark: keyof typeof schema.marks) => boolean): InputRule[] {
   const fromParagraph =
     (block: PageEditorBlock | ((match: RegExpMatchArray) => PageEditorBlock)) =>
     (match: RegExpMatchArray, node: ProseNode): PageEditorBlock | null =>
@@ -433,7 +434,7 @@ export function buildInputRules(allowed: Allowed, markAllowed: () => boolean): I
 
   const markRule = (pattern: RegExp, open: number, type: keyof typeof schema.marks) =>
     new InputRule(pattern, (state, match, start, end) => {
-      if (!markAllowed()) return null
+      if (!markAllowed(type)) return null
       const [whole, lead = '', inner] = match
       const from = start + lead.length
       const innerFrom = from + open
@@ -573,3 +574,29 @@ export const normalize = new Plugin({
 /** Content of `kind` items for plain lines, used when pasting into a list. */
 export const itemsOf = (lines: string[], kind: ListKind, indent: number) =>
   Fragment.fromArray(lines.map((text) => item.create({ kind, indent, checked: false }, line(text))))
+
+/** The extent of `type` around a position, or `null` when it does not carry it. */
+export function markExtent($pos: ResolvedPos, type: MarkType): { from: number; to: number } | null {
+  const parent = $pos.parent
+  const start = $pos.start()
+  let found: Mark | undefined = type.isInSet($pos.marks())
+  if (!found && $pos.nodeAfter) found = type.isInSet($pos.nodeAfter.marks)
+  if (!found) return null
+  const mark = found
+  let from = -1
+  let to = -1
+  let offset = 0
+  for (let index = 0; index < parent.childCount; index++) {
+    const child = parent.child(index)
+    const end = offset + child.nodeSize
+    if (mark.isInSet(child.marks)) {
+      if (from < 0) from = offset
+      to = end
+    } else if (from >= 0) {
+      if (start + to >= $pos.pos) break
+      from = -1
+    }
+    offset = end
+  }
+  return from < 0 ? null : { from: start + from, to: start + to }
+}

@@ -633,6 +633,10 @@
       "types": "./dist/reorder-list.d.ts",
       "default": "./dist/reorder-list.js"
     },
+    "./rich-text-editor": {
+      "types": "./dist/rich-text-editor.d.ts",
+      "default": "./dist/rich-text-editor.js"
+    },
     "./search-field": {
       "types": "./dist/search-field.d.ts",
       "default": "./dist/search-field.js"
@@ -1048,6 +1052,7 @@
     "@c2n/rate": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
+    "@c2n/rich-text-editor": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",
