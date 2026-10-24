@@ -16,6 +16,7 @@ import { inputRules, undoInputRule } from 'prosemirror-inputrules'
 import {
   backspaceAtStart,
   buildInputRules,
+  composedSelection,
   currentBlock,
   enterInCode,
   enterInItem,
@@ -28,6 +29,7 @@ import {
   markExtent,
   normalize,
   pageToHTML,
+  place,
   safeHref,
   schema,
   setBlock as setBlockCommand,
@@ -173,19 +175,6 @@ function blockOfState(state: EditorState): RichTextBlock {
   if (block === 'bullet' || block === 'ordered' || block === 'quote') return block
   if (block === 'code') return 'code-block'
   return 'paragraph'
-}
-
-/** Places a popover next to `anchor`, flipping to the other side when there is no room. */
-function place(popover: HTMLElement, anchor: { left: number; top: number; bottom: number }, side: 'above' | 'below') {
-  const width = popover.offsetWidth
-  const height = popover.offsetHeight
-  const gap = 8
-  let y = side === 'below' ? anchor.bottom + gap : anchor.top - height - gap
-  if (side === 'below' && y + height > innerHeight - 8 && anchor.top - height - gap >= 8) y = anchor.top - height - gap
-  if (side === 'above' && y < 8) y = anchor.bottom + gap
-  const x = Math.min(Math.max(8, anchor.left), innerWidth - width - 8)
-  popover.style.left = `${Math.round(x)}px`
-  popover.style.top = `${Math.round(Math.max(8, y))}px`
 }
 
 /** The toolbar a `formats` value describes, or `undefined` when it names no format. */
@@ -408,7 +397,8 @@ export class RichTextEditor extends LitElement {
   private dismissedTrigger = -1
   private modKey = 'Ctrl+'
   private resizeObserver?: ResizeObserver
-  private editorLocale = ''
+  private appliedSurface = ''
+  private parsedFormats: { formats: string; entries: ToolbarEntry[]; allowed: Set<RichTextFormatName> } | null = null
 
   get form() {
     return this.internals.form
@@ -435,12 +425,22 @@ export class RichTextEditor extends LitElement {
     return { ...this.format }
   }
 
+  /** `formats` read once per value: the toolbar's entries and the formats they allow. */
+  private get parsed() {
+    if (this.parsedFormats?.formats !== this.formats) {
+      const entries = toolbarEntries(this.formats) ?? toolbarEntries(DEFAULT_TOOLBAR)!
+      const allowed = new Set(entries.flatMap((entry) => (entry.kind === 'tool' ? [entry.name] : [])))
+      this.parsedFormats = { formats: this.formats, entries, allowed }
+    }
+    return this.parsedFormats
+  }
+
   private get toolbarEntries(): ToolbarEntry[] {
-    return toolbarEntries(this.formats) ?? toolbarEntries(DEFAULT_TOOLBAR)!
+    return this.parsed.entries
   }
 
   private get allowed(): Set<RichTextFormatName> {
-    return new Set(this.toolbarEntries.flatMap((entry) => (entry.kind === 'tool' ? [entry.name] : [])))
+    return this.parsed.allowed
   }
 
   private get editable() {
@@ -461,6 +461,8 @@ export class RichTextEditor extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.modKey = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent) ? '⌘' : 'Ctrl+'
+    // Moved in the page: disconnectedCallback stopped watching the toolbar's width.
+    if (this.view) this.observeToolbar()
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
@@ -616,13 +618,14 @@ export class RichTextEditor extends LitElement {
         handleDOMEvents: {
           keydown: (view, event) => {
             if (event.key !== 'Tab' && event.key !== 'Escape' && event.key !== 'Shift') this.tabReleased = false
-            this.syncSelectionFromDom(view)
+            if (!event.isComposing) this.syncSelectionFromDom(view)
             // A capture-phase listener of the app (a mention picker) took the key.
             return event.defaultPrevented
           },
           focus: () => {
             this.coarse = matchMedia('(pointer: coarse)').matches
-            this.changedSinceFocus = false
+            // Back from the toolbar, the "More" menu or the link popover: the field never lost focus.
+            if (!this.focused) this.changedSinceFocus = false
             return false
           },
         },
@@ -657,9 +660,7 @@ export class RichTextEditor extends LitElement {
         },
       },
     )
-    this.serialized = toMarkdown(this.view.state.doc)
-    this.textLength = docText(this.view.state.doc).length
-    this.editorLocale = this.msg.locale
+    this.adoptDoc()
     this.emitFormat()
     this.syncFormState()
     this.resizeObserver = new ResizeObserver(() => this.measureToolbar())
@@ -675,23 +676,37 @@ export class RichTextEditor extends LitElement {
     if (!view) return
     if (changed.has('value') && this.value !== this.serialized) {
       view.updateState(this.createState(this.value))
-      this.serialized = toMarkdown(view.state.doc)
-      this.textLength = docText(view.state.doc).length
+      this.adoptDoc()
       this.endTrigger()
       this.emitFormat()
     }
     if (changed.has('formats') && changed.get('formats') !== undefined) {
       // Text already written in a format no longer allowed loses it.
-      view.updateState(this.createState(toMarkdown(view.state.doc)))
+      view.updateState(this.createState(this.serialized))
+      this.adoptDoc()
       this.emitFormat()
     }
-    if (this.msg.locale !== this.editorLocale) this.editorLocale = this.msg.locale
-    // Re-reads `editable`, the surface attributes and the placeholder.
-    view.setProps({})
+    // Re-reads `editable`, the surface attributes and the placeholder, when one of them may have changed.
+    const surface = JSON.stringify(this.surfaceAttributes())
+    if (surface !== this.appliedSurface || ['disabled', 'disabledByForm', 'readOnly', 'placeholder'].some((key) => changed.has(key))) {
+      this.appliedSurface = surface
+      view.setProps({})
+    }
     if (changed.has('toolbarPosition') || changed.has('readOnly') || changed.has('coarse') || changed.has('formats')) this.observeToolbar()
     if (changed.has('focused') || changed.has('selectionEmpty') || changed.has('format') || changed.has('toolbarPosition') || changed.has('linkOpen'))
       this.placeFloatingToolbar()
     this.syncFormState()
+  }
+
+  /**
+   * Takes the document the view holds as the value. A value set from outside is normalised to what the editor holds,
+   * so it never keeps a format `formats` does not allow.
+   */
+  private adoptDoc() {
+    const doc = this.view!.state.doc
+    this.serialized = toMarkdown(doc)
+    this.textLength = docText(doc).length
+    if (this.value !== this.serialized) this.value = this.serialized
   }
 
   private createState(markdown: string) {
@@ -878,7 +893,7 @@ export class RichTextEditor extends LitElement {
    * key pressed before it arrives would run against the old selection, so read the real one first.
    */
   private syncSelectionFromDom(view: EditorView) {
-    const dom = this.domSelection()
+    const dom = composedSelection(this.renderRoot)
     if (!dom || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
     try {
       const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset)
@@ -888,25 +903,6 @@ export class RichTextEditor extends LitElement {
     } catch {
       // A position inside a marker has no text selection; keep ProseMirror's own.
     }
-  }
-
-  /**
-   * The caret and selection inside the shadow root: `getComposedRanges` where the browser has it, whose `direction`
-   * tells the anchor from the focus, else the shadow root's own `getSelection()`.
-   */
-  private domSelection(): { anchorNode: Node; anchorOffset: number; focusNode: Node; focusOffset: number } | null {
-    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const selection = document.getSelection() as (Selection & { direction?: string }) | null
-    if (selection && typeof selection.getComposedRanges === 'function') {
-      if (!selection.rangeCount) return null
-      const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
-      if (!range) return null
-      return selection.direction === 'backward'
-        ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
-        : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
-    }
-    const fallback = root.getSelection?.() ?? selection
-    return fallback?.anchorNode && fallback.focusNode ? (fallback as Selection & { anchorNode: Node; focusNode: Node }) : null
   }
 
   private handlePaste(view: EditorView, event: ClipboardEvent): boolean {
@@ -970,10 +966,13 @@ export class RichTextEditor extends LitElement {
     const { $head, empty } = view.state.selection
     let found: { char: string; query: string; from: number } | null = null
     if (chars.length && empty && this.editable && $head.parent.isTextblock && !$head.parent.type.spec.code) {
-      const before = $head.parent.textBetween(Math.max(0, $head.parentOffset - 64), $head.parentOffset, undefined, '￼')
+      const start = Math.max(0, $head.parentOffset - 64)
+      const before = $head.parent.textBetween(start, $head.parentOffset, undefined, '\ufffc')
       const escaped = chars.map((char) => char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
       const match = new RegExp(`(?:^|\\s)(${escaped})([^\\s\\ufffc]*)$`).exec(before)
-      if (match) found = { char: match[1], query: match[2], from: $head.pos - match[2].length - match[1].length }
+      // `^` is the start of the window: a trigger there starts a word only at the block's start or after a space.
+      const midWord = start > 0 && match?.index === 0 && !/\s/.test(match[0][0]) && !/\s/.test($head.parent.textBetween(start - 1, start))
+      if (match && !midWord) found = { char: match[1], query: match[2], from: $head.pos - match[2].length - match[1].length }
     }
     if (found && found.from === this.dismissedTrigger) found = null
     else if (!found) this.dismissedTrigger = -1
@@ -1079,6 +1078,8 @@ export class RichTextEditor extends LitElement {
     const next = event.relatedTarget as Node | null
     if (next && this.linkPopover.contains(next)) return
     this.closeLink(false)
+    // The popover is outside the box, so leaving the field from it is noticed here.
+    this.handleFocusOut()
   }
 
   // ---- toolbar ------------------------------------------------------------------------------------------------------
@@ -1229,14 +1230,13 @@ export class RichTextEditor extends LitElement {
     }
     const flags: ValidityStateFlags = {}
     let message = ''
-    const text = this.view ? docText(this.view.state.doc) : this.text
     if (this.customValidityMessage) {
       flags.customError = true
       message = this.customValidityMessage
-    } else if (this.required && !text.trim()) {
+    } else if (this.required && !(this.view ? this.view.state.doc.textContent : this.text).trim()) {
       flags.valueMissing = true
       message = this.msg.t('valueMissing')
-    } else if (this.maxLength >= 0 && text.length > this.maxLength) {
+    } else if (this.overLimit) {
       flags.tooLong = true
       message = this.msg.t('tooLong', this.maxLength)
     }

@@ -22,6 +22,7 @@ export {
   setBlock,
   toggleBlock,
 } from './commands'
+export { composedSelection, place, type ComposedSelection, type PopoverAnchor } from './dom'
 export { pageToHTML, splitPastedLines } from './html'
 export { fromMarkdown, toMarkdown } from './markdown'
 export { BLOCK_NAMES, MARK_NAMES, blockOf, formatOf, safeHref, schema, type PageEditorBlock, type PageEditorFormat, type PageEditorMark } from './schema'

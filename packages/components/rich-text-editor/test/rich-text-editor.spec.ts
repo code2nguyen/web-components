@@ -398,3 +398,54 @@ test('passes an accessibility scan in a field with a value and in the floating l
   <c2-rich-text-editor label="Note" toolbar-position="floating" placeholder="Write…"></c2-rich-text-editor>`)
   await accessible(page)
 })
+
+test('change still fires after a trip to the toolbar or the link popover', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-rich-text-editor label="Comment"></c2-rich-text-editor><button>After</button>`)
+  await host(page).evaluate((element) =>
+    element.addEventListener('change', () => element.setAttribute('data-change', String(Number(element.getAttribute('data-change') ?? 0) + 1))),
+  )
+  await text$(page).click()
+  await page.keyboard.type('hello')
+  await page.keyboard.press('Alt+F10')
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'After' }).click()
+  await expect(host(page)).toHaveAttribute('data-change', '1')
+
+  // Leaving the field from the link popover reports the change too.
+  await text$(page).click()
+  await page.keyboard.type('!')
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('ControlOrMeta+k')
+  await expect(page.getByRole('textbox', { name: 'Link address' })).toBeFocused()
+  await page.getByRole('button', { name: 'After' }).click()
+  await expect(host(page)).toHaveAttribute('data-change', '2')
+})
+
+test('the value never keeps a format that formats does not allow', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-rich-text-editor label="Comment" name="body" formats="bold" value="# Title&#10;&#10;- *item*"></c2-rich-text-editor></form>`)
+  await expect(host(page)).toHaveJSProperty('value', 'Title\n\nitem')
+  expect(await page.locator('main > form').evaluate((form: HTMLFormElement) => new FormData(form).get('body'))).toBe('Title\n\nitem')
+
+  await props(host(page), { formats: '', value: '**hi** there' })
+  await expect(host(page)).toHaveJSProperty('value', '**hi** there')
+  await props(host(page), { formats: 'italic' })
+  await expect(host(page)).toHaveJSProperty('value', 'hi there')
+})
+
+test('a moved editor keeps fitting its toolbar to its width', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="a"><c2-rich-text-editor label="Comment" style="width: 600px"></c2-rich-text-editor></div><div id="b"></div>`)
+  const more = toolbar(page).getByRole('button', { name: 'More formatting' })
+  await expect(more).toHaveCount(0)
+  await page.evaluate(() => document.querySelector('#b')!.append(document.querySelector('c2-rich-text-editor')!))
+  await props(host(page), { style: 'width: 220px' })
+  await expect(more).toBeVisible()
+})
+
+test('a trigger character in the middle of a long word starts nothing', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-rich-text-editor label="Comment" triggers="@"></c2-rich-text-editor>`)
+  await watch(host(page), 'trigger')
+  await text$(page).click()
+  // The @ sits exactly 64 characters before the caret, at the edge of the window the editor reads.
+  await page.keyboard.type(`${'a'.repeat(10)}@${'b'.repeat(63)}`)
+  expect(await events(page)).toEqual([])
+})

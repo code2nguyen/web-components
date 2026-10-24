@@ -35,6 +35,7 @@ import {
   toggleChecked,
 } from './commands'
 import { highlightPlugin } from './highlight'
+import { composedSelection, place } from './dom'
 import { pageToHTML, splitPastedLines } from './html'
 import { fromMarkdown, tableFromText, toMarkdown } from './markdown'
 import {
@@ -895,7 +896,7 @@ export class PageEditor extends LitElement {
    * key pressed before it arrives (Enter, Backspace, a shortcut) would run against the old selection, so read the real one first.
    */
   private syncSelectionFromDom(view: EditorView) {
-    const dom = this.domSelection()
+    const dom = composedSelection(this.renderRoot)
     if (!dom || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
     try {
       const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset)
@@ -906,26 +907,6 @@ export class PageEditor extends LitElement {
     } catch {
       // A position inside a marker or between nodes has no text selection; keep ProseMirror's own.
     }
-  }
-
-  /**
-   * The caret and selection inside the shadow root. The standard way is `getComposedRanges` with this shadow root
-   * (Chromium, WebKit, Firefox), whose `direction` tells the anchor from the focus. WebKit's `shadowRoot.getSelection()`
-   * can lag behind a selection set from script, so it is only the fallback for browsers without composed ranges.
-   */
-  private domSelection(): { anchorNode: Node; anchorOffset: number; focusNode: Node; focusOffset: number } | null {
-    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const selection = document.getSelection() as (Selection & { direction?: string }) | null
-    if (selection && typeof selection.getComposedRanges === 'function' && root instanceof ShadowRoot) {
-      if (!selection.rangeCount) return null
-      const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
-      if (!range) return null
-      return selection.direction === 'backward'
-        ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
-        : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
-    }
-    const fallback = root.getSelection?.() ?? selection
-    return fallback?.anchorNode && fallback.focusNode ? (fallback as Selection & { anchorNode: Node; focusNode: Node }) : null
   }
 
   private toggleTodo(pos: number) {
@@ -1975,19 +1956,6 @@ const BLOCK_ENTRIES: ReadonlyArray<{ block: PageEditorBlock; keywords: string; s
 ]
 
 const isSelectedTable = (state: EditorState) => state.selection instanceof NodeSelection && state.selection.node.type === schema.nodes.table
-
-/** Places a popover next to `anchor`, flipping to the other side when there is no room. */
-function place(popover: HTMLElement, anchor: DOMRect, side: 'above' | 'below') {
-  const width = popover.offsetWidth
-  const height = popover.offsetHeight
-  const gap = 6
-  let y = side === 'below' ? anchor.bottom + gap : anchor.top - height - gap
-  if (side === 'below' && y + height > innerHeight - 8 && anchor.top - height - gap >= 8) y = anchor.top - height - gap
-  if (side === 'above' && y < 8) y = anchor.bottom + gap
-  const x = Math.min(Math.max(8, anchor.left), innerWidth - width - 8)
-  popover.style.left = `${Math.round(x)}px`
-  popover.style.top = `${Math.round(Math.max(8, y))}px`
-}
 
 declare global {
   interface HTMLElementTagNameMap {
