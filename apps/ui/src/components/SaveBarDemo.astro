@@ -93,11 +93,13 @@ const markup = `
     demo.addEventListener('change', sync)
 
     bar.addEventListener('save', async () => {
+      // What is sent is what counts as saved: an edit made while it saves keeps the bar open.
+      const sending = read()
       bar.saving = true
       await new Promise((resolve) => setTimeout(resolve, 900))
-      saved = read()
+      saved = sending
       bar.saving = false
-      bar.open = false
+      sync()
       status.textContent = `Saved at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`
       fields[0].focus()
     })

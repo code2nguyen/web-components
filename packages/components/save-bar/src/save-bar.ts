@@ -1,12 +1,16 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { query } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { matchesStroke, parseShortcut } from '@c2n/core/shortcut-helper.js'
 import '@c2n/button'
 import { saveBarMessages } from './messages'
 import styles from './save-bar.scss?inline'
+
+/** The save shortcut: ⌘S on Apple platforms, Ctrl+S elsewhere. */
+const SAVE_STROKE = parseShortcut('mod+s')[0].strokes[0]
 
 /** Events fired by {@link SaveBar}, keyed for `addEventListener`. */
 export interface SaveBarEventMap {
@@ -41,7 +45,7 @@ export interface SaveBar {
  * @tag c2-save-bar
  *
  * @slot default - Further actions, shown before Discard: `c2-button`s, a `c2-link-button`.
- * @slot message - Replaces the "Unsaved changes" / "Saving…" text, for example to say what changed or what to fix.
+ * @slot message - Replaces the "Unsaved changes" text, for example to say what changed or what to fix; it is announced when slotted. "Saving…" still shows while `saving`.
  *
  * @event {Event} save - The Save button was activated, or Ctrl+S / ⌘S was pressed with `shortcut`. Save the changes, then clear `open`. Does not bubble.
  * @event {Event} discard - The Discard button was activated. Restore the saved values, then clear `open`. Does not bubble.
@@ -87,11 +91,6 @@ export class SaveBar extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, saveBarMessages)
 
-  constructor() {
-    super()
-    this.internals.role = 'group'
-  }
-
   /** Shows the bar. Set it while there are unsaved changes and clear it once they are saved or discarded. */
   @property({ type: Boolean }) open = false
 
@@ -118,6 +117,12 @@ export class SaveBar extends LitElement {
   /** Whether the bar was open at the last update: it slides only when that changes, never on the first render. */
   private wasOpen?: boolean
 
+  /** The text of the slotted `message`, announced in place of the built-in "Unsaved changes". */
+  @state() private slottedMessage = ''
+
+  /** Whether the `beforeunload` listener is attached: only while it can warn, so other pages keep the back/forward cache. */
+  private guarding = false
+
   /** Fires `save`, as the Save button does, unless the bar is closed, saving or invalid. */
   save(): void {
     if (!this.open || this.saving || this.invalid) return
@@ -133,32 +138,44 @@ export class SaveBar extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     document.addEventListener('keydown', this.handleKeydown)
-    window.addEventListener('beforeunload', this.handleBeforeUnload)
+    this.guard()
   }
 
   override disconnectedCallback() {
     document.removeEventListener('keydown', this.handleKeydown)
+    this.guarding = false
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
     super.disconnectedCallback()
   }
 
   private handleKeydown = (event: KeyboardEvent): void => {
     if (!this.shortcut || !this.open || event.defaultPrevented) return
-    if (event.key.toLowerCase() !== 's' || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
-    // Keep the browser's "Save page" dialog away even while the save itself cannot run (saving, invalid).
+    if (!matchesStroke(SAVE_STROKE, event)) return
+    // Keep the browser's "Save page" dialog away even while the save itself cannot run (saving, invalid, a held key).
     event.preventDefault()
-    this.save()
+    if (!event.repeat) this.save()
+  }
+
+  /** Attaches the `beforeunload` listener while `warn-on-leave` and `open` are both set, and only then. */
+  private guard(): void {
+    const wanted = this.isConnected && this.warnOnLeave && this.open
+    if (wanted === this.guarding) return
+    this.guarding = wanted
+    if (wanted) window.addEventListener('beforeunload', this.handleBeforeUnload)
+    else window.removeEventListener('beforeunload', this.handleBeforeUnload)
   }
 
   private handleBeforeUnload = (event: BeforeUnloadEvent): void => {
-    if (!this.warnOnLeave || !this.open) return
     event.preventDefault()
     // Older browsers only ask when `returnValue` is set.
     event.returnValue = ''
   }
 
   protected override updated(changed: PropertyValues<this>): void {
-    this.internals.ariaLabel = this.msg.t('bar')
+    // Closed, the host is an empty strip: it states no group, so assistive tech does not list an empty one.
+    this.internals.role = this.open ? 'group' : null
+    this.internals.ariaLabel = this.open ? this.msg.t('bar') : null
+    this.guard()
     if (changed.has('open')) {
       if (this.open) this.internals.states.add('open')
       else this.internals.states.delete('open')
@@ -185,15 +202,27 @@ export class SaveBar extends LitElement {
     bar.animate({ translate: open ? [down, rest] : [rest, down] }, { duration, easing: 'ease' })
   }
 
+  private readMessage = (event: Event): void => {
+    const nodes = (event.target as HTMLSlotElement).assignedNodes({ flatten: true })
+    this.slottedMessage = nodes
+      .map((node) => node.textContent ?? '')
+      .join('')
+      .trim()
+  }
+
   override render() {
-    const message = this.msg.t(this.saving ? 'saving' : 'unsaved')
+    const saving = this.msg.t('saving')
+    const unsaved = this.msg.t('unsaved')
     // The live region sits outside the bar: the bar is `visibility: hidden` while closed, and a region that enters the
-    // accessibility tree together with its first text is often not announced. It says nothing while closed.
-    return html`<span class="announcer" role="status">${this.open ? message : ''}</span>
+    // accessibility tree together with its first text is often not announced. It says nothing while closed, the slotted
+    // message when there is one (so a change to it, such as a field to fix, is announced), and "Saving…" while saving.
+    const announcement = !this.open ? '' : this.saving ? saving : this.slottedMessage || unsaved
+    // While saving, "Saving…" shows in place of the slotted message too.
+    return html`<span class="announcer" role="status">${announcement}</span>
       <div class="bar">
         <span class="status">
           <span class="indicator" aria-hidden="true"></span>
-          <span class="message"><slot name="message">${message}</slot></span>
+          <span class="message">${this.saving ? saving : html`<slot name="message" @slotchange=${this.readMessage}>${unsaved}</slot>`}</span>
         </span>
         <div class="actions">
           <slot></slot>

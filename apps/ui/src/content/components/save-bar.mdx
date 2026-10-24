@@ -28,19 +28,23 @@ Wire it to a form:
 ```typescript tag=CodeBlock
 const form = document.querySelector('form')
 const bar = document.querySelector('c2-save-bar')
-let saved = new URLSearchParams(new FormData(form)).toString()
-const sync = () => (bar.open = new URLSearchParams(new FormData(form)).toString() !== saved)
+const snapshot = () => Object.fromEntries(new FormData(form))
+let saved = snapshot()
+const sync = () => (bar.open = JSON.stringify(snapshot()) !== JSON.stringify(saved))
 form.addEventListener('input', sync)
 
 bar.addEventListener('save', async () => {
+  // What is sent is what counts as saved: an edit made while the request runs keeps the bar open.
+  const sending = snapshot()
   bar.saving = true
-  await api.save(new FormData(form))
-  saved = new URLSearchParams(new FormData(form)).toString()
+  await api.save(sending)
+  saved = sending
   bar.saving = false
-  bar.open = false
+  sync()
 })
 bar.addEventListener('discard', () => {
-  form.reset()
+  // Back to the last save, not to the values the page loaded with (which is what form.reset() restores).
+  for (const [name, value] of Object.entries(saved)) form.elements.namedItem(name).value = value
   sync()
 })
 ```

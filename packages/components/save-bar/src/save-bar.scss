@@ -177,10 +177,9 @@
   .bar {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    width: calc(100% - 16px);
-    max-width: none;
+    // At least the width of the screen less a margin; a full-width bar (`--c2-save-bar__container--width: 100%`) stays so.
+    min-width: calc(100% - 16px);
     row-gap: 8px;
-    padding: 10px;
   }
 
   .actions > *,

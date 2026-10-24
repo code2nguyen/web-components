@@ -20,6 +20,9 @@ test('stays hidden and out of the Tab order while there is nothing to save', asy
   await renderScenario(around())
   await expect(surface(page)).toBeHidden()
   await expect(page.getByRole('status')).toHaveText('')
+  // An empty closed strip states no group.
+  await expect(bar(page)).toHaveHostAria('role', null)
+  await expect(bar(page)).toHaveHostAria('aria-label', null)
   await page.locator('#before').focus()
   await tab()
   await expect(page.locator('#after')).toBeFocused()
@@ -72,13 +75,24 @@ test('invalid disables Save and marks the indicator, but still allows Discard', 
   await renderScenario(around('open invalid', '<span slot="message">1 field to fix</span>'))
   await watch(bar(page), 'discard')
   await expect(saveButton(page)).toBeDisabled()
-  await expect(page.getByText('1 field to fix')).toBeVisible()
+  await expect(page.locator('[slot=message]')).toBeVisible()
+  await expect(page.getByRole('status')).toHaveText('1 field to fix')
   const dot = await bar(page)
     .locator('.indicator')
     .evaluate((element) => getComputedStyle(element).backgroundColor)
   expect(dot).toBe('rgb(220, 38, 38)')
   await discardButton(page).click()
   await expect(bar(page)).toHaveAttribute('data-events', '[null]')
+})
+
+test('a slotted message is announced, and gives way to "Saving…" while saving', async ({ page, renderScenario }) => {
+  await renderScenario(around('open'))
+  await bar(page).evaluate((element) => element.insertAdjacentHTML('beforeend', '<span slot="message">1 field to fix</span>'))
+  await expect(page.getByRole('status')).toHaveText('1 field to fix')
+  await props(bar(page), { saving: true })
+  await expect(page.getByRole('status')).toHaveText('Saving…')
+  await expect(bar(page).locator('.message')).toHaveText('Saving…')
+  await expect(page.locator('[slot=message]')).toBeHidden()
 })
 
 test('extra actions in the default slot come before Discard', async ({ page, renderScenario, tab }) => {
@@ -111,6 +125,26 @@ test('with shortcut, Ctrl+S / Meta+S fires save only while open', async ({ page,
   await expect(bar(page)).toHaveAttribute('data-events', '[null]')
 })
 
+test('a held Ctrl+S fires save once, and a keydown with no key is ignored', async ({ page, renderScenario }) => {
+  await renderScenario(around('shortcut open'))
+  await watch(bar(page), 'save')
+  const results = await page.evaluate(() => {
+    const send = (init: KeyboardEventInit) => {
+      const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
+      document.body.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    // Chrome's autofill dispatches a keydown whose `key` is undefined.
+    const autofill = new Event('keydown', { bubbles: true, cancelable: true })
+    document.body.dispatchEvent(autofill)
+    const apple = /Mac|iPhone|iPad/.test(navigator.platform)
+    return [send({ key: 's', ctrlKey: !apple, metaKey: apple }), send({ key: 's', ctrlKey: !apple, metaKey: apple, repeat: true })]
+  })
+  // The repeat is still kept from the browser, but fires nothing.
+  expect(results).toEqual([true, true])
+  await expect(bar(page)).toHaveAttribute('data-events', '[null]')
+})
+
 test('without shortcut, Ctrl+S is left to the page', async ({ page, renderScenario }) => {
   await renderScenario(around('open'))
   await watch(bar(page), 'save')
@@ -134,6 +168,8 @@ test('warn-on-leave cancels beforeunload only while open', async ({ page, render
   expect(await unload()).toBe(false)
   await props(bar(page), { open: true })
   expect(await unload()).toBe(true)
+  await props(bar(page), { open: false })
+  expect(await unload()).toBe(false)
 })
 
 test('sticks to the bottom of its scroll container, over the content', async ({ page, renderScenario }) => {
