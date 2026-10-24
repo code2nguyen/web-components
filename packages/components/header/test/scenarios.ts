@@ -16,9 +16,9 @@ if (scenario === 'glass') {
   subject.toggleAttribute('blurred', true)
   subject.style.setProperty('--c2-header__content--max-width', '640px')
 }
-if (scenario === 'scroll') {
+if (scenario === 'scroll' || scenario === 'hide') {
   subject.toggleAttribute('sticky', true)
-  subject.toggleAttribute('hide-on-scroll', true)
+  subject.toggleAttribute('hide-on-scroll', scenario === 'hide')
   subject.style.setProperty('--c2-header__stuck--box-shadow', '0 1px 3px rgba(0, 0, 0, 0.18)')
   // The header sticks within its parent, so the page content goes in the same block.
   main.style.display = 'block'

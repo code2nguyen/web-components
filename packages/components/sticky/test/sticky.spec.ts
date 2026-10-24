@@ -9,6 +9,16 @@ async function wheel(page: Page, deltaY: number, target = '.scroller') {
   await page.mouse.wheel(0, deltaY)
 }
 
+/**
+ * Moves the scroll box in one step. Engines handle a wheel differently (WebKit animates it over several frames, Firefox
+ * caps its distance), so tests that depend on where one scroll lands set the position directly.
+ */
+async function scrollTo(page: Page, top: number | 'end') {
+  await page.locator('.scroller').evaluate((scroller, to) => {
+    scroller.scrollTo({ top: to === 'end' ? scroller.scrollHeight : to, behavior: 'instant' })
+  }, top)
+}
+
 test('is not stuck while it rests in the flow, and sticks once content scrolls beneath it', async ({ page, scenario }) => {
   await scenario()
   const sticky = page.locator('c2-sticky')
@@ -40,9 +50,9 @@ test('keeps the offset from the edge', async ({ page, scenario }) => {
 test('sticks to the bottom edge until the end of the content is reached', async ({ page, scenario }) => {
   await scenario('bottom')
   await expect.poll(() => hasState(page, 'stuck')).toBe(true)
-  await wheel(page, 5000)
+  await scrollTo(page, 'end')
   await expect.poll(() => hasState(page, 'stuck')).toBe(false)
-  await wheel(page, -200)
+  await scrollTo(page, 200)
   await expect.poll(() => hasState(page, 'stuck')).toBe(true)
 })
 
@@ -70,22 +80,20 @@ test('hide-on-scroll retracts while scrolling down and returns on the way up', a
   await expect(page.getByRole('button', { name: 'Bold' })).toBeInViewport()
 })
 
-test('hide-on-scroll brings the content back when focus moves into it', async ({ page, scenario }) => {
+test('hide-on-scroll brings the content back when focus moves into it', async ({ page, scenario, tab }) => {
   await scenario('hide')
   await wheel(page, 300)
   await wheel(page, 100)
   await expect.poll(() => hasState(page, 'retracted')).toBe(true)
   await page.locator('.scroller').focus()
-  await page.keyboard.press('Shift+Tab')
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
+  await tab()
   await expect(page.getByRole('button', { name: 'Bold' })).toBeFocused()
   await expect.poll(() => hasState(page, 'retracted')).toBe(false)
 })
 
 test('a single fast scroll that pins the content does not also hide it', async ({ page, scenario }) => {
   await scenario('hide')
-  await wheel(page, 400)
+  await scrollTo(page, 400)
   await expect.poll(() => hasState(page, 'stuck')).toBe(true)
   expect(await hasState(page, 'retracted')).toBe(false)
   await expect(page.getByRole('button', { name: 'Bold' })).toBeInViewport()
