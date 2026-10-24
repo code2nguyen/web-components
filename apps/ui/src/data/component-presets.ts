@@ -400,6 +400,48 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-save-bar': {
+    html: `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:520px;max-width:100%;height:112px;padding-bottom:16px;box-sizing:border-box"><c2-save-bar open></c2-save-bar></div>`,
+    presets: [
+      {
+        name: 'Inverse',
+        description: 'A dark bar with a light Save button that stands apart from a light settings page, as in Shopify admin.',
+        css: {
+          '--c2-save-bar__container--background': '#18181b',
+          '--c2-save-bar__container--border': '1px solid #18181b',
+          '--c2-save-bar__message--color': '#fafafa',
+          '--c2-save-bar__indicator--size': '0px',
+          '--c2-save-bar__discard--color': '#fafafa',
+          '--c2-save-bar__discard--border': '1px solid #3f3f46',
+          '--c2-save-bar__discard__hover--background-color': '#27272a',
+          '--c2-save-bar__save--background-color': '#fafafa',
+          '--c2-save-bar__save--color': '#18181b',
+          '--c2-save-bar__save__hover--background-color': '#e4e4e7',
+        },
+      },
+      {
+        name: 'Full width',
+        description: 'A strip across the bottom of the page, the actions pushed to the far edge.',
+        css: {
+          '--c2-save-bar--inset-bottom': '0px',
+          '--c2-save-bar__container--width': '100%',
+          '--c2-save-bar__container--max-width': '100%',
+          '--c2-save-bar__container--border-radius': '0',
+          '--c2-save-bar__container--justify-content': 'space-between',
+          '--c2-save-bar__container--padding': '10px 16px',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded surface and buttons.',
+        css: {
+          '--c2-save-bar__container--border-radius': '999px',
+          '--c2-save-bar__container--padding': '5px 5px 5px 18px',
+          '--c2-save-bar__button--border-radius': '999px',
+        },
+      },
+    ],
+  },
   'c2-sparkline': {
     html: `<c2-sparkline style="width:140px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>`,
     presets: [

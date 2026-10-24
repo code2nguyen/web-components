@@ -1,0 +1,128 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SaveBar } from '@c2n/components/save-bar'
+
+## Presets
+
+Curated looks for `c2-save-bar`. Open any card in the studio to start from it. The `__container--*` variables restyle
+the floating surface, `__indicator--*` the dot before the message, and `__discard--*` / `__save--*` the two buttons;
+`__container--width: 100%` with a zero radius turns the floating bar into a full-width strip. Each card sits in a frame
+standing in for the form the bar floats over.
+
+<GalleryGrid min="480">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .sb-frame {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+</style>
+<div class="sb-frame">
+  <c2-save-bar open></c2-save-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Full width
+<style>
+  .sb-frame-full {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    overflow: hidden;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .sb-full {
+    --c2-save-bar--inset-bottom: 0px;
+    --c2-save-bar__container--width: 100%;
+    --c2-save-bar__container--max-width: 100%;
+    --c2-save-bar__container--border-radius: 0;
+    --c2-save-bar__container--justify-content: space-between;
+    --c2-save-bar__container--padding: 10px 16px;
+    --c2-save-bar__container--box-shadow: 0 -4px 16px rgba(24, 24, 27, 0.06);
+  }
+</style>
+<div class="sb-frame-full">
+  <c2-save-bar class="sb-full" open></c2-save-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Inverse
+<style>
+  .sb-frame-inverse {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .sb-inverse {
+    --c2-save-bar__container--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-save-bar__container--border: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-save-bar__container--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.24);
+    --c2-save-bar__message--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-save-bar__indicator--size: 0px;
+    --c2-save-bar__discard--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-save-bar__discard--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-inverse-surface, #fafafa) 24%, transparent);
+    --c2-save-bar__discard__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-inverse-surface, #fafafa) 12%, transparent);
+    --c2-save-bar__save--background-color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-save-bar__save--color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-save-bar__save__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-inverse-surface, #fafafa) 86%, transparent);
+  }
+</style>
+<div class="sb-frame-inverse">
+  <c2-save-bar class="sb-inverse" open></c2-save-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .sb-frame-pill {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .sb-pill {
+    --c2-save-bar__container--border-radius: 999px;
+    --c2-save-bar__container--padding: 5px 5px 5px 18px;
+    --c2-save-bar__container--background: light-dark(#ecfdf5, #0f2a20);
+    --c2-save-bar__container--border: 1px solid light-dark(#a7f3d0, #1f5a43);
+    --c2-save-bar__message--color: light-dark(#047857, #6ee7b7);
+    --c2-save-bar__indicator--background: #10b981;
+    --c2-save-bar__indicator--box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    --c2-save-bar__button--border-radius: 999px;
+    --c2-save-bar__discard--border: 1px solid transparent;
+    --c2-save-bar__discard--color: light-dark(#047857, #6ee7b7);
+    --c2-save-bar__discard__hover--background-color: light-dark(#d1fae5, #134e3a);
+    --c2-save-bar__save--background-color: #059669;
+    --c2-save-bar__save__hover--background-color: #047857;
+  }
+</style>
+<div class="sb-frame-pill">
+  <c2-save-bar class="sb-pill" open save-label="Save draft"></c2-save-bar>
+</div>
+```
+
+</GalleryGrid>

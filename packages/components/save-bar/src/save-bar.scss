@@ -1,0 +1,189 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-save-bar,
+  $theme: (
+    position: sticky,
+    inset-bottom: 16px,
+    z-index: 10,
+    container--background: #ffffff,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 8px,
+    container--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    container--padding: 6px 6px 6px 14px,
+    container--gap: 12px,
+    container--width: max-content,
+    container--max-width: calc(100% - 32px),
+    container--justify-content: flex-start,
+    container--offset: 8px,
+    container--transition-duration: 150ms,
+    indicator--size: 8px,
+    indicator--background: #d97706,
+    indicator--box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.18),
+    indicator__invalid--background: #dc2626,
+    indicator__invalid--box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18),
+    message--font-size: 14px,
+    message--font-weight: 500,
+    message--color: #18181b,
+    actions--gap: 8px,
+    button--height: 32px,
+    button--border-radius: 6px,
+    discard--background-color: transparent,
+    discard--color: #18181b,
+    discard--border: 1px solid #d4d4d8,
+    discard__hover--background-color: #f4f4f5,
+    save--background-color: rgb(2, 101, 220),
+    save--color: #ffffff,
+    save__hover--background-color: rgb(1, 84, 184),
+  )
+);
+
+// The host is a zero-height strip pinned to the bottom of its scroll container; the bar floats above it, over the
+// content, so it takes no room in the layout whether it shows or not.
+:host {
+  display: block;
+  position: css.cssVar(position);
+  bottom: css.cssVar(inset-bottom);
+  // Spans its container (or, with `position: fixed`, the viewport) so the bar can centre in it.
+  left: 0;
+  right: 0;
+  z-index: css.cssVar(z-index);
+  height: 0;
+  pointer-events: none;
+  // The bar's layout follows the width it has to work with (see the narrow layout at the end).
+  container-type: inline-size;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.bar {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: css.cssVar(container--justify-content);
+  gap: css.cssVar(container--gap);
+  width: css.cssVar(container--width);
+  max-width: css.cssVar(container--max-width);
+  padding: css.cssVar(container--padding);
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  box-shadow: css.cssVar(container--box-shadow);
+  pointer-events: auto;
+  translate: -50% 0;
+  // Read by the slide (an animation run as the bar shows or hides), resolved to the values the theme gives.
+  --_offset: #{css.cssVar(container--offset)};
+  --_duration: #{css.cssVar(container--transition-duration)};
+  transition:
+    opacity css.cssVar(container--transition-duration) ease,
+    visibility 0s linear;
+}
+
+// Closed: faded and invisible, which also takes the buttons out of the Tab order. Visibility flips only once the fade
+// has finished. It rests where it shows, so it never reaches past the bottom of its scroll container.
+:host(:not(:state(open))) .bar {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, css.cssVar(container--transition-duration);
+}
+
+.announcer {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.indicator {
+  flex: none;
+  width: css.cssVar(indicator--size);
+  height: css.cssVar(indicator--size);
+  border-radius: 999px;
+  background: css.cssVar(indicator--background);
+  box-shadow: css.cssVar(indicator--box-shadow);
+}
+
+:host(:state(invalid)) .indicator {
+  background: css.cssVar(indicator__invalid--background);
+  box-shadow: css.cssVar(indicator__invalid--box-shadow);
+}
+
+.message {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: css.cssVar(message--font-size);
+  font-weight: css.cssVar(message--font-weight);
+  color: css.cssVar(message--color);
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+}
+
+.discard,
+.save {
+  --c2-button__container--height: #{css.cssVar(button--height)};
+  --c2-button__container--border-radius: #{css.cssVar(button--border-radius)};
+  --c2-button__container--padding-left: 14px;
+  --c2-button__container--padding-right: 14px;
+  --c2-button__running-icon--size: 16px;
+}
+
+.discard {
+  --c2-button__container--background-color: #{css.cssVar(discard--background-color)};
+  --c2-button__container--color: #{css.cssVar(discard--color)};
+  --c2-button__container--border: #{css.cssVar(discard--border)};
+  --c2-button__container__hover--background-color: #{css.cssVar(discard__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(discard__hover--background-color)};
+}
+
+.save {
+  --c2-button__container--background-color: #{css.cssVar(save--background-color)};
+  --c2-button__container--color: #{css.cssVar(save--color)};
+  --c2-button__container__hover--background-color: #{css.cssVar(save__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(save__hover--background-color)};
+}
+
+// Narrow (a phone): the message takes the top row and the buttons share a full-width row below.
+@container (max-width: 480px) {
+  .bar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    width: calc(100% - 16px);
+    max-width: none;
+    row-gap: 8px;
+    padding: 10px;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+  }
+
+  .actions > *,
+  ::slotted(*) {
+    flex: 1 1 0;
+    --c2-button__container--width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  :host(:not(:state(open))) .bar {
+    translate: -50% 0;
+  }
+}

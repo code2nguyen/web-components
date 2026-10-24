@@ -121,6 +121,7 @@
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
+    "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",

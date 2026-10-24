@@ -99,6 +99,7 @@ import rate from '@c2n/rate/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
+import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
@@ -249,6 +250,7 @@ export const componentManifests = (function () {
     relativeTime,
     reorderList,
     richTextEditor,
+    saveBar,
     searchField,
     select,
     separator,

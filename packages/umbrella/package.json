@@ -641,6 +641,10 @@
       "types": "./dist/rich-text-editor.d.ts",
       "default": "./dist/rich-text-editor.js"
     },
+    "./save-bar": {
+      "types": "./dist/save-bar.d.ts",
+      "default": "./dist/save-bar.js"
+    },
     "./search-field": {
       "types": "./dist/search-field.d.ts",
       "default": "./dist/search-field.js"
@@ -1057,6 +1061,7 @@
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
+    "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",

@@ -195,6 +195,7 @@
         "./packages/components/relative-time:build",
         "./packages/components/reorder-list:build",
         "./packages/components/rich-text-editor:build",
+        "./packages/components/save-bar:build",
         "./packages/components/search-field:build",
         "./packages/components/select:build",
         "./packages/components/separator:build",
