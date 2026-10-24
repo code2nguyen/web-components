@@ -126,9 +126,23 @@ export class BottomNav extends LitElement {
     return this.away
   }
 
-  /** The bar's `c2-bottom-nav-item` children. */
+  /** The bar's `c2-bottom-nav-item` elements, in order. */
   get items(): BottomNavItem[] {
-    return Array.from(this.children).filter((child): child is BottomNavItem => child.localName === ITEM_TAG)
+    return BottomNav.collectItems(this)
+  }
+
+  /**
+   * The nearest `c2-bottom-nav-item` descendants of `root`, looking through anything that is not one. An item is not
+   * always a literal child: Astro wraps every island in a `display: contents` `<astro-island>`, and an app may wrap
+   * items in a router link component.
+   */
+  private static collectItems(root: ParentNode): BottomNavItem[] {
+    const found: BottomNavItem[] = []
+    for (const child of root.children) {
+      if (child.localName === ITEM_TAG) found.push(child as BottomNavItem)
+      else found.push(...BottomNav.collectItems(child))
+    }
+    return found
   }
 
   constructor() {
@@ -172,6 +186,14 @@ export class BottomNav extends LitElement {
 
   private syncItems() {
     const items = this.items
+    // Items load in their own module (an island each, on the docs site) and may not be upgraded yet.
+    if (!customElements.get(ITEM_TAG) && items.length) {
+      void customElements.whenDefined(ITEM_TAG).then(() => {
+        this.adoptMarkedValue()
+        this.syncItems()
+      })
+      return
+    }
     for (const item of items) {
       const current = !!this.value && item.effectiveValue === this.value
       const labelHidden = this.labelHiddenFor(current, items.length)
@@ -209,7 +231,7 @@ export class BottomNav extends LitElement {
   private readonly handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented) return
     const item = event.composedPath().find((node): node is BottomNavItem => node instanceof Element && node.localName === ITEM_TAG)
-    if (!item || item.parentElement !== this) return
+    if (!item || !this.items.includes(item)) return
     // A modified click on a link opens it elsewhere and leaves this page where it is.
     if (item.href && (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return
     const value = item.effectiveValue

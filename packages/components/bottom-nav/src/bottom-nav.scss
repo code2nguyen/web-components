@@ -23,6 +23,8 @@
 
 :host {
   display: block;
+  box-sizing: border-box;
+  width: 100%;
   position: css.cssVar(position);
   bottom: 0;
   left: 0;

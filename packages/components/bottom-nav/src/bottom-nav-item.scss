@@ -45,6 +45,7 @@
 
 :host {
   display: block;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -104,7 +105,7 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: css.cssVar(indicator--width);
+  width: min(#{css.cssVar(indicator--width)}, 100%);
   height: css.cssVar(indicator--height);
   border-radius: css.cssVar(indicator--border-radius);
   background: css.cssVar(indicator--background);

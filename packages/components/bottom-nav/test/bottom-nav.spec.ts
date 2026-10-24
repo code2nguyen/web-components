@@ -185,3 +185,18 @@ test('without hide-on-scroll the bar stays', async ({ page, renderScenario }) =>
   await expect.poll(() => page.locator('#feed').evaluate((element) => element.scrollTop)).toBeGreaterThan(100)
   await expect(page.locator('c2-bottom-nav')).not.toHaveState('scrolled-away')
 })
+
+test('finds items inside wrapper elements, such as the islands Astro wraps them in', async ({ page, renderScenario }) => {
+  const wrapped = links.replace(
+    /<c2-bottom-nav-item([\s\S]*?)<\/c2-bottom-nav-item>/g,
+    '<span style="display: contents"><c2-bottom-nav-item$1</c2-bottom-nav-item></span>',
+  )
+  await renderScenario(wrapped.replace('<c2-bottom-nav value="home">', '<c2-bottom-nav value="home" label-visibility="selected">'))
+  await expect(page.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
+  expect(await labelShown(page)).toEqual([true, false, false, false])
+  await page.getByRole('link', { name: 'Cards' }).click()
+  await expect(page.getByRole('link', { name: 'Cards' })).toHaveAttribute('aria-current', 'page')
+  // Items still share the bar's width equally.
+  const widths = await page.locator('c2-bottom-nav-item').evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().width)))
+  expect(new Set(widths).size).toBe(1)
+})
