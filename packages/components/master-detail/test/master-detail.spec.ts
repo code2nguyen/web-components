@@ -7,7 +7,7 @@ const placeholder = (page: Page) => page.getByText('Select a conversation')
 const item = (page: Page, name: string) => page.getByRole('button', { name })
 const back = (page: Page) => page.getByRole('button', { name: 'Back', exact: true })
 const events = (page: Page) => page.locator('output')
-const layoutOf = (page: Page) => page.locator('c2-master-detail').evaluate((element) => element.layout)
+const layoutOf = (page: Page) => page.locator('c2-master-detail').evaluate((element) => (element as HTMLElementTagNameMap['c2-master-detail']).layout)
 
 test('split: shows the placeholder until a record opens beside the list', async ({ page, scenario }) => {
   await scenario('split')
