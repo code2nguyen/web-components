@@ -134,6 +134,7 @@
         "../../components/navigation-menu:build",
         "../../components/notepad:build",
         "../../components/number-input:build",
+        "../../components/org-chart:build",
         "../../components/otp-input:build",
         "../../components/overlay:build",
         "../../components/page-editor:build",

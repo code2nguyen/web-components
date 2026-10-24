@@ -102,6 +102,7 @@
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
     "@c2n/number-input": "*",
+    "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
