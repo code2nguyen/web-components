@@ -80,12 +80,13 @@ export const schema = new Schema({
     },
     // A picture between the lines, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
     // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
-    // for yet.
+    // for yet (a web image's address is, until its copy is saved). `web` marks an image pasted from another page with
+    // its web address, to copy into the application's store (see `adoptPastedImages`); it is never written.
     image: {
       atom: true,
       selectable: true,
       draggable: true,
-      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null }, web: { default: false } },
       parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
       toDOM: (node) => {
         const { src, alt, width } = node.attrs

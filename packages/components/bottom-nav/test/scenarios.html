@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>bottom-nav scenarios</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        max-width: 420px;
+      }
+      #feed {
+        height: 300px;
+        overflow: auto;
+      }
+      .tall {
+        height: 2000px;
+      }
+    </style>
+    <script type="module">
+      import '../src/bottom-nav.ts'
+      // The app's languages: French, added as an app would.
+      import './translations.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

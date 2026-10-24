@@ -254,6 +254,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
   },
+  // The "More" trigger of an overflow list is outlined in the accent while it holds the current page.
+  '--c2-overflow-list__more__current--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
   // Org chart: the connector lines are the resting border grey, hovering a card or a toggle takes the hover border,
   // and the selection ring doubles the accent border.
   '--c2-org-chart__connector--color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
@@ -292,6 +297,11 @@ export const overrides: Record<string, Override> = {
   '--c2-trace-waterfall__series-7--color': { token: 'chart-series-7' },
   '--c2-trace-waterfall__series-8--color': { token: 'chart-series-8' },
   '--c2-trace-waterfall__bar__error--background': { token: 'color-error' },
+  '--c2-save-bar__container--box-shadow': { token: 'shadow-md' },
+  '--c2-save-bar__indicator__invalid--background': { token: 'color-error' },
+  '--c2-save-bar__indicator--background': { exclude: 'unsaved-changes warning hue; the theme has no warning token' },
+  '--c2-save-bar__indicator--box-shadow': { exclude: 'halo in the indicator hue' },
+  '--c2-save-bar__indicator__invalid--box-shadow': { exclude: 'halo in the indicator hue' },
   // Row dividers and axis lines are fainter than a hairline border: the surface-container grey.
   '--c2-trace-waterfall__grid-line--color': { token: 'color-surface-container' },
   '--c2-trace-waterfall__row--border-bottom': {
@@ -960,4 +970,14 @@ export const overrides: Record<string, Override> = {
   '--c2-form-field__warning--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__counter__near-limit--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__icon-glyph--color': { exclude: 'glyph on the error or warning disc' },
+  // Bottom nav: the pressed indicator is the hover surface tinted a step further (as on the copy button), and the badge
+  // ring cuts the badge out of the bar, so it is drawn in the bar's surface colour like the avatar-group ring.
+  '--c2-bottom-nav-item__indicator__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  '--c2-bottom-nav-item__badge--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
 }

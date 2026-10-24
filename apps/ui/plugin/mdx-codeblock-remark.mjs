@@ -212,10 +212,14 @@ function asAttributeName(name) {
 const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 // Tags that stay plain only as direct children of a given parent, because they are islands of their own elsewhere.
 // `c2-chip-group` reads the size its chips and badges report, which only reaches it from a direct child.
+// `c2-overflow-list` measures its children and builds menu rows from them; an `<astro-island>` wrapper is a
+// zero-width `display: contents` box with no label (the buttons are registered by `chrome-modules.ts`, the rows by
+// the list's own module).
 // `c2-swipe-action` lays its actions out as flex items and clicks the outermost one on a full swipe, which a
 // `display: contents` island wrapper defeats; `c2-button` and `c2-icon-button` are registered by `chrome-modules.ts`.
 const NESTED_CHILDREN_OF = new Map([
   ['c2-chip-group', new Set(['c2-chip', 'c2-badge'])],
+  ['c2-overflow-list', new Set(['c2-button', 'c2-icon-button', 'c2-link-button', 'c2-menu-item'])],
   ['c2-swipe-action', new Set(['c2-button', 'c2-icon-button'])],
 ])
 
