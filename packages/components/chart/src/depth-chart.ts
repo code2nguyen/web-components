@@ -284,6 +284,8 @@ export class DepthChart extends UplotChartBase {
     context.roundRect(left, top + 2 * ratio, labelWidth, labelHeight, labelHeight / 2)
     context.fill()
     context.fillStyle = this.themeController.resolveColor('var(--c2-chart__mid-label--color, #fafafa)', theme.tooltipColor)
+    // uPlot leaves the context centred for its axis labels; the label is placed by its left edge.
+    context.textAlign = 'left'
     context.textBaseline = 'middle'
     context.fillText(label, left + padX, top + 2 * ratio + labelHeight / 2)
     context.restore()

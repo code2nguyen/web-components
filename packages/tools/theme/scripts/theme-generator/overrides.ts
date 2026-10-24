@@ -318,6 +318,11 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // A depth chart's sides are the chart's own rise and fall colours, not the error role, and its mid price label is
+  // drawn like the tooltip: an inverse surface with the text that reads on it.
+  '--c2-chart__bid--color': { token: 'chart-positive' },
+  '--c2-chart__ask--color': { token: 'chart-negative' },
+  '--c2-chart__mid-label--color': { token: 'color-on-inverse-surface' },
   // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
   // falling-direction colour so a brand recolours the pair together with the charts.
   '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
