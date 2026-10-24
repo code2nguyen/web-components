@@ -411,6 +411,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-save-bar__container--border': '1px solid #18181b',
           '--c2-save-bar__message--color': '#fafafa',
           '--c2-save-bar__indicator--size': '0px',
+          '--c2-save-bar__indicator--box-shadow': 'none',
           '--c2-save-bar__discard--color': '#fafafa',
           '--c2-save-bar__discard--border': '1px solid #3f3f46',
           '--c2-save-bar__discard__hover--background-color': '#27272a',

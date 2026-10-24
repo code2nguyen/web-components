@@ -103,6 +103,14 @@
   white-space: nowrap;
 }
 
+// The indicator and the message stay together, so `space-between` puts them at one edge and the actions at the other.
+.status {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
+  min-width: 0;
+}
+
 .indicator {
   flex: none;
   width: css.cssVar(indicator--size);
@@ -157,21 +165,22 @@
   --c2-button__container--color: #{css.cssVar(save--color)};
   --c2-button__container__hover--background-color: #{css.cssVar(save__hover--background-color)};
   --c2-button__container__active--background-color: #{css.cssVar(save__hover--background-color)};
+
+  // A running Save stays solid with its spinner; only an invalid one is dimmed.
+  &[running] {
+    --c2-button__container__disabled--opacity: 1;
+  }
 }
 
 // Narrow (a phone): the message takes the top row and the buttons share a full-width row below.
 @container (max-width: 480px) {
   .bar {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     width: calc(100% - 16px);
     max-width: none;
     row-gap: 8px;
     padding: 10px;
-  }
-
-  .actions {
-    grid-column: 1 / -1;
   }
 
   .actions > *,

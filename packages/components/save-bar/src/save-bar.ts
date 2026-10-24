@@ -191,8 +191,10 @@ export class SaveBar extends LitElement {
     // accessibility tree together with its first text is often not announced. It says nothing while closed.
     return html`<span class="announcer" role="status">${this.open ? message : ''}</span>
       <div class="bar">
-        <span class="indicator" aria-hidden="true"></span>
-        <span class="message"><slot name="message">${message}</slot></span>
+        <span class="status">
+          <span class="indicator" aria-hidden="true"></span>
+          <span class="message"><slot name="message">${message}</slot></span>
+        </span>
         <div class="actions">
           <slot></slot>
           <c2-button class="discard" ?disabled=${this.saving} @click=${this.discard}>${this.discardLabel || this.msg.t('discard')}</c2-button>
