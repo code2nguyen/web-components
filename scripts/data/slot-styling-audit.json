@@ -3704,6 +3704,30 @@
       "decision": "part",
       "parts": ["frame"],
       "reason": "The empty frame (background, border, minimum height) owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's c2-menubar-menu elements; each trigger is styled through the c2-menubar-menu variables."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "end",
+      "decision": "assigned-content",
+      "reason": "The end slot projects consumer-owned light DOM beside the menus; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "start",
+      "decision": "assigned-content",
+      "reason": "The start slot projects consumer-owned light DOM before the menus; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-menubar-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's menu rows into c2-menu; style them through the c2-menu and c2-menu-item contracts."
     }
   ]
 }

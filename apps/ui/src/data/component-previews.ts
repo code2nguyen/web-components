@@ -274,6 +274,11 @@ price: .price
   <hr />
   <c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
 </c2-menu>`,
+  menubar: `<c2-menubar aria-label="Application">
+  <c2-menubar-menu label="File"><c2-menu-item value="new">New</c2-menu-item><c2-menu-item value="open">Open…</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Edit"><c2-menu-item value="undo">Undo</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="View"><c2-menu-item value="zoom">Zoom</c2-menu-item></c2-menubar-menu>
+</c2-menubar>`,
   mermaid: `<c2-mermaid style="width:260px;--c2-mermaid--font-size:12px" value="flowchart LR
   Cart --> Pay{Paid?}
   Pay -- yes --> Ship"></c2-mermaid>`,

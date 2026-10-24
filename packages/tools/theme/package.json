@@ -130,6 +130,7 @@
         "../../components/mat-icon:build",
         "../../components/math:build",
         "../../components/menu:build",
+        "../../components/menubar:build",
         "../../components/mermaid:build",
         "../../components/modal:build",
         "../../components/money-input:build",
