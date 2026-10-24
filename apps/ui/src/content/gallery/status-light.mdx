@@ -1,0 +1,138 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { StatusLight } from '@c2n/components/status-light'
+
+## Presets
+
+Curated looks for `c2-status-light`. Open any card in the studio to start from it. `--c2-status-light--background` with the paddings turns the light into a pill, `--c2-status-light__dot--clip-path` and `--border-radius` code each tone with a shape as well as a colour, and the per-tone `--c2-status-light__dot__<tone>--background` variables recolour a tone everywhere.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-status-light tone="success">Live</c2-status-light>
+```
+
+```html tag=MdxCodeBlock,label=Subtle pill
+<style>
+  .pill {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pill c2-status-light {
+    --c2-status-light--padding-left: 8px;
+    --c2-status-light--padding-right: 10px;
+    --c2-status-light--padding-top: 2px;
+    --c2-status-light--padding-bottom: 2px;
+    --c2-status-light--gap: 6px;
+    --c2-status-light--font-size: 12px;
+    --c2-status-light--font-weight: 500;
+    --c2-status-light__dot--size: 6px;
+  }
+  .pill [tone='neutral'] {
+    --c2-status-light--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-status-light--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .pill [tone='success'] {
+    --c2-status-light--background: light-dark(#dcfce7, #0f2e1b);
+    --c2-status-light--color: light-dark(#166534, #6fd596);
+  }
+  .pill [tone='warning'] {
+    --c2-status-light--background: light-dark(#fef3c7, #33270a);
+    --c2-status-light--color: light-dark(#92400e, #e6b85c);
+  }
+  .pill [tone='danger'] {
+    --c2-status-light--background: light-dark(#fee2e2, #3a1414);
+    --c2-status-light--color: light-dark(#991b1b, #f29a9a);
+  }
+</style>
+<div class="pill">
+  <c2-status-light tone="neutral">Draft</c2-status-light>
+  <c2-status-light tone="success">Paid</c2-status-light>
+  <c2-status-light tone="warning">Overdue</c2-status-light>
+  <c2-status-light tone="danger">Refused</c2-status-light>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Shape-coded
+<style>
+  .shapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .shapes [tone='warning'] {
+    --c2-status-light__dot--size: 9px;
+    --c2-status-light__dot--border-radius: 1px;
+    --c2-status-light__dot--clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  .shapes [tone='danger'] {
+    --c2-status-light__dot--size: 10px;
+    --c2-status-light__dot--border-radius: 0;
+    --c2-status-light__dot--clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  .shapes [tone='neutral'] {
+    --c2-status-light__dot--background: transparent;
+    --c2-status-light__dot--box-shadow: inset 0 0 0 2px var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="shapes">
+  <c2-status-light tone="success">Healthy</c2-status-light>
+  <c2-status-light tone="warning">Warning</c2-status-light>
+  <c2-status-light tone="danger">Critical</c2-status-light>
+  <c2-status-light tone="neutral">Paused</c2-status-light>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Service list
+<style>
+  .services {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px 32px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .services c2-status-light {
+    --c2-status-light--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-status-light--font-size: 13px;
+  }
+</style>
+<div class="services">
+  <span>API gateway</span>
+  <c2-status-light tone="success">Operational</c2-status-light>
+  <span>Search index</span>
+  <c2-status-light tone="warning">Degraded</c2-status-light>
+  <span>Payments webhook</span>
+  <c2-status-light tone="danger" pulse>Incident</c2-status-light>
+  <span>Image CDN</span>
+  <c2-status-light tone="info">Maintenance</c2-status-light>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Bold caps
+<style>
+  .caps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .caps c2-status-light {
+    --c2-status-light--font-size: 12px;
+    --c2-status-light--font-weight: 600;
+    --c2-status-light--gap: 6px;
+    --c2-status-light__dot--size: 10px;
+    --c2-status-light__dot--border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+</style>
+<div class="caps">
+  <c2-status-light tone="primary" pulse>Building</c2-status-light>
+  <c2-status-light tone="success">Ready</c2-status-light>
+  <c2-status-light tone="danger">Error</c2-status-light>
+</div>
+```
+
+</GalleryGrid>

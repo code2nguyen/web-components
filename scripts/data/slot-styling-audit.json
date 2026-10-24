@@ -1515,6 +1515,26 @@
       "reason": "The menu slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-status-light",
+      "slot": "",
+      "decision": "variables",
+      "variables": [
+        "--c2-status-light--color",
+        "--c2-status-light--font-family",
+        "--c2-status-light--font-size",
+        "--c2-status-light--font-weight",
+        "--c2-status-light--line-height"
+      ],
+      "reason": "The label wrapper sets the type the slotted label text inherits, and truncates it on overflow."
+    },
+    {
+      "tag": "c2-status-light",
+      "slot": "dot",
+      "decision": "variables",
+      "variables": ["--c2-status-light__icon--size", "--c2-status-light__dot--background"],
+      "reason": "The dot wrapper sizes a slotted SVG and colours it with the tone through currentColor."
+    },
+    {
       "tag": "c2-tour",
       "slot": "",
       "decision": "part",

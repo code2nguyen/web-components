@@ -166,6 +166,7 @@
         "../../components/spreadsheet:build",
         "../../components/stat:build",
         "../../components/state-timeline:build",
+        "../../components/status-light:build",
         "../../components/status-panel:build",
         "../../components/steps:build",
         "../../components/streaming-text:build",

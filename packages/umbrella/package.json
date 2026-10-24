@@ -689,6 +689,10 @@
       "types": "./dist/state-timeline.d.ts",
       "default": "./dist/state-timeline.js"
     },
+    "./status-light": {
+      "types": "./dist/status-light.d.ts",
+      "default": "./dist/status-light.js"
+    },
     "./status-panel": {
       "types": "./dist/status-panel.d.ts",
       "default": "./dist/status-panel.js"
@@ -1055,6 +1059,7 @@
     "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",
     "@c2n/state-timeline": "*",
+    "@c2n/status-light": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/streaming-text": "*",
