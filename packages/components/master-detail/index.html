@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-master-detail</title>
+    <script type="module" src="/src/master-detail.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+      }
+      .frame {
+        height: 360px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        overflow: hidden;
+        resize: horizontal;
+      }
+      .row {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        border: 0;
+        border-bottom: 1px solid #f4f4f5;
+        background: none;
+        text-align: start;
+        font: inherit;
+      }
+      article {
+        padding: 16px 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Resize the frame (drag its corner) across 720px</h2>
+    <div class="frame" style="width: 960px">
+      <c2-master-detail id="inbox">
+        <div slot="master">
+          <button class="row" data-subject="Invoice 2041 charged twice">Ana Ruiz</button>
+          <button class="row" data-subject="SSO login loops back to sign-in">Kenji Watanabe</button>
+          <button class="row" data-subject="Export to CSV drops the last column">Priya Natarajan</button>
+        </div>
+        <article slot="detail">
+          <h2 class="subject"></h2>
+          <p>Message body.</p>
+        </article>
+        <p slot="placeholder">Select a conversation</p>
+      </c2-master-detail>
+    </div>
+
+    <h2>collapse="overlay"</h2>
+    <div class="frame" style="width: 560px">
+      <c2-master-detail collapse="overlay">
+        <div slot="master">
+          <button class="row" data-subject="Invoice 2041 charged twice">Ana Ruiz</button>
+          <button class="row" data-subject="SSO login loops back to sign-in">Kenji Watanabe</button>
+        </div>
+        <article slot="detail">
+          <h2 class="subject"></h2>
+          <p>Message body.</p>
+        </article>
+      </c2-master-detail>
+    </div>
+
+    <script type="module">
+      for (const layout of document.querySelectorAll('c2-master-detail')) {
+        layout.addEventListener('click', (event) => {
+          const row = event.target.closest('.row')
+          if (!row) return
+          layout.querySelector('.subject').textContent = row.dataset.subject
+          layout.open = true
+        })
+      }
+    </script>
+  </body>
+</html>

@@ -2635,6 +2635,26 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-master-detail': {
+    html: `<c2-master-detail open breakpoint="0" style="width: 300px; height: 140px; border: 1px solid #e4e4e7; border-radius: 8px"><div slot="master" style="padding: 10px; font-size: 12px">Ana Ruiz<br>Kenji Watanabe</div><div slot="detail" style="padding: 10px; font-size: 12px">Invoice 2041 charged twice</div></c2-master-detail>`,
+    presets: [
+      {
+        name: 'Narrow master',
+        description: 'A 120px master column with no divider line.',
+        css: { '--c2-master-detail__master--width': '120px', '--c2-master-detail__divider--border': 'none' },
+      },
+      {
+        name: 'Tinted master',
+        description: 'A grey master column, a white detail.',
+        css: { '--c2-master-detail__master--background': '#f4f4f5', '--c2-master-detail__divider--border': '1px solid #e4e4e7' },
+      },
+      {
+        name: 'Accent divider',
+        description: 'A 2px accent line between the panes.',
+        css: { '--c2-master-detail__divider--border': '2px solid rgb(2, 101, 220)' },
+      },
+    ],
+  },
   'c2-menu': {
     html: `<c2-menu aria-label="Actions"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file</c2-menu-item><c2-menu-item value="duplicate">Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>`,
     presets: [

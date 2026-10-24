@@ -71,6 +71,7 @@ import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
+import masterDetail from '@c2n/master-detail/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
@@ -221,6 +222,7 @@ export const componentManifests = (function () {
     marker,
     maskInput,
     masonry,
+    masterDetail,
     matIcon,
     math,
     menu,
