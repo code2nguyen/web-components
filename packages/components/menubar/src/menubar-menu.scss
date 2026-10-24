@@ -1,0 +1,88 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-menubar-menu,
+  $theme: (
+    trigger--height: 28px,
+    trigger--padding-left: 10px,
+    trigger--padding-right: 10px,
+    trigger--border-radius: 6px,
+    trigger--font-size: 14px,
+    trigger--font-weight: null,
+    trigger--font-family: null,
+    trigger--color: #18181b,
+    trigger--background-color: transparent,
+    trigger__hover--background-color: #f4f4f5,
+    trigger__hover--color: null,
+    trigger__open--background-color: #f4f4f5,
+    trigger__open--color: null,
+    trigger__open--font-weight: null,
+    trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    trigger__focus--outline-offset: 0px,
+    trigger__disabled--opacity: variables.$disabled-content-opacity,
+    menu--offset: 4px,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+c2-menu {
+  display: flex;
+  // Read by the overlay; a submenu sets its own offset on its host, so this does not reach it.
+  --c2-overlay--offset-y: #{css.cssVar(menu--offset)};
+}
+
+.trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: css.cssVar(trigger--height);
+  padding-left: css.cssVar(trigger--padding-left);
+  padding-right: css.cssVar(trigger--padding-right);
+  border-radius: css.cssVar(trigger--border-radius);
+  font-family: css.cssVar(trigger--font-family);
+  font-size: css.cssVar(trigger--font-size);
+  font-weight: css.cssVar(trigger--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  color: css.cssVar(trigger--color);
+  background-color: css.cssVar(trigger--background-color);
+  cursor: default;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover:not([aria-disabled]) {
+    background-color: css.cssVar(trigger__hover--background-color);
+    color: css.cssVar(trigger__hover--color, trigger--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: css.cssVar(trigger__focus--outline-offset);
+  }
+
+  &[aria-disabled] {
+    opacity: css.cssVar(trigger__disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+:host(:state(open)) .trigger,
+:host(:state(open)) .trigger:hover {
+  background-color: css.cssVar(trigger__open--background-color);
+  color: css.cssVar(trigger__open--color, trigger--color);
+  font-weight: css.cssVar(trigger__open--font-weight, trigger--font-weight);
+}
+
+@media (forced-colors: active) {
+  :host(:state(open)) .trigger {
+    outline: 1px solid ButtonText;
+  }
+}

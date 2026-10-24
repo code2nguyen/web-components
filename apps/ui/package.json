@@ -96,6 +96,7 @@
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
+    "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",

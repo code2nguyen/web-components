@@ -529,6 +529,14 @@
       "types": "./dist/menu/menu-row.d.ts",
       "default": "./dist/menu/menu-row.js"
     },
+    "./menubar": {
+      "types": "./dist/menubar.d.ts",
+      "default": "./dist/menubar.js"
+    },
+    "./menubar/menubar-menu": {
+      "types": "./dist/menubar/menubar-menu.d.ts",
+      "default": "./dist/menubar/menubar-menu.js"
+    },
     "./mermaid": {
       "types": "./dist/mermaid.d.ts",
       "default": "./dist/mermaid.js"
@@ -1033,6 +1041,7 @@
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
+    "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",

@@ -222,7 +222,8 @@ export class Menu extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!isServer && this.renderRoot.hasChildNodes()) {
+    // Under `defer-hydration` Lit has not made the render root yet; it calls this again once hydration starts.
+    if (!isServer && this.renderRoot?.hasChildNodes()) {
       void this.updateComplete.then(() => {
         this.syncAnchor()
         this.syncItems()
@@ -401,8 +402,12 @@ export class Menu extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
+    const own = this.itemFromEvent(event)
+    // A key a submenu left alone (ArrowRight on a plain row) is not this menu's either: it goes on to whatever holds
+    // the menu, which is how a menubar moves to its next menu. Without this it reopened the submenu it came from.
+    if (!own && event.target instanceof Element && event.target.closest('c2-menu-item')) return
     const enabled = this.enabledItems
-    const current = this.itemFromEvent(event) ?? this.focusedItem
+    const current = own ?? this.focusedItem
     const index = current ? enabled.indexOf(current) : -1
 
     switch (event.key) {
@@ -546,6 +551,8 @@ export class Menu extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     // The overlay needs its anchor in the same commit that opens it, so resolve it before rendering, not after.
+    // There is no DOM to query under a server render; the anchor is resolved once the element upgrades.
+    if (isServer) return
     if (changed.has('anchor') && this.anchor) this.anchorElement = this.resolveAnchor()
     else if (!this.anchorElement) this.anchorElement = this.querySelector<HTMLElement>(':scope > [slot="trigger"]')
     this.hasTrigger = !!this.anchorElement
