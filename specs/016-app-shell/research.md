@@ -58,7 +58,7 @@ Three example apps hand-build a shell from `c2-header` + `c2-side-nav`:
 
 ### Page header
 
-Eleven pages hand-build the top of `main` (`grep -rn "<h1" apps/examples`). The same pieces every time:
+27 source files under `apps/examples` contain an `<h1>` (`grep -rln "<h1" apps/examples`, build output excluded): 11 in `observability-nextjs`, 7 in `data-platform-html`, 4 in `close-workbench-sveltekit`, one in each of the other five apps. Most of them hand-build the top of `main` with the same pieces:
 
 | Page                                                                    | What it hand-rolls                                                                                                                                                                |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
