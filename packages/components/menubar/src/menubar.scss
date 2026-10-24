@@ -1,0 +1,57 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-menubar,
+  $theme: (
+    gap: 8px,
+    menus-gap: 2px,
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: none,
+    padding-top: 4px,
+    padding-right: 4px,
+    padding-bottom: 4px,
+    padding-left: 4px,
+  )
+);
+
+:host {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  background-color: css.cssVar(background-color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.menus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(menus-gap);
+  min-width: 0;
+}
+
+slot[name='start']::slotted(*),
+slot[name='end']::slotted(*) {
+  flex: none;
+}
+
+// The end slot takes the remaining space, so a title or status sits at the far end unless the author centres it. When
+// the bar is too narrow for it, it wraps onto a line of its own rather than running over the menus.
+slot[name='end'] {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}

@@ -1,0 +1,113 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TableOfContents } from '@c2n/components/table-of-contents'
+
+## Presets
+
+Looks for `c2-table-of-contents`. The rail (`--c2-table-of-contents__track--*`), the sliding indicator (`__indicator--*`) and the current link (`__link__active--*`) do most of the work; `--c2-table-of-contents__marker--content` numbers the entries and `__progress--background-color` fills the rail as reading progress. Each card lists the sections of an imaginary page, so the first entry is current.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-table-of-contents
+  items='[{"id":"g-default-intro","label":"Introduction","level":1},{"id":"g-default-setup","label":"Setup","level":1},{"id":"g-default-env","label":"Environment variables","level":2},{"id":"g-default-db","label":"Database","level":2},{"id":"g-default-deploy","label":"Deploying","level":1},{"id":"g-default-faq","label":"FAQ","level":1}]'
+></c2-table-of-contents>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .toc-pill {
+    --c2-table-of-contents__track--width: 0px;
+    --c2-table-of-contents__indicator--width: 0px;
+    --c2-table-of-contents__link--padding-inline: 10px;
+    --c2-table-of-contents__link--padding-block: 6px;
+    --c2-table-of-contents__link--border-radius: 6px;
+    --c2-table-of-contents__link__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table-of-contents__link__active--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-table-of-contents__link__active--font-weight: 600;
+    --c2-table-of-contents__title--text-transform: none;
+    --c2-table-of-contents__title--letter-spacing: 0;
+    --c2-table-of-contents__title--font-size: 14px;
+    --c2-table-of-contents__title--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table-of-contents__title--margin: 0 0 8px 10px;
+    width: 220px;
+  }
+</style>
+<c2-table-of-contents
+  class="toc-pill"
+  label="In this article"
+  items='[{"id":"g-pill-overview","label":"Overview","level":1},{"id":"g-pill-pricing","label":"Pricing plans","level":1},{"id":"g-pill-billing","label":"Billing cycle","level":2},{"id":"g-pill-refunds","label":"Refunds","level":2},{"id":"g-pill-support","label":"Support","level":1}]'
+></c2-table-of-contents>
+```
+
+```html tag=MdxCodeBlock,label=Numbered
+<style>
+  .toc-numbered {
+    --c2-table-of-contents__marker--content: counters(c2-toc, '.') '  ';
+    --c2-table-of-contents__marker--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-table-of-contents__link--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table-of-contents__link__active--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-table-of-contents__link--indent: 18px;
+    --c2-table-of-contents__track--width: 0px;
+    --c2-table-of-contents__indicator--width: 0px;
+    --c2-table-of-contents__link--padding-inline: 0px;
+    --c2-table-of-contents__title--text-transform: none;
+    --c2-table-of-contents__title--letter-spacing: 0;
+    --c2-table-of-contents__title--font-size: 14px;
+    --c2-table-of-contents__title--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table-of-contents__title--margin: 0 0 6px;
+    width: 240px;
+  }
+</style>
+<c2-table-of-contents
+  class="toc-numbered"
+  label="Contents"
+  items='[{"id":"g-num-scope","label":"Scope","level":1},{"id":"g-num-terms","label":"Terms and definitions","level":1},{"id":"g-num-req","label":"Requirements","level":1},{"id":"g-num-req-func","label":"Functional","level":2},{"id":"g-num-req-perf","label":"Performance","level":2},{"id":"g-num-test","label":"Testing","level":1}]'
+></c2-table-of-contents>
+```
+
+```html tag=MdxCodeBlock,label=Reading progress
+<style>
+  .toc-progress {
+    --c2-table-of-contents__track--width: 3px;
+    --c2-table-of-contents__track--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table-of-contents__indicator--width: 3px;
+    --c2-table-of-contents__progress--background-color: light-dark(#a7f3d0, #14532d);
+    --c2-table-of-contents__indicator--background-color: #059669;
+    --c2-table-of-contents__link__active--color: light-dark(#047857, #4ade80);
+    --c2-table-of-contents__link__passed--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table-of-contents__link--padding-block: 6px;
+    width: 220px;
+  }
+</style>
+<c2-table-of-contents
+  class="toc-progress"
+  label="Your progress"
+  items='[{"id":"g-prog-welcome","label":"Welcome","level":1},{"id":"g-prog-basics","label":"The basics","level":1},{"id":"g-prog-layout","label":"Layout","level":1},{"id":"g-prog-motion","label":"Motion","level":1},{"id":"g-prog-quiz","label":"Final quiz","level":1}]'
+></c2-table-of-contents>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .toc-compact {
+    --c2-table-of-contents--font-size: 12px;
+    --c2-table-of-contents__title--display: none;
+    --c2-table-of-contents__link--padding-block: 2px;
+    --c2-table-of-contents__link--padding-inline: 8px;
+    --c2-table-of-contents__link--indent: 10px;
+    --c2-table-of-contents__indicator--width: 1px;
+    --c2-table-of-contents__link__active--font-weight: 600;
+    --c2-table-of-contents__link__active--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table-of-contents__indicator--background-color: var(--c2-theme--color-on-surface, #18181b);
+    width: 180px;
+  }
+</style>
+<c2-table-of-contents
+  class="toc-compact"
+  label="Sections"
+  items='[{"id":"g-cmp-props","label":"Properties","level":1},{"id":"g-cmp-value","label":"value","level":2},{"id":"g-cmp-disabled","label":"disabled","level":2},{"id":"g-cmp-events","label":"Events","level":1},{"id":"g-cmp-slots","label":"Slots","level":1},{"id":"g-cmp-css","label":"CSS properties","level":1}]'
+></c2-table-of-contents>
+```
+
+</GalleryGrid>

@@ -43,6 +43,7 @@ import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
+import floatButton from '@c2n/float-button/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
@@ -72,9 +73,11 @@ import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
+import masterDetail from '@c2n/master-detail/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
+import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
@@ -121,6 +124,7 @@ import steps from '@c2n/steps/custom-elements.json'
 import streamingText from '@c2n/streaming-text/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import tableOfContents from '@c2n/table-of-contents/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
@@ -194,6 +198,7 @@ export const componentManifests = (function () {
     featherIcons,
     fieldset,
     filterBuilder,
+    floatButton,
     flow,
     form,
     formField,
@@ -223,9 +228,11 @@ export const componentManifests = (function () {
     marker,
     maskInput,
     masonry,
+    masterDetail,
     matIcon,
     math,
     menu,
+    menubar,
     mermaid,
     modal,
     moneyInput,
@@ -273,6 +280,7 @@ export const componentManifests = (function () {
     switchManifest,
     symbols,
     table,
+    tableOfContents,
     tabs,
     tagInput,
     taskIcons,

@@ -1145,6 +1145,33 @@
       "reason": "The error slot projects consumer-owned light DOM inside the error part; it inherits the --c2-fieldset__error--* colour and size."
     },
     {
+      "tag": "c2-float-button",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's c2-float-button-action elements; they are styled through their own --c2-float-button-action__* variables."
+    },
+    {
+      "tag": "c2-float-button",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-float-button__icon--size", "--c2-float-button__icon__open--transform"],
+      "reason": "The icon wrapper sizes the slotted icon and its plus fallback and turns it while the dial is open."
+    },
+    {
+      "tag": "c2-float-button",
+      "slot": "open-icon",
+      "decision": "variables",
+      "variables": ["--c2-float-button__icon--size"],
+      "reason": "The open-icon wrapper sizes the slotted icon, which replaces the icon while the dial is open."
+    },
+    {
+      "tag": "c2-float-button-action",
+      "slot": "",
+      "decision": "variables",
+      "variables": ["--c2-float-button-action__icon--size", "--c2-float-button-action__button--color"],
+      "reason": "The round button sizes the slotted icon and colours it through the button colour variable."
+    },
+    {
       "tag": "c2-flow",
       "slot": "actions",
       "decision": "variables",
@@ -1469,6 +1496,41 @@
       "slot": "empty",
       "decision": "assigned-content",
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "back-icon",
+      "decision": "variables",
+      "variables": ["--c2-master-detail__back--icon-size", "--c2-master-detail__back--color"],
+      "reason": "The Back button sizes the slotted icon and its chevron fallback through the icon size variable and colours it with the button colour."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "detail",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The scrolling detail body owns the detail slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "master",
+      "decision": "part",
+      "parts": ["master"],
+      "reason": "The master pane owns the master slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["placeholder"],
+      "reason": "The placeholder pane owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-master-detail",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The Back bar owns the toolbar slot's component-side presentation."
     },
     {
       "tag": "c2-money-input",
@@ -2753,7 +2815,7 @@
       "tag": "c2-format-number",
       "slot": "",
       "decision": "assigned-content",
-      "reason": "The default slot only projects the consumer's fallback text (\"—\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
+      "reason": "The default slot only projects the consumer's fallback text (\"\u2014\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
     },
     {
       "tag": "c2-radio-group",
@@ -3668,6 +3730,30 @@
       "decision": "part",
       "parts": ["frame"],
       "reason": "The empty frame (background, border, minimum height) owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's c2-menubar-menu elements; each trigger is styled through the c2-menubar-menu variables."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "end",
+      "decision": "assigned-content",
+      "reason": "The end slot projects consumer-owned light DOM beside the menus; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-menubar",
+      "slot": "start",
+      "decision": "assigned-content",
+      "reason": "The start slot projects consumer-owned light DOM before the menus; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-menubar-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's menu rows into c2-menu; style them through the c2-menu and c2-menu-item contracts."
     }
   ]
 }

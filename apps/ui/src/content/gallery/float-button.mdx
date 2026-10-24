@@ -1,0 +1,205 @@
+---
+description: 'Ready-made looks for c2-float-button: circle, rounded square, extended, ink, small, icon-only and a support chat launcher. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FloatButton, FloatButtonAction } from '@c2n/components/float-button'
+import { FeatherEdit2Icon as FeatherEdit_2 } from '@c2n/feather-icons/icons/edit-2.js'
+import { FeatherUploadIcon as FeatherUpload } from '@c2n/feather-icons/icons/upload.js'
+import { FeatherFileTextIcon as FeatherFileText } from '@c2n/feather-icons/icons/file-text.js'
+import { FeatherImageIcon as FeatherImage } from '@c2n/feather-icons/icons/image.js'
+import { FeatherLinkIcon as FeatherLink } from '@c2n/feather-icons/icons/link.js'
+import { FeatherMessageCircleIcon as FeatherMessageCircle } from '@c2n/feather-icons/icons/message-circle.js'
+import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
+import { FeatherCameraIcon as FeatherCamera } from '@c2n/feather-icons/icons/camera.js'
+import { FeatherMicIcon as FeatherMic } from '@c2n/feather-icons/icons/mic.js'
+
+## Looks
+
+The button and each action have their own colour, size, radius and shadow variables. `--c2-float-button__label--display` turns the circle into an extended button, and `--c2-float-button-action__label--display: none` makes the actions icon-only. Every card holds its button in a `contain: layout` stage; in an app the button is fixed to the viewport.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+</style>
+<div class="stage">
+  <c2-float-button label="Create" open>
+    <c2-float-button-action label="Upload file" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+    <c2-float-button-action label="New document" value="document"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+    <c2-float-button-action label="Add image" value="image"><c2-feather-image></c2-feather-image></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Rounded square
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+  .square {
+    --c2-float-button__button--border-radius: 16px;
+    --c2-float-button__button--background-color: light-dark(#dbe4ff, #1c2c55);
+    --c2-float-button__button__hover--background-color: light-dark(#c9d6ff, #243a6e);
+    --c2-float-button__button__open--background-color: light-dark(#c9d6ff, #243a6e);
+    --c2-float-button__button--color: light-dark(#1e3a8a, #b9cbff);
+  }
+  .square c2-float-button-action {
+    --c2-float-button-action__button--border-radius: 12px;
+    --c2-float-button-action__button--background-color: light-dark(#dbe4ff, #1c2c55);
+    --c2-float-button-action__button__hover--background-color: light-dark(#c9d6ff, #243a6e);
+    --c2-float-button-action__button--color: light-dark(#1e3a8a, #b9cbff);
+    --c2-float-button-action__button--border: none;
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="square" label="Create" open>
+    <c2-float-button-action label="Upload file" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+    <c2-float-button-action label="New document" value="document"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+    <c2-float-button-action label="Add image" value="image"><c2-feather-image></c2-feather-image></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Extended
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 120px;
+  }
+  .extended {
+    --c2-float-button__label--display: inline;
+    --c2-float-button__button--padding-inline: 20px;
+    --c2-float-button__button--border-radius: 16px;
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="extended" label="Compose"><c2-feather-edit-2 slot="icon"></c2-feather-edit-2></c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Ink
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+  .ink {
+    --c2-float-button__button--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-float-button__button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-inverse-surface, #18181b) 85%, var(--c2-theme--color-surface, #ffffff));
+    --c2-float-button__button__open--background-color: color-mix(in srgb, var(--c2-theme--color-inverse-surface, #18181b) 85%, var(--c2-theme--color-surface, #ffffff));
+    --c2-float-button__button--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+  }
+  .ink c2-float-button-action {
+    --c2-float-button-action__label--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-float-button-action__label--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-float-button-action__label--border: none;
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="ink" label="Create" open>
+    <c2-float-button-action label="Take photo" value="photo"><c2-feather-camera></c2-feather-camera></c2-float-button-action>
+    <c2-float-button-action label="Voice note" value="voice"><c2-feather-mic></c2-feather-mic></c2-float-button-action>
+    <c2-float-button-action label="Text note" value="text"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Icon-only row
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 120px;
+  }
+  .row {
+    --c2-float-button--inset: auto auto 24px 24px;
+  }
+  .row c2-float-button-action {
+    --c2-float-button-action__label--display: none;
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="row" label="Share" direction="right" open>
+    <c2-float-button-action label="Copy link" value="link"><c2-feather-link></c2-feather-link></c2-float-button-action>
+    <c2-float-button-action label="Image" value="image"><c2-feather-image></c2-feather-image></c2-float-button-action>
+    <c2-float-button-action label="Upload" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Small
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 200px;
+  }
+  .small {
+    --c2-float-button__button--size: 40px;
+    --c2-float-button__button--padding-inline: 10px;
+    --c2-float-button__icon--size: 20px;
+    --c2-float-button__actions--gap: 8px;
+    --c2-float-button__actions--offset: 12px;
+  }
+  .small c2-float-button-action {
+    --c2-float-button-action__button--size: 32px;
+    --c2-float-button-action__icon--size: 16px;
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="small" label="Create" open>
+    <c2-float-button-action label="Upload" value="upload"><c2-feather-upload></c2-feather-upload></c2-float-button-action>
+    <c2-float-button-action label="Document" value="document"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+    <c2-float-button-action label="Link" value="link"><c2-feather-link></c2-feather-link></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Support chat
+<style>
+  .stage {
+    contain: layout;
+    position: relative;
+    width: 260px;
+    height: 260px;
+  }
+  .support {
+    --c2-float-button__button--background-color: light-dark(#7e22ce, #a76cdc);
+    --c2-float-button__button__hover--background-color: light-dark(#6b21a8, #b88ae3);
+    --c2-float-button__button__open--background-color: light-dark(#6b21a8, #b88ae3);
+    --c2-float-button__button--color: light-dark(#ffffff, #1e0a33);
+    --c2-float-button__focus--outline: 2px solid light-dark(rgba(126, 34, 206, 0.4), rgba(167, 108, 220, 0.5));
+  }
+  .support c2-float-button-action {
+    --c2-float-button-action__button--color: light-dark(#7e22ce, #c9a5ec);
+  }
+</style>
+<div class="stage">
+  <c2-float-button class="support" label="Help" open>
+    <c2-feather-message-circle slot="icon"></c2-feather-message-circle>
+    <c2-feather-x slot="open-icon"></c2-feather-x>
+    <c2-float-button-action label="Chat with us" value="chat"><c2-feather-message-circle></c2-feather-message-circle></c2-float-button-action>
+    <c2-float-button-action label="Help articles" value="docs"><c2-feather-file-text></c2-feather-file-text></c2-float-button-action>
+  </c2-float-button>
+</div>
+```
+
+</GalleryGrid>

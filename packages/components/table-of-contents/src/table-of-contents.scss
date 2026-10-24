@@ -1,0 +1,167 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-table-of-contents,
+  $theme: (
+    font-family: inherit,
+    font-size: 14px,
+    title--display: block,
+    title--color: #71717a,
+    title--font-size: 12px,
+    title--font-weight: 600,
+    title--letter-spacing: 0.06em,
+    title--text-transform: uppercase,
+    title--margin: 0 0 8px,
+    link--color: #71717a,
+    link--background-color: transparent,
+    link--font-weight: 400,
+    link--padding-block: 4px,
+    link--padding-inline: 12px,
+    link--line-height: 1.4,
+    link--border-radius: 0,
+    link--indent: 12px,
+    link__hover--color: #18181b,
+    link__hover--background-color: transparent,
+    link__active--color: rgb(2, 101, 220),
+    link__active--background-color: transparent,
+    link__active--font-weight: 500,
+    link__passed--color: #71717a,
+    link__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    link__focus--outline-offset: -2px,
+    nested--font-size: inherit,
+    marker--content: none,
+    marker--color: #71717a,
+    track--width: 1px,
+    track--background-color: #e4e4e7,
+    indicator--width: 2px,
+    indicator--background-color: rgb(2, 101, 220),
+    indicator--border-radius: 999px,
+    progress--background-color: transparent,
+    transition-duration: 150ms,
+  )
+);
+
+:host {
+  display: block;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.title {
+  display: css.cssVar(title--display);
+  margin: css.cssVar(title--margin);
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  letter-spacing: css.cssVar(title--letter-spacing);
+  text-transform: css.cssVar(title--text-transform);
+  line-height: 1.4;
+}
+
+.body {
+  position: relative;
+}
+
+[hidden] {
+  display: none;
+}
+
+.track,
+.progress,
+.indicator {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: css.cssVar(track--width);
+  pointer-events: none;
+}
+
+.track {
+  inset-block: 0;
+  background-color: css.cssVar(track--background-color);
+}
+
+.progress {
+  inset-block-start: 0;
+  background-color: css.cssVar(progress--background-color);
+  transition: block-size css.cssVar(transition-duration) ease-out;
+}
+
+.indicator {
+  inset-block-start: 0;
+  inset-inline-start: calc((#{css.cssVar(track--width)} - #{css.cssVar(indicator--width)}) / 2);
+  inline-size: css.cssVar(indicator--width);
+  border-radius: css.cssVar(indicator--border-radius);
+  background-color: css.cssVar(indicator--background-color);
+  transition-property: transform, block-size;
+  transition-duration: css.cssVar(transition-duration);
+  transition-timing-function: ease-out;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: c2-toc;
+
+  li {
+    counter-increment: c2-toc;
+  }
+}
+
+.link {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  padding-block: css.cssVar(link--padding-block);
+  padding-inline: calc(#{css.cssVar(track--width)} + #{css.cssVar(link--padding-inline)} + var(--level, 0) * #{css.cssVar(link--indent)})
+    css.cssVar(link--padding-inline);
+  border-radius: css.cssVar(link--border-radius);
+  background-color: css.cssVar(link--background-color);
+  color: css.cssVar(link--color);
+  font-weight: css.cssVar(link--font-weight);
+  line-height: css.cssVar(link--line-height);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition-property: color, background-color;
+  transition-duration: css.cssVar(transition-duration);
+
+  &::before {
+    content: css.cssVar(marker--content);
+    color: css.cssVar(marker--color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.nested {
+    font-size: css.cssVar(nested--font-size);
+  }
+
+  &.passed {
+    color: css.cssVar(link__passed--color);
+  }
+
+  &:hover {
+    background-color: css.cssVar(link__hover--background-color);
+    color: css.cssVar(link__hover--color);
+  }
+
+  &.active {
+    background-color: css.cssVar(link__active--background-color);
+    color: css.cssVar(link__active--color);
+    font-weight: css.cssVar(link__active--font-weight);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(link__focus--outline);
+    outline-offset: css.cssVar(link__focus--outline-offset);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress,
+  .indicator,
+  .link {
+    transition-duration: 0s;
+  }
+}

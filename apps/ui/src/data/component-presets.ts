@@ -1673,6 +1673,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-float-button': {
+    html: `<c2-float-button label="Create" open style="--c2-float-button--position:absolute"><c2-float-button-action label="Upload file" value="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></c2-float-button-action></c2-float-button>`,
+    presets: [
+      {
+        name: 'Rounded square',
+        description: 'Material-style tonal container with a 16px radius.',
+        css: {
+          '--c2-float-button__button--border-radius': '16px',
+          '--c2-float-button__button--background-color': '#dbe4ff',
+          '--c2-float-button__button__hover--background-color': '#c9d6ff',
+          '--c2-float-button__button__open--background-color': '#c9d6ff',
+          '--c2-float-button__button--color': '#1e3a8a',
+        },
+      },
+      {
+        name: 'Ink',
+        css: {
+          '--c2-float-button__button--background-color': '#18181b',
+          '--c2-float-button__button__hover--background-color': '#3f3f46',
+          '--c2-float-button__button__open--background-color': '#3f3f46',
+          '--c2-float-button__button--color': '#fafafa',
+        },
+      },
+      {
+        name: 'Small',
+        css: { '--c2-float-button__button--size': '40px', '--c2-float-button__button--padding-inline': '10px', '--c2-float-button__icon--size': '20px' },
+      },
+    ],
+  },
   'c2-icon-button': {
     html: `<c2-icon-button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>`,
     presets: [
@@ -2665,6 +2694,26 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-code-viewer--border-bottom-right-radius': '6px',
           '--c2-code-viewer--background': '#fafafa',
         },
+      },
+    ],
+  },
+  'c2-master-detail': {
+    html: `<c2-master-detail open breakpoint="0" style="width: 300px; height: 140px; border: 1px solid #e4e4e7; border-radius: 8px"><div slot="master" style="padding: 10px; font-size: 12px">Ana Ruiz<br>Kenji Watanabe</div><div slot="detail" style="padding: 10px; font-size: 12px">Invoice 2041 charged twice</div></c2-master-detail>`,
+    presets: [
+      {
+        name: 'Narrow master',
+        description: 'A 120px master column with no divider line.',
+        css: { '--c2-master-detail__master--width': '120px', '--c2-master-detail__divider--border': 'none' },
+      },
+      {
+        name: 'Tinted master',
+        description: 'A grey master column, a white detail.',
+        css: { '--c2-master-detail__master--background': '#f4f4f5', '--c2-master-detail__divider--border': '1px solid #e4e4e7' },
+      },
+      {
+        name: 'Accent divider',
+        description: 'A 2px accent line between the panes.',
+        css: { '--c2-master-detail__divider--border': '2px solid rgb(2, 101, 220)' },
       },
     ],
   },
