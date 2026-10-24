@@ -4,8 +4,8 @@ import { test, expect } from './fixture'
 
 const hasState = (page: Page, state: string) => page.locator('c2-sticky').evaluate((el, name) => el.matches(`:state(${name})`), state)
 
-async function wheel(page: Page, deltaY: number) {
-  await page.locator('.scroller').hover()
+async function wheel(page: Page, deltaY: number, target = '.scroller') {
+  await page.locator(target).first().hover()
   await page.mouse.wheel(0, deltaY)
 }
 
@@ -81,6 +81,35 @@ test('hide-on-scroll brings the content back when focus moves into it', async ({
   await page.keyboard.press('Tab')
   await expect(page.getByRole('button', { name: 'Bold' })).toBeFocused()
   await expect.poll(() => hasState(page, 'retracted')).toBe(false)
+})
+
+test('a single fast scroll that pins the content does not also hide it', async ({ page, scenario }) => {
+  await scenario('hide')
+  await wheel(page, 400)
+  await expect.poll(() => hasState(page, 'stuck')).toBe(true)
+  expect(await hasState(page, 'retracted')).toBe(false)
+  await expect(page.getByRole('button', { name: 'Bold' })).toBeInViewport()
+})
+
+test('sticks within a scroll box that a parent renders in its shadow root after the content connects', async ({ page, scenario }) => {
+  await scenario('shadow')
+  await wheel(page, 400, 'scenario-panel')
+  await expect.poll(() => hasState(page, 'stuck')).toBe(true)
+})
+
+test('sticks when the body is the scroller', async ({ page, scenario }) => {
+  await scenario('body')
+  await page.mouse.move(200, 200)
+  await page.mouse.wheel(0, 400)
+  await expect.poll(() => hasState(page, 'stuck')).toBe(true)
+})
+
+test('notices content that arrives without a scroll', async ({ page, scenario }) => {
+  await scenario('grow')
+  expect(await hasState(page, 'stuck')).toBe(false)
+  await page.getByRole('button', { name: 'Load more' }).click()
+  await expect.poll(() => hasState(page, 'stuck')).toBe(true)
+  await expect(page.locator('#log')).toHaveAttribute('data-stuck', 'true')
 })
 
 for (const state of ['default', 'hide']) {

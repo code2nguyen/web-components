@@ -2,15 +2,15 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { StickyController, type StickyEdge, type StickyState } from '@c2n/core/controllers/sticky.js'
+import { StickyController, type StickyEdge, type StickyEventMap as StickyControllerEventMap } from '@c2n/core/controllers/sticky.js'
 import styles from './sticky.scss?inline'
 
-export type { StickyEdge, StickyState }
+export type { StickyEdge }
 
 /** Events fired by {@link Sticky}, keyed for `addEventListener`. */
 export interface StickyEventMap {
-  'stuck-change': CustomEvent<{ stuck: boolean }>
-  'retract-change': CustomEvent<{ retracted: boolean }>
+  'stuck-change': StickyControllerEventMap['stuck-change']
+  'retract-change': StickyControllerEventMap['retract-change']
 }
 
 export interface Sticky {
@@ -59,9 +59,9 @@ export class Sticky extends LitElement {
   private readonly internals = this.attachInternals()
 
   private readonly sticky = new StickyController(this, {
+    internals: this.internals,
     edge: () => this.edge,
     hideOnScroll: () => this.hideOnScroll,
-    onChange: (state, previous) => this.handleStickyChange(state, previous),
   })
 
   /** Whether the content is currently pinned to its edge with content scrolling beneath it. */
@@ -79,21 +79,9 @@ export class Sticky extends LitElement {
     this.sticky.reveal()
   }
 
-  private handleStickyChange(state: StickyState, previous: StickyState): void {
-    toggleState(this.internals, 'stuck', state.stuck)
-    toggleState(this.internals, 'retracted', state.retracted)
-    if (state.stuck !== previous.stuck) this.dispatchEvent(new CustomEvent('stuck-change', { detail: { stuck: state.stuck } }))
-    if (state.retracted !== previous.retracted) this.dispatchEvent(new CustomEvent('retract-change', { detail: { retracted: state.retracted } }))
-  }
-
   override render() {
     return html`<div class="surface" part="surface"><slot></slot></div>`
   }
-}
-
-function toggleState(internals: ElementInternals, name: string, on: boolean): void {
-  if (on) internals.states.add(name)
-  else internals.states.delete(name)
 }
 
 declare global {

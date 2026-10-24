@@ -46,6 +46,8 @@
   pointer-events: none;
 }
 :host(:state(retracted)) .c2-header {
+  /* A shadow reaches past the box, so it would stay in view as a band along the edge. */
+  box-shadow: none;
   transform: translateY(calc(-100% - #{css.cssVar(sticky-top)}));
 }
 @media (prefers-reduced-motion: reduce) {

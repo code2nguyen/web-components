@@ -2,13 +2,13 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { StickyController, type StickyState } from '@c2n/core/controllers/sticky.js'
+import { StickyController, type StickyEventMap } from '@c2n/core/controllers/sticky.js'
 import styles from './header.scss?inline'
 
 /** Events fired by {@link Header}, keyed for `addEventListener`. */
 export interface HeaderEventMap {
-  'stuck-change': CustomEvent<{ stuck: boolean }>
-  'retract-change': CustomEvent<{ retracted: boolean }>
+  'stuck-change': StickyEventMap['stuck-change']
+  'retract-change': StickyEventMap['retract-change']
 }
 
 export interface Header {
@@ -73,10 +73,12 @@ export class Header extends LitElement {
 
   private readonly internals = this.attachInternals()
 
+  // Only a sticky header observes scrolling; any other header attaches no listener.
   private readonly stickiness = new StickyController(this, {
+    internals: this.internals,
     edge: () => 'top',
+    enabled: () => this.sticky,
     hideOnScroll: () => this.hideOnScroll,
-    onChange: (state, previous) => this.handleStickyChange(state, previous),
   })
 
   /** Whether a `sticky` header is currently pinned to the top with page content scrolling beneath it. */
@@ -92,15 +94,6 @@ export class Header extends LitElement {
   /** Brings a retracted header back into view. */
   reveal(): void {
     this.stickiness.reveal()
-  }
-
-  private handleStickyChange(state: StickyState, previous: StickyState): void {
-    if (state.stuck) this.internals.states.add('stuck')
-    else this.internals.states.delete('stuck')
-    if (state.retracted) this.internals.states.add('retracted')
-    else this.internals.states.delete('retracted')
-    if (state.stuck !== previous.stuck) this.dispatchEvent(new CustomEvent('stuck-change', { detail: { stuck: state.stuck } }))
-    if (state.retracted !== previous.retracted) this.dispatchEvent(new CustomEvent('retract-change', { detail: { retracted: state.retracted } }))
   }
 
   override render() {
