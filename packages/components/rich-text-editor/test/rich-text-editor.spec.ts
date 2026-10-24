@@ -449,3 +449,29 @@ test('a trigger character in the middle of a long word starts nothing', async ({
   await page.keyboard.type(`${'a'.repeat(10)}@${'b'.repeat(63)}`)
   expect(await events(page)).toEqual([])
 })
+
+test('a link that browsers would read as javascript: is never kept', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-rich-text-editor label="Comment" triggers="@"></c2-rich-text-editor>`)
+  const links = text$(page).locator('a')
+
+  // A tab hidden in the scheme by percent-encoding, in the value.
+  await props(host(page), { value: '[x](java%09script:alert(1)) [y](%01javascript:alert(1))' })
+  await expect(links).toHaveCount(0)
+  expect(await host(page).evaluate((element) => element.toHTML())).not.toContain('<a')
+
+  // The same as an entity in pasted HTML.
+  await props(host(page), { value: '' })
+  await text$(page).click()
+  await paste(page, { 'text/html': '<p><a href="java&#9;script:alert(1)">pasted</a></p>', 'text/plain': 'pasted' })
+  await expect(text$(page)).toContainText('pasted')
+  await expect(links).toHaveCount(0)
+
+  // And through the API an app hands mention or picker data to.
+  await page.keyboard.press('ControlOrMeta+a')
+  expect(await host(page).evaluate((element) => element.setLink('java\nscript:alert(1)'))).toBe(false)
+  await page.keyboard.press('End')
+  await page.keyboard.type(' @ma')
+  await host(page).evaluate((element) => element.completeTrigger('@Mai', { href: '\u0001javascript:alert(1)' }))
+  await expect(text$(page)).toContainText('@Mai')
+  await expect(links).toHaveCount(0)
+})
