@@ -25,6 +25,10 @@ const markup: Record<string, string> = {
   ended: `
     <c2-countdown id="subject" locale="en-US" display="clock" units="minutes seconds" date="${at(3 * SECOND)}"><strong slot="ended">We are live!</strong></c2-countdown>
     <c2-countdown id="past" locale="en-US" display="clock" units="minutes seconds" date="${at(-MINUTE)}"></c2-countdown>`,
+  trimmed: `<c2-countdown id="subject" locale="en-US" trim date="${at(3 * HOUR + 12 * MINUTE + 5 * SECOND)}"></c2-countdown>`,
+  invalid: `
+    <c2-countdown id="subject" locale="en-US" display="clock" units="minutes seconds" duration="5"></c2-countdown>
+    <c2-countdown id="nan" locale="en-US" display="clock" units="minutes seconds" duration="abc"></c2-countdown>`,
   lang: `<p lang="fr"><c2-countdown id="subject" display="inline" units="days hours" date="${at(2 * DAY + 3 * HOUR)}"></c2-countdown></p>`,
 }
 main.innerHTML = markup[scenario] ?? markup.default

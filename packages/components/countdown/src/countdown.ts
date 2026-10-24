@@ -1,4 +1,5 @@
-import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, unsafeCSS, type PropertyValues } from 'lit'
+import { classMap } from 'lit/directives/class-map.js'
 import { keyed } from 'lit/directives/keyed.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -52,6 +53,53 @@ function toDate(value: Date | string | number | null | undefined): Date | undefi
   if (value === null || value === undefined || value === '') return undefined
   const date = value instanceof Date ? new Date(value.getTime()) : new Date(typeof value === 'string' && /^-?\d+$/.test(value.trim()) ? Number(value) : value)
   return Number.isNaN(date.getTime()) ? undefined : date
+}
+
+/** The same moment, whatever form it was given in: a new `Date` of the same time is no change. */
+function sameDate(value: unknown, old: unknown): boolean {
+  const a = toDate(value as Date | string | number | undefined)
+  const b = toDate(old as Date | string | number | undefined)
+  return a?.getTime() === b?.getTime() && (a !== undefined || value === old)
+}
+
+/** A duration in seconds; anything that is not a finite number (a removed attribute, `"abc"`) is unset. */
+function toSeconds(value: number | null | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(value, 0) : undefined
+}
+
+const formats = new Map<string, Intl.NumberFormat>()
+
+/** A cached `Intl.NumberFormat`: built once per locale and options, then reused by every element and every tick. */
+function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.NumberFormat {
+  const key = `${locale}|${JSON.stringify(options)}`
+  let format = formats.get(key)
+  if (!format) {
+    try {
+      format = new Intl.NumberFormat(locale, options)
+    } catch {
+      format = new Intl.NumberFormat('en', options)
+    }
+    formats.set(key, format)
+  }
+  return format
+}
+
+const lists = new Map<string, { format(items: string[]): string } | null>()
+
+/** The units as a phrase, "2 days, 14 hours", in `locale`. */
+function phrase(parts: CountdownPart[], locale: string, display: CountdownFormat): string {
+  const items = parts.map(({ unit, value }) => numberFormat(locale, { style: 'unit', unit: INTL_UNIT[unit], unitDisplay: display }).format(value))
+  const key = `${locale}|${display}`
+  if (!lists.has(key)) {
+    let list: { format(items: string[]): string } | null = null
+    try {
+      if (ListFormat) list = new ListFormat(locale, { type: 'unit', style: display })
+    } catch {
+      // An invalid locale falls back to the plain join.
+    }
+    lists.set(key, list)
+  }
+  return lists.get(key)?.format(items) ?? items.join(' ')
 }
 
 /** The known units in `list` (space or comma separated), largest first; none known means all four. */
@@ -140,7 +188,7 @@ export class Countdown extends LitElement {
   static override styles = unsafeCSS(styles)
 
   /** The moment to count down to: an ISO 8601 string or a millisecond timestamp in markup, or a `Date` from script. Wins over `duration`. */
-  @property() date: Date | string | number | undefined = undefined
+  @property({ hasChanged: (value: unknown, old: unknown) => !sameDate(value, old) }) date: Date | string | number | undefined = undefined
 
   /** Length of a timer in seconds, used when `date` is unset. The timer starts when the element connects, unless `paused`; changing it restarts the timer. */
   @property({ type: Number }) duration: number | undefined = undefined
@@ -182,6 +230,11 @@ export class Countdown extends LitElement {
   #lastShown: string | undefined
   /** Whether the element has drawn its countdown running; `complete` fires only after that. */
   #hasRun = false
+  /** `date` parsed, and `units` read, once per update. */
+  #date: Date | undefined
+  #units: CountdownUnit[] = [...ALL_UNITS]
+  /** The time left this update draws: one reading of the clock for `render()` and `updated()`, so both agree. */
+  #remaining = 0
 
   constructor() {
     super()
@@ -208,9 +261,10 @@ export class Countdown extends LitElement {
     this.paused = true
   }
 
-  /** Puts a timer back to its full `duration`, running unless paused, and arms `complete` again. */
+  /** Puts a timer back to its full `duration`, running unless paused, and arms `complete` again. A countdown to a `date` has nothing to reset. */
   reset() {
-    this.#left = Math.max(this.duration ?? 0, 0) * SECOND
+    if (toDate(this.date)) return
+    this.#left = (toSeconds(this.duration) ?? 0) * SECOND
     this.#endsAt = this.paused || !this.isConnected ? undefined : Date.now() + this.#left
     this.#completed = false
     this.requestUpdate()
@@ -233,24 +287,26 @@ export class Countdown extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    if (changed.has('date') || !this.hasUpdated) this.#date = toDate(this.date)
+    if (changed.has('units') || !this.hasUpdated) this.#units = parseUnits(this.units)
     if (changed.has('duration') || !this.hasUpdated) {
-      this.#left = Math.max(this.duration ?? 0, 0) * SECOND
+      this.#left = (toSeconds(this.duration) ?? 0) * SECOND
       this.#endsAt = undefined
       this.#completed = false
     }
     if (changed.has('date') && this.hasUpdated) this.#completed = false
     if (changed.has('paused') || changed.has('duration') || changed.has('date') || !this.hasUpdated) {
-      const date = toDate(this.date)
-      const dated = date !== undefined
+      const date = this.#date
       if (this.paused) {
         // Paused, the countdown holds the time that was left at that moment.
         if (date) this.#left = Math.max(date.getTime() - Date.now(), 0)
         else if (this.#endsAt !== undefined) this.#left = Math.max(this.#endsAt - Date.now(), 0)
         this.#endsAt = undefined
-      } else if (!dated && !isServer && this.isConnected && this.#endsAt === undefined && this.#left > 0) {
+      } else if (!date && !isServer && this.isConnected && this.#endsAt === undefined && this.#left > 0) {
         this.#endsAt = Date.now() + this.#left
       }
     }
+    this.#remaining = this.remaining
   }
 
   #stop() {
@@ -259,25 +315,26 @@ export class Countdown extends LitElement {
   }
 
   get #active(): boolean {
-    return toDate(this.date) !== undefined || this.duration !== undefined
+    return this.#date !== undefined || toSeconds(this.duration) !== undefined
   }
 
   protected override updated(_changed: PropertyValues<this>) {
     this.#stop()
     if (isServer || !this.isConnected) return
-    const remaining = this.remaining
-    const running = this.#active && !this.paused && remaining > 0
+    const remaining = this.#remaining
+    const active = this.#active
+    const running = active && !this.paused && remaining > 0
     this.#setState('running', running)
-    this.#setState('paused', this.#active && this.paused && remaining > 0)
-    this.#setState('ended', this.#active && remaining <= 0)
-    this.#setState('warning', this.#active && remaining > 0 && this.warnAt > 0 && remaining <= this.warnAt * SECOND)
+    this.#setState('paused', active && this.paused && remaining > 0)
+    this.#setState('ended', active && remaining <= 0)
+    this.#setState('warning', active && remaining > 0 && this.warnAt > 0 && remaining <= this.warnAt * SECOND)
 
-    const shown = this.#active ? this.#key(remaining) : undefined
+    const shown = active ? this.#key(remaining) : undefined
     if (shown !== undefined && shown !== this.#lastShown && this.#lastShown !== undefined) {
       this.dispatchEvent(new CustomEvent('tick', { detail: { remaining } }))
     }
     this.#lastShown = shown
-    if (this.#active && remaining <= 0 && !this.#completed) {
+    if (active && remaining <= 0 && !this.#completed) {
       this.#completed = true
       if (this.#endsAt !== undefined) {
         this.#left = 0
@@ -303,8 +360,7 @@ export class Countdown extends LitElement {
 
   /** Milliseconds until the shown value, or the warning state, changes. */
   #nextChangeIn(remaining: number): number {
-    const units = parseUnits(this.units)
-    const step = UNIT_MS[units[units.length - 1]]
+    const step = UNIT_MS[this.#units[this.#units.length - 1]]
     // The smallest unit is rounded up: it changes when the remainder crosses the next whole step below.
     let wait = remaining - (Math.ceil(remaining / step) - 1) * step
     const warnAt = this.warnAt * SECOND
@@ -313,7 +369,7 @@ export class Countdown extends LitElement {
   }
 
   #key(remaining: number): string {
-    return splitRemaining(remaining, parseUnits(this.units), this.trim)
+    return splitRemaining(remaining, this.#units, this.trim)
       .map(({ value }) => value)
       .join(':')
   }
@@ -324,58 +380,35 @@ export class Countdown extends LitElement {
 
   /** Unit name for `value` in the element's language: "hours", "hr", "h". */
   #unitName(unit: CountdownUnit, value: number, locale: string): string {
-    const parts = this.#unitFormat(unit, locale).formatToParts(value)
-    return parts
+    return numberFormat(locale, { style: 'unit', unit: INTL_UNIT[unit], unitDisplay: this.format })
+      .formatToParts(value)
       .filter(({ type }) => type === 'unit')
       .map(({ value: text }) => text)
       .join('')
       .trim()
   }
 
-  #unitFormat(unit: CountdownUnit, locale: string, display: CountdownFormat = this.format): Intl.NumberFormat {
-    try {
-      return new Intl.NumberFormat(locale, { style: 'unit', unit: INTL_UNIT[unit], unitDisplay: display })
-    } catch {
-      return new Intl.NumberFormat('en', { style: 'unit', unit: INTL_UNIT[unit], unitDisplay: 'long' })
-    }
-  }
-
-  /** The units as a phrase, "2 days, 14 hours", in the element's language. */
-  #phrase(parts: CountdownPart[], locale: string, display: CountdownFormat): string {
-    const items = parts.map(({ unit, value }) => this.#unitFormat(unit, locale, display).format(value))
-    try {
-      if (ListFormat) return new ListFormat(locale, { type: 'unit', style: display }).format(items)
-    } catch {
-      // An invalid locale falls through to the plain join.
-    }
-    return items.join(' ')
-  }
-
-  #digits(locale: string): Intl.NumberFormat {
-    try {
-      return new Intl.NumberFormat(locale, { minimumIntegerDigits: 2, useGrouping: false })
-    } catch {
-      return new Intl.NumberFormat('en', { minimumIntegerDigits: 2, useGrouping: false })
-    }
-  }
-
   override render() {
     const locale = this.#locale
-    const remaining = this.remaining
-    const parts = splitRemaining(remaining, parseUnits(this.units), this.trim)
-    const digits = this.#digits(locale)
-    const spoken = this.#phrase(parts, locale, 'long')
+    const remaining = this.#remaining
+    const all = splitRemaining(remaining, this.#units)
+    const parts = this.trim ? splitRemaining(remaining, this.#units, true) : all
+    const digits = numberFormat(locale, { minimumIntegerDigits: 2, useGrouping: false })
 
     let drawn
     if (this.display === 'clock') {
       drawn = html`<span part="text" class="text">${parts.map(({ value }) => digits.format(value)).join(':')}</span>`
     } else if (this.display === 'inline') {
-      drawn = html`<span part="text" class="text">${this.#phrase(parts, locale, this.format)}</span>`
+      drawn = html`<span part="text" class="text">${phrase(parts, locale, this.format)}</span>`
     } else {
+      // Every unit keeps its segment, a trimmed one hidden, so the structure never depends on the time: a server-rendered
+      // countdown hydrates against the same parts, and trimming a unit away does not shift the others' digits.
+      const first = all.length - parts.length
       drawn = html`<span class="segments">
-        ${parts.map(
+        ${all.map(
           ({ unit, value }, index) =>
-            html`${index ? html`<span part="separator" class="separator">:</span>` : nothing}<span part="segment" class="segment" data-unit=${unit}
+            html`<span part="separator" class=${classMap({ separator: true, trimmed: index <= first })}>:</span
+              ><span part="segment" class=${classMap({ segment: true, trimmed: index < first })} data-unit=${unit}
                 >${keyed(value, html`<span part="value" class="value">${digits.format(value)}</span>`)}<span part="label" class="label"
                   >${this.#unitName(unit, value, locale)}</span
                 ></span
@@ -384,10 +417,11 @@ export class Countdown extends LitElement {
       </span>`
     }
 
-    // The digits are hidden from assistive technology, which reads the phrase instead. The `ended` slot sits outside
-    // that hidden part, so slotted content is read.
-    const content = html`<span class="visually-hidden">${spoken}</span><span class="drawn" aria-hidden="true">${drawn}</span>`
-    return this.#active && remaining <= 0 ? html`<slot name="ended">${content}</slot>` : content
+    // The digits are hidden from assistive technology, which reads the phrase instead. The slot sits outside that hidden
+    // part, so slotted content is read. It is renamed rather than added at the end, so the template stays the same.
+    return html`<slot name=${this.#active && remaining <= 0 ? 'ended' : 'c2-countdown-running'}
+      ><span class="visually-hidden">${phrase(parts, locale, 'long')}</span><span class="drawn" aria-hidden="true">${drawn}</span></slot
+    >`
   }
 }
 

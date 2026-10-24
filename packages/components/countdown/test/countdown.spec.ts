@@ -43,6 +43,27 @@ test('the largest unit absorbs the rest, and trim drops leading zeros', async ({
   await expect(page.locator('#trim .text')).toHaveText('3h 12m 5s')
 })
 
+test('trim hides the leading zero segments and their separators', async ({ page, scenario }) => {
+  await scenario('trimmed')
+  const subject = page.locator('#subject')
+  await expect(subject.locator('.segment:visible .value')).toHaveText(['03', '12', '05'])
+  await expect(subject.locator('.segment')).toHaveCount(4)
+})
+
+test('a removed or non-numeric duration leaves the element inactive', async ({ page, scenario }) => {
+  await scenario('invalid')
+  const nan = page.locator('#nan')
+  await expect(nan.locator('.text')).toHaveText('00:00')
+  await expect(nan).not.toHaveState('ended')
+
+  const subject = page.locator('#subject')
+  await page.clock.runFor(1_000)
+  await subject.evaluate((element) => element.removeAttribute('duration'))
+  await expect(subject).not.toHaveState('running')
+  await expect(subject).not.toHaveState('ended')
+  expect((await events(page)).filter(({ type }) => type === 'complete')).toHaveLength(0)
+})
+
 test('a timer counts its duration in a clock', async ({ page, scenario }) => {
   await scenario('clock')
   const text = page.locator('#subject .text')
@@ -104,6 +125,14 @@ test('fires complete once at zero and shows the ended slot', async ({ page, scen
   await expect(subject).toHaveState('ended')
   await expect(subject.getByText('We are live!')).toBeVisible()
   await page.clock.runFor(5_000)
+  expect((await events(page)).filter(({ type }) => type === 'complete')).toHaveLength(1)
+
+  // The same moment handed over again (a framework re-render) or a reset does not end it a second time.
+  await subject.evaluate((element: HTMLElementTagNameMap['c2-countdown']) => {
+    element.date = new Date(String(element.date))
+    element.reset()
+  })
+  await page.clock.runFor(2_000)
   expect((await events(page)).filter(({ type }) => type === 'complete')).toHaveLength(1)
 
   // A date already past draws zeros and never counted down.
