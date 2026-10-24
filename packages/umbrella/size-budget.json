@@ -3,6 +3,8 @@
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
+    "app-shell": 9594,
+    "app-shell/app-shell-toggle": 2471,
     "attachment": 5425,
     "attachment/attachment-group": 1482,
     "autocomplete": 26630,
@@ -135,6 +137,7 @@
     "otp-input": 3955,
     "overlay": 12727,
     "page-editor": 53742,
+    "page-header": 30484,
     "pagination": 32625,
     "password-field": 6176,
     "phone-input": 24698,

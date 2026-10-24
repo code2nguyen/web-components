@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-page-header</title>
+    <script type="module" src="/src/page-header.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        font:
+          15px system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      .content {
+        height: 1600px;
+        padding: 24px;
+      }
+      button {
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid #bcbcc6;
+        border-radius: 8px;
+        background: #ffffff;
+        font: inherit;
+      }
+      button[primary] {
+        border-color: transparent;
+        background: rgb(2, 101, 220);
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-page-header sticky style="--c2-page-header--border-bottom: 1px solid #e4e4e7; --c2-page-header--background-color: #ffffff">
+      <nav slot="breadcrumb" aria-label="Breadcrumb"><a href="#payouts">Payouts</a> › <a href="#batches">Batches</a> › B-0412</nav>
+      <a slot="parent" href="#batches">‹ Batches</a>
+      <h1>October supplier run</h1>
+      <span slot="title-suffix" style="padding: 2px 8px; border-radius: 999px; background: #fdf1d8; color: #8a5a00; font-size: 12px">Awaiting approval</span>
+      <p slot="description">Batch B-0412 · 12 payouts to EU suppliers, due before the 15:30 CET SEPA cut-off.</p>
+      <span slot="meta">Total €1,284,300.00 · 1 of 2 approvals</span>
+      <button slot="actions" overflow-priority="1">Export</button>
+      <button slot="actions" overflow-priority="2">Duplicate</button>
+      <button slot="actions" overflow-priority="3">Reject</button>
+      <button slot="actions" primary>Approve batch</button>
+    </c2-page-header>
+    <div class="content">Resize the window to fold the actions; scroll to see the condensed bar.</div>
+  </body>
+</html>

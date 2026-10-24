@@ -11,6 +11,13 @@ export const componentPreviews: Record<string, string> = {
   'action-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
   <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
 </div>`,
+  'app-shell': `<div class="preview-app-shell">
+  <c2-app-shell scrolling="main" style="--c2-app-shell--height:110px;--c2-app-shell__navigation--width:76px;--c2-app-shell__navigation--background-color:var(--site-color-surface-container-3);--c2-app-shell__divider--color:var(--site-color-outline-variant)">
+    <div slot="header" style="padding:8px 10px;font-size:13px;font-weight:600;border-bottom:1px solid var(--site-color-outline-variant)">Ledgerline</div>
+    <div slot="navigation" style="font-size:12px;line-height:1.9;padding-left:2px">Overview<br>Batches<br>Rules</div>
+    <div style="padding:10px;font-size:12px">Batches</div>
+  </c2-app-shell>
+</div>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
   autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
@@ -315,6 +322,11 @@ price: .price
   </c2-overlay>
 </div>`,
   'page-editor': `<c2-page-editor label="Notes" style="width:260px;--c2-page-editor__content--min-height:0;--c2-page-editor__content--font-size:13px;--c2-page-editor__content--padding:4px 8px 4px 24px;--c2-page-editor__heading2--font-size:17px;--c2-page-editor__block--margin-top:2px" value="## Launch plan&#10;&#10;Ship **Friday**, <span data-color=&quot;red&quot;>no slips</span>.&#10;&#10;- [x] Freeze the API&#10;- [ ] Write the docs"></c2-page-editor>`,
+  'page-header': `<c2-page-header style="width:260px;--c2-page-header--padding-top:8px;--c2-page-header--padding-right:12px;--c2-page-header--padding-bottom:8px;--c2-page-header--padding-left:12px;--c2-page-header__title--font-size:16px;--c2-page-header--gap:6px">
+  <h3 style="margin:0">Payouts</h3>
+  <c2-badge slot="title-suffix" tone="warning">3 failed</c2-badge>
+  <span slot="description">October · EUR</span>
+</c2-page-header>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   'password-field': `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width:220px"></c2-password-field>`,
   'phone-input': `<c2-phone-input value="+33612345678" style="width:240px"></c2-phone-input>`,

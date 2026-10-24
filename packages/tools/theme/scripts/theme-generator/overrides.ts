@@ -597,6 +597,13 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-app-shell__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-app-shell-toggle__hover--background-color': { exclude: 'translucent wash works on any header surface' },
+  // The condensed bar of a sticky page header keeps its translucency over whatever scrolls under it.
+  '--c2-page-header__condensed--background-color': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 92%, transparent)',
+  },
   '--c2-chip__remove-button__hover--background-color': { exclude: 'translucent wash works on any chip background' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },

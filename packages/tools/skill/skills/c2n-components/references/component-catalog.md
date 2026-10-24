@@ -166,6 +166,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
 - **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it.
+- **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface.
 - **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
@@ -175,6 +176,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
+- **Page Header** — `c2-page-header` · `@c2n/components/page-header` — The top of a page: breadcrumb or parent link, your heading with status badges, description, metadata, page actions that fold into a menu, tabs and a toolbar.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 

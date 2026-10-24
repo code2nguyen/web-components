@@ -1,6 +1,6 @@
 # Feature: `c2-app-shell` and `c2-page-header` — the frame of an app and the top of each page
 
-**Status**: Proposed
+**Status**: Implemented (`packages/components/app-shell`, `packages/components/page-header`)
 **Roadmap**: #57 and #58, section D, P1
 **Research**: [research.md](./research.md)
 **Mock**: [c2-app-shell mock](https://claude.ai/artifact/PQgz6gegX8J4ByoctSR4X1) — anatomy, an interactive prototype at 1280 / 834 / 390 px (layouts, navigation modes, condensed page header, folded actions, event log), page header variants, API sketch.
@@ -12,6 +12,14 @@ Two packages, specified together because they are designed together; they do not
 | ------------------------------------------------------ | ------------------------------------- |
 | `@c2n/app-shell` (`packages/components/app-shell`)     | `c2-app-shell`, `c2-app-shell-toggle` |
 | `@c2n/page-header` (`packages/components/page-header`) | `c2-page-header`                      |
+
+## Changes made while implementing
+
+- The shell's `scroll` attribute is **`scrolling`**: a `scroll` property would shadow `HTMLElement.prototype.scroll()`.
+- The condensed bar shows an `aria-hidden` **copy** of the `title-suffix` badges instead of moving them, and **shifts** the primary action into the bar with a transform rather than reassigning it. Moving either changed the header's height while it was stuck, which moved the point where it sticks. The primary action is still the same node, with its state and focus.
+- A server-rendered page header renders every part, and no derived content, on its first render; the parent link and the hiding of empty parts follow on the next update. A server renderer cannot see the light DOM, and hydration expects the first client render to match.
+- `--c2-page-header__title--min-width` (240px) is the room kept for the title before actions fold.
+- The drawer controller records the deepest focused element (through shadow roots), so focus returns to a toggle that renders its button in a shadow root.
 
 ## Decisions taken
 
@@ -38,7 +46,7 @@ Every app built on c2 writes the same frame and the same page top by hand (resea
 3. Navigation presentation per width: `side` (pushes main), `rail` (collapses to icons; expanded it pushes) or `over` (modal drawer). Below 600 px always `over`; `tablet-mode` (600–959, default `rail`) and `desktop-mode` (≥ 960, default `side`) pick the other two. The aside is a column at ≥ 960 px and a sheet from the end edge below.
 4. Toggling from anywhere inside the shell, including a button in the slotted `c2-header`, without script: a `c2-app-shell-toggle` element (button with `aria-expanded`, localised name, hamburger icon) or any element with an `app-shell-toggle` attribute.
 5. Drawer behaviour identical to `c2-side-nav` (focus trap, Escape, backdrop, scroll lock, focus return), through a controller shared with it.
-6. Page scrolling (default) or main scrolling (`scroll="main"`: the shell is the height of its container and only main scrolls).
+6. Page scrolling (default) or main scrolling (`scrolling="main"`: the shell is the height of its container and only main scrolls).
 
 `c2-page-header`:
 
@@ -156,7 +164,7 @@ The "More actions" menu is an internal `c2-menu` whose rows are generated from t
 | `desktopMode`      | `desktop-mode`      | `'side' \| 'rail' \| 'over'`           | `'side'`         | Presentation at ≥ 960 px of the shell's width.                                                                                                                                                                                                                                     |
 | `tabletMode`       | `tablet-mode`       | `'side' \| 'rail' \| 'over'`           | `'rail'`         | Presentation at 600–959 px. Below 600 px it is always `over`.                                                                                                                                                                                                                      |
 | `asideOpened`      | `aside-opened`      | `boolean`                              | `false`          | Aside column (≥ 960 px) or sheet (below) shown. Does not reflect; `:state(aside-opened)`.                                                                                                                                                                                          |
-| `scroll`           | `scroll`            | `'page' \| 'main'`                     | `'page'`         | `main`: the shell takes `--c2-app-shell--height` and only main scrolls; header and navigation never move.                                                                                                                                                                          |
+| `scrolling`        | `scrolling`         | `'page' \| 'main'`                     | `'page'`         | `main`: the shell takes `--c2-app-shell--height` and only main scrolls; header and navigation never move.                                                                                                                                                                          |
 | `closeOnNavigate`  | `close-on-navigate` | `boolean`                              | `false`          | In `over` mode, a click on a link (`a[href]`, or an element with `href` such as `c2-list-item`) in the navigation closes the drawer and focuses main.                                                                                                                              |
 | `navigationLabel`  | `navigation-label`  | `string`                               | `''`             | Name of the navigation landmark. Empty: the message "Main".                                                                                                                                                                                                                        |
 | `asideLabel`       | `aside-label`       | `string`                               | `''`             | Name of the aside landmark when the slotted content has none.                                                                                                                                                                                                                      |
@@ -224,7 +232,7 @@ Derived parent link: when `parent` is empty and the `breadcrumb` slot holds a `c
 
 - **Width**: the host is `container-type: inline-size`. Grid columns, the rail width and the aside-as-sheet switch are `@container` rules, so the server-rendered first paint is already right. A `ResizeObserver` derives `breakpoint` and `mode` for behaviour (modal or not, `mode-change`). Mode defaults on entering a breakpoint: `side` opens, `rail` collapses, `over` closes; the user's last `side` / `rail` choice is restored when the width grows back (and from `storage-key`).
 - **Drawer**: `@c2n/core/controllers/drawer-controller.ts`, extracted from `c2-side-nav` (`syncOverlayState`, `lockScroll` / `smartFixedPosition`, `focusDrawer` with keyboard modality, focus return, Escape on `window`, the `inert` rules for rail vs overlay). `c2-side-nav` is refactored onto it in the same change, with its suite as the guard; the shell uses one instance for the navigation and one for the aside sheet. `--c2-app-shell__over--position` (default `fixed`, `absolute` keeps it inside a positioned parent) decides whether scroll is locked, as in the side nav.
-- **Header**: the shell does not style the slotted header. `c2-header sticky` sticks to the top of the page (`scroll="page"`), and is outside the scrolled area with `scroll="main"`. The shell sets `--c2-app-shell--sticky-offset` on its `:host` from a constructed stylesheet in its shadow root (never a host attribute): the measured header height with `scroll="page"`, `0px` with `scroll="main"`, where main's scrollport already starts below the header. Custom properties inherit through the slot, so a page header in main picks it up with no author CSS (`--c2-page-header--sticky-top` defaults to `var(--c2-app-shell--sticky-offset, 0px)`).
+- **Header**: the shell does not style the slotted header. `c2-header sticky` sticks to the top of the page (`scrolling="page"`), and is outside the scrolled area with `scrolling="main"`. The shell sets `--c2-app-shell--sticky-offset` on its `:host` from a constructed stylesheet in its shadow root (never a host attribute): the measured header height with `scrolling="page"`, `0px` with `scrolling="main"`, where main's scrollport already starts below the header. Custom properties inherit through the slot, so a page header in main picks it up with no author CSS (`--c2-page-header--sticky-top` defaults to `var(--c2-app-shell--sticky-offset, 0px)`).
 - **Skip link**: first in the shadow root, visually hidden until focused, styled by the shell's own `--c2-app-shell__skip-link--*` variables whose defaults copy `c2-skip-link`'s literals (so the theme maps them to the same tokens; no dependency on `@c2n/skip-link`); activation calls `focusMain()`.
 
 `c2-page-header`:
@@ -239,26 +247,26 @@ Defaults reuse the repo's literals so `@c2n/theme` maps them (radii 8px, font si
 
 `c2-app-shell`:
 
-| Variable                                       | Default                           | Notes                                                                                         |
-| ---------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------- |
-| `--c2-app-shell--height`                       | `100dvh`                          | Used with `scroll="main"`.                                                                    |
-| `--c2-app-shell__navigation--width`            | `240px`                           | Side, expanded rail.                                                                          |
-| `--c2-app-shell__navigation__rail--width`      | `64px`                            | Collapsed rail.                                                                               |
-| `--c2-app-shell__navigation__over--width`      | `min(280px, 85%)`                 | Drawer.                                                                                       |
-| `--c2-app-shell__navigation--background-color` | `#fafafa`                         | Same default as `c2-side-nav`.                                                                |
-| `--c2-app-shell__navigation--padding`          | `8px`                             |                                                                                               |
-| `--c2-app-shell__aside--width`                 | `320px`                           | Column and sheet.                                                                             |
-| `--c2-app-shell__aside--background-color`      | `#ffffff`                         |                                                                                               |
-| `--c2-app-shell__main--background-color`       | `transparent`                     |                                                                                               |
-| `--c2-app-shell__main--padding`                | `0`                               | The page header and content own their padding.                                                |
-| `--c2-app-shell__divider--width` / `--color`   | `1px` / `#e4e4e7`                 | Between navigation, main and aside.                                                           |
-| `--c2-app-shell__over--position`               | `fixed`                           |                                                                                               |
-| `--c2-app-shell__over--box-shadow`             | `0 12px 40px rgba(0, 0, 0, 0.18)` | Drawer and aside sheet.                                                                       |
-| `--c2-app-shell__backdrop--background-color`   | `rgba(0, 0, 0, 0.32)`             |                                                                                               |
-| `--c2-app-shell__backdrop--z-index`            | `1000`                            |                                                                                               |
-| `--c2-app-shell--transition-duration`          | `250ms`                           | 0 under `prefers-reduced-motion`.                                                             |
-| `--c2-app-shell--sticky-offset`                | measured                          | Output: header height (`scroll="page"`) or `0px` (`scroll="main"`). Read by `c2-page-header`. |
-| `--c2-app-shell__skip-link--*`                 | `c2-skip-link`'s literals         | Background, colour, padding, radius, focus outline.                                           |
+| Variable                                       | Default                           | Notes                                                                                               |
+| ---------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `--c2-app-shell--height`                       | `100dvh`                          | Used with `scrolling="main"`.                                                                       |
+| `--c2-app-shell__navigation--width`            | `240px`                           | Side, expanded rail.                                                                                |
+| `--c2-app-shell__navigation__rail--width`      | `64px`                            | Collapsed rail.                                                                                     |
+| `--c2-app-shell__navigation__over--width`      | `min(280px, 85%)`                 | Drawer.                                                                                             |
+| `--c2-app-shell__navigation--background-color` | `#fafafa`                         | Same default as `c2-side-nav`.                                                                      |
+| `--c2-app-shell__navigation--padding`          | `8px`                             |                                                                                                     |
+| `--c2-app-shell__aside--width`                 | `320px`                           | Column and sheet.                                                                                   |
+| `--c2-app-shell__aside--background-color`      | `#ffffff`                         |                                                                                                     |
+| `--c2-app-shell__main--background-color`       | `transparent`                     |                                                                                                     |
+| `--c2-app-shell__main--padding`                | `0`                               | The page header and content own their padding.                                                      |
+| `--c2-app-shell__divider--width` / `--color`   | `1px` / `#e4e4e7`                 | Between navigation, main and aside.                                                                 |
+| `--c2-app-shell__over--position`               | `fixed`                           |                                                                                                     |
+| `--c2-app-shell__over--box-shadow`             | `0 12px 40px rgba(0, 0, 0, 0.18)` | Drawer and aside sheet.                                                                             |
+| `--c2-app-shell__backdrop--background-color`   | `rgba(0, 0, 0, 0.32)`             |                                                                                                     |
+| `--c2-app-shell__backdrop--z-index`            | `1000`                            |                                                                                                     |
+| `--c2-app-shell--transition-duration`          | `250ms`                           | 0 under `prefers-reduced-motion`.                                                                   |
+| `--c2-app-shell--sticky-offset`                | measured                          | Output: header height (`scrolling="page"`) or `0px` (`scrolling="main"`). Read by `c2-page-header`. |
+| `--c2-app-shell__skip-link--*`                 | `c2-skip-link`'s literals         | Background, colour, padding, radius, focus outline.                                                 |
 
 `c2-page-header`:
 
@@ -324,7 +332,7 @@ Page header:
 - Toggles: `c2-app-shell-toggle` in the slotted `c2-header` opens the drawer and its `aria-expanded` follows; `[app-shell-toggle]` on a plain button works; a nested shell's toggle does not reach the outer one.
 - Events: fired for user changes only, not for property sets; none bubble.
 - `close-on-navigate`: link click in the drawer closes it and focuses main; not in `side` mode.
-- `scroll="main"`: only main scrolls; `--c2-app-shell--sticky-offset` is `0px`. `scroll="page"`: it matches the slotted header's height.
+- `scrolling="main"`: only main scrolls; `--c2-app-shell--sticky-offset` is `0px`. `scrolling="page"`: it matches the slotted header's height.
 - `layout="navigation-first"`: the slotted `c2-header` is outside `<main>` and still exposes `banner`.
 - `storage-key`: a rail choice survives a reload; absent key writes nothing.
 - No attributes on the host after upgrade (`toHaveHostAria` for internals); SSR / hydration without mismatch.
@@ -336,7 +344,7 @@ Page header:
 - Folding: at decreasing widths foldable actions fold by `overflow-priority`, the primary and non-foldable elements never fold, `overflow-change` lists them, rows use `menu-label`; a folded `c2-link-button` row navigates, a folded `type="submit"` `c2-button` submits its form with it as submitter, a disabled action is a disabled row, a plain action's host listeners run; no attribute written on any action.
 - Narrow (< 600 px container): parent link shown, breadcrumb hidden; derived from the breadcrumb's second-to-last item, overridden by `parent` / `parent-href` / `parent-label`; absent with neither.
 - Condensed: scrolling past the title row toggles `condensed` and fires `condensed-change` once each way, honouring `--c2-page-header--sticky-top`; the bar stays visible after the whole header (with tabs and toolbar) has scrolled past, until the end of the scroll container; the primary action is the same node; the title copy is `aria-hidden`; nothing observed without `sticky`.
-- Works in a shell with `scroll="main"` (implicit observer root, clipped by main) and `scroll="page"` (offset by the header), and in a plain page.
+- Works in a shell with `scrolling="main"` (implicit observer root, clipped by main) and `scrolling="page"` (offset by the header), and in a plain page.
 - Localisation: "More actions" and "Back to …" in a second language from `test/translations.ts`.
 - SSR / hydration: no mismatch; a server-rendered page header does not fold (actions wrap) and never writes `slot`.
 
@@ -345,7 +353,7 @@ Both are added to the umbrella (registration check), and `c2-page-header` to the
 ## Docs and wiring (from the `new-component` skill)
 
 - Doc pages under `apps/ui/src/content/components/` (category Layout): `app-shell.mdx` (rows "Header first", "Navigation first", "Rail"; a note on container width, and that `c2-side-nav` remains the lighter choice for a single drawer), `page-header.mdx` (rows "List page", "Record", "With tabs"; "When to use": one per page, at the top of main).
-- Usage blocks run inside example frames, which is exactly what "own width" makes work; the shell examples use `scroll="main"` with a fixed `--c2-app-shell--height` and `--c2-app-shell__over--position: absolute`.
+- Usage blocks run inside example frames, which is exactly what "own width" makes work; the shell examples use `scrolling="main"` with a fixed `--c2-app-shell--height` and `--c2-app-shell__over--position: absolute`.
 - Gallery files with the cards listed under Styling; `component-previews.ts` and `component-modules.ts` entries; manifests registered; `npm run size:add -w packages/umbrella`.
 - Pointers: `side-nav.mdx` and `header.mdx` link to the app shell; `breadcrumb.mdx` to the page header.
 - Dogfooding: `apps/examples/observability-nextjs` moves to `c2-app-shell` + `c2-page-header` in a follow-up PR (removes its toggle wiring, skip link and `.section-heading` CSS), recorded in `COMPONENT-FEEDBACK.md` if anything is missing.
