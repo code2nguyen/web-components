@@ -122,6 +122,7 @@ import steps from '@c2n/steps/custom-elements.json'
 import streamingText from '@c2n/streaming-text/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import tableOfContents from '@c2n/table-of-contents/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
@@ -275,6 +276,7 @@ export const componentManifests = (function () {
     switchManifest,
     symbols,
     table,
+    tableOfContents,
     tabs,
     tagInput,
     taskIcons,

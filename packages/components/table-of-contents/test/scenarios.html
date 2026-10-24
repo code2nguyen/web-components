@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>table-of-contents scenarios</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 220px;
+        gap: 32px;
+        max-width: 900px;
+        padding: 0 32px;
+      }
+      main > c2-table-of-contents {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        grid-column: 2;
+        grid-row: 1;
+      }
+      article {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      article section {
+        min-height: 700px;
+      }
+      header.sticky {
+        position: sticky;
+        top: 0;
+        height: 60px;
+        background: #f4f4f5;
+      }
+    </style>
+    <script type="module">
+      // The app's languages: French and Vietnamese, added as an app would.
+      import './translations.ts'
+      import '../src/table-of-contents.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

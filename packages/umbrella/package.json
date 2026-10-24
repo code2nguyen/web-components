@@ -745,6 +745,10 @@
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
     },
+    "./table-of-contents": {
+      "types": "./dist/table-of-contents.d.ts",
+      "default": "./dist/table-of-contents.js"
+    },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
       "default": "./dist/tabs.js"
@@ -1092,6 +1096,7 @@
     "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
+    "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
     "@c2n/text-field": "*",

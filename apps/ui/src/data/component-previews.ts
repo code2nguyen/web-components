@@ -445,6 +445,7 @@ price: .price
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
   <c2-table-column field="score" header="Score" width="90px" align="end" format="number" sortable></c2-table-column>
 </c2-table>`,
+  'table-of-contents': `<c2-table-of-contents style="width:200px" label="On this page" items='[{"id":"preview-toc-a","label":"Overview","level":1},{"id":"preview-toc-b","label":"Installation","level":1},{"id":"preview-toc-c","label":"With npm","level":2},{"id":"preview-toc-d","label":"Theming","level":1}]'></c2-table-of-contents>`,
   tabs: `<c2-tabs selected-tab="tab2" style="width:240px">
   <c2-tab label="Overview" for="tab1"></c2-tab>
   <c2-tab label="Activity" for="tab2"></c2-tab>

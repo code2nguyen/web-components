@@ -144,6 +144,7 @@
     "@c2n/streaming-text": "*",
     "@c2n/switch": "*",
     "@c2n/symbols": "*",
+    "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
     "@c2n/task-icons": "*",
