@@ -1586,6 +1586,20 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-save-bar",
+      "slot": "default",
+      "decision": "variables",
+      "variables": ["--c2-save-bar__actions--gap"],
+      "reason": "The actions row spaces the slotted actions before Discard; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-save-bar",
+      "slot": "message",
+      "decision": "variables",
+      "variables": ["--c2-save-bar__message--font-size", "--c2-save-bar__message--font-weight", "--c2-save-bar__message--color"],
+      "reason": "The message line sets the type the slotted message inherits."
+    },
+    {
       "tag": "c2-skip-link",
       "slot": "",
       "decision": "assigned-content",
