@@ -1,0 +1,96 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Countdown } from '@c2n/components/countdown'
+
+## Presets
+
+From a quiet product-page countdown to a launch hero and a quiz timer. The segment variables (`__segment--background-color`, `__segment--border`, `__segment--min-width`) and the value size do most of the work; `__separator--display` brings the colons in and `__value--animation-duration` rolls each new digit in.
+
+<GalleryGrid min={320}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-countdown date="2030-01-01T00:00:00Z"></c2-countdown>
+```
+
+```html tag=MdxCodeBlock,label=Launch hero
+<style>
+  .launch-countdown {
+    --c2-countdown--gap: 10px;
+    --c2-countdown__segment--min-width: 72px;
+    --c2-countdown__segment--padding: 14px 8px 10px;
+    --c2-countdown__segment--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-countdown__segment--border: 1px solid light-dark(#c7d7fb, #23345c);
+    --c2-countdown__segment--border-radius: 14px;
+    --c2-countdown__value--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-countdown__value--font-size: 36px;
+    --c2-countdown__value--animation-duration: 240ms;
+    --c2-countdown__label--color: light-dark(#1d4ed8, #8fb0f5);
+    --c2-countdown__label--text-transform: uppercase;
+    --c2-countdown__label--letter-spacing: 0.06em;
+    --c2-countdown__label--font-size: 11px;
+  }
+</style>
+<c2-countdown class="launch-countdown" date="2030-01-01T00:00:00Z"></c2-countdown>
+```
+
+```html tag=MdxCodeBlock,label=Flip clock
+<style>
+  .flip-countdown {
+    --c2-countdown--gap: 6px;
+    --c2-countdown__segment--background-color: #18181b;
+    --c2-countdown__segment--border: 1px solid #27272a;
+    --c2-countdown__segment--border-radius: 6px;
+    --c2-countdown__segment--padding: 10px 8px 8px;
+    --c2-countdown__value--color: #fafafa;
+    --c2-countdown__value--font-size: 34px;
+    --c2-countdown__value--animation-duration: 200ms;
+    --c2-countdown__label--color: #a1a1aa;
+    --c2-countdown__label--font-size: 10px;
+    --c2-countdown__label--text-transform: uppercase;
+    --c2-countdown__separator--display: inline;
+    --c2-countdown__separator--color: #71717a;
+    --c2-countdown__separator--font-size: 28px;
+  }
+</style>
+<c2-countdown class="flip-countdown" units="hours minutes seconds" format="short" duration="7384"></c2-countdown>
+```
+
+```html tag=MdxCodeBlock,label=Minimal
+<style>
+  .minimal-countdown {
+    --c2-countdown--gap: 20px;
+    --c2-countdown__segment--background-color: transparent;
+    --c2-countdown__segment--border: none;
+    --c2-countdown__segment--padding: 0;
+    --c2-countdown__segment--min-width: 48px;
+    --c2-countdown__value--font-size: 40px;
+    --c2-countdown__value--font-weight: 500;
+    --c2-countdown__label--font-size: 12px;
+  }
+</style>
+<c2-countdown class="minimal-countdown" format="short" date="2030-01-01T00:00:00Z"></c2-countdown>
+```
+
+```html tag=MdxCodeBlock,label=Quiz timer
+<style>
+  .quiz-timer {
+    --c2-countdown--font-size: 20px;
+    --c2-countdown--font-weight: 600;
+    --c2-countdown__warning--color: light-dark(#b91c1c, #f87171);
+  }
+</style>
+<span>Time left <c2-countdown class="quiz-timer" display="clock" units="minutes seconds" duration="20" warn-at="10"></c2-countdown></span>
+```
+
+```html tag=MdxCodeBlock,label=Sale banner
+<style>
+  .sale-countdown {
+    --c2-countdown--font-weight: 600;
+    --c2-countdown--color: light-dark(#9a3412, #fdba74);
+  }
+</style>
+<span>Flash sale: 40% off. Ends in <c2-countdown class="sale-countdown" display="inline" format="short" trim duration="11525"></c2-countdown></span>
+```
+
+</GalleryGrid>

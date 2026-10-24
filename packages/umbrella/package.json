@@ -301,6 +301,10 @@
       "types": "./dist/copy-button.d.ts",
       "default": "./dist/copy-button.js"
     },
+    "./countdown": {
+      "types": "./dist/countdown.d.ts",
+      "default": "./dist/countdown.js"
+    },
     "./dashboard": {
       "types": "./dist/dashboard.d.ts",
       "default": "./dist/dashboard.js"
@@ -552,6 +556,10 @@
     "./number-input": {
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
+    },
+    "./org-chart": {
+      "types": "./dist/org-chart.d.ts",
+      "default": "./dist/org-chart.js"
     },
     "./otp-input": {
       "types": "./dist/otp-input.d.ts",
@@ -971,6 +979,7 @@
     "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
+    "@c2n/countdown": "*",
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
@@ -1019,6 +1028,7 @@
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
     "@c2n/number-input": "*",
+    "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",

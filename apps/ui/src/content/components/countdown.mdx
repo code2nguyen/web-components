@@ -1,0 +1,49 @@
+---
+title: 'Countdown'
+description: 'Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Countdown } from '@c2n/components/countdown'
+
+`c2-countdown` counts down to a `date` (an ISO 8601 string or a millisecond timestamp in markup, a `Date` from script) or through a `duration` in seconds, which starts when the element connects unless it is `paused`. `display` picks the drawing: `segments` (a box per unit with its name, the default), `clock` (`14:05:31`) or `inline` (a phrase such as "2 days, 14 hours"). `units` lists the units to show, largest first; the largest absorbs the rest, so `units="hours minutes"` shows two days as 48 hours, and `trim` drops leading units that are zero. Unit names and digits come from `Intl` in the element's `locale`, else the nearest `lang` attribute, so there is nothing to translate; `format` sets their length (`long`, `short`, `narrow`). One timer wakes exactly when the shown value changes. `warn-at` sets the seconds under which the element is in its warning state, `pause()`, `start()` and `reset()` drive a timer from script, and at zero it fires `complete` once and shows its `ended` slot in place of the zeros. The host has the `timer` role, and assistive technology reads a full phrase rather than the digits. Style the states with `:state(running)`, `:state(paused)`, `:state(warning)` and `:state(ended)`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/countdown'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/countdown
+<style>
+  .countdown-colons {
+    --c2-countdown__separator--display: inline;
+  }
+</style>
+<div data-label="Segments">
+  <c2-countdown date="2030-01-01T00:00:00Z"></c2-countdown>
+</div>
+<div data-label="Separators and units">
+  <c2-countdown class="countdown-colons" units="hours minutes seconds" duration="7384"></c2-countdown>
+</div>
+<div data-label="Clock">
+  <span>Resend code in <c2-countdown display="clock" units="minutes seconds" duration="60"></c2-countdown></span>
+  <c2-countdown display="clock" units="minutes seconds" duration="15" warn-at="10"></c2-countdown>
+</div>
+<div data-label="Inline">
+  <span>Sale ends in <c2-countdown display="inline" trim duration="11525"></c2-countdown></span>
+  <span>Ends in <c2-countdown display="inline" format="narrow" trim duration="11525"></c2-countdown></span>
+</div>
+<div data-label="Ended">
+  <c2-countdown display="clock" units="minutes seconds" duration="5"><strong slot="ended">We are live!</strong></c2-countdown>
+</div>
+<div data-label="Locale">
+  <c2-countdown display="inline" units="days hours" locale="fr" date="2030-01-01T00:00:00Z"></c2-countdown>
+  <c2-countdown display="inline" units="days hours" locale="ja" date="2030-01-01T00:00:00Z"></c2-countdown>
+</div>
+```

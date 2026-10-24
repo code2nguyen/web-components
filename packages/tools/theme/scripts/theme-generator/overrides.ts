@@ -254,6 +254,12 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
   },
+  // Org chart: the connector lines are the resting border grey, hovering a card or a toggle takes the hover border,
+  // and the selection ring doubles the accent border.
+  '--c2-org-chart__connector--color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-org-chart__card__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-org-chart__toggle__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-org-chart__card__selected--box-shadow': { token: 'color-primary', value: '0 0 0 1px var(--c2-theme--color-primary, rgb(2, 101, 220))' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

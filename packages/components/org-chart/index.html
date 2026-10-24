@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Org Chart</title>
+    <script type="module" src="/src/org-chart.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 32px;
+        font: 14px system-ui;
+        color: #18181b;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 32px 0 8px;
+      }
+      c2-org-chart {
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      .soft {
+        --c2-org-chart__card--border: 1px solid transparent;
+        --c2-org-chart__card--border-radius: 14px;
+        --c2-org-chart__card--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06), 0 4px 12px rgba(24, 24, 27, 0.06);
+        --c2-org-chart__connector--border-radius: 12px;
+      }
+      .teams {
+        --c2-org-chart__avatar--display: none;
+        --c2-org-chart__card--width: 140px;
+        --c2-org-chart__card--text-align: center;
+        --c2-org-chart__card--align-items: stretch;
+        --c2-org-chart__connector--border-style: dashed;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Default, selectable</h2>
+    <c2-org-chart id="people" selectable aria-label="Leadership team"></c2-org-chart>
+
+    <h2>Collapsed, soft cards</h2>
+    <c2-org-chart id="collapsed" class="soft" collapsed-items="li;maya" aria-label="Leadership team"></c2-org-chart>
+
+    <h2>Horizontal</h2>
+    <c2-org-chart id="horizontal" orientation="horizontal" aria-label="Leadership team"></c2-org-chart>
+
+    <h2>Teams, right to left</h2>
+    <c2-org-chart id="teams" class="teams" dir="rtl" aria-label="Departments"></c2-org-chart>
+
+    <h2>Custom cards (renderItem)</h2>
+    <c2-org-chart id="custom" aria-label="Leadership team"></c2-org-chart>
+
+    <h2>Empty</h2>
+    <c2-org-chart><span slot="empty">Nobody here yet</span></c2-org-chart>
+
+    <script type="module">
+      import { html } from 'lit'
+
+      const people = [
+        {
+          id: 'ana',
+          label: 'Ana Ruiz',
+          description: 'Chief Executive Officer',
+          children: [
+            {
+              id: 'li',
+              label: 'Li Wei',
+              description: 'CTO',
+              children: [
+                { id: 'sam', label: 'Sam Patel', description: 'Platform lead' },
+                { id: 'kim', label: 'Kim Lee', description: 'Design lead', disabled: true },
+              ],
+            },
+            { id: 'maya', label: 'Maya Cohen', description: 'CFO', children: [{ id: 'joe', label: 'Joe Park', description: 'Controller' }] },
+            { id: 'omar', label: 'Omar Haddad', description: 'COO' },
+          ],
+        },
+      ]
+      const teams = [
+        {
+          id: 'co',
+          label: 'Northwind',
+          description: '412 people',
+          children: [
+            {
+              id: 'eng',
+              label: 'Engineering',
+              description: '186 people',
+              children: [
+                { id: 'web', label: 'Web' },
+                { id: 'mob', label: 'Mobile' },
+              ],
+            },
+            { id: 'ops', label: 'Operations', description: '94 people' },
+          ],
+        },
+      ]
+      for (const id of ['people', 'collapsed', 'horizontal', 'custom']) document.getElementById(id).items = people
+      document.getElementById('teams').items = teams
+      document.getElementById('people').addEventListener('selection-change', (event) => console.log('selection-change', event.detail))
+      document.getElementById('custom').renderItem = ({ node, level }) =>
+        html`<span style="display:flex;flex-direction:column"
+          ><strong>${node.label}</strong><small>Level ${level} · ${node.children?.length ?? 0} reports</small></span
+        >`
+    </script>
+  </body>
+</html>
