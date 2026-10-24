@@ -31,6 +31,7 @@ import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import confirmDialog from '@c2n/confirm-dialog/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
+import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
@@ -80,6 +81,7 @@ import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
+import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
@@ -111,6 +113,7 @@ import splitPanel from '@c2n/split-panel/custom-elements.json'
 import spreadsheet from '@c2n/spreadsheet/custom-elements.json'
 import stat from '@c2n/stat/custom-elements.json'
 import stateTimeline from '@c2n/state-timeline/custom-elements.json'
+import statusLight from '@c2n/status-light/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
 import streamingText from '@c2n/streaming-text/custom-elements.json'
@@ -177,6 +180,7 @@ export const componentManifests = (function () {
     confirmDialog,
     contextMenu,
     copyButton,
+    countdown,
     dashboard,
     dateInput,
     dateSelector,
@@ -226,6 +230,7 @@ export const componentManifests = (function () {
     navigationMenu,
     notepad,
     numberInput,
+    orgChart,
     otpInput,
     overlay,
     pageEditor,
@@ -257,6 +262,7 @@ export const componentManifests = (function () {
     spreadsheet,
     stat,
     stateTimeline,
+    statusLight,
     statusPanel,
     steps,
     streamingText,

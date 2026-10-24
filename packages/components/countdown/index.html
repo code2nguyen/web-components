@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-countdown</title>
+    <script type="module" src="/src/countdown.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .colons {
+        --c2-countdown__separator--display: inline;
+        --c2-countdown__value--animation-duration: 200ms;
+      }
+      .dark {
+        --c2-countdown__segment--background-color: #18181b;
+        --c2-countdown__segment--border: 1px solid #27272a;
+        --c2-countdown__value--color: #fafafa;
+        --c2-countdown__label--color: #a1a1aa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-countdown id="launch" date="2030-01-01T00:00:00Z"></c2-countdown>
+    <c2-countdown class="colons" units="hours minutes seconds" duration="7384"></c2-countdown>
+    <c2-countdown class="dark" format="short" units="minutes seconds" duration="600"></c2-countdown>
+    <p>Resend code in <c2-countdown display="clock" units="minutes seconds" duration="60"></c2-countdown></p>
+    <p>
+      <c2-countdown id="timer" display="clock" units="minutes seconds" duration="15" warn-at="10" paused><strong slot="ended">Time is up</strong></c2-countdown>
+      <button onclick="timer.start()">Start</button>
+      <button onclick="timer.pause()">Pause</button>
+      <button onclick="timer.reset()">Reset</button>
+    </p>
+    <p>Sale ends in <c2-countdown display="inline" trim duration="11525"></c2-countdown></p>
+    <p lang="fr">Fin dans <c2-countdown display="inline" format="short" units="days hours minutes" date="2030-01-01T00:00:00Z"></c2-countdown></p>
+  </body>
+</html>
