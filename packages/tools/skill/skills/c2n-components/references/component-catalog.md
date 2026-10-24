@@ -175,6 +175,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
+- **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.
 - **Save Bar** — `c2-save-bar` · `@c2n/components/save-bar` — A floating bar that appears while a form has unsaved changes, with Discard and Save.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
