@@ -547,7 +547,8 @@ export class Menu extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     // The overlay needs its anchor in the same commit that opens it, so resolve it before rendering, not after.
     if (changed.has('anchor') && this.anchor) this.anchorElement = this.resolveAnchor()
-    else if (!this.anchorElement) this.anchorElement = this.querySelector<HTMLElement>(':scope > [slot="trigger"]')
+    // A server renderer has no DOM to query; the trigger is found once the element upgrades in the browser.
+    else if (!this.anchorElement && !isServer) this.anchorElement = this.querySelector<HTMLElement>(':scope > [slot="trigger"]')
     this.hasTrigger = !!this.anchorElement
   }
 
