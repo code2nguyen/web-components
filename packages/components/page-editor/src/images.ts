@@ -5,8 +5,10 @@ import { ImageBlock, type ImageBlockText } from '@c2n/core/image-block.js'
 import {
   copyImage,
   dataUrlToBlob,
+  fetchWebImage,
   imageToMarkdown,
   isDataUrl,
+  isWebUrl,
   pendingImages,
   readAsDataUrl,
   stepImageWidth,
@@ -163,19 +165,37 @@ export function savedImages(image: NodeType) {
   })
 }
 
-/** Uploads each image in turn, in order, and gives the blocks their `src`, or removes a block whose upload failed. */
-function save(view: EditorView, host: ImageHost, jobs: { id: string; file: () => Promise<Blob> }[]) {
+/** An image to save: its file, read when its turn comes, and the `src` it keeps if it cannot be saved. */
+interface SaveJob {
+  id: string
+  file: () => Promise<Blob>
+  /** A web image keeps its address when it cannot be copied: the block stays. */
+  fallback?: string
+}
+
+/**
+ * Uploads each image in turn, in order, and gives the blocks their `src`; a block whose upload failed keeps its
+ * fallback, or is removed. A web image its site will not hand over (no CORS, not an image, no answer) is not reported;
+ * a refused upload is.
+ */
+function save(view: EditorView, host: ImageHost, jobs: SaveJob[]) {
   void (async () => {
-    for (const { id, file } of jobs) {
+    for (const { id, file, fallback } of jobs) {
       let src: string | null = null
-      try {
-        src = await (host.uploader() ?? readAsDataUrl)(await file())
-        if (!src) throw new Error('The image upload gave no src')
-        pendingImages.finish(id, src)
-      } catch (error) {
-        pendingImages.fail(id)
-        host.failed(error)
-      }
+      const blob = await file().catch((error: unknown) => {
+        if (!fallback) host.failed(error)
+        return null
+      })
+      if (blob)
+        try {
+          src = await (host.uploader() ?? readAsDataUrl)(blob)
+          if (!src) throw new Error('The image upload gave no src')
+        } catch (error) {
+          host.failed(error)
+        }
+      src ||= fallback ?? null
+      if (src) pendingImages.finish(id, src)
+      else pendingImages.fail(id)
       if (view.isDestroyed) continue
       const tr = markSaved(view.state, host, id, src)
       if (tr) view.dispatch(tr)
@@ -213,18 +233,23 @@ export function insertImages(view: EditorView, host: ImageHost, files: Blob[], a
 }
 
 /**
- * Pasted images held in the HTML as data URLs (copied from another application) are saved like pasted files, when
- * there is an uploader: the page keeps the uploader's `src`, not the image in its text.
+ * Pasted images are saved like pasted files when there is an uploader, so the page keeps the uploader's `src`: one
+ * held in the HTML as a data URL (copied from another application), and one copied from another page with its web
+ * address, which is then not fetched from its site each time it is drawn. A web image is written with its address
+ * while it is copied, and keeps it when its site will not hand it over or the uploader refuses it. An image copied in
+ * this application, or written as Markdown, is pasted as it is.
  */
 export function adoptPastedImages(view: EditorView, host: ImageHost, nodes: readonly ProseNode[]): ProseNode[] {
   if (!host.uploader()) return [...nodes]
-  const jobs: { id: string; file: () => Promise<Blob> }[] = []
+  const jobs: SaveJob[] = []
   const adopted = nodes.map((node) => {
+    if (node.type !== host.image) return node
     const src = node.attrs.src as string
-    if (node.type !== host.image || !isDataUrl(src)) return node
+    const web = !!node.attrs.web && isWebUrl(src)
+    if (!web && !isDataUrl(src)) return node
     const id = pendingImages.begin(src)
-    jobs.push({ id, file: () => dataUrlToBlob(src) })
-    return host.image.create({ ...node.attrs, src: '', pending: id })
+    jobs.push(web ? { id, file: () => fetchWebImage(src), fallback: src } : { id, file: () => dataUrlToBlob(src) })
+    return host.image.create({ ...node.attrs, src: web ? src : '', pending: id, web: false })
   })
   // Once the paste has gone in, and only for the images that did: a paste the editor handles otherwise (the image file
   // beside the same image in the HTML) drops this slice, and its images are not uploaded.
