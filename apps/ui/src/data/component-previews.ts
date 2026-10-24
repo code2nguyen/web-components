@@ -165,6 +165,7 @@ price: .price
 </div>`,
   fieldset: `<c2-fieldset legend="Notifications" description="Choose what we email you about." style="width: 240px"><c2-checkbox checked>Mentions</c2-checkbox><c2-checkbox>Weekly digest</c2-checkbox></c2-fieldset>`,
   'filter-builder': `<c2-filter-builder compact-below="0" style="width:300px" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>`,
+  'float-button': `<div style="contain:layout;position:relative;width:200px;height:170px"><c2-float-button label="Create" open style="--c2-float-button--inset:auto 8px 8px auto"><c2-float-button-action label="Upload file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></c2-float-button-action><c2-float-button-action label="New document"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></c2-float-button-action></c2-float-button></div>`,
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
   form: `<c2-form style="width: 260px"><form><c2-form-field label="Email" error-text="Enter an email address, like name@example.com."><c2-text-field name="email" type="email" value="ada@"></c2-text-field></c2-form-field><div><c2-button type="submit">Save</c2-button></div></form></c2-form>`,
   'form-field': `<c2-form-field style="width: 240px" label="Display name" hint="Shown on your profile." counter><c2-text-field name="displayName" value="Ada Lovelace" maxlength="40"></c2-text-field></c2-form-field>`,
@@ -251,6 +252,14 @@ price: .price
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
+  'master-detail': `<c2-master-detail open breakpoint="0" style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px;--c2-master-detail__master--width:110px">
+  <div slot="master" style="display:grid">
+    <span style="padding:8px 10px;background:var(--c2-theme--color-primary-container, #edf1fe);font-weight:600">Ana Ruiz</span>
+    <span style="padding:8px 10px">Kenji W.</span>
+    <span style="padding:8px 10px">Priya N.</span>
+  </div>
+  <div slot="detail" style="padding:10px"><strong>Invoice 2041</strong><br>Charged twice for March.</div>
+</c2-master-detail>`,
   'mat-icon': `<div class="preview-row" style="gap:18px;font-size:26px">
   <c2-mat-icon>home</c2-mat-icon>
   <c2-mat-icon>favorite</c2-mat-icon>
@@ -265,6 +274,11 @@ price: .price
   <hr />
   <c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
 </c2-menu>`,
+  menubar: `<c2-menubar aria-label="Application">
+  <c2-menubar-menu label="File"><c2-menu-item value="new">New</c2-menu-item><c2-menu-item value="open">Open…</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Edit"><c2-menu-item value="undo">Undo</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="View"><c2-menu-item value="zoom">Zoom</c2-menu-item></c2-menubar-menu>
+</c2-menubar>`,
   mermaid: `<c2-mermaid style="width:260px;--c2-mermaid--font-size:12px" value="flowchart LR
   Cart --> Pay{Paid?}
   Pay -- yes --> Ship"></c2-mermaid>`,
@@ -437,6 +451,7 @@ price: .price
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
   <c2-table-column field="score" header="Score" width="90px" align="end" format="number" sortable></c2-table-column>
 </c2-table>`,
+  'table-of-contents': `<c2-table-of-contents style="width:200px" label="On this page" items='[{"id":"preview-toc-a","label":"Overview","level":1},{"id":"preview-toc-b","label":"Installation","level":1},{"id":"preview-toc-c","label":"With npm","level":2},{"id":"preview-toc-d","label":"Theming","level":1}]'></c2-table-of-contents>`,
   tabs: `<c2-tabs selected-tab="tab2" style="width:240px">
   <c2-tab label="Overview" for="tab1"></c2-tab>
   <c2-tab label="Activity" for="tab2"></c2-tab>

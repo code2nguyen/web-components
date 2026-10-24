@@ -1,0 +1,113 @@
+---
+title: 'Menubar'
+description: 'Desktop-style File, Edit and View menus in one bar, with the arrow-key and hover movement of an application menu bar.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Menubar, MenubarMenu } from '@c2n/components/menubar'
+import { Menu, MenuItem } from '@c2n/components/menu'
+
+`c2-menubar` is the row of menus at the top of a document or code editor: File, Edit, View. Each menu is a `c2-menubar-menu` with a `label` for its trigger, and its children are the rows of a `c2-menu`: `c2-menu-item` elements (checkbox and radio rows, shortcuts, descriptions, submenus), `<hr>` separators and `<h1>`–`<h6>` group headings.
+
+The bar is one Tab stop. On a trigger, ArrowLeft and ArrowRight move across the bar, Home and End jump to the ends, and a letter jumps to the next menu that starts with it. Enter, Space or ArrowDown open the menu on its first row, and ArrowUp opens it on its last row. Inside a menu, ArrowRight opens a submenu or, on a plain row, moves to the next menu. ArrowLeft closes a submenu or, at the top level, moves to the previous menu. Escape closes the menu and returns focus to its trigger. With the pointer, a click opens a menu, and while one is open, hovering another trigger switches to it. On the triggers, right-to-left layouts swap the arrow keys; inside a menu they keep the meaning `c2-menu` gives them.
+
+Picked rows fire `menu-select`, which bubbles through the bar, so one listener on `c2-menubar` handles the whole bar. The `start` and `end` slots hold what sits beside the menus, such as an app icon, a document title or a "Saved" status. They are outside the `menubar` role. `disabled` on a `c2-menubar-menu` greys out its trigger, and the arrow keys skip it.
+
+Use a menubar for an app that has many commands, such as an editor or a design tool. For site navigation, use `c2-navigation-menu`. For a few actions, use a `c2-menu` behind a button.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/menubar'
+```
+
+Importing `@c2n/components/menubar` also registers `c2-menubar-menu`, `c2-menu` and `c2-menu-item`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/menubar
+<style>
+  .doc-bar {
+    --c2-menubar--border: none;
+    --c2-menubar--padding-left: 0px;
+    --c2-menubar--menus-gap: 0px;
+    --c2-menubar-menu__trigger--height: 26px;
+    --c2-menubar-menu__trigger--padding-left: 8px;
+    --c2-menubar-menu__trigger--padding-right: 8px;
+    --c2-menubar-menu__trigger--border-radius: 4px;
+  }
+  .doc-title {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 6px;
+  }
+  .doc-status {
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    padding-right: 8px;
+  }
+</style>
+<div data-label="Editor">
+  <c2-menubar client:only="lit" aria-label="Editor" style="width: 100%">
+    <c2-menubar-menu label="File">
+      <c2-menu-item value="new">New file<span slot="shortcut">⌘N</span></c2-menu-item>
+      <c2-menu-item value="open">Open…<span slot="shortcut">⌘O</span></c2-menu-item>
+      <c2-menu-item value="recent">
+        Open recent
+        <c2-menu slot="submenu">
+          <c2-menu-item value="report">report.md</c2-menu-item>
+          <c2-menu-item value="notes">notes.md</c2-menu-item>
+        </c2-menu>
+      </c2-menu-item>
+      <hr />
+      <c2-menu-item value="save">Save<span slot="shortcut">⌘S</span></c2-menu-item>
+      <c2-menu-item value="close">Close window<span slot="shortcut">⇧⌘W</span></c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="Edit">
+      <c2-menu-item value="undo">Undo<span slot="shortcut">⌘Z</span></c2-menu-item>
+      <c2-menu-item value="redo">Redo<span slot="shortcut">⇧⌘Z</span></c2-menu-item>
+      <hr />
+      <c2-menu-item value="cut">Cut<span slot="shortcut">⌘X</span></c2-menu-item>
+      <c2-menu-item value="copy">Copy<span slot="shortcut">⌘C</span></c2-menu-item>
+      <c2-menu-item value="paste">Paste<span slot="shortcut">⌘V</span></c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="View">
+      <c2-menu-item type="checkbox" value="ruler" checked keep-open>Show ruler</c2-menu-item>
+      <c2-menu-item type="checkbox" value="outline" keep-open>Show outline</c2-menu-item>
+      <hr />
+      <h6>Mode</h6>
+      <c2-menu-item type="radio" name="mode" value="editing" checked>Editing</c2-menu-item>
+      <c2-menu-item type="radio" name="mode" value="suggesting">Suggesting</c2-menu-item>
+      <c2-menu-item type="radio" name="mode" value="viewing">Viewing</c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="Help">
+      <c2-menu-item value="docs">Documentation</c2-menu-item>
+      <c2-menu-item value="shortcuts">Keyboard shortcuts<span slot="shortcut">⌘/</span></c2-menu-item>
+    </c2-menubar-menu>
+  </c2-menubar>
+</div>
+<div data-label="Document">
+  <c2-menubar client:only="lit" class="doc-bar" aria-label="Document" style="width: 100%">
+    <span slot="start" class="doc-title">Q4 planning</span>
+    <c2-menubar-menu label="File">
+      <c2-menu-item value="share">Share…</c2-menu-item>
+      <c2-menu-item value="download">Download</c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="Insert">
+      <c2-menu-item value="image">Image</c2-menu-item>
+      <c2-menu-item value="table">Table</c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="Format">
+      <c2-menu-item value="bold">Bold<span slot="shortcut">⌘B</span></c2-menu-item>
+      <c2-menu-item value="italic">Italic<span slot="shortcut">⌘I</span></c2-menu-item>
+    </c2-menubar-menu>
+    <c2-menubar-menu label="Tools" disabled>
+      <c2-menu-item value="spelling">Spelling</c2-menu-item>
+    </c2-menubar-menu>
+    <span slot="end" class="doc-status">Saved</span>
+  </c2-menubar>
+</div>
+```

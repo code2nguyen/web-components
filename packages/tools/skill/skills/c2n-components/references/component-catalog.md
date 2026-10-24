@@ -8,6 +8,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Button** — `c2-button` · `@c2n/components/button` — Themeable button with slots for text, prefix, suffix and running icons.
 - **Button Group** — `c2-button-group` · `@c2n/components/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`.
 - **Copy Button** — `c2-copy-button` · `@c2n/components/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
+- **Float Button** — `c2-float-button, c2-float-button-action` · `@c2n/components/float-button` — A floating action button for the main action of a screen, which can expand into a speed dial of related actions. Children: `c2-float-button-action`.
 - **Icon Button** — `c2-icon-button` · `@c2n/components/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
 - **Split Button** — `c2-split-button` · `@c2n/components/split-button` — A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method. Children: `c2-menu-item`.
 
@@ -173,6 +174,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
+- **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
 - **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
@@ -184,10 +186,12 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Context Menu** — `c2-context-menu` · `@c2n/components/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.
 - **Link Button** — `c2-link-button` · `@c2n/components/link-button` — Text-styled control for link and navigation actions, rendered as a real anchor or a button.
 - **Menu** — `c2-menu, c2-menu-item, c2-menu-row` · `@c2n/components/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`, `c2-menu-row`.
+- **Menubar** — `c2-menubar, c2-menubar-menu` · `@c2n/components/menubar` — Desktop-style File, Edit and View menus in one bar, with the arrow-key and hover movement of an application menu bar. Children: `c2-menu-item`, `c2-menubar-menu`.
 - **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/components/navigation-menu` — Site navigation bar whose triggers open panels of links below the header. Children: `c2-navigation-menu-item`, `c2-navigation-menu-link`.
 - **Pagination** — `c2-pagination` · `@c2n/components/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/components/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
 - **Skip Link** — `c2-skip-link` · `@c2n/components/skip-link` — A "Skip to main content" link that appears when a keyboard user tabs onto it and moves focus into the main content.
+- **Table Of Contents** — `c2-table-of-contents` · `@c2n/components/table-of-contents` — An "On this page" navigation that lists the headings of a document, nests them by level and highlights the section being read.
 - **Tabs** — `c2-tabs, c2-tab` · `@c2n/components/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
 
 ## Planning
