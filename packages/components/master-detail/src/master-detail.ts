@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -23,6 +23,16 @@ export interface MasterDetailEventMap {
 export interface MasterDetail {
   addEventListener: TypedAddEventListener<MasterDetail, MasterDetailEventMap>
   removeEventListener: TypedRemoveEventListener<MasterDetail, MasterDetailEventMap>
+}
+
+/** An open popover or dialog, which takes Escape before the layout. `:popover-open` throws where it is unsupported. */
+const isOpenPopup = (element: Element): boolean => {
+  if (element.matches('dialog[open]')) return true
+  try {
+    return element.matches(':popover-open')
+  } catch {
+    return false
+  }
 }
 
 /** Attribute that turns any element inside the detail into a back button. */
@@ -176,6 +186,7 @@ export class MasterDetail extends LitElement {
     super.disconnectedCallback()
     this.resizeObserver?.disconnect()
     cancelAnimationFrame(this.instantFrame)
+    this.toggleState('instant', false)
   }
 
   private layoutFor(width: number): MasterDetailLayout {
@@ -207,10 +218,14 @@ export class MasterDetail extends LitElement {
     else states.delete(name)
   }
 
-  protected override willUpdate(changed: PropertyValues<this>): void {
+  protected override willUpdate(changed: PropertyValues): void {
     if ((changed.has('breakpoint') || changed.has('collapse')) && this.measuredLayout !== undefined) this.measure()
     // Read before the render makes the master inert, which drops the focus to the body.
-    this.masterHadFocus = this.slotOf(this.focusedInRoot()) === 'master'
+    if (changed.has('measuredLayout') || changed.has('open')) {
+      const active = this.focusedInRoot()
+      this.masterHadFocus = this.slotOf(active) === 'master'
+      if (changed.has('open') && this.open) this.returnFocus = this.masterHadFocus ? active : null
+    }
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -225,19 +240,12 @@ export class MasterDetail extends LitElement {
         if (layout !== 'split' && this.open && this.masterHadFocus) this.focusDetail()
       }
     }
-    if (changed.has('open') && this.hasOpened(changed) && layout !== undefined && layout !== 'split') {
-      if (this.open) {
-        this.returnFocus = this.focusInMaster()
-        this.focusDetail()
-      } else {
-        this.restoreFocus()
-      }
+    // The initial value of `open` moves no focus.
+    const firstUpdate = changed.get('open') === undefined
+    if (changed.has('open') && !firstUpdate && layout !== undefined && layout !== 'split') {
+      if (this.open) this.focusDetail()
+      else this.restoreFocus()
     }
-  }
-
-  /** True when `open` changed after the first render: the initial value must not move focus. */
-  private hasOpened(changed: PropertyValues): boolean {
-    return changed.get('open') !== undefined
   }
 
   /** The element of this shadow tree holding focus (the Back button, a pane), or `null` when it is elsewhere. */
@@ -257,11 +265,6 @@ export class MasterDetail extends LitElement {
     return node ? (node.getAttribute('slot') ?? '') : undefined
   }
 
-  private focusInMaster(): Element | null {
-    const active = this.focusedInRoot()
-    return this.slotOf(active) === 'master' ? active : null
-  }
-
   private focusDetail(): void {
     const autofocus = this.detailSlot
       ?.assignedElements({ flatten: true })
@@ -271,8 +274,11 @@ export class MasterDetail extends LitElement {
   }
 
   private restoreFocus(): void {
-    const active = this.focusedInRoot()
-    const lost = !active || active === document.body || this.detailPane.contains(this.focusedInShadow()) || this.slotOf(active) === 'detail'
+    // Focus is lost when it fell to the body as the detail went inert, or still sits in the detail (its own slots or
+    // the Back button). Focus the app moved elsewhere stays where it is.
+    const slot = this.slotOf(this.focusedInRoot())
+    const outside = document.activeElement
+    const lost = !outside || outside === document.body || this.detailPane.contains(this.focusedInShadow()) || slot === 'detail' || slot === 'toolbar'
     if (!lost) return
     const target = this.returnFocus
     this.returnFocus = null
@@ -289,22 +295,23 @@ export class MasterDetail extends LitElement {
   private handleKeydown = (event: KeyboardEvent): void => {
     if (event.key !== 'Escape' || event.defaultPrevented || !this.open || this.layout !== 'overlay') return
     // Escape in an open popup inside the detail closes that popup first.
-    if (event.composedPath().some((node) => node instanceof Element && node.matches(':popover-open, dialog[open]'))) return
+    if (event.composedPath().some((node) => node instanceof Element && isOpenPopup(node))) return
     event.preventDefault()
     this.requestClose('escape')
   }
 
   private handleClick = (event: MouseEvent): void => {
     if (event.defaultPrevented) return
+    // The composed path crosses the shadow roots of components rendered in the detail.
+    let back = false
     for (const node of event.composedPath()) {
-      if (node === this) return
-      if (node instanceof Element && node.hasAttribute(MASTER_DETAIL_BACK_ATTRIBUTE)) {
-        // A back button of a nested layout belongs to that layout.
-        if (node.closest('c2-master-detail') !== this) return
-        this.requestClose('back')
-        return
-      }
+      if (node === this) break
+      if (!(node instanceof Element)) continue
+      if (node.hasAttribute(MASTER_DETAIL_BACK_ATTRIBUTE)) back = true
+      // A back button inside a nested layout belongs to that layout.
+      else if (back && node instanceof MasterDetail) return
     }
+    if (back) this.requestClose('back')
   }
 
   override render() {
@@ -321,9 +328,10 @@ export class MasterDetail extends LitElement {
           class="detail"
           part="detail"
           role=${overlayOpen ? 'dialog' : 'region'}
+          aria-modal=${overlayOpen ? 'true' : nothing}
           aria-label=${this.detailLabel || this.msg.t('details')}
           tabindex="-1"
-          ?inert=${(collapsed || layout === 'split') && !this.open}
+          ?inert=${layout !== undefined && !this.open}
         >
           <div class="toolbar" part="toolbar">
             <button class="back" part="back" type="button" @click=${() => this.requestClose('back')}>

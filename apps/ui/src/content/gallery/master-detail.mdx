@@ -17,6 +17,9 @@ Looks for `c2-master-detail`. `--c2-master-detail__master--width` and `--c2-mast
     width: 100%;
     height: 220px;
   }
+  .md-default-record {
+    padding: 16px;
+  }
 </style>
 <c2-master-detail class="md-default" open breakpoint="0">
   <c2-list client:only="lit" slot="master" value="ana" aria-label="Inbox">
@@ -24,7 +27,7 @@ Looks for `c2-master-detail`. `--c2-master-detail__master--width` and `--c2-mast
     <c2-list-item value="kenji">Kenji Watanabe</c2-list-item>
     <c2-list-item value="priya">Priya Natarajan</c2-list-item>
   </c2-list>
-  <div slot="detail" style="padding: 16px">Invoice 2041 charged twice</div>
+  <div slot="detail" class="md-default-record">Invoice 2041 charged twice</div>
 </c2-master-detail>
 ```
 

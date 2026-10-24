@@ -3,7 +3,7 @@ import '../src/master-detail'
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'split'
 const main = document.querySelector('main')!
 
-const widths: Record<string, number> = { split: 900, stack: 400, overlay: 600, cancel: 400, 'custom-back': 400, resize: 900, 'split-open': 900 }
+const widths: Record<string, number> = { split: 900, stack: 400, overlay: 600, cancel: 400, 'custom-back': 400, extras: 400, resize: 900, 'split-open': 900 }
 const attributes: Record<string, string> = {
   overlay: 'collapse="overlay"',
   'split-open': 'open',
@@ -20,7 +20,9 @@ main.innerHTML = `<button id="before">Before</button>
       <nav slot="master" aria-label="Inbox">
         ${records.map((record) => `<button type="button" data-id="${record.id}" style="display: block; width: 100%; padding: 12px; text-align: start">${record.from}</button>`).join('')}
       </nav>
+      ${scenario === 'extras' ? '<button type="button" slot="toolbar" id="done">Done</button>' : ''}
       <article slot="detail">
+        ${scenario === 'extras' ? '<detail-view></detail-view>' : ''}
         ${scenario === 'custom-back' ? '<button type="button" master-detail-back>Close record</button>' : ''}
         <h2 id="title">${records[0].subject}</h2>
         <p>Message body.</p>
@@ -30,6 +32,16 @@ main.innerHTML = `<button id="before">Before</button>
     </c2-master-detail>
   </div>
   <output aria-label="Events"></output>`
+
+// A detail view that renders its own back button in its shadow root.
+customElements.define(
+  'detail-view',
+  class extends HTMLElement {
+    connectedCallback() {
+      this.attachShadow({ mode: 'open' }).innerHTML = '<button type="button" master-detail-back>Back to inbox</button>'
+    }
+  },
+)
 
 if (scenario === 'custom-back') {
   const style = document.createElement('style')
@@ -58,4 +70,5 @@ subject.addEventListener('layout-change', (event) => log(`layout:${event.detail.
 await subject.updateComplete
 // The first measurement lands on the next resize observation.
 await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+document.querySelector('#done')?.addEventListener('click', () => subject.close())
 main.dataset.ready = 'true'

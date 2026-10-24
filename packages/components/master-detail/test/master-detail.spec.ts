@@ -115,6 +115,29 @@ test('an element with master-detail-back closes the detail', async ({ page, scen
   await expect(events(page)).toHaveText('close:back')
 })
 
+test("a back button in a detail component's shadow root closes the detail", async ({ page, scenario }) => {
+  await scenario('extras')
+  await item(page, 'Kenji Watanabe').click()
+  await page.getByRole('button', { name: 'Back to inbox' }).click()
+  await expect(detail(page)).toBeHidden()
+  await expect(events(page)).toHaveText('close:back')
+  await expect(item(page, 'Kenji Watanabe')).toBeFocused()
+})
+
+test('closing from the toolbar slot returns focus to the record', async ({ page, scenario }) => {
+  await scenario('extras')
+  await item(page, 'Priya Natarajan').click()
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(detail(page)).toBeHidden()
+  await expect(item(page, 'Priya Natarajan')).toBeFocused()
+})
+
+test('overlay: the open detail is a modal dialog', async ({ page, scenario }) => {
+  await scenario('overlay')
+  await item(page, 'Ana Ruiz').click()
+  await expect(page.locator('c2-master-detail [part="detail"]')).toHaveAttribute('aria-modal', 'true')
+})
+
 test('follows its own width across the breakpoint and keeps the open record', async ({ page, scenario }) => {
   await scenario('resize')
   await item(page, 'Kenji Watanabe').click()
