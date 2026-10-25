@@ -2,6 +2,307 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.17",
+      "date": "2026-10-25",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["mermaid"],
+              "text": "Make mermaid an optional peer dependency",
+              "hash": "f2f741d"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["sticky"],
+              "text": "Add c2-sticky and share stuck detection with c2-header",
+              "hash": "2f11f4f"
+            },
+            {
+              "scopes": ["notepad", "page-editor"],
+              "text": "A web image pasted from another page is copied through imageUpload, or keeps its address when the site refuses",
+              "hash": "18b9a19"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Swipe rows only with the opt-in swipeable attribute",
+              "hash": "6796ba4"
+            },
+            {
+              "scopes": ["menubar"],
+              "text": "Add c2-menubar and c2-menubar-menu",
+              "hash": "461fbe9"
+            },
+            {
+              "scopes": ["swipe-action"],
+              "text": "Keyboard shortcuts for actions, and swipe rows in a c2-list",
+              "hash": "9934148"
+            },
+            {
+              "scopes": ["float-button"],
+              "text": "Add c2-float-button, a floating action button with a speed dial",
+              "hash": "16dc67c"
+            },
+            {
+              "scopes": ["master-detail"],
+              "text": "Add c2-master-detail",
+              "hash": "c598bf9"
+            },
+            {
+              "scopes": ["overflow-list"],
+              "text": "Add c2-overflow-list, a row that folds what does not fit into a More menu",
+              "hash": "e311172"
+            },
+            {
+              "scopes": ["swipe-action"],
+              "text": "Add c2-swipe-action, a list row that swipes to reveal actions",
+              "hash": "ba25011"
+            },
+            {
+              "scopes": ["table-of-contents"],
+              "text": "Add c2-table-of-contents",
+              "hash": "ad10dab"
+            },
+            {
+              "scopes": ["bottom-nav"],
+              "text": "Add c2-bottom-nav, the mobile tab bar",
+              "hash": "4bebaae"
+            },
+            {
+              "scopes": ["save-bar"],
+              "text": "Add c2-save-bar for unsaved form changes",
+              "hash": "e51666d"
+            },
+            {
+              "scopes": ["app-shell"],
+              "text": "Add c2-app-shell, c2-app-shell-toggle and c2-page-header",
+              "hash": "c203eb1"
+            },
+            {
+              "scopes": ["sheet"],
+              "text": "Add swipe-close and content-sized sheets",
+              "hash": "1704b8c"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-sankey-chart, flows between stages",
+              "hash": "918804f"
+            },
+            {
+              "scopes": ["rich-text-editor"],
+              "text": "Add c2-rich-text-editor, a compact formatted-text field",
+              "hash": "81992ec"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-depth-chart, cumulative order-book depth around the mid price",
+              "hash": "bd6cd99"
+            },
+            {
+              "scopes": ["countdown"],
+              "text": "Add c2-countdown",
+              "hash": "98847f9"
+            },
+            {
+              "scopes": ["org-chart"],
+              "text": "Add c2-org-chart, a hierarchy drawn as connected cards",
+              "hash": "49d6ebe"
+            },
+            {
+              "scopes": ["status-light"],
+              "text": "Add c2-status-light",
+              "hash": "65ba1ab"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["sticky"],
+              "text": "Track scrollers rendered late, body scrollers and content growth",
+              "hash": "66cc51e"
+            },
+            {
+              "scopes": ["app-shell"],
+              "text": "A navigationOpened set before the first measurement wins over the side default",
+              "hash": "4a8ecff"
+            },
+            {
+              "scopes": ["swipe-action"],
+              "text": "Measure flick speed over the last 100ms, and keep the CDP touch test to Chromium",
+              "hash": "caf21af"
+            },
+            {
+              "scopes": ["page-header"],
+              "text": "Defer resize work a frame and render the derived parent link only without a slotted one",
+              "hash": "3f68600"
+            },
+            {
+              "scopes": ["overflow-list"],
+              "text": "Settle in a declarative shadow root and copy wrapped icons",
+              "hash": "80f9f85"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Read a deferred-hydration shadow root in connectedCallback",
+              "hash": "817a506"
+            },
+            {
+              "scopes": ["swipe-action"],
+              "text": "Address code review findings",
+              "hash": "32d4f2a"
+            },
+            {
+              "scopes": ["menubar"],
+              "text": "Keyboard into a hovered menu, one tab stop after SSR and disabled changes",
+              "hash": "18902e5"
+            },
+            {
+              "scopes": ["table-of-contents"],
+              "text": "Tolerate whole-pixel scrolling in WebKit",
+              "hash": "22a6c75"
+            },
+            {
+              "scopes": ["page-header"],
+              "text": "Fill the width, refold on late upgrades, docs screenshots pass",
+              "hash": "679fbf3"
+            },
+            {
+              "scopes": ["master-detail"],
+              "text": "Address review findings",
+              "hash": "2d788ea"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Find a row's c2-list-item inside wrappers, past whitespace and nested wrappers",
+              "hash": "f05ae0f"
+            },
+            {
+              "scopes": ["bottom-nav"],
+              "text": "Find items inside wrapper elements and fill the bar's width",
+              "hash": "fafa7e8"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Skip the trigger lookup while server rendering",
+              "hash": "0a49c15"
+            },
+            {
+              "scopes": ["app-shell"],
+              "text": "Address review of the shell and page header",
+              "hash": "faa839d"
+            },
+            {
+              "scopes": ["save-bar"],
+              "text": "Keep the message at the start of a full-width bar and Save solid while saving",
+              "hash": "74632dd"
+            },
+            {
+              "scopes": ["sheet"],
+              "text": "Tighten swipe-close grab area, flick and handle placement",
+              "hash": "50c3cfc"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Keep sankey outside labels inside the plot",
+              "hash": "89d8bc3"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Draw the depth chart's mid label inside its pill, in both themes",
+              "hash": "a3e1b97"
+            },
+            {
+              "scopes": ["page-editor", "rich-text-editor"],
+              "text": "Refuse links that browsers read as javascript:",
+              "hash": "7fa1799"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Address review findings on c2-sankey-chart",
+              "hash": "e6224e2"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Address depth chart review findings",
+              "hash": "22180af"
+            },
+            {
+              "scopes": ["rich-text-editor"],
+              "text": "Keep the linked text highlighted while the link popover is open",
+              "hash": "284e811"
+            },
+            {
+              "scopes": ["rich-text-editor"],
+              "text": "Describe its parts' slots and cover it in the FormData suite",
+              "hash": "078de5b"
+            },
+            {
+              "scopes": ["rich-text-editor"],
+              "text": "Document attributes and slots, add its dependencies to the lockfile",
+              "hash": "6298a93"
+            },
+            {
+              "scopes": ["status-light"],
+              "text": "Keep the pulse ring and icon dot right in every state",
+              "hash": "f65f438"
+            },
+            {
+              "scopes": ["mermaid"],
+              "text": "Keep the loader's error when mermaid cannot be loaded",
+              "hash": "539eafe"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Isolate the grid viewport rather than the host",
+              "hash": "c5e5901"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Keep pinned and sticky cells' stacking inside the table",
+              "hash": "56e92ce"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["chart"],
+              "text": "Keep the depth chart's messages out of the shared chunk",
+              "hash": "84493b3"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Write the merged custom-elements.json without indentation",
+              "hash": "c380723"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["examples"],
+              "text": "Make Log Lens tabs and shortcuts respond after a file loads",
+              "hash": "9b3b541"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.16",
       "date": "2026-10-23",
       "sections": [
