@@ -1,8 +1,10 @@
 // Nothing here is presentation a consumer could tune: these are the rules that keep the content readable by
 // assistive technology while drawing nothing, so the element documents no CSS variables. `!important` in a shadow
-// root wins over the page's own `!important`, so an outside rule on the tag cannot unhide it.
-:host(:not([focusable])),
-:host([focusable]:not(:focus-within)) {
+// root wins over the page's own `!important`, so an outside rule on the tag cannot unhide it. This is also why the file
+// has no `@c2n/sass/css-variable` preamble: there is no `$theme` map to declare.
+// `focusable` is read through a custom state set from the property, since `focusable="false"` must stay hidden.
+:host(:not(:state(focusable))),
+:host(:state(focusable):not(:focus-within)) {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;

@@ -34,6 +34,7 @@ The examples below also use `@c2n/feather-icons` (`npm install @c2n/feather-icon
   .vh-icon-only {
     --c2-button__container--padding-left: 10px;
     --c2-button__container--padding-right: 10px;
+    --c2-button__container--gap: 0;
   }
   .vh-sentence {
     display: flex;
@@ -70,21 +71,21 @@ The examples below also use `@c2n/feather-icons` (`npm install @c2n/feather-icon
 <div data-label="Words a visual cue stands for">
   <div class="vh-sentence">
     <span><span class="vh-stars" aria-hidden="true">★★★★☆</span><c2-visually-hidden>Rated 4 out of 5 stars</c2-visually-hidden></span>
-    <a href="#pricing">Read more<c2-visually-hidden> about pricing</c2-visually-hidden></a>
+    <a href="#before-the-element-is-defined">Read more<c2-visually-hidden> about server rendering</c2-visually-hidden></a>
   </div>
 </div>
 <div data-label="Focusable: click here, then press Tab">
-  <c2-visually-hidden class="vh-skip" focusable><a href="#vh-comments">Skip to comments</a></c2-visually-hidden>
+  <c2-visually-hidden class="vh-skip" focusable><a href="#before-the-element-is-defined">Skip to the setup notes</a></c2-visually-hidden>
 </div>
 ```
 
-The first row is three buttons named "Edit invoice", "Share invoice" and "Delete invoice"; the second reads "Rated 4 out of 5 stars" and "Read more about pricing" where the screen shows stars and "Read more". In the last row nothing is drawn until Tab lands on the link.
+The first row is three buttons named "Edit invoice", "Share invoice" and "Delete invoice"; the second reads "Rated 4 out of 5 stars" and "Read more about server rendering" where the screen shows stars and "Read more". In the last row nothing is drawn until Tab lands on the link.
 
-A hidden heading gives a screen-reader user a landmark to jump to without adding a visible title the design does not want:
+A hidden heading gives a screen-reader user a landmark to jump to without adding a visible title the design does not want. Wrap the whole heading, so its margins leave the layout too:
 
 ```html tag=CodeBlock
 <section aria-labelledby="filters-heading">
-  <h2 id="filters-heading"><c2-visually-hidden>Filters</c2-visually-hidden></h2>
+  <c2-visually-hidden><h2 id="filters-heading">Filters</h2></c2-visually-hidden>
   …
 </section>
 ```
@@ -104,9 +105,12 @@ c2-visually-hidden:not(:defined) {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
+  padding: 0 !important;
   margin: -1px !important;
   overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
   clip-path: inset(50%) !important;
   white-space: nowrap !important;
+  border: 0 !important;
 }
 ```

@@ -71,6 +71,13 @@ test('without focusable, focused content stays hidden', async ({ page, renderSce
   await expect(page.locator('c2-visually-hidden')).toHaveCSS('position', 'absolute')
 })
 
+test('focusable="false", as a framework writes it, stays hidden', async ({ page, renderScenario, tab }) => {
+  await renderScenario('<c2-visually-hidden focusable="false"><a href="#x">Hidden link</a></c2-visually-hidden>')
+  await tab()
+  await expect(page.getByRole('link', { name: 'Hidden link' })).toBeFocused()
+  await expect(page.locator('c2-visually-hidden')).toHaveCSS('position', 'absolute')
+})
+
 test('hidden removes it from the accessibility tree', async ({ page, renderScenario }) => {
   await renderScenario('<button>✕<c2-visually-hidden hidden>Close</c2-visually-hidden></button>')
   await expect(page.locator('c2-visually-hidden')).toHaveCSS('display', 'none')

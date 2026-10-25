@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './visually-hidden.scss?inline'
@@ -25,8 +25,17 @@ export class VisuallyHidden extends LitElement {
    */
   @property({ type: Boolean, reflect: true }) focusable = false
 
+  private readonly internals = this.attachInternals()
+
   override render() {
     return html`<slot></slot>`
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    // The stylesheet reads this state, not the attribute: `focusable="false"` (Svelte 5, a server renderer) is false.
+    if (!changed.has('focusable')) return
+    if (this.focusable) this.internals.states.add('focusable')
+    else this.internals.states.delete('focusable')
   }
 }
 

@@ -13,7 +13,7 @@ npm install @c2n/components
 
 <c2-icon-button><c2-feather-trash-2></c2-feather-trash-2><c2-visually-hidden>Delete invoice</c2-visually-hidden></c2-icon-button>
 
-<h2><c2-visually-hidden>Filters</c2-visually-hidden></h2>
+<c2-visually-hidden><h2>Filters</h2></c2-visually-hidden>
 
 <c2-visually-hidden role="status" aria-live="polite">3 results</c2-visually-hidden>
 
