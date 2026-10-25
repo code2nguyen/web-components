@@ -1,0 +1,59 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    bid--color: #16a34a,
+    ask--color: #dc2626,
+    mid-line--color: #a1a1aa,
+    mid-label--background-color: #18181b,
+    mid-label--color: #fafafa,
+    mirror-marker--size: 8px,
+    mirror-marker--background-color: #ffffff,
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
+.plot:focus {
+  outline: none;
+}
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: -2px;
+}
+
+// Placed by the chart over the plot: the other side's depth at the same distance from the mid price, and the level
+// reached with the arrow keys. `--_side` is the colour of the side the marker is on.
+.depth-marker {
+  position: absolute;
+  width: css.cssVar(mirror-marker--size);
+  height: css.cssVar(mirror-marker--size);
+  box-sizing: border-box;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.depth-marker--mirror {
+  border: 2px solid var(--_side, currentColor);
+  background: css.cssVar(mirror-marker--background-color);
+}
+
+.depth-marker--focus {
+  background: var(--_side, currentColor);
+  box-shadow: 0 0 0 2px css.cssVar(mirror-marker--background-color);
+}
+
+.depth-marker[hidden] {
+  display: none;
+}
+
+// The announcement of the level reached with the arrow keys is for assistive technology only.
+.depth-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

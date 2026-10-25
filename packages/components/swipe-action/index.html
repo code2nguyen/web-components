@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-swipe-action</title>
+    <script type="module" src="/src/swipe-action.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        background: #fafafa;
+      }
+      .list {
+        width: 360px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .list c2-swipe-action + c2-swipe-action {
+        border-top: 1px solid #e4e4e7;
+      }
+      .blocks {
+        --c2-swipe-action__actions--padding: 0;
+        --c2-swipe-action__actions--gap: 0px;
+        --c2-swipe-action__actions--align-items: stretch;
+      }
+      .blocks button {
+        border: 0;
+        padding: 0 16px;
+        color: #ffffff;
+        background: #52525b;
+        font: inherit;
+      }
+      .blocks .danger {
+        background: #b91c1c;
+      }
+      .blocks .archive {
+        background: #15803d;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Both sides, full-bleed actions</h3>
+    <div class="list">
+      <c2-swipe-action class="blocks">
+        <button slot="start" class="archive">Archive</button>
+        Weekly sync notes
+        <button slot="end">Flag</button>
+        <button slot="end" class="danger">Delete</button>
+      </c2-swipe-action>
+      <c2-swipe-action class="blocks" full-swipe>
+        <button slot="start" class="archive">Archive</button>
+        Full swipe deletes
+        <button slot="end" class="danger" onclick="this.parentElement.remove()">Delete</button>
+      </c2-swipe-action>
+      <c2-swipe-action class="blocks" open="end">
+        Opened from markup
+        <button slot="end">Flag</button>
+        <button slot="end" class="danger">Delete</button>
+      </c2-swipe-action>
+    </div>
+  </body>
+</html>

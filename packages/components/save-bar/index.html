@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-save-bar</title>
+    <script type="module" src="/src/save-bar.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+      }
+      .frame {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        width: 560px;
+        height: 96px;
+        margin-bottom: 16px;
+        border: 1px dashed #d4d4d8;
+        border-radius: 8px;
+      }
+      c2-save-bar {
+        --c2-save-bar--position: relative;
+        --c2-save-bar--inset-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame"><c2-save-bar open></c2-save-bar></div>
+    <div class="frame"><c2-save-bar open saving></c2-save-bar></div>
+    <div class="frame">
+      <c2-save-bar open invalid><span slot="message">Unsaved changes · 1 field to fix</span></c2-save-bar>
+    </div>
+    <div class="frame"><c2-save-bar open shortcut save-label="Publish" discard-label="Revert"></c2-save-bar></div>
+  </body>
+</html>

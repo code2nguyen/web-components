@@ -1,0 +1,146 @@
+---
+description: 'Ready-made looks for c2-bottom-nav: Material indicator, glass, floating dock, top line, current label and brand colour. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { BottomNav } from '@c2n/components/bottom-nav'
+import { BottomNavItem } from '@c2n/components/bottom-nav/bottom-nav-item'
+import { PhosphorHouseIcon as PhosphorHouse } from '@c2n/phosphor-icons/icons/house.js'
+import { PhosphorMagnifyingGlassIcon as PhosphorMagnifyingGlass } from '@c2n/phosphor-icons/icons/magnifying-glass.js'
+import { PhosphorTrayIcon as PhosphorTray } from '@c2n/phosphor-icons/icons/tray.js'
+import { PhosphorUserIcon as PhosphorUser } from '@c2n/phosphor-icons/icons/user.js'
+
+## Looks
+
+Every look is a set of CSS variables on the bar. The item variables (`--c2-bottom-nav-item__*`) inherit, so one class on `c2-bottom-nav` styles the bar and all of its items. The indicator and the top line carry most of the difference; set the indicator to `transparent` for a tint-only bar, and keep a filled `current-icon` so the current item is not marked by colour alone.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-bottom-nav value="home">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>
+```
+
+```html tag=MdxCodeBlock,label=Glass
+<style>
+.glass-stage {
+    position: relative;
+    width: 380px;
+    max-width: 100%;
+  }
+  .glass-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+  }
+  .glass-tiles span {
+    display: block;
+    aspect-ratio: 1;
+  }
+  .glass {
+    --c2-bottom-nav--position: absolute;
+    --c2-bottom-nav--background: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 70%, transparent);
+    --c2-bottom-nav--backdrop-filter: blur(18px) saturate(1.6);
+    --c2-bottom-nav--border-top: none;
+    --c2-bottom-nav-item__indicator__current--background: transparent;
+    --c2-bottom-nav-item__current--font-weight: 500;
+  }
+</style>
+<div class="glass-stage">
+  <div class="glass-tiles"><span style="background:#7aa2d6"></span><span style="background:#d8b26e"></span><span style="background:#8fc1a9"></span><span style="background:#c98a8a"></span><span style="background:#9b8fc9"></span><span style="background:#6fb3c0"></span></div>
+  <c2-bottom-nav class="glass" value="home">
+    <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+  </c2-bottom-nav>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Floating dock
+<style>
+.dock {
+    width: 380px;
+    max-width: 100%;
+    --c2-bottom-nav--margin: 0 12px 12px;
+    --c2-bottom-nav--padding-bottom: 0px;
+    --c2-bottom-nav--min-height: 60px;
+    --c2-bottom-nav--border-top: none;
+    --c2-bottom-nav--border-radius: 28px;
+    --c2-bottom-nav--box-shadow: 0 8px 24px rgb(15 20 30 / 0.14), 0 0 0 1px var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-bottom-nav-item__indicator--width: 48px;
+    --c2-bottom-nav-item--padding-top: 6px;
+  }
+</style>
+<c2-bottom-nav class="dock" value="home" label-visibility="unlabeled">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>
+```
+
+```html tag=MdxCodeBlock,label=Top line
+<style>
+.top-line {
+    width: 380px;
+    max-width: 100%;
+    --c2-bottom-nav-item__indicator__current--background: transparent;
+    --c2-bottom-nav-item__line--height: 3px;
+    --c2-bottom-nav-item__line--width: 40%;
+  }
+</style>
+<c2-bottom-nav class="top-line" value="home">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>
+```
+
+```html tag=MdxCodeBlock,label=Current label
+<style>
+.current-label {
+    width: 380px;
+    max-width: 100%;
+    --c2-bottom-nav-item__indicator--width: 64px;
+  }
+</style>
+<c2-bottom-nav class="current-label" value="home" label-visibility="selected">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>
+```
+
+```html tag=MdxCodeBlock,label=Brand
+<style>
+.brand {
+    width: 380px;
+    max-width: 100%;
+    --c2-bottom-nav--background: #1e3a8a;
+    --c2-bottom-nav--border-top: none;
+    --c2-bottom-nav-item--color: #bfdbfe;
+    --c2-bottom-nav-item__current--color: #ffffff;
+    --c2-bottom-nav-item__indicator__current--background: #2563eb;
+    --c2-bottom-nav-item__indicator__hover--background: #1e40af;
+    --c2-bottom-nav-item__indicator__active--background: #1d4ed8;
+    --c2-bottom-nav-item__badge--box-shadow: 0 0 0 2px #1e3a8a;
+  }
+</style>
+<c2-bottom-nav class="brand" value="home">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house><c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray><c2-phosphor-tray slot="current-icon" weight="fill"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user><c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>
+```
+
+</GalleryGrid>

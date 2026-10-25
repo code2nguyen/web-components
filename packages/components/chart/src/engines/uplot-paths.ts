@@ -32,6 +32,22 @@ export function linePaths(curve: ChartCurve): Series.PathBuilder | undefined {
   return builder
 }
 
+const steppedCache = new Map<number, Series.PathBuilder | undefined>()
+
+/**
+ * A stepped path that holds each value until the next point (`align: 1`, what `curve="step"` draws) or takes each
+ * point's value back to the previous one (`align: -1`). The depth chart needs both: asks accumulate left to right and
+ * bids right to left. Memoised and read synchronously, as {@link linePaths} is.
+ */
+export function steppedPaths(align: 1 | -1): Series.PathBuilder | undefined {
+  if (steppedCache.has(align)) return steppedCache.get(align)
+  const paths = loadedUplot()?.paths
+  if (!paths) return undefined
+  const builder = paths.stepped?.({ align })
+  steppedCache.set(align, builder)
+  return builder
+}
+
 /**
  * Applies an alpha to a resolved colour, for the fill under an area series.
  *

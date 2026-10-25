@@ -1,0 +1,72 @@
+---
+/** A simulated live order book for the depth chart documentation, and the readout of a picked price. */
+---
+
+<script>
+  import '@c2n/components/button'
+
+  type Level = [number, number]
+  interface DepthElement extends HTMLElement {
+    bids?: Level[]
+    asks?: Level[]
+  }
+  interface PriceSelect {
+    price: number
+    side: 'bid' | 'ask'
+    cumulative: number
+    averagePrice: number
+  }
+
+  const price = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+  const size = new Intl.NumberFormat('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
+
+  /** One tick of a made-up feed: the touch moves a little and the sizes near it change, as a busy book does. */
+  function tick(bids: Level[], asks: Level[]): { bids: Level[]; asks: Level[] } {
+    const drift = Math.round((Math.random() - 0.5) * 6) / 2
+    const bestBid = bids[0][0] + drift
+    const bestAsk = Math.max(bestBid + 0.5, asks[0][0] + drift + (Math.random() < 0.3 ? 0.5 : 0))
+    const reshape = (levels: Level[], best: number, direction: 1 | -1): Level[] => {
+      const kept = levels.filter(([at]) => (direction < 0 ? at <= best : at >= best))
+      if (kept.length === 0 || kept[0][0] !== best) kept.unshift([best, Math.round((0.05 + Math.random() * 0.8) * 1000) / 1000])
+      return kept.map(([at, amount], index) => {
+        if (index > 12 || Math.random() > 0.35) return [at, amount]
+        return [at, Math.max(0.01, Math.round(amount * (0.6 + Math.random() * 0.9) * 1000) / 1000)]
+      })
+    }
+    return { bids: reshape(bids, bestBid, -1), asks: reshape(asks, bestAsk, 1) }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-depth-live]').forEach((demo) => {
+    const chart = demo.querySelector<DepthElement>('c2-depth-chart')
+    const button = demo.querySelector<HTMLElement>('c2-button')
+    const status = demo.querySelector<HTMLElement>('[data-depth-status]')
+    if (!chart || !button || !status) return
+    let timer: ReturnType<typeof setInterval> | undefined
+
+    const stop = () => {
+      clearInterval(timer)
+      timer = undefined
+      button.textContent = 'Resume feed'
+    }
+    const start = () => {
+      timer = setInterval(() => {
+        if (document.hidden || !chart.bids || !chart.asks) return
+        const next = tick(chart.bids, chart.asks)
+        // A new book is a data-only update: the chart redraws without rebuilding.
+        chart.bids = next.bids
+        chart.asks = next.asks
+      }, 800)
+      button.textContent = 'Pause feed'
+    }
+
+    void customElements.whenDefined('c2-depth-chart').then(() => {
+      button.addEventListener('click', () => (timer ? stop() : start()))
+      chart.addEventListener('price-select', (event) => {
+        const { price: at, side, cumulative, averagePrice } = (event as CustomEvent<PriceSelect>).detail
+        status.textContent = `price-select · ${side} ${price.format(at)} · ${size.format(cumulative)} BTC · avg fill ${price.format(averagePrice)}`
+      })
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) start()
+      else stop()
+    })
+  })
+</script>

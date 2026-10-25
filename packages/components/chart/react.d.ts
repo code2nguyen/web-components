@@ -22,6 +22,7 @@ import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { ChordChart } from '@c2n/chart/chord-chart.js'
+import type { DepthChart } from '@c2n/chart/depth-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
@@ -31,6 +32,7 @@ import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
+import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
@@ -140,6 +142,25 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: ChordChart['series'] | string
         annotations?: ChordChart['annotations'] | string
+      }
+      'c2-depth-chart': Omit<C2Props<DepthChart>, 'bids' | 'asks' | 'series' | 'annotations'> & {
+        'base-label'?: Attribute
+        'quote-label'?: Attribute
+        'price-precision'?: Attribute
+        'size-precision'?: Attribute
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        bids?: DepthChart['bids'] | string
+        asks?: DepthChart['asks'] | string
+        series?: DepthChart['series'] | string
+        annotations?: DepthChart['annotations'] | string
       }
       'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series' | 'annotations'> & {
         'start-angle'?: Attribute
@@ -294,6 +315,23 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: RadarChart['series'] | string
         annotations?: RadarChart['annotations'] | string
+      }
+      'c2-sankey-chart': Omit<C2Props<SankeyChart>, 'nodes' | 'series' | 'annotations'> & {
+        'source-field'?: Attribute
+        'target-field'?: Attribute
+        'value-field'?: Attribute
+        'node-align'?: Attribute
+        'link-color'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        nodes?: SankeyChart['nodes'] | string
+        series?: SankeyChart['series'] | string
+        annotations?: SankeyChart['annotations'] | string
       }
       'c2-scatter-chart': Omit<C2Props<ScatterChart>, 'series' | 'annotations'> & {
         'symbol-size'?: Attribute

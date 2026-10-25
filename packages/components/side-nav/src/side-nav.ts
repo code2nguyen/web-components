@@ -6,7 +6,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './side-nav.scss?inline'
 import { BreakpointsObserver } from '@c2n/core/controllers/breakpoints-observer.js'
-import { Breakpoints, smartFixedPosition } from '@c2n/core/dom-helper.js'
+import { Breakpoints } from '@c2n/core/dom-helper.js'
+import { DrawerController } from '@c2n/core/controllers/drawer-controller.js'
 
 export type DisplayMode = 'over' | 'side'
 export type SideNavPosition = 'start' | 'end'
@@ -17,16 +18,6 @@ export interface OpenedChangeEventDetail {
 }
 
 const BREAKPOINT_QUERIES = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Desktop]
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-// Whether the last user input was a key press rather than a pointer. WebKit shows `:focus-visible` on any scripted
-// focus, so moving focus to the first drawer link after a tap drew a keyboard ring on it; a pointer opening focuses the
-// drawer panel instead, which still traps focus and puts Tab on the first link.
-let keyboardModality = false
-if (!isServer) {
-  document.addEventListener('keydown', (event) => (keyboardModality = !event.metaKey && !event.altKey && !event.ctrlKey), true)
-  document.addEventListener('pointerdown', () => (keyboardModality = false), true)
-}
 
 /** Events fired by {@link SideNav}, keyed for `addEventListener`. */
 export interface SideNavEventMap {
@@ -131,8 +122,12 @@ export class SideNav extends LitElement {
 
   /** The state the user wants in `side` mode, restored when the viewport grows back. */
   private preferredOpened = false
-  private previouslyFocused: Element | null = null
-  private scrollLocked = false
+
+  private drawerController = new DrawerController(this, {
+    panel: () => this.drawer,
+    slots: () => [this.renderRoot.querySelector<HTMLSlotElement>('slot[name="side-nav-content"]')],
+    onEscape: () => this.setOpened(false, true),
+  })
 
   private breakpointsController = new BreakpointsObserver(this, BREAKPOINT_QUERIES, (isInitial) => this.handleBreakpoint(isInitial))
 
@@ -151,12 +146,6 @@ export class SideNav extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback()
     this.preferredOpened = this.opened
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback()
-    window.removeEventListener('keydown', this.handleKeydown)
-    this.lockScroll(false)
   }
 
   private collapsesAt(breakpoint: SideNavBreakpoint): boolean {
@@ -209,13 +198,6 @@ export class SideNav extends LitElement {
     this.setOpened(false, true)
   }
 
-  private handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.opened && this.mode === 'over') {
-      event.preventDefault()
-      this.setOpened(false, true)
-    }
-  }
-
   /** Click delegation for `[side-nav-toggle]` elements anywhere in the light DOM (drawer or content). */
   private handleToggleClick(event: Event) {
     const path = event.composedPath()
@@ -226,48 +208,6 @@ export class SideNav extends LitElement {
     const owner = path.slice(triggerIndex + 1).find((node) => node instanceof Element && node.localName === this.localName)
     if (owner !== this) return
     this.toggle()
-  }
-
-  private lockScroll(lock: boolean) {
-    if (lock === this.scrollLocked) return
-    // Only lock the page when the overlay really covers the viewport (not when it is kept inside a positioned parent).
-    if (lock && (isServer || getComputedStyle(this.drawer).position !== 'fixed')) return
-    this.scrollLocked = lock
-    smartFixedPosition(lock)
-  }
-
-  private syncOverlayState() {
-    const overlayOpen = this.opened && this.mode === 'over'
-    window.removeEventListener('keydown', this.handleKeydown)
-    if (overlayOpen) {
-      window.addEventListener('keydown', this.handleKeydown)
-      this.lockScroll(true)
-      this.previouslyFocused = document.activeElement
-      this.focusDrawer()
-    } else {
-      this.lockScroll(false)
-      const focused = document.activeElement
-      if (focused && this.previouslyFocused instanceof HTMLElement && (focused === this || this.contains(focused))) {
-        this.previouslyFocused.focus()
-      }
-      this.previouslyFocused = null
-    }
-  }
-
-  private focusDrawer() {
-    if (!keyboardModality) {
-      this.drawer.focus({ preventScroll: true })
-      return
-    }
-    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="side-nav-content"]')
-    for (const element of slot?.assignedElements({ flatten: true }) ?? []) {
-      const target = element.matches(FOCUSABLE) ? element : element.querySelector(FOCUSABLE)
-      if (target instanceof HTMLElement) {
-        target.focus()
-        return
-      }
-    }
-    this.drawer.focus()
   }
 
   /** In side mode a collapsed drawer with a non-zero closed width is a rail and must stay interactive. */
@@ -287,7 +227,7 @@ export class SideNav extends LitElement {
     if (changed.has('opened') || changed.has('breakpoint') || changed.has('desktopMode') || changed.has('tabletMode')) {
       const wasOverlayOpen = changed.has('opened') ? (changed.get('opened') as boolean | undefined) && this.mode === 'over' : undefined
       const isOverlayOpen = this.opened && this.mode === 'over'
-      if (wasOverlayOpen !== isOverlayOpen || changed.has('breakpoint')) this.syncOverlayState()
+      if (wasOverlayOpen !== isOverlayOpen || changed.has('breakpoint')) this.drawerController.sync(isOverlayOpen)
     }
   }
 

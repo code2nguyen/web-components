@@ -145,3 +145,21 @@ test('a delete button inside a row handles its own click and Enter without selec
   await option(page, 'Banana').click()
   await expect(host).toHaveJSProperty('value', ['b'])
 })
+
+test('a row may sit inside a wrapper, with whitespace around it or a wrapper inside the wrapper', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-list aria-label="Fruit">
+  <div>
+    <c2-list-item value="a">Apple</c2-list-item>
+  </div>
+  <div><span> <c2-list-item value="b">Banana</c2-list-item> </span></div>
+  <div><c2-list aria-label="Inner"><c2-list-item value="x">Inner row</c2-list-item></c2-list></div>
+</c2-list>`)
+  const outer = page.locator('c2-list[aria-label="Fruit"]')
+  // The inner list's row belongs to the inner list, not to the row wrapper around it.
+  await expect.poll(() => outer.evaluate((list) => (list as HTMLElement & { items: { value: string }[] }).items.map((item) => item.value))).toEqual(['a', 'b'])
+  await option(page, 'Apple').click()
+  await page.keyboard.press('ArrowDown')
+  await expect(option(page, 'Banana')).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(outer).toHaveJSProperty('value', ['b'])
+})

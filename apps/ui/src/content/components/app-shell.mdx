@@ -1,0 +1,183 @@
+---
+title: 'App Shell'
+description: 'The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { AppShell, AppShellToggle } from '@c2n/components/app-shell'
+import { Header } from '@c2n/components/header'
+import { List } from '@c2n/components/list'
+import { ListItem } from '@c2n/components/list-item'
+import { Badge } from '@c2n/components/badge'
+import { Button } from '@c2n/components/button'
+import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
+import { FeatherLayersIcon as FeatherLayers } from '@c2n/feather-icons/icons/layers.js'
+import { FeatherUsersIcon as FeatherUsers } from '@c2n/feather-icons/icons/users.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+`c2-app-shell` lays out a whole application: a `banner` strip, the `header` (usually a `c2-header`), a `navigation` with its own `navigation-header` and `navigation-footer`, the main content in the default slot, an `aside` details panel and a `footer`. Each region is rendered in its own landmark, and a skip link to main comes first in the tab order.
+
+The layout follows the shell's **own width**, not the window's, so each frame below behaves like the device its width matches: the docs column is tablet-sized, so the first frame sets `tablet-mode="side"` to show a side navigation. Below 600px the navigation is a modal drawer (`over`); `tablet-mode` (600 to 959px, `rail` by default) and `desktop-mode` (960px and up, `side` by default) choose between `side`, which pushes main, `rail`, which collapses to its icons, and `over`. The aside is a column from 960px and a sheet from the end edge below. Put a `c2-app-shell-toggle` anywhere inside the shell, including in the slotted `c2-header`, to open and close the navigation; `for="aside"` does the same for the aside. A drawer traps focus, closes on Escape and on a click outside, and gives focus back to the toggle; with `close-on-navigate` a link in the drawer closes it too.
+
+`layout="navigation-first"` runs the navigation the full height with the header beside it, the arrangement of Linear or Stripe. Hide item labels in a collapsed rail with `c2-app-shell:state(rail):not(:state(navigation-opened)) .label { display: none }`. When the page scrolls (default) the header sticks; `scrolling="main"` gives the shell `--c2-app-shell--height` and scrolls only main. Either way `--c2-app-shell--sticky-offset` tells sticky content such as a `c2-page-header` where the header ends.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/app-shell'
+```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
+
+## Usage
+
+The frames are fixed-size containers with `scrolling="main"` and `--c2-app-shell__over--position: absolute`, so the drawer stays inside them; in an app the shell fills the page and the drawer covers the viewport.
+
+```html tag=UsageBlock,package=@c2n/app-shell
+<style>
+  .shell-frame {
+    width: 100%;
+    max-width: 980px;
+    height: 360px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--c2-theme--color-surface, #ffffff);
+    font-size: 14px;
+  }
+  .shell-frame.tablet {
+    max-width: 720px;
+  }
+  .shell-frame.phone {
+    max-width: 380px;
+  }
+  .demo-shell {
+    --c2-app-shell--height: 100%;
+    --c2-app-shell__over--position: absolute;
+    --c2-app-shell__navigation--width: 208px;
+    --c2-app-shell__aside--width: 260px;
+    --c2-app-shell__navigation--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-app-shell__divider--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .demo-shell:state(rail):not(:state(navigation-opened)) .label {
+    display: none;
+  }
+  .demo-header {
+    --c2-header--min-height: 52px;
+    --c2-header--padding: 6px 12px;
+    --c2-header--gap: 12px;
+    --c2-header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .brand {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .demo-nav {
+    --c2-list--background: transparent;
+    --c2-list--padding-left: 0px;
+    --c2-list--padding-right: 0px;
+    --c2-list-item--padding-left: 12px;
+    --c2-list-item--padding-right: 12px;
+  }
+  .workspace {
+    margin: 4px 4px 0;
+    font-weight: 600;
+  }
+  .page {
+    padding: 20px 24px;
+  }
+  .page-title {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .page p {
+    margin: 0 0 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .details {
+    padding: 16px;
+  }
+  .details-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+</style>
+<div data-label="Header first · side">
+  <div class="shell-frame">
+    <c2-app-shell class="demo-shell" scrolling="main" tablet-mode="side" aside-label="Payout details" close-on-navigate>
+      <c2-header slot="header" class="demo-header">
+        <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
+        <a slot="brand" class="brand" href="#usage">Ledgerline</a>
+        <c2-badge slot="actions" tone="warning">Test mode</c2-badge>
+      </c2-header>
+      <c2-list slot="navigation" class="demo-nav" aria-label="Sections">
+        <c2-list-item href="#usage"><c2-feather-home slot="prefix-icon"></c2-feather-home><span class="label">Overview</span></c2-list-item>
+        <c2-list-item href="#usage" selected><c2-feather-layers slot="prefix-icon"></c2-feather-layers><span class="label">Batches</span></c2-list-item>
+        <c2-list-item href="#usage"><c2-feather-users slot="prefix-icon"></c2-feather-users><span class="label">Beneficiaries</span></c2-list-item>
+      </c2-list>
+      <c2-list slot="navigation-footer" class="demo-nav" aria-label="Account">
+        <c2-list-item href="#usage"><c2-feather-settings slot="prefix-icon"></c2-feather-settings><span class="label">Settings</span></c2-list-item>
+      </c2-list>
+      <div class="page">
+        <strong class="page-title">Batches</strong>
+        <p>Two batches wait for approval before the 15:30 CET SEPA cut-off.</p>
+        <c2-button app-shell-toggle="aside">Show details</c2-button>
+      </div>
+      <section slot="aside" class="details">
+        <div class="details-head">B-0412 <c2-app-shell-toggle for="aside"></c2-app-shell-toggle></div>
+        <p>12 payouts · €1,284,300.00</p>
+      </section>
+    </c2-app-shell>
+  </div>
+</div>
+<div data-label="Navigation first · rail">
+  <div class="shell-frame tablet">
+    <c2-app-shell class="demo-shell" layout="navigation-first" scrolling="main">
+      <c2-header slot="header" class="demo-header">
+        <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
+        <strong slot="brand">Batches</strong>
+      </c2-header>
+      <div slot="navigation-header" class="workspace"><span class="label">Acme EU</span></div>
+      <c2-list slot="navigation" class="demo-nav" aria-label="Sections">
+        <c2-list-item href="#usage"><c2-feather-home slot="prefix-icon"></c2-feather-home><span class="label">Overview</span></c2-list-item>
+        <c2-list-item href="#usage" selected><c2-feather-layers slot="prefix-icon"></c2-feather-layers><span class="label">Batches</span></c2-list-item>
+        <c2-list-item href="#usage"><c2-feather-users slot="prefix-icon"></c2-feather-users><span class="label">Beneficiaries</span></c2-list-item>
+      </c2-list>
+      <div class="page">
+        <strong class="page-title">Batches</strong>
+        <p>At this width the navigation is a rail: its icons stay, the toggle expands it.</p>
+      </div>
+    </c2-app-shell>
+  </div>
+</div>
+<div data-label="Phone · drawer">
+  <div class="shell-frame phone">
+    <c2-app-shell class="demo-shell" scrolling="main" close-on-navigate>
+      <c2-header slot="header" class="demo-header">
+        <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
+        <a slot="brand" class="brand" href="#usage">Ledgerline</a>
+      </c2-header>
+      <c2-list slot="navigation" class="demo-nav" aria-label="Sections">
+        <c2-list-item href="#usage"><c2-feather-home slot="prefix-icon"></c2-feather-home><span class="label">Overview</span></c2-list-item>
+        <c2-list-item href="#usage" selected><c2-feather-layers slot="prefix-icon"></c2-feather-layers><span class="label">Batches</span></c2-list-item>
+      </c2-list>
+      <div class="page">
+        <strong class="page-title">Batches</strong>
+        <p>Below 600px the navigation is a drawer over the page.</p>
+      </div>
+    </c2-app-shell>
+  </div>
+</div>
+```
+
+Pair the shell with `c2-page-header` at the top of main for the page's title, status and actions. `c2-side-nav` remains the lighter choice when a page only needs one drawer beside its content.

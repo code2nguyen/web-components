@@ -45,38 +45,33 @@ Domain patterns with no design-system home come from the products that made them
 
 ### A. Forms and input
 
-| #   | Component             | What it adds                                                                                        | Real-world model                                                                | Priority | Decision |
-| --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------- |
-| 5   | `c2-choice-card`      | Card-sized radio or checkbox for plan, shipping or payment choices                                  | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
-| 12  | `c2-month-picker`     | Month or year granularity (billing periods, card expiry)                                            | Mantine MonthPicker / YearPicker                                                | P2       | Proposed |
-| 13  | `c2-tree-select`      | Select from a hierarchy, single or multiple                                                         | antd TreeSelect, Mantine TreeSelect, PrimeVue treeselect                        | P2       | Proposed |
-| 14  | `c2-transfer-list`    | Move items between two lists (roles, permissions)                                                   | antd Transfer, PrimeVue PickList                                                | P3       | Proposed |
-| 15  | `c2-mention-input`    | `@user` and `#tag` suggestions inside text                                                          | antd Mentions; Slack, GitHub                                                    | P2       | Proposed |
-| 17  | `c2-rich-text-editor` | Compact formatted-text field for comments and emails (`c2-page-editor` stays the full block editor) | PrimeVue Editor, Mantine Tiptap; Gmail, Linear comments                         | P2       | Proposed |
-| 18  | `c2-image-cropper`    | Crop, zoom and rotate before upload (avatars, logos)                                                | Ark image cropper                                                               | P2       | Proposed |
-| 19  | `c2-signature-pad`    | Draw a signature, export SVG or PNG                                                                 | Ark signature pad; DocuSign                                                     | P3       | Proposed |
-| 20  | `c2-angle-slider`     | Circular knob for angles and dials                                                                  | Ark/Mantine angle slider, PrimeVue Knob                                         | P3       | Proposed |
-| 21  | `c2-emoji-picker`     | Searchable emoji grid with skin tones and recents                                                   | Slack, GitHub, Discord                                                          | P2       | Proposed |
-| 22  | `c2-cron-input`       | Build a recurring schedule, output a cron expression                                                | Vercel cron jobs, GitHub Actions schedules                                      | P3       | Proposed |
-| 23  | `c2-duration-input`   | Accepts "1h 30m" and "90m", stores seconds                                                          | Jira time tracking, Toggl                                                       | P3       | Proposed |
-| 24  | `c2-secret-field`     | Masked secret with reveal, copy and regenerate                                                      | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
-| 25  | `c2-card-input`       | Card number, expiry and CVC with brand detection and Luhn check                                     | Stripe Elements card field                                                      | P2       | Proposed |
+| #   | Component           | What it adds                                                       | Real-world model                                                                | Priority | Decision |
+| --- | ------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------- | -------- | -------- |
+| 5   | `c2-choice-card`    | Card-sized radio or checkbox for plan, shipping or payment choices | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
+| 12  | `c2-month-picker`   | Month or year granularity (billing periods, card expiry)           | Mantine MonthPicker / YearPicker                                                | P2       | Proposed |
+| 14  | `c2-transfer-list`  | Move items between two lists (roles, permissions)                  | antd Transfer, PrimeVue PickList                                                | P3       | Proposed |
+| 15  | `c2-mention-input`  | `@user` and `#tag` suggestions inside text                         | antd Mentions; Slack, GitHub                                                    | P2       | Proposed |
+| 19  | `c2-signature-pad`  | Draw a signature, export SVG or PNG                                | Ark signature pad; DocuSign                                                     | P3       | Proposed |
+| 20  | `c2-angle-slider`   | Circular knob for angles and dials                                 | Ark/Mantine angle slider, PrimeVue Knob                                         | P3       | Proposed |
+| 21  | `c2-emoji-picker`   | Searchable emoji grid with skin tones and recents                  | Slack, GitHub, Discord                                                          | P2       | Proposed |
+| 22  | `c2-cron-input`     | Build a recurring schedule, output a cron expression               | Vercel cron jobs, GitHub Actions schedules                                      | P3       | Proposed |
+| 23  | `c2-duration-input` | Accepts "1h 30m" and "90m", stores seconds                         | Jira time tracking, Toggl                                                       | P3       | Proposed |
+| 24  | `c2-secret-field`   | Masked secret with reveal, copy and regenerate                     | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
+| 25  | `c2-card-input`     | Card number, expiry and CVC with brand detection and Luhn check    | Stripe Elements card field                                                      | P2       | Proposed |
 
 ### B. Data display
 
-| #   | Component           | What it adds                                                        | Real-world model                                                                 | Priority | Decision |
-| --- | ------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- | -------- |
-| 28  | `c2-status-light`   | Coloured dot plus label for states such as Live, Failed or Building | Spectrum status light, Carbon shape indicator, Chakra Status; Vercel deployments | P1       | Proposed |
-| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota)    | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar                    | P2       | Proposed |
-| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes               | Ark timer, antd Statistic.Countdown                                              | P2       | Proposed |
-| 37  | `c2-rolling-number` | Digits that roll when a value changes                               | Mantine RollingNumber; Robinhood tickers                                         | P3       | Proposed |
-| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip    | PrimeVue Galleria, antd Image preview group                                      | P2       | Proposed |
-| 43  | `c2-image-compare`  | Before/after slider                                                 | Web Awesome comparison, PrimeVue ImageCompare                                    | P3       | Proposed |
-| 44  | `c2-video-player`   | Themed controls, captions, chapters                                 | Loom, YouTube                                                                    | P3       | Proposed |
-| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                    | Slack clips, WhatsApp voice notes                                                | P3       | Proposed |
-| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                              | DocuSign, Gmail attachment preview                                               | P3       | Proposed |
-| 47  | `c2-org-chart`      | Hierarchy as connected cards that expand and collapse               | PrimeVue OrganizationChart; Rippling, BambooHR                                   | P3       | Proposed |
-| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                         | Chakra, Mantine and Ark marquee; stock ticker tapes                              | P3       | Proposed |
+| #   | Component           | What it adds                                                     | Real-world model                                              | Priority | Decision |
+| --- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
+| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota) | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar | P2       | Proposed |
+| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes            | Ark timer, antd Statistic.Countdown                           | P2       | Proposed |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers                      | P3       | Proposed |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group                   | P2       | Proposed |
+| 43  | `c2-image-compare`  | Before/after slider                                              | Web Awesome comparison, PrimeVue ImageCompare                 | P3       | Proposed |
+| 44  | `c2-video-player`   | Themed controls, captions, chapters                              | Loom, YouTube                                                 | P3       | Proposed |
+| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                 | Slack clips, WhatsApp voice notes                             | P3       | Proposed |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview                            | P3       | Proposed |
+| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                      | Chakra, Mantine and Ark marquee; stock ticker tapes           | P3       | Proposed |
 
 ### C. Charts
 
@@ -86,41 +81,34 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 | --- | -------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
 | 51  | `c2-treemap-chart`   | Nested rectangles sized by value                     | Finviz market map, disk-usage tools            | P2       | Proposed |
 | 52  | `c2-waterfall-chart` | Running total bridged by positive and negative steps | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
-| 53  | `c2-sankey-chart`    | Flows between stages                                 | Money-flow and user-journey reports            | P3       | Proposed |
 | 54  | `c2-boxplot-chart`   | Distribution summary (median, quartiles, outliers)   | Datadog and Grafana latency views              | P3       | Proposed |
 | 55  | `c2-bullet-chart`    | One measure against a target and qualitative bands   | KPI scorecards                                 | P3       | Proposed |
-| 56  | `c2-depth-chart`     | Cumulative bid and ask volume around the mid price   | Binance, Coinbase Advanced                     | P3       | Proposed |
 
 ### D. Navigation and layout
 
 | #   | Component              | What it adds                                                                                              | Real-world model                                                   | Priority | Decision                                                                                         |
 | --- | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------ |
-| 57  | `c2-app-shell`         | Header, sidebar, main and aside regions with responsive collapse (composes `c2-header` and `c2-side-nav`) | Mantine AppShell, Vaadin AppLayout, Carbon UI shell, Polaris Frame | P1       | Proposed                                                                                         |
-| 58  | `c2-page-header`       | Title, breadcrumbs, metadata, primary actions and tabs                                                    | Carbon page header, Polaris Page                                   | P1       | Proposed                                                                                         |
+| 57  | `c2-app-shell`         | Header, sidebar, main and aside regions with responsive collapse (composes `c2-header` and `c2-side-nav`) | Mantine AppShell, Vaadin AppLayout, Carbon UI shell, Polaris Frame | P1       | Accept: [spec 016](specs/016-app-shell/spec.md)                                                  |
+| 58  | `c2-page-header`       | Title, breadcrumbs, metadata, primary actions and tabs                                                    | Carbon page header, Polaris Page                                   | P1       | Accept: [spec 016](specs/016-app-shell/spec.md)                                                  |
 | 59  | `c2-toolbar`           | Roving-focus container for button groups, selects and separators                                          | PrimeVue Toolbar, WAI-ARIA toolbar pattern                         | P1       | Reject: covered by `c2-button-group toolbar` (role, one Tab stop, arrow keys across any control) |
-| 61  | `c2-menubar`           | Desktop-style File / Edit / View menus with keyboard navigation                                           | Mantine Menubar, PrimeVue Menubar; Figma, VS Code for the Web      | P2       | Proposed                                                                                         |
-| 62  | `c2-overflow-list`     | Shows the items that fit and moves the rest into a "More" menu                                            | Mantine OverflowList, Carbon overflow menu                         | P2       | Proposed                                                                                         |
 | 63  | `c2-table-of-contents` | Heading links with scroll-spy                                                                             | antd Anchor, Mantine TableOfContents, Ark TOC                      | P2       | Proposed                                                                                         |
 | 64  | `c2-scroll-area`       | Themed scrollbars and edge shadows                                                                        | Mantine, Chakra and PrimeVue ScrollArea                            | P2       | Proposed                                                                                         |
-| 66  | `c2-bottom-nav`        | Mobile tab bar with icons and badges                                                                      | Material navigation bar, iOS tab bar                               | P2       | Proposed                                                                                         |
-| 67  | `c2-float-button`      | Floating action button that expands into a speed dial                                                     | antd FloatButton, Material FAB, PrimeVue SpeedDial                 | P2       | Proposed                                                                                         |
 | 68  | `c2-sticky`            | Pins content once it scrolls to an offset and reports its stuck state                                     | antd Affix, Polaris Sticky                                         | P3       | Proposed                                                                                         |
-| 69  | `c2-master-detail`     | List and detail side by side, stacked with a back step on mobile                                          | Vaadin MasterDetailLayout; Gmail, Outlook                          | P2       | Proposed                                                                                         |
+| 69  | `c2-master-detail`     | List and detail side by side, stacked with a back step on mobile                                          | Vaadin MasterDetailLayout; Gmail, Outlook                          | P2       | Accepted, implemented ([spec](specs/017-master-detail/spec.md))                                  |
 | 70  | `c2-swipe-actions`     | Swipe a list row to reveal actions                                                                        | iOS Mail, Gmail mobile                                             | P3       | Proposed                                                                                         |
 
 ### E. Overlays and feedback
 
 These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which already exist.
 
-| #   | Component                | What it adds                                                               | Real-world model                                                      | Priority | Decision |
-| --- | ------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------- | -------- |
-| 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                            | P2       | Proposed |
-| 74  | `c2-tour`                | Step-by-step onboarding with spotlight, anchored steps and progress        | antd Tour, Ark tour, Carbon and Spectrum coachmark; Intercom, Appcues | P2       | Proposed |
-| 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications         | P2       | Proposed |
-| 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                              | P2       | Proposed |
-| 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps                       | P2       | Proposed |
-| 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings             | P2       | Proposed |
-| 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                        | P3       | Proposed |
+| #   | Component                | What it adds                                                               | Real-world model                                              | Priority | Decision |
+| --- | ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
+| 73  | `c2-toggletip`           | Click-to-open help bubble that can hold links (a tooltip cannot)           | Carbon toggletip, Spectrum contextual help                    | P2       | Proposed |
+| 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications | P2       | Proposed |
+| 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                      | P2       | Proposed |
+| 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps               | P2       | Proposed |
+| 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings     | P2       | Proposed |
+| 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                | P3       | Proposed |
 
 ### F. Collaboration
 
@@ -135,14 +123,14 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 ### G. Business apps
 
-| #   | Component             | What it adds                                                                           | Real-world model                                | Priority | Decision |
-| --- | --------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
-| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                           | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
-| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                         | Calendly, Cal.com                               | P2       | Proposed |
-| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                            | Google Drive, Dropbox                           | P2       | Proposed |
-| 90  | `c2-order-book`       | Live bids and asks with depth bars and grouping                                        | Binance, Coinbase Advanced                      | P2       | Proposed |
-| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                          | XMind, Miro mind map                            | P3       | Proposed |
-| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only) | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
+| #   | Component             | What it adds                                                                                                                                                                                                                                                                           | Real-world model                                | Priority | Decision |
+| --- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------- | -------- |
+| 87  | `c2-scheduler`        | Resources × time with drag-to-create and drag-to-move events                                                                                                                                                                                                                           | Google Calendar, FullCalendar resource timeline | P2       | Proposed |
+| 88  | `c2-time-slot-picker` | Pick an available slot from someone's calendar                                                                                                                                                                                                                                         | Calendly, Cal.com                               | P2       | Proposed |
+| 89  | `c2-file-browser`     | Folder tree, grid and list views, breadcrumbs, multi-select                                                                                                                                                                                                                            | Google Drive, Dropbox                           | P2       | Proposed |
+| 90  | `c2-order-book`       | Live bids and asks with depth bars, price grouping and spread row. Keeps the book from an exchange diff feed (size 0 deletes a level), the state `c2-depth-chart` leaves to the app since it draws snapshots; sums with the chart's `depth-model.ts` and fires the same `price-select` | Binance, Coinbase Advanced, Kraken Pro          | P2       | Proposed |
+| 92  | `c2-mind-map`         | Auto-laid-out idea tree with keyboard editing                                                                                                                                                                                                                                          | XMind, Miro mind map                            | P3       | Proposed |
+| 93  | `c2-terminal`         | Interactive prompt with history and command handlers (`c2-log-viewer` stays read-only)                                                                                                                                                                                                 | PrimeVue Terminal; Replit, Vercel               | P3       | Proposed |
 
 ### H. AI interfaces
 

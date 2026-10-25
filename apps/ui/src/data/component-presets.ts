@@ -105,6 +105,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-bottom-nav': {
+    html: `<c2-bottom-nav value="home" style="width:380px;max-width:100%;--c2-bottom-nav--position:relative"><c2-bottom-nav-item value="home" label="Home"></c2-bottom-nav-item><c2-bottom-nav-item value="search" label="Search"></c2-bottom-nav-item><c2-bottom-nav-item value="inbox" label="Inbox" count="4"></c2-bottom-nav-item><c2-bottom-nav-item value="profile" label="Profile" dot></c2-bottom-nav-item></c2-bottom-nav>`,
+    presets: [
+      {
+        name: 'Floating dock',
+        description: 'A rounded bar lifted off the screen edges with a soft shadow, as in iOS apps with a floating tab bar.',
+        css: {
+          '--c2-bottom-nav--margin': '0 12px 12px',
+          '--c2-bottom-nav--padding-bottom': '0px',
+          '--c2-bottom-nav--border-top': 'none',
+          '--c2-bottom-nav--border-radius': '28px',
+          '--c2-bottom-nav--box-shadow': '0 8px 24px rgb(15 20 30 / 0.14)',
+        },
+      },
+      {
+        name: 'Tint only',
+        description: 'No indicator shape: the current item is shown by its colour and filled icon, like the classic iOS tab bar.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__current--font-weight': '500',
+        },
+      },
+      {
+        name: 'Top line',
+        description: 'A short line on the top edge of the current item instead of an indicator fill.',
+        css: {
+          '--c2-bottom-nav-item__indicator__current--background': 'transparent',
+          '--c2-bottom-nav-item__line--height': '3px',
+          '--c2-bottom-nav-item__line--width': '40%',
+        },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [
@@ -176,6 +209,48 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-tree-item__selected--background': '#edf1fe',
           '--c2-tree-item__selected--color': '#2f56e6',
           '--c2-tree-item__toggle--size': '14px',
+        },
+      },
+    ],
+  },
+  'c2-org-chart': {
+    html: `<c2-org-chart aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"}]}]'></c2-org-chart>`,
+    presets: [
+      {
+        name: 'Soft cards',
+        description: 'Borderless, shadowed cards joined by lines with rounded corners.',
+        css: {
+          '--c2-org-chart__card--width': '168px',
+          '--c2-org-chart__card--border': '1px solid transparent',
+          '--c2-org-chart__card--border-radius': '14px',
+          '--c2-org-chart__card--box-shadow': '0 1px 2px rgba(24, 24, 27, 0.06), 0 4px 12px rgba(24, 24, 27, 0.06)',
+          '--c2-org-chart__connector--border-radius': '12px',
+          '--c2-org-chart__level--gap': '48px',
+        },
+      },
+      {
+        name: 'Stacked profiles',
+        description: 'Narrow cards with the avatar above a centred name, for a chart of people.',
+        css: {
+          '--c2-org-chart__card--width': '128px',
+          '--c2-org-chart__card--flex-direction': 'column',
+          '--c2-org-chart__card--text-align': 'center',
+          '--c2-org-chart__card--gap': '8px',
+          '--c2-org-chart__card--padding': '16px 8px 12px',
+          '--c2-org-chart__avatar--size': '48px',
+        },
+      },
+      {
+        name: 'Compact outline',
+        description: 'Pill-shaped text-only cards and dashed lines, for a dense team map.',
+        css: {
+          '--c2-org-chart__avatar--display': 'none',
+          '--c2-org-chart__card--width': 'auto',
+          '--c2-org-chart__card--padding': '4px 10px',
+          '--c2-org-chart__card--border-radius': '999px',
+          '--c2-org-chart__connector--border-style': 'dashed',
+          '--c2-org-chart__level--gap': '32px',
+          '--c2-org-chart__sibling--gap': '8px',
         },
       },
     ],
@@ -354,6 +429,49 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-autocomplete__option--padding-bottom': '5px',
           '--c2-autocomplete__option--padding-left': '8px',
           '--c2-autocomplete__description--font-size': '11px',
+        },
+      },
+    ],
+  },
+  'c2-save-bar': {
+    html: `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:520px;max-width:100%;height:112px;padding-bottom:16px;box-sizing:border-box"><c2-save-bar open></c2-save-bar></div>`,
+    presets: [
+      {
+        name: 'Inverse',
+        description: 'A dark bar with a light Save button that stands apart from a light settings page, as in Shopify admin.',
+        css: {
+          '--c2-save-bar__container--background': '#18181b',
+          '--c2-save-bar__container--border': '1px solid #18181b',
+          '--c2-save-bar__message--color': '#fafafa',
+          '--c2-save-bar__indicator--size': '0px',
+          '--c2-save-bar__indicator--box-shadow': 'none',
+          '--c2-save-bar__discard--color': '#fafafa',
+          '--c2-save-bar__discard--border': '1px solid #3f3f46',
+          '--c2-save-bar__discard__hover--background-color': '#27272a',
+          '--c2-save-bar__save--background-color': '#fafafa',
+          '--c2-save-bar__save--color': '#18181b',
+          '--c2-save-bar__save__hover--background-color': '#e4e4e7',
+        },
+      },
+      {
+        name: 'Full width',
+        description: 'A strip across the bottom of the page, the actions pushed to the far edge.',
+        css: {
+          '--c2-save-bar--inset-bottom': '0px',
+          '--c2-save-bar__container--width': '100%',
+          '--c2-save-bar__container--max-width': '100%',
+          '--c2-save-bar__container--border-radius': '0',
+          '--c2-save-bar__container--justify-content': 'space-between',
+          '--c2-save-bar__container--padding': '10px 16px',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded surface and buttons.',
+        css: {
+          '--c2-save-bar__container--border-radius': '999px',
+          '--c2-save-bar__container--padding': '5px 5px 5px 18px',
+          '--c2-save-bar__button--border-radius': '999px',
         },
       },
     ],
@@ -662,6 +780,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-relative-time--font-size': '12px',
         },
         attributes: { format: 'narrow' },
+      },
+    ],
+  },
+  'c2-countdown': {
+    html: `<c2-countdown date="2030-01-01T00:00:00Z"></c2-countdown>`,
+    presets: [
+      {
+        name: 'Launch',
+        description: 'Large tinted segments with uppercase labels for a launch page',
+        css: {
+          '--c2-countdown__segment--min-width': '72px',
+          '--c2-countdown__segment--background-color': '#edf1fe',
+          '--c2-countdown__segment--border-radius': '14px',
+          '--c2-countdown__value--font-size': '36px',
+          '--c2-countdown__label--text-transform': 'uppercase',
+          '--c2-countdown__label--letter-spacing': '0.06em',
+          '--c2-countdown__value--animation-duration': '240ms',
+        },
+      },
+      {
+        name: 'Colons',
+        description: 'Separated hours, minutes and seconds',
+        css: {
+          '--c2-countdown__separator--display': 'inline',
+        },
+        attributes: { units: 'hours minutes seconds', format: 'short' },
+      },
+      {
+        name: 'Minimal',
+        description: 'Bare digits over short labels, no boxes',
+        css: {
+          '--c2-countdown__segment--background-color': 'transparent',
+          '--c2-countdown__segment--border': 'none',
+          '--c2-countdown__segment--padding': '0',
+          '--c2-countdown__value--font-weight': '500',
+        },
+        attributes: { format: 'short' },
       },
     ],
   },
@@ -1561,6 +1716,35 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-float-button': {
+    html: `<c2-float-button label="Create" open style="--c2-float-button--position:absolute"><c2-float-button-action label="Upload file" value="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></c2-float-button-action></c2-float-button>`,
+    presets: [
+      {
+        name: 'Rounded square',
+        description: 'Material-style tonal container with a 16px radius.',
+        css: {
+          '--c2-float-button__button--border-radius': '16px',
+          '--c2-float-button__button--background-color': '#dbe4ff',
+          '--c2-float-button__button__hover--background-color': '#c9d6ff',
+          '--c2-float-button__button__open--background-color': '#c9d6ff',
+          '--c2-float-button__button--color': '#1e3a8a',
+        },
+      },
+      {
+        name: 'Ink',
+        css: {
+          '--c2-float-button__button--background-color': '#18181b',
+          '--c2-float-button__button__hover--background-color': '#3f3f46',
+          '--c2-float-button__button__open--background-color': '#3f3f46',
+          '--c2-float-button__button--color': '#fafafa',
+        },
+      },
+      {
+        name: 'Small',
+        css: { '--c2-float-button__button--size': '40px', '--c2-float-button__button--padding-inline': '10px', '--c2-float-button__icon--size': '20px' },
+      },
+    ],
+  },
   'c2-icon-button': {
     html: `<c2-icon-button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>`,
     presets: [
@@ -1774,6 +1958,28 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         },
       },
       { name: 'Counter', attributes: { tone: 'danger', count: '120' } },
+    ],
+  },
+  'c2-status-light': {
+    html: `<c2-status-light tone="success">Live</c2-status-light>`,
+    presets: [
+      { name: 'Building', attributes: { tone: 'primary', pulse: '' } },
+      {
+        name: 'Subtle pill',
+        css: {
+          '--c2-status-light--background': 'light-dark(#dcfce7, #0f2e1b)',
+          '--c2-status-light--color': 'light-dark(#166534, #6fd596)',
+          '--c2-status-light--padding-left': '8px',
+          '--c2-status-light--padding-right': '10px',
+          '--c2-status-light--padding-top': '2px',
+          '--c2-status-light--padding-bottom': '2px',
+          '--c2-status-light--gap': '6px',
+          '--c2-status-light--font-size': '12px',
+          '--c2-status-light--font-weight': '500',
+          '--c2-status-light__dot--size': '6px',
+        },
+      },
+      { name: 'Square dot', css: { '--c2-status-light__dot--size': '10px', '--c2-status-light__dot--border-radius': '2px' } },
     ],
   },
   'c2-indicator': {
@@ -2531,6 +2737,26 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-code-viewer--border-bottom-right-radius': '6px',
           '--c2-code-viewer--background': '#fafafa',
         },
+      },
+    ],
+  },
+  'c2-master-detail': {
+    html: `<c2-master-detail open breakpoint="0" style="width: 300px; height: 140px; border: 1px solid #e4e4e7; border-radius: 8px"><div slot="master" style="padding: 10px; font-size: 12px">Ana Ruiz<br>Kenji Watanabe</div><div slot="detail" style="padding: 10px; font-size: 12px">Invoice 2041 charged twice</div></c2-master-detail>`,
+    presets: [
+      {
+        name: 'Narrow master',
+        description: 'A 120px master column with no divider line.',
+        css: { '--c2-master-detail__master--width': '120px', '--c2-master-detail__divider--border': 'none' },
+      },
+      {
+        name: 'Tinted master',
+        description: 'A grey master column, a white detail.',
+        css: { '--c2-master-detail__master--background': '#f4f4f5', '--c2-master-detail__divider--border': '1px solid #e4e4e7' },
+      },
+      {
+        name: 'Accent divider',
+        description: 'A 2px accent line between the panes.',
+        css: { '--c2-master-detail__divider--border': '2px solid rgb(2, 101, 220)' },
       },
     ],
   },

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>app-shell: toggle defined before the shell</title>
+    <script type="module">
+      // Only the toggle is defined while the static markup upgrades; the shell module loads afterwards.
+      import '../src/app-shell-toggle.ts'
+      document.documentElement.dataset.toggleReady = 'true'
+      window.loadShell = () => import('../src/app-shell.ts')
+    </script>
+  </head>
+  <body>
+    <c2-app-shell>
+      <div slot="header"><c2-app-shell-toggle></c2-app-shell-toggle></div>
+      <nav slot="navigation" aria-label="Sections">Links</nav>
+      <p>Page</p>
+    </c2-app-shell>
+  </body>
+</html>

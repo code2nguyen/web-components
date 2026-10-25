@@ -1,0 +1,122 @@
+---
+title: 'Sticky'
+description: 'Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Sticky } from '@c2n/components/sticky'
+import { Button } from '@c2n/components/button'
+
+`c2-sticky` keeps a toolbar, a row of tabs, a section heading or an action bar in view while the content around it scrolls. Stickiness itself is CSS `position: sticky`, so it costs nothing at rest; what the element adds is the **stuck state**: once content runs beneath it the host matches `:state(stuck)`, fires `stuck-change`, and its surface switches to the `__stuck--*` background and shadow, so a bar can sit flat on the page until it actually overlaps something. `edge="bottom"` pins it to the bottom edge instead. With `hide-on-scroll` it slides out of view while the reader scrolls down and comes back on the way up, or as soon as focus moves into it.
+
+The element sticks within its parent, and the nearest ancestor with `overflow` set is the box it sticks to, exactly as for any sticky box. Keep a distance from the edge with `--c2-sticky--offset` (the height of a sticky header above it, for instance), and switch pinning off under a breakpoint with `--c2-sticky--position: static`, which also switches the stuck state off. `c2-header` uses the same behaviour for its `sticky` mode.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/sticky'
+```
+
+## Usage
+
+Scroll inside each box.
+
+```html tag=UsageBlock,package=@c2n/sticky
+<style>
+  .sticky-scroller {
+    width: min(520px, 100%);
+    height: 240px;
+    overflow: auto;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .sticky-scroller p {
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .sticky-toolbar {
+    --c2-sticky__stuck--background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .sticky-toolbar .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .sticky-toolbar .bar strong {
+    margin-inline-end: auto;
+    font-size: 14px;
+  }
+</style>
+<div data-label="Toolbar that gains a surface once stuck">
+  <div class="sticky-scroller">
+    <p>Quarterly report. Scroll down: the toolbar below sits flat on the page until content runs beneath it.</p>
+    <c2-sticky class="sticky-toolbar">
+      <div class="bar"><strong>Q3 report</strong><c2-button>Share</c2-button><c2-button>Export</c2-button></div>
+    </c2-sticky>
+    <p>Revenue grew 14% quarter over quarter, led by the enterprise segment.</p>
+    <p>Operating costs held flat as the new region came online ahead of plan.</p>
+    <p>Churn fell to 2.1%, the lowest since the product launched.</p>
+    <p>Hiring slowed in the second half of the quarter, by design.</p>
+    <p>The board approved the expansion budget for the next two quarters.</p>
+    <p>Cash on hand covers 30 months of runway at the current burn.</p>
+    <p>Next quarter focuses on onboarding and self-serve upgrades.</p>
+  </div>
+</div>
+<div data-label="Hides while scrolling down">
+  <div class="sticky-scroller">
+    <c2-sticky class="sticky-toolbar" hide-on-scroll>
+      <div class="bar"><strong>Inbox</strong><c2-button>Compose</c2-button></div>
+    </c2-sticky>
+    <p>Scroll down and the bar slides away; scroll back up a little and it returns.</p>
+    <p>Design review moved to Thursday at 10:00.</p>
+    <p>Your invoice for September is ready.</p>
+    <p>Three new comments on the roadmap document.</p>
+    <p>Deploy to production finished in 4 minutes.</p>
+    <p>Reminder: quarterly planning starts next week.</p>
+    <p>New sign-in from a browser on Linux.</p>
+    <p>The team lunch is booked for Friday.</p>
+    <p>Weekly metrics digest: all dashboards green.</p>
+  </div>
+</div>
+<div data-label="Pinned to the bottom edge">
+  <div class="sticky-scroller">
+    <p>Terms of service, section 1. The actions stay in reach until the end of the text.</p>
+    <p>Section 2. Accounts and access.</p>
+    <p>Section 3. Payment and billing.</p>
+    <p>Section 4. Acceptable use.</p>
+    <p>Section 5. Data and privacy.</p>
+    <p>Section 6. Termination.</p>
+    <p>Section 7. Liability.</p>
+    <p>Section 8. Changes to these terms.</p>
+    <c2-sticky class="sticky-toolbar" edge="bottom">
+      <div class="bar"><strong>Accept the terms?</strong><c2-button>Decline</c2-button><c2-button>Accept</c2-button></div>
+    </c2-sticky>
+  </div>
+</div>
+```
+
+## Reacting to the stuck state
+
+Style a stuck element from outside with `:state(stuck)` and `:state(retracted)`, or listen for `stuck-change` and `retract-change`, which do not bubble. The element's `stuck` and `retracted` properties read the current state, and `reveal()` brings a retracted element back.
+
+```typescript tag=CodeBlock
+const toolbar = document.querySelector('c2-sticky')!
+toolbar.addEventListener('stuck-change', (event) => {
+  console.log(event.detail.stuck ? 'content runs beneath the toolbar' : 'toolbar back in the flow')
+})
+```
+
+```css tag=CodeBlock
+c2-sticky:state(stuck) .title {
+  font-size: 14px;
+}
+```

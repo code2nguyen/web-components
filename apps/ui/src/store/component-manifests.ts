@@ -1,12 +1,14 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
+import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
+import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
@@ -31,6 +33,7 @@ import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import confirmDialog from '@c2n/confirm-dialog/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
+import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
@@ -41,6 +44,7 @@ import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
+import floatButton from '@c2n/float-button/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
@@ -70,9 +74,11 @@ import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
+import masterDetail from '@c2n/master-detail/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
 import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
+import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
@@ -80,9 +86,12 @@ import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
+import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
+import overflowList from '@c2n/overflow-list/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
+import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
@@ -96,6 +105,8 @@ import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
+import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
+import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
@@ -111,11 +122,15 @@ import splitPanel from '@c2n/split-panel/custom-elements.json'
 import spreadsheet from '@c2n/spreadsheet/custom-elements.json'
 import stat from '@c2n/stat/custom-elements.json'
 import stateTimeline from '@c2n/state-timeline/custom-elements.json'
+import statusLight from '@c2n/status-light/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
+import sticky from '@c2n/sticky/custom-elements.json'
 import streamingText from '@c2n/streaming-text/custom-elements.json'
+import swipeAction from '@c2n/swipe-action/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import tableOfContents from '@c2n/table-of-contents/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
@@ -147,12 +162,14 @@ export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
     actionBar,
+    appShell,
     attachment,
     autocomplete,
     avatar,
     badge,
     banner,
     borderBeam,
+    bottomNav,
     breadcrumb,
     button,
     buttonGroup,
@@ -177,6 +194,7 @@ export const componentManifests = (function () {
     confirmDialog,
     contextMenu,
     copyButton,
+    countdown,
     dashboard,
     dateInput,
     dateSelector,
@@ -187,6 +205,7 @@ export const componentManifests = (function () {
     featherIcons,
     fieldset,
     filterBuilder,
+    floatButton,
     flow,
     form,
     formField,
@@ -216,9 +235,11 @@ export const componentManifests = (function () {
     marker,
     maskInput,
     masonry,
+    masterDetail,
     matIcon,
     math,
     menu,
+    menubar,
     mermaid,
     modal,
     moneyInput,
@@ -226,9 +247,12 @@ export const componentManifests = (function () {
     navigationMenu,
     notepad,
     numberInput,
+    orgChart,
     otpInput,
+    overflowList,
     overlay,
     pageEditor,
+    pageHeader,
     pagination,
     passwordField,
     phoneInput,
@@ -242,6 +266,8 @@ export const componentManifests = (function () {
     rate,
     relativeTime,
     reorderList,
+    richTextEditor,
+    saveBar,
     searchField,
     select,
     separator,
@@ -257,12 +283,16 @@ export const componentManifests = (function () {
     spreadsheet,
     stat,
     stateTimeline,
+    statusLight,
     statusPanel,
     steps,
+    sticky,
     streamingText,
+    swipeAction,
     switchManifest,
     symbols,
     table,
+    tableOfContents,
     tabs,
     tagInput,
     taskIcons,

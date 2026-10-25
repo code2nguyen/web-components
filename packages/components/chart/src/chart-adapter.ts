@@ -100,5 +100,11 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
   /** Converts a value in a coordinate system (a map's `[lon, lat]`) to a pixel inside the plot. */
   convertToPixel?(finder: Record<string, unknown>, value: number[]): [number, number] | null
 
+  /**
+   * Where the engine drew one datum of a series, in CSS pixels inside the plot, or `null` when it has not laid it out.
+   * For a chart whose layout the engine decides, such as a sankey ordering the nodes in a column.
+   */
+  itemLayout?(seriesIndex: number, dataIndex: number): { x: number; y: number } | null
+
   destroy(): void
 }

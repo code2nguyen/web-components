@@ -10,7 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Sheet } from '@c2n/components/sheet'
 import { Button } from '@c2n/components/button'
 
-`c2-sheet` is a dialog that spans one edge of the screen and slides in from it — filters, details, a form beside the record it edits. It is built on the native `<dialog>` like `c2-modal`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. `side` picks the edge (`right` by default), and `--c2-sheet--size` is the width of a left/right sheet or the height of a top/bottom one while the other axis fills the screen. Open it with the `open` attribute or `show()`, close it with `close(returnValue)`, the × button, a backdrop click or Escape — `hide-close`, `no-backdrop-close` and `no-escape` turn those off. The heading goes in `title` (it labels the sheet; use `label` when there is none), the content in the default slot, the actions in `footer`; only the body scrolls, so the header and footer stay put.
+`c2-sheet` is a dialog that spans one edge of the screen and slides in from it — filters, details, a form beside the record it edits. It is built on the native `<dialog>` like `c2-modal`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. `side` picks the edge (`right` by default), and `--c2-sheet--size` is the width of a left/right sheet or the height of a top/bottom one while the other axis fills the screen. `--c2-sheet--size: auto` fits the sheet to its content, up to `--c2-sheet--max-size`, past which the body scrolls. `swipe-close` lets the user drag the sheet toward its edge by the header to dismiss it, and gives a top or bottom sheet a grab handle — the phone bottom sheet is `side="bottom" swipe-close` with an `auto` size. Open it with the `open` attribute or `show()`, close it with `close(returnValue)`, the × button, a backdrop click or Escape — `hide-close`, `no-backdrop-close` and `no-escape` turn those off. The heading goes in `title` (it labels the sheet; use `label` when there is none), the content in the default slot, the actions in `footer`; only the body scrolls, so the header and footer stay put.
 
 ## Import
 
@@ -42,6 +42,11 @@ import '@c2n/components/sheet'
   .short {
     --c2-sheet--size: 280px;
   }
+  .fit {
+    --c2-sheet--size: auto;
+    --c2-sheet--max-size: 90dvh;
+    --c2-sheet--border-radius: 16px;
+  }
 </style>
 <div data-label="Sides">
   <c2-button onclick="document.getElementById('sh-right').show()">Right</c2-button>
@@ -63,9 +68,9 @@ import '@c2n/components/sheet'
   </c2-sheet>
 
   <c2-button onclick="document.getElementById('sh-bottom').show()">Bottom</c2-button>
-  <c2-sheet id="sh-bottom" side="bottom" class="sheet short">
+  <c2-sheet id="sh-bottom" side="bottom" swipe-close class="sheet fit">
     <span slot="title">Share</span>
-    <p>The phone pattern: a bottom sheet for actions on the current screen.</p>
+    <p>The phone pattern: a bottom sheet for actions on the current screen. Drag it down by the header or the handle to dismiss it; it is as tall as its content.</p>
   </c2-sheet>
 </div>
 <div data-label="With actions">

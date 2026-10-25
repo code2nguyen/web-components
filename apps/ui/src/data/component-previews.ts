@@ -11,6 +11,13 @@ export const componentPreviews: Record<string, string> = {
   'action-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
   <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
 </div>`,
+  'app-shell': `<div class="preview-app-shell">
+  <c2-app-shell scrolling="main" style="--c2-app-shell--height:110px;--c2-app-shell__navigation--width:76px;--c2-app-shell__navigation--background-color:var(--site-color-surface-container-3);--c2-app-shell__divider--color:var(--site-color-outline-variant)">
+    <div slot="header" style="padding:8px 10px;font-size:13px;font-weight:600;border-bottom:1px solid var(--site-color-outline-variant)">Ledgerline</div>
+    <div slot="navigation" style="font-size:12px;line-height:1.9;padding-left:2px">Overview<br>Batches<br>Rules</div>
+    <div style="padding:10px;font-size:12px">Batches</div>
+  </c2-app-shell>
+</div>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
   autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
@@ -31,6 +38,12 @@ export const componentPreviews: Record<string, string> = {
   banner: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
   'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:12px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b)"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam style="--c2-border-beam__beam--width:2px;--c2-border-beam__beam--size:140px;--c2-border-beam__beam--color-from:#3b82f6;--c2-border-beam__beam--color-to:#a5b4fc;--c2-border-beam__beam--opacity:1;--c2-border-beam__beam--filter:drop-shadow(0 0 6px rgba(59, 130, 246, 0.75));--c2-border-beam__beam--duration:4s"></c2-border-beam></div>`,
+  'bottom-nav': `<c2-bottom-nav value="home" style="width:300px;max-width:100%;--c2-bottom-nav--position:relative;--c2-bottom-nav--border-radius:14px;--c2-bottom-nav--border-top:none;--c2-bottom-nav--box-shadow:0 0 0 1px var(--c2-theme--color-outline-variant, #e4e4e7)">
+  <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon" weight="fill"></c2-phosphor-house>Home</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="search"><c2-phosphor-magnifying-glass slot="icon"></c2-phosphor-magnifying-glass>Search</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
+  <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+</c2-bottom-nav>`,
   breadcrumb: `<c2-breadcrumb>
   <c2-link-button href="#">Home</c2-link-button>
   <c2-link-button href="#">Library</c2-link-button>
@@ -136,6 +149,7 @@ greet('world')"></c2-code-editor>`,
   <c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
   <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6); --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5)">Copy</c2-copy-button>
 </div>`,
+  countdown: `<c2-countdown units="hours minutes seconds" duration="7384" style="--c2-countdown__segment--min-width:56px;--c2-countdown__value--font-size:26px"></c2-countdown>`,
   dashboard: `<c2-dashboard columns="1fr 1fr" rows="1fr 1fr" style="width:260px;height:150px;--c2-dashboard--gap:6px;--c2-dashboard--padding:6px;--c2-dashboard--background:var(--c2-theme--color-surface-container);--c2-dashboard--border-radius:10px;--c2-dash-card--background:var(--c2-theme--color-surface);--c2-dash-card--border:var(--c2-theme--border);--c2-dash-card--border-radius:6px;--c2-dash-card__header--font-size:11px;--c2-dash-card__header--min-height:0;--c2-dash-card__header--padding-block:6px;--c2-dash-card__header--padding-inline:8px">
   <c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card>
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
@@ -144,6 +158,7 @@ greet('world')"></c2-code-editor>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
   'date-time-picker': `<c2-date-time-picker value="2026-10-14T09:30" time-zone="Europe/Paris" aria-label="Meeting" style="width:240px"></c2-date-time-picker>`,
+  'depth-chart': `<c2-depth-chart style="width:280px;height:132px;--c2-chart--padding:6px" axes="x" grid="none" range="0.004" bids='[[67410.5,0.6],[67402,1.4],[67390,0.9],[67371,2.2],[67352,1.1],[67330,3.6],[67300,6.8],[67276,1.9],[67250,2.4]]' asks='[[67414.5,0.4],[67421,1.2],[67433,0.8],[67450,2.9],[67468,1.3],[67490,1.7],[67500,5.2],[67531,2.1],[67575,2.6]]'></c2-depth-chart>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
@@ -163,6 +178,7 @@ price: .price
 </div>`,
   fieldset: `<c2-fieldset legend="Notifications" description="Choose what we email you about." style="width: 240px"><c2-checkbox checked>Mentions</c2-checkbox><c2-checkbox>Weekly digest</c2-checkbox></c2-fieldset>`,
   'filter-builder': `<c2-filter-builder compact-below="0" style="width:300px" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>`,
+  'float-button': `<div style="contain:layout;position:relative;width:200px;height:170px"><c2-float-button label="Create" open style="--c2-float-button--inset:auto 8px 8px auto"><c2-float-button-action label="Upload file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></c2-float-button-action><c2-float-button-action label="New document"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></c2-float-button-action></c2-float-button></div>`,
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
   form: `<c2-form style="width: 260px"><form><c2-form-field label="Email" error-text="Enter an email address, like name@example.com."><c2-text-field name="email" type="email" value="ada@"></c2-text-field></c2-form-field><div><c2-button type="submit">Save</c2-button></div></form></c2-form>`,
   'form-field': `<c2-form-field style="width: 240px" label="Display name" hint="Shown on your profile." counter><c2-text-field name="displayName" value="Ada Lovelace" maxlength="40"></c2-text-field></c2-form-field>`,
@@ -249,6 +265,14 @@ price: .price
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
+  'master-detail': `<c2-master-detail open breakpoint="0" style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px;--c2-master-detail__master--width:110px">
+  <div slot="master" style="display:grid">
+    <span style="padding:8px 10px;background:var(--c2-theme--color-primary-container, #edf1fe);font-weight:600">Ana Ruiz</span>
+    <span style="padding:8px 10px">Kenji W.</span>
+    <span style="padding:8px 10px">Priya N.</span>
+  </div>
+  <div slot="detail" style="padding:10px"><strong>Invoice 2041</strong><br>Charged twice for March.</div>
+</c2-master-detail>`,
   'mat-icon': `<div class="preview-row" style="gap:18px;font-size:26px">
   <c2-mat-icon>home</c2-mat-icon>
   <c2-mat-icon>favorite</c2-mat-icon>
@@ -263,6 +287,11 @@ price: .price
   <hr />
   <c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
 </c2-menu>`,
+  menubar: `<c2-menubar aria-label="Application">
+  <c2-menubar-menu label="File"><c2-menu-item value="new">New</c2-menu-item><c2-menu-item value="open">Open…</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="Edit"><c2-menu-item value="undo">Undo</c2-menu-item></c2-menubar-menu>
+  <c2-menubar-menu label="View"><c2-menu-item value="zoom">Zoom</c2-menu-item></c2-menubar-menu>
+</c2-menubar>`,
   mermaid: `<c2-mermaid style="width:260px;--c2-mermaid--font-size:12px" value="flowchart LR
   Cart --> Pay{Paid?}
   Pay -- yes --> Ship"></c2-mermaid>`,
@@ -289,7 +318,9 @@ price: .price
 </c2-navigation-menu>`,
   notepad: `<c2-notepad label="Groceries" style="width:240px;--c2-notepad__sheet--min-height:150px;--c2-notepad__writing--font-size:16px;--c2-notepad__rule--spacing:24px;--c2-notepad__margin--inset:36px" value="- [x] Oat milk&#10;- [ ] **Sourdough**&#10;remember the ==blue== bag"></c2-notepad>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
+  'org-chart': `<c2-org-chart style="--c2-org-chart--padding:0;--c2-org-chart__card--width:96px;--c2-org-chart__card--padding:6px;--c2-org-chart__card--gap:6px;--c2-org-chart__avatar--size:22px;--c2-org-chart__label--font-size:11px;--c2-org-chart__label--line-height:14px;--c2-org-chart__description--font-size:10px;--c2-org-chart__description--line-height:12px;--c2-org-chart__level--gap:24px;--c2-org-chart__sibling--gap:6px;--c2-org-chart__toggle--size:14px;--c2-org-chart__toggle--font-size:10px" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>`,
   'otp-input': `<c2-otp-input value="4827" group="3" aria-label="Verification code" style="--c2-otp-input__cell--width:32px;--c2-otp-input__cell--height:38px;--c2-otp-input__cell--font-size:16px;--c2-otp-input--gap:6px"></c2-otp-input>`,
+  'overflow-list': `<c2-overflow-list style="width:250px" aria-label="Actions"><c2-button>Edit</c2-button><c2-button>Share</c2-button><c2-button>Move</c2-button><c2-button>Archive</c2-button></c2-overflow-list>`,
   'overlap-chart': `<c2-overlap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__region-label--font-size:11px;--c2-chart__set-label--font-size:11px" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web"></c2-chart-series><c2-chart-series field="mobile" label="Mobile"></c2-chart-series><c2-chart-series field="api" label="API"></c2-chart-series></c2-overlap-chart>`,
   overlay: `<div>
   <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
@@ -298,6 +329,11 @@ price: .price
   </c2-overlay>
 </div>`,
   'page-editor': `<c2-page-editor label="Notes" style="width:260px;--c2-page-editor__content--min-height:0;--c2-page-editor__content--font-size:13px;--c2-page-editor__content--padding:4px 8px 4px 24px;--c2-page-editor__heading2--font-size:17px;--c2-page-editor__block--margin-top:2px" value="## Launch plan&#10;&#10;Ship **Friday**, <span data-color=&quot;red&quot;>no slips</span>.&#10;&#10;- [x] Freeze the API&#10;- [ ] Write the docs"></c2-page-editor>`,
+  'page-header': `<c2-page-header style="width:260px;--c2-page-header--padding-top:8px;--c2-page-header--padding-right:12px;--c2-page-header--padding-bottom:8px;--c2-page-header--padding-left:12px;--c2-page-header__title--font-size:16px;--c2-page-header--gap:6px">
+  <h3 style="margin:0">Payouts</h3>
+  <c2-badge slot="title-suffix" tone="warning">3 failed</c2-badge>
+  <span slot="description">October · EUR</span>
+</c2-page-header>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   'password-field': `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width:220px"></c2-password-field>`,
   'phone-input': `<c2-phone-input value="+33612345678" style="width:240px"></c2-phone-input>`,
@@ -334,6 +370,11 @@ price: .price
   <div data-reorder-key="build" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Build packages</div>
   <div data-reorder-key="publish" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Publish packages</div>
 </c2-reorder-list>`,
+  'rich-text-editor': `<c2-rich-text-editor label="Comment" formats="bold italic | link bullet" style="width:260px;--c2-rich-text-editor__content--min-height:44px" value="Ship the **migration guide** with the release."></c2-rich-text-editor>`,
+  'sankey-chart': `<c2-sankey-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__node--width:8px;--c2-chart__node--gap:4px;--c2-chart--font-size:10px" labels="inside" aria-label="Where the revenue went" data='[{"source":"Subscriptions","target":"Revenue","value":84},{"source":"Services","target":"Revenue","value":16},{"source":"Revenue","target":"Gross profit","value":69},{"source":"Revenue","target":"Costs","value":31},{"source":"Gross profit","target":"Expenses","value":52},{"source":"Gross profit","target":"Profit","value":17}]'></c2-sankey-chart>`,
+  'save-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
+  <c2-save-bar open style="--c2-save-bar--position:relative;--c2-save-bar--inset-bottom:0px;--c2-save-bar__container--padding:4px 4px 4px 12px;--c2-save-bar__container--gap:8px;--c2-save-bar__button--height:28px"></c2-save-bar>
+</div>`,
   'scatter-chart': `<c2-scatter-chart style="width:280px;height:132px;--c2-chart--padding:8px" aria-label="Weekly active hours against 90-day retention by plan" x-field="hours" legend="none" symbol-size="7" data='[{"hours":2.5,"starter":33.2},{"hours":4.2,"starter":32.6},{"hours":4.9,"starter":35.9},{"hours":5.7,"starter":34.9},{"hours":7.4,"starter":42.8},{"hours":7.9,"starter":32.1},{"hours":9.1,"starter":44.6},{"hours":10.3,"growth":45.9},{"hours":11.0,"starter":28.8},{"hours":11.5,"growth":51.9},{"hours":12.5,"starter":51.1},{"hours":13.3,"starter":43.9},{"hours":13.7,"growth":62.3},{"hours":13.9,"starter":30.7},{"hours":15.3,"growth":58.7},{"hours":15.4,"starter":33.1},{"hours":16.7,"growth":60.2},{"hours":18.2,"growth":52.2},{"hours":20.5,"growth":70.6},{"hours":21.8,"growth":64.8},{"hours":22.5,"growth":54.1},{"hours":23.4,"scale":81.1},{"hours":23.5,"scale":67.5},{"hours":23.9,"growth":51.4},{"hours":26.1,"growth":60.7},{"hours":26.4,"scale":74.9},{"hours":27.8,"growth":61.5},{"hours":28.0,"scale":74.4},{"hours":28.1,"scale":79.4},{"hours":30.7,"scale":73.3},{"hours":31.1,"scale":75.0},{"hours":33.9,"scale":85.9},{"hours":34.2,"scale":75.1},{"hours":35.7,"scale":72.0},{"hours":38.2,"scale":76.2},{"hours":39.3,"scale":82.7}]'><c2-chart-series field="starter" label="Starter"></c2-chart-series><c2-chart-series field="growth" label="Growth"></c2-chart-series><c2-chart-series field="scale" label="Scale"></c2-chart-series></c2-scatter-chart>`,
   'search-field': `<c2-search-field placeholder="Search issues" shortcut="/" style="width:220px"></c2-search-field>`,
   select: `<c2-select value="FR" placeholder="Select a country" style="width:190px">
@@ -395,6 +436,12 @@ price: .price
   <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
 </c2-stat>`,
   'state-timeline': `<c2-state-timeline style="width: 100%; --c2-state-timeline__label--width: 64px; --c2-state-timeline__row--height: 16px; --c2-state-timeline__summary--width: 52px" hide-axis hide-legend aria-label="Service health" end="2026-10-08T12:00:00Z" states='[{"value":"ok","label":"Operational","tone":"success","baseline":true},{"value":"degraded","label":"Degraded","tone":"warning"},{"value":"down","label":"Outage","tone":"danger"},{"value":"maintenance","label":"Maintenance","tone":"primary"}]' series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:05:00Z","state":"degraded"},{"start":"2026-10-08T10:40:00Z","state":"ok"}]},{"label":"Database","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T10:15:00Z","state":"down"},{"start":"2026-10-08T10:35:00Z","state":"degraded"},{"start":"2026-10-08T10:55:00Z","state":"ok"}]},{"label":"Search","segments":[{"start":"2026-10-08T09:00:00Z","state":"ok"},{"start":"2026-10-08T11:20:00Z","state":"maintenance"},{"start":"2026-10-08T11:45:00Z","state":"ok"}]}]'></c2-state-timeline>`,
+  'status-light': `<div class="preview-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+  <c2-status-light tone="primary" pulse>Building</c2-status-light>
+  <c2-status-light tone="success">Live</c2-status-light>
+  <c2-status-light tone="warning">Degraded</c2-status-light>
+  <c2-status-light tone="danger">Failed</c2-status-light>
+</div>`,
   'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
   steps: `<c2-steps style="width:300px;--c2-steps--background:color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));--c2-steps--border:1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, var(--c2-theme--color-surface, #ffffff))" aria-label="Run trace">
   <c2-step status="success" label="build" trailing="24 s"></c2-step>
@@ -404,7 +451,15 @@ price: .price
   </c2-step>
   <c2-step status="pending" label="ship"></c2-step>
 </c2-steps>`,
+  sticky: `<div style="width:220px;height:120px;overflow:auto;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px">
+  <c2-sticky style="--c2-sticky--padding:6px 10px"><strong>Pinned toolbar</strong></c2-sticky>
+  <div style="padding:6px 10px">Scroll: the bar stays in view and gains a shadow once content runs beneath it.</div>
+  <div style="padding:6px 10px">Second paragraph.</div>
+  <div style="padding:6px 10px">Third paragraph.</div>
+  <div style="padding:6px 10px">Fourth paragraph.</div>
+</div>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
+  'swipe-action': `<c2-swipe-action open="end" style="width:280px;border:1px solid #e4e4e7;border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>
   <c2-switch></c2-switch>
@@ -425,6 +480,7 @@ price: .price
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
   <c2-table-column field="score" header="Score" width="90px" align="end" format="number" sortable></c2-table-column>
 </c2-table>`,
+  'table-of-contents': `<c2-table-of-contents style="width:200px" label="On this page" items='[{"id":"preview-toc-a","label":"Overview","level":1},{"id":"preview-toc-b","label":"Installation","level":1},{"id":"preview-toc-c","label":"With npm","level":2},{"id":"preview-toc-d","label":"Theming","level":1}]'></c2-table-of-contents>`,
   tabs: `<c2-tabs selected-tab="tab2" style="width:240px">
   <c2-tab label="Overview" for="tab1"></c2-tab>
   <c2-tab label="Activity" for="tab2"></c2-tab>

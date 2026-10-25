@@ -21,6 +21,8 @@ import './map-chart.js'
 import './map-layer.js'
 import './heatmap-chart.js'
 import './chord-chart.js'
+import './depth-chart.js'
+import './sankey-chart.js'
 import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
@@ -90,6 +92,35 @@ export {
   type ChordRibbonDetail,
   type ChordTooltipContext,
 } from './chord-chart.js'
+export { DepthChart, type DepthChartEventMap, type DepthTooltipContext } from './depth-chart.js'
+export {
+  buildDepthBook,
+  depthAt,
+  depthReadout,
+  depthSeries,
+  depthWindow,
+  mirrorReadout,
+  type DepthBook,
+  type DepthLevel,
+  type DepthLevelInput,
+  type DepthPoint,
+  type DepthReadout,
+  type DepthSeries,
+  type DepthSide,
+} from './depth-model.js'
+export {
+  SankeyChart,
+  buildSankeyModel,
+  type SankeyChartEventMap,
+  type SankeyEmphasis,
+  type SankeyLinkDetail,
+  type SankeyModel,
+  type SankeyModelOptions,
+  type SankeyNodeAlign,
+  type SankeyNodeConfig,
+  type SankeyNodeDetail,
+  type SankeyTooltipContext,
+} from './sankey-chart.js'
 export type { MapFeature, MapFeatureProperties, MapProjection, MapSource } from './maps/map-source.js'
 export { ChartSeries, SERIES_CHANGE_EVENT } from './chart-series.js'
 export { ChartLegend } from './chart-legend.js'

@@ -212,15 +212,30 @@ function asAttributeName(name) {
 const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 // Tags that stay plain only as direct children of a given parent, because they are islands of their own elsewhere.
 // `c2-chip-group` reads the size its chips and badges report, which only reaches it from a direct child.
-const NESTED_CHILDREN_OF = new Map([['c2-chip-group', new Set(['c2-chip', 'c2-badge'])]])
+// `c2-overflow-list` measures its children and builds menu rows from them; an `<astro-island>` wrapper is a
+// zero-width `display: contents` box with no label (the buttons are registered by `chrome-modules.ts`, the rows by
+// the list's own module).
+// `c2-swipe-action` lays its actions out as flex items and clicks the outermost one on a full swipe, which a
+// `display: contents` island wrapper defeats; `c2-button` and `c2-icon-button` are registered by `chrome-modules.ts`.
+const NESTED_CHILDREN_OF = new Map([
+  ['c2-chip-group', new Set(['c2-chip', 'c2-badge'])],
+  ['c2-overflow-list', new Set(['c2-button', 'c2-icon-button', 'c2-link-button', 'c2-menu-item'])],
+  ['c2-swipe-action', new Set(['c2-button', 'c2-icon-button'])],
+])
 
 function isNestedChild(tag, parentTag) {
   return NESTED_CHILD_TAGS.has(tag) || !!NESTED_CHILDREN_OF.get(parentTag)?.has(tag)
 }
 
-function changeComponentName(vnode, uid, componentName, markup, parentTag) {
+// Astro routes an island's `slot` into its parent's named slot only when that parent is a component; under a plain tag
+// it drops it, so a slotted icon inside a nested `c2-button` lands in the label. Such a child stays plain as well.
+function hasSlotAttribute(vnode) {
+  return !!vnode.attributes?.some((attribute) => attribute.name === 'slot')
+}
+
+function changeComponentName(vnode, uid, componentName, markup, parentTag, parentNested = false) {
   const tag = vnode.name
-  const nested = isNestedChild(tag, parentTag)
+  const nested = isNestedChild(tag, parentTag) || (parentNested && tag?.startsWith('c2-') && hasSlotAttribute(vnode))
   let mainComponent = componentName && vnode.name == componentName ? vnode : null
   const classAttributeIndex = vnode.attributes?.findIndex((item) => item.name == 'class')
   if (classAttributeIndex > -1) {
@@ -262,7 +277,7 @@ function changeComponentName(vnode, uid, componentName, markup, parentTag) {
   }
   if (vnode.children) {
     for (const item of vnode.children) {
-      const hostNode = changeComponentName(item, uid, componentName, markup, tag)
+      const hostNode = changeComponentName(item, uid, componentName, markup, tag, nested)
       if (!mainComponent && hostNode) {
         mainComponent = hostNode
       }

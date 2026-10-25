@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -77,6 +77,14 @@
       "types": "./dist/action-bar.d.ts",
       "default": "./dist/action-bar.js"
     },
+    "./app-shell": {
+      "types": "./dist/app-shell.d.ts",
+      "default": "./dist/app-shell.js"
+    },
+    "./app-shell/app-shell-toggle": {
+      "types": "./dist/app-shell/app-shell-toggle.d.ts",
+      "default": "./dist/app-shell/app-shell-toggle.js"
+    },
     "./attachment": {
       "types": "./dist/attachment.d.ts",
       "default": "./dist/attachment.js"
@@ -104,6 +112,14 @@
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
+    },
+    "./bottom-nav": {
+      "types": "./dist/bottom-nav.d.ts",
+      "default": "./dist/bottom-nav.js"
+    },
+    "./bottom-nav/bottom-nav-item": {
+      "types": "./dist/bottom-nav/bottom-nav-item.d.ts",
+      "default": "./dist/bottom-nav/bottom-nav-item.js"
     },
     "./breadcrumb": {
       "types": "./dist/breadcrumb.d.ts",
@@ -169,6 +185,10 @@
       "types": "./dist/chart/chord-chart.d.ts",
       "default": "./dist/chart/chord-chart.js"
     },
+    "./chart/depth-chart": {
+      "types": "./dist/chart/depth-chart.d.ts",
+      "default": "./dist/chart/depth-chart.js"
+    },
     "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"
@@ -204,6 +224,10 @@
     "./chart/radar-chart": {
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
+    },
+    "./chart/sankey-chart": {
+      "types": "./dist/chart/sankey-chart.d.ts",
+      "default": "./dist/chart/sankey-chart.js"
     },
     "./chart/scatter-chart": {
       "types": "./dist/chart/scatter-chart.d.ts",
@@ -301,6 +325,10 @@
       "types": "./dist/copy-button.d.ts",
       "default": "./dist/copy-button.js"
     },
+    "./countdown": {
+      "types": "./dist/countdown.d.ts",
+      "default": "./dist/countdown.js"
+    },
     "./dashboard": {
       "types": "./dist/dashboard.d.ts",
       "default": "./dist/dashboard.js"
@@ -348,6 +376,14 @@
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
+    },
+    "./float-button": {
+      "types": "./dist/float-button.d.ts",
+      "default": "./dist/float-button.js"
+    },
+    "./float-button/float-button-action": {
+      "types": "./dist/float-button/float-button-action.d.ts",
+      "default": "./dist/float-button/float-button-action.js"
     },
     "./flow": {
       "types": "./dist/flow.d.ts",
@@ -497,6 +533,10 @@
       "types": "./dist/masonry/masonry-item.d.ts",
       "default": "./dist/masonry/masonry-item.js"
     },
+    "./master-detail": {
+      "types": "./dist/master-detail.d.ts",
+      "default": "./dist/master-detail.js"
+    },
     "./mat-icon": {
       "types": "./dist/mat-icon.d.ts",
       "default": "./dist/mat-icon.js"
@@ -516,6 +556,14 @@
     "./menu/menu-row": {
       "types": "./dist/menu/menu-row.d.ts",
       "default": "./dist/menu/menu-row.js"
+    },
+    "./menubar": {
+      "types": "./dist/menubar.d.ts",
+      "default": "./dist/menubar.js"
+    },
+    "./menubar/menubar-menu": {
+      "types": "./dist/menubar/menubar-menu.d.ts",
+      "default": "./dist/menubar/menubar-menu.js"
     },
     "./mermaid": {
       "types": "./dist/mermaid.d.ts",
@@ -553,9 +601,17 @@
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
     },
+    "./org-chart": {
+      "types": "./dist/org-chart.d.ts",
+      "default": "./dist/org-chart.js"
+    },
     "./otp-input": {
       "types": "./dist/otp-input.d.ts",
       "default": "./dist/otp-input.js"
+    },
+    "./overflow-list": {
+      "types": "./dist/overflow-list.d.ts",
+      "default": "./dist/overflow-list.js"
     },
     "./overlay": {
       "types": "./dist/overlay.d.ts",
@@ -564,6 +620,10 @@
     "./page-editor": {
       "types": "./dist/page-editor.d.ts",
       "default": "./dist/page-editor.js"
+    },
+    "./page-header": {
+      "types": "./dist/page-header.d.ts",
+      "default": "./dist/page-header.js"
     },
     "./pagination": {
       "types": "./dist/pagination.d.ts",
@@ -620,6 +680,14 @@
     "./reorder-list": {
       "types": "./dist/reorder-list.d.ts",
       "default": "./dist/reorder-list.js"
+    },
+    "./rich-text-editor": {
+      "types": "./dist/rich-text-editor.d.ts",
+      "default": "./dist/rich-text-editor.js"
+    },
+    "./save-bar": {
+      "types": "./dist/save-bar.d.ts",
+      "default": "./dist/save-bar.js"
     },
     "./search-field": {
       "types": "./dist/search-field.d.ts",
@@ -681,6 +749,10 @@
       "types": "./dist/state-timeline.d.ts",
       "default": "./dist/state-timeline.js"
     },
+    "./status-light": {
+      "types": "./dist/status-light.d.ts",
+      "default": "./dist/status-light.js"
+    },
     "./status-panel": {
       "types": "./dist/status-panel.d.ts",
       "default": "./dist/status-panel.js"
@@ -693,9 +765,17 @@
       "types": "./dist/steps/step.d.ts",
       "default": "./dist/steps/step.js"
     },
+    "./sticky": {
+      "types": "./dist/sticky.d.ts",
+      "default": "./dist/sticky.js"
+    },
     "./streaming-text": {
       "types": "./dist/streaming-text.d.ts",
       "default": "./dist/streaming-text.js"
+    },
+    "./swipe-action": {
+      "types": "./dist/swipe-action.d.ts",
+      "default": "./dist/swipe-action.js"
     },
     "./switch": {
       "types": "./dist/switch.d.ts",
@@ -708,6 +788,10 @@
     "./table/table-column": {
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
+    },
+    "./table-of-contents": {
+      "types": "./dist/table-of-contents.d.ts",
+      "default": "./dist/table-of-contents.js"
     },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
@@ -836,10 +920,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.16",
-    "@c2n/phosphor-icons": "1.0.16",
-    "@c2n/task-icons": "1.0.16",
-    "@c2n/theme": "1.0.16",
+    "@c2n/core": "1.0.17",
+    "@c2n/phosphor-icons": "1.0.17",
+    "@c2n/task-icons": "1.0.17",
+    "@c2n/theme": "1.0.17",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -852,7 +936,6 @@
     "d3-geo": "3.1.1",
     "lit": "3.3.3",
     "marked": "18.1.0",
-    "mermaid": "12.1.0",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
     "prosemirror-inputrules": "^1.5.1",
@@ -879,6 +962,7 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
+    "mermaid": "^12.1.0",
     "react": ">=18.0.0",
     "uplot": "^1.6.31",
     "vue": "^3.3.0"
@@ -920,6 +1004,9 @@
     "echarts": {
       "optional": true
     },
+    "mermaid": {
+      "optional": true
+    },
     "react": {
       "optional": true
     },
@@ -933,12 +1020,14 @@
   "devDependencies": {
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
+    "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/border-beam": "*",
+    "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",
@@ -964,6 +1053,7 @@
     "@c2n/confirm-dialog": "*",
     "@c2n/context-menu": "*",
     "@c2n/copy-button": "*",
+    "@c2n/countdown": "*",
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
@@ -973,6 +1063,7 @@
     "@c2n/diff-viewer": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
+    "@c2n/float-button": "*",
     "@c2n/flow": "*",
     "@c2n/form": "*",
     "@c2n/form-field": "*",
@@ -1002,9 +1093,11 @@
     "@c2n/marker": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
+    "@c2n/master-detail": "*",
     "@c2n/mat-icon": "*",
     "@c2n/math": "*",
     "@c2n/menu": "*",
+    "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
@@ -1012,9 +1105,12 @@
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
     "@c2n/number-input": "*",
+    "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
+    "@c2n/overflow-list": "*",
     "@c2n/overlay": "*",
     "@c2n/page-editor": "*",
+    "@c2n/page-header": "*",
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
     "@c2n/phone-input": "*",
@@ -1027,6 +1123,8 @@
     "@c2n/rate": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
+    "@c2n/rich-text-editor": "*",
+    "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",
@@ -1042,11 +1140,15 @@
     "@c2n/spreadsheet": "*",
     "@c2n/stat": "*",
     "@c2n/state-timeline": "*",
+    "@c2n/status-light": "*",
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
+    "@c2n/sticky": "*",
     "@c2n/streaming-text": "*",
+    "@c2n/swipe-action": "*",
     "@c2n/switch": "*",
     "@c2n/table": "*",
+    "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
     "@c2n/text-field": "*",

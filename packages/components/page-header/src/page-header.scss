@@ -1,0 +1,401 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-page-header,
+  $theme: (
+    padding-top: 20px,
+    padding-right: 24px,
+    padding-bottom: 16px,
+    padding-left: 24px,
+    gap: 12px,
+    background-color: transparent,
+    color: null,
+    border-bottom: none,
+    sticky-top: var(--c2-app-shell--sticky-offset, 0px),
+    z-index: 5,
+    transition-duration: 180ms,
+
+    title--font-size: 24px,
+    title--font-weight: 600,
+    title--line-height: 1.25,
+    title--line-clamp: 2,
+    title--color: #18181b,
+    title--min-width: 240px,
+    title__narrow--font-size: 20px,
+
+    leading--size: 40px,
+
+    description--color: #52525b,
+    description--font-size: 14px,
+
+    meta--color: #71717a,
+    meta--font-size: 12px,
+    meta--gap: 4px 16px,
+
+    actions--gap: 8px,
+
+    link--color: rgb(2, 101, 220),
+    link--font-size: 14px,
+
+    more--size: 36px,
+    more--border-radius: 8px,
+    more--border: 1px solid #bcbcc6,
+    more--background-color: #ffffff,
+    more--color: #18181b,
+    more__hover--background-color: #f4f4f5,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    navigation--margin-top: 4px,
+
+    condensed--height: 48px,
+    condensed--background-color: rgba(255, 255, 255, 0.92),
+    condensed--backdrop-filter: blur(12px),
+    condensed--border-bottom: 1px solid #e4e4e7,
+    condensed__title--font-size: 14px,
+  )
+);
+
+$_duration: css.cssVar(transition-duration);
+
+// The layout follows the page header's own width.
+:host {
+  display: block;
+  // A size container has no intrinsic width: without this it collapses to nothing in a centring flex or grid parent.
+  width: 100%;
+  box-sizing: border-box;
+  container-type: inline-size;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// A sticky header slides up until only its last `condensed--height` pixels show, and stays there: it never leaves its
+// containing block, so the condensed bar lasts as long as the page below it scrolls.
+:host([sticky]) {
+  position: sticky;
+  top: calc(#{css.cssVar(sticky-top)} - var(--_collapse-offset, 0px));
+  z-index: css.cssVar(z-index);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.c2-page-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  box-sizing: border-box;
+  padding: css.cssVar(padding-top) css.cssVar(padding-right) css.cssVar(padding-bottom) css.cssVar(padding-left);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  border-bottom: css.cssVar(border-bottom);
+}
+
+.context,
+.parent {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+// The parent link replaces the breadcrumb on narrow widths only.
+.parent {
+  display: none;
+}
+
+.parent-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: css.cssVar(link--color);
+  font-size: css.cssVar(link--font-size);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 4px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &.compact {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 6px;
+  }
+}
+
+.title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: css.cssVar(gap) 16px;
+  min-width: 0;
+}
+
+.title-area {
+  display: flex;
+  flex: 1 1 css.cssVar(title--min-width);
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+// The title typography sits on the wrapper and the slotted heading inherits it, so it beats the browser's heading
+// defaults; a page stylesheet that styles headings globally can opt back in with `h1 { font: inherit; color: inherit }`.
+.heading {
+  min-width: 0;
+  max-width: 100%;
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: css.cssVar(title--line-height);
+}
+
+.heading ::slotted(*) {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: css.cssVar(title--line-clamp);
+  line-clamp: css.cssVar(title--line-clamp);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  overflow-wrap: anywhere;
+}
+
+.leading {
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(leading--size);
+  height: css.cssVar(leading--size);
+  flex: none;
+
+  ::slotted(*) {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+.suffix {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.description {
+  max-width: 72ch;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: 1.5;
+
+  ::slotted(*) {
+    margin: 0;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(meta--gap);
+  color: css.cssVar(meta--color);
+  font-size: css.cssVar(meta--font-size);
+}
+
+.actions {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: css.cssVar(actions--gap);
+  min-width: 0;
+}
+
+.row-actions {
+  display: contents;
+}
+
+.primary {
+  display: inline-flex;
+  flex: none;
+  transition: transform $_duration ease-out;
+}
+
+.more-menu {
+  flex: none;
+}
+
+.more {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(more--size);
+  height: css.cssVar(more--size);
+  margin: 0;
+  padding: 0;
+  border: css.cssVar(more--border);
+  border-radius: css.cssVar(more--border-radius);
+  background-color: css.cssVar(more--background-color);
+  color: css.cssVar(more--color);
+  font: inherit;
+  cursor: pointer;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: css.cssVar(more__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.navigation {
+  min-width: 0;
+  margin-top: css.cssVar(navigation--margin-top);
+  margin-bottom: calc(-1 * #{css.cssVar(padding-bottom)});
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toolbar {
+  min-width: 0;
+}
+
+.has-navigation .toolbar {
+  margin-top: css.cssVar(padding-bottom);
+}
+
+// ------------------------------------
+// Narrow: parent link instead of the breadcrumb, no leading visual, actions on their own row.
+@container (max-width: 599.98px) {
+  .context,
+  .leading {
+    display: none !important;
+  }
+
+  .has-parent .parent {
+    display: flex;
+  }
+
+  // Narrow widths only ever shrink the title: a page header already set smaller keeps its own size.
+  .heading {
+    font-size: min(#{css.cssVar(title--font-size)}, #{css.cssVar(title__narrow--font-size)});
+  }
+
+  .title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .title-area {
+    flex-basis: auto;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}
+
+// ------------------------------------
+// Condensed bar: over the last strip of a stuck header.
+.condensed-bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: css.cssVar(condensed--height);
+  padding-inline: calc(#{css.cssVar(padding-left)} - 8px) calc(#{css.cssVar(padding-right)} + var(--_primary-width, 0px) + 12px);
+  background-color: css.cssVar(condensed--background-color);
+  backdrop-filter: css.cssVar(condensed--backdrop-filter);
+  -webkit-backdrop-filter: css.cssVar(condensed--backdrop-filter);
+  border-bottom: css.cssVar(condensed--border-bottom);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity $_duration ease-out,
+    visibility 0s linear $_duration;
+}
+
+.condensed-bar .parent-link:not(.compact) {
+  display: none;
+}
+
+.condensed-title {
+  min-width: 0;
+  overflow: hidden;
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(condensed__title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.condensed-suffix {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+}
+
+.c2-page-header.condensed {
+  .condensed-bar {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity $_duration ease-out,
+      visibility 0s linear 0s;
+  }
+
+  // The primary action is shifted into the bar and drawn above it; the rest of the actions keep their place, unseen.
+  .primary {
+    position: relative;
+    z-index: 1;
+  }
+
+  .row-actions,
+  .more-menu {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .condensed-bar {
+    transition-duration: 0s;
+  }
+}

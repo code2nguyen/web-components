@@ -6,7 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController, formatMessage } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
-import { DOMSerializer, Fragment, Slice, type Mark, type MarkType, type Node as ProseNode, type ResolvedPos } from 'prosemirror-model'
+import { Fragment, Slice, type Node as ProseNode } from 'prosemirror-model'
 import { EditorState, NodeSelection, Plugin, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view'
 import { keymap } from 'prosemirror-keymap'
@@ -28,12 +28,15 @@ import {
   leaveTable,
   lineBreak,
   listNumbering,
+  markExtent,
   normalize,
   setBlock as setBlockCommand,
   toggleBlock,
   toggleChecked,
 } from './commands'
 import { highlightPlugin } from './highlight'
+import { composedSelection, place } from './dom'
+import { pageToHTML, splitPastedLines } from './html'
 import { fromMarkdown, tableFromText, toMarkdown } from './markdown'
 import {
   BLOCK_NAMES,
@@ -43,7 +46,6 @@ import {
   emptyFormat,
   formatOf,
   isColor,
-  listNumbers,
   safeHref,
   schema,
   type PageEditorBlock,
@@ -61,6 +63,7 @@ import styles from './page-editor.scss?inline'
 export { BLOCK_NAMES as PAGE_EDITOR_BLOCKS, COLORS as PAGE_EDITOR_COLORS, MARK_NAMES as PAGE_EDITOR_MARKS } from './schema'
 export type { PageEditorBlock, PageEditorColor, PageEditorFormat, PageEditorMark } from './schema'
 export { LANGUAGES as PAGE_EDITOR_LANGUAGES } from './languages'
+export { splitPastedLines } from './html'
 
 /** Renders a page editor value (Markdown) as HTML, with real nested lists, without an editor on the page. */
 export function markdownToHTML(markdown: string): string {
@@ -172,7 +175,7 @@ const glyph = (text: string) => html`<span class="glyph" aria-hidden="true">${te
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the editor loses focus after its value changed.
  * @event {CustomEvent<PageEditorFormat>} format-change - Fired when the block or the formatting at the selection changes. Does not bubble.
- * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its block is removed. Does not bubble.
+ * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its block is removed, but a pasted web image keeps its address. Does not bubble.
  * @csspart content - The editable page.
  * @csspart toolbar - The formatting toolbar over selected text.
  * @csspart slash-menu - The menu opened by `/` and the `+` button.
@@ -294,7 +297,9 @@ export class PageEditor extends LitElement {
   @property({ type: Boolean, reflect: true }) required = false
   /**
    * Saves a pasted or dropped image and resolves to the `src` the page stores for it (an id, a URL). Unset, the image
-   * is stored in the page as a data URL. A rejection fires `image-error`.
+   * is stored in the page as a data URL. A rejection fires `image-error`. Set, an image pasted from another page with
+   * its web address is copied through it too, when its site lets the page read it (CORS); otherwise it keeps its
+   * address.
    */
   @property({ attribute: false }) imageUpload: ImageUploader | null = null
   /** Turns a stored image `src` into a URL to draw (an object URL from the application's store). Unset, the `src` is drawn as it is. */
@@ -893,7 +898,7 @@ export class PageEditor extends LitElement {
    * key pressed before it arrives (Enter, Backspace, a shortcut) would run against the old selection, so read the real one first.
    */
   private syncSelectionFromDom(view: EditorView) {
-    const dom = this.domSelection()
+    const dom = composedSelection(this.renderRoot)
     if (!dom || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
     try {
       const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset)
@@ -904,26 +909,6 @@ export class PageEditor extends LitElement {
     } catch {
       // A position inside a marker or between nodes has no text selection; keep ProseMirror's own.
     }
-  }
-
-  /**
-   * The caret and selection inside the shadow root. The standard way is `getComposedRanges` with this shadow root
-   * (Chromium, WebKit, Firefox), whose `direction` tells the anchor from the focus. WebKit's `shadowRoot.getSelection()`
-   * can lag behind a selection set from script, so it is only the fallback for browsers without composed ranges.
-   */
-  private domSelection(): { anchorNode: Node; anchorOffset: number; focusNode: Node; focusOffset: number } | null {
-    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const selection = document.getSelection() as (Selection & { direction?: string }) | null
-    if (selection && typeof selection.getComposedRanges === 'function' && root instanceof ShadowRoot) {
-      if (!selection.rangeCount) return null
-      const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
-      if (!range) return null
-      return selection.direction === 'backward'
-        ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
-        : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
-    }
-    const fallback = root.getSelection?.() ?? selection
-    return fallback?.anchorNode && fallback.focusNode ? (fallback as Selection & { anchorNode: Node; focusNode: Node }) : null
   }
 
   private toggleTodo(pos: number) {
@@ -1974,127 +1959,8 @@ const BLOCK_ENTRIES: ReadonlyArray<{ block: PageEditorBlock; keywords: string; s
 
 const isSelectedTable = (state: EditorState) => state.selection instanceof NodeSelection && state.selection.node.type === schema.nodes.table
 
-/** Places a popover next to `anchor`, flipping to the other side when there is no room. */
-function place(popover: HTMLElement, anchor: DOMRect, side: 'above' | 'below') {
-  const width = popover.offsetWidth
-  const height = popover.offsetHeight
-  const gap = 6
-  let y = side === 'below' ? anchor.bottom + gap : anchor.top - height - gap
-  if (side === 'below' && y + height > innerHeight - 8 && anchor.top - height - gap >= 8) y = anchor.top - height - gap
-  if (side === 'above' && y < 8) y = anchor.bottom + gap
-  const x = Math.min(Math.max(8, anchor.left), innerWidth - width - 8)
-  popover.style.left = `${Math.round(x)}px`
-  popover.style.top = `${Math.round(Math.max(8, y))}px`
-}
-
-/** The extent of `type` around a position, or `null` when it does not carry it. */
-function markExtent($pos: ResolvedPos, type: MarkType): { from: number; to: number } | null {
-  const parent = $pos.parent
-  const start = $pos.start()
-  let found: Mark | undefined = type.isInSet($pos.marks())
-  if (!found && $pos.nodeAfter) found = type.isInSet($pos.nodeAfter.marks)
-  if (!found) return null
-  const mark = found
-  let from = -1
-  let to = -1
-  let offset = 0
-  for (let index = 0; index < parent.childCount; index++) {
-    const child = parent.child(index)
-    const end = offset + child.nodeSize
-    if (mark.isInSet(child.marks)) {
-      if (from < 0) from = offset
-      to = end
-    } else if (from >= 0) {
-      if (start + to >= $pos.pos) break
-      from = -1
-    }
-    offset = end
-  }
-  return from < 0 ? null : { from: start + from, to: start + to }
-}
-
-/** Serializes a page to HTML with real nested `<ul>`/`<ol>` lists. */
-function pageToHTML(doc: ProseNode): string {
-  const serializer = DOMSerializer.fromSchema(schema)
-  const root = document.createElement('div')
-  const numbers = listNumbers(doc)
-  let stack: Array<{ list: HTMLElement; kind: string; last: HTMLElement | null }> = []
-  doc.forEach((node, _pos, index) => {
-    if (node.type !== schema.nodes.item) {
-      stack = []
-      if (node.type === schema.nodes.paragraph && node.content.size === 0 && index === doc.childCount - 1) return
-      root.append(serializer.serializeNode(node))
-      return
-    }
-    const indent = node.attrs.indent as number
-    const kind = node.attrs.kind as string
-    const tag = kind === 'ordered' ? 'ol' : 'ul'
-    while (stack.length > indent + 1) stack.pop()
-    let level: (typeof stack)[number] | undefined = stack[indent]
-    if (level && level.kind !== kind) {
-      stack.length = indent
-      level = undefined
-    }
-    if (!level) {
-      const list = document.createElement(tag)
-      if (kind === 'todo') list.className = 'todo-list'
-      if (kind === 'ordered' && numbers[index] > 1) list.setAttribute('start', String(numbers[index]))
-      const parent = indent > 0 ? stack[indent - 1]?.last : null
-      ;(parent ?? root).append(list)
-      level = { list, kind, last: null }
-      stack[indent] = level
-    }
-    const li = document.createElement('li')
-    if (kind === 'todo') {
-      const box = document.createElement('input')
-      box.type = 'checkbox'
-      box.disabled = true
-      if (node.attrs.checked) box.setAttribute('checked', '')
-      li.append(box, ' ')
-      li.dataset.checked = String(node.attrs.checked)
-    }
-    li.append(serializer.serializeFragment(node.content))
-    level.list.append(li)
-    level.last = li
-  })
-  return root.innerHTML
-}
-
 declare global {
   interface HTMLElementTagNameMap {
     'c2-page-editor': PageEditor
   }
-}
-
-/** A list marker a pasted line starts with: `-`, `*`, `•` or `–` for a bullet, `1.` or `1)` for a numbered item. */
-const PASTED_MARKER = /^\s*(?:([-*•–])|\d+[.)])\s+/
-
-/** A pasted paragraph that starts with a list marker, as a list item without the marker; anything else as it is. */
-function pastedListItem(node: ProseNode): ProseNode {
-  const first = node.firstChild
-  const match = node.type === schema.nodes.paragraph && first?.isText ? PASTED_MARKER.exec(first.text!) : null
-  if (!match || first!.text!.length === match[0].length) return node
-  const rest = first!.cut(match[0].length)
-  return schema.nodes.item.create({ kind: match[1] ? 'bullet' : 'ordered' }, node.content.replaceChild(0, rest), node.marks)
-}
-
-/**
- * A web page's text often comes as one paragraph whose lines are `<br>`s: pasted as is, it is one block, so a heading
- * or a list made of one line takes them all. Each line of a pasted text block becomes a block of its own (the blank
- * ones a `<br><br>` leaves are dropped), and a line starting with a list marker a list item. A code block keeps its
- * lines.
- */
-export function splitPastedLines(slice: Slice): Slice {
-  const blocks: ProseNode[] = []
-  slice.content.forEach((node) => {
-    if (!node.isTextblock || node.type.spec.code) {
-      blocks.push(node)
-      return
-    }
-    const lines: ProseNode[][] = [[]]
-    node.forEach((child) => (child.type === schema.nodes.hard_break ? lines.push([]) : lines[lines.length - 1].push(child)))
-    const kept = lines.length > 1 ? lines.filter((line) => line.some((child) => !child.isText || child.text!.trim())) : lines
-    for (const line of kept.length ? kept : [[]]) blocks.push(pastedListItem(node.type.create(node.attrs, line, node.marks)))
-  })
-  return new Slice(Fragment.fromArray(blocks), slice.openStart, slice.openEnd)
 }

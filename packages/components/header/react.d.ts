@@ -24,6 +24,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-header': C2Props<Header> & {
+        'hide-on-scroll'?: Attribute
         'navigation-label'?: Attribute
       }
     }

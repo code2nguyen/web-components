@@ -254,6 +254,17 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff))',
   },
+  // The "More" trigger of an overflow list is outlined in the accent while it holds the current page.
+  '--c2-overflow-list__more__current--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
+  // Org chart: the connector lines are the resting border grey, hovering a card or a toggle takes the hover border,
+  // and the selection ring doubles the accent border.
+  '--c2-org-chart__connector--color': { token: 'color-outline', value: 'var(--c2-theme--color-outline, #bcbcc6)' },
+  '--c2-org-chart__card__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-org-chart__toggle__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-org-chart__card__selected--box-shadow': { token: 'color-primary', value: '0 0 0 1px var(--c2-theme--color-primary, rgb(2, 101, 220))' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -286,6 +297,11 @@ export const overrides: Record<string, Override> = {
   '--c2-trace-waterfall__series-7--color': { token: 'chart-series-7' },
   '--c2-trace-waterfall__series-8--color': { token: 'chart-series-8' },
   '--c2-trace-waterfall__bar__error--background': { token: 'color-error' },
+  '--c2-save-bar__container--box-shadow': { token: 'shadow-md' },
+  '--c2-save-bar__indicator__invalid--background': { token: 'color-error' },
+  '--c2-save-bar__indicator--background': { exclude: 'unsaved-changes warning hue; the theme has no warning token' },
+  '--c2-save-bar__indicator--box-shadow': { exclude: 'halo in the indicator hue' },
+  '--c2-save-bar__indicator__invalid--box-shadow': { exclude: 'halo in the indicator hue' },
   // Row dividers and axis lines are fainter than a hairline border: the surface-container grey.
   '--c2-trace-waterfall__grid-line--color': { token: 'color-surface-container' },
   '--c2-trace-waterfall__row--border-bottom': {
@@ -312,6 +328,11 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // A depth chart's sides are the chart's own rise and fall colours, not the error role, and its mid price label is
+  // drawn like the tooltip: an inverse surface with the text that reads on it.
+  '--c2-chart__bid--color': { token: 'chart-positive' },
+  '--c2-chart__ask--color': { token: 'chart-negative' },
+  '--c2-chart__mid-label--color': { token: 'color-on-inverse-surface' },
   // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
   // falling-direction colour so a brand recolours the pair together with the charts.
   '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
@@ -379,6 +400,9 @@ export const overrides: Record<string, Override> = {
   // white sheen rather than a surface colour, and the theme has no token for one.
   '--c2-skeleton--background-color': { token: 'color-outline-variant' },
   '--c2-skeleton__sheen--color': { exclude: 'translucent highlight, not a surface colour' },
+  // Table of contents: the rail is the same hairline grey as the progress track; the reading-progress fill is off by
+  // default (transparent) and an accent the author picks.
+  '--c2-table-of-contents__track--background-color': { token: 'color-outline-variant' },
   // Virtual list: the search highlight is a marker yellow, deliberately outside the surface/accent ramp so a match
   // stands out in every theme.
   '--c2-virtual-list__highlight--background': { exclude: 'marker highlight, not a surface colour' },
@@ -451,6 +475,13 @@ export const overrides: Record<string, Override> = {
   '--c2-indicator__danger--color': { token: 'color-on-fill' },
   '--c2-indicator__info--background': { exclude: 'solid status fill' },
   '--c2-indicator__info--color': { token: 'color-on-fill' },
+  // Status light dots carry no text, so the grey and red follow the theme (both lighten on a dark page); the other
+  // status hues have no token.
+  '--c2-status-light__dot__neutral--background': { token: 'color-on-surface-variant' },
+  '--c2-status-light__dot__danger--background': { token: 'color-error' },
+  '--c2-status-light__dot__info--background': { exclude: 'status colour' },
+  '--c2-status-light__dot__success--background': { exclude: 'status colour' },
+  '--c2-status-light__dot__warning--background': { exclude: 'status colour' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },
@@ -576,6 +607,13 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-app-shell__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  '--c2-app-shell-toggle__hover--background-color': { exclude: 'translucent wash works on any header surface' },
+  // The condensed bar of a sticky page header keeps its translucency over whatever scrolls under it.
+  '--c2-page-header__condensed--background-color': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 92%, transparent)',
+  },
   '--c2-chip__remove-button__hover--background-color': { exclude: 'translucent wash works on any chip background' },
   // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
@@ -825,6 +863,15 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
   '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },
   '--c2-notepad__sheet__focus--box-shadow': { exclude: 'paper elevation over the desk' },
+  // Rich text editor: its popovers and selection follow the page editor's; the quote bar keeps its own width.
+  '--c2-rich-text-editor__popover--box-shadow': { token: 'shadow-md' },
+  '--c2-rich-text-editor__selection--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
+  '--c2-rich-text-editor__quote--border-left': { token: 'color-outline', value: '3px solid var(--c2-theme--color-outline, #d4d4d8)' },
+  '--c2-rich-text-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
+  '--c2-rich-text-editor__code--font-family': { exclude: 'monospace code face' },
   // Page editor: the floating toolbar and menus are popovers, and the caret's code block and selection follow the accent.
   '--c2-page-editor__popover--box-shadow': { token: 'shadow-md' },
   '--c2-page-editor__selection--background': {
@@ -930,4 +977,14 @@ export const overrides: Record<string, Override> = {
   '--c2-form-field__warning--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__counter__near-limit--color': { exclude: 'semantic warning colour' },
   '--c2-form-field__icon-glyph--color': { exclude: 'glyph on the error or warning disc' },
+  // Bottom nav: the pressed indicator is the hover surface tinted a step further (as on the copy button), and the badge
+  // ring cuts the badge out of the bar, so it is drawn in the bar's surface colour like the avatar-group ring.
+  '--c2-bottom-nav-item__indicator__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  '--c2-bottom-nav-item__badge--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
 }

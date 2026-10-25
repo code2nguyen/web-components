@@ -1,0 +1,98 @@
+---
+title: 'Bottom Nav'
+description: 'The mobile tab bar: three to five destinations along the bottom of the screen, each an icon over a short label with a count or dot badge.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BottomNav } from '@c2n/components/bottom-nav'
+import { BottomNavItem } from '@c2n/components/bottom-nav/bottom-nav-item'
+import { PhosphorHouseIcon as PhosphorHouse } from '@c2n/phosphor-icons/icons/house.js'
+import { PhosphorWalletIcon as PhosphorWallet } from '@c2n/phosphor-icons/icons/wallet.js'
+import { PhosphorPaperPlaneTiltIcon as PhosphorPaperPlaneTilt } from '@c2n/phosphor-icons/icons/paper-plane-tilt.js'
+import { PhosphorChartPieIcon as PhosphorChartPie } from '@c2n/phosphor-icons/icons/chart-pie.js'
+import { PhosphorUserIcon as PhosphorUser } from '@c2n/phosphor-icons/icons/user.js'
+
+`c2-bottom-nav` is the tab bar of a mobile app: three to five `c2-bottom-nav-item` destinations, each an icon (`icon` slot) over a short label, with an optional `count` or `dot` badge. It is a navigation landmark of plain links (items with an `href`) or buttons, named "Main" unless you give the host an `aria-label`. The current item is announced with `aria-current="page"` and marked by more than colour: an indicator behind the icon, and the `current-icon` slot when you give a filled variant. A badge is read as part of the item's name ("Payments, 3 new").
+
+Set `value` to the value of the item being shown, or mark that item `current`. Activating another item fires a cancelable `item-select` (cancel it to keep the user on a screen with unsaved changes; a link is not followed), then updates `value` and fires `change`. Activating the current item again fires `reselect`: scroll back to the top there.
+
+The host is `position: sticky` at the bottom, so as the last element of the page it stays on screen without covering the end of the content, and the bar is padded by `env(safe-area-inset-bottom)` for the phone's home indicator (add `viewport-fit=cover` to the viewport meta). `hide-on-scroll` slides it away while the page scrolls down and brings it back on scroll up, at the top or when focus moves into it; `scroll-target` names a scrolling element other than the window. `label-visibility` shows every label (`labeled`, the default), only the current one (`selected`), none (`unlabeled`), or all of them up to three items and only the current one from four (`auto`). Hidden labels remain the items' accessible names.
+
+Use it for the top-level sections of a phone layout. On wider screens, switch to `c2-side-nav` with a media query, or lay the items out in a row with `--c2-bottom-nav-item--flex-direction: row`. Avoid disabling or hiding items, and keep badges for what needs attention.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/bottom-nav'
+```
+
+Importing `@c2n/components/bottom-nav` registers `c2-bottom-nav-item` too. The examples use icons from the separate `@c2n/phosphor-icons` package: `npm install @c2n/phosphor-icons`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/bottom-nav
+<style>
+  .bottom-nav-demo {
+    width: 380px;
+    max-width: 100%;
+    --c2-bottom-nav--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<div data-label="Labeled">
+  <c2-bottom-nav class="bottom-nav-demo" value="home">
+    <c2-bottom-nav-item value="home" href="#home">
+      <c2-phosphor-house slot="icon"></c2-phosphor-house>
+      <c2-phosphor-house slot="current-icon" weight="fill"></c2-phosphor-house>
+      Home
+    </c2-bottom-nav-item>
+    <c2-bottom-nav-item value="cards" href="#cards">
+      <c2-phosphor-wallet slot="icon"></c2-phosphor-wallet>
+      <c2-phosphor-wallet slot="current-icon" weight="fill"></c2-phosphor-wallet>
+      Cards
+    </c2-bottom-nav-item>
+    <c2-bottom-nav-item value="payments" href="#payments" count="3">
+      <c2-phosphor-paper-plane-tilt slot="icon"></c2-phosphor-paper-plane-tilt>
+      <c2-phosphor-paper-plane-tilt slot="current-icon" weight="fill"></c2-phosphor-paper-plane-tilt>
+      Payments
+    </c2-bottom-nav-item>
+    <c2-bottom-nav-item value="insights" href="#insights">
+      <c2-phosphor-chart-pie slot="icon"></c2-phosphor-chart-pie>
+      <c2-phosphor-chart-pie slot="current-icon" weight="fill"></c2-phosphor-chart-pie>
+      Insights
+    </c2-bottom-nav-item>
+    <c2-bottom-nav-item value="profile" href="#profile" dot>
+      <c2-phosphor-user slot="icon"></c2-phosphor-user>
+      <c2-phosphor-user slot="current-icon" weight="fill"></c2-phosphor-user>
+      Profile
+    </c2-bottom-nav-item>
+  </c2-bottom-nav>
+</div>
+<div data-label="Current label only">
+  <c2-bottom-nav class="bottom-nav-demo" value="payments" label-visibility="selected">
+    <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house>Home</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="cards"><c2-phosphor-wallet slot="icon"></c2-phosphor-wallet>Cards</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="payments" count="128"><c2-phosphor-paper-plane-tilt slot="icon"></c2-phosphor-paper-plane-tilt>Payments</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="profile"><c2-phosphor-user slot="icon"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+  </c2-bottom-nav>
+</div>
+<div data-label="Unlabeled">
+  <c2-bottom-nav class="bottom-nav-demo" value="cards" label-visibility="unlabeled">
+    <c2-bottom-nav-item value="home"><c2-phosphor-house slot="icon"></c2-phosphor-house>Home</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="cards"><c2-phosphor-wallet slot="icon"></c2-phosphor-wallet>Cards</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="insights"><c2-phosphor-chart-pie slot="icon"></c2-phosphor-chart-pie>Insights</c2-bottom-nav-item>
+    <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user>Profile</c2-bottom-nav-item>
+  </c2-bottom-nav>
+</div>
+```
+
+```javascript tag=CodeBlock
+const nav = document.querySelector('c2-bottom-nav')
+nav.addEventListener('item-select', (event) => {
+  if (hasUnsavedChanges()) event.preventDefault() // stay, and the link is not followed
+})
+nav.addEventListener('change', () => router.navigate(nav.value))
+nav.addEventListener('reselect', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
+```

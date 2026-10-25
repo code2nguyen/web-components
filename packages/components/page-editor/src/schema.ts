@@ -20,10 +20,16 @@ export const MAX_INDENT = 3
 
 export const isColor = (value: unknown): value is PageEditorColor => COLORS.includes(value as PageEditorColor)
 
-/** Links keep web, mail, phone and relative addresses; anything else (`javascript:`) is dropped. */
+/**
+ * Links keep web, mail, phone and relative addresses; anything else (`javascript:`) is dropped. Browsers remove tabs and
+ * line breaks anywhere in a URL and control characters at its ends before reading its scheme, so those are removed
+ * here first (`java<tab>script:` is `javascript:`), and an address still holding a control character is refused.
+ */
 export function safeHref(href: string | null | undefined): string | null {
-  const value = (href ?? '').trim()
-  if (!value) return null
+  // eslint-disable-next-line no-control-regex
+  const value = (href ?? '').replace(/[\t\n\r]/g, '').replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '')
+  // eslint-disable-next-line no-control-regex
+  if (!value || /[\u0000-\u001f\u007f]/.test(value)) return null
   if (/^(https?:|mailto:|tel:)/i.test(value) || /^[/#?.]/.test(value)) return value
   if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return null
   // A bare domain ("example.com/docs") is a web address.
@@ -244,13 +250,14 @@ export const schema = new Schema({
     },
     // A picture on a line of its own, pasted or dropped: its `src` is the application's (see `imageUpload`), its width
     // the one it was resized to. `pending` is the id of a pasted image still being saved, which no Markdown is written
-    // for yet.
+    // for yet (a web image's address is, until its copy is saved). `web` marks an image pasted from another page with
+    // its web address, to copy into the application's store (see `adoptPastedImages`); it is never written.
     image: {
       group: 'block',
       atom: true,
       selectable: true,
       draggable: true,
-      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null } },
+      attrs: { src: { default: '' }, alt: { default: '' }, width: { default: null }, pending: { default: null }, web: { default: false } },
       parseDOM: [{ tag: 'img[src]', getAttrs: (dom) => imageFromDOM(dom as HTMLImageElement) }],
       toDOM: (node) => {
         const { src, alt, width } = node.attrs
