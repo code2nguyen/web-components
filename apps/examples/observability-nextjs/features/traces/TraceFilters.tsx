@@ -57,9 +57,9 @@ export function TraceFilters({ services, operations }: Readonly<TraceFiltersProp
 
   return (
     <section aria-labelledby="trace-filter-heading">
-      <h2 id="trace-filter-heading" className="sr-only">
-        Trace filters
-      </h2>
+      <c2-visually-hidden>
+        <h2 id="trace-filter-heading">Trace filters</h2>
+      </c2-visually-hidden>
       <div className="filter-bar">
         <label className="filter-field">
           <span>Search</span>

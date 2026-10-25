@@ -889,6 +889,10 @@
       "types": "./dist/virtual-list.d.ts",
       "default": "./dist/virtual-list.js"
     },
+    "./visually-hidden": {
+      "types": "./dist/visually-hidden.d.ts",
+      "default": "./dist/visually-hidden.js"
+    },
     "./week-planner": {
       "types": "./dist/week-planner.d.ts",
       "default": "./dist/week-planner.js"
@@ -1168,6 +1172,7 @@
     "@c2n/upload": "*",
     "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
+    "@c2n/visually-hidden": "*",
     "@c2n/week-planner": "*",
     "@c2n/working-indicator": "*"
   }

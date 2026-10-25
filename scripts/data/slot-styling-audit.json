@@ -3860,6 +3860,12 @@
       "reason": "The toolbar slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-visually-hidden",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned content the host hides; revealed (focusable with focus inside), the element applies no styles, so the content keeps its own class styles."
+    },
+    {
       "tag": "c2-week-planner",
       "slot": "actions",
       "decision": "part",

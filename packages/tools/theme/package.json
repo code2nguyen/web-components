@@ -203,6 +203,7 @@
         "../../components/upload:build",
         "../../components/view-options:build",
         "../../components/virtual-list:build",
+        "../../components/visually-hidden:build",
         "../../components/week-planner:build",
         "../../components/working-indicator:build",
         "../../icons/feather-icons:build",

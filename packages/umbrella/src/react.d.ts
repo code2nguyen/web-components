@@ -158,6 +158,7 @@ import '@c2n/truncate/react'
 import '@c2n/upload/react'
 import '@c2n/view-options/react'
 import '@c2n/virtual-list/react'
+import '@c2n/visually-hidden/react'
 import '@c2n/week-planner/react'
 import '@c2n/working-indicator/react'
 

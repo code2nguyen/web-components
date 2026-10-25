@@ -183,6 +183,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 - **Sticky** — `c2-sticky` · `@c2n/components/sticky` — Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down.
 - **Swipe Action** — `c2-swipe-action` · `@c2n/components/swipe-action` — A list row that slides sideways to reveal actions behind it, as in a mail or task list on a phone.
+- **Visually Hidden** — `c2-visually-hidden` · `@c2n/components/visually-hidden` — Text for screen readers only: kept in the accessibility tree, drawn nowhere, optionally shown while it holds focus.
 
 ## Navigation
 

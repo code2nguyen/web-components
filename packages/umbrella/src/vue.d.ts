@@ -158,6 +158,7 @@ import '@c2n/truncate/vue'
 import '@c2n/upload/vue'
 import '@c2n/view-options/vue'
 import '@c2n/virtual-list/vue'
+import '@c2n/visually-hidden/vue'
 import '@c2n/week-planner/vue'
 import '@c2n/working-indicator/vue'
 

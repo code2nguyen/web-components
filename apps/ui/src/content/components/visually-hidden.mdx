@@ -1,0 +1,112 @@
+---
+title: 'Visually Hidden'
+description: 'Text for screen readers only: kept in the accessibility tree, drawn nowhere, optionally shown while it holds focus.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { VisuallyHidden } from '@c2n/components/visually-hidden'
+import { Button } from '@c2n/components/button'
+import { FeatherEdit2Icon as FeatherEdit_2 } from '@c2n/feather-icons/icons/edit-2.js'
+import { FeatherShare2Icon as FeatherShare_2 } from '@c2n/feather-icons/icons/share-2.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+`c2-visually-hidden` keeps its content for assistive technology and draws nothing: the text is read out, can name the control it sits in and can be referenced by `aria-labelledby` or `aria-describedby`, but it takes no space in the layout. Use it for the label of an icon-only button, the words a visual cue stands for ("4 out of 5 stars"), a heading the layout makes obvious, or a live-region announcement (put `role="status"` and `aria-live` on the element itself).
+
+Add `focusable` for a link or button only keyboard users need to see: the content appears while focus is inside it and hides again when focus leaves. Revealed, the element applies no styles of its own, so the page styles it like any inline content.
+
+The hiding rules are `!important` inside the shadow root, so a page rule on the tag cannot bring the content back by accident. `hidden` (or `display: none`) is different: it removes the content from the accessibility tree too. The element has no CSS variables, because nothing about drawing nothing is worth tuning.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/visually-hidden'
+```
+
+The examples below also use `@c2n/feather-icons` (`npm install @c2n/feather-icons`).
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/visually-hidden
+<style>
+  .vh-icon-only {
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+  }
+  .vh-sentence {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .vh-stars {
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #f59e0b;
+  }
+  .vh-sentence a,
+  .vh-skip a {
+    color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .vh-skip a {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: var(--c2-theme--color-primary, #0265dc);
+    color: var(--c2-theme--color-on-primary, #ffffff);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>
+<div data-label="Icon-only buttons, named by hidden text">
+  <c2-button class="vh-icon-only"><c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2><c2-visually-hidden>Edit invoice</c2-visually-hidden></c2-button>
+  <c2-button class="vh-icon-only"><c2-feather-share-2 slot="prefix-icon"></c2-feather-share-2><c2-visually-hidden>Share invoice</c2-visually-hidden></c2-button>
+  <c2-button class="vh-icon-only"><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2><c2-visually-hidden>Delete invoice</c2-visually-hidden></c2-button>
+</div>
+<div data-label="Words a visual cue stands for">
+  <div class="vh-sentence">
+    <span><span class="vh-stars" aria-hidden="true">★★★★☆</span><c2-visually-hidden>Rated 4 out of 5 stars</c2-visually-hidden></span>
+    <a href="#pricing">Read more<c2-visually-hidden> about pricing</c2-visually-hidden></a>
+  </div>
+</div>
+<div data-label="Focusable: click here, then press Tab">
+  <c2-visually-hidden class="vh-skip" focusable><a href="#vh-comments">Skip to comments</a></c2-visually-hidden>
+</div>
+```
+
+The first row is three buttons named "Edit invoice", "Share invoice" and "Delete invoice"; the second reads "Rated 4 out of 5 stars" and "Read more about pricing" where the screen shows stars and "Read more". In the last row nothing is drawn until Tab lands on the link.
+
+A hidden heading gives a screen-reader user a landmark to jump to without adding a visible title the design does not want:
+
+```html tag=CodeBlock
+<section aria-labelledby="filters-heading">
+  <h2 id="filters-heading"><c2-visually-hidden>Filters</c2-visually-hidden></h2>
+  …
+</section>
+```
+
+An announcement the screen does not need to show goes on the element itself:
+
+```html tag=CodeBlock
+<c2-visually-hidden role="status" aria-live="polite">12 results</c2-visually-hidden>
+```
+
+## Before the element is defined
+
+Until `@c2n/components/visually-hidden` has loaded, the browser treats the tag as an unknown inline element and draws its text. A page rendered on the server or exported as static HTML (Next.js, Astro, SvelteKit) paints before the module runs, so give the undefined element the same rules once in the app's stylesheet:
+
+```css tag=CodeBlock
+c2-visually-hidden:not(:defined) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+```
