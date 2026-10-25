@@ -3,6 +3,76 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.17](https://github.com/code2nguyen/web-components/releases/tag/v1.0.17) — 2026-10-25
+
+### Breaking changes
+
+- **mermaid:** Make mermaid an optional peer dependency ([f2f741d](https://github.com/code2nguyen/web-components/commit/f2f741d))
+
+### Features
+
+- **sticky:** Add c2-sticky and share stuck detection with c2-header ([2f11f4f](https://github.com/code2nguyen/web-components/commit/2f11f4f))
+- **notepad, page-editor:** A web image pasted from another page is copied through imageUpload, or keeps its address when the site refuses ([18b9a19](https://github.com/code2nguyen/web-components/commit/18b9a19))
+- **list:** Swipe rows only with the opt-in swipeable attribute ([6796ba4](https://github.com/code2nguyen/web-components/commit/6796ba4))
+- **menubar:** Add c2-menubar and c2-menubar-menu ([461fbe9](https://github.com/code2nguyen/web-components/commit/461fbe9))
+- **swipe-action:** Keyboard shortcuts for actions, and swipe rows in a c2-list ([9934148](https://github.com/code2nguyen/web-components/commit/9934148))
+- **float-button:** Add c2-float-button, a floating action button with a speed dial ([16dc67c](https://github.com/code2nguyen/web-components/commit/16dc67c))
+- **master-detail:** Add c2-master-detail ([c598bf9](https://github.com/code2nguyen/web-components/commit/c598bf9))
+- **overflow-list:** Add c2-overflow-list, a row that folds what does not fit into a More menu ([e311172](https://github.com/code2nguyen/web-components/commit/e311172))
+- **swipe-action:** Add c2-swipe-action, a list row that swipes to reveal actions ([ba25011](https://github.com/code2nguyen/web-components/commit/ba25011))
+- **table-of-contents:** Add c2-table-of-contents ([ad10dab](https://github.com/code2nguyen/web-components/commit/ad10dab))
+- **bottom-nav:** Add c2-bottom-nav, the mobile tab bar ([4bebaae](https://github.com/code2nguyen/web-components/commit/4bebaae))
+- **save-bar:** Add c2-save-bar for unsaved form changes ([e51666d](https://github.com/code2nguyen/web-components/commit/e51666d))
+- **app-shell:** Add c2-app-shell, c2-app-shell-toggle and c2-page-header ([c203eb1](https://github.com/code2nguyen/web-components/commit/c203eb1))
+- **sheet:** Add swipe-close and content-sized sheets ([1704b8c](https://github.com/code2nguyen/web-components/commit/1704b8c))
+- **chart:** Add c2-sankey-chart, flows between stages ([918804f](https://github.com/code2nguyen/web-components/commit/918804f))
+- **rich-text-editor:** Add c2-rich-text-editor, a compact formatted-text field ([81992ec](https://github.com/code2nguyen/web-components/commit/81992ec))
+- **chart:** Add c2-depth-chart, cumulative order-book depth around the mid price ([bd6cd99](https://github.com/code2nguyen/web-components/commit/bd6cd99))
+- **countdown:** Add c2-countdown ([98847f9](https://github.com/code2nguyen/web-components/commit/98847f9))
+- **org-chart:** Add c2-org-chart, a hierarchy drawn as connected cards ([49d6ebe](https://github.com/code2nguyen/web-components/commit/49d6ebe))
+- **status-light:** Add c2-status-light ([65ba1ab](https://github.com/code2nguyen/web-components/commit/65ba1ab))
+
+### Fixes
+
+- **sticky:** Track scrollers rendered late, body scrollers and content growth ([66cc51e](https://github.com/code2nguyen/web-components/commit/66cc51e))
+- **app-shell:** A navigationOpened set before the first measurement wins over the side default ([4a8ecff](https://github.com/code2nguyen/web-components/commit/4a8ecff))
+- **swipe-action:** Measure flick speed over the last 100ms, and keep the CDP touch test to Chromium ([caf21af](https://github.com/code2nguyen/web-components/commit/caf21af))
+- **page-header:** Defer resize work a frame and render the derived parent link only without a slotted one ([3f68600](https://github.com/code2nguyen/web-components/commit/3f68600))
+- **overflow-list:** Settle in a declarative shadow root and copy wrapped icons ([80f9f85](https://github.com/code2nguyen/web-components/commit/80f9f85))
+- **menu:** Read a deferred-hydration shadow root in connectedCallback ([817a506](https://github.com/code2nguyen/web-components/commit/817a506))
+- **swipe-action:** Address code review findings ([32d4f2a](https://github.com/code2nguyen/web-components/commit/32d4f2a))
+- **menubar:** Keyboard into a hovered menu, one tab stop after SSR and disabled changes ([18902e5](https://github.com/code2nguyen/web-components/commit/18902e5))
+- **table-of-contents:** Tolerate whole-pixel scrolling in WebKit ([22a6c75](https://github.com/code2nguyen/web-components/commit/22a6c75))
+- **page-header:** Fill the width, refold on late upgrades, docs screenshots pass ([679fbf3](https://github.com/code2nguyen/web-components/commit/679fbf3))
+- **master-detail:** Address review findings ([2d788ea](https://github.com/code2nguyen/web-components/commit/2d788ea))
+- **list:** Find a row's c2-list-item inside wrappers, past whitespace and nested wrappers ([f05ae0f](https://github.com/code2nguyen/web-components/commit/f05ae0f))
+- **bottom-nav:** Find items inside wrapper elements and fill the bar's width ([fafa7e8](https://github.com/code2nguyen/web-components/commit/fafa7e8))
+- **menu:** Skip the trigger lookup while server rendering ([0a49c15](https://github.com/code2nguyen/web-components/commit/0a49c15))
+- **app-shell:** Address review of the shell and page header ([faa839d](https://github.com/code2nguyen/web-components/commit/faa839d))
+- **save-bar:** Keep the message at the start of a full-width bar and Save solid while saving ([74632dd](https://github.com/code2nguyen/web-components/commit/74632dd))
+- **sheet:** Tighten swipe-close grab area, flick and handle placement ([50c3cfc](https://github.com/code2nguyen/web-components/commit/50c3cfc))
+- **chart:** Keep sankey outside labels inside the plot ([89d8bc3](https://github.com/code2nguyen/web-components/commit/89d8bc3))
+- **chart:** Draw the depth chart's mid label inside its pill, in both themes ([a3e1b97](https://github.com/code2nguyen/web-components/commit/a3e1b97))
+- **page-editor, rich-text-editor:** Refuse links that browsers read as javascript: ([7fa1799](https://github.com/code2nguyen/web-components/commit/7fa1799))
+- **chart:** Address review findings on c2-sankey-chart ([e6224e2](https://github.com/code2nguyen/web-components/commit/e6224e2))
+- **chart:** Address depth chart review findings ([22180af](https://github.com/code2nguyen/web-components/commit/22180af))
+- **rich-text-editor:** Keep the linked text highlighted while the link popover is open ([284e811](https://github.com/code2nguyen/web-components/commit/284e811))
+- **rich-text-editor:** Describe its parts' slots and cover it in the FormData suite ([078de5b](https://github.com/code2nguyen/web-components/commit/078de5b))
+- **rich-text-editor:** Document attributes and slots, add its dependencies to the lockfile ([6298a93](https://github.com/code2nguyen/web-components/commit/6298a93))
+- **status-light:** Keep the pulse ring and icon dot right in every state ([f65f438](https://github.com/code2nguyen/web-components/commit/f65f438))
+- **mermaid:** Keep the loader's error when mermaid cannot be loaded ([539eafe](https://github.com/code2nguyen/web-components/commit/539eafe))
+- **table:** Isolate the grid viewport rather than the host ([c5e5901](https://github.com/code2nguyen/web-components/commit/c5e5901))
+- **table:** Keep pinned and sticky cells' stacking inside the table ([56e92ce](https://github.com/code2nguyen/web-components/commit/56e92ce))
+
+### Performance
+
+- **chart:** Keep the depth chart's messages out of the shared chunk ([84493b3](https://github.com/code2nguyen/web-components/commit/84493b3))
+- **components:** Write the merged custom-elements.json without indentation ([c380723](https://github.com/code2nguyen/web-components/commit/c380723))
+
+### Docs site & examples
+
+- **examples:** Make Log Lens tabs and shortcuts respond after a file loads ([9b3b541](https://github.com/code2nguyen/web-components/commit/9b3b541))
+
 ## [1.0.16](https://github.com/code2nguyen/web-components/releases/tag/v1.0.16) — 2026-10-23
 
 ### Features
