@@ -79,7 +79,7 @@ export class InspectorRow extends LitElement {
       }
       .info {
         flex: none;
-        --c2-toggletip__button--size: 16px;
+        --c2-toggletip__button--size: 13px;
         --c2-toggletip__icon--size: 11px;
         --c2-toggletip__button--color: var(--site-color-on-surface-muted);
         --c2-toggletip__button__hover--color: var(--site-color-primary);

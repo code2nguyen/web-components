@@ -101,6 +101,13 @@ export class Toggletip extends LitElement {
   /** Whether the `icon` slot holds words, which name the button better than a hidden label would. */
   @state() private iconHasText = false
 
+  /**
+   * Whether the live region holds the content. It is filled a frame after the bubble is shown, never in the same
+   * render: a region that appears already full is not announced, one that is exposed and then filled is.
+   */
+  @state() private filled = false
+  private fillFrame = 0
+
   private readonly msg = new LocalizeController(this, toggletipMessages)
   private cleanupPosition: (() => void) | null = null
   private offsetObserver: MutationObserver | null = null
@@ -110,6 +117,10 @@ export class Toggletip extends LitElement {
     super.disconnectedCallback()
     this.stopListening()
     this.stopPositioning()
+    cancelAnimationFrame(this.fillFrame)
+    // The browser hides a popover taken out of the document; keep `open` (and `aria-expanded`) in step with that.
+    this.open = false
+    this.filled = false
   }
 
   override focus(options?: FocusOptions) {
@@ -118,7 +129,8 @@ export class Toggletip extends LitElement {
 
   private handleIconSlotChange(event: Event) {
     const nodes = (event.target as HTMLSlotElement).assignedNodes({ flatten: true })
-    this.iconHasText = nodes.some((node) => !!node.textContent?.trim())
+    // An icon's `<title>` or `<text>` is not visible wording, so an svg never counts.
+    this.iconHasText = nodes.some((node) => !(node instanceof SVGElement) && !!node.textContent?.trim())
   }
 
   private handleButtonClick = () => {
@@ -133,6 +145,8 @@ export class Toggletip extends LitElement {
 
   private handleKeydown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !this.open) return
+    // Only the innermost layer closes: not an enclosing dialog, which would otherwise take the key as its close request.
+    event.preventDefault()
     event.stopPropagation()
     this.close(true)
   }
@@ -159,8 +173,8 @@ export class Toggletip extends LitElement {
     this.removeEventListener('focusout', this.handleFocusOut)
   }
 
-  private readPixels(name: string, fallback: number) {
-    const value = Number.parseFloat(getComputedStyle(this).getPropertyValue(name))
+  private readPixels(style: CSSStyleDeclaration, name: string, fallback: number) {
+    const value = Number.parseFloat(style.getPropertyValue(name))
     return Number.isNaN(value) ? fallback : value
   }
 
@@ -191,8 +205,9 @@ export class Toggletip extends LitElement {
 
   private async updatePosition(panel: HTMLElement, anchor: HTMLElement) {
     const arrowElement = this.arrowElement
-    const arrowSize = arrowElement ? this.readPixels('--c2-toggletip__arrow--size', 10) : 0
-    const middleware = [offset(this.readPixels('--c2-toggletip--offset', 6) + arrowSize / 2), flip({ padding: 8 }), shift({ padding: 8 })]
+    const style = getComputedStyle(this)
+    const arrowSize = arrowElement ? this.readPixels(style, '--c2-toggletip__arrow--size', 10) : 0
+    const middleware = [offset(this.readPixels(style, '--c2-toggletip--offset', 6) + arrowSize / 2), flip({ padding: 8 }), shift({ padding: 8 })]
     if (arrowElement && arrowSize > 0) middleware.push(arrow({ element: arrowElement, padding: 8 }))
     const { x, y, placement, middlewareData } = await computePosition(anchor, panel, { placement: this.placement, strategy: 'fixed', middleware })
     panel.style.left = `${x}px`
@@ -223,11 +238,15 @@ export class Toggletip extends LitElement {
     }
     this.startPositioning(panel, anchor)
     this.startListening()
+    cancelAnimationFrame(this.fillFrame)
+    this.fillFrame = requestAnimationFrame(() => (this.filled = this.open))
     this.dispatchEvent(new Event('show'))
   }
 
   private hide() {
     const panel = this.panel
+    cancelAnimationFrame(this.fillFrame)
+    this.filled = false
     this.stopPositioning()
     this.stopListening()
     if (!panel?.matches(':popover-open')) return
@@ -272,8 +291,8 @@ export class Toggletip extends LitElement {
       </button>
       <div id="panel" class="panel" part="panel" popover="manual" @keydown=${this.handleKeydown}>
         <span class="arrow" part="arrow"></span>
-        <!-- The live region stays in the tree; its content arrives on opening, which is what makes it announced. -->
-        <div class="content" part="content" role="status">${this.open ? html`<slot></slot>` : nothing}</div>
+        <!-- The live region is exposed first and filled a frame later, which is what makes it announced. -->
+        <div class="content" part="content" role="status">${this.open && this.filled ? html`<slot></slot>` : nothing}</div>
       </div>
     `
   }

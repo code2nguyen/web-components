@@ -20,9 +20,19 @@ test('a press opens the bubble, announces its content and marks the button expan
   await expect(panel(page)).toBeHidden()
   // The live region is empty while closed, so nothing is read before the user asks.
   await expect(page.locator('c2-toggletip').locator('[part="content"]')).toHaveText('')
+  // Record whether the live region was ever exposed while still empty: a region that appears already full is not announced.
+  await page.locator('c2-toggletip').evaluate((el) => {
+    const region = el.shadowRoot!.querySelector('[role="status"]')!
+    const w = window as unknown as { exposedEmpty: boolean }
+    w.exposedEmpty = false
+    el.addEventListener('show', () => {
+      w.exposedEmpty = (region as HTMLElement).checkVisibility() && region.querySelector('slot') === null
+    })
+  })
   await button(page).click()
   await expect(button(page)).toHaveAttribute('aria-expanded', 'true')
   await expect(panel(page)).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as { exposedEmpty: boolean }).exposedEmpty)).toBe(true)
   await expect(page.getByText('Your EU VAT number')).toBeVisible()
   // The content is rendered through a slot inside the live region, which is what a screen reader announces.
   const announced = await page.locator('c2-toggletip p').evaluate((p) => p.assignedSlot?.closest('[role="status"]') !== null && p.assignedSlot !== null)
@@ -119,4 +129,29 @@ test('label names the button; words in the icon slot name it themselves; the def
   await expect(page.getByRole('button', { name: 'About billing periods' })).toBeVisible()
   await expect(page.getByRole('button', { name: "What's this?" })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Plus d’informations' })).toBeVisible()
+})
+
+test('Escape does not reach an enclosing dialog, and a moved toggletip starts closed', async ({ page, renderScenario }) => {
+  await renderScenario('<dialog id="d"><c2-toggletip>Inside a dialog.</c2-toggletip></dialog><div id="elsewhere"></div>')
+  await page.locator('#d').evaluate((d: HTMLDialogElement) => d.showModal())
+  await button(page).click()
+  await expect(panel(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(panel(page)).toBeHidden()
+  await expect(page.locator('#d')).toHaveAttribute('open', '')
+  await page.locator('#d').evaluate((d: HTMLDialogElement) => d.close())
+  await page.locator('#d').evaluate((d: HTMLDialogElement) => d.show())
+  await button(page).click()
+  await expect(panel(page)).toBeVisible()
+  await page.locator('c2-toggletip').evaluate((el) => document.querySelector('#elsewhere')!.append(el))
+  await expect(button(page)).toHaveAttribute('aria-expanded', 'false')
+  await button(page).click()
+  await expect(panel(page)).toBeVisible()
+})
+
+test('an svg title in the icon slot does not replace the translatable name', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-toggletip><svg slot="icon" viewBox="0 0 24 24"><title>info</title><circle cx="12" cy="12" r="10"></circle></svg>Help.</c2-toggletip>',
+  )
+  await expect(button(page)).toBeVisible()
 })
