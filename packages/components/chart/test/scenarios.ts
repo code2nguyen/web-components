@@ -24,6 +24,8 @@ import '../src/overlap-chart'
 import * as overlapLayout from '../src/overlap-layout'
 import '../src/chord-chart'
 import '../src/sankey-chart'
+import '../src/treemap-chart'
+import '../src/waterfall-chart'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -261,6 +263,15 @@ function build(): void {
     case 'sankey':
       main.innerHTML = `<c2-sankey-chart id="chart" source-field="from" target-field="to" value-field="amount"></c2-sankey-chart>`
       break
+    case 'waterfall':
+      main.innerHTML = `<c2-waterfall-chart id="chart" label-field="item" total-field="total" total-label="Net income"><c2-chart-series field="amount" label="Amount"></c2-chart-series></c2-waterfall-chart>`
+      break
+    case 'treemap':
+      main.innerHTML = `<c2-treemap-chart id="chart" label-field="ticker" group-field="sector"><c2-chart-series field="cap" label="Market cap"></c2-chart-series></c2-treemap-chart>`
+      break
+    case 'treemap-color':
+      main.innerHTML = `<c2-treemap-chart id="chart" label-field="ticker" group-field="sector" color-field="change" color-label="Change" color-suffix="%" label-content="name-value"><c2-chart-series field="cap" label="Market cap"></c2-chart-series></c2-treemap-chart>`
+      break
     case 'family':
       main.innerHTML = `
         <c2-line-chart style="--c2-chart--color:rgb(1,2,3)" x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-line-chart>
@@ -333,7 +344,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -394,6 +405,29 @@ function build(): void {
       { from: 'Revenue', to: 'Cost of revenue', amount: 20 },
       { from: 'Services', to: 'Revenue', amount: 0 },
       { from: 'Tax', amount: 3 },
+    ]
+  } else if (scenario === 'waterfall') {
+    chart.data = [
+      // A total row with a value opens the bridge at that level.
+      { item: 'Revenue', amount: 420, total: true },
+      { item: 'Cost of sales', amount: -180 },
+      { item: 'Services', amount: 35 },
+      { item: 'Gross profit', total: true },
+      { item: 'Operating expenses', amount: -95 },
+      // A row with no value changes nothing and draws no bar.
+      { item: 'Pending', amount: null },
+      { item: 'Tax', amount: -40 },
+    ]
+  } else if (scenario === 'treemap' || scenario === 'treemap-color') {
+    chart.data = [
+      { sector: 'Technology', ticker: 'AAPL', cap: 3400, change: 1.2 },
+      { sector: 'Technology', ticker: 'MSFT', cap: 3100, change: -0.4 },
+      { sector: 'Technology', ticker: 'NVDA', cap: 2900, change: 3.1 },
+      { sector: 'Energy', ticker: 'XOM', cap: 480, change: -1.5 },
+      { sector: 'Energy', ticker: 'CVX', cap: 300, change: 0 },
+      { sector: 'Health', ticker: 'LLY', cap: 700, change: 0.6 },
+      // No positive size: left out.
+      { sector: 'Health', ticker: 'ZERO', cap: 0, change: 2 },
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
@@ -515,7 +549,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart',
     ),
   ),
 ).then(() => {

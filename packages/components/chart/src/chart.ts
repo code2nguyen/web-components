@@ -23,6 +23,8 @@ import './heatmap-chart.js'
 import './chord-chart.js'
 import './depth-chart.js'
 import './sankey-chart.js'
+import './treemap-chart.js'
+import './waterfall-chart.js'
 import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
@@ -121,6 +123,15 @@ export {
   type SankeyNodeDetail,
   type SankeyTooltipContext,
 } from './sankey-chart.js'
+export { TreemapChart, buildTreemap, type TreemapModelOptions, type TreemapNode, type TreemapTooltipContext, type TreemapTreeNode } from './treemap-chart.js'
+export {
+  WaterfallChart,
+  buildWaterfallSteps,
+  type WaterfallRowInput,
+  type WaterfallStep,
+  type WaterfallStepKind,
+  type WaterfallTooltipContext,
+} from './waterfall-chart.js'
 export type { MapFeature, MapFeatureProperties, MapProjection, MapSource } from './maps/map-source.js'
 export { ChartSeries, SERIES_CHANGE_EVENT } from './chart-series.js'
 export { ChartLegend } from './chart-legend.js'

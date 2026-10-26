@@ -73,3 +73,29 @@ const sankeyEn = {
 
 /** The sankey chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const sankeyMessages = defineMessages('sankey-chart', sankeyEn)
+
+const waterfallEn = {
+  increase: 'Increase',
+  decrease: 'Decrease',
+  total: 'Total',
+  change: 'Change',
+  runningTotal: 'Running total',
+  step: 'Step',
+  summary: (series: string, count: string) => `Waterfall chart of ${series}, ${count} bars`,
+}
+
+/** The waterfall chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const waterfallMessages = defineMessages('waterfall-chart', waterfallEn)
+
+const treemapEn = {
+  name: 'Name',
+  group: 'Group',
+  value: 'Value',
+  share: 'Share of total',
+  shareOf: (group: string) => `Share of ${group}`,
+  path: (parent: string, name: string) => `${parent} › ${name}`,
+  summary: (series: string, count: string) => `Treemap of ${series}, ${count} tiles`,
+}
+
+/** The treemap chart's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const treemapMessages = defineMessages('treemap-chart', treemapEn)

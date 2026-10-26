@@ -326,6 +326,8 @@ export const overrides: Record<string, Override> = {
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
   '--c2-chart__negative--color': { token: 'chart-negative' },
+  // The zero of a treemap's colour scale: a quiet tile in either theme, which the outline colour is.
+  '--c2-chart__neutral--color': { token: 'color-outline' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
   // A depth chart's sides are the chart's own rise and fall colours, not the error role, and its mid price label is

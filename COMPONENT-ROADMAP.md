@@ -74,12 +74,10 @@ Domain patterns with no design-system home come from the products that made them
 
 These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar, pie, scatter, bubble, radar, gauge, pyramid, candlestick, butterfly, overlap, map, heatmap, sparkline). Each needs only a new series type on the existing engine.
 
-| #   | Component            | What it adds                                         | Real-world model                               | Priority | Decision |
-| --- | -------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
-| 51  | `c2-treemap-chart`   | Nested rectangles sized by value                     | Finviz market map, disk-usage tools            | P2       | Proposed |
-| 52  | `c2-waterfall-chart` | Running total bridged by positive and negative steps | P&L and cash-flow bridges in finance reporting | P2       | Proposed |
-| 54  | `c2-boxplot-chart`   | Distribution summary (median, quartiles, outliers)   | Datadog and Grafana latency views              | P3       | Proposed |
-| 55  | `c2-bullet-chart`    | One measure against a target and qualitative bands   | KPI scorecards                                 | P3       | Proposed |
+| #   | Component          | What it adds                                       | Real-world model                  | Priority | Decision |
+| --- | ------------------ | -------------------------------------------------- | --------------------------------- | -------- | -------- |
+| 54  | `c2-boxplot-chart` | Distribution summary (median, quartiles, outliers) | Datadog and Grafana latency views | P3       | Proposed |
+| 55  | `c2-bullet-chart`  | One measure against a target and qualitative bands | KPI scorecards                    | P3       | Proposed |
 
 ### D. Navigation and layout
 
