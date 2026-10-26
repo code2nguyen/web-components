@@ -1,0 +1,128 @@
+---
+title: 'Loading Overlay'
+description: 'Covers a region while it loads: the content stays in place, dimmed and blocked, with a spinner and an announced label.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { LoadingOverlay } from '@c2n/components/loading-overlay'
+import { Button } from '@c2n/components/button'
+import { TextField } from '@c2n/components/text-field'
+import { Skeleton } from '@c2n/components/skeleton'
+
+`c2-loading-overlay` covers a region while it refreshes, saves or recalculates: a card fetching new numbers, a table loading its next page, a form being submitted. The content stays where it is under a scrim with a spinner, so the layout does not jump, and it cannot be clicked, typed into or tabbed to until `loading` is removed. Use `c2-skeleton` when there is no content to show yet.
+
+While loading, the content is `inert` and marked busy (`aria-busy`), and a polite live region beside it announces the `label`, the text of the `label` slot, or the translatable "Loading". The spinner itself is hidden from assistive technology, so the region is announced once. `--c2-loading-overlay--delay` holds the overlay and its announcement back for loads that usually finish quickly, so they are neither seen nor heard; the content is blocked from the start either way. Put a `label` slot under the spinner to say what is happening, or replace the spinner with the `indicator` slot.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/loading-overlay'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/loading-overlay
+<style>
+  .lo-card {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .lo-card strong {
+    font-size: 24px;
+  }
+  .lo-frame {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 8px;
+  }
+  .lo-button {
+    --c2-skeleton--height: 36px;
+  }
+</style>
+<div data-label="Loading">
+  <c2-loading-overlay class="lo-frame" loading>
+    <div class="lo-card">
+      <span>Revenue this month</span>
+      <strong>$48,210</strong>
+      <c2-button>View report</c2-button>
+    </div>
+  </c2-loading-overlay>
+</div>
+<div data-label="With a label">
+  <c2-loading-overlay class="lo-frame" loading>
+    <div class="lo-card">
+      <c2-text-field aria-label="Workspace name" value="Acme"></c2-text-field>
+      <c2-button>Save</c2-button>
+    </div>
+    <span slot="label">Saving changes…</span>
+  </c2-loading-overlay>
+</div>
+<div data-label="First load: skeletons, overlay off">
+  <c2-loading-overlay class="lo-frame">
+    <div class="lo-card">
+      <c2-skeleton variant="text" lines="2" label="Loading the report"></c2-skeleton>
+      <c2-skeleton class="lo-button"></c2-skeleton>
+    </div>
+  </c2-loading-overlay>
+</div>
+<div data-label="Not loading">
+  <c2-loading-overlay class="lo-frame">
+    <div class="lo-card">
+      <span>Revenue this month</span>
+      <strong>$48,210</strong>
+      <c2-button>View report</c2-button>
+    </div>
+  </c2-loading-overlay>
+</div>
+```
+
+Toggle `loading` from your code around the work:
+
+```js tag=CodeBlock
+const overlay = document.querySelector('c2-loading-overlay')
+overlay.loading = true
+try {
+  await refreshReport()
+} finally {
+  overlay.loading = false
+}
+```
+
+The scrim takes the host's border radius, so give the overlay the radius of the card it covers. If the user was typing in the covered region, move focus somewhere useful before loading starts: the browser drops focus from inert content.
+
+## First load and refresh
+
+The overlay and `c2-skeleton` cover two different moments, and one wrapper can serve both. On the first load there is nothing to show yet: put skeletons in the region and leave `loading` off. Once the real content is in, turn `loading` on for each refresh, so the content stays readable and in place while it is blocked.
+
+```html tag=CodeBlock
+<c2-loading-overlay id="report" label="Refreshing the report">
+  <!-- First load: placeholders, the overlay stays off -->
+  <c2-skeleton variant="text" lines="3" label="Loading the report"></c2-skeleton>
+</c2-loading-overlay>
+
+<script type="module">
+  const report = document.querySelector('#report')
+  report.replaceChildren(renderReport(await fetchReport()))
+
+  async function refresh() {
+    report.loading = true
+    try {
+      report.replaceChildren(renderReport(await fetchReport()))
+    } finally {
+      report.loading = false
+    }
+  }
+</script>
+```
+
+Do not turn `loading` on over skeletons: a spinner over pulsing placeholders says "loading" twice, a labelled skeleton and the overlay would both be announced, and there is nothing under the scrim to protect.

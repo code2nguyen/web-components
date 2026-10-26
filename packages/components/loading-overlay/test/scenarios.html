@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>loading-overlay scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        width: 420px;
+      }
+      .card {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+    </style>
+    <script type="module">
+      import './translations.ts'
+      import '../src/loading-overlay.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>
