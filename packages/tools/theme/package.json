@@ -123,6 +123,7 @@
         "../../components/link-button:build",
         "../../components/list-item:build",
         "../../components/list:build",
+        "../../components/loading-overlay:build",
         "../../components/log-viewer:build",
         "../../components/markdown:build",
         "../../components/marker:build",

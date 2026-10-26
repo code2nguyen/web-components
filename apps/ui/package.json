@@ -91,6 +91,7 @@
     "@c2n/link-button": "*",
     "@c2n/list": "*",
     "@c2n/list-item": "*",
+    "@c2n/loading-overlay": "*",
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",

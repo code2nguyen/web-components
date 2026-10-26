@@ -166,6 +166,7 @@
         "./packages/components/link-button:build",
         "./packages/components/list-item:build",
         "./packages/components/list:build",
+        "./packages/components/loading-overlay:build",
         "./packages/components/log-viewer:build",
         "./packages/components/markdown:build",
         "./packages/components/marker:build",

@@ -91,6 +91,7 @@ npm run build -w packages/tools/theme         # regenerate the base theme; read 
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
 npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
+node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
 npm run lint && npm run format:check          # or: npm run fix
 npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
 npm test                                      # the new package's Playwright suite

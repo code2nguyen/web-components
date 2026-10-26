@@ -1,0 +1,110 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-loading-overlay,
+  $theme: (
+    scrim--background-color: #ffffff,
+    scrim--opacity: 0.72,
+    scrim--blur: 1px,
+    border-radius: inherit,
+    z-index: 10,
+    delay: 0ms,
+    transition-duration: 150ms,
+    spinner--size: 32px,
+    spinner--color: #0265dc,
+    indicator--gap: 12px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 500,
+  )
+);
+
+:host {
+  position: relative;
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.content {
+  display: contents;
+}
+
+// The scrim stays in the tree while hidden so its fade can run; `hidden` only stops it covering and blocking.
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: css.cssVar(z-index);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: css.cssVar(border-radius);
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    opacity css.cssVar(transition-duration) ease css.cssVar(delay),
+    display css.cssVar(transition-duration) allow-discrete css.cssVar(delay);
+  backdrop-filter: blur(#{css.cssVar(scrim--blur)});
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: css.cssVar(scrim--background-color);
+    opacity: css.cssVar(scrim--opacity);
+  }
+
+  &[hidden] {
+    display: none;
+    opacity: 0;
+    transition-delay: 0ms;
+  }
+}
+
+@starting-style {
+  .scrim:not([hidden]) {
+    opacity: 0;
+  }
+}
+
+.indicator {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: css.cssVar(indicator--gap);
+  padding: 16px;
+  text-align: center;
+}
+
+.spinner {
+  --c2-spinner--size: #{css.cssVar(spinner--size)};
+  --c2-spinner--color: #{css.cssVar(spinner--color)};
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim {
+    transition: none;
+  }
+}

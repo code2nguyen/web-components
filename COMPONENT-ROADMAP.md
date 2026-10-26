@@ -95,7 +95,6 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | #   | Component                | What it adds                                                               | Real-world model                                              | Priority | Decision |
 | --- | ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
 | 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications | P2       | Proposed |
-| 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                      | P2       | Proposed |
 | 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps               | P2       | Proposed |
 | 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                | P3       | Proposed |
 

@@ -509,6 +509,10 @@
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
     },
+    "./loading-overlay": {
+      "types": "./dist/loading-overlay.d.ts",
+      "default": "./dist/loading-overlay.js"
+    },
     "./log-viewer": {
       "types": "./dist/log-viewer.d.ts",
       "default": "./dist/log-viewer.js"
@@ -1104,6 +1108,7 @@
     "@c2n/link-button": "*",
     "@c2n/list": "*",
     "@c2n/list-item": "*",
+    "@c2n/loading-overlay": "*",
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",

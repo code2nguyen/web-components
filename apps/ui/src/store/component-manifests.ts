@@ -69,6 +69,7 @@ import label from '@c2n/label/custom-elements.json'
 import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
 import list from '@c2n/list/custom-elements.json'
+import loadingOverlay from '@c2n/loading-overlay/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
@@ -234,6 +235,7 @@ export const componentManifests = (function () {
     linkButton,
     list,
     listItem,
+    loadingOverlay,
     logViewer,
     markdown,
     marker,
