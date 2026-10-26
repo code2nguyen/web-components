@@ -143,6 +143,7 @@ import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
+import toggletip from '@c2n/toggletip/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
@@ -305,6 +306,7 @@ export const componentManifests = (function () {
     timeline,
     toast,
     todoList,
+    toggletip,
     tooltip,
     tour,
     traceWaterfall,

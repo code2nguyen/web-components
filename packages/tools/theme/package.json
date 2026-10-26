@@ -194,6 +194,7 @@
         "../../components/timeline:build",
         "../../components/toast:build",
         "../../components/todo-list:build",
+        "../../components/toggletip:build",
         "../../components/tooltip:build",
         "../../components/tour:build",
         "../../components/trace-waterfall:build",

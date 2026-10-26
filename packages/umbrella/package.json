@@ -845,6 +845,10 @@
       "types": "./dist/todo-list.d.ts",
       "default": "./dist/todo-list.js"
     },
+    "./toggletip": {
+      "types": "./dist/toggletip.d.ts",
+      "default": "./dist/toggletip.js"
+    },
     "./tooltip": {
       "types": "./dist/tooltip.d.ts",
       "default": "./dist/tooltip.js"
@@ -1163,6 +1167,7 @@
     "@c2n/timeline": "*",
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
+    "@c2n/toggletip": "*",
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",

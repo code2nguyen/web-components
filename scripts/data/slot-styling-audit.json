@@ -3697,6 +3697,19 @@
       "reason": "The empty slot projects consumer-owned empty-state content; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-toggletip",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned help content into the bubble; it inherits the bubble's text variables and keeps its own class styles."
+    },
+    {
+      "tag": "c2-toggletip",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-toggletip__button--color", "--c2-toggletip__icon--size"],
+      "reason": "The button sets the colour slotted text or icons inherit and the size of a slotted svg."
+    },
+    {
       "tag": "c2-tooltip",
       "slot": "",
       "decision": "assigned-content",
