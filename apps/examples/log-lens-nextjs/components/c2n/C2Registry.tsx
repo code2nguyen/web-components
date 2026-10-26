@@ -23,6 +23,7 @@ export function registerC2Elements(): Promise<void> {
     import('@c2n/components/list-item'),
     import('@c2n/components/log-viewer'),
     import('@c2n/components/marker'),
+    import('@c2n/components/meter'),
     import('@c2n/components/modal'),
     import('@c2n/components/progress'),
     import('@c2n/components/select'),

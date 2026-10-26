@@ -965,15 +965,17 @@ code {
   list-style: none;
 }
 
-.ll-slot__values c2-progress,
-.ll-lift c2-progress {
-  --c2-progress--height: 6px;
-  --c2-progress__label--font-size: 12px;
-  --c2-progress__label--color: var(--ll-text);
-  --c2-progress__track--background-color: var(--ll-surface-3);
-  --c2-progress__indicator--background-color: var(--ll-accent);
-  --c2-progress--gap: 4px;
-  display: block;
+.ll-slot__values c2-meter,
+.ll-lift c2-meter {
+  --c2-meter__track--height: 6px;
+  --c2-meter__label--font-size: 12px;
+  --c2-meter__label--font-weight: 400;
+  --c2-meter__label--color: var(--ll-text);
+  --c2-meter__value--font-size: 12px;
+  --c2-meter__value--color: var(--ll-muted);
+  --c2-meter__track--background-color: var(--ll-surface-3);
+  --c2-meter__indicator--background-color: var(--ll-accent);
+  --c2-meter--gap: 4px;
 }
 
 .ll-code {
@@ -1036,12 +1038,12 @@ code {
 }
 
 .ll-lift .ll-bar--inside {
-  --c2-progress__indicator--background-color: var(--ll-danger);
+  --c2-meter__indicator--background-color: var(--ll-danger);
 }
 
 .ll-lift .ll-bar--outside {
-  --c2-progress__indicator--background-color: var(--ll-border-strong);
-  --c2-progress__label--color: var(--ll-muted);
+  --c2-meter__indicator--background-color: var(--ll-border-strong);
+  --c2-meter__label--color: var(--ll-muted);
 }
 
 .ll-lift__ratio {

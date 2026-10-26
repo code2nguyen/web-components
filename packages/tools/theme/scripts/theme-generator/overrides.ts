@@ -396,6 +396,12 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // Meter: the unused range is the progress track's hairline grey, a critical value is the error colour, and the
+  // segment palette is the chart series, so one category reads the same in a chart and a meter. The sub-optimum
+  // amber is an accent the theme has no token for.
+  '--c2-meter__track--background-color': { token: 'color-outline-variant' },
+  '--c2-meter__indicator__critical--background-color': { token: 'color-error' },
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-meter__segment-${i + 1}--background-color`, { token: `chart-series-${i + 1}` }])),
   // Skeleton: the resting block is the same hairline grey as the progress track. The wave highlight is a translucent
   // white sheen rather than a surface colour, and the theme has no token for one.
   '--c2-skeleton--background-color': { token: 'color-outline-variant' },

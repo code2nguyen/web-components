@@ -569,6 +569,10 @@
       "types": "./dist/mermaid.d.ts",
       "default": "./dist/mermaid.js"
     },
+    "./meter": {
+      "types": "./dist/meter.d.ts",
+      "default": "./dist/meter.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
@@ -1103,6 +1107,7 @@
     "@c2n/menu": "*",
     "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
+    "@c2n/meter": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
     "@c2n/month-planner": "*",

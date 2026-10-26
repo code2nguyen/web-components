@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-meter</title>
+    <script type="module" src="/src/meter.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+        max-width: 420px;
+      }
+      .thick {
+        --c2-meter__track--height: 14px;
+        --c2-meter__segment--gap: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-meter value="64">Usage</c2-meter>
+    <c2-meter value="62000" max="100000" value-text="62,000 of 100,000 calls">API calls this month</c2-meter>
+    <c2-meter value="40" low="70" high="90" optimum="0">Disk · optimum</c2-meter>
+    <c2-meter value="78" low="70" high="90" optimum="0">Disk · sub-optimum</c2-meter>
+    <c2-meter value="96" low="70" high="90" optimum="0">Disk · critical</c2-meter>
+    <c2-meter value="12" low="20" high="60" optimum="100">Battery</c2-meter>
+    <c2-meter class="thick" max="15" segments='[{"label":"Photos","value":6},{"label":"Documents","value":3},{"label":"Mail","value":1.5}]'>Storage</c2-meter>
+    <div lang="fr"><c2-meter max="15" segments='[{"label":"Photos","value":6.5}]'>Stockage</c2-meter></div>
+  </body>
+</html>
