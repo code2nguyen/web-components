@@ -37,7 +37,7 @@ npm install                                     # link the new workspace into no
 - adds the component's `:build` to `packages/tools/theme/package.json` `wireit.build.dependencies` (the theme generator reads its manifest)
 - scaffolds the Playwright suite `<package>/test/` (`scenarios.html`, `scenarios.ts`, `fixture.ts`, `<name>.spec.ts`)
 - creates the doc stub `apps/ui/src/content/components/<name>.mdx` (open packages: `apps/ui/src/content/oepn-components/<name>.mdx`, see caveat below)
-- **npm packages only:** the `custom-elements.json` import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json`, the side-effect import in `component-modules.ts`, a placeholder entry in `component-previews.ts`, and the gallery stub `apps/ui/src/content/gallery/<name>.mdx`
+- **npm packages only:** the `custom-elements.json` import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json` and in `packages/umbrella/package.json`'s `devDependencies`, the side-effect import in `component-modules.ts`, a placeholder entry in `component-previews.ts`, and the gallery stub `apps/ui/src/content/gallery/<name>.mdx`
 
 `npm install` afterwards is not optional: it creates the `node_modules/@c2n/<name>` workspace symlink. Without it
 `npm run ui:build` fails with `failed to resolve import "@c2n/<name>/custom-elements.json"`.
@@ -89,6 +89,7 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 npm run build -w packages/components/<name>   # type-check + vite build; regenerates custom-elements.json (commit it)
 npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
+npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 npm run lint && npm run format:check          # or: npm run fix
 npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
@@ -96,9 +97,38 @@ npm test                                      # the new package's Playwright sui
 npm run ui:dev                                # open /components/<name>; check example, gallery, API table, inspector
 ```
 
-`build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
+`build:tools` rewrites the dependency keys of `packages/umbrella/package.json` from what the bundle imports. The generator already added the `@c2n/<name>` devDependency, which the first `npm install` recorded; a third-party library the new package imports lands in the umbrella's `dependencies` only now. Whenever that file changed, run `npm install` again and commit `package-lock.json` with it, or the lockfile disagrees with `package.json` and `npm ci` in CI rejects the install. `build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
+
+## 7. Review it in the docs app by screenshot
+
+Passing checks do not show what a reader sees. Before the pull request — and again after any fix that changes the
+component's look or its docs — build the site and screenshot the component's pages, then look at every image yourself:
+
+```bash
+npm run ui:build
+node .claude/skills/new-component/scripts/doc-screenshots.mjs <name> [--press "<button name>"]…
+```
+
+The script serves `apps/ui/dist` with `astro preview` and writes `test-results/doc-screenshots/<name>/` (ignored by
+Git): the Docs usage card and the Gallery in the light and the dark theme, the API tab, the landing card,
+`aria.txt` (the usage card's accessibility tree) and `report.json`. It fails on any page or console error. Each
+`--press` clicks the first button with that accessible name on the Docs page and screenshots the page, for a state
+that only shows after interaction: an open popup, a revealed value, a pressed toggle.
+
+Read each screenshot, then check:
+
+- **Both themes:** text and surfaces readable in dark mode, no light literal left on a dark surface.
+- **Every gallery card and usage row:** nothing clipped, overlapping or cut off, especially in the narrow gallery
+  frames; icons drawn in every state (an SVG built with Lit's `html` instead of `svg` draws nothing).
+- **Interactive states** through `--press`: the popup placed beside its trigger, the state actually changed.
+- **`aria.txt`:** every control and the component itself have the name you intended; no stray text is read.
+- **Landing card:** the preview reads at that size.
+
+Fix what you find, re-run the step, and send the user the screenshots that show the component (with
+`SendUserFile` when available), saying what was fixed after they were taken. The pull request description notes
+that the review was done and what it caught.
 
 ## Checklist to report
 
@@ -107,7 +137,8 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
 - `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
-- `npm run build:tools` run; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
+- `npm run build:tools` run (then `npm install` again if it changed `packages/umbrella/package.json`, with `package-lock.json` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
+- the component's row deleted from `COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - `apps/ui/src/store/component-manifests.ts` import + entry
 - `apps/ui/package.json` dependency on `@c2n/<name>`, and `npm install` run so the workspace is linked
@@ -115,3 +146,4 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - `apps/ui/src/content/components/<name>.mdx` and `gallery/<name>.mdx` filled in (or the gallery deliberately deleted)
 - `<package>/test/` suite written and passing
 - lint + format clean, `npm run ui:build` green
+- docs app reviewed by screenshot (step 7) in both themes, problems fixed, screenshots shared
