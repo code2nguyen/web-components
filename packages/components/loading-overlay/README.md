@@ -17,4 +17,4 @@ npm install @c2n/components
 </c2-loading-overlay>
 ```
 
-While `loading`, the content is `inert`, the element is busy (`aria-busy`) and a polite live region announces the `label`, the `label` slot's text or the translatable "Loading". `--c2-loading-overlay--delay` keeps quick loads from flashing the overlay. Use `c2-skeleton` when there is no content to show yet.
+While `loading`, the content is `inert` and busy (`aria-busy`), and a polite live region announces the `label`, the `label` slot's text or the translatable "Loading". `--c2-loading-overlay--delay` keeps quick loads from flashing the overlay or being announced. Use `c2-skeleton` when there is no content to show yet.

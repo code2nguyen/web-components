@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -13,13 +13,13 @@ import styles from './loading-overlay.scss?inline'
  * tabbed to until loading ends; the layout does not jump, as it would if the content were swapped for a placeholder.
  * Use `c2-skeleton` instead when there is nothing to show yet.
  *
- * While `loading`, the content is `inert`, the element is marked busy (`aria-busy`) and a polite live region
- * announces the `label`, the text of the `label` slot, or the translatable "Loading". Focus inside the content when
- * loading starts is lost with it, as the browser drops focus from inert content; move it somewhere useful first if
- * the user was typing.
+ * While `loading`, the content is `inert` and marked busy (`aria-busy`), and a polite live region beside it announces
+ * the `label`, the text of the `label` slot, or the translatable "Loading". Focus inside the content when loading
+ * starts is lost with it, as the browser drops focus from inert content; move it somewhere useful first if the user
+ * was typing.
  *
- * The overlay fades in after `--c2-loading-overlay--delay`, so a load that finishes quickly never flashes it; the
- * content is blocked from the start either way.
+ * The overlay fades in after `--c2-loading-overlay--delay`, and the announcement waits as long, so a load that
+ * finishes quickly is neither seen nor heard; the content is blocked from the start either way.
  *
  * @tag c2-loading-overlay
  *
@@ -36,7 +36,7 @@ import styles from './loading-overlay.scss?inline'
  * @cssproperty {pixel} [--c2-loading-overlay__scrim--blur=1px] - Blur of the content under the scrim; `0px` for none.
  * @cssproperty {border-radius} [--c2-loading-overlay--border-radius=inherit] - Rounds the scrim to match the region; it follows the host's own radius by default.
  * @cssproperty {number} [--c2-loading-overlay--z-index=10] - Stacking of the overlay above the content.
- * @cssproperty {time} [--c2-loading-overlay--delay=0ms] - Wait before the overlay fades in, e.g. `300ms` so quick loads never show it.
+ * @cssproperty {time} [--c2-loading-overlay--delay=0ms] - Wait before the overlay shows and is announced, e.g. `300ms` so quick loads go unnoticed.
  * @cssproperty {time} [--c2-loading-overlay--transition-duration=150ms] - Fade in and out.
  * @cssproperty {pixel} [--c2-loading-overlay__spinner--size=32px]
  * @cssproperty {color} [--c2-loading-overlay__spinner--color=#0265dc]
@@ -57,18 +57,56 @@ export class LoadingOverlay extends LitElement {
 
   @state() private labelText = ''
 
+  /** Whether the live region holds the announcement; set after the delay, never in the render that shows the scrim. */
+  @state() private announcing = false
+
   @query('slot[name="label"]') private labelSlot?: HTMLSlotElement
 
-  private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, loadingOverlayMessages)
+  /** A declarative shadow root is already there in the constructor: the element was rendered on the server. */
+  private readonly serverRendered = this.shadowRoot !== null
+  private announceTimer = 0
+  // Text edited inside an element already in the label slot fires no `slotchange`. Browser only: a server render has
+  // no MutationObserver.
+  private labelObserver?: MutationObserver
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (isServer) return
+    this.labelObserver ??= new MutationObserver(() => this.readLabel())
+    this.labelObserver.observe(this, { subtree: true, childList: true, characterData: true })
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.labelObserver?.disconnect()
+    clearTimeout(this.announceTimer)
+  }
 
   // A server-rendered element hydrates with its label already assigned, and no `slotchange` follows: read it once.
   protected override firstUpdated(): void {
-    this.readLabel()
+    if (this.serverRendered) this.readLabel()
   }
 
   protected override updated(changed: PropertyValues<this>): void {
-    if (changed.has('loading')) this.internals.ariaBusy = this.loading ? 'true' : null
+    if (changed.has('loading')) this.scheduleAnnouncement()
+  }
+
+  /** Fills the live region once the scrim's delay has passed (and at least a frame after the region exists). */
+  private scheduleAnnouncement() {
+    clearTimeout(this.announceTimer)
+    if (!this.loading) {
+      this.announcing = false
+      return
+    }
+    this.announceTimer = window.setTimeout(() => (this.announcing = this.loading), Math.max(16, this.delayMs()))
+  }
+
+  private delayMs(): number {
+    const value = getComputedStyle(this).getPropertyValue('--c2-loading-overlay--delay').trim()
+    const amount = Number.parseFloat(value)
+    if (!Number.isFinite(amount)) return 0
+    return value.endsWith('ms') ? amount : value.endsWith('s') ? amount * 1000 : 0
   }
 
   private readLabel() {
@@ -81,15 +119,17 @@ export class LoadingOverlay extends LitElement {
 
   override render() {
     const announcement = this.label || this.labelText || this.msg.t('label')
+    // The live region renders `nothing` while silent, not '': hydrating a server-rendered empty string, Lit writes the
+    // next text into its end marker comment, where nobody reads it.
     return html`
-      <div class="content" ?inert=${this.loading}><slot></slot></div>
+      <div class="content" ?inert=${this.loading} aria-busy=${this.loading ? 'true' : 'false'}><slot></slot></div>
       <div class="scrim" part="scrim" ?hidden=${!this.loading}>
         <div class="indicator" part="indicator">
           <slot name="indicator"><c2-spinner class="spinner" aria-hidden="true"></c2-spinner></slot>
           <div class="label" part="label" ?hidden=${!this.labelText}><slot name="label" @slotchange=${this.readLabel}></slot></div>
         </div>
       </div>
-      <div class="sr-only" role="status">${this.loading ? announcement : ''}</div>
+      <div class="sr-only" role="status">${this.loading && this.announcing ? announcement : nothing}</div>
     `
   }
 }

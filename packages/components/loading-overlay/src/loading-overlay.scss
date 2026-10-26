@@ -20,14 +20,17 @@
 :host {
   position: relative;
   display: block;
+  // Its own stacking context, so a sticky header or popover inside the content cannot paint over the scrim.
+  isolation: isolate;
 }
 
 :host([hidden]) {
   display: none;
 }
 
+// A block, not `display: contents`, so it is in the accessibility tree to carry `aria-busy`.
 .content {
-  display: contents;
+  display: block;
 }
 
 // The scrim stays in the tree while hidden so its fade can run; `hidden` only stops it covering and blocking.
@@ -103,8 +106,9 @@
   white-space: nowrap;
 }
 
+// No fade, but the delay still holds: quick loads must not flash the scrim for people who asked for less motion.
 @media (prefers-reduced-motion: reduce) {
   .scrim {
-    transition: none;
+    transition-duration: 0s;
   }
 }

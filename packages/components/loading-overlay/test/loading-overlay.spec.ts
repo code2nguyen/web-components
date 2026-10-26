@@ -25,7 +25,7 @@ test('without loading, the content is usable and nothing covers it', async ({ pa
   await expect(scrim(page)).toBeHidden()
   await page.locator('#save').click()
   await page.locator('#name').fill('Ada')
-  await expect(overlay(page)).toHaveHostAria('aria-busy', null)
+  await expect(overlay(page).locator('.content')).toHaveAttribute('aria-busy', 'false')
   await accessible(page)
 })
 
@@ -34,7 +34,9 @@ test('loading covers the content, blocks pointer and keyboard, and marks the reg
   await expect(scrim(page)).toBeVisible()
   const [box, cover] = await Promise.all([overlay(page).boundingBox(), scrim(page).boundingBox()])
   expect(cover).toEqual(box)
-  await expect(overlay(page)).toHaveHostAria('aria-busy', 'true')
+  // Busy is the content, not the host: the live region beside it must not sit inside a busy subtree.
+  await expect(overlay(page).locator('.content')).toHaveAttribute('aria-busy', 'true')
+  await expect(overlay(page)).toHaveHostAria('aria-busy', null)
   // Inert content is skipped by Tab and ignores clicks.
   await page.locator('#before').focus()
   await tab()
@@ -88,4 +90,51 @@ test('the scrim follows the host radius and the delay variable holds it back', a
   await renderScenario(card('loading style="border-radius: 12px; --c2-loading-overlay--delay: 400ms"'))
   await expect(scrim(page)).toHaveCSS('border-radius', '12px')
   await expect(scrim(page)).toHaveCSS('transition-delay', /0\.4s/)
+})
+
+test('an overlay that starts loading exposes its live region empty, then fills it', async ({ page, renderScenario }) => {
+  await renderScenario('<div id="slot-here"></div>')
+  const seen = await page.evaluate(async () => {
+    const host = document.createElement('c2-loading-overlay') as HTMLElement & { loading: boolean; updateComplete: Promise<unknown> }
+    host.loading = true
+    host.innerHTML = '<p>Body</p>'
+    document.querySelector('#slot-here')!.append(host)
+    await host.updateComplete
+    const region = host.shadowRoot!.querySelector('[role="status"]')!
+    const first = region.textContent
+    await new Promise((done) => setTimeout(done, 100))
+    return [first, region.textContent]
+  })
+  expect(seen).toEqual(['', 'Loading'])
+})
+
+test('the delay holds the announcement as well as the scrim', async ({ page, renderScenario }) => {
+  await renderScenario(card('style="--c2-loading-overlay--delay: 600ms"'))
+  const status = overlay(page).locator('[role="status"]')
+  await setLoading(page, true)
+  await page.waitForTimeout(200)
+  await expect(status).toHaveText('')
+  await expect(status).toHaveText('Loading')
+  // A load that ends inside the delay is never announced.
+  await setLoading(page, false)
+  await setLoading(page, true)
+  await page.waitForTimeout(100)
+  await setLoading(page, false)
+  await page.waitForTimeout(700)
+  await expect(status).toHaveText('')
+})
+
+test('label text changed inside the slotted element is picked up', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-loading-overlay loading><p>Body</p><span slot="label" id="msg"></span></c2-loading-overlay>')
+  await expect(overlay(page).locator('.indicator > .label')).toBeHidden()
+  await page.locator('#msg').evaluate((el) => (el.textContent = 'Uploading 40%'))
+  await expect(overlay(page).locator('.indicator > .label')).toBeVisible()
+  await expect(overlay(page).locator('[role="status"]')).toHaveText('Uploading 40%')
+})
+
+test('content with its own z-index stays under the scrim', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-loading-overlay loading><div style="position: relative; z-index: 50; height: 80px" id="raised">Sticky</div></c2-loading-overlay>')
+  const box = (await page.locator('#raised').boundingBox())!
+  const top = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.localName, { x: box.x + 5, y: box.y + 5 })
+  expect(top).toBe('c2-loading-overlay')
 })
