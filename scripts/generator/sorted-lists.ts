@@ -125,6 +125,7 @@ export const registries = {
     list: { after: /^export const componentPreviews: Record<string, string> = \{/, item: /^ {2}'?([\w-]+)'?: /, end: /^\}/ },
   },
   uiDependencies: { file: 'apps/ui/package.json', path: ['dependencies'] },
+  umbrellaDevDependencies: { file: 'packages/umbrella/package.json', path: ['devDependencies'] },
   rootBuild: { file: 'package.json', path: ['wireit', 'build', 'dependencies'] },
   examplesBuild: { file: 'package.json', path: ['wireit', 'examples:build', 'dependencies'] },
   themeBuild: { file: 'packages/tools/theme/package.json', path: ['wireit', 'build', 'dependencies'] },

@@ -233,14 +233,14 @@ Researching 90 products found 68 more primitives that no design system above shi
 
 Everything still listed ships in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` (built) wraps every input in waves 2 and 4, and `c2-confirm-dialog` (built) backs destructive actions everywhere.
 
-| Wave | Scope                | Planned | Gate before the next wave                       |
-| ---- | -------------------- | ------- | ----------------------------------------------- |
-| 1    | Foundations (P1)     | 23      | `c2-form-field` wraps every existing input      |
-| 2    | Business apps (P2)   | 50      | Blocks collection opens (forms, settings pages) |
-| 3    | Data, media, AI (P2) | 42      | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
-| 4    | Specialized (P3)     | 50      | —                                               |
+| Wave | Scope                | Planned on 2026-10-04 | Gate before the next wave                       |
+| ---- | -------------------- | --------------------- | ----------------------------------------------- |
+| 1    | Foundations (P1)     | 23                    | `c2-form-field` wraps every existing input      |
+| 2    | Business apps (P2)   | 50                    | Blocks collection opens (forms, settings pages) |
+| 3    | Data, media, AI (P2) | 42                    | P3 list re-ranked from `COMPONENT-FEEDBACK.md`  |
+| 4    | Specialized (P3)     | 50                    | —                                               |
 
-Each gate has to pass before the next wave starts. No calendar dates are set yet.
+The counts are the plan as researched and are not kept up to date (a running total is a line every component PR would edit); the tables above hold what remains. Each gate has to pass before the next wave starts. No calendar dates are set yet.
 
 **Definition of done for every component**, from the repo's own conventions:
 
