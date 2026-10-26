@@ -12,7 +12,7 @@ import { readableOn } from './chart-contrast.js'
 import { mixColors } from './map-scale.js'
 import { measureText } from './chart-measure.js'
 import { treemapMessages } from './messages.js'
-import type { ChartBuildContext } from './chart-adapter.js'
+import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
 import './chart-series.js'
@@ -147,11 +147,12 @@ export function buildTreemap(rows: readonly unknown[], options: TreemapModelOpti
     }
   }
   settle(root)
+  // A share is of the whole data, so hiding a group from the legend does not change what the others are a share of.
+  const total = [...root.children.values()].reduce((sum, child) => sum + child.value, 0)
   for (const name of options.hidden ?? []) {
     root.children.delete(`group:${name}`)
     root.children.delete(`leaf:${name}`)
   }
-  const total = [...root.children.values()].reduce((sum, child) => sum + child.value, 0)
 
   const finish = (node: Draft, parentPath: string[], parentValue: number, depth: number): TreemapTreeNode => {
     const path = [...parentPath, node.label]
@@ -295,6 +296,18 @@ export class TreemapChart extends EchartsChartBase {
 
   // ------------------------------------------------------ chart overrides ---
 
+  /** The tile labels are fitted to the laid-out tiles; a resize lays them out again, so the labels are fitted again. */
+  protected override async createAdapter(): Promise<ChartAdapter> {
+    const adapter = await super.createAdapter()
+    return {
+      ...adapter,
+      resize: (width, height) => {
+        adapter.resize(width, height)
+        if (width > 0 && height > 0 && this.frame) adapter.setData(this.projectData(this.frame, { ...this.buildContext(), width, height }))
+      },
+    }
+  }
+
   /** The base fast path sends the data alone; the tree's colours and labels ride on the options too. */
   protected override shouldUpdate(changed: PropertyValues): boolean {
     if (changed.has('data') || changed.has('revision')) return true
@@ -318,7 +331,7 @@ export class TreemapChart extends EchartsChartBase {
   protected override inferredSeries(): ChartSeriesConfig[] {
     return super
       .inferredSeries()
-      .filter((series) => series.field !== this.colorField)
+      .filter((series) => series.field !== this.colorField && !this.#groupFields().includes(series.field))
       .slice(0, 1)
   }
 
@@ -526,10 +539,7 @@ export class TreemapChart extends EchartsChartBase {
     const options = {
       labelField: this.labelField,
       valueField,
-      groupFields: this.groupField
-        .split(',')
-        .map((field) => field.trim())
-        .filter(Boolean),
+      groupFields: this.#groupFields(),
       childrenField: this.childrenField,
       colorField: this.colorField,
     }
@@ -563,12 +573,15 @@ export class TreemapChart extends EchartsChartBase {
     return index === undefined ? null : { ...detail, index: index + 1 }
   }
 
-  #engineNodes(nodes: readonly TreemapTreeNode[], context: ChartBuildContext): Record<string, unknown>[] {
+  #engineNodes(
+    nodes: readonly TreemapTreeNode[],
+    context: ChartBuildContext,
+    scale = this.#colorScale(),
+    highlighted = this.#computeModel().tree.some((top) => top.label === this.highlighted) ? this.highlighted : null,
+  ): Record<string, unknown>[] {
     const { theme } = context
-    const highlighted = this.highlighted
     return nodes.map((node) => {
-      const opacity =
-        highlighted !== null && node.path[0] !== highlighted && this.#computeModel().tree.some((top) => top.label === highlighted) ? theme.dimmedOpacity : 1
+      const opacity = highlighted !== null && node.path[0] !== highlighted ? theme.dimmedOpacity : 1
       if (!node.leaf) {
         // A group is drawn as its header strip and the gaps between its tiles, in the surface colour.
         return {
@@ -576,10 +589,10 @@ export class TreemapChart extends EchartsChartBase {
           value: node.value,
           itemStyle: { color: theme.surface, borderColor: theme.surface, opacity },
           upperLabel: { opacity },
-          children: this.#engineNodes(node.children, context),
+          children: this.#engineNodes(node.children, context, scale, highlighted),
         }
       }
-      const color = this.#tileColor(node)
+      const color = this.#tileColor(node, scale)
       // ECharts' treemap ignores an item's opacity, so a dimmed tile is drawn faded into the surface instead.
       const fill = opacity < 1 ? mixColors(theme.surface, color, opacity) : color
       return { name: engineName(node), value: node.value, itemStyle: { color: fill }, label: { color: readableOn(color), opacity } }
@@ -608,24 +621,38 @@ export class TreemapChart extends EchartsChartBase {
     return ''
   }
 
-  #tileColor(node: TreemapNode): string {
+  #tileColor(node: TreemapNode, scale = this.#colorScale()): string {
     const theme = this.themeController.theme
     if (this.colorField) {
-      if (node.colorValue === null) return this.#neutral()
-      const limit = this.#colorLimit()
-      const strength = limit > 0 ? Math.min(1, Math.abs(node.colorValue) / limit) : 0
-      return mixColors(this.#neutral(), node.colorValue < 0 ? theme.negative : theme.positive, strength)
+      if (node.colorValue === null) return scale.neutral
+      const strength = scale.limit > 0 ? Math.min(1, Math.abs(node.colorValue) / scale.limit) : 0
+      return mixColors(scale.neutral, node.colorValue < 0 ? theme.negative : theme.positive, strength)
     }
     return this.#groupColor(node.path[0] ?? node.label)
+  }
+
+  /** What every tile's `color-field` colour is read against, worked out once per build rather than per tile. */
+  #colorScale(): { neutral: string; limit: number } {
+    if (!this.colorField) return { neutral: '', limit: 0 }
+    // Resolved through the theme's probe, so a `light-dark()` or `color-mix()` reaches the colour mix as a colour.
+    return { neutral: this.themeController.resolveColor('var(--c2-chart__neutral--color, #d4d4d8)', '#d4d4d8'), limit: this.#colorLimit() }
+  }
+
+  #groupFields(): string[] {
+    return this.groupField
+      .split(',')
+      .map((field) => field.trim())
+      .filter(Boolean)
   }
 
   /** A top-level group's palette colour, which stays with its name when others are hidden. */
   #groupColor(name: string): string {
     const theme = this.themeController.theme
     const series = this.resolvedSeries[0]
-    const index = Math.max(0, this.#computeModel().order.indexOf(name))
-    // A single tree with one top-level group takes the series colour, as a one-series chart does.
-    if (index === 0 && series?.color) return series.color
+    const order = this.#computeModel().order
+    // A tree with one top-level group takes the series colour, as a one-series chart does.
+    if (order.length === 1 && series?.color) return series.color
+    const index = Math.max(0, order.indexOf(name))
     return theme.palette[index % theme.palette.length]
   }
 
@@ -634,10 +661,6 @@ export class TreemapChart extends EchartsChartBase {
     let largest = 0
     for (const node of this.#computeModel().nodes) if (node.leaf && node.colorValue !== null) largest = Math.max(largest, Math.abs(node.colorValue))
     return largest
-  }
-
-  #neutral(): string {
-    return getComputedStyle(this).getPropertyValue('--c2-chart__neutral--color').trim() || '#d4d4d8'
   }
 
   #layout(): { tileGap: number; groupGap: number; radius: number } {

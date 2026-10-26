@@ -19,7 +19,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 
 ```html tag=MdxCodeBlock,label=Market map
 <style>
-  .treemap-market { width: 100%; --c2-chart--height: 300px; --c2-chart__tile--gap: 2px; --c2-chart__tile--border-radius: 0px; --c2-chart__neutral--color: #52525b; --c2-chart__positive--color: #22c55e; --c2-chart__negative--color: #ef4444; }
+  .treemap-market { width: 100%; --c2-chart--height: 300px; --c2-chart__tile--gap: 2px; --c2-chart__tile--border-radius: 0px; --c2-chart__neutral--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff)); --c2-chart__positive--color: #22c55e; --c2-chart__negative--color: #ef4444; }
 </style>
 <c2-treemap-chart class="treemap-market" label-field="ticker" group-field="sector" color-field="change" color-label="Change" color-suffix="%" color-max="3" label-content="name-value" data='[{"sector":"Technology","ticker":"AAPL","cap":3400,"change":1.2},{"sector":"Technology","ticker":"MSFT","cap":3100,"change":-0.4},{"sector":"Technology","ticker":"NVDA","cap":2900,"change":3.1},{"sector":"Communication","ticker":"GOOGL","cap":2100,"change":0.8},{"sector":"Communication","ticker":"META","cap":1400,"change":-2.3},{"sector":"Consumer","ticker":"AMZN","cap":1900,"change":1.6},{"sector":"Consumer","ticker":"TSLA","cap":800,"change":-3.4},{"sector":"Health","ticker":"LLY","cap":700,"change":-1.8},{"sector":"Health","ticker":"UNH","cap":480,"change":0.9}]'>
   <c2-chart-series field="cap" label="Market cap ($bn)"></c2-chart-series>

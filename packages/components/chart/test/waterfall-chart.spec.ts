@@ -17,6 +17,8 @@ interface WaterfallElement extends HTMLElement {
   projectData(frame: unknown, context: unknown): number[][][]
   frame: unknown
   getLegendItems(): { label: string; key: string; visible: boolean; toggle(): void }[]
+  appendPoint(x: number, values: readonly (number | null)[]): void
+  series?: unknown
 }
 
 test('bridges the running total through the steps, with totals and an opening balance', async ({ page, scenario }) => {
@@ -93,7 +95,7 @@ test('colours rises, falls and totals, prints signed labels and lists the three 
   })
   // Series colour for a total, --c2-chart__negative--color for a fall, --c2-chart__positive--color for a rise.
   expect(result.fills).toEqual(['rgb(2, 101, 220)', 'rgb(220, 38, 38)', 'rgb(22, 163, 74)'])
-  expect(result.texts).toEqual(['420', '−180', '+35'])
+  expect(result.texts).toEqual(['420', '-180', '+35'])
   expect(result.legend).toEqual(['Increase', 'Decrease', 'Total'])
 })
 
@@ -153,7 +155,7 @@ test('describes a hovered bar with its change and running total, and fires point
     return out
   })
   expect(seen).toEqual([
-    ['Cost of sales', 'Amount=−180', 'Running total=240'],
+    ['Cost of sales', 'Amount=-180', 'Running total=240'],
     'point:Cost of sales:-180',
     ['Net income', 'Total=140'],
     'point:Net income:140',
@@ -169,9 +171,39 @@ test('names the plot and lists every step in a table for screen readers, with no
   await expect(chart.locator('.plot')).toHaveAttribute('aria-label', 'Waterfall chart of Amount, 7 bars')
   const rows = chart.locator('table.waterfall-a11y tbody tr')
   await expect(rows).toHaveCount(7)
-  await expect(rows.nth(1)).toHaveText(/Cost of sales\s*−180\s*240/)
+  await expect(rows.nth(1)).toHaveText(/Cost of sales\s*-180\s*240/)
   await expect(rows.nth(3)).toHaveText(/Gross profit\s*Total\s*275/)
 
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
+})
+
+test('reads one inferred series, never a numeric total flag, and draws steps appended without a rebuild', async ({ page, scenario }) => {
+  await scenario('waterfall')
+  const chart = page.locator('c2-waterfall-chart')
+  await expect(chart).toHaveState('ready')
+
+  const result = await chart.evaluate(async (element) => {
+    const waterfall = element as WaterfallElement
+    waterfall.querySelector('c2-chart-series')?.remove()
+    // `total` is numeric here and comes first, so it would be inferred as the value without the guard.
+    waterfall.data = [
+      { item: 'Open', total: 1, amount: 100 },
+      { item: 'Sales', total: 0, amount: 40 },
+    ]
+    await waterfall.updateComplete
+    const inferred = waterfall.steps.map((step) => [step.label, step.end])
+    waterfall.appendPoint(2, [-15])
+    const stub = { coord: (p: number[]) => [p[0] * 100 + 50, 500 - p[1]], size: () => [100, 0] }
+    const option = waterfall.seriesOption(0, waterfall.buildContext())
+    return { inferred, appended: waterfall.steps.at(-2)?.end, drawn: option.renderItem({ dataIndex: 2 }, stub)?.children[0]?.type }
+  })
+  // The total row with a value opens the bridge at 100; the appended -15 lands before the closing total.
+  expect(result.inferred).toEqual([
+    ['Open', 100],
+    ['Sales', 140],
+    ['Net income', 140],
+  ])
+  expect(result.appended).toBe(125)
+  expect(result.drawn).toBe('rect')
 })

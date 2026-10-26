@@ -169,6 +169,9 @@ export class WaterfallChart extends EchartsChartBase {
 
   private readonly msg = new LocalizeController(this, waterfallMessages, () => this.locale)
 
+  /** The category labels the engine last received, so a data-only update sends them again only when they change. */
+  #axisKey = ''
+
   #steps?: { frame: ChartFrame; revision: number; length: number; data: unknown; key: string; steps: WaterfallStep[] }
 
   constructor() {
@@ -234,7 +237,7 @@ export class WaterfallChart extends EchartsChartBase {
       xAxis: {
         ...base.xAxis,
         type: 'category',
-        data: this.#computeSteps().map((step) => step.label),
+        data: this.#axisLabels(),
         axisTick: { alignWithLabel: true },
         axisLabel: { ...(base.xAxis.axisLabel as object), ...labels.axisLabel },
       },
@@ -257,7 +260,6 @@ export class WaterfallChart extends EchartsChartBase {
   }
 
   protected override seriesOption(_index: number, context: ChartBuildContext): Record<string, unknown> {
-    const steps = this.#computeSteps()
     const { theme } = context
     const connector = this.#connector()
     const highlighted = KINDS.find((kind) => kind === this.highlighted)
@@ -268,6 +270,8 @@ export class WaterfallChart extends EchartsChartBase {
       encode: { x: 0, y: [1, 2] },
       animationDurationUpdate: 0,
       renderItem: (params: RenderParams, api: RenderApi) => {
+        // Read when drawn, not when the options were built: `appendPoint` and a data source add steps without a rebuild.
+        const steps = this.#computeSteps()
         const step = steps[params.dataIndex]
         if (!step) return null
         const index = params.dataIndex
@@ -313,7 +317,7 @@ export class WaterfallChart extends EchartsChartBase {
             type: 'line',
             silent: true,
             shape: { x1: x + width / 2, y1: endY, x2: nextX - width / 2, y2: endY },
-            style: { stroke: connector.color || theme.crosshairColor, lineWidth: connector.width },
+            style: { stroke: connector.color, lineWidth: connector.width },
           })
         }
         return { type: 'group', children }
@@ -323,7 +327,23 @@ export class WaterfallChart extends EchartsChartBase {
 
   protected override projectData(_frame: ChartFrame, _context: ChartBuildContext): unknown {
     this.#renderAccessibleSummary()
-    return [this.#computeSteps().map((step, index) => [index, step.start, step.end])]
+    const steps = this.#computeSteps()
+    // `appendPoint` and a data source reach the engine through here alone, without rebuilding the options: the category
+    // axis goes with the bars, or a new step would draw without its name.
+    const labels = steps.map((step) => step.label)
+    if (this.adapter && labels.join('\u0000') !== this.#axisKey) {
+      this.#axisKey = labels.join('\u0000')
+      this.adapter.setOptions({ xAxis: { data: labels } }, 'merge')
+    }
+    return [steps.map((step, index) => [index, step.start, step.end])]
+  }
+
+  /** A waterfall reads one series; a numeric `total-field` flag must not be inferred as a second. */
+  protected override inferredSeries(): ChartSeriesConfig[] {
+    return super
+      .inferredSeries()
+      .filter((series) => series.field !== this.totalField)
+      .slice(0, 1)
   }
 
   /** A click names one bar; the single series has nothing to set apart. */
@@ -418,6 +438,12 @@ export class WaterfallChart extends EchartsChartBase {
     }
   }
 
+  #axisLabels(): string[] {
+    const labels = this.#computeSteps().map((step) => step.label)
+    this.#axisKey = labels.join('\u0000')
+    return labels
+  }
+
   #summary(): string {
     const series = this.resolvedSeries[0]
     return this.msg.t('summary', series?.label ?? series?.field ?? '', String(this.#computeSteps().length))
@@ -500,9 +526,11 @@ export class WaterfallChart extends EchartsChartBase {
   }
 
   #connector(): { color: string; width: number } {
-    const style = getComputedStyle(this)
-    const width = parseFloat(style.getPropertyValue('--c2-chart__connector--width'))
-    return { color: style.getPropertyValue('--c2-chart__connector--color').trim(), width: Number.isFinite(width) ? width : 1 }
+    const width = parseFloat(getComputedStyle(this).getPropertyValue('--c2-chart__connector--width'))
+    // Resolved through the theme's probe, so a `light-dark()` or `color-mix()` reaches the engine as a colour it can draw.
+    const theme = this.themeController.theme
+    const color = this.themeController.resolveColor('var(--c2-chart__connector--color, #a1a1aa)', theme.crosshairColor)
+    return { color, width: Number.isFinite(width) ? width : 1 }
   }
 
   #format(value: number): string {
@@ -510,10 +538,13 @@ export class WaterfallChart extends EchartsChartBase {
     return series?.format?.(value) ?? this.formatValue(value)
   }
 
-  /** A step's change with its sign, so a rise reads as one without its colour. */
+  /** A step's change with its sign, so a rise reads as one without its colour. The locale places the sign. */
   #signed(value: number): string {
-    const text = this.#format(Math.abs(value))
-    return value < 0 ? `−${text}` : `+${text}`
+    const format = (this.resolvedSeries[0] as ChartSeriesConfig | undefined)?.format
+    if (!format) return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value)
+    // A series' own format takes the magnitude; the sign is put in front of what it returns.
+    const text = format(Math.abs(value))
+    return value < 0 ? `-${text}` : value > 0 ? `+${text}` : text
   }
 }
 

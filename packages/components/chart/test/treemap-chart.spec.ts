@@ -23,6 +23,7 @@ interface TreemapElement extends HTMLElement {
   projectData(frame: unknown, context: unknown): EngineNode[][]
   frame: unknown
   getLegendItems(): { label: string; key: string; color: string; visible: boolean; toggle(): void }[]
+  setGroupVisible(name: string, visible: boolean): void
 }
 
 test('groups the rows into tiles, sums the groups and orders siblings largest first', async ({ page, scenario }) => {
@@ -222,4 +223,52 @@ test('names the plot and lists every tile in a table for screen readers, with no
 
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
+})
+
+test('keeps shares of the whole data when a group is hidden, and resolves a light-dark() neutral', async ({ page, scenario }) => {
+  await scenario('treemap-color')
+  const chart = page.locator('c2-treemap-chart')
+  await expect(chart).toHaveState('ready')
+
+  const result = await chart.evaluate(async (element) => {
+    const treemap = element as TreemapElement
+    const before = treemap.nodes.find((node) => node.label === 'Technology')?.share
+    treemap.setGroupVisible('Energy', false)
+    await treemap.updateComplete
+    const after = treemap.nodes.find((node) => node.label === 'Technology')?.share
+    treemap.setGroupVisible('Energy', true)
+    treemap.style.setProperty('--c2-chart__neutral--color', 'light-dark(rgb(1, 2, 3), rgb(4, 5, 6))')
+    await treemap.updateComplete
+    // Theme reads are cached until the theme changes; a new style counts as one here.
+    window.dispatchEvent(new Event('c2n-theme-change'))
+    await treemap.updateComplete
+    const [tree] = treemap.projectData(treemap.frame, treemap.buildContext())
+    return { before, after, cvx: tree[1].children?.[1]?.itemStyle.color }
+  })
+  expect(result.after).toBe(result.before)
+  expect(result.cvx).toBe('rgb(1, 2, 3)')
+})
+
+test('never infers a group field as the size, and gives a series colour only to a single group', async ({ page, scenario }) => {
+  await scenario('treemap')
+  const chart = page.locator('c2-treemap-chart')
+  await expect(chart).toHaveState('ready')
+
+  const result = await chart.evaluate(async (element) => {
+    const treemap = element as TreemapElement
+    const series = treemap.querySelector('c2-chart-series')
+    series?.setAttribute('color', 'rgb(9, 9, 9)')
+    await treemap.updateComplete
+    const colours = treemap.getLegendItems().map((item) => item.color)
+    series?.remove()
+    treemap.groupField = 'year'
+    treemap.data = [
+      { year: 2024, ticker: 'A', size: 10 },
+      { year: 2024, ticker: 'B', size: 30 },
+    ]
+    await treemap.updateComplete
+    return { colours, sizes: treemap.nodes.map((node) => `${node.label}:${node.value}`) }
+  })
+  expect(result.colours).toEqual(['rgb(2, 101, 220)', 'rgb(234, 88, 12)', 'rgb(15, 118, 110)'])
+  expect(result.sizes).toEqual(['2024:40', 'B:30', 'A:10'])
 })
