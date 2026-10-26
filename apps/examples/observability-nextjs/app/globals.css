@@ -112,7 +112,8 @@ h2 {
   font-size: 1.25rem;
 }
 
-.sr-only {
+/* The static export paints before c2-visually-hidden is defined: hide its text until then, as the element will. */
+c2-visually-hidden:not(:defined) {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -120,6 +121,7 @@ h2 {
   margin: -1px !important;
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
   white-space: nowrap !important;
   border: 0 !important;
 }

@@ -180,6 +180,7 @@ import '@c2n/components/truncate'
 import '@c2n/components/upload'
 import '@c2n/components/view-options'
 import '@c2n/components/virtual-list'
+import '@c2n/components/visually-hidden'
 import '@c2n/components/week-planner'
 import '@c2n/components/working-indicator'
 

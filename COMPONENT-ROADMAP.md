@@ -144,11 +144,10 @@ These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat
 
 ### I. Utilities
 
-| #   | Component            | What it adds                                                           | Real-world model                  | Priority | Decision |
-| --- | -------------------- | ---------------------------------------------------------------------- | --------------------------------- | -------- | -------- |
-| 98  | `c2-visually-hidden` | Text for screen readers only                                           | Chakra and Mantine VisuallyHidden | P1       | Proposed |
-| 99  | `c2-focus-trap`      | Keeps focus inside a region (custom panels, inline editors)            | Ark, Chakra and Mantine FocusTrap | P2       | Proposed |
-| 100 | `c2-in-view`         | Fires when content enters the viewport (lazy reveal, infinite loading) | Web Awesome intersection-observer | P3       | Proposed |
+| #   | Component       | What it adds                                                           | Real-world model                  | Priority | Decision |
+| --- | --------------- | ---------------------------------------------------------------------- | --------------------------------- | -------- | -------- |
+| 99  | `c2-focus-trap` | Keeps focus inside a region (custom panels, inline editors)            | Ark, Chakra and Mantine FocusTrap | P2       | Proposed |
+| 100 | `c2-in-view`    | Fires when content enters the viewport (lazy reveal, infinite loading) | Web Awesome intersection-observer | P3       | Proposed |
 
 ## 68 more from real apps
 

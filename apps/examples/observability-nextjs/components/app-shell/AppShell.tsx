@@ -59,9 +59,9 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
         </main>
       </c2-side-nav>
 
-      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      <c2-visually-hidden role="status" aria-live="polite" aria-atomic="true">
         {announcement}
-      </div>
+      </c2-visually-hidden>
     </>
   )
 }

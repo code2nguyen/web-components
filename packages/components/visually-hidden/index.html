@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-visually-hidden</title>
+    <script type="module" src="/src/visually-hidden.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+      }
+      button {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .revealed a {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: rgb(2, 101, 220);
+        color: #ffffff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Icon-only button (the label is read, not shown)</h3>
+      <button type="button">✕<c2-visually-hidden>Close dialog</c2-visually-hidden></button>
+    </section>
+
+    <section>
+      <h3>Hidden heading</h3>
+      <h2><c2-visually-hidden>Filters</c2-visually-hidden></h2>
+      <label>Status <input /></label>
+    </section>
+
+    <section>
+      <h3>Live region</h3>
+      <c2-visually-hidden role="status" aria-live="polite">3 results</c2-visually-hidden>
+      <p>The status above is announced, not drawn.</p>
+    </section>
+
+    <section>
+      <h3>Focusable (Tab to reveal)</h3>
+      <c2-visually-hidden focusable class="revealed"><a href="#comments">Skip to comments</a></c2-visually-hidden>
+    </section>
+  </body>
+</html>

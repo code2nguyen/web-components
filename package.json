@@ -246,6 +246,7 @@
         "./packages/components/upload:build",
         "./packages/components/view-options:build",
         "./packages/components/virtual-list:build",
+        "./packages/components/visually-hidden:build",
         "./packages/components/week-planner:build",
         "./packages/components/working-indicator:build",
         "./packages/core:build",
