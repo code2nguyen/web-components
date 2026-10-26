@@ -109,6 +109,7 @@ import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
+import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
@@ -273,6 +274,7 @@ export const componentManifests = (function () {
     richTextEditor,
     saveBar,
     searchField,
+    secretField,
     select,
     separator,
     sheet,
