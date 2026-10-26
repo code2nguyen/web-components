@@ -104,6 +104,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Spinner** — `c2-spinner` · `@c2n/components/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
 - **Status Panel** — `c2-status-panel` · `@c2n/components/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps.
 - **Toast** — `c2-toast, c2-toast-region` · `@c2n/components/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
+- **Toggletip** — `c2-toggletip` · `@c2n/components/toggletip` — A small ⓘ button that opens a help bubble on click or tap; the bubble can hold links and is announced to screen readers.
 - **Tooltip** — `c2-tooltip` · `@c2n/components/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
 - **Tour** — `c2-tour, c2-tour-step` · `@c2n/components/tour` — A guided product tour that spotlights one element at a time and explains it in a panel beside it. Children: `c2-tour-step`.
 - **Working Indicator** — `c2-working-indicator` · `@c2n/components/working-indicator` — A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.
