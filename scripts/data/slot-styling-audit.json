@@ -3146,6 +3146,20 @@
       "reason": "The field sizes and colours the slotted suffix icon through the icon variables."
     },
     {
+      "tag": "c2-secret-field",
+      "slot": "help",
+      "decision": "variables",
+      "variables": ["--c2-secret-field__help--color", "--c2-secret-field__help--font-size"],
+      "reason": "The help region sets the colour and size the slotted help text inherits."
+    },
+    {
+      "tag": "c2-secret-field",
+      "slot": "label",
+      "decision": "variables",
+      "variables": ["--c2-secret-field__label--color", "--c2-secret-field__label--font-size", "--c2-secret-field__label--font-weight"],
+      "reason": "The label region sets the type the slotted label inherits."
+    },
+    {
       "tag": "c2-select",
       "slot": "button-content",
       "decision": "assigned-content",

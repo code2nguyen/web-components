@@ -697,6 +697,10 @@
       "types": "./dist/search-field.d.ts",
       "default": "./dist/search-field.js"
     },
+    "./secret-field": {
+      "types": "./dist/secret-field.d.ts",
+      "default": "./dist/secret-field.js"
+    },
     "./select": {
       "types": "./dist/select.d.ts",
       "default": "./dist/select.js"
@@ -1139,6 +1143,7 @@
     "@c2n/rich-text-editor": "*",
     "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
+    "@c2n/secret-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",
     "@c2n/sheet": "*",

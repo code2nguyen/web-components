@@ -162,6 +162,7 @@
         "../../components/rich-text-editor:build",
         "../../components/save-bar:build",
         "../../components/search-field:build",
+        "../../components/secret-field:build",
         "../../components/select:build",
         "../../components/separator:build",
         "../../components/sheet:build",

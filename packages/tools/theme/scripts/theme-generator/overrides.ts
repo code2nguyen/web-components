@@ -396,6 +396,8 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // Secret field: the show button's pressed fill is the same hairline grey, a step above the hover surface.
+  '--c2-secret-field__action__selected--background-color': { token: 'color-outline-variant' },
   // Meter: the unused range is the progress track's hairline grey, a critical value is the error colour, and the
   // segment palette is the chart series, so one category reads the same in a chart and a meter. The sub-optimum
   // amber is an accent the theme has no token for.

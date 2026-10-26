@@ -150,6 +150,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
 - **Rich Text Editor** — `c2-rich-text-editor` · `@c2n/components/rich-text-editor` — A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.
 - **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.
+- **Secret Field** — `c2-secret-field` · `@c2n/components/secret-field` — Shows an API key or other secret masked, with buttons to reveal it, copy it and ask for a new one.
 - **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
 - **Shortcut** — `c2-shortcut` · `@c2n/components/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
