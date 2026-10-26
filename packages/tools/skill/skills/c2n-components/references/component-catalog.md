@@ -33,6 +33,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/scatter-chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`, `c2-map-layer`.
 - **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sparkline` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`, `c2-map-layer`.
 - **State Timeline** — `c2-state-timeline` · `@c2n/components/state-timeline` — One band per series, coloured by the discrete state it was in over time: service health, CI runs, host power.
+- **Treemap chart** — `c2-treemap-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/treemap-chart` — A whole split into nested rectangles, each sized by its value: market maps, budgets and disk usage. Children: `c2-chart-series`, `c2-map-layer`.
+- **Waterfall chart** — `c2-waterfall-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/waterfall-chart` — A running total bridged by the steps that move it, where one row is one step and totals mark where the bridge lands. Children: `c2-chart-series`, `c2-map-layer`.
 
 ## Chat
 

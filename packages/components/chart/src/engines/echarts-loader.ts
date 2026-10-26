@@ -12,6 +12,7 @@ export type EchartsFeature =
   | 'custom'
   | 'chord'
   | 'sankey'
+  | 'treemap'
   | 'pie'
   | 'gauge'
   | 'radar'
@@ -30,6 +31,7 @@ const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   custom: () => import('echarts/charts').then((m) => [m.CustomChart]),
   chord: () => import('echarts/charts').then((m) => [m.ChordChart]),
   sankey: () => import('echarts/charts').then((m) => [m.SankeyChart]),
+  treemap: () => import('echarts/charts').then((m) => [m.TreemapChart]),
   pie: () => import('echarts/charts').then((m) => [m.PieChart]),
   gauge: () => import('echarts/charts').then((m) => [m.GaugeChart]),
   radar: () => import('echarts/charts').then((m) => [m.RadarChart]),

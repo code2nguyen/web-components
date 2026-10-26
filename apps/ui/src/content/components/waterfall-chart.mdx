@@ -1,0 +1,100 @@
+---
+title: 'Waterfall chart'
+description: 'A running total bridged by the steps that move it, where one row is one step and totals mark where the bridge lands.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-waterfall-chart'
+apiTags: ['c2-waterfall-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { WaterfallChart } from '@c2n/components/chart/waterfall-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A waterfall chart explains how a total got from one value to another: revenue down to net income, an opening cash
+balance to a closing one, last year's headcount to this year's. One row is one step: `label-field` names it and the
+single series gives the change, so each bar floats from the total before the step to the total after it. Rises are
+drawn in the positive colour, falls in the negative one, and a thin connector carries the running total from one bar
+to the next. It is drawn by ECharts.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/waterfall-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .waterfall-plot {
+    width: 100%;
+    --c2-chart--height: 320px;
+  }
+</style>
+
+<div data-label="Income statement">
+  <c2-waterfall-chart
+    class="waterfall-plot"
+    label-field="item"
+    total-field="total"
+    total-label="Net income"
+    value-labels
+    data='[{"item":"Revenue","amount":1020,"total":true},{"item":"Cost of revenue","amount":-330},{"item":"Gross profit","total":true},{"item":"R&D","amount":-280},{"item":"Sales & marketing","amount":-170},{"item":"G&A","amount":-70},{"item":"Other income","amount":20},{"item":"Tax","amount":-40}]'
+  >
+    <c2-chart-series field="amount" label="Amount ($k)"></c2-chart-series>
+  </c2-waterfall-chart>
+</div>
+
+<div data-label="Cash bridge">
+  <c2-waterfall-chart
+    class="waterfall-plot"
+    label-field="month"
+    total-field="opening"
+    total-label="Closing cash"
+    legend="none"
+    data='[{"month":"Opening cash","net":240,"opening":true},{"month":"Jan","net":38},{"month":"Feb","net":-22},{"month":"Mar","net":51},{"month":"Apr","net":-64},{"month":"May","net":17},{"month":"Jun","net":29}]'
+  >
+    <c2-chart-series field="net" label="Net cash flow"></c2-chart-series>
+  </c2-waterfall-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects; `label-field` names each bar and the one `c2-chart-series` reads its change, positive or
+negative. A row with no value (or `null`) changes nothing and draws no bar.
+
+A row whose `total-field` is `true` is a total: a bar from zero up to the running total at that point, in the series
+colour. A total row that also carries a value sets the running total to it first, which is how an opening balance
+starts the bridge (the "Revenue" and "Opening cash" rows above). `total-label` appends one closing total after the
+last row, so the data does not have to compute it.
+
+The `steps` getter returns every bar with its kind (`increase`, `decrease` or `total`), its change and where it starts
+and ends, for a table beside the chart or an export. `buildWaterfallSteps(rows, totalLabel)` is the same computation
+as a plain function.
+
+### Colour
+
+Rises take `--c2-chart__positive--color`, falls `--c2-chart__negative--color`, and totals the series colour
+(`--c2-chart__series-1--color`, or the series' own `color`). When a rise is bad news, as with costs, swap the two
+variables on the element. `--c2-chart__connector--color` and `--c2-chart__connector--width` style the connectors (a
+width of `0` leaves them out), and `--c2-chart__bar--border-radius` rounds the bars.
+
+A connector is drawn only where the next bar starts at the level the last one ended at, so a second opening balance
+at another level does not get a line leading into it.
+
+### Interaction
+
+The tooltip shows a step's change, signed, and the running total after it; a total shows the total. `point-hover` and
+`point-click` report the bar's label and its change (`y`), and `tooltip-change` carries the whole `step`.
+
+The legend lists the kinds of bar the chart draws. Clicking an entry highlights that kind and dims the others; with
+`legend-action="toggle"` it hides that kind instead (`setKindVisible('decrease', false)` does the same from code), and
+the running total still counts the hidden steps. `value-labels` prints each bar's change over it.
+
+A visually hidden table lists every step with its change and running total for screen readers, and names the plot.

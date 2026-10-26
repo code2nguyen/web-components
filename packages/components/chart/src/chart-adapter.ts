@@ -102,9 +102,10 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
 
   /**
    * Where the engine drew one datum of a series, in CSS pixels inside the plot, or `null` when it has not laid it out.
-   * For a chart whose layout the engine decides, such as a sankey ordering the nodes in a column.
+   * For a chart whose layout the engine decides, such as a sankey ordering the nodes in a column. `width` and `height`
+   * are there when the datum is a box, as a treemap's tiles are.
    */
-  itemLayout?(seriesIndex: number, dataIndex: number): { x: number; y: number } | null
+  itemLayout?(seriesIndex: number, dataIndex: number): { x: number; y: number; width?: number; height?: number } | null
 
   destroy(): void
 }

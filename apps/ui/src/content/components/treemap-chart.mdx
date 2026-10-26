@@ -1,0 +1,103 @@
+---
+title: 'Treemap chart'
+description: 'A whole split into nested rectangles, each sized by its value: market maps, budgets and disk usage.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-treemap-chart'
+apiTags: ['c2-treemap-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TreemapChart } from '@c2n/components/chart/treemap-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A treemap splits a whole into rectangles whose areas follow their values, grouped the way the data is: stocks by
+sector, spending by department, files by folder. Unlike a pie, it holds hundreds of parts and a hierarchy, and the
+largest parts stand out at a glance. One row is one tile, named by `label-field` and sized by the single series. It is
+drawn by ECharts' treemap series.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/treemap-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .treemap-plot {
+    width: 100%;
+    --c2-chart--height: 340px;
+  }
+</style>
+
+<div data-label="Market map">
+  <c2-treemap-chart
+    class="treemap-plot"
+    label-field="ticker"
+    group-field="sector"
+    color-field="change"
+    color-label="Change"
+    color-suffix="%"
+    color-max="3"
+    label-content="name-value"
+    data='[{"sector":"Technology","ticker":"AAPL","cap":3400,"change":1.2},{"sector":"Technology","ticker":"MSFT","cap":3100,"change":-0.4},{"sector":"Technology","ticker":"NVDA","cap":2900,"change":3.1},{"sector":"Technology","ticker":"AVGO","cap":800,"change":2.2},{"sector":"Technology","ticker":"ORCL","cap":420,"change":-1.1},{"sector":"Communication","ticker":"GOOGL","cap":2100,"change":0.8},{"sector":"Communication","ticker":"META","cap":1400,"change":-2.3},{"sector":"Communication","ticker":"NFLX","cap":300,"change":0.2},{"sector":"Consumer","ticker":"AMZN","cap":1900,"change":1.6},{"sector":"Consumer","ticker":"TSLA","cap":800,"change":-3.4},{"sector":"Consumer","ticker":"HD","cap":380,"change":0.1},{"sector":"Financials","ticker":"JPM","cap":600,"change":-0.6},{"sector":"Financials","ticker":"V","cap":550,"change":0.3},{"sector":"Financials","ticker":"MA","cap":450,"change":0.5},{"sector":"Health","ticker":"LLY","cap":700,"change":-1.8},{"sector":"Health","ticker":"UNH","cap":480,"change":0.9},{"sector":"Health","ticker":"JNJ","cap":370,"change":-0.2},{"sector":"Energy","ticker":"XOM","cap":480,"change":-1.5},{"sector":"Energy","ticker":"CVX","cap":300,"change":0}]'
+  >
+    <c2-chart-series field="cap" label="Market cap ($bn)"></c2-chart-series>
+  </c2-treemap-chart>
+</div>
+
+<div data-label="Disk usage">
+  <c2-treemap-chart
+    class="treemap-plot"
+    label-field="name"
+    legend="bottom"
+    data='[{"name":"node_modules","children":[{"name":"echarts","size":52},{"name":"typescript","size":23},{"name":"@astrojs","size":18},{"name":"playwright-core","size":9},{"name":"lit","size":2}]},{"name":"packages","children":[{"name":"components","size":31},{"name":"tools","size":12},{"name":"icons","size":8}]},{"name":"apps","children":[{"name":"ui","size":14},{"name":"examples","size":11}]},{"name":".git","size":38}]'
+  >
+    <c2-chart-series field="size" label="Size (MB)"></c2-chart-series>
+  </c2-treemap-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects. A row is a tile: `label-field` names it, and the one `c2-chart-series` sizes it. Rows without a
+positive value are left out, and so is a group left empty. There are two ways to give the hierarchy:
+
+- **Flat rows with `group-field`.** The field names the group a row belongs to, as a market map groups stocks by
+  sector. A comma-separated list nests the groups, outermost first: `group-field="region, sector"`.
+- **Nested rows with `children-field`** (`children` by default). A row with children is a group of them and is sized
+  by them, as a folder is by its files; children may nest to any depth.
+
+Siblings are laid out largest first. The `nodes` getter returns every group and tile in that order, each with its path,
+value, share of the whole and share of its group; `buildTreemap(rows, options)` is the same computation as a plain
+function.
+
+### Colour
+
+Without `color-field`, each top-level group takes the next colour of `--c2-chart__series-1…8--color` and its tiles
+share it; a group keeps its colour when another is hidden. Each group's name sits in a header strip above its tiles.
+
+With `color-field`, tiles are coloured by that field on a scale around zero instead: from `--c2-chart__neutral--color`
+at zero towards `--c2-chart__positive--color` above it and `--c2-chart__negative--color` below, reaching full strength
+at `color-max` (by default the largest value either side). `color-label` names the measure in the tooltip and the
+table, and `color-suffix` follows its value, or `formatColor` formats it from code. Text on a tile is white or
+near-black, whichever reads better on it.
+
+`--c2-chart__tile--gap`, `--c2-chart__tile--border-radius` and `--c2-chart__group--gap` set the spacing.
+
+### Interaction
+
+The tooltip gives a tile's path, its value, its `color-field` value, and its share of the whole and of its group;
+hovering a group header describes the whole group. `point-click` reports the tile or group, and clicking one
+highlights its top-level group, dimming the rest, as a legend entry does.
+
+The headers already name every group, so the legend is off by default. With `legend="bottom"` it lists the top-level
+groups; with `legend-action="toggle"` an entry hides its group (`setGroupVisible(name, false)` does the same from code)
+and the rest grow into the space. A visually hidden table lists every tile with its group, value and share for screen
+readers, and names the plot.

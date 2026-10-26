@@ -237,6 +237,14 @@
       "types": "./dist/chart/sparkline.d.ts",
       "default": "./dist/chart/sparkline.js"
     },
+    "./chart/treemap-chart": {
+      "types": "./dist/chart/treemap-chart.d.ts",
+      "default": "./dist/chart/treemap-chart.js"
+    },
+    "./chart/waterfall-chart": {
+      "types": "./dist/chart/waterfall-chart.d.ts",
+      "default": "./dist/chart/waterfall-chart.js"
+    },
     "./chat-input": {
       "types": "./dist/chat-input.d.ts",
       "default": "./dist/chat-input.js"

@@ -35,6 +35,8 @@ import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
+import type { TreemapChart } from '@c2n/chart/treemap-chart.js'
+import type { WaterfallChart } from '@c2n/chart/waterfall-chart.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -358,6 +360,38 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: Sparkline['series'] | string
         annotations?: Sparkline['annotations'] | string
+      }
+      'c2-treemap-chart': Omit<C2Props<TreemapChart>, 'series' | 'annotations'> & {
+        'group-field'?: Attribute
+        'children-field'?: Attribute
+        'color-field'?: Attribute
+        'color-max'?: Attribute
+        'color-label'?: Attribute
+        'color-suffix'?: Attribute
+        'label-content'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: TreemapChart['series'] | string
+        annotations?: TreemapChart['annotations'] | string
+      }
+      'c2-waterfall-chart': Omit<C2Props<WaterfallChart>, 'series' | 'annotations'> & {
+        'total-field'?: Attribute
+        'total-label'?: Attribute
+        'value-labels'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: WaterfallChart['series'] | string
+        annotations?: WaterfallChart['annotations'] | string
       }
     }
   }
