@@ -123,9 +123,9 @@ export function PatternDetail({ analysis, patternId, actions }: Readonly<Props>)
                       <ul className="ll-slot__values">
                         {slot.top.slice(0, 5).map((value) => (
                           <li key={value.value}>
-                            <c2-progress value={value.count} max={pattern.count} label={`${value.value}: ${value.count}`}>
-                              <code>{value.value}</code> · {formatNumber(value.count)}
-                            </c2-progress>
+                            <c2-meter value={value.count} max={pattern.count} value-text={formatNumber(value.count)}>
+                              <code>{value.value}</code>
+                            </c2-meter>
                           </li>
                         ))}
                       </ul>

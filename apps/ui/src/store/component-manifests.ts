@@ -80,6 +80,7 @@ import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
 import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
+import meter from '@c2n/meter/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
@@ -242,6 +243,7 @@ export const componentManifests = (function () {
     menu,
     menubar,
     mermaid,
+    meter,
     modal,
     moneyInput,
     monthPlanner,

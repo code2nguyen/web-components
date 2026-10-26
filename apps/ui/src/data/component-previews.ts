@@ -295,6 +295,7 @@ price: .price
   mermaid: `<c2-mermaid style="width:260px;--c2-mermaid--font-size:12px" value="flowchart LR
   Cart --> Pay{Paid?}
   Pay -- yes --> Ship"></c2-mermaid>`,
+  meter: `<div class="preview-row" style="flex-direction:column;align-items:stretch;gap:14px;width:220px"><c2-meter value="78" low="70" high="90" optimum="0">Disk</c2-meter><c2-meter max="15" value-text="10.5 of 15 GB" segments='[{"label":"Photos","value":6},{"label":"Docs","value":3},{"label":"Mail","value":1.5}]'>Storage</c2-meter></div>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>

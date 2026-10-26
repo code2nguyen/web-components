@@ -45,33 +45,32 @@ Domain patterns with no design-system home come from the products that made them
 
 ### A. Forms and input
 
-| #   | Component           | What it adds                                                       | Real-world model                                                                | Priority | Decision |
-| --- | ------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------- | -------- | -------- |
-| 5   | `c2-choice-card`    | Card-sized radio or checkbox for plan, shipping or payment choices | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Proposed |
-| 12  | `c2-month-picker`   | Month or year granularity (billing periods, card expiry)           | Mantine MonthPicker / YearPicker                                                | P2       | Proposed |
-| 14  | `c2-transfer-list`  | Move items between two lists (roles, permissions)                  | antd Transfer, PrimeVue PickList                                                | P3       | Proposed |
-| 15  | `c2-mention-input`  | `@user` and `#tag` suggestions inside text                         | antd Mentions; Slack, GitHub                                                    | P2       | Proposed |
-| 19  | `c2-signature-pad`  | Draw a signature, export SVG or PNG                                | Ark signature pad; DocuSign                                                     | P3       | Proposed |
-| 20  | `c2-angle-slider`   | Circular knob for angles and dials                                 | Ark/Mantine angle slider, PrimeVue Knob                                         | P3       | Proposed |
-| 21  | `c2-emoji-picker`   | Searchable emoji grid with skin tones and recents                  | Slack, GitHub, Discord                                                          | P2       | Proposed |
-| 22  | `c2-cron-input`     | Build a recurring schedule, output a cron expression               | Vercel cron jobs, GitHub Actions schedules                                      | P3       | Proposed |
-| 23  | `c2-duration-input` | Accepts "1h 30m" and "90m", stores seconds                         | Jira time tracking, Toggl                                                       | P3       | Proposed |
-| 24  | `c2-secret-field`   | Masked secret with reveal, copy and regenerate                     | Stripe and OpenAI API key pages                                                 | P2       | Proposed |
-| 25  | `c2-card-input`     | Card number, expiry and CVC with brand detection and Luhn check    | Stripe Elements card field                                                      | P2       | Proposed |
+| #   | Component           | What it adds                                                       | Real-world model                                                                | Priority | Decision                                                                                                            |
+| --- | ------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| 5   | `c2-choice-card`    | Card-sized radio or checkbox for plan, shipping or payment choices | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Reject: covered by `c2-radio` card styling (container border, checked states, description slot) in `c2-radio-group` |
+| 12  | `c2-month-picker`   | Month or year granularity (billing periods, card expiry)           | Mantine MonthPicker / YearPicker                                                | P2       | Proposed                                                                                                            |
+| 14  | `c2-transfer-list`  | Move items between two lists (roles, permissions)                  | antd Transfer, PrimeVue PickList                                                | P3       | Proposed                                                                                                            |
+| 15  | `c2-mention-input`  | `@user` and `#tag` suggestions inside text                         | antd Mentions; Slack, GitHub                                                    | P2       | Proposed                                                                                                            |
+| 19  | `c2-signature-pad`  | Draw a signature, export SVG or PNG                                | Ark signature pad; DocuSign                                                     | P3       | Proposed                                                                                                            |
+| 20  | `c2-angle-slider`   | Circular knob for angles and dials                                 | Ark/Mantine angle slider, PrimeVue Knob                                         | P3       | Proposed                                                                                                            |
+| 21  | `c2-emoji-picker`   | Searchable emoji grid with skin tones and recents                  | Slack, GitHub, Discord                                                          | P2       | Proposed                                                                                                            |
+| 22  | `c2-cron-input`     | Build a recurring schedule, output a cron expression               | Vercel cron jobs, GitHub Actions schedules                                      | P3       | Proposed                                                                                                            |
+| 23  | `c2-duration-input` | Accepts "1h 30m" and "90m", stores seconds                         | Jira time tracking, Toggl                                                       | P3       | Proposed                                                                                                            |
+| 24  | `c2-secret-field`   | Masked secret with reveal, copy and regenerate                     | Stripe and OpenAI API key pages                                                 | P2       | Proposed                                                                                                            |
+| 25  | `c2-card-input`     | Card number, expiry and CVC with brand detection and Luhn check    | Stripe Elements card field                                                      | P2       | Proposed                                                                                                            |
 
 ### B. Data display
 
-| #   | Component           | What it adds                                                     | Real-world model                                              | Priority | Decision |
-| --- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- | -------- | -------- |
-| 35  | `c2-meter`          | Value inside a known range, or several segments (storage, quota) | Spectrum meter, PrimeVue MeterGroup; Google Drive storage bar | P2       | Proposed |
-| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes            | Ark timer, antd Statistic.Countdown                           | P2       | Proposed |
-| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers                      | P3       | Proposed |
-| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group                   | P2       | Proposed |
-| 43  | `c2-image-compare`  | Before/after slider                                              | Web Awesome comparison, PrimeVue ImageCompare                 | P3       | Proposed |
-| 44  | `c2-video-player`   | Themed controls, captions, chapters                              | Loom, YouTube                                                 | P3       | Proposed |
-| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                 | Slack clips, WhatsApp voice notes                             | P3       | Proposed |
-| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview                            | P3       | Proposed |
-| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                      | Chakra, Mantine and Ark marquee; stock ticker tapes           | P3       | Proposed |
+| #   | Component           | What it adds                                                     | Real-world model                                    | Priority | Decision |
+| --- | ------------------- | ---------------------------------------------------------------- | --------------------------------------------------- | -------- | -------- |
+| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes            | Ark timer, antd Statistic.Countdown                 | P2       | Proposed |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers            | P3       | Proposed |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group         | P2       | Proposed |
+| 43  | `c2-image-compare`  | Before/after slider                                              | Web Awesome comparison, PrimeVue ImageCompare       | P3       | Proposed |
+| 44  | `c2-video-player`   | Themed controls, captions, chapters                              | Loom, YouTube                                       | P3       | Proposed |
+| 45  | `c2-audio-player`   | Waveform playback for voice notes and recordings                 | Slack clips, WhatsApp voice notes                   | P3       | Proposed |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview                  | P3       | Proposed |
+| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                      | Chakra, Mantine and Ark marquee; stock ticker tapes | P3       | Proposed |
 
 ### C. Charts
 

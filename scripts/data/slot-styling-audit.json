@@ -2230,6 +2230,20 @@
       "reason": "The default slot projects consumer-owned c2-menu-item choices, styled through the menu item's documented variables."
     },
     {
+      "tag": "c2-meter",
+      "slot": "",
+      "decision": "variables",
+      "variables": ["--c2-meter__label--color", "--c2-meter__label--font-size", "--c2-meter__label--font-weight"],
+      "reason": "The label region sets the type the slotted label inherits."
+    },
+    {
+      "tag": "c2-meter",
+      "slot": "value",
+      "decision": "part",
+      "parts": ["value"],
+      "reason": "The semantic value region owns the value slot's component-side presentation, like the progress bar's."
+    },
+    {
       "tag": "c2-modal",
       "slot": "",
       "decision": "part",

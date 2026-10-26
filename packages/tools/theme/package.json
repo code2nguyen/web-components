@@ -134,6 +134,7 @@
         "../../components/menu:build",
         "../../components/menubar:build",
         "../../components/mermaid:build",
+        "../../components/meter:build",
         "../../components/modal:build",
         "../../components/money-input:build",
         "../../components/month-planner:build",

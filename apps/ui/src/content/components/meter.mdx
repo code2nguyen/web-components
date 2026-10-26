@@ -1,0 +1,61 @@
+---
+title: 'Meter'
+description: 'A measurement inside a known range — storage, quota, strength — with native meter thresholds and an optional segmented breakdown.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Meter } from '@c2n/components/meter'
+
+`c2-meter` shows where a value sits inside a known range: storage used, API calls left this month, a password's strength. It is not `c2-progress`: nothing is moving towards done, so it is announced as a meter, not a progress bar. The label sits above the bar and the value beside it, as a percentage of the range in the page's language; `value-text` replaces that with your own words ("62,000 of 100,000 calls"), which are also what a screen reader hears.
+
+`low`, `high` and `optimum` work like the native `<meter>`: they judge the value as optimum, sub-optimum or critical, and the bar turns blue, amber or red. Put `optimum` below `low` when less is better (disk usage) and above `high` when more is better (battery). The tone is also exposed as `:state(optimum)`, `:state(suboptimum)` and `:state(critical)`, so you can style things around the meter, such as a warning next to a critical one.
+
+Give it `segments` instead of a `value` to split the bar into parts, like a storage quota by file type. Each segment is `{ label, value, color? }` in range units; without a `color` it takes the next of six palette variables. A legend lists the segments under the bar, and a screen reader hears each one by name followed by the total.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/meter'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/meter
+<style>
+  .meter-row {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+  }
+</style>
+<div data-label="Value in a range">
+  <div class="meter-row">
+    <c2-meter value="62000" max="100000" value-text="62,000 of 100,000 calls">API calls this month</c2-meter>
+  </div>
+</div>
+<div data-label="Less is better: optimum below low">
+  <div class="meter-row">
+    <c2-meter value="40" low="70" high="90" optimum="0">Disk · web-01</c2-meter>
+    <c2-meter value="78" low="70" high="90" optimum="0">Disk · web-02</c2-meter>
+    <c2-meter value="96" low="70" high="90" optimum="0">Disk · db-01</c2-meter>
+  </div>
+</div>
+<div data-label="More is better: optimum above high">
+  <div class="meter-row">
+    <c2-meter value="12" low="20" high="60" optimum="100">Battery</c2-meter>
+  </div>
+</div>
+<div data-label="Segments">
+  <div class="meter-row">
+    <c2-meter max="15" value-text="10.5 GB of 15 GB" segments='[{"label":"Photos","value":6},{"label":"Documents","value":3},{"label":"Mail","value":1.5}]'>Storage</c2-meter>
+  </div>
+</div>
+```
+
+The disk meters show the three tones: under `low` is optimum, between `low` and `high` sub-optimum, and above `high` critical. The battery reads the other way round. The storage meter sets `value-text` so it reads in gigabytes; without it, a segmented meter shows its total against `max` ("10.5 of 15").
+
+To hide the shown value and keep it announced, set `--c2-meter__value--display: none`. To hide the legend of a segmented meter, set `--c2-meter__legend--display: none`.

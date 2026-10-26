@@ -1,0 +1,175 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-meter,
+  $theme: (
+    width: 100%,
+    gap: 8px,
+    transition-duration: 300ms,
+    track--height: 8px,
+    track--border-radius: 999px,
+    track--background-color: #e4e4e7,
+    indicator--background-color: #0265dc,
+    indicator__suboptimum--background-color: #d97706,
+    indicator__critical--background-color: #dc2626,
+    segment--gap: 2px,
+    segment-1--background-color: #0265dc,
+    segment-2--background-color: #0f766e,
+    segment-3--background-color: #d97706,
+    segment-4--background-color: #7c3aed,
+    segment-5--background-color: #db2777,
+    segment-6--background-color: #0891b2,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    value--color: #71717a,
+    value--font-size: 14px,
+    value--font-weight: 400,
+    value--display: inline,
+    legend--display: flex,
+    legend--gap: 4px 16px,
+    legend--color: #71717a,
+    legend--font-size: 12px,
+    legend-value--color: #18181b,
+    swatch--size: 8px,
+    swatch--border-radius: 999px,
+  )
+);
+
+:host {
+  display: block;
+  // On the host, not the inner box: as a flex or grid item an auto-width host would leave the bar's percentage
+  // widths indefinite.
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-meter {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.c2-meter-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.4;
+}
+
+.c2-meter-label {
+  min-width: 0;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-meter-value {
+  display: css.cssVar(value--display);
+  flex: none;
+  margin-inline-start: auto;
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.c2-meter-track {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  height: css.cssVar(track--height);
+  border-radius: css.cssVar(track--border-radius);
+  background-color: css.cssVar(track--background-color);
+}
+
+.c2-meter-indicator {
+  height: 100%;
+  border-radius: inherit;
+  background-color: css.cssVar(indicator--background-color);
+  transition:
+    width css.cssVar(transition-duration) ease,
+    background-color css.cssVar(transition-duration) ease;
+}
+
+.is-suboptimum .c2-meter-indicator {
+  background-color: css.cssVar(indicator__suboptimum--background-color);
+}
+
+.is-critical .c2-meter-indicator {
+  background-color: css.cssVar(indicator__critical--background-color);
+}
+
+.c2-meter-segments {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: css.cssVar(segment--gap);
+}
+
+.c2-meter-segment {
+  flex: none;
+  height: 100%;
+  transition: width css.cssVar(transition-duration) ease;
+
+  // An empty segment would still take a gap.
+  &.is-empty {
+    display: none;
+  }
+
+  &:last-child {
+    border-start-end-radius: css.cssVar(track--border-radius);
+    border-end-end-radius: css.cssVar(track--border-radius);
+  }
+}
+
+// The palette repeats every six segments; a segment's own `color` (an inline style) wins.
+@for $n from 1 through 6 {
+  .c2-meter-segment:nth-child(6n + #{$n}),
+  .c2-meter-legend-item:nth-child(6n + #{$n}) .c2-meter-swatch {
+    background-color: css.cssVar(segment-#{$n}--background-color);
+  }
+}
+
+.c2-meter-legend {
+  display: css.cssVar(legend--display);
+  flex-wrap: wrap;
+  gap: css.cssVar(legend--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: css.cssVar(legend--color);
+  font-size: css.cssVar(legend--font-size);
+  line-height: 1.4;
+}
+
+.c2-meter-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.c2-meter-swatch {
+  flex: none;
+  width: css.cssVar(swatch--size);
+  height: css.cssVar(swatch--size);
+  border-radius: css.cssVar(swatch--border-radius);
+}
+
+.c2-meter-legend-value {
+  color: css.cssVar(legend-value--color);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-meter-indicator,
+  .c2-meter-segment {
+    transition: none;
+  }
+}

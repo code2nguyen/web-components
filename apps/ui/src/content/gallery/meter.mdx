@@ -1,0 +1,95 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Meter } from '@c2n/components/meter'
+
+## Presets
+
+Meters for quotas, storage and strength. The track height and radius set the shape, and the three
+`__indicator` colours (optimum, `__suboptimum`, `__critical`) carry the meaning.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-meter value="64">Usage</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Storage breakdown
+<style>
+  .storage {
+    width: 280px;
+    --c2-meter__track--height: 12px;
+    --c2-meter__segment--gap: 0px;
+    --c2-meter__label--font-weight: 600;
+  }
+</style>
+<c2-meter class="storage" max="15" value-text="11.2 GB of 15 GB" segments='[{"label":"Photos","value":5.4},{"label":"Drive","value":3.1},{"label":"Mail","value":1.9},{"label":"Backups","value":0.8}]'>Storage</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Thin quota line
+<style>
+  .quota {
+    width: 240px;
+    --c2-meter__track--height: 4px;
+    --c2-meter--gap: 6px;
+    --c2-meter__label--font-size: 12px;
+    --c2-meter__label--font-weight: 400;
+    --c2-meter__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-meter__value--font-size: 12px;
+    --c2-meter__value--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-meter class="quota" value="8" max="10" value-text="8 of 10 seats" low="7" high="9" optimum="0">Team seats</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Password strength
+<style>
+  .strength {
+    width: 240px;
+    --c2-meter__track--height: 6px;
+    --c2-meter__label--font-size: 12px;
+    --c2-meter__value--font-size: 12px;
+    --c2-meter__value--font-weight: 600;
+    --c2-meter__indicator--background-color: #16a34a;
+  }
+  .strength:state(critical) {
+    --c2-meter__value--color: var(--c2-theme--color-error, #dc2626);
+  }
+</style>
+<c2-meter class="strength" value="1" max="4" low="2" high="3" optimum="4" value-text="Weak">Password strength</c2-meter>
+<c2-meter class="strength" value="4" max="4" low="2" high="3" optimum="4" value-text="Strong">Password strength</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Square blocks
+<style>
+  .blocks {
+    width: 260px;
+    --c2-meter__track--height: 16px;
+    --c2-meter__track--border-radius: 4px;
+    --c2-meter__segment--gap: 3px;
+    --c2-meter__swatch--border-radius: 2px;
+    --c2-meter__track--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-meter class="blocks" max="100" segments='[{"label":"Done","value":48,"color":"#16a34a"},{"label":"In review","value":22,"color":"#d97706"},{"label":"Blocked","value":9,"color":"#dc2626"}]'>Sprint scope</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Large figure
+<style>
+  .figure {
+    width: 260px;
+    --c2-meter--gap: 10px;
+    --c2-meter__track--height: 10px;
+    --c2-meter__label--font-size: 12px;
+    --c2-meter__label--font-weight: 600;
+    --c2-meter__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-meter__value--font-size: 24px;
+    --c2-meter__value--font-weight: 600;
+    --c2-meter__value--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-meter__indicator--background-color: #7c3aed;
+  }
+</style>
+<c2-meter class="figure" value="73" value-text="73%">CPU</c2-meter>
+```
+
+</GalleryGrid>
