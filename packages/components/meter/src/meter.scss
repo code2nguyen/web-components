@@ -12,11 +12,13 @@
     indicator__critical--background-color: #dc2626,
     segment--gap: 2px,
     segment-1--background-color: #0265dc,
-    segment-2--background-color: #0f766e,
-    segment-3--background-color: #d97706,
-    segment-4--background-color: #7c3aed,
-    segment-5--background-color: #db2777,
-    segment-6--background-color: #0891b2,
+    segment-2--background-color: #ea580c,
+    segment-3--background-color: #0f766e,
+    segment-4--background-color: #db2777,
+    segment-5--background-color: #a16207,
+    segment-6--background-color: #7c3aed,
+    segment-7--background-color: #0891b2,
+    segment-8--background-color: #52525b,
     label--color: #18181b,
     label--font-size: 14px,
     label--font-weight: 500,
@@ -25,7 +27,8 @@
     value--font-weight: 400,
     value--display: inline,
     legend--display: flex,
-    legend--gap: 4px 16px,
+    legend--row-gap: 4px,
+    legend--column-gap: 16px,
     legend--color: #71717a,
     legend--font-size: 12px,
     legend-value--color: #18181b,
@@ -114,7 +117,9 @@
 }
 
 .c2-meter-segment {
-  flex: none;
+  // The widths add up to at most the whole range; shrinking (in proportion to them) is what makes room for the gaps.
+  flex: 0 1 auto;
+  min-width: 0;
   height: 100%;
   transition: width css.cssVar(transition-duration) ease;
 
@@ -123,16 +128,16 @@
     display: none;
   }
 
-  &:last-child {
+  &.is-last {
     border-start-end-radius: css.cssVar(track--border-radius);
     border-end-end-radius: css.cssVar(track--border-radius);
   }
 }
 
-// The palette repeats every six segments; a segment's own `color` (an inline style) wins.
-@for $n from 1 through 6 {
-  .c2-meter-segment:nth-child(6n + #{$n}),
-  .c2-meter-legend-item:nth-child(6n + #{$n}) .c2-meter-swatch {
+// The palette repeats every eight segments; a segment's own `color` (an inline style) wins.
+@for $n from 1 through 8 {
+  .c2-meter-segment:nth-child(8n + #{$n}),
+  .c2-meter-legend-item:nth-child(8n + #{$n}) .c2-meter-swatch {
     background-color: css.cssVar(segment-#{$n}--background-color);
   }
 }
@@ -140,7 +145,8 @@
 .c2-meter-legend {
   display: css.cssVar(legend--display);
   flex-wrap: wrap;
-  gap: css.cssVar(legend--gap);
+  row-gap: css.cssVar(legend--row-gap);
+  column-gap: css.cssVar(legend--column-gap);
   margin: 0;
   padding: 0;
   list-style: none;

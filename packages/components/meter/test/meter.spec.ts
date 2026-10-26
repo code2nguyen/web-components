@@ -15,6 +15,7 @@ test('exposes a labelled meter with its range and value, and fills its share of 
   await expect(meter).toHaveAttribute('aria-valuemin', '0')
   await expect(meter).toHaveAttribute('aria-valuemax', '200')
   await expect(page.locator('c2-meter').locator('[part="value"]')).toHaveText('15%')
+  await expect(meter).toHaveAttribute('aria-valuetext', '15%')
   await expect.poll(() => widthRatio(page, 'indicator')).toBeCloseTo(0.15, 2)
   await accessible(page)
 })
@@ -48,6 +49,10 @@ for (const [scenario, markup, tone] of [
   ['optimum high, value low', '<c2-meter low="20" high="80" optimum="100" value="10">Battery</c2-meter>', 'critical'],
   ['optimum high, value high', '<c2-meter low="20" high="80" optimum="100" value="90">Battery</c2-meter>', 'optimum'],
   ['optimum middle, value outside', '<c2-meter low="40" high="60" value="80">Balance</c2-meter>', 'suboptimum'],
+  ['optimum low, value on low', '<c2-meter low="60" high="85" optimum="0" value="60">Usage</c2-meter>', 'optimum'],
+  ['optimum low, value on high', '<c2-meter low="60" high="85" optimum="0" value="85">Usage</c2-meter>', 'suboptimum'],
+  ['optimum high, value on high', '<c2-meter low="20" high="80" optimum="100" value="80">Battery</c2-meter>', 'optimum'],
+  ['unparsable thresholds are ignored', '<c2-meter low="abc" high="xyz" value="95">Usage</c2-meter>', 'optimum'],
 ] as const) {
   test(`judges the value like the native meter: ${scenario}`, async ({ page, renderScenario }) => {
     await renderScenario(markup)
@@ -82,7 +87,7 @@ test('segments split the bar, add a legend and announce each part with the total
   await expect(segments).toHaveCount(3)
   await expect.poll(() => widthRatio(page, 'segment', 0)).toBeCloseTo(6 / 15, 1)
   await expect(segments.nth(0)).toHaveCSS('background-color', 'rgb(2, 101, 220)')
-  await expect(segments.nth(1)).toHaveCSS('background-color', 'rgb(15, 118, 110)')
+  await expect(segments.nth(1)).toHaveCSS('background-color', 'rgb(234, 88, 12)')
   await expect(segments.nth(2)).toHaveCSS('background-color', 'rgb(0, 128, 0)')
   const legend = page.locator('c2-meter').locator('[part="legend-item"]')
   await expect(legend).toHaveText([/Photos\s*6/, /Documents\s*3/, /Mail\s*1.5/])
@@ -112,4 +117,20 @@ test('the shown value can be hidden through its variable and is still announced'
   await renderScenario('<c2-meter value="12" max="15" value-text="12 of 15" style="--c2-meter__value--display: none">Seats</c2-meter>')
   await expect(page.locator('c2-meter').locator('[part="value"]')).toBeHidden()
   await expect(page.getByRole('meter', { name: 'Seats' })).toHaveAttribute('aria-valuetext', '12 of 15')
+})
+
+test('the visible segment, not an empty one after it, gets the rounded end, and gaps fit inside the track', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-meter max="10" style="--c2-meter__segment--gap: 8px" segments='[{"label":"A","value":5},{"label":"B","value":5},{"label":"C","value":2}]'>Full</c2-meter>`,
+  )
+  const segments = page.locator('c2-meter').locator('[part="segment"]')
+  await expect(segments.nth(1)).not.toHaveCSS('border-top-right-radius', '0px')
+  const [outer, b] = await Promise.all([track(page).boundingBox(), segments.nth(1).boundingBox()])
+  expect(b!.x + b!.width).toBeLessThanOrEqual(outer!.x + outer!.width + 0.5)
+})
+
+test('a segmented meter counts its total from min, like its legend', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-meter min="10" max="20" segments='[{"label":"A","value":3},{"label":"B","value":2}]'>Offset</c2-meter>`)
+  await expect(page.locator('c2-meter').locator('[part="value"]')).toHaveText('5 of 10')
+  await expect(page.getByRole('meter', { name: 'Offset' })).toHaveAttribute('aria-valuenow', '15')
 })

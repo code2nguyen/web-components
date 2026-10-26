@@ -4,7 +4,6 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { meterMessages } from './messages'
 import styles from './meter.scss?inline'
@@ -15,7 +14,7 @@ export interface MeterSegment {
   label: string
   /** Amount this segment uses, in the meter's `min`–`max` units. */
   value: number
-  /** Fill colour. Without one the segment takes the next `--c2-meter__segment-<n>--background-color`. */
+  /** Fill colour. Without one the segment takes the next of the eight `--c2-meter__segment-<n>--background-color`. */
   color?: string
 }
 
@@ -64,12 +63,14 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * @cssproperty {color} [--c2-meter__indicator__critical--background-color=#dc2626] - Fill while the value is critical.
  *
  * @cssproperty {pixel} [--c2-meter__segment--gap=2px] - Space between two segments.
- * @cssproperty {color} [--c2-meter__segment-1--background-color=#0265dc] - Fill of the 1st, 7th, 13th… segment without a `color`.
- * @cssproperty {color} [--c2-meter__segment-2--background-color=#0f766e]
- * @cssproperty {color} [--c2-meter__segment-3--background-color=#d97706]
- * @cssproperty {color} [--c2-meter__segment-4--background-color=#7c3aed]
- * @cssproperty {color} [--c2-meter__segment-5--background-color=#db2777]
- * @cssproperty {color} [--c2-meter__segment-6--background-color=#0891b2]
+ * @cssproperty {color} [--c2-meter__segment-1--background-color=#0265dc] - Fill of the 1st, 9th, 17th… segment without a `color`. The eight follow the theme's chart series.
+ * @cssproperty {color} [--c2-meter__segment-2--background-color=#ea580c]
+ * @cssproperty {color} [--c2-meter__segment-3--background-color=#0f766e]
+ * @cssproperty {color} [--c2-meter__segment-4--background-color=#db2777]
+ * @cssproperty {color} [--c2-meter__segment-5--background-color=#a16207]
+ * @cssproperty {color} [--c2-meter__segment-6--background-color=#7c3aed]
+ * @cssproperty {color} [--c2-meter__segment-7--background-color=#0891b2]
+ * @cssproperty {color} [--c2-meter__segment-8--background-color=#52525b]
  *
  * @cssproperty {color} [--c2-meter__label--color=#18181b]
  * @cssproperty {font-size} [--c2-meter__label--font-size=14px]
@@ -80,7 +81,8 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * @cssproperty {display} [--c2-meter__value--display=inline] - `none` hides the shown value; it is still announced.
  *
  * @cssproperty {display} [--c2-meter__legend--display=flex] - `none` hides the legend of a segmented meter.
- * @cssproperty {pixel} [--c2-meter__legend--gap=4px 16px] - Row and column gap between legend entries.
+ * @cssproperty {pixel} [--c2-meter__legend--row-gap=4px] - Space between two rows of legend entries.
+ * @cssproperty {pixel} [--c2-meter__legend--column-gap=16px] - Space between two legend entries on a row.
  * @cssproperty {color} [--c2-meter__legend--color=#71717a] - Colour of a legend entry's label.
  * @cssproperty {font-size} [--c2-meter__legend--font-size=12px]
  * @cssproperty {color} [--c2-meter__legend-value--color=#18181b] - Colour of a legend entry's value.
@@ -146,12 +148,13 @@ export class Meter extends LitElement {
   /** How good the current value is, judged from `low`, `high` and `optimum` the way the native `<meter>` does. */
   get tone(): MeterTone {
     const [min, max] = this.range
-    const low = clamp(this.low ?? min, min, max)
-    const high = clamp(this.high ?? max, low, max)
-    const optimum = clamp(this.optimum ?? (min + max) / 2, min, max)
+    const low = clamp(finite(this.low) ?? min, min, max)
+    const high = clamp(finite(this.high) ?? max, low, max)
+    const optimum = clamp(finite(this.optimum) ?? (min + max) / 2, min, max)
     const value = this.current
-    if (optimum < low) return value < low ? 'optimum' : value <= high ? 'suboptimum' : 'critical'
-    if (optimum > high) return value > high ? 'optimum' : value >= low ? 'suboptimum' : 'critical'
+    // The boundaries belong to the better region, as in the native element.
+    if (optimum < low) return value <= low ? 'optimum' : value <= high ? 'suboptimum' : 'critical'
+    if (optimum > high) return value >= high ? 'optimum' : value >= low ? 'suboptimum' : 'critical'
     return value >= low && value <= high ? 'optimum' : 'suboptimum'
   }
 
@@ -164,28 +167,25 @@ export class Meter extends LitElement {
   }
 
   private format(value: number, options?: Intl.NumberFormatOptions): string {
-    try {
-      return new Intl.NumberFormat(this.msg.locale, options).format(value)
-    } catch {
-      return new Intl.NumberFormat('en', options).format(value)
-    }
+    return numberFormat(this.msg.locale, options).format(value)
   }
 
-  /** The value as shown: `value-text`, the segments' total, or the percentage of the range. */
-  private shownValue(): string {
+  /**
+   * The value as shown: `value-text`, the segments' sum against the size of the range (both counted from `min`, like
+   * the legend), or the percentage of the range.
+   */
+  private shownValue(min: number, max: number, current: number): string {
     if (this.valueText) return this.valueText
-    const [min, max] = this.range
-    if (this.segmented) return this.msg.t('total', this.format(this.current), this.format(max))
-    const fraction = max > min ? (this.current - min) / (max - min) : 0
+    if (this.segmented) return this.msg.t('total', this.format(current - min), this.format(max - min))
+    const fraction = max > min ? (current - min) / (max - min) : 0
     return this.format(fraction, { style: 'percent', maximumFractionDigits: 0 })
   }
 
-  /** What a screen reader hears beyond the numbers: `value-text`, or each segment by name and the total. */
-  private announcedValue(): string | undefined {
-    if (this.valueText) return this.valueText
-    if (!this.segmented) return undefined
+  /** What a screen reader hears: the shown value, after each segment by name in a segmented meter. */
+  private announcedValue(shown: string): string {
+    if (this.valueText || !this.segmented) return shown
     const parts = this.segments.map((segment) => this.msg.t('segment', segment.label, this.format(positive(segment.value))))
-    return [...parts, this.shownValue()].join(', ')
+    return [...parts, shown].join(', ')
   }
 
   override render() {
@@ -194,6 +194,7 @@ export class Meter extends LitElement {
     const hasLabel = this.slotPresence.has('') || !!this.label
     const current = this.current
     const tone = this.tone
+    const shown = this.shownValue(min, max, current)
     return html`
       <div class="c2-meter">
         <div class="c2-meter-header" part="header">
@@ -201,7 +202,7 @@ export class Meter extends LitElement {
             <slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
           </span>
           <span class="c2-meter-value" part="value" aria-hidden="true">
-            <slot name="value" @slotchange=${this.slotPresence.handleSlotChange}>${this.shownValue()}</slot>
+            <slot name="value" @slotchange=${this.slotPresence.handleSlotChange}>${shown}</slot>
           </span>
         </div>
         <div
@@ -213,30 +214,36 @@ export class Meter extends LitElement {
           aria-valuemin=${String(min)}
           aria-valuemax=${String(max)}
           aria-valuenow=${String(current)}
-          aria-valuetext=${ifDefined(this.announcedValue())}
+          aria-valuetext=${this.announcedValue(shown)}
         >
-          ${this.segmented ? this.renderSegments(min, span) : this.renderIndicator(min, span)}
+          ${this.segmented ? this.renderSegments(min, span) : this.renderIndicator(min, span, current)}
         </div>
         ${this.segmented ? this.renderLegend() : nothing}
       </div>
     `
   }
 
-  private renderIndicator(min: number, span: number) {
-    const width = span > 0 ? ((this.current - min) / span) * 100 : 0
+  private renderIndicator(min: number, span: number, current: number) {
+    const width = span > 0 ? ((current - min) / span) * 100 : 0
     return html`<div class="c2-meter-indicator" part="indicator" style=${styleMap({ width: `${width}%` })}></div>`
   }
 
   private renderSegments(min: number, span: number) {
     // Each segment fills its share of the range; a sum past `max` is cut at the end of the track.
     let used = min
+    const widths = this.segments.map((segment) => {
+      const value = Math.min(positive(segment.value), min + span - used)
+      used += value
+      return span > 0 ? (value / span) * 100 : 0
+    })
+    // The rounded end goes on the last segment that shows, not on an empty one after it.
+    let last = widths.length - 1
+    while (last >= 0 && widths[last] === 0) last--
     return html`<div class="c2-meter-segments">
-      ${this.segments.map((segment) => {
-        const value = Math.min(positive(segment.value), min + span - used)
-        used += value
-        const width = span > 0 ? (value / span) * 100 : 0
+      ${this.segments.map((segment, index) => {
+        const width = widths[index]
         return html`<div
-          class=${classMap({ 'c2-meter-segment': true, 'is-empty': width === 0 })}
+          class=${classMap({ 'c2-meter-segment': true, 'is-empty': width === 0, 'is-last': index === last })}
           part="segment"
           style=${styleMap({ width: `${width}%`, backgroundColor: segment.color || undefined })}
         ></div>`
@@ -260,6 +267,28 @@ export class Meter extends LitElement {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
+}
+
+function finite(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+}
+
+/** One `Intl.NumberFormat` per locale and options, shared by every meter and every render. */
+const formats = new Map<string, Intl.NumberFormat>()
+
+function numberFormat(locale: string, options: Intl.NumberFormatOptions = {}): Intl.NumberFormat {
+  const key = `${locale}|${JSON.stringify(options)}`
+  let format = formats.get(key)
+  if (!format) {
+    try {
+      format = new Intl.NumberFormat(locale, options)
+    } catch {
+      // An invalid `lang` falls back to English rather than breaking the render.
+      format = new Intl.NumberFormat('en', options)
+    }
+    formats.set(key, format)
+  }
+  return format
 }
 
 function positive(value: unknown): number {

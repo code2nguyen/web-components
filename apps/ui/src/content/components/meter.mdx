@@ -13,7 +13,7 @@ import { Meter } from '@c2n/components/meter'
 
 `low`, `high` and `optimum` work like the native `<meter>`: they judge the value as optimum, sub-optimum or critical, and the bar turns blue, amber or red. Put `optimum` below `low` when less is better (disk usage) and above `high` when more is better (battery). The tone is also exposed as `:state(optimum)`, `:state(suboptimum)` and `:state(critical)`, so you can style things around the meter, such as a warning next to a critical one.
 
-Give it `segments` instead of a `value` to split the bar into parts, like a storage quota by file type. Each segment is `{ label, value, color? }` in range units; without a `color` it takes the next of six palette variables. A legend lists the segments under the bar, and a screen reader hears each one by name followed by the total.
+Give it `segments` instead of a `value` to split the bar into parts, like a storage quota by file type. Each segment is `{ label, value, color? }` in range units; without a `color` it takes the next of eight palette variables, which follow the theme's chart series, so a category reads the same in a chart and a meter. A legend lists the segments under the bar, and a screen reader hears each one by name followed by the total.
 
 ## Import
 
@@ -56,6 +56,6 @@ import '@c2n/components/meter'
 </div>
 ```
 
-The disk meters show the three tones: under `low` is optimum, between `low` and `high` sub-optimum, and above `high` critical. The battery reads the other way round. The storage meter sets `value-text` so it reads in gigabytes; without it, a segmented meter shows its total against `max` ("10.5 of 15").
+The disk meters show the three tones: under `low` is optimum, between `low` and `high` sub-optimum, and above `high` critical. The battery reads the other way round. The storage meter sets `value-text` so it reads in gigabytes; without it, a segmented meter shows its total against the size of the range ("10.5 of 15").
 
 To hide the shown value and keep it announced, set `--c2-meter__value--display: none`. To hide the legend of a segmented meter, set `--c2-meter__legend--display: none`.
