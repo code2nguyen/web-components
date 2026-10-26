@@ -63,7 +63,6 @@ Domain patterns with no design-system home come from the products that made them
 
 | #   | Component           | What it adds                                                     | Real-world model                                    | Priority | Decision |
 | --- | ------------------- | ---------------------------------------------------------------- | --------------------------------------------------- | -------- | -------- |
-| 36  | `c2-countdown`      | Countdown or stopwatch with an event when it finishes            | Ark timer, antd Statistic.Countdown                 | P2       | Proposed |
 | 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers            | P3       | Proposed |
 | 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group         | P2       | Proposed |
 | 43  | `c2-image-compare`  | Before/after slider                                              | Web Awesome comparison, PrimeVue ImageCompare       | P3       | Proposed |
@@ -85,16 +84,10 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 
 ### D. Navigation and layout
 
-| #   | Component              | What it adds                                                                                              | Real-world model                                                   | Priority | Decision                                                                                         |
-| --- | ---------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------ |
-| 57  | `c2-app-shell`         | Header, sidebar, main and aside regions with responsive collapse (composes `c2-header` and `c2-side-nav`) | Mantine AppShell, Vaadin AppLayout, Carbon UI shell, Polaris Frame | P1       | Accept: [spec 016](specs/016-app-shell/spec.md)                                                  |
-| 58  | `c2-page-header`       | Title, breadcrumbs, metadata, primary actions and tabs                                                    | Carbon page header, Polaris Page                                   | P1       | Accept: [spec 016](specs/016-app-shell/spec.md)                                                  |
-| 59  | `c2-toolbar`           | Roving-focus container for button groups, selects and separators                                          | PrimeVue Toolbar, WAI-ARIA toolbar pattern                         | P1       | Reject: covered by `c2-button-group toolbar` (role, one Tab stop, arrow keys across any control) |
-| 63  | `c2-table-of-contents` | Heading links with scroll-spy                                                                             | antd Anchor, Mantine TableOfContents, Ark TOC                      | P2       | Proposed                                                                                         |
-| 64  | `c2-scroll-area`       | Themed scrollbars and edge shadows                                                                        | Mantine, Chakra and PrimeVue ScrollArea                            | P2       | Proposed                                                                                         |
-| 68  | `c2-sticky`            | Pins content once it scrolls to an offset and reports its stuck state                                     | antd Affix, Polaris Sticky                                         | P3       | Proposed                                                                                         |
-| 69  | `c2-master-detail`     | List and detail side by side, stacked with a back step on mobile                                          | Vaadin MasterDetailLayout; Gmail, Outlook                          | P2       | Accepted, implemented ([spec](specs/017-master-detail/spec.md))                                  |
-| 70  | `c2-swipe-actions`     | Swipe a list row to reveal actions                                                                        | iOS Mail, Gmail mobile                                             | P3       | Proposed                                                                                         |
+| #   | Component        | What it adds                                                     | Real-world model                           | Priority | Decision                                                                                         |
+| --- | ---------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------ |
+| 59  | `c2-toolbar`     | Roving-focus container for button groups, selects and separators | PrimeVue Toolbar, WAI-ARIA toolbar pattern | P1       | Reject: covered by `c2-button-group toolbar` (role, one Tab stop, arrow keys across any control) |
+| 64  | `c2-scroll-area` | Themed scrollbars and edge shadows                               | Mantine, Chakra and PrimeVue ScrollArea    | P2       | Proposed                                                                                         |
 
 ### E. Overlays and feedback
 
@@ -105,7 +98,6 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 | 75  | `c2-notification-center` | Inbox panel with read and unread states, grouping and "mark all read"      | Carbon notification panel; Linear inbox, GitHub notifications | P2       | Proposed |
 | 76  | `c2-loading-overlay`     | Blocks a region and shows progress while it loads                          | Mantine LoadingOverlay, PrimeVue BlockUI                      | P2       | Proposed |
 | 77  | `c2-bottom-sheet`        | Mobile sheet with drag handle and snap points                              | Spectrum tray, Vaul (shadcn drawer); Apple Maps               | P2       | Proposed |
-| 78  | `c2-save-bar`            | "Unsaved changes: Discard / Save" bar that appears when a form is dirty    | Polaris ContextualSaveBar; Shopify admin, Linear settings     | P2       | Proposed |
 | 79  | `c2-watermark`           | Tiled text or logo over content (confidential screens, screenshot tracing) | antd Watermark                                                | P3       | Proposed |
 
 ### F. Collaboration

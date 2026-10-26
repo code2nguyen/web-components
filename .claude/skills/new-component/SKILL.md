@@ -89,6 +89,7 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 npm run build -w packages/components/<name>   # type-check + vite build; regenerates custom-elements.json (commit it)
 npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
+npm install                                   # again: build:tools added the package to the umbrella's devDependencies; this records it in package-lock.json
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 npm run lint && npm run format:check          # or: npm run fix
 npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
@@ -96,7 +97,7 @@ npm test                                      # the new package's Playwright sui
 npm run ui:dev                                # open /components/<name>; check example, gallery, API table, inspector
 ```
 
-`build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
+The second `npm install` is not optional either: `build:tools` writes `@c2n/<name>` into `packages/umbrella/package.json`, and until `npm install` records it the committed lockfile disagrees with that file, which `npm ci` in CI rejects. `git status` after it should list `package-lock.json` as changed. `build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
 
@@ -107,7 +108,7 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
 - `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
-- `npm run build:tools` run; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
+- `npm run build:tools` run, then `npm install` again so `package-lock.json` lists the umbrella's new devDependency; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - `apps/ui/src/store/component-manifests.ts` import + entry
 - `apps/ui/package.json` dependency on `@c2n/<name>`, and `npm install` run so the workspace is linked
