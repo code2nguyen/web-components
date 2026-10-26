@@ -28,8 +28,9 @@ test('takes no space in the layout', async ({ page, renderScenario }) => {
     '<p id="row" style="display:inline-block">A<c2-visually-hidden>long hidden explanation</c2-visually-hidden>B</p><p id="plain" style="display:inline-block">AB</p>',
   )
   const [row, plain] = await Promise.all([page.locator('#row').boundingBox(), page.locator('#plain').boundingBox()])
-  expect(row?.width).toBe(plain?.width)
-  expect(row?.height).toBe(plain?.height)
+  // Splitting "AB" into two text runs can drop their kerning (a fraction of a pixel); the hidden text would add ~150px.
+  expect(Math.abs(row!.width - plain!.width)).toBeLessThan(1)
+  expect(Math.abs(row!.height - plain!.height)).toBeLessThan(1)
 })
 
 test('page styles on the tag cannot unhide it', async ({ page, renderScenario }) => {
