@@ -101,6 +101,35 @@ npm run ui:dev                                # open /components/<name>; check e
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
 
+## 7. Review it in the docs app by screenshot
+
+Passing checks do not show what a reader sees. Before the pull request — and again after any fix that changes the
+component's look or its docs — build the site and screenshot the component's pages, then look at every image yourself:
+
+```bash
+npm run ui:build
+node .claude/skills/new-component/scripts/doc-screenshots.mjs <name> [--press "<button name>"]…
+```
+
+The script serves `apps/ui/dist` with `astro preview` and writes `test-results/doc-screenshots/<name>/` (ignored by
+Git): the Docs usage card and the Gallery in the light and the dark theme, the API tab, the landing card,
+`aria.txt` (the usage card's accessibility tree) and `report.json`. It fails on any page or console error. Each
+`--press` clicks the first button with that accessible name on the Docs page and screenshots the page, for a state
+that only shows after interaction: an open popup, a revealed value, a pressed toggle.
+
+Read each screenshot, then check:
+
+- **Both themes:** text and surfaces readable in dark mode, no light literal left on a dark surface.
+- **Every gallery card and usage row:** nothing clipped, overlapping or cut off, especially in the narrow gallery
+  frames; icons drawn in every state (an SVG built with Lit's `html` instead of `svg` draws nothing).
+- **Interactive states** through `--press`: the popup placed beside its trigger, the state actually changed.
+- **`aria.txt`:** every control and the component itself have the name you intended; no stray text is read.
+- **Landing card:** the preview reads at that size.
+
+Fix what you find, re-run the step, and send the user the screenshots that show the component (with
+`SendUserFile` when available), saying what was fixed after they were taken. The pull request description notes
+that the review was done and what it caught.
+
 ## Checklist to report
 
 - `packages/components/<name>/` (or `open-packages/<name>/`) scaffolded, implemented, built, `custom-elements.json` generated
@@ -117,3 +146,4 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - `apps/ui/src/content/components/<name>.mdx` and `gallery/<name>.mdx` filled in (or the gallery deliberately deleted)
 - `<package>/test/` suite written and passing
 - lint + format clean, `npm run ui:build` green
+- docs app reviewed by screenshot (step 7) in both themes, problems fixed, screenshots shared

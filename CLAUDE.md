@@ -236,7 +236,8 @@ Pull requests target `develop`. Before opening one, review the branch's changes 
 
 1. Run `/code-review` on the branch. Fix the confirmed bugs. For a finding left unfixed, say why (not a real bug, out of scope, or left for a follow-up).
 2. Run `/security-review` on the branch and handle its findings the same way.
-3. Re-run the checks the fixes touched, then open the pull request. Its description lists what each review found and what was done about it.
+3. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `npm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 7 of the `new-component` skill describes. Fix what it shows.
+4. Re-run the checks the fixes touched, then open the pull request. Its description lists what each review found, what the screenshot review caught, and what was done about it.
 
 Do not open a pull request while either review still has an unanswered finding.
 
@@ -244,6 +245,8 @@ Do not open a pull request while either review still has an unanswered finding.
 
 Do not use Chrome, browser debugging, browser automation, screenshots,
 DOM inspection, DevTools, or browser MCP tools unless explicitly requested
-by the user.
+by the user. The one standing exception is the docs-app screenshot review in
+"Before opening a pull request" (the `doc-screenshots.mjs` script of the
+`new-component` skill), which the maintainer asked for on every component change.
 
 Prefer source-code inspection, terminal commands, tests, and application logs.
