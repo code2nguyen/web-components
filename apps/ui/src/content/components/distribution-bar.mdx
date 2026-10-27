@@ -1,0 +1,75 @@
+---
+title: 'Distribution Bar'
+description: 'One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DistributionBar } from '@c2n/components/distribution-bar'
+
+`c2-distribution-bar` splits a whole into its parts in one thin bar: the languages of a repository, the browsers behind an error, the statuses of a project's tasks. Each item's segment is as wide as its share of the total, and the legend underneath lists every item with its share. Hovering a segment or a legend entry brings that part forward, dims the others and shows its share and value in a bubble over the bar.
+
+It is not `c2-meter`: nothing is measured against a range, the parts always fill the bar. Give it `items` as `{ label, value, color?, key? }` in any unit; an item without a `color` takes the next of eight palette variables, which follow the theme's chart series, so a part reads the same here as in a chart.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/distribution-bar'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/distribution-bar
+<style>
+  .distribution-row {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .distribution-total {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="Languages">
+  <div class="distribution-row">
+    <c2-distribution-bar
+      items='[{"label":"TypeScript","value":812400,"color":"#3178c6"},{"label":"SCSS","value":96200,"color":"#c6538c"},{"label":"Astro","value":51800,"color":"#ff5a03"},{"label":"JavaScript","value":24100,"color":"#f1e05a"},{"label":"Shell","value":3100,"color":"#89e051"}]'>Languages</c2-distribution-bar>
+  </div>
+</div>
+<div data-label="Top values, the rest as Other">
+  <div class="distribution-row">
+    <c2-distribution-bar
+      max-items="4"
+      interactive
+      items='[{"label":"Chrome 131","value":4120},{"label":"Safari 18","value":1830},{"label":"Firefox 133","value":760},{"label":"Edge 131","value":410},{"label":"Samsung Internet","value":120},{"label":"Opera","value":60}]'>browser<span slot="header-end" class="distribution-total">7,300 events</span></c2-distribution-bar>
+  </div>
+</div>
+<div data-label="Shares and counts">
+  <div class="distribution-row">
+    <c2-distribution-bar
+      legend-content="both"
+      precision="0"
+      items='[{"label":"Done","value":18,"color":"#16a34a"},{"label":"In progress","value":7,"color":"#0265dc"},{"label":"Todo","value":11,"color":"#a1a1aa"}]'>Project progress</c2-distribution-bar>
+  </div>
+</div>
+```
+
+### Data
+
+Items with no positive value are left out. The order you give is the order drawn, or `sort="descending"` orders the parts largest first. `max-items` keeps the largest items and sums the rest into one "Other" part, drawn last in `--c2-distribution-bar__other--color`, whichever order the others are in.
+
+A tiny share keeps a sliver of `--c2-distribution-bar__segment--min-width` (2px) so it stays visible, and its share reads as below the precision (`<0.1%`) rather than as zero. `precision` sets the decimals of a share (one by default), and `legend-content` shows each entry's `percent` share, its `value`, or `both`.
+
+### Interaction
+
+Hovering a segment or a legend entry brings it forward and shows `label share · value` in a bubble over the bar, kept within the bar's width. `--c2-distribution-bar__tooltip--display: none` turns the bubble off and keeps the highlight.
+
+With `interactive`, every legend entry is a button and every segment clickable, and both fire `item-click` with the part: its `key` (the item's `key`, else its label), `label`, `value` and `share`, and for "Other" the `items` it sums. That is how a tag breakdown filters an issue list by the value clicked. Keyboard focus on an entry highlights its segment the way the pointer does.
+
+### Accessibility
+
+The bar is one image named by its label followed by every part's share ("Languages TypeScript 82.3%, SCSS 9.7%, …"), so a screen reader hears the whole breakdown once. The label comes from the default slot or `label`, else a translatable "Distribution". With `interactive` the legend's buttons carry the same information and the bar is left out, so nothing is read twice.

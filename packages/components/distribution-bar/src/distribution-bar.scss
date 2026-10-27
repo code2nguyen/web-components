@@ -1,0 +1,219 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-distribution-bar,
+  $theme: (
+    width: 100%,
+    gap: 8px,
+    transition-duration: 150ms,
+    bar--height: 8px,
+    bar--border-radius: 999px,
+    bar--background-color: #e4e4e7,
+    segment--gap: 2px,
+    segment--min-width: 2px,
+    segment__dimmed--opacity: 0.35,
+    segment-1--color: #0265dc,
+    segment-2--color: #ea580c,
+    segment-3--color: #0f766e,
+    segment-4--color: #db2777,
+    segment-5--color: #a16207,
+    segment-6--color: #7c3aed,
+    segment-7--color: #0891b2,
+    segment-8--color: #52525b,
+    other--color: #a1a1aa,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 600,
+    legend--display: flex,
+    legend--row-gap: 4px,
+    legend--column-gap: 16px,
+    legend--color: #18181b,
+    legend--font-size: 12px,
+    legend-value--color: #71717a,
+    swatch--size: 8px,
+    swatch--border-radius: 999px,
+    legend-item__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    legend-item--border-radius: 4px,
+    legend-item__hover--background-color: #f4f4f5,
+    tooltip--background-color: #18181b,
+    tooltip--color: #fafafa,
+    tooltip--font-size: 12px,
+    tooltip--padding: 4px 8px,
+    tooltip--border-radius: 6px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--display: block,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  // On the host, not an inner box: as a flex or grid item an auto-width host would leave the segments' share of the
+  // width indefinite.
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.4;
+}
+
+.label {
+  min-width: 0;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.header-end {
+  margin-inline-start: auto;
+}
+
+.track {
+  position: relative;
+}
+
+.bar {
+  display: flex;
+  overflow: hidden;
+  height: css.cssVar(bar--height);
+  gap: css.cssVar(segment--gap);
+  border-radius: css.cssVar(bar--border-radius);
+
+  &.is-empty {
+    background-color: css.cssVar(bar--background-color);
+  }
+}
+
+.segment {
+  // Each segment grows by its value from nothing, so the widths are the shares of what is left after the gaps.
+  flex: 0 1 0;
+  min-width: css.cssVar(segment--min-width);
+  height: 100%;
+  transition:
+    opacity css.cssVar(transition-duration) ease,
+    flex-grow css.cssVar(transition-duration) ease;
+
+  .bar.has-active &:not(.is-active) {
+    opacity: css.cssVar(segment__dimmed--opacity);
+  }
+}
+
+// The palette repeats every eight parts; a part's own `color` (an inline style) wins, and "Other" has its own grey.
+@for $n from 1 through 8 {
+  .segment[data-slot='#{$n}'],
+  .swatch[data-slot='#{$n}'] {
+    background-color: css.cssVar(segment-#{$n}--color);
+  }
+}
+
+.segment.is-other,
+.is-other .swatch {
+  background-color: css.cssVar(other--color);
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  z-index: 1;
+  display: css.cssVar(tooltip--display);
+  padding: css.cssVar(tooltip--padding);
+  border-radius: css.cssVar(tooltip--border-radius);
+  background-color: css.cssVar(tooltip--background-color);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  color: css.cssVar(tooltip--color);
+  font-size: css.cssVar(tooltip--font-size);
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltip-label {
+  font-weight: 600;
+}
+
+.legend {
+  display: css.cssVar(legend--display);
+  flex-wrap: wrap;
+  row-gap: css.cssVar(legend--row-gap);
+  column-gap: css.cssVar(legend--column-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: css.cssVar(legend--color);
+  font-size: css.cssVar(legend--font-size);
+  line-height: 1.4;
+}
+
+.legend--empty {
+  color: css.cssVar(legend-value--color);
+}
+
+.legend-row {
+  display: contents;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity css.cssVar(transition-duration) ease;
+
+  // The hovered part's entry carries `is-active` too, whether the pointer is on its segment or on the entry.
+  .legend:has(.is-active) &:not(.is-active) {
+    opacity: css.cssVar(segment__dimmed--opacity);
+  }
+}
+
+button.legend-item {
+  margin: 0 -4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: css.cssVar(legend-item--border-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background-color: css.cssVar(legend-item__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(legend-item__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.bar.is-interactive .segment {
+  cursor: pointer;
+}
+
+.swatch {
+  flex: none;
+  width: css.cssVar(swatch--size);
+  height: css.cssVar(swatch--size);
+  border-radius: css.cssVar(swatch--border-radius);
+}
+
+.legend-value {
+  color: css.cssVar(legend-value--color);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment,
+  .legend-item {
+    transition: none;
+  }
+}

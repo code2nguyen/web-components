@@ -63,6 +63,7 @@
     "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
+    "@c2n/distribution-bar": "*",
     "@c2n/feather-icons": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
