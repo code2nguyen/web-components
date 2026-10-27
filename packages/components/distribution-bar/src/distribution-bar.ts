@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -24,6 +24,7 @@ export interface DistributionItem {
 
 /** One part as the bar draws it: an item, or the "Other" part that `max-items` folds the smallest into. */
 export interface DistributionPart {
+  /** The item's `key`, else its label; `__other` for the "Other" part, which `other` tells apart from an item. */
   key: string
   label: string
   value: number
@@ -198,19 +199,63 @@ export class DistributionBar extends LitElement {
   /** Makes the legend entries buttons and the segments clickable, both firing `item-click`. */
   @property({ type: Boolean }) interactive = false
 
-  /** The part brought forward by the pointer or the keyboard, by key. */
-  @state() private active: string | null = null
+  /**
+   * The part brought forward by the pointer or the keyboard, by position: two items may share a label, and an item's
+   * own `key` may be anything, so neither tells a drawn part apart.
+   */
+  @state() private active: number | null = null
 
   private readonly msg = new LocalizeController(this, distributionBarMessages)
   private readonly slotPresence = new SlotPresenceController(this, ['', 'header-end'])
 
+  /** The parts as last drawn, worked out once per change of the data rather than on every hover. */
+  #parts: DistributionPart[] = []
+  /** The language the "Other" label of `#parts` was written in. */
+  #partsLocale = ''
+  #resizeObserver?: ResizeObserver
+
   /** The parts as drawn: items with a value, sorted and folded as asked. */
   get parts(): DistributionPart[] {
-    return distributionParts(Array.isArray(this.items) ? this.items : [], { sort: this.sort, maxItems: this.maxItems, otherLabel: this.msg.t('other') })
+    return this.#parts.map((part) => ({ ...part, items: [...part.items] }))
   }
 
-  protected override updated(changed: PropertyValues): void {
-    if (changed.has('active') || changed.has('items')) this.placeTooltip()
+  override connectedCallback(): void {
+    super.connectedCallback()
+    // Lit does not re-render on reconnect, so the bar is observed again here; the first time, from `firstUpdated`.
+    const bar = this.renderRoot?.querySelector<HTMLElement>('.bar')
+    if (bar) this.#resizeObserver?.observe(bar)
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.#resizeObserver?.disconnect()
+  }
+
+  protected override willUpdate(changed: PropertyValues): void {
+    const dataChanged = changed.has('items') || changed.has('sort') || changed.has('maxItems')
+    if (dataChanged || this.#partsLocale !== this.msg.locale || !this.hasUpdated) {
+      this.#parts = distributionParts(Array.isArray(this.items) ? this.items : [], {
+        sort: this.sort,
+        maxItems: this.maxItems,
+        otherLabel: this.msg.t('other'),
+      })
+      this.#partsLocale = this.msg.locale
+    }
+    // The hovered part may be gone or somewhere else now; the next pointer move or focus brings one forward again.
+    if (dataChanged) this.active = null
+  }
+
+  protected override firstUpdated(): void {
+    if (isServer || typeof ResizeObserver === 'undefined') return
+    // A resize moves the segments under a bubble that is already showing.
+    this.#resizeObserver = new ResizeObserver(() => this.placeTooltip())
+    const bar = this.renderRoot.querySelector<HTMLElement>('.bar')
+    if (bar) this.#resizeObserver.observe(bar)
+  }
+
+  protected override updated(): void {
+    // Any change can move the active segment: the data, the sort, the folding, the label row.
+    this.placeTooltip()
   }
 
   /** A share as text: a percentage in the page's language, at `precision` places, or "<0.1%" for a sliver. */
@@ -233,10 +278,10 @@ export class DistributionBar extends LitElement {
   }
 
   override render() {
-    const parts = this.parts
+    const parts = this.#parts
     const hasLabel = this.slotPresence.has('') || !!this.label
     const summary = parts.length > 0 ? parts.map((part) => this.msg.t('part', part.label, this.formatShare(part.share))).join(', ') : this.msg.t('empty')
-    const active = parts.find((part) => part.key === this.active)
+    const active = this.active === null ? undefined : parts[this.active]
     return html`
       <div class="header" part="header" ?hidden=${!hasLabel && !this.slotPresence.has('header-end')}>
         <span id="label" class="label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot></span>
@@ -255,12 +300,11 @@ export class DistributionBar extends LitElement {
           ${parts.map(
             (part) =>
               html`<div
-                class=${classMap({ segment: true, 'is-active': part.key === this.active, 'is-other': part.other })}
+                class=${classMap({ segment: true, 'is-active': part.index === this.active, 'is-other': part.other })}
                 part="segment"
-                data-key=${part.key}
                 data-slot=${String((part.index % PALETTE_SIZE) + 1)}
-                style=${styleMap({ flexGrow: String(part.value), backgroundColor: part.color || undefined })}
-                @pointerenter=${() => this.setActive(part.key)}
+                style=${styleMap({ flexGrow: String(part.share), backgroundColor: part.color || undefined })}
+                @pointerenter=${() => this.setActive(part.index)}
                 @click=${() => this.activate(part)}
               ></div>`,
           )}
@@ -293,9 +337,9 @@ export class DistributionBar extends LitElement {
         ${parts.map(
           (part) =>
             html`<li
-              class=${classMap({ 'legend-item': true, 'is-active': part.key === this.active, 'is-other': part.other })}
+              class=${classMap({ 'legend-item': true, 'is-active': part.index === this.active, 'is-other': part.other })}
               part="legend-item"
-              @pointerenter=${() => this.setActive(part.key)}
+              @pointerenter=${() => this.setActive(part.index)}
               @pointerleave=${this.clearActive}
             >
               ${entry(part)}
@@ -309,12 +353,12 @@ export class DistributionBar extends LitElement {
           html`<li class="legend-row">
             <button
               type="button"
-              class=${classMap({ 'legend-item': true, 'is-active': part.key === this.active, 'is-other': part.other })}
+              class=${classMap({ 'legend-item': true, 'is-active': part.index === this.active, 'is-other': part.other })}
               part="legend-item"
               aria-label=${this.msg.t('part', part.label, this.legendText(part))}
-              @pointerenter=${() => this.setActive(part.key)}
+              @pointerenter=${() => this.setActive(part.index)}
               @pointerleave=${this.clearActive}
-              @focus=${() => this.setActive(part.key)}
+              @focus=${() => this.setActive(part.index)}
               @blur=${this.clearActive}
               @click=${() => this.activate(part)}
             >
@@ -325,8 +369,8 @@ export class DistributionBar extends LitElement {
     </ul>`
   }
 
-  private setActive(key: string): void {
-    this.active = key
+  private setActive(index: number): void {
+    this.active = index
   }
 
   private clearActive = (): void => {
@@ -343,7 +387,7 @@ export class DistributionBar extends LitElement {
     const tooltip = this.renderRoot.querySelector<HTMLElement>('.tooltip')
     const bar = this.renderRoot.querySelector<HTMLElement>('.bar')
     if (!tooltip || !bar || this.active === null) return
-    const segment = [...bar.querySelectorAll<HTMLElement>('.segment')].find((element) => element.dataset.key === this.active)
+    const segment = bar.querySelectorAll<HTMLElement>('.segment')[this.active]
     if (!segment || bar.clientWidth === 0) return
     const centre = segment.offsetLeft + segment.offsetWidth / 2
     const fraction = Math.min(1, Math.max(0, centre / bar.clientWidth))

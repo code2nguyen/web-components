@@ -169,3 +169,39 @@ test('a header-end slot sits at the end of the label row, and a slotted label na
   const [label, end] = await Promise.all([host(page).locator('[part="label"]').boundingBox(), page.getByRole('link', { name: 'All' }).boundingBox()])
   expect(end!.x).toBeGreaterThan(label!.x + label!.width)
 })
+
+test('values given as fractions still fill the whole bar', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-distribution-bar label="Split" items='[{"label":"A","value":0.2},{"label":"B","value":0.3}]'></c2-distribution-bar>`)
+  const shares = await widths(page)
+  // Everything but the one 2px gap is filled, in the 40/60 the legend states.
+  expect(shares[0] + shares[1]).toBeGreaterThan(0.99)
+  expect(shares[0] / shares[1]).toBeCloseTo(0.4 / 0.6, 1)
+  await expect(legend(page)).toHaveText(['A 40%', 'B 60%'])
+})
+
+test('two parts with the same label are hovered one at a time, and the bubble follows the one under the pointer', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-distribution-bar label="Versions" items='[{"label":"Chrome","value":3},{"label":"Chrome","value":1}]'></c2-distribution-bar>`)
+  await segments(page).nth(1).hover()
+  await expect(segments(page).nth(0)).toHaveCSS('opacity', '0.35')
+  await expect(segments(page).nth(1)).toHaveCSS('opacity', '1')
+  const [segment, bubble] = await Promise.all([segments(page).nth(1).boundingBox(), tooltip(page).boundingBox()])
+  // The bubble's anchor slides along with its segment, so its right part overlaps the second segment.
+  expect(bubble!.x + bubble!.width).toBeGreaterThan(segment!.x)
+  await expect(tooltip(page)).toHaveText('Chrome 25% · 1')
+})
+
+test('a data change lets go of the hovered part, and a resize moves the bubble with its segment', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="box" style="width:400px"><c2-distribution-bar interactive items='${LANGUAGES}'>Languages</c2-distribution-bar></div>`)
+  // Keyboard focus holds the highlight; a pointer would leave the segment once it moves.
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await expect(tooltip(page)).toHaveText('SCSS 12% · 120')
+  const before = (await tooltip(page).boundingBox())!.x
+  await page.locator('#box').evaluate((element) => ((element as HTMLElement).style.width = '200px'))
+  await expect.poll(async () => (await tooltip(page).boundingBox())!.x).toBeLessThan(before - 20)
+
+  await host(page).evaluate((element) => ((element as HTMLElement & { items: unknown }).items = [{ label: 'Rust', value: 1 }]))
+  await expect(tooltip(page)).toBeHidden()
+  await expect(segments(page)).toHaveCount(1)
+  await expect(segments(page).nth(0)).toHaveCSS('opacity', '1')
+})

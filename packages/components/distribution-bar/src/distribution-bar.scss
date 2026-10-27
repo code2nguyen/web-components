@@ -96,7 +96,8 @@
 }
 
 .segment {
-  // Each segment grows by its value from nothing, so the widths are the shares of what is left after the gaps.
+  // Each segment grows by its share from nothing, so the widths are the shares of what is left after the gaps, whatever
+  // the values add up to: a flex-grow sum below 1 would hand out only that fraction of the room.
   flex: 0 1 0;
   min-width: css.cssVar(segment--min-width);
   height: 100%;
