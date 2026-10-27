@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-card-input</title>
+    <script type="module" src="/src/card-input.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-card-input></c2-card-input>
+    <c2-card-input brands="visa;mastercard" name="card" required></c2-card-input>
+  </body>
+</html>

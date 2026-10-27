@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -24,6 +24,7 @@ export interface DateStripMarker {
 export interface DateStripEventMap {
   input: Event
   change: CustomEvent<{ value: string }>
+  'range-change': CustomEvent<{ start: string; end: string }>
 }
 
 export interface DateStrip {
@@ -66,7 +67,8 @@ function addDays(date: Date, amount: number): Date {
  *
  * The value is a `YYYY-MM-DD` string in the local calendar, so it does not shift across time zones. `min` and `max`
  * disable the days outside them and stop the paging there. `markers` lists the days with a dot, each with an optional
- * label a screen reader hears with the day.
+ * label a screen reader hears with the day. `disabled-dates` turns off single days (fully booked, closed), which the arrow
+ * keys step over.
  *
  * The days are a list box with one tab stop: the arrow keys move by day and page on at the ends, Home and End go to
  * the first and last day shown, Page Up and Page Down page, and Enter or Space picks. It is a form control: under a
@@ -76,6 +78,7 @@ function addDays(date: Date, amount: number): Date {
  *
  * @event {Event} input - Fired when the user picks a day, before `change`. Read `value`.
  * @event {CustomEvent<{ value: string }>} change - Fired after the user picks a day. Not fired for programmatic changes.
+ * @event {CustomEvent<{ start: string; end: string }>} range-change - Fired when the user pages to other days, with the first and last day now shown, so an app can load what is on them.
  *
  * @csspart header - The row with the month and the paging buttons.
  * @csspart title - The month (or months) of the days shown.
@@ -132,6 +135,9 @@ export class DateStrip extends LitElement {
   /** The latest day that can be picked, as `YYYY-MM-DD`. */
   @property() max = ''
 
+  /** Single days that cannot be picked, as `YYYY-MM-DD`. As an attribute, a `;`-separated list. */
+  @property({ attribute: 'disabled-dates', converter: arrayPropertyConverter }) disabledDates: string[] = []
+
   /** The days with a dot. As an attribute, a JSON array of `"YYYY-MM-DD"` strings or `{ date, label }` objects. */
   @property({ converter: jsonPropertyConverter }) markers: (DateStripMarker | string)[] = []
 
@@ -160,6 +166,8 @@ export class DateStrip extends LitElement {
   private customValidityMessage = ''
   /** The markers by day, rebuilt when `markers` changes. */
   private markerMap = new Map<string, DateStripMarker>()
+  /** `disabledDates` as a set, rebuilt when it changes. */
+  private disabledSet = new Set<string>()
   /** The locale the page of days was laid out for: a week starts on its first day. */
   private layoutLocale = ''
 
@@ -212,6 +220,7 @@ export class DateStrip extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') && this.value && !fromIso(this.value)) this.value = ''
     if (this.defaultValue === undefined) this.defaultValue = this.value
+    if (changed.has('disabledDates')) this.disabledSet = new Set(Array.isArray(this.disabledDates) ? this.disabledDates : [])
     if (changed.has('markers')) {
       this.markerMap = new Map()
       for (const marker of Array.isArray(this.markers) ? this.markers : []) {
@@ -279,8 +288,13 @@ export class DateStrip extends LitElement {
     return fromIso(this.max) ? this.max : ''
   }
 
+  /** Outside `min`/`max`: no day further that way can be picked. */
+  private outOfRange(day: string): boolean {
+    return (!!this.minDay && day < this.minDay) || (!!this.maxDay && day > this.maxDay)
+  }
+
   private unavailable(day: string): boolean {
-    return this.effectiveDisabled || (!!this.minDay && day < this.minDay) || (!!this.maxDay && day > this.maxDay)
+    return this.effectiveDisabled || this.outOfRange(day) || this.disabledSet.has(day)
   }
 
   private canPage(direction: -1 | 1): boolean {
@@ -294,6 +308,12 @@ export class DateStrip extends LitElement {
     const first = fromIso(this.viewStart) ?? new Date()
     this.viewStart = toIso(addDays(first, direction * this.pageSize))
     this.focusDay = ''
+    this.announceRange()
+  }
+
+  private announceRange(): void {
+    const shown = this.shown()
+    this.dispatchEvent(new CustomEvent('range-change', { detail: { start: shown[0], end: shown[shown.length - 1] }, bubbles: true, composed: true }))
   }
 
   private syncFormState(): void {
@@ -358,11 +378,25 @@ export class DateStrip extends LitElement {
         return
     }
     event.preventDefault()
-    // The day the key leads to, checked before anything moves: a day outside min/max keeps focus where it is.
+    // The day the key leads to, checked before anything moves: past a disabled day to the next one that can be picked,
+    // but never past min/max, which keeps focus where it is.
     const first = fromIso(shown[0])!
-    const day = toIso(addDays(first, target))
+    const step = target < at ? -1 : target > at ? 1 : 0
+    let offset = target
+    let day = toIso(addDays(first, offset))
+    // Home and End land on the nearest usable day inward; an arrow keeps going outward, at most two months.
+    const direction = event.key === 'Home' ? 1 : event.key === 'End' ? -1 : step
+    for (let tries = 0; this.unavailable(day) && tries < 62; tries++) {
+      if (this.outOfRange(day) || this.effectiveDisabled) return
+      offset += direction
+      if ((event.key === 'Home' || event.key === 'End') && (offset < 0 || offset >= shown.length)) return
+      day = toIso(addDays(first, offset))
+    }
     if (this.unavailable(day)) return
-    if (target < 0 || target >= shown.length) this.page(target < 0 ? -1 : 1)
+    if (offset < 0 || offset >= shown.length) {
+      this.viewStart = toIso(addDays(first, Math.floor(offset / this.pageSize) * this.pageSize))
+      this.announceRange()
+    }
     this.focusDay = day
     void this.focusDayButton()
   }

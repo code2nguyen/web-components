@@ -13,6 +13,7 @@ import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
+import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
@@ -153,6 +154,7 @@ import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
 import timeInput from '@c2n/time-input/custom-elements.json'
 import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
+import timeSlotPicker from '@c2n/time-slot-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
@@ -190,6 +192,7 @@ export const componentManifests = (function () {
     button,
     buttonGroup,
     card,
+    cardInput,
     carousel,
     cascader,
     chart,
@@ -329,6 +332,7 @@ export const componentManifests = (function () {
     themeSelect,
     timeInput,
     timeRangePicker,
+    timeSlotPicker,
     timeline,
     toast,
     todoList,

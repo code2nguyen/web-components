@@ -1,0 +1,61 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TimeSlotPicker } from '@c2n/components/time-slot-picker'
+
+## Presets
+
+Looks for `c2-time-slot-picker`. The time's shape and selected colour set the style; the days take the date strip's own variables.
+
+<GalleryGrid min={340}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-time-slot-picker time-zone="Europe/Paris" value="2026-11-02T09:30:00+01:00"
+  slots='[{"start":"2026-11-02T09:00:00+01:00","end":"2026-11-02T09:30:00+01:00"},{"start":"2026-11-02T09:30:00+01:00","end":"2026-11-02T10:00:00+01:00"},{"start":"2026-11-02T10:00:00+01:00","end":"2026-11-02T10:30:00+01:00","available":false},{"start":"2026-11-02T13:30:00+01:00","end":"2026-11-02T14:00:00+01:00"},{"start":"2026-11-02T14:00:00+01:00","end":"2026-11-02T14:30:00+01:00"},{"start":"2026-11-02T16:30:00+01:00","end":"2026-11-02T17:00:00+01:00"},{"start":"2026-11-03T11:00:00+01:00","end":"2026-11-03T11:30:00+01:00"},{"start":"2026-11-03T15:00:00+01:00","end":"2026-11-03T15:30:00+01:00"},{"start":"2026-11-05T09:00:00+01:00","end":"2026-11-05T09:30:00+01:00"},{"start":"2026-11-05T09:30:00+01:00","end":"2026-11-05T10:00:00+01:00","available":false},{"start":"2026-11-05T17:30:00+01:00","end":"2026-11-05T18:00:00+01:00"},{"start":"2026-11-06T10:30:00+01:00","end":"2026-11-06T11:00:00+01:00"},{"start":"2026-11-06T14:30:00+01:00","end":"2026-11-06T15:00:00+01:00"},{"start":"2026-11-06T15:00:00+01:00","end":"2026-11-06T15:30:00+01:00"}]'></c2-time-slot-picker>
+```
+
+```html tag=MdxCodeBlock,label=Pills
+<style>
+  .slots-pills {
+    --c2-time-slot-picker__slot--border-radius: 999px;
+    --c2-time-slot-picker__slot--height: 36px;
+    --c2-time-slot-picker__slots--min-width: 76px;
+    --c2-date-strip__day--border-radius: 999px;
+  }
+</style>
+<c2-time-slot-picker class="slots-pills" time-zone="Europe/Paris" date="2026-11-05"
+  slots='[{"start":"2026-11-02T09:00:00+01:00","end":"2026-11-02T09:30:00+01:00"},{"start":"2026-11-02T09:30:00+01:00","end":"2026-11-02T10:00:00+01:00"},{"start":"2026-11-02T10:00:00+01:00","end":"2026-11-02T10:30:00+01:00","available":false},{"start":"2026-11-02T13:30:00+01:00","end":"2026-11-02T14:00:00+01:00"},{"start":"2026-11-02T14:00:00+01:00","end":"2026-11-02T14:30:00+01:00"},{"start":"2026-11-02T16:30:00+01:00","end":"2026-11-02T17:00:00+01:00"},{"start":"2026-11-03T11:00:00+01:00","end":"2026-11-03T11:30:00+01:00"},{"start":"2026-11-03T15:00:00+01:00","end":"2026-11-03T15:30:00+01:00"},{"start":"2026-11-05T09:00:00+01:00","end":"2026-11-05T09:30:00+01:00"},{"start":"2026-11-05T09:30:00+01:00","end":"2026-11-05T10:00:00+01:00","available":false},{"start":"2026-11-05T17:30:00+01:00","end":"2026-11-05T18:00:00+01:00"},{"start":"2026-11-06T10:30:00+01:00","end":"2026-11-06T11:00:00+01:00"},{"start":"2026-11-06T14:30:00+01:00","end":"2026-11-06T15:00:00+01:00"},{"start":"2026-11-06T15:00:00+01:00","end":"2026-11-06T15:30:00+01:00"}]'></c2-time-slot-picker>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .slots-soft {
+    --c2-time-slot-picker__slot--border: 1px solid transparent;
+    --c2-time-slot-picker__slot--background: light-dark(#f0fdf4, #0f2a1a);
+    --c2-time-slot-picker__slot--color: light-dark(#15803d, #4ade80);
+    --c2-time-slot-picker__slot__hover--background: light-dark(#dcfce7, #14532d);
+    --c2-time-slot-picker__slot__hover--border: 1px solid #16a34a;
+    --c2-time-slot-picker__slot__selected--background: #15803d;
+    --c2-date-strip__day__selected--background: #15803d;
+    --c2-date-strip__day__today--color: #15803d;
+    --c2-date-strip__marker--color: #16a34a;
+  }
+</style>
+<c2-time-slot-picker class="slots-soft" time-zone="Europe/Paris" date="2026-11-06" value="2026-11-06T14:30:00+01:00"
+  slots='[{"start":"2026-11-02T09:00:00+01:00","end":"2026-11-02T09:30:00+01:00"},{"start":"2026-11-02T09:30:00+01:00","end":"2026-11-02T10:00:00+01:00"},{"start":"2026-11-02T10:00:00+01:00","end":"2026-11-02T10:30:00+01:00","available":false},{"start":"2026-11-02T13:30:00+01:00","end":"2026-11-02T14:00:00+01:00"},{"start":"2026-11-02T14:00:00+01:00","end":"2026-11-02T14:30:00+01:00"},{"start":"2026-11-02T16:30:00+01:00","end":"2026-11-02T17:00:00+01:00"},{"start":"2026-11-03T11:00:00+01:00","end":"2026-11-03T11:30:00+01:00"},{"start":"2026-11-03T15:00:00+01:00","end":"2026-11-03T15:30:00+01:00"},{"start":"2026-11-05T09:00:00+01:00","end":"2026-11-05T09:30:00+01:00"},{"start":"2026-11-05T09:30:00+01:00","end":"2026-11-05T10:00:00+01:00","available":false},{"start":"2026-11-05T17:30:00+01:00","end":"2026-11-05T18:00:00+01:00"},{"start":"2026-11-06T10:30:00+01:00","end":"2026-11-06T11:00:00+01:00"},{"start":"2026-11-06T14:30:00+01:00","end":"2026-11-06T15:00:00+01:00"},{"start":"2026-11-06T15:00:00+01:00","end":"2026-11-06T15:30:00+01:00"}]'></c2-time-slot-picker>
+```
+
+```html tag=MdxCodeBlock,label=Compact list
+<style>
+  .slots-compact {
+    --c2-time-slot-picker__slot--height: 32px;
+    --c2-time-slot-picker__slots--min-width: 140px;
+    --c2-time-slot-picker__slots--gap: 6px;
+    --c2-time-slot-picker--gap: 12px;
+  }
+</style>
+<c2-time-slot-picker class="slots-compact" time-zone="Europe/Paris" date="2026-11-03" show-end group-by="none"
+  slots='[{"start":"2026-11-02T09:00:00+01:00","end":"2026-11-02T09:30:00+01:00"},{"start":"2026-11-02T09:30:00+01:00","end":"2026-11-02T10:00:00+01:00"},{"start":"2026-11-02T10:00:00+01:00","end":"2026-11-02T10:30:00+01:00","available":false},{"start":"2026-11-02T13:30:00+01:00","end":"2026-11-02T14:00:00+01:00"},{"start":"2026-11-02T14:00:00+01:00","end":"2026-11-02T14:30:00+01:00"},{"start":"2026-11-02T16:30:00+01:00","end":"2026-11-02T17:00:00+01:00"},{"start":"2026-11-03T11:00:00+01:00","end":"2026-11-03T11:30:00+01:00"},{"start":"2026-11-03T15:00:00+01:00","end":"2026-11-03T15:30:00+01:00"},{"start":"2026-11-05T09:00:00+01:00","end":"2026-11-05T09:30:00+01:00"},{"start":"2026-11-05T09:30:00+01:00","end":"2026-11-05T10:00:00+01:00","available":false},{"start":"2026-11-05T17:30:00+01:00","end":"2026-11-05T18:00:00+01:00"},{"start":"2026-11-06T10:30:00+01:00","end":"2026-11-06T11:00:00+01:00"},{"start":"2026-11-06T14:30:00+01:00","end":"2026-11-06T15:00:00+01:00"},{"start":"2026-11-06T15:00:00+01:00","end":"2026-11-06T15:30:00+01:00"}]'></c2-time-slot-picker>
+```
+
+</GalleryGrid>

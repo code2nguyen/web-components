@@ -40,7 +40,9 @@ import '@c2n/components/date-strip'
 
 ### Value and limits
 
-`value` is the day picked, as `YYYY-MM-DD` in the local calendar. A click, or Enter or Space on the focused day, picks it and fires `input` then `change` (with `detail.value`). `min` and `max` disable the days outside them and stop the paging there.
+`value` is the day picked, as `YYYY-MM-DD` in the local calendar. A click, or Enter or Space on the focused day, picks it and fires `input` then `change` (with `detail.value`). `min` and `max` disable the days outside them and stop the paging there. `disabled-dates` turns off single days (a `;`-separated list, or an array as a property), such as fully booked or closed days. The arrow keys step over them.
+
+Paging fires `range-change` with the first and last day now shown, so an app can load what is on them.
 
 ### Markers
 

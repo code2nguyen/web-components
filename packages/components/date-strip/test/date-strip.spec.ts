@@ -88,3 +88,16 @@ test('in a row too narrow for every day, the picked day is scrolled into sight',
   const scrolled = await strip(page).evaluate((element) => element.shadowRoot!.querySelector<HTMLElement>('.days')!.scrollLeft)
   expect(scrolled).toBeGreaterThan(0)
 })
+
+test('disabled dates cannot be picked and the arrows step over them; paging fires range-change with the days shown', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="en-US"><c2-date-strip value="2026-10-13" disabled-dates="2026-10-14;2026-10-15"></c2-date-strip></div>`)
+  await watch(strip(page), 'range-change')
+  await expect(page.getByRole('option', { name: /October 14, 2026/ })).toHaveAttribute('aria-disabled', 'true')
+  await page.getByRole('option', { name: /October 14, 2026/ }).click({ force: true })
+  expect(await value(page)).toBe('2026-10-13')
+  await page.getByRole('option', { name: /October 13, 2026/ }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('option', { name: /October 16, 2026/ })).toBeFocused()
+  await page.getByRole('button', { name: 'Later days' }).click()
+  expect(JSON.parse((await strip(page).getAttribute('data-events'))!)).toEqual([{ start: '2026-10-18', end: '2026-10-24' }])
+})

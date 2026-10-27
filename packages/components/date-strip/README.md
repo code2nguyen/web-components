@@ -18,6 +18,7 @@ A row of days to pick one from, a week at a time, with dots on the days that hav
 `YYYY-MM-DD` in the local calendar.
 
 - `days` (7 by default, starting on the locale's first day of the week) and `start` set the days shown.
-- `min` / `max` disable days and stop the paging; `markers` lists the days with a dot and an optional label.
+- `min` / `max` disable days and stop the paging; `disabled-dates` turns off single days; `markers` lists the days with a dot and an optional label.
+- `range-change` fires with the days shown after paging.
 - A form control: `name`, `required`, reset and `c2-form-field` support.
 - Themed through `--c2-date-strip*` custom properties; see the API page of the docs site.
