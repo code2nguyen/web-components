@@ -63,14 +63,19 @@ thead th {
   white-space: nowrap;
 }
 
-.column-header {
-  .column-label {
-    display: block;
-  }
+.toggle-row > * {
+  padding-top: 0;
+}
 
-  .control {
-    margin-top: 6px;
-  }
+thead tr:has(+ .toggle-row) > * {
+  padding-bottom: 4px;
+  border-bottom: 0;
+}
+
+.toggle-cell {
+  width: 1px;
+  padding-right: 0;
+  line-height: 0;
 }
 
 /* The first column stays in place while a wide matrix scrolls sideways. */
@@ -89,16 +94,13 @@ thead th {
 }
 
 .row-header {
-  min-width: 140px;
   color: css.cssVar(row-header--color);
   font-size: css.cssVar(row-header--font-size);
   font-weight: css.cssVar(row-header--font-weight);
 }
 
-.row-heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.row-label {
+  display: block;
 }
 
 .description {
@@ -156,7 +158,7 @@ thead th {
   }
 
   &:checked,
-  &:indeterminate {
+  &:not([type='radio']):indeterminate {
     border-color: transparent;
     background-color: css.cssVar(control__selected--background-color);
   }
@@ -174,8 +176,8 @@ thead th {
     content: '';
   }
 
-  /* The dash of a partly checked toggle. */
-  &:indeterminate::after {
+  /* The dash of a partly checked toggle. A radio group with nothing chosen also matches :indeterminate; it draws nothing. */
+  &:not([type='radio']):indeterminate::after {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -208,7 +210,7 @@ thead th {
 
 @media (forced-colors: active) {
   .control:checked,
-  .control:indeterminate {
+  .control:not([type='radio']):indeterminate {
     background-color: Highlight;
   }
 }

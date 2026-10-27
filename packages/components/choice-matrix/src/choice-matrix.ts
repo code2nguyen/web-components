@@ -317,22 +317,31 @@ export class ChoiceMatrix extends LitElement {
         <table class="table" part="table">
           <thead>
             <tr>
+              ${rowToggles ? html`<td class="toggle-cell"></td>` : nothing}
               <th class="corner" scope="col">${this.rowHeader}</th>
               ${columns.map(
                 (column, at) =>
-                  html`<th class="column-header" part="column-header" scope="col">
-                    <span class="column-label" id="column-${at}">${column.label}</span>
-                    ${
-                      columnToggles
-                        ? this.renderToggle(
-                            rows.map((row) => [row, column]),
-                            this.msg.t('toggleColumn', column.label),
-                          )
-                        : nothing
-                    }
-                  </th>`,
+                  html`<th class="column-header" part="column-header" scope="col"><span class="column-label" id="column-${at}">${column.label}</span></th>`,
               )}
             </tr>
+            ${
+              // The column toggles get a row of their own, so a column title is named by its text alone.
+              columnToggles
+                ? html`<tr class="toggle-row">
+                    ${rowToggles ? html`<td class="toggle-cell"></td>` : nothing}
+                    <td class="corner"></td>
+                    ${columns.map(
+                      (column) =>
+                        html`<td class="cell">
+                          ${this.renderToggle(
+                            rows.map((row) => [row, column]),
+                            this.msg.t('toggleColumn', column.label),
+                          )}
+                        </td>`,
+                    )}
+                  </tr>`
+                : nothing
+            }
           </thead>
           ${[...groups].map(
             ([group, groupRows]) =>
@@ -340,6 +349,7 @@ export class ChoiceMatrix extends LitElement {
                 ${
                   group
                     ? html`<tr class="group-header" part="group-header">
+                        ${rowToggles ? html`<td class="toggle-cell"></td>` : nothing}
                         <th scope="rowgroup" class="group-title">${group}</th>
                         ${columns.map(
                           (column) =>
@@ -368,18 +378,19 @@ export class ChoiceMatrix extends LitElement {
   private renderRow(row: ChoiceMatrixRow, index: number, columns: ChoiceMatrixColumn[], rowToggle: boolean) {
     const headerId = `row-${index}`
     return html`<tr class="row ${row.disabled ? 'row--disabled' : ''}">
+      ${
+        // The row toggle sits in a cell of its own, so the row title is named by its text alone.
+        rowToggle
+          ? html`<td class="toggle-cell">
+              ${this.renderToggle(
+                columns.map((column) => [row, column]),
+                this.msg.t('toggleRow', row.label),
+              )}
+            </td>`
+          : nothing
+      }
       <th class="row-header" part="row-header" scope="row">
-        <span class="row-heading">
-          ${
-            rowToggle
-              ? this.renderToggle(
-                  columns.map((column) => [row, column]),
-                  this.msg.t('toggleRow', row.label),
-                )
-              : nothing
-          }
-          <span class="row-label" id=${headerId}>${row.label}</span>
-        </span>
+        <span class="row-label" id=${headerId}>${row.label}</span>
         ${row.description ? html`<span class="description" part="description">${row.description}</span>` : nothing}
       </th>
       ${columns.map(

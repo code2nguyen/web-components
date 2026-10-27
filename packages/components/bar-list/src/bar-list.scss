@@ -1,6 +1,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-bar-list,
   $theme: (
+    width: 100%,
     gap: 6px,
     row--height: 32px,
     row--column-gap: 16px,
@@ -30,6 +31,9 @@
 
 :host {
   display: block;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
 }
 
 :host([hidden]) {

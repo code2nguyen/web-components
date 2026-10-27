@@ -74,6 +74,7 @@ function opensElsewhere(target: string): boolean {
  * @csspart toggle - The button that shows or hides the rows past `max-items`.
  * @csspart empty - The message shown when there are no items.
  *
+ * @cssproperty {length} [--c2-bar-list--width=100%] - The list fills its container by default, so the bars have room in a centred or flex layout.
  * @cssproperty {pixel} [--c2-bar-list--gap=6px] - Space between the rows.
  * @cssproperty {pixel} [--c2-bar-list__row--height=32px]
  * @cssproperty {pixel} [--c2-bar-list__row--column-gap=16px] - Space between the bar and the value.
