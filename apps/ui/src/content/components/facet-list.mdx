@@ -1,0 +1,63 @@
+---
+title: 'Facet List'
+description: 'One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FacetList } from '@c2n/components/facet-list'
+
+`c2-facet-list` is one facet of a log or search sidebar, as in Datadog, Sentry and Kibana: an attribute's values with how many records have each, a checkbox to include a value, Only to make it the only one, and Exclude to filter it out. A sidebar stacks one element per attribute.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/facet-list'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/facet-list
+<style>
+  .facets {
+    display: grid;
+    gap: 8px;
+    width: 260px;
+  }
+</style>
+<div data-label="Log sidebar">
+  <div class="facets">
+    <c2-facet-list label="Service" include="checkout" exclude="healthcheck" values='[{"value":"checkout","count":12400},{"value":"search","count":8100},{"value":"payments","count":2300},{"value":"healthcheck","count":18200},{"value":"auth","count":950}]'></c2-facet-list>
+    <c2-facet-list label="Status" values='[{"value":"info","label":"Info","count":31200},{"value":"warn","label":"Warn","count":1840},{"value":"error","label":"Error","count":212}]'></c2-facet-list>
+  </div>
+</div>
+<div data-label="Long list">
+  <div class="facets">
+    <c2-facet-list label="Host" searchable max-items="4" values='[{"value":"web-01","count":5400},{"value":"web-02","count":5100},{"value":"web-03","count":4900},{"value":"worker-01","count":2100},{"value":"worker-02","count":1980},{"value":"db-01","count":640},{"value":"db-02","count":610}]'></c2-facet-list>
+  </div>
+</div>
+```
+
+### Values and selection
+
+`values` is an array of `{ value, label, count }`, as a property or as JSON in the attribute. `include` and `exclude` hold the values picked, as arrays or as `;`-separated attributes; an empty selection means no filter. Values are sorted by count, largest first (`sort="label"` or `"none"` to change it), and counts are shortened in the page's language, or formatted by `count-format` (`Intl.NumberFormat` options).
+
+### Changing the filter
+
+The checkbox includes a value; **Only** makes it the only value included; **Exclude** filters it out (it is struck through, and its button includes it again); **Clear** empties the selection. Each change fires a cancelable `filter-change` with `include` and `exclude` as they are about to become, then updates them; cancel it to keep the facet controlled, for example when the selection lives in the URL.
+
+```typescript tag=CodeBlock
+facet.addEventListener('filter-change', (event) => {
+  query.set(facet.label, event.detail) // then rerun the search
+})
+```
+
+### Long lists
+
+`searchable` adds a field that filters the values as you type. `max-items` shows the first values with a button to show the rest. The title is a disclosure button that collapses the facet (`open`), firing `toggle`.
+
+### Accessibility
+
+The facet is a group named by its title. Each value's checkbox is named by its label and count, and says when the value is excluded. The Only and Exclude buttons appear on hover and focus, but they are always in the tab order and named for screen readers ("Only checkout", "Exclude checkout").

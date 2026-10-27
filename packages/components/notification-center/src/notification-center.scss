@@ -1,0 +1,305 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-notification-center,
+  $theme: (
+    width: 380px,
+    max-height: 520px,
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: none,
+    color: #18181b,
+    font-size: 14px,
+    header--padding: 12px 16px 8px,
+    title--font-weight: 600,
+    group-title--color: #71717a,
+    group-title--font-size: 12px,
+    item--padding: 10px 16px,
+    item--gap: 12px,
+    item__hover--background-color: #fafafa,
+    item__unread--background-color: #edf1fe,
+    dot--color: rgb(2, 101, 220),
+    dot--size: 8px,
+    item-title__unread--font-weight: 600,
+    body--color: #52525b,
+    body--font-size: 13px,
+    time--color: #52525b,
+    time--font-size: 12px,
+    divider--border: 1px solid #e4e4e7,
+    filter__selected--background-color: #f4f4f5,
+    link--color: rgb(2, 101, 220),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
+  max-height: css.cssVar(max-height);
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  box-shadow: css.cssVar(box-shadow);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}
+
+.header {
+  flex: none;
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(divider--border);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.link {
+  color: css.cssVar(link--color);
+  font-size: css.cssVar(time--font-size);
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.filter {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+  font-weight: 500;
+
+  &[aria-pressed='true'] {
+    background-color: css.cssVar(filter__selected--background-color);
+    color: css.cssVar(color);
+  }
+}
+
+.scroller {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.group + .group {
+  border-top: css.cssVar(divider--border);
+}
+
+.group-title {
+  padding: 10px 16px 4px;
+  color: css.cssVar(group-title--color);
+  font-size: css.cssVar(group-title--font-size);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: css.cssVar(dot--size) auto minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: css.cssVar(item--gap);
+  padding: css.cssVar(item--padding);
+
+  &:hover {
+    background-color: css.cssVar(item__hover--background-color);
+  }
+}
+
+.item--unread {
+  background-color: css.cssVar(item__unread--background-color);
+
+  &:hover {
+    background-color: css.cssVar(item__unread--background-color);
+  }
+
+  .dot {
+    background-color: css.cssVar(dot--color);
+  }
+
+  .item-title {
+    font-weight: css.cssVar(item-title__unread--font-weight);
+  }
+}
+
+.dot {
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  margin-top: 6px;
+  border-radius: 50%;
+}
+
+/* With no avatar, the content takes the avatar's column too. */
+.item:not(:has(.avatar)) .content {
+  grid-column: 2 / 4;
+}
+
+.avatar {
+  grid-column: 2;
+}
+
+.content {
+  display: flex;
+  grid-column: 3;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* The main control covers the whole item, so a click anywhere on it activates the item. */
+.main {
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: css.cssVar(focus--outline);
+      outline-offset: -2px;
+    }
+  }
+}
+
+.body {
+  overflow: hidden;
+  color: css.cssVar(body--color);
+  font-size: css.cssVar(body--font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+}
+
+.toggle {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  grid-column: 4;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: css.cssVar(time--color);
+  opacity: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+  }
+
+  &:hover {
+    background-color: css.cssVar(filter__selected--background-color);
+  }
+}
+
+.item:hover .toggle,
+.item:focus-within .toggle {
+  opacity: 1;
+}
+
+/* With no hover (a touch screen), the toggle is always shown. */
+@media (hover: none) {
+  .toggle {
+    opacity: 1;
+  }
+}
+
+.empty {
+  padding: 32px 16px;
+  color: css.cssVar(time--color);
+  text-align: center;
+}
+
+.load-more {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-top: css.cssVar(divider--border);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
