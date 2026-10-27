@@ -63,6 +63,11 @@ const reflectOnly: Record<string, string> = {
   'c2-split-button': 'its main half is a submit button: an entry of the submission it triggers only',
 }
 
+// Form-associated elements whose entries are not under `name` itself, each covered by a test of its own below.
+const ownCase: Record<string, string> = {
+  'c2-choice-matrix': 'submits one name[row] entry per choice',
+}
+
 test('every form-associated element has a FormData case', async ({ page, renderScenario }) => {
   await renderScenario('')
   const formAssociated = await page.evaluate(
@@ -70,7 +75,7 @@ test('every form-associated element has a FormData case', async ({ page, renderS
     tags,
   )
   expect(formAssociated.length).toBeGreaterThan(30)
-  expect(formAssociated.filter((tag) => !(tag in submitted) && !(tag in reflectOnly))).toEqual([])
+  expect(formAssociated.filter((tag) => !(tag in submitted) && !(tag in reflectOnly) && !(tag in ownCase))).toEqual([])
 })
 
 test('a client-created control is submitted under the name set as a property', async ({ page, renderScenario }) => {
@@ -160,4 +165,34 @@ test('c2-date-selector reflects end-name and submits the end of the range under 
     return { attribute: element.getAttribute('end-name'), data: Object.fromEntries(new FormData(document.querySelector('form')!)) }
   })
   expect(outcome).toEqual({ attribute: 'end', data: { start: '2026-10-17', end: '2026-10-24' } })
+})
+
+test('c2-choice-matrix reflects a name set as a property and submits one name[row] entry per choice', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-choice-matrix') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'perm',
+      rows: [
+        { value: 'issues', label: 'Issues' },
+        { value: 'pulls', label: 'Pull requests' },
+      ],
+      columns: [
+        { value: 'read', label: 'Read' },
+        { value: 'write', label: 'Write' },
+      ],
+      value: { issues: ['read', 'write'], pulls: ['read'] },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'perm',
+    entries: [
+      ['perm[issues]', 'read'],
+      ['perm[issues]', 'write'],
+      ['perm[pulls]', 'read'],
+    ],
+  })
 })
