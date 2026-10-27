@@ -137,6 +137,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
 - **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range.
+- **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
 - **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
@@ -149,6 +150,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
 - **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
+- **Month Picker** — `c2-month-picker` · `@c2n/components/month-picker` — Pick a month, or a year: billing periods, reports and card expiry.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.

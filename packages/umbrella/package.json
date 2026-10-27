@@ -365,6 +365,10 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./date-strip": {
+      "types": "./dist/date-strip.d.ts",
+      "default": "./dist/date-strip.js"
+    },
     "./date-time-picker": {
       "types": "./dist/date-time-picker.d.ts",
       "default": "./dist/date-time-picker.js"
@@ -612,6 +616,10 @@
     "./money-input": {
       "types": "./dist/money-input.d.ts",
       "default": "./dist/money-input.js"
+    },
+    "./month-picker": {
+      "types": "./dist/month-picker.d.ts",
+      "default": "./dist/month-picker.js"
     },
     "./month-planner": {
       "types": "./dist/month-planner.d.ts",
@@ -1112,6 +1120,7 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/date-strip": "*",
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
@@ -1160,6 +1169,7 @@
     "@c2n/meter": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
+    "@c2n/month-picker": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",

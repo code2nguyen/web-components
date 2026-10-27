@@ -227,8 +227,20 @@ export class DateStrip extends LitElement {
     else if (changed.has('value') && this.value && !this.shown().includes(this.value)) this.viewStart = this.pageStartFor(this.value)
   }
 
-  protected override updated(): void {
+  protected override updated(changed: PropertyValues<this>): void {
     this.syncFormState()
+    if (changed.has('value') || (changed as PropertyValues).has('viewStart')) this.revealSelected()
+  }
+
+  /** In a row too narrow for every day, scrolls the row (never the page) so the picked day is in sight. */
+  private revealSelected(): void {
+    const row = this.renderRoot.querySelector<HTMLElement>('.days')
+    const day = row?.querySelector<HTMLElement>('.day--selected')
+    if (!row || !day || row.scrollWidth <= row.clientWidth) return
+    // The row is positioned, so a day's offsetLeft is measured from the row's start.
+    const start = day.offsetLeft
+    if (start < row.scrollLeft) row.scrollLeft = start
+    else if (start + day.offsetWidth > row.scrollLeft + row.clientWidth) row.scrollLeft = start + day.offsetWidth - row.clientWidth
   }
 
   private get effectiveDisabled(): boolean {

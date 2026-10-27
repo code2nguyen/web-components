@@ -160,6 +160,7 @@ greet('world')"></c2-code-editor>`,
 </c2-dashboard>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
+  'date-strip': `<c2-date-strip value="2026-10-14" start="2026-10-12" markers='["2026-10-13","2026-10-16"]' style="width:250px;--c2-date-strip__day--min-width:30px;--c2-date-strip__date--font-size:14px"></c2-date-strip>`,
   'date-time-picker': `<c2-date-time-picker value="2026-10-14T09:30" time-zone="Europe/Paris" aria-label="Meeting" style="width:240px"></c2-date-time-picker>`,
   'depth-chart': `<c2-depth-chart style="width:280px;height:132px;--c2-chart--padding:6px" axes="x" grid="none" range="0.004" bids='[[67410.5,0.6],[67402,1.4],[67390,0.9],[67371,2.2],[67352,1.1],[67330,3.6],[67300,6.8],[67276,1.9],[67250,2.4]]' asks='[[67414.5,0.4],[67421,1.2],[67433,0.8],[67450,2.9],[67468,1.3],[67490,1.7],[67500,5.2],[67531,2.1],[67575,2.6]]'></c2-depth-chart>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
@@ -311,6 +312,7 @@ price: .price
   </c2-modal>
 </div>`,
   'money-input': `<c2-money-input value="250000" locale="en-US" currencies="USD;EUR;GBP" aria-label="Payout amount" style="width:220px"></c2-money-input>`,
+  'month-picker': `<c2-month-picker value="2026-05" style="--c2-month-picker--width:230px;--c2-month-picker__cell--height:30px;--c2-month-picker--padding:8px;--c2-month-picker__grid--gap:2px"></c2-month-picker>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">

@@ -101,6 +101,7 @@
 }
 
 .days {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(var(--_days), minmax(css.cssVar(day--min-width), 1fr));
   gap: css.cssVar(gap);

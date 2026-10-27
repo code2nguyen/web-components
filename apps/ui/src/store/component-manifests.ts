@@ -40,6 +40,7 @@ import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
+import dateStrip from '@c2n/date-strip/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
@@ -89,6 +90,7 @@ import mermaid from '@c2n/mermaid/custom-elements.json'
 import meter from '@c2n/meter/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
+import monthPicker from '@c2n/month-picker/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
@@ -212,6 +214,7 @@ export const componentManifests = (function () {
     dashboard,
     dateInput,
     dateSelector,
+    dateStrip,
     dateTimePicker,
     descriptionList,
     details,
@@ -261,6 +264,7 @@ export const componentManifests = (function () {
     meter,
     modal,
     moneyInput,
+    monthPicker,
     monthPlanner,
     navigationMenu,
     notepad,

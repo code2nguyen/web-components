@@ -80,3 +80,10 @@ test('a disabled strip is out of the tab order, and the keys do not move onto a 
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('option', { name: /October 15, 2026/ })).toBeFocused()
 })
+
+test('in a row too narrow for every day, the picked day is scrolled into sight', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="width:180px"><c2-date-strip value="2026-10-17" start="2026-10-11"></c2-date-strip></div>`)
+  await expect(page.getByRole('option', { name: /October 17, 2026/ })).toBeInViewport()
+  const scrolled = await strip(page).evaluate((element) => element.shadowRoot!.querySelector<HTMLElement>('.days')!.scrollLeft)
+  expect(scrolled).toBeGreaterThan(0)
+})
