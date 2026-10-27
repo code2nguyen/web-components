@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/distribution-bar.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-distribution-bar items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'
+      >Languages</c2-distribution-bar
+    >
+    <c2-distribution-bar
+      label="browser"
+      max-items="3"
+      interactive
+      legend-content="both"
+      items='[{"label":"Chrome","value":4120},{"label":"Safari","value":1830},{"label":"Firefox","value":760},{"label":"Edge","value":410}]'
+    ></c2-distribution-bar>
+    <c2-distribution-bar label="Empty" items="[]"></c2-distribution-bar>
+  </body>
+</html>

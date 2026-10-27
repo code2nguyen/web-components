@@ -41,6 +41,7 @@ import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
+import distributionBar from '@c2n/distribution-bar/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
@@ -207,6 +208,7 @@ export const componentManifests = (function () {
     descriptionList,
     details,
     diffViewer,
+    distributionBar,
     featherIcons,
     fieldset,
     filterBuilder,

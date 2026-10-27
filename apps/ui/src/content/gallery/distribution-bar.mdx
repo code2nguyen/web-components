@@ -1,0 +1,87 @@
+---
+title: 'Distribution Bar gallery'
+description: 'A repository language bar, an error tag breakdown, a project status bar, a storage split and a thick labelled bar.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DistributionBar } from '@c2n/components/distribution-bar'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-distribution-bar label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>
+```
+
+```html tag=MdxCodeBlock,label=Language bar
+<style>
+  .distribution-languages {
+    --c2-distribution-bar__segment--gap: 0px;
+    --c2-distribution-bar__legend--column-gap: 12px;
+    --c2-distribution-bar__swatch--size: 10px;
+  }
+</style>
+<c2-distribution-bar class="distribution-languages" label="Languages" items='[{"label":"TypeScript","value":812400,"color":"#3178c6"},{"label":"SCSS","value":96200,"color":"#c6538c"},{"label":"Astro","value":51800,"color":"#ff5a03"},{"label":"JavaScript","value":24100,"color":"#f1e05a"},{"label":"Shell","value":3100,"color":"#89e051"}]'></c2-distribution-bar>
+```
+
+```html tag=MdxCodeBlock,label=Tag breakdown
+<style>
+  .distribution-tags {
+    --c2-distribution-bar__bar--height: 6px;
+    --c2-distribution-bar__bar--border-radius: 2px;
+    --c2-distribution-bar__label--font-size: 12px;
+    --c2-distribution-bar__label--font-weight: 500;
+    --c2-distribution-bar__label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-distribution-bar__segment-1--color: #7c3aed;
+    --c2-distribution-bar__segment-2--color: #a78bfa;
+    --c2-distribution-bar__segment-3--color: #c4b5fd;
+  }
+</style>
+<c2-distribution-bar class="distribution-tags" label="browser" max-items="4" interactive items='[{"label":"Chrome 131","value":4120},{"label":"Safari 18","value":1830},{"label":"Firefox 133","value":760},{"label":"Edge 131","value":410},{"label":"Opera","value":60}]'></c2-distribution-bar>
+```
+
+```html tag=MdxCodeBlock,label=Project status
+<style>
+  .distribution-status {
+    --c2-distribution-bar__bar--height: 12px;
+    --c2-distribution-bar__bar--border-radius: 4px;
+    --c2-distribution-bar__segment--gap: 3px;
+    --c2-distribution-bar__segment-1--color: #16a34a;
+    --c2-distribution-bar__segment-2--color: #f59e0b;
+    --c2-distribution-bar__segment-3--color: #dc2626;
+    --c2-distribution-bar__segment-4--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 25%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-distribution-bar class="distribution-status" label="Sprint 42" legend-content="both" precision="0" items='[{"label":"Done","value":21},{"label":"In review","value":6},{"label":"Blocked","value":2},{"label":"Todo","value":9}]'></c2-distribution-bar>
+```
+
+```html tag=MdxCodeBlock,label=Storage split
+<style>
+  .distribution-storage {
+    --c2-distribution-bar__bar--height: 10px;
+    --c2-distribution-bar__legend--font-size: 13px;
+    --c2-distribution-bar__segment-1--color: #0891b2;
+    --c2-distribution-bar__segment-2--color: #22d3ee;
+    --c2-distribution-bar__segment-3--color: #a5f3fc;
+  }
+</style>
+<c2-distribution-bar class="distribution-storage" label="Workspace storage" legend-content="value" items='[{"label":"Files (GB)","value":182},{"label":"Backups (GB)","value":64},{"label":"Logs (GB)","value":21}]'></c2-distribution-bar>
+```
+
+```html tag=MdxCodeBlock,label=Thick with gaps
+<style>
+  .distribution-thick {
+    --c2-distribution-bar__bar--height: 24px;
+    --c2-distribution-bar__bar--border-radius: 6px;
+    --c2-distribution-bar__segment--gap: 4px;
+    --c2-distribution-bar__segment--min-width: 6px;
+    --c2-distribution-bar__label--font-size: 16px;
+    --c2-distribution-bar__legend--font-size: 13px;
+    --c2-distribution-bar__swatch--border-radius: 3px;
+  }
+</style>
+<c2-distribution-bar class="distribution-thick" label="Revenue by region" sort="descending" items='[{"label":"Americas","value":48},{"label":"Europe","value":31},{"label":"Asia Pacific","value":17},{"label":"Middle East & Africa","value":4}]'></c2-distribution-bar>
+```
+
+</GalleryGrid>

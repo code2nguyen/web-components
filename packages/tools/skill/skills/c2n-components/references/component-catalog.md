@@ -53,6 +53,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
+- **Distribution Bar** — `c2-distribution-bar` · `@c2n/components/distribution-bar` — One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.

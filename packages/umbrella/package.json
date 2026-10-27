@@ -377,6 +377,10 @@
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
     },
+    "./distribution-bar": {
+      "types": "./dist/distribution-bar.d.ts",
+      "default": "./dist/distribution-bar.js"
+    },
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
@@ -1089,6 +1093,7 @@
     "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
+    "@c2n/distribution-bar": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",

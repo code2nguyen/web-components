@@ -170,6 +170,7 @@ price: .price
 item: article.product
 price: .price
 "></c2-diff-viewer>`,
+  'distribution-bar': `<c2-distribution-bar style="width:260px" label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
   <c2-feather-camera></c2-feather-camera>

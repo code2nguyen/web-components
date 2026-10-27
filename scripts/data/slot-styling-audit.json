@@ -1184,6 +1184,19 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-distribution-bar",
+      "slot": "",
+      "decision": "variables",
+      "variables": ["--c2-distribution-bar__label--color", "--c2-distribution-bar__label--font-size", "--c2-distribution-bar__label--font-weight"],
+      "reason": "The label region sets the type the slotted label inherits."
+    },
+    {
+      "tag": "c2-distribution-bar",
+      "slot": "header-end",
+      "decision": "assigned-content",
+      "reason": "The header-end slot projects consumer-owned light DOM, such as a total or a link; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-fieldset",
       "slot": "",
       "decision": "assigned-content",
