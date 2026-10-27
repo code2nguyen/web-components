@@ -401,6 +401,10 @@
       "types": "./dist/emoji-picker.d.ts",
       "default": "./dist/emoji-picker.js"
     },
+    "./facet-list": {
+      "types": "./dist/facet-list.d.ts",
+      "default": "./dist/facet-list.js"
+    },
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
@@ -640,6 +644,10 @@
     "./notepad": {
       "types": "./dist/notepad.d.ts",
       "default": "./dist/notepad.js"
+    },
+    "./notification-center": {
+      "types": "./dist/notification-center.d.ts",
+      "default": "./dist/notification-center.js"
     },
     "./number-input": {
       "types": "./dist/number-input.d.ts",
@@ -1127,6 +1135,7 @@
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
     "@c2n/emoji-picker": "*",
+    "@c2n/facet-list": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",
@@ -1173,6 +1182,7 @@
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
+    "@c2n/notification-center": "*",
     "@c2n/number-input": "*",
     "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",

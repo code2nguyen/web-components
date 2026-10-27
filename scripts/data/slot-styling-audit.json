@@ -1653,6 +1653,18 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-notification-center",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot replaces the built-in empty message with consumer markup, which the consumer styles in its own scope."
+    },
+    {
+      "tag": "c2-notification-center",
+      "slot": "header-actions",
+      "decision": "assigned-content",
+      "reason": "The header-actions slot projects consumer controls (a settings link, a c2-icon-button) beside Mark all as read; style them through their own variables."
+    },
+    {
       "tag": "c2-org-chart",
       "slot": "empty",
       "decision": "assigned-content",

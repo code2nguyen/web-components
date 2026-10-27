@@ -1,0 +1,61 @@
+---
+title: 'Notification Center'
+description: 'An inbox panel of notifications grouped by day, with read and unread states and mark all as read.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { NotificationCenter } from '@c2n/components/notification-center'
+
+`c2-notification-center` is the panel behind a bell icon, like GitHub's notifications or Linear's inbox: newest first, grouped by day, unread ones marked, with an All / Unread filter and "Mark all as read". It is a panel only, so it fits a dropdown (`c2-overlay`), a side sheet (`c2-sheet`) or a page column.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/notification-center'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/notification-center
+<div data-label="Inbox">
+  <c2-notification-center has-more notifications='[
+    {"id":"1","title":"Ana requested your review","body":"#388 Add bar list and choice matrix","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}},
+    {"id":"2","title":"Deploy to production succeeded","body":"web-components · v1.0.18","time":"2026-10-27T08:12:00Z","read":true,"avatar":{"name":"CI"}},
+    {"id":"3","title":"Ben commented on your pull request","body":"Looks good, one nit on the docs","time":"2026-10-26T16:05:00Z","avatar":{"name":"Ben Ode"}},
+    {"id":"4","title":"Weekly digest is ready","time":"2026-10-20T07:00:00Z","read":true}
+  ]'></c2-notification-center>
+</div>
+<div data-label="All caught up">
+  <c2-notification-center filter="unread" notifications='[{"id":"1","title":"Deploy succeeded","time":"2026-10-27T08:12:00Z","read":true}]'></c2-notification-center>
+</div>
+```
+
+### Notifications
+
+`notifications` is an array of `{ id, title, body, time, read, href, avatar, group }`, as a property or as JSON in the attribute. `time` is a `Date`, a timestamp or an ISO string, shown as a `c2-relative-time` ("2 min ago"). `avatar` (`{ name, src }`) draws a `c2-avatar`. An item with an `href` is a link (only http(s) and relative addresses are followed); one without is a button.
+
+### Grouping and filtering
+
+Items are grouped by day (Today, Yesterday, then the date in the page's language); `group-by="field"` groups them by each item's `group`, and `"none"` lists them flat. The All / Unread buttons set `filter`. The header shows the unread count.
+
+### Read state
+
+Activating an item fires a cancelable `notification-click`, then marks it read; the toggle beside each item marks it read or unread, and "Mark all as read" marks every unread one. Each change fires a cancelable `read-change` with the ids and the new state, then updates `notifications`; cancel it to keep the panel controlled while the server confirms.
+
+```typescript tag=CodeBlock
+center.addEventListener('read-change', async (event) => {
+  event.preventDefault()
+  center.notifications = await api.markRead(event.detail.ids, event.detail.read)
+})
+```
+
+### More and empty
+
+`has-more` adds a Load more button that fires `load-more`; set `loading` while the next page arrives. With nothing to list, the panel says "No notifications", or "You're all caught up" under the Unread filter; the `empty` slot replaces it. The `header-actions` slot adds controls to the header, such as a settings button.
+
+### Accessibility
+
+The panel is a region named by its title, and each day is a list named by its title. An unread item reads as "Unread: …"; the read toggle is named "Mark as read" or "Mark as unread"; a live region confirms "All notifications marked as read".

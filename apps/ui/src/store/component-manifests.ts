@@ -47,6 +47,7 @@ import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import distributionBar from '@c2n/distribution-bar/custom-elements.json'
 import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
+import facetList from '@c2n/facet-list/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
@@ -94,6 +95,7 @@ import monthPicker from '@c2n/month-picker/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
+import notificationCenter from '@c2n/notification-center/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
@@ -221,6 +223,7 @@ export const componentManifests = (function () {
     diffViewer,
     distributionBar,
     emojiPicker,
+    facetList,
     featherIcons,
     fieldset,
     filterBuilder,
@@ -268,6 +271,7 @@ export const componentManifests = (function () {
     monthPlanner,
     navigationMenu,
     notepad,
+    notificationCenter,
     numberInput,
     orgChart,
     otpInput,

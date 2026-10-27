@@ -103,6 +103,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Loading Overlay** — `c2-loading-overlay` · `@c2n/components/loading-overlay` — Covers a region while it loads: the content stays in place, dimmed and blocked, with a spinner and an announced label.
 - **Modal** — `c2-modal` · `@c2n/components/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
+- **Notification Center** — `c2-notification-center` · `@c2n/components/notification-center` — An inbox panel of notifications grouped by day, with read and unread states and mark all as read.
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Popconfirm** — `c2-popconfirm` · `@c2n/components/popconfirm` — A small "Are you sure?" popup anchored to the button that asked for it.
 - **Progress** — `c2-progress` · `@c2n/components/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
@@ -140,6 +141,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
 - **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
+- **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
 - **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
 - **Form** — `c2-form` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
