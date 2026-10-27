@@ -44,6 +44,7 @@
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
     "@c2n/chip-group": "*",
+    "@c2n/citation": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",

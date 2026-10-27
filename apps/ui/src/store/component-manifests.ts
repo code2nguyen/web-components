@@ -23,6 +23,7 @@ import chatbot from '@c2n/chatbot/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
+import citation from '@c2n/citation/custom-elements.json'
 import codeEditor from '@c2n/code-editor/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
@@ -190,6 +191,7 @@ export const componentManifests = (function () {
     checkbox,
     chip,
     chipGroup,
+    citation,
     codeEditor,
     codeViewer,
     colorArea,

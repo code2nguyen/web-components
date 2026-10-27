@@ -804,6 +804,19 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-citation",
+      "slot": "",
+      "decision": "part",
+      "parts": ["marker"],
+      "reason": "The marker owns the slotted text's component-side presentation: its pill, colour and type."
+    },
+    {
+      "tag": "c2-citation",
+      "slot": "preview",
+      "decision": "assigned-content",
+      "reason": "The preview slot projects consumer-owned card content; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-code-editor",
       "slot": "label",
       "decision": "part",

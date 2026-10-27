@@ -121,6 +121,7 @@
         "./packages/components/checkbox:build",
         "./packages/components/chip-group:build",
         "./packages/components/chip:build",
+        "./packages/components/citation:build",
         "./packages/components/code-editor:build",
         "./packages/components/code-viewer:build",
         "./packages/components/color-area:build",

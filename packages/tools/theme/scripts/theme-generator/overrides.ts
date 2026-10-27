@@ -483,6 +483,12 @@ export const overrides: Record<string, Override> = {
   '--c2-indicator__neutral--color': { exclude: 'white text on a fixed neutral fill' },
   '--c2-indicator__success--background': { exclude: 'solid status fill' },
   '--c2-indicator__success--color': { token: 'color-on-fill' },
+  // A citation marker's hover is a stronger tint of its resting surface, so it still shows in the dark theme, where the
+  // outline grey equals that surface.
+  '--c2-citation__marker__hover--background-color': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
   '--c2-indicator__warning--background': { exclude: 'solid status fill' },
   '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
   '--c2-indicator__danger--background': { exclude: 'solid status fill' },

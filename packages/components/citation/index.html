@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/citation.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p style="max-width: 480px; margin-top: 160px">
+      Lit renders on the server and hydrates in the browser<c2-citation
+        index="1"
+        href="https://lit.dev/docs/ssr/overview/"
+        source-title="Server-side rendering – Lit"
+        snippet="Lit's SSR renders components to static HTML in Node."
+      ></c2-citation
+      >, using declarative shadow DOM<c2-citation index="2" href="javascript:alert(1)" source-title="Unsafe address, shown as a button"></c2-citation>.
+    </p>
+  </body>
+</html>

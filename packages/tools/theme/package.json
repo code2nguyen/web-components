@@ -78,6 +78,7 @@
         "../../components/checkbox:build",
         "../../components/chip-group:build",
         "../../components/chip:build",
+        "../../components/citation:build",
         "../../components/code-editor:build",
         "../../components/code-viewer:build",
         "../../components/color-area:build",

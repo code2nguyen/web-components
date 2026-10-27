@@ -108,6 +108,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-chip>Marketing</c2-chip>
 </c2-chip-group>`,
   'chord-chart': `<c2-chord-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__arc--width:8px;--c2-chart--font-size:10px" aria-label="Transfers between currency wallets" data='[{"source":"EUR","target":"USD","value":42},{"source":"EUR","target":"GBP","value":18},{"source":"USD","target":"EUR","value":32},{"source":"USD","target":"JPY","value":15},{"source":"GBP","target":"EUR","value":21},{"source":"GBP","target":"USD","value":15},{"source":"JPY","target":"USD","value":10}]'></c2-chord-chart>`,
+  citation: `<p style="margin:0;max-width:260px;font-size:13px;line-height:1.6;color:var(--c2-theme--color-on-surface, #18181b)">Lit renders on the server, then hydrates<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit"></c2-citation> in the browser<c2-citation index="2" href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom" source-title="Declarative Shadow DOM"></c2-citation>.</p>`,
   'code-editor': `<c2-code-editor style="width:300px;--c2-code-editor--min-height:132px;--c2-code-editor--font-size:12px" language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) =>
   \`hello \${name}\`
 
