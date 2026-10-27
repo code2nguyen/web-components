@@ -11,11 +11,12 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'))
 })
 
+// WebKit writes en-GB dates without the comma after the weekday that Chromium and Firefox put there.
 test("shows the week holding today from the locale's first day, today marked, with weekday and number", async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="en-GB"><c2-date-strip></c2-date-strip></div>`)
   await expect(days(page)).toHaveCount(7)
-  await expect(days(page).first()).toHaveAccessibleName('Monday, 12 October 2026')
-  await expect(page.getByRole('option', { name: 'Wednesday, 14 October 2026' })).toHaveAttribute('aria-current', 'date')
+  await expect(days(page).first()).toHaveAccessibleName(/^Monday,? 12 October 2026$/)
+  await expect(page.getByRole('option', { name: /^Wednesday,? 14 October 2026$/ })).toHaveAttribute('aria-current', 'date')
   await expect(days(page).first()).toContainText(/Mon\s*12/)
   await expect(strip(page).locator('[part="title"]')).toHaveText('October 2026')
   await accessible(page)
