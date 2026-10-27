@@ -1,0 +1,167 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-reaction-bar,
+  $theme: (
+    gap: 4px,
+    reaction--height: 28px,
+    reaction--padding: 0 8px,
+    reaction--border: 1px solid #e4e4e7,
+    reaction--border-radius: 999px,
+    reaction--background-color: #f4f4f5,
+    reaction__hover--border-color: #a1a1aa,
+    reaction__reacted--background-color: #edf1fe,
+    reaction__reacted--border-color: rgb(2, 101, 220),
+    reaction__reacted--color: rgb(2, 101, 220),
+    reaction__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    emoji--font-size: 16px,
+    emoji--font-family: (
+      'Apple Color Emoji',
+      'Segoe UI Emoji',
+      'Noto Color Emoji',
+      sans-serif,
+    ),
+    count--color: #52525b,
+    count--font-size: 12px,
+    count--font-weight: 500,
+    add--color: #71717a,
+    add__hover--color: #18181b,
+    menu--background-color: #ffffff,
+    menu--border: 1px solid #e4e4e7,
+    menu--border-radius: 8px,
+    menu--box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12),
+    menu--padding: 6px,
+    quick--size: 32px,
+    quick--font-size: 20px,
+    quick__hover--background-color: #f4f4f5,
+  )
+);
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+button {
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: css.cssVar(reaction--height);
+  padding: css.cssVar(reaction--padding);
+  border: css.cssVar(reaction--border);
+  border-radius: css.cssVar(reaction--border-radius);
+  background-color: css.cssVar(reaction--background-color);
+  color: css.cssVar(count--color);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+button.reaction:hover {
+  border-color: css.cssVar(reaction__hover--border-color);
+}
+
+.reaction--reacted {
+  border-color: css.cssVar(reaction__reacted--border-color);
+  background-color: css.cssVar(reaction__reacted--background-color);
+  color: css.cssVar(reaction__reacted--color);
+}
+
+button.reaction--reacted:hover {
+  border-color: css.cssVar(reaction__reacted--border-color);
+}
+
+.emoji,
+.quick-emoji {
+  font-family: css.cssVar(emoji--font-family);
+}
+
+.emoji {
+  font-size: css.cssVar(emoji--font-size);
+}
+
+.count {
+  font-size: css.cssVar(count--font-size);
+  font-weight: css.cssVar(count--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(reaction--height);
+  height: css.cssVar(reaction--height);
+  padding: 0;
+  border: css.cssVar(reaction--border);
+  border-radius: css.cssVar(reaction--border-radius);
+  background-color: transparent;
+  color: css.cssVar(add--color);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    border-color: css.cssVar(reaction__hover--border-color);
+    color: css.cssVar(add__hover--color);
+  }
+}
+
+.reaction:focus-visible,
+.add:focus-visible,
+.quick-emoji:focus-visible {
+  outline: css.cssVar(reaction__focus--outline);
+  outline-offset: 1px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: css.cssVar(menu--padding);
+  border: css.cssVar(menu--border);
+  border-radius: css.cssVar(menu--border-radius);
+  background-color: css.cssVar(menu--background-color);
+  box-shadow: css.cssVar(menu--box-shadow);
+}
+
+.quick {
+  display: flex;
+  gap: 2px;
+}
+
+.quick-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(quick--size);
+  height: css.cssVar(quick--size);
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font-size: css.cssVar(quick--font-size);
+  line-height: 1;
+
+  &:hover {
+    background-color: css.cssVar(quick__hover--background-color);
+  }
+}
+
+::slotted([slot='picker']) {
+  --c2-emoji-picker--border: 0;
+  --c2-emoji-picker--border-radius: 0;
+}

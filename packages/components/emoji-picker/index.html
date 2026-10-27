@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-emoji-picker</title>
+    <script type="module" src="/src/emoji-picker.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+      .compact {
+        --c2-emoji-picker--width: 288px;
+        --c2-emoji-picker--height: 320px;
+        --c2-emoji-picker__grid--columns: 8;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-emoji-picker storage-key="c2-emoji-picker-harness"></c2-emoji-picker>
+    <c2-emoji-picker class="compact" recents="👍;🎉;🚀" skin-tone="3"></c2-emoji-picker>
+    <output id="picked"></output>
+    <script type="module">
+      document.addEventListener('emoji-select', (event) => (document.querySelector('#picked').textContent = `${event.detail.emoji} ${event.detail.name}`))
+    </script>
+  </body>
+</html>

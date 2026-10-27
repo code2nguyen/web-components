@@ -381,6 +381,10 @@
       "types": "./dist/distribution-bar.d.ts",
       "default": "./dist/distribution-bar.js"
     },
+    "./emoji-picker": {
+      "types": "./dist/emoji-picker.d.ts",
+      "default": "./dist/emoji-picker.js"
+    },
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
@@ -692,6 +696,10 @@
     "./rate": {
       "types": "./dist/rate.d.ts",
       "default": "./dist/rate.js"
+    },
+    "./reaction-bar": {
+      "types": "./dist/reaction-bar.d.ts",
+      "default": "./dist/reaction-bar.js"
     },
     "./relative-time": {
       "types": "./dist/relative-time.d.ts",
@@ -1094,6 +1102,7 @@
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
+    "@c2n/emoji-picker": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",
@@ -1156,6 +1165,7 @@
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/reaction-bar": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",

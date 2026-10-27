@@ -171,6 +171,7 @@ item: article.product
 price: .price
 "></c2-diff-viewer>`,
   'distribution-bar': `<c2-distribution-bar style="width:260px" label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>`,
+  'emoji-picker': `<c2-emoji-picker recents="👍;🎉;🚀;❤️;😂;👀;🔥;✨" style="--c2-emoji-picker--width:252px;--c2-emoji-picker--height:168px;--c2-emoji-picker__grid--columns:8;--c2-emoji-picker__emoji--font-size:18px;--c2-emoji-picker__category--size:26px"></c2-emoji-picker>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
   <c2-feather-camera></c2-feather-camera>
@@ -366,6 +367,7 @@ price: .price
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
+  'reaction-bar': `<c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'></c2-reaction-bar>`,
   'relative-time': `<div class="preview-row"><span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span><span>Renews <c2-relative-time format="short" date="2027-03-01T00:00:00Z"></c2-relative-time></span></div>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>

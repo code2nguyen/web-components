@@ -1,0 +1,55 @@
+---
+title: 'Reaction Bar'
+description: 'Emoji reactions with counts under a message or comment, toggled by the current user, with a picker to add more.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ReactionBar } from '@c2n/components/reaction-bar'
+import { EmojiPicker } from '@c2n/components/emoji-picker'
+
+`c2-reaction-bar` is the row of emoji reactions under a message, comment or post, as in Slack, GitHub and Discord. Each reaction is a pill with its count, pressed when the current user reacted with it; pressing it adds or removes their reaction. The button at the end opens quick reactions and, in its `picker` slot, a full `c2-emoji-picker`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/reaction-bar'
+import '@c2n/components/emoji-picker' // for the picker slot
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/reaction-bar
+<div data-label="On a message">
+  <c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'>
+    <c2-emoji-picker client:only="lit" slot="picker"></c2-emoji-picker>
+  </c2-reaction-bar>
+</div>
+<div data-label="Quick reactions only">
+  <c2-reaction-bar quick="👍 👎 😄 🎉 😕 ❤️ 🚀 👀" reactions='[{"emoji":"🚀","count":12},{"emoji":"❤️","count":3,"reacted":true}]'></c2-reaction-bar>
+</div>
+<div data-label="Read-only">
+  <c2-reaction-bar readonly reactions='[{"emoji":"👍","count":1280,"reacted":true},{"emoji":"😂","count":96}]'></c2-reaction-bar>
+</div>
+```
+
+### Reactions
+
+`reactions` is an array of `{ emoji, count, reacted }`, as a property or as JSON in the attribute; `emoji` may be any short text, for custom reactions. Counts are shortened in the page's language (`1.3K`). `quick` sets the reactions offered first in the popup, as emoji separated by spaces.
+
+### Changing a reaction
+
+Pressing a pill, a quick reaction or an emoji in the picker fires `reaction-change` with the reaction as it is about to become (`emoji`, `reacted`, `count`), then updates `reactions`: a count that reaches 0 removes the pill and a new emoji is added at the end. Picking a reaction the user already gave keeps it. The event is cancelable: cancel it to keep the bar controlled, for example while the server confirms, and set `reactions` yourself.
+
+```typescript tag=CodeBlock
+bar.addEventListener('reaction-change', async (event) => {
+  event.preventDefault()
+  bar.reactions = await api.react(messageId, event.detail.emoji, event.detail.reacted)
+})
+```
+
+### Accessibility
+
+The bar is a group named "Reactions". A screen reader hears each pill as its emoji and count, a toggle button pressed when you reacted. The add button opens a dialog of quick reactions, focused on the first; Escape or a pick closes it and returns focus to the button. `readonly` shows the pills as images whose name also says whether you reacted, with no add button.

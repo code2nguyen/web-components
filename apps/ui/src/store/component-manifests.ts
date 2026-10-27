@@ -42,6 +42,7 @@ import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import distributionBar from '@c2n/distribution-bar/custom-elements.json'
+import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
@@ -106,6 +107,7 @@ import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
+import reactionBar from '@c2n/reaction-bar/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
@@ -209,6 +211,7 @@ export const componentManifests = (function () {
     details,
     diffViewer,
     distributionBar,
+    emojiPicker,
     featherIcons,
     fieldset,
     filterBuilder,
@@ -273,6 +276,7 @@ export const componentManifests = (function () {
     questionnaire,
     radio,
     rate,
+    reactionBar,
     relativeTime,
     reorderList,
     richTextEditor,

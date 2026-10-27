@@ -1,0 +1,313 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-emoji-picker,
+  $theme: (
+    width: 352px,
+    height: 420px,
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: none,
+    color: #18181b,
+    font-size: 14px,
+    emoji--font-family: (
+      'Apple Color Emoji',
+      'Segoe UI Emoji',
+      'Noto Color Emoji',
+      sans-serif,
+    ),
+    header--padding: 8px 8px 4px,
+    search--height: 32px,
+    search--border: 1px solid #bcbcc6,
+    search__hover--border-color: #a1a1aa,
+    search--border-radius: 6px,
+    search--background-color: #ffffff,
+    search--placeholder-color: #71717a,
+    search__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    category--size: 32px,
+    category__hover--background-color: #f4f4f5,
+    category__active--indicator-color: rgb(2, 101, 220),
+    category--opacity: 0.55,
+    grid--columns: 9,
+    grid--gap: 2px,
+    body--padding: 0 8px 8px,
+    section-title--color: #71717a,
+    section-title--font-size: 12px,
+    section-title--font-weight: 600,
+    emoji--font-size: 22px,
+    emoji--border-radius: 6px,
+    emoji__hover--background-color: #f4f4f5,
+    emoji__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    preview--border-top: 1px solid #e4e4e7,
+    preview--padding: 6px 12px,
+    preview__emoji--font-size: 24px,
+    preview--color: #71717a,
+    empty--color: #71717a,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: top;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
+  height: css.cssVar(height);
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  box-shadow: css.cssVar(box-shadow);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  line-height: 1.4;
+}
+
+.emoji-glyph,
+.emoji {
+  font-family: css.cssVar(emoji--font-family);
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: css.cssVar(header--padding);
+}
+
+.search {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-width: 0;
+  height: css.cssVar(search--height);
+  padding: 0 8px;
+  border: css.cssVar(search--border);
+  border-radius: css.cssVar(search--border-radius);
+  background-color: css.cssVar(search--background-color);
+  color: css.cssVar(search--placeholder-color);
+
+  &:hover {
+    border-color: css.cssVar(search__hover--border-color);
+  }
+
+  &:focus-within {
+    outline: css.cssVar(search__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.search-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: css.cssVar(color);
+  font: inherit;
+
+  &::placeholder {
+    color: css.cssVar(search--placeholder-color);
+  }
+
+  &::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+}
+
+.tone-button,
+.tone,
+.category {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(category--size);
+  height: css.cssVar(category--size);
+  border-radius: css.cssVar(emoji--border-radius);
+  font-size: 18px;
+
+  &:hover {
+    background-color: css.cssVar(category__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(emoji__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.tones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 8px 4px;
+}
+
+.tone[aria-checked='true'] {
+  background-color: css.cssVar(category__hover--background-color);
+  box-shadow: inset 0 0 0 1px css.cssVar(category__active--indicator-color);
+}
+
+.categories {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-bottom: css.cssVar(preview--border-top);
+}
+
+.category {
+  position: relative;
+  flex: 1 1 0;
+  max-width: css.cssVar(category--size);
+  border-radius: css.cssVar(emoji--border-radius) css.cssVar(emoji--border-radius) 0 0;
+
+  .emoji-glyph {
+    opacity: css.cssVar(category--opacity);
+    filter: grayscale(1);
+    transition:
+      opacity 150ms ease,
+      filter 150ms ease;
+  }
+
+  &:hover .emoji-glyph,
+  &[aria-current='true'] .emoji-glyph {
+    opacity: 1;
+    filter: none;
+  }
+
+  &[aria-current='true']::after {
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    left: 4px;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background-color: css.cssVar(category__active--indicator-color);
+    content: '';
+  }
+}
+
+.body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: css.cssVar(body--padding);
+}
+
+.section-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 2px 4px;
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(section-title--color);
+  font-size: css.cssVar(section-title--font-size);
+  font-weight: css.cssVar(section-title--font-weight);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(css.cssVar(grid--columns), minmax(0, 1fr));
+  gap: css.cssVar(grid--gap);
+}
+
+.emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: css.cssVar(emoji--border-radius);
+  font-size: css.cssVar(emoji--font-size);
+  line-height: 1;
+
+  &:hover {
+    background-color: css.cssVar(emoji__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(emoji__focus--outline);
+    outline-offset: -2px;
+    background-color: css.cssVar(emoji__hover--background-color);
+  }
+}
+
+.empty {
+  margin: 24px 8px;
+  color: css.cssVar(empty--color);
+  text-align: center;
+}
+
+.preview {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: css.cssVar(preview--padding);
+  border-top: css.cssVar(preview--border-top);
+  color: css.cssVar(preview--color);
+}
+
+.preview-emoji {
+  font-size: css.cssVar(preview__emoji--font-size);
+  line-height: 1;
+}
+
+.preview-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category .emoji-glyph {
+    transition: none;
+  }
+}

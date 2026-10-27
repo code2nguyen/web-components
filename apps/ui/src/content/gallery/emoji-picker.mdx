@@ -1,0 +1,58 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { EmojiPicker } from '@c2n/components/emoji-picker'
+
+## Presets
+
+Looks for `c2-emoji-picker`. Width, height and `--c2-emoji-picker__grid--columns` set the density; the category indicator and the hover and focus colours carry the accent.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-emoji-picker client:only="lit"></c2-emoji-picker>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .emoji-compact {
+    --c2-emoji-picker--width: 288px;
+    --c2-emoji-picker--height: 320px;
+    --c2-emoji-picker__grid--columns: 8;
+    --c2-emoji-picker__emoji--font-size: 19px;
+    --c2-emoji-picker__category--size: 28px;
+  }
+</style>
+<c2-emoji-picker client:only="lit" class="emoji-compact"></c2-emoji-picker>
+```
+
+```html tag=MdxCodeBlock,label=Floating
+<style>
+  .emoji-floating {
+    --c2-emoji-picker--border: 0;
+    --c2-emoji-picker--border-radius: 14px;
+    --c2-emoji-picker--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    --c2-emoji-picker__search--border: 0;
+    --c2-emoji-picker__search--border-radius: 999px;
+    --c2-emoji-picker__search--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-emoji-picker__preview--border-top: 0;
+  }
+</style>
+<c2-emoji-picker client:only="lit" class="emoji-floating"></c2-emoji-picker>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .emoji-soft {
+    --c2-emoji-picker__category__active--indicator-color: light-dark(#9333ea, #ab63ed);
+    --c2-emoji-picker__emoji__hover--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-emoji-picker__category__hover--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-emoji-picker__emoji__focus--outline: 2px solid #c084fc;
+    --c2-emoji-picker__search__focus--outline: 2px solid #c084fc;
+    --c2-emoji-picker__section-title--color: light-dark(#7e22ce, #a76cdc);
+  }
+</style>
+<c2-emoji-picker client:only="lit" class="emoji-soft" recents="💜;✨;🔮;🦄"></c2-emoji-picker>
+```
+
+</GalleryGrid>

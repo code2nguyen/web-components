@@ -1,0 +1,63 @@
+---
+title: 'Emoji Picker'
+description: 'A searchable grid of emoji in categories, with skin tones and the emoji used last.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { EmojiPicker } from '@c2n/components/emoji-picker'
+
+`c2-emoji-picker` is the emoji grid of Slack, GitHub and Discord: a search field, a skin-tone choice, a row of categories and every emoji in sections, with the emoji used last listed first. Picking one fires `emoji-select`; the picker inserts and closes nothing itself, so it fits a popover, a panel or the popup of a `c2-reaction-bar`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/emoji-picker'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/emoji-picker
+<style>
+  .emoji-compact {
+    --c2-emoji-picker--width: 300px;
+    --c2-emoji-picker--height: 340px;
+    --c2-emoji-picker__grid--columns: 8;
+    --c2-emoji-picker__emoji--font-size: 20px;
+  }
+</style>
+<div data-label="Default">
+  <c2-emoji-picker client:only="lit"></c2-emoji-picker>
+</div>
+<div data-label="Compact, with recent emoji">
+  <c2-emoji-picker client:only="lit" class="emoji-compact" recents="👍;🎉;🚀;❤️;😂;👀" skin-tone="2"></c2-emoji-picker>
+</div>
+```
+
+### Picking
+
+`emoji-select` carries `detail.emoji`, the emoji as shown (in the chosen skin tone when it has one), `detail.base` without the tone, `detail.name` and `detail.skinTone`. It bubbles, so one listener on a container serves several pickers.
+
+```typescript tag=CodeBlock
+picker.addEventListener('emoji-select', (event) => {
+  input.setRangeText(event.detail.emoji, input.selectionStart, input.selectionEnd, 'end')
+})
+```
+
+### Searching
+
+Typing in the search field (or setting `query`) lists the emoji whose name or keywords have a word starting with each word typed, best matches first: `thumbs` finds 👍 and 👎, `party` finds 🎉 and 🥳. Enter picks the first match.
+
+### Skin tones and recent emoji
+
+The hand beside the search field picks a skin tone (`skin-tone`, 0 for the default yellow, 1 to 5 from light to dark), applied to every emoji that has one. Each pick moves the emoji to the front of `recents`, listed first under Recently used (up to `max-recents`, 18 by default; 0 hides it). Give the picker a `storage-key` to keep both in `localStorage` across visits; without one they last as long as the element.
+
+### Your own emoji
+
+The default set is every Unicode emoji up to 15.1 with English names and keywords, from [Emojibase](https://emojibase.dev). Set `emojis` to an array of `{ emoji, name, group, keywords, skins }` to offer another: a set in the reader's language, a short list, or custom emoji whose `emoji` is any text. A `group` the picker does not know is titled with its own id.
+
+### Keyboard
+
+The emoji are one grid with a single tab stop. The arrow keys move between them (up and down by the row you see), Home and End go to the first and last, Enter or Space picks. From the search field, Arrow Down enters the grid; from the first row, Arrow Up returns to the field. The footer names the emoji pointed at or focused, and a screen reader hears each emoji by its name and the number of matches after a search.
