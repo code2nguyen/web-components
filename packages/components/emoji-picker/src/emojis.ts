@@ -33,10 +33,10 @@ export function defaultEmojis(): EmojiData[] {
   return parsed
 }
 
-/** Whether every word of `query` starts a word of the emoji's name or keywords; the lower the rank, the better the match. */
+/** How well `terms` match an emoji: -1 when one of them matches nothing, else 0 for the best match and more for weaker ones. */
 export function searchRank(entry: EmojiData, terms: string[]): number {
   const name = entry.name.toLowerCase()
-  const words = name.split(/[^\p{L}\p{N}]+/u).concat(entry.keywords ?? [])
+  const words = name.split(/[^\p{L}\p{N}]+/u).concat((entry.keywords ?? []).map((keyword) => keyword.toLowerCase()))
   let rank = 0
   for (const term of terms) {
     if (name.startsWith(term)) continue

@@ -207,7 +207,7 @@ export class EmojiPicker extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('storageKey')) this.loadStorage()
+    if (changed.has('storageKey') && this.storageKey !== this.loadedKey) this.loadStorage()
     if (changed.has('query') || changed.has('emojis')) this.activeIndex = 0
   }
 
@@ -275,7 +275,7 @@ export class EmojiPicker extends LitElement {
     const sections = this.sections()
     this.flat = sections.flatMap((section) => section.items)
     const searching = !!this.query.trim()
-    const inView = searching ? '' : this.activeSection || sections[0]?.id || ''
+    const inView = searching ? '' : this.activeSection || '0'
     return html`<div class="picker" part="picker">
       <div class="header" part="header">
         <label class="search" part="search">
@@ -316,6 +316,7 @@ export class EmojiPicker extends LitElement {
         aria-label=${this.msg.t('skinTone')}
         ?hidden=${!this.tonesOpen}
         @keydown=${this.handleTonesKeydown}
+        @focusout=${this.handleTonesFocusOut}
       >
         ${TONES.map(
           (tone) =>
@@ -338,14 +339,14 @@ export class EmojiPicker extends LitElement {
           ? nothing
           : html`<div class="categories" part="categories" role="group" aria-label=${this.msg.t('categories')}>
               ${sections.map(
-                (section) =>
+                (section, at) =>
                   html`<button
                     class="category"
                     part="category"
                     type="button"
                     aria-label=${section.title}
-                    aria-current=${section.id === inView ? 'true' : nothing}
-                    data-section=${section.id}
+                    aria-current=${String(at) === inView ? 'true' : nothing}
+                    data-section=${at}
                     @click=${this.scrollToSection}
                   >
                     <span class="emoji-glyph" aria-hidden="true">${GROUP_ICONS[section.id] ?? section.items[0]?.emoji ?? ''}</span>
@@ -381,10 +382,11 @@ export class EmojiPicker extends LitElement {
   private renderSections(sections: Section[]) {
     const active = Math.min(this.activeIndex, Math.max(0, this.flat.length - 1))
     let index = 0
-    return sections.map((section) => {
+    return sections.map((section, at) => {
       if (!section.items.length) return nothing
-      const titleId = `title-${section.id}`
-      return html`<section class="section" data-section=${section.id} aria-labelledby=${titleId}>
+      // Ids and keys come from the position: a group id of the author's own may hold spaces or repeat a built-in one.
+      const titleId = `section-title-${at}`
+      return html`<section class="section" data-section=${at} aria-labelledby=${titleId}>
         <div class="section-title" part="section-title" id=${titleId}>${section.title}</div>
         <div class="grid" part="grid">
           ${section.items.map((entry) => {
@@ -398,18 +400,23 @@ export class EmojiPicker extends LitElement {
     })
   }
 
-  private emojiButtons(): HTMLButtonElement[] {
-    return [...(this.body?.querySelectorAll<HTMLButtonElement>('button.emoji') ?? [])]
+  private emojiButton(index: number): HTMLButtonElement | null {
+    return this.body?.querySelector<HTMLButtonElement>(`button.emoji[data-index="${index}"]`) ?? null
+  }
+
+  /** Moves the grid's single tab stop to `index`, touching only the old and the new stop. */
+  private setTabStop(index: number): HTMLButtonElement | null {
+    if (!this.flat.length) return null
+    const target = Math.max(0, Math.min(this.flat.length - 1, index))
+    for (const stop of this.body?.querySelectorAll<HTMLButtonElement>('button.emoji[tabindex="0"]') ?? []) stop.tabIndex = -1
+    this.activeIndex = target
+    const button = this.emojiButton(target)
+    if (button) button.tabIndex = 0
+    return button
   }
 
   private focusIndex(index: number): void {
-    if (!this.flat.length) return
-    const target = Math.max(0, Math.min(this.flat.length - 1, index))
-    this.activeIndex = target
-    const button = this.body?.querySelector<HTMLButtonElement>(`button.emoji[data-index="${target}"]`)
-    if (!button) return
-    for (const other of this.emojiButtons()) other.tabIndex = other === button ? 0 : -1
-    button.focus()
+    this.setTabStop(index)?.focus()
   }
 
   private pick(index: number): void {
@@ -423,7 +430,11 @@ export class EmojiPicker extends LitElement {
       this.saveStorage()
       // The recent emoji are listed first, so every button after them moves: keep focus on the emoji just picked, in
       // its own category (its last occurrence), rather than on whatever button now sits where it was.
-      if (fromGrid) this.updateComplete.then(() => this.focusIndex(this.flat.lastIndexOf(entry)))
+      this.updateComplete.then(() => {
+        const at = this.flat.lastIndexOf(entry)
+        if (fromGrid) this.focusIndex(at)
+        else this.setTabStop(at)
+      })
     }
     this.dispatchEvent(
       new CustomEvent<EmojiSelectDetail>('emoji-select', {
@@ -441,7 +452,7 @@ export class EmojiPicker extends LitElement {
     if (event.key === 'ArrowDown' && this.flat.length) {
       event.preventDefault()
       this.focusIndex(0)
-    } else if (event.key === 'Enter' && this.query.trim() && this.flat.length) {
+    } else if (event.key === 'Enter' && !event.isComposing && this.query.trim() && this.flat.length) {
       event.preventDefault()
       this.pick(0)
     }
@@ -496,7 +507,14 @@ export class EmojiPicker extends LitElement {
     let rowTop: number | undefined
     let best: HTMLButtonElement | undefined
     let bestDistance = Infinity
-    for (const button of this.emojiButtons()) {
+    // The next row is within a few rows' worth of emoji, whatever the column count: measure only those.
+    const origin = Number(from.dataset.index)
+    const span = 64
+    const start = down ? origin + 1 : Math.max(0, origin - span)
+    const end = down ? Math.min(this.flat.length - 1, origin + span) : origin - 1
+    for (let at = start; at <= end; at++) {
+      const button = this.emojiButton(at)
+      if (!button) continue
       const rect = button.getBoundingClientRect()
       const beyond = down ? rect.top > box.top + 2 : rect.top < box.top - 2
       if (!beyond) continue
@@ -528,8 +546,7 @@ export class EmojiPicker extends LitElement {
   private handleFocusIn(event: FocusEvent): void {
     const button = (event.target as Element).closest<HTMLButtonElement>('button.emoji')
     if (!button) return
-    this.activeIndex = Number(button.dataset.index)
-    for (const other of this.emojiButtons()) other.tabIndex = other === button ? 0 : -1
+    if (button.tabIndex !== 0) this.setTabStop(Number(button.dataset.index))
     this.previewed = this.flat[this.activeIndex]
   }
 
@@ -539,7 +556,8 @@ export class EmojiPicker extends LitElement {
     const top = body.scrollTop
     let current = ''
     for (const section of body.querySelectorAll<HTMLElement>('section')) {
-      if (section.offsetTop - body.offsetTop <= top + 8) current = section.dataset.section ?? ''
+      // `.body` is positioned, so a section's offsetTop is measured from the top of the scrolling list.
+      if (section.offsetTop <= top + 8) current = section.dataset.section ?? ''
       else break
     }
     if (current !== this.activeSection) this.activeSection = current
@@ -550,7 +568,7 @@ export class EmojiPicker extends LitElement {
     const body = this.body
     const section = body?.querySelector<HTMLElement>(`section[data-section="${CSS.escape(id ?? '')}"]`)
     if (!body || !section) return
-    body.scrollTop = section.offsetTop - body.offsetTop
+    body.scrollTop = section.offsetTop
     this.activeSection = id ?? ''
   }
 
@@ -567,6 +585,13 @@ export class EmojiPicker extends LitElement {
     this.skinTone = tone
     this.saveStorage()
     this.dispatchEvent(new CustomEvent('skin-tone-change', { detail: { skinTone: tone } }))
+  }
+
+  /** The choice of tones closes when focus leaves it for anything but the button that opened it. */
+  private handleTonesFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as Element | null
+    if (next?.closest('.tones, .tone-button')) return
+    this.tonesOpen = false
   }
 
   private handleTonesKeydown(event: KeyboardEvent): void {
@@ -591,10 +616,17 @@ export class EmojiPicker extends LitElement {
   }
 
   private loadStorage(): void {
-    if (isServer || !this.storageKey || this.storageKey === this.loadedKey) return
+    if (isServer || this.storageKey === this.loadedKey) return
+    const switching = this.loadedKey !== ''
     this.loadedKey = this.storageKey
+    if (!this.storageKey) return
     try {
       const saved = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as { recents?: unknown; skinTone?: unknown } | null
+      // Moving to another key (another user) must not carry the previous one's choices into it.
+      if (!saved && switching) {
+        this.recents = []
+        this.skinTone = 0
+      }
       if (Array.isArray(saved?.recents)) this.recents = saved.recents.filter((emoji): emoji is string => typeof emoji === 'string')
       if (TONES.includes(saved?.skinTone as SkinTone)) this.skinTone = saved!.skinTone as SkinTone
     } catch {

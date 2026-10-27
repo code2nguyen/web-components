@@ -77,6 +77,12 @@ test('an emoji picker in the picker slot adds what it picks', async ({ page, ren
   await expect(page.getByRole('button', { name: '🚀, 1 reaction' })).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('with no quick reactions, the popup opens on its picker', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reaction-bar quick=""><c2-emoji-picker slot="picker"></c2-emoji-picker></c2-reaction-bar>`)
+  await page.getByRole('button', { name: 'Add reaction' }).click()
+  await expect(page.getByRole('searchbox', { name: 'Search emoji' })).toBeFocused()
+})
+
 test('read-only reactions are not buttons and say whether you reacted, in the page language', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr"><c2-reaction-bar readonly ${REACTIONS}></c2-reaction-bar></div>`)
   await expect(page.locator('c2-reaction-bar').getByRole('button')).toHaveCount(0)

@@ -211,7 +211,10 @@ export class ReactionBar extends LitElement {
 
   private handleMenuToggle(event: ToggleEvent): void {
     this.menuOpen = event.newState === 'open'
-    if (event.newState === 'open') this.renderRoot.querySelector<HTMLButtonElement>('.quick-emoji')?.focus()
+    if (event.newState !== 'open') return
+    const first = this.renderRoot.querySelector<HTMLButtonElement>('.quick-emoji')
+    if (first) first.focus()
+    else this.querySelector<HTMLElement>(':scope > [slot="picker"]')?.focus()
   }
 
   private handlePickerSelect(event: CustomEvent<{ emoji?: string }>): void {
