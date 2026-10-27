@@ -185,6 +185,7 @@ button {
 
 .categories {
   display: flex;
+  container-type: inline-size;
   justify-content: space-between;
   padding: 0 8px;
   border-bottom: css.cssVar(preview--border-top);
@@ -196,6 +197,8 @@ button {
   width: auto;
   min-width: 0;
   max-width: css.cssVar(category--size);
+  // Ten categories share a narrow picker's row: the icons shrink with it rather than overlap.
+  font-size: min(18px, 6.5cqi);
   border-radius: css.cssVar(emoji--border-radius) css.cssVar(emoji--border-radius) 0 0;
 
   .emoji-glyph {
