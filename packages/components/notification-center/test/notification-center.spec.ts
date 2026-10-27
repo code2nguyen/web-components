@@ -1,6 +1,7 @@
 import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
-import type { NotificationCenter } from '../src/notification-center'
+// A local shape: importing the component's types would declare c2-relative-time a second time next to its own suite.
+type NotificationCenter = HTMLElement & { notifications: { id: string | number; read?: boolean }[] }
 
 const center = (page: Page) => page.locator('c2-notification-center')
 const readState = (page: Page) =>
@@ -24,7 +25,8 @@ test('lists the notifications by day, newest first, unread ones named as such, w
   await expect(page.getByRole('list', { name: 'Today' }).getByRole('link', { name: 'Deploy succeeded' })).toBeVisible()
   await expect(page.getByRole('list', { name: 'Yesterday' }).getByRole('button', { name: 'Unread: Ben commented' })).toBeVisible()
   await expect(page.getByRole('list', { name: 'Thursday, October 1' })).toBeVisible()
-  await expect(center(page).locator('c2-badge')).toHaveAttribute('aria-label', '2 unread')
+  await expect(center(page).locator('c2-badge')).toHaveAttribute('aria-hidden', 'true')
+  await expect(center(page).locator('.visually-hidden', { hasText: '2 unread' })).toHaveCount(1)
   await expect(center(page).locator('[part="time"]').first()).toHaveText(/2 min/)
   await accessible(page)
 })
