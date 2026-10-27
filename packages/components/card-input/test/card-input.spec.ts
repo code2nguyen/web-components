@@ -105,3 +105,24 @@ test('text follows the language', async ({ page, renderScenario }) => {
   await page.getByRole('textbox', { name: "Date d'expiration (MM / AA)" }).focus()
   await expect(card(page).locator('[part="error"]')).toHaveText('Le numéro de carte est incomplet.')
 })
+
+test('a four-digit year is read as such; a code is cut to the new brand; Delete steps over a space', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-card-input></c2-card-input>`)
+  await expiry(page).fill('12/2028')
+  await expect(expiry(page)).toHaveValue('12 / 28')
+  await number(page).fill('378282246310005')
+  await cvc(page).fill('1234')
+  await number(page).fill('4242424242424242')
+  await expect(cvc(page)).toHaveValue('123')
+  await number(page).evaluate((input: HTMLInputElement) => input.setSelectionRange(4, 4))
+  await number(page).press('Delete')
+  await expect(number(page)).toHaveValue('4242 2424 2424 242')
+})
+
+test('with brands limited, a number of a network the field does not know is refused', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-card-input brands="visa"></c2-card-input>`)
+  // Passes the Luhn check, matches no brand.
+  await number(page).fill('9000000000000001')
+  await expiry(page).focus()
+  await expect(card(page).locator('[part="error"]')).toHaveText('This card type is not accepted.')
+})

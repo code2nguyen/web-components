@@ -78,7 +78,7 @@ function addDays(date: Date, amount: number): Date {
  *
  * @event {Event} input - Fired when the user picks a day, before `change`. Read `value`.
  * @event {CustomEvent<{ value: string }>} change - Fired after the user picks a day. Not fired for programmatic changes.
- * @event {CustomEvent<{ start: string; end: string }>} range-change - Fired when the user pages to other days, with the first and last day now shown, so an app can load what is on them.
+ * @event {CustomEvent<{ start: string; end: string }>} range-change - Fired when other days come into view (paging, or a value that was not shown), with the first and last day now shown, so an app can load what is on them.
  *
  * @csspart header - The row with the month and the paging buttons.
  * @csspart title - The month (or months) of the days shown.
@@ -166,6 +166,8 @@ export class DateStrip extends LitElement {
   private customValidityMessage = ''
   /** The markers by day, rebuilt when `markers` changes. */
   private markerMap = new Map<string, DateStripMarker>()
+  /** Set when a value from outside moved the days shown: `range-change` follows the render. */
+  private rangeMoved = false
   /** `disabledDates` as a set, rebuilt when it changes. */
   private disabledSet = new Set<string>()
   /** The locale the page of days was laid out for: a week starts on its first day. */
@@ -232,13 +234,20 @@ export class DateStrip extends LitElement {
     const relayout = this.layoutLocale !== this.msg.locale && !fromIso(this.start)
     this.layoutLocale = this.msg.locale
     if (!this.viewStart || changed.has('start') || changed.has('days') || relayout) this.viewStart = this.initialStart()
-    // A value set from outside that is not shown brings its page into view.
-    else if (changed.has('value') && this.value && !this.shown().includes(this.value)) this.viewStart = this.pageStartFor(this.value)
+    // A value set from outside that is not shown brings its page into view, and says which days are shown now.
+    else if (changed.has('value') && this.value && !this.shown().includes(this.value)) {
+      this.viewStart = this.pageStartFor(this.value)
+      this.rangeMoved = true
+    }
   }
 
   protected override updated(changed: PropertyValues<this>): void {
     this.syncFormState()
     if (changed.has('value') || (changed as PropertyValues).has('viewStart')) this.revealSelected()
+    if (this.rangeMoved) {
+      this.rangeMoved = false
+      this.announceRange()
+    }
   }
 
   /** In a row too narrow for every day, scrolls the row (never the page) so the picked day is in sight. */
@@ -385,11 +394,13 @@ export class DateStrip extends LitElement {
     let offset = target
     let day = toIso(addDays(first, offset))
     // Home and End land on the nearest usable day inward; an arrow keeps going outward, at most two months.
+    const edge = event.key === 'Home' || event.key === 'End'
     const direction = event.key === 'Home' ? 1 : event.key === 'End' ? -1 : step
     for (let tries = 0; this.unavailable(day) && tries < 62; tries++) {
-      if (this.outOfRange(day) || this.effectiveDisabled) return
+      // Going outward, a day past min/max ends the search; going inward from an edge, it is skipped like any other.
+      if ((this.outOfRange(day) && !edge) || this.effectiveDisabled) return
       offset += direction
-      if ((event.key === 'Home' || event.key === 'End') && (offset < 0 || offset >= shown.length)) return
+      if (edge && (offset < 0 || offset >= shown.length)) return
       day = toIso(addDays(first, offset))
     }
     if (this.unavailable(day)) return

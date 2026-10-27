@@ -94,3 +94,12 @@ test('loading shows a busy list; text follows the language', async ({ page, rend
   await expect(picker(page)).toHaveHostAria('aria-label', 'Choisir un horaire')
   await expect(page.getByRole('option', { name: '18:00, indisponible' })).toBeVisible()
 })
+
+test('slots that arrive after the picker renders move it to their first free day, and set from outside the strip reports the days shown', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="en-GB"><c2-time-slot-picker time-zone="UTC"></c2-time-slot-picker></div>`)
+  await watch(picker(page), 'range-change')
+  await picker(page).evaluate((element: Picker & { slots: unknown }, slots) => (element.slots = JSON.parse(slots)), JSON.stringify([{ start: '2026-10-27T09:00:00Z' }]))
+  await expect(page.getByRole('option', { name: /^Tuesday,? 27 October 2026/ })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('option', { name: /^0?9:00$/ })).toBeVisible()
+  expect(await events(page)).toEqual([{ start: '2026-10-26', end: '2026-11-01' }])
+})

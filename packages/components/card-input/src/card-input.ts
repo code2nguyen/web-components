@@ -181,6 +181,8 @@ export class CardInput extends LitElement {
     this.expiryDigits = ''
     this.cvcDigits = ''
     this.touched = new Set()
+    this.brandAnnouncement = ''
+    this.emitCardChange()
   }
 
   override focus(options?: FocusOptions): void {
@@ -248,10 +250,12 @@ export class CardInput extends LitElement {
   private firstError(all = false): { segment: Segment; message: string } | null {
     const shown = (segment: Segment) => all || this.touched.has(segment)
     const brand = detectBrand(this.numberDigits)
-    const accepted = this.brands.length === 0 || (brand !== undefined && this.brands.includes(brand.id)) || !brand
+    const accepted = this.brands.length === 0 || (brand !== undefined && this.brands.includes(brand.id))
     if (shown('number')) {
-      if (brand && !accepted) return { segment: 'number', message: this.msg.t('unsupported', brand.name) }
       const number = numberState(this.numberDigits)
+      if (brand && !accepted) return { segment: 'number', message: this.msg.t('unsupported', brand.name) }
+      // A complete number of a network the component does not know is refused too when the brands are limited.
+      if (!brand && !accepted && number === 'complete') return { segment: 'number', message: this.msg.t('unsupportedUnknown') }
       if (number === 'invalid') return { segment: 'number', message: this.msg.t('numberInvalid') }
       if (number === 'incomplete' || (number === 'empty' && all && this.anyFilled())) return { segment: 'number', message: this.msg.t('numberIncomplete') }
     }
@@ -262,7 +266,7 @@ export class CardInput extends LitElement {
       if (expiry === 'incomplete' || (expiry === 'empty' && all && this.anyFilled())) return { segment: 'expiry', message: this.msg.t('expiryIncomplete') }
     }
     if (shown('cvc')) {
-      const short = this.cvcDigits.length < this.cvcLength
+      const short = this.cvcDigits.length !== this.cvcLength
       if ((this.cvcDigits && short) || (!this.cvcDigits && all && this.anyFilled())) return { segment: 'cvc', message: this.msg.t('cvcIncomplete') }
     }
     return null
@@ -315,6 +319,8 @@ export class CardInput extends LitElement {
     if (event.inputType === 'deleteContentBackward' && digits === previous && caretDigits > 0) {
       digits = digits.slice(0, caretDigits - 1) + digits.slice(caretDigits)
       caretDigits -= 1
+    } else if (event.inputType === 'deleteContentForward' && digits === previous && caretDigits < digits.length) {
+      digits = digits.slice(0, caretDigits) + digits.slice(caretDigits + 1)
     }
     return { digits, caretDigits }
   }
@@ -343,6 +349,8 @@ export class CardInput extends LitElement {
     const rules = detectBrand(digits) ?? unknownBrand
     const next = digits.slice(0, Math.max(...rules.lengths))
     this.numberDigits = next
+    // A code typed for a 4-digit brand is cut to the new brand's length.
+    if (this.cvcDigits.length > rules.cvcLength) this.cvcDigits = this.cvcDigits.slice(0, rules.cvcLength)
     const text = formatNumber(next, rules.gaps)
     input.value = text
     void this.place(input, text, Math.min(caretDigits, next.length))
@@ -350,12 +358,18 @@ export class CardInput extends LitElement {
     this.emitCardChange()
     // Complete at the usual length (or the longest), and valid: on to the expiry.
     const typedAtEnd = caretDigits >= next.length
-    if (typedAtEnd && numberState(next) === 'complete' && next.length >= rules.lengths[0] && event.inputType.startsWith('insert')) this.input('expiry')?.focus()
+    if (typedAtEnd && numberState(next) === 'complete' && next.length >= rules.lengths[0] && (event.inputType ?? '').startsWith('insert')) this.input('expiry')?.focus()
   }
 
   private handleExpiryInput(event: InputEvent): void {
     const input = event.target as HTMLInputElement
     const edited = this.editedDigits(input, event, this.expiryDigits)
+    // Autofill and pastes may carry a four-digit year ("12/2027").
+    const full = /^\D*(\d{1,2})\D+(\d{4})\D*$/.exec(input.value)
+    if (full) {
+      edited.digits = full[1].padStart(2, '0') + full[2].slice(2)
+      edited.caretDigits = 4
+    }
     const next = normalizeExpiry(edited.digits)
     const caretDigits = edited.caretDigits + (next.length > edited.digits.length ? 1 : 0)
     this.expiryDigits = next
@@ -363,12 +377,12 @@ export class CardInput extends LitElement {
     input.value = text
     void this.place(input, text, Math.min(caretDigits, next.length))
     this.emitCardChange()
-    if (next.length === 4 && caretDigits >= 4 && event.inputType.startsWith('insert') && expiryState(next) === 'complete') this.input('cvc')?.focus()
+    if (next.length === 4 && caretDigits >= 4 && (event.inputType ?? '').startsWith('insert') && expiryState(next) === 'complete') this.input('cvc')?.focus()
   }
 
   private handleCvcInput(event: InputEvent): void {
     const input = event.target as HTMLInputElement
-    const next = digitsOf(input.value).slice(0, 4)
+    const next = digitsOf(input.value).slice(0, this.cvcLength)
     this.cvcDigits = next
     input.value = next
     this.emitCardChange()

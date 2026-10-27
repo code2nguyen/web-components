@@ -101,3 +101,12 @@ test('disabled dates cannot be picked and the arrows step over them; paging fire
   await page.getByRole('button', { name: 'Later days' }).click()
   expect(JSON.parse((await strip(page).getAttribute('data-events'))!)).toEqual([{ start: '2026-10-18', end: '2026-10-24' }])
 })
+
+test('Home and End land on the nearest day inside min and max', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="en-GB"><c2-date-strip value="2026-10-15" min="2026-10-14" max="2026-10-16"></c2-date-strip></div>`)
+  await page.getByRole('option', { name: /15 October 2026/ }).focus()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('option', { name: /14 October 2026/ })).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(page.getByRole('option', { name: /16 October 2026/ })).toBeFocused()
+})

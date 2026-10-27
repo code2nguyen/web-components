@@ -16,6 +16,7 @@ const en = {
   numberIncomplete: 'Your card number is incomplete.',
   numberInvalid: 'Your card number is invalid.',
   unsupported: (brand: string) => `${brand} cards are not accepted.`,
+  unsupportedUnknown: 'This card type is not accepted.',
   expiryIncomplete: "Your card's expiry date is incomplete.",
   expiryInvalid: "Your card's expiry month is invalid.",
   expiryPast: "Your card's expiry date is in the past.",

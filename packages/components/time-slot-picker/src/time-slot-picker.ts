@@ -75,6 +75,9 @@ function dayInstant(day: string): Date {
   return new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12))
 }
 
+/** One empty list, so the strip does not see a new `disabledDates` on every render while loading. */
+const noDays: string[] = []
+
 function periodOf(minutes: number): Period {
   return minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening'
 }
@@ -197,6 +200,10 @@ export class TimeSlotPicker extends LitElement {
   private byDay = new Map<string, PlacedSlot[]>()
   /** Days with at least one free time, in order. */
   private freeDays: string[] = []
+  /** Days between the first and last day with slots that have no free time, rebuilt with `byDay`. */
+  private booked: string[] = []
+  /** The day shown while `date` is not set. */
+  private defaultDate = ''
   private announcementTimer: ReturnType<typeof setTimeout> | undefined
 
   constructor() {
@@ -259,6 +266,11 @@ export class TimeSlotPicker extends LitElement {
     return this.timeZone && isTimeZone(this.timeZone) ? this.timeZone : ''
   }
 
+  /** The day shown: `date`, or the default worked out from the value and the slots. */
+  private get shownDate(): string {
+    return parseDate(this.date) ? this.date : this.defaultDate
+  }
+
   private get effectiveDisabled(): boolean {
     return this.disabled || this.disabledByForm
   }
@@ -267,10 +279,11 @@ export class TimeSlotPicker extends LitElement {
     if (this.defaultValue === undefined) this.defaultValue = this.value
     if (changed.has('slots') || changed.has('timeZone')) this.place()
     // With no day asked for, show the value's day, else the first free day from today, else the first free day.
-    if (!parseDate(this.date) && (changed.has('date') || changed.has('slots') || changed.has('value') || !this.hasUpdated)) {
+    // Worked out again as slots or a value arrive, so a picker mounted before its slots load moves to them.
+    if (!parseDate(this.date) && (changed.has('date') || changed.has('slots') || changed.has('timeZone') || changed.has('value') || !this.hasUpdated)) {
       const picked = this.placedValue()
       const today = this.today()
-      this.date = picked?.day ?? this.freeDays.find((day) => day >= today) ?? this.freeDays[0] ?? today
+      this.defaultDate = picked?.day ?? this.freeDays.find((day) => day >= today) ?? this.freeDays[0] ?? today
     }
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
   }
@@ -307,6 +320,7 @@ export class TimeSlotPicker extends LitElement {
     }
     for (const list of this.byDay.values()) list.sort((a, b) => a.start - b.start)
     this.freeDays = [...this.byDay.keys()].filter((day) => this.byDay.get(day)!.some((slot) => slot.available)).sort()
+    this.booked = this.bookedDays()
   }
 
   private placedValue(): PlacedSlot | undefined {
@@ -351,7 +365,7 @@ export class TimeSlotPicker extends LitElement {
   }
 
   private showDay(day: string): void {
-    if (day === this.date) return
+    if (day === this.shownDate) return
     this.date = day
     this.focusSlot = ''
     const free = (this.byDay.get(day) ?? []).filter((slot) => slot.available).length
@@ -398,7 +412,7 @@ export class TimeSlotPicker extends LitElement {
       case 'Enter':
       case ' ': {
         event.preventDefault()
-        const placed = this.byDay.get(this.date)?.find((slot) => slot.slot.start === current.dataset.start)
+        const placed = this.byDay.get(this.shownDate)?.find((slot) => slot.slot.start === current.dataset.start)
         if (placed) this.pick(placed)
         return
       }
@@ -468,11 +482,11 @@ export class TimeSlotPicker extends LitElement {
         </div>
       </div>`
     }
-    const list = this.byDay.get(this.date) ?? []
+    const list = this.byDay.get(this.shownDate) ?? []
     if (!list.some((placed) => placed.available)) {
-      const next = this.freeDays.find((day) => day > this.date && (!parseDate(this.max) || day <= this.max))
+      const next = this.freeDays.find((day) => day > this.shownDate && (!parseDate(this.max) || day <= this.max))
       return html`<div class="empty" part="empty">
-        <span>${this.msg.t('noTimes', this.longDate(this.date))}</span>
+        <span>${this.msg.t('noTimes', this.longDate(this.shownDate))}</span>
         ${
           next && !this.effectiveDisabled
             ? html`<button class="next" part="next" type="button" @click=${() => this.showDay(next)}>
@@ -487,7 +501,7 @@ export class TimeSlotPicker extends LitElement {
     const stop = this.effectiveDisabled
       ? ''
       : ([this.focusSlot, this.value].find((start) => usable.some((placed) => placed.slot.start === start)) ?? usable[0].slot.start)
-    if (this.groupBy === 'none') return this.renderSlots(list, stop, this.msg.t('times', this.longDate(this.date)), nothing)
+    if (this.groupBy === 'none') return this.renderSlots(list, stop, this.msg.t('times', this.longDate(this.shownDate)), nothing)
     const periods: Period[] = ['morning', 'afternoon', 'evening']
     return periods.map((period) => {
       const group = list.filter((placed) => periodOf(placed.minutes) === period)
@@ -508,9 +522,9 @@ export class TimeSlotPicker extends LitElement {
         >
           <c2-date-strip
             part="days"
-            .value=${this.date}
+            .value=${this.shownDate}
             .markers=${this.freeDays}
-            .disabledDates=${this.loading ? [] : this.bookedDays()}
+            .disabledDates=${this.loading ? noDays : this.booked}
             .min=${this.min}
             .max=${this.max}
             .label=${this.msg.t('day')}

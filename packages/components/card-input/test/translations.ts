@@ -15,6 +15,7 @@ const fr: typeof cardInputMessages.en = {
   numberIncomplete: 'Le numéro de carte est incomplet.',
   numberInvalid: 'Le numéro de carte est invalide.',
   unsupported: (brand) => `Les cartes ${brand} ne sont pas acceptées.`,
+  unsupportedUnknown: "Ce type de carte n'est pas accepté.",
   expiryIncomplete: "La date d'expiration est incomplète.",
   expiryInvalid: "Le mois d'expiration est invalide.",
   expiryPast: "La date d'expiration est passée.",
