@@ -56,7 +56,7 @@
 
 /* In `diverging` mode the header follows the three columns: label, track, value. */
 .header--diverging {
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
+  grid-template-columns: fit-content(40%) minmax(0, 1fr) auto;
 
   .header-value {
     grid-column: 3;
@@ -175,7 +175,7 @@ a.row:hover .label-text {
 
 /* Diverging: the label, then a track whose centre line is zero, then the value. */
 .list--diverging {
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
+  grid-template-columns: fit-content(40%) minmax(0, 1fr) auto;
 
   .label {
     padding-left: 0;

@@ -40,7 +40,9 @@ Looks for `c2-choice-matrix`. The row borders and the cell padding set the densi
 <style>
   .matrix-scale {
     --c2-choice-matrix__row--border-bottom: 0;
-    --c2-choice-matrix__cell--padding: 8px 6px;
+    --c2-choice-matrix__cell--padding: 8px 4px;
+    --c2-choice-matrix__row-header--font-size: 13px;
+    --c2-choice-matrix__column-header--font-size: 11px;
   }
 </style>
 <c2-choice-matrix class="matrix-scale" type="radio" columns='[{"value":"1","label":"No"},{"value":"2","label":"Maybe"},{"value":"3","label":"Yes"}]' rows='[{"value":"a","label":"Easy to use"},{"value":"b","label":"Would recommend"}]' value='{"a":"3"}'></c2-choice-matrix>
