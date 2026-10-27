@@ -1,0 +1,72 @@
+---
+title: 'Citation gallery'
+description: 'Numbered markers, a round pill, a bracketed footnote, a site-name chip and an accent marker in running text.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Citation } from '@c2n/components/citation'
+
+<GalleryGrid min="320">
+
+```html tag=MdxCodeBlock,label=Default
+<p>Static HTML first, then hydration<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit" snippet="Lit's SSR renders components to static HTML in Node."></c2-citation>.</p>
+```
+
+```html tag=MdxCodeBlock,label=Round pill
+<style>
+  .citation-round {
+    --c2-citation__marker--border-radius: 999px;
+    --c2-citation__marker--min-width: 18px;
+    --c2-citation__marker--height: 18px;
+    --c2-citation__marker--background-color: light-dark(#e0edff, #10294f);
+    --c2-citation__marker--color: light-dark(#0b5bd3, #8ab8ff);
+    --c2-citation__marker__hover--background-color: #0265dc;
+    --c2-citation__marker__hover--color: #ffffff;
+  }
+</style>
+<p>Most teams ship weekly<c2-citation class="citation-round" index="2" href="https://survey.stackoverflow.co/2024/" source-title="2024 Developer Survey"></c2-citation> and review every change<c2-citation class="citation-round" index="3" href="https://example.com/review" source-title="Code review at scale"></c2-citation>.</p>
+```
+
+```html tag=MdxCodeBlock,label=Footnote
+<style>
+  .citation-footnote {
+    --c2-citation__marker--background-color: transparent;
+    --c2-citation__marker--padding: 0 1px;
+    --c2-citation__marker--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-citation__marker--font-size: 12px;
+    --c2-citation__marker--vertical-align: 0.4em;
+    --c2-citation__marker__hover--background-color: transparent;
+    --c2-citation__marker__hover--color: var(--c2-theme--color-primary-hover, #0154b8);
+  }
+</style>
+<p>Shadow roots can be declared in HTML<c2-citation class="citation-footnote" href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom" source-title="Declarative Shadow DOM">[4]</c2-citation>.</p>
+```
+
+```html tag=MdxCodeBlock,label=Site chip
+<style>
+  .citation-chip {
+    --c2-citation__marker--height: 20px;
+    --c2-citation__marker--padding: 0 8px;
+    --c2-citation__marker--border-radius: 999px;
+    --c2-citation__marker--font-size: 12px;
+    --c2-citation__marker--vertical-align: 0.1em;
+  }
+</style>
+<p>The release notes list the fix<c2-citation class="citation-chip" href="https://github.com/lit/lit/releases" source-title="Releases · lit/lit" snippet="lit 3.3: SSR hydration fixes.">github.com</c2-citation>.</p>
+```
+
+```html tag=MdxCodeBlock,label=Wide card
+<style>
+  .citation-wide {
+    --c2-citation__card--width: 380px;
+    --c2-citation__card--padding: 16px;
+    --c2-citation__title--font-size: 16px;
+    --c2-citation__snippet--line-clamp: 5;
+  }
+</style>
+<p>Hydration attaches behaviour to server HTML<c2-citation class="citation-wide" index="5" href="https://lit.dev/docs/ssr/client-usage/" source-title="Client usage – Lit SSR" snippet="Hydration is the process of making server-rendered HTML interactive: Lit attaches its templates to the existing DOM instead of re-rendering it, which keeps the first paint fast and avoids layout shift when the scripts arrive."></c2-citation>.</p>
+```
+
+</GalleryGrid>

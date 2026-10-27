@@ -23,6 +23,7 @@ import chatbot from '@c2n/chatbot/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
+import citation from '@c2n/citation/custom-elements.json'
 import codeEditor from '@c2n/code-editor/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
@@ -148,6 +149,7 @@ import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
 import toggletip from '@c2n/toggletip/custom-elements.json'
+import toolCall from '@c2n/tool-call/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
@@ -190,6 +192,7 @@ export const componentManifests = (function () {
     checkbox,
     chip,
     chipGroup,
+    citation,
     codeEditor,
     codeViewer,
     colorArea,
@@ -315,6 +318,7 @@ export const componentManifests = (function () {
     toast,
     todoList,
     toggletip,
+    toolCall,
     tooltip,
     tour,
     traceWaterfall,

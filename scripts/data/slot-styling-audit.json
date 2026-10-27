@@ -804,6 +804,19 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-citation",
+      "slot": "",
+      "decision": "part",
+      "parts": ["marker"],
+      "reason": "The marker owns the slotted text's component-side presentation: its pill, colour and type."
+    },
+    {
+      "tag": "c2-citation",
+      "slot": "preview",
+      "decision": "assigned-content",
+      "reason": "The preview slot projects consumer-owned card content; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-code-editor",
       "slot": "label",
       "decision": "part",
@@ -1868,6 +1881,40 @@
       "decision": "variables",
       "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
       "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-tool-call",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions row owns the slot's layout and spacing; the slotted controls keep their own contract."
+    },
+    {
+      "tag": "c2-tool-call",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The description region sets the colour and single-line truncation the slotted text inherits."
+    },
+    {
+      "tag": "c2-tool-call",
+      "slot": "icon",
+      "decision": "assigned-content",
+      "reason": "The icon slot projects the consumer's own icon; size and colour it through its own contract."
+    },
+    {
+      "tag": "c2-tool-call",
+      "slot": "input",
+      "decision": "part",
+      "parts": ["section"],
+      "reason": "The input section owns the slot's place under its heading; the slotted content keeps its own contract."
+    },
+    {
+      "tag": "c2-tool-call",
+      "slot": "output",
+      "decision": "part",
+      "parts": ["section"],
+      "reason": "The output section owns the slot's place under its heading; the slotted content keeps its own contract."
     },
     {
       "tag": "c2-tour",

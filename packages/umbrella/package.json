@@ -281,6 +281,10 @@
       "types": "./dist/chip-group.d.ts",
       "default": "./dist/chip-group.js"
     },
+    "./citation": {
+      "types": "./dist/citation.d.ts",
+      "default": "./dist/citation.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"
@@ -873,6 +877,10 @@
       "types": "./dist/toggletip.d.ts",
       "default": "./dist/toggletip.js"
     },
+    "./tool-call": {
+      "types": "./dist/tool-call.d.ts",
+      "default": "./dist/tool-call.js"
+    },
     "./tooltip": {
       "types": "./dist/tooltip.d.ts",
       "default": "./dist/tooltip.js"
@@ -1074,6 +1082,7 @@
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
     "@c2n/chip-group": "*",
+    "@c2n/citation": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
@@ -1196,6 +1205,7 @@
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
     "@c2n/toggletip": "*",
+    "@c2n/tool-call": "*",
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",

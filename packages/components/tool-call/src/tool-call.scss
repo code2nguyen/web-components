@@ -1,0 +1,250 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tool-call,
+  $theme: (
+    width: 100%,
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    color: #18181b,
+    font-size: 14px,
+    header--padding: 8px 12px,
+    header--gap: 8px,
+    header__hover--background-color: #fafafa,
+    header__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    name--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      monospace,
+    ),
+    name--font-weight: 600,
+    description--color: #71717a,
+    meta--color: #71717a,
+    meta--font-size: 12px,
+    status--size: 16px,
+    status__pending--color: #a1a1aa,
+    status__running--color: #0265dc,
+    status__success--color: #16a34a,
+    status__error--color: #dc2626,
+    status__cancelled--color: #71717a,
+    status--on-color: #ffffff,
+    status--animation-duration: 900ms,
+    body--padding: 0 12px 12px,
+    body--gap: 12px,
+    actions--padding: 0 12px 12px,
+    section-label--color: #71717a,
+    section-label--font-size: 12px,
+    section-label--font-weight: 500,
+    code--background-color: #fafafa,
+    code--border: 1px solid #e4e4e7,
+    code--border-radius: 6px,
+    code--padding: 8px 10px,
+    code--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      monospace,
+    ),
+    code--font-size: 12px,
+    code--max-height: 240px,
+    error--color: #dc2626,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  line-height: 1.4;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(header--gap);
+  padding: css.cssVar(header--padding);
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    background-color: css.cssVar(header__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(header__focus--outline);
+    outline-offset: -2px;
+    border-radius: css.cssVar(border-radius);
+  }
+}
+
+.status {
+  --_on-status: #{css.cssVar(status--on-color)};
+
+  flex: none;
+  width: css.cssVar(status--size);
+  height: css.cssVar(status--size);
+}
+
+.status--pending {
+  color: css.cssVar(status__pending--color);
+}
+
+.status--running {
+  color: css.cssVar(status__running--color);
+
+  .spin-track {
+    opacity: 0.25;
+  }
+
+  .spin-arc {
+    transform-origin: 8px 8px;
+    animation: c2-tool-call-spin css.cssVar(status--animation-duration) linear infinite;
+  }
+}
+
+.status--success {
+  color: css.cssVar(status__success--color);
+}
+
+.status--error {
+  color: css.cssVar(status__error--color);
+}
+
+.status--cancelled {
+  color: css.cssVar(status__cancelled--color);
+}
+
+@keyframes c2-tool-call-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.texts {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  min-width: 0;
+  gap: 8px;
+}
+
+.name {
+  flex: none;
+  font-family: css.cssVar(name--font-family);
+  font-weight: css.cssVar(name--font-weight);
+}
+
+.description {
+  overflow: hidden;
+  min-width: 0;
+  color: css.cssVar(description--color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: 8px;
+  color: css.cssVar(meta--color);
+  font-size: css.cssVar(meta--font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: css.cssVar(meta--color);
+  transition: transform 150ms ease;
+
+  .card[open] & {
+    transform: rotate(90deg);
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(body--gap);
+  padding: css.cssVar(body--padding);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.section-label {
+  color: css.cssVar(section-label--color);
+  font-size: css.cssVar(section-label--font-size);
+  font-weight: css.cssVar(section-label--font-weight);
+}
+
+.code {
+  // The maximum height is the whole box's, padding and border included.
+  box-sizing: border-box;
+  overflow: auto;
+  max-height: css.cssVar(code--max-height);
+  margin: 0;
+  padding: css.cssVar(code--padding);
+  border: css.cssVar(code--border);
+  border-radius: css.cssVar(code--border-radius);
+  background-color: css.cssVar(code--background-color);
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  &:focus-visible {
+    outline: css.cssVar(header__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.section--error .code {
+  color: css.cssVar(error--color);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: css.cssVar(actions--padding);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status--running .spin-arc {
+    animation-duration: calc(#{css.cssVar(status--animation-duration)} * 4);
+  }
+
+  .chevron {
+    transition: none;
+  }
+}

@@ -122,11 +122,9 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat-message-list`, `c2-chatbot`) and the open working-indicator PR.
 
-| #   | Component        | What it adds                                                         | Real-world model                                        | Priority | Decision |
-| --- | ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | -------- | -------- |
-| 94  | `c2-tool-call`   | Collapsible card for an agent step: tool name, input, status, output | Claude and ChatGPT agent steps, Vercel AI Elements Tool | P2       | Proposed |
-| 95  | `c2-citation`    | Numbered inline source marker with a hover preview of the source     | Perplexity, ChatGPT search                              | P2       | Proposed |
-| 97  | `c2-web-preview` | Sandboxed iframe with URL bar, reload and device sizes               | v0, Bolt                                                | P3       | Proposed |
+| #   | Component        | What it adds                                           | Real-world model | Priority | Decision |
+| --- | ---------------- | ------------------------------------------------------ | ---------------- | -------- | -------- |
+| 97  | `c2-web-preview` | Sandboxed iframe with URL bar, reload and device sizes | v0, Bolt         | P3       | Proposed |
 
 ### I. Utilities
 

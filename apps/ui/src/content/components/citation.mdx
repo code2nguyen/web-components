@@ -1,0 +1,55 @@
+---
+title: 'Citation'
+description: 'A numbered inline marker that names its source, with a hover preview of the page it cites.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Citation } from '@c2n/components/citation'
+
+`c2-citation` is the numbered marker an AI answer puts after a claim to say where it comes from, like the inline citations of Perplexity and ChatGPT search. The marker is a link to the source; hovering or focusing it opens a card with the site, the page's title, the passage quoted and the address, which the pointer can move into and Escape closes.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/citation'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/citation
+<style>
+  .citation-answer {
+    max-width: 520px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+</style>
+<div data-label="In an answer">
+  <p class="citation-answer">
+    Lit renders components to static HTML on the server and hydrates them in the browser<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit" snippet="Lit's SSR renders components to static HTML in Node, then hydrates them in the browser so they become interactive."></c2-citation>. Declarative shadow DOM is what lets the browser attach a component's shadow root before any script runs<c2-citation index="2" href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom" source-title="Declarative Shadow DOM" site="Chrome for Developers" snippet="Declarative Shadow DOM is a web platform feature that lets you define shadow roots in HTML, without JavaScript."></c2-citation>.
+  </p>
+</div>
+<div data-label="Named by the site">
+  <p class="citation-answer">
+    The 2024 survey found most teams ship weekly<c2-citation href="https://survey.stackoverflow.co/2024/" source-title="2024 Developer Survey" snippet="Responses from 65,000 developers.">stackoverflow.co</c2-citation>.
+  </p>
+</div>
+```
+
+### The source
+
+`href` is the page cited, `source-title` its title, `snippet` the passage the text draws on, `site` the site's name (by default the address's host, without `www.`) and `favicon` its icon. `index` is the number in the marker; the default slot replaces it with your own text, such as the site's name. The `preview` slot replaces the whole card.
+
+Only http(s) and relative addresses become a link, and only those (plus `data:image/`) load as an icon. Sources often come from a model's output, so a `javascript:` or other address is dropped: the marker is then a button that only opens its preview.
+
+### Opening the card
+
+The card is a `c2-hover-card`: it opens `open-delay` milliseconds (300 by default) after the pointer rests on the marker, or at once on keyboard focus, beside the marker at `placement` (`top` by default), and flips when there is no room. On touch it does not open, since a tap follows the link. So the card adds a preview; it should not be the only place a source is named — list the sources under the answer too.
+
+### Accessibility
+
+A screen reader hears the marker as `Source 1: <title>` in the page's language, a link that opens in a new tab by default (`target`). Its icon is decorative (`alt=""`).
