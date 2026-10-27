@@ -18,9 +18,31 @@ async function paste(page: Page, data: Record<string, string>) {
   }, data)
 }
 
-/** Selects the last `count` characters before the caret with real keyboard input. Wait for the typed value first. */
-async function selectBack(page: Page, count: number) {
+/** The focused editor's caret: the text before it in its editable root, and what is selected. */
+function caretState(): { before: string; selected: string } {
+  // `document.getSelection()` retargets a selection inside a shadow root to the host; the root's own does not.
+  let root: Document | ShadowRoot = document
+  while (root.activeElement?.shadowRoot) root = root.activeElement.shadowRoot
+  const selection = (root as unknown as { getSelection?: () => Selection | null }).getSelection?.() ?? getSelection()
+  const focus = selection?.focusNode
+  const editable = (focus instanceof Element ? focus : focus?.parentElement)?.closest('[contenteditable="true"]')
+  if (!selection || !focus || !editable) return { before: '', selected: '' }
+  const range = document.createRange()
+  range.setStart(editable, 0)
+  range.setEnd(focus, selection.focusOffset)
+  return { before: range.toString(), selected: selection.toString() }
+}
+
+/**
+ * Selects the characters before the caret with real keyboard input. Given the text, it first waits until the editor
+ * holds that text just before the caret — typing and End land asynchronously, and on a loaded runner the presses would
+ * otherwise start from an earlier caret — then until exactly that text is selected. A count presses blind.
+ */
+async function selectBack(page: Page, text: string | number) {
+  const count = typeof text === 'string' ? text.length : text
+  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).before.endsWith(text)).toBe(true)
   for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
+  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).selected).toBe(text)
 }
 
 test('typing writes Markdown into value and fires input, then change on blur', async ({ page, renderScenario }) => {
@@ -50,7 +72,7 @@ test('selecting text opens the tape toolbar, which formats the selection', async
   await page.keyboard.type('pick up the dry cleaning')
   await expect(host).toHaveJSProperty('value', 'pick up the dry cleaning')
   await expect(toolbar(page)).toBeHidden()
-  await selectBack(page, 8)
+  await selectBack(page, 'cleaning')
   await expect(toolbar(page)).toBeVisible()
 
   await toolbar(page).getByRole('button', { name: 'Bold' }).click()
@@ -99,7 +121,7 @@ test('keyboard shortcuts and the toolbar are reachable without a pointer', async
   await surface(page).focus()
   await page.keyboard.type('one two')
   await expect(host).toHaveJSProperty('value', 'one two')
-  await selectBack(page, 3)
+  await selectBack(page, 'two')
   await page.keyboard.press('ControlOrMeta+i')
   await expect(host).toHaveJSProperty('value', 'one *two*')
   await page.keyboard.press('ControlOrMeta+u')
@@ -124,7 +146,7 @@ test('a colour flyout opens by tap and by keyboard', async ({ page, renderScenar
   await surface(page).click()
   await page.keyboard.type('ink me')
   await expect(host).toHaveJSProperty('value', 'ink me')
-  await selectBack(page, 2)
+  await selectBack(page, 'me')
   const inks = toolbar(page).getByRole('button', { name: /^Ink colour/ })
   await expect(inks).toHaveAttribute('aria-expanded', 'false')
 
@@ -238,7 +260,7 @@ test('a custom ink and highlighter list stores positions, and a new list recolou
   // The toolbar offers the list's colours under their labels and applies them by position.
   await surface(page).click()
   await page.keyboard.press('End')
-  await selectBack(page, 5)
+  await selectBack(page, 'today')
   await toolbar(page)
     .getByRole('button', { name: /^Ink colour/ })
     .hover()
@@ -290,7 +312,7 @@ test('marks limits the toolbar, the shortcuts and pasted formatting', async ({ p
   await surface(page).click()
   await page.keyboard.type('plain')
   await expect(host).toHaveJSProperty('value', 'plain')
-  await selectBack(page, 5)
+  await selectBack(page, 'plain')
   await expect(toolbar(page).getByRole('button', { name: 'Bold' })).toBeVisible()
   await expect(toolbar(page).getByRole('button', { name: 'Italic' })).toBeHidden()
   await expect(toolbar(page).getByRole('button', { name: /^Ink colour/ })).toBeHidden()
@@ -547,7 +569,7 @@ test('the toolbar and the paper card follow the page when it scrolls', async ({ 
   await surface(page).click()
   await page.keyboard.type('scroll me')
   await expect(page.locator('c2-notepad')).toHaveJSProperty('value', 'scroll me')
-  await selectBack(page, 2)
+  await selectBack(page, 'me')
   await expect(toolbar(page)).toBeVisible()
   const sheet = page.locator('c2-notepad .sheet')
   const gap = async (popover: import('@playwright/test').Locator) => (await popover.boundingBox())!.y - (await sheet.boundingBox())!.y
@@ -695,7 +717,7 @@ test('the tape of the toolbar is cut from the paper it sits on, unless its colou
   const host = page.locator('c2-notepad')
   await surface(page).click()
   await page.keyboard.press('End')
-  await selectBack(page, 8)
+  await selectBack(page, 'cleaning')
   await expect(toolbar(page)).toBeVisible()
   const tape = () => toolbar(page).evaluate((element) => getComputedStyle(element, '::before').backgroundColor)
 
