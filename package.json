@@ -243,7 +243,6 @@
         "./packages/components/toast:build",
         "./packages/components/todo-list:build",
         "./packages/components/toggletip:build",
-        "./packages/components/tool-call:build",
         "./packages/components/tooltip:build",
         "./packages/components/tour:build",
         "./packages/components/trace-waterfall:build",

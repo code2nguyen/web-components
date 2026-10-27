@@ -1883,40 +1883,6 @@
       "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
     },
     {
-      "tag": "c2-tool-call",
-      "slot": "actions",
-      "decision": "part",
-      "parts": ["actions"],
-      "reason": "The actions row owns the slot's layout and spacing; the slotted controls keep their own contract."
-    },
-    {
-      "tag": "c2-tool-call",
-      "slot": "description",
-      "decision": "part",
-      "parts": ["description"],
-      "reason": "The description region sets the colour and single-line truncation the slotted text inherits."
-    },
-    {
-      "tag": "c2-tool-call",
-      "slot": "icon",
-      "decision": "assigned-content",
-      "reason": "The icon slot projects the consumer's own icon; size and colour it through its own contract."
-    },
-    {
-      "tag": "c2-tool-call",
-      "slot": "input",
-      "decision": "part",
-      "parts": ["section"],
-      "reason": "The input section owns the slot's place under its heading; the slotted content keeps its own contract."
-    },
-    {
-      "tag": "c2-tool-call",
-      "slot": "output",
-      "decision": "part",
-      "parts": ["section"],
-      "reason": "The output section owns the slot's place under its heading; the slotted content keeps its own contract."
-    },
-    {
       "tag": "c2-tour",
       "slot": "",
       "decision": "part",

@@ -44,7 +44,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Citation** — `c2-citation` · `@c2n/components/citation` — A numbered inline marker that names its source, with a hover preview of the page it cites.
 - **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.
 - **Streaming Text** — `c2-streaming-text` · `@c2n/components/streaming-text` — Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.
-- **Tool Call** — `c2-tool-call` · `@c2n/components/tool-call` — One step an AI agent took with a tool, as a collapsible card with its state, input and output.
 
 ## Data display
 
