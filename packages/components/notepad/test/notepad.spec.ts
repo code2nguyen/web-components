@@ -1,4 +1,4 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, selectBack } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Notes' })
@@ -16,33 +16,6 @@ async function paste(page: Page, data: Record<string, string>) {
     Object.defineProperty(event, 'clipboardData', { value: transfer })
     element.dispatchEvent(event)
   }, data)
-}
-
-/** The focused editor's caret: the text before it in its editable root, and what is selected. */
-function caretState(): { before: string; selected: string } {
-  // `document.getSelection()` retargets a selection inside a shadow root to the host; the root's own does not.
-  let root: Document | ShadowRoot = document
-  while (root.activeElement?.shadowRoot) root = root.activeElement.shadowRoot
-  const selection = (root as unknown as { getSelection?: () => Selection | null }).getSelection?.() ?? getSelection()
-  const focus = selection?.focusNode
-  const editable = (focus instanceof Element ? focus : focus?.parentElement)?.closest('[contenteditable="true"]')
-  if (!selection || !focus || !editable) return { before: '', selected: '' }
-  const range = document.createRange()
-  range.setStart(editable, 0)
-  range.setEnd(focus, selection.focusOffset)
-  return { before: range.toString(), selected: selection.toString() }
-}
-
-/**
- * Selects the characters before the caret with real keyboard input. Given the text, it first waits until the editor
- * holds that text just before the caret — typing and End land asynchronously, and on a loaded runner the presses would
- * otherwise start from an earlier caret — then until exactly that text is selected. A count presses blind.
- */
-async function selectBack(page: Page, text: string | number) {
-  const count = typeof text === 'string' ? text.length : text
-  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).before.endsWith(text)).toBe(true)
-  for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
-  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).selected).toBe(text)
 }
 
 test('typing writes Markdown into value and fires input, then change on blur', async ({ page, renderScenario }) => {
@@ -624,8 +597,9 @@ test('representative states pass an accessibility scan', async ({ page, renderSc
   `)
   await expect(page.getByRole('alert')).toHaveText('Write something first')
   await surface(page).click()
-  await page.keyboard.press('End')
-  await selectBack(page, 4)
+  // The click lands on either line of the note; the end of the document is the last word of the last line.
+  await page.keyboard.press('ControlOrMeta+End')
+  await selectBack(page, 'note')
   await expect(toolbar(page)).toBeVisible()
   await accessible(page)
 })

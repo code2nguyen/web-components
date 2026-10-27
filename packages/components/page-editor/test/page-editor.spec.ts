@@ -1,4 +1,4 @@
-import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, selectBack } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 const page$ = (page: Page) => page.getByRole('textbox', { name: 'Notes' })
@@ -18,33 +18,6 @@ async function paste(page: Page, data: Record<string, string>) {
     Object.defineProperty(event, 'clipboardData', { value: transfer })
     element.dispatchEvent(event)
   }, data)
-}
-
-/** The focused editor's caret: the text before it in its editable root, and what is selected. */
-function caretState(): { before: string; selected: string } {
-  // `document.getSelection()` retargets a selection inside a shadow root to the host; the root's own does not.
-  let root: Document | ShadowRoot = document
-  while (root.activeElement?.shadowRoot) root = root.activeElement.shadowRoot
-  const selection = (root as unknown as { getSelection?: () => Selection | null }).getSelection?.() ?? getSelection()
-  const focus = selection?.focusNode
-  const editable = (focus instanceof Element ? focus : focus?.parentElement)?.closest('[contenteditable="true"]')
-  if (!selection || !focus || !editable) return { before: '', selected: '' }
-  const range = document.createRange()
-  range.setStart(editable, 0)
-  range.setEnd(focus, selection.focusOffset)
-  return { before: range.toString(), selected: selection.toString() }
-}
-
-/**
- * Selects the characters before the caret with real keyboard input. Given the text, it first waits until the editor
- * holds that text just before the caret — typing and End land asynchronously, and on a loaded runner the presses would
- * otherwise start from an earlier caret — then until exactly that text is selected. A count presses blind.
- */
-async function selectBack(page: Page, text: string | number) {
-  const count = typeof text === 'string' ? text.length : text
-  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).before.endsWith(text)).toBe(true)
-  for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
-  if (typeof text === 'string') await expect.poll(async () => (await page.evaluate(caretState)).selected).toBe(text)
 }
 
 const SAMPLE = `# Launch plan
