@@ -47,6 +47,7 @@
         "c2-text-field-clear": true,
         "c2-textarea": true,
         "c2-time-input": true,
+        "c2-time-slot-picker": true,
         "c2-tree-select": true
       },
       "checked": {

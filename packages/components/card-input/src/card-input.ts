@@ -154,6 +154,21 @@ export class CardInput extends LitElement {
     this.addEventListener('invalid', () => (this.touched = new Set<Segment>(['number', 'expiry', 'cvc'])))
   }
 
+  /** A page kept in the back/forward cache must not keep the card: it is cleared as the page is stored. */
+  private readonly handlePageHide = (event: PageTransitionEvent) => {
+    if (event.persisted) this.clear()
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    window.addEventListener('pagehide', this.handlePageHide)
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    window.removeEventListener('pagehide', this.handlePageHide)
+  }
+
   /** The brand detected from the digits typed so far, or `''`. */
   get brand(): CardBrandId | '' {
     return detectBrand(this.numberDigits)?.id ?? ''
@@ -358,7 +373,8 @@ export class CardInput extends LitElement {
     this.emitCardChange()
     // Complete at the usual length (or the longest), and valid: on to the expiry.
     const typedAtEnd = caretDigits >= next.length
-    if (typedAtEnd && numberState(next) === 'complete' && next.length >= rules.lengths[0] && (event.inputType ?? '').startsWith('insert')) this.input('expiry')?.focus()
+    if (typedAtEnd && numberState(next) === 'complete' && next.length >= rules.lengths[0] && (event.inputType ?? '').startsWith('insert'))
+      this.input('expiry')?.focus()
   }
 
   private handleExpiryInput(event: InputEvent): void {

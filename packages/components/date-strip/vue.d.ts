@@ -20,6 +20,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-date-strip': DefineComponent<
       C2Props<DateStrip> & {
+        'disabled-dates'?: unknown
+        onRangeChange?: (event: EventOf<DateStrip, 'range-change'>) => void
         onInput?: (event: EventOf<DateStrip, 'input'>) => void
         onChange?: (event: EventOf<DateStrip, 'change'>) => void
       }

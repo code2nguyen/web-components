@@ -141,6 +141,10 @@
       "types": "./dist/card.d.ts",
       "default": "./dist/card.js"
     },
+    "./card-input": {
+      "types": "./dist/card-input.d.ts",
+      "default": "./dist/card-input.js"
+    },
     "./carousel": {
       "types": "./dist/carousel.d.ts",
       "default": "./dist/carousel.js"
@@ -889,6 +893,10 @@
       "types": "./dist/time-range-picker.d.ts",
       "default": "./dist/time-range-picker.js"
     },
+    "./time-slot-picker": {
+      "types": "./dist/time-slot-picker.d.ts",
+      "default": "./dist/time-slot-picker.js"
+    },
     "./timeline": {
       "types": "./dist/timeline.d.ts",
       "default": "./dist/timeline.js"
@@ -1101,6 +1109,7 @@
     "@c2n/button": "*",
     "@c2n/button-group": "*",
     "@c2n/card": "*",
+    "@c2n/card-input": "*",
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
     "@c2n/chart": "*",
@@ -1237,6 +1246,7 @@
     "@c2n/theme-select": "*",
     "@c2n/time-input": "*",
     "@c2n/time-range-picker": "*",
+    "@c2n/time-slot-picker": "*",
     "@c2n/timeline": "*",
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",

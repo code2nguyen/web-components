@@ -17,11 +17,15 @@ import type { DateStrip } from '@c2n/date-strip'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-date-strip': Omit<C2Props<DateStrip>, 'markers'> & {
+      'c2-date-strip': Omit<C2Props<DateStrip>, 'disabledDates' | 'markers'> & {
+        'disabled-dates'?: Attribute
+        disabledDates?: DateStrip['disabledDates'] | string
         markers?: DateStrip['markers'] | string
       }
     }

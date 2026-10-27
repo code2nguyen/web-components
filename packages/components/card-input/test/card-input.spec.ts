@@ -114,8 +114,9 @@ test('a four-digit year is read as such; a code is cut to the new brand; Delete 
   await cvc(page).fill('1234')
   await number(page).fill('4242424242424242')
   await expect(cvc(page)).toHaveValue('123')
+  await number(page).focus()
   await number(page).evaluate((input: HTMLInputElement) => input.setSelectionRange(4, 4))
-  await number(page).press('Delete')
+  await page.keyboard.press('Delete')
   await expect(number(page)).toHaveValue('4242 2424 2424 242')
 })
 

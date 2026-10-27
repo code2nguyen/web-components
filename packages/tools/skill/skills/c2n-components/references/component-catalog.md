@@ -128,6 +128,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer. Children: `c2-checkbox`.
 - **Checkbox group** — `c2-checkbox-group, c2-checkbox` · `@c2n/components/checkbox/checkbox-group` — Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule. Children: `c2-checkbox`.
@@ -174,6 +175,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
+- **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 - **View Options** — `c2-view-options, c2-view-field, c2-view-toggle` · `@c2n/components/view-options` — The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value. Children: `c2-view-field`, `c2-view-toggle`.

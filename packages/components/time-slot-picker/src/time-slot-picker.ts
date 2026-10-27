@@ -466,9 +466,8 @@ export class TimeSlotPicker extends LitElement {
             aria-label=${unavailable ? this.msg.t('unavailable', text) : nothing}
             @click=${() => this.pick(placed)}
             @focus=${() => (this.focusSlot = placed.slot.start)}
-          >
-            ${text}
-          </div>`
+            .textContent=${text}
+          ></div>`
         })}
       </div>
     </div>`
