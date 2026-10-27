@@ -39,6 +39,8 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-key-value-editor', markup: '<c2-key-value-editor></c2-key-value-editor>' },
   { tag: 'c2-query-input', markup: '<c2-query-input></c2-query-input>' },
   { tag: 'c2-tree-select', markup: '<c2-tree-select><c2-tree-item value="a" label="A"></c2-tree-item></c2-tree-select>' },
+  { tag: 'c2-month-picker', markup: '<c2-month-picker></c2-month-picker>' },
+  { tag: 'c2-date-strip', markup: '<c2-date-strip></c2-date-strip>' },
   {
     tag: 'c2-choice-matrix',
     markup: `<c2-choice-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-choice-matrix>`,

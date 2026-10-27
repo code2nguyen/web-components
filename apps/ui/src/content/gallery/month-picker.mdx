@@ -1,0 +1,50 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MonthPicker } from '@c2n/components/month-picker'
+
+## Presets
+
+Looks for `c2-month-picker`. The cell shape and the selected colour do most of the work.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-month-picker value="2026-05"></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Squared
+<style>
+  .months-squared {
+    --c2-month-picker--border-radius: 8px;
+    --c2-month-picker__cell--border-radius: 6px;
+    --c2-month-picker__cell--height: 36px;
+    --c2-month-picker--width: 240px;
+  }
+</style>
+<c2-month-picker class="months-squared" value="2026-02"></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Floating
+<style>
+  .months-floating {
+    --c2-month-picker--border: 0;
+    --c2-month-picker--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.12), 0 0 0 1px rgba(24, 24, 27, 0.06);
+  }
+</style>
+<c2-month-picker class="months-floating" value="2026-08"></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .months-soft {
+    --c2-month-picker__cell__selected--background: #f3e8ff;
+    --c2-month-picker__cell__selected--color: #7e22ce;
+    --c2-month-picker__cell__current--color: #9333ea;
+    --c2-month-picker__focus--outline: 2px solid #c084fc;
+  }
+</style>
+<c2-month-picker class="months-soft" granularity="year" value="2025"></c2-month-picker>
+```
+
+</GalleryGrid>

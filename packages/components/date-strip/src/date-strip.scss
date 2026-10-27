@@ -1,0 +1,174 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-strip,
+  $theme: (
+    gap: 4px,
+    font-size: 14px,
+    color: #18181b,
+    title--font-weight: 600,
+    navigation--size: 32px,
+    navigation__hover--background: #f4f4f5,
+    day--min-width: 40px,
+    day--padding: 8px 0,
+    day--border: 1px solid transparent,
+    day--border-radius: 14px,
+    day--background: transparent,
+    day__hover--background: #f4f4f5,
+    day__today--color: #0265dc,
+    day__selected--background: #0265dc,
+    day__selected--color: #ffffff,
+    day__disabled--opacity: 0.38,
+    weekday--color: #71717a,
+    weekday--font-size: 12px,
+    date--font-size: 16px,
+    date--font-weight: 600,
+    marker--size: 4px,
+    marker--color: #0265dc,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    error--border: 1px solid #dc2626,
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.paging {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.navigation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: css.cssVar(day__disabled--opacity);
+    cursor: default;
+  }
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(var(--_days), minmax(css.cssVar(day--min-width), 1fr));
+  gap: css.cssVar(gap);
+  overflow-x: auto;
+  border-radius: css.cssVar(day--border-radius);
+}
+
+.days.error {
+  outline: css.cssVar(error--border);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: css.cssVar(day--padding);
+  border: css.cssVar(day--border);
+  border-radius: css.cssVar(day--border-radius);
+  background: css.cssVar(day--background);
+  cursor: pointer;
+  user-select: none;
+
+  &:hover:not(.day--selected):not(.day--disabled) {
+    background: css.cssVar(day__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.weekday {
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(weekday--font-size);
+}
+
+.date {
+  font-size: css.cssVar(date--font-size);
+  font-weight: css.cssVar(date--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.day--today .date {
+  color: css.cssVar(day__today--color);
+}
+
+.marker {
+  width: css.cssVar(marker--size);
+  height: css.cssVar(marker--size);
+  border-radius: 50%;
+  background: css.cssVar(marker--color);
+}
+
+.marker--none {
+  visibility: hidden;
+}
+
+.day--selected {
+  background: css.cssVar(day__selected--background);
+  color: css.cssVar(day__selected--color);
+
+  .weekday,
+  .date {
+    color: inherit;
+  }
+
+  .marker {
+    background: currentColor;
+  }
+}
+
+.day--disabled {
+  opacity: css.cssVar(day__disabled--opacity);
+  cursor: default;
+}
