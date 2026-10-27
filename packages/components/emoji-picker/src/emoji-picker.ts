@@ -134,7 +134,7 @@ interface Section {
  * @cssproperty {color} [--c2-emoji-picker__category__active--indicator-color=rgb(2, 101, 220)] - The line under the category in view.
  * @cssproperty {number} [--c2-emoji-picker__category--opacity=0.55] - Opacity of the categories not in view, which are also drawn in grey.
  *
- * @cssproperty {number} [--c2-emoji-picker__grid--columns=9] - Emoji per row; the buttons share the picker's width.
+ * @cssproperty {pixel} [--c2-emoji-picker__emoji--size=36px] - The smallest an emoji button gets: each row fits as many as the picker's width allows, and they share what is left.
  * @cssproperty {pixel} [--c2-emoji-picker__grid--gap=2px]
  * @cssproperty {padding} [--c2-emoji-picker__body--padding=0 8px 8px] - Space around the sections inside the scrolling list.
  * @cssproperty {color} [--c2-emoji-picker__section-title--color=#71717a]

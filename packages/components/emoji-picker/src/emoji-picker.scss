@@ -27,7 +27,7 @@
     category__hover--background-color: #f4f4f5,
     category__active--indicator-color: rgb(2, 101, 220),
     category--opacity: 0.55,
-    grid--columns: 9,
+    emoji--size: 36px,
     grid--gap: 2px,
     body--padding: 0 8px 8px,
     section-title--color: #71717a,
@@ -47,6 +47,7 @@
 
 :host {
   display: inline-block;
+  max-width: 100%;
   vertical-align: top;
 }
 
@@ -192,6 +193,8 @@ button {
 .category {
   position: relative;
   flex: 1 1 0;
+  width: auto;
+  min-width: 0;
   max-width: css.cssVar(category--size);
   border-radius: css.cssVar(emoji--border-radius) css.cssVar(emoji--border-radius) 0 0;
 
@@ -243,7 +246,7 @@ button {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(css.cssVar(grid--columns), minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(css.cssVar(emoji--size), 1fr));
   gap: css.cssVar(grid--gap);
 }
 

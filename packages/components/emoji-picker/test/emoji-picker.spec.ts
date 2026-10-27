@@ -43,11 +43,14 @@ test('the arrow keys walk the grid by position and Enter picks; the pick is list
   await page.keyboard.press('ArrowRight')
   await expect(page.locator('c2-emoji-picker button.emoji[data-index="1"]')).toBeFocused()
   await page.keyboard.press('ArrowDown')
-  // Nine to a row by default.
-  await expect(page.locator('c2-emoji-picker button.emoji[data-index="10"]')).toBeFocused()
-  await expect(page.locator('c2-emoji-picker [part="preview"]')).toContainText(
-    (await page.locator('c2-emoji-picker button.emoji[data-index="10"]').getAttribute('aria-label')) ?? '',
-  )
+  // A row holds as many emoji as fit: down from the second emoji is the second of the next row.
+  const columns = await page
+    .locator('c2-emoji-picker [part="grid"]')
+    .first()
+    .evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' ').length)
+  const below = page.locator(`c2-emoji-picker button.emoji[data-index="${columns + 1}"]`)
+  await expect(below).toBeFocused()
+  await expect(page.locator('c2-emoji-picker [part="preview"]')).toContainText((await below.getAttribute('aria-label')) ?? '')
   await page.keyboard.press('Enter')
   const [picked] = await events(page)
   await expect(page.locator('c2-emoji-picker [part="section-title"]').first()).toHaveText('Recently used')
