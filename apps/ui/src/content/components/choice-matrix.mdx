@@ -1,0 +1,56 @@
+---
+title: 'Choice Matrix'
+description: 'Rows × columns of checkboxes or radio buttons in one form control: permissions, notification settings, agreement scales.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ChoiceMatrix } from '@c2n/components/choice-matrix'
+
+`c2-choice-matrix` is the grid of choices behind a permissions page (resources × read, write, admin, as in GitHub and Okta), notification settings (events × email, push, SMS) or a survey's agreement scale. With checkboxes a row takes any number of columns; with radio buttons exactly one. Tri-state toggles check or clear a whole row, a whole column, or a column within a group of rows.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/choice-matrix'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/choice-matrix
+<div data-label="Permissions">
+  <c2-choice-matrix name="permissions" label="Role permissions" row-header="Resource" toggles="both"
+    columns='[{"value":"read","label":"Read"},{"value":"write","label":"Write"},{"value":"admin","label":"Admin"}]'
+    rows='[{"value":"code","label":"Code","group":"Repository"},{"value":"issues","label":"Issues","group":"Repository"},{"value":"pulls","label":"Pull requests","group":"Repository"},{"value":"members","label":"Members","group":"Organization","description":"Invite and remove people"},{"value":"billing","label":"Billing","group":"Organization","description":"Invoices and plan"}]'
+    value='{"code":["read","write"],"issues":["read","write"],"pulls":["read"],"members":["read"]}'></c2-choice-matrix>
+</div>
+<div data-label="Notifications">
+  <c2-choice-matrix name="notify" label="Notifications" row-header="Event"
+    columns='[{"value":"email","label":"Email"},{"value":"push","label":"Push"},{"value":"sms","label":"SMS","disabled":true}]'
+    rows='[{"value":"mention","label":"Someone mentions you"},{"value":"review","label":"A review is requested"},{"value":"deploy","label":"A deploy fails"}]'
+    value='{"mention":["email","push"],"deploy":["push"]}'></c2-choice-matrix>
+</div>
+<div data-label="Agreement scale">
+  <c2-choice-matrix type="radio" required name="survey" label="How much do you agree?"
+    columns='[{"value":"1","label":"Disagree"},{"value":"2","label":"Neutral"},{"value":"3","label":"Agree"}]'
+    rows='[{"value":"docs","label":"The docs are clear"},{"value":"setup","label":"Setup was easy"}]'></c2-choice-matrix>
+</div>
+```
+
+### Rows, columns and value
+
+`rows` and `columns` are arrays (or JSON attributes) of `{ value, label }`; a row may add a `description` and a `group`, and either may be `disabled`. `value` maps each row's `value` to the checked columns' values, `{"issues":["read","write"]}`, or to the one chosen column with `type="radio"`, `{"docs":"3"}`. `input` and `change` fire when the user changes a choice, `change` with the new value in `detail.value`.
+
+### Toggles and groups
+
+`toggles="rows"` puts a tri-state checkbox at the start of each row, `"columns"` one under each column title (and in each group's header row), `"both"` both. A toggle is checked when all its choices are, mixed when some are; pressing it checks them all, or clears them all when all were checked. Disabled rows and columns keep their choices and are skipped. Radio matrices have no toggles.
+
+### In a form
+
+Under a `name`, the form receives one `name[row]=column` entry per choice, as a server expects from checkboxes named `permissions[issues]`. `required` asks for at least one choice, or for every row to be answered with `type="radio"`. Inside a `c2-form-field` the field's label names the matrix and its hint and error describe it.
+
+### Accessibility
+
+The matrix is a group named by `label` holding a table: each choice is named by its row and its column, so a screen reader reads both as you move. A radio row is one stop in the tab order, and the arrow keys move along it. On a narrow screen the table scrolls sideways with the row titles held in place.

@@ -7,6 +7,7 @@ import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
+import barList from '@c2n/bar-list/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
@@ -23,6 +24,7 @@ import chatbot from '@c2n/chatbot/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
+import choiceMatrix from '@c2n/choice-matrix/custom-elements.json'
 import citation from '@c2n/citation/custom-elements.json'
 import codeEditor from '@c2n/code-editor/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
@@ -177,6 +179,7 @@ export const componentManifests = (function () {
     avatar,
     badge,
     banner,
+    barList,
     borderBeam,
     bottomNav,
     breadcrumb,
@@ -193,6 +196,7 @@ export const componentManifests = (function () {
     checkbox,
     chip,
     chipGroup,
+    choiceMatrix,
     citation,
     codeEditor,
     codeViewer,

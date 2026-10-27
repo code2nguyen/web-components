@@ -1,0 +1,51 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ChoiceMatrix } from '@c2n/components/choice-matrix'
+
+## Presets
+
+Looks for `c2-choice-matrix`. The row borders and the cell padding set the density; the selected colour carries the accent.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-choice-matrix columns='[{"value":"email","label":"Email"},{"value":"push","label":"Push"}]' rows='[{"value":"mention","label":"Mentions"},{"value":"review","label":"Reviews"}]' value='{"mention":["email"]}'></c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .matrix-compact {
+    --c2-choice-matrix__cell--padding: 6px 8px;
+    --c2-choice-matrix__control--size: 16px;
+    --c2-choice-matrix__row-header--font-size: 13px;
+  }
+</style>
+<c2-choice-matrix class="matrix-compact" toggles="columns" columns='[{"value":"r","label":"Read"},{"value":"w","label":"Write"}]' rows='[{"value":"code","label":"Code"},{"value":"issues","label":"Issues"},{"value":"wiki","label":"Wiki"}]' value='{"code":["r"],"issues":["r","w"]}'></c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .matrix-soft {
+    --c2-choice-matrix__control__selected--background-color: #9333ea;
+    --c2-choice-matrix__control__focus--outline: 2px solid #c084fc;
+    --c2-choice-matrix__control--border-radius: 6px;
+    --c2-choice-matrix__row__hover--background-color: light-dark(#faf5ff, #1f1530);
+  }
+</style>
+<c2-choice-matrix class="matrix-soft" columns='[{"value":"a","label":"Team"},{"value":"b","label":"Org"}]' rows='[{"value":"share","label":"Share"},{"value":"export","label":"Export"}]' value='{"share":["a","b"]}'></c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Scale
+<style>
+  .matrix-scale {
+    --c2-choice-matrix__row--border-bottom: 0;
+    --c2-choice-matrix__cell--padding: 8px 4px;
+    --c2-choice-matrix__row-header--font-size: 13px;
+    --c2-choice-matrix__column-header--font-size: 11px;
+  }
+</style>
+<c2-choice-matrix class="matrix-scale" type="radio" columns='[{"value":"1","label":"No"},{"value":"2","label":"Maybe"},{"value":"3","label":"Yes"}]' rows='[{"value":"a","label":"Easy to use"},{"value":"b","label":"Would recommend"}]' value='{"a":"3"}'></c2-choice-matrix>
+```
+
+</GalleryGrid>

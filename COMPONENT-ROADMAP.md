@@ -277,18 +277,16 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### S. Settings and admin
 
-| #   | Component          | What it does                                                                                                                             | Seen in                | Source | Priority | Decision |
-| --- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------ | -------- | -------- |
-| 222 | `c2-choice-matrix` | Rows × columns of checkboxes or radios with row/column toggles and tri-state groups: permissions, notification preferences, Likert grids | GitHub, Okta, Supabase | —      | P2       | Proposed |
+| #   | Component | What it does | Seen in | Source | Priority | Decision |
+| --- | --------- | ------------ | ------- | ------ | -------- | -------- |
 
 ### T. Dashboards, flows and editorial (design inspiration sites)
 
-| #   | Component       | What it does                                                                                                                | Seen in                                              | Source                                                | Priority | Decision |
-| --- | --------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------- | -------- | -------- |
-| 224 | `c2-bar-list`   | Ranked rows whose background is a bar: icon, label or link, value; a diverging mode for ± changes (absorbs #230)            | Tremor BarList, Vercel Analytics, Plausible, Stripe  | [Tremor](https://www.npmjs.com/package/@tremor/react) | P2       | Proposed |
-| 234 | `c2-card-stack` | Swipe deck (keep or skip) and cards that stack as the page scrolls                                                          | Tinder, Apple Wallet, Awwwards sites                 | [Awwwards](https://www.awwwards.com/websites/)        | P3       | Proposed |
-| 236 | `c2-scrolly`    | Scrollytelling: a sticky graphic and steps that fire as each enters view; horizontal pinned mode                            | The New York Times, The Pudding, Apple product pages | [Awwwards](https://www.awwwards.com/websites/)        | P3       | Proposed |
-| 238 | `c2-pan-zoom`   | Pan and zoom viewport for any content: inertia, pinch, fit and zoom controls; shared by image previews, diagrams and boards | Godly and Awwwards portfolio sites                   | [Awwwards](https://www.awwwards.com/websites/)        | P3       | Proposed |
+| #   | Component       | What it does                                                                                                                | Seen in                                              | Source                                         | Priority | Decision |
+| --- | --------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
+| 234 | `c2-card-stack` | Swipe deck (keep or skip) and cards that stack as the page scrolls                                                          | Tinder, Apple Wallet, Awwwards sites                 | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
+| 236 | `c2-scrolly`    | Scrollytelling: a sticky graphic and steps that fire as each enters view; horizontal pinned mode                            | The New York Times, The Pudding, Apple product pages | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
+| 238 | `c2-pan-zoom`   | Pan and zoom viewport for any content: inertia, pinch, fit and zoom controls; shared by image previews, diagrams and boards | Godly and Awwwards portfolio sites                   | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
 
 ### Extend instead of adding
 
@@ -434,7 +432,7 @@ From the 2026-10-27 round, these rows were researched and dropped during verific
 | 227 | `c2-receipt`            | Composition of `c2-status-panel` and `c2-description-list`                                        |
 | 228 | `c2-quote`              | Covered by `c2-markdown` and `<blockquote>`                                                       |
 | 229 | `c2-leaderboard`        | Composition of `c2-list` or `c2-table`                                                            |
-| 230 | `c2-delta-bar`          | Merged into #224 `c2-bar-list` (diverging mode)                                                   |
+| 230 | `c2-delta-bar`          | Shipped as `c2-bar-list` `diverging`                                                              |
 | 231 | `c2-control-tile`       | Composition of `c2-card`, `c2-switch` and `c2-slider`                                             |
 | 232 | `c2-page-indicator`     | Extract the `c2-carousel` indicators so they can follow any scroll-snap container                 |
 | 233 | `c2-date-badge`         | Composition of `c2-format-date` and CSS                                                           |
