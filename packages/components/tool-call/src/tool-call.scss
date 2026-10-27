@@ -27,7 +27,7 @@
     status__success--color: #16a34a,
     status__error--color: #dc2626,
     status__cancelled--color: #71717a,
-    status--on-color: #ffffff,
+    status-mark--color: #ffffff,
     status--animation-duration: 900ms,
     body--padding: 0 12px 12px,
     body--gap: 12px,
@@ -95,7 +95,7 @@
 }
 
 .status {
-  --_on-status: #{css.cssVar(status--on-color)};
+  --_on-status: #{css.cssVar(status-mark--color)};
 
   flex: none;
   width: css.cssVar(status--size);

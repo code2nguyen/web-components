@@ -69,7 +69,7 @@ import '@c2n/components/tool-call'
 
 ### Input and output
 
-`input` and `output` take any value, as a property or as JSON in the attribute: text shows as it is (an attribute that is not JSON stays text) and anything else as indented JSON, in a box that scrolls past `--c2-tool-call__code--max-height` and joins the tab order only when it does. A failed call shows `error-text` in place of the output, under an Error heading. The `input` and `output` slots replace the formatted values with richer content, such as a `c2-json-viewer` for a large result or rendered Markdown.
+`input` and `output` take any value, as a property or as JSON in the attribute: text shows as it is and anything else as indented JSON; an attribute is read as JSON only when it holds an object or an array, so a tool that printed `null` or `7` shows exactly that, in a box that scrolls past `--c2-tool-call__code--max-height` and joins the tab order only when it does. A failed call shows `error-text` in place of the output, under an Error heading. The `input` and `output` slots replace the formatted values with richer content, such as a `c2-json-viewer` for a large result or rendered Markdown.
 
 ### Approval
 

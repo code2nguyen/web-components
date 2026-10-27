@@ -93,7 +93,37 @@ test('a long output scrolls in its box and can be reached from the keyboard; a s
 })
 
 test('a call without a name still reads as a tool, and its words follow the language', async ({ page, renderScenario }) => {
-  await renderScenario(`<div lang="fr"><c2-tool-call duration="320" state="running" open input='"q"'></c2-tool-call></div>`)
+  await renderScenario(`<div lang="fr"><c2-tool-call duration="320" state="running" open input="q"></c2-tool-call></div>`)
   await expect(header(page)).toHaveText(/Outil\s+320ms\s+En cours/)
   await expect(sections(page).nth(0)).toHaveText(/Entrée\s+q/)
+})
+
+test('only an object or an array in the attribute is read as JSON, and a card that starts open fires no toggle', async ({ page, renderScenario }) => {
+  await page.addInitScript(() => {
+    ;(window as unknown as { toggles: number }).toggles = 0
+    document.addEventListener('toggle', () => (window as unknown as { toggles: number }).toggles++, true)
+  })
+  await renderScenario(`<c2-tool-call name="probe" open input="7" output="null"></c2-tool-call>`)
+  await expect(sections(page).nth(0)).toHaveText(/Input\s+7/)
+  await expect(sections(page).nth(1)).toHaveText(/Output\s+null/)
+  await expect(card(page)).toHaveJSProperty('output', 'null')
+  // The details' own toggle stays in the shadow root; a capturing listener on the document sees only the host's.
+  await page.waitForTimeout(150)
+  expect(await page.evaluate(() => (window as unknown as { toggles: number }).toggles)).toBe(0)
+})
+
+test('an open call with nothing to show reveals no empty body, and a box that starts scrolling after a state change joins the tab order', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-tool-call name="wait" state="running" open output="ok"></c2-tool-call>`)
+  await card(page).evaluate((element) => {
+    element.output = undefined
+  })
+  await expect(card(page).locator('[part="body"]')).toBeHidden()
+  await card(page).evaluate((element) => {
+    element.errorText = Array.from({ length: 60 }, (_, line) => `trace line ${line}`).join('\n')
+    element.state = 'error'
+  })
+  await expect(sections(page).nth(1).locator('pre')).toHaveAttribute('tabindex', '0')
 })

@@ -129,7 +129,7 @@ export class HoverCard extends LitElement {
 
   private handleFocusOut = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
-    if (next && (next === this || this.contains(next))) return
+    if (next && flatContains(this, next)) return
     if (this.matches(':hover')) return
     this.scheduleClose()
   }
@@ -137,7 +137,9 @@ export class HoverCard extends LitElement {
   private handleKeydown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !this.open) return
     event.stopPropagation()
-    const focusInCard = [...this.children].some((child) => child.slot !== 'trigger' && child.contains(document.activeElement))
+    // The focused element itself, not `document.activeElement`, which a shadow root around the card retargets to its host.
+    const focused = event.composedPath()[0]
+    const focusInCard = focused instanceof Node && [...this.children].some((child) => child.slot !== 'trigger' && flatContains(child, focused))
     this.clearTimers()
     this.open = false
     if (focusInCard) this.focusTrigger()
@@ -260,6 +262,18 @@ export class HoverCard extends LitElement {
       </div>
     `
   }
+}
+
+/**
+ * Whether `node` is `ancestor` or renders inside it, following slots and shadow roots: content slotted into a component
+ * that wraps the card is in the card, though `contains` says otherwise.
+ */
+function flatContains(ancestor: Node, node: Node): boolean {
+  for (let current: Node | null = node; current;) {
+    if (current === ancestor) return true
+    current = (current as Element).assignedSlot ?? current.parentNode ?? (current instanceof ShadowRoot ? current.host : null)
+  }
+  return false
 }
 
 declare global {

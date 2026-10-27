@@ -1,7 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import '@c2n/hover-card'
 import { citationMessages } from './messages'
@@ -15,7 +14,7 @@ export type CitationPlacement = 'top' | 'bottom' | 'left' | 'right' | 'top-start
  * dropped, so a source taken from a model's output cannot run script when clicked.
  */
 export function safeSourceUrl(value: string): string {
-  const url = value.trim()
+  const url = cleanUrl(value)
   if (!url) return ''
   const scheme = /^([a-z][a-z\d+.-]*):/i.exec(url)?.[1]?.toLowerCase()
   if (scheme === undefined) return url
@@ -24,8 +23,23 @@ export function safeSourceUrl(value: string): string {
 
 /** An icon address the preview may load: what {@link safeSourceUrl} allows, plus inline `data:image/` icons. */
 export function safeIconUrl(value: string): string {
-  const url = value.trim()
+  const url = cleanUrl(value)
   return /^data:image\//i.test(url) ? url : safeSourceUrl(url)
+}
+
+/**
+ * An address as the browser's URL parser reads it: without the leading and trailing control characters and spaces it
+ * strips, and without the tabs and line breaks it drops anywhere, so `java\tscript:` is seen for the `javascript:` it is.
+ */
+function cleanUrl(value: string): string {
+  // eslint-disable-next-line no-control-regex
+  return value.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '').replace(/[\t\n\r]/g, '')
+}
+
+/** Whether a link `target` opens another browsing context, which must not get a handle on this page. */
+function opensElsewhere(target: string): boolean {
+  const name = target.trim().toLowerCase()
+  return name !== '' && name !== '_self' && name !== '_parent' && name !== '_top'
 }
 
 /** The site an address belongs to, without `www.`: `https://www.nytimes.com/…` gives `nytimes.com`. */
@@ -125,7 +139,6 @@ export class Citation extends LitElement {
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300
 
   private readonly msg = new LocalizeController(this, citationMessages)
-  private readonly slotPresence = new SlotPresenceController(this, ['preview'])
 
   /** What a screen reader hears for the marker: "Source 1: <title>". */
   private markerName(): string {
@@ -145,7 +158,7 @@ export class Citation extends LitElement {
           part="marker"
           href=${href}
           target=${this.target || nothing}
-          rel=${this.target === '_blank' ? 'noopener noreferrer' : nothing}
+          rel=${opensElsewhere(this.target) ? 'noopener noreferrer' : nothing}
           aria-label=${name}
           ><slot>${text}</slot></a
         >`
@@ -153,7 +166,7 @@ export class Citation extends LitElement {
     return html`<c2-hover-card class="card" part="card" placement=${this.placement} open-delay=${String(this.openDelay)}>
       ${marker}
       <div class="preview">
-        <slot name="preview" @slotchange=${this.slotPresence.handleSlotChange}>${this.renderPreview(href)}</slot>
+        <slot name="preview">${this.renderPreview(href)}</slot>
       </div>
     </c2-hover-card>`
   }

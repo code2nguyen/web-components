@@ -86,3 +86,31 @@ test('the marker is named in the page language', async ({ page, renderScenario }
   await renderScenario(`<div lang="fr"><c2-citation index="3" href="https://example.com" source-title="Exemple"></c2-citation></div>`)
   await expect(page.getByRole('link', { name: 'Source 3 : Exemple' })).toBeVisible()
 })
+
+test('a scheme hidden by tabs, line breaks or control characters is still caught, and any new-window target gets rel', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-citation id="tab" index="1" href="java&#9;script:alert(1)"></c2-citation><c2-citation id="nl" index="2" href="javas&#10;cript:alert(1)"></c2-citation><c2-citation id="ctl" index="4" source-title="x"></c2-citation><c2-citation id="named" index="3" href="https://example.com" target="sources"></c2-citation>`,
+  )
+  await expect(page.getByRole('link')).toHaveCount(1)
+  await expect(marker(page, '#named')).toHaveAttribute('rel', 'noopener noreferrer')
+  await citation(page, '#ctl').evaluate((element) => {
+    element.href = '\u0001javascript:alert(1)'
+    element.favicon = 'da\nta:image/gif;base64,R0lGODlhAQABAAAAACw='
+  })
+  await expect(page.getByRole('link')).toHaveCount(1)
+  await expect(citation(page, '#ctl').locator('[part="favicon"]')).toHaveAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAAAAACw=')
+})
+
+test('Escape from a link inside a slotted preview closes the card and returns focus to the marker', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-citation index="1" href="https://example.com" source-title="Example"><div slot="preview"><a href="#more">More</a></div></c2-citation>`,
+  )
+  await page.keyboard.press('Tab')
+  await expect(panel(page)).toBeVisible()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'More' })).toBeFocused()
+  await expect(panel(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(panel(page)).toBeHidden()
+  await expect(page.getByRole('link', { name: /^Source 1/ })).toBeFocused()
+})

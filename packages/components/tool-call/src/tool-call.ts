@@ -23,12 +23,13 @@ export interface ToolCall {
 }
 
 /**
- * Reads `input` and `output` from an attribute as JSON, and keeps any other text as it is: a tool's output is often
- * plain text, which the shared JSON converter would drop.
+ * Reads `input` and `output` from an attribute as JSON when it holds an object or an array, and keeps any other text as
+ * it is: a tool's output is often plain text, and one that prints `null` or `7` must show that, not a parsed value.
  */
 const valueConverter = {
   fromAttribute: (value: string | null): unknown => {
     if (value === null) return undefined
+    if (!/^\s*[[{]/.test(value)) return value
     try {
       return JSON.parse(value)
     } catch {
@@ -120,7 +121,7 @@ const ICONS: Record<ToolCallState, ReturnType<typeof svg>> = {
  * @cssproperty {color} [--c2-tool-call__status__success--color=#16a34a]
  * @cssproperty {color} [--c2-tool-call__status__error--color=#dc2626]
  * @cssproperty {color} [--c2-tool-call__status__cancelled--color=#71717a]
- * @cssproperty {color} [--c2-tool-call__status--on-color=#ffffff] - The check and the cross drawn on the filled success and error marks.
+ * @cssproperty {color} [--c2-tool-call__status-mark--color=#ffffff] - The check and the cross drawn on the filled success and error marks.
  * @cssproperty {time} [--c2-tool-call__status--animation-duration=900ms] - One turn of the running mark.
  *
  * @cssproperty {padding} [--c2-tool-call__body--padding=0 12px 12px]
@@ -170,25 +171,38 @@ export class ToolCall extends LitElement {
   private readonly msg = new LocalizeController(this, toolCallMessages)
   private readonly slotPresence = new SlotPresenceController(this, ['icon', 'description', 'input', 'output', 'actions'])
 
+  private resizeObserver?: ResizeObserver
+
   private get currentState(): ToolCallState {
     return STATES.includes(this.state) ? this.state : 'running'
   }
 
-  protected override updated(changed: PropertyValues): void {
+  protected override updated(_changed: PropertyValues): void {
     const state = this.currentState
     for (const name of STATES) {
       if (name === state) this.internals.states.add(name)
       else this.internals.states.delete(name)
     }
-    if (changed.has('input') || changed.has('output') || changed.has('open') || changed.has('errorText')) this.markScrollable()
+    this.markScrollable()
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.resizeObserver ??= new ResizeObserver(() => this.markScrollable())
+    this.resizeObserver.observe(this)
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.resizeObserver?.disconnect()
   }
 
   /** A box that scrolls has to be reachable from the keyboard to be read; one that does not is left out of the tab order. */
   private markScrollable(): void {
     for (const code of this.renderRoot.querySelectorAll<HTMLElement>('.code')) {
       const scrolls = code.scrollHeight > code.clientHeight + 1
-      if (scrolls) code.tabIndex = 0
-      else code.removeAttribute('tabindex')
+      if (scrolls && code.tabIndex !== 0) code.tabIndex = 0
+      else if (!scrolls && code.hasAttribute('tabindex')) code.removeAttribute('tabindex')
     }
   }
 
@@ -225,7 +239,7 @@ export class ToolCall extends LitElement {
             <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </summary>
-        <div class="body" part="body">${this.renderInput()}${this.renderOutput(state)}</div>
+        <div class="body" part="body" ?hidden=${!this.hasInput() && !this.hasOutput(state)}>${this.renderInput()}${this.renderOutput(state)}</div>
       </details>
       <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
         <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
@@ -233,10 +247,21 @@ export class ToolCall extends LitElement {
     `
   }
 
+  private hasInput(): boolean {
+    return this.slotPresence.has('input') || !!formatToolValue(this.input)
+  }
+
+  private outputText(state: ToolCallState): string {
+    return state === 'error' ? this.errorText || formatToolValue(this.output) : formatToolValue(this.output)
+  }
+
+  private hasOutput(state: ToolCallState): boolean {
+    return this.slotPresence.has('output') || !!this.outputText(state)
+  }
+
   private renderInput() {
     const text = formatToolValue(this.input)
-    const slotted = this.slotPresence.has('input')
-    return html`<section class="section" part="section" ?hidden=${!slotted && !text} aria-label=${this.msg.t('input')}>
+    return html`<section class="section" part="section" ?hidden=${!this.hasInput()} aria-label=${this.msg.t('input')}>
       <div class="section-label" part="section-label" aria-hidden="true">${this.msg.t('input')}</div>
       <slot name="input" @slotchange=${this.slotPresence.handleSlotChange}>${text ? html`<pre class="code" part="code">${text}</pre>` : nothing}</slot>
     </section>`
@@ -244,10 +269,9 @@ export class ToolCall extends LitElement {
 
   private renderOutput(state: ToolCallState) {
     const failed = state === 'error'
-    const text = failed ? this.errorText || formatToolValue(this.output) : formatToolValue(this.output)
-    const slotted = this.slotPresence.has('output')
+    const text = this.outputText(state)
     const label = this.msg.t(failed ? 'errorLabel' : 'output')
-    return html`<section class="section ${failed ? 'section--error' : ''}" part="section" ?hidden=${!slotted && !text} aria-label=${label}>
+    return html`<section class="section ${failed ? 'section--error' : ''}" part="section" ?hidden=${!this.hasOutput(state)} aria-label=${label}>
       <div class="section-label" part="section-label" aria-hidden="true">${label}</div>
       <slot name="output" @slotchange=${this.slotPresence.handleSlotChange}>${text ? html`<pre class="code" part="code">${text}</pre>` : nothing}</slot>
     </section>`
@@ -255,6 +279,9 @@ export class ToolCall extends LitElement {
 
   private handleToggle(event: Event): void {
     const details = event.currentTarget as HTMLDetailsElement
+    // The browser also fires toggle for an `open` the card was rendered with or given; only a change the reader made
+    // leaves the property behind, and only that is announced.
+    if (details.open === this.open) return
     this.open = details.open
     redispatchEvent(this, event)
   }

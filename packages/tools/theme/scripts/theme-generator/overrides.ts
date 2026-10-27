@@ -486,7 +486,7 @@ export const overrides: Record<string, Override> = {
   // A tool call's success mark is a solid status fill like the indicator's; the check and cross on the filled marks
   // take the fill text colour.
   '--c2-tool-call__status__success--color': { exclude: 'solid status fill' },
-  '--c2-tool-call__status--on-color': { token: 'color-on-fill' },
+  '--c2-tool-call__status-mark--color': { token: 'color-on-fill' },
   // A citation marker's hover is a stronger tint of its resting surface, so it still shows in the dark theme, where the
   // outline grey equals that surface.
   '--c2-citation__marker__hover--background-color': {
