@@ -1,0 +1,302 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-facet-list,
+  $theme: (
+    font-size: 14px,
+    color: #18181b,
+    title--font-weight: 600,
+    header--padding: 6px 4px,
+    value--height: 30px,
+    value--padding: 0 4px,
+    value--border-radius: 6px,
+    value__hover--background-color: #f4f4f5,
+    count--color: #71717a,
+    count--font-size: 12px,
+    checkbox--size: 16px,
+    checkbox--border: 1px solid #bcbcc6,
+    checkbox__selected--background-color: #476ef9,
+    checkbox__mark--color: #ffffff,
+    excluded--color: #dc2626,
+    action--size: 24px,
+    action--color: #71717a,
+    action__hover--background-color: #e4e4e7,
+    search--border: 1px solid #bcbcc6,
+    search--border-radius: 6px,
+    link--color: rgb(2, 101, 220),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: css.cssVar(header--padding);
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  border-radius: 4px;
+  font-weight: css.cssVar(title--font-weight);
+  text-align: start;
+}
+
+.chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  transition: transform 150ms ease;
+}
+
+.title[aria-expanded='true'] .chevron {
+  transform: rotate(90deg);
+}
+
+.link {
+  color: css.cssVar(link--color);
+  font-size: css.cssVar(count--font-size);
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 30px;
+  margin: 2px 0 6px;
+  padding: 0 8px;
+  border: css.cssVar(search--border);
+  border-radius: css.cssVar(search--border-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: css.cssVar(count--font-size);
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.values {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.value {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  min-height: css.cssVar(value--height);
+  padding: css.cssVar(value--padding);
+  border-radius: css.cssVar(value--border-radius);
+
+  &:hover,
+  &:focus-within {
+    background-color: css.cssVar(value__hover--background-color);
+  }
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  color: css.cssVar(count--color);
+  font-size: css.cssVar(count--font-size);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/*
+ * The actions show on hover and while focus is in the row, but stay in the tab order and the accessibility tree.
+ * They sit over the end of the row instead of taking a column, so a hidden action never shortens the label.
+ */
+.actions {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-inline-start: 4px;
+  border-radius: inherit;
+  background-color: css.cssVar(value__hover--background-color);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.value:hover .actions,
+.value:focus-within .actions {
+  opacity: 1;
+}
+
+/* With no hover (a touch screen), the actions are always shown, in a column of their own. */
+@media (hover: none) {
+  .value {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .actions {
+    position: static;
+    background-color: transparent;
+    opacity: 1;
+  }
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: css.cssVar(action--size);
+  height: css.cssVar(action--size);
+  border-radius: 4px;
+  color: css.cssVar(action--color);
+  font-size: css.cssVar(count--font-size);
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.5;
+  }
+
+  &:hover {
+    background-color: css.cssVar(action__hover--background-color);
+  }
+}
+
+.action--only {
+  padding: 0 6px;
+}
+
+/* A box matching c2-checkbox: a check when included, a dash when excluded. */
+.checkbox {
+  position: relative;
+  box-sizing: border-box;
+  flex: none;
+  width: css.cssVar(checkbox--size);
+  height: css.cssVar(checkbox--size);
+  margin: 0;
+  border: css.cssVar(checkbox--border);
+  border-radius: 4px;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:checked {
+    border-color: transparent;
+    background-color: css.cssVar(checkbox__selected--background-color);
+  }
+
+  &:checked::after {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 30%;
+    height: 55%;
+    border: solid css.cssVar(checkbox__mark--color);
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    content: '';
+  }
+
+  &:indeterminate {
+    border-color: transparent;
+    background-color: css.cssVar(excluded--color);
+  }
+
+  &:indeterminate::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 55%;
+    height: 2px;
+    border-radius: 1px;
+    background-color: css.cssVar(checkbox__mark--color);
+    transform: translate(-50%, -50%);
+    content: '';
+  }
+}
+
+.value--excluded .label {
+  color: css.cssVar(excluded--color);
+  text-decoration: line-through;
+}
+
+.empty {
+  margin: 4px;
+  color: css.cssVar(count--color);
+  font-size: css.cssVar(count--font-size);
+}
+
+.more {
+  margin: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .actions {
+    transition: none;
+  }
+}

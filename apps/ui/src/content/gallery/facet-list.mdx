@@ -1,0 +1,56 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FacetList } from '@c2n/components/facet-list'
+
+## Presets
+
+Looks for `c2-facet-list`. The row height and the selected colour do most of the work.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .facet-column {
+    width: 220px;
+  }
+</style>
+<div class="facet-column">
+  <c2-facet-list label="Status" include="error" values='[{"value":"info","count":31200},{"value":"warn","count":1840},{"value":"error","count":212}]'></c2-facet-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .facet-column {
+    width: 220px;
+  }
+  .facet-compact {
+    --c2-facet-list--font-size: 13px;
+    --c2-facet-list__value--height: 24px;
+    --c2-facet-list__checkbox--size: 14px;
+  }
+</style>
+<div class="facet-column">
+  <c2-facet-list class="facet-compact" label="Region" values='[{"value":"eu-west-1","count":4200},{"value":"us-east-1","count":3900},{"value":"ap-south-1","count":800}]'></c2-facet-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .facet-column {
+    width: 220px;
+  }
+  .facet-soft {
+    --c2-facet-list__checkbox__selected--background-color: #9333ea;
+    --c2-facet-list__value__hover--background-color: light-dark(#faf5ff, #1f1530);
+    --c2-facet-list__link--color: light-dark(#7e22ce, #a76cdc);
+    --c2-facet-list__focus--outline: 2px solid #c084fc;
+  }
+</style>
+<div class="facet-column">
+  <c2-facet-list class="facet-soft" label="Team" include="design" values='[{"value":"design","label":"Design","count":38},{"value":"eng","label":"Engineering","count":64},{"value":"sales","label":"Sales","count":21}]'></c2-facet-list>
+</div>
+```
+
+</GalleryGrid>
