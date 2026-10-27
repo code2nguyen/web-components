@@ -13,14 +13,12 @@ export { barListMessages } from './messages'
 export interface BarListItem {
   /** The row's name. */
   label: string
-  /** Its value: the bar is drawn in proportion to it. Negative values are drawn to the left in `diverging` mode. */
+  /** Its value: the bar is drawn in proportion to it. Negative values are drawn to the left in `diverging` mode, and as no bar otherwise. */
   value: number
   /** Makes the row a link. Only http(s) and relative addresses are followed. */
   href?: string
   /** An image before the label, such as a site's favicon or a country's flag. Only http(s), relative and `data:image/` addresses load. */
   icon?: string
-  /** A stable key for `item-select`; defaults to the label. */
-  key?: string
 }
 
 /** Events fired by {@link BarList}, keyed for `addEventListener`. */
@@ -174,7 +172,13 @@ export class BarList extends LitElement {
     const hidden = rows.length - shown.length
     const hasHeader = !!(this.labelHeader || this.valueHeader)
     return html`
-      ${hasHeader ? html`<div class="header" part="header" aria-hidden="true"><span>${this.labelHeader}</span><span>${this.valueHeader}</span></div>` : nothing}
+      ${
+        hasHeader
+          ? html`<div class="header ${this.diverging ? 'header--diverging' : ''}" part="header" aria-hidden="true">
+              <span class="header-label">${this.labelHeader}</span><span class="header-value">${this.valueHeader}</span>
+            </div>`
+          : nothing
+      }
       ${
         rows.length
           ? html`<ul class="list ${this.diverging ? 'list--diverging' : ''}" part="list" aria-label=${this.label || this.msg.t('label')}>
@@ -193,7 +197,9 @@ export class BarList extends LitElement {
   }
 
   private renderRow(item: BarListItem, index: number, scale: number) {
-    const share = scale > 0 ? Math.min(1, Math.abs(item.value) / scale) : 0
+    // Outside `diverging`, a negative value has no bar rather than one that reads as a large positive share.
+    const magnitude = this.diverging ? Math.abs(item.value) : Math.max(0, item.value)
+    const share = scale > 0 ? Math.min(1, magnitude / scale) : 0
     const sign = item.value > 0 ? 'positive' : item.value < 0 ? 'negative' : 'zero'
     const width = `${(share * (this.diverging ? 50 : 100)).toFixed(3)}%`
     const icon = safeUrl(item.icon, true)

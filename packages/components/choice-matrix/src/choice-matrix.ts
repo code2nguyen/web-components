@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
+import { live } from 'lit/directives/live.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -144,8 +145,8 @@ export class ChoiceMatrix extends LitElement {
   private customValidityMessage = ''
   private defaultValue: ChoiceMatrixValue | undefined
 
-  override connectedCallback(): void {
-    super.connectedCallback()
+  protected override firstUpdated(): void {
+    // A value a framework binds right after inserting the element is in place by the first update, so it is the default a form reset returns to.
     this.defaultValue ??= this.copy(this.value)
   }
 
@@ -254,10 +255,14 @@ export class ChoiceMatrix extends LitElement {
   private syncFormState(): void {
     const rows = this.rowList
     const entries = this.name ? new FormData() : null
-    for (const row of rows) for (const column of this.chosen(row.value)) entries?.append(`${this.name}[${row.value}]`, column)
+    for (const row of rows) {
+      // A radio row submits the one choice it shows, even when `value` holds a list.
+      const chosen = this.radio ? this.chosen(row.value).slice(0, 1) : this.chosen(row.value)
+      for (const column of chosen) entries?.append(`${this.name}[${row.value}]`, column)
+    }
     this.internals.setFormValue(this.effectiveDisabled ? null : entries, JSON.stringify(this.value))
-    const answered = rows.filter((row) => this.chosen(row.value).length > 0).length
-    const missing = this.required && (this.radio ? answered < rows.filter((row) => !row.disabled).length : answered === 0)
+    const answered = (row: ChoiceMatrixRow) => this.chosen(row.value).length > 0
+    const missing = this.required && (this.radio ? rows.some((row) => !row.disabled && !answered(row)) : !rows.some(answered))
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
     const message = this.customValidityMessage || (missing ? this.msg.t(this.radio ? 'rowsMissing' : 'valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLInputElement>('input.cell-control:not(:disabled)') ?? undefined
@@ -277,8 +282,10 @@ export class ChoiceMatrix extends LitElement {
       const chosen = new Set(Array.isArray(current) ? current : typeof current === 'string' ? [current] : [])
       if (checked) chosen.add(column.value)
       else chosen.delete(column.value)
-      // Keep the columns in their order, whatever order they were checked in.
-      next[row.value] = this.columnList.map((item) => item.value).filter((value) => chosen.has(value))
+      // Keep the columns in their order, whatever order they were checked in, and any value that is not a column (one
+      // hidden from this user, say) where it was.
+      const known = this.columnList.map((item) => item.value)
+      next[row.value] = [...known.filter((value) => chosen.has(value)), ...[...chosen].filter((value) => !known.includes(value))]
       if (!(next[row.value] as string[]).length) delete next[row.value]
     }
     this.value = next
@@ -384,9 +391,10 @@ export class ChoiceMatrix extends LitElement {
               type=${this.radio ? 'radio' : 'checkbox'}
               name=${this.radio ? `row-${index}` : nothing}
               aria-labelledby="${headerId} column-${at}"
-              .checked=${this.isChecked(row.value, column.value)}
+              .checked=${live(this.isChecked(row.value, column.value))}
               ?disabled=${this.cellDisabled(row, column)}
               aria-invalid=${this.field.invalid ? 'true' : nothing}
+              @input=${this.stopNativeInput}
               @change=${(event: Event) => this.commit([[row, column]], (event.target as HTMLInputElement).checked)}
             />
           </td>`,
@@ -403,11 +411,17 @@ export class ChoiceMatrix extends LitElement {
       part="control"
       type="checkbox"
       aria-label=${label}
-      .checked=${state === 'all'}
-      .indeterminate=${state === 'some'}
+      .checked=${live(state === 'all')}
+      .indeterminate=${live(state === 'some')}
       ?disabled=${!enabled}
+      @input=${this.stopNativeInput}
       @change=${() => this.commit(cells, state !== 'all')}
     />`
+  }
+
+  /** The inner input's own `input` is composed and would reach listeners before `value` changes; the host fires its own after. */
+  private stopNativeInput(event: Event): void {
+    event.stopPropagation()
   }
 }
 

@@ -37,13 +37,26 @@
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  gap: css.cssVar(row--column-gap);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: css.cssVar(row--column-gap);
   margin-bottom: 4px;
   color: css.cssVar(header--color);
   font-size: css.cssVar(header--font-size);
   font-weight: css.cssVar(header--font-weight);
+}
+
+.header-value {
+  text-align: end;
+}
+
+/* In `diverging` mode the header follows the three columns: label, track, value. */
+.header--diverging {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
+
+  .header-value {
+    grid-column: 3;
+  }
 }
 
 .list {

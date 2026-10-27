@@ -79,3 +79,11 @@ test('a list with no items says so, with optional column titles', async ({ page,
   await expect(list(page).locator('[part="empty"]')).toHaveText('No data')
   await expect(list(page).locator('[part="header"]')).toHaveText(/Page\s*Visitors/)
 })
+
+test('outside diverging mode a negative value draws no bar', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-bar-list items='[{"label":"Up","value":100},{"label":"Down","value":-80}]'></c2-bar-list>`)
+  const widths = await list(page)
+    .locator('[part="bar"]')
+    .evaluateAll((bars) => bars.map((bar) => bar.getBoundingClientRect().width))
+  expect(widths[1]).toBe(0)
+})

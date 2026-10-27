@@ -75,3 +75,26 @@ test('a value set from the attribute is shown, and disabled turns every choice o
   await expect(page.getByRole('checkbox', { name: 'Billing Admin' })).toBeDisabled()
   await expect(page.getByRole('checkbox', { name: 'Tout Billing' })).toBeDisabled()
 })
+
+test('one input per change, after value updates; a vetoed change is drawn back; unknown values survive', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-choice-matrix ${ROWS} ${COLUMNS} value='{"issues":["read","triage"]}'></c2-choice-matrix>`)
+  await matrix(page).evaluate((element: ChoiceMatrix) => {
+    const seen: unknown[] = []
+    ;(window as unknown as { seen: unknown[] }).seen = seen
+    element.addEventListener('input', () => seen.push(JSON.parse(JSON.stringify(element.value))))
+  })
+  await page.getByRole('checkbox', { name: 'Issues Write' }).check()
+  expect(await page.evaluate(() => (window as unknown as { seen: unknown[] }).seen)).toEqual([{ issues: ['read', 'write', 'triage'] }])
+
+  // A controlled consumer puts the old value back: the checkbox follows it.
+  await matrix(page).evaluate((element: ChoiceMatrix) => element.addEventListener('change', () => (element.value = { issues: ['read', 'write', 'triage'] })))
+  await page.getByRole('checkbox', { name: 'Pull requests Read' }).click()
+  await expect(page.getByRole('checkbox', { name: 'Pull requests Read' })).not.toBeChecked()
+})
+
+test('required radio rows: an answered disabled row does not stand in for an unanswered one', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-choice-matrix type="radio" required rows='[{"value":"a","label":"A","disabled":true},{"value":"b","label":"B"}]' columns='[{"value":"x","label":"X"}]' value='{"a":"x"}'></c2-choice-matrix>`,
+  )
+  expect(await matrix(page).evaluate((element: ChoiceMatrix) => element.checkValidity())).toBe(false)
+})
