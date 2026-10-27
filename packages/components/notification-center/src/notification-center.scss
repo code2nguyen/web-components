@@ -84,8 +84,9 @@ button {
 
 .heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 }
 
 .title {
@@ -101,6 +102,7 @@ button {
 
 .link {
   color: css.cssVar(link--color);
+  white-space: nowrap;
   font-size: css.cssVar(time--font-size);
   font-weight: 500;
 

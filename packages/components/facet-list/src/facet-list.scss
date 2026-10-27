@@ -125,15 +125,17 @@ button {
 }
 
 .value {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 4px;
   min-height: css.cssVar(value--height);
   padding: css.cssVar(value--padding);
   border-radius: css.cssVar(value--border-radius);
 
-  &:hover {
+  &:hover,
+  &:focus-within {
     background-color: css.cssVar(value__hover--background-color);
   }
 }
@@ -159,10 +161,20 @@ button {
   text-align: end;
 }
 
-/* The actions show on hover and while focus is in the row, but stay in the tab order and the accessibility tree. */
+/*
+ * The actions show on hover and while focus is in the row, but stay in the tab order and the accessibility tree.
+ * They sit over the end of the row instead of taking a column, so a hidden action never shortens the label.
+ */
 .actions {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
   display: inline-flex;
+  align-items: center;
   gap: 2px;
+  padding-inline-start: 4px;
+  border-radius: inherit;
+  background-color: css.cssVar(value__hover--background-color);
   opacity: 0;
   transition: opacity 120ms ease;
 }
@@ -172,9 +184,15 @@ button {
   opacity: 1;
 }
 
-/* With no hover (a touch screen), the actions are always shown. */
+/* With no hover (a touch screen), the actions are always shown, in a column of their own. */
 @media (hover: none) {
+  .value {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
   .actions {
+    position: static;
+    background-color: transparent;
     opacity: 1;
   }
 }
