@@ -225,9 +225,9 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 167 | `c2-generation-grid`   | 2×2 variants that blur in, with per-tile vary/upscale/select              | Midjourney, ChatGPT images                | [Android Authority](https://www.androidauthority.com/midjourney-u1-v1-buttons-meaning-3327309/)                                               | P3       | Proposed |
 | 168 | `c2-version-history`   | Snapshot list with bookmarks, preview and "Restore this version"          | Lovable, Bolt, v0                         | [Lovable](https://docs.lovable.dev/features/projects/history)                                                                                 | P3       | Proposed |
 
-## 55 more from component libraries and app shots
+## 70 more from component libraries, app shots and inspiration sites
 
-Researched on 2026-10-27, numbered 169 to 223. The first round (rows 1 to 168) read design systems and products. This round reads the animated and enterprise component catalogs that Dribbble-style interfaces are built from, plus recurring app-shot patterns (mobile, commerce, travel, fintech, AI agents). Every row was checked against the 216 `c2-*` tags on `develop` and rows 1 to 168 of this file.
+Researched on 2026-10-27, numbered 169 to 238. The first round (rows 1 to 168) read design systems and products. This round reads the animated and enterprise component catalogs that Dribbble-style interfaces are built from, recurring app-shot patterns (mobile, commerce, travel, fintech, AI agents), and the design inspiration sites (Dribbble, Mobbin, Refero, SaaSFrame, component.gallery, Awwwards, Godly) for section T. Every row was checked against the 216 `c2-*` tags on `develop` and rows 1 to 168 of this file.
 
 The catalogs were read on 2026-10-27:
 
@@ -235,7 +235,7 @@ The catalogs were read on 2026-10-27:
 - [shadcn/ui v4 registry](https://github.com/shadcn-ui/ui/blob/main/apps/v4/public/r/index.json): 65 components.
 - Package lists on npm for [Zag](https://www.npmjs.com/org/zag-js) (the Ark UI state machines), [Syncfusion EJ2](https://www.npmjs.com/org/syncfusion), [Kendo React](https://www.npmjs.com/org/progress), [HeroUI](https://www.npmjs.com/org/heroui) and [MUI X](https://www.npmjs.com/org/mui).
 
-Dribbble and Mobbin could not be reached from the research environment. So rows whose Source is "—" list the products from memory, without a link checked on that date: verify one before accepting the row.
+The inspiration sites could not be fetched from the research environment, only searched: section T links the search result each pattern came from. Rows whose Source is "—" list the products from memory, without a link checked on that date: verify one before accepting the row.
 
 ### O. Motion and visual effects
 
@@ -317,6 +317,26 @@ Dribbble and Mobbin could not be reached from the research environment. So rows 
 | 222 | `c2-permission-matrix`  | Roles by permissions grid with tri-state groups and inherited values                         | GitHub, Okta, Supabase               | —                                                                            | P2       | Proposed |
 | 223 | `c2-bento-grid`         | Feature tiles with authored spans that collapse to one column; tile slots for media and copy | Magic UI (bento-grid), Apple, Linear | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
 
+### T. Dashboards, flows and editorial (design inspiration sites)
+
+| #   | Component             | What it does                                                                                        | Seen in                                                      | Source                                                                  | Priority | Decision |
+| --- | --------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------- | -------- | -------- |
+| 224 | `c2-bar-list`         | Ranked rows whose background is a bar: icon, label or link, value ("Top pages", "Top countries")    | Tremor BarList, Vercel Analytics, Plausible, Stripe          | [Tremor](https://www.npmjs.com/package/@tremor/react)                   | P2       | Proposed |
+| 225 | `c2-activity-feed`    | Events grouped by day: actor avatar, verb, linked object, time, inline preview, load more           | GitHub, Linear, HubSpot; Dribbble widget cards               | [Dribbble](https://dribbble.com/tags/widget_cards)                      | P2       | Proposed |
+| 226 | `c2-wizard`           | Step panels with a validation gate, back, next and finish, driving `c2-steps`; resumable            | SaaSFrame wizard flows, Stripe Connect, Gusto                | [Page Flows / Refero](https://refero.design/)                           | P2       | Proposed |
+| 227 | `c2-receipt`          | Confirmation of a transfer or order: status, amount, parties, line items, copyable reference, share | Wise, Revolut, Cash App                                      | [Wandr](https://www.wandr.studio/blog/fintech-mobile-app-design-trends) | P2       | Proposed |
+| 228 | `c2-quote`            | Block or pull quote with attribution, avatar and source; testimonial variant                        | component.gallery (Quote, in 60 components), marketing sites | [component.gallery](https://component.gallery/components/)              | P2       | Proposed |
+| 229 | `c2-leaderboard`      | Ranked people with a top-three podium, rank-change arrows and the current user pinned               | Duolingo, Strava, sales dashboards                           | —                                                                       | P3       | Proposed |
+| 230 | `c2-delta-bar`        | Bar that grows left or right from the centre for a negative or positive change                      | Tremor DeltaBar, finance dashboards                          | [Tremor](https://www.npmjs.com/package/@tremor/react)                   | P3       | Proposed |
+| 231 | `c2-control-tile`     | Device tile: icon, state, toggle and a quick slider (light, thermostat, lock)                       | Apple Home, Google Home                                      | —                                                                       | P3       | Proposed |
+| 232 | `c2-page-indicator`   | Paging dots or dashes linked to any scroll container (onboarding pages, custom carousels)           | iOS page control, Mobbin onboarding screens                  | [Mobbin](https://mobbin.com/explore/mobile/ui-elements)                 | P3       | Proposed |
+| 233 | `c2-date-badge`       | Calendar-tile date ("OCT / 27") for event lists and cards                                           | Eventbrite, Meetup, Luma                                     | —                                                                       | P3       | Proposed |
+| 234 | `c2-card-stack`       | Swipe deck (keep or skip) and cards that stack as the page scrolls                                  | Tinder, Apple Wallet, Awwwards sites                         | [Awwwards](https://www.awwwards.com/websites/)                          | P3       | Proposed |
+| 235 | `c2-flip-card`        | Card with a front and back that turns on press; flashcards, card details                            | Quizlet, banking card details                                | —                                                                       | P3       | Proposed |
+| 236 | `c2-scrolly`          | Scrollytelling: a sticky graphic and steps that fire as each enters view; horizontal pinned mode    | The New York Times, The Pudding, Apple product pages         | [Awwwards](https://www.awwwards.com/websites/)                          | P3       | Proposed |
+| 237 | `c2-expanding-panels` | Row of media panels where the hovered or focused one widens                                         | Awwwards and Godly portfolio sites                           | [Awwwards](https://www.awwwards.com/websites/)                          | P3       | Proposed |
+| 238 | `c2-infinite-canvas`  | Draggable endless grid of media with inertia and lazy loading                                       | Godly and Awwwards portfolio sites                           | [Awwwards](https://www.awwwards.com/websites/)                          | P3       | Proposed |
+
 ### Extend instead of adding
 
 These came up in the same research, but an existing component covers most of each one. They belong in that component's next change, not in a new package:
@@ -328,22 +348,28 @@ These came up in the same research, but an existing component covers most of eac
 - `c2-stat`: a value that animates when it changes, built on `c2-rolling-number` (row 37).
 - `c2-scroll-area` (row 64): edge fade and progressive blur (Magic UI progressive-blur, HeroUI scroll-shadow).
 - `c2-angle-slider` (row 20): an arc or knob mode for thermostats and volume.
+- `c2-tabs` and `c2-chip-group`: scroll buttons when the row overflows (Airbnb's category bar).
+- `c2-modal`: a full-screen mode (Mobbin's full-screen overlay).
+- `c2-bottom-sheet` (row 77): an action-sheet preset (actions, destructive action, cancel).
+- `c2-map-chart`: a dotted world-map preset with pulsing points, a Dribbble dashboard staple.
 
 ### Example apps to build next
 
 The eight apps in `apps/examples` cover HTML, React, Vue, Angular, SvelteKit and Next.js, but every one is a desktop business tool. Each app below adds a framework or a form factor that is not covered yet, and it exercises the rows above. Under the dogfooding rule, that is what proves each row ready to ship.
 
-| App                     | Framework            | New ground                      | Exercises                                                                                                          |
-| ----------------------- | -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Mobile wallet           | Lit + Vite (PWA)     | First mobile app, first Lit app | `c2-payment-card`, `c2-amount-keypad`, `c2-passcode`, `c2-fx-converter`, `c2-iban-input`, `c2-bottom-sheet`        |
-| Storefront and checkout | Nuxt (SSR)           | Server-rendered Vue, commerce   | `c2-product-gallery`, `c2-swatch-picker`, `c2-price`, `c2-rating-summary`, `c2-address-field`, `c2-cookie-consent` |
-| Travel booking          | React Router 7 (SSR) | Hydration of a React SSR app    | `c2-histogram-slider`, `c2-quantity-picker`, `c2-seat-map`, `c2-ticket`, `c2-date-strip`, `@c2n/google-map`        |
-| Fitness tracker         | SolidJS (PWA)        | Solid, touch-first inputs       | `c2-radial-bar-chart`, `c2-wheel-picker`, `c2-date-strip`, `c2-streak`, `c2-celebration`                           |
-| Product analytics       | Qwik                 | Resumability, heavy data        | `c2-pivot-table`, `c2-cohort-table`, `c2-chart-builder`, `c2-filter-builder`, `c2-sankey-chart`                    |
-| AI agent workspace      | Next.js              | Streaming agent UI              | `c2-reasoning`, `c2-agent-plan`, `c2-tool-call`, `c2-model-picker`, `c2-context-meter`, `c2-document-tabs`         |
-| Team admin console      | Angular              | Settings and permissions        | `c2-workspace-switcher`, `c2-permission-matrix`, `c2-timezone-select`, `c2-country-select`, `c2-secret-field`      |
-| Marketing site          | Astro (islands)      | Static site, motion budget      | `c2-text-effect`, `c2-backdrop`, `c2-globe`, `c2-orbit`, `c2-beam`, `c2-device-frame`, `c2-marquee`                |
-| Messaging app           | Svelte 5 (Vite, SPA) | Mobile chat                     | `c2-voice-message`, `c2-link-preview`, `c2-spoiler`, `c2-share-sheet`, `c2-story-progress`                         |
+| App                     | Framework              | New ground                        | Exercises                                                                                                          |
+| ----------------------- | ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Mobile wallet           | Lit + Vite (PWA)       | First mobile app, first Lit app   | `c2-payment-card`, `c2-amount-keypad`, `c2-passcode`, `c2-fx-converter`, `c2-iban-input`, `c2-bottom-sheet`        |
+| Storefront and checkout | Nuxt (SSR)             | Server-rendered Vue, commerce     | `c2-product-gallery`, `c2-swatch-picker`, `c2-price`, `c2-rating-summary`, `c2-address-field`, `c2-cookie-consent` |
+| Travel booking          | React Router 7 (SSR)   | Hydration of a React SSR app      | `c2-histogram-slider`, `c2-quantity-picker`, `c2-seat-map`, `c2-ticket`, `c2-date-strip`, `@c2n/google-map`        |
+| Fitness tracker         | SolidJS (PWA)          | Solid, touch-first inputs         | `c2-radial-bar-chart`, `c2-wheel-picker`, `c2-date-strip`, `c2-streak`, `c2-celebration`                           |
+| Product analytics       | Qwik                   | Resumability, heavy data          | `c2-pivot-table`, `c2-cohort-table`, `c2-chart-builder`, `c2-filter-builder`, `c2-sankey-chart`                    |
+| AI agent workspace      | Next.js                | Streaming agent UI                | `c2-reasoning`, `c2-agent-plan`, `c2-tool-call`, `c2-model-picker`, `c2-context-meter`, `c2-document-tabs`         |
+| Team admin console      | Angular                | Settings and permissions          | `c2-workspace-switcher`, `c2-permission-matrix`, `c2-timezone-select`, `c2-country-select`, `c2-secret-field`      |
+| Marketing site          | Astro (islands)        | Static site, motion budget        | `c2-text-effect`, `c2-backdrop`, `c2-globe`, `c2-orbit`, `c2-beam`, `c2-device-frame`, `c2-marquee`                |
+| Messaging app           | Svelte 5 (Vite, SPA)   | Mobile chat                       | `c2-voice-message`, `c2-link-preview`, `c2-spoiler`, `c2-share-sheet`, `c2-story-progress`                         |
+| Smart home dashboard    | Preact                 | Preact, tablet layout             | `c2-control-tile`, `c2-radial-bar-chart`, `c2-angle-slider`, `c2-activity-feed`, `c2-date-strip`                   |
+| Data story              | Eleventy (static HTML) | Long-form editorial, no framework | `c2-scrolly`, `c2-quote`, `c2-bar-list`, `c2-delta-bar`, `c2-map-chart`                                            |
 
 ## Delivery plan
 
