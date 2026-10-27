@@ -96,6 +96,7 @@
         "../../components/description-list:build",
         "../../components/details:build",
         "../../components/diff-viewer:build",
+        "../../components/distribution-bar:build",
         "../../components/fieldset:build",
         "../../components/filter-builder:build",
         "../../components/float-button:build",

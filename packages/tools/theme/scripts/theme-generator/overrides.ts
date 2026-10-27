@@ -406,6 +406,10 @@ export const overrides: Record<string, Override> = {
   '--c2-meter__track--background-color': { token: 'color-outline-variant' },
   '--c2-meter__indicator__critical--background-color': { token: 'color-error' },
   ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-meter__segment-${i + 1}--background-color`, { token: `chart-series-${i + 1}` }])),
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-distribution-bar__segment-${i + 1}--color`, { token: `chart-series-${i + 1}` }])),
+  // The empty bar is a track, like the meter's; the hover bubble is an inverse surface, like the chart tooltip.
+  '--c2-distribution-bar__bar--background-color': { token: 'color-outline-variant' },
+  '--c2-distribution-bar__tooltip--color': { token: 'color-on-inverse-surface' },
   // Skeleton: the resting block is the same hairline grey as the progress track. The wave highlight is a translucent
   // white sheen rather than a surface colour, and the theme has no token for one.
   '--c2-skeleton--background-color': { token: 'color-outline-variant' },
