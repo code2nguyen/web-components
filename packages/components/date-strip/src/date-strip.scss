@@ -30,6 +30,8 @@
 
 :host {
   display: block;
+  min-width: 0;
+  max-width: 100%;
   color: css.cssVar(color);
   font-size: css.cssVar(font-size);
 }
@@ -47,7 +49,11 @@
 }
 
 .title {
+  min-width: 0;
+  overflow: hidden;
   font-weight: css.cssVar(title--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .paging {

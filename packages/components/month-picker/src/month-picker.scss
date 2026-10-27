@@ -82,6 +82,8 @@ button {
 
 .title {
   flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
   min-height: css.cssVar(navigation--size);
   padding: 0 8px;
   border-radius: 8px;
