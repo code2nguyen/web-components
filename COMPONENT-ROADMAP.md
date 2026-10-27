@@ -225,6 +225,126 @@ Researching 90 products found 68 more primitives that no design system above shi
 | 167 | `c2-generation-grid`   | 2×2 variants that blur in, with per-tile vary/upscale/select              | Midjourney, ChatGPT images                | [Android Authority](https://www.androidauthority.com/midjourney-u1-v1-buttons-meaning-3327309/)                                               | P3       | Proposed |
 | 168 | `c2-version-history`   | Snapshot list with bookmarks, preview and "Restore this version"          | Lovable, Bolt, v0                         | [Lovable](https://docs.lovable.dev/features/projects/history)                                                                                 | P3       | Proposed |
 
+## 55 more from component libraries and app shots
+
+Researched on 2026-10-27, numbered 169 to 223. The first round (rows 1 to 168) read design systems and products. This round reads the animated and enterprise component catalogs that Dribbble-style interfaces are built from, plus recurring app-shot patterns (mobile, commerce, travel, fintech, AI agents). Every row was checked against the 216 `c2-*` tags on `develop` and rows 1 to 168 of this file.
+
+The catalogs were read on 2026-10-27:
+
+- [Magic UI registry](https://github.com/magicuidesign/magicui/blob/main/registry.json): 210 items.
+- [shadcn/ui v4 registry](https://github.com/shadcn-ui/ui/blob/main/apps/v4/public/r/index.json): 65 components.
+- Package lists on npm for [Zag](https://www.npmjs.com/org/zag-js) (the Ark UI state machines), [Syncfusion EJ2](https://www.npmjs.com/org/syncfusion), [Kendo React](https://www.npmjs.com/org/progress), [HeroUI](https://www.npmjs.com/org/heroui) and [MUI X](https://www.npmjs.com/org/mui).
+
+Dribbble and Mobbin could not be reached from the research environment. So rows whose Source is "—" list the products from memory, without a link checked on that date: verify one before accepting the row.
+
+### O. Motion and visual effects
+
+| #   | Component            | What it does                                                                                               | Seen in                                                              | Source                                                                       | Priority | Decision |
+| --- | -------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- | -------- |
+| 169 | `c2-text-effect`     | Animated text: rotating words, typewriter, scramble, shimmer, reveal; static under reduced motion          | Magic UI (word-rotate, typing-animation, hyper-text), Aceternity     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 170 | `c2-backdrop`        | Decorative `aria-hidden` background: dot, grid, stripe, flickering grid, aurora, meteors; themed by tokens | Magic UI (dot-pattern, flickering-grid, retro-grid, meteors), Linear | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 171 | `c2-celebration`     | Confetti or burst fired by `fire()` on success; nothing under reduced motion                               | Magic UI (confetti, cool-mode), Asana, Duolingo                      | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 172 | `c2-image-magnifier` | Lens zoom over an image on hover, or on press on touch                                                     | Magic UI (lens), Amazon, Nike                                        | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 173 | `c2-spotlight`       | Glow and border that follow the cursor across a card or a grid of cards                                    | Magic UI (magic-card, neon-gradient-card), Vercel, Linear            | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 174 | `c2-dock`            | Toolbar whose items magnify near the pointer, with labels                                                  | Magic UI (dock), macOS                                               | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 175 | `c2-orbit`           | Slotted icons orbiting a centre on concentric rings (integration heroes)                                   | Magic UI (orbiting-circles), Zapier, Raycast                         | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 176 | `c2-beam`            | Animated connector drawn between two elements (data-flow and integration diagrams)                         | Magic UI (animated-beam), Stripe                                     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 177 | `c2-globe`           | Rotating 3D globe with markers and arcs, drag to spin                                                      | Magic UI (globe), Stripe, GitHub, Vercel                             | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 178 | `c2-device-frame`    | Phone, browser or laptop frame around slotted content                                                      | Magic UI (safari, iphone-15-pro, android)                            | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 179 | `c2-scratch-reveal`  | Scratch a canvas layer to reveal a reward; keyboard button fallback                                        | Magic UI (scratch-to-reveal), Google Pay rewards                     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 180 | `c2-scroll-progress` | Reading progress of the page or a container as a bar or ring, scroll-driven                                | Magic UI (scroll-progress), Medium                                   | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 181 | `c2-animated-list`   | Staggered enter and exit of items for live feeds                                                           | Magic UI (animated-list), Vercel deployments                         | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+
+### P. Enterprise data
+
+| #   | Component             | What it does                                                                                     | Seen in                                               | Source                                                                        | Priority | Decision |
+| --- | --------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | -------- |
+| 182 | `c2-pivot-table`      | Drag fields to rows, columns and values; sum/count/avg, expandable subtotals                     | Syncfusion pivotview, Kendo pivotgrid, Excel          | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-pivotview)         | P2       | Proposed |
+| 183 | `c2-cohort-table`     | Retention triangle: cohorts by period, cells shaded by rate                                      | Mixpanel, Amplitude, PostHog                          | —                                                                             | P2       | Proposed |
+| 184 | `c2-radial-bar-chart` | Concentric rings or radial bars toward a goal (activity rings, budgets)                          | Apple Fitness, Oura, Monzo                            | —                                                                             | P2       | Proposed |
+| 185 | `c2-barcode`          | EAN-13, UPC, Code 128 and Data Matrix as SVG                                                     | Syncfusion barcode-generator, Kendo barcodes, Shopify | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-barcode-generator) | P2       | Proposed |
+| 186 | `c2-image-annotator`  | Arrows, boxes, text, blur and redact over an image; exports a PNG and the shapes                 | Syncfusion image-editor, Jam, Marker.io               | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-image-editor)      | P2       | Proposed |
+| 187 | `c2-grid-list`        | Keyboard-navigable grid of selectable tiles (photos, files, templates)                           | Zag gridlist, Google Photos, Figma                    | [Zag](https://www.npmjs.com/package/@zag-js/gridlist)                         | P2       | Proposed |
+| 188 | `c2-floating-panel`   | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom                       | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel)                   | P3       | Proposed |
+| 189 | `c2-chart-builder`    | Choose dimensions, measures and a chart type with a live preview; emits a c2 chart spec          | Kendo chart-wizard, Metabase, Looker                  | [Kendo](https://www.npmjs.com/package/@progress/kendo-react-chart-wizard)     | P3       | Proposed |
+| 190 | `c2-ribbon`           | Tabbed toolbar of labelled groups that collapse into overflow menus                              | Syncfusion ribbon, Word, Excel                        | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-ribbon)            | P3       | Proposed |
+| 191 | `c2-network-graph`    | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz                            | —                                                                             | P3       | Proposed |
+| 192 | `c2-sunburst-chart`   | Hierarchy as rings, click to zoom into a branch (cut from round 1)                               | Disk usage tools, budget breakdowns                   | —                                                                             | P3       | Proposed |
+| 193 | `c2-word-cloud`       | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail                                   | —                                                                             | P3       | Proposed |
+| 194 | `c2-pipeline`         | CI/CD stages as columns of jobs with status, durations and edges                                 | GitHub Actions, GitLab, Vercel                        | —                                                                             | P3       | Proposed |
+
+### Q. Inputs with built-in data and mobile inputs
+
+| #   | Component            | What it does                                                                                | Seen in                                 | Source | Priority | Decision |
+| --- | -------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- | ------ | -------- | -------- |
+| 195 | `c2-address-field`   | Address autocomplete (pluggable provider) split into the fields each country's format needs | Stripe Address Element, Shopify, Airbnb | —      | P2       | Proposed |
+| 196 | `c2-country-select`  | Countries with flags, search and pinned favourites; shares `c2-phone-input`'s country data  | Stripe, Shopify, Wise                   | —      | P2       | Proposed |
+| 197 | `c2-timezone-select` | Zones grouped by region with UTC offset and local time, search by city                      | Calendly, Google Calendar, Linear       | —      | P2       | Proposed |
+| 198 | `c2-currency-select` | ISO currencies with symbol and flag; pairs with `c2-money-input`                            | Wise, Stripe, Revolut                   | —      | P2       | Proposed |
+| 199 | `c2-iban-input`      | IBAN grouped by country format, checksum validation, bank name through a lookup callback    | Qonto, Revolut, Wise                    | —      | P2       | Proposed |
+| 200 | `c2-swatch-picker`   | Colour, material or size swatches with out-of-stock and price-difference states             | Shopify, Nike, Apple Store              | —      | P2       | Proposed |
+| 201 | `c2-wheel-picker`    | iOS-style scroll wheel for time, height or weight                                           | iOS, Apple Health, MyFitnessPal         | —      | P2       | Proposed |
+| 202 | `c2-date-strip`      | Horizontal scrolling strip of days with markers and the selected day                        | Google Fit, Calendly mobile, Uber Eats  | —      | P2       | Proposed |
+| 203 | `c2-scrub-input`     | Number field changed by dragging its label, with modifier keys for steps                    | Figma, Framer, Blender                  | —      | P3       | Proposed |
+| 204 | `c2-seat-map`        | Seat or table selection with categories, prices and availability                            | Ticketmaster, airline apps, cinema apps | —      | P3       | Proposed |
+| 205 | `c2-passcode`        | Lock-screen PIN dots and keypad with a biometric slot                                       | Banking apps, iOS                       | —      | P3       | Proposed |
+
+### R. Commerce, content and social
+
+| #   | Component            | What it does                                                                             | Seen in                                | Source | Priority | Decision |
+| --- | -------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------- | ------ | -------- | -------- |
+| 206 | `c2-price`           | Amount with currency, compare-at strike-through, discount badge, unit price and tax note | Shopify, Amazon, Apple Store           | —      | P2       | Proposed |
+| 207 | `c2-product-gallery` | Main image with thumbnails, zoom (row 172), video and swipe on touch                     | Shopify Dawn, Nike, Apple Store        | —      | P2       | Proposed |
+| 208 | `c2-cookie-consent`  | Consent banner plus a category preferences dialog; stores the choice and fires an event  | OneTrust, Cookiebot, most EU sites     | —      | P2       | Proposed |
+| 209 | `c2-share-sheet`     | Share targets, copy link and QR, falling back from the native Web Share API              | Notion, Figma, YouTube                 | —      | P2       | Proposed |
+| 210 | `c2-link-preview`    | URL card (title, image, site) from metadata the app supplies                             | Slack, iMessage, Notion                | —      | P2       | Proposed |
+| 211 | `c2-voice-message`   | Recorded clip bubble: waveform, scrub, speed, transcript toggle                          | WhatsApp, Telegram, Slack              | —      | P2       | Proposed |
+| 212 | `c2-ticket`          | Perforated ticket, boarding pass or coupon with a stub and a code slot                   | Apple Wallet, airline apps, Eventbrite | —      | P3       | Proposed |
+| 213 | `c2-embed`           | Click-to-load facade for YouTube, Vimeo, Loom or Figma iframes                           | Notion, lite-youtube-embed             | —      | P3       | Proposed |
+| 214 | `c2-spoiler`         | Blurs content until the reader reveals it                                                | Discord, Telegram, Reddit              | —      | P3       | Proposed |
+| 215 | `c2-pull-to-refresh` | Pull gesture with progress and a release threshold (cut from round 1)                    | iOS, Android, X                        | —      | P3       | Proposed |
+
+### S. AI agents and app chrome
+
+| #   | Component               | What it does                                                                                 | Seen in                              | Source                                                                       | Priority | Decision |
+| --- | ----------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------- | -------- | -------- |
+| 216 | `c2-reasoning`          | Collapsible thinking block, live while streaming, then "Thought for 12s"                     | ChatGPT, Claude, Gemini              | —                                                                            | P2       | Proposed |
+| 217 | `c2-agent-plan`         | Live plan of steps (pending, running, done, failed) with sub-steps and an approve action     | Claude Code, Cursor, Devin           | —                                                                            | P2       | Proposed |
+| 218 | `c2-model-picker`       | Model select with provider icon, capability badges and cost or speed hints                   | ChatGPT, Cursor, Perplexity          | —                                                                            | P2       | Proposed |
+| 219 | `c2-context-meter`      | Context-window usage ring with a breakdown on hover                                          | Cursor, Claude Code                  | —                                                                            | P3       | Proposed |
+| 220 | `c2-document-tabs`      | Closable, reorderable tabs with a dirty dot, overflow menu and new-tab button                | VS Code, Figma, Chrome               | —                                                                            | P2       | Proposed |
+| 221 | `c2-workspace-switcher` | Organisation or project switcher with avatars, search and "create"                           | Slack, Linear, Vercel, Notion        | —                                                                            | P2       | Proposed |
+| 222 | `c2-permission-matrix`  | Roles by permissions grid with tri-state groups and inherited values                         | GitHub, Okta, Supabase               | —                                                                            | P2       | Proposed |
+| 223 | `c2-bento-grid`         | Feature tiles with authored spans that collapse to one column; tile slots for media and copy | Magic UI (bento-grid), Apple, Linear | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+
+### Extend instead of adding
+
+These came up in the same research, but an existing component covers most of each one. They belong in that component's next change, not in a new package:
+
+- `c2-button`: a success and an error state after `running`, so the button can go idle → loading → ✓.
+- `c2-text-field`: a floating-label variant.
+- `c2-autocomplete`: multi-column result rows (Syncfusion multicolumn-combobox).
+- `c2-questionnaire`: a matrix (Likert grid) question.
+- `c2-stat`: a value that animates when it changes, built on `c2-rolling-number` (row 37).
+- `c2-scroll-area` (row 64): edge fade and progressive blur (Magic UI progressive-blur, HeroUI scroll-shadow).
+- `c2-angle-slider` (row 20): an arc or knob mode for thermostats and volume.
+
+### Example apps to build next
+
+The eight apps in `apps/examples` cover HTML, React, Vue, Angular, SvelteKit and Next.js, but every one is a desktop business tool. Each app below adds a framework or a form factor that is not covered yet, and it exercises the rows above. Under the dogfooding rule, that is what proves each row ready to ship.
+
+| App                     | Framework            | New ground                      | Exercises                                                                                                          |
+| ----------------------- | -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Mobile wallet           | Lit + Vite (PWA)     | First mobile app, first Lit app | `c2-payment-card`, `c2-amount-keypad`, `c2-passcode`, `c2-fx-converter`, `c2-iban-input`, `c2-bottom-sheet`        |
+| Storefront and checkout | Nuxt (SSR)           | Server-rendered Vue, commerce   | `c2-product-gallery`, `c2-swatch-picker`, `c2-price`, `c2-rating-summary`, `c2-address-field`, `c2-cookie-consent` |
+| Travel booking          | React Router 7 (SSR) | Hydration of a React SSR app    | `c2-histogram-slider`, `c2-quantity-picker`, `c2-seat-map`, `c2-ticket`, `c2-date-strip`, `@c2n/google-map`        |
+| Fitness tracker         | SolidJS (PWA)        | Solid, touch-first inputs       | `c2-radial-bar-chart`, `c2-wheel-picker`, `c2-date-strip`, `c2-streak`, `c2-celebration`                           |
+| Product analytics       | Qwik                 | Resumability, heavy data        | `c2-pivot-table`, `c2-cohort-table`, `c2-chart-builder`, `c2-filter-builder`, `c2-sankey-chart`                    |
+| AI agent workspace      | Next.js              | Streaming agent UI              | `c2-reasoning`, `c2-agent-plan`, `c2-tool-call`, `c2-model-picker`, `c2-context-meter`, `c2-document-tabs`         |
+| Team admin console      | Angular              | Settings and permissions        | `c2-workspace-switcher`, `c2-permission-matrix`, `c2-timezone-select`, `c2-country-select`, `c2-secret-field`      |
+| Marketing site          | Astro (islands)      | Static site, motion budget      | `c2-text-effect`, `c2-backdrop`, `c2-globe`, `c2-orbit`, `c2-beam`, `c2-device-frame`, `c2-marquee`                |
+| Messaging app           | Svelte 5 (Vite, SPA) | Mobile chat                     | `c2-voice-message`, `c2-link-preview`, `c2-spoiler`, `c2-share-sheet`, `c2-story-progress`                         |
+
 ## Delivery plan
 
 Everything still listed ships in four waves sorted by priority, in PRs of 3 to 5 components. Wave 1 comes first because later items reuse it: `c2-form-field` (built) wraps every input in waves 2 and 4, and `c2-confirm-dialog` (built) backs destructive actions everywhere.
@@ -260,6 +380,6 @@ These show up in other design systems but are not on the list:
 | Layout helpers (Stack, Grid, Flex, Center, Space) | Plain CSS does this better than a custom element |
 | Login form, pricing table, checkout, settings page | Blocks made from primitives, not primitives. They belong in the planned blocks collection. |
 | Portal, config provider, theme provider | Framework concepts with no web-component equivalent; `@c2n/theme` tokens already cover theming |
-| Floating window, pull-to-refresh, sunburst, back-to-top | Cut to keep the first list at 100; candidates for a later roadmap |
+| Back-to-top | Cut to keep the first list at 100; floating window, pull-to-refresh and sunburst came back as rows 188, 215 and 192 |
 
 From the app research, six patterns were also cut because only one product ships them, or because an existing component covers them with a preset: Basecamp's hill chart, Google Maps' busyness chart, Coinbase's ruler picker, ChatGPT's response compare, Gemini's claim check, and the burndown chart (a `c2-line-chart` preset).
