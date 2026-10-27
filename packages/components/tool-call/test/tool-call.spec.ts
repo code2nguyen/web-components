@@ -1,4 +1,5 @@
 import { test, expect, accessible } from '../../../../tests/component-fixture'
+import type { ToolCall } from '../src/tool-call'
 import type { Page } from '@playwright/test'
 
 const card = (page: Page, selector = 'c2-tool-call') => page.locator(selector)
@@ -117,11 +118,11 @@ test('an open call with nothing to show reveals no empty body, and a box that st
   renderScenario,
 }) => {
   await renderScenario(`<c2-tool-call name="wait" state="running" open output="ok"></c2-tool-call>`)
-  await card(page).evaluate((element) => {
+  await card(page).evaluate((element: ToolCall) => {
     element.output = undefined
   })
   await expect(card(page).locator('[part="body"]')).toBeHidden()
-  await card(page).evaluate((element) => {
+  await card(page).evaluate((element: ToolCall) => {
     element.errorText = Array.from({ length: 60 }, (_, line) => `trace line ${line}`).join('\n')
     element.state = 'error'
   })

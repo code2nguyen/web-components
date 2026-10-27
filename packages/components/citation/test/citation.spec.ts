@@ -1,4 +1,5 @@
 import { test, expect, accessible } from '../../../../tests/component-fixture'
+import type { Citation } from '../src/citation'
 import type { Page } from '@playwright/test'
 
 const citation = (page: Page, selector = 'c2-citation') => page.locator(selector)
@@ -93,7 +94,7 @@ test('a scheme hidden by tabs, line breaks or control characters is still caught
   )
   await expect(page.getByRole('link')).toHaveCount(1)
   await expect(marker(page, '#named')).toHaveAttribute('rel', 'noopener noreferrer')
-  await citation(page, '#ctl').evaluate((element) => {
+  await citation(page, '#ctl').evaluate((element: Citation) => {
     element.href = '\u0001javascript:alert(1)'
     element.favicon = 'da\nta:image/gif;base64,R0lGODlhAQABAAAAACw='
   })
