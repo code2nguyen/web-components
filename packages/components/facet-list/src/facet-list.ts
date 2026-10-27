@@ -270,7 +270,7 @@ export class FacetList extends LitElement {
   }
 
   private renderValue(item: FacetValue) {
-    const value = String(value)
+    const value = String(item.value)
     const label = item.label ?? value
     const count = this.formatCount(item.count)
     const included = this.includeList.includes(value)

@@ -175,6 +175,7 @@ price: .price
 "></c2-diff-viewer>`,
   'distribution-bar': `<c2-distribution-bar style="width:260px" label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>`,
   'emoji-picker': `<c2-emoji-picker recents="👍;🎉;🚀;❤️;😂;👀;🔥;✨" style="--c2-emoji-picker--width:252px;--c2-emoji-picker--height:168px;--c2-emoji-picker__emoji--size:28px;--c2-emoji-picker__emoji--font-size:18px;--c2-emoji-picker__category--size:26px"></c2-emoji-picker>`,
+  'facet-list': `<c2-facet-list label="Status" include="error" style="width:220px" values='[{"value":"info","count":31200},{"value":"warn","count":1840},{"value":"error","count":212}]'></c2-facet-list>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
   <c2-feather-camera></c2-feather-camera>
@@ -324,6 +325,7 @@ price: .price
   <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
 </c2-navigation-menu>`,
   notepad: `<c2-notepad label="Groceries" style="width:240px;--c2-notepad__sheet--min-height:150px;--c2-notepad__writing--font-size:16px;--c2-notepad__rule--spacing:24px;--c2-notepad__margin--inset:36px" value="- [x] Oat milk&#10;- [ ] **Sourdough**&#10;remember the ==blue== bag"></c2-notepad>`,
+  'notification-center': `<c2-notification-center group-by="none" style="--c2-notification-center--width:250px;--c2-notification-center__item--padding:6px 10px;--c2-notification-center__header--padding:8px 10px 6px" notifications='[{"id":"1","title":"Ana mentioned you","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}}]'></c2-notification-center>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
   'org-chart': `<c2-org-chart style="--c2-org-chart--padding:0;--c2-org-chart__card--width:96px;--c2-org-chart__card--padding:6px;--c2-org-chart__card--gap:6px;--c2-org-chart__avatar--size:22px;--c2-org-chart__label--font-size:11px;--c2-org-chart__label--line-height:14px;--c2-org-chart__description--font-size:10px;--c2-org-chart__description--line-height:12px;--c2-org-chart__level--gap:24px;--c2-org-chart__sibling--gap:6px;--c2-org-chart__toggle--size:14px;--c2-org-chart__toggle--font-size:10px" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"},{"id":"omar","label":"Omar Haddad","description":"COO"}]}]'></c2-org-chart>`,
   'otp-input': `<c2-otp-input value="4827" group="3" aria-label="Verification code" style="--c2-otp-input__cell--width:32px;--c2-otp-input__cell--height:38px;--c2-otp-input__cell--font-size:16px;--c2-otp-input--gap:6px"></c2-otp-input>`,
