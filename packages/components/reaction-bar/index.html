@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-reaction-bar</title>
+    <script type="module" src="/src/reaction-bar.ts"></script>
+    <script type="module" src="../emoji-picker/src/emoji-picker.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2}]'>
+      <c2-emoji-picker slot="picker"></c2-emoji-picker>
+    </c2-reaction-bar>
+    <c2-reaction-bar quick="👍 👎 😄 🎉 😕 ❤️ 🚀 👀"></c2-reaction-bar>
+    <c2-reaction-bar readonly reactions='[{"emoji":"👍","count":1280,"reacted":true},{"emoji":"😂","count":96}]'></c2-reaction-bar>
+  </body>
+</html>

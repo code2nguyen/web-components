@@ -1007,4 +1007,9 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface',
     value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
   },
+  // Emoji are drawn at the size of a picture, not on the text scale.
+  '--c2-emoji-picker__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-emoji-picker__preview__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-reaction-bar__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-reaction-bar__quick--font-size': { exclude: 'emoji glyph size' },
 }

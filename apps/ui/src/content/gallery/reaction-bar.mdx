@@ -1,0 +1,67 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ReactionBar } from '@c2n/components/reaction-bar'
+
+## Presets
+
+Looks for `c2-reaction-bar`. The pill's radius, border and background set the shape; the reacted colours mark the reactions that are yours.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'></c2-reaction-bar>
+```
+
+```html tag=MdxCodeBlock,label=Squared
+<style>
+  .reactions-squared {
+    --c2-reaction-bar__reaction--border-radius: 6px;
+    --c2-reaction-bar__reaction--height: 26px;
+    --c2-reaction-bar__reaction--background-color: transparent;
+    --c2-reaction-bar__reaction__reacted--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+  }
+</style>
+<c2-reaction-bar class="reactions-squared" reactions='[{"emoji":"🚀","count":12},{"emoji":"❤️","count":3,"reacted":true},{"emoji":"😄","count":2}]'></c2-reaction-bar>
+```
+
+```html tag=MdxCodeBlock,label=Borderless
+<style>
+  .reactions-borderless {
+    --c2-reaction-bar__reaction--border: 1px solid transparent;
+    --c2-reaction-bar__reaction__hover--border-color: transparent;
+    --c2-reaction-bar__reaction__reacted--border-color: transparent;
+    --c2-reaction-bar__reaction--height: 30px;
+    --c2-reaction-bar__reaction--padding: 0 10px;
+    --c2-reaction-bar__emoji--font-size: 18px;
+  }
+</style>
+<c2-reaction-bar class="reactions-borderless" reactions='[{"emoji":"🔥","count":28,"reacted":true},{"emoji":"💯","count":9},{"emoji":"🙌","count":4}]'></c2-reaction-bar>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .reactions-soft {
+    --c2-reaction-bar__reaction__reacted--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-reaction-bar__reaction__reacted--border-color: #c084fc;
+    --c2-reaction-bar__reaction__reacted--color: light-dark(#7e22ce, #a76cdc);
+    --c2-reaction-bar__reaction__focus--outline: 2px solid #c084fc;
+  }
+</style>
+<c2-reaction-bar class="reactions-soft" reactions='[{"emoji":"💜","count":7,"reacted":true},{"emoji":"✨","count":3},{"emoji":"🦄","count":1}]'></c2-reaction-bar>
+```
+
+```html tag=MdxCodeBlock,label=Read-only summary
+<style>
+  .reactions-summary {
+    --c2-reaction-bar--gap: 2px;
+    --c2-reaction-bar__reaction--height: 22px;
+    --c2-reaction-bar__reaction--padding: 0 6px;
+    --c2-reaction-bar__emoji--font-size: 13px;
+    --c2-reaction-bar__count--font-size: 11px;
+  }
+</style>
+<c2-reaction-bar class="reactions-summary" readonly reactions='[{"emoji":"👍","count":1280,"reacted":true},{"emoji":"😂","count":96},{"emoji":"😮","count":12}]'></c2-reaction-bar>
+```
+
+</GalleryGrid>

@@ -1734,6 +1734,12 @@
       "reason": "The toolbar region owns the toolbar slot's layout."
     },
     {
+      "tag": "c2-reaction-bar",
+      "slot": "picker",
+      "decision": "assigned-content",
+      "reason": "The picker slot projects a consumer-owned c2-emoji-picker into the popup; style it through its own --c2-emoji-picker variables."
+    },
+    {
       "tag": "c2-sankey-chart",
       "slot": "actions",
       "decision": "part",
