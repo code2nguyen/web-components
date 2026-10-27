@@ -17,6 +17,7 @@
         "c2-cascader": true,
         "c2-chat-input": true,
         "c2-checkbox-group": true,
+        "c2-choice-matrix": true,
         "c2-code-editor": true,
         "c2-date-input": true,
         "c2-date-time-picker": true,

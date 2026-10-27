@@ -1,0 +1,61 @@
+---
+title: 'Bar List'
+description: 'A ranked list whose rows carry their own bar: top pages, referrers, countries, or the changes between two periods.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BarList } from '@c2n/components/bar-list'
+
+`c2-bar-list` is the ranking of an analytics dashboard, as in Vercel Analytics, Plausible and Stripe: each row's background is a bar as long as its share of the largest value, with the label (and an icon or a link) on it and the value at the end. Its `diverging` mode draws changes instead, growing right or left from a centre line.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/bar-list'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/bar-list
+<style>
+  .bar-list-demo {
+    width: 420px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Top pages">
+  <c2-bar-list class="bar-list-demo" label="Top pages" label-header="Page" value-header="Visitors" max-items="4"
+    items='[{"label":"/","value":12840,"href":"#"},{"label":"/pricing","value":6420,"href":"#"},{"label":"/blog/lit-ssr","value":3190,"href":"#"},{"label":"/docs","value":2280,"href":"#"},{"label":"/changelog","value":940,"href":"#"},{"label":"/careers","value":410,"href":"#"}]'></c2-bar-list>
+</div>
+<div data-label="Shares">
+  <c2-bar-list class="bar-list-demo" label="Traffic sources" value-format='{"style":"percent","maximumFractionDigits":0}'
+    items='[{"label":"Search","value":0.46},{"label":"Direct","value":0.27},{"label":"Social","value":0.15},{"label":"Email","value":0.12}]'></c2-bar-list>
+</div>
+<div data-label="Diverging">
+  <c2-bar-list class="bar-list-demo" diverging label="Revenue change by region" value-format='{"style":"percent","maximumFractionDigits":1}'
+    items='[{"label":"Europe","value":0.124},{"label":"North America","value":0.061},{"label":"Asia Pacific","value":-0.032},{"label":"Latin America","value":-0.087}]'></c2-bar-list>
+</div>
+```
+
+### Items
+
+`items` is an array of `{ label, value, href, icon }`, as a property or as JSON in the attribute. A row with an `href` is a link (opened in `target`; only http(s) and relative addresses are followed); `icon` draws an image before the label, such as a favicon or a flag. With `interactive`, rows without an `href` are buttons that fire `item-select` with the item and its index, for a dashboard that filters by the row picked.
+
+### Scale and order
+
+Each bar is as long as its value's share of the largest one, or of `max` when set, so two lists can share a scale. Rows are sorted largest first (`sort="ascending"` or `"none"` to change it). `max-items` shows only the first rows, with a button to show the rest.
+
+### Values
+
+Values are formatted in the page's language. `value-format` takes `Intl.NumberFormat` options: `{"style":"percent"}`, `{"style":"currency","currency":"EUR"}`, `{"notation":"compact"}`. For anything else set `valueFormatter`, a function of the value and the item. `label-header` and `value-header` add column titles.
+
+### Diverging
+
+`diverging` draws changes: the bars grow right from a centre line for positive values and left for negative ones, in their own colours (`--c2-bar-list__bar__positive--background-color`, `__negative--…`), and the values carry their sign.
+
+### Accessibility
+
+The list is a list named by `label`; a screen reader hears each row as its label and its value. The bars are drawn, not read, so the value is always in the text.

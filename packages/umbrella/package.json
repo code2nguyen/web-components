@@ -109,6 +109,10 @@
       "types": "./dist/banner.d.ts",
       "default": "./dist/banner.js"
     },
+    "./bar-list": {
+      "types": "./dist/bar-list.d.ts",
+      "default": "./dist/bar-list.js"
+    },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
@@ -280,6 +284,10 @@
     "./chip-group": {
       "types": "./dist/chip-group.d.ts",
       "default": "./dist/chip-group.js"
+    },
+    "./choice-matrix": {
+      "types": "./dist/choice-matrix.d.ts",
+      "default": "./dist/choice-matrix.js"
     },
     "./citation": {
       "types": "./dist/citation.d.ts",
@@ -1070,6 +1078,7 @@
     "@c2n/avatar": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
+    "@c2n/bar-list": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1086,6 +1095,7 @@
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
     "@c2n/chip-group": "*",
+    "@c2n/choice-matrix": "*",
     "@c2n/citation": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",

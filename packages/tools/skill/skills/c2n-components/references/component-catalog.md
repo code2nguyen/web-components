@@ -51,6 +51,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
+- **Bar List** — `c2-bar-list` · `@c2n/components/bar-list` — A ranked list whose rows carry their own bar: top pages, referrers, countries, or the changes between two periods.
 - **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
@@ -130,6 +131,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer. Children: `c2-checkbox`.
 - **Checkbox group** — `c2-checkbox-group, c2-checkbox` · `@c2n/components/checkbox/checkbox-group` — Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule. Children: `c2-checkbox`.
 - **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
+- **Choice Matrix** — `c2-choice-matrix` · `@c2n/components/choice-matrix` — Rows × columns of checkboxes or radio buttons in one form control: permissions, notification settings, agreement scales.
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.

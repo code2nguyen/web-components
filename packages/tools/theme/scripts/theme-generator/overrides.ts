@@ -1012,4 +1012,24 @@ export const overrides: Record<string, Override> = {
   '--c2-emoji-picker__preview__emoji--font-size': { exclude: 'emoji glyph size' },
   '--c2-reaction-bar__emoji--font-size': { exclude: 'emoji glyph size' },
   '--c2-reaction-bar__quick--font-size': { exclude: 'emoji glyph size' },
+  // A bar list's hover is a stronger tint of its primary-container bar.
+  '--c2-bar-list__bar__hover--background-color': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #476ef9) 10%)',
+  },
+  // The diverging bars are washes over the surface, so they darken with it in the dark theme; there is no success token.
+  '--c2-bar-list__bar__positive--background-color': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, #16a34a 16%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-bar-list__bar__negative--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 14%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  // Green text mixed with ink: dark enough on white, light enough on the dark surface.
+  '--c2-bar-list__value__positive--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #16a34a 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-choice-matrix__row-header--font-weight': { exclude: 'regular body weight' },
 }
