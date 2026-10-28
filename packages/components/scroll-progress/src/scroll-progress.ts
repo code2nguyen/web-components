@@ -31,7 +31,7 @@ const LOOKUP_FRAMES = 30
  * @csspart fill - The filled part.
  *
  * @cssproperty {pixel} [--c2-scroll-progress--thickness=3px] - The bar's height.
- * @cssproperty {color} [--c2-scroll-progress__track--color=transparent]
+ * @cssproperty {color} [--c2-scroll-progress__track--color=#e4e4e7] - `transparent` hides the unfilled part.
  * @cssproperty {color} [--c2-scroll-progress__fill--color=#0265dc]
  * @cssproperty {border-radius} [--c2-scroll-progress--border-radius=0]
  * @cssproperty {pixel} [--c2-scroll-progress__ring--size=40px]
