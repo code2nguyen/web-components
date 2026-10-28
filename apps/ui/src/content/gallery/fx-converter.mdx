@@ -7,12 +7,12 @@ import { FxConverter } from '@c2n/components/fx-converter'
 
 Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do most of the work; the fields keep their own `--c2-money-input-*` variables, which can be set on the converter.
 
-<GalleryGrid>
+<GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
   .fx-box {
-    width: 320px;
+    width: 100%;
   }
 </style>
 <c2-fx-converter class="fx-box" from="EUR" to="USD" currencies="EUR;USD;GBP" amount="100000" rate="1.0842" fee="413"></c2-fx-converter>
@@ -21,7 +21,7 @@ Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do mo
 ```html tag=MdxCodeBlock,label=Compact
 <style>
   .fx-compact {
-    width: 300px;
+    width: 100%;
     --c2-fx-converter--padding: 12px;
     --c2-fx-converter--border-radius: 8px;
     --c2-fx-converter__amount--font-size: 16px;
@@ -35,7 +35,7 @@ Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do mo
 ```html tag=MdxCodeBlock,label=Bold amounts
 <style>
   .fx-bold {
-    width: 320px;
+    width: 100%;
     --c2-fx-converter--border: 0 solid transparent;
     --c2-fx-converter--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-fx-converter__amount--font-size: 24px;
@@ -51,7 +51,7 @@ Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do mo
 ```html tag=MdxCodeBlock,label=Fixed recipient amount
 <style>
   .fx-exact {
-    width: 320px;
+    width: 100%;
   }
 </style>
 <c2-fx-converter class="fx-exact" from="EUR" to="GBP" currencies="EUR;GBP;USD" amount="200000" fixed="to" rate="0.8571" fee="350"></c2-fx-converter>

@@ -169,6 +169,8 @@ export class MoneyInput extends LitElement {
   @property({ type: String, reflect: true }) name = ''
   /** Form field name of the currency code. Empty submits the value only. */
   @property({ attribute: 'currency-name' }) currencyName = ''
+  /** Accessible name of the currency picker, when two fields with pickers sit together ("You send currency"). Default: "Currency". */
+  @property({ attribute: 'currency-label' }) currencyLabel = ''
   /** Browser autocomplete hint, such as `transaction-amount`. */
   @property({ type: String }) autocomplete = ''
   /** Text shown while the field is empty. Empty shows zero in the currency's format (`0.00`). */
@@ -421,7 +423,11 @@ export class MoneyInput extends LitElement {
   private renderPicker(currencies: string[], locale: string) {
     const current = normalizeCurrency(this.currency)
     return html`<span class="picker">
-      <select aria-label=${this.msg.t('currency')} ?disabled=${this.effectiveDisabled || this.readOnly} @change=${this.handleCurrencyChange}>
+      <select
+        aria-label=${this.currencyLabel || this.msg.t('currency')}
+        ?disabled=${this.effectiveDisabled || this.readOnly}
+        @change=${this.handleCurrencyChange}
+      >
         ${currencies.map((code) => html`<option value=${code} title=${currencyName(locale, code)} .selected=${code === current}>${code}</option>`)}
       </select>
       <span class="chevron" aria-hidden="true">

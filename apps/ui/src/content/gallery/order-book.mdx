@@ -7,12 +7,12 @@ import { OrderBook } from '@c2n/components/order-book'
 
 Looks for `c2-order-book`. The bid and ask colours drive the prices, the depth bars and the flashes; the row height and font size set the density.
 
-<GalleryGrid>
+<GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
   .book-box {
-    width: 280px;
+    width: 100%;
   }
 </style>
 <c2-order-book class="book-box" depth="6" base="BTC" quote="USD" bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208]]' asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731]]'></c2-order-book>
@@ -21,7 +21,7 @@ Looks for `c2-order-book`. The bid and ask colours drive the prices, the depth b
 ```html tag=MdxCodeBlock,label=Dense terminal
 <style>
   .book-dense {
-    width: 260px;
+    width: 100%;
     --c2-order-book__row--height: 18px;
     --c2-order-book--font-size: 11px;
     --c2-order-book--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -36,7 +36,7 @@ Looks for `c2-order-book`. The bid and ask colours drive the prices, the depth b
 ```html tag=MdxCodeBlock,label=Blue and orange
 <style>
   .book-colour {
-    width: 280px;
+    width: 100%;
     --c2-order-book__bid--color: light-dark(#1d4ed8, #93c5fd);
     --c2-order-book__ask--color: light-dark(#c2410c, #fdba74);
   }
@@ -44,14 +44,15 @@ Looks for `c2-order-book`. The bid and ask colours drive the prices, the depth b
 <c2-order-book class="book-colour" depth="6" base="ETH" quote="EUR" bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208]]' asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731]]'></c2-order-book>
 ```
 
-```html tag=MdxCodeBlock,label=Side by side, grouped
+```html tag=MdxCodeBlock,label=Grouped by 5
 <style>
-  .book-split {
-    width: 460px;
-    max-width: 100%;
+  .book-grouped {
+    width: 100%;
+    --c2-order-book__row--height: 24px;
+    --c2-order-book__grouping--width: 88px;
   }
 </style>
-<c2-order-book class="book-split" layout="split" depth="6" groups="1;5;10" group="1" base="BTC" quote="USD" bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208],[64207.25,3.05],[64206.75,2.21]]' asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731],[64213.75,0.044],[64214.25,0.065]]'></c2-order-book>
+<c2-order-book class="book-grouped" depth="4" groups="0.5;1;5;10" group="5" base="BTC" quote="USD" bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208],[64207.25,3.05],[64206.75,2.21]]' asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731],[64213.75,0.044],[64214.25,0.065]]'></c2-order-book>
 ```
 
 </GalleryGrid>

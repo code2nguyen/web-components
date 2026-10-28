@@ -7,6 +7,7 @@ const fr: typeof fxConverterMessages.en = {
   fromLabel: 'Vous envoyez',
   toLabel: 'Le destinataire reçoit',
   toExactLabel: 'Le destinataire reçoit exactement',
+  currencyOf: (field) => `${field} : devise`,
   fee: 'Frais',
   converted: 'Montant converti',
   rate: 'Taux de change',

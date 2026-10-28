@@ -8,6 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { FxConverter } from '@c2n/components/fx-converter'
+import { Button } from '@c2n/components/button'
 
 `c2-fx-converter` quotes a currency transfer the way Wise and Revolut do: the reader types what they send or what the recipient gets, and the other amount is computed from the rate, after the fee. A swap button exchanges the currencies, and a guaranteed rate counts down beside the rate line, then asks for a new one.
 
@@ -38,10 +39,7 @@ import '@c2n/components/fx-converter'
     fee="413"
     max="1000000"
   ></c2-fx-converter>
-  <c2-button
-    onclick="const fx = document.getElementById('fx-live'); const requote = () => { fx.rate = Math.round((1.08 + Math.random() / 100) * 10000) / 10000; fx.rateExpires = String(Date.now() + 10000) }; if (!fx.requote) { fx.requote = requote; fx.addEventListener('rate-refresh', requote) } requote()"
-    >Guarantee for 10 seconds</c2-button
-  >
+  <c2-button onclick="const fx = document.getElementById('fx-live'); const requote = () => { fx.rate = Math.round((1.08 + Math.random() / 100) * 10000) / 10000; fx.rateExpires = String(Date.now() + 10000) }; if (!fx.requote) { fx.requote = requote; fx.addEventListener('rate-refresh', requote) } requote()">Guarantee for 10 seconds</c2-button>
 </div>
 <div data-label="Without a fee">
   <c2-fx-converter class="fx-demo" from="GBP" to="USD" currencies="GBP;USD;EUR" amount="50000" rate="1.2741"></c2-fx-converter>

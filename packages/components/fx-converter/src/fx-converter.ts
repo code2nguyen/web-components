@@ -408,6 +408,7 @@ export class FxConverter extends LitElement {
       <span class="label">${label}</span>
       <c2-money-input
         aria-label=${label}
+        currency-label=${this.msg.t('currencyOf', label)}
         .value=${live(value)}
         currency=${side === 'from' ? this.from : this.to}
         .currencies=${this.listFor(side)}

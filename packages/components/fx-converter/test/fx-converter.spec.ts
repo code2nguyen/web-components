@@ -42,7 +42,7 @@ test('swap exchanges the currencies, keeps the typed amount, and marks the inver
   await expect.poll(() => events(page)).toEqual([{ from: 'USD', to: 'EUR' }])
   await expect(page.locator('main')).not.toHaveAttribute('data-bubbled')
   await expect(page.getByRole('textbox', { name: 'You send' })).toHaveValue('1,000.00')
-  await expect(page.getByRole('combobox').first()).toHaveValue('USD')
+  await expect(page.getByRole('combobox', { name: 'You send currency' })).toHaveValue('USD')
   // The fee was in euros: it is gone until the app sends a new quote.
   await expect(converter(page).locator('.line')).toHaveText([/1 USD = 0\.922339 EUR\s*Indicative rate/])
   await expect(page.getByRole('textbox', { name: 'Recipient gets' })).toHaveValue('922.34')
@@ -79,7 +79,7 @@ test('picking a currency recomputes in its minor unit; max shows an error; text 
   await renderScenario(`<c2-fx-converter from="USD" to="EUR" currencies="USD;EUR;JPY" rate="150.5" amount="1000" max="500" locale="en-US"></c2-fx-converter>
     <div lang="fr"><c2-fx-converter id="fr" from="EUR" to="USD" rate="1.1" amount="1000"></c2-fx-converter></div>`)
   await watch(converter(page).first(), 'currency-change')
-  await converter(page).first().getByRole('combobox').nth(1).selectOption('JPY')
+  await converter(page).first().getByRole('combobox', { name: 'Recipient gets currency' }).selectOption('JPY')
   await expect.poll(async () => JSON.parse((await converter(page).first().getAttribute('data-events')) ?? '[]')).toEqual([{ side: 'to', currency: 'JPY' }])
   // Yen have no minor unit: 10 USD × 150.5 is ¥1,505.
   await expect(page.getByRole('textbox', { name: 'Recipient gets' }).first()).toHaveValue('1,505')

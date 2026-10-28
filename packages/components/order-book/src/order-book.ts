@@ -1,4 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -217,6 +218,8 @@ export class OrderBook extends LitElement {
   /** The row holding the tab stop. */
   private focusKey = ''
   private formats = new Map<string, Intl.NumberFormat>()
+  /** Set after the first client render; see renderGrouping. */
+  @state() private hydrated = false
 
   constructor() {
     super()
@@ -258,6 +261,10 @@ export class OrderBook extends LitElement {
     this.dataDigits[side] = 0
     this.merge(side, Array.isArray(levels) ? levels : [])
     this.dataChanged = true
+  }
+
+  protected override firstUpdated(): void {
+    this.hydrated = true
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -480,6 +487,9 @@ export class OrderBook extends LitElement {
 
   private renderGrouping() {
     if (this.groups.length < 2) return nothing
+    // A select rendered on the server comes up with an empty trigger after hydration (it reads its label on
+    // slotchange, which hydration never fires): it is drawn on the client only, in a box of its own size meanwhile.
+    if (!this.hydrated) return html`<span class="grouping grouping--pending"></span>`
     const current = this.groups.find((step) => Number(step) === this.group) ?? ''
     return html`<span class="grouping" @c2-field-connect=${this.stopInner} @input=${this.stopInner} @change=${this.stopInner}>
       <c2-select aria-label=${this.msg.t('grouping')} value=${current} @selection-change=${this.handleGroup}>

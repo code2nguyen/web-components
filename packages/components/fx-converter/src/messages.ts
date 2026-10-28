@@ -7,6 +7,8 @@ const en = {
   toLabel: 'Recipient gets',
   /** Label of the lower field when the reader typed in it, so it is the amount that is kept. */
   toExactLabel: 'Recipient gets exactly',
+  /** Accessible name of a field's currency picker: `{0}` is the field's label. */
+  currencyOf: (field: string) => `${field} currency`,
   /** The fee line. */
   fee: 'Fee',
   /** The line under the fee: what is left to convert. */

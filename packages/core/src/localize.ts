@@ -168,8 +168,10 @@ function render(message: TranslatedMessage, locale: string, args: unknown[]): st
  * language, else English. `lang=""` (unknown) is skipped.
  */
 export function localeOf(element: Element | null | undefined): string {
+  // A server renderer (Lit SSR) has elements but no Element or ShadowRoot class to test them against.
+  const dom = typeof Element !== 'undefined' && typeof ShadowRoot !== 'undefined'
   let node: Node | null | undefined = element
-  while (node) {
+  while (node && dom) {
     if (node instanceof Element) {
       const lang = node.getAttribute('lang')
       if (lang) return lang

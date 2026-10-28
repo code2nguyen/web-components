@@ -111,6 +111,13 @@ test('picks a currency and keeps the amount in major units', async ({ page, rend
   await expect(host).toHaveJSProperty('value', '10')
 })
 
+test('currency-label names the picker, so two fields side by side tell their pickers apart', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-money-input aria-label="From" currency-label="From currency" currencies="USD;EUR"></c2-money-input>
+    <c2-money-input aria-label="To" currency-label="To currency" currency="EUR" currencies="USD;EUR"></c2-money-input>`)
+  await expect(page.getByRole('combobox', { name: 'From currency' })).toHaveValue('USD')
+  await expect(page.getByRole('combobox', { name: 'To currency' })).toHaveValue('EUR')
+})
+
 test('submits, validates and resets with its form', async ({ page, renderScenario }) => {
   await renderScenario(`
     <form>
