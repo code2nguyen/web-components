@@ -3,6 +3,40 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.18](https://github.com/code2nguyen/web-components/releases/tag/v1.0.18) — 2026-10-27
+
+### Features
+
+- **facet-list, notification-center:** Wire the docs app and build graph ([1f6694f](https://github.com/code2nguyen/web-components/commit/1f6694f))
+- **facet-list, notification-center:** Add c2-facet-list and c2-notification-center (sources) ([bd7a8f5](https://github.com/code2nguyen/web-components/commit/bd7a8f5))
+- **bar-list, choice-matrix:** Add c2-bar-list and c2-choice-matrix ([e98504e](https://github.com/code2nguyen/web-components/commit/e98504e))
+- **emoji-picker, reaction-bar:** Add c2-emoji-picker and c2-reaction-bar ([1fa1a6e](https://github.com/code2nguyen/web-components/commit/1fa1a6e))
+- **tool-call, citation:** Add c2-tool-call and c2-citation ([e17ba64](https://github.com/code2nguyen/web-components/commit/e17ba64))
+- **distribution-bar:** Add c2-distribution-bar, one 100% stacked bar of a breakdown ([9130143](https://github.com/code2nguyen/web-components/commit/9130143))
+- **chart:** Add c2-waterfall-chart and c2-treemap-chart ([256aa0c](https://github.com/code2nguyen/web-components/commit/256aa0c))
+- **loading-overlay:** Add c2-loading-overlay for regions that refresh in place ([1024e78](https://github.com/code2nguyen/web-components/commit/1024e78))
+- **secret-field:** Add c2-secret-field for API keys and other secrets ([fd1712e](https://github.com/code2nguyen/web-components/commit/fd1712e))
+- **toggletip:** Add c2-toggletip, a help bubble opened by a press ([7a654aa](https://github.com/code2nguyen/web-components/commit/7a654aa))
+- **meter:** Add c2-meter for measurements inside a known range ([7979b8b](https://github.com/code2nguyen/web-components/commit/7979b8b))
+- **visually-hidden:** Add c2-visually-hidden for screen-reader-only content ([0023c21](https://github.com/code2nguyen/web-components/commit/0023c21))
+
+### Fixes
+
+- **facet-list, notification-center:** Keep hidden facet actions from shortening labels, wrap the inbox header ([21c65cb](https://github.com/code2nguyen/web-components/commit/21c65cb))
+- **bar-list, choice-matrix:** Fit the diverging labels and the scale card ([83637d0](https://github.com/code2nguyen/web-components/commit/83637d0))
+- **bar-list, choice-matrix:** Fixes from the screenshot review ([ba24f28](https://github.com/code2nguyen/web-components/commit/ba24f28))
+- **bar-list, choice-matrix:** Address review findings ([c4ddd0a](https://github.com/code2nguyen/web-components/commit/c4ddd0a))
+- **emoji-picker:** Shrink the category icons with a narrow picker ([5846e4e](https://github.com/code2nguyen/web-components/commit/5846e4e))
+- **emoji-picker:** Fit the grid and the categories to the picker's width ([09bc186](https://github.com/code2nguyen/web-components/commit/09bc186))
+- **distribution-bar:** Fill the bar whatever the values add up to, and hover one part at a time ([58dcd16](https://github.com/code2nguyen/web-components/commit/58dcd16))
+- **chart:** Address review findings on the waterfall and treemap charts ([288adc9](https://github.com/code2nguyen/web-components/commit/288adc9))
+- **loading-overlay:** Announce reliably, server-render safely, keep the scrim on top ([c214136](https://github.com/code2nguyen/web-components/commit/c214136))
+- **generator:** Register the umbrella devDependency when scaffolding ([44a23a9](https://github.com/code2nguyen/web-components/commit/44a23a9))
+- **toggletip:** Announce reliably, keep Escape to itself, survive a move ([7d1626b](https://github.com/code2nguyen/web-components/commit/7d1626b))
+- **meter:** Match native meter boundaries, chart palette and fitted segments ([d56cd67](https://github.com/code2nguyen/web-components/commit/d56cd67))
+- **visually-hidden:** Keep focusable="false" hidden and tidy the examples ([edc1eb4](https://github.com/code2nguyen/web-components/commit/edc1eb4))
+- **float-button:** Keep a tapped hover dial open on iOS Safari ([afc37b7](https://github.com/code2nguyen/web-components/commit/afc37b7))
+
 ## [1.0.17](https://github.com/code2nguyen/web-components/releases/tag/v1.0.17) — 2026-10-25
 
 ### Breaking changes

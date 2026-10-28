@@ -3,7 +3,7 @@
   "name": "io.github.code2nguyen/c2n",
   "title": "c2n Web Components",
   "description": "Exact APIs, examples, theme tokens and markup validation for the c2n (c2-*) Lit web components.",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "websiteUrl": "https://code2nguyen.github.io/web-components/guides/ai-tools",
   "repository": {
     "url": "https://github.com/code2nguyen/web-components",
@@ -14,7 +14,7 @@
     {
       "registryType": "npm",
       "identifier": "@c2n/mcp",
-      "version": "1.0.17",
+      "version": "1.0.18",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

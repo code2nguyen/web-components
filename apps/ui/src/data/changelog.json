@@ -2,6 +2,154 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.18",
+      "date": "2026-10-27",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["facet-list", "notification-center"],
+              "text": "Wire the docs app and build graph",
+              "hash": "1f6694f"
+            },
+            {
+              "scopes": ["facet-list", "notification-center"],
+              "text": "Add c2-facet-list and c2-notification-center (sources)",
+              "hash": "bd7a8f5"
+            },
+            {
+              "scopes": ["bar-list", "choice-matrix"],
+              "text": "Add c2-bar-list and c2-choice-matrix",
+              "hash": "e98504e"
+            },
+            {
+              "scopes": ["emoji-picker", "reaction-bar"],
+              "text": "Add c2-emoji-picker and c2-reaction-bar",
+              "hash": "1fa1a6e"
+            },
+            {
+              "scopes": ["tool-call", "citation"],
+              "text": "Add c2-tool-call and c2-citation",
+              "hash": "e17ba64"
+            },
+            {
+              "scopes": ["distribution-bar"],
+              "text": "Add c2-distribution-bar, one 100% stacked bar of a breakdown",
+              "hash": "9130143"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-waterfall-chart and c2-treemap-chart",
+              "hash": "256aa0c"
+            },
+            {
+              "scopes": ["loading-overlay"],
+              "text": "Add c2-loading-overlay for regions that refresh in place",
+              "hash": "1024e78"
+            },
+            {
+              "scopes": ["secret-field"],
+              "text": "Add c2-secret-field for API keys and other secrets",
+              "hash": "fd1712e"
+            },
+            {
+              "scopes": ["toggletip"],
+              "text": "Add c2-toggletip, a help bubble opened by a press",
+              "hash": "7a654aa"
+            },
+            {
+              "scopes": ["meter"],
+              "text": "Add c2-meter for measurements inside a known range",
+              "hash": "7979b8b"
+            },
+            {
+              "scopes": ["visually-hidden"],
+              "text": "Add c2-visually-hidden for screen-reader-only content",
+              "hash": "0023c21"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["facet-list", "notification-center"],
+              "text": "Keep hidden facet actions from shortening labels, wrap the inbox header",
+              "hash": "21c65cb"
+            },
+            {
+              "scopes": ["bar-list", "choice-matrix"],
+              "text": "Fit the diverging labels and the scale card",
+              "hash": "83637d0"
+            },
+            {
+              "scopes": ["bar-list", "choice-matrix"],
+              "text": "Fixes from the screenshot review",
+              "hash": "ba24f28"
+            },
+            {
+              "scopes": ["bar-list", "choice-matrix"],
+              "text": "Address review findings",
+              "hash": "c4ddd0a"
+            },
+            {
+              "scopes": ["emoji-picker"],
+              "text": "Shrink the category icons with a narrow picker",
+              "hash": "5846e4e"
+            },
+            {
+              "scopes": ["emoji-picker"],
+              "text": "Fit the grid and the categories to the picker's width",
+              "hash": "09bc186"
+            },
+            {
+              "scopes": ["distribution-bar"],
+              "text": "Fill the bar whatever the values add up to, and hover one part at a time",
+              "hash": "58dcd16"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Address review findings on the waterfall and treemap charts",
+              "hash": "288adc9"
+            },
+            {
+              "scopes": ["loading-overlay"],
+              "text": "Announce reliably, server-render safely, keep the scrim on top",
+              "hash": "c214136"
+            },
+            {
+              "scopes": ["generator"],
+              "text": "Register the umbrella devDependency when scaffolding",
+              "hash": "44a23a9"
+            },
+            {
+              "scopes": ["toggletip"],
+              "text": "Announce reliably, keep Escape to itself, survive a move",
+              "hash": "7d1626b"
+            },
+            {
+              "scopes": ["meter"],
+              "text": "Match native meter boundaries, chart palette and fitted segments",
+              "hash": "d56cd67"
+            },
+            {
+              "scopes": ["visually-hidden"],
+              "text": "Keep focusable=\"false\" hidden and tidy the examples",
+              "hash": "edc1eb4"
+            },
+            {
+              "scopes": ["float-button"],
+              "text": "Keep a tapped hover dial open on iOS Safari",
+              "hash": "afc37b7"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.17",
       "date": "2026-10-25",
       "sections": [
