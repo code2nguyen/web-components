@@ -195,8 +195,12 @@ export class SelectionToolbar extends LitElement {
   private ownsSelection(selection: Selection): boolean {
     if (selection.rangeCount === 0) return false
     // Text selected in a form field is the field's: some engines report it as a range around the field.
-    const active = document.activeElement
-    if (active && this.contains(active) && active.matches('input, textarea')) return false
+    // Focus may sit inside a component's shadow root (a c2-text-field), so walk down to the innermost element.
+    let active = document.activeElement
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+    const field = (element: Element | null) =>
+      !!element && (element.matches('input, textarea') || (element.constructor as { formAssociated?: boolean }).formAssociated === true)
+    if (document.activeElement && this.contains(document.activeElement) && (field(active) || field(document.activeElement))) return false
     // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
     const range = selection.getRangeAt(0)
     const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
