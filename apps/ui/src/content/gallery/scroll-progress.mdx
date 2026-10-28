@@ -17,8 +17,11 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
     height: 140px;
     overflow: auto;
   }
+  .progress-bar {
+    width: 220px;
+  }
 </style>
-<c2-scroll-progress for="progress-card-1"></c2-scroll-progress>
+<c2-scroll-progress class="progress-bar" for="progress-card-1"></c2-scroll-progress>
 <div id="progress-card-1" class="progress-box"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></div>
 ```
 
@@ -33,6 +36,7 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
     --c2-scroll-progress--border-radius: 999px;
     --c2-scroll-progress__track--color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-scroll-progress__fill--color: #16a34a;
+    width: 220px;
     margin-bottom: 8px;
   }
 </style>
