@@ -333,6 +333,10 @@
       "types": "./dist/command/command-separator.d.ts",
       "default": "./dist/command/command-separator.js"
     },
+    "./comment-thread": {
+      "types": "./dist/comment-thread.d.ts",
+      "default": "./dist/comment-thread.js"
+    },
     "./comparison-bar": {
       "types": "./dist/comparison-bar.d.ts",
       "default": "./dist/comparison-bar.js"
@@ -761,6 +765,10 @@
       "types": "./dist/select.d.ts",
       "default": "./dist/select.js"
     },
+    "./selection-toolbar": {
+      "types": "./dist/selection-toolbar.d.ts",
+      "default": "./dist/selection-toolbar.js"
+    },
     "./separator": {
       "types": "./dist/separator.d.ts",
       "default": "./dist/separator.js"
@@ -1128,6 +1136,7 @@
     "@c2n/color-select": "*",
     "@c2n/color-slider": "*",
     "@c2n/command": "*",
+    "@c2n/comment-thread": "*",
     "@c2n/comparison-bar": "*",
     "@c2n/config": "*",
     "@c2n/confirm-dialog": "*",
@@ -1217,6 +1226,7 @@
     "@c2n/search-field": "*",
     "@c2n/secret-field": "*",
     "@c2n/select": "*",
+    "@c2n/selection-toolbar": "*",
     "@c2n/separator": "*",
     "@c2n/sheet": "*",
     "@c2n/shortcut": "*",
