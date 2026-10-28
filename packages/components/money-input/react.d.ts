@@ -26,6 +26,7 @@ declare module 'react' {
       'c2-money-input': Omit<C2Props<MoneyInput>, 'currencies'> & {
         'currency-display'?: Attribute
         'currency-name'?: Attribute
+        'currency-label'?: Attribute
         readonly?: Attribute
         'error-text'?: Attribute
         'aria-label'?: Attribute

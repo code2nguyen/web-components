@@ -111,6 +111,19 @@ test('picks a currency and keeps the amount in major units', async ({ page, rend
   await expect(host).toHaveJSProperty('value', '10')
 })
 
+test('currency-label names the picker; a pick that keeps the value fires no input', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-money-input aria-label="From" currency-label="From currency" currencies="USD;EUR"></c2-money-input>
+    <c2-money-input aria-label="To" currency-label="To currency" currency="EUR" currencies="USD;EUR"></c2-money-input>`)
+  await expect(page.getByRole('combobox', { name: 'From currency' })).toHaveValue('USD')
+  await expect(page.getByRole('combobox', { name: 'To currency' })).toHaveValue('EUR')
+  // A pick that keeps the value (two-digit to two-digit) is not an edit: no input event leaves the field.
+  const from = page.locator('c2-money-input').first()
+  await watch(from, 'input')
+  await page.getByRole('combobox', { name: 'From currency' }).selectOption('EUR')
+  await expect(from).toHaveJSProperty('currency', 'EUR')
+  await expect(from).toHaveAttribute('data-events', '[]')
+})
+
 test('submits, validates and resets with its form', async ({ page, renderScenario }) => {
   await renderScenario(`
     <form>

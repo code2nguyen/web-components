@@ -1,0 +1,271 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-order-book,
+  $theme: (
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    background: #ffffff,
+    color: #18181b,
+    font-size: 12px,
+    font-family: inherit,
+    divider--border: 1px solid #e4e4e7,
+    header--display: flex,
+    header--padding: 8px 12px,
+    title--font-size: 14px,
+    title--font-weight: 600,
+    grouping--width: 96px,
+    column-header--color: #71717a,
+    row--height: 20px,
+    row--padding-inline: 12px,
+    row__hover--background: #f4f4f5,
+    row__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    bid--color: light-dark(#166534, #4ade80),
+    ask--color: light-dark(#b91c1c, #f87171),
+    bid-bar--background: color-mix(in srgb, var(--c2-order-book__bid--color, light-dark(#166534, #4ade80)) 14%, transparent),
+    ask-bar--background: color-mix(in srgb, var(--c2-order-book__ask--color, light-dark(#b91c1c, #f87171)) 14%, transparent),
+    flash__up--background: color-mix(in srgb, var(--c2-order-book__bid--color, light-dark(#166534, #4ade80)) 20%, transparent),
+    flash__down--background: color-mix(in srgb, var(--c2-order-book__ask--color, light-dark(#b91c1c, #f87171)) 20%, transparent),
+    flash--duration: 600ms,
+    own--size: 4px,
+    spread--background: #fafafa,
+    spread--padding: 6px 12px,
+    spread__price--font-size: 16px,
+    spread__price--font-weight: 600,
+    spread__label--color: #71717a,
+    empty--min-height: 160px,
+    empty--color: #71717a,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.book {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.header {
+  display: css.cssVar(header--display);
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(divider--border);
+}
+
+.title {
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.grouping {
+  display: block;
+  width: css.cssVar(grouping--width);
+}
+
+.grouping c2-select {
+  display: block;
+  width: 100%;
+}
+
+.head,
+.row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding-inline: css.cssVar(row--padding-inline);
+}
+
+.head {
+  padding-block: 6px;
+  color: css.cssVar(column-header--color);
+}
+
+.head > :not(:first-child),
+.row > :not(:first-child) {
+  text-align: end;
+}
+
+/* Side by side, the bids end on their price, next to the asks. */
+.book--split .side--bid .head > :last-child,
+.book--split .side--bid .row > :last-child {
+  text-align: end;
+}
+
+.row {
+  position: relative;
+  align-items: center;
+  height: css.cssVar(row--height);
+  cursor: pointer;
+  white-space: nowrap;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* The depth bar: the cumulative size to this level, as a share of the deepest level drawn, grown from the side the spread is on. */
+.row {
+  background: linear-gradient(to left, var(--_bar) calc(var(--_depth, 0) * 100%), transparent 0);
+}
+
+.book--split .row--ask {
+  background: linear-gradient(to right, var(--_bar) calc(var(--_depth, 0) * 100%), transparent 0);
+}
+
+:host(:dir(rtl)) {
+  .row {
+    background: linear-gradient(to right, var(--_bar) calc(var(--_depth, 0) * 100%), transparent 0);
+  }
+
+  .book--split .row--ask {
+    background: linear-gradient(to left, var(--_bar) calc(var(--_depth, 0) * 100%), transparent 0);
+  }
+}
+
+.row--bid {
+  --_bar: #{css.cssVar(bid-bar--background)};
+}
+
+.row--ask {
+  --_bar: #{css.cssVar(ask-bar--background)};
+}
+
+.row:hover {
+  background-color: css.cssVar(row__hover--background);
+}
+
+.row:focus-visible {
+  outline: css.cssVar(row__focus--outline);
+  outline-offset: -2px;
+}
+
+.row--bid .price {
+  color: css.cssVar(bid--color);
+}
+
+.row--ask .price {
+  color: css.cssVar(ask--color);
+}
+
+.own {
+  display: inline-block;
+  width: css.cssVar(own--size);
+  height: css.cssVar(own--size);
+  margin-inline-start: 4px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@keyframes flash-up-0 {
+  from {
+    box-shadow: inset 0 0 0 999px css.cssVar(flash__up--background);
+  }
+}
+
+@keyframes flash-up-1 {
+  from {
+    box-shadow: inset 0 0 0 999px css.cssVar(flash__up--background);
+  }
+}
+
+@keyframes flash-down-0 {
+  from {
+    box-shadow: inset 0 0 0 999px css.cssVar(flash__down--background);
+  }
+}
+
+@keyframes flash-down-1 {
+  from {
+    box-shadow: inset 0 0 0 999px css.cssVar(flash__down--background);
+  }
+}
+
+@each $name in flash-up-0, flash-up-1, flash-down-0, flash-down-1 {
+  .#{$name} {
+    animation: $name css.cssVar(flash--duration) ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    animation: none;
+  }
+}
+
+.spread {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: css.cssVar(spread--padding);
+  border-block: css.cssVar(divider--border);
+  background: css.cssVar(spread--background);
+  white-space: nowrap;
+}
+
+.book--split .spread {
+  border-top: none;
+}
+
+.spread__price {
+  font-size: css.cssVar(spread__price--font-size);
+  font-weight: css.cssVar(spread__price--font-weight);
+}
+
+.spread__price--up {
+  color: css.cssVar(bid--color);
+}
+
+.spread__price--down {
+  color: css.cssVar(ask--color);
+}
+
+.spread__label {
+  margin-inline-start: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: css.cssVar(spread__label--color);
+}
+
+.sides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sides > .side + .side {
+  border-inline-start: css.cssVar(divider--border);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: css.cssVar(empty--min-height);
+  color: css.cssVar(empty--color);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

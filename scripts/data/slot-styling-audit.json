@@ -1355,6 +1355,13 @@
       "reason": "The default slot only projects the consumer's fallback text (\"No date\") while no valid date is set; it inherits the host's --c2-format-date--* typography and is otherwise styled by the consumer."
     },
     {
+      "tag": "c2-fx-converter",
+      "slot": "swap-icon",
+      "decision": "variables",
+      "variables": ["--c2-fx-converter__swap-icon--size"],
+      "reason": "The swap button sizes the slotted icon and its default arrows through the icon size variable."
+    },
+    {
       "tag": "c2-gantt",
       "slot": "duration-header",
       "decision": "assigned-content",
