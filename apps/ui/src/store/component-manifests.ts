@@ -13,6 +13,7 @@ import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
+import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
@@ -40,6 +41,7 @@ import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
+import dateStrip from '@c2n/date-strip/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
@@ -90,6 +92,7 @@ import mermaid from '@c2n/mermaid/custom-elements.json'
 import meter from '@c2n/meter/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
+import monthPicker from '@c2n/month-picker/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
@@ -151,6 +154,7 @@ import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
 import timeInput from '@c2n/time-input/custom-elements.json'
 import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
+import timeSlotPicker from '@c2n/time-slot-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
@@ -188,6 +192,7 @@ export const componentManifests = (function () {
     button,
     buttonGroup,
     card,
+    cardInput,
     carousel,
     cascader,
     chart,
@@ -214,6 +219,7 @@ export const componentManifests = (function () {
     dashboard,
     dateInput,
     dateSelector,
+    dateStrip,
     dateTimePicker,
     descriptionList,
     details,
@@ -264,6 +270,7 @@ export const componentManifests = (function () {
     meter,
     modal,
     moneyInput,
+    monthPicker,
     monthPlanner,
     navigationMenu,
     notepad,
@@ -325,6 +332,7 @@ export const componentManifests = (function () {
     themeSelect,
     timeInput,
     timeRangePicker,
+    timeSlotPicker,
     timeline,
     toast,
     todoList,

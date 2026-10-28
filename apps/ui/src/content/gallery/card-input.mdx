@@ -1,0 +1,62 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { CardInput } from '@c2n/components/card-input'
+
+## Presets
+
+Looks for `c2-card-input`. The box's border, radius and height set the style.
+
+<GalleryGrid min={320}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-card-input></c2-card-input>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .card-large {
+    --c2-card-input--height: 52px;
+    --c2-card-input--font-size: 16px;
+    --c2-card-input--border-radius: 12px;
+    --c2-card-input--padding: 0 16px;
+  }
+</style>
+<c2-card-input class="card-large"></c2-card-input>
+```
+
+```html tag=MdxCodeBlock,label=Underlined
+<style>
+  .card-underlined {
+    --c2-card-input--border: 1px solid transparent;
+    --c2-card-input--border-radius: 0;
+    --c2-card-input--padding: 0;
+    --c2-card-input--background: transparent;
+    --c2-card-input__focus--outline: none;
+    --c2-card-input__focus--border: 1px solid transparent;
+  }
+  .card-underlined::part(field) {
+    border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  }
+  .card-underlined::part(field):focus-within {
+    border-bottom-color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-card-input class="card-underlined"></c2-card-input>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .card-soft {
+    --c2-card-input--background: light-dark(#faf5ff, #1f1530);
+    --c2-card-input--border: 1px solid light-dark(#e9d5ff, #3b2556);
+    --c2-card-input__focus--border: 1px solid #9333ea;
+    --c2-card-input__focus--outline: 2px solid rgba(147, 51, 234, 0.3);
+    --c2-card-input__badge--background: light-dark(#f3e8ff, #2e1a47);
+    --c2-card-input__badge--color: light-dark(#7e22ce, #c4a1f0);
+  }
+</style>
+<c2-card-input class="card-soft"></c2-card-input>
+```
+
+</GalleryGrid>

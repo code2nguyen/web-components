@@ -545,6 +545,18 @@
       "reason": "The semantic media region owns the media slot's component-side presentation."
     },
     {
+      "tag": "c2-card-input",
+      "slot": "brand",
+      "decision": "assigned-content",
+      "reason": "The brand slot replaces the outline shown while no brand is detected with the app's own mark, which the app sizes and styles."
+    },
+    {
+      "tag": "c2-card-input",
+      "slot": "brand-visa",
+      "decision": "assigned-content",
+      "reason": "The brand-<id> slots take the app's licensed card artwork in place of the text badge; the app styles its own image."
+    },
+    {
       "tag": "c2-carousel",
       "slot": "",
       "decision": "assigned-content",

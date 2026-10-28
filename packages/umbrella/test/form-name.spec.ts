@@ -25,6 +25,7 @@ const submitted: Record<string, string[]> = {
   'c2-code-editor': ['let a = 1'],
   'c2-date-input': ['2026-10-17'],
   'c2-date-selector': ['2026-10-17'],
+  'c2-date-strip': ['2026-10-17'],
   'c2-date-time-picker': ['2026-10-17T09:30'],
   'c2-inline-edit': ['Apollo'],
   'c2-json-form': ['{"city":"Paris"}'],
@@ -32,6 +33,7 @@ const submitted: Record<string, string[]> = {
   'c2-map-chart': ['DEU', 'POL'],
   'c2-mask-input': ['abc'],
   'c2-money-input': ['1250'],
+  'c2-month-picker': ['2026-10'],
   'c2-notepad': ['Notes'],
   'c2-number-input': ['42'],
   'c2-otp-input': ['1234'],
@@ -53,6 +55,7 @@ const submitted: Record<string, string[]> = {
   'c2-text-field-clear': ['Ada'],
   'c2-textarea': ['Long text'],
   'c2-time-input': ['09:30'],
+  'c2-time-slot-picker': ['2026-10-17T09:00:00Z'],
   'c2-tree-select': ['eu'],
   'c2-upload': ['notes.txt'],
 }
@@ -65,6 +68,7 @@ const reflectOnly: Record<string, string> = {
 
 // Form-associated elements whose entries are not under `name` itself, each covered by a test of its own below.
 const ownCase: Record<string, string> = {
+  'c2-card-input': 'submits name[number], name[expiry] and name[cvc], typed in by the user only',
   'c2-choice-matrix': 'submits one name[row] entry per choice',
 }
 
@@ -94,6 +98,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-code-editor': (e) => (e.value = 'let a = 1'),
         'c2-date-input': (e) => (e.value = '2026-10-17'),
         'c2-date-selector': (e) => (e.from = '2026-10-17'),
+        'c2-date-strip': (e) => (e.value = '2026-10-17'),
         'c2-date-time-picker': (e) => (e.value = '2026-10-17T09:30'),
         'c2-inline-edit': (e) => (e.value = 'Apollo'),
         'c2-json-form': (e) => Object.assign(e, { schema: { type: 'object', properties: { city: { type: 'string' } } }, value: { city: 'Paris' } }),
@@ -101,6 +106,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-map-chart': (e) => (e.value = ['DEU', 'POL']),
         'c2-mask-input': (e) => (e.value = 'abc'),
         'c2-money-input': (e) => (e.value = '1250'),
+        'c2-month-picker': (e) => (e.value = '2026-10'),
         'c2-notepad': (e) => (e.value = 'Notes'),
         'c2-number-input': (e) => (e.value = '42'),
         'c2-otp-input': (e) => (e.value = '1234'),
@@ -122,6 +128,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-text-field-clear': (e) => (e.value = 'Ada'),
         'c2-textarea': (e) => (e.value = 'Long text'),
         'c2-time-input': (e) => (e.value = '09:30'),
+        'c2-time-slot-picker': (e) => (e.value = '2026-10-17T09:00:00Z'),
         'c2-tree-select': (e) => (e.value = ['eu']),
         'c2-upload': (e) => (e.value = [new File(['hello'], 'notes.txt', { type: 'text/plain' })]),
         'c2-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
@@ -195,4 +202,23 @@ test('c2-choice-matrix reflects a name set as a property and submits one name[ro
       ['perm[pulls]', 'read'],
     ],
   })
+})
+
+test('c2-card-input reflects a name set as a property and submits name[number], name[expiry] and name[cvc]', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  // The card has no value property: it can only be typed in, so the entries come from the inputs.
+  await page.evaluate(() => {
+    const element = document.createElement('c2-card-input') as HTMLElement & { name: string }
+    element.name = 'card'
+    document.querySelector('form')!.append(element)
+  })
+  await expect(page.locator('c2-card-input')).toHaveAttribute('name', 'card')
+  await page.getByRole('textbox', { name: 'Card number' }).fill('4242424242424242')
+  await page.getByRole('textbox', { name: 'Expiry date (MM / YY)' }).fill('1240')
+  await page.getByRole('textbox', { name: 'Security code' }).fill('123')
+  expect(await page.locator('form').evaluate((form: HTMLFormElement) => [...new FormData(form)])).toEqual([
+    ['card[number]', '4242424242424242'],
+    ['card[expiry]', '2040-12'],
+    ['card[cvc]', '123'],
+  ])
 })

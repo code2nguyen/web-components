@@ -20,12 +20,14 @@
         "c2-choice-matrix": true,
         "c2-code-editor": true,
         "c2-date-input": true,
+        "c2-date-strip": true,
         "c2-date-time-picker": true,
         "c2-inline-edit": true,
         "c2-json-form": true,
         "c2-map-chart": true,
         "c2-mask-input": true,
         "c2-money-input": true,
+        "c2-month-picker": true,
         "c2-notepad": true,
         "c2-number-input": true,
         "c2-otp-input": true,
@@ -45,6 +47,7 @@
         "c2-text-field-clear": true,
         "c2-textarea": true,
         "c2-time-input": true,
+        "c2-time-slot-picker": true,
         "c2-tree-select": true
       },
       "checked": {

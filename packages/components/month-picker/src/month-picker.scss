@@ -1,0 +1,166 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-month-picker,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    box-shadow: none,
+    padding: 12px,
+    width: 264px,
+    font-size: 14px,
+    title--font-weight: 600,
+    navigation--size: 32px,
+    navigation__hover--background: #f4f4f5,
+    grid--gap: 4px,
+    cell--height: 40px,
+    cell--border-radius: 999px,
+    cell__hover--background: #f4f4f5,
+    cell__current--color: #0265dc,
+    cell__current--font-weight: 600,
+    cell__selected--background: #0265dc,
+    cell__selected--color: #ffffff,
+    cell__disabled--opacity: 0.38,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    error--border: 1px solid #dc2626,
+  )
+);
+
+:host {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.picker {
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+.picker.error {
+  border: css.cssVar(error--border);
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  min-height: css.cssVar(navigation--size);
+  padding: 0 8px;
+  border-radius: 8px;
+  font-weight: css.cssVar(title--font-weight);
+  text-align: center;
+}
+
+button.title:hover:not(:disabled) {
+  background: css.cssVar(navigation__hover--background);
+}
+
+span.title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navigation {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  border-radius: 999px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(cell__disabled--opacity);
+  }
+}
+
+.grid {
+  display: grid;
+  gap: css.cssVar(grid--gap);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: css.cssVar(grid--gap);
+}
+
+.cell {
+  height: css.cssVar(cell--height);
+  border-radius: css.cssVar(cell--border-radius);
+  white-space: nowrap;
+
+  &:hover:not(:disabled):not(.cell--selected) {
+    background: css.cssVar(cell__hover--background);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(cell__disabled--opacity);
+  }
+}
+
+.cell--current {
+  color: css.cssVar(cell__current--color);
+  font-weight: css.cssVar(cell__current--font-weight);
+}
+
+.cell--selected,
+.cell--selected.cell--current {
+  background: css.cssVar(cell__selected--background);
+  color: css.cssVar(cell__selected--color);
+}

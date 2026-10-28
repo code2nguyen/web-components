@@ -67,6 +67,7 @@ export const componentPreviews: Record<string, string> = {
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #71717a)">Supporting text that describes what this card is about.</div>
 </c2-card>`,
+  'card-input': `<c2-card-input style="width: 260px"></c2-card-input>`,
   carousel: `<c2-carousel label="Preview" loop style="width:260px;--c2-carousel__control--size:28px;--c2-carousel__control--inset:8px">
   <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#0265dc,#7c3aed);color:#fff;font-weight:600">1</div>
   <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#db2777,#ea580c);color:#fff;font-weight:600">2</div>
@@ -160,6 +161,7 @@ greet('world')"></c2-code-editor>`,
 </c2-dashboard>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
+  'date-strip': `<c2-date-strip value="2026-10-14" start="2026-10-12" markers='["2026-10-13","2026-10-16"]' style="width:250px;--c2-date-strip__day--min-width:30px;--c2-date-strip__date--font-size:14px"></c2-date-strip>`,
   'date-time-picker': `<c2-date-time-picker value="2026-10-14T09:30" time-zone="Europe/Paris" aria-label="Meeting" style="width:240px"></c2-date-time-picker>`,
   'depth-chart': `<c2-depth-chart style="width:280px;height:132px;--c2-chart--padding:6px" axes="x" grid="none" range="0.004" bids='[[67410.5,0.6],[67402,1.4],[67390,0.9],[67371,2.2],[67352,1.1],[67330,3.6],[67300,6.8],[67276,1.9],[67250,2.4]]' asks='[[67414.5,0.4],[67421,1.2],[67433,0.8],[67450,2.9],[67468,1.3],[67490,1.7],[67500,5.2],[67531,2.1],[67575,2.6]]'></c2-depth-chart>`,
   'description-list': `<c2-description-list aria-label="Customer" style="width:280px;--c2-description-list__grid--min-column-width:120px;--c2-description-list__grid--columns:2"><c2-description-item label="Name">Ada Lovelace</c2-description-item><c2-description-item label="Plan">Business</c2-description-item><c2-description-item label="Email">ada@example.com</c2-description-item><c2-description-item label="Phone"></c2-description-item></c2-description-list>`,
@@ -312,6 +314,7 @@ price: .price
   </c2-modal>
 </div>`,
   'money-input': `<c2-money-input value="250000" locale="en-US" currencies="USD;EUR;GBP" aria-label="Payout amount" style="width:220px"></c2-money-input>`,
+  'month-picker': `<c2-month-picker value="2026-05" style="--c2-month-picker--width:230px;--c2-month-picker__cell--height:30px;--c2-month-picker--padding:8px;--c2-month-picker__grid--gap:2px"></c2-month-picker>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">
@@ -511,6 +514,7 @@ price: .price
   'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
   'time-range-picker': `<c2-time-range-picker nav from="now-6h" refresh-intervals="10s 30s 1m" refresh-interval="30s"></c2-time-range-picker>`,
+  'time-slot-picker': `<c2-time-slot-picker style="width: 260px" time-zone="Europe/Paris" value="2026-11-02T09:30:00+01:00" slots='[{"start":"2026-11-02T09:00:00+01:00"},{"start":"2026-11-02T09:30:00+01:00"},{"start":"2026-11-02T10:00:00+01:00","available":false},{"start":"2026-11-03T11:00:00+01:00"}]'></c2-time-slot-picker>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,

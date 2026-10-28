@@ -128,6 +128,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer. Children: `c2-checkbox`.
 - **Checkbox group** — `c2-checkbox-group, c2-checkbox` · `@c2n/components/checkbox/checkbox-group` — Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule. Children: `c2-checkbox`.
@@ -138,6 +139,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
 - **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range.
+- **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
 - **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
 - **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
@@ -151,6 +153,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
 - **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
+- **Month Picker** — `c2-month-picker` · `@c2n/components/month-picker` — Pick a month, or a year: billing periods, reports and card expiry.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
@@ -172,6 +175,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
+- **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 - **View Options** — `c2-view-options, c2-view-field, c2-view-toggle` · `@c2n/components/view-options` — The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value. Children: `c2-view-field`, `c2-view-toggle`.
