@@ -32,6 +32,8 @@
   background-color: css.cssVar(background);
   box-shadow: css.cssVar(box-shadow);
   color: inherit;
+  /* Not for scrolling: the script reads the offset from here, resolved to pixels. */
+  scroll-margin-top: css.cssVar(offset);
 }
 
 /* Shown as a popover; the flex layout only applies while open, so a closed popover stays display: none. */

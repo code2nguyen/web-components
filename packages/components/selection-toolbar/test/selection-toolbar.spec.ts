@@ -113,3 +113,27 @@ test('disabled never shows; text follows the language', async ({ page, renderSce
   await select(page, 'text', 'brown')
   await expect(page.getByRole('toolbar', { name: 'Actions sur la sélection' })).toBeVisible()
 })
+
+test('a selection across two paragraphs shows it; one in a form field does not; disabling hides it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-selection-toolbar>
+    <p id="one">First paragraph.</p>
+    <p id="two">Second paragraph.</p>
+    <textarea id="field">Text in a field</textarea>
+    <button slot="toolbar">Comment</button>
+  </c2-selection-toolbar>`)
+  await page.evaluate(() => {
+    const range = document.createRange()
+    range.setStart(document.getElementById('one')!.firstChild!, 6)
+    range.setEnd(document.getElementById('two')!.firstChild!, 6)
+    document.getSelection()!.removeAllRanges()
+    document.getSelection()!.addRange(range)
+  })
+  await expect(toolbar(page)).toBeVisible()
+  await host(page).evaluate((element: SelectionToolbar) => (element.disabled = true))
+  await expect(toolbar(page)).toBeHidden()
+  await host(page).evaluate((element: SelectionToolbar) => (element.disabled = false))
+  await page.locator('#field').focus()
+  await page.locator('#field').evaluate((field: HTMLTextAreaElement) => field.setSelectionRange(0, 4))
+  await page.waitForTimeout(400)
+  await expect(toolbar(page)).toBeHidden()
+})

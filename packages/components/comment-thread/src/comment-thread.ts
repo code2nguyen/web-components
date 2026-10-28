@@ -145,7 +145,7 @@ export class CommentThread extends LitElement {
   /** Shows a reaction bar under each comment. */
   @property({ type: Boolean }) reactions = false
 
-  /** Past this many replies, only the first and the last two show until "Show N earlier replies" is pressed. */
+  /** Past this many replies (at least 3), only the first and the last two show until "Show N earlier replies" is pressed. */
   @property({ type: Number, attribute: 'collapse-after' }) collapseAfter = 4
 
   /** No reply box, edit, delete or resolve. */
@@ -157,7 +157,8 @@ export class CommentThread extends LitElement {
   @state() private expanded = false
   /** The comment being edited, by id. */
   @state() private editing: string | number | null = null
-  @state() private draft = ''
+  /** The text in the reply box. It empties when a reply is sent, even a cancelled one; set it back to restore the text when a server refuses the reply. */
+  @property({ attribute: false }) draft = ''
   @state() private editDraft = ''
   @state() private announcement = ''
 
@@ -211,6 +212,15 @@ export class CommentThread extends LitElement {
     this.renderRoot.querySelector<HTMLElement>(selector)?.focus()
   }
 
+  /** Focuses the first of the selectors that matches, in the order given (not document order). */
+  private async focusFirst(...selectors: string[]): Promise<void> {
+    await this.updateComplete
+    for (const selector of selectors) {
+      const element = this.renderRoot.querySelector<HTMLElement>(selector)
+      if (element) return element.focus()
+    }
+  }
+
   private submitReply(): void {
     const body = this.draft.trim()
     if (!body || !this.canWrite) return
@@ -218,9 +228,9 @@ export class CommentThread extends LitElement {
       localIds += 1
       const author = this.currentUser!
       this.comments = [...this.list, { id: `local-${localIds}`, author: { ...author }, body, time: new Date().toISOString() }]
+      this.announce(this.msg.t('replyAdded'))
     }
     this.draft = ''
-    this.announce(this.msg.t('replyAdded'))
     void this.focusSelector('.composer c2-textarea')
   }
 
@@ -249,9 +259,10 @@ export class CommentThread extends LitElement {
   private deleteComment(comment: ThreadComment, root: boolean): void {
     if (!this.fire('comment-delete', { id: comment.id })) return
     // Removing the whole thread is the app's: the first comment stays until the app takes the thread away.
-    if (!root) this.comments = this.list.filter((item) => item.id !== comment.id)
+    if (root) return
+    this.comments = this.list.filter((item) => item.id !== comment.id)
     this.announce(this.msg.t('commentDeleted'))
-    void this.focusSelector('.composer c2-textarea, .resolve')
+    void this.focusFirst('.composer c2-textarea', '.resolve')
   }
 
   private toggleResolved(): void {
@@ -298,7 +309,7 @@ export class CommentThread extends LitElement {
     })()
     const name = comment.author.name
     if (this.editing === comment.id) {
-      return html`<article class="comment" part="comment" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
+      return html`<article class="comment" part="comment" tabindex="-1" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
         <c2-avatar class="avatar" name=${name} src=${comment.author.avatar || nothing} aria-hidden="true"></c2-avatar>
         <div class="main">
           <div class="meta"><span class="author" part="author">${name}</span></div>
@@ -328,7 +339,7 @@ export class CommentThread extends LitElement {
         </div>
       </article>`
     }
-    return html`<article class="comment" part="comment" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
+    return html`<article class="comment" part="comment" tabindex="-1" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
       <c2-avatar class="avatar" name=${name} src=${comment.author.avatar || nothing} aria-hidden="true"></c2-avatar>
       <div class="main">
         <div class="meta">
@@ -385,7 +396,8 @@ export class CommentThread extends LitElement {
   }
 
   private renderReplies(replies: ThreadComment[]) {
-    const limit = Math.max(1, Number.isFinite(this.collapseAfter) ? Math.round(this.collapseAfter) : 4)
+    // The folded view shows three replies, so fewer than four never fold.
+    const limit = Math.max(3, Number.isFinite(this.collapseAfter) ? Math.round(this.collapseAfter) : 4)
     if (this.expanded || replies.length <= limit) return replies.map((reply) => this.renderComment(reply, false))
     const hidden = replies.length - 3
     return html`${this.renderComment(replies[0], false)}

@@ -116,3 +116,25 @@ test('reactions are re-fired with the comment id and kept on the comment', async
   expect(await events(page)).toEqual([{ id: 1, emoji: '👍', reacted: true, count: 2 }])
   expect(await thread(page).evaluate((element: CommentThread) => element.comments[0].reactions)).toEqual([{ emoji: '👍', count: 2, reacted: true }])
 })
+
+test('unfolding replies moves focus to the first one shown; a small collapse-after never folds three replies', async ({ page, renderScenario }) => {
+  const many = JSON.stringify(
+    Array.from({ length: 6 }, (_, at) => ({ id: at + 1, author: at % 2 ? BEN : ANA, body: `Comment ${at + 1}`, time: '2026-10-14T09:00:00Z' })),
+  )
+  await renderScenario(`<c2-comment-thread comments='${many}'></c2-comment-thread><c2-comment-thread collapse-after="1" comments='${COMMENTS}'></c2-comment-thread>`)
+  await page.getByRole('button', { name: 'Show 2 earlier replies' }).click()
+  await expect(page.locator('c2-comment-thread').first().locator('[data-id="3"]')).toBeFocused()
+  await expect(page.locator('c2-comment-thread').nth(1).locator('[part="body"]')).toHaveCount(3)
+})
+
+test('a cancelled reply is not announced; deleting a reply returns focus to the reply box', async ({ page, renderScenario }) => {
+  await renderScenario(scenario())
+  await thread(page).evaluate((element: CommentThread) => element.addEventListener('comment-add', (event) => event.preventDefault(), { once: true }))
+  await page.getByRole('textbox', { name: 'Reply…' }).fill('Held for the server')
+  await page.getByRole('button', { name: 'Reply', exact: true }).click()
+  await page.waitForTimeout(200)
+  await expect(thread(page).locator('[role="status"]')).toHaveText('')
+  await page.getByRole('button', { name: "Delete Ben Ito's comment" }).click()
+  await page.getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: 'Reply…' })).toBeFocused()
+})

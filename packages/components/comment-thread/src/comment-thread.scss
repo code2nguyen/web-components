@@ -63,6 +63,13 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
+  border-radius: 4px;
+
+  /* Focus lands on a comment only from script, when replies unfold. */
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 4px;
+  }
 }
 
 .avatar {

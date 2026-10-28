@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { computePosition, autoUpdate, flip, shift, offset, type VirtualElement } from '@floating-ui/dom'
 import { property } from '@c2n/core/lit-helper.js'
@@ -109,6 +109,8 @@ export class SelectionToolbar extends LitElement {
     super.connectedCallback()
     document.addEventListener('selectionchange', this.handleSelectionChange)
     document.addEventListener('pointerup', this.handlePointerUp, true)
+    // A touch long-press hands the gesture to native selection with a pointercancel, not a pointerup.
+    document.addEventListener('pointercancel', this.handlePointerUp, true)
     document.addEventListener('keydown', this.handleDocumentKeydown, true)
     this.addEventListener('pointerdown', this.handlePointerDown)
   }
@@ -117,10 +119,15 @@ export class SelectionToolbar extends LitElement {
     super.disconnectedCallback()
     document.removeEventListener('selectionchange', this.handleSelectionChange)
     document.removeEventListener('pointerup', this.handlePointerUp, true)
+    document.removeEventListener('pointercancel', this.handlePointerUp, true)
     document.removeEventListener('keydown', this.handleDocumentKeydown, true)
     this.removeEventListener('pointerdown', this.handlePointerDown)
     clearTimeout(this.settleTimer)
     this.hide()
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('disabled') && this.disabled) this.hide()
   }
 
   private get panel(): HTMLElement | null {
@@ -187,9 +194,13 @@ export class SelectionToolbar extends LitElement {
   /** Whether the selection lies inside the content (and not in the toolbar). */
   private ownsSelection(selection: Selection): boolean {
     if (selection.rangeCount === 0) return false
+    // Text selected in a form field is the field's: some engines report it as a range around the field.
+    const active = document.activeElement
+    if (active && this.contains(active) && active.matches('input, textarea')) return false
+    // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
     const range = selection.getRangeAt(0)
-    const node = range.commonAncestorContainer
-    return this.contains(node) && node !== this && !this.inToolbar(node)
+    const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
+    return inside(range.startContainer) && inside(range.endContainer)
   }
 
   /** Shows, moves or hides the toolbar for the current selection. */
@@ -217,7 +228,8 @@ export class SelectionToolbar extends LitElement {
     this.open = true
     await this.updateComplete
     const panel = this.panel
-    if (!panel) return
+    // Hidden again while the render was pending.
+    if (!panel || !this.open) return
     if (!wasOpen) {
       try {
         panel.showPopover()
@@ -235,7 +247,9 @@ export class SelectionToolbar extends LitElement {
       getClientRects: () => range.getClientRects(),
       contextElement: this,
     }
-    const distance = parseFloat(getComputedStyle(this).getPropertyValue('--c2-selection-toolbar--offset')) || 8
+    // The offset is resolved by the stylesheet onto scroll-margin-top, which computes to pixels whatever its unit.
+    const resolved = parseFloat(getComputedStyle(panel).scrollMarginTop)
+    const distance = Number.isFinite(resolved) ? resolved : 8
     this.cleanupPosition = autoUpdate(anchor, panel, async () => {
       const { x, y } = await computePosition(anchor, panel, {
         strategy: 'fixed',
