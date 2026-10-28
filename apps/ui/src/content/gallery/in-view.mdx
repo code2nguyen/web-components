@@ -1,0 +1,76 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { InView } from '@c2n/components/in-view'
+import { ScrollArea } from '@c2n/components/scroll-area'
+
+## Presets
+
+Looks for `c2-in-view`. Scroll a card's list to see its reveal; each look is two or three CSS variables.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Fade up
+<style>
+  .reveal-up {
+    --c2-scroll-area--max-height: 200px;
+    width: 220px;
+  }
+  .reveal-up c2-in-view {
+    --c2-in-view__hidden--opacity: 0;
+    --c2-in-view__hidden--transform: translateY(24px);
+  }
+  .reveal-up .card {
+    margin: 0 0 12px;
+    padding: 20px 12px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-scroll-area class="reveal-up" label="Cards"><c2-in-view><p class="card">Card 1</p></c2-in-view><c2-in-view><p class="card">Card 2</p></c2-in-view><c2-in-view><p class="card">Card 3</p></c2-in-view><c2-in-view><p class="card">Card 4</p></c2-in-view><c2-in-view><p class="card">Card 5</p></c2-in-view><c2-in-view><p class="card">Card 6</p></c2-in-view></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Scale in
+<style>
+  .reveal-scale {
+    --c2-scroll-area--max-height: 200px;
+    width: 220px;
+  }
+  .reveal-scale c2-in-view {
+    --c2-in-view__hidden--opacity: 0;
+    --c2-in-view__hidden--transform: scale(0.92);
+    --c2-in-view--transition-duration: 350ms;
+  }
+  .reveal-scale .card {
+    margin: 0 0 12px;
+    padding: 20px 12px;
+    border-radius: 12px;
+    background: light-dark(#eef2ff, #1c2142);
+    color: light-dark(#4338ca, #a5b4fc);
+  }
+</style>
+<c2-scroll-area class="reveal-scale" label="Cards"><c2-in-view><p class="card">Card 1</p></c2-in-view><c2-in-view><p class="card">Card 2</p></c2-in-view><c2-in-view><p class="card">Card 3</p></c2-in-view><c2-in-view><p class="card">Card 4</p></c2-in-view><c2-in-view><p class="card">Card 5</p></c2-in-view><c2-in-view><p class="card">Card 6</p></c2-in-view></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Slide from the side
+<style>
+  .reveal-side {
+    --c2-scroll-area--max-height: 200px;
+    width: 220px;
+  }
+  .reveal-side c2-in-view {
+    --c2-in-view__hidden--opacity: 0;
+    --c2-in-view__hidden--transform: translateX(-32px);
+    --c2-in-view--transition-duration: 600ms;
+  }
+  .reveal-side .card {
+    margin: 0 0 12px;
+    padding: 20px 12px;
+    border-left: 3px solid var(--c2-theme--color-primary, #0265dc);
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-scroll-area class="reveal-side" label="Cards"><c2-in-view><p class="card">Card 1</p></c2-in-view><c2-in-view><p class="card">Card 2</p></c2-in-view><c2-in-view><p class="card">Card 3</p></c2-in-view><c2-in-view><p class="card">Card 4</p></c2-in-view><c2-in-view><p class="card">Card 5</p></c2-in-view><c2-in-view><p class="card">Card 6</p></c2-in-view></c2-scroll-area>
+```
+
+</GalleryGrid>

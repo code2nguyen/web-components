@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-scroll-progress</title>
+    <script type="module" src="/src/scroll-progress.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-scroll-progress style="position: fixed; inset: 0 0 auto"></c2-scroll-progress>
+    <div style="height: 300vh">Scroll</div>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ScrollArea } from '@c2n/components/scroll-area'
+
+## Presets
+
+Looks for `c2-scroll-area`. The scrollbar, the shadows and the fade set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .area-default {
+    --c2-scroll-area--max-height: 180px;
+    width: 220px;
+  }
+  .area-default .row {
+    margin: 0;
+    padding: 8px 4px;
+  }
+</style>
+<c2-scroll-area class="area-default" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Hover scrollbar
+<style>
+  .area-hover {
+    --c2-scroll-area--max-height: 180px;
+    --c2-scroll-area__thumb--color: transparent;
+    --c2-scroll-area__thumb__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 35%, transparent);
+    width: 220px;
+  }
+  .area-hover .row {
+    margin: 0;
+    padding: 8px 4px;
+  }
+</style>
+<c2-scroll-area class="area-hover" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Fade
+<style>
+  .area-fade {
+    --c2-scroll-area--max-height: 180px;
+    --c2-scroll-area__shadow--color: transparent;
+    --c2-scroll-area__fade--size: 48px;
+    --c2-scroll-area__scrollbar--width: none;
+    width: 220px;
+  }
+  .area-fade .row {
+    margin: 0;
+    padding: 8px 4px;
+  }
+</style>
+<c2-scroll-area class="area-fade" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+```
+
+</GalleryGrid>

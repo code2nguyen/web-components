@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-in-view</title>
+    <script type="module" src="/src/in-view.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="height: 120vh">Scroll down</div>
+    <c2-in-view style="--c2-in-view__hidden--opacity: 0; --c2-in-view__hidden--transform: translateY(24px)"><p>Revealed</p></c2-in-view>
+  </body>
+</html>
