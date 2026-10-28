@@ -57,6 +57,8 @@ const optionsConverter = {
     }
   },
   toAttribute: (value: unknown) => JSON.stringify(value),
+  // A string assigned to the property (a server renderer, Svelte) reads like the attribute.
+  fromProperty: (value: unknown) => (typeof value === 'string' ? optionsConverter.fromAttribute(value) : value),
 }
 
 /** How long a wheel's scroll has to stay still before its row counts as picked (where `scrollend` is missing). */
@@ -126,8 +128,8 @@ export class WheelPicker extends LitElement {
   /** Shorthand for a single wheel's options: a JSON array, or a `;`-separated list. */
   @property({ converter: optionsConverter }) options: (string | WheelOption)[] = []
 
-  /** One value per wheel. As an attribute, a `;`-separated list. */
-  @property({ converter: arrayPropertyConverter, reflect: true }) value: string[] = []
+  /** One value per wheel. As an attribute, a `;`-separated list. Not reflected: the attribute stays as the author wrote it. */
+  @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name: the form receives the values joined by `;`. */
   @property({ reflect: true }) name = ''
@@ -149,6 +151,12 @@ export class WheelPicker extends LitElement {
   private settleTimers = new Map<number, ReturnType<typeof setTimeout>>()
   /** Wheels being turned from code: their scroll does not count as the user's. */
   private steering = new Set<number>()
+  /** Wheels already scrolling, smoothly, to the value just chosen: their scroll is not cut short by a jump. */
+  private gliding = new Set<number>()
+  /** A picker rendered while hidden (a closed sheet, a tab) has no scroll position yet: it turns its wheels once it has a size. */
+  private readonly resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => this.turnToValue())
+  /** Where `scrollend` is missing, a pointer still down holds the wheel: the settle timer only runs after it lifts. */
+  private dragging = false
 
   constructor() {
     super()
@@ -196,8 +204,14 @@ export class WheelPicker extends LitElement {
     if (typeof state === 'string') this.value = state ? state.split(';') : []
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.resizeObserver?.observe(this)
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    this.resizeObserver?.disconnect()
     for (const timer of this.settleTimers.values()) clearTimeout(timer)
     this.settleTimers.clear()
   }
@@ -222,7 +236,7 @@ export class WheelPicker extends LitElement {
       return wheel.options[this.nearestEnabled(at, index < 0 ? 0 : index)]?.value ?? ''
     })
     if (next.length !== values.length || next.some((value, at) => value !== values[at])) this.value = next
-    if (this.defaultValue === undefined && this.wheels.length) this.defaultValue = [...this.value]
+    if (this.defaultValue === undefined && this.wheels.some((wheel) => wheel.options.length)) this.defaultValue = [...this.value]
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
   }
 
@@ -263,6 +277,7 @@ export class WheelPicker extends LitElement {
   /** Scrolls every wheel to its value, without firing events. */
   private turnToValue(): void {
     this.tracks().forEach((track, wheel) => {
+      if (this.gliding.delete(wheel)) return
       const top = this.indexOf(wheel) * this.rowHeight(track)
       if (Math.abs(track.scrollTop - top) < 1) return
       this.steering.add(wheel)
@@ -281,9 +296,10 @@ export class WheelPicker extends LitElement {
   }
 
   /** Sets one wheel's value as the user's choice: fires `input` then `change`. */
-  private choose(wheel: number, index: number): void {
+  private choose(wheel: number, index: number, gliding = false): void {
     const option = this.wheels[wheel]?.options[index]
     if (!option || option.disabled || this.effectiveDisabled || option.value === this.value[wheel]) return
+    if (gliding) this.gliding.add(wheel)
     const next = [...this.value]
     next[wheel] = option.value
     this.value = next
@@ -301,7 +317,7 @@ export class WheelPicker extends LitElement {
     const index = this.nearestEnabled(wheel, Math.min(resting, (this.wheels[wheel]?.options.length ?? 1) - 1))
     if (index < 0) return
     if (index !== resting) track.scrollTo({ top: index * height, behavior: this.scrollBehavior() })
-    this.choose(wheel, index)
+    this.choose(wheel, index, true)
   }
 
   private scrollBehavior(): ScrollBehavior {
@@ -309,7 +325,8 @@ export class WheelPicker extends LitElement {
   }
 
   private handleScroll(wheel: number, event: Event): void {
-    if (this.steering.has(wheel)) return
+    // Where the browser has scrollend, it alone settles a wheel; the timer is the fallback.
+    if (this.steering.has(wheel) || 'onscrollend' in window || this.dragging) return
     const track = event.currentTarget as HTMLElement
     clearTimeout(this.settleTimers.get(wheel))
     this.settleTimers.set(
@@ -322,12 +339,15 @@ export class WheelPicker extends LitElement {
     const count = this.wheels[wheel]?.options.length ?? 0
     if (!count || this.effectiveDisabled) return
     const at = this.indexOf(wheel)
+    const options = this.wheels[wheel].options
     const step = (from: number, delta: number) => {
-      // The next enabled row in that direction, or where it was when there is none.
-      const direction = Math.sign(delta)
-      let index = Math.min(count - 1, Math.max(0, from + delta))
-      while (index >= 0 && index < count && this.wheels[wheel].options[index].disabled) index += direction || 1
-      return index >= 0 && index < count ? index : at
+      // The row that far, clamped to the ends; when it is disabled, the next enabled one onward, else the nearest one
+      // back towards where the wheel was. Where there is none, the wheel stays.
+      const direction = Math.sign(delta) || 1
+      const clamped = Math.min(count - 1, Math.max(0, from + delta))
+      for (let index = clamped; index >= 0 && index < count; index += direction) if (!options[index].disabled) return index
+      for (let index = clamped - direction; index !== at && index >= 0 && index < count; index -= direction) if (!options[index].disabled) return index
+      return at
     }
     let target: number
     switch (event.key) {
@@ -353,7 +373,10 @@ export class WheelPicker extends LitElement {
         return
     }
     event.preventDefault()
-    this.choose(wheel, target)
+    if (target === at) return
+    const track = event.currentTarget as HTMLElement
+    track.scrollTo({ top: target * this.rowHeight(track), behavior: this.scrollBehavior() })
+    this.choose(wheel, target, true)
   }
 
   private handleRowClick(wheel: number, index: number, event: Event): void {
@@ -361,9 +384,7 @@ export class WheelPicker extends LitElement {
     const track = (event.currentTarget as HTMLElement).closest<HTMLElement>('.track')
     if (!track) return
     track.scrollTo({ top: index * this.rowHeight(track), behavior: this.scrollBehavior() })
-    // The scroll settles on this row, which picks it; picking now as well keeps a click that does not scroll (the row
-    // already in the band) and a reduced-motion jump the same.
-    this.choose(wheel, index)
+    this.choose(wheel, index, true)
   }
 
   override render() {
@@ -392,6 +413,9 @@ export class WheelPicker extends LitElement {
               aria-describedby=${this.field.describedBy()}
               @keydown=${(event: KeyboardEvent) => this.handleKeydown(at, event)}
               @scroll=${(event: Event) => this.handleScroll(at, event)}
+              @pointerdown=${() => (this.dragging = true)}
+              @pointerup=${() => (this.dragging = false)}
+              @pointercancel=${() => (this.dragging = false)}
               @scrollend=${(event: Event) => this.settle(at, event.currentTarget as HTMLElement)}
             >
               ${wheel.options.map(

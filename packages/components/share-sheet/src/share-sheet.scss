@@ -137,6 +137,5 @@ c2-sheet {
 
 .qr {
   align-self: center;
-  width: css.cssVar(qr--size);
   --c2-qr-code--size: #{css.cssVar(qr--size)};
 }

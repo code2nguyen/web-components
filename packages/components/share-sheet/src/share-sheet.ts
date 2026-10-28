@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -102,7 +102,7 @@ const glyphs = {
  *
  * @slot icon-linkedin - Artwork for a target, in place of its tile. Likewise `icon-email`, `icon-sms`, `icon-x`, `icon-facebook`, `icon-whatsapp`, `icon-telegram`, `icon-reddit` and `icon-native`.
  *
- * @event {CustomEvent<{ target: string; url: string }>} share - Cancelable. Fired before a target opens, and after the link is copied (target `copy`).
+ * @event {CustomEvent<{ target: 'copy' | 'email' | 'sms' | 'x' | 'linkedin' | 'facebook' | 'whatsapp' | 'telegram' | 'reddit' | 'native'; url: string }>} share - Cancelable. Fired before a target opens, and after the link is copied (target `copy`).
  * @event {Event} open - Fired after the sheet has opened.
  * @event {Event} close - Fired after the sheet has closed.
  *
@@ -151,7 +151,10 @@ export class ShareSheet extends LitElement {
   @property() side: 'top' | 'right' | 'bottom' | 'left' = 'bottom'
 
   private readonly msg = new LocalizeController(this, shareSheetMessages)
-  private nativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  /** Read each time: a polyfill may add `navigator.share` after this element upgraded. */
+  private get nativeShare(): boolean {
+    return typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  }
 
   /** Opens the sheet. */
   show(): void {
@@ -179,12 +182,6 @@ export class ShareSheet extends LitElement {
     this.show()
   }
 
-  protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('open') && changed.get('open') !== undefined) {
-      this.dispatchEvent(new Event(this.open ? 'open' : 'close', { bubbles: true, composed: true }))
-    }
-  }
-
   private fire(target: ShareTarget, url: string): boolean {
     return this.dispatchEvent(new CustomEvent('share', { detail: { target, url }, bubbles: true, composed: true, cancelable: true }))
   }
@@ -202,10 +199,12 @@ export class ShareSheet extends LitElement {
     }
   }
 
-  /** The sheet closed itself (Escape, the backdrop, its × button): its own `close` stays inside, this one goes out. */
-  private handleSheetClose(event: Event): void {
+  /** The inner sheet opened or closed (by `open`, Escape, the backdrop or its × button): its own event stays inside, this one goes out once it is done. */
+  private handleSheetToggle(event: Event): void {
     event.stopPropagation()
-    this.open = false
+    if (event.target !== event.currentTarget) return
+    this.open = event.type === 'open'
+    this.dispatchEvent(new Event(event.type, { bubbles: true, composed: true }))
   }
 
   private renderTile(target: string, content: unknown) {
@@ -252,7 +251,7 @@ export class ShareSheet extends LitElement {
   override render() {
     const url = safeUrl(this.url)
     const shown = url || this.url
-    return html`<c2-sheet .open=${this.open} side=${this.side} swipe-close @close=${this.handleSheetClose} @open=${(event: Event) => event.stopPropagation()}>
+    return html`<c2-sheet .open=${this.open} side=${this.side} swipe-close @close=${this.handleSheetToggle} @open=${this.handleSheetToggle}>
       <span slot="title">${this.msg.t('heading', this.heading)}</span>
       <div class="body">
         <div class="link-row">
@@ -277,7 +276,7 @@ export class ShareSheet extends LitElement {
           ></c2-copy-button>
         </div>
         ${url ? this.renderTargets(url) : nothing}
-        ${this.qr && url ? html`<c2-qr-code class="qr" part="qr" .value=${url} aria-label=${this.msg.t('qr', url)}></c2-qr-code>` : nothing}
+        ${this.qr && url ? html`<c2-qr-code class="qr" part="qr" size="0" .value=${url} aria-label=${this.msg.t('qr', url)}></c2-qr-code>` : nothing}
       </div>
     </c2-sheet>`
   }

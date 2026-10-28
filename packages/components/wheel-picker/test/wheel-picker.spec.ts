@@ -81,3 +81,29 @@ test('a disabled picker is out of the tab order; text follows the language', asy
   await expect(page.getByRole('spinbutton', { name: 'Roue 1 sur 2' })).toHaveAttribute('tabindex', '-1')
   await expect(picker(page)).toHaveHostAria('aria-label', 'Choisir une valeur')
 })
+
+test('a picker rendered hidden turns to its value once shown; it writes no value attribute; Page Down stops before a disabled end', async ({
+  page,
+  renderScenario,
+}) => {
+  const options = JSON.stringify(['a', 'b', 'c', 'd', 'e', 'f', 'g', { value: 'h', disabled: true }])
+  await renderScenario(`<div id="box" hidden><c2-wheel-picker label="Letter" value="f" options='${options}'></c2-wheel-picker></div>`)
+  await page.locator('#box').evaluate((box: HTMLElement) => (box.hidden = false))
+  await expect
+    .poll(() =>
+      picker(page)
+        .locator('.track')
+        .evaluate((track: HTMLElement) => Math.round(track.scrollTop / track.querySelector<HTMLElement>('.row')!.offsetHeight)),
+    )
+    .toBe(5)
+  expect(await picker(page).getAttribute('value')).toBe('f')
+  await page.getByRole('spinbutton', { name: 'Letter' }).focus()
+  await page.keyboard.press('PageDown')
+  expect(await value(page)).toEqual(['g'])
+})
+
+test('a picker without a value writes none on its host', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-wheel-picker options="S;M;L"></c2-wheel-picker>`)
+  expect(await value(page)).toEqual(['S'])
+  expect(await picker(page).getAttribute('value')).toBeNull()
+})

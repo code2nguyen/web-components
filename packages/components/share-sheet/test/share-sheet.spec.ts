@@ -74,3 +74,17 @@ test('with a device share sheet, share() uses it and More appears; text follows 
   await expect(page.getByRole('dialog', { name: 'Partager « Trip to Lisbon »' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Plus d’options de partage' })).toBeVisible()
 })
+
+test('open fires once the dialog is shown; the QR code takes the sheet size', async ({ page, renderScenario }) => {
+  await renderScenario(scenario('qr'))
+  await sheet(page).evaluate((element: Sheet) => {
+    element.addEventListener('open', () => {
+      const dialog = element.shadowRoot!.querySelector('c2-sheet')!.shadowRoot!.querySelector('dialog')!
+      element.dataset.openSeen = String(dialog.open)
+    })
+    element.open = true
+  })
+  await expect(sheet(page)).toHaveAttribute('data-open-seen', 'true')
+  const box = await sheet(page).locator('c2-qr-code').boundingBox()
+  expect(Math.round(box!.width)).toBe(160)
+})
