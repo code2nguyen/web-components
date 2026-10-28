@@ -1,0 +1,50 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { BarList } from '@c2n/components/bar-list'
+
+## Presets
+
+Looks for `c2-bar-list`. The bar's colour and radius do most of the work; the row height sets the density.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-bar-list items='[{"label":"Search","value":4620},{"label":"Direct","value":2710},{"label":"Social","value":1530},{"label":"Email","value":1180}]'></c2-bar-list>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .bars-compact {
+    --c2-bar-list--gap: 2px;
+    --c2-bar-list__row--height: 24px;
+    --c2-bar-list__label--font-size: 12px;
+    --c2-bar-list__value--font-size: 12px;
+    --c2-bar-list__bar--border-radius: 2px;
+  }
+</style>
+<c2-bar-list class="bars-compact" items='[{"label":"Germany","value":1820},{"label":"France","value":1310},{"label":"Spain","value":990},{"label":"Italy","value":760},{"label":"Poland","value":420}]'></c2-bar-list>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .bars-soft {
+    --c2-bar-list__bar--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-bar-list__bar__hover--background-color: light-dark(#e9d5ff, #321257);
+    --c2-bar-list__bar--border-radius: 999px;
+    --c2-bar-list__label--padding: 0 12px;
+  }
+</style>
+<c2-bar-list class="bars-soft" interactive items='[{"label":"Design","value":38},{"label":"Engineering","value":64},{"label":"Marketing","value":21},{"label":"Sales","value":29}]'></c2-bar-list>
+```
+
+```html tag=MdxCodeBlock,label=Changes
+<style>
+  .bars-changes {
+    --c2-bar-list__row--height: 28px;
+  }
+</style>
+<c2-bar-list class="bars-changes" diverging value-format='{"style":"percent","maximumFractionDigits":0}' items='[{"label":"Checkout","value":0.18},{"label":"Search","value":0.07},{"label":"Onboarding","value":-0.04},{"label":"Settings","value":-0.11}]'></c2-bar-list>
+```
+
+</GalleryGrid>

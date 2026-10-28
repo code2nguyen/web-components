@@ -326,6 +326,8 @@ export const overrides: Record<string, Override> = {
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
   '--c2-chart__negative--color': { token: 'chart-negative' },
+  // The zero of a treemap's colour scale: a quiet tile in either theme, which the outline colour is.
+  '--c2-chart__neutral--color': { token: 'color-outline' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
   // A depth chart's sides are the chart's own rise and fall colours, not the error role, and its mid price label is
@@ -396,6 +398,18 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // Secret field: the show button's pressed fill is the same hairline grey, a step above the hover surface.
+  '--c2-secret-field__action__selected--background-color': { token: 'color-outline-variant' },
+  // Meter: the unused range is the progress track's hairline grey, a critical value is the error colour, and the
+  // segment palette is the chart series, so one category reads the same in a chart and a meter. The sub-optimum
+  // amber is an accent the theme has no token for.
+  '--c2-meter__track--background-color': { token: 'color-outline-variant' },
+  '--c2-meter__indicator__critical--background-color': { token: 'color-error' },
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-meter__segment-${i + 1}--background-color`, { token: `chart-series-${i + 1}` }])),
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-distribution-bar__segment-${i + 1}--color`, { token: `chart-series-${i + 1}` }])),
+  // The empty bar is a track, like the meter's; the hover bubble is an inverse surface, like the chart tooltip.
+  '--c2-distribution-bar__bar--background-color': { token: 'color-outline-variant' },
+  '--c2-distribution-bar__tooltip--color': { token: 'color-on-inverse-surface' },
   // Skeleton: the resting block is the same hairline grey as the progress track. The wave highlight is a translucent
   // white sheen rather than a surface colour, and the theme has no token for one.
   '--c2-skeleton--background-color': { token: 'color-outline-variant' },
@@ -469,6 +483,12 @@ export const overrides: Record<string, Override> = {
   '--c2-indicator__neutral--color': { exclude: 'white text on a fixed neutral fill' },
   '--c2-indicator__success--background': { exclude: 'solid status fill' },
   '--c2-indicator__success--color': { token: 'color-on-fill' },
+  // A citation marker's hover is a stronger tint of its resting surface, so it still shows in the dark theme, where the
+  // outline grey equals that surface.
+  '--c2-citation__marker__hover--background-color': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
   '--c2-indicator__warning--background': { exclude: 'solid status fill' },
   '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
   '--c2-indicator__danger--background': { exclude: 'solid status fill' },
@@ -987,4 +1007,29 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface',
     value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
   },
+  // Emoji are drawn at the size of a picture, not on the text scale.
+  '--c2-emoji-picker__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-emoji-picker__preview__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-reaction-bar__emoji--font-size': { exclude: 'emoji glyph size' },
+  '--c2-reaction-bar__quick--font-size': { exclude: 'emoji glyph size' },
+  // A bar list's hover is a stronger tint of its primary-container bar.
+  '--c2-bar-list__bar__hover--background-color': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #476ef9) 10%)',
+  },
+  // The diverging bars are washes over the surface, so they darken with it in the dark theme; there is no success token.
+  '--c2-bar-list__bar__positive--background-color': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, #16a34a 16%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-bar-list__bar__negative--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 14%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  // Green text mixed with ink: dark enough on white, light enough on the dark surface.
+  '--c2-bar-list__value__positive--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #16a34a 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-choice-matrix__row-header--font-weight': { exclude: 'regular body weight' },
 }

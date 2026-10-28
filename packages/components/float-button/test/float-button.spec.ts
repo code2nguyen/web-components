@@ -219,6 +219,30 @@ test('a hover-opened dial stays open when the mouse then clicks the button', asy
   await expect(page.locator('c2-float-button')).not.toHaveAttribute('open')
 })
 
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true })
+
+  // iOS Safari follows a tap with emulated mouse events, reported as pointerType "mouse": the pointer "enters" the
+  // tapped element and "leaves" it again. Chromium does not, so the test sends them the way WebKit does.
+  const emulatedMouse = (page: Page, type: string) =>
+    page.locator('c2-float-button').evaluate((element, type) => element.dispatchEvent(new PointerEvent(type, { pointerType: 'mouse' })), type)
+
+  test('a tap opens a trigger="hover" dial and the emulated mouse events that follow do not close it', async ({ page, renderScenario }) => {
+    await renderScenario(dial('trigger="hover"'))
+    const host = page.locator('c2-float-button')
+    await trigger(page).tap()
+    await emulatedMouse(page, 'pointerenter')
+    await expect(host).toHaveAttribute('open', '')
+    await emulatedMouse(page, 'pointerleave')
+    // Longer than the hover close delay.
+    await page.waitForTimeout(400)
+    await expect(host).toHaveAttribute('open', '')
+    // A second tap closes it.
+    await trigger(page).tap()
+    await expect(host).not.toHaveAttribute('open')
+  })
+})
+
 test('an open dial moved in the document still closes on a click outside', async ({ page, renderScenario }) => {
   await renderScenario(`${dial('open')}<section id="elsewhere"></section>`)
   await page.locator('c2-float-button').evaluate(async (element) => {

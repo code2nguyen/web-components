@@ -1,0 +1,57 @@
+---
+title: 'Card Input'
+description: 'Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { CardInput } from '@c2n/components/card-input'
+import { FormField } from '@c2n/components/form-field'
+
+`c2-card-input` is the card field of a checkout, like Stripe Elements' card element. It holds the number, the expiry date and the security code in one box. The number is spaced as its brand prints it, the brand shows as a badge, and focus moves on to the next part as each one is complete.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/card-input'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/card-input
+<style>
+  .card-input-demo {
+    max-width: 420px;
+  }
+</style>
+<div data-label="Checkout">
+  <c2-form-field class="card-input-demo" label="Card" hint="Try the test card 4242 4242 4242 4242.">
+    <c2-card-input></c2-card-input>
+  </c2-form-field>
+</div>
+<div data-label="Visa and Mastercard only">
+  <c2-card-input class="card-input-demo" brands="visa;mastercard"></c2-card-input>
+</div>
+```
+
+### Typing
+
+The number is spaced as its brand prints it (American Express 4-6-5, most others 4-4-4-4) and a pasted number keeps only its digits. Once it is complete and passes the Luhn check, focus moves to the expiry date, and from there to the security code, which has 4 digits for American Express and 3 otherwise. A first expiry digit above 1 is a month on its own ("4" becomes "04"). Backspace in an empty part goes back to the one before. Each part has its `autocomplete` token (`cc-number`, `cc-exp`, `cc-csc`), so browsers and password managers fill it.
+
+### Brands
+
+The brand is detected from the first digits: Visa, Mastercard, American Express, Discover, Diners Club, JCB, UnionPay and Maestro. `brands` limits the ones accepted (`brands="visa;mastercard"`); another brand is then refused with a message. The badge is the brand's name in text, because the component draws no trademarked logo. An app with licensed artwork puts it in the brand's slot (`<img slot="brand-visa" …>`). The `brand` property reads the brand detected so far.
+
+### The number stays in the element
+
+Nothing is reflected to an attribute and no event carries the number. `card-change` fires after every edit with `{ brand, complete, error, last4 }`: what a Pay button needs to turn on. On submit, `getCardDetails()` returns `{ number, expMonth, expYear, cvc, brand }` for the payment provider's tokenize call. `clear()` empties the three parts.
+
+### Problems
+
+A part is checked when it loses focus, never while it is being typed. The problems are an incomplete or invalid number, a brand that is not accepted, an incomplete, invalid or past expiry date, and an incomplete security code. The message shows under the box, or in the `c2-form-field` around it, and the part at fault is marked invalid. A failed submit shows every problem at once.
+
+### In a form
+
+Under a `name`, the form receives `name[number]`, `name[expiry]` (as `YYYY-MM`) and `name[cvc]`. That is for an app that posts to its own PCI-scoped server; with no `name`, nothing is submitted. `required` asks for a card, and the form does not submit while there is a problem. A form reset empties the parts.

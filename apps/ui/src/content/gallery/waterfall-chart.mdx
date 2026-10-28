@@ -1,0 +1,56 @@
+---
+title: 'Waterfall chart gallery'
+description: 'An income statement, a cash bridge, a budget variance, a headcount plan and a price build-up drawn as waterfalls.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { WaterfallChart } from '@c2n/components/chart/waterfall-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-waterfall-chart label-field="item" total-field="total" total-label="Net income" data='[{"item":"Revenue","amount":420,"total":true},{"item":"Cost of sales","amount":-180},{"item":"Services","amount":35},{"item":"Gross profit","total":true},{"item":"Opex","amount":-95},{"item":"Tax","amount":-40}]'>
+  <c2-chart-series field="amount" label="Amount"></c2-chart-series>
+</c2-waterfall-chart>
+```
+
+```html tag=MdxCodeBlock,label=Value labels
+<style>
+  .waterfall-labels { width: 100%; --c2-chart--height: 300px; --c2-chart__bar--border-radius: 0.12; --c2-chart__connector--width: 0; }
+</style>
+<c2-waterfall-chart class="waterfall-labels" label-field="quarter" total-field="start" total-label="Q4 ARR" legend="none" value-labels data='[{"quarter":"Q3 ARR","arr":8.4,"start":true},{"quarter":"New","arr":1.6},{"quarter":"Expansion","arr":0.9},{"quarter":"Contraction","arr":-0.3},{"quarter":"Churn","arr":-0.7}]'>
+  <c2-chart-series field="arr" label="ARR ($M)"></c2-chart-series>
+</c2-waterfall-chart>
+```
+
+```html tag=MdxCodeBlock,label=Cost overrun
+<style>
+  .waterfall-costs { width: 100%; --c2-chart--height: 300px; --c2-chart__positive--color: #dc2626; --c2-chart__negative--color: #16a34a; --c2-chart__series-1--color: #475569; }
+</style>
+<c2-waterfall-chart class="waterfall-costs" label-field="line" total-field="budget" total-label="Actual" data='[{"line":"Budget","spend":500,"budget":true},{"line":"Contractors","spend":64},{"line":"Cloud","spend":38},{"line":"Travel","spend":-21},{"line":"Licences","spend":-12},{"line":"Hardware","spend":17}]'>
+  <c2-chart-series field="spend" label="Spend ($k)"></c2-chart-series>
+</c2-waterfall-chart>
+```
+
+```html tag=MdxCodeBlock,label=Headcount plan
+<style>
+  .waterfall-people { width: 100%; --c2-chart--height: 300px; --c2-chart__positive--color: #0d9488; --c2-chart__negative--color: #e11d48; --c2-chart__series-1--color: #6366f1; --c2-chart__connector--color: #6366f1; --c2-chart__bar--border-radius: 0.5; }
+</style>
+<c2-waterfall-chart class="waterfall-people" label-field="step" total-field="total" total-label="End of year" legend="top" data='[{"step":"Start of year","people":142,"total":true},{"step":"Hires H1","people":28},{"step":"Leavers H1","people":-11},{"step":"Mid-year","total":true},{"step":"Hires H2","people":19},{"step":"Leavers H2","people":-9}]'>
+  <c2-chart-series field="people" label="People"></c2-chart-series>
+</c2-waterfall-chart>
+```
+
+```html tag=MdxCodeBlock,label=Price build-up
+<style>
+  .waterfall-price { width: 100%; --c2-chart--height: 300px; --c2-chart__positive--color: #2563eb; --c2-chart__series-1--color: light-dark(#0f172a, #cbd5e1); --c2-chart__connector--width: 0; }
+</style>
+<c2-waterfall-chart class="waterfall-price" label-field="part" total-label="Shelf price" legend="none" value-labels data='[{"part":"Materials","usd":12.4},{"part":"Labour","usd":6.1},{"part":"Freight","usd":2.3},{"part":"Duty","usd":1.7},{"part":"Margin","usd":9.5}]'>
+  <c2-chart-series field="usd" label="USD"></c2-chart-series>
+</c2-waterfall-chart>
+```
+
+</GalleryGrid>

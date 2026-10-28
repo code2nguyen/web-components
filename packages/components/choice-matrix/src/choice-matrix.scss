@@ -1,0 +1,216 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-choice-matrix,
+  $theme: (
+    cell--padding: 10px 12px,
+    row--border-bottom: 1px solid #e4e4e7,
+    row__hover--background-color: #fafafa,
+    background-color: #ffffff,
+    column-header--color: #71717a,
+    column-header--font-size: 12px,
+    column-header--font-weight: 500,
+    row-header--color: #18181b,
+    row-header--font-size: 14px,
+    row-header--font-weight: 400,
+    description--color: #71717a,
+    description--font-size: 12px,
+    group-header--background-color: #f4f4f5,
+    group-header--color: #18181b,
+    group-header--font-weight: 600,
+    control--size: 18px,
+    control--border: 1px solid #bcbcc6,
+    control--border-radius: 4px,
+    control--background-color: #ffffff,
+    control__hover--border-color: #a1a1aa,
+    control__selected--background-color: #476ef9,
+    control__selected--mark-color: #ffffff,
+    control__error--border-color: #dc2626,
+    control__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    control__disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.matrix {
+  overflow-x: auto;
+  background-color: css.cssVar(background-color);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: css.cssVar(cell--padding);
+  border-bottom: css.cssVar(row--border-bottom);
+  text-align: center;
+  vertical-align: middle;
+}
+
+thead th {
+  color: css.cssVar(column-header--color);
+  font-size: css.cssVar(column-header--font-size);
+  font-weight: css.cssVar(column-header--font-weight);
+  white-space: nowrap;
+}
+
+.toggle-row > * {
+  padding-top: 0;
+}
+
+thead tr:has(+ .toggle-row) > * {
+  padding-bottom: 4px;
+  border-bottom: 0;
+}
+
+.toggle-cell {
+  width: 1px;
+  padding-right: 0;
+  line-height: 0;
+}
+
+/* The first column stays in place while a wide matrix scrolls sideways. */
+.corner,
+.row-header,
+.group-title {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: css.cssVar(background-color);
+  text-align: start;
+}
+
+.row:hover > * {
+  background-color: css.cssVar(row__hover--background-color);
+}
+
+.row-header {
+  color: css.cssVar(row-header--color);
+  font-size: css.cssVar(row-header--font-size);
+  font-weight: css.cssVar(row-header--font-weight);
+}
+
+.row-label {
+  display: block;
+}
+
+.description {
+  display: block;
+  margin-top: 2px;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+}
+
+.row--disabled .row-header {
+  opacity: css.cssVar(control__disabled--opacity);
+}
+
+.group-header > * {
+  background-color: css.cssVar(group-header--background-color);
+}
+
+.group-title {
+  color: css.cssVar(group-header--color);
+  font-size: css.cssVar(row-header--font-size);
+  font-weight: css.cssVar(group-header--font-weight);
+}
+
+.cell {
+  line-height: 0;
+}
+
+/* The controls are native inputs drawn to match c2-checkbox: a box with a check or a dash, a ring with a dot. */
+.control {
+  position: relative;
+  box-sizing: border-box;
+  flex: none;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  margin: 0;
+  border: css.cssVar(control--border);
+  border-radius: css.cssVar(control--border-radius);
+  background-color: css.cssVar(control--background-color);
+  vertical-align: middle;
+  appearance: none;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: css.cssVar(control__hover--border-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(control__focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: css.cssVar(control__disabled--opacity);
+    cursor: not-allowed;
+  }
+
+  &:checked,
+  &:not([type='radio']):indeterminate {
+    border-color: transparent;
+    background-color: css.cssVar(control__selected--background-color);
+  }
+
+  /* The check. */
+  &:checked::after {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 30%;
+    height: 55%;
+    border: solid css.cssVar(control__selected--mark-color);
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    content: '';
+  }
+
+  /* The dash of a partly checked toggle. A radio group with nothing chosen also matches :indeterminate; it draws nothing. */
+  &:not([type='radio']):indeterminate::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 55%;
+    height: 2px;
+    border-radius: 1px;
+    background-color: css.cssVar(control__selected--mark-color);
+    transform: translate(-50%, -50%);
+    content: '';
+  }
+}
+
+.control--radio {
+  border-radius: 50%;
+
+  &:checked::after {
+    width: 40%;
+    height: 40%;
+    border: 0;
+    border-radius: 50%;
+    background-color: css.cssVar(control__selected--mark-color);
+    transform: translate(-50%, -50%);
+    top: 50%;
+  }
+}
+
+.matrix--invalid .cell-control:not(:checked) {
+  border-color: css.cssVar(control__error--border-color);
+}
+
+@media (forced-colors: active) {
+  .control:checked,
+  .control:not([type='radio']):indeterminate {
+    background-color: Highlight;
+  }
+}

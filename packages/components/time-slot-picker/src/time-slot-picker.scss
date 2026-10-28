@@ -1,0 +1,189 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-time-slot-picker,
+  $theme: (
+    font-size: 14px,
+    color: #18181b,
+    gap: 16px,
+    zone--color: #71717a,
+    zone--font-size: 12px,
+    heading--color: #71717a,
+    heading--font-size: 12px,
+    heading--font-weight: 600,
+    slots--min-width: 88px,
+    slots--gap: 8px,
+    slot--height: 40px,
+    slot--border: 1px solid #d4d4d8,
+    slot--border-radius: 8px,
+    slot--background: transparent,
+    slot--color: #0265dc,
+    slot--font-weight: 600,
+    slot__hover--background: #edf1fe,
+    slot__hover--border: 1px solid #0265dc,
+    slot__selected--background: #0265dc,
+    slot__selected--color: #ffffff,
+    slot__unavailable--color: #a1a1aa,
+    slot__loading--background: #f4f4f5,
+    empty--color: #71717a,
+    link--color: #0265dc,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    error--border: 1px solid #dc2626,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.zone {
+  color: css.cssVar(zone--color);
+  font-size: css.cssVar(zone--font-size);
+}
+
+.times {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading {
+  margin-bottom: 6px;
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(css.cssVar(slots--min-width), 1fr));
+  gap: css.cssVar(slots--gap);
+  border-radius: css.cssVar(slot--border-radius);
+
+  /* A start and an end ("10:30 – 11:00 AM") need about twice the room of a start alone. */
+  &.slots--ranges {
+    grid-template-columns: repeat(auto-fill, minmax(calc(2 * #{css.cssVar(slots--min-width)}), 1fr));
+  }
+
+  &.error {
+    outline: css.cssVar(error--border);
+    outline-offset: 4px;
+  }
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+  height: css.cssVar(slot--height);
+  padding: 0 8px;
+  border: css.cssVar(slot--border);
+  border-radius: css.cssVar(slot--border-radius);
+  background-color: css.cssVar(slot--background);
+  color: css.cssVar(slot--color);
+  font-weight: css.cssVar(slot--font-weight);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover:not(.slot--unavailable, .slot--selected, [aria-disabled='true']) {
+    border: css.cssVar(slot__hover--border);
+    background-color: css.cssVar(slot__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.slot--selected {
+  border-color: transparent;
+  background-color: css.cssVar(slot__selected--background);
+  color: css.cssVar(slot__selected--color);
+}
+
+.slot--unavailable {
+  color: css.cssVar(slot__unavailable--color);
+  font-weight: 400;
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.slot[aria-disabled='true']:not(.slot--unavailable) {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.slot--loading {
+  border-color: transparent;
+  background-color: css.cssVar(slot__loading--background);
+  cursor: default;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: css.cssVar(empty--color);
+}
+
+.next {
+  padding: 0;
+  border: none;
+  background: none;
+  color: css.cssVar(link--color);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot--loading {
+    animation: none;
+  }
+}

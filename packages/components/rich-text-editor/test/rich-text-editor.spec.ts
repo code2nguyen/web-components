@@ -1,4 +1,4 @@
-import { test, expect, watch, accessible, props } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, props, selectBack } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 import type { RichTextEditor } from '../src/rich-text-editor'
 
@@ -19,10 +19,6 @@ async function paste(page: Page, data: Record<string, string>) {
     Object.defineProperty(event, 'clipboardData', { value: transfer })
     element.dispatchEvent(event)
   }, data)
-}
-
-async function selectBack(page: Page, count: number) {
-  for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
 }
 
 const events = (page: Page) => host(page).evaluate((element) => JSON.parse(element.getAttribute('data-events') ?? '[]') as unknown[])
@@ -81,7 +77,7 @@ test('formatting shortcuts and typed Markdown format the text, and the toolbar s
   const content = text$(page)
   await content.click()
   await page.keyboard.type('Ship it')
-  await selectBack(page, 2)
+  await selectBack(page, 'it')
   await page.keyboard.press('ControlOrMeta+b')
   await expect(host(page)).toHaveJSProperty('value', 'Ship **it**')
   await expect(tool(page, 'Bold')).toHaveAttribute('aria-pressed', 'true')
@@ -135,7 +131,7 @@ test('a toolbar button formats the selection and keeps it', async ({ page, rende
   await renderScenario(`<c2-rich-text-editor label="Comment" value="Plan"></c2-rich-text-editor>`)
   await text$(page).click()
   await page.keyboard.press('End')
-  await selectBack(page, 4)
+  await selectBack(page, 'Plan')
   await tool(page, 'Italic').click()
   await expect(host(page)).toHaveJSProperty('value', '*Plan*')
   await tool(page, 'Numbered list').click()
@@ -194,7 +190,7 @@ test('Mod+K edits a link; an unsafe address is refused', async ({ page, renderSc
   await renderScenario(`<c2-rich-text-editor label="Comment" value="Read the plan"></c2-rich-text-editor>`)
   await text$(page).click()
   await page.keyboard.press('End')
-  await selectBack(page, 4)
+  await selectBack(page, 'plan')
   await page.keyboard.press('ControlOrMeta+k')
   const address = page.getByRole('textbox', { name: 'Link address' })
   await expect(address).toBeFocused()
@@ -310,7 +306,7 @@ test('the toolbar sits at the bottom with the footer slots, or floats over the s
   await expect(toolbar(page)).toBeHidden()
   await text$(page).click()
   await page.keyboard.press('End')
-  await selectBack(page, 4)
+  await selectBack(page, 'Note')
   await expect(toolbar(page)).toBeVisible()
   const bar = await toolbar(page).boundingBox()
   const line = await text$(page).locator('p').boundingBox()

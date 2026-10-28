@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-toggletip</title>
+    <script type="module" src="/src/toggletip.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 120px 24px 24px;
+        display: grid;
+        gap: 32px;
+        justify-items: start;
+      }
+      .field {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+      }
+      .inverse {
+        --c2-toggletip--background-color: #18181b;
+        --c2-toggletip--color: #fafafa;
+        --c2-toggletip--border: 1px solid transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <span class="field"
+      >VAT number
+      <c2-toggletip label="About the VAT number">
+        <p>Your EU VAT number, starting with the two-letter country code.</p>
+        <a href="#where">Where to find it</a>
+      </c2-toggletip>
+    </span>
+    <span class="field">Billing period <c2-toggletip placement="bottom" label="About billing periods">Yearly plans cost two months less.</c2-toggletip></span>
+    <c2-toggletip class="inverse"><span slot="icon">What's this?</span>A workspace groups the projects of one team.</c2-toggletip>
+    <span lang="fr" class="field">Numéro de TVA <c2-toggletip>Votre numéro de TVA intracommunautaire.</c2-toggletip></span>
+  </body>
+</html>

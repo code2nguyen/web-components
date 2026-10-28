@@ -1,0 +1,160 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { LoadingOverlay } from '@c2n/components/loading-overlay'
+
+## Presets
+
+Scrims for cards, tables and forms. `__scrim--opacity` and `__scrim--blur` decide how much of the content stays readable; the spinner and label variables carry the brand.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .region {
+    padding: 24px;
+  }
+</style>
+<c2-loading-overlay loading><div class="region">Monthly revenue: $48,210</div></c2-loading-overlay>
+```
+
+```html tag=MdxCodeBlock,label=Frosted card
+<style>
+  .frosted {
+    width: 220px;
+    border-radius: 14px;
+    --c2-loading-overlay__scrim--opacity: 0.5;
+    --c2-loading-overlay__scrim--blur: 4px;
+  }
+  .frosted .body {
+    display: grid;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .frosted strong {
+    font-size: 22px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-loading-overlay class="frosted" loading>
+  <div class="body"><span>Active users</span><strong>12,804</strong><span>+8.2% this week</span></div>
+</c2-loading-overlay>
+```
+
+```html tag=MdxCodeBlock,label=Saving with a label
+<style>
+  .saving {
+    width: 240px;
+    border-radius: 8px;
+    --c2-loading-overlay__scrim--opacity: 0.9;
+    --c2-loading-overlay__spinner--size: 24px;
+    --c2-loading-overlay__indicator--gap: 8px;
+    --c2-loading-overlay__label--font-size: 13px;
+  }
+  .saving .body {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .saving .line {
+    height: 10px;
+    border-radius: 4px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-loading-overlay class="saving" loading>
+  <div class="body"><div class="line"></div><div class="line"></div><div class="line"></div></div>
+  <span slot="label">Saving changes…</span>
+</c2-loading-overlay>
+```
+
+```html tag=MdxCodeBlock,label=Brand tint
+<style>
+  .tint {
+    width: 220px;
+    border-radius: 8px;
+    --c2-loading-overlay__scrim--background-color: light-dark(#ede9fe, #1e1530);
+    --c2-loading-overlay__scrim--opacity: 0.85;
+    --c2-loading-overlay__spinner--color: light-dark(#7c3aed, #9a69ef);
+    --c2-loading-overlay__label--color: light-dark(#6d28d9, #b79cf5);
+  }
+  .tint .body {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    font-size: 14px;
+  }
+</style>
+<c2-loading-overlay class="tint" loading>
+  <div class="body">Generating your summary</div>
+  <span slot="label">Thinking…</span>
+</c2-loading-overlay>
+```
+
+```html tag=MdxCodeBlock,label=Table rows
+<style>
+  .rows {
+    width: 260px;
+    --c2-loading-overlay__scrim--opacity: 0.6;
+    --c2-loading-overlay__scrim--blur: 0px;
+    --c2-loading-overlay__spinner--size: 20px;
+  }
+  .rows table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .rows td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<c2-loading-overlay class="rows" loading>
+  <table>
+    <tr><td>INV-1042</td><td>$1,200</td></tr>
+    <tr><td>INV-1043</td><td>$860</td></tr>
+    <tr><td>INV-1044</td><td>$2,410</td></tr>
+  </table>
+</c2-loading-overlay>
+```
+
+```html tag=MdxCodeBlock,label=Custom indicator
+<style>
+  .dots {
+    width: 220px;
+    border-radius: 8px;
+  }
+  .dots .body {
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px dashed var(--c2-theme--color-outline, #d4d4d8);
+    font-size: 14px;
+  }
+  .dots .pulse {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--c2-theme--color-primary, #0265dc);
+    animation: pulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes pulse {
+    to {
+      transform: scale(1.6);
+      opacity: 0.4;
+    }
+  }
+</style>
+<c2-loading-overlay class="dots" loading>
+  <div class="body">Syncing calendar</div>
+  <span slot="indicator" class="pulse"></span>
+</c2-loading-overlay>
+```
+
+</GalleryGrid>

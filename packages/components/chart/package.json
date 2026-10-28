@@ -93,6 +93,14 @@
       "types": "./types/src/sankey-chart.d.ts",
       "default": "./dist/sankey-chart.js"
     },
+    "./treemap-chart.js": {
+      "types": "./types/src/treemap-chart.d.ts",
+      "default": "./dist/treemap-chart.js"
+    },
+    "./waterfall-chart.js": {
+      "types": "./types/src/waterfall-chart.d.ts",
+      "default": "./dist/waterfall-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"

@@ -1,4 +1,4 @@
-import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, selectBack } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 const page$ = (page: Page) => page.getByRole('textbox', { name: 'Notes' })
@@ -18,10 +18,6 @@ async function paste(page: Page, data: Record<string, string>) {
     Object.defineProperty(event, 'clipboardData', { value: transfer })
     element.dispatchEvent(event)
   }, data)
-}
-
-async function selectBack(page: Page, count: number) {
-  for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
 }
 
 const SAMPLE = `# Launch plan
@@ -212,7 +208,7 @@ test('the selection toolbar formats, colours and links the selected text', async
   await content.click()
   await page.keyboard.type('ship the release')
   await expect(toolbar(page)).toBeHidden()
-  await selectBack(page, 7)
+  await selectBack(page, 'release')
   await expect(toolbar(page)).toBeVisible()
   await toolbar(page).getByRole('button', { name: 'Bold' }).click()
   await expect(host(page)).toHaveJSProperty('value', 'ship the **release**')
@@ -286,7 +282,7 @@ test('pasting Markdown or HTML keeps its structure, and a link pasted over text 
   await paste(page, { 'text/html': '<ul><li>alpha<ul><li>beta</li></ul></li></ul><p style="color: red">plain <b>bold</b></p>', 'text/plain': 'alpha beta' })
   await expect(host(page)).toHaveJSProperty('value', '## Steps\n\n1. one\n2. two\n- alpha\n  - beta\n\nplain **bold**')
   await page.keyboard.type(' words')
-  await selectBack(page, 5)
+  await selectBack(page, 'words')
   await paste(page, { 'text/plain': 'https://example.com' })
   await expect(content.locator('a')).toHaveText('words')
 })
@@ -639,7 +635,7 @@ test('is accessible with its menus open', async ({ page, renderScenario }) => {
   const content = page$(page)
   await content.locator('p').click()
   await page.keyboard.press('End')
-  await selectBack(page, 4)
+  await selectBack(page, 'text')
   await expect(toolbar(page)).toBeVisible()
   await accessible(page)
   await page.keyboard.press('End')
@@ -719,7 +715,7 @@ test('the interface follows the nearest lang, including placeholders and code bl
   await expect(content.locator('.code-language')).toHaveAttribute('aria-label', 'Ngôn ngữ: JavaScript')
   await page.keyboard.press('ControlOrMeta+Enter')
   await page.keyboard.type('xin chao')
-  await selectBack(page, 4)
+  await selectBack(page, 'chao')
   await expect(page.getByRole('toolbar', { name: 'Định dạng' }).getByRole('button', { name: 'Đậm' })).toBeVisible()
 
   // A language the component does not ship falls back to English, in the code block drawn before the switch too.

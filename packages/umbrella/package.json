@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -109,6 +109,10 @@
       "types": "./dist/banner.d.ts",
       "default": "./dist/banner.js"
     },
+    "./bar-list": {
+      "types": "./dist/bar-list.d.ts",
+      "default": "./dist/bar-list.js"
+    },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
@@ -136,6 +140,10 @@
     "./card": {
       "types": "./dist/card.d.ts",
       "default": "./dist/card.js"
+    },
+    "./card-input": {
+      "types": "./dist/card-input.d.ts",
+      "default": "./dist/card-input.js"
     },
     "./carousel": {
       "types": "./dist/carousel.d.ts",
@@ -237,6 +245,14 @@
       "types": "./dist/chart/sparkline.d.ts",
       "default": "./dist/chart/sparkline.js"
     },
+    "./chart/treemap-chart": {
+      "types": "./dist/chart/treemap-chart.d.ts",
+      "default": "./dist/chart/treemap-chart.js"
+    },
+    "./chart/waterfall-chart": {
+      "types": "./dist/chart/waterfall-chart.d.ts",
+      "default": "./dist/chart/waterfall-chart.js"
+    },
     "./chat-input": {
       "types": "./dist/chat-input.d.ts",
       "default": "./dist/chat-input.js"
@@ -272,6 +288,14 @@
     "./chip-group": {
       "types": "./dist/chip-group.d.ts",
       "default": "./dist/chip-group.js"
+    },
+    "./choice-matrix": {
+      "types": "./dist/choice-matrix.d.ts",
+      "default": "./dist/choice-matrix.js"
+    },
+    "./citation": {
+      "types": "./dist/citation.d.ts",
+      "default": "./dist/citation.js"
     },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
@@ -345,6 +369,10 @@
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
     },
+    "./date-strip": {
+      "types": "./dist/date-strip.d.ts",
+      "default": "./dist/date-strip.js"
+    },
     "./date-time-picker": {
       "types": "./dist/date-time-picker.d.ts",
       "default": "./dist/date-time-picker.js"
@@ -368,6 +396,18 @@
     "./diff-viewer": {
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
+    },
+    "./distribution-bar": {
+      "types": "./dist/distribution-bar.d.ts",
+      "default": "./dist/distribution-bar.js"
+    },
+    "./emoji-picker": {
+      "types": "./dist/emoji-picker.d.ts",
+      "default": "./dist/emoji-picker.js"
+    },
+    "./facet-list": {
+      "types": "./dist/facet-list.d.ts",
+      "default": "./dist/facet-list.js"
     },
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
@@ -509,6 +549,10 @@
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
     },
+    "./loading-overlay": {
+      "types": "./dist/loading-overlay.d.ts",
+      "default": "./dist/loading-overlay.js"
+    },
     "./log-viewer": {
       "types": "./dist/log-viewer.d.ts",
       "default": "./dist/log-viewer.js"
@@ -569,6 +613,10 @@
       "types": "./dist/mermaid.d.ts",
       "default": "./dist/mermaid.js"
     },
+    "./meter": {
+      "types": "./dist/meter.d.ts",
+      "default": "./dist/meter.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
@@ -576,6 +624,10 @@
     "./money-input": {
       "types": "./dist/money-input.d.ts",
       "default": "./dist/money-input.js"
+    },
+    "./month-picker": {
+      "types": "./dist/month-picker.d.ts",
+      "default": "./dist/month-picker.js"
     },
     "./month-planner": {
       "types": "./dist/month-planner.d.ts",
@@ -596,6 +648,10 @@
     "./notepad": {
       "types": "./dist/notepad.d.ts",
       "default": "./dist/notepad.js"
+    },
+    "./notification-center": {
+      "types": "./dist/notification-center.d.ts",
+      "default": "./dist/notification-center.js"
     },
     "./number-input": {
       "types": "./dist/number-input.d.ts",
@@ -673,6 +729,10 @@
       "types": "./dist/rate.d.ts",
       "default": "./dist/rate.js"
     },
+    "./reaction-bar": {
+      "types": "./dist/reaction-bar.d.ts",
+      "default": "./dist/reaction-bar.js"
+    },
     "./relative-time": {
       "types": "./dist/relative-time.d.ts",
       "default": "./dist/relative-time.js"
@@ -692,6 +752,10 @@
     "./search-field": {
       "types": "./dist/search-field.d.ts",
       "default": "./dist/search-field.js"
+    },
+    "./secret-field": {
+      "types": "./dist/secret-field.d.ts",
+      "default": "./dist/secret-field.js"
     },
     "./select": {
       "types": "./dist/select.d.ts",
@@ -829,6 +893,10 @@
       "types": "./dist/time-range-picker.d.ts",
       "default": "./dist/time-range-picker.js"
     },
+    "./time-slot-picker": {
+      "types": "./dist/time-slot-picker.d.ts",
+      "default": "./dist/time-slot-picker.js"
+    },
     "./timeline": {
       "types": "./dist/timeline.d.ts",
       "default": "./dist/timeline.js"
@@ -844,6 +912,10 @@
     "./todo-list": {
       "types": "./dist/todo-list.d.ts",
       "default": "./dist/todo-list.js"
+    },
+    "./toggletip": {
+      "types": "./dist/toggletip.d.ts",
+      "default": "./dist/toggletip.js"
     },
     "./tooltip": {
       "types": "./dist/tooltip.d.ts",
@@ -889,6 +961,10 @@
       "types": "./dist/virtual-list.d.ts",
       "default": "./dist/virtual-list.js"
     },
+    "./visually-hidden": {
+      "types": "./dist/visually-hidden.d.ts",
+      "default": "./dist/visually-hidden.js"
+    },
     "./week-planner": {
       "types": "./dist/week-planner.d.ts",
       "default": "./dist/week-planner.js"
@@ -920,10 +996,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.17",
-    "@c2n/phosphor-icons": "1.0.17",
-    "@c2n/task-icons": "1.0.17",
-    "@c2n/theme": "1.0.17",
+    "@c2n/core": "1.0.18",
+    "@c2n/phosphor-icons": "1.0.18",
+    "@c2n/task-icons": "1.0.18",
+    "@c2n/theme": "1.0.18",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1026,12 +1102,14 @@
     "@c2n/avatar": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
+    "@c2n/bar-list": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",
     "@c2n/card": "*",
+    "@c2n/card-input": "*",
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
     "@c2n/chart": "*",
@@ -1042,6 +1120,8 @@
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
     "@c2n/chip-group": "*",
+    "@c2n/choice-matrix": "*",
+    "@c2n/citation": "*",
     "@c2n/code-editor": "*",
     "@c2n/code-viewer": "*",
     "@c2n/color-area": "*",
@@ -1057,10 +1137,14 @@
     "@c2n/dashboard": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
+    "@c2n/date-strip": "*",
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
+    "@c2n/distribution-bar": "*",
+    "@c2n/emoji-picker": "*",
+    "@c2n/facet-list": "*",
     "@c2n/fieldset": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",
@@ -1088,6 +1172,7 @@
     "@c2n/link-button": "*",
     "@c2n/list": "*",
     "@c2n/list-item": "*",
+    "@c2n/loading-overlay": "*",
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
@@ -1099,11 +1184,14 @@
     "@c2n/menu": "*",
     "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
+    "@c2n/meter": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
+    "@c2n/month-picker": "*",
     "@c2n/month-planner": "*",
     "@c2n/navigation-menu": "*",
     "@c2n/notepad": "*",
+    "@c2n/notification-center": "*",
     "@c2n/number-input": "*",
     "@c2n/org-chart": "*",
     "@c2n/otp-input": "*",
@@ -1121,11 +1209,13 @@
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
+    "@c2n/reaction-bar": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
     "@c2n/save-bar": "*",
     "@c2n/search-field": "*",
+    "@c2n/secret-field": "*",
     "@c2n/select": "*",
     "@c2n/separator": "*",
     "@c2n/sheet": "*",
@@ -1156,9 +1246,11 @@
     "@c2n/theme-select": "*",
     "@c2n/time-input": "*",
     "@c2n/time-range-picker": "*",
+    "@c2n/time-slot-picker": "*",
     "@c2n/timeline": "*",
     "@c2n/toast": "*",
     "@c2n/todo-list": "*",
+    "@c2n/toggletip": "*",
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
@@ -1168,6 +1260,7 @@
     "@c2n/upload": "*",
     "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
+    "@c2n/visually-hidden": "*",
     "@c2n/week-planner": "*",
     "@c2n/working-indicator": "*"
   }

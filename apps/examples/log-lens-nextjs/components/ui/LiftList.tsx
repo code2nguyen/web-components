@@ -22,22 +22,12 @@ export function LiftList({
             </code>
           </div>
           <div className="ll-lift__bars">
-            <c2-progress
-              className="ll-bar ll-bar--inside"
-              value={Math.round(lift.targetShare * 1000) / 10}
-              max={100}
-              label={`${inside}: ${formatPercent(lift.targetShare)}`}
-            >
-              {inside} · {formatPercent(lift.targetShare)}
-            </c2-progress>
-            <c2-progress
-              className="ll-bar ll-bar--outside"
-              value={Math.round(lift.restShare * 1000) / 10}
-              max={100}
-              label={`${outside}: ${formatPercent(lift.restShare)}`}
-            >
-              {outside} · {formatPercent(lift.restShare)}
-            </c2-progress>
+            <c2-meter className="ll-bar ll-bar--inside" value={Math.round(lift.targetShare * 1000) / 10} max={100} value-text={formatPercent(lift.targetShare)}>
+              {inside}
+            </c2-meter>
+            <c2-meter className="ll-bar ll-bar--outside" value={Math.round(lift.restShare * 1000) / 10} max={100} value-text={formatPercent(lift.restShare)}>
+              {outside}
+            </c2-meter>
           </div>
           <c2-badge tone={lift.lift >= 5 ? 'danger' : lift.lift >= 2 ? 'warning' : 'neutral'} className="ll-lift__ratio">
             {lift.lift >= 100 ? 'only here' : `${lift.lift.toFixed(1)}×`}

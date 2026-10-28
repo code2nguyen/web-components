@@ -41,9 +41,9 @@ export function LogFilters({ services }: Readonly<{ services: readonly Service[]
   ].filter((item): item is [string, string, string] => Boolean(item[2]))
   return (
     <section aria-labelledby="log-filter-heading">
-      <h2 id="log-filter-heading" className="sr-only">
-        Log filters
-      </h2>
+      <c2-visually-hidden>
+        <h2 id="log-filter-heading">Log filters</h2>
+      </c2-visually-hidden>
       <div className="filter-bar">
         <label className="filter-field">
           <span>Search</span>

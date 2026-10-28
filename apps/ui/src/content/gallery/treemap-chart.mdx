@@ -1,0 +1,56 @@
+---
+title: 'Treemap chart gallery'
+description: 'A sector map, a market map coloured by change, a budget, disk usage and a flat product mix drawn as treemaps.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TreemapChart } from '@c2n/components/chart/treemap-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-treemap-chart label-field="ticker" group-field="sector" data='[{"sector":"Technology","ticker":"AAPL","cap":3400},{"sector":"Technology","ticker":"MSFT","cap":3100},{"sector":"Technology","ticker":"NVDA","cap":2900},{"sector":"Communication","ticker":"GOOGL","cap":2100},{"sector":"Communication","ticker":"META","cap":1400},{"sector":"Consumer","ticker":"AMZN","cap":1900},{"sector":"Consumer","ticker":"TSLA","cap":800},{"sector":"Health","ticker":"LLY","cap":700},{"sector":"Health","ticker":"UNH","cap":480}]'>
+  <c2-chart-series field="cap" label="Market cap ($bn)"></c2-chart-series>
+</c2-treemap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Market map
+<style>
+  .treemap-market { width: 100%; --c2-chart--height: 300px; --c2-chart__tile--gap: 2px; --c2-chart__tile--border-radius: 0px; --c2-chart__neutral--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff)); --c2-chart__positive--color: #22c55e; --c2-chart__negative--color: #ef4444; }
+</style>
+<c2-treemap-chart class="treemap-market" label-field="ticker" group-field="sector" color-field="change" color-label="Change" color-suffix="%" color-max="3" label-content="name-value" data='[{"sector":"Technology","ticker":"AAPL","cap":3400,"change":1.2},{"sector":"Technology","ticker":"MSFT","cap":3100,"change":-0.4},{"sector":"Technology","ticker":"NVDA","cap":2900,"change":3.1},{"sector":"Communication","ticker":"GOOGL","cap":2100,"change":0.8},{"sector":"Communication","ticker":"META","cap":1400,"change":-2.3},{"sector":"Consumer","ticker":"AMZN","cap":1900,"change":1.6},{"sector":"Consumer","ticker":"TSLA","cap":800,"change":-3.4},{"sector":"Health","ticker":"LLY","cap":700,"change":-1.8},{"sector":"Health","ticker":"UNH","cap":480,"change":0.9}]'>
+  <c2-chart-series field="cap" label="Market cap ($bn)"></c2-chart-series>
+</c2-treemap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Budget by department
+<style>
+  .treemap-budget { width: 100%; --c2-chart--height: 300px; --c2-chart__tile--gap: 3px; --c2-chart__group--gap: 6px; --c2-chart__tile--border-radius: 6px; }
+</style>
+<c2-treemap-chart class="treemap-budget" label-field="team" group-field="department" legend="bottom" data='[{"department":"Engineering","team":"Platform","budget":2.4},{"department":"Engineering","team":"Product","budget":3.1},{"department":"Engineering","team":"Data","budget":1.2},{"department":"Go to market","team":"Sales","budget":2.8},{"department":"Go to market","team":"Marketing","budget":1.6},{"department":"Operations","team":"Finance","budget":0.7},{"department":"Operations","team":"People","budget":0.6},{"department":"Operations","team":"Legal","budget":0.4}]'>
+  <c2-chart-series field="budget" label="Budget ($M)"></c2-chart-series>
+</c2-treemap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Disk usage
+<style>
+  .treemap-disk { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #7c3aed; --c2-chart__series-2--color: #0891b2; --c2-chart__series-3--color: #d97706; --c2-chart__series-4--color: #64748b; }
+</style>
+<c2-treemap-chart class="treemap-disk" label-field="name" label-content="name-value" data='[{"name":"node_modules","children":[{"name":"echarts","size":52},{"name":"typescript","size":23},{"name":"@astrojs","size":18},{"name":"playwright-core","size":9}]},{"name":"packages","children":[{"name":"components","size":31},{"name":"tools","size":12},{"name":"icons","size":8}]},{"name":"apps","children":[{"name":"ui","size":14},{"name":"examples","size":11}]},{"name":".git","size":38}]'>
+  <c2-chart-series field="size" label="Size (MB)"></c2-chart-series>
+</c2-treemap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Flat product mix
+<style>
+  .treemap-mix { width: 100%; --c2-chart--height: 260px; --c2-chart__group--gap: 2px; --c2-chart__tile--border-radius: 4px; }
+</style>
+<c2-treemap-chart class="treemap-mix" label-field="product" label-content="name-value" data='[{"product":"Cloud","revenue":44},{"product":"Licences","revenue":21},{"product":"Support","revenue":14},{"product":"Hardware","revenue":11},{"product":"Training","revenue":6},{"product":"Other","revenue":4}]'>
+  <c2-chart-series field="revenue" label="Revenue (%)"></c2-chart-series>
+</c2-treemap-chart>
+```
+
+</GalleryGrid>

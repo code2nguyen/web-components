@@ -43,6 +43,7 @@ export function registerC2Elements(): Promise<void> {
     import('@c2n/components/toast'),
     import('@c2n/components/tooltip'),
     import('@c2n/components/tree'),
+    import('@c2n/components/visually-hidden'),
     // Register only the chart implementations the example ships. Avoiding the chart
     // barrel keeps optional ECharts chart engines out of every route.
     import('@c2n/components/chart/line-chart'),

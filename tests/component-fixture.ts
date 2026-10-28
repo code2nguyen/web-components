@@ -204,3 +204,46 @@ export async function clipboard(page: Page, fail = false) {
     })
   }, fail)
 }
+
+/**
+ * The caret inside the focused element's shadow root, read the way the editors read it: `getComposedRanges` with that
+ * root, and the root's own `getSelection()` only where composed ranges are missing (WebKit's lags behind script).
+ * `before` is the text of the caret's own text node up to the caret, so an editor's widgets and other blocks never count.
+ */
+function caretState(): { before: string; selected: string } {
+  let root: Document | ShadowRoot = document
+  while (root.activeElement?.shadowRoot) root = root.activeElement.shadowRoot
+  const selection = document.getSelection() as (Selection & { direction?: string }) | null
+  if (!selection?.rangeCount) return { before: '', selected: '' }
+  let start: { node: Node; offset: number }
+  let end: { node: Node; offset: number }
+  if (root instanceof ShadowRoot && typeof selection.getComposedRanges === 'function') {
+    const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
+    if (!range) return { before: '', selected: '' }
+    start = { node: range.startContainer, offset: range.startOffset }
+    end = { node: range.endContainer, offset: range.endOffset }
+  } else {
+    const own = (root as unknown as { getSelection?: () => Selection | null }).getSelection?.() ?? selection
+    const range = own?.rangeCount ? own.getRangeAt(0) : null
+    if (!range) return { before: '', selected: '' }
+    start = { node: range.startContainer, offset: range.startOffset }
+    end = { node: range.endContainer, offset: range.endOffset }
+  }
+  const range = document.createRange()
+  range.setStart(start.node, start.offset)
+  range.setEnd(end.node, end.offset)
+  // `before` is only read while the selection is collapsed, where the caret is the end.
+  const before = end.node.nodeType === Node.TEXT_NODE ? end.node.textContent!.slice(0, end.offset) : (end.node.childNodes[end.offset - 1]?.textContent ?? '')
+  return { before, selected: range.toString() }
+}
+
+/**
+ * Selects `text`, the characters just before the caret, with real Shift+ArrowLeft presses. It first waits until the
+ * editor holds that text just before the caret, because typing and End land asynchronously and, on a loaded runner,
+ * presses sent straight after them start from an earlier caret. Then it waits until exactly that text is selected.
+ */
+export async function selectBack(page: Page, text: string) {
+  await expect.poll(async () => (await page.evaluate(caretState)).before.endsWith(text)).toBe(true)
+  for (let i = 0; i < text.length; i++) await page.keyboard.press('Shift+ArrowLeft')
+  await expect.poll(async () => (await page.evaluate(caretState)).selected).toBe(text)
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-secret-field</title>
+    <script type="module" src="/src/secret-field.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+        max-width: 440px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-secret-field label="Secret key" value="acme_live_51HxQ8vLkT2bR9wJmN4pZc7aYe0gDf3s4242" reveal-start="10"></c2-secret-field>
+    <c2-secret-field id="regen" label="Signing secret" value="acme_hook_9f8e7d6c5b4a3f2e1d0c9b8a" reveal-start="10" regenerable>
+      <span slot="help">Used to verify webhook events.</span>
+    </c2-secret-field>
+    <c2-secret-field label="Recovery code" value="8F2K-Q7MX-4LZP-9RTD" reveal-end="0" hide-reveal></c2-secret-field>
+    <div lang="fr"><c2-secret-field label="Clé secrète" value="acme_live_51HxQ8vLkT2bR9wJmN4pZc7aYe0gDf3s4242" reveal-start="10"></c2-secret-field></div>
+    <script type="module">
+      const field = document.querySelector('#regen')
+      field.addEventListener('regenerate', () => {
+        field.value = 'acme_hook_' + Math.random().toString(16).slice(2)
+        field.revealed = true
+      })
+    </script>
+  </body>
+</html>

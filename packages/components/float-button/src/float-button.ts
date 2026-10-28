@@ -50,6 +50,24 @@ const ARROW_STEPS: Record<FloatButtonDirection, Record<string, number>> = {
 const HOVER_CLOSE_DELAY = 200
 
 /**
+ * How long after a touch "mouse" pointer events are taken to be emulated. iOS Safari follows a tap with a mouse
+ * `pointerenter` and `pointerleave` on the tapped element, which would otherwise open a hover dial and close it again.
+ */
+const EMULATED_MOUSE_WINDOW = 1000
+
+let lastTouch = -Infinity
+if (!isServer) {
+  const onTouch = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse') lastTouch = event.timeStamp
+  }
+  document.addEventListener('pointerdown', onTouch, { capture: true, passive: true })
+  document.addEventListener('pointerup', onTouch, { capture: true, passive: true })
+}
+
+/** A pointer event from a real mouse, not one emulated after a touch. */
+const isMouse = (event: PointerEvent) => event.pointerType === 'mouse' && event.timeStamp - lastTouch > EMULATED_MOUSE_WINDOW
+
+/**
  * A raised button pinned to a corner of the viewport for the screen's main action ("Compose", "New task"). Give it
  * `c2-float-button-action` children and it becomes a speed dial: the button opens a short menu of related actions
  * that fan out in `direction`, its plus turning into a cross.
@@ -387,7 +405,7 @@ export class FloatButton extends LitElement {
   }
 
   private readonly onPointerEnter = (event: PointerEvent) => {
-    if (this.trigger !== 'hover' || event.pointerType !== 'mouse') return
+    if (this.trigger !== 'hover' || !isMouse(event)) return
     clearTimeout(this.hoverTimer)
     if (!this.open) {
       this.show()
@@ -396,7 +414,7 @@ export class FloatButton extends LitElement {
   }
 
   private readonly onPointerLeave = (event: PointerEvent) => {
-    if (this.trigger !== 'hover' || event.pointerType !== 'mouse') return
+    if (this.trigger !== 'hover' || !isMouse(event)) return
     clearTimeout(this.hoverTimer)
     this.hoverTimer = setTimeout(() => this.hide(), HOVER_CLOSE_DELAY)
   }

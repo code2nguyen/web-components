@@ -1,0 +1,57 @@
+---
+title: 'Date Strip'
+description: 'A row of days to pick one from, a week at a time, with dots on the days that have something on them.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DateStrip } from '@c2n/components/date-strip'
+
+`c2-date-strip` is the row of days at the top of a booking, fitness or calendar app: each day shows its weekday and number, the chosen day is filled, today is marked, and a dot marks the days that have something on them. The buttons at the end page through the days, a week at a time.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/date-strip'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/date-strip
+<style>
+  .date-strip-demo {
+    max-width: 420px;
+  }
+</style>
+<div data-label="Schedule">
+  <c2-date-strip class="date-strip-demo" label="Workout day" value="2026-10-14"
+    markers='["2026-10-12",{"date":"2026-10-14","label":"2 workouts"},"2026-10-16"]'></c2-date-strip>
+</div>
+<div data-label="Next two weeks">
+  <c2-date-strip class="date-strip-demo" label="Delivery day" days="14" start="2026-10-19" min="2026-10-20" max="2026-10-30"></c2-date-strip>
+</div>
+```
+
+### Days shown
+
+`days` sets how many days show at once (7 by default) and how far the paging buttons move. A week of 7 starts on the first day of the week in the page's language: Monday in most of Europe, Sunday in the United States. `start` sets the first day shown; by default it is the start of the week holding the value, or today. Setting a value that is not shown brings its page into view. On a narrow screen the row scrolls rather than squeezing the days below `--c2-date-strip__day--min-width`.
+
+### Value and limits
+
+`value` is the day picked, as `YYYY-MM-DD` in the local calendar. A click, or Enter or Space on the focused day, picks it and fires `input` then `change` (with `detail.value`). `min` and `max` disable the days outside them and stop the paging there. `disabled-dates` turns off single days (a `;`-separated list, or an array as a property), such as fully booked or closed days. The arrow keys step over them.
+
+Paging fires `range-change` with the first and last day now shown, so an app can load what is on them.
+
+### Markers
+
+`markers` lists the days with a dot, as `"YYYY-MM-DD"` strings or `{ date, label }` objects. A screen reader hears the label with the day ("Wednesday, October 14, 2026, 2 workouts"), or "has events" when there is none.
+
+### In a form
+
+Under a `name`, the form receives the value. `required` asks for one. Inside a `c2-form-field`, the field's label names the strip and its hint and error describe it.
+
+### Keyboard
+
+The days are a list box with one tab stop. The arrow keys move by day and page on at the ends, Home and End go to the first and last day shown, Page Up and Page Down page, and Enter or Space picks.

@@ -965,15 +965,17 @@ code {
   list-style: none;
 }
 
-.ll-slot__values c2-progress,
-.ll-lift c2-progress {
-  --c2-progress--height: 6px;
-  --c2-progress__label--font-size: 12px;
-  --c2-progress__label--color: var(--ll-text);
-  --c2-progress__track--background-color: var(--ll-surface-3);
-  --c2-progress__indicator--background-color: var(--ll-accent);
-  --c2-progress--gap: 4px;
-  display: block;
+.ll-slot__values c2-meter,
+.ll-lift c2-meter {
+  --c2-meter__track--height: 6px;
+  --c2-meter__label--font-size: 12px;
+  --c2-meter__label--font-weight: 400;
+  --c2-meter__label--color: var(--ll-text);
+  --c2-meter__value--font-size: 12px;
+  --c2-meter__value--color: var(--ll-muted);
+  --c2-meter__track--background-color: var(--ll-surface-3);
+  --c2-meter__indicator--background-color: var(--ll-accent);
+  --c2-meter--gap: 4px;
 }
 
 .ll-code {
@@ -1036,12 +1038,12 @@ code {
 }
 
 .ll-lift .ll-bar--inside {
-  --c2-progress__indicator--background-color: var(--ll-danger);
+  --c2-meter__indicator--background-color: var(--ll-danger);
 }
 
 .ll-lift .ll-bar--outside {
-  --c2-progress__indicator--background-color: var(--ll-border-strong);
-  --c2-progress__label--color: var(--ll-muted);
+  --c2-meter__indicator--background-color: var(--ll-border-strong);
+  --c2-meter__label--color: var(--ll-muted);
 }
 
 .ll-lift__ratio {
@@ -1203,23 +1205,17 @@ code {
 }
 
 .ll-loading {
-  --c2-card--padding-top: 32px;
-  --c2-card--padding-bottom: 32px;
-  --c2-card--border-top-left-radius: 18px;
-  --c2-card--border-top-right-radius: 18px;
-  --c2-card--border-bottom-left-radius: 18px;
-  --c2-card--border-bottom-right-radius: 18px;
+  --c2-loading-overlay--border-radius: 18px;
+  --c2-loading-overlay__scrim--background-color: var(--ll-surface);
+  --c2-loading-overlay__scrim--opacity: 0.86;
+  --c2-loading-overlay__spinner--color: var(--ll-accent);
+  --c2-loading-overlay__label--color: var(--ll-text);
+}
+
+.ll-loading__label {
   display: grid;
-  gap: 12px;
-  text-align: left;
-}
-
-.ll-loading c2-progress {
-  display: block;
-}
-
-.ll-loading .ll-muted {
-  margin-top: 12px;
+  gap: 4px;
+  max-width: 36ch;
 }
 
 .ll-error {

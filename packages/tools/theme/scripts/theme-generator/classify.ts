@@ -74,6 +74,8 @@ const FONT_WEIGHT_TOKENS: Record<string, string> = { '500': 'font-weight-medium'
 
 const SHADOW_MD_PREFIXES = new Set([
   'c2-action-bar',
+  'c2-reaction-bar',
+  'c2-distribution-bar',
   'c2-carousel',
   'c2-filter-builder',
   'c2-chart',
@@ -82,6 +84,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-query-input',
   'c2-phone-input',
   'c2-tooltip',
+  'c2-toggletip',
   'c2-hover-card',
   'c2-popconfirm',
   'c2-select',

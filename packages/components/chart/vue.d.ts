@@ -31,6 +31,8 @@ import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
+import type { TreemapChart } from '@c2n/chart/treemap-chart.js'
+import type { WaterfallChart } from '@c2n/chart/waterfall-chart.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -544,6 +546,58 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<Sparkline, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<Sparkline, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<Sparkline, 'point-click'>) => void
+      }
+    >
+    'c2-treemap-chart': DefineComponent<
+      C2Props<TreemapChart> & {
+        'group-field'?: unknown
+        'children-field'?: unknown
+        'color-field'?: unknown
+        'color-max'?: unknown
+        'color-label'?: unknown
+        'color-suffix'?: unknown
+        'label-content'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<TreemapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<TreemapChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<TreemapChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<TreemapChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<TreemapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<TreemapChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<TreemapChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<TreemapChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<TreemapChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<TreemapChart, 'point-click'>) => void
+      }
+    >
+    'c2-waterfall-chart': DefineComponent<
+      C2Props<WaterfallChart> & {
+        'total-field'?: unknown
+        'total-label'?: unknown
+        'value-labels'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<WaterfallChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<WaterfallChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<WaterfallChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<WaterfallChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<WaterfallChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<WaterfallChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<WaterfallChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<WaterfallChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<WaterfallChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<WaterfallChart, 'point-click'>) => void
       }
     >
   }

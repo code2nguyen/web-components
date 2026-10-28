@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-loading-overlay</title>
+    <script type="module" src="/src/loading-overlay.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+        max-width: 420px;
+      }
+      .card {
+        display: grid;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      c2-loading-overlay {
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="toggle" type="button">Toggle loading</button>
+    <c2-loading-overlay id="overlay" loading style="--c2-loading-overlay--delay: 200ms">
+      <div class="card">
+        <label>Workspace name <input value="Acme" /></label>
+        <button type="button">Save</button>
+      </div>
+      <span slot="label">Saving changes…</span>
+    </c2-loading-overlay>
+    <div lang="fr">
+      <c2-loading-overlay loading><div class="card">Contenu</div></c2-loading-overlay>
+    </div>
+    <script type="module">
+      const overlay = document.querySelector('#overlay')
+      document.querySelector('#toggle').addEventListener('click', () => (overlay.loading = !overlay.loading))
+    </script>
+  </body>
+</html>

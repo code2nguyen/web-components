@@ -1,0 +1,265 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-bar-list,
+  $theme: (
+    width: 100%,
+    gap: 6px,
+    row--height: 32px,
+    row--column-gap: 16px,
+    bar--background-color: #edf1fe,
+    bar__hover--background-color: #dce4fd,
+    bar__positive--background-color: #dcfce7,
+    bar__negative--background-color: #fee2e2,
+    axis--color: #e4e4e7,
+    bar--border-radius: 4px,
+    label--padding: 0 8px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    icon--size: 16px,
+    icon--border-radius: 4px,
+    value--color: #18181b,
+    value--font-size: 14px,
+    value--font-weight: 500,
+    value__positive--color: #15803d,
+    value__negative--color: #dc2626,
+    header--color: #71717a,
+    header--font-size: 12px,
+    header--font-weight: 500,
+    toggle--color: rgb(2, 101, 220),
+    row__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: css.cssVar(row--column-gap);
+  margin-bottom: 4px;
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.header-value {
+  text-align: end;
+}
+
+/* In `diverging` mode the header follows the three columns: label, track, value. */
+.header--diverging {
+  grid-template-columns: fit-content(40%) minmax(0, 1fr) auto;
+
+  .header-value {
+    grid-column: 3;
+  }
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  row-gap: css.cssVar(gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Every row shares the list's columns, so the value column is as wide as the widest value and all bars share one scale. */
+li {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  column-gap: css.cssVar(row--column-gap);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(row--height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(bar--border-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+}
+
+button.row {
+  cursor: pointer;
+}
+
+.row--action:focus-visible {
+  outline: css.cssVar(row__focus--outline);
+  outline-offset: 2px;
+}
+
+/* The track holds the bar and sits under the label, in the same grid cell. */
+.track {
+  position: relative;
+  grid-row: 1;
+  grid-column: 1;
+  align-self: stretch;
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--_share);
+  border-radius: css.cssVar(bar--border-radius);
+  background-color: css.cssVar(bar--background-color);
+}
+
+.row--action:hover .bar {
+  background-color: css.cssVar(bar__hover--background-color);
+}
+
+.label {
+  position: relative;
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: css.cssVar(label--padding);
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+.label-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+a.row:hover .label-text {
+  text-decoration: underline;
+}
+
+.icon {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  border-radius: css.cssVar(icon--border-radius);
+  object-fit: cover;
+}
+
+.value {
+  grid-row: 1;
+  grid-column: 2;
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* Diverging: the label, then a track whose centre line is zero, then the value. */
+.list--diverging {
+  grid-template-columns: fit-content(40%) minmax(0, 1fr) auto;
+
+  .label {
+    padding-left: 0;
+  }
+
+  .track {
+    grid-column: 2;
+    min-height: css.cssVar(row--height);
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background-color: css.cssVar(axis--color);
+      content: '';
+    }
+  }
+
+  .bar--positive {
+    left: 50%;
+    border-radius: 0 css.cssVar(bar--border-radius) css.cssVar(bar--border-radius) 0;
+    background-color: css.cssVar(bar__positive--background-color);
+  }
+
+  .bar--negative {
+    right: 50%;
+    left: auto;
+    border-radius: css.cssVar(bar--border-radius) 0 0 css.cssVar(bar--border-radius);
+    background-color: css.cssVar(bar__negative--background-color);
+  }
+
+  .bar--zero {
+    display: none;
+  }
+
+  .row--action:hover .bar--positive {
+    background-color: css.cssVar(bar__positive--background-color);
+    filter: brightness(0.95);
+  }
+
+  .row--action:hover .bar--negative {
+    background-color: css.cssVar(bar__negative--background-color);
+    filter: brightness(0.95);
+  }
+
+  .value {
+    grid-column: 3;
+  }
+
+  .value--positive {
+    color: css.cssVar(value__positive--color);
+  }
+
+  .value--negative {
+    color: css.cssVar(value__negative--color);
+  }
+}
+
+.empty {
+  margin: 0;
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+.toggle {
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: css.cssVar(toggle--color);
+  font: inherit;
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(row__focus--outline);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}

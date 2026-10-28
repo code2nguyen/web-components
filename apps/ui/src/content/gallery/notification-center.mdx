@@ -1,0 +1,38 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { NotificationCenter } from '@c2n/components/notification-center'
+
+## Presets
+
+Looks for `c2-notification-center`. The unread background and dot carry the accent; the panel surface and shadow set the context.
+
+<GalleryGrid min={320}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-notification-center group-by="none" notifications='[{"id":"1","title":"Ana mentioned you","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}},{"id":"2","title":"Build passed","time":"2026-10-27T08:00:00Z","read":true}]'></c2-notification-center>
+```
+
+```html tag=MdxCodeBlock,label=Dropdown
+<style>
+  .inbox-dropdown {
+    --c2-notification-center--border: 0;
+    --c2-notification-center--border-radius: 12px;
+    --c2-notification-center--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14), 0 0 0 1px rgba(24, 24, 27, 0.06);
+  }
+</style>
+<c2-notification-center class="inbox-dropdown" group-by="none" notifications='[{"id":"1","title":"New comment on Q3 plan","body":"“Can we move the launch?”","time":"2026-10-27T09:40:00Z","avatar":{"name":"Lea Roy"}},{"id":"2","title":"Invoice paid","time":"2026-10-26T12:00:00Z","read":true}]'></c2-notification-center>
+```
+
+```html tag=MdxCodeBlock,label=Quiet unread
+<style>
+  .inbox-quiet {
+    --c2-notification-center__item__unread--background-color: transparent;
+    --c2-notification-center__dot--color: #16a34a;
+    --c2-notification-center__item--padding: 8px 12px;
+  }
+</style>
+<c2-notification-center class="inbox-quiet" group-by="none" notifications='[{"id":"1","title":"Ticket #4821 assigned to you","time":"2026-10-27T09:40:00Z"},{"id":"2","title":"SLA met for October","time":"2026-10-25T10:00:00Z","read":true}]'></c2-notification-center>
+```
+
+</GalleryGrid>

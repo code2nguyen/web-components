@@ -7,11 +7,13 @@ import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
+import barList from '@c2n/bar-list/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
+import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
@@ -23,6 +25,8 @@ import chatbot from '@c2n/chatbot/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
+import choiceMatrix from '@c2n/choice-matrix/custom-elements.json'
+import citation from '@c2n/citation/custom-elements.json'
 import codeEditor from '@c2n/code-editor/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
@@ -37,10 +41,14 @@ import countdown from '@c2n/countdown/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
+import dateStrip from '@c2n/date-strip/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
+import distributionBar from '@c2n/distribution-bar/custom-elements.json'
+import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
+import facetList from '@c2n/facet-list/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
@@ -69,6 +77,7 @@ import label from '@c2n/label/custom-elements.json'
 import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
 import list from '@c2n/list/custom-elements.json'
+import loadingOverlay from '@c2n/loading-overlay/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
@@ -80,11 +89,14 @@ import math from '@c2n/math/custom-elements.json'
 import menu from '@c2n/menu/custom-elements.json'
 import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
+import meter from '@c2n/meter/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
+import monthPicker from '@c2n/month-picker/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
+import notificationCenter from '@c2n/notification-center/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
@@ -103,11 +115,13 @@ import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
+import reactionBar from '@c2n/reaction-bar/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
+import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
@@ -140,9 +154,11 @@ import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
 import timeInput from '@c2n/time-input/custom-elements.json'
 import timeRangePicker from '@c2n/time-range-picker/custom-elements.json'
+import timeSlotPicker from '@c2n/time-slot-picker/custom-elements.json'
 import timeline from '@c2n/timeline/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
+import toggletip from '@c2n/toggletip/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
@@ -152,6 +168,7 @@ import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
 import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
+import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
 
@@ -168,12 +185,14 @@ export const componentManifests = (function () {
     avatar,
     badge,
     banner,
+    barList,
     borderBeam,
     bottomNav,
     breadcrumb,
     button,
     buttonGroup,
     card,
+    cardInput,
     carousel,
     cascader,
     chart,
@@ -184,6 +203,8 @@ export const componentManifests = (function () {
     checkbox,
     chip,
     chipGroup,
+    choiceMatrix,
+    citation,
     codeEditor,
     codeViewer,
     colorArea,
@@ -198,10 +219,14 @@ export const componentManifests = (function () {
     dashboard,
     dateInput,
     dateSelector,
+    dateStrip,
     dateTimePicker,
     descriptionList,
     details,
     diffViewer,
+    distributionBar,
+    emojiPicker,
+    facetList,
     featherIcons,
     fieldset,
     filterBuilder,
@@ -230,6 +255,7 @@ export const componentManifests = (function () {
     linkButton,
     list,
     listItem,
+    loadingOverlay,
     logViewer,
     markdown,
     marker,
@@ -241,11 +267,14 @@ export const componentManifests = (function () {
     menu,
     menubar,
     mermaid,
+    meter,
     modal,
     moneyInput,
+    monthPicker,
     monthPlanner,
     navigationMenu,
     notepad,
+    notificationCenter,
     numberInput,
     orgChart,
     otpInput,
@@ -264,11 +293,13 @@ export const componentManifests = (function () {
     questionnaire,
     radio,
     rate,
+    reactionBar,
     relativeTime,
     reorderList,
     richTextEditor,
     saveBar,
     searchField,
+    secretField,
     select,
     separator,
     sheet,
@@ -301,9 +332,11 @@ export const componentManifests = (function () {
     themeSelect,
     timeInput,
     timeRangePicker,
+    timeSlotPicker,
     timeline,
     toast,
     todoList,
+    toggletip,
     tooltip,
     tour,
     traceWaterfall,
@@ -313,6 +346,7 @@ export const componentManifests = (function () {
     upload,
     viewOptions,
     virtualList,
+    visuallyHidden,
     weekPlanner,
     workingIndicator,
   ].reduce((result, item) => {

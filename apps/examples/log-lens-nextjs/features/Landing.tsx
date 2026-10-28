@@ -71,17 +71,17 @@ export function Landing({ status, fileName, error, onFile, onSample }: Readonly<
         </p>
 
         <div className="ll-hero__drop">
-          {status === 'loading' ? (
-            <c2-card className="ll-loading">
-              <c2-progress label={`Reading ${fileName}`}>Reading {fileName}…</c2-progress>
-              <p className="ll-muted">Parsing records, mining patterns, stitching traces and writing the story.</p>
-            </c2-card>
-          ) : (
+          {/* The drop zone stays in place while a file is read, covered and blocked, so the page does not jump. */}
+          <c2-loading-overlay className="ll-loading" loading={status === 'loading'} label={`Reading ${fileName}`}>
             <c2-upload ref={uploadRef} className="ll-upload" accept=".json,.jsonl,.ndjson,.log,.txt" aria-label="Open an OpenTelemetry log file">
               <span slot="prompt">Drop an OpenTelemetry log file here, or click to choose one</span>
               <span slot="hint">OTLP JSON or JSON Lines (collector file exporter) · the file never leaves this tab</span>
             </c2-upload>
-          )}
+            <div slot="label" className="ll-loading__label">
+              <strong>Reading {fileName}…</strong>
+              <span className="ll-muted">Parsing records, mining patterns, stitching traces and writing the story.</span>
+            </div>
+          </c2-loading-overlay>
           {status === 'error' && (
             <c2-status-panel className="ll-error" status="error" heading={`${fileName} could not be analyzed`} description={error} heading-level={2}>
               <c2-button slot="actions" onClick={onSample}>

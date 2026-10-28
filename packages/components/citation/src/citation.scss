@@ -1,0 +1,155 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-citation,
+  $theme: (
+    marker--min-width: 16px,
+    marker--height: 16px,
+    marker--padding: 0 4px,
+    marker--border-radius: 4px,
+    marker--background-color: #f4f4f5,
+    marker--color: #52525b,
+    marker--font-size: 11px,
+    marker--font-weight: 500,
+    marker--vertical-align: 0.15em,
+    marker__hover--background-color: #e4e4e7,
+    marker__hover--color: #18181b,
+    marker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    card--width: 300px,
+    card--padding: 12px,
+    card--gap: 6px,
+    favicon--size: 16px,
+    favicon--border-radius: 4px,
+    site--color: #71717a,
+    site--font-size: 12px,
+    title--color: #18181b,
+    title--font-size: 14px,
+    title--font-weight: 600,
+    snippet--color: #52525b,
+    snippet--font-size: 13px,
+    snippet--line-clamp: 3,
+    url--color: #71717a,
+    url--font-size: 12px,
+  )
+);
+
+:host {
+  display: inline;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.card {
+  // The card's own variables, bridged from this element's, so a citation is styled through one prefix.
+  --c2-hover-card--width: #{css.cssVar(card--width)};
+  --c2-hover-card--padding-top: #{css.cssVar(card--padding)};
+  --c2-hover-card--padding-right: #{css.cssVar(card--padding)};
+  --c2-hover-card--padding-bottom: #{css.cssVar(card--padding)};
+  --c2-hover-card--padding-left: #{css.cssVar(card--padding)};
+
+  display: inline;
+}
+
+.marker {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: css.cssVar(marker--min-width);
+  height: css.cssVar(marker--height);
+  margin: 0 1px;
+  padding: css.cssVar(marker--padding);
+  border: 0;
+  border-radius: css.cssVar(marker--border-radius);
+  background-color: css.cssVar(marker--background-color);
+  color: css.cssVar(marker--color);
+  font: inherit;
+  font-size: css.cssVar(marker--font-size);
+  font-weight: css.cssVar(marker--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: css.cssVar(marker--vertical-align);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    background-color: css.cssVar(marker__hover--background-color);
+    color: css.cssVar(marker__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(marker__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(card--gap);
+  min-width: 0;
+  white-space: normal;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.favicon {
+  flex: none;
+  width: css.cssVar(favicon--size);
+  height: css.cssVar(favicon--size);
+  border-radius: css.cssVar(favicon--border-radius);
+  object-fit: contain;
+}
+
+.site {
+  overflow: hidden;
+  color: css.cssVar(site--color);
+  font-size: css.cssVar(site--font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.snippet {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: css.cssVar(snippet--color);
+  font-size: css.cssVar(snippet--font-size);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: css.cssVar(snippet--line-clamp);
+}
+
+.url {
+  overflow: hidden;
+  color: css.cssVar(url--color);
+  font-size: css.cssVar(url--font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker {
+    transition: none;
+  }
+}

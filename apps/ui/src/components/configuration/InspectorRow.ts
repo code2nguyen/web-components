@@ -3,9 +3,8 @@ import { customElement, property } from 'lit/decorators.js'
 
 import '@c2n/components/label'
 import '@c2n/components/icon-button'
-import '@c2n/components/tooltip'
+import '@c2n/components/toggletip'
 import '@c2n/feather-icons/icons/rotate-ccw.js'
-import '@c2n/feather-icons/icons/info.js'
 
 /**
  * One property row of the inspector: label on the left, control slotted on the right.
@@ -80,19 +79,20 @@ export class InspectorRow extends LitElement {
       }
       .info {
         flex: none;
-        display: inline-flex;
-        color: var(--site-color-on-surface-muted);
-        width: 11px;
-        height: 11px;
-      }
-      .info c2-feather-info {
-        --c2-feather-icon--size: 11px;
+        --c2-toggletip__button--size: 13px;
+        --c2-toggletip__icon--size: 11px;
+        --c2-toggletip__button--color: var(--site-color-on-surface-muted);
+        --c2-toggletip__button__hover--color: var(--site-color-primary);
+        --c2-toggletip__button__hover--background-color: var(--site-color-surface-container-2);
+        --c2-toggletip__button__expanded--color: var(--site-color-primary);
+        --c2-toggletip--font-size: 12px;
+        --c2-toggletip--max-width: 240px;
       }
     `,
   ]
 
   @property() label = ''
-  /** Manifest description, shown as a tooltip on an info glyph beside the label. */
+  /** Manifest description, shown in a toggletip beside the label. */
   @property() description = ''
   /** The value differs from the authored example: show the dot and enable the revert button. */
   @property({ type: Boolean, reflect: true }) changed = false
@@ -108,14 +108,7 @@ export class InspectorRow extends LitElement {
       <div class="label">
         <c2-label title=${this.label}>${this.label}</c2-label>
         ${this.changed ? html`<span class="dot" aria-hidden="true"></span>` : nothing}
-        ${
-          this.description
-            ? html`<span class="info" tabindex="0" role="note">
-                <c2-feather-info></c2-feather-info>
-                <c2-tooltip placement="left">${this.description}</c2-tooltip>
-              </span>`
-            : nothing
-        }
+        ${this.description ? html`<c2-toggletip class="info" placement="left" label="About ${this.label}">${this.description}</c2-toggletip>` : nothing}
       </div>
       <div class="control">
         <slot></slot>

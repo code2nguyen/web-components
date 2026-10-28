@@ -1,0 +1,66 @@
+---
+title: 'Toggletip'
+description: 'A small ⓘ button that opens a help bubble on click or tap; the bubble can hold links and is announced to screen readers.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Toggletip } from '@c2n/components/toggletip'
+
+`c2-toggletip` puts an explanation one press away: the help behind a field label, a setting or a column header. The ⓘ button opens a bubble on click, tap or Enter, and the bubble can hold links and buttons, which a `c2-tooltip` cannot. It is help for everyone, so unlike `c2-hover-card` it opens on a press, works on touch, and its content is a live region that a screen reader announces when it opens, without moving focus. Tab from the button continues into any link in the bubble.
+
+Pressing the button again, Escape (which puts focus back on the button), a press outside and focus moving elsewhere close it. The button's name is the `label` attribute, or the translatable "More information"; give each toggletip a `label` that says what it explains when a page has several. To use words instead of the icon ("What's this?"), put them in the `icon` slot, and they become the button's name.
+
+Use `c2-tooltip` for a short name of an icon button, `c2-hover-card` for a preview behind a link, and `c2-popconfirm` for an "Are you sure?" question.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/toggletip'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/toggletip
+<style>
+  .tt-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .tt-field a {
+    color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .tt-link {
+    --c2-toggletip__button--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-toggletip__button__hover--background-color: transparent;
+    font-size: 13px;
+    text-decoration: underline;
+  }
+</style>
+<div data-label="Beside a field label">
+  <span class="tt-field">
+    VAT number
+    <c2-toggletip label="About the VAT number">
+      <p>Your EU VAT number, starting with the two-letter country code, e.g. FR40303265045.</p>
+      <a href="#import">Where to find it</a>
+    </c2-toggletip>
+  </span>
+</div>
+<div data-label="Below the button">
+  <span class="tt-field">
+    Billing period
+    <c2-toggletip placement="bottom" label="About billing periods">Yearly plans are billed once and cost two months less than twelve monthly payments.</c2-toggletip>
+  </span>
+</div>
+<div data-label="Words instead of the icon">
+  <c2-toggletip class="tt-link"><span slot="icon">What's this?</span>A workspace groups the projects and people of one team.</c2-toggletip>
+</div>
+```
+
+Click a button, or Tab to it and press Enter. In the first row, Tab once more to reach the link inside the bubble.
