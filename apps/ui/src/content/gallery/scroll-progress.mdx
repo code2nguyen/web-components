@@ -10,15 +10,16 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
 
 <GalleryGrid>
 
-```html tag=MdxCodeBlock,label=Thin bar
+```html tag=MdxCodeBlock,label=Default
 <style>
-  .progress-article-140 {
-    --c2-scroll-area--max-height: 140px;
+  .progress-box {
     width: 220px;
+    height: 140px;
+    overflow: auto;
   }
 </style>
 <c2-scroll-progress for="progress-card-1"></c2-scroll-progress>
-<c2-scroll-area id="progress-card-1" class="progress-article-140" label="Article"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+<div id="progress-card-1" class="progress-box"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></div>
 ```
 
 ```html tag=MdxCodeBlock,label=Thick rounded bar

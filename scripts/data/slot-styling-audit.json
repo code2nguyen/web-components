@@ -1529,6 +1529,12 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-in-view",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content, watched and revealed as a whole; the app styles it."
+    },
+    {
       "tag": "c2-indicator",
       "slot": "",
       "decision": "assigned-content",
@@ -1824,6 +1830,18 @@
       "decision": "variables",
       "variables": ["--c2-save-bar__message--font-size", "--c2-save-bar__message--font-weight", "--c2-save-bar__message--color"],
       "reason": "The message line sets the type the slotted message inherits."
+    },
+    {
+      "tag": "c2-scroll-area",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content that scrolls; the app styles it, and the area themes only the scroller."
+    },
+    {
+      "tag": "c2-scroll-progress",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot is the centre of a ring: the app's own icon or button, styled by the app."
     },
     {
       "tag": "c2-selection-toolbar",

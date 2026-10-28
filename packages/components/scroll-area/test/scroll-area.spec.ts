@@ -38,7 +38,7 @@ test('content that fits shows no shadow and fires nothing; a horizontal area tra
   await renderScenario(`<div lang="fr"><c2-scroll-area style="--c2-scroll-area--max-height: 400px">${rows(3)}</c2-scroll-area>
     <c2-scroll-area orientation="horizontal" id="wide"><div style="width: 2000px; height: 40px">Wide</div></c2-scroll-area></div>`)
   await expect(frame(page).first()).not.toHaveClass(/more-/)
-  await expect(page.getByRole('region', { name: 'Contenu défilant' })).toHaveCount(2)
+  await expect(page.getByRole('group', { name: 'Contenu défilant' })).toHaveCount(2)
   await expect(page.locator('#wide .frame')).toHaveClass(/more-end/)
   await expect(page.locator('#wide .frame')).not.toHaveClass(/more-bottom/)
 })

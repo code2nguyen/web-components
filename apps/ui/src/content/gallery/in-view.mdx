@@ -10,6 +10,17 @@ Looks for `c2-in-view`. Scroll a card's list to see its reveal; each look is two
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .in-view-plain {
+    padding: 20px 12px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-in-view><p class="in-view-plain">Shown as it is; listen to enter and leave.</p></c2-in-view>
+```
+
 ```html tag=MdxCodeBlock,label=Fade up
 <style>
   .reveal-up {

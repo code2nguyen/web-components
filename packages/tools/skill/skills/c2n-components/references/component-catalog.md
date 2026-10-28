@@ -109,6 +109,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Popconfirm** — `c2-popconfirm` · `@c2n/components/popconfirm` — A small "Are you sure?" popup anchored to the button that asked for it.
 - **Progress** — `c2-progress` · `@c2n/components/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
+- **Scroll Progress** — `c2-scroll-progress` · `@c2n/components/scroll-progress` — How far the reader got: a bar that fills or a ring that closes as the page or a container scrolls.
 - **Share Sheet** — `c2-share-sheet` · `@c2n/components/share-sheet` — Share a link anywhere: copy it, send it to email or a network, scan it as a QR code, or hand it to the device’s own share sheet.
 - **Sheet** — `c2-sheet` · `@c2n/components/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 - **Skeleton** — `c2-skeleton` · `@c2n/components/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
@@ -196,11 +197,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
+- **In View** — `c2-in-view` · `@c2n/components/in-view` — Reacts when its content scrolls into view: reveal it, load more, or pause it when it leaves.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
 - **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.
 - **Page Header** — `c2-page-header` · `@c2n/components/page-header` — The top of a page: breadcrumb or parent link, your heading with status badges, description, metadata, page actions that fold into a menu, tabs and a toolbar.
 - **Save Bar** — `c2-save-bar` · `@c2n/components/save-bar` — A floating bar that appears while a form has unsaved changes, with Discard and Save.
+- **Scroll Area** — `c2-scroll-area` · `@c2n/components/scroll-area` — A scroll container with themed scrollbars and shadows on the edges with more content beyond them.
 - **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 - **Sticky** — `c2-sticky` · `@c2n/components/sticky` — Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down.
