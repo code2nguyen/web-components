@@ -1,0 +1,148 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-fx-converter,
+  $theme: (
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    background: #ffffff,
+    color: #18181b,
+    padding: 16px,
+    gap: 4px,
+    label--color: #71717a,
+    label--font-size: 12px,
+    label--font-weight: 500,
+    amount--font-size: 20px,
+    amount--line-height: 28px,
+    rail--border: 2px solid #e4e4e7,
+    line--font-size: 12px,
+    line__value--font-weight: 500,
+    line__label--color: #71717a,
+    rate--color: #0265dc,
+    expired--color: #dc2626,
+    stale--opacity: 0.38,
+    swap--border: 1px solid #e4e4e7,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.converter {
+  display: grid;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.field c2-money-input {
+  display: block;
+  --c2-money-input--font-size: #{css.cssVar(amount--font-size)};
+  --c2-money-input--line-height: #{css.cssVar(amount--line-height)};
+}
+
+.field--stale c2-money-input {
+  opacity: css.cssVar(stale--opacity);
+}
+
+.middle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding-block: 4px;
+  padding-inline-start: 12px;
+}
+
+.lines {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-block: 4px;
+  padding-inline: 16px 0;
+  border-inline-start: css.cssVar(rail--border);
+  list-style: none;
+  font-size: css.cssVar(line--font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.line__value {
+  min-width: 96px;
+  font-weight: css.cssVar(line__value--font-weight);
+}
+
+.line--rate .line__value {
+  color: css.cssVar(rate--color);
+}
+
+.line__label {
+  color: css.cssVar(line__label--color);
+}
+
+.lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lock__ring {
+  --c2-progress--size: 14px;
+  --c2-progress--height: 2px;
+}
+
+.expired {
+  color: css.cssVar(expired--color);
+}
+
+.swap {
+  --c2-icon-button--border: #{css.cssVar(swap--border)};
+}
+
+svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.refresh svg {
+  width: 16px;
+  height: 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

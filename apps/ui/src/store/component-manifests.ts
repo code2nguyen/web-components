@@ -59,6 +59,7 @@ import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
 import formatDate from '@c2n/format-date/custom-elements.json'
 import formatNumber from '@c2n/format-number/custom-elements.json'
+import fxConverter from '@c2n/fx-converter/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
@@ -100,6 +101,7 @@ import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import notificationCenter from '@c2n/notification-center/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
+import orderBook from '@c2n/order-book/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
 import overflowList from '@c2n/overflow-list/custom-elements.json'
@@ -244,6 +246,7 @@ export const componentManifests = (function () {
     formField,
     formatDate,
     formatNumber,
+    fxConverter,
     gantt,
     googleMap,
     header,
@@ -285,6 +288,7 @@ export const componentManifests = (function () {
     notepad,
     notificationCenter,
     numberInput,
+    orderBook,
     orgChart,
     otpInput,
     overflowList,
