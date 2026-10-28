@@ -48,7 +48,8 @@
         "c2-textarea": true,
         "c2-time-input": true,
         "c2-time-slot-picker": true,
-        "c2-tree-select": true
+        "c2-tree-select": true,
+        "c2-wheel-picker": true
       },
       "checked": {
         "c2-checkbox": true,
