@@ -182,8 +182,10 @@ export class FxConverter extends LitElement {
   /** The locale amounts are formatted in. Without it: the nearest `lang`. */
   @property() locale = ''
 
+  /** Turns off both fields and the swap button. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
+  /** Shows the amounts without letting them be edited or swapped. */
   @property({ type: Boolean, attribute: 'readonly' }) readOnly = false
 
   private readonly internals = this.attachInternals()
@@ -302,10 +304,6 @@ export class FxConverter extends LitElement {
     if (render && changed) this.requestUpdate()
   }
 
-  private emit(type: 'input' | 'change'): void {
-    this.dispatchEvent(new CustomEvent(type, { detail: this.value, bubbles: true, composed: true }))
-  }
-
   private announce(text: string, delay = ANNOUNCE_DELAY): void {
     clearTimeout(this.announceTimer)
     this.announceTimer = setTimeout(() => {
@@ -332,12 +330,12 @@ export class FxConverter extends LitElement {
       const text = this.formatMoney(computed, currency)
       this.announce(this.msg.t(side === 'from' ? 'announceTo' : 'announceFrom', text))
     }
-    this.emit('input')
+    this.dispatchEvent(new CustomEvent('input', { detail: this.value, bubbles: true, composed: true }))
   }
 
   private handleChange(event: Event): void {
     event.stopPropagation()
-    this.emit('change')
+    this.dispatchEvent(new CustomEvent('change', { detail: this.value, bubbles: true, composed: true }))
   }
 
   private handleCurrency(side: FxSide, event: CustomEvent<{ currency: string }>): void {
@@ -365,7 +363,7 @@ export class FxConverter extends LitElement {
       this.swapping = true
     }
     this.dispatchEvent(new CustomEvent('swap', { detail: { from: this.from, to: this.to } }))
-    this.emit('change')
+    this.dispatchEvent(new CustomEvent('change', { detail: this.value, bubbles: true, composed: true }))
   }
 
   private refresh(): void {

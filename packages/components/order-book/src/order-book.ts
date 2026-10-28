@@ -448,8 +448,11 @@ export class OrderBook extends LitElement {
   }
 
   private renderSpread() {
-    const bid = Math.max(...this.levels.bid.keys())
-    const ask = Math.min(...this.levels.ask.keys())
+    // A loop, not Math.max(...keys): spreading a deep book's prices as arguments overflows the stack.
+    let bid = -Infinity
+    let ask = Infinity
+    for (const price of this.levels.bid.keys()) if (price > bid) bid = price
+    for (const price of this.levels.ask.keys()) if (price < ask) ask = price
     const both = Number.isFinite(bid) && Number.isFinite(ask)
     const mid = both ? (bid + ask) / 2 : undefined
     const shown = this.lastPrice ?? mid
@@ -461,9 +464,9 @@ export class OrderBook extends LitElement {
         shown !== undefined
           ? html`<span class="spread__price ${this.lastPrice !== undefined ? `spread__price--${this.lastDirection || 'flat'}` : ''}"
               ><span class="visually-hidden">${this.msg.t(this.lastPrice !== undefined ? 'last' : 'mid')} </span>${this.format(
-              shown,
-              this.lastPrice === undefined && mid !== undefined ? Math.max(digits, decimalsOf(clean(mid))) : digits,
-            )}${arrow ? html`<span aria-hidden="true"> ${arrow}</span>` : nothing}</span
+                shown,
+                this.lastPrice === undefined && mid !== undefined ? Math.max(digits, decimalsOf(clean(mid))) : digits,
+              )}${arrow ? html`<span aria-hidden="true"> ${arrow}</span>` : nothing}</span
             >`
           : nothing
       }
