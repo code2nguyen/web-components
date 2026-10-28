@@ -79,3 +79,22 @@ test('Escape closes and returns focus; disabled locks the trigger and the counte
   await props(picker(page).first(), { disabled: true })
   await expect(picker(page).first().locator('.trigger')).toBeDisabled()
 })
+
+test('End without an upper limit stays; counters after the first draw a divider; a click elsewhere keeps its focus', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-quantity-picker inline><c2-quantity value="3" singular="seat" plural="seats">Seats</c2-quantity><c2-quantity>Bags</c2-quantity></c2-quantity-picker>
+    <c2-quantity-picker id="popover" label="Guests">${GUESTS}</c2-quantity-picker><input aria-label="Elsewhere" />`)
+  await page.getByRole('spinbutton', { name: 'Seats' }).focus()
+  await page.keyboard.press('End')
+  await expect(page.getByRole('spinbutton', { name: 'Seats' })).toHaveAttribute('aria-valuenow', '3')
+  const divided = (name: string) =>
+    page
+      .locator('c2-quantity', { hasText: name })
+      .evaluate((element) => element.shadowRoot!.querySelector('.quantity')!.classList.contains('quantity--divided'))
+  expect(await divided('Seats')).toBe(false)
+  expect(await divided('Bags')).toBe(true)
+  await page.getByRole('button', { name: 'Guests: 2 adults, 1 child' }).click()
+  await expect(page.getByRole('dialog', { name: 'Guests' })).toBeVisible()
+  await page.getByRole('textbox', { name: 'Elsewhere' }).click()
+  await expect(page.getByRole('dialog', { name: 'Guests' })).toBeHidden()
+  await expect(page.getByRole('textbox', { name: 'Elsewhere' })).toBeFocused()
+})

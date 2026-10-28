@@ -149,6 +149,11 @@ export class PromoCodeField extends LitElement {
       return
     }
     const accepted: PromoCode = { code: result.code || code, ...(result.label ? { label: result.label } : {}) }
+    // The server may answer with its own spelling of a code already applied (an alias): refuse it too.
+    if (this.codes.some((applied) => this.canonical(applied.code) === this.canonical(accepted.code))) {
+      this.refuse(code, this.msg.t('alreadyApplied', accepted.code))
+      return
+    }
     this.codes = [...this.codes, accepted]
     this.draft = ''
     this.announcement = accepted.label ? this.msg.t('appliedWith', accepted.code, accepted.label) : this.msg.t('applied', accepted.code)
@@ -173,7 +178,8 @@ export class PromoCodeField extends LitElement {
   private focusAfterChange(): void {
     const field = this.renderRoot.querySelector<HTMLElement>('c2-text-field')
     const chip = this.renderRoot.querySelector<HTMLElement>('c2-chip')
-    ;(field ?? chip)?.focus()
+    const add = this.renderRoot.querySelector<HTMLElement>('c2-link-button')
+    ;(field ?? chip ?? add)?.focus()
   }
 
   private handleInput(event: Event): void {

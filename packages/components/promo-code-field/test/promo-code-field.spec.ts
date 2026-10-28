@@ -82,3 +82,19 @@ test('collapsed opens from its link into a focused field; case-sensitive keeps t
   await expect(page.locator('#fr').getByRole('button', { name: 'Appliquer' })).toBeDisabled()
   await accessible(page)
 })
+
+test('an alias the server spells as an applied code is refused; removing the last restored code focuses the link', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-promo-code-field max="0" codes='[{"code":"SPRING20"}]'></c2-promo-code-field>
+    <c2-promo-code-field id="collapsed" collapsed codes='[{"code":"WELCOME"}]'></c2-promo-code-field>`)
+  await field(page)
+    .first()
+    .evaluate((element: Field) => {
+      element.validate = async () => ({ code: 'SPRING20', label: '−$12.00' })
+    })
+  await input(page).fill('spring')
+  await page.keyboard.press('Enter')
+  await expect(field(page).first().getByText('SPRING20 is already applied')).toBeVisible()
+  await expect(field(page).first().getByRole('listitem')).toHaveCount(1)
+  await page.locator('#collapsed').getByRole('button', { name: 'Remove WELCOME' }).click()
+  await expect(page.locator('#collapsed c2-link-button')).toBeFocused()
+})

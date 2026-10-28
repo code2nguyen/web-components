@@ -21,7 +21,7 @@
       // A fake card API: the details arrive after a short delay, as after a re-authentication.
       const card = document.getElementById('card')
       card.addEventListener('reveal-request', () => setTimeout(() => (card.details = { number: '4242 4242 4242 4242', expiry: '08/29', cvc: '314' }), 600))
-      card.addEventListener('copy', (event) => console.log('copied', event.detail.field))
+      card.addEventListener('field-copy', (event) => console.log('copied', event.detail.field))
     </script>
   </body>
 </html>

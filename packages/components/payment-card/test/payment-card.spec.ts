@@ -26,11 +26,11 @@ test('masked: the last four digits only; showing asks the app, then shows each f
   await accessible(page)
 })
 
-test('a copy fires copy with the field; hiding drops the details and says so', async ({ page, renderScenario }) => {
+test('a copy fires field-copy with the field; hiding drops the details and says so', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-payment-card last4="4242"></c2-payment-card>`)
   await clipboard(page)
   await props(card(page), { details: DETAILS })
-  await watch(card(page), 'copy')
+  await watch(card(page), 'field-copy')
   await page.getByRole('button', { name: 'Copy card number' }).click()
   await expect(page.locator('html')).toHaveAttribute('data-clipboard', '4242424242424242')
   await expect.poll(() => events(page)).toEqual([{ field: 'number' }])
@@ -64,4 +64,23 @@ test('frozen: badged, cannot be shown, and freezing a shown card masks it; text 
   await expect(page.locator('#fr').getByRole('button', { name: 'Afficher les détails' })).toBeDisabled()
   await expect(page.locator('#fr').getByText('Carte se terminant par 1111')).toBeAttached()
   await accessible(page)
+})
+
+test('details that arrive after the reveal was cancelled or on a frozen card stay hidden; copy values are no attributes', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-payment-card last4="4242"></c2-payment-card>`)
+  await page.getByRole('button', { name: 'Show details' }).click()
+  await card(page).evaluate((element: Card) => element.hide())
+  await props(card(page), { details: DETAILS })
+  await expect(card(page)).toHaveJSProperty('details', null)
+  await expect(card(page).locator('.digits')).toHaveText('•••• •••• •••• 4242')
+  await page.getByRole('button', { name: 'Show details' }).click()
+  await props(card(page), { frozen: true })
+  await props(card(page), { details: DETAILS })
+  await expect(card(page)).toHaveJSProperty('details', null)
+  await props(card(page), { frozen: false })
+  await page.getByRole('button', { name: 'Show details' }).click()
+  await props(card(page), { details: DETAILS })
+  await expect(card(page).locator('.digits')).toHaveText('4242 4242 4242 4242')
+  // The number and the code reach the copy buttons as properties, never as markup.
+  await expect(card(page).locator('c2-copy-button[value]')).toHaveCount(0)
 })

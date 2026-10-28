@@ -87,7 +87,7 @@ export interface QuantityPicker {
  * @cssproperty {border-radius} [--c2-quantity-picker__panel--border-radius=8px]
  * @cssproperty {color} [--c2-quantity-picker__panel--background=#ffffff]
  * @cssproperty {shadow} [--c2-quantity-picker__panel--box-shadow=0 8px 24px rgba(0, 0, 0, 0.12)]
- * @cssproperty {border} [--c2-quantity-picker__divider--border=1px solid #e4e4e7] - The lines between counters.
+ * @cssproperty {border} [--c2-quantity-picker__divider--border=1px solid #e4e4e7] - The line above the panel's footer; the counters draw their own (`--c2-quantity__divider--border`).
  * @cssproperty {color} [--c2-quantity-picker__note--color=#71717a]
  * @cssproperty {font-size} [--c2-quantity-picker__note--font-size=12px]
  */
@@ -196,9 +196,11 @@ export class QuantityPicker extends LitElement {
   private share(): void {
     const limit = Number.isFinite(this.maxTotal) && this.maxTotal >= 0 ? this.maxTotal : Number.POSITIVE_INFINITY
     const room = limit - this.total
-    for (const counter of this.counters) {
+    for (const [index, counter] of this.counters.entries()) {
       // A counter hydrating after the picker gets its limits after its own first update (it sends a sync then).
       if (!counter.hasUpdated) continue
+      // The counter draws its own divider: a wrapper around it (Astro's island) may have no box to draw one on.
+      counter.divided = index > 0
       counter.room = room
       counter.locked = this.disabled
     }
@@ -244,7 +246,11 @@ export class QuantityPicker extends LitElement {
     this.open = open
     if (!open) {
       this.commit()
-      this.renderRoot.querySelector<HTMLElement>('.trigger')?.focus()
+      // Back to the trigger from the panel (Escape, Done), but not away from a control the reader clicked elsewhere.
+      const active = document.activeElement
+      if (!active || active === document.body || active === this || this.contains(active)) {
+        this.renderRoot.querySelector<HTMLElement>('.trigger')?.focus()
+      }
     } else {
       // Focus the first counter's value, so the arrow keys work at once.
       requestAnimationFrame(() => this.counters[0]?.shadowRoot?.querySelector<HTMLElement>('[role=spinbutton]')?.focus())

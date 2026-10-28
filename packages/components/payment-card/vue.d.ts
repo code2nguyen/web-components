@@ -22,7 +22,7 @@ declare module 'vue' {
       C2Props<PaymentCard> & {
         'hide-after'?: unknown
         onRevealRequest?: (event: EventOf<PaymentCard, 'reveal-request'>) => void
-        onCopy?: (event: EventOf<PaymentCard, 'copy'>) => void
+        onFieldCopy?: (event: EventOf<PaymentCard, 'field-copy'>) => void
       }
     >
   }

@@ -41,6 +41,7 @@ export const QUANTITY_SYNC = 'c2-quantity-sync'
  * @cssproperty {opacity} [--c2-quantity__button__disabled--opacity=0.38]
  * @cssproperty {outline} [--c2-quantity__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-quantity__value--min-width=24px]
+ * @cssproperty {border} [--c2-quantity__divider--border=1px solid #e4e4e7] - The line above every counter of a picker after the first.
  */
 @customElement('c2-quantity')
 export class Quantity extends LitElement {
@@ -75,6 +76,9 @@ export class Quantity extends LitElement {
 
   /** Set by a disabled picker: the counter is off without an attribute written on it. */
   @property({ attribute: false }) locked = false
+
+  /** Set by the picker on every counter after the first: draws the line above it. */
+  @property({ attribute: false }) divided = false
 
   private get inactive(): boolean {
     return this.disabled || this.locked
@@ -142,7 +146,8 @@ export class Quantity extends LitElement {
       ArrowDown: () => this.value - this.stepSize,
       ArrowLeft: () => this.value - this.stepSize,
       Home: () => this.min,
-      End: () => this.upper,
+      // No upper limit: End has nowhere to go.
+      End: () => (Number.isFinite(this.upper) ? this.upper : this.value),
     }
     const target = keys[event.key]
     if (!target) return
@@ -155,7 +160,7 @@ export class Quantity extends LitElement {
     const atMin = this.value <= this.min
     const atMax = this.value >= this.upper
     const max = Number.isFinite(this.upper) ? this.upper : undefined
-    return html`<div class="quantity">
+    return html`<div class="quantity ${this.divided ? 'quantity--divided' : ''}">
       <div class="text">
         <span class="label" id="label"><slot @slotchange=${() => (this.labelText = this.label)}></slot></span>
         <span class="hint" id="hint"><slot name="hint"></slot></span>

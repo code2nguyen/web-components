@@ -15,6 +15,7 @@
     button__disabled--opacity: 0.38,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     value--min-width: 24px,
+    divider--border: 1px solid #e4e4e7,
   )
 );
 
@@ -31,6 +32,10 @@
   align-items: center;
   gap: css.cssVar(gap);
   padding: css.cssVar(padding);
+}
+
+.quantity--divided {
+  border-top: css.cssVar(divider--border);
 }
 
 .text {

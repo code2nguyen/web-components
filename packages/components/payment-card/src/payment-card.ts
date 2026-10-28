@@ -27,7 +27,7 @@ export type PaymentCardField = 'number' | 'expiry' | 'cvc'
 /** Events fired by {@link PaymentCard}, keyed for `addEventListener`. */
 export interface PaymentCardEventMap {
   'reveal-request': CustomEvent<void>
-  copy: CustomEvent<{ field: PaymentCardField }>
+  'field-copy': CustomEvent<{ field: PaymentCardField }>
 }
 
 export interface PaymentCard {
@@ -63,7 +63,7 @@ export function groupCardNumber(number: string): string[] {
  * @slot actions - More buttons beside "Show details" ("Freeze", "Report lost").
  *
  * @event {CustomEvent<void>} reveal-request - Fired when the reader asks to see the details: fetch them and set `details`, or call `revealFailed()`. Does not bubble.
- * @event {CustomEvent<{ field: 'number' | 'expiry' | 'cvc' }>} copy - Fired after a field was copied. Does not bubble.
+ * @event {CustomEvent<{ field: 'number' | 'expiry' | 'cvc' }>} field-copy - Fired after a field was copied (named apart from the native clipboard `copy`). Does not bubble.
  *
  * @csspart face - The card face.
  * @csspart number - The number line.
@@ -116,6 +116,8 @@ export class PaymentCard extends LitElement {
   @property({ type: Boolean, reflect: true }) frozen = false
 
   @state() private loading = false
+  /** A reveal was cancelled while loading; its late details must not show. */
+  private cancelled = false
   @state() private announcement = ''
 
   private readonly internals = this.attachInternals()
@@ -135,6 +137,7 @@ export class PaymentCard extends LitElement {
   /** Asks for the details, as the button does: fires `reveal-request` and shows the loading state. */
   reveal(): void {
     if (this.frozen || this.loading || this.revealed) return
+    this.cancelled = false
     this.loading = true
     this.dispatchEvent(new CustomEvent('reveal-request'))
   }
@@ -142,6 +145,8 @@ export class PaymentCard extends LitElement {
   /** Masks the card again and drops the details from memory. */
   hide(): void {
     const was = this.revealed
+    // A reveal still loading is cancelled: the details it brings later are dropped.
+    if (this.loading) this.cancelled = true
     this.loading = false
     this.details = null
     if (was) this.announcement = this.msg.t('hidden')
@@ -166,9 +171,9 @@ export class PaymentCard extends LitElement {
     this.loading = false
   }
 
-  /** A hidden tab is a card nobody watches: mask it. */
+  /** A hidden tab is a card nobody watches: mask it, and cancel a reveal still loading. */
   private readonly handleVisibility = () => {
-    if (document.visibilityState === 'hidden' && this.revealed) this.hide()
+    if (document.visibilityState === 'hidden' && (this.revealed || this.loading)) this.hide()
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -176,6 +181,12 @@ export class PaymentCard extends LitElement {
     if (changed.has('frozen') && this.frozen && (this.revealed || this.loading)) this.hide()
     if (changed.has('details')) {
       clearTimeout(this.hideTimer)
+      // Details for a cancelled reveal, a frozen card or a hidden page are not shown.
+      const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
+      if (this.details && (this.cancelled || this.frozen || hidden)) {
+        this.cancelled = false
+        this.details = null
+      }
       if (this.details) {
         this.loading = false
         this.announcement = this.msg.t('shown')
@@ -186,11 +197,11 @@ export class PaymentCard extends LitElement {
   }
 
   private copied(field: PaymentCardField): void {
-    this.dispatchEvent(new CustomEvent('copy', { detail: { field } }))
+    this.dispatchEvent(new CustomEvent('field-copy', { detail: { field } }))
   }
 
   private renderCopy(field: PaymentCardField, value: string, label: string) {
-    return html`<c2-copy-button class="copy" reveal="always" value=${value} label=${label} @copied=${() => this.copied(field)}></c2-copy-button>`
+    return html`<c2-copy-button class="copy" reveal="always" .value=${value} label=${label} @copied=${() => this.copied(field)}></c2-copy-button>`
   }
 
   private renderNumber() {

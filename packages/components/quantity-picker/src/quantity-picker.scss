@@ -127,10 +127,6 @@
   box-shadow: none;
 }
 
-.counters ::slotted(:not(:first-child)) {
-  border-top: css.cssVar(divider--border);
-}
-
 .footer {
   display: flex;
   align-items: center;

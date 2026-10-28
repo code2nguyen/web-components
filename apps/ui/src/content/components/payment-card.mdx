@@ -62,11 +62,11 @@ card.addEventListener('reveal-request', async () => {
 })
 ```
 
-While the request runs, the button shows its running state and the number line is a skeleton. The card masks itself again, dropping `details` from memory, after `hide-after` seconds (60 by default), when the page is hidden, when it is frozen, and through `hide()`.
+While the request runs, the button shows its running state and the number line is a skeleton. The card masks itself again, dropping `details` from memory, after `hide-after` seconds (60 by default), when the page is hidden, when it is frozen, and through `hide()`. Details that arrive after the reveal was cancelled (the card hidden, frozen, or the page left) are dropped rather than shown.
 
 ### Copy and accessibility
 
-Each shown field has a `c2-copy-button` ("Copy card number", "Copy expiry date", "Copy security code"), and a copy fires `copy` with the `field`, for an audit log. The masked number reads "Card ending in 4242"; showing and hiding the details is announced.
+Each shown field has a `c2-copy-button` ("Copy card number", "Copy expiry date", "Copy security code"), and a copy fires `field-copy` with the `field`, for an audit log (named apart from the native clipboard `copy`). The masked number reads "Card ending in 4242"; showing and hiding the details is announced.
 
 ### Styling
 
