@@ -1,0 +1,210 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-scroll-area,
+  $theme: (
+    max-height: none,
+    max-width: none,
+    padding: 0,
+    border-radius: 0,
+    scrollbar--width: thin,
+    scrollbar--size: 8px,
+    thumb--color: rgba(113, 113, 122, 0.4),
+    thumb__hover--color: rgba(113, 113, 122, 0.4),
+    track--color: transparent,
+    shadow--color: rgba(0, 0, 0, 0.12),
+    shadow--size: 12px,
+    fade--size: 0px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.frame {
+  --_thumb: #{css.cssVar(thumb--color)};
+  --_fade: #{css.cssVar(fade--size)};
+
+  position: relative;
+  display: flex;
+  max-width: css.cssVar(max-width);
+  height: 100%;
+  max-height: css.cssVar(max-height);
+  overflow: hidden;
+  border-radius: css.cssVar(border-radius);
+
+  &:hover {
+    --_thumb: #{css.cssVar(thumb__hover--color)};
+  }
+}
+
+.viewport {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  max-height: css.cssVar(max-height);
+  padding: css.cssVar(padding);
+  overflow: hidden auto;
+  border-radius: inherit;
+  outline: none;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--_thumb) css.cssVar(track--color);
+  scrollbar-width: css.cssVar(scrollbar--width);
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: -2px;
+  }
+
+  /* Safari reads only the WebKit pseudo-elements. */
+  &::-webkit-scrollbar {
+    width: css.cssVar(scrollbar--size);
+    height: css.cssVar(scrollbar--size);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: var(--_thumb);
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: css.cssVar(track--color);
+  }
+}
+
+:host([orientation='horizontal']) .viewport {
+  overflow: auto hidden;
+}
+
+:host([orientation='both']) .viewport {
+  overflow: auto;
+}
+
+/*
+ * The fade: one mask per axis, intersected, easing the content out on each edge with more beyond it. It is applied only
+ * when a fade size is set. The inline axis follows the writing direction.
+ */
+.fade .viewport {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      var(--_mask-top, #000) 0,
+      #000 var(--_fade-top, 0px),
+      #000 calc(100% - var(--_fade-bottom, 0px)),
+      var(--_mask-bottom, #000) 100%
+    ),
+    linear-gradient(to right, var(--_mask-left, #000) 0, #000 var(--_fade-left, 0px), #000 calc(100% - var(--_fade-right, 0px)), var(--_mask-right, #000) 100%);
+  mask-composite: intersect;
+}
+
+.more-top {
+  --_fade-top: var(--_fade);
+  --_mask-top: transparent;
+}
+
+.more-bottom {
+  --_fade-bottom: var(--_fade);
+  --_mask-bottom: transparent;
+}
+
+.more-start {
+  --_fade-left: var(--_fade);
+  --_mask-left: transparent;
+}
+
+.more-end {
+  --_fade-right: var(--_fade);
+  --_mask-right: transparent;
+}
+
+:host(:dir(rtl)) {
+  .more-start {
+    --_fade-left: 0px;
+    --_mask-left: #000;
+    --_fade-right: var(--_fade);
+    --_mask-right: transparent;
+  }
+
+  .more-end {
+    --_fade-right: 0px;
+    --_mask-right: #000;
+    --_fade-left: var(--_fade);
+    --_mask-left: transparent;
+  }
+
+  .more-start.more-end {
+    --_fade-left: var(--_fade);
+    --_mask-left: transparent;
+    --_fade-right: var(--_fade);
+    --_mask-right: transparent;
+  }
+}
+
+/* The shadows: a gradient on each edge with more beyond it, over the content and never catching the pointer. */
+.shadow {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.shadow--top,
+.shadow--bottom {
+  right: 0;
+  left: 0;
+  height: css.cssVar(shadow--size);
+}
+
+.shadow--top {
+  top: 0;
+  background: linear-gradient(to bottom, css.cssVar(shadow--color), transparent);
+}
+
+.shadow--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, css.cssVar(shadow--color), transparent);
+}
+
+.shadow--start,
+.shadow--end {
+  top: 0;
+  bottom: 0;
+  width: css.cssVar(shadow--size);
+}
+
+.shadow--start {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, css.cssVar(shadow--color), transparent);
+}
+
+.shadow--end {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, css.cssVar(shadow--color), transparent);
+}
+
+:host(:dir(rtl)) .shadow--start {
+  background: linear-gradient(to left, css.cssVar(shadow--color), transparent);
+}
+
+:host(:dir(rtl)) .shadow--end {
+  background: linear-gradient(to right, css.cssVar(shadow--color), transparent);
+}
+
+.more-top .shadow--top,
+.more-bottom .shadow--bottom,
+.more-start .shadow--start,
+.more-end .shadow--end {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shadow {
+    transition: none;
+  }
+}

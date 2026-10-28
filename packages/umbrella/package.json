@@ -497,6 +497,10 @@
       "types": "./dist/image-cropper.d.ts",
       "default": "./dist/image-cropper.js"
     },
+    "./in-view": {
+      "types": "./dist/in-view.d.ts",
+      "default": "./dist/in-view.js"
+    },
     "./indicator": {
       "types": "./dist/indicator.d.ts",
       "default": "./dist/indicator.js"
@@ -752,6 +756,14 @@
     "./save-bar": {
       "types": "./dist/save-bar.d.ts",
       "default": "./dist/save-bar.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/scroll-area.d.ts",
+      "default": "./dist/scroll-area.js"
+    },
+    "./scroll-progress": {
+      "types": "./dist/scroll-progress.d.ts",
+      "default": "./dist/scroll-progress.js"
     },
     "./search-field": {
       "types": "./dist/search-field.d.ts",
@@ -1178,6 +1190,7 @@
     "@c2n/icon-button": "*",
     "@c2n/image": "*",
     "@c2n/image-cropper": "*",
+    "@c2n/in-view": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
     "@c2n/json-form": "*",
@@ -1231,6 +1244,8 @@
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
     "@c2n/save-bar": "*",
+    "@c2n/scroll-area": "*",
+    "@c2n/scroll-progress": "*",
     "@c2n/search-field": "*",
     "@c2n/secret-field": "*",
     "@c2n/select": "*",

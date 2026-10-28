@@ -67,6 +67,7 @@ import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
+import inView from '@c2n/in-view/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import jsonForm from '@c2n/json-form/custom-elements.json'
@@ -121,6 +122,8 @@ import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
+import scrollArea from '@c2n/scroll-area/custom-elements.json'
+import scrollProgress from '@c2n/scroll-progress/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
@@ -249,6 +252,7 @@ export const componentManifests = (function () {
     iconButton,
     image,
     imageCropper,
+    inView,
     indicator,
     inlineEdit,
     jsonForm,
@@ -303,6 +307,8 @@ export const componentManifests = (function () {
     reorderList,
     richTextEditor,
     saveBar,
+    scrollArea,
+    scrollProgress,
     searchField,
     secretField,
     select,

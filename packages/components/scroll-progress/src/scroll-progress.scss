@@ -1,0 +1,81 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-scroll-progress,
+  $theme: (
+    thickness: 3px,
+    track--color: #e4e4e7,
+    fill--color: #0265dc,
+    border-radius: 0,
+    ring--size: 40px,
+    ring--stroke-width: 3,
+    ring__track--color: #e4e4e7,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([variant='ring']) {
+  display: inline-block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.bar {
+  display: block;
+  height: css.cssVar(thickness);
+  overflow: hidden;
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(track--color);
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  background-color: css.cssVar(fill--color);
+  transform: scaleX(var(--_progress, 0));
+  transform-origin: left center;
+}
+
+:host(:dir(rtl)) .bar__fill {
+  transform-origin: right center;
+}
+
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(ring--size);
+  height: css.cssVar(ring--size);
+
+  svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: css.cssVar(ring--stroke-width);
+  }
+}
+
+.ring__track {
+  stroke: css.cssVar(ring__track--color);
+}
+
+.ring__fill {
+  stroke: css.cssVar(fill--color);
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--_progress, 0) * 100);
+  stroke-linecap: round;
+}
+
+.ring__centre {
+  position: relative;
+  display: inline-flex;
+}

@@ -1,0 +1,74 @@
+---
+title: 'Scroll Progress'
+description: 'How far the reader got: a bar that fills or a ring that closes as the page or a container scrolls.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ScrollProgress } from '@c2n/components/scroll-progress'
+import { ScrollArea } from '@c2n/components/scroll-area'
+
+`c2-scroll-progress` shows how far the reader got, like the reading-progress bar of Medium and Magic UI or the ring around a "back to top" button: a bar that fills, or a ring that closes, as the page or a container scrolls.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/scroll-progress'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/scroll-progress
+<style>
+  .progress-demo {
+    width: 320px;
+  }
+  .progress-demo c2-scroll-area {
+    --c2-scroll-area--max-height: 200px;
+    --c2-scroll-area--padding: 0 12px;
+  }
+  .progress-ring-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+</style>
+<div data-label="Bar over an article">
+  <div class="progress-demo">
+    <c2-scroll-progress for="progress-article"></c2-scroll-progress>
+    <c2-scroll-area id="progress-article" label="Article"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+  </div>
+</div>
+<div data-label="Ring">
+  <div class="progress-ring-row">
+    <c2-scroll-progress variant="ring" for="progress-article-2"><span aria-hidden="true">↑</span></c2-scroll-progress>
+    <c2-scroll-area id="progress-article-2" label="Article" style="--c2-scroll-area--max-height: 120px; width: 260px"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+  </div>
+</div>
+```
+
+### What it follows
+
+Without `for`, it follows the page. `for` names the id of a scroll container instead; for a `c2-scroll-area` it follows the area's own viewport. Progress is read once per frame while scrolling, and again when the content changes size.
+
+### Placing it
+
+It does not place itself. Pin a page's bar in your own CSS:
+
+```css tag=CodeBlock
+c2-scroll-progress.page-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+}
+```
+
+### Variants
+
+`variant="bar"` (the default) is a thin bar that fills from the start edge; `variant="ring"` is a ring that closes, with a slot in its centre for an icon or a "back to top" button. Thickness, colours, ring size and stroke are CSS variables.
+
+### Accessibility
+
+It is a progress bar named by `label` ("Reading progress" by default), whose value moves in whole percents so a screen reader is not flooded with updates.

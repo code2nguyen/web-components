@@ -78,10 +78,9 @@ These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar,
 
 ### D. Navigation and layout
 
-| #   | Component        | What it adds                                                     | Real-world model                           | Priority | Decision                                                                                         |
-| --- | ---------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------ |
-| 59  | `c2-toolbar`     | Roving-focus container for button groups, selects and separators | PrimeVue Toolbar, WAI-ARIA toolbar pattern | P1       | Reject: covered by `c2-button-group toolbar` (role, one Tab stop, arrow keys across any control) |
-| 64  | `c2-scroll-area` | Themed scrollbars, edge shadows and edge fade                    | Mantine, Chakra and PrimeVue ScrollArea    | P2       | Proposed                                                                                         |
+| #   | Component    | What it adds                                                     | Real-world model                           | Priority | Decision                                                                                         |
+| --- | ------------ | ---------------------------------------------------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------ |
+| 59  | `c2-toolbar` | Roving-focus container for button groups, selects and separators | PrimeVue Toolbar, WAI-ARIA toolbar pattern | P1       | Reject: covered by `c2-button-group toolbar` (role, one Tab stop, arrow keys across any control) |
 
 ### E. Overlays and feedback
 
@@ -122,10 +121,9 @@ These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat
 
 ### I. Utilities
 
-| #   | Component       | What it adds                                                           | Real-world model                  | Priority | Decision                                                                                                                        |
-| --- | --------------- | ---------------------------------------------------------------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 99  | `c2-focus-trap` | Keeps focus inside a region (custom panels, inline editors)            | Ark, Chakra and Mantine FocusTrap | P2       | Reject: not an element: `c2-modal` and `c2-sheet` trap focus through `<dialog>`; a focus-trap controller belongs in `@c2n/core` |
-| 100 | `c2-in-view`    | Fires when content enters the viewport (lazy reveal, infinite loading) | Web Awesome intersection-observer | P3       | Proposed                                                                                                                        |
+| #   | Component       | What it adds                                                | Real-world model                  | Priority | Decision                                                                                                                        |
+| --- | --------------- | ----------------------------------------------------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 99  | `c2-focus-trap` | Keeps focus inside a region (custom panels, inline editors) | Ark, Chakra and Mantine FocusTrap | P2       | Reject: not an element: `c2-modal` and `c2-sheet` trap focus through `<dialog>`; a focus-trap controller belongs in `@c2n/core` |
 
 ## 68 more from real apps
 
@@ -230,14 +228,13 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### O. Motion and visual effects
 
-| #   | Component            | What it does                                                                                               | Seen in                                                              | Source                                                                       | Priority | Decision |
-| --- | -------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- | -------- |
-| 169 | `c2-text-effect`     | Animated text: rotating words, typewriter, scramble, shimmer, reveal; static under reduced motion          | Magic UI (word-rotate, typing-animation, hyper-text), Aceternity     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
-| 170 | `c2-backdrop`        | Decorative `aria-hidden` background: dot, grid, stripe, flickering grid, aurora, meteors; themed by tokens | Magic UI (dot-pattern, flickering-grid, retro-grid, meteors), Linear | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
-| 171 | `c2-celebration`     | Confetti, burst or rising emoji fired by `fire()`; nothing under reduced motion (absorbs #134)             | Magic UI (confetti, cool-mode), Asana, Duolingo                      | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
-| 176 | `c2-beam`            | Animated connector drawn between two elements (data-flow and integration diagrams)                         | Magic UI (animated-beam), Stripe                                     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
-| 178 | `c2-device-frame`    | Phone, browser or laptop frame around slotted content                                                      | Magic UI (safari, iphone-15-pro, android)                            | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
-| 180 | `c2-scroll-progress` | Reading progress of the page or a container as a bar or ring, scroll-driven                                | Magic UI (scroll-progress), Medium                                   | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| #   | Component         | What it does                                                                                               | Seen in                                                              | Source                                                                       | Priority | Decision |
+| --- | ----------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------- | -------- |
+| 169 | `c2-text-effect`  | Animated text: rotating words, typewriter, scramble, shimmer, reveal; static under reduced motion          | Magic UI (word-rotate, typing-animation, hyper-text), Aceternity     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 170 | `c2-backdrop`     | Decorative `aria-hidden` background: dot, grid, stripe, flickering grid, aurora, meteors; themed by tokens | Magic UI (dot-pattern, flickering-grid, retro-grid, meteors), Linear | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 171 | `c2-celebration`  | Confetti, burst or rising emoji fired by `fire()`; nothing under reduced motion (absorbs #134)             | Magic UI (confetti, cool-mode), Asana, Duolingo                      | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P2       | Proposed |
+| 176 | `c2-beam`         | Animated connector drawn between two elements (data-flow and integration diagrams)                         | Magic UI (animated-beam), Stripe                                     | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+| 178 | `c2-device-frame` | Phone, browser or laptop frame around slotted content                                                      | Magic UI (safari, iphone-15-pro, android)                            | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
 
 ### P. Enterprise data
 
