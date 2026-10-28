@@ -2,19 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-quantity-picker</title>
     <script type="module" src="/src/quantity-picker.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 32px;
+        max-width: 360px;
         padding: 24px;
+        font: 14px system-ui;
       }
     </style>
   </head>
-
   <body>
-    <c2-quantity-picker></c2-quantity-picker>
+    <c2-quantity-picker label="Guests" max-total="6">
+      <c2-quantity name="adults" value="2" min="1" one="adult" other="adults">Adults<span slot="hint">Ages 13 or above</span></c2-quantity>
+      <c2-quantity name="children" value="1" one="child" other="children">Children<span slot="hint">Ages 2–12</span></c2-quantity>
+      <c2-quantity name="infants" one="infant" other="infants">Infants<span slot="hint">Under 2</span></c2-quantity>
+    </c2-quantity-picker>
+    <c2-quantity-picker label="Rooms" inline>
+      <c2-quantity name="rooms" value="1" min="1" max="8" one="room" other="rooms">Rooms</c2-quantity>
+      <c2-quantity name="guests" value="2" min="1" max="4" one="guest" other="guests">Guests per room</c2-quantity>
+    </c2-quantity-picker>
   </body>
 </html>

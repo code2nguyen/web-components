@@ -11,7 +11,11 @@ import '@c2n/components/promo-code-field'
 ```
 
 ```html
-<c2-promo-code-field></c2-promo-code-field>
+<c2-promo-code-field max="2"></c2-promo-code-field>
 ```
 
-// TODO: describe the component, its attributes, slots, events and CSS custom properties.
+Apply a promo code with checking and refusal states; applied codes stay as removable tokens with their saving.
+
+- `validate` (an async function) asks the app's server and answers `{ code, label }` or `{ error }`.
+- `codes`, `max`, `collapsed` and `case-sensitive`; `apply`, `remove` and `reject` events.
+- Themed through `--c2-promo-code-field*` custom properties; see the API page of the docs site.

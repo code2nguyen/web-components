@@ -1771,6 +1771,60 @@
       "reason": "The toolbar region owns the toolbar slot's layout."
     },
     {
+      "tag": "c2-payment-card",
+      "slot": "brand",
+      "decision": "assigned-content",
+      "reason": "The app's licensed network or issuer logo, sized and coloured by the app."
+    },
+    {
+      "tag": "c2-payment-card",
+      "slot": "badge",
+      "decision": "assigned-content",
+      "reason": "Replaces the \"Frozen\" text inside the badge, which keeps its own background variable; the app styles its own content."
+    },
+    {
+      "tag": "c2-payment-card",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "More buttons beside \"Show details\"; each is styled through its own public contract."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The counter's label text, styled by the counter's label variables it inherits."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "hint",
+      "decision": "assigned-content",
+      "reason": "A line under the label; it inherits the hint colour and size variables, and the app styles anything richer."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "decrement-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own \u2212 icon, sized by the app; the default glyph is 16px."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "increment-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own + icon, sized by the app; the default glyph is 16px."
+    },
+    {
+      "tag": "c2-quantity-picker",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The c2-quantity counters, each styled through its own variables."
+    },
+    {
+      "tag": "c2-quantity-picker",
+      "slot": "chevron-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own chevron, sized by the app; the default glyph is 16px."
+    },
+    {
       "tag": "c2-reaction-bar",
       "slot": "picker",
       "decision": "assigned-content",
