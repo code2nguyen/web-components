@@ -107,6 +107,8 @@ test('one tab stop for the rows; arrows move, Enter and a click pick a price wit
   await page.getByRole('textbox', { name: 'after' }).focus()
   await page.keyboard.press('Shift+Tab')
   await expect(book(page).locator('.row[data-key="ask:101.5"]')).toBeFocused()
+  // One tab stop for the whole book, wherever focus went.
+  await expect(book(page).locator('.row[tabindex="0"]')).toHaveCount(1)
   expect(await page.evaluate(() => (window as unknown as { picks: unknown[] }).picks)).toEqual([
     { side: 'bid', price: 100.5, size: 1, total: 1 },
     { side: 'ask', price: 101.5, size: 1, total: 2.5 },
