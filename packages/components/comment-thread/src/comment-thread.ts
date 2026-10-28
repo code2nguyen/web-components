@@ -69,6 +69,9 @@ function tokens(body: string): { text: string; mention: boolean }[] {
 
 let localIds = 0
 
+/** The thread's change events bubble out of the shadow root and can be cancelled. */
+const changeEvent = { bubbles: true, composed: true, cancelable: true }
+
 /**
  * One conversation on a piece of content, like a comment in Google Docs, a review thread on GitHub or a comment pin in
  * Figma: the first comment and its replies, a reply box, edit and delete on your own comments, and Resolve.
@@ -203,8 +206,9 @@ export class CommentThread extends LitElement {
     this.announcementTimer = setTimeout(() => (this.announcement = text), 100)
   }
 
-  private fire<K extends keyof CommentThreadEventMap>(type: K, detail: CommentThreadEventMap[K]['detail']): boolean {
-    return this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true, cancelable: true }))
+  /** Dispatches one of the thread's change events; `false` when it was cancelled. */
+  private fire(event: CustomEvent): boolean {
+    return this.dispatchEvent(event)
   }
 
   private async focusSelector(selector: string): Promise<void> {
@@ -224,7 +228,7 @@ export class CommentThread extends LitElement {
   private submitReply(): void {
     const body = this.draft.trim()
     if (!body || !this.canWrite) return
-    if (this.fire('comment-add', { body })) {
+    if (this.fire(new CustomEvent('comment-add', { detail: { body }, ...changeEvent }))) {
       localIds += 1
       const author = this.currentUser!
       this.comments = [...this.list, { id: `local-${localIds}`, author: { ...author }, body, time: new Date().toISOString() }]
@@ -249,7 +253,7 @@ export class CommentThread extends LitElement {
   private saveEdit(comment: ThreadComment): void {
     const body = this.editDraft.trim()
     if (!body) return
-    if (body !== comment.body && this.fire('comment-edit', { id: comment.id, body })) {
+    if (body !== comment.body && this.fire(new CustomEvent('comment-edit', { detail: { id: comment.id, body }, ...changeEvent }))) {
       this.comments = this.list.map((item) => (item.id === comment.id ? { ...item, body, edited: true } : item))
       this.announce(this.msg.t('commentEdited'))
     }
@@ -257,7 +261,7 @@ export class CommentThread extends LitElement {
   }
 
   private deleteComment(comment: ThreadComment, root: boolean): void {
-    if (!this.fire('comment-delete', { id: comment.id })) return
+    if (!this.fire(new CustomEvent('comment-delete', { detail: { id: comment.id }, ...changeEvent }))) return
     // Removing the whole thread is the app's: the first comment stays until the app takes the thread away.
     if (root) return
     this.comments = this.list.filter((item) => item.id !== comment.id)
@@ -267,7 +271,7 @@ export class CommentThread extends LitElement {
 
   private toggleResolved(): void {
     const resolved = !this.resolved
-    if (!this.fire('resolve-change', { resolved })) return
+    if (!this.fire(new CustomEvent('resolve-change', { detail: { resolved }, ...changeEvent }))) return
     this.resolved = resolved
     this.announce(this.msg.t(resolved ? 'threadResolved' : 'threadReopened'))
     void this.focusSelector('.resolve')
@@ -276,7 +280,7 @@ export class CommentThread extends LitElement {
   private handleReaction(comment: ThreadComment, event: CustomEvent<ReactionChangeDetail>): void {
     event.stopPropagation()
     const detail = { id: comment.id, ...event.detail }
-    if (!this.fire('reaction-change', detail)) {
+    if (!this.fire(new CustomEvent('reaction-change', { detail, ...changeEvent }))) {
       event.preventDefault()
       return
     }

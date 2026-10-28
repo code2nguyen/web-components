@@ -1826,6 +1826,18 @@
       "reason": "The message line sets the type the slotted message inherits."
     },
     {
+      "tag": "c2-selection-toolbar",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content, whose selections the toolbar acts on; the app styles it."
+    },
+    {
+      "tag": "c2-selection-toolbar",
+      "slot": "toolbar",
+      "decision": "assigned-content",
+      "reason": "The toolbar slot takes the app's controls (c2-button, c2-icon-button), styled through their own variables."
+    },
+    {
       "tag": "c2-skip-link",
       "slot": "",
       "decision": "assigned-content",

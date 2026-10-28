@@ -1,6 +1,8 @@
 import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
-import type { CommentThread, ThreadComment } from '../src/comment-thread'
+// Local shapes: importing the component's types would declare c2-reaction-bar and c2-relative-time a second time next to their own suites.
+type ThreadComment = { id: string | number; author: { id?: string; name: string }; body: string; reactions?: unknown[] }
+type CommentThread = HTMLElement & { comments: ThreadComment[] }
 
 const thread = (page: Page) => page.locator('c2-comment-thread')
 const events = async (page: Page) => JSON.parse((await thread(page).getAttribute('data-events'))!)
@@ -121,7 +123,9 @@ test('unfolding replies moves focus to the first one shown; a small collapse-aft
   const many = JSON.stringify(
     Array.from({ length: 6 }, (_, at) => ({ id: at + 1, author: at % 2 ? BEN : ANA, body: `Comment ${at + 1}`, time: '2026-10-14T09:00:00Z' })),
   )
-  await renderScenario(`<c2-comment-thread comments='${many}'></c2-comment-thread><c2-comment-thread collapse-after="1" comments='${COMMENTS}'></c2-comment-thread>`)
+  await renderScenario(
+    `<c2-comment-thread comments='${many}'></c2-comment-thread><c2-comment-thread collapse-after="1" comments='${COMMENTS}'></c2-comment-thread>`,
+  )
   await page.getByRole('button', { name: 'Show 2 earlier replies' }).click()
   await expect(page.locator('c2-comment-thread').first().locator('[data-id="3"]')).toBeFocused()
   await expect(page.locator('c2-comment-thread').nth(1).locator('[part="body"]')).toHaveCount(3)
