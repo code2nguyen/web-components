@@ -117,6 +117,8 @@ export class QuantityPicker extends LitElement {
   @property({ attribute: false }) summary?: QuantitySummary
 
   @state() private counters: Quantity[] = []
+  /** Set after the first update; see `text`. */
+  @state() private ready = false
   @state() private announcement = ''
 
   private readonly internals = this.attachInternals()
@@ -129,6 +131,8 @@ export class QuantityPicker extends LitElement {
     this.addEventListener(QUANTITY_CHANGE, (event) => this.handleCount(event))
     this.addEventListener(QUANTITY_SYNC, (event) => {
       event.stopPropagation()
+      // A counter that upgraded after the picker looked joins it here.
+      if (!this.counters.includes(event.target as Quantity)) this.collect(this.renderRoot.querySelector('.counters slot'))
       this.requestUpdate()
     })
   }
@@ -145,6 +149,9 @@ export class QuantityPicker extends LitElement {
 
   /** The trigger's text: the summary, or the placeholder while every counter is 0. */
   get text(): string {
+    // Until the first update, the text a server render could write: a hydrated trigger must match it, or its text
+    // is never written over.
+    if (!this.ready) return this.placeholder || this.msg.t('none')
     if (this.summary) return this.summary(this.counters, this.msg.locale)
     const locale = this.msg.locale
     let plural: Intl.PluralRules
@@ -190,14 +197,30 @@ export class QuantityPicker extends LitElement {
     const limit = Number.isFinite(this.maxTotal) && this.maxTotal >= 0 ? this.maxTotal : Number.POSITIVE_INFINITY
     const room = limit - this.total
     for (const counter of this.counters) {
+      // A counter hydrating after the picker gets its limits after its own first update (it sends a sync then).
+      if (!counter.hasUpdated) continue
       counter.room = room
       counter.locked = this.disabled
     }
   }
 
   private handleSlotChange(event: Event): void {
-    const slot = event.target as HTMLSlotElement
-    this.counters = slot.assignedElements({ flatten: true }).filter((element): element is Quantity => element instanceof Quantity)
+    this.collect(event.target as HTMLSlotElement)
+  }
+
+  private collect(slot: HTMLSlotElement | null): void {
+    if (!slot) return
+    // A counter may sit in a wrapper of its own (an island of a server-rendering framework, such as Astro's).
+    this.counters = slot
+      .assignedElements({ flatten: true })
+      .flatMap((element) => (element instanceof Quantity ? [element] : [...element.querySelectorAll('c2-quantity')]))
+      .filter((element): element is Quantity => element instanceof Quantity)
+  }
+
+  protected override firstUpdated(): void {
+    // Hydrated from server-rendered markup, the slot fires no slotchange: collect the counters now.
+    this.collect(this.renderRoot.querySelector('.counters slot'))
+    this.ready = true
   }
 
   private handleCount(event: Event): void {

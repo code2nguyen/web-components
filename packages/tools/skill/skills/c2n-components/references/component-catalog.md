@@ -73,6 +73,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Meter** — `c2-meter` · `@c2n/components/meter` — A measurement inside a known range — storage, quota, strength — with native meter thresholds and an optional segmented breakdown.
 - **Order Book** — `c2-order-book` · `@c2n/components/order-book` — Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
+- **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
@@ -164,6 +165,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
 - **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
+- **Promo Code Field** — `c2-promo-code-field` · `@c2n/components/promo-code-field` — Apply a promo code with checking and refusal states; applied codes stay as removable tokens with their saving.
+- **Quantity Picker** — `c2-quantity-picker, c2-quantity` · `@c2n/components/quantity-picker` — Several labelled counters behind one summary ("2 adults, 1 child"), with limits per counter and in total. Children: `c2-quantity`.
 - **Query Input** — `c2-query-input` · `@c2n/components/query-input` — A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.

@@ -127,7 +127,7 @@
   box-shadow: none;
 }
 
-.counters ::slotted(c2-quantity:not(:first-child)) {
+.counters ::slotted(:not(:first-child)) {
   border-top: css.cssVar(divider--border);
 }
 

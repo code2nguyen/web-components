@@ -1,4 +1,5 @@
-import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
+import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -83,6 +84,8 @@ export class Quantity extends LitElement {
 
   /** The label's text, from the default slot. */
   get label(): string {
+    // A server renderer has no light DOM to read; the client fills the label in on its first update.
+    if (isServer) return ''
     return [...this.childNodes]
       .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
       .map((node) => node.textContent ?? '')
@@ -106,6 +109,18 @@ export class Quantity extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') && !Number.isFinite(this.value)) this.value = this.min
+  }
+
+  /**
+   * The label as the buttons' names use it. It starts empty on the server and on the client alike, so a hydrated
+   * counter matches its server render, and is read from the light DOM after the first update.
+   */
+  @state() private labelText = ''
+
+  protected override firstUpdated(): void {
+    this.labelText = this.label
+    // The picker may have looked for its counters before this one upgraded.
+    this.dispatchEvent(new CustomEvent(QUANTITY_SYNC, { bubbles: true }))
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -136,13 +151,13 @@ export class Quantity extends LitElement {
   }
 
   override render() {
-    const label = this.label
+    const label = this.labelText
     const atMin = this.value <= this.min
     const atMax = this.value >= this.upper
     const max = Number.isFinite(this.upper) ? this.upper : undefined
     return html`<div class="quantity">
       <div class="text">
-        <span class="label" id="label"><slot></slot></span>
+        <span class="label" id="label"><slot @slotchange=${() => (this.labelText = this.label)}></slot></span>
         <span class="hint" id="hint"><slot name="hint"></slot></span>
       </div>
       <div class="stepper" part="stepper">
