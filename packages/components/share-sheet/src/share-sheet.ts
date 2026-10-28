@@ -1,4 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -61,7 +62,8 @@ const DEFAULT_TARGETS = ['email', 'x', 'linkedin', 'facebook', 'whatsapp']
 function safeUrl(value: string): string {
   if (!value) return ''
   try {
-    const url = new URL(value, document.baseURI)
+    // On the server there is no document: an absolute link reads the same there and in the browser.
+    const url = new URL(value, typeof document === 'undefined' ? undefined : document.baseURI)
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : ''
   } catch {
     return ''
@@ -150,10 +152,17 @@ export class ShareSheet extends LitElement {
   /** The edge the sheet comes from, as `c2-sheet`'s `side`. */
   @property() side: 'top' | 'right' | 'bottom' | 'left' = 'bottom'
 
+  /** "More" shows once the element runs in the browser: a server render cannot know about `navigator.share`, and the first render in the browser must match it. */
+  @state() private canShareNatively = false
+
   private readonly msg = new LocalizeController(this, shareSheetMessages)
   /** Read each time: a polyfill may add `navigator.share` after this element upgraded. */
   private get nativeShare(): boolean {
     return typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  }
+
+  protected override firstUpdated(): void {
+    this.canShareNatively = this.nativeShare
   }
 
   /** Opens the sheet. */
@@ -236,7 +245,7 @@ export class ShareSheet extends LitElement {
         </li>`
       })}
       ${
-        this.nativeShare
+        this.canShareNatively && this.nativeShare
           ? html`<li>
               <button class="target" part="target" type="button" aria-label=${this.msg.t('moreOptions')} @click=${() => this.handleNative(url)}>
                 ${this.renderTile('native', glyphs.more)}
