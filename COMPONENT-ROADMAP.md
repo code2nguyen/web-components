@@ -257,15 +257,13 @@ The inspiration sites could not be fetched from the research environment, only s
 | #   | Component          | What it does                                                                                | Seen in                                 | Source | Priority | Decision |
 | --- | ------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------- | ------ | -------- | -------- |
 | 195 | `c2-address-field` | Address autocomplete (pluggable provider) split into the fields each country's format needs | Stripe Address Element, Shopify, Airbnb | —      | P2       | Proposed |
-| 201 | `c2-wheel-picker`  | iOS-style scroll wheel for time, height or weight                                           | iOS, Apple Health, MyFitnessPal         | —      | P2       | Proposed |
 
 ### R. Commerce, content and social
 
-| #   | Component            | What it does                                                                | Seen in                    | Source | Priority | Decision |
-| --- | -------------------- | --------------------------------------------------------------------------- | -------------------------- | ------ | -------- | -------- |
-| 209 | `c2-share-sheet`     | Share targets, copy link and QR, falling back from the native Web Share API | Notion, Figma, YouTube     | —      | P2       | Proposed |
-| 213 | `c2-embed`           | Click-to-load facade for YouTube, Vimeo, Loom or Figma iframes              | Notion, lite-youtube-embed | —      | P3       | Proposed |
-| 215 | `c2-pull-to-refresh` | Pull gesture with progress and a release threshold (cut from round 1)       | iOS, Android, X            | —      | P3       | Proposed |
+| #   | Component            | What it does                                                          | Seen in                    | Source | Priority | Decision |
+| --- | -------------------- | --------------------------------------------------------------------- | -------------------------- | ------ | -------- | -------- |
+| 213 | `c2-embed`           | Click-to-load facade for YouTube, Vimeo, Loom or Figma iframes        | Notion, lite-youtube-embed | —      | P3       | Proposed |
+| 215 | `c2-pull-to-refresh` | Pull gesture with progress and a release threshold (cut from round 1) | iOS, Android, X            | —      | P3       | Proposed |
 
 ### S. Settings and admin
 

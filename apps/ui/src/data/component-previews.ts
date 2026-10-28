@@ -404,6 +404,7 @@ price: .price
   <c2-separator>or</c2-separator>
   <c2-separator style="--c2-separator--style: dashed"></c2-separator>
 </div>`,
+  'share-sheet': `<c2-button onclick="this.nextElementSibling.show()">Share</c2-button><c2-share-sheet heading="Trip to Lisbon" url="https://example.com/trips/lisbon"></c2-share-sheet>`,
   sheet: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open sheet</c2-button>
   <c2-sheet>
@@ -553,6 +554,7 @@ price: .price
   'visually-hidden': `<div class="preview-row" style="flex-direction:column;gap:6px"><span style="font-size:22px;letter-spacing:3px;color:#f59e0b"><span aria-hidden="true">★★★★☆</span><c2-visually-hidden>Rated 4 out of 5 stars</c2-visually-hidden></span><span style="font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Read aloud: “Rated 4 out of 5 stars”</span></div>`,
   'waterfall-chart': `<c2-waterfall-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart--font-size:10px;--c2-chart__axis--font-size:9px" aria-label="Revenue to net income" label-field="item" total-field="total" total-label="Net" legend="none" data='[{"item":"Revenue","amount":420,"total":true},{"item":"Costs","amount":-180},{"item":"Services","amount":35},{"item":"Opex","amount":-95},{"item":"Tax","amount":-40}]'><c2-chart-series field="amount" label="Amount"></c2-chart-series></c2-waterfall-chart>`,
   'week-planner': `<c2-week-planner locale="en-US" start-hour="8" end-hour="14" style="width:720px;max-width:none;zoom:0.34;--c2-week-planner--padding:16px;--c2-week-planner__hour--height:36px;--c2-week-planner__hour-label--font-size:16px;--c2-week-planner__day-header--font-size:18px;--c2-week-planner__event--font-size:16px" events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Kids","day":"wed","start":"11:00","end":"14:00","color":"#0f766e"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Football","day":"sat","start":"09:00","end":"12:00","color":"#0f766e"}]'></c2-week-planner>`,
+  'wheel-picker': `<c2-wheel-picker label="Height" value="5;10" style="--c2-wheel-picker--visible-rows: 3" columns='[{"label":"Feet","suffix":"ft","options":["4","5","6","7"]},{"label":"Inches","suffix":"in","options":["8","9","10","11"]}]'></c2-wheel-picker>`,
   'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">
   <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))"></c2-working-indicator>
   <c2-working-indicator indicator="dots" effect="wave" label="Generating"></c2-working-indicator>

@@ -1838,6 +1838,12 @@
       "reason": "The toolbar slot takes the app's controls (c2-button, c2-icon-button), styled through their own variables."
     },
     {
+      "tag": "c2-share-sheet",
+      "slot": "icon-linkedin",
+      "decision": "assigned-content",
+      "reason": "The icon-<target> slots take the app's licensed artwork in place of the neutral tile; the app sizes its own image, which fills the round tile."
+    },
+    {
       "tag": "c2-skip-link",
       "slot": "",
       "decision": "assigned-content",

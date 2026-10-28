@@ -126,6 +126,7 @@ import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
 import selectionToolbar from '@c2n/selection-toolbar/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
+import shareSheet from '@c2n/share-sheet/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
@@ -172,6 +173,7 @@ import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
+import wheelPicker from '@c2n/wheel-picker/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
@@ -306,6 +308,7 @@ export const componentManifests = (function () {
     select,
     selectionToolbar,
     separator,
+    shareSheet,
     sheet,
     shortcut,
     sideNav,
@@ -352,6 +355,7 @@ export const componentManifests = (function () {
     virtualList,
     visuallyHidden,
     weekPlanner,
+    wheelPicker,
     workingIndicator,
   ].reduce((result, item) => {
     const pkg = item as Package

@@ -179,6 +179,7 @@
     "select": 25250,
     "selection-toolbar": 13472,
     "separator": 1536,
+    "share-sheet": 23103,
     "sheet": 3046,
     "shortcut": 1807,
     "side-nav": 3914,
@@ -231,6 +232,7 @@
     "visually-hidden": 789,
     "vue": 1773,
     "week-planner": 37562,
+    "wheel-picker": 5074,
     "working-indicator": 4979
   }
 }

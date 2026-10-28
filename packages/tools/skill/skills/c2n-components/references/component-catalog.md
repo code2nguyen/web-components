@@ -109,6 +109,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Popconfirm** — `c2-popconfirm` · `@c2n/components/popconfirm` — A small "Are you sure?" popup anchored to the button that asked for it.
 - **Progress** — `c2-progress` · `@c2n/components/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
+- **Share Sheet** — `c2-share-sheet` · `@c2n/components/share-sheet` — Share a link anywhere: copy it, send it to email or a network, scan it as a QR code, or hand it to the device’s own share sheet.
 - **Sheet** — `c2-sheet` · `@c2n/components/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 - **Skeleton** — `c2-skeleton` · `@c2n/components/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
 - **Spinner** — `c2-spinner` · `@c2n/components/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
@@ -181,6 +182,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 - **View Options** — `c2-view-options, c2-view-field, c2-view-toggle` · `@c2n/components/view-options` — The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value. Children: `c2-view-field`, `c2-view-toggle`.
+- **Wheel Picker** — `c2-wheel-picker` · `@c2n/components/wheel-picker` — iOS-style scroll wheels to pick a time, a height, a weight or any value from a short list, by swipe, scroll, click or keys.
 
 ## Layout
 
