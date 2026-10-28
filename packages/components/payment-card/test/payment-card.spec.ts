@@ -31,9 +31,14 @@ test('a copy fires field-copy with the field; hiding drops the details and says 
   await clipboard(page)
   await props(card(page), { details: DETAILS })
   await watch(card(page), 'field-copy')
+  await page.evaluate(() =>
+    document.addEventListener('copied', (event) => (document.documentElement.dataset.leaked = JSON.stringify((event as CustomEvent).detail))),
+  )
   await page.getByRole('button', { name: 'Copy card number' }).click()
   await expect(page.locator('html')).toHaveAttribute('data-clipboard', '4242424242424242')
   await expect.poll(() => events(page)).toEqual([{ field: 'number' }])
+  // The copied number itself never leaves the card.
+  await expect(page.locator('html')).not.toHaveAttribute('data-leaked')
   await page.getByRole('button', { name: 'Hide details' }).click()
   await expect(card(page).locator('.digits')).toHaveText('•••• •••• •••• 4242')
   await expect(card(page)).toHaveJSProperty('details', null)

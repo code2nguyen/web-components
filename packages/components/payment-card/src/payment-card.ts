@@ -201,7 +201,19 @@ export class PaymentCard extends LitElement {
   }
 
   private renderCopy(field: PaymentCardField, value: string, label: string) {
-    return html`<c2-copy-button class="copy" reveal="always" .value=${value} label=${label} @copied=${() => this.copied(field)}></c2-copy-button>`
+    // The copy button's own events carry the copied text and bubble out of this shadow root: the number and the code
+    // stop here, and only `field-copy`, with the field's name, leaves the card.
+    return html`<c2-copy-button
+      class="copy"
+      reveal="always"
+      .value=${value}
+      label=${label}
+      @copied=${(event: Event) => {
+        event.stopPropagation()
+        this.copied(field)
+      }}
+      @copy-error=${(event: Event) => event.stopPropagation()}
+    ></c2-copy-button>`
   }
 
   private renderNumber() {
