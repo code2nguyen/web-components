@@ -1,0 +1,67 @@
+---
+title: 'Selection Toolbar'
+description: 'A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SelectionToolbar } from '@c2n/components/selection-toolbar'
+import { Button } from '@c2n/components/button'
+
+`c2-selection-toolbar` wraps content and shows a small toolbar over any text selected in it, like the selection bubbles of Notion and Medium, the "Add comment" button of Google Docs, or "Ask ChatGPT" on a selection. The app slots in the controls; the toolbar positions them, keeps the selection while they are pressed, and makes them reachable from the keyboard.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/selection-toolbar'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/selection-toolbar
+<style>
+  .selection-demo {
+    max-width: 440px;
+    line-height: 1.6;
+  }
+  .selection-demo-button {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--font-size: 13px;
+  }
+</style>
+<div data-label="Select some text">
+  <c2-selection-toolbar class="selection-demo">
+    <p>Select any words in this paragraph. A toolbar appears above the selection with the actions the app put in it, and pressing one keeps the selection, so the app can read it.</p>
+    <c2-button slot="toolbar" class="selection-demo-button" data-action="ask">Ask AI</c2-button>
+    <c2-button slot="toolbar" class="selection-demo-button" data-action="comment">Comment</c2-button>
+  </c2-selection-toolbar>
+</div>
+```
+
+### When it shows
+
+The toolbar appears once a selection inside the content is complete: when the pointer is released, or after a short pause in a keyboard selection. The selection needs at least `min-length` characters (1 by default), once trimmed. The toolbar sits centred above the selection; `placement="bottom"` puts it below, and it flips when there is no room. It renders in the top layer, so no overflow or z-index clips it, and it follows the selection on scroll. It hides when the selection collapses or leaves the content, and on Escape. `disabled` turns it off.
+
+### Acting on the selection
+
+Pressing a control keeps the selection, so `selection` (`{ text, range }`) can still be read in its click handler. A control with `data-action` also fires `selection-action` with that action and the selected text, so one listener can serve every button:
+
+```js tag=CodeBlock
+toolbar.addEventListener('selection-action', (event) => {
+  if (event.detail.action === 'comment') openThread({ quote: event.detail.text })
+})
+```
+
+`selection-change` fires when the toolbar shows for a selection or its selection changes, and `toggle` fires when it opens or closes.
+
+### Keyboard
+
+The toolbar never takes focus on its own. When it appears, a screen reader hears "Actions available, press Alt+F10". Alt+F10 moves focus into the toolbar, the convention of TinyMCE, CKEditor and Google Docs. The arrow keys move between its controls, Home and End go to the ends, and Escape returns focus to where it was.
+
+### Limits
+
+It acts on selections in the page's own text. Selections inside other components' shadow roots and inside form fields belong to those components.

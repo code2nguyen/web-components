@@ -1,0 +1,224 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-comment-thread,
+  $theme: (
+    font-size: 14px,
+    color: #18181b,
+    background: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 12px,
+    gap: 12px,
+    quote--color: #52525b,
+    quote--border: 3px solid #f59e0b,
+    quote--background: #fffbeb,
+    author--font-weight: 600,
+    time--color: #71717a,
+    time--font-size: 12px,
+    mention--color: #0265dc,
+    mention--background: #edf1fe,
+    action--color: #52525b,
+    action__hover--background: #f4f4f5,
+    submit--background: #0265dc,
+    submit--color: #ffffff,
+    resolved--color: #15803d,
+    avatar--size: 28px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background);
+}
+
+.quote {
+  margin: 0;
+  padding: 6px 10px;
+  border-left: css.cssVar(quote--border);
+  border-radius: 2px;
+  background-color: css.cssVar(quote--background);
+  color: css.cssVar(quote--color);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.avatar {
+  --c2-avatar--size: #{css.cssVar(avatar--size)};
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-height: 24px;
+}
+
+.author {
+  font-weight: css.cssVar(author--font-weight);
+}
+
+.time {
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.body {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.mention {
+  padding: 0 2px;
+  border-radius: 4px;
+  background-color: css.cssVar(mention--background);
+  color: css.cssVar(mention--color);
+  font-weight: 500;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(action--color);
+  font: inherit;
+  font-size: css.cssVar(time--font-size);
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background-color: css.cssVar(action__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+}
+
+.more {
+  align-self: flex-start;
+  margin-left: calc(#{css.cssVar(avatar--size)} + 4px);
+}
+
+.thread--resolved .resolve,
+.resolved-line {
+  color: css.cssVar(resolved--color);
+}
+
+.resolved-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: calc(#{css.cssVar(avatar--size)} + 10px);
+  font-size: css.cssVar(time--font-size);
+  font-weight: 500;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+}
+
+.composer,
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.composer {
+  margin-left: calc(#{css.cssVar(avatar--size)} + 10px);
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.submit {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: css.cssVar(submit--background);
+  color: css.cssVar(submit--color);
+  font: inherit;
+  font-size: css.cssVar(time--font-size);
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

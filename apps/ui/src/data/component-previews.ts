@@ -135,6 +135,7 @@ greet('world')"></c2-code-editor>`,
     <c2-command-item value="profile">Profile</c2-command-item>
   </c2-command-group>
 </c2-command>`,
+  'comment-thread': `<c2-comment-thread style="width: 280px; font-size: 13px" comments='[{"id":1,"author":{"name":"Ana Diaz"},"body":"Should this be a token?","time":"2026-10-27T08:00:00Z"},{"id":2,"author":{"name":"Ben Ito"},"body":"@Ana yes, radius-md.","time":"2026-10-27T09:00:00Z"}]'></c2-comment-thread>`,
   'comparison-bar': `<c2-comparison-bar start-value="22.43" end-value="77.57" start-label="Bid" end-label="Ask" show-value style="width:240px"></c2-comparison-bar>`,
   'confirm-dialog': `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()" style="--c2-button__container--background-color:#dc2626;--c2-button__container__hover--background-color:#b91c1c">Delete project</c2-button>
@@ -397,6 +398,7 @@ price: .price
   <c2-list-item value="FR">France</c2-list-item>
   <c2-list-item value="VN">Vietnam</c2-list-item>
 </c2-select>`,
+  'selection-toolbar': `<c2-selection-toolbar style="width: 260px"><p style="margin: 0">Select any words in this sentence.</p><c2-button slot="toolbar">Comment</c2-button></c2-selection-toolbar>`,
   separator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">
   <c2-separator></c2-separator>
   <c2-separator>or</c2-separator>
