@@ -14,7 +14,7 @@ export const QUANTITY_SYNC = 'c2-quantity-sync'
  * One counter of a `c2-quantity-picker`: a label, an optional hint and a stepper. The reader steps it with the − and
  * + buttons, or with ↑ ↓ Home End on its value, which is a spinbutton (the one tab stop of the counter).
  *
- * `one` and `other` are the singular and plural nouns the picker's summary uses ("2 adults, 1 child"); a counter
+ * `singular` and `plural` are the nouns the picker's summary uses ("2 adults, 1 child"); a counter
  * without them is summed into the summary as its label. `name` is its key in the picker's `values`.
  *
  * @tag c2-quantity
@@ -48,22 +48,25 @@ export class Quantity extends LitElement {
   /** The count. */
   @property({ type: Number }) value = 0
 
+  /** The least it may count. */
   @property({ type: Number }) min = 0
 
   /** The most this counter allows; the picker's `max-total` may stop it sooner. */
   @property({ type: Number }) max = Number.POSITIVE_INFINITY
 
+  /** How much each press or arrow key adds or takes away. */
   @property({ type: Number }) step = 1
 
   /** The counter's key in the picker's `values`. Default: its label in lower case. */
   @property() name = ''
 
   /** The singular noun of the summary ("adult"). */
-  @property() one = ''
+  @property() singular = ''
 
   /** The plural noun of the summary ("adults"). */
-  @property() other = ''
+  @property() plural = ''
 
+  /** Turns the counter's buttons and keys off. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** How much the picker's total limit still allows this counter to grow; set by the picker. */

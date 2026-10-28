@@ -3,9 +3,9 @@ import type { Page } from '@playwright/test'
 
 const picker = (page: Page) => page.locator('c2-quantity-picker')
 const events = async (page: Page) => JSON.parse((await picker(page).first().getAttribute('data-events')) ?? '[]')
-const GUESTS = `<c2-quantity name="adults" value="2" min="1" one="adult" other="adults">Adults<span slot="hint">Ages 13 or above</span></c2-quantity>
-  <c2-quantity name="children" value="1" one="child" other="children">Children<span slot="hint">Ages 2–12</span></c2-quantity>
-  <c2-quantity name="infants" one="infant" other="infants">Infants</c2-quantity>`
+const GUESTS = `<c2-quantity name="adults" value="2" min="1" singular="adult" plural="adults">Adults<span slot="hint">Ages 13 or above</span></c2-quantity>
+  <c2-quantity name="children" value="1" singular="child" plural="children">Children<span slot="hint">Ages 2–12</span></c2-quantity>
+  <c2-quantity name="infants" singular="infant" plural="infants">Infants</c2-quantity>`
 
 test('the trigger sums up; the panel opens on the first counter, steps with the keys, and Done closes with one change', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-quantity-picker label="Guests">${GUESTS}</c2-quantity-picker>`)
@@ -65,7 +65,7 @@ test('inline fires change on every step; a counter set by the app updates the su
 
 test('Escape closes and returns focus; disabled locks the trigger and the counters; text follows the language', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-quantity-picker label="Guests">${GUESTS}</c2-quantity-picker>
-    <div lang="fr"><c2-quantity-picker id="fr" label="Voyageurs" inline max-total="6"><c2-quantity value="1" one="adulte" other="adultes">Adultes</c2-quantity></c2-quantity-picker></div>`)
+    <div lang="fr"><c2-quantity-picker id="fr" label="Voyageurs" inline max-total="6"><c2-quantity value="1" singular="adulte" plural="adultes">Adultes</c2-quantity></c2-quantity-picker></div>`)
   await page.getByRole('button', { name: 'Guests: 2 adults, 1 child' }).click()
   await expect(page.getByRole('spinbutton', { name: 'Adults' })).toBeFocused()
   await page.keyboard.press('Escape')

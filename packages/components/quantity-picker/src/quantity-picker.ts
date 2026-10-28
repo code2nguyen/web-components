@@ -45,7 +45,7 @@ export interface QuantityPicker {
  * The guests picker of Airbnb and Booking.com: a trigger that sums up several counts ("2 adults, 1 child") and opens a
  * panel of labelled counters, each a `c2-quantity` child with its own limits.
  *
- * The summary joins each counter's count and noun (`one`/`other`, chosen with `Intl.PluralRules`) with
+ * The summary joins each counter's count and noun (`singular`/`plural`, chosen with `Intl.PluralRules`) with
  * `Intl.ListFormat`, leaving out counters at 0; `summary` replaces it with a function of your own, and `placeholder`
  * shows while every counter is 0. `max-total` caps the sum: at the limit every + is off and the note says so.
  * `inline` drops the trigger and the popover, for a booking panel that shows the counters directly.
@@ -107,6 +107,7 @@ export class QuantityPicker extends LitElement {
   /** Shows the counters directly, with no trigger or popover. */
   @property({ type: Boolean, reflect: true }) inline = false
 
+  /** Turns the trigger and every counter off. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Whether the panel is open. */
@@ -158,7 +159,7 @@ export class QuantityPicker extends LitElement {
     const parts = this.counters
       .filter((counter) => counter.value > 0)
       .map((counter) => {
-        const noun = plural.select(counter.value) === 'one' ? counter.one || counter.other : counter.other || counter.one
+        const noun = plural.select(counter.value) === 'one' ? counter.singular || counter.plural : counter.plural || counter.singular
         return `${counter.value} ${noun || counter.label.toLowerCase()}`
       })
     if (!parts.length) return this.placeholder || this.msg.t('none')

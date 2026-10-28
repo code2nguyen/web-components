@@ -90,6 +90,7 @@ export class PromoCodeField extends LitElement {
   /** The field's accessible name and placeholder. Default: "Promo code". */
   @property() label = ''
 
+  /** Turns the field, the Apply button and the tokens' remove buttons off. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Checks a code with the app's server; see the class description. Without it every code is accepted. */
@@ -240,10 +241,10 @@ export class PromoCodeField extends LitElement {
                     value=${applied.code}
                     remove-label=${this.msg.t('remove', applied.code)}
                     @remove=${(event: Event) => {
-                    // The chip's own remove bubbles out of this shadow root: the field fires its own instead.
-                    event.stopPropagation()
-                    this.removeCode(applied.code)
-                  }}
+                      // The chip's own remove bubbles out of this shadow root: the field fires its own instead.
+                      event.stopPropagation()
+                      this.removeCode(applied.code)
+                    }}
                     ><span class="code">${applied.code}</span>${applied.label ? html`<span class="saving">${applied.label}</span>` : nothing}</c2-chip
                   >`,
               )}
