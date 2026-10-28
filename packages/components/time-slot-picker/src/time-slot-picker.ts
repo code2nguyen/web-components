@@ -122,7 +122,7 @@ function periodOf(minutes: number): Period {
  * @cssproperty {color} [--c2-time-slot-picker__heading--color=#71717a]
  * @cssproperty {font-size} [--c2-time-slot-picker__heading--font-size=12px]
  * @cssproperty {font-weight} [--c2-time-slot-picker__heading--font-weight=600]
- * @cssproperty {pixel} [--c2-time-slot-picker__slots--min-width=88px] - The narrowest a time gets; the grid fits as many columns as this allows.
+ * @cssproperty {pixel} [--c2-time-slot-picker__slots--min-width=88px] - The narrowest a time gets; the grid fits as many columns as this allows. With `show-end`, a range gets twice this.
  * @cssproperty {pixel} [--c2-time-slot-picker__slots--gap=8px]
  * @cssproperty {pixel} [--c2-time-slot-picker__slot--height=40px]
  * @cssproperty {border} [--c2-time-slot-picker__slot--border=1px solid #d4d4d8]
@@ -332,6 +332,18 @@ export class TimeSlotPicker extends LitElement {
     return undefined
   }
 
+  /** The strip's dots, labelled for screen readers; kept while the days and the language stay the same. */
+  private markerCache: { days: string[]; locale: string; markers: { date: string; label: string }[] } | undefined
+
+  private dayMarkers(): { date: string; label: string }[] {
+    const locale = this.msg.locale
+    if (this.markerCache?.days !== this.freeDays || this.markerCache.locale !== locale) {
+      const label = this.msg.t('hasTimes')
+      this.markerCache = { days: this.freeDays, locale, markers: this.freeDays.map((date) => ({ date, label })) }
+    }
+    return this.markerCache.markers
+  }
+
   /** Days between the first and last day with slots that have no free time: known to be fully booked. */
   private bookedDays(): string[] {
     const known = [...this.byDay.keys()].sort()
@@ -441,7 +453,7 @@ export class TimeSlotPicker extends LitElement {
     return html`<div class="group" part="group">
       ${heading}
       <div
-        class="slots ${invalid ? 'error' : ''}"
+        class="slots ${invalid ? 'error' : ''} ${this.showEnd ? 'slots--ranges' : ''}"
         part="slots"
         role="listbox"
         aria-label=${label}
@@ -522,7 +534,7 @@ export class TimeSlotPicker extends LitElement {
           <c2-date-strip
             part="days"
             .value=${this.shownDate}
-            .markers=${this.freeDays}
+            .markers=${this.dayMarkers()}
             .disabledDates=${this.loading ? noDays : this.booked}
             .min=${this.min}
             .max=${this.max}

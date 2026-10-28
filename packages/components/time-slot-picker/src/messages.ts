@@ -5,6 +5,8 @@ const en = {
   label: 'Choose a time',
   /** Accessible name of the row of days. */
   day: 'Choose a day',
+  /** Read with a day that has a free time. */
+  hasTimes: 'times available',
   /** Headings of the groups of times, by the hour they start. */
   morning: 'Morning',
   afternoon: 'Afternoon',

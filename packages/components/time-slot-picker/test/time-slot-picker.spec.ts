@@ -29,6 +29,7 @@ test('shows the first free day, its times grouped by period in the zone, taken o
   await expect(picker(page)).toHaveHostAria('aria-label', 'Choose a time')
   await expect(page.getByRole('option', { name: /^Wednesday,? 14 October 2026/ })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('option', { name: /^Thursday,? 15 October 2026/ })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('option', { name: /^Friday,? 16 October 2026, times available$/ })).toBeVisible()
   await expect(page.getByRole('listbox', { name: 'Morning' }).getByRole('option')).toHaveText([/^0?9:00$/, /^0?9:30$/])
   await expect(page.getByRole('listbox', { name: 'Afternoon' }).getByRole('option')).toHaveText([/^14:00$/])
   await expect(page.getByRole('listbox', { name: 'Evening' }).getByRole('option', { name: '18:00, unavailable' })).toHaveAttribute('aria-disabled', 'true')

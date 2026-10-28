@@ -29,7 +29,6 @@
 
 :host {
   display: block;
-  container-type: inline-size;
   min-width: 0;
   color: css.cssVar(color);
   font-size: css.cssVar(font-size);
@@ -41,6 +40,8 @@
 
 .field {
   display: flex;
+  /* In a narrow box the expiry and the code wrap under the number. */
+  flex-wrap: wrap;
   align-items: center;
   gap: css.cssVar(gap);
   box-sizing: border-box;
@@ -124,7 +125,16 @@ input {
 }
 
 .number {
-  flex: 1 1 auto;
+  flex: 1 0 16ch;
+}
+
+/* The expiry and the code wrap together, to the end of the second row. */
+.dates {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(gap);
+  margin-left: auto;
 }
 
 .expiry {
@@ -145,28 +155,6 @@ input {
   margin-top: 4px;
   color: css.cssVar(error--color);
   font-size: css.cssVar(error--font-size);
-}
-
-/* In a narrow container the number takes the first row; expiry and code share the second. */
-@container (max-width: 300px) {
-  .field {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-
-  .number {
-    flex-basis: calc(100% - 24px - #{css.cssVar(gap)});
-  }
-
-  .expiry,
-  .cvc {
-    flex: 1 1 0;
-    width: auto;
-  }
-
-  .expiry {
-    margin-left: calc(24px + #{css.cssVar(gap)});
-  }
 }
 
 .visually-hidden {

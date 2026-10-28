@@ -74,6 +74,11 @@
   gap: css.cssVar(slots--gap);
   border-radius: css.cssVar(slot--border-radius);
 
+  /* A start and an end ("10:30 – 11:00 AM") need about twice the room of a start alone. */
+  &.slots--ranges {
+    grid-template-columns: repeat(auto-fill, minmax(calc(2 * #{css.cssVar(slots--min-width)}), 1fr));
+  }
+
   &.error {
     outline: css.cssVar(error--border);
     outline-offset: 4px;

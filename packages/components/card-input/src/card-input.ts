@@ -473,49 +473,51 @@ export class CardInput extends LitElement {
           @change=${(event: Event) => redispatchEvent(this, event)}
           @blur=${() => this.handleBlur('number')}
         />
-        <input
-          class="expiry ${error?.segment === 'expiry' ? 'part--invalid' : ''}"
-          part="expiry"
-          data-segment="expiry"
-          type="text"
-          inputmode="numeric"
-          autocomplete="cc-exp"
-          spellcheck="false"
-          aria-label=${this.msg.t('expiry')}
-          aria-describedby=${describedBy}
-          aria-invalid=${segmentInvalid('expiry')}
-          aria-required=${this.required ? 'true' : nothing}
-          placeholder=${this.msg.t('expiryPlaceholder')}
-          .value=${live(formatExpiry(this.expiryDigits))}
-          ?disabled=${disabled}
-          ?readonly=${this.readonly}
-          @input=${this.handleExpiryInput}
-          @change=${(event: Event) => redispatchEvent(this, event)}
-          @keydown=${(event: KeyboardEvent) => this.handleKeydown('expiry', event)}
-          @blur=${() => this.handleBlur('expiry')}
-        />
-        <input
-          class="cvc ${error?.segment === 'cvc' ? 'part--invalid' : ''}"
-          part="cvc"
-          data-segment="cvc"
-          type="text"
-          inputmode="numeric"
-          autocomplete="cc-csc"
-          spellcheck="false"
-          maxlength=${this.cvcLength}
-          aria-label=${this.msg.t('cvc')}
-          aria-describedby=${describedBy}
-          aria-invalid=${segmentInvalid('cvc')}
-          aria-required=${this.required ? 'true' : nothing}
-          placeholder=${this.cvcLength === 4 ? '1234' : this.msg.t('cvcPlaceholder')}
-          .value=${live(this.cvcDigits)}
-          ?disabled=${disabled}
-          ?readonly=${this.readonly}
-          @input=${this.handleCvcInput}
-          @change=${(event: Event) => redispatchEvent(this, event)}
-          @keydown=${(event: KeyboardEvent) => this.handleKeydown('cvc', event)}
-          @blur=${() => this.handleBlur('cvc')}
-        />
+        <span class="dates">
+          <input
+            class="expiry ${error?.segment === 'expiry' ? 'part--invalid' : ''}"
+            part="expiry"
+            data-segment="expiry"
+            type="text"
+            inputmode="numeric"
+            autocomplete="cc-exp"
+            spellcheck="false"
+            aria-label=${this.msg.t('expiry')}
+            aria-describedby=${describedBy}
+            aria-invalid=${segmentInvalid('expiry')}
+            aria-required=${this.required ? 'true' : nothing}
+            placeholder=${this.msg.t('expiryPlaceholder')}
+            .value=${live(formatExpiry(this.expiryDigits))}
+            ?disabled=${disabled}
+            ?readonly=${this.readonly}
+            @input=${this.handleExpiryInput}
+            @change=${(event: Event) => redispatchEvent(this, event)}
+            @keydown=${(event: KeyboardEvent) => this.handleKeydown('expiry', event)}
+            @blur=${() => this.handleBlur('expiry')}
+          />
+          <input
+            class="cvc ${error?.segment === 'cvc' ? 'part--invalid' : ''}"
+            part="cvc"
+            data-segment="cvc"
+            type="text"
+            inputmode="numeric"
+            autocomplete="cc-csc"
+            spellcheck="false"
+            maxlength=${this.cvcLength}
+            aria-label=${this.msg.t('cvc')}
+            aria-describedby=${describedBy}
+            aria-invalid=${segmentInvalid('cvc')}
+            aria-required=${this.required ? 'true' : nothing}
+            placeholder=${this.cvcLength === 4 ? '1234' : this.msg.t('cvcPlaceholder')}
+            .value=${live(this.cvcDigits)}
+            ?disabled=${disabled}
+            ?readonly=${this.readonly}
+            @input=${this.handleCvcInput}
+            @change=${(event: Event) => redispatchEvent(this, event)}
+            @keydown=${(event: KeyboardEvent) => this.handleKeydown('cvc', event)}
+            @blur=${() => this.handleBlur('cvc')}
+          />
+        </span>
       </div>
       ${error && !this.field.managed ? html`<div class="error" part="error" id=${errorId}>${error.message}</div>` : nothing}
       <div class="visually-hidden" role="status">${this.brandAnnouncement}</div>

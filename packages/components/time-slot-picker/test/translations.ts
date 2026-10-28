@@ -6,6 +6,7 @@ import { timeSlotPickerMessages } from '../src/messages.js'
 const fr: typeof timeSlotPickerMessages.en = {
   label: 'Choisir un horaire',
   day: 'Choisir un jour',
+  hasTimes: 'horaires disponibles',
   morning: 'Matin',
   afternoon: 'Après-midi',
   evening: 'Soir',
