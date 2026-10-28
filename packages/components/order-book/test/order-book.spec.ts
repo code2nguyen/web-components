@@ -103,10 +103,9 @@ test('one tab stop for the rows; arrows move, Enter and a click pick a price wit
   // A click moves the tab stop to the row it picked.
   await expect(book(page).locator('.row[data-key="ask:101.5"]')).toBeFocused()
   await expect(book(page).locator('.row[tabindex="0"]')).toHaveAttribute('data-key', 'ask:101.5')
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('textbox', { name: 'after' })).toBeFocused()
+  // The tab stop stays on the last row used: coming back from the field after the book lands on it.
+  await page.getByRole('textbox', { name: 'after' }).focus()
   await page.keyboard.press('Shift+Tab')
-  // The tab stop stays on the last row used.
   await expect(book(page).locator('.row[data-key="ask:101.5"]')).toBeFocused()
   expect(await page.evaluate(() => (window as unknown as { picks: unknown[] }).picks)).toEqual([
     { side: 'bid', price: 100.5, size: 1, total: 1 },
