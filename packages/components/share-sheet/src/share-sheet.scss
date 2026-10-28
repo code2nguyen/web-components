@@ -1,0 +1,142 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-share-sheet,
+  $theme: (
+    gap: 20px,
+    link--background: #f4f4f5,
+    link--color: #3f3f46,
+    link--border-radius: 8px,
+    tile--size: 48px,
+    tile--background: #f4f4f5,
+    tile--color: #18181b,
+    tile__hover--background: #e4e4e7,
+    label--font-size: 12px,
+    label--color: #52525b,
+    qr--size: 160px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: contents;
+}
+
+/* Fits its content, up to the sheet's own maximum. */
+c2-sheet {
+  --c2-sheet--size: auto;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  padding-bottom: 8px;
+}
+
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: css.cssVar(link--border-radius);
+  background-color: css.cssVar(link--background);
+  color: css.cssVar(link--color);
+  font: inherit;
+  font-size: 14px;
+  text-overflow: ellipsis;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+}
+
+.targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: calc(#{css.cssVar(tile--size)} + 20px);
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:hover .tile {
+    background-color: css.cssVar(tile__hover--background);
+  }
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(tile--size);
+  height: css.cssVar(tile--size);
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: css.cssVar(tile--background);
+  color: css.cssVar(tile--color);
+
+  svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+
+  circle {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.initial {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  text-align: center;
+}
+
+.qr {
+  align-self: center;
+  width: css.cssVar(qr--size);
+  --c2-qr-code--size: #{css.cssVar(qr--size)};
+}

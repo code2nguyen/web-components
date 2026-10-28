@@ -1,0 +1,54 @@
+---
+title: 'Share Sheet'
+description: 'Share a link anywhere: copy it, send it to email or a network, scan it as a QR code, or hand it to the device’s own share sheet.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ShareSheet } from '@c2n/components/share-sheet'
+import { Button } from '@c2n/components/button'
+
+`c2-share-sheet` is the share dialog of Notion, Figma and YouTube. It shows the link with a copy button, a row of targets (email, X, LinkedIn, Facebook, WhatsApp, …) and an optional QR code. Where the device has its own share sheet, a "More" target hands the link to it. It opens as a `c2-sheet`, from the bottom by default.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/share-sheet'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/share-sheet
+<div data-label="Share a link">
+  <c2-button onclick="document.getElementById('share-trip').share()">Share</c2-button>
+  <c2-share-sheet id="share-trip" heading="Trip to Lisbon" text="Five days in Lisbon" url="https://example.com/trips/lisbon"></c2-share-sheet>
+</div>
+<div data-label="With a QR code, from the right">
+  <c2-button onclick="document.getElementById('share-qr').show()">Share with QR</c2-button>
+  <c2-share-sheet id="share-qr" side="right" qr heading="Event ticket" url="https://example.com/tickets/42" targets="email;sms;whatsapp;telegram"></c2-share-sheet>
+</div>
+```
+
+### What is shared
+
+`url` is what is shared, `heading` names it in the heading ("Share “Trip to Lisbon”") and as the subject or title where a target takes one, and `text` goes with the link where a target takes text. Only an http(s) link is offered to the targets; for anything else the sheet shows the link with its copy button alone.
+
+### Targets
+
+`targets` picks them, `;`-separated, in order: `email`, `sms`, `x`, `linkedin`, `facebook`, `whatsapp`, `telegram` and `reddit` (default `email;x;linkedin;facebook;whatsapp`). Copying the link is always there. Each target is a link to that service's share page, with every part encoded, opened in a new tab without a referrer (mail and text messages hand over to the device's app). `qr` adds a QR code of the link.
+
+The targets show the network's initial on a neutral tile: no trademarked logo is drawn. An app with licensed artwork puts it in the target's slot (`<img slot="icon-linkedin" …>`).
+
+### Opening it
+
+`share()` is what a Share button calls: it opens the device's own share sheet (`navigator.share`) where there is one, and this sheet otherwise. `show()` always opens this sheet, `close()` closes it, and `open` reflects its state; `open` and `close` events follow.
+
+### Events
+
+Every target fires a cancelable `share` event with `{ target, url }` before it opens, and copying fires one with target `copy`. Cancel the event to handle a target yourself, or just listen to count shares:
+
+```js tag=CodeBlock
+sheet.addEventListener('share', (event) => analytics.track('share', { target: event.detail.target }))
+```

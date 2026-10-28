@@ -1,0 +1,137 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-wheel-picker,
+  $theme: (
+    visible-rows: 5,
+    row--height: 36px,
+    font-size: 20px,
+    color: #18181b,
+    row--color: #a1a1aa,
+    row__selected--font-weight: 500,
+    band--background: #f4f4f5,
+    band--border-radius: 8px,
+    gap: 8px,
+    wheel--min-width: 56px,
+    suffix--color: #18181b,
+    suffix--font-size: 16px,
+    row__disabled--opacity: 0.3,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    error--border: 1px solid #dc2626,
+  )
+);
+
+:host {
+  display: inline-block;
+  max-width: 100%;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.wheels {
+  --_row: #{css.cssVar(row--height)};
+  --_rows: #{css.cssVar(visible-rows)};
+
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: css.cssVar(gap);
+  padding: 0 8px;
+}
+
+/* The band across the middle row of every wheel. */
+.band {
+  position: absolute;
+  top: calc(var(--_row) * (var(--_rows) - 1) / 2);
+  right: 0;
+  left: 0;
+  height: var(--_row);
+  border-radius: css.cssVar(band--border-radius);
+  background-color: css.cssVar(band--background);
+  pointer-events: none;
+}
+
+.wheels--invalid .band {
+  outline: css.cssVar(error--border);
+}
+
+.column {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wheel {
+  min-width: css.cssVar(wheel--min-width);
+  border-radius: css.cssVar(band--border-radius);
+  outline: none;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+
+  &[aria-disabled='true'] {
+    opacity: 0.6;
+  }
+}
+
+.track {
+  box-sizing: border-box;
+  height: calc(var(--_row) * var(--_rows));
+  padding: calc(var(--_row) * (var(--_rows) - 1) / 2) 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  /* The rows fade towards the edges, as on a drum. */
+  mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wheel[aria-disabled='true'].track {
+  overflow-y: hidden;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--_row);
+  padding: 0 8px;
+  color: css.cssVar(row--color);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  scroll-snap-align: center;
+  user-select: none;
+}
+
+.row--selected {
+  color: inherit;
+  font-weight: css.cssVar(row__selected--font-weight);
+}
+
+.row--disabled {
+  cursor: default;
+  opacity: css.cssVar(row__disabled--opacity);
+}
+
+.suffix {
+  position: relative;
+  padding-left: 2px;
+  color: css.cssVar(suffix--color);
+  font-size: css.cssVar(suffix--font-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    scroll-behavior: auto;
+  }
+}
