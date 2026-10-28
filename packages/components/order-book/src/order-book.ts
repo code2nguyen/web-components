@@ -442,7 +442,11 @@ export class OrderBook extends LitElement {
       data-key=${key}
       tabindex=${key === focusKey ? 0 : -1}
       style=${styleMap({ '--_depth': row.depth.toFixed(4) })}
-      @click=${() => this.select(row)}
+      @click=${(event: MouseEvent) => {
+        // WebKit does not focus a clicked tabindex="-1" element in a shadow root: focus it, so the tab stop follows.
+        ;(event.currentTarget as HTMLElement).focus()
+        this.select(row)
+      }}
       @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, row)}
       @focus=${this.handleFocus}
     >
