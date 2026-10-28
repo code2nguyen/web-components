@@ -71,6 +71,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Math** — `c2-math` · `@c2n/components/math` — TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.
 - **Mermaid** — `c2-mermaid` · `@c2n/components/mermaid` — Mermaid text diagrams drawn in your theme colours, loaded on demand and safe for untrusted sources.
 - **Meter** — `c2-meter` · `@c2n/components/meter` — A measurement inside a known range — storage, quota, strength — with native meter thresholds and an optional segmented breakdown.
+- **Order Book** — `c2-order-book` · `@c2n/components/order-book` — Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
@@ -151,6 +152,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
 - **Form** — `c2-form` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
 - **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
+- **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.

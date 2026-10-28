@@ -449,6 +449,10 @@
       "types": "./dist/format-number.d.ts",
       "default": "./dist/format-number.js"
     },
+    "./fx-converter": {
+      "types": "./dist/fx-converter.d.ts",
+      "default": "./dist/fx-converter.js"
+    },
     "./gantt": {
       "types": "./dist/gantt.d.ts",
       "default": "./dist/gantt.js"
@@ -664,6 +668,10 @@
     "./number-input": {
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
+    },
+    "./order-book": {
+      "types": "./dist/order-book.d.ts",
+      "default": "./dist/order-book.js"
     },
     "./org-chart": {
       "types": "./dist/org-chart.d.ts",
