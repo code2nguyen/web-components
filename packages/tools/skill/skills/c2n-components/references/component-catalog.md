@@ -42,6 +42,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chat Message** — `c2-chat-message` · `@c2n/components/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
 - **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
 - **Citation** — `c2-citation` · `@c2n/components/citation` — A numbered inline marker that names its source, with a hover preview of the page it cites.
+- **Comment Thread** — `c2-comment-thread` · `@c2n/components/comment-thread` — One conversation on a piece of content: the first comment and its replies, a reply box, edit and delete on your own comments, and Resolve.
 - **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.
 - **Reaction Bar** — `c2-reaction-bar` · `@c2n/components/reaction-bar` — Emoji reactions with counts under a message or comment, toggled by the current user, with a picker to add more.
 - **Streaming Text** — `c2-streaming-text` · `@c2n/components/streaming-text` — Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.
@@ -94,6 +95,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
+- **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
 - **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
 
 ## Feedback

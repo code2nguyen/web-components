@@ -33,6 +33,7 @@ import colorArea from '@c2n/color-area/custom-elements.json'
 import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorSlider from '@c2n/color-slider/custom-elements.json'
 import command from '@c2n/command/custom-elements.json'
+import commentThread from '@c2n/comment-thread/custom-elements.json'
 import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import confirmDialog from '@c2n/confirm-dialog/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
@@ -123,6 +124,7 @@ import saveBar from '@c2n/save-bar/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
+import selectionToolbar from '@c2n/selection-toolbar/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
@@ -211,6 +213,7 @@ export const componentManifests = (function () {
     colorSelect,
     colorSlider,
     command,
+    commentThread,
     comparisonBar,
     confirmDialog,
     contextMenu,
@@ -301,6 +304,7 @@ export const componentManifests = (function () {
     searchField,
     secretField,
     select,
+    selectionToolbar,
     separator,
     sheet,
     shortcut,

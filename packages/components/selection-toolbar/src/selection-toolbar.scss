@@ -1,0 +1,58 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-selection-toolbar,
+  $theme: (
+    background: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12),
+    padding: 4px,
+    gap: 2px,
+    offset: 8px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.toolbar {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  overflow: visible;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+  color: inherit;
+  /* Not for scrolling: the script reads the offset from here, resolved to pixels. */
+  scroll-margin-top: css.cssVar(offset);
+}
+
+/* Shown as a popover; the flex layout only applies while open, so a closed popover stays display: none. */
+.toolbar:popover-open,
+.toolbar--open {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+.toolbar:not(.toolbar--open) {
+  display: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
