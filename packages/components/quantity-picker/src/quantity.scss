@@ -1,0 +1,103 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-quantity,
+  $theme: (
+    padding: 12px 0,
+    gap: 12px,
+    label--font-weight: 500,
+    hint--color: #71717a,
+    hint--font-size: 12px,
+    button--size: 32px,
+    button--border: 1px solid #bcbcc6,
+    button__hover--border: 1px solid #a1a1aa,
+    button--border-radius: 999px,
+    button--color: #18181b,
+    button--background: transparent,
+    button__disabled--opacity: 0.38,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    value--min-width: 24px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.label {
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.hint {
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+  padding: 0;
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  color: css.cssVar(button--color);
+  background: css.cssVar(button--background);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border: css.cssVar(button__hover--border);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(button__disabled--opacity);
+  }
+
+  svg,
+  ::slotted(*) {
+    width: 16px;
+    height: 16px;
+  }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+}
+
+.value {
+  min-width: css.cssVar(value--min-width);
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+  }
+}
