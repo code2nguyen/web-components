@@ -56,15 +56,22 @@ The reveal is CSS: `--c2-in-view__hidden--opacity` and `--c2-in-view__hidden--tr
 
 ### Loading more
 
-Put one at the end of a list, with a margin so it fires before the reader gets there. `enter` fires when it comes into view, not again while it stays there, so keep loading while a page of results leaves it in view:
+Put one at the end of a list, with a margin so it fires before the reader gets there. `enter` fires when it comes into view, not again while it stays there, so keep loading while a page of results leaves it in view, one page at a time, and stop at the last page:
 
 ```html tag=CodeBlock
 <c2-in-view root-margin="300px" id="more"></c2-in-view>
 <script>
   const more = document.getElementById('more')
-  more.addEventListener('enter', async function load() {
-    await loadNextPage()
-    if (more.inView) load()
+  let loading = false
+  more.addEventListener('enter', async () => {
+    if (loading) return
+    loading = true
+    // loadNextPage() resolves to whether there was a page to add.
+    while (more.inView && (await loadNextPage()));
+    loading = false
+    // No more pages: stop watching.
+    if (!more.inView) return
+    more.disabled = true
   })
 </script>
 ```

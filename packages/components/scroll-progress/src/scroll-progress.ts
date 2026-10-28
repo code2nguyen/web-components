@@ -114,8 +114,11 @@ export class ScrollProgress extends LitElement {
     const definition = found.localName.includes('-') ? customElements.get(found.localName) : undefined
     if (found.localName.includes('-') && (!definition || !(found instanceof definition))) return null
     // A c2-scroll-area scrolls inside its shadow root: follow its viewport, once it has rendered one.
-    if ('viewport' in found) return (found as HTMLElement & { viewport: HTMLElement | null }).viewport
-    return found
+    if (found.localName === 'c2-scroll-area') {
+      const viewport = (found as HTMLElement & { viewport?: unknown }).viewport
+      return viewport instanceof HTMLElement ? viewport : null
+    }
+    return found instanceof HTMLElement ? found : null
   }
 
   private attach(tries = 0): void {
