@@ -20,6 +20,7 @@
     expired--color: #dc2626,
     stale--opacity: 0.38,
     swap--border: 1px solid #e4e4e7,
+    swap-icon--size: 20px,
   )
 );
 
@@ -121,6 +122,14 @@
 
 .swap {
   --c2-icon-button--border: #{css.cssVar(swap--border)};
+  --c2-icon-button__icon--width: #{css.cssVar(swap-icon--size)};
+  --c2-icon-button__icon--height: #{css.cssVar(swap-icon--size)};
+}
+
+.swap svg,
+.swap ::slotted(*) {
+  width: css.cssVar(swap-icon--size);
+  height: css.cssVar(swap-icon--size);
 }
 
 svg {

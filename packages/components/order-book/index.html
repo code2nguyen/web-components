@@ -2,19 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-order-book</title>
     <script type="module" src="/src/order-book.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 32px;
+        max-width: 560px;
         padding: 24px;
+        font: 14px system-ui;
+      }
+      #live {
+        width: 300px;
       }
     </style>
   </head>
-
   <body>
-    <c2-order-book></c2-order-book>
+    <c2-order-book
+      id="live"
+      base="BTC"
+      quote="USD"
+      groups="0.5;1;5"
+      group="0.5"
+      own-prices="64208.75"
+      bids="[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66]]"
+      asks="[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21]]"
+    ></c2-order-book>
+    <c2-order-book layout="split" depth="4" bids="[[100.5,1],[100,2],[99.5,0.5]]" asks="[[101,1.5],[101.5,1],[102,3]]"></c2-order-book>
+    <c2-order-book loading></c2-order-book>
+    <script type="module">
+      // A fake feed: one bid and one ask change every half second.
+      const book = document.getElementById('live')
+      setInterval(() => {
+        const bid = 64210.25 - Math.floor(Math.random() * 5) * 0.5
+        const ask = 64210.75 + Math.floor(Math.random() * 5) * 0.5
+        book.applyDelta({ bids: [[bid, Math.round(Math.random() * 300) / 100]], asks: [[ask, Math.round(Math.random() * 300) / 100]] })
+        book.lastPrice = Math.random() > 0.5 ? bid : ask
+      }, 500)
+      book.addEventListener('price-select', (event) => console.log('price-select', event.detail))
+    </script>
   </body>
 </html>

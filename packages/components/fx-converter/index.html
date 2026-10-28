@@ -2,19 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-fx-converter</title>
     <script type="module" src="/src/fx-converter.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 32px;
+        max-width: 380px;
         padding: 24px;
+        font: 14px system-ui;
       }
     </style>
   </head>
-
   <body>
-    <c2-fx-converter></c2-fx-converter>
+    <c2-fx-converter id="quoted" from="EUR" to="USD" currencies="EUR;USD;GBP;JPY" amount="100000" rate="1.0842" fee="413" max="1000000"></c2-fx-converter>
+    <c2-fx-converter from="GBP" to="USD" currencies="GBP;USD;EUR" amount="50000" rate="1.2741"></c2-fx-converter>
+    <script type="module">
+      // A fake quote service: a new rate guaranteed for 15 seconds whenever the converter asks.
+      const fx = document.getElementById('quoted')
+      const quote = () => {
+        fx.rate = Math.round(((fx.from === 'EUR' ? 1.08 : 0.92) + Math.random() / 100) * 10000) / 10000
+        fx.rateExpires = String(Date.now() + 15000)
+      }
+      for (const type of ['rate-refresh', 'swap', 'currency-change']) fx.addEventListener(type, quote)
+      fx.addEventListener('change', (event) => console.log('change', event.detail))
+      quote()
+    </script>
   </body>
 </html>

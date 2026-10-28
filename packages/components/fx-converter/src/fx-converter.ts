@@ -134,6 +134,7 @@ const ANNOUNCE_DELAY = 700
  * @cssproperty {color} [--c2-fx-converter__expired--color=#dc2626]
  * @cssproperty {opacity} [--c2-fx-converter__stale--opacity=0.38] - The computed amount while the rate has expired.
  * @cssproperty {border} [--c2-fx-converter__swap--border=1px solid #e4e4e7]
+ * @cssproperty {pixel} [--c2-fx-converter__swap-icon--size=20px] - The swap icon, slotted or default.
  */
 @customElement('c2-fx-converter')
 export class FxConverter extends LitElement {
