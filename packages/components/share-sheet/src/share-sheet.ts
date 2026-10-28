@@ -89,7 +89,7 @@ const glyphs = {
  * `url` is what is shared, `heading` names it ("Share “Trip to Lisbon”") and `text` goes with it where the target
  * takes text. `targets` picks the targets, `;`-separated, from `email`, `sms`, `x`, `linkedin`, `facebook`,
  * `whatsapp`, `telegram` and `reddit`; copying the link is always there. `qr` adds a QR code of the link. Only an
- * http(s) link is offered to the targets: anything else leaves the copy field alone.
+ * http(s) link is offered: anything else leaves the sheet empty, with nothing to share or copy.
  *
  * `share()` is what a Share button calls: it opens the device's share sheet (`navigator.share`) where there is one,
  * and this sheet otherwise. Every target fires a cancelable `share` with `{ target, url }` before it opens (in a new
@@ -250,7 +250,8 @@ export class ShareSheet extends LitElement {
 
   override render() {
     const url = safeUrl(this.url)
-    const shown = url || this.url
+    // A link that is not http(s) is not offered at all, not even to copy.
+    const shown = url
     return html`<c2-sheet .open=${this.open} side=${this.side} swipe-close @close=${this.handleSheetToggle} @open=${this.handleSheetToggle}>
       <span slot="title">${this.msg.t('heading', this.heading)}</span>
       <div class="body">

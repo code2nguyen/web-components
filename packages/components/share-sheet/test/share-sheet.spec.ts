@@ -40,6 +40,7 @@ test('a target fires a cancelable share; targets follows the list; a non-http li
   await expect(page).toHaveURL(/scenarios/)
   await sheet(page).evaluate((element: Sheet) => element.setAttribute('url', 'javascript:alert(1)'))
   await expect(page.getByRole('list', { name: 'Share to' })).toHaveCount(0)
+  await expect(page.getByRole('textbox', { name: 'Link' })).toHaveValue('')
 })
 
 test('Escape closes it and fires close; share() opens it where the device has no share sheet', async ({ page, renderScenario }) => {
