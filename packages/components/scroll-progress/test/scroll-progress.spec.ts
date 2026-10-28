@@ -41,3 +41,15 @@ test('a ring closes as it fills and holds its slotted centre; text follows the l
   )
   expect(parseFloat(drawn)).toBeCloseTo(0.5, 1)
 })
+
+test('a for set right after insertion is the container followed', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="box" style="height: 200px; overflow: auto"><div style="height: 1000px"></div></div><div style="height: 3000px"></div>`)
+  await page.evaluate(() => {
+    const element = document.createElement('c2-scroll-progress') as HTMLElement & { for: string }
+    document.querySelector('main')!.prepend(element)
+    element.for = 'box'
+  })
+  await page.evaluate(() => window.scrollTo(0, 1000))
+  await page.locator('#box').evaluate((box: HTMLElement) => (box.scrollTop = 800))
+  await expect(progress(page)).toHaveHostAria('aria-valuenow', '100')
+})

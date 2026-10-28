@@ -60,8 +60,8 @@ A shadow shows on each edge that has content beyond it and disappears once that 
 
 ### Scrolling from code
 
-`scrollToEdge('top' | 'bottom' | 'start' | 'end')` jumps to an edge, `scrollTo()` works as on any element, and `viewport` is the element that scrolls, for code that needs the real scroller. `scroll-edge` fires with `{ edge }` when a scroll reaches an edge: the hook for loading more at the end of a feed or the top of a chat.
+`scrollToEdge('top' | 'bottom' | 'start' | 'end')` jumps to an edge, `scrollTo()` works as on any element, and `viewport` is the element that scrolls, for code that needs the real scroller. `scroll-edge` fires with `{ edge }` when a scroll reaches an edge (not when content loads, and not at the edges the area starts at): the hook for loading more at the end of a feed or the top of a chat. It does not bubble, so a scroll area nested in another does not trigger the outer one's listener.
 
 ### Keyboard
 
-A region that scrolls must be reachable from the keyboard, so the area has a tab stop and a name (`label`); once focused, the arrow keys, Page Up, Page Down, Home and End scroll it.
+A region that scrolls must be reachable from the keyboard, so the area has a tab stop and a name. With a `label` it is a region landmark; without one it is a group, so several scroll areas on a page do not make landmarks with the same name. Once focused, the arrow keys, Page Up, Page Down, Home and End scroll it.

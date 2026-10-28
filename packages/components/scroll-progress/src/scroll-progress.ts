@@ -61,7 +61,10 @@ export class ScrollProgress extends LitElement {
   private scroller: HTMLElement | null = null
   private frame = 0
   private lookup = 0
+  private retry: ReturnType<typeof setTimeout> | undefined
   private percent = -1
+  /** Whether it is following something (the page, or the container found for `for`). */
+  private attached = false
 
   constructor() {
     super()
@@ -77,18 +80,23 @@ export class ScrollProgress extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.attach()
+    // The first attach waits for the first update, so a `for` set right after insertion is the one followed.
+    if (this.hasUpdated) this.attach()
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     this.detach()
     cancelAnimationFrame(this.lookup)
+    clearTimeout(this.retry)
   }
 
-  protected override willUpdate(changed: PropertyValues<this>): void {
+  protected override willUpdate(): void {
     this.internals.ariaLabel = this.label || this.msg.t('label')
-    if (changed.has('for') && this.hasUpdated) this.attach()
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('for') || !this.attached) this.attach()
   }
 
   private readonly schedule = () => {
@@ -97,14 +105,14 @@ export class ScrollProgress extends LitElement {
   }
 
   /** The container named by `for`, looked up in this element's tree, then in the document. */
-  private target(lastTry = false): HTMLElement | null {
+  private target(): HTMLElement | null {
     if (!this.for) return null
     const root = this.getRootNode() as Document | ShadowRoot
     const found = root.getElementById?.(this.for) ?? document.getElementById(this.for)
     if (!found) return null
-    // A custom element that has not upgraded yet (it comes after this one in the page) is looked at again next frame.
+    // A custom element that has not upgraded yet (it comes after this one, or its module loads later) is looked at again.
     const definition = found.localName.includes('-') ? customElements.get(found.localName) : undefined
-    if (!lastTry && found.localName.includes('-') && (!definition || !(found instanceof definition))) return null
+    if (found.localName.includes('-') && (!definition || !(found instanceof definition))) return null
     // A c2-scroll-area scrolls inside its shadow root: follow its viewport, once it has rendered one.
     if ('viewport' in found) return (found as HTMLElement & { viewport: HTMLElement | null }).viewport
     return found
@@ -113,11 +121,14 @@ export class ScrollProgress extends LitElement {
   private attach(tries = 0): void {
     this.detach()
     cancelAnimationFrame(this.lookup)
+    clearTimeout(this.retry)
     if (this.for) {
-      const scroller = this.target(tries >= LOOKUP_FRAMES)
+      const scroller = this.target()
       if (!scroller) {
-        // Not in the page yet, or its viewport not rendered: look again for a few frames.
+        // Not in the page yet, not upgraded, or its viewport not rendered: look again every frame for a while, then
+        // every half second, for as long as this element is connected.
         if (tries < LOOKUP_FRAMES) this.lookup = requestAnimationFrame(() => this.attach(tries + 1))
+        else this.retry = setTimeout(() => this.attach(tries + 1), 500)
         return
       }
       this.scroller = scroller
@@ -130,10 +141,12 @@ export class ScrollProgress extends LitElement {
       window.addEventListener('resize', this.schedule, { passive: true })
       this.resizeObserver?.observe(document.documentElement)
     }
+    this.attached = true
     this.schedule()
   }
 
   private detach(): void {
+    this.attached = false
     this.scroller?.removeEventListener('scroll', this.schedule)
     this.scroller = null
     window.removeEventListener('scroll', this.schedule)

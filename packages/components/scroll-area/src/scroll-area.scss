@@ -86,16 +86,21 @@
   overflow: auto;
 }
 
-/* The fade: a mask that eases the content out on each edge with more beyond it. */
-.more-top .viewport,
-.more-bottom .viewport {
-  mask-image: linear-gradient(
-    to bottom,
-    var(--_mask-top, #000) 0,
-    #000 var(--_fade-top, 0px),
-    #000 calc(100% - var(--_fade-bottom, 0px)),
-    var(--_mask-bottom, #000) 100%
-  );
+/*
+ * The fade: one mask per axis, intersected, easing the content out on each edge with more beyond it. It is applied only
+ * when a fade size is set. The inline axis follows the writing direction.
+ */
+.fade .viewport {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      var(--_mask-top, #000) 0,
+      #000 var(--_fade-top, 0px),
+      #000 calc(100% - var(--_fade-bottom, 0px)),
+      var(--_mask-bottom, #000) 100%
+    ),
+    linear-gradient(to right, var(--_mask-left, #000) 0, #000 var(--_fade-left, 0px), #000 calc(100% - var(--_fade-right, 0px)), var(--_mask-right, #000) 100%);
+  mask-composite: intersect;
 }
 
 .more-top {
@@ -108,25 +113,37 @@
   --_mask-bottom: transparent;
 }
 
-.more-start .viewport,
-.more-end .viewport {
-  mask-image: linear-gradient(
-    to right,
-    var(--_mask-start, #000) 0,
-    #000 var(--_fade-start, 0px),
-    #000 calc(100% - var(--_fade-end, 0px)),
-    var(--_mask-end, #000) 100%
-  );
-}
-
 .more-start {
-  --_fade-start: var(--_fade);
-  --_mask-start: transparent;
+  --_fade-left: var(--_fade);
+  --_mask-left: transparent;
 }
 
 .more-end {
-  --_fade-end: var(--_fade);
-  --_mask-end: transparent;
+  --_fade-right: var(--_fade);
+  --_mask-right: transparent;
+}
+
+:host(:dir(rtl)) {
+  .more-start {
+    --_fade-left: 0px;
+    --_mask-left: #000;
+    --_fade-right: var(--_fade);
+    --_mask-right: transparent;
+  }
+
+  .more-end {
+    --_fade-right: 0px;
+    --_mask-right: #000;
+    --_fade-left: var(--_fade);
+    --_mask-left: transparent;
+  }
+
+  .more-start.more-end {
+    --_fade-left: var(--_fade);
+    --_mask-left: transparent;
+    --_fade-right: var(--_fade);
+    --_mask-right: transparent;
+  }
 }
 
 /* The shadows: a gradient on each edge with more beyond it, over the content and never catching the pointer. */

@@ -11,12 +11,22 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Thin bar
+<style>
+  .progress-article-140 {
+    --c2-scroll-area--max-height: 140px;
+    width: 220px;
+  }
+</style>
 <c2-scroll-progress for="progress-card-1"></c2-scroll-progress>
-<c2-scroll-area id="progress-card-1" label="Article" style="--c2-scroll-area--max-height: 140px; width: 220px"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+<c2-scroll-area id="progress-card-1" class="progress-article-140" label="Article"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
 ```
 
 ```html tag=MdxCodeBlock,label=Thick rounded bar
 <style>
+  .progress-article-140 {
+    --c2-scroll-area--max-height: 140px;
+    width: 220px;
+  }
   .progress-thick {
     --c2-scroll-progress--thickness: 6px;
     --c2-scroll-progress--border-radius: 999px;
@@ -26,11 +36,15 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
   }
 </style>
 <c2-scroll-progress class="progress-thick" for="progress-card-2"></c2-scroll-progress>
-<c2-scroll-area id="progress-card-2" label="Article" style="--c2-scroll-area--max-height: 140px; width: 220px"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+<c2-scroll-area id="progress-card-2" class="progress-article-140" label="Article"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
 ```
 
 ```html tag=MdxCodeBlock,label=Ring
 <style>
+  .progress-article-120 {
+    --c2-scroll-area--max-height: 120px;
+    width: 220px;
+  }
   .progress-ring {
     --c2-scroll-progress__ring--size: 48px;
     --c2-scroll-progress__ring--stroke-width: 4;
@@ -38,7 +52,7 @@ Looks for `c2-scroll-progress`. Scroll a card's text to move it. Thickness and c
   }
 </style>
 <c2-scroll-progress class="progress-ring" variant="ring" for="progress-card-3"><span aria-hidden="true">↑</span></c2-scroll-progress>
-<c2-scroll-area id="progress-card-3" label="Article" style="--c2-scroll-area--max-height: 120px; width: 220px"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
+<c2-scroll-area id="progress-card-3" class="progress-article-120" label="Article"><p>Paragraph 1. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 2. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 3. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 4. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 5. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 6. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 7. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 8. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 9. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 10. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 11. A long article scrolls inside this area, and the bar above follows how far the reader got.</p><p>Paragraph 12. A long article scrolls inside this area, and the bar above follows how far the reader got.</p></c2-scroll-area>
 ```
 
 </GalleryGrid>

@@ -23,7 +23,8 @@
   display: none;
 }
 
-:host(:state(in-view)) {
+:host(:state(in-view)),
+:host(:state(unwatched)) {
   opacity: 1;
   transform: none;
 }

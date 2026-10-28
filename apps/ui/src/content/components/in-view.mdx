@@ -46,9 +46,9 @@ Scroll the list: each card fades and rises as it comes into view.
 
 ### Events and state
 
-`enter` fires when the content comes into view and `leave` when it goes, each with `{ ratio }`, the share of it that shows; `inView` reads the state now. `threshold` (0 to 1) is how much must show to count, and `root-margin` grows or shrinks the viewport, as CSS margins. `once` stops watching after the first entry, and `disabled` stops watching.
+`enter` fires when the content comes into view and `leave` when it goes, each with `{ ratio }`, the share of it that shows; `inView` reads the state now. `threshold` (0 to 1) is how much must show to count, and `root-margin` grows or shrinks the viewport, as CSS margins. `once` stops watching after the first entry, and `disabled` stops watching; content never seen while not watched shows as in view, so a reveal never leaves it hidden.
 
-The state is a CSS custom state, not an attribute: style it with `c2-in-view:state(in-view)`. Content inside a scrolling container, such as a `c2-scroll-area`, counts as in view only where the container shows it.
+The state is a CSS custom state, not an attribute: style it with `c2-in-view:state(in-view)`. Content inside a scrolling container, such as a `c2-scroll-area`, counts as in view only where the container shows it; `root-margin` applies to the page's viewport, not to the container's edge. The events do not bubble, so an in-view nested in another does not fire the outer one's listeners.
 
 ### Reveal
 
@@ -56,11 +56,15 @@ The reveal is CSS: `--c2-in-view__hidden--opacity` and `--c2-in-view__hidden--tr
 
 ### Loading more
 
-Put one at the end of a list, with a margin so it fires before the reader gets there:
+Put one at the end of a list, with a margin so it fires before the reader gets there. `enter` fires when it comes into view, not again while it stays there, so keep loading while a page of results leaves it in view:
 
 ```html tag=CodeBlock
 <c2-in-view root-margin="300px" id="more"></c2-in-view>
 <script>
-  document.getElementById('more').addEventListener('enter', () => loadNextPage())
+  const more = document.getElementById('more')
+  more.addEventListener('enter', async function load() {
+    await loadNextPage()
+    if (more.inView) load()
+  })
 </script>
 ```

@@ -48,3 +48,17 @@ test('a fade size masks the edges with more beyond them', async ({ page, renderS
   const mask = await area(page).evaluate((element: Area) => getComputedStyle(element.viewport).maskImage)
   expect(mask).toContain('linear-gradient')
 })
+
+test('content that loads later fires no scroll-edge; an area moved in the page keeps tracking its content', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="a"></div><div id="b"></div><c2-scroll-area style="--c2-scroll-area--max-height: 200px">${rows(2)}</c2-scroll-area>`)
+  await watch(area(page), 'scroll-edge')
+  await area(page).evaluate((element: HTMLElement, more) => element.insertAdjacentHTML('beforeend', more), rows(20))
+  await expect(frame(page)).toHaveClass(/more-bottom/)
+  await page.waitForTimeout(200)
+  expect(await events(page)).toEqual([])
+  await area(page).evaluate((element: HTMLElement) => {
+    document.getElementById('b')!.append(element)
+    element.replaceChildren()
+  })
+  await expect(frame(page)).not.toHaveClass(/more-bottom/)
+})

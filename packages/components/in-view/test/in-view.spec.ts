@@ -45,3 +45,17 @@ test('inside a scroll area it counts as in view only where the area shows it', a
   await page.locator('c2-scroll-area').evaluate((element: HTMLElement & { scrollToEdge(edge: string): void }) => element.scrollToEdge('bottom'))
   await expect.poll(() => matchesState(page)).toBe(true)
 })
+
+test('a disabled watcher never hides its content; enter does not bubble to an outer watcher', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-in-view id="outer"><div style="height: 1500px"></div>
+    <c2-in-view id="inner"><p style="margin: 0">Inner</p></c2-in-view></c2-in-view>
+    <c2-in-view id="off" disabled style="--c2-in-view__hidden--opacity: 0; --c2-in-view--transition-duration: 0ms"><p>Off</p></c2-in-view>`)
+  await page.locator('#outer').evaluate((element: HTMLElement) => {
+    element.dataset.count = '0'
+    element.addEventListener('enter', () => (element.dataset.count = String(Number(element.dataset.count) + 1)))
+  })
+  await page.locator('#inner').scrollIntoViewIfNeeded()
+  await expect.poll(() => page.locator('#inner').evaluate((element: Element) => element.matches(':state(in-view)'))).toBe(true)
+  expect(await page.locator('#outer').getAttribute('data-count')).toBe('0')
+  expect(await page.locator('#off').evaluate((element: HTMLElement) => getComputedStyle(element).opacity)).toBe('1')
+})

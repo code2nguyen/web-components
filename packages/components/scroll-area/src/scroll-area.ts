@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -43,7 +43,7 @@ const EDGE = 1
  *
  * @slot - The content that scrolls.
  *
- * @event {CustomEvent<{ edge: 'top' | 'bottom' | 'start' | 'end' }>} scroll-edge - Fired when a scroll reaches an edge.
+ * @event {CustomEvent<{ edge: 'top' | 'bottom' | 'start' | 'end' }>} scroll-edge - Fired when a scroll reaches an edge. Does not bubble, so a scroll area nested in another does not trigger the outer one's listener.
  *
  * @csspart viewport - The element that scrolls.
  *
@@ -73,6 +73,8 @@ export class ScrollArea extends LitElement {
 
   /** Edges with content hidden behind them. */
   @state() private beyond = { top: false, bottom: false, start: false, end: false }
+  /** Whether a fade size is set: the mask is only applied then. */
+  @state() private fading = false
 
   private readonly msg = new LocalizeController(this, scrollAreaMessages)
   private readonly resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => this.measure())
@@ -118,7 +120,25 @@ export class ScrollArea extends LitElement {
     cancelAnimationFrame(this.frame)
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback()
+    // Moved in the page: watch the same viewport again.
+    if (this.hasUpdated) this.watch()
+  }
+
   protected override firstUpdated(): void {
+    this.watch()
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    if (changed.has('orientation') && changed.get('orientation') !== undefined) {
+      this.reached.clear()
+      this.measuredOnce = false
+      this.measure()
+    }
+  }
+
+  private watch(): void {
     const viewport = this.viewport
     if (viewport && this.resizeObserver) {
       this.resizeObserver.observe(viewport)
@@ -131,11 +151,11 @@ export class ScrollArea extends LitElement {
 
   private handleScroll(): void {
     cancelAnimationFrame(this.frame)
-    this.frame = requestAnimationFrame(() => this.measure())
+    this.frame = requestAnimationFrame(() => this.measure(true))
   }
 
   /** Works out which edges have content behind them, and fires `scroll-edge` for an edge just reached by a scroll. */
-  private measure(): void {
+  private measure(fromScroll = false): void {
     const viewport = this.viewport
     if (!viewport) return
     const { scrollTop, scrollHeight, clientHeight, scrollWidth, clientWidth } = viewport
@@ -155,19 +175,29 @@ export class ScrollArea extends LitElement {
       const atEdge = axisScrolls && !next[edge]
       if (atEdge && !this.reached.has(edge)) {
         this.reached.add(edge)
-        // The edges the area starts at are where it already is: only arriving at one later is news.
-        if (this.measuredOnce) this.dispatchEvent(new CustomEvent('scroll-edge', { detail: { edge }, bubbles: true, composed: true }))
+        // Only a scroll arrives at an edge: where the area starts, or content growing or shrinking, is not news.
+        if (fromScroll && this.measuredOnce) this.dispatchEvent(new CustomEvent('scroll-edge', { detail: { edge } }))
       } else if (!atEdge) this.reached.delete(edge)
     }
     this.measuredOnce = true
+    const fade = parseFloat(getComputedStyle(this).getPropertyValue('--c2-scroll-area__fade--size')) > 0
+    if (fade !== this.fading) this.fading = fade
     const current = this.beyond
     if (current.top !== next.top || current.bottom !== next.bottom || current.start !== next.start || current.end !== next.end) this.beyond = next
   }
 
   override render() {
     const edges = (['top', 'bottom', 'start', 'end'] as ScrollEdge[]).filter((edge) => this.beyond[edge])
-    return html`<div class="frame ${edges.map((edge) => `more-${edge}`).join(' ')}">
-      <div class="viewport" part="viewport" tabindex="0" role="region" aria-label=${this.label || this.msg.t('label')} @scroll=${this.handleScroll}>
+    // Named, it is a landmark; unnamed, a group, so several scroll areas do not make landmarks with the same name.
+    return html`<div class="frame ${edges.map((edge) => `more-${edge}`).join(' ')} ${this.fading ? 'fade' : ''}">
+      <div
+        class="viewport"
+        part="viewport"
+        tabindex="0"
+        role=${this.label ? 'region' : 'group'}
+        aria-label=${this.label || this.msg.t('label')}
+        @scroll=${this.handleScroll}
+      >
         <div class="content"><slot @slotchange=${() => this.measure()}></slot></div>
       </div>
       <span class="shadow shadow--top" aria-hidden="true"></span>
