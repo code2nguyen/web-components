@@ -90,3 +90,36 @@ test('picking a currency recomputes in its minor unit; max shows an error; text 
   await expect(page.locator('#fr').getByRole('button', { name: 'Inverser les devises' })).toBeVisible()
   await expect(page.locator('#fr .line--rate')).toHaveText(/1 EUR = 1,1 USD\s*Taux de change/)
 })
+
+test('swap keeps the typed amount in major units across currencies with other minor units', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-fx-converter from="USD" to="JPY" currencies="USD;JPY" amount="100000" rate="150" locale="en-US"></c2-fx-converter>`)
+  await expect(page.getByRole('textbox', { name: 'Recipient gets' })).toHaveValue('150,000')
+  await page.getByRole('button', { name: 'Swap currencies' }).click()
+  // $1,000.00 becomes ¥1,000, not ¥100,000.
+  await expect(page.getByRole('textbox', { name: 'You send' })).toHaveValue('1,000')
+  await expect(converter(page)).toHaveJSProperty('fromAmount', '1000')
+  await expect(page.getByRole('textbox', { name: 'Recipient gets' })).toHaveValue('6.67')
+})
+
+test('a quote set from the swap listener is firm; a new rate after expiry drops the old guarantee', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-fx-converter ${EUR_USD} amount="100000"></c2-fx-converter>`)
+  await converter(page).evaluate((element: HTMLElement & { rate: number }) => element.addEventListener('swap', () => (element.rate = 0.92)))
+  await page.getByRole('button', { name: 'Swap currencies' }).click()
+  await expect(converter(page).locator('.line--rate')).toHaveText(/1 USD = 0\.92 EUR\s*Exchange rate/)
+  await props(converter(page), { rateExpires: String(Date.now() + 1000) })
+  await expect(converter(page).locator('.line--rate')).toHaveText(/Rate expired/, { timeout: 4000 })
+  await watch(converter(page), 'rate-expire')
+  await props(converter(page), { rate: 0.93 })
+  await expect(converter(page).locator('.line--rate')).toHaveText(/1 USD = 0\.93 EUR\s*Exchange rate/)
+  await expect(page.getByRole('button', { name: 'Swap currencies' })).toBeVisible()
+  expect(await events(page)).toEqual([])
+})
+
+test('picking a currency fires one change, also when the amount does not move', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-fx-converter ${EUR_USD} amount="100000"></c2-fx-converter>`)
+  await watch(converter(page), 'change')
+  await page.getByRole('combobox', { name: 'Recipient gets currency' }).selectOption('GBP')
+  await expect.poll(() => events(page)).toEqual([{ from: 'EUR', to: 'GBP', fromAmount: '100000', toAmount: '107972', fixed: 'from', rate: 1.0842 }])
+  await page.getByRole('combobox', { name: 'You send currency' }).selectOption('USD')
+  await expect.poll(async () => (await events(page)).length).toBe(2)
+})

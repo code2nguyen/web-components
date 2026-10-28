@@ -196,13 +196,14 @@ export class FxConverter extends LitElement {
   private span = 0
   private expired = false
   private indicative = false
-  /** Set by the swap button for the update that inverts the rate. */
-  private swapping = false
+  /** The inverted rate the swap button set, until the update that draws it. */
+  private swapping: number | undefined
   private timer: ReturnType<typeof setInterval> | undefined
   private announceTimer: ReturnType<typeof setTimeout> | undefined
   private announcement = ''
   /** A currency picked in a field: the `input` that follows it is the picker's, not the reader's typing. */
   private picking: FxSide | undefined
+  private formats = new Map<string, Intl.NumberFormat>()
 
   constructor() {
     super()
@@ -259,10 +260,14 @@ export class FxConverter extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('rate') || changed.has('rateExpires')) {
-      // The swap's inverted rate is a guess until the app sets the real quote, which clears it.
-      this.indicative = this.swapping && this.rate > 0
-      this.swapping = false
+      // The swap's inverted rate is a guess until the app sets the real quote, which clears it; a quote the app sets
+      // from its `swap` listener lands in the same update, and is not the guess.
+      this.indicative = this.swapping !== undefined && this.rate === this.swapping
+      this.swapping = undefined
       this.expired = false
+      // A new rate after a guarantee ran out is a new quote: without a new `rate-expires`, it has no guarantee.
+      const stale = timeOf(this.rateExpires)
+      if (changed.has('rate') && !changed.has('rateExpires') && stale !== undefined && stale <= Date.now()) this.rateExpires = ''
       const expires = timeOf(this.rateExpires)
       this.span = expires === undefined ? 0 : Math.max(1, Math.ceil((expires - Date.now()) / 1000))
       this.tick(false)
@@ -335,6 +340,8 @@ export class FxConverter extends LitElement {
 
   private handleChange(event: Event): void {
     event.stopPropagation()
+    // A picked currency fires the converter's own `change`, once, whether or not the field's value moved.
+    if (this.picking) return
     this.dispatchEvent(new CustomEvent('change', { detail: this.value, bubbles: true, composed: true }))
   }
 
@@ -343,9 +350,12 @@ export class FxConverter extends LitElement {
     if (side === 'from') this.from = currency
     else this.to = currency
     this.picking = side
-    // The field fires its `input` and `change` right after this event, in the same task.
-    queueMicrotask(() => (this.picking = undefined))
     this.dispatchEvent(new CustomEvent('currency-change', { detail: { side, currency } }))
+    // The field fires its `input` and `change` right after this event, in the same task.
+    queueMicrotask(() => {
+      this.picking = undefined
+      this.dispatchEvent(new CustomEvent('change', { detail: this.value, bubbles: true, composed: true }))
+    })
   }
 
   private swap(): void {
@@ -355,12 +365,19 @@ export class FxConverter extends LitElement {
     const fromList = this.fromCurrencies
     this.fromCurrencies = this.toCurrencies
     this.toCurrencies = fromList
+    // The typed amount keeps its value in major units, as the field does when its currency changes: 1,000 USD
+    // swapped to JPY is ¥1,000, so the minor units are rescaled to the field's new currency.
+    const typed = minorOf(this.amount)
+    if (typed !== undefined) {
+      const [before, after] = this.fixed === 'from' ? [from, to] : [to, from]
+      this.amount = String(Math.round(typed * 10 ** (currencyDigits(after) - currencyDigits(before))))
+    }
     // The fee was in the old sending currency, and the guarantee was for the old pair.
     this.fee = ''
     this.rateExpires = ''
     if (this.rate > 0) {
       this.rate = 1 / this.rate
-      this.swapping = true
+      this.swapping = this.rate
     }
     this.dispatchEvent(new CustomEvent('swap', { detail: { from: this.from, to: this.to } }))
     this.dispatchEvent(new CustomEvent('change', { detail: this.value, bubbles: true, composed: true }))
@@ -376,11 +393,17 @@ export class FxConverter extends LitElement {
   }
 
   private formatNumber(value: number, options: Intl.NumberFormatOptions): string {
-    try {
-      return new Intl.NumberFormat(this.msg.locale, options).format(value)
-    } catch {
-      return new Intl.NumberFormat('en', options).format(value)
+    const key = `${this.msg.locale}|${JSON.stringify(options)}`
+    let format = this.formats.get(key)
+    if (!format) {
+      try {
+        format = new Intl.NumberFormat(this.msg.locale, options)
+      } catch {
+        format = new Intl.NumberFormat('en', options)
+      }
+      this.formats.set(key, format)
     }
+    return format.format(value)
   }
 
   /** An amount in minor units as "1,079.72 USD". */

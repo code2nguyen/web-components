@@ -1,5 +1,4 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -213,13 +212,13 @@ export class OrderBook extends LitElement {
   private flashes = new Map<string, string>()
   private flashTurn = new Map<string, number>()
   private dataChanged = false
+  /** Deltas from `applyDelta`, merged at the next update after any snapshot. */
+  private deltas: OrderBookDelta[] = []
   private previousLast?: number
   private lastDirection: 'up' | 'down' | '' = ''
   /** The row holding the tab stop. */
   private focusKey = ''
   private formats = new Map<string, Intl.NumberFormat>()
-  /** Set after the first client render; see renderGrouping. */
-  @state() private hydrated = false
 
   constructor() {
     super()
@@ -231,10 +230,15 @@ export class OrderBook extends LitElement {
    * in one task are drawn in one render.
    */
   applyDelta(delta: OrderBookDelta): void {
-    if (delta.bids) this.merge('bid', delta.bids)
-    if (delta.asks) this.merge('ask', delta.asks)
-    this.dataChanged = true
+    // Queued, not merged now: a snapshot set in the same task (`bids = …` then the buffered deltas) is applied
+    // when the element updates, and the deltas have to land on it rather than be wiped by it.
+    this.deltas.push(delta)
     this.requestUpdate()
+  }
+
+  /** `last-price` when it is a number: a removed attribute reads as `null`, which is no price. */
+  private get last(): number | undefined {
+    return typeof this.lastPrice === 'number' && Number.isFinite(this.lastPrice) ? this.lastPrice : undefined
   }
 
   /** The levels drawn on a side, best first, after grouping. */
@@ -263,23 +267,28 @@ export class OrderBook extends LitElement {
     this.dataChanged = true
   }
 
-  protected override firstUpdated(): void {
-    this.hydrated = true
-  }
-
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('bids')) this.replace('bid', this.bids)
     if (changed.has('asks')) this.replace('ask', this.asks)
+    for (const delta of this.deltas.splice(0)) {
+      if (delta.bids) this.merge('bid', delta.bids)
+      if (delta.asks) this.merge('ask', delta.asks)
+      this.dataChanged = true
+    }
     if (changed.has('lastPrice')) {
+      const last = this.last
       const previous = this.previousLast
-      if (previous !== undefined && this.lastPrice !== undefined && this.lastPrice !== previous) this.lastDirection = this.lastPrice > previous ? 'up' : 'down'
-      if (this.lastPrice === undefined) this.lastDirection = ''
-      this.previousLast = this.lastPrice
+      if (last === undefined) this.lastDirection = ''
+      else if (previous !== undefined && last !== previous) this.lastDirection = last > previous ? 'up' : 'down'
+      this.previousLast = last
     }
     // Regrouping or a deeper view redraws levels that did not trade: no flash for those.
     const regrouped = changed.has('group') || changed.has('depth')
-    this.rows = { bid: this.build('bid'), ask: this.build('ask') }
-    this.track(this.dataChanged && !regrouped && this.hasUpdated)
+    // The levels are regrouped and sorted only when they or the view changed, not for a new last price or label.
+    if (this.dataChanged || regrouped || changed.has('ownPrices')) {
+      this.rows = { bid: this.build('bid'), ask: this.build('ask') }
+      this.track(this.dataChanged && !regrouped && this.hasUpdated)
+    }
     this.dataChanged = false
     this.internals.ariaLabel = this.label || this.msg.t('label')
   }
@@ -462,17 +471,18 @@ export class OrderBook extends LitElement {
     for (const price of this.levels.ask.keys()) if (price < ask) ask = price
     const both = Number.isFinite(bid) && Number.isFinite(ask)
     const mid = both ? (bid + ask) / 2 : undefined
-    const shown = this.lastPrice ?? mid
+    const last = this.last
+    const shown = last ?? mid
     const digits = this.priceDigits
     const spread = both ? clean(ask - bid) : undefined
-    const arrow = this.lastPrice !== undefined && this.lastDirection ? (this.lastDirection === 'up' ? '↑' : '↓') : ''
+    const arrow = last !== undefined && this.lastDirection ? (this.lastDirection === 'up' ? '↑' : '↓') : ''
     return html`<div class="spread" part="spread">
       ${
         shown !== undefined
-          ? html`<span class="spread__price ${this.lastPrice !== undefined ? `spread__price--${this.lastDirection || 'flat'}` : ''}"
-              ><span class="visually-hidden">${this.msg.t(this.lastPrice !== undefined ? 'last' : 'mid')} </span>${this.format(
+          ? html`<span class="spread__price ${last !== undefined ? `spread__price--${this.lastDirection || 'flat'}` : ''}"
+              ><span class="visually-hidden">${this.msg.t(last !== undefined ? 'last' : 'mid')} </span>${this.format(
                 shown,
-                this.lastPrice === undefined && mid !== undefined ? Math.max(digits, decimalsOf(clean(mid))) : digits,
+                last === undefined && mid !== undefined ? Math.max(digits, decimalsOf(clean(mid))) : digits,
               )}${arrow ? html`<span aria-hidden="true"> ${arrow}</span>` : nothing}</span
             >`
           : nothing
@@ -487,9 +497,6 @@ export class OrderBook extends LitElement {
 
   private renderGrouping() {
     if (this.groups.length < 2) return nothing
-    // A select rendered on the server comes up with an empty trigger after hydration (it reads its label on
-    // slotchange, which hydration never fires): it is drawn on the client only, in a box of its own size meanwhile.
-    if (!this.hydrated) return html`<span class="grouping grouping--pending"></span>`
     const current = this.groups.find((step) => Number(step) === this.group) ?? ''
     return html`<span class="grouping" @c2-field-connect=${this.stopInner} @input=${this.stopInner} @change=${this.stopInner}>
       <c2-select aria-label=${this.msg.t('grouping')} value=${current} @selection-change=${this.handleGroup}>

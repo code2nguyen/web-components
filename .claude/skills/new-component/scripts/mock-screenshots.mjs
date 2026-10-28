@@ -63,7 +63,11 @@ async function reachable(url) {
 // Reuse a running test server (npm run test:serve); otherwise start one and stop it at the end.
 let server
 if (!(await reachable(`${base}/tests/health.html`))) {
-  server = spawn('npx', ['vite', '--config', 'tests/vite.config.ts', '--port', String(port), '--strictPort'], { cwd: root, stdio: 'ignore' })
+  // The Vite binary itself, not npx: killing npx would leave its Vite child holding the port.
+  server = spawn(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), '--config', 'tests/vite.config.ts', '--port', String(port), '--strictPort'], {
+    cwd: root,
+    stdio: 'ignore',
+  })
   process.on('exit', () => server.kill())
   let up = false
   for (let attempt = 0; attempt < 60 && !up; attempt++) {

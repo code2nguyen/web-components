@@ -231,6 +231,8 @@ export class Select extends LitElement {
   @state() private displayText = ''
 
   protected childItemsUpdated!: Promise<unknown[]>
+  /** Times the display text was looked up again because a selected item had no label yet. */
+  private displayRetries = 0
 
   data: unknown[] = []
 
@@ -357,6 +359,14 @@ export class Select extends LitElement {
       )
     }
     this.displayText = displayText.join(', ')
+    // Hydrated from server-rendered markup, the items may not have upgraded or rendered yet when this first runs,
+    // and nothing else would call it again (hydration fires no slotchange): look again once they have.
+    const missing = unupgraded > 0 || displayText.length < this.value.length
+    if (missing && this.displayRetries < 3) {
+      this.displayRetries += 1
+      await customElements.whenDefined('c2-list-item')
+      requestAnimationFrame(() => this.updateDisplayText())
+    } else if (!missing) this.displayRetries = 0
   }
 
   private renderButtonContent() {

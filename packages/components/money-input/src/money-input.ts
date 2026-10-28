@@ -422,11 +422,14 @@ export class MoneyInput extends LitElement {
 
   private renderPicker(currencies: string[], locale: string) {
     const current = normalizeCurrency(this.currency)
+    // The picker's own `input` is composed and would leave the field as an amount edit; the field fires its own
+    // `input` only when the pick changes the value.
     return html`<span class="picker">
       <select
         aria-label=${this.currencyLabel || this.msg.t('currency')}
         ?disabled=${this.effectiveDisabled || this.readOnly}
         @change=${this.handleCurrencyChange}
+        @input=${(event: Event) => event.stopPropagation()}
       >
         ${currencies.map((code) => html`<option value=${code} title=${currencyName(locale, code)} .selected=${code === current}>${code}</option>`)}
       </select>

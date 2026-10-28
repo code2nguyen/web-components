@@ -140,3 +140,21 @@ test('an empty book says it is waiting or empty; text follows the language', asy
   await expect(book(page).first().locator('c2-spinner')).toHaveCount(0)
   await accessible(page)
 })
+
+test('deltas sent in the same task as a snapshot land on it; a removed last price is the mid again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-order-book last-price="100.8" size-precision="1"></c2-order-book>`)
+  await book(page).evaluate(async (element: Book & { bids: unknown; asks: unknown; updateComplete: Promise<boolean> }) => {
+    element.bids = [[100, 1]]
+    element.asks = [[101, 1]]
+    element.applyDelta({ bids: [[99, 2]], asks: [[101, 3]] })
+    await element.updateComplete
+  })
+  expect(await rows(page)).toEqual([
+    ['ask', '101', '3.0', '3.0'],
+    ['bid', '100', '1.0', '1.0'],
+    ['bid', '99', '2.0', '3.0'],
+  ])
+  await book(page).evaluate((element: HTMLElement) => element.removeAttribute('last-price'))
+  await expect(book(page).locator('.spread__price')).toHaveText(/^Mid price\s*100\.5$/)
+  await expect(book(page).locator('.spread__price')).not.toHaveClass(/spread__price--/)
+})

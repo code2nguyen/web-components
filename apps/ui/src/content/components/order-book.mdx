@@ -60,7 +60,7 @@ import '@c2n/components/order-book'
 
 ### Feeding it
 
-`bids` and `asks` take a snapshot: `{ price, size }` objects, or the `[price, size]` pairs exchange feeds send, as numbers or numeric strings. Setting either replaces that side. A stream then patches it with `applyDelta()`, where a size of 0 removes the level; deltas that arrive in the same task are drawn in one render.
+`bids` and `asks` take a snapshot: `{ price, size }` objects, or the `[price, size]` pairs exchange feeds send, as numbers or numeric strings. Setting either replaces that side. A stream then patches it with `applyDelta()`, where a size of 0 removes the level. Deltas that arrive in the same task are drawn in one render, on top of a snapshot set in that task, so replaying buffered deltas right after a snapshot works.
 
 ```typescript tag=CodeBlock
 const book = document.querySelector('c2-order-book')!
