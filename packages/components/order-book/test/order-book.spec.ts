@@ -85,22 +85,26 @@ test('picking a price step merges levels: bids round down, asks round up', async
 })
 
 test('one tab stop for the rows; arrows move, Enter and a click pick a price without bubbling', async ({ page, renderScenario }) => {
-  await renderScenario(`<button>before</button><c2-order-book ${BOOK}></c2-order-book><button>after</button>`)
+  // Text fields around the book: every engine tabs to them (WebKit skips buttons unless told to).
+  await renderScenario(`<input aria-label="before" /><c2-order-book ${BOOK}></c2-order-book><input aria-label="after" />`)
   await page.evaluate(() => {
     const picks: unknown[] = []
     ;(window as unknown as { picks: unknown[] }).picks = picks
     document.querySelector('c2-order-book')!.addEventListener('price-select', (event) => picks.push((event as CustomEvent).detail))
     document.querySelector('main')!.addEventListener('price-select', () => picks.push('bubbled'))
   })
-  await page.getByRole('button', { name: 'before' }).focus()
+  await page.getByRole('textbox', { name: 'before' }).focus()
   await page.keyboard.press('Tab')
   await expect(book(page).locator('.row[data-key="ask:102"]')).toBeFocused()
   for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowDown')
   await expect(book(page).locator('.row[data-key="bid:100.5"]')).toBeFocused()
   await page.keyboard.press('Enter')
   await book(page).locator('.row[data-key="ask:101.5"]').click()
+  // A click moves the tab stop to the row it picked.
+  await expect(book(page).locator('.row[data-key="ask:101.5"]')).toBeFocused()
+  await expect(book(page).locator('.row[tabindex="0"]')).toHaveAttribute('data-key', 'ask:101.5')
   await page.keyboard.press('Tab')
-  await expect(page.getByRole('button', { name: 'after' })).toBeFocused()
+  await expect(page.getByRole('textbox', { name: 'after' })).toBeFocused()
   await page.keyboard.press('Shift+Tab')
   // The tab stop stays on the last row used.
   await expect(book(page).locator('.row[data-key="ask:101.5"]')).toBeFocused()
