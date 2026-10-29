@@ -1,0 +1,64 @@
+---
+title: 'Promo Code Field'
+description: 'Apply a promo code with checking and refusal states; applied codes stay as removable tokens with their saving.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PromoCodeField } from '@c2n/components/promo-code-field'
+import { Button } from '@c2n/components/button'
+
+`c2-promo-code-field` is the promo code field of a checkout, like Shopify's, Uber Eats' or Amazon's: type a code, apply it, see it accepted or refused, and keep each applied code as a removable token with its saving.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/promo-code-field'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/promo-code-field
+<style>
+  .promo-demo {
+    width: 320px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Checked by the app (try SPRING20, FREESHIP or WINTER5)">
+  <c2-promo-code-field id="promo-demo" class="promo-demo" max="2"></c2-promo-code-field>
+  <c2-button onclick="const field = document.getElementById('promo-demo'); field.validate = (code) => new Promise((done) => setTimeout(() => done(code === 'SPRING20' ? { code, label: '−$12.00' } : code === 'FREESHIP' ? { code, label: 'Free shipping' } : { error: 'This code expired on 1 March.' }), 700))">Connect a fake server</c2-button>
+</div>
+<div data-label="Collapsed until needed">
+  <c2-promo-code-field class="promo-demo" collapsed></c2-promo-code-field>
+</div>
+<div data-label="Already applied">
+  <c2-promo-code-field class="promo-demo" codes='[{"code":"SPRING20","label":"−20%"}]'></c2-promo-code-field>
+</div>
+```
+
+### Checking codes
+
+Set `validate` to an async function that asks your server. It answers `{ code, label }` for an accepted code (the server's spelling of the code wins) or `{ error }` for a refused one:
+
+```typescript tag=CodeBlock
+const field = document.querySelector('c2-promo-code-field')!
+field.validate = async (code) => {
+  const result = await api.applyPromo(code)
+  return result.ok ? { code: result.code, label: result.saving } : { error: result.message }
+}
+field.addEventListener('apply', ({ detail }) => cart.addDiscount(detail.code))
+field.addEventListener('remove', ({ detail }) => cart.removeDiscount(detail.code))
+```
+
+While it runs, the field is read-only and the Apply button runs. Without `validate`, every code is accepted. A code already applied is refused without asking the server, and codes are upper-cased unless `case-sensitive`.
+
+### How many codes
+
+`max` is how many codes may apply at once (1 by default, 0 for no limit). At the limit the field gives way to the tokens, and removing a token brings it back. `codes` holds the applied codes, so a cart restored from the server can set it. `collapsed` starts the field as an "Add a promo code" link, the common checkout pattern.
+
+### Accessibility
+
+The field is named "Promo code" (or `label`), Enter applies, and a refusal shows under the field and describes it. Accepting and removing a code is announced ("SPRING20 applied: −$12.00"), and the tokens are a list named "Applied codes".

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-promo-code-field</title>
+    <script type="module" src="/src/promo-code-field.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 360px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-promo-code-field id="promo" max="2"></c2-promo-code-field>
+    <c2-promo-code-field collapsed></c2-promo-code-field>
+    <script type="module">
+      // A fake promo service: SPRING20 and FREESHIP apply, anything else has expired.
+      const savings = { SPRING20: '−$12.00', FREESHIP: 'Free shipping' }
+      document.getElementById('promo').validate = (code) =>
+        new Promise((resolve) => setTimeout(() => resolve(savings[code] ? { code, label: savings[code] } : { error: 'This code expired on 1 March.' }), 700))
+    </script>
+  </body>
+</html>

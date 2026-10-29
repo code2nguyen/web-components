@@ -1,0 +1,155 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-quantity-picker,
+  $theme: (
+    width: 280px,
+    panel--width: 320px,
+    trigger--padding: 8px 12px,
+    trigger--border: 1px solid #bcbcc6,
+    trigger__hover--border: 1px solid #a1a1aa,
+    trigger__open--border: 1px solid rgb(2, 101, 220),
+    trigger--border-radius: 6px,
+    trigger--background: #ffffff,
+    trigger--color: #18181b,
+    trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    label--color: #71717a,
+    label--font-size: 12px,
+    panel--padding: 8px 16px,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--background: #ffffff,
+    panel--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12),
+    divider--border: 1px solid #e4e4e7,
+    note--color: #71717a,
+    note--font-size: 12px,
+  )
+);
+
+:host {
+  display: inline-block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([inline]) {
+  display: block;
+  width: auto;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.trigger {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: css.cssVar(trigger--padding);
+  box-sizing: border-box;
+  border: css.cssVar(trigger--border);
+  border-radius: css.cssVar(trigger--border-radius);
+  color: css.cssVar(trigger--color);
+  background: css.cssVar(trigger--background);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border: css.cssVar(trigger__hover--border);
+  }
+
+  &[aria-expanded='true'] {
+    border: css.cssVar(trigger__open--border);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+.value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chevron,
+::slotted([slot='chevron-icon']) {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.chevron {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.panel {
+  display: grid;
+  width: css.cssVar(panel--width);
+  max-width: calc(100vw - 32px);
+  padding: css.cssVar(panel--padding);
+  box-sizing: border-box;
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  color: css.cssVar(trigger--color);
+  background: css.cssVar(panel--background);
+  box-shadow: css.cssVar(panel--box-shadow);
+}
+
+.panel--inline {
+  width: auto;
+  max-width: none;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 8px 4px;
+  border-top: css.cssVar(divider--border);
+}
+
+.note {
+  color: css.cssVar(note--color);
+  font-size: css.cssVar(note--font-size);
+}
+
+.done {
+  margin-inline-start: auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -705,6 +705,10 @@
       "types": "./dist/password-field.d.ts",
       "default": "./dist/password-field.js"
     },
+    "./payment-card": {
+      "types": "./dist/payment-card.d.ts",
+      "default": "./dist/payment-card.js"
+    },
     "./phone-input": {
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
@@ -717,9 +721,17 @@
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
     },
+    "./promo-code-field": {
+      "types": "./dist/promo-code-field.d.ts",
+      "default": "./dist/promo-code-field.js"
+    },
     "./qr-code": {
       "types": "./dist/qr-code.d.ts",
       "default": "./dist/qr-code.js"
+    },
+    "./quantity-picker": {
+      "types": "./dist/quantity-picker.d.ts",
+      "default": "./dist/quantity-picker.js"
     },
     "./query-input": {
       "types": "./dist/query-input.d.ts",
@@ -1241,10 +1253,13 @@
     "@c2n/page-header": "*",
     "@c2n/pagination": "*",
     "@c2n/password-field": "*",
+    "@c2n/payment-card": "*",
     "@c2n/phone-input": "*",
     "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
+    "@c2n/promo-code-field": "*",
     "@c2n/qr-code": "*",
+    "@c2n/quantity-picker": "*",
     "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",

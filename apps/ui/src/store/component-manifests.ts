@@ -110,11 +110,14 @@ import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
+import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
+import promoCodeField from '@c2n/promo-code-field/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
+import quantityPicker from '@c2n/quantity-picker/custom-elements.json'
 import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
@@ -297,11 +300,14 @@ export const componentManifests = (function () {
     pageHeader,
     pagination,
     passwordField,
+    paymentCard,
     phoneInput,
     phosphorIcons,
     popconfirm,
     progress,
+    promoCodeField,
     qrCode,
+    quantityPicker,
     queryInput,
     questionnaire,
     radio,

@@ -352,6 +352,7 @@ price: .price
 </c2-page-header>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   'password-field': `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width:220px"></c2-password-field>`,
+  'payment-card': `<c2-payment-card style="--c2-payment-card--width: 240px; --c2-payment-card__face--padding: 14px; --c2-payment-card__number--font-size: 15px; --c2-payment-card__actions--display: none; --c2-payment-card__fields--display: none" label="Marketing · Virtual" holder="Ada Lovelace" last4="4242"></c2-payment-card>`,
   'phone-input': `<c2-phone-input value="+33612345678" style="width:240px"></c2-phone-input>`,
   'phosphor-icons': `<div class="preview-row" style="gap:18px;--c2-phosphor-icon--size:26px">
   <c2-phosphor-heart weight="fill"></c2-phosphor-heart>
@@ -368,8 +369,10 @@ price: .price
   </div>
   <c2-progress variant="circular" value="67" show-value label="Readiness" style="--c2-progress--size:56px;--c2-progress--height:6px"></c2-progress>
 </div>`,
+  'promo-code-field': `<c2-promo-code-field style="width: 260px" codes='[{"code":"SPRING20","label":"−$12.00"}]' max="2"></c2-promo-code-field>`,
   'pyramid-chart': `<c2-pyramid-chart style="width:280px;height:132px;--c2-chart--padding:4px" label-field="plan" legend="none" data='[{"plan":"Enterprise","accounts":42},{"plan":"Business","accounts":318},{"plan":"Team","accounts":1260},{"plan":"Starter","accounts":4870}]'><c2-chart-series field="accounts" label="Accounts"></c2-chart-series></c2-pyramid-chart>`,
   'qr-code': `<c2-qr-code value="https://github.com/code2nguyen/web-components" size="132" aria-label="Project QR code"></c2-qr-code>`,
+  'quantity-picker': `<c2-quantity-picker style="width: 240px" label="Guests"><c2-quantity value="2" singular="adult" plural="adults">Adults</c2-quantity><c2-quantity value="1" singular="child" plural="children">Children</c2-quantity></c2-quantity-picker>`,
   'query-input': `<c2-query-input style="width: 280px" aria-label="Log query" value='service:web -status:>=500 "timed out"'></c2-query-input>`,
   questionnaire: `<c2-questionnaire style="zoom:0.5;width:448px" questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
   'radar-chart': `<c2-radar-chart style="width:280px;height:132px;--c2-chart--padding:4px" label-field="metric" max="100" points="none" data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'><c2-chart-series field="current" label="Current"></c2-chart-series><c2-chart-series field="target" label="Target"></c2-chart-series></c2-radar-chart>`,

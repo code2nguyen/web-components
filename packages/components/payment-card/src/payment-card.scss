@@ -1,0 +1,195 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-payment-card,
+  $theme: (
+    width: 340px,
+    face--aspect-ratio: 1.586,
+    face--background: radial-gradient(120% 140% at 0% 0%, #3f3f46 0%, #18181b 60%),
+    face--color: #ffffff,
+    face--padding: 20px,
+    face--border-radius: 14px,
+    face--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18),
+    number--font-size: 20px,
+    label--font-size: 13px,
+    caption--font-size: 10px,
+    value--font-size: 14px,
+    chip--display: block,
+    chip--background: linear-gradient(135deg, #e7c66b, #b8913a),
+    fields--display: flex,
+    actions--display: flex,
+    copy--color: rgba(255, 255, 255, 0.8),
+    skeleton--background: rgba(255, 255, 255, 0.18),
+    badge--background: rgba(255, 255, 255, 0.16),
+    frozen--filter: grayscale(1) brightness(0.9),
+    gap: 10px,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.card {
+  display: grid;
+  gap: css.cssVar(gap);
+}
+
+.face {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  aspect-ratio: css.cssVar(face--aspect-ratio);
+  padding: css.cssVar(face--padding);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: css.cssVar(face--border-radius);
+  color: css.cssVar(face--color);
+  background: css.cssVar(face--background);
+  box-shadow: css.cssVar(face--box-shadow);
+  font-variant-numeric: tabular-nums;
+}
+
+:host([frozen]) .face {
+  filter: css.cssVar(frozen--filter);
+}
+
+:host([frozen]) .face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 8px, transparent 8px 16px);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: css.cssVar(label--font-size);
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+.brand {
+  display: inline-flex;
+  margin-inline-start: auto;
+}
+
+.badge {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: css.cssVar(badge--background);
+}
+
+.chip {
+  display: css.cssVar(chip--display);
+  width: 36px;
+  height: 26px;
+  margin-top: 18px;
+  border-radius: 6px;
+  background: css.cssVar(chip--background);
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 1.4em;
+  font-size: css.cssVar(number--font-size);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.skeleton {
+  display: inline-block;
+  width: 60%;
+  height: 0.9em;
+  border-radius: 4px;
+  background: css.cssVar(skeleton--background);
+}
+
+.fields {
+  display: css.cssVar(fields--display);
+  align-items: flex-end;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.caption {
+  font-size: css.cssVar(caption--font-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  font-size: css.cssVar(value--font-size);
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.copy {
+  --c2-copy-button__container--color: #{css.cssVar(copy--color)};
+  --c2-copy-button__container__hover--background-color: rgba(255, 255, 255, 0.14);
+  --c2-copy-button__container__active--background-color: rgba(255, 255, 255, 0.22);
+  --c2-copy-button__container__copied--color: #4ade80;
+  --c2-copy-button__container--height: 24px;
+  --c2-copy-button__container--min-width: 24px;
+  --c2-copy-button__icon--size: 14px;
+  letter-spacing: normal;
+}
+
+.actions {
+  display: css.cssVar(actions--display);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
