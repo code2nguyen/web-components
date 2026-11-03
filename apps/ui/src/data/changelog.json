@@ -2,6 +2,159 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.19",
+      "date": "2026-11-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["quantity-picker"],
+              "text": "Add c2-quantity-picker and c2-quantity",
+              "hash": "220ad08"
+            },
+            {
+              "scopes": ["payment-card", "promo-code-field"],
+              "text": "Add c2-payment-card and c2-promo-code-field",
+              "hash": "77098f3"
+            },
+            {
+              "scopes": ["order-book", "fx-converter"],
+              "text": "Add c2-order-book and c2-fx-converter",
+              "hash": "7a514ee"
+            },
+            {
+              "scopes": ["scroll-area", "in-view", "scroll-progress"],
+              "text": "Add c2-scroll-area, c2-in-view and c2-scroll-progress (sources)",
+              "hash": "786a4c3"
+            },
+            {
+              "scopes": ["wheel-picker", "share-sheet"],
+              "text": "Add c2-wheel-picker and c2-share-sheet (sources)",
+              "hash": "3737e53"
+            },
+            {
+              "scopes": ["comment-thread", "selection-toolbar"],
+              "text": "Add c2-comment-thread and c2-selection-toolbar (sources)",
+              "hash": "5996b54"
+            },
+            {
+              "scopes": ["time-slot-picker", "card-input"],
+              "text": "Add c2-time-slot-picker and c2-card-input; date-strip gets disabled-dates and range-change (sources)",
+              "hash": "ad7076a"
+            },
+            {
+              "scopes": ["month-picker", "date-strip"],
+              "text": "Generated files, theme pairs, reveal the picked day",
+              "hash": "e97e500"
+            },
+            {
+              "scopes": ["month-picker", "date-strip"],
+              "text": "Add c2-month-picker and c2-date-strip (sources)",
+              "hash": "f55def6"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["payment-card"],
+              "text": "Stop the copy button's events, which carry the copied number, at the card",
+              "hash": "26afab8"
+            },
+            {
+              "scopes": ["payment-card", "promo-code-field", "quantity-picker"],
+              "text": "Code review",
+              "hash": "09cbd69"
+            },
+            {
+              "scopes": ["quantity-picker", "payment-card", "promo-code-field"],
+              "text": "Hydration in the docs site, Button imports, generated files",
+              "hash": "925cbd7"
+            },
+            {
+              "scopes": ["quantity-picker", "promo-code-field"],
+              "text": "singular/plural nouns instead of one/other, prop docs, Quantity import in the docs",
+              "hash": "af349d4"
+            },
+            {
+              "scopes": ["order-book"],
+              "text": "Focus a clicked row, so the tab stop follows in WebKit",
+              "hash": "c721dcc"
+            },
+            {
+              "scopes": [],
+              "text": "Code review of c2-order-book and c2-fx-converter",
+              "hash": "6ee3442"
+            },
+            {
+              "scopes": [],
+              "text": "Screenshot review of c2-order-book and c2-fx-converter",
+              "hash": "1107757"
+            },
+            {
+              "scopes": ["order-book", "fx-converter"],
+              "text": "Literal event names, prop docs, and a best-price loop for deep books",
+              "hash": "4760f35"
+            },
+            {
+              "scopes": ["scroll-progress"],
+              "text": "A visible track by default, so the bar shows before any scroll",
+              "hash": "7ad3029"
+            },
+            {
+              "scopes": ["scroll-progress", "in-view"],
+              "text": "Follow only a real scroll area's viewport; a load-more snippet that stops at the last page",
+              "hash": "92395a9"
+            },
+            {
+              "scopes": ["scroll-area", "in-view", "scroll-progress"],
+              "text": "Address code review findings",
+              "hash": "540da3f"
+            },
+            {
+              "scopes": ["share-sheet"],
+              "text": "Render the same on the server and in the browser's first pass",
+              "hash": "0aec68c"
+            },
+            {
+              "scopes": ["share-sheet"],
+              "text": "Offer nothing, not even the copy field, for a link that is not http(s)",
+              "hash": "88e8aa2"
+            },
+            {
+              "scopes": ["comment-thread"],
+              "text": "Transparent quote background for dark mode, shorter reply box",
+              "hash": "c74523b"
+            },
+            {
+              "scopes": ["comment-thread", "selection-toolbar"],
+              "text": "Name events literally, slot audit entries, local test types",
+              "hash": "d32a41e"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Treat focus inside a form-associated component as a form field",
+              "hash": "b6827de"
+            },
+            {
+              "scopes": ["card-input", "time-slot-picker"],
+              "text": "Fixes from the docs screenshot review",
+              "hash": "d341f7c"
+            },
+            {
+              "scopes": ["month-picker", "date-strip"],
+              "text": "Review and screenshot fixes",
+              "hash": "802f620"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.18",
       "date": "2026-10-27",
       "sections": [
