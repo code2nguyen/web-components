@@ -950,7 +950,7 @@ export class Spreadsheet extends LitElement {
             : scroller
         }
         ${this.summary ? html`<div class="summary">${this.renderSummary(box)}</div>` : nothing} ${this.renderHelp(suggestions, suggestionIndex)}
-        <div class="visually-hidden" role="status">${this.announcement}</div>
+        <div class="visually-hidden" role="status">${this.announcement || nothing}</div>
       </div>
     `
   }

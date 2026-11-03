@@ -271,7 +271,7 @@ export class QuantityPicker extends LitElement {
     if (this.inline) {
       return html`<div class="panel panel--inline" part="panel">
         ${this.renderCounters()} ${Number.isFinite(this.maxTotal) ? html`<div class="footer">${this.renderNote()}</div>` : nothing}
-        <span class="visually-hidden" aria-live="polite">${this.announcement}</span>
+        <span class="visually-hidden" aria-live="polite">${this.announcement || nothing}</span>
       </div>`
     }
     const text = this.text
@@ -298,7 +298,7 @@ export class QuantityPicker extends LitElement {
             ${this.renderNote()}
             <c2-button class="done" @click=${() => (this.open = false)}>${this.msg.t('done')}</c2-button>
           </div>
-          <span class="visually-hidden" aria-live="polite">${this.announcement}</span>
+          <span class="visually-hidden" aria-live="polite">${this.announcement || nothing}</span>
         </div>
       </c2-overlay>`
   }

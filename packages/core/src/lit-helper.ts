@@ -47,17 +47,33 @@ export const numberPropertyConverter = {
   fromProperty: (value: unknown) => (typeof value !== 'string' ? value : value.trim() === '' ? undefined : Number(value)),
 } satisfies StringTolerantConverter & Record<string, unknown>
 
+/**
+ * Reads a list attribute: `;`-separated (`EUR;USD`), or a JSON array of strings (`["EUR","USD"]`), which is how
+ * data attributes such as a table's `rows` are written and so what an author reaches for first. A value that only
+ * looks like JSON (`[draft]`, `[1]`, an array holding objects) is split on `;` as before, so it stays one item.
+ */
+function parseList(value: string | null | undefined): string[] {
+  if (!value) return []
+  const trimmed = value.trim()
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed: unknown = JSON.parse(trimmed)
+      if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) return parsed
+    } catch {
+      // Not JSON: a plain `;`-separated value that happens to start with a bracket.
+    }
+  }
+  return value.split(';')
+}
+
 export const arrayPropertyConverter = {
+  // An item holding `;` would split when read back, so such a list is written as JSON.
   toAttribute: (value: string[]) => {
-    return Array.isArray(value) ? value.join(';') : ''
+    if (!Array.isArray(value)) return ''
+    return value.some((item) => String(item).includes(';')) ? JSON.stringify(value) : value.join(';')
   },
-  fromAttribute: (value: string) => {
-    return value ? value.split(';') : []
-  },
-  fromProperty: (value: unknown) => {
-    if (typeof value !== 'string') return value
-    return value ? value.split(';') : []
-  },
+  fromAttribute: (value: string | null) => parseList(value),
+  fromProperty: (value: unknown) => (typeof value === 'string' ? parseList(value) : value),
 } satisfies StringTolerantConverter & Record<string, unknown>
 
 /**
@@ -80,6 +96,7 @@ export const jsonPropertyConverter = {
     try {
       return JSON.parse(value)
     } catch {
+      warnStringifiedObject(value)
       return undefined
     }
   },
@@ -88,10 +105,23 @@ export const jsonPropertyConverter = {
     try {
       return JSON.parse(value)
     } catch {
+      warnStringifiedObject(value)
       return value
     }
   },
 } satisfies StringTolerantConverter & Record<string, unknown>
+
+/**
+ * An object or array written as an attribute by a template that cannot set properties (a server render, or a
+ * framework binding made before the element was registered) arrives as `[object Object]`, which parses to nothing:
+ * the component silently shows no data or goes read-only. Say so once per page.
+ */
+let warnedStringifiedObject = false
+function warnStringifiedObject(value: string): void {
+  if (warnedStringifiedObject || !value.startsWith('[object ')) return
+  warnedStringifiedObject = true
+  console.warn(`c2n: a JSON attribute received ${value.slice(0, 40)}. Pass the value through JSON.stringify(), or set it as a property.`)
+}
 
 /** The `fromProperty` of a declaration's converter, when it has one. */
 function propertyCoercion(options?: PropertyDeclaration): ((value: unknown) => unknown) | undefined {

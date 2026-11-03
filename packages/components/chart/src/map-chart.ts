@@ -351,7 +351,7 @@ export class MapChart extends EchartsChartBase {
   /** Whether clicking a region selects it: `single` keeps one region selected, `multiple` toggles each one. */
   @property({ type: String }) selection: 'none' | 'single' | 'multiple' = 'none'
 
-  /** Keys of the selected regions. As an attribute, separated by semicolons: `value="FRA;DEU"`. */
+  /** Keys of the selected regions. As an attribute, separated by semicolons (`value="FRA;DEU"`) or a JSON array. */
   @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name. The form receives one entry per selected region. */

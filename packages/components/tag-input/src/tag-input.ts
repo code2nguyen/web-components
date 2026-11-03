@@ -182,7 +182,7 @@ export class TagInput extends LitElement {
 
   // Data
 
-  /** The tags. In markup, separate them with semicolons. */
+  /** The tags. In markup, separate them with semicolons, or write a JSON array. */
   @property({ converter: arrayPropertyConverter }) value: string[] = []
 
   /** Form field name. Each tag is submitted as its own entry under this name. */

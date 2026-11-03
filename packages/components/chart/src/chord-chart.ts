@@ -520,7 +520,7 @@ export class ChordChart extends EchartsChartBase {
               `
             : nothing
         }
-        <div class="chord-a11y" aria-live="polite">${announcement}</div>
+        <div class="chord-a11y" aria-live="polite">${announcement || nothing}</div>
       `,
       root,
       { host: this },
