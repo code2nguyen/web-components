@@ -69,11 +69,14 @@
 .stage .more {
   flex: none;
   box-sizing: border-box;
-  width: var(--_tile-width, calc(50% - var(--_gap)));
-  height: var(--_tile-height, auto);
+  width: var(--_c2-video-grid-tile-width, calc(50% - var(--_gap)));
+  height: var(--_c2-video-grid-tile-height, auto);
 }
 
 .strip {
+  /* Inherited by the tiles: a c2-video-tile in a wrapper the slot cannot size (a framework island) sizes itself. */
+  --_c2-video-grid-tile-width: auto;
+  --_c2-video-grid-tile-height: 100%;
   display: flex;
   gap: var(--_gap);
   min-width: 0;
@@ -100,6 +103,8 @@
 }
 
 .layout-sidebar .strip {
+  --_c2-video-grid-tile-width: 100%;
+  --_c2-video-grid-tile-height: auto;
   flex-direction: column;
 }
 

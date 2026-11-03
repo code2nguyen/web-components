@@ -43,7 +43,7 @@ import '@c2n/components/video-tile'
 </div>
 <div data-label="Your camera">
   <div class="vt-row">
-    <c2-video-tile id="vt-self" name="You" local detect-speaking></c2-video-tile>
+    <c2-video-tile id="vt-self" name="Sam Lee" local detect-speaking></c2-video-tile>
   </div>
   <c2-button onclick="navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => (document.getElementById('vt-self').stream = stream))">Use my camera</c2-button>
 </div>

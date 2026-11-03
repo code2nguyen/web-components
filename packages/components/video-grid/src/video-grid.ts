@@ -57,10 +57,21 @@ function parseAspect(value: string): number {
 const OBSERVED = ['featured', 'kind', 'pinned', 'speaking', 'name']
 
 /**
+ * The element whose state a child stands for: the child itself, or the `c2-video-tile` it wraps, when a framework
+ * wraps each tile in an element of its own (an island, a hydration boundary).
+ */
+function subject(child: Element): Element {
+  if (child.localName === 'c2-video-tile') return child
+  return child.querySelector('c2-video-tile') ?? child
+}
+
+/**
  * A tile's state as the grid reads it: the property when the tile is an element that has it (a `c2-video-tile`, set
  * as a property by a framework), else the attribute (`true` for a boolean one that is present).
  */
-function read(tile: Element, name: 'kind' | 'pinned' | 'speaking' | 'isSpeaking' | 'name'): unknown {
+function read(child: Element, name: 'featured' | 'kind' | 'pinned' | 'speaking' | 'isSpeaking' | 'name'): unknown {
+  const tile = subject(child)
+  if (name === 'featured') return child.hasAttribute(name) || tile.hasAttribute(name)
   if (name in tile) return (tile as unknown as Record<string, unknown>)[name]
   if (name === 'isSpeaking') return undefined
   if (name === 'pinned' || name === 'speaking') return tile.hasAttribute(name)
@@ -125,6 +136,11 @@ export class VideoGrid extends LitElement {
 
   @state() private tiles: Element[] = []
   @state() private stageFit: VideoGridFit = { columns: 1, width: 0, height: 0 }
+  /**
+   * False until the first update. A server renders the grid without its children, and hydration expects the client's
+   * first render to match that: the tiles are laid out from the second render on.
+   */
+  @state() private ready = false
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, videoGridMessages)
@@ -168,6 +184,7 @@ export class VideoGrid extends LitElement {
 
   protected override firstUpdated(): void {
     this.observeStage()
+    this.ready = true
   }
 
   private observeStage(): void {
@@ -181,10 +198,11 @@ export class VideoGrid extends LitElement {
   private watchTiles(tiles: readonly Element[]): void {
     this.tileObserver?.disconnect()
     this.tileObserver = new MutationObserver(this.handleTileChange)
-    for (const tile of tiles) this.tileObserver.observe(tile, { attributes: true, attributeFilter: OBSERVED })
-    for (const tile of this.listened) if (!tiles.includes(tile)) tile.removeEventListener('speaking-change', this.handleTileChange)
-    for (const tile of tiles) if (!this.listened.has(tile)) tile.addEventListener('speaking-change', this.handleTileChange)
-    this.listened = new Set(tiles)
+    const subjects = tiles.map(subject)
+    for (const tile of new Set([...tiles, ...subjects])) this.tileObserver.observe(tile, { attributes: true, attributeFilter: OBSERVED })
+    for (const tile of this.listened) if (!subjects.includes(tile)) tile.removeEventListener('speaking-change', this.handleTileChange)
+    for (const tile of subjects) if (!this.listened.has(tile)) tile.addEventListener('speaking-change', this.handleTileChange)
+    this.listened = new Set(subjects)
   }
 
   private readonly handleTileChange = (): void => {
@@ -204,8 +222,8 @@ export class VideoGrid extends LitElement {
   }
 
   protected override updated(changed: PropertyValues): void {
-    if (changed.has('tiles') || changed.has('layout') || changed.has('maxTiles')) this.measure()
-    if (!this.manualSlots) this.routeBySlotAttribute()
+    if (changed.has('tiles') || changed.has('layout') || changed.has('maxTiles') || changed.has('ready')) this.measure()
+    if (!this.manualSlots && this.ready) this.routeBySlotAttribute()
   }
 
   /** The element children, in order: the tiles. */
@@ -217,7 +235,7 @@ export class VideoGrid extends LitElement {
 
   private pickFeatured(tiles: readonly Element[]): Element | null {
     return (
-      tiles.find((tile) => tile.hasAttribute('featured')) ??
+      tiles.find((tile) => read(tile, 'featured') === true) ??
       tiles.find((tile) => read(tile, 'kind') === 'screen') ??
       tiles.find((tile) => read(tile, 'pinned') === true) ??
       tiles[0] ??
@@ -227,6 +245,7 @@ export class VideoGrid extends LitElement {
 
   /** Which tiles are drawn and which fold into the "+N more" tile. */
   private split(): { shown: Element[]; hidden: Element[] } {
+    if (!this.ready) return { shown: [], hidden: [] }
     const tiles = this.tiles
     const limit = Math.floor(this.maxTiles)
     if (!(limit > 0) || tiles.length <= limit) return { shown: tiles, hidden: [] }
@@ -308,7 +327,11 @@ export class VideoGrid extends LitElement {
     const main = grid ? shown : featured ? [featured] : []
     const strip = grid ? [] : shown.filter((tile) => tile !== featured)
     return html`<div class="grid layout-${grid ? 'grid' : this.layout}">
-      <div class="stage" part="stage" style=${isServer ? '' : `--_tile-width: ${fit.width}px; --_tile-height: ${fit.height}px`}>
+      <div
+        class="stage"
+        part="stage"
+        style=${isServer || !this.ready ? '' : `--_c2-video-grid-tile-width: ${fit.width}px; --_c2-video-grid-tile-height: ${fit.height}px`}
+      >
         <slot name="main" ${assignSlot(main)}></slot>
         ${grid ? this.renderMore(hidden) : nothing}
       </div>

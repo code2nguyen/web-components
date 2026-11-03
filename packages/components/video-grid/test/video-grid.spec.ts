@@ -163,3 +163,24 @@ test('regressions: tile state set as properties counts, a re-attached grid still
   })
   await expect.poll(async () => (await boxes(page))[0].width).toBeLessThan(250)
 })
+
+test('tiles wrapped in a display: contents element (a framework island) are sized and read through the wrapper', async ({ page, renderScenario }) => {
+  const wrap = (inner: string) => `<span class="island" style="display: contents">${inner}</span>`
+  await renderScenario(
+    `<c2-video-grid layout="sidebar">${wrap('<c2-video-tile id="a" name="Ana"></c2-video-tile>')}${wrap('<c2-video-tile id="b" name="Ben" pinned></c2-video-tile>')}${wrap('<c2-video-tile id="c" name="Cy"></c2-video-tile>')}</c2-video-grid>`,
+  )
+  const box = (id: string) =>
+    page.locator(`#${id}`).evaluate((tile) => {
+      const rect = tile.getBoundingClientRect()
+      return { x: Math.round(rect.x), width: Math.round(rect.width), height: Math.round(rect.height) }
+    })
+  // The pinned tile, inside its wrapper, is the featured one: the large stage on the left.
+  await expect.poll(async () => (await box('b')).width).toBeGreaterThan(400)
+  const side = await box('a')
+  expect(side.width).toBe(112)
+  expect(side.x).toBeGreaterThan((await box('b')).x)
+  await props(grid(page), { layout: 'grid' })
+  // Three tiles in 720 × 405: two columns, two rows, so the height limits them to 352 × 198.
+  await expect.poll(async () => (await box('a')).width).toBe(352)
+  expect((await box('c')).height).toBe(198)
+})

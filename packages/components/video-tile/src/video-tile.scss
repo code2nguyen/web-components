@@ -28,6 +28,11 @@
 :host {
   display: block;
   position: relative;
+  flex: none;
+  box-sizing: border-box;
+  // The size a c2-video-grid fits its tiles to, inherited through any wrapper between them; unset elsewhere.
+  width: var(--_c2-video-grid-tile-width, auto);
+  height: var(--_c2-video-grid-tile-height, auto);
   aspect-ratio: css.cssVar(aspect-ratio);
   min-width: 0;
   min-height: 0;
