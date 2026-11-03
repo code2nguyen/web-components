@@ -77,6 +77,8 @@ test('has no axe violations', async ({ page, scenario }) => {
 
 test.describe('month picker', () => {
   test('marks the months that have events', async ({ page, scenario }) => {
+    // The current month's name gains ", this month": keep "today" out of the months the test names.
+    await page.clock.setFixedTime(new Date(2025, 5, 15, 12))
     await scenario()
     await page.getByRole('button', { name: 'September 2026' }).click()
     const picker = page.getByRole('dialog', { name: 'Choose a month' })
