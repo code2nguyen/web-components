@@ -86,7 +86,7 @@ const pinIcon = html`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
  * @cssproperty {string} [--c2-video-tile__video--object-fit=cover] - How a camera fills the tile.
  * @cssproperty {string} [--c2-video-tile__screen--object-fit=contain] - How a screen share fits the tile.
  * @cssproperty {color} [--c2-video-tile__surface--background=light-dark(#e4e4e7, #27272a)] - The camera-off surface.
- * @cssproperty {pixel} [--c2-video-tile__avatar--size=clamp(32px, 28cqh, 96px)] - The avatar on the camera-off surface.
+ * @cssproperty {pixel} [--c2-video-tile__avatar--size=clamp(20px, 28cqh, 96px)] - The avatar on the camera-off surface.
  * @cssproperty {color} [--c2-video-tile__name--background=rgba(0, 0, 0, 0.55)]
  * @cssproperty {color} [--c2-video-tile__name--color=#ffffff]
  * @cssproperty {font-size} [--c2-video-tile__name--font-size=12px]

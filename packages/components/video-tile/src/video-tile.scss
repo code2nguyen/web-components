@@ -7,7 +7,7 @@
     video--object-fit: cover,
     screen--object-fit: contain,
     surface--background: light-dark(#e4e4e7, #27272a),
-    avatar--size: clamp(32px, 28cqh, 96px),
+    avatar--size: clamp(20px, 28cqh, 96px),
     name--background: rgba(0, 0, 0, 0.55),
     name--color: #ffffff,
     name--font-size: 12px,
@@ -86,6 +86,9 @@ video,
 .surface {
   display: grid;
   place-items: center;
+  // The avatar centres in the space above the name pill, so a small tile never puts one over the other.
+  padding-bottom: calc(var(--_inset) + 24px);
+  box-sizing: border-box;
   background: css.cssVar(surface--background);
 }
 

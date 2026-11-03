@@ -76,6 +76,7 @@
   --_color: #{css.cssVar(orb--color)};
   --_size: #{css.cssVar(orb--size)};
   position: relative;
+  overflow: hidden;
   width: var(--_size);
   height: var(--_size);
   border-radius: 50%;
@@ -103,10 +104,12 @@
 .orb.state-thinking::before {
   content: '';
   position: absolute;
-  inset: 0;
   border-radius: inherit;
   background: conic-gradient(var(--_color), color-mix(in srgb, var(--_color) 30%, #ffffff), var(--_color));
   opacity: 0.85;
+  /* Softens the point where the conic gradient meets, so the orb reads as a shimmer, not a pinwheel. */
+  filter: blur(calc(var(--_size) * 0.12));
+  inset: -15%;
   animation: c2-audio-visualizer-turn 2.4s linear infinite;
 }
 
