@@ -79,9 +79,12 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * `comments` lists the thread oldest first: the first is the root, the rest its replies. Each has an `author`, a plain
  * text `body` (line breaks kept, `@mentions` highlighted, never read as HTML), a `time`, and optionally `reactions` for
  * a `c2-reaction-bar` under it (shown with `reactions`). `quote` shows the text the thread is about. `current-user`
- * says who is writing: their own comments can be edited and deleted, and without one the thread is read-only. A thread
+ * says who is writing: their own comments can be edited and deleted, and without one the thread is read-only. When the
+ * thread's status lives elsewhere in the page, `no-resolve` drops the Resolve button. A thread
  * with more than `collapse-after` replies folds its middle behind "Show N earlier replies"; a `resolved` thread folds
- * down to its first comment.
+ * down to its first comment. A comment without reactions keeps its reaction add button with its other actions, and on
+ * a device with a pointer the add button shows while the comment is hovered or holds focus, so ten replies do not
+ * draw ten of them.
  *
  * Every change is a cancelable event fired before it is applied: `comment-add`, `comment-edit`, `comment-delete`,
  * `resolve-change` and `reaction-change`. Cancel one to keep the thread controlled (to wait for the server) and set
@@ -102,7 +105,12 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * @csspart time - A comment's time.
  * @csspart body - A comment's text.
  * @csspart mention - An `@mention` in a comment's text.
- * @csspart action - A small text button (Resolve, Edit, Delete, Show earlier replies).
+ * @csspart action - Every small text button (Resolve, Edit, Delete, Cancel, Show earlier replies).
+ * @csspart resolve-action - The Resolve / Reopen button on the first comment.
+ * @csspart edit-action - The Edit button on one's own comment.
+ * @csspart delete-action - The Delete button on one's own comment.
+ * @csspart cancel-action - The Cancel button of the reply box and of a comment being edited.
+ * @csspart more-action - The "Show N earlier replies" button.
  * @csspart composer - The reply box with its buttons.
  * @csspart submit - The Reply and Save buttons.
  *
@@ -136,7 +144,12 @@ export class CommentThread extends LitElement {
   /** The thread, oldest first. As an attribute, a JSON array of `{ id, author, body, time, edited?, reactions? }`. */
   @property({ converter: jsonPropertyConverter }) comments: ThreadComment[] = []
 
-  /** Who is writing, as `{ id?, name, avatar? }`. Their comments can be edited and deleted. Without one, the thread is read-only. */
+  /**
+   * Who is writing, as `{ id?, name, avatar? }`. Their comments can be edited and deleted. Without one, the thread is
+   * read-only. As an attribute, a JSON object: a template that writes attributes (server rendering, or Svelte before the
+   * element is registered) must pass `JSON.stringify(user)`, since an object written as an attribute arrives as
+   * `[object Object]`.
+   */
   @property({ attribute: 'current-user', converter: jsonPropertyConverter }) currentUser: CommentAuthor | null = null
 
   /** The text the thread is about, shown as a quote above the first comment. */
@@ -153,6 +166,9 @@ export class CommentThread extends LitElement {
 
   /** No reply box, edit, delete or resolve. */
   @property({ type: Boolean, reflect: true }) readonly = false
+
+  /** No Resolve button, for a page that resolves the thread through controls of its own. `resolved` still folds it. */
+  @property({ type: Boolean, attribute: 'no-resolve' }) noResolve = false
 
   /** The accessible name of the thread. */
   @property() label = ''
@@ -293,6 +309,13 @@ export class CommentThread extends LitElement {
       const reactions = current ? (item.reactions ?? []).flatMap((reaction) => (reaction.emoji === detail.emoji ? next : [reaction])) : [...others, ...next]
       return { ...item, reactions }
     })
+    // The first reaction moves the bar from the header to under the text: keep focus on its add button there.
+    if ((event.target as Element).classList.contains('header-reactions')) {
+      void this.updateComplete.then(() => {
+        const bar = this.renderRoot.querySelector(`[data-id="${CSS.escape(String(comment.id))}"] c2-reaction-bar`)
+        bar?.shadowRoot?.querySelector<HTMLElement>('[part="add"]')?.focus()
+      })
+    }
   }
 
   /** Inner controls keep their own events: their `input` or field enrolment is not this thread's. */
@@ -312,6 +335,9 @@ export class CommentThread extends LitElement {
       return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(this.msg.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date)
     })()
     const name = comment.author.name
+    // A comment with reactions shows them under its text; one without has only the add button, which sits with the
+    // other actions in the header instead of taking a row of its own.
+    const reacted = this.reactions && (comment.reactions ?? []).length > 0
     if (this.editing === comment.id) {
       return html`<article class="comment" part="comment" tabindex="-1" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
         <c2-avatar class="avatar" name=${name} src=${comment.author.avatar || nothing} aria-hidden="true"></c2-avatar>
@@ -334,7 +360,7 @@ export class CommentThread extends LitElement {
               }}
             ></c2-textarea>
             <div class="buttons">
-              <button class="action" part="action" type="button" @click=${() => this.cancelEdit()}>${this.msg.t('cancel')}</button>
+              <button class="action" part="action cancel-action" type="button" @click=${() => this.cancelEdit()}>${this.msg.t('cancel')}</button>
               <button class="submit" part="submit" type="button" ?disabled=${!this.editDraft.trim()} @click=${() => this.saveEdit(comment)}>
                 ${this.msg.t('save')}
               </button>
@@ -352,9 +378,10 @@ export class CommentThread extends LitElement {
             ><c2-relative-time .date=${time} format="short"></c2-relative-time>${comment.edited ? html` · ${this.msg.t('edited')}` : nothing}</span
           >
           <span class="actions">
+            ${this.reactions && !reacted && this.canWrite ? this.renderReactions(comment, true) : nothing}
             ${
-              root && !this.readonly && this.currentUser?.name
-                ? html`<button class="action resolve" part="action" type="button" @click=${() => this.toggleResolved()}>
+              root && !this.readonly && !this.noResolve && this.currentUser?.name
+                ? html`<button class="action resolve" part="action resolve-action" type="button" @click=${() => this.toggleResolved()}>
                     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8.5 3.2 3L13 4.5" /></svg>${this.msg.t(this.resolved ? 'reopen' : 'resolve')}
                   </button>`
                 : nothing
@@ -363,7 +390,7 @@ export class CommentThread extends LitElement {
               own && !this.resolved
                 ? html`<button
                       class="action edit"
-                      part="action"
+                      part="action edit-action"
                       type="button"
                       aria-label=${this.msg.t('editLabel', name)}
                       @click=${() => this.startEdit(comment)}
@@ -377,7 +404,7 @@ export class CommentThread extends LitElement {
                       placement="bottom"
                       @confirm=${() => this.deleteComment(comment, root)}
                     >
-                      <button slot="trigger" class="action delete" part="action" type="button" aria-label=${this.msg.t('deleteLabel', name)}>
+                      <button slot="trigger" class="action delete" part="action delete-action" type="button" aria-label=${this.msg.t('deleteLabel', name)}>
                         ${this.msg.t('delete')}
                       </button>
                     </c2-popconfirm>`
@@ -386,17 +413,18 @@ export class CommentThread extends LitElement {
           </span>
         </div>
         <div class="body" part="body">${this.renderBody(comment.body)}</div>
-        ${
-          this.reactions
-            ? html`<c2-reaction-bar
-                .reactions=${comment.reactions ?? []}
-                ?readonly=${!this.canWrite}
-                @reaction-change=${(event: CustomEvent<ReactionChangeDetail>) => this.handleReaction(comment, event)}
-              ></c2-reaction-bar>`
-            : nothing
-        }
+        ${reacted ? this.renderReactions(comment, false) : nothing}
       </div>
     </article>`
+  }
+
+  private renderReactions(comment: ThreadComment, inHeader: boolean) {
+    return html`<c2-reaction-bar
+      class=${inHeader ? 'header-reactions' : 'reactions'}
+      .reactions=${comment.reactions ?? []}
+      ?readonly=${!this.canWrite}
+      @reaction-change=${(event: CustomEvent<ReactionChangeDetail>) => this.handleReaction(comment, event)}
+    ></c2-reaction-bar>`
   }
 
   private renderReplies(replies: ThreadComment[]) {
@@ -407,7 +435,7 @@ export class CommentThread extends LitElement {
     return html`${this.renderComment(replies[0], false)}
       <button
         class="action more"
-        part="action"
+        part="action more-action"
         type="button"
         @click=${() => {
           this.expanded = true
@@ -438,7 +466,7 @@ export class CommentThread extends LitElement {
       ${
         this.draft
           ? html`<div class="buttons">
-              <button class="action" part="action" type="button" @click=${() => (this.draft = '')}>${this.msg.t('cancel')}</button>
+              <button class="action" part="action cancel-action" type="button" @click=${() => (this.draft = '')}>${this.msg.t('cancel')}</button>
               <button class="submit" part="submit" type="button" ?disabled=${!this.draft.trim()} @click=${() => this.submitReply()}>
                 ${this.msg.t('reply')}
               </button>
@@ -466,7 +494,7 @@ export class CommentThread extends LitElement {
         }
         ${this.renderComposer()}
       </div>
-      <div class="visually-hidden" role="status">${this.announcement}</div>`
+      <div class="visually-hidden" role="status">${this.announcement || nothing}</div>`
   }
 }
 

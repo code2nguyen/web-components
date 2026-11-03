@@ -232,11 +232,13 @@ test('a disabled menu passes its tab stop on, and a bar with every menu disabled
   await expect(trigger(page, 'File')).toBeFocused()
 })
 
-test('right-to-left: inside a menu ArrowRight still goes to the next menu, as it opens a submenu', async ({ page, renderScenario }) => {
+test('right-to-left: inside a menu ArrowLeft goes to the next menu, as it opens a submenu', async ({ page, renderScenario }) => {
   await renderScenario(`<div dir="rtl">${bar}</div>`)
   await trigger(page, 'Edit').focus()
   await page.keyboard.press('ArrowDown')
   await expect(row(page, 'undo')).toBeFocused()
-  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowLeft')
   await expect(row(page, 'ruler')).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(row(page, 'undo')).toBeFocused()
 })

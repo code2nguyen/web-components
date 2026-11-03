@@ -3140,7 +3140,7 @@ export class Flow extends LitElement {
           ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">${this.msg.t('emptyHint')}</span>` : nothing}
         </div>
       </c2-context-menu>
-      ${this.renderActions()} ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement}</div>` : nothing}
+      ${this.renderActions()} ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement || nothing}</div>` : nothing}
       <div class="card" popover="manual" @pointerenter=${this.handleCardEnter} @pointerleave=${this.handleCardLeave} @keydown=${this.handleCardKeydown}>
         ${this.renderCardContent()}
       </div>

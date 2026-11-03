@@ -172,7 +172,7 @@ export class SearchField extends LitElement {
    */
   @property({ type: String }) shortcut = ''
 
-  /** Recent searches, most recent first. As an attribute, separated by semicolons. */
+  /** Recent searches, most recent first. As an attribute, separated by semicolons or a JSON array. */
   @property({ attribute: 'recent', converter: arrayPropertyConverter }) recent: string[] = []
 
   /** When set, the field records committed searches into `recent` itself and keeps them in `localStorage` under this key. */

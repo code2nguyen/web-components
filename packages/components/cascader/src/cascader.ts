@@ -128,7 +128,7 @@ export class Cascader extends LitElement {
   /** Nested hierarchy shown in the floating panel. In markup this is a JSON array. */
   @property({ converter: jsonPropertyConverter }) options: CascaderOption[] = []
 
-  /** Selected value path. In markup, separate levels with semicolons. */
+  /** Selected value path. In markup, separate levels with semicolons, or write a JSON array. */
   @property({ converter: arrayPropertyConverter, reflect: true }) value: string[] = []
 
   /** Name used when the cascader participates in a form. */

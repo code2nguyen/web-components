@@ -96,6 +96,55 @@ test('resolving folds the thread to its first comment; reopening unfolds it', as
   expect(await events(page)).toEqual([{ resolved: true }, { resolved: false }])
 })
 
+test('no-resolve drops the Resolve button but a resolved thread still folds; each action has a part of its own', async ({ page, renderScenario }) => {
+  await renderScenario(scenario('no-resolve'))
+  await expect(page.getByRole('button', { name: "Edit Ben Ito's comment" })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Resolve' })).toHaveCount(0)
+  await expect(thread(page).locator('[part~="edit-action"]')).toHaveCount(1)
+  await expect(thread(page).locator('[part~="delete-action"]')).toHaveCount(1)
+  await thread(page).evaluate((element: CommentThread & { resolved: boolean }) => (element.resolved = true))
+  await expect(page.getByRole('article')).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Reopen' })).toHaveCount(0)
+
+  await renderScenario(scenario())
+  await expect(thread(page).locator('[part~="resolve-action"]')).toHaveText('Resolve')
+  await expect(thread(page).locator('[part~="action"]')).toHaveCount(3)
+})
+
+test('with a pointer, a comment shows its reaction add button only while hovered or focused', async ({ page, renderScenario }) => {
+  await renderScenario(scenario('reactions'))
+  const add = (at: number) => page.getByRole('article').nth(at).locator('c2-reaction-bar').locator('[part="add"]')
+  const opacity = (at: number) => add(at).evaluate((button) => getComputedStyle(button).opacity)
+  await page.mouse.move(0, 0)
+  expect(await opacity(0)).toBe('0')
+  await page.getByRole('article').nth(1).hover()
+  expect(await opacity(1)).toBe('1')
+  expect(await opacity(0)).toBe('0')
+  await page.mouse.move(0, 0)
+  await add(2).focus()
+  expect(await opacity(2)).toBe('1')
+})
+
+test('a comment without reactions keeps its add button in the header; the first reaction moves it under the text with focus', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(
+    scenario('reactions').replace(`"body":"Should this be a token?"`, `"body":"Should this be a token?","reactions":[{"emoji":"👍","count":1}]`),
+  )
+  const reply = page.getByRole('article').nth(1)
+  await expect(page.getByRole('article').first().locator('.meta c2-reaction-bar')).toHaveCount(0)
+  await expect(page.getByRole('article').first().locator('.main > c2-reaction-bar')).toHaveCount(1)
+  await expect(reply.locator('.meta c2-reaction-bar')).toHaveCount(1)
+  await expect(reply.locator('.main > c2-reaction-bar')).toHaveCount(0)
+
+  await reply.locator('.meta c2-reaction-bar').locator('[part="add"]').click()
+  await page.getByRole('button', { name: '🎉' }).click()
+  await expect(reply.locator('.main > c2-reaction-bar').getByRole('button', { name: /🎉/ })).toBeVisible()
+  await expect(reply.locator('.meta c2-reaction-bar')).toHaveCount(0)
+  await expect(reply.locator('.main > c2-reaction-bar').locator('[part="add"]')).toBeFocused()
+})
+
 test('a long thread folds its middle; without a current user it is read-only; text follows the language', async ({ page, renderScenario }) => {
   const many = JSON.stringify(
     Array.from({ length: 7 }, (_, at) => ({ id: at + 1, author: at % 2 ? BEN : ANA, body: `Comment ${at + 1}`, time: '2026-10-14T09:00:00Z' })),

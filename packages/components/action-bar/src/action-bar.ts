@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -188,7 +188,7 @@ export class ActionBar extends LitElement {
     // The live region sits outside the bar: the bar is `visibility: hidden` while closed, and a region that enters
     // the accessibility tree together with its first text is often not announced. It says the count even when the
     // `label` slot replaces the visible text, and nothing at zero.
-    return html`<span class="announcer" role="status">${this.count > 0 ? this.msg.t('selected', this.count) : ''}</span>
+    return html`<span class="announcer" role="status">${this.count > 0 ? this.msg.t('selected', this.count) : nothing}</span>
       <div class="bar">
         <span class="label"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
         <span class="divider" aria-hidden="true"></span>

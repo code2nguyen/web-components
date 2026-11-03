@@ -547,7 +547,7 @@ export class ImageCropper extends LitElement {
         </div>
       </div>
       <span id="instructions" hidden>${this.msg.t('instructions')}</span>
-      <span class="visually-hidden" aria-live="polite">${this.announcement}</span>
+      <span class="visually-hidden" aria-live="polite">${this.announcement || nothing}</span>
     `
   }
 }
