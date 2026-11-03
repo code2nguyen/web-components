@@ -1,12 +1,13 @@
+@use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-video-grid,
   $theme: (
     height: auto,
-    aspect-ratio: unquote('16 / 9'),
+    aspect-ratio: string.unquote('16 / 9'),
     gap: 8px,
     padding: 8px,
     background: transparent,
-    tile--aspect-ratio: unquote('16 / 9'),
+    tile--aspect-ratio: string.unquote('16 / 9'),
     strip--size: 112px,
     more--background: light-dark(#e4e4e7, #27272a),
     more--color: light-dark(#18181b, #fafafa),

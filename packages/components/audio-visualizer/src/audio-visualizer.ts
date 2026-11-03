@@ -29,6 +29,20 @@ const SPEAKING_HOLD = 300
 const REDUCED_INTERVAL = 250
 
 let sharedContext: AudioContext | undefined
+let silentSink: GainNode | undefined
+
+/**
+ * A muted path to the speakers. An analyser that leads nowhere may never be processed (Firefox reads it as silence),
+ * so every analyser ends here: the graph is pulled, and nothing is heard twice.
+ */
+function sink(context: AudioContext): GainNode {
+  if (!silentSink) {
+    silentSink = context.createGain()
+    silentSink.gain.value = 0
+    silentSink.connect(context.destination)
+  }
+  return silentSink
+}
 /**
  * Whether a media element's audio can be read. Web Audio reads a cross-origin element without CORS as silence, and
  * routing it there would silence its playback for good, so such an element is left alone.
@@ -289,6 +303,7 @@ export class AudioVisualizer extends LitElement {
       analyser.fftSize = 256
       analyser.smoothingTimeConstant = 0.5
       source.connect(analyser)
+      analyser.connect(sink(context))
       this.sourceNode = source
       this.connectedTo = stream ?? media
       this.analyser = analyser
@@ -304,6 +319,7 @@ export class AudioVisualizer extends LitElement {
     if (this.sourceNode && this.analyser) {
       try {
         this.sourceNode.disconnect(this.analyser)
+        this.analyser.disconnect()
       } catch {
         // Already disconnected.
       }

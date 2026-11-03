@@ -1,7 +1,8 @@
+@use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-video-tile,
   $theme: (
-    aspect-ratio: unquote('16 / 9'),
+    aspect-ratio: string.unquote('16 / 9'),
     border-radius: 8px,
     background: #27272a,
     video--object-fit: cover,
