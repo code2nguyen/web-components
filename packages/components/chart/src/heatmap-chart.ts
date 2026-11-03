@@ -1570,7 +1570,7 @@ export class HeatmapChart extends EchartsChartBase {
   protected override render(): TemplateResult {
     return html`
       ${super.render()}${this.#renderDataTable()}
-      <div class="data-table" aria-live="polite">${this.#announcement()}</div>
+      <div class="data-table" aria-live="polite">${this.#announcement() || nothing}</div>
       <span class="heat-probes" aria-hidden="true">
         ${['empty', 'hover', 'focus', 'label', 'label-inverse', 'marginal', 'scale-start', 'scale-end', 'scale-negative', 'scale-mid'].map(
           (name) => html`<span class="heat-probe heat-probe--${name}"></span>`,

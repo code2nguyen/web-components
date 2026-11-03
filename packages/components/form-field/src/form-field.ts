@@ -585,7 +585,7 @@ export class FormField extends LitElement {
         <slot @slotchange=${this.handleSlotChange}></slot>
         ${this.renderSupportingText()}
         <slot name="error" hidden @slotchange=${this.handleSlotChange}></slot>
-        <span class="live" aria-live="polite">${this.announcement}</span>
+        <span class="live" aria-live="polite">${this.announcement || nothing}</span>
       </div>
     </div>`
   }

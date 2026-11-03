@@ -315,7 +315,7 @@ export class ReorderList extends LitElement {
       <div part="dragging-item" class=${classMap({ 'dragging-item': true, 'dragging-item--active': pointerItem !== null })} aria-hidden="true" inert>
         <slot name="dragging-item" ${assignSlot(this.getSpecialChildren('dragging-item'))}><span class="dragging-item__fallback">${activeLabel}</span></slot>
       </div>
-      <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement}</p>
+      <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement || nothing}</p>
     `
   }
 

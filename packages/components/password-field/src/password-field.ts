@@ -241,7 +241,7 @@ export class PasswordField extends LitElement {
    */
   @property({ converter: arrayPropertyConverter }) requirements: (string | PasswordRequirement)[] = []
 
-  /** Labels of the five strength scores, 0 to 4, separated by semicolons. */
+  /** Labels of the five strength scores, 0 to 4, separated by semicolons, or a JSON array. */
   @property({ attribute: 'strength-labels', converter: arrayPropertyConverter }) strengthLabels: string[] = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong']
 
   /** Replaces {@link scorePassword} as the strength estimate. Returns 0 to 4. */
@@ -498,7 +498,7 @@ export class PasswordField extends LitElement {
       >
         ${[1, 2, 3, 4].map((segment) => html`<span class="segment ${segment <= score ? 'filled' : ''}"></span>`)}
       </div>
-      <span class="meter-label" aria-live="polite">${label}</span>
+      <span class="meter-label" aria-live="polite">${label || nothing}</span>
     </div>`
   }
 

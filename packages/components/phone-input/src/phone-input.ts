@@ -175,10 +175,10 @@ export class PhoneInput extends LitElement {
     this.countryIso = phoneCountry(next)?.iso
   }
 
-  /** The countries the picker offers, as ISO codes. Empty offers all of them. As an attribute, separated by semicolons. */
+  /** The countries the picker offers, as ISO codes. Empty offers all of them. As an attribute, separated by semicolons or a JSON array. */
   @property({ attribute: 'countries', converter: arrayPropertyConverter }) countries: string[] = []
 
-  /** Countries listed first in the picker, in this order. As an attribute, separated by semicolons. */
+  /** Countries listed first in the picker, in this order. As an attribute, separated by semicolons or a JSON array. */
   @property({ attribute: 'preferred-countries', converter: arrayPropertyConverter }) preferredCountries: string[] = []
 
   /** Locale of the country names, and of the default country. Defaults to the browser's language. */

@@ -364,12 +364,32 @@ test('an image takes whole rules, so the line after it is written on a rule', as
   await page.keyboard.type('After')
   await expect.poll(() => value(page)).toBe('![](app:1)\nAfter')
   await expect.poll(() => drawn(page)).toBe(400)
-  const { rule, height } = await block(page).evaluate((element) => ({
-    rule: parseFloat(getComputedStyle(element.closest('.writing')!).lineHeight),
-    height: element.getBoundingClientRect().height,
-  }))
-  expect(height).toBeGreaterThan(200)
-  expect(height % rule).toBeCloseTo(0, 1)
+  const measure = () =>
+    block(page).evaluate((element) => ({
+      rule: parseFloat(getComputedStyle(element.closest('.writing')!).lineHeight),
+      height: element.getBoundingClientRect().height,
+    }))
+  // The height snaps from a ResizeObserver once the image has its size, a frame after it is drawn: poll for it.
+  await expect
+    .poll(async () => {
+      const { rule, height } = await measure()
+      return Math.round((height % rule) * 10) / 10
+    })
+    .toBe(0)
+  expect((await measure()).height).toBeGreaterThan(200)
+})
+
+test('the block padding counts towards the whole rules', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-notepad label="Notes"></c2-notepad>`)
+  await withStore(page)
+  await content(page).click()
+  await pasteImage(page)
+  await expect.poll(() => drawn(page)).toBe(400)
+  // A frame of 6 rules minus 2px: with the block's 4px padding it needs a seventh rule.
+  await block(page)
+    .locator('img')
+    .evaluate((image: HTMLImageElement) => (image.style.height = `${6 * 28 - 2}px`))
+  await expect.poll(() => block(page).evaluate((element) => element.getBoundingClientRect().height)).toBe(7 * 28)
 })
 
 test('a written line that reads as an image stays text', async ({ page, renderScenario }) => {

@@ -22,6 +22,7 @@ declare module 'vue' {
       C2Props<CommentThread> & {
         'current-user'?: unknown
         'collapse-after'?: unknown
+        'no-resolve'?: unknown
         onCommentAdd?: (event: EventOf<CommentThread, 'comment-add'>) => void
         onCommentEdit?: (event: EventOf<CommentThread, 'comment-edit'>) => void
         onCommentDelete?: (event: EventOf<CommentThread, 'comment-delete'>) => void
