@@ -29,6 +29,23 @@ const SPEAKING_HOLD = 300
 const REDUCED_INTERVAL = 250
 
 let sharedContext: AudioContext | undefined
+/**
+ * Whether a media element's audio can be read. Web Audio reads a cross-origin element without CORS as silence, and
+ * routing it there would silence its playback for good, so such an element is left alone.
+ */
+function readable(element: HTMLMediaElement): boolean {
+  if (element.crossOrigin !== null) return true
+  const source = element.currentSrc || element.src
+  // Without a source yet there is no telling where it will come from.
+  if (!source) return false
+  if (source.startsWith('blob:') || source.startsWith('data:')) return true
+  try {
+    return new URL(source, location.href).origin === location.origin
+  } catch {
+    return false
+  }
+}
+
 /** A media element can be routed into Web Audio only once, ever: its source node is kept for every later visualizer. */
 const mediaSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>()
 
@@ -42,13 +59,17 @@ function audioContext(): AudioContext {
     sharedContext = context
     if (context.state === 'suspended') {
       const resume = () => {
-        void context.resume()
-        if (context.state !== 'suspended') {
-          document.removeEventListener('pointerdown', resume, true)
-          document.removeEventListener('keydown', resume, true)
-        }
+        context.resume().then(
+          () => {
+            document.removeEventListener('pointerdown', resume, true)
+            document.removeEventListener('keydown', resume, true)
+          },
+          () => {
+            // Still not allowed: the next gesture tries again.
+          },
+        )
       }
-      void context.resume()
+      resume()
       document.addEventListener('pointerdown', resume, true)
       document.addEventListener('keydown', resume, true)
     }
@@ -83,7 +104,8 @@ const FLAT_WAVE = wavePath(Array.from({ length: WAVE_POINTS }, () => 0))
  * a voice assistant.
  *
  * The level comes from the first source set: `stream`, a `MediaStream` (a microphone, a call participant's track),
- * analysed through Web Audio; `media`, an `<audio>` or `<video>` element that plays; or `level`, a number from 0 to 1
+ * analysed through Web Audio; `media`, an `<audio>` or `<video>` element that plays (same-origin, or served with CORS
+ * and `crossorigin`, and given its source first: Web Audio cannot read another one, which is then left alone); or `level`, a number from 0 to 1
  * an app already has from its call SDK. With no source, `state` (`idle`, `listening`, `thinking`, `speaking`) animates
  * what an agent is doing while its audio plays elsewhere. `muted` draws a flat, greyed meter.
  *
@@ -133,7 +155,7 @@ export class AudioVisualizer extends LitElement {
   /** A `MediaStream` to analyse, such as a microphone or a call participant's audio track. Property only. */
   @property({ attribute: false }) stream: MediaStream | null = null
 
-  /** An `<audio>` or `<video>` element to analyse while it plays. Property only. */
+  /** An `<audio>` or `<video>` element to analyse while it plays, set once it has its source. Property only. */
   @property({ attribute: false }) media: HTMLMediaElement | null = null
 
   /** What to animate when there is no source. */
@@ -152,6 +174,9 @@ export class AudioVisualizer extends LitElement {
 
   private analyser: AnalyserNode | null = null
   private sourceNode: AudioNode | null = null
+  private connectedTo: MediaStream | HTMLMediaElement | null = null
+  /** The slower loop that keeps reading an unseen source, so that speaking still starts and ends. */
+  private listenTimer: ReturnType<typeof setTimeout> | undefined
   private frequency: Uint8Array<ArrayBuffer> | null = null
   private timeDomain: Float32Array<ArrayBuffer> | null = null
   /** The smoothed level of each bar, and of the whole source. */
@@ -183,6 +208,7 @@ export class AudioVisualizer extends LitElement {
     })
     this.observer.observe(this)
     this.connectSource()
+    this.schedule()
   }
 
   override disconnectedCallback(): void {
@@ -193,6 +219,7 @@ export class AudioVisualizer extends LitElement {
     this.observer = null
     this.stop()
     this.disconnectSource()
+    if (this.speakingNow) this.setSpeaking(false)
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -206,9 +233,14 @@ export class AudioVisualizer extends LitElement {
 
   protected override updated(changed: PropertyValues<this>): void {
     if (isServer) return
-    if ((changed.has('stream') || changed.has('media')) && this.isConnected) this.connectSource()
-    // A source that went away no longer speaks.
-    if (!this.hasSource && this.speakingNow) this.setSpeaking(false)
+    if ((changed.has('stream') || changed.has('media')) && this.isConnected) {
+      const live = this.analyser !== null
+      this.connectSource()
+      // The look of the visualizer depends on whether a source is connected: draw it again when that changed.
+      if (live !== (this.analyser !== null)) this.requestUpdate()
+    }
+    // A source that went away, or went quiet by being muted, no longer speaks.
+    if ((!this.hasSource || this.muted) && this.speakingNow) this.setSpeaking(false)
     this.schedule()
   }
 
@@ -227,10 +259,13 @@ export class AudioVisualizer extends LitElement {
   }
 
   private connectSource(): void {
-    this.disconnectSource()
     const stream = this.stream
     const media = this.media
+    // Already analysing this source.
+    if (this.analyser && this.connectedTo === (stream ?? media)) return
+    this.disconnectSource()
     if (!stream && !media) return
+    if (!stream && media && !readable(media)) return
     try {
       const context = audioContext()
       let source: AudioNode
@@ -253,11 +288,12 @@ export class AudioVisualizer extends LitElement {
       analyser.smoothingTimeConstant = 0.5
       source.connect(analyser)
       this.sourceNode = source
+      this.connectedTo = stream ?? media
       this.analyser = analyser
       this.frequency = new Uint8Array(analyser.frequencyBinCount)
       this.timeDomain = new Float32Array(analyser.fftSize)
     } catch {
-      // No Web Audio (or a cross-origin media element): the visualizer falls back to `level` or `state`.
+      // No Web Audio: the visualizer falls back to `level` or `state`.
       this.disconnectSource()
     }
   }
@@ -271,6 +307,7 @@ export class AudioVisualizer extends LitElement {
       }
     }
     this.sourceNode = null
+    this.connectedTo = null
     this.analyser = null
     this.frequency = null
     this.timeDomain = null
@@ -282,16 +319,37 @@ export class AudioVisualizer extends LitElement {
     const visible = this.onScreen && document.visibilityState !== 'hidden'
     const animated = !this.muted && (this.hasSource || this.state !== 'idle')
     if (visible && animated) {
+      this.stopListening()
       if (!this.frame) this.frame = requestAnimationFrame(this.tick)
     } else {
       this.stop()
       if (this.hasUpdated) this.draw(performance.now(), true)
+      // Off screen or in a hidden page a source still speaks, and whoever shows the speaker must hear it stop.
+      if (animated && this.hasSource) this.listen()
+      else this.stopListening()
     }
   }
 
   private stop(): void {
     if (this.frame) cancelAnimationFrame(this.frame)
     this.frame = 0
+    this.stopListening()
+  }
+
+  private listen(): void {
+    if (this.listenTimer !== undefined) return
+    this.listenTimer = setTimeout(() => {
+      this.listenTimer = undefined
+      if (!this.isConnected) return
+      const now = performance.now()
+      this.detectSpeaking(this.sample(now).level, now)
+      this.schedule()
+    }, REDUCED_INTERVAL)
+  }
+
+  private stopListening(): void {
+    if (this.listenTimer !== undefined) clearTimeout(this.listenTimer)
+    this.listenTimer = undefined
   }
 
   private readonly tick = (time: number): void => {

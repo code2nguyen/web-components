@@ -1,4 +1,4 @@
-import { test, expect, accessible, props } from '../../../../tests/component-fixture'
+import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 type FakeStream = (options?: { video?: boolean; audio?: boolean }) => MediaStream
@@ -141,4 +141,40 @@ test('its text follows the language', async ({ page, renderScenario }) => {
   )
   await expect(tile(page).first()).toHaveHostAria('aria-label', 'Sam (vous), micro coupé, main levée')
   await expect(tile(page, '#share').locator('[part="name"]')).toHaveText('Écran de Ana')
+})
+
+test('regressions: the inner video is muted as a property, a muted tile stops speaking, a second raised hand is announced again', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-video-tile name="Ana Ruiz" detect-speaking level="0"></c2-video-tile>`)
+  await watch(tile(page), 'speaking-change')
+  await props(tile(page), { level: 0.7 })
+  expect(
+    await tile(page)
+      .locator('video')
+      .evaluate((video) => (video as HTMLVideoElement).muted),
+  ).toBe(true)
+  await expect(tile(page)).toHaveState('speaking')
+  await expect.poll(async () => JSON.parse((await tile(page).getAttribute('data-events')) ?? '[]')).toEqual([{ speaking: true }])
+  await props(tile(page), { muted: true })
+  await expect(tile(page)).not.toHaveState('speaking')
+  await expect.poll(async () => JSON.parse((await tile(page).getAttribute('data-events')) ?? '[]')).toEqual([{ speaking: true }, { speaking: false }])
+
+  // Record what the live region says: the same words twice must be said twice.
+  await tile(page).evaluate((element) => {
+    const region = element.shadowRoot!.querySelector('.announce')!
+    const said: string[] = []
+    ;(window as unknown as { said: string[] }).said = said
+    new MutationObserver(() => region.textContent?.trim() && said.push(region.textContent.trim())).observe(region, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
+  })
+  await props(tile(page), { handRaised: true })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { said: string[] }).said)).toEqual(['Ana Ruiz raised a hand'])
+  await props(tile(page), { handRaised: false })
+  await props(tile(page), { handRaised: true })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { said: string[] }).said)).toEqual(['Ana Ruiz raised a hand', 'Ana Ruiz raised a hand'])
 })

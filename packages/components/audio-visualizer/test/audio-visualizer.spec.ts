@@ -150,3 +150,52 @@ test('without a source, state animates; idle is flat; reduced motion holds a ste
   expect(await barHeights(page)).toEqual(still)
   expect(Math.max(...still)).toBeGreaterThan(10)
 })
+
+test('speaking ends when the visualizer is muted, removed or scrolled away from a source that goes quiet', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="height: 3000px"><c2-audio-visualizer id="a" level="0"></c2-audio-visualizer></div>`)
+  const subject = visualizer(page, '#a')
+  await watch(subject, 'speaking-change')
+  await props(subject, { level: 0.6 })
+  await expect.poll(() => events(page, '#a')).toEqual([{ speaking: true }])
+  await props(subject, { muted: true })
+  await expect.poll(() => events(page, '#a')).toEqual([{ speaking: true }, { speaking: false }])
+  await props(subject, { muted: false })
+  await expect.poll(() => events(page, '#a')).toHaveLength(3)
+
+  // Off screen the source is still heard: it going quiet still ends speaking.
+  await page.evaluate(() => window.scrollTo(0, 2500))
+  await props(subject, { level: 0 })
+  await expect.poll(() => events(page, '#a')).toHaveLength(4)
+  await props(subject, { level: 0.6 })
+  await expect.poll(() => events(page, '#a')).toHaveLength(5)
+
+  await subject.evaluate((element) => {
+    ;(window as unknown as { last: unknown }).last = null
+    element.addEventListener('speaking-change', (event) => ((window as unknown as { last: unknown }).last = (event as CustomEvent).detail))
+    element.remove()
+  })
+  expect(await page.evaluate(() => (window as unknown as { last: unknown }).last)).toEqual({ speaking: false })
+})
+
+test('a stream set after the visualizer drew is drawn live; a cross-origin element is left alone', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-audio-visualizer variant="orb"></c2-audio-visualizer>`)
+  await expect(visualizer(page).locator('.orb.state-idle')).toHaveCount(1)
+  await page.locator('main').click()
+  await visualizer(page).evaluate(async (element) => {
+    const context = new AudioContext()
+    const oscillator = context.createOscillator()
+    const destination = context.createMediaStreamDestination()
+    oscillator.connect(destination)
+    oscillator.start()
+    ;(element as HTMLElement & { stream: MediaStream }).stream = destination.stream
+  })
+  await expect(visualizer(page).locator('.orb.state-live')).toHaveCount(1)
+
+  await visualizer(page).evaluate(async (element) => {
+    const audio = document.createElement('audio')
+    audio.src = 'https://example.invalid/voice.mp3'
+    Object.assign(element, { stream: null, media: audio })
+  })
+  // Not routed into Web Audio, so not analysed (and never silenced).
+  await expect(visualizer(page).locator('.orb.state-idle')).toHaveCount(1)
+})

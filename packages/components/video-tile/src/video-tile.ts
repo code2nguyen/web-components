@@ -3,6 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/avatar'
 import '@c2n/audio-visualizer'
 import { videoTileMessages } from './messages'
@@ -15,6 +16,16 @@ export type VideoTileKind = 'camera' | 'screen'
 
 /** The quality of a participant's connection, as the call SDK reports it. */
 export type VideoTileConnection = 'good' | 'fair' | 'poor'
+
+/** Events fired by {@link VideoTile}, keyed for `addEventListener`. */
+export interface VideoTileEventMap {
+  'speaking-change': CustomEvent<{ speaking: boolean }>
+}
+
+export interface VideoTile {
+  addEventListener: TypedAddEventListener<VideoTile, VideoTileEventMap>
+  removeEventListener: TypedRemoveEventListener<VideoTile, VideoTileEventMap>
+}
 
 const micOffIcon = html`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
   <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -60,6 +71,8 @@ const pinIcon = html`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
  * @slot badge - More badges beside the hand and the pin, top left.
  * @slot actions - Buttons shown on hover and focus, top right: typically a `c2-menu` of tile actions.
  *
+ * @event {CustomEvent<{ speaking: boolean }>} speaking-change - Fired when the tile starts or stops showing the participant as speaking, from `speaking` or its own meter. Does not bubble.
+ *
  * @csspart video - The inner `<video>`.
  * @csspart name - The name pill.
  * @csspart surface - The camera-off surface around the avatar.
@@ -72,7 +85,7 @@ const pinIcon = html`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
  * @cssproperty {color} [--c2-video-tile--background=#27272a] - Behind the video, seen around a screen share.
  * @cssproperty {string} [--c2-video-tile__video--object-fit=cover] - How a camera fills the tile.
  * @cssproperty {string} [--c2-video-tile__screen--object-fit=contain] - How a screen share fits the tile.
- * @cssproperty {color} [--c2-video-tile__surface--background=#e4e4e7] - The camera-off surface.
+ * @cssproperty {color} [--c2-video-tile__surface--background=light-dark(#e4e4e7, #27272a)] - The camera-off surface.
  * @cssproperty {pixel} [--c2-video-tile__avatar--size=clamp(32px, 28cqh, 96px)] - The avatar on the camera-off surface.
  * @cssproperty {color} [--c2-video-tile__name--background=rgba(0, 0, 0, 0.55)]
  * @cssproperty {color} [--c2-video-tile__name--color=#ffffff]
@@ -94,7 +107,7 @@ export class VideoTile extends LitElement {
   static override styles = unsafeCSS(styles)
 
   /** The participant's name. */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** The participant's video (and audio, for the meter). Property only. */
   @property({ attribute: false }) stream: MediaStream | null = null
@@ -112,10 +125,10 @@ export class VideoTile extends LitElement {
   @property({ type: Boolean }) local = false
 
   /** `camera`, or `screen` for a screen share. */
-  @property() kind: VideoTileKind = 'camera'
+  @property({ reflect: true }) kind: VideoTileKind = 'camera'
 
   /** The participant is speaking: the accent outline. */
-  @property({ type: Boolean }) speaking = false
+  @property({ type: Boolean, reflect: true }) speaking = false
 
   /** Lets the tile's own meter decide when the participant speaks, from `stream` or `level`. */
   @property({ type: Boolean, attribute: 'detect-speaking' }) detectSpeaking = false
@@ -127,7 +140,7 @@ export class VideoTile extends LitElement {
   @property({ type: Boolean, attribute: 'hand-raised' }) handRaised = false
 
   /** The tile is pinned. */
-  @property({ type: Boolean }) pinned = false
+  @property({ type: Boolean, reflect: true }) pinned = false
 
   /** Connection quality; `fair` and `poor` show signal bars. */
   @property() connection: VideoTileConnection = 'good'
@@ -141,6 +154,8 @@ export class VideoTile extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, videoTileMessages)
   private watchedStream: MediaStream | null = null
+  /** What `speaking-change` last said. */
+  private reportedSpeaking = false
   private readonly watchedTracks = new Set<MediaStreamTrack>()
 
   constructor() {
@@ -179,7 +194,8 @@ export class VideoTile extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (!isServer && changed.has('stream')) this.watchStream(this.stream)
-    if (changed.has('detectSpeaking') && !this.detectSpeaking) this.detected = false
+    // Without a meter (muted, a screen share) nothing is detected.
+    if (!this.detectSpeaking || this.muted || this.kind === 'screen') this.detected = false
     const states: string[] = []
     if (this.muted && this.kind !== 'screen') states.push(this.msg.t('muted'))
     if (this.handRaised) states.push(this.msg.t('handRaised'))
@@ -188,8 +204,7 @@ export class VideoTile extends LitElement {
     if (this.connection === 'poor') states.push(this.msg.t('poorConnection'))
     this.internals.ariaLabel = states.length ? this.msg.t('described', this.displayName, states.join(', ')) : this.displayName
     // A hand raised after the tile first drew is news; one that was already up when it appeared is not.
-    if (changed.has('handRaised') && this.hasUpdated && this.handRaised)
-      this.announcement = this.msg.t('raisedHand', this.name.trim() || this.msg.t('participant'))
+    if (changed.has('handRaised') && this.hasUpdated && this.handRaised) this.announce(this.msg.t('raisedHand', this.name.trim() || this.msg.t('participant')))
     try {
       if (this.isSpeaking) this.internals.states.add('speaking')
       else this.internals.states.delete('speaking')
@@ -200,6 +215,20 @@ export class VideoTile extends LitElement {
 
   protected override firstUpdated(): void {
     this.readSlot()
+  }
+
+  protected override updated(): void {
+    const speaking = this.isSpeaking
+    if (speaking !== this.reportedSpeaking) {
+      this.reportedSpeaking = speaking
+      this.dispatchEvent(new CustomEvent('speaking-change', { detail: { speaking } }))
+    }
+  }
+
+  /** Says `text` in the live region; the same text twice is said twice. */
+  private announce(text: string): void {
+    this.announcement = ''
+    requestAnimationFrame(() => (this.announcement = text))
   }
 
   /** Follows the tracks of the stream, so a camera turned off or a track ended swaps the video for the avatar. */
@@ -265,7 +294,7 @@ export class VideoTile extends LitElement {
     return html`<div class=${classes}>
       <div class="media">
         <slot @slotchange=${this.readSlot}></slot>
-        ${this.slotted ? nothing : html`<video part="video" autoplay playsinline muted .srcObject=${isServer ? null : this.stream}></video>`}
+        ${this.slotted ? nothing : html`<video part="video" autoplay playsinline muted .muted=${true} .srcObject=${isServer ? null : this.stream}></video>`}
       </div>
       ${
         video

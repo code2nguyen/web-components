@@ -135,3 +135,31 @@ test('lays out c2-video-tile elements and follows the language', async ({ page, 
     )
     .toBe(200)
 })
+
+test('regressions: tile state set as properties counts, a re-attached grid still resizes, a gap of 0 is 0', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-video-grid max-tiles="3" style="--c2-video-grid--gap: 0px"><c2-video-tile id="a" name="Ana"></c2-video-tile><c2-video-tile id="b" name="Ben"></c2-video-tile><c2-video-tile id="c" name="Cy"></c2-video-tile><c2-video-tile id="d" name="Dee"></c2-video-tile></c2-video-grid>`,
+  )
+  const drawn = () => boxes(page).then((laid) => laid.filter((box) => box.width > 0).map((box) => box.id))
+  await expect.poll(drawn).toEqual(['a', 'b'])
+  // Set as properties, as React, Vue and Angular do.
+  await page.locator('#d').evaluate((tile) => ((tile as HTMLElement & { pinned: boolean }).pinned = true))
+  await expect.poll(drawn).toEqual(['a', 'd'])
+  // A tile whose own meter hears speech is kept too.
+  await page.locator('#c').evaluate((tile) => Object.assign(tile, { detectSpeaking: true, level: 0.8 }))
+  await expect.poll(drawn).toEqual(['c', 'd'])
+  await props(grid(page), { maxTiles: 0, layout: 'spotlight' })
+  await page.locator('#b').evaluate((tile) => ((tile as HTMLElement & { kind: string }).kind = 'screen'))
+  await expect.poll(() => grid(page).evaluate((element) => (element as HTMLElement & { featured: Element }).featured.id)).toBe('b')
+
+  await props(grid(page), { layout: 'grid' })
+  // 4 tiles in 720 × 405 with no gap: two columns of exactly 360.
+  await expect.poll(async () => (await boxes(page)).map((box) => box.width)).toEqual([360, 360, 360, 360])
+  await grid(page).evaluate((element) => {
+    const parent = element.parentElement!
+    element.remove()
+    parent.append(element)
+    ;(element as HTMLElement).style.width = '400px'
+  })
+  await expect.poll(async () => (await boxes(page))[0].width).toBeLessThan(250)
+})
