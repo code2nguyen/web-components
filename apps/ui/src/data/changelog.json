@@ -2,6 +2,33 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.20",
+      "date": "2026-11-03",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["breadcrumb"],
+              "text": "Re-measure when an item changes width after the trail was measured",
+              "hash": "997fca6"
+            },
+            {
+              "scopes": ["comment-thread"],
+              "text": "Keep the add button of a comment without reactions in its header",
+              "hash": "e5ab7b4"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Resolve the open component feedback",
+              "hash": "712908f"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.19",
       "date": "2026-11-03",
       "sections": [
