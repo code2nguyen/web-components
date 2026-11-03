@@ -3,6 +3,41 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.19](https://github.com/code2nguyen/web-components/releases/tag/v1.0.19) — 2026-11-03
+
+### Features
+
+- **quantity-picker:** Add c2-quantity-picker and c2-quantity ([220ad08](https://github.com/code2nguyen/web-components/commit/220ad08))
+- **payment-card, promo-code-field:** Add c2-payment-card and c2-promo-code-field ([77098f3](https://github.com/code2nguyen/web-components/commit/77098f3))
+- **order-book, fx-converter:** Add c2-order-book and c2-fx-converter ([7a514ee](https://github.com/code2nguyen/web-components/commit/7a514ee))
+- **scroll-area, in-view, scroll-progress:** Add c2-scroll-area, c2-in-view and c2-scroll-progress (sources) ([786a4c3](https://github.com/code2nguyen/web-components/commit/786a4c3))
+- **wheel-picker, share-sheet:** Add c2-wheel-picker and c2-share-sheet (sources) ([3737e53](https://github.com/code2nguyen/web-components/commit/3737e53))
+- **comment-thread, selection-toolbar:** Add c2-comment-thread and c2-selection-toolbar (sources) ([5996b54](https://github.com/code2nguyen/web-components/commit/5996b54))
+- **time-slot-picker, card-input:** Add c2-time-slot-picker and c2-card-input; date-strip gets disabled-dates and range-change (sources) ([ad7076a](https://github.com/code2nguyen/web-components/commit/ad7076a))
+- **month-picker, date-strip:** Generated files, theme pairs, reveal the picked day ([e97e500](https://github.com/code2nguyen/web-components/commit/e97e500))
+- **month-picker, date-strip:** Add c2-month-picker and c2-date-strip (sources) ([f55def6](https://github.com/code2nguyen/web-components/commit/f55def6))
+
+### Fixes
+
+- **payment-card:** Stop the copy button's events, which carry the copied number, at the card ([26afab8](https://github.com/code2nguyen/web-components/commit/26afab8))
+- **payment-card, promo-code-field, quantity-picker:** Code review ([09cbd69](https://github.com/code2nguyen/web-components/commit/09cbd69))
+- **quantity-picker, payment-card, promo-code-field:** Hydration in the docs site, Button imports, generated files ([925cbd7](https://github.com/code2nguyen/web-components/commit/925cbd7))
+- **quantity-picker, promo-code-field:** singular/plural nouns instead of one/other, prop docs, Quantity import in the docs ([af349d4](https://github.com/code2nguyen/web-components/commit/af349d4))
+- **order-book:** Focus a clicked row, so the tab stop follows in WebKit ([c721dcc](https://github.com/code2nguyen/web-components/commit/c721dcc))
+- Code review of c2-order-book and c2-fx-converter ([6ee3442](https://github.com/code2nguyen/web-components/commit/6ee3442))
+- Screenshot review of c2-order-book and c2-fx-converter ([1107757](https://github.com/code2nguyen/web-components/commit/1107757))
+- **order-book, fx-converter:** Literal event names, prop docs, and a best-price loop for deep books ([4760f35](https://github.com/code2nguyen/web-components/commit/4760f35))
+- **scroll-progress:** A visible track by default, so the bar shows before any scroll ([7ad3029](https://github.com/code2nguyen/web-components/commit/7ad3029))
+- **scroll-progress, in-view:** Follow only a real scroll area's viewport; a load-more snippet that stops at the last page ([92395a9](https://github.com/code2nguyen/web-components/commit/92395a9))
+- **scroll-area, in-view, scroll-progress:** Address code review findings ([540da3f](https://github.com/code2nguyen/web-components/commit/540da3f))
+- **share-sheet:** Render the same on the server and in the browser's first pass ([0aec68c](https://github.com/code2nguyen/web-components/commit/0aec68c))
+- **share-sheet:** Offer nothing, not even the copy field, for a link that is not http(s) ([88e8aa2](https://github.com/code2nguyen/web-components/commit/88e8aa2))
+- **comment-thread:** Transparent quote background for dark mode, shorter reply box ([c74523b](https://github.com/code2nguyen/web-components/commit/c74523b))
+- **comment-thread, selection-toolbar:** Name events literally, slot audit entries, local test types ([d32a41e](https://github.com/code2nguyen/web-components/commit/d32a41e))
+- **selection-toolbar:** Treat focus inside a form-associated component as a form field ([b6827de](https://github.com/code2nguyen/web-components/commit/b6827de))
+- **card-input, time-slot-picker:** Fixes from the docs screenshot review ([d341f7c](https://github.com/code2nguyen/web-components/commit/d341f7c))
+- **month-picker, date-strip:** Review and screenshot fixes ([802f620](https://github.com/code2nguyen/web-components/commit/802f620))
+
 ## [1.0.18](https://github.com/code2nguyen/web-components/releases/tag/v1.0.18) — 2026-10-27
 
 ### Features
