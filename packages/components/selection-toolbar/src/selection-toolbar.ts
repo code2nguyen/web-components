@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { computePosition, autoUpdate, flip, shift, offset, type VirtualElement } from '@floating-ui/dom'
 import { property } from '@c2n/core/lit-helper.js'
@@ -346,7 +346,7 @@ export class SelectionToolbar extends LitElement {
       >
         <slot name="toolbar"></slot>
       </div>
-      <div class="visually-hidden" role="status">${this.hint}</div>`
+      <div class="visually-hidden" role="status">${this.hint || nothing}</div>`
   }
 }
 

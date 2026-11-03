@@ -191,7 +191,7 @@ export class Kanban extends LitElement {
       >
         <slot @slotchange=${this.handleSlotChange}></slot>
       </div>
-      <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement}</p>
+      <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement || nothing}</p>
     `
   }
 

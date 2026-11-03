@@ -1313,7 +1313,7 @@ export class LogViewer extends LitElement {
       </div>
       ${rows ? nothing : html`<div part="empty" id="empty">${this.entries.length ? this.msg.t('noMatches') : this.msg.t('noEntries')}</div>`}
       ${this.renderRuler()} ${this.findOpen ? this.renderFind() : nothing}
-      <span class="copy-status" role="status" aria-live="polite">${this.status === 'find' ? this.findStatus : this.copyStatus}</span>`
+      <span class="copy-status" role="status" aria-live="polite">${(this.status === 'find' ? this.findStatus : this.copyStatus) || nothing}</span>`
   }
 }
 

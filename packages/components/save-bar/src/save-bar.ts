@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
@@ -218,7 +218,7 @@ export class SaveBar extends LitElement {
     // message when there is one (so a change to it, such as a field to fix, is announced), and "Saving…" while saving.
     const announcement = !this.open ? '' : this.saving ? saving : this.slottedMessage || unsaved
     // While saving, "Saving…" shows in place of the slotted message too.
-    return html`<span class="announcer" role="status">${announcement}</span>
+    return html`<span class="announcer" role="status">${announcement || nothing}</span>
       <div class="bar">
         <span class="status">
           <span class="indicator" aria-hidden="true"></span>

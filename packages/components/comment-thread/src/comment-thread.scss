@@ -107,6 +107,19 @@
   margin-left: auto;
 }
 
+// One add button per comment reads as a column of identical buttons: with a pointer, it shows on the comment being
+// hovered or holding focus (the opened popup keeps focus inside, so it stays). Touch devices always show it.
+// In the header, the add button is as tall as the text actions beside it.
+.header-reactions {
+  --c2-reaction-bar__reaction--height: 22px;
+}
+
+@media (hover: hover) {
+  .comment:not(:hover, :focus-within) c2-reaction-bar::part(add) {
+    opacity: 0;
+  }
+}
+
 .body {
   overflow-wrap: anywhere;
   white-space: pre-wrap;

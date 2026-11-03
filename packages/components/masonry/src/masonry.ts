@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
@@ -692,7 +692,7 @@ export class Masonry extends LitElement {
             : null
         }
       </div>
-      <span class="sr-only" role="status" aria-live="polite">${this.statusMessage}</span>`
+      <span class="sr-only" role="status" aria-live="polite">${this.statusMessage || nothing}</span>`
   }
 }
 

@@ -33,7 +33,7 @@ export interface Menubar {
  * Home/End to the first/last, a letter to the next menu whose label starts with it; Enter, Space or ArrowDown open the
  * menu on its first row, ArrowUp on its last. Inside a menu, ArrowRight opens a submenu or, on a plain row, moves to
  * the next menu; ArrowLeft closes a submenu or, at the top level, moves to the previous menu; Escape closes the menu
- * and returns focus to its trigger.
+ * and returns focus to its trigger. Right to left, both arrows swap inside the menus as on the triggers.
  *
  * The `start` and `end` slots hold what sits beside the menus (an app icon, a document title, a "Saved" status); they
  * are outside the `menubar` role. Activated rows fire `menu-select`, which bubbles from the row through the bar.
@@ -185,9 +185,9 @@ export class Menubar extends LitElement {
     const source = this.menuFromEvent(event)
     if (!source) return
     const { menu, onTrigger } = source
-    // The triggers follow the reading direction. Inside a menu the keys stay as c2-menu reads them (ArrowRight opens a
-    // submenu, so it also goes on to the next menu), or a row with a submenu and a plain row would disagree.
-    const rtl = onTrigger && this.isRtl
+    // The keys follow the reading direction, on the triggers and inside a menu alike: c2-menu mirrors them too, so the
+    // key that opens a submenu on one row (ArrowLeft, right to left) goes on to the next menu from a plain row.
+    const rtl = this.isRtl
     const forward = rtl ? 'ArrowLeft' : 'ArrowRight'
     const backward = rtl ? 'ArrowRight' : 'ArrowLeft'
 

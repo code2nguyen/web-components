@@ -38,7 +38,8 @@ export interface Menu {
  * Keyboard: the trigger opens the menu with Enter, Space or ArrowDown (ArrowUp opens it on the last row). Inside,
  * Arrow Up/Down move between enabled rows, Home/End jump to the first/last, typing letters jumps to a matching row,
  * Enter and Space activate, ArrowRight opens a submenu, ArrowLeft returns to its parent row, and Escape or Tab closes
- * the menu and returns focus to the trigger.
+ * the menu and returns focus to the trigger. In a right-to-left page (`dir="rtl"`) the two horizontal arrows swap and
+ * submenus open on the left.
  *
  * Activating a row fires `menu-select` and closes the menu; `keep-open` on the menu (or on a single row) leaves it
  * open, which is what a list of `checkbox` rows wants.
@@ -105,7 +106,7 @@ export class Menu extends LitElement {
   /** Whether the menu is showing. Set it to open or close the menu from code. */
   @property({ type: Boolean, reflect: true }) open = false
 
-  /** Preferred placement of the surface (floating-ui names). Submenus default to `right-start`. */
+  /** Preferred placement of the surface (floating-ui names). Submenus default to `right-start` (`left-start` right to left). */
   @property({ reflect: true })
   placement:
     'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' =
@@ -149,8 +150,15 @@ export class Menu extends LitElement {
    * `placement` attribute on a host the server rendered without one.
    */
   private get effectivePlacement(): Menu['placement'] {
-    if (this.getAttribute('slot') === 'submenu' && !this.hasAttribute('placement') && this.placement === 'bottom-start') return 'right-start'
+    if (this.getAttribute('slot') === 'submenu' && !this.hasAttribute('placement') && this.placement === 'bottom-start') {
+      return this.isRtl ? 'left-start' : 'right-start'
+    }
     return this.placement
+  }
+
+  /** Whether the menu reads right to left, which mirrors the horizontal arrow keys and the side a submenu opens on. */
+  private get isRtl(): boolean {
+    return !isServer && getComputedStyle(this).direction === 'rtl'
   }
 
   /** Whether something is slotted into `trigger`; a menu opened from one is never narrower than it. */
@@ -410,8 +418,11 @@ export class Menu extends LitElement {
     const enabled = this.enabledItems
     const current = own ?? this.focusedItem
     const index = current ? enabled.indexOf(current) : -1
+    // Right to left, the arrow pointing away from the parent row (ArrowLeft) opens a submenu and the other returns.
+    const horizontal = event.key === 'ArrowRight' || event.key === 'ArrowLeft'
+    const key = horizontal && this.isRtl ? (event.key === 'ArrowRight' ? 'ArrowLeft' : 'ArrowRight') : event.key
 
-    switch (event.key) {
+    switch (key) {
       case 'ArrowDown':
         event.preventDefault()
         event.stopPropagation()

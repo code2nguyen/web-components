@@ -155,7 +155,7 @@ export class MoneyInput extends LitElement {
   @property({ type: String }) value = ''
   /** ISO 4217 code of the currency (`USD`, `EUR`, `JPY`). Decides the symbol and the minor-unit digits. */
   @property({ type: String }) currency = 'USD'
-  /** Currencies the user may pick from, as ISO codes. With two or more a picker is shown. As an attribute, separated by semicolons. */
+  /** Currencies the user may pick from, as ISO codes. With two or more a picker is shown. As an attribute, separated by semicolons (`EUR;USD`) or a JSON array (`["EUR","USD"]`). */
   @property({ attribute: 'currencies', converter: arrayPropertyConverter }) currencies: string[] = []
   /** How the currency is written next to the amount: `symbol` (`CA$`), `narrowSymbol` (`$`) or `code` (`CAD`). */
   @property({ attribute: 'currency-display' }) currencyDisplay: CurrencyDisplay = 'symbol'
