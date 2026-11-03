@@ -226,7 +226,11 @@ export class ImageBlock {
   private snapHeight() {
     const line = this.options.lineHeight?.() ?? 0
     if (!(line > 0)) return
-    const height = this.frame.getBoundingClientRect().height
+    // The block's own padding counts too: the min-height is its border box, so a frame just short of a whole number
+    // of rules plus the padding would otherwise end off the rule.
+    const style = getComputedStyle(this.dom)
+    const padding = (parseFloat(style.paddingBlockStart) || 0) + (parseFloat(style.paddingBlockEnd) || 0)
+    const height = this.frame.getBoundingClientRect().height + padding
     this.dom.style.minHeight = `${Math.ceil(height / line) * line}px`
   }
 }
