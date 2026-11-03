@@ -1,0 +1,64 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-promo-code-field,
+  $theme: (
+    gap: 8px,
+    row--gap: 8px,
+    codes--gap: 6px,
+    saving--color: #71717a,
+    code--font-weight: 600,
+    code--letter-spacing: 0.02em,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.promo {
+  display: grid;
+  gap: css.cssVar(gap);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(row--gap);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+}
+
+.add {
+  justify-self: start;
+}
+
+.codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(codes--gap);
+}
+
+.code {
+  font-weight: css.cssVar(code--font-weight);
+  letter-spacing: css.cssVar(code--letter-spacing);
+}
+
+.saving {
+  margin-inline-start: 6px;
+  color: css.cssVar(saving--color);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

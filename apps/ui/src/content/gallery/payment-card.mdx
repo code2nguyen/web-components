@@ -1,0 +1,65 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PaymentCard } from '@c2n/components/payment-card'
+
+## Presets
+
+Looks for `c2-payment-card`. The face background takes any gradient; the display variables turn the chip, the expiry row and the button row off for compact cards.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-payment-card label="Marketing team · Virtual" holder="Ada Lovelace" last4="4242"></c2-payment-card>
+```
+
+```html tag=MdxCodeBlock,label=Ocean
+<style>
+  .card-ocean {
+    --c2-payment-card__face--background: radial-gradient(120% 140% at 0% 0%, #2563eb 0%, #1e3a8a 70%);
+  }
+</style>
+<c2-payment-card class="card-ocean" label="Travel · Physical" holder="Grace Hopper" last4="1881"></c2-payment-card>
+```
+
+```html tag=MdxCodeBlock,label=Silver
+<style>
+  .card-silver {
+    --c2-payment-card__face--background: linear-gradient(135deg, #f4f4f5 0%, #d4d4d8 55%, #a1a1aa 100%);
+    --c2-payment-card__face--color: #18181b;
+    --c2-payment-card__copy--color: #3f3f46;
+    --c2-payment-card__skeleton--background: rgba(24, 24, 27, 0.14);
+    --c2-payment-card__badge--background: rgba(24, 24, 27, 0.1);
+  }
+</style>
+<c2-payment-card class="card-silver" label="Office supplies" holder="Ada Lovelace" last4="5100"></c2-payment-card>
+```
+
+```html tag=MdxCodeBlock,label=Emerald, square corners
+<style>
+  .card-emerald {
+    --c2-payment-card__face--background: linear-gradient(160deg, #065f46 0%, #022c22 100%);
+    --c2-payment-card__face--border-radius: 6px;
+    --c2-payment-card__chip--background: linear-gradient(135deg, #d4d4d8, #71717a);
+  }
+</style>
+<c2-payment-card class="card-emerald" label="Engineering · Virtual" holder="Katherine Johnson" last4="7310"></c2-payment-card>
+```
+
+```html tag=MdxCodeBlock,label=Compact list card
+<style>
+  .card-mini {
+    --c2-payment-card--width: 220px;
+    --c2-payment-card__face--padding: 14px;
+    --c2-payment-card__face--border-radius: 10px;
+    --c2-payment-card__number--font-size: 15px;
+    --c2-payment-card__chip--display: none;
+    --c2-payment-card__fields--display: none;
+    --c2-payment-card__actions--display: none;
+    --c2-payment-card__face--background: radial-gradient(120% 140% at 0% 0%, #7c3aed 0%, #3b0764 75%);
+  }
+</style>
+<c2-payment-card class="card-mini" label="Subscriptions" last4="0042"></c2-payment-card>
+```
+
+</GalleryGrid>

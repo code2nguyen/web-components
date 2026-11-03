@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-comment-thread</title>
+    <script type="module" src="/src/comment-thread.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-comment-thread
+      quote="border-radius: 6px"
+      reactions
+      current-user='{"id":"ben","name":"Ben Ito"}'
+      comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this be a token?","time":"2026-10-27T08:00:00Z"},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, radius-md.","time":"2026-10-27T09:00:00Z"}]'
+    ></c2-comment-thread>
+  </body>
+</html>

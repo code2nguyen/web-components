@@ -107,15 +107,18 @@ test('markers are buttons named by label and x, reachable from the keyboard, and
   await expect(marker).toHaveCount(1)
   await expect(marker).toHaveAttribute('title', 'Error surge')
 
-  const clicked = page
-    .locator('#chart')
-    .evaluate(
-      (element) =>
-        new Promise<unknown>((resolve) => element.addEventListener('annotation-click', (event) => resolve((event as CustomEvent).detail), { once: true })),
-    )
+  // The listener must be in place before the key is pressed: an evaluate left pending can still be resolving its
+  // locator when Enter lands, and the event then goes unheard. It is wrapped in an object because a handle to the
+  // promise itself would wait for it.
+  const clicked = await page.locator('#chart').evaluateHandle((element) => ({
+    detail: new Promise<unknown>((resolve) => element.addEventListener('annotation-click', (event) => resolve((event as CustomEvent).detail), { once: true })),
+  }))
   await marker.focus()
   await page.keyboard.press('Enter')
-  expect(await clicked).toEqual({ annotation: { x: start + 1_800_000, label: 'Error surge', tone: 'danger', id: 'surge' }, index: 0 })
+  expect(await clicked.evaluate((listener) => listener.detail)).toEqual({
+    annotation: { x: start + 1_800_000, label: 'Error surge', tone: 'danger', id: 'surge' },
+    index: 0,
+  })
 })
 
 test('a marker on a labelled row is named by the row label, as the axis names it', async ({ page, scenario }) => {

@@ -1,0 +1,54 @@
+---
+title: 'Wheel Picker'
+description: 'iOS-style scroll wheels to pick a time, a height, a weight or any value from a short list, by swipe, scroll, click or keys.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { WheelPicker } from '@c2n/components/wheel-picker'
+
+`c2-wheel-picker` is the picker of iOS and of fitness apps: each wheel is a column of rows that scrolls and snaps, and the row in the band across the middle is its value. It suits short lists picked with a thumb, such as a time, a height, a weight or a size.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/wheel-picker'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/wheel-picker
+<div data-label="Height">
+  <c2-wheel-picker label="Height" value="5;10" columns='[{"label":"Feet","suffix":"ft","options":["4","5","6","7"]},{"label":"Inches","suffix":"in","options":["0","1","2","3","4","5","6","7","8","9","10","11"]}]'></c2-wheel-picker>
+</div>
+<div data-label="Time">
+  <c2-wheel-picker label="Reminder time" value="7;30;AM" columns='[{"label":"Hour","options":["1","2","3","4","5","6","7","8","9","10","11","12"]},{"label":"Minute","options":["00","05","10","15","20","25","30","35","40","45","50","55"]},{"label":"Period","options":["AM","PM"]}]'></c2-wheel-picker>
+</div>
+<div data-label="One wheel">
+  <c2-wheel-picker label="Size" value="M" options="XS;S;M;L;XL"></c2-wheel-picker>
+</div>
+```
+
+### Wheels
+
+`columns` lists the wheels, as a JSON attribute or a property. Each has `options` (strings, or `{ value, label?, disabled? }`), a `label` that names it for screen readers, and an optional `suffix` shown after it ("ft", "kg") and read with its value. For a single wheel, `options` alone is enough: a JSON array, or a `;`-separated list.
+
+### Value
+
+`value` holds one value per wheel; as an attribute, the values are separated by `;` (`value="5;10"`). A wheel without a value starts on its first enabled row, so the picker always has a value.
+
+When the user turns a wheel, the row it settles on becomes its value, and `input` then `change` fire. A swipe, the mouse wheel and a click on a row all turn it. A disabled row is skipped: a wheel that settles on one moves on to the nearest enabled row. Setting `value` turns the wheels without firing events.
+
+### In a form
+
+Under a `name`, the form receives the values joined by `;`. Inside a `c2-form-field`, the field's label names the picker and its hint describes it.
+
+### Look
+
+How many rows show is CSS: `--c2-wheel-picker--visible-rows` (5 by default; an odd number keeps the band in the middle) and `--c2-wheel-picker__row--height`. The band, the faded rows and the picked row each have their own variables.
+
+### Keyboard
+
+Each wheel is a spin button with one tab stop. Up and Down step a row, Page Up and Page Down step five, and Home and End go to the ends. Disabled rows are skipped.

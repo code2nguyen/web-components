@@ -1,0 +1,67 @@
+---
+title: 'Scroll Area'
+description: 'A scroll container with themed scrollbars and shadows on the edges with more content beyond them.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ScrollArea } from '@c2n/components/scroll-area'
+
+`c2-scroll-area` is a scroll container that looks the part, like the ScrollArea of Mantine, Chakra and PrimeVue or the side panels of Slack and Linear. It keeps native scrolling (wheel, touch, keys, momentum), themes the scrollbar, and casts a shadow on each edge that has content beyond it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/scroll-area'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/scroll-area
+<style>
+  .scroll-demo {
+    --c2-scroll-area--max-height: 220px;
+    --c2-scroll-area--border-radius: 8px;
+    width: 260px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+  .scroll-demo .row {
+    margin: 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .scroll-fade {
+    --c2-scroll-area__shadow--color: transparent;
+    --c2-scroll-area__fade--size: 40px;
+  }
+</style>
+<div data-label="Shadows">
+  <c2-scroll-area class="scroll-demo" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+</div>
+<div data-label="Fade">
+  <c2-scroll-area class="scroll-demo scroll-fade" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+</div>
+```
+
+### Size
+
+The area grows with its content up to `--c2-scroll-area--max-height` (or `--c2-scroll-area--max-width`), then scrolls; inside a box with a fixed height, it fills it. `orientation` picks the axes that scroll: `vertical` (the default), `horizontal` or `both`.
+
+### Scrollbars
+
+The scrollbar stays native, so it keeps the platform's feel and accessibility, and is themed through CSS: `--c2-scroll-area__scrollbar--width` (`thin` by default, `auto` or `none`), the thumb and track colours, and the thickness where the browser lets it be set. `--c2-scroll-area__thumb__hover--color` applies while the pointer is over the area: with a transparent thumb, the bar fades in on hover as on macOS.
+
+### Shadows and fade
+
+A shadow shows on each edge that has content beyond it and disappears once that edge is reached. Set `--c2-scroll-area__shadow--color: transparent` to turn shadows off, and `--c2-scroll-area__fade--size` above 0 to fade the content into those edges instead.
+
+### Scrolling from code
+
+`scrollToEdge('top' | 'bottom' | 'start' | 'end')` jumps to an edge, `scrollTo()` works as on any element, and `viewport` is the element that scrolls, for code that needs the real scroller. `scroll-edge` fires with `{ edge }` when a scroll reaches an edge (not when content loads, and not at the edges the area starts at): the hook for loading more at the end of a feed or the top of a chat. It does not bubble, so a scroll area nested in another does not trigger the outer one's listener.
+
+### Keyboard
+
+A region that scrolls must be reachable from the keyboard, so the area has a tab stop and a name. With a `label` it is a region landmark; without one it is a group, so several scroll areas on a page do not make landmarks with the same name. Once focused, the arrow keys, Page Up, Page Down, Home and End scroll it.

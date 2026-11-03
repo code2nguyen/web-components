@@ -1355,6 +1355,13 @@
       "reason": "The default slot only projects the consumer's fallback text (\"No date\") while no valid date is set; it inherits the host's --c2-format-date--* typography and is otherwise styled by the consumer."
     },
     {
+      "tag": "c2-fx-converter",
+      "slot": "swap-icon",
+      "decision": "variables",
+      "variables": ["--c2-fx-converter__swap-icon--size"],
+      "reason": "The swap button sizes the slotted icon and its default arrows through the icon size variable."
+    },
+    {
       "tag": "c2-gantt",
       "slot": "duration-header",
       "decision": "assigned-content",
@@ -1527,6 +1534,12 @@
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-in-view",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content, watched and revealed as a whole; the app styles it."
     },
     {
       "tag": "c2-indicator",
@@ -1758,6 +1771,60 @@
       "reason": "The toolbar region owns the toolbar slot's layout."
     },
     {
+      "tag": "c2-payment-card",
+      "slot": "brand",
+      "decision": "assigned-content",
+      "reason": "The app's licensed network or issuer logo, sized and coloured by the app."
+    },
+    {
+      "tag": "c2-payment-card",
+      "slot": "badge",
+      "decision": "assigned-content",
+      "reason": "Replaces the \"Frozen\" text inside the badge, which keeps its own background variable; the app styles its own content."
+    },
+    {
+      "tag": "c2-payment-card",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "More buttons beside \"Show details\"; each is styled through its own public contract."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The counter's label text, styled by the counter's label variables it inherits."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "hint",
+      "decision": "assigned-content",
+      "reason": "A line under the label; it inherits the hint colour and size variables, and the app styles anything richer."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "decrement-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own \u2212 icon, sized by the app; the default glyph is 16px."
+    },
+    {
+      "tag": "c2-quantity",
+      "slot": "increment-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own + icon, sized by the app; the default glyph is 16px."
+    },
+    {
+      "tag": "c2-quantity-picker",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The c2-quantity counters, each styled through its own variables."
+    },
+    {
+      "tag": "c2-quantity-picker",
+      "slot": "chevron-icon",
+      "decision": "assigned-content",
+      "reason": "The app's own chevron, sized by the app; the default glyph is 16px."
+    },
+    {
       "tag": "c2-reaction-bar",
       "slot": "picker",
       "decision": "assigned-content",
@@ -1824,6 +1891,36 @@
       "decision": "variables",
       "variables": ["--c2-save-bar__message--font-size", "--c2-save-bar__message--font-weight", "--c2-save-bar__message--color"],
       "reason": "The message line sets the type the slotted message inherits."
+    },
+    {
+      "tag": "c2-scroll-area",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content that scrolls; the app styles it, and the area themes only the scroller."
+    },
+    {
+      "tag": "c2-scroll-progress",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot is the centre of a ring: the app's own icon or button, styled by the app."
+    },
+    {
+      "tag": "c2-selection-toolbar",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds the app's own content, whose selections the toolbar acts on; the app styles it."
+    },
+    {
+      "tag": "c2-selection-toolbar",
+      "slot": "toolbar",
+      "decision": "assigned-content",
+      "reason": "The toolbar slot takes the app's controls (c2-button, c2-icon-button), styled through their own variables."
+    },
+    {
+      "tag": "c2-share-sheet",
+      "slot": "icon-linkedin",
+      "decision": "assigned-content",
+      "reason": "The icon-<target> slots take the app's licensed artwork in place of the neutral tile; the app sizes its own image, which fills the round tile."
     },
     {
       "tag": "c2-skip-link",

@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+  Design mock for c2-__NAME__: a static picture of the component before it exists. Draw the new element with plain
+  HTML and CSS; use real c2-* elements for the parts it composes (the imports below resolve to source). One
+  <section data-mock="State name"> per state worth reviewing; each is screenshotted on its own, in both themes.
+  Colours, radii, sizes and fonts come from the --c2-theme--* tokens or the library's default literals, so the mock
+  already reads in dark mode and its CSS can move into the component's $theme map as is.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>c2-__NAME__ design mock</title>
+    <link rel="stylesheet" href="/packages/tools/theme/dist/theme.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        color: var(--c2-theme--color-on-surface, #18181b);
+        background: var(--c2-theme--color-surface, #ffffff);
+      }
+      section[data-mock] {
+        display: grid;
+        gap: 8px;
+        width: max-content;
+        max-width: 100%;
+        margin-bottom: 32px;
+        padding: 16px;
+      }
+      section[data-mock]::before {
+        content: attr(data-mock);
+        color: var(--c2-theme--color-on-surface-variant, #71717a);
+        font-size: 12px;
+      }
+
+      /* The new element, drawn by hand. */
+      .__NAME__ {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+        border-radius: var(--c2-theme--radius-lg, 8px);
+      }
+    </style>
+    <script type="module">
+      // Real elements the component composes, from source: import '@c2n/button'
+    </script>
+  </head>
+  <body>
+    <section data-mock="Default">
+      <div class="__NAME__">…</div>
+    </section>
+  </body>
+</html>

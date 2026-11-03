@@ -22,6 +22,7 @@ declare module 'vue' {
       C2Props<MoneyInput> & {
         'currency-display'?: unknown
         'currency-name'?: unknown
+        'currency-label'?: unknown
         readonly?: unknown
         'error-text'?: unknown
         'aria-label'?: unknown

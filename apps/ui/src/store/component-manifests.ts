@@ -33,6 +33,7 @@ import colorArea from '@c2n/color-area/custom-elements.json'
 import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorSlider from '@c2n/color-slider/custom-elements.json'
 import command from '@c2n/command/custom-elements.json'
+import commentThread from '@c2n/comment-thread/custom-elements.json'
 import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import confirmDialog from '@c2n/confirm-dialog/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
@@ -58,6 +59,7 @@ import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
 import formatDate from '@c2n/format-date/custom-elements.json'
 import formatNumber from '@c2n/format-number/custom-elements.json'
+import fxConverter from '@c2n/fx-converter/custom-elements.json'
 import gantt from '@c2n/gantt/custom-elements.json'
 import googleMap from '@c2n/google-map/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
@@ -66,6 +68,7 @@ import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
+import inView from '@c2n/in-view/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
 import jsonForm from '@c2n/json-form/custom-elements.json'
@@ -98,6 +101,7 @@ import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import notificationCenter from '@c2n/notification-center/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
+import orderBook from '@c2n/order-book/custom-elements.json'
 import orgChart from '@c2n/org-chart/custom-elements.json'
 import otpInput from '@c2n/otp-input/custom-elements.json'
 import overflowList from '@c2n/overflow-list/custom-elements.json'
@@ -106,11 +110,14 @@ import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
+import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
+import promoCodeField from '@c2n/promo-code-field/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
+import quantityPicker from '@c2n/quantity-picker/custom-elements.json'
 import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
@@ -120,10 +127,14 @@ import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
+import scrollArea from '@c2n/scroll-area/custom-elements.json'
+import scrollProgress from '@c2n/scroll-progress/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
 import secretField from '@c2n/secret-field/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
+import selectionToolbar from '@c2n/selection-toolbar/custom-elements.json'
 import separator from '@c2n/separator/custom-elements.json'
+import shareSheet from '@c2n/share-sheet/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
@@ -170,6 +181,7 @@ import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
+import wheelPicker from '@c2n/wheel-picker/custom-elements.json'
 import workingIndicator from '@c2n/working-indicator/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
@@ -211,6 +223,7 @@ export const componentManifests = (function () {
     colorSelect,
     colorSlider,
     command,
+    commentThread,
     comparisonBar,
     confirmDialog,
     contextMenu,
@@ -236,6 +249,7 @@ export const componentManifests = (function () {
     formField,
     formatDate,
     formatNumber,
+    fxConverter,
     gantt,
     googleMap,
     header,
@@ -244,6 +258,7 @@ export const componentManifests = (function () {
     iconButton,
     image,
     imageCropper,
+    inView,
     indicator,
     inlineEdit,
     jsonForm,
@@ -276,6 +291,7 @@ export const componentManifests = (function () {
     notepad,
     notificationCenter,
     numberInput,
+    orderBook,
     orgChart,
     otpInput,
     overflowList,
@@ -284,11 +300,14 @@ export const componentManifests = (function () {
     pageHeader,
     pagination,
     passwordField,
+    paymentCard,
     phoneInput,
     phosphorIcons,
     popconfirm,
     progress,
+    promoCodeField,
     qrCode,
+    quantityPicker,
     queryInput,
     questionnaire,
     radio,
@@ -298,10 +317,14 @@ export const componentManifests = (function () {
     reorderList,
     richTextEditor,
     saveBar,
+    scrollArea,
+    scrollProgress,
     searchField,
     secretField,
     select,
+    selectionToolbar,
     separator,
+    shareSheet,
     sheet,
     shortcut,
     sideNav,
@@ -348,6 +371,7 @@ export const componentManifests = (function () {
     virtualList,
     visuallyHidden,
     weekPlanner,
+    wheelPicker,
     workingIndicator,
   ].reduce((result, item) => {
     const pkg = item as Package

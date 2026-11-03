@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-share-sheet</title>
+    <script type="module" src="/src/share-sheet.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <button onclick="document.querySelector('c2-share-sheet').share()">Share</button
+    ><c2-share-sheet heading="Trip to Lisbon" url="https://example.com/trips/lisbon" qr></c2-share-sheet>
+  </body>
+</html>

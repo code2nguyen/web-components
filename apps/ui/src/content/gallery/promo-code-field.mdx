@@ -1,0 +1,45 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PromoCodeField } from '@c2n/components/promo-code-field'
+
+## Presets
+
+Looks for `c2-promo-code-field`. Its own variables space the row and style the tokens; the field, the button and the chips keep their own variables, which can be set on it.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-promo-code-field codes='[{"code":"SPRING20","label":"−$12.00"}]' max="2"></c2-promo-code-field>
+```
+
+```html tag=MdxCodeBlock,label=Savings in green
+<style>
+  .promo-green {
+    --c2-promo-code-field__saving--color: light-dark(#15803d, #4ade80);
+    --c2-chip__container--background-color: light-dark(#f0fdf4, #0f2a1a);
+    --c2-chip__container--border: 1px solid light-dark(#bbf7d0, #14532d);
+  }
+</style>
+<c2-promo-code-field class="promo-green" codes='[{"code":"FREESHIP","label":"Free shipping"},{"code":"WELCOME10","label":"−10%"}]' max="3"></c2-promo-code-field>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .promo-pill {
+    --c2-promo-code-field__row--gap: 0px;
+    --c2-text-field--border-top-left-radius: 999px;
+    --c2-text-field--border-bottom-left-radius: 999px;
+    --c2-text-field--border-top-right-radius: 0;
+    --c2-text-field--border-bottom-right-radius: 0;
+    --c2-button__container--border-radius: 0 999px 999px 0;
+  }
+</style>
+<c2-promo-code-field class="promo-pill"></c2-promo-code-field>
+```
+
+```html tag=MdxCodeBlock,label=Collapsed
+<c2-promo-code-field collapsed></c2-promo-code-field>
+```
+
+</GalleryGrid>

@@ -1,0 +1,48 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { CommentThread } from '@c2n/components/comment-thread'
+
+## Presets
+
+Looks for `c2-comment-thread`. The surface, the quote bar and the mention colour set the style.
+
+<GalleryGrid min={340}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-comment-thread quote="border-radius: 6px" current-user='{"id":"ben","name":"Ben Ito"}' comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+```
+
+```html tag=MdxCodeBlock,label=Flat
+<style>
+  .thread-flat {
+    --c2-comment-thread--border: 1px solid transparent;
+    --c2-comment-thread--background: transparent;
+    --c2-comment-thread--padding: 0;
+    --c2-comment-thread__quote--border: 3px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-comment-thread__quote--background: transparent;
+  }
+</style>
+<c2-comment-thread class="thread-flat" quote="border-radius: 6px" current-user='{"id":"ben","name":"Ben Ito"}' comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .thread-soft {
+    --c2-comment-thread--background: light-dark(#faf5ff, #1f1530);
+    --c2-comment-thread--border: 1px solid light-dark(#e9d5ff, #3b2556);
+    --c2-comment-thread__quote--border: 3px solid #9333ea;
+    --c2-comment-thread__quote--background: light-dark(#f3e8ff, #2e1a47);
+    --c2-comment-thread__mention--color: light-dark(#7e22ce, #c4a1f0);
+    --c2-comment-thread__mention--background: light-dark(#f3e8ff, #2e1a47);
+    --c2-comment-thread__submit--background: #7e22ce;
+  }
+</style>
+<c2-comment-thread class="thread-soft" reactions current-user='{"id":"ben","name":"Ben Ito"}' comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+```
+
+```html tag=MdxCodeBlock,label=Resolved
+<c2-comment-thread resolved current-user='{"id":"ben","name":"Ben Ito"}' comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+```
+
+</GalleryGrid>

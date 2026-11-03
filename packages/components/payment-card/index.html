@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-payment-card</title>
+    <script type="module" src="/src/payment-card.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-payment-card id="card" label="Marketing team · Virtual" holder="Ada Lovelace" last4="4242" hide-after="15"></c2-payment-card>
+    <c2-payment-card label="Travel · Physical" holder="Ada Lovelace" last4="9010" frozen></c2-payment-card>
+    <script type="module">
+      // A fake card API: the details arrive after a short delay, as after a re-authentication.
+      const card = document.getElementById('card')
+      card.addEventListener('reveal-request', () => setTimeout(() => (card.details = { number: '4242 4242 4242 4242', expiry: '08/29', cvc: '314' }), 600))
+      card.addEventListener('field-copy', (event) => console.log('copied', event.detail.field))
+    </script>
+  </body>
+</html>

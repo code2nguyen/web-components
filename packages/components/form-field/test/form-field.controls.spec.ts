@@ -41,6 +41,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-tree-select', markup: '<c2-tree-select><c2-tree-item value="a" label="A"></c2-tree-item></c2-tree-select>' },
   { tag: 'c2-month-picker', markup: '<c2-month-picker></c2-month-picker>' },
   { tag: 'c2-date-strip', markup: '<c2-date-strip></c2-date-strip>' },
+  { tag: 'c2-wheel-picker', markup: '<c2-wheel-picker options="S;M;L"></c2-wheel-picker>' },
   // Both are groups named by the field; the field label names the group and each inner control keeps its own name.
   { tag: 'c2-card-input', markup: '<c2-card-input></c2-card-input>', selfLabelled: true },
   {

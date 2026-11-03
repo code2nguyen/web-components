@@ -1,0 +1,94 @@
+---
+title: 'Order Book'
+description: 'Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { OrderBook } from '@c2n/components/order-book'
+import { Button } from '@c2n/components/button'
+
+`c2-order-book` shows the resting orders of a market, like the order books of Binance, Coinbase Advanced and Kraken Pro: bids high to low, asks low to high, each row with its size, the running total from the best price and a bar sized by that total. A level whose size changes flashes green when it grew and red when it shrank.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/order-book'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/order-book
+<style>
+  .book-demo {
+    width: 300px;
+  }
+  .book-demo--split {
+    width: 520px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Stacked, with price grouping and a trade feed">
+  <div class="book-demo">
+    <c2-order-book
+      id="book-live"
+      base="BTC"
+      quote="USD"
+      groups="0.5;1;5;10"
+      group="0.5"
+      own-prices="64212.25;64208.75"
+      last-price="64210.5"
+      bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208],[64207.25,3.05],[64206.75,2.21]]'
+      asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731],[64213.75,0.044],[64214.25,0.065]]'
+    ></c2-order-book>
+    <c2-button onclick="const book = document.getElementById('book-live'); const bid = 64210.25 - Math.floor(Math.random() * 4) * 0.5; const ask = 64210.75 + Math.floor(Math.random() * 4) * 0.5; book.applyDelta({ bids: [[bid, Math.round(Math.random() * 300) / 100]], asks: [[ask, Math.round(Math.random() * 300) / 100]] }); book.lastPrice = Math.random() > 0.5 ? bid : ask">Next tick</c2-button>
+  </div>
+</div>
+<div data-label="Side by side">
+  <div class="book-demo book-demo--split">
+    <c2-order-book layout="split" depth="6" base="BTC" quote="USD" bids='[[64210.25,0.412],[64209.75,0.18],[64209.25,0.57],[64208.75,2.94],[64208.25,1.66],[64207.75,1.208]]' asks='[[64210.75,2.94],[64211.25,1.66],[64211.75,1.208],[64212.25,3.05],[64212.75,2.21],[64213.25,0.731]]'></c2-order-book>
+  </div>
+</div>
+<div data-label="Connecting">
+  <div class="book-demo">
+    <c2-order-book loading base="BTC" quote="USD"></c2-order-book>
+  </div>
+</div>
+```
+
+### Feeding it
+
+`bids` and `asks` take a snapshot: `{ price, size }` objects, or the `[price, size]` pairs exchange feeds send, as numbers or numeric strings. Setting either replaces that side. A stream then patches it with `applyDelta()`, where a size of 0 removes the level. Deltas that arrive in the same task are drawn in one render, on top of a snapshot set in that task, so replaying buffered deltas right after a snapshot works.
+
+```typescript tag=CodeBlock
+const book = document.querySelector('c2-order-book')!
+const socket = new WebSocket('wss://example.com/book/BTC-USD')
+socket.onmessage = ({ data }) => {
+  const message = JSON.parse(data)
+  if (message.type === 'snapshot') {
+    book.bids = message.bids
+    book.asks = message.asks
+  } else {
+    book.applyDelta({ bids: message.bids, asks: message.asks })
+  }
+}
+```
+
+Only `depth` levels a side are drawn (10 by default), so a deep book costs no more to render than a shallow one.
+
+### Grouping, the spread and own orders
+
+- `group` merges levels into price steps: bids round down and asks round up, so a merged level never looks better than it is.
+- `groups` lists the steps the reader may pick from a select in the header, and `group-change` reports the pick.
+- The spread row shows the mid price and the spread; set `last-price` to show the last trade there instead, with an arrow against the previous one.
+- `own-prices` puts a dot after the prices the user has orders at, read as "your order".
+
+### Picking a price
+
+Clicking a row, or pressing Enter on it, fires `price-select` with `{ side, price, size, total }`: the hook for filling a trade form. The rows share one tab stop, and the arrow keys, Home and End move between them. Each side is a table, captioned "Asks" and "Bids", so a screen reader reads its columns. The spread row is deliberately not a live region: a live book would never stop talking.
+
+### Colours
+
+The bid and ask colours default to a darker green and red in the light theme and lighter ones in the dark theme (`light-dark()`), so the prices keep 4.5:1 contrast on their own depth bars. The bars and the flashes are mixed from those two colours, so setting `--c2-order-book__bid--color` and `--c2-order-book__ask--color` recolours everything.

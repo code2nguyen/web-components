@@ -1,0 +1,45 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ShareSheet } from '@c2n/components/share-sheet'
+import { Button } from '@c2n/components/button'
+
+## Presets
+
+Looks for `c2-share-sheet`. Press a card's button to open its sheet. The tiles and the link field set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-button onclick="document.getElementById('share-card-1').show()">Share</c2-button>
+<c2-share-sheet id="share-card-1" heading="Trip to Lisbon" url="https://example.com/trips/lisbon"></c2-share-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Square tiles
+<style>
+  .share-square {
+    --c2-share-sheet__tile--size: 52px;
+    --c2-share-sheet__tile--background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .share-square::part(tile) {
+    border-radius: 14px;
+  }
+</style>
+<c2-button onclick="document.getElementById('share-card-2').show()">Share</c2-button>
+<c2-share-sheet id="share-card-2" class="share-square" heading="Design review" url="https://example.com/files/review" targets="email;sms;whatsapp;telegram"></c2-share-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent with QR
+<style>
+  .share-soft {
+    --c2-share-sheet__tile--background: light-dark(#eff6ff, #12233f);
+    --c2-share-sheet__tile--color: light-dark(#1d4ed8, #93c5fd);
+    --c2-share-sheet__tile__hover--background: light-dark(#dbeafe, #1b3260);
+    --c2-share-sheet__link--background: light-dark(#eff6ff, #12233f);
+  }
+</style>
+<c2-button onclick="document.getElementById('share-card-3').show()">Share</c2-button>
+<c2-share-sheet id="share-card-3" class="share-soft" qr heading="Event ticket" url="https://example.com/tickets/42"></c2-share-sheet>
+```
+
+</GalleryGrid>

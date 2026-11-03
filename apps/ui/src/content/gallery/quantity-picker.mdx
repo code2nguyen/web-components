@@ -1,0 +1,64 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { QuantityPicker, Quantity } from '@c2n/components/quantity-picker'
+
+## Presets
+
+Looks for `c2-quantity-picker`. The picker styles the trigger, the panel and the dividers; each `c2-quantity` styles its stepper, and its variables can be set on the picker.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-quantity-picker label="Guests">
+  <c2-quantity name="adults" value="2" min="1" singular="adult" plural="adults">Adults<span slot="hint">Ages 13 or above</span></c2-quantity>
+  <c2-quantity name="children" singular="child" plural="children">Children<span slot="hint">Ages 2–12</span></c2-quantity>
+</c2-quantity-picker>
+```
+
+```html tag=MdxCodeBlock,label=Inline panel
+<style>
+  .qp-inline {
+    width: 100%;
+  }
+</style>
+<c2-quantity-picker class="qp-inline" label="Tickets" inline max-total="8">
+  <c2-quantity name="standard" value="2" singular="standard ticket" plural="standard tickets">Standard<span slot="hint">$24.00</span></c2-quantity>
+  <c2-quantity name="student" singular="student ticket" plural="student tickets">Student<span slot="hint">$16.00 · ID required</span></c2-quantity>
+  <c2-quantity name="child" singular="child ticket" plural="child tickets">Child<span slot="hint">$12.00 · Under 12</span></c2-quantity>
+</c2-quantity-picker>
+```
+
+```html tag=MdxCodeBlock,label=Filled steppers
+<style>
+  .qp-filled {
+    width: 100%;
+    --c2-quantity__button--background: var(--c2-theme--color-primary, #0265dc);
+    --c2-quantity__button--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-quantity__button--border: 1px solid transparent;
+    --c2-quantity__button__hover--border: 1px solid transparent;
+    --c2-quantity__button--border-radius: 8px;
+    --c2-quantity__button--size: 28px;
+  }
+</style>
+<c2-quantity-picker class="qp-filled" label="Rooms" inline>
+  <c2-quantity name="rooms" value="1" min="1" max="8" singular="room" plural="rooms">Rooms</c2-quantity>
+  <c2-quantity name="beds" value="2" min="1" max="4" singular="bed" plural="beds">Beds per room</c2-quantity>
+</c2-quantity-picker>
+```
+
+```html tag=MdxCodeBlock,label=Pill trigger
+<style>
+  .qp-pill {
+    --c2-quantity-picker__trigger--border-radius: 999px;
+    --c2-quantity-picker__trigger--padding: 8px 18px;
+    --c2-quantity-picker__panel--border-radius: 14px;
+  }
+</style>
+<c2-quantity-picker class="qp-pill" label="Passengers" placeholder="Add passengers">
+  <c2-quantity name="adults" singular="adult" plural="adults">Adults</c2-quantity>
+  <c2-quantity name="seniors" singular="senior" plural="seniors">Seniors<span slot="hint">65 or older</span></c2-quantity>
+</c2-quantity-picker>
+```
+
+</GalleryGrid>

@@ -1,0 +1,58 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SelectionToolbar } from '@c2n/components/selection-toolbar'
+import { Button } from '@c2n/components/button'
+
+## Presets
+
+Looks for `c2-selection-toolbar`. Select text in a card to see its toolbar. The surface and shadow set the style; the controls keep their own.
+
+<GalleryGrid min={320}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-selection-toolbar>
+  <p>Select a few words of this sentence to show the toolbar.</p>
+  <c2-button slot="toolbar" data-action="ask">Ask AI</c2-button>
+  <c2-button slot="toolbar" data-action="comment">Comment</c2-button>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=Dark bubble
+<style>
+  .toolbar-dark {
+    --c2-selection-toolbar--background: #18181b;
+    --c2-selection-toolbar--border: 1px solid #18181b;
+    --c2-selection-toolbar--border-radius: 999px;
+    --c2-selection-toolbar--padding: 4px 6px;
+  }
+  .toolbar-dark c2-button {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container--color: #fafafa;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--height: 30px;
+  }
+</style>
+<c2-selection-toolbar class="toolbar-dark">
+  <p>Select a few words of this sentence to show the toolbar.</p>
+  <c2-button slot="toolbar" data-action="rewrite">Rewrite</c2-button>
+  <c2-button slot="toolbar" data-action="translate">Translate</c2-button>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=Below the text
+<style>
+  .toolbar-flat {
+    --c2-selection-toolbar--box-shadow: none;
+    --c2-selection-toolbar--border-radius: 6px;
+    --c2-selection-toolbar--offset: 4px;
+  }
+</style>
+<c2-selection-toolbar class="toolbar-flat" placement="bottom">
+  <p>Select a few words of this sentence to show the toolbar.</p>
+  <c2-button slot="toolbar" data-action="highlight">Highlight</c2-button>
+</c2-selection-toolbar>
+```
+
+</GalleryGrid>

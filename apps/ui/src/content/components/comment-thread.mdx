@@ -1,0 +1,71 @@
+---
+title: 'Comment Thread'
+description: 'One conversation on a piece of content: the first comment and its replies, a reply box, edit and delete on your own comments, and Resolve.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { CommentThread } from '@c2n/components/comment-thread'
+
+`c2-comment-thread` is a comment and its replies, like a comment in Google Docs, a review thread on GitHub or a pin in Figma. It shows the text the thread is about, each comment with its author and time, a reply box, edit and delete on your own comments, emoji reactions, and Resolve.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/comment-thread'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/comment-thread
+<style>
+  .comment-thread-demo {
+    width: 360px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Open thread">
+  <c2-comment-thread class="comment-thread-demo" quote="border-radius: 6px" reactions current-user='{"id":"ben","name":"Ben Ito"}'
+    comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+</div>
+<div data-label="Resolved">
+  <c2-comment-thread class="comment-thread-demo" resolved current-user='{"id":"ben","name":"Ben Ito"}' comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"Should this radius be a token instead of 6px?","time":"2026-10-27T08:00:00Z","reactions":[{"emoji":"👍","count":2}]},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"@Ana yes, --c2-theme--radius-md covers it.","time":"2026-10-27T09:10:00Z"},{"id":3,"author":{"id":"ana","name":"Ana Diaz"},"body":"Great, updating now.","time":"2026-10-27T09:40:00Z","reactions":[{"emoji":"🎉","count":1,"reacted":true}]}]'></c2-comment-thread>
+</div>
+```
+
+### Comments
+
+`comments` lists the thread oldest first, as a JSON attribute or a property: the first is the root comment, the rest its replies. Each has an `id`, an `author` (`{ id?, name, avatar? }`), a `body`, a `time` (an ISO date-time or a timestamp), and optionally `edited` and `reactions`. Bodies are plain text, never read as HTML: line breaks are kept and `@mentions` are highlighted. `quote` shows the text the thread is about above the first comment.
+
+### Who can do what
+
+`current-user` (`{ id?, name, avatar? }`) says who is writing. It gets the reply box and Resolve, and can edit and delete its own comments, matched by `id`, or by name when there are no ids. With no current user, or with `readonly`, the thread is read-only.
+
+### Events
+
+Every change is a cancelable event, fired before it is applied:
+- `comment-add` (`{ body }`), from the Reply button or Ctrl/⌘+Enter.
+- `comment-edit` (`{ id, body }`). Escape cancels an edit.
+- `comment-delete` (`{ id }`), after a confirmation.
+- `resolve-change` (`{ resolved }`).
+- `reaction-change` (`{ id, emoji, reacted, count }`), shown with `reactions`.
+
+Cancel an event to keep the thread controlled, for example while the server answers, and set `comments` yourself. An added comment that is not cancelled gets a temporary id (`local-1`). Deleting the first comment only fires the event: removing the thread is up to the app.
+
+```js tag=CodeBlock
+thread.addEventListener('comment-add', async (event) => {
+  event.preventDefault()
+  const saved = await api.reply(threadId, event.detail.body)
+  thread.comments = [...thread.comments, saved]
+})
+```
+
+### Long and resolved threads
+
+A thread with more than `collapse-after` replies (4 by default) shows its first reply and its last two, with "Show N earlier replies" between them. A `resolved` thread folds down to its first comment, with the number of replies and a Reopen button.
+
+### With a selection toolbar
+
+`c2-selection-toolbar` puts a Comment button over the text a reader selects. Its `selection-action` event carries the text, which becomes the new thread's `quote`.

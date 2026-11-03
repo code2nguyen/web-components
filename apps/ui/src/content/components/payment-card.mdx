@@ -1,0 +1,73 @@
+---
+title: 'Payment Card'
+description: 'A company card face that stays masked until the reader asks, then shows each detail with a copy button.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PaymentCard } from '@c2n/components/payment-card'
+import { Button } from '@c2n/components/button'
+
+`c2-payment-card` shows a card the way Brex, Mercury and Ramp do: the face is masked down to the last four digits until the reader asks to see it, and then the number, expiry and security code each get a copy button.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/payment-card'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/payment-card
+<style>
+  .card-blue {
+    --c2-payment-card__face--background: radial-gradient(120% 140% at 0% 0%, #2563eb 0%, #1e3a8a 70%);
+  }
+  .card-compact {
+    --c2-payment-card--width: 220px;
+    --c2-payment-card__face--padding: 14px;
+    --c2-payment-card__face--border-radius: 10px;
+    --c2-payment-card__number--font-size: 15px;
+    --c2-payment-card__chip--display: none;
+    --c2-payment-card__fields--display: none;
+    --c2-payment-card__actions--display: none;
+  }
+</style>
+<div data-label="Masked, reveal on request">
+  <c2-payment-card id="card-demo" label="Marketing team · Virtual" holder="Ada Lovelace" last4="4242"></c2-payment-card>
+  <c2-button onclick="const card = document.getElementById('card-demo'); if (!card.wired) { card.wired = true; card.addEventListener('reveal-request', () => setTimeout(() => { card.details = { number: '4242 4242 4242 4242', expiry: '08/29', cvc: '314' } }, 600)) } card.reveal()">Show through the API</c2-button>
+</div>
+<div data-label="Frozen">
+  <c2-payment-card class="card-blue" label="Travel · Physical" holder="Ada Lovelace" last4="9010" frozen></c2-payment-card>
+</div>
+<div data-label="Compact, for a list">
+  <c2-payment-card class="card-compact card-blue" label="Travel" last4="4242"></c2-payment-card>
+</div>
+```
+
+### The details stay with your app
+
+The full number never sits in an attribute. `last4`, `holder` and `label` describe the masked face. "Show details" fires `reveal-request`; your app fetches the details (usually behind a re-authentication) and sets the `details` property:
+
+```typescript tag=CodeBlock
+const card = document.querySelector('c2-payment-card')!
+card.addEventListener('reveal-request', async () => {
+  try {
+    card.details = await api.cardDetails(cardId) // { number, expiry, cvc }
+  } catch {
+    card.revealFailed()
+  }
+})
+```
+
+While the request runs, the button shows its running state and the number line is a skeleton. The card masks itself again, dropping `details` from memory, after `hide-after` seconds (60 by default), when the page is hidden, when it is frozen, and through `hide()`. Details that arrive after the reveal was cancelled (the card hidden, frozen, or the page left) are dropped rather than shown.
+
+### Copy and accessibility
+
+Each shown field has a `c2-copy-button` ("Copy card number", "Copy expiry date", "Copy security code"), and a copy fires `field-copy` with the `field`, for an audit log (named apart from the native clipboard `copy`). The masked number reads "Card ending in 4242"; showing and hiding the details is announced.
+
+### Styling
+
+The face is designed dark, so its colours stay in both themes. `--c2-payment-card__face--background` takes any colour or gradient, and the chip, the expiry row and the button row each have a display variable, which is how the compact card above drops them. The `brand` slot takes the network's or issuer's logo, as your app is licensed to show it; `actions` takes more buttons ("Freeze") beside "Show details".

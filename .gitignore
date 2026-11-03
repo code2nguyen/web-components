@@ -33,3 +33,6 @@ apps/ui/public/demo/
 
 # Built by packages/umbrella/scripts/bundle.ts
 packages/umbrella/custom-elements.json
+
+# Design mocks of components before they are built (new-component skill, step 2)
+/design-mocks/

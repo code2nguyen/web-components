@@ -21,7 +21,42 @@ From `$ARGUMENTS` and the conversation, determine:
 
 If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
 
-## 2. Run the generator (non-interactive)
+## 2. Design mock screen (complex components)
+
+For a complex component, draw it before building it. A mock is the cheapest place to get the look and the layout
+right, and the user sees the design as a picture, not only as prose. A component is complex when any of these hold:
+it has more than one region or pane, it composes several `c2-*` elements, it opens a popup or overlay, it supports
+drag, resize or live data, or it has four or more visual states. A glyph, a pill or a single-control input skips
+this step.
+
+```bash
+node .claude/skills/new-component/scripts/mock-screenshots.mjs <name> --init     # writes design-mocks/<name>.html from the template
+node .claude/skills/new-component/scripts/mock-screenshots.mjs <name> [--mobile] # one PNG per state and theme in test-results/design-mocks/<name>/
+```
+
+`design-mocks/` is ignored by Git: the mock is a working drawing, and the component replaces it. The script serves the
+repo with the test Vite server, which resolves every `@c2n/*` import to source, and loads `@c2n/theme`'s
+`theme.css` (build it with `npm run build -w packages/tools/theme` if it is missing).
+
+- **Draw the new element with plain HTML and CSS**, and use the real `c2-*` elements for the parts it composes (a
+  `c2-select` in a toolbar, a `c2-button` in a footer) through a `<script type="module">` import, so the mock shows
+  them as they are.
+- **One `<section data-mock="State name">` per state worth reviewing**: the default, empty, loading, error,
+  selected or open states, a long-content or overflow case, and RTL where direction matters. Each section is
+  screenshotted on its own, in both themes; `--mobile` adds the full page at 390px for anything that has to
+  reflow.
+- **Use the tokens and the library's literals** (step 4 lists them): `var(--c2-theme--color-on-surface, #18181b)`,
+  `var(--c2-theme--radius-lg, 8px)`. The mock then reads in dark mode as is, and its values move into the
+  component's `$theme` map unchanged.
+- **Name the parts as the component will** (`.header`, `.row`, `.row__selected`): those class names are the
+  `--c2-<name>__<part>--<property>` variables to come.
+
+Look at every image, fix the mock until it reads well in both themes and at narrow widths, then send the
+screenshots to the user with the design doc (`SendUserFile` when available). Build only after that. The mock is also
+the reference for step 8: the built component's screenshots should match it, or the difference should be a
+deliberate change.
+
+## 3. Run the generator (non-interactive)
 
 Plop accepts the prompt answers as positional bypass args, so never run it interactively:
 
@@ -46,7 +81,7 @@ Each registry entry lands at its alphabetical place (`scripts/generator/sorted-l
 
 Verify with `git status --short` that exactly those files changed (`scripts/generator/plopfile.js` and `sorted-lists.js` are git-ignored and rebuilt by `pregenerate`, so they never show up).
 
-## 3. Implement the component
+## 4. Implement the component
 
 Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/components/checkbox/src/checkbox.ts` as the reference shape; `label` is a good minimal example.
 
@@ -57,7 +92,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
 - Replace the scaffold's `<c2-<name>>` in `index.html` with a few hand-written usage examples (states, slots, themed variant).
 
-## 4. Write the test suite
+## 5. Write the test suite
 
 The generator leaves a passing placeholder in `<package>/test/`. Replace it with real coverage before calling the
 component done — `tests/README.md` has the conventions, and `packages/components/button/test/` is the reference.
@@ -72,7 +107,7 @@ For a component where cost matters more than behaviour — anything virtualized 
 `packages/components/table/test/` for the split between a machine-independent `*.perf.spec.ts` and an opt-in
 wall-clock `*.bench.spec.ts` with a committed baseline.
 
-## 5. Fill in the UI app wiring the generator stubbed
+## 6. Fill in the UI app wiring the generator stubbed
 
 - `apps/ui/src/data/component-previews.ts` — replace the placeholder with real markup keyed by doc id (use `<div class="preview-row">` for several elements).
 - `apps/ui/src/content/gallery/<name>.mdx` — replace the two stub cards with styled variants worth drawing from; delete the file if the component has no meaningful variants and the Gallery tab should not appear.
@@ -83,7 +118,7 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 
 **Open-package caveat:** `apps/ui/src/content/oepn-components/` is not an Astro collection, so that stub is not served. To document an open package, move the mdx into `apps/ui/src/content/components/`, set `package: '@c2n/<name>'` in its frontmatter, and add the manifest import + `normalizedManifests` entry to `component-manifests.ts` by hand.
 
-## 6. Verify (match CI)
+## 7. Verify (match CI)
 
 ```bash
 npm run build -w packages/components/<name>   # type-check + vite build; regenerates custom-elements.json (commit it)
@@ -102,7 +137,7 @@ npm run ui:dev                                # open /components/<name>; check e
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
 
-## 7. Review it in the docs app by screenshot
+## 8. Review it in the docs app by screenshot
 
 Passing checks do not show what a reader sees. Before the pull request — and again after any fix that changes the
 component's look or its docs — build the site and screenshot the component's pages, then look at every image yourself:
@@ -126,6 +161,7 @@ Read each screenshot, then check:
 - **Interactive states** through `--press`: the popup placed beside its trigger, the state actually changed.
 - **`aria.txt`:** every control and the component itself have the name you intended; no stray text is read.
 - **Landing card:** the preview reads at that size.
+- **Against the mock** (complex components, step 2): the built look matches it, or the difference is deliberate.
 
 Fix what you find, re-run the step, and send the user the screenshots that show the component (with
 `SendUserFile` when available), saying what was fixed after they were taken. The pull request description notes
@@ -147,4 +183,5 @@ that the review was done and what it caught.
 - `apps/ui/src/content/components/<name>.mdx` and `gallery/<name>.mdx` filled in (or the gallery deliberately deleted)
 - `<package>/test/` suite written and passing
 - lint + format clean, `npm run ui:build` green
-- docs app reviewed by screenshot (step 7) in both themes, problems fixed, screenshots shared
+- complex components: design mock drawn and reviewed in both themes, and shared with the design doc before building (step 2)
+- docs app reviewed by screenshot (step 8) in both themes, problems fixed, screenshots shared

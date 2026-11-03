@@ -1,0 +1,60 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FxConverter } from '@c2n/components/fx-converter'
+
+## Presets
+
+Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do most of the work; the fields keep their own `--c2-money-input-*` variables, which can be set on the converter.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .fx-box {
+    width: 100%;
+  }
+</style>
+<c2-fx-converter class="fx-box" from="EUR" to="USD" currencies="EUR;USD;GBP" amount="100000" rate="1.0842" fee="413"></c2-fx-converter>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .fx-compact {
+    width: 100%;
+    --c2-fx-converter--padding: 12px;
+    --c2-fx-converter--border-radius: 8px;
+    --c2-fx-converter__amount--font-size: 16px;
+    --c2-fx-converter__amount--line-height: 24px;
+    --c2-fx-converter__rail--border: 0 solid transparent;
+  }
+</style>
+<c2-fx-converter class="fx-compact" from="GBP" to="USD" currencies="GBP;USD;EUR" amount="50000" rate="1.2741"></c2-fx-converter>
+```
+
+```html tag=MdxCodeBlock,label=Bold amounts
+<style>
+  .fx-bold {
+    width: 100%;
+    --c2-fx-converter--border: 0 solid transparent;
+    --c2-fx-converter--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-fx-converter__amount--font-size: 24px;
+    --c2-fx-converter__amount--line-height: 32px;
+    --c2-fx-converter__rate--color: light-dark(#15803d, #4ade80);
+    --c2-fx-converter__rail--border: 2px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-money-input__input--font-weight: 600;
+  }
+</style>
+<c2-fx-converter class="fx-bold" from="USD" to="JPY" currencies="USD;JPY;EUR" amount="25000" rate="150.52" fee="299"></c2-fx-converter>
+```
+
+```html tag=MdxCodeBlock,label=Fixed recipient amount
+<style>
+  .fx-exact {
+    width: 100%;
+  }
+</style>
+<c2-fx-converter class="fx-exact" from="EUR" to="GBP" currencies="EUR;GBP;USD" amount="200000" fixed="to" rate="0.8571" fee="350"></c2-fx-converter>
+```
+
+</GalleryGrid>

@@ -1,0 +1,39 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { WheelPicker } from '@c2n/components/wheel-picker'
+
+## Presets
+
+Looks for `c2-wheel-picker`. The band, the row height and the number of rows set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-wheel-picker label="Height" value="5;10" columns='[{"label":"Feet","suffix":"ft","options":["4","5","6","7"]},{"label":"Inches","suffix":"in","options":["0","1","2","3","4","5","6","7","8","9","10","11"]}]'></c2-wheel-picker>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .wheel-compact {
+    --c2-wheel-picker--visible-rows: 3;
+    --c2-wheel-picker__row--height: 32px;
+    --c2-wheel-picker--font-size: 17px;
+  }
+</style>
+<c2-wheel-picker class="wheel-compact" label="Weight" value="68;.4" columns='[{"label":"Kilograms","options":["60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75"]},{"label":"Tenths","suffix":"kg","options":[".0",".1",".2",".3",".4",".5",".6",".7",".8",".9"]}]'></c2-wheel-picker>
+```
+
+```html tag=MdxCodeBlock,label=Soft accent
+<style>
+  .wheel-soft {
+    --c2-wheel-picker__band--background: light-dark(#ecfdf5, #0f2a1d);
+    --c2-wheel-picker--color: light-dark(#047857, #6ee7b7);
+    --c2-wheel-picker__band--border-radius: 999px;
+    --c2-wheel-picker__row__selected--font-weight: 600;
+  }
+</style>
+<c2-wheel-picker class="wheel-soft" label="Reminder time" value="7;30;AM" columns='[{"label":"Hour","options":["1","2","3","4","5","6","7","8","9","10","11","12"]},{"label":"Minute","options":["00","05","10","15","20","25","30","35","40","45","50","55"]},{"label":"Period","options":["AM","PM"]}]'></c2-wheel-picker>
+```
+
+</GalleryGrid>

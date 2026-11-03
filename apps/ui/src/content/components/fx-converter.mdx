@@ -1,0 +1,78 @@
+---
+title: 'FX Converter'
+description: 'Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FxConverter } from '@c2n/components/fx-converter'
+import { Button } from '@c2n/components/button'
+
+`c2-fx-converter` quotes a currency transfer the way Wise and Revolut do: the reader types what they send or what the recipient gets, and the other amount is computed from the rate, after the fee. A swap button exchanges the currencies, and a guaranteed rate counts down beside the rate line, then asks for a new one.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/fx-converter'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/fx-converter
+<style>
+  .fx-demo {
+    width: 360px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Fee and a guaranteed rate">
+  <c2-fx-converter
+    id="fx-live"
+    class="fx-demo"
+    from="EUR"
+    to="USD"
+    currencies="EUR;USD;GBP;JPY"
+    amount="100000"
+    rate="1.0842"
+    fee="413"
+    max="1000000"
+  ></c2-fx-converter>
+  <c2-button onclick="const fx = document.getElementById('fx-live'); const requote = () => { fx.rate = Math.round((1.08 + Math.random() / 100) * 10000) / 10000; fx.rateExpires = String(Date.now() + 10000) }; if (!fx.requote) { fx.requote = requote; fx.addEventListener('rate-refresh', requote) } requote()">Guarantee for 10 seconds</c2-button>
+</div>
+<div data-label="Without a fee">
+  <c2-fx-converter class="fx-demo" from="GBP" to="USD" currencies="GBP;USD;EUR" amount="50000" rate="1.2741"></c2-fx-converter>
+</div>
+```
+
+### Amounts and the rate
+
+Amounts are integers in **minor units**, as in `c2-money-input`: `amount="100000"` in EUR is €1,000.00, and no amount passes through floating point. Only `rate` is a float: 1 unit of `from` buys `rate` units of `to`.
+
+- With `fixed="from"` (the default), the recipient gets `(amount − fee) × rate`, rounded to their currency's minor unit.
+- Typing in the lower field switches to `fixed="to"`: the amount sent becomes `amount ÷ rate + fee`, rounded **up** so the recipient gets at least what was typed. The label reads "Recipient gets exactly".
+- `fee` is in minor units of `from`. Set, it draws the fee and "amount converted" lines; unset, the rate line reads "1 GBP = 1.2741 USD".
+- `max` caps the amount sent, with an error under the upper field.
+- `fromAmount`, `toAmount` and `value` read the result, and `input` / `change` carry it as `{ from, to, fromAmount, toAmount, fixed, rate }`.
+
+### Quotes from your server
+
+The component never fetches a rate. It tells the app when it needs one:
+
+```typescript tag=CodeBlock
+const fx = document.querySelector('c2-fx-converter')!
+async function quote() {
+  const { rate, fee, expiresAt } = await fetchQuote(fx.from, fx.to)
+  Object.assign(fx, { rate, fee: String(fee), rateExpires: expiresAt })
+}
+fx.addEventListener('currency-change', quote) // a new pair
+fx.addEventListener('swap', quote) // the pair reversed: 1 ÷ rate is shown as indicative until then
+fx.addEventListener('rate-refresh', quote) // the reader asked for a new rate after it expired
+```
+
+`rate-expires` takes an ISO time or epoch milliseconds. While it runs, the rate line counts down ("Guaranteed for 24s") with a ring; when it runs out the computed amount dims, `rate-expire` fires, and a "New rate" button takes the swap button's place. Setting `rate` or `rate-expires` again clears it.
+
+### Accessibility
+
+Each amount field is named by its label, and the currency pickers are the money inputs' own. Once typing pauses, a polite live region reads the computed amount ("Recipient gets 1,079.72 USD"), and it says when the rate expires. The countdown ring is hidden from assistive technology; the text beside it carries the time.
