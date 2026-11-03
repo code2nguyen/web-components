@@ -15,7 +15,15 @@ export default defineConfig({
   projects: [
     // `CHROMIUM_PATH` points at a browser installed outside Playwright's cache (a container with a pinned Chromium).
     { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        // Lets Web Audio run without a click first, as it does in Chromium and WebKit here: the media suites feed an
+        // oscillator stream into an AudioContext, which Firefox's autoplay policy would otherwise keep suspended.
+        launchOptions: { firefoxUserPrefs: { 'media.autoplay.default': 0, 'media.autoplay.block-webaudio': false } },
+      },
+    },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     {
       name: 'reorder-touch',

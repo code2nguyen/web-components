@@ -268,6 +268,8 @@ export class AudioVisualizer extends LitElement {
     if (!stream && media && !readable(media)) return
     try {
       const context = audioContext()
+      // A context created before the page could play audio may still be suspended: try again now a source is here.
+      if (context.state === 'suspended') context.resume().catch(() => undefined)
       let source: AudioNode
       if (stream) {
         if (stream.getAudioTracks().length === 0) return
