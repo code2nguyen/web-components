@@ -374,7 +374,7 @@ export class EmojiPicker extends LitElement {
             : html`<span class="preview-name">${this.msg.t('placeholder')}</span>`
         }
       </div>
-      <div class="visually-hidden" role="status">${searching ? this.msg.t('resultCount', this.flat.length) : ''}</div>
+      <div class="visually-hidden" role="status">${searching ? this.msg.t('resultCount', this.flat.length) : nothing}</div>
     </div>`
   }
 

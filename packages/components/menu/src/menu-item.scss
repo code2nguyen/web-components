@@ -159,6 +159,11 @@
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
+// The chevron points the way the submenu opens.
+:host(:dir(rtl)) .submenu-icon {
+  transform: scaleX(-1);
+}
+
 ::slotted([slot='shortcut']) {
   flex: none;
   margin-left: auto;

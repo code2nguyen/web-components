@@ -621,7 +621,7 @@ export class OverlapChart extends EchartsChartBase {
               `
             : nothing
         }
-        <div class="overlap-a11y" aria-live="polite">${announcement}</div>
+        <div class="overlap-a11y" aria-live="polite">${announcement || nothing}</div>
       `,
       root,
       { host: this },

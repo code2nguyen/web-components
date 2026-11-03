@@ -85,18 +85,24 @@ export class Breadcrumb extends LitElement {
   private measuredWidth = -1
   private automaticCurrent?: HTMLElement
   private measureScheduled = false
+  /**
+   * The shadow root came from the server (declarative shadow DOM). A server render cannot read the light DOM, so it
+   * drew an empty trail; the first client render must draw the same one to hydrate, and the items are adopted after it.
+   */
+  private readonly serverRendered = !isServer && this.shadowRoot !== null
 
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer) {
-      this.separatorNodes = [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
-      this.assignItems()
+      if (this.serverRendered && !this.hasUpdated) void this.updateComplete.then(() => this.adoptChildren())
+      else this.adoptChildren()
       // `slot` changes too: a child that gains or loses `slot="separator"` changes which slot it belongs in, which
       // manual assignment does not pick up by itself. Attribute records on children need `subtree`, so filter the
       // records to the trail's own children: a mutation inside an item does not change the item list.
       this.observer ??= new MutationObserver((records) => {
         const affectsItems = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
-        if (records.some(affectsItems)) this.assignItems()
+        // Before hydration the deferred adoption picks the change up; adopting now would break the hydration.
+        if (records.some(affectsItems) && (this.hasUpdated || !this.serverRendered)) this.assignItems()
       })
       this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {
@@ -109,6 +115,16 @@ export class Breadcrumb extends LitElement {
     }
   }
 
+  private adoptChildren() {
+    this.separatorNodes = this.separatorChildren
+    this.assignItems()
+  }
+
+  /** The children placed in the `separator` slot. Empty on the server, which has no light DOM to read. */
+  private get separatorChildren(): Element[] {
+    return isServer ? [] : [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.observer?.disconnect()
@@ -117,6 +133,7 @@ export class Breadcrumb extends LitElement {
 
   /** The item elements, in order (everything except the separator content). */
   get items(): HTMLElement[] {
+    if (isServer) return []
     return [...this.children].filter((child): child is HTMLElement => child instanceof HTMLElement && child.getAttribute('slot') !== 'separator')
   }
 
@@ -292,12 +309,7 @@ export class Breadcrumb extends LitElement {
           ${content}
         </ol>
       </nav>
-      <slot
-        name="separator"
-        class="c2-breadcrumb-separator-source"
-        ${assignSlot([...this.children].filter((child) => child.getAttribute('slot') === 'separator'))}
-        @slotchange=${this.handleSeparatorChange}
-      ></slot>
+      <slot name="separator" class="c2-breadcrumb-separator-source" ${assignSlot(this.separatorChildren)} @slotchange=${this.handleSeparatorChange}></slot>
     `
   }
 }

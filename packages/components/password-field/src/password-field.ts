@@ -498,7 +498,7 @@ export class PasswordField extends LitElement {
       >
         ${[1, 2, 3, 4].map((segment) => html`<span class="segment ${segment <= score ? 'filled' : ''}"></span>`)}
       </div>
-      <span class="meter-label" aria-live="polite">${label}</span>
+      <span class="meter-label" aria-live="polite">${label || nothing}</span>
     </div>`
   }
 

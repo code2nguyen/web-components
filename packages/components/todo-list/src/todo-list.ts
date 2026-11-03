@@ -1408,7 +1408,7 @@ export class TodoList extends LitElement {
         ${icon && !ring ? html`<span class="list-icon" aria-hidden="true">${renderTaskIcon(icon)}</span>` : nothing}
         <div class="titles">
           ${this.renderHeading()}
-          <p class="meta" aria-live="polite">${meta}</p>
+          <p class="meta" aria-live="polite">${meta || nothing}</p>
         </div>
         <div class="actions">
           ${this.actionsPlacement === 'end' ? nothing : html`<slot name="actions"></slot>`}

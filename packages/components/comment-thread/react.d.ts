@@ -26,6 +26,7 @@ declare module 'react' {
       'c2-comment-thread': Omit<C2Props<CommentThread>, 'comments'> & {
         'current-user'?: Attribute
         'collapse-after'?: Attribute
+        'no-resolve'?: Attribute
         comments?: CommentThread['comments'] | string
       }
     }

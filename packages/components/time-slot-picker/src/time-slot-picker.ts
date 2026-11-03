@@ -545,7 +545,7 @@ export class TimeSlotPicker extends LitElement {
         <div class="zone" part="zone">${this.msg.t('timesIn', zoneName)}</div>
         <div class="times" aria-busy=${this.loading ? 'true' : 'false'}>${this.renderTimes()}</div>
       </div>
-      <div class="visually-hidden" role="status">${this.announcement}</div>
+      <div class="visually-hidden" role="status">${this.announcement || nothing}</div>
       ${this.field.renderDescription()}`
   }
 }
