@@ -1,0 +1,140 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-video-grid,
+  $theme: (
+    height: 480px,
+    gap: 8px,
+    padding: 8px,
+    background: transparent,
+    tile--aspect-ratio: unquote('16 / 9'),
+    strip--size: 112px,
+    more--background: light-dark(#e4e4e7, #27272a),
+    more--color: light-dark(#18181b, #fafafa),
+    more--border-radius: 8px,
+    more__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  height: css.cssVar(height);
+  min-width: 0;
+  // The tiles take the grid's shape.
+  --c2-video-tile--aspect-ratio: #{css.cssVar(tile--aspect-ratio)};
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.grid {
+  --_gap: #{css.cssVar(gap)};
+  --_strip: #{css.cssVar(strip--size)};
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--_gap);
+  width: 100%;
+  height: 100%;
+  padding: css.cssVar(padding);
+  background: css.cssVar(background);
+}
+
+.layout-grid {
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+}
+
+.layout-spotlight {
+  grid-template: minmax(0, 1fr) var(--_strip) / minmax(0, 1fr);
+}
+
+.layout-sidebar {
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr) var(--_strip);
+}
+
+.stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  gap: var(--_gap);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.stage ::slotted(*),
+.stage .more {
+  flex: none;
+  box-sizing: border-box;
+  width: var(--_tile-width, calc(50% - var(--_gap)));
+  height: var(--_tile-height, auto);
+}
+
+.strip {
+  display: flex;
+  gap: var(--_gap);
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.strip[hidden] {
+  display: none;
+}
+
+.layout-spotlight .strip {
+  justify-content: safe center;
+}
+
+.layout-spotlight .strip ::slotted(*),
+.layout-spotlight .strip .more {
+  flex: none;
+  box-sizing: border-box;
+  height: 100%;
+  width: auto;
+  aspect-ratio: css.cssVar(tile--aspect-ratio);
+}
+
+.layout-sidebar .strip {
+  flex-direction: column;
+}
+
+.layout-sidebar .strip ::slotted(*),
+.layout-sidebar .strip .more {
+  flex: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  aspect-ratio: css.cssVar(tile--aspect-ratio);
+}
+
+.more {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: css.cssVar(more--border-radius);
+  background: css.cssVar(more--background);
+  color: css.cssVar(more--color);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.more:focus-visible {
+  outline: css.cssVar(more__focus--outline);
+  outline-offset: 2px;
+}
+
+.faces {
+  --c2-avatar--size: 28px;
+}
+
+.more-label {
+  white-space: nowrap;
+}

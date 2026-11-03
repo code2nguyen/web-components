@@ -1,0 +1,74 @@
+---
+title: 'Video Tile'
+description: 'One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { VideoTile } from '@c2n/components/video-tile'
+import { Button } from '@c2n/components/button'
+
+`c2-video-tile` draws one participant of a call the way Meet, Zoom and Teams do: their video, or their avatar while the camera is off, a name pill with a live microphone meter, and badges for a raised hand, a pin and a weak connection. It connects to nothing: your call SDK supplies the stream and the state, and the tile draws them.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/video-tile'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/video-tile
+<style>
+  .vt-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    width: 100%;
+  }
+</style>
+<div data-label="Speaking, muted, camera off">
+  <div class="vt-row">
+    <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+    <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  </div>
+</div>
+<div data-label="Badges">
+  <div class="vt-row">
+    <c2-video-tile name="Diego Fernández" hand-raised pinned></c2-video-tile>
+    <c2-video-tile name="Lea Müller" connection="poor" level="0.2"></c2-video-tile>
+  </div>
+</div>
+<div data-label="Your camera">
+  <div class="vt-row">
+    <c2-video-tile id="vt-self" name="You" local detect-speaking></c2-video-tile>
+  </div>
+  <c2-button onclick="navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => (document.getElementById('vt-self').stream = stream))">Use my camera</c2-button>
+</div>
+```
+
+### Video
+
+Set `stream` to the participant's `MediaStream`. It plays in an inner `<video>` that is always muted: the call's audio is yours to play, as with every call SDK, and playing it twice echoes. An SDK that attaches its own `<video>` element (LiveKit's `track.attach()`) puts it in the default slot instead.
+
+```typescript tag=CodeBlock
+const tile = document.createElement('c2-video-tile')
+tile.name = participant.name
+tile.stream = new MediaStream([participant.videoTrack, participant.audioTrack])
+tile.muted = !participant.audioEnabled
+```
+
+Without a live, enabled video track, or with `video-off`, the tile shows a `c2-avatar` of `avatar-src` or the name's initials. `local` mirrors your own camera and adds "(You)" to the name; `kind="screen"` shows a screen share, fitted inside the tile, never mirrored, and named "Ana Ruiz's screen".
+
+### State
+
+- **Microphone.** The name pill ends with a three-bar `c2-audio-visualizer` of the stream's audio, or of `level` when your SDK reports one. `muted` replaces it with a struck-through microphone.
+- **Speaking.** `speaking` draws the accent outline: set it from your SDK's active speaker. Or set `detect-speaking`, and the tile's own meter decides.
+- **Badges.** `hand-raised`, `pinned` and a `fair` or `poor` `connection` add their badges. The `badge` slot adds your own (recording, host).
+- **Actions.** The `actions` slot shows on hover and focus, top right, for a `c2-menu` of tile actions such as "Pin" or "Mute for everyone".
+
+### Accessibility
+
+The tile is a group named by the participant and their state: "Ana Ruiz, muted, hand raised". Speaking is not part of the name, since it changes several times a second. A hand raised after the tile appeared is announced once.

@@ -4056,6 +4056,30 @@
       "reason": "The semantic prompt region owns the prompt slot's component-side presentation."
     },
     {
+      "tag": "c2-video-grid",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The tiles, usually c2-video-tile elements; the grid sizes each one and the tile styles itself through its own public contract."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "A <video> element the call SDK attached; the tile sizes and fits it like its own video, through the object-fit variables."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "badge",
+      "decision": "assigned-content",
+      "reason": "The app's own badges (recording, host) beside the built-in ones; the app styles its content, which picks up the badge look by default."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "Buttons or a c2-menu shown on hover and focus; each is styled through its own public contract."
+    },
+    {
       "tag": "c2-view-options",
       "slot": "",
       "decision": "assigned-content",

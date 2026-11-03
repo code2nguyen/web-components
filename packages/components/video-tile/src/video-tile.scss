@@ -1,0 +1,265 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-video-tile,
+  $theme: (
+    aspect-ratio: unquote('16 / 9'),
+    border-radius: 8px,
+    background: #27272a,
+    video--object-fit: cover,
+    screen--object-fit: contain,
+    surface--background: light-dark(#e4e4e7, #27272a),
+    avatar--size: clamp(32px, 28cqh, 96px),
+    name--background: rgba(0, 0, 0, 0.55),
+    name--color: #ffffff,
+    name--font-size: 12px,
+    name--font-weight: 500,
+    name--border-radius: 6px,
+    overlay--inset: 8px,
+    speaking--color: rgb(2, 101, 220),
+    speaking--width: 3px,
+    badge--background: rgba(0, 0, 0, 0.55),
+    badge--color: #ffffff,
+    hand--background: #fbbf24,
+    hand--color: #1c1917,
+    signal__fair--color: #fbbf24,
+    signal__poor--color: #f87171,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  aspect-ratio: css.cssVar(aspect-ratio);
+  min-width: 0;
+  min-height: 0;
+  border-radius: css.cssVar(border-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.tile {
+  --_inset: #{css.cssVar(overlay--inset)};
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  border-radius: inherit;
+  background: css.cssVar(background);
+  color: css.cssVar(name--color);
+}
+
+.media,
+.surface {
+  position: absolute;
+  inset: 0;
+}
+
+video,
+::slotted(video) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: css.cssVar(video--object-fit);
+}
+
+.kind-screen video,
+.kind-screen ::slotted(video) {
+  object-fit: css.cssVar(screen--object-fit);
+}
+
+.mirrored video,
+.mirrored ::slotted(video) {
+  transform: scaleX(-1);
+}
+
+.no-video .media {
+  visibility: hidden;
+}
+
+.surface {
+  display: grid;
+  place-items: center;
+  background: css.cssVar(surface--background);
+}
+
+.avatar {
+  --c2-avatar--size: #{css.cssVar(avatar--size)};
+}
+
+/* The outline of a speaking participant, drawn above the video. */
+.speaking::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 css.cssVar(speaking--width) css.cssVar(speaking--color),
+    inset 0 0 12px css.cssVar(speaking--width) color-mix(in srgb, css.cssVar(speaking--color) 45%, transparent);
+  pointer-events: none;
+}
+
+.name {
+  position: absolute;
+  z-index: 2;
+  left: var(--_inset);
+  bottom: var(--_inset);
+  max-width: calc(100% - 2 * var(--_inset));
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: css.cssVar(name--border-radius);
+  background: css.cssVar(name--background);
+  color: css.cssVar(name--color);
+  font-size: css.cssVar(name--font-size);
+  font-weight: css.cssVar(name--font-weight);
+  line-height: 16px;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.meter {
+  flex: none;
+  --c2-audio-visualizer--height: 14px;
+  --c2-audio-visualizer__bar--width: 3px;
+  --c2-audio-visualizer__bar--gap: 2px;
+  --c2-audio-visualizer__bar--min-height: 3px;
+  --c2-audio-visualizer__bar--color: currentColor;
+}
+
+.badges {
+  position: absolute;
+  z-index: 2;
+  left: var(--_inset);
+  top: var(--_inset);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: calc(100% - 2 * var(--_inset) - 64px);
+}
+
+.badge,
+::slotted([slot='badge']) {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: css.cssVar(badge--background);
+  color: css.cssVar(badge--color);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.badge .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.hand {
+  background: css.cssVar(hand--background);
+  color: css.cssVar(hand--color);
+}
+
+.corner {
+  position: absolute;
+  z-index: 3;
+  right: var(--_inset);
+  top: var(--_inset);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+:host(:hover) .actions,
+:host(:focus-within) .actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
+}
+
+.signal {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  padding: 7px 8px;
+  border-radius: 999px;
+  background: css.cssVar(badge--background);
+}
+
+.signal i {
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.signal i:nth-child(1) {
+  height: 40%;
+}
+
+.signal i:nth-child(2) {
+  height: 70%;
+}
+
+.signal i:nth-child(3) {
+  height: 100%;
+}
+
+.signal.fair i:nth-child(-n + 2) {
+  background: css.cssVar(signal__fair--color);
+}
+
+.signal.poor i:nth-child(1) {
+  background: css.cssVar(signal__poor--color);
+}
+
+.announce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actions {
+    transition: none;
+  }
+}

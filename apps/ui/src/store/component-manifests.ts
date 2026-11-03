@@ -3,6 +3,7 @@ import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
+import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
@@ -177,6 +178,8 @@ import treeSelect from '@c2n/tree-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
+import videoGrid from '@c2n/video-grid/custom-elements.json'
+import videoTile from '@c2n/video-tile/custom-elements.json'
 import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
@@ -193,6 +196,7 @@ export const componentManifests = (function () {
     actionBar,
     appShell,
     attachment,
+    audioVisualizer,
     autocomplete,
     avatar,
     badge,
@@ -367,6 +371,8 @@ export const componentManifests = (function () {
     treeSelect,
     truncate,
     upload,
+    videoGrid,
+    videoTile,
     viewOptions,
     virtualList,
     visuallyHidden,
