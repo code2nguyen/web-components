@@ -3,6 +3,14 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.20](https://github.com/code2nguyen/web-components/releases/tag/v1.0.20) — 2026-11-03
+
+### Fixes
+
+- **breadcrumb:** Re-measure when an item changes width after the trail was measured ([997fca6](https://github.com/code2nguyen/web-components/commit/997fca6))
+- **comment-thread:** Keep the add button of a comment without reactions in its header ([e5ab7b4](https://github.com/code2nguyen/web-components/commit/e5ab7b4))
+- **components:** Resolve the open component feedback ([712908f](https://github.com/code2nguyen/web-components/commit/712908f))
+
 ## [1.0.19](https://github.com/code2nguyen/web-components/releases/tag/v1.0.19) — 2026-11-03
 
 ### Features
