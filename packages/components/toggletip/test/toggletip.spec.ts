@@ -52,6 +52,8 @@ test('opens from the keyboard, Tab continues into a link inside, and leaving it 
   await expect(button(page)).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(panel(page)).toBeVisible()
+  // The content fills the live region a frame after the bubble opens; Tab before then would skip the link.
+  await expect(page.getByRole('link', { name: 'Where to find it' })).toBeVisible()
   await tab()
   await expect(page.getByRole('link', { name: 'Where to find it' })).toBeFocused()
   await tab()
@@ -67,6 +69,8 @@ test('Escape closes and returns focus to the button, from the button or from ins
   await expect(button(page)).toBeFocused()
   await page.keyboard.press('Space')
   await expect(panel(page)).toBeVisible()
+  // The content fills the live region a frame after the bubble opens; Tab before then would skip the link.
+  await expect(page.getByRole('link', { name: 'Where to find it' })).toBeVisible()
   await tab()
   await expect(page.getByRole('link', { name: 'Where to find it' })).toBeFocused()
   await page.keyboard.press('Escape')
