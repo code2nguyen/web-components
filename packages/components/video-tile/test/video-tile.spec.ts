@@ -1,4 +1,4 @@
-import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, props, watch, webAudioRuns } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 type FakeStream = (options?: { video?: boolean; audio?: boolean }) => MediaStream
@@ -107,8 +107,12 @@ test('speaking draws the outline; detect-speaking lets the meter decide from the
   await expect(tile(page, '#auto')).toHaveState('speaking')
   await props(tile(page, '#auto'), { level: 0 })
   await expect(tile(page, '#auto')).not.toHaveState('speaking')
+})
 
+test('detect-speaking hears a stream; a muted tile has no meter', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-video-tile id="auto" name="Lea" detect-speaking></c2-video-tile>`)
   await page.locator('main').click()
+  test.skip(!(await webAudioRuns(page)), 'Web Audio does not run in this browser here (no audio device), so a stream reads as silence')
   await giveStream(page, { video: false, audio: true }, '#auto')
   await expect(tile(page, '#auto')).toHaveState('speaking')
   // Muted: no meter, so nothing to detect.

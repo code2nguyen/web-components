@@ -1,4 +1,4 @@
-import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, props, watch, webAudioRuns } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 const visualizer = (page: Page, selector = 'c2-audio-visualizer') => page.locator(selector)
@@ -118,6 +118,7 @@ test('a MediaStream is analysed: a tone lifts the bars and speaks; a stream with
   await watch(visualizer(page), 'speaking-change')
   // A user gesture lets the shared AudioContext run.
   await page.locator('main').click()
+  test.skip(!(await webAudioRuns(page)), 'Web Audio does not run in this browser here (no audio device), so a stream reads as silence')
   await visualizer(page).evaluate((element) => {
     const context = new AudioContext()
     const oscillator = context.createOscillator()
