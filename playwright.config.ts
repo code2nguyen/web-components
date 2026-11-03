@@ -19,9 +19,12 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        // Lets Web Audio run without a click first, as it does in Chromium and WebKit here: the media suites feed an
-        // oscillator stream into an AudioContext, which Firefox's autoplay policy would otherwise keep suspended.
-        launchOptions: { firefoxUserPrefs: { 'media.autoplay.default': 0, 'media.autoplay.block-webaudio': false } },
+        // Lets Web Audio run in CI, as it does in Chromium and WebKit: the media suites feed an oscillator stream into an
+        // AudioContext, which Firefox keeps suspended on a machine with no audio device (the null backend stands in
+        // for one) and, without a click, under its autoplay policy.
+        launchOptions: {
+          firefoxUserPrefs: { 'media.cubeb.force_null_context': true, 'media.autoplay.default': 0, 'media.autoplay.block-webaudio': false },
+        },
       },
     },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
