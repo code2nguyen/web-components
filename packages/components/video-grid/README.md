@@ -24,4 +24,4 @@ Lays out the tiles of a call the way Meet does, every tile as large as the space
 - The featured tile is a child marked `featured`, else a screen share, else a pinned tile, else the first; `featured-change` fires when it changes.
 - `max-tiles` folds the rest into a "+N more" tile that fires `overflow-click`; pinned and speaking tiles stay drawn.
 - Tiles are routed by manual slot assignment, so a tile that moves keeps its playing video.
-- Give it a height (`--c2-video-grid--height`, 480px by default). Themed through `--c2-video-grid*` custom properties; see the API page of the docs site.
+- By default it takes its height from its width at 16:9; `--c2-video-grid--height` sets one. Themed through `--c2-video-grid*` custom properties; see the API page of the docs site.

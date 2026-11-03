@@ -88,7 +88,8 @@ const OBSERVED = ['featured', 'kind', 'pinned', 'speaking', 'name']
  *
  * @internalcomponent c2-avatar-group
  *
- * @cssproperty {pixel} [--c2-video-grid--height=480px] - The grid needs a height to fit its tiles to; `100%` fills a sized parent.
+ * @cssproperty {pixel} [--c2-video-grid--height=auto] - The height the tiles are fitted to; `100%` fills a sized parent. While `auto`, the grid takes `--c2-video-grid--aspect-ratio` from its width.
+ * @cssproperty {number} [--c2-video-grid--aspect-ratio=16 / 9] - The grid's own shape while its height is `auto`.
  * @cssproperty {pixel} [--c2-video-grid--gap=8px]
  * @cssproperty {pixel} [--c2-video-grid--padding=8px]
  * @cssproperty {color} [--c2-video-grid--background=transparent]

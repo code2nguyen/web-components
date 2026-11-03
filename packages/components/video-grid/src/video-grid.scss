@@ -1,7 +1,8 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-video-grid,
   $theme: (
-    height: 480px,
+    height: auto,
+    aspect-ratio: unquote('16 / 9'),
     gap: 8px,
     padding: 8px,
     background: transparent,
@@ -17,6 +18,8 @@
 :host {
   display: block;
   height: css.cssVar(height);
+  // Used only while the height is `auto`: the grid then takes its height from its width.
+  aspect-ratio: css.cssVar(aspect-ratio);
   min-width: 0;
   // The tiles take the grid's shape.
   --c2-video-tile--aspect-ratio: #{css.cssVar(tile--aspect-ratio)};

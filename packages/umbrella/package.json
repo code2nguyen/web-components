@@ -93,6 +93,10 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./audio-visualizer": {
+      "types": "./dist/audio-visualizer.d.ts",
+      "default": "./dist/audio-visualizer.js"
+    },
     "./autocomplete": {
       "types": "./dist/autocomplete.d.ts",
       "default": "./dist/autocomplete.js"
@@ -996,6 +1000,14 @@
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
+    },
+    "./video-grid": {
+      "types": "./dist/video-grid.d.ts",
+      "default": "./dist/video-grid.js"
+    },
+    "./video-tile": {
+      "types": "./dist/video-tile.d.ts",
+      "default": "./dist/video-tile.js"
     },
     "./view-options": {
       "types": "./dist/view-options.d.ts",

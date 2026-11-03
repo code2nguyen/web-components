@@ -50,6 +50,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Data display
 
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
+- **Audio Visualizer** — `c2-audio-visualizer` · `@c2n/components/audio-visualizer` — Live audio level as bars, a waveform or an orb: the mic meter of a call, a voice message, a voice assistant.
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 - **Bar List** — `c2-bar-list` · `@c2n/components/bar-list` — A ranked list whose rows carry their own bar: top pages, referrers, countries, or the changes between two periods.
@@ -85,6 +86,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
+- **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.
 - **Virtual List** — `c2-virtual-list` · `@c2n/components/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
 ## Editors & viewers
@@ -213,6 +215,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 - **Sticky** — `c2-sticky` · `@c2n/components/sticky` — Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down.
 - **Swipe Action** — `c2-swipe-action` · `@c2n/components/swipe-action` — A list row that slides sideways to reveal actions behind it, as in a mail or task list on a phone.
+- **Video Grid** — `c2-video-grid` · `@c2n/components/video-grid` — Lays out the tiles of a call as a grid, a spotlight or a sidebar, every tile as large as the space allows.
 - **Visually Hidden** — `c2-visually-hidden` · `@c2n/components/visually-hidden` — Text for screen readers only: kept in the accessibility tree, drawn nowhere, optionally shown while it holds focus.
 
 ## Navigation
