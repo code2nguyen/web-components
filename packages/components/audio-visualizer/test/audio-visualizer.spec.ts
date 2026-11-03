@@ -4,6 +4,39 @@ import type { Page } from '@playwright/test'
 const visualizer = (page: Page, selector = 'c2-audio-visualizer') => page.locator(selector)
 const events = async (page: Page, selector = 'c2-audio-visualizer') => JSON.parse((await visualizer(page, selector).getAttribute('data-events')) ?? '[]')
 
+/** The state of the tone's context, the visualizer's analyser, and the level each of them reads from the tone. */
+const audioState = (page: Page) =>
+  visualizer(page).evaluate(async (element) => {
+    const win = window as unknown as { tone?: MediaStream; toneContext?: AudioContext }
+    const analyser = (element as unknown as { analyser: AnalyserNode | null }).analyser
+    const rms = (node: AnalyserNode) => {
+      const data = new Float32Array(node.fftSize)
+      node.getFloatTimeDomainData(data)
+      return Math.sqrt(data.reduce((sum, value) => sum + value * value, 0) / data.length)
+    }
+    // A second, independent reading of the tone.
+    let own: number | string = 'no tone'
+    if (win.tone) {
+      try {
+        const context = new AudioContext()
+        const probe = context.createAnalyser()
+        context.createMediaStreamSource(win.tone).connect(probe)
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        own = rms(probe)
+        await context.close()
+      } catch (error) {
+        own = String(error)
+      }
+    }
+    return {
+      toneContext: win.toneContext?.state,
+      tracks: win.tone?.getAudioTracks().map((track) => `${track.readyState}/${track.enabled}/${track.muted}`),
+      visualizerContext: analyser?.context.state ?? 'no analyser',
+      visualizerLevel: analyser ? rms(analyser) : null,
+      ownLevel: own,
+    }
+  })
+
 /** The height of each bar, in pixels. */
 const barHeights = (page: Page, selector = 'c2-audio-visualizer') =>
   visualizer(page, selector)
@@ -92,10 +125,19 @@ test('a MediaStream is analysed: a tone lifts the bars and speaks; a stream with
     const destination = context.createMediaStreamDestination()
     oscillator.connect(destination)
     oscillator.start()
-    ;(window as unknown as { tone: MediaStream }).tone = destination.stream
+    ;(window as unknown as { tone: MediaStream; toneContext: AudioContext }).tone = destination.stream
+    ;(window as unknown as { toneContext: AudioContext }).toneContext = context
     ;(element as HTMLElement & { stream: MediaStream }).stream = destination.stream
   })
-  await expect.poll(async () => Math.max(...(await barHeights(page)))).toBeGreaterThan(10)
+  const flat = await expect
+    .poll(async () => Math.max(...(await barHeights(page))))
+    .toBeGreaterThan(10)
+    .then(
+      () => null,
+      (error: Error) => error,
+    )
+  // Should the bars stay flat, say where the sound was lost: that differs between browsers.
+  if (flat) throw new Error(`${flat.message}\naudio state: ${JSON.stringify(await audioState(page))}`)
   await expect.poll(() => events(page)).toEqual([{ speaking: true }])
 
   await visualizer(page).evaluate((element) => ((element as HTMLElement & { stream: MediaStream | null }).stream = null))
