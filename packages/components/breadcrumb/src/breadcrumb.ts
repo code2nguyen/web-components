@@ -85,6 +85,9 @@ export class Breadcrumb extends LitElement {
   private measuredWidth = -1
   private automaticCurrent?: HTMLElement
   private measureScheduled = false
+  /** Each item's width at the last measure, and the items being watched for a change to it. */
+  private measuredItemWidths = new WeakMap<Element, number>()
+  private watchedItems: HTMLElement[] = []
   /**
    * The shadow root came from the server (declarative shadow DOM). A server render cannot read the light DOM, so it
    * drew an empty trail; the first client render must draw the same one to hydrate, and the items are adopted after it.
@@ -107,8 +110,21 @@ export class Breadcrumb extends LitElement {
       this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver ??= new ResizeObserver((entries) => {
-          const width = entries[0]?.contentRect.width ?? 0
-          if (Math.abs(width - this.measuredWidth) > 0.5) this.requestMeasure()
+          let itemChanged = false
+          for (const entry of entries) {
+            if (entry.target === this) {
+              if (Math.abs(entry.contentRect.width - this.measuredWidth) > 0.5) this.requestMeasure()
+              continue
+            }
+            // An item that renders after it was measured (a link button upgrading, a web font arriving) changes
+            // width without the trail resizing: measure again, or a trail measured as fitting overflows. An item
+            // hidden behind the ellipsis is not rendered and reads 0, which is not a change.
+            const width = entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width
+            const measured = this.measuredItemWidths.get(entry.target)
+            if (width > 0 && measured !== undefined && Math.abs(width - measured) > 0.5) itemChanged = true
+          }
+          // Next frame: measuring renders every item, which resized inside this callback is a ResizeObserver loop.
+          if (itemChanged) requestAnimationFrame(() => this.requestMeasure())
         })
         this.resizeObserver.observe(this)
       }
@@ -129,6 +145,7 @@ export class Breadcrumb extends LitElement {
     super.disconnectedCallback()
     this.observer?.disconnect()
     this.resizeObserver?.disconnect()
+    this.watchedItems = []
   }
 
   /** The item elements, in order (everything except the separator content). */
@@ -222,6 +239,7 @@ export class Breadcrumb extends LitElement {
     this.measuredWidth = this.getBoundingClientRect().width
     const gap = parseFloat(getComputedStyle(list).columnGap) || 0
     const widths = items.map((item) => item.getBoundingClientRect().width)
+    this.watchItems()
     const count = widths.length
     const total = widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, count - 1)
     const maxVisible = this.maxItems > 0 ? this.maxItems : Infinity
@@ -249,6 +267,17 @@ export class Breadcrumb extends LitElement {
       this.collapsed = { showFirst, tail }
     }
     this.measuring = false
+  }
+
+  /** Records every item's width as measured and watches it for a change. */
+  private watchItems() {
+    const items = this.items
+    for (const item of this.watchedItems) if (!items.includes(item)) this.resizeObserver?.unobserve(item)
+    for (const item of items) {
+      this.measuredItemWidths.set(item, item.getBoundingClientRect().width)
+      if (!this.watchedItems.includes(item)) this.resizeObserver?.observe(item)
+    }
+    this.watchedItems = items
   }
 
   private expand() {
