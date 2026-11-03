@@ -24,8 +24,9 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-| Component | Severity | Finding |
-| --------- | -------- | ------- |
+| Component       | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `c2-breadcrumb` | bug      | Screenshot review of the breadcrumb gallery (dark and light): the "Slash" card (`<span slot="separator">/</span>`, three items, regular weight) shows every item and clips the current page to "brea…" instead of collapsing the middle behind the ellipsis. The measuring pass seems to see the trail as fitting; likely the slotted text separator or the lighter weight is measured before it applies. Smallest fix: measure after the separator clones render, or re-measure when the list overflows (`scrollWidth > clientWidth`). |
 
 ## Fixed
 

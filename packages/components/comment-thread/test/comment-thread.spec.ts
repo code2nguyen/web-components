@@ -125,6 +125,26 @@ test('with a pointer, a comment shows its reaction add button only while hovered
   expect(await opacity(2)).toBe('1')
 })
 
+test('a comment without reactions keeps its add button in the header; the first reaction moves it under the text with focus', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(
+    scenario('reactions').replace(`"body":"Should this be a token?"`, `"body":"Should this be a token?","reactions":[{"emoji":"👍","count":1}]`),
+  )
+  const reply = page.getByRole('article').nth(1)
+  await expect(page.getByRole('article').first().locator('.meta c2-reaction-bar')).toHaveCount(0)
+  await expect(page.getByRole('article').first().locator('.main > c2-reaction-bar')).toHaveCount(1)
+  await expect(reply.locator('.meta c2-reaction-bar')).toHaveCount(1)
+  await expect(reply.locator('.main > c2-reaction-bar')).toHaveCount(0)
+
+  await reply.locator('.meta c2-reaction-bar').locator('[part="add"]').click()
+  await page.getByRole('button', { name: '🎉' }).click()
+  await expect(reply.locator('.main > c2-reaction-bar').getByRole('button', { name: /🎉/ })).toBeVisible()
+  await expect(reply.locator('.meta c2-reaction-bar')).toHaveCount(0)
+  await expect(reply.locator('.main > c2-reaction-bar').locator('[part="add"]')).toBeFocused()
+})
+
 test('a long thread folds its middle; without a current user it is read-only; text follows the language', async ({ page, renderScenario }) => {
   const many = JSON.stringify(
     Array.from({ length: 7 }, (_, at) => ({ id: at + 1, author: at % 2 ? BEN : ANA, body: `Comment ${at + 1}`, time: '2026-10-14T09:00:00Z' })),

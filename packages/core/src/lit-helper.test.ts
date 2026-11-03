@@ -11,7 +11,7 @@ test('a list attribute reads as a ;-separated value', () => {
 
 test('a list attribute also reads as a JSON array', () => {
   assert.deepEqual(arrayPropertyConverter.fromAttribute('["EUR","USD"]'), ['EUR', 'USD'])
-  assert.deepEqual(arrayPropertyConverter.fromAttribute(' [1, 2] '), ['1', '2'])
+  assert.deepEqual(arrayPropertyConverter.fromAttribute(' ["a", "b"] '), ['a', 'b'])
   assert.deepEqual(arrayPropertyConverter.fromAttribute('[]'), [])
   assert.deepEqual(arrayPropertyConverter.fromProperty('["a;b","c"]'), ['a;b', 'c'])
 })
@@ -20,6 +20,17 @@ test('a value that only looks like JSON is still split on ;', () => {
   assert.deepEqual(arrayPropertyConverter.fromAttribute('[draft];done'), ['[draft]', 'done'])
   assert.deepEqual(arrayPropertyConverter.fromAttribute('[draft]'), ['[draft]'])
   assert.deepEqual(arrayPropertyConverter.fromAttribute('[{"a":1}]'), ['[{"a":1}]'])
+  assert.deepEqual(arrayPropertyConverter.fromAttribute('[1.50]'), ['[1.50]'])
+})
+
+test('a list reflects as a ;-separated value, or as JSON when an item holds a ;', () => {
+  for (const list of [
+    ['EUR', 'USD'],
+    ['a;b', 'c'],
+  ]) {
+    assert.deepEqual(arrayPropertyConverter.fromAttribute(arrayPropertyConverter.toAttribute(list)), list)
+  }
+  assert.equal(arrayPropertyConverter.toAttribute(['EUR', 'USD']), 'EUR;USD')
 })
 
 test('a list assigned to the property passes through', () => {

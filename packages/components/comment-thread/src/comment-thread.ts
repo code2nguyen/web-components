@@ -82,8 +82,9 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * says who is writing: their own comments can be edited and deleted, and without one the thread is read-only. When the
  * thread's status lives elsewhere in the page, `no-resolve` drops the Resolve button. A thread
  * with more than `collapse-after` replies folds its middle behind "Show N earlier replies"; a `resolved` thread folds
- * down to its first comment. On a device with a pointer, a comment's reaction add button shows while the comment is
- * hovered or holds focus, so ten replies do not draw ten of them.
+ * down to its first comment. A comment without reactions keeps its reaction add button with its other actions, and on
+ * a device with a pointer the add button shows while the comment is hovered or holds focus, so ten replies do not
+ * draw ten of them.
  *
  * Every change is a cancelable event fired before it is applied: `comment-add`, `comment-edit`, `comment-delete`,
  * `resolve-change` and `reaction-change`. Cancel one to keep the thread controlled (to wait for the server) and set
@@ -308,6 +309,13 @@ export class CommentThread extends LitElement {
       const reactions = current ? (item.reactions ?? []).flatMap((reaction) => (reaction.emoji === detail.emoji ? next : [reaction])) : [...others, ...next]
       return { ...item, reactions }
     })
+    // The first reaction moves the bar from the header to under the text: keep focus on its add button there.
+    if ((event.target as Element).classList.contains('header-reactions')) {
+      void this.updateComplete.then(() => {
+        const bar = this.renderRoot.querySelector(`[data-id="${CSS.escape(String(comment.id))}"] c2-reaction-bar`)
+        bar?.shadowRoot?.querySelector<HTMLElement>('[part="add"]')?.focus()
+      })
+    }
   }
 
   /** Inner controls keep their own events: their `input` or field enrolment is not this thread's. */
@@ -327,6 +335,9 @@ export class CommentThread extends LitElement {
       return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(this.msg.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date)
     })()
     const name = comment.author.name
+    // A comment with reactions shows them under its text; one without has only the add button, which sits with the
+    // other actions in the header instead of taking a row of its own.
+    const reacted = this.reactions && (comment.reactions ?? []).length > 0
     if (this.editing === comment.id) {
       return html`<article class="comment" part="comment" tabindex="-1" data-id=${String(comment.id)} aria-label=${this.msg.t('commentBy', name, timeText)}>
         <c2-avatar class="avatar" name=${name} src=${comment.author.avatar || nothing} aria-hidden="true"></c2-avatar>
@@ -367,6 +378,7 @@ export class CommentThread extends LitElement {
             ><c2-relative-time .date=${time} format="short"></c2-relative-time>${comment.edited ? html` · ${this.msg.t('edited')}` : nothing}</span
           >
           <span class="actions">
+            ${this.reactions && !reacted && this.canWrite ? this.renderReactions(comment, true) : nothing}
             ${
               root && !this.readonly && !this.noResolve && this.currentUser?.name
                 ? html`<button class="action resolve" part="action resolve-action" type="button" @click=${() => this.toggleResolved()}>
@@ -401,17 +413,18 @@ export class CommentThread extends LitElement {
           </span>
         </div>
         <div class="body" part="body">${this.renderBody(comment.body)}</div>
-        ${
-          this.reactions
-            ? html`<c2-reaction-bar
-                .reactions=${comment.reactions ?? []}
-                ?readonly=${!this.canWrite}
-                @reaction-change=${(event: CustomEvent<ReactionChangeDetail>) => this.handleReaction(comment, event)}
-              ></c2-reaction-bar>`
-            : nothing
-        }
+        ${reacted ? this.renderReactions(comment, false) : nothing}
       </div>
     </article>`
+  }
+
+  private renderReactions(comment: ThreadComment, inHeader: boolean) {
+    return html`<c2-reaction-bar
+      class=${inHeader ? 'header-reactions' : 'reactions'}
+      .reactions=${comment.reactions ?? []}
+      ?readonly=${!this.canWrite}
+      @reaction-change=${(event: CustomEvent<ReactionChangeDetail>) => this.handleReaction(comment, event)}
+    ></c2-reaction-bar>`
   }
 
   private renderReplies(replies: ThreadComment[]) {

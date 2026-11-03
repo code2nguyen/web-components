@@ -48,9 +48,9 @@ export const numberPropertyConverter = {
 } satisfies StringTolerantConverter & Record<string, unknown>
 
 /**
- * Reads a list attribute: `;`-separated (`EUR;USD`), or a JSON array of strings or numbers (`["EUR","USD"]`), which
- * is how data attributes such as a table's `rows` are written and so what an author reaches for first. A value
- * that only looks like JSON (`[draft]`, or an array holding objects) is split on `;` as before.
+ * Reads a list attribute: `;`-separated (`EUR;USD`), or a JSON array of strings (`["EUR","USD"]`), which is how
+ * data attributes such as a table's `rows` are written and so what an author reaches for first. A value that only
+ * looks like JSON (`[draft]`, `[1]`, an array holding objects) is split on `;` as before, so it stays one item.
  */
 function parseList(value: string | null | undefined): string[] {
   if (!value) return []
@@ -58,7 +58,7 @@ function parseList(value: string | null | undefined): string[] {
   if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
     try {
       const parsed: unknown = JSON.parse(trimmed)
-      if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string' || typeof item === 'number')) return parsed.map(String)
+      if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) return parsed
     } catch {
       // Not JSON: a plain `;`-separated value that happens to start with a bracket.
     }
@@ -67,8 +67,10 @@ function parseList(value: string | null | undefined): string[] {
 }
 
 export const arrayPropertyConverter = {
+  // An item holding `;` would split when read back, so such a list is written as JSON.
   toAttribute: (value: string[]) => {
-    return Array.isArray(value) ? value.join(';') : ''
+    if (!Array.isArray(value)) return ''
+    return value.some((item) => String(item).includes(';')) ? JSON.stringify(value) : value.join(';')
   },
   fromAttribute: (value: string | null) => parseList(value),
   fromProperty: (value: unknown) => (typeof value === 'string' ? parseList(value) : value),
