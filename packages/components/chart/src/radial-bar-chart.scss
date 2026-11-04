@@ -40,6 +40,21 @@
   pointer-events: none;
 }
 
+// Sized by the ring variables, so script reads them in pixels whatever unit they are written in.
+.radial-probe {
+  position: absolute;
+  visibility: hidden;
+  height: 0;
+
+  &.width {
+    width: var(--_ring-width);
+  }
+
+  &.gap {
+    width: var(--_ring-gap);
+  }
+}
+
 // The rings as text, for assistive technology only.
 .radial-a11y {
   position: absolute;

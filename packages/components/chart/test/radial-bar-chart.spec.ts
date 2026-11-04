@@ -31,9 +31,9 @@ test('one ring per row toward its goal, outermost first, in the row colours; pas
   await expect(chart).toHaveState('ready')
   const [values, laps, tracks] = await project(page)
   expect(values.map((datum) => [datum.name, Number((datum.value as number).toFixed(2)), datum.itemStyle?.color])).toEqual([
-    ['Move', 0.7, '#fa114f'],
-    ['Exercise', 0.8, '#92e82a'],
-    ['Stand', 1, '#1eeaef'],
+    ['Move', 0.7, 'rgb(250, 17, 79)'],
+    ['Exercise', 0.8, 'rgb(146, 232, 42)'],
+    ['Stand', 1, 'rgb(30, 234, 239)'],
   ])
   expect(laps.map((datum) => (datum.value === '-' ? '-' : Number(datum.value.toFixed(2))))).toEqual(['-', '-', 0.3])
   expect(laps[2].itemStyle?.color).toBe('rgb(21, 164, 167)')
@@ -159,4 +159,35 @@ test('regression: new data with another ring count redraws every ring and the te
     return radial.buildOptions(radial.buildContext())
   })
   expect(options.radiusAxis[0].data).toEqual(['Sales', 'Support', 'Product', 'Design'])
+})
+
+test('regressions: any CSS colour shades its lap, a rem ring width is read in pixels, a ring with no label highlights on click', async ({ page, scenario }) => {
+  await scenario('radial')
+  const chart = page.locator('c2-radial-bar-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const radial = element as RadialElement
+    radial.style.setProperty('--c2-chart__ring--width', '1.25rem')
+    radial.data = [
+      { ring: 'Short', value: 18, goal: 12, color: '#ff0' },
+      { ring: 'Named', value: 5, goal: 10, color: 'red' },
+    ]
+    await radial.updateComplete
+    const [values, laps] = radial.projectData(radial.frame, radial.buildContext())
+    const width = radial.buildOptions(radial.buildContext()).series[0].barWidth
+    return { values: values.map((datum) => datum.itemStyle?.color), lap: laps[0].itemStyle?.color, width }
+  })
+  expect(result.values).toEqual(['rgb(255, 255, 0)', 'rgb(255, 0, 0)'])
+  expect(result.lap).toBe('rgb(179, 179, 0)')
+  expect(result.width).toBe(20)
+
+  await chart.evaluate(async (element) => {
+    const radial = element as RadialElement & { labelField: string }
+    radial.labelField = ''
+    radial.data = [{ value: 40 }, { value: 70 }]
+    await radial.updateComplete
+    radial.handleEngineClick({ index: 1, seriesIndex: 0 })
+    await radial.updateComplete
+  })
+  expect(await chart.evaluate((element) => (element as RadialElement).highlighted)).toBe('2')
 })

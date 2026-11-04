@@ -30,6 +30,27 @@ interface Ring {
 /** Rings past this many laps are drawn as two full laps; the tooltip keeps the true value. */
 const MAX_LAPS = 2
 
+const resolved = new Map<string, string>()
+
+/**
+ * Any CSS colour (`#f00`, `red`, `hsl()`, `oklch()`) as `rgb()`, painted on a 1 × 1 canvas: the lap shade and the
+ * label contrast are worked out from channels. Left as it is where there is no document (a server render).
+ */
+function toRgb(color: string): string {
+  if (typeof document === 'undefined') return color
+  const known = resolved.get(color)
+  if (known) return known
+  const context = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  if (!context) return color
+  context.fillStyle = '#000000'
+  context.fillStyle = color
+  context.fillRect(0, 0, 1, 1)
+  const [red, green, blue] = context.getImageData(0, 0, 1, 1).data
+  const result = `rgb(${red}, ${green}, ${blue})`
+  if (resolved.size < 256) resolved.set(color, result)
+  return result
+}
+
 /** A colour mixed toward black, for the overshoot lap. Canvas cannot read `color-mix()`, so it is done here. */
 function darken(color: string, amount = 0.3): string {
   const hex = /^#([0-9a-f]{6})$/i.exec(color.trim())
@@ -117,6 +138,7 @@ export class RadialBarChart extends EchartsChartBase {
   @state() private plotSize = 0
 
   #sizes?: ResizeObserver
+  #plotBox = { width: 0, height: 0 }
 
   constructor() {
     super()
@@ -130,8 +152,11 @@ export class RadialBarChart extends EchartsChartBase {
     this.#sizes = new ResizeObserver((entries) => {
       const rect = entries[entries.length - 1]?.contentRect
       if (!rect) return
+      this.#metrics = undefined
+      this.#plotBox = { width: rect.width, height: rect.height }
       const size = Math.round(Math.min(rect.width, rect.height) / 4) * 4
       if (size !== this.plotSize) this.plotSize = size
+      else this.requestUpdate()
     })
     if (this.plotElement) this.#sizes.observe(this.plotElement)
   }
@@ -145,6 +170,12 @@ export class RadialBarChart extends EchartsChartBase {
   protected override firstUpdated(): void {
     super.firstUpdated()
     if (this.plotElement) this.#sizes?.observe(this.plotElement)
+  }
+
+  protected override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed)
+    // A pointer moving over the rings only changes the tooltip: keep the label geometry it was laid out with.
+    if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.#metrics = undefined
   }
 
   // ------------------------------------------------------------------ data ---
@@ -203,7 +234,7 @@ export class RadialBarChart extends EchartsChartBase {
         value,
         goal,
         share,
-        color: colors[row] ?? theme.palette[row % theme.palette.length],
+        color: toRgb(colors[row] ?? theme.palette[row % theme.palette.length]),
       })
     }
     return rings
@@ -212,16 +243,26 @@ export class RadialBarChart extends EchartsChartBase {
   // ---------------------------------------------------------------- layout ---
 
   /** Reads a pixel CSS variable off the host. */
-  private pixels(name: string, fallback: number): number {
-    const value = Number.parseFloat(getComputedStyle(this).getPropertyValue(name))
-    return Number.isFinite(value) && value >= 0 ? value : fallback
+  private pixels(name: 'width' | 'gap', fallback: number): number {
+    // A probe sized by the variable resolves any unit (`1.25rem`, `calc()`) to pixels.
+    const probe = this.renderRoot?.querySelector<HTMLElement>(`.radial-probe.${name}`)
+    const value = probe ? probe.getBoundingClientRect().width : Number.NaN
+    return Number.isFinite(value) && value >= 0 && probe?.isConnected ? value : fallback
   }
 
+  /** The ring width and gap the labels were last laid out with: hover renders reuse them rather than measure again. */
+  #metrics?: { ring: number; gap: number; width: number; height: number }
+
   /** The polar radii and ring width, in pixels, for `count` rings in a box of `width` × `height`. */
-  private layout(count: number, width: number, height: number): { inner: number; outer: number; ring: number; band: number } {
+  private layout(
+    count: number,
+    width: number,
+    height: number,
+    measured?: { ring: number; gap: number },
+  ): { inner: number; outer: number; ring: number; band: number } {
     const outer = Math.max(4, Math.min(width, height) / 2 - 2)
-    let ring = this.pixels('--_ring-width', 16)
-    let gap = this.pixels('--_ring-gap', 6)
+    let ring = measured?.ring ?? this.pixels('width', 16)
+    let gap = measured?.gap ?? this.pixels('gap', 6)
     // Keep at least a fifth of the radius for the hole: rings narrow rather than fill the centre.
     const room = outer * 0.8
     const needed = count * (ring + gap)
@@ -325,7 +366,7 @@ export class RadialBarChart extends EchartsChartBase {
 
   /** Every part of a ring (its value, lap or track) is that ring. */
   protected override highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
-    return this.frame?.labels?.[detail.index]
+    return this.rings()[detail.index]?.label
   }
 
   private format(value: number): string {
@@ -379,13 +420,12 @@ export class RadialBarChart extends EchartsChartBase {
    * white for contrast; left out when that arc is shorter than the text.
    */
   private renderRingLabels(rings: Ring[]): unknown {
-    const plot = this.plotElement
-    const width = plot?.clientWidth ?? 0
-    const height = plot?.clientHeight ?? 0
+    const { width, height } = this.#plotBox
     // `plotSize` is set by the resize observer, never on the server, so a hydrated chart's first render matches it.
     if (this.labels !== 'start' || !rings.length || !this.plotSize || !width || !height) return nothing
     const theme = this.themeController.theme
-    const { inner, ring, band } = this.layout(rings.length, width, height)
+    this.#metrics ??= { ring: this.pixels('width', 16), gap: this.pixels('gap', 6), width, height }
+    const { inner, ring, band } = this.layout(rings.length, width, height, this.#metrics)
     if (ring < 9) return nothing
     const sweep = this.clampedSweep
     const start = sweep < 360 ? 180 + (360 - sweep) / 2 : this.startAngle || 0
@@ -421,6 +461,7 @@ export class RadialBarChart extends EchartsChartBase {
     const rings = this.rings()
     return html`${this.renderRingLabels(rings)}
       <div class="radial-center" part="center"><slot name="center"></slot></div>
+      <span class="radial-probe width"></span><span class="radial-probe gap"></span>
       <ul class="radial-a11y">
         ${rings.map(
           (ring) =>

@@ -41,6 +41,8 @@
 
 .code {
   box-sizing: border-box;
+  // A code reads left to right in any language: the bars and the digits under them never mirror.
+  direction: ltr;
   max-width: 100%;
   border-radius: css.cssVar(border-radius);
   background: css.cssVar(background--color);

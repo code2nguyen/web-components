@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -72,6 +73,12 @@ export function formatTranscriptTime(seconds: number): string {
   return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${rest}` : `${minutes}:${rest}`
 }
 
+/** Whether `value` is one CSS colour, and nothing more. */
+function isColor(value: unknown): value is string {
+  if (typeof value !== 'string' || !value.trim() || /[;{}]|url\(/i.test(value)) return false
+  return typeof CSS === 'undefined' || typeof CSS.supports !== 'function' || CSS.supports('color', value)
+}
+
 /** A character folded for search: lower case, without accents. */
 function fold(char: string): string {
   return char.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
@@ -114,7 +121,7 @@ interface Group {
  * `segments` holds the text, each with a `start` (and `end`) in seconds and optionally its `words` with their own
  * times. Consecutive segments by one speaker sit under one header: an avatar, the name and the time. `speakers` maps a
  * speaker id to a name, an avatar and a colour; speakers without a colour take the eight `--c2-transcript__speaker-<n>--color`
- * in the order they first speak, so two speakers never share one. `layout="compact"` drops the avatars and puts a time
+ * in the order they first speak, so the first eight speakers never share one. `layout="compact"` drops the avatars and puts a time
  * before every segment, for a narrow side panel.
  *
  * Playback comes from `media` (an `<audio>` or `<video>`), or from `current-time` set by the app. The segment playing
@@ -217,6 +224,7 @@ export class Transcript extends LitElement {
   private atBottom = true
   private listened: HTMLMediaElement | null = null
   private pendingMatchScroll = false
+  private pendingMatchNotify = false
 
   constructor() {
     super()
@@ -259,18 +267,47 @@ export class Transcript extends LitElement {
     if (!Array.isArray(this.segments)) this.segments = []
     if (changed.has('segments') || changed.has('speakers')) this.group()
     if (changed.has('segments') || changed.has('query')) {
-      const before = this.matchIndex
+      const previousSegments = (changed.get('segments') as TranscriptSegment[] | undefined) ?? this.segments
+      const previous = this.found[this.matchIndex]
+      const count = this.found.length
       this.found = this.query
         ? this.segments.flatMap((segment, index) => findAll(this.display(segment).text, this.query).map(([start, end]) => ({ segment: index, start, end })))
         : []
-      this.matchIndex = this.found.length ? (changed.has('query') ? 0 : Math.min(Math.max(0, before), this.found.length - 1)) : -1
-      if (changed.has('query')) this.pendingMatchScroll = true
+      if (changed.has('query')) {
+        this.matchIndex = this.found.length ? 0 : -1
+        this.pendingMatchScroll = true
+      } else {
+        // New segments keep the same match selected, by its segment and place, not by its position in the list.
+        const segment = previous ? previousSegments[previous.segment] : undefined
+        const kept = this.found.findIndex((match) => this.segments[match.segment] === segment && match.start === previous?.start)
+        const index = kept >= 0 ? kept : this.found.length ? Math.min(Math.max(0, this.matchIndex), this.found.length - 1) : -1
+        if (this.found.length !== count || index !== this.matchIndex) this.pendingMatchNotify = true
+        this.matchIndex = index
+      }
     }
     if (changed.has('segments')) {
+      // Only an append (live captions) keeps the view at the bottom; a transcript loaded or replaced opens at its start.
+      const old = changed.get('segments') as TranscriptSegment[] | undefined
+      const first = this.segments[0]
+      const appended =
+        this.hasUpdated &&
+        Array.isArray(old) &&
+        old.length > 0 &&
+        this.segments.length >= old.length &&
+        (first === old[0] || (first?.start === old[0]?.start && first?.text === old[0]?.text))
       const box = this.box
-      this.atBottom = !box || box.scrollTop + box.clientHeight >= box.scrollHeight - 4
+      this.atBottom = appended && (!box || box.scrollTop + box.clientHeight >= box.scrollHeight - 4)
       if (this.focusIndex >= this.segments.length) this.focusIndex = Math.max(0, this.segments.length - 1)
     }
+  }
+
+  /** A new playing position alone repaints the marks by hand: it never re-renders the transcript. */
+  protected override shouldUpdate(changed: PropertyValues<this>): boolean {
+    if (this.hasUpdated && changed.size === 1 && changed.has('currentTime')) {
+      this.paint()
+      return false
+    }
+    return true
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -282,7 +319,11 @@ export class Transcript extends LitElement {
     }
     if (this.pendingMatchScroll) {
       this.pendingMatchScroll = false
+      this.pendingMatchNotify = false
       this.showMatch()
+    } else if (this.pendingMatchNotify) {
+      this.pendingMatchNotify = false
+      this.showMatch(false)
     }
   }
 
@@ -541,14 +582,15 @@ export class Transcript extends LitElement {
     this.pendingMatchScroll = true
   }
 
-  private showMatch(): void {
+  /** Says where the search stands, and with `reveal`, brings the match shown into view. */
+  private showMatch(reveal = true): void {
     const count = this.found.length
     this.announcement = this.query.trim() ? (count ? this.msg.t('matches', this.matchIndex + 1, count) : this.msg.t('noMatches')) : ''
     this.dispatchEvent(
       new CustomEvent<TranscriptMatchEventDetail>('match-change', { detail: { count, index: this.matchIndex }, bubbles: true, composed: true }),
     )
     const mark = this.renderRoot.querySelector<HTMLElement>('mark.current')
-    if (!mark) return
+    if (!mark || !reveal) return
     // Looking at a match while it plays elsewhere stops following, until "Jump to current".
     if (this.active >= 0 && this.follow) this.paused = true
     this.reveal(mark)
@@ -594,9 +636,10 @@ export class Transcript extends LitElement {
     return html`<button class="time" part="time" type="button" tabindex="-1" data-index=${index} aria-label=${this.msg.t('playFrom', time)}>${time}</button>`
   }
 
-  private colorStyle(id: string): string {
+  /** A speaker's own colour, used only when it parses as one, so speaker data cannot add declarations of its own. */
+  private colorStyle(id: string) {
     const custom = this.speaker(id).color
-    return custom ? `--_speaker: ${custom}` : ''
+    return styleMap(isColor(custom) ? { '--_speaker': custom } : {})
   }
 
   private renderGroup(group: Group) {

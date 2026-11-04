@@ -107,6 +107,8 @@ test('the segments are one tab stop: arrows move, Enter plays from the one focus
 })
 
 test('follows a real <audio> in a scroll box; scrolling away shows Jump to current, which comes back', async ({ page, renderScenario }) => {
+  // Instant scrolling, so a click never lands while a smooth scroll is still moving the segment under the pointer.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   const many = Array.from({ length: 30 }, (_value, index) => ({
     speaker: index % 3 ? 'ana' : 'marcus',
     start: index * 2,
@@ -197,4 +199,34 @@ test('its text follows the language', async ({ page, renderScenario }) => {
   await expect(transcript(page)).toHaveHostAria('aria-label', 'Transcription')
   await expect(transcript(page).locator('[part="time"]').first()).toHaveAttribute('aria-label', 'Lire à partir de 0:42')
   await expect(transcript(page).locator('[role="status"]')).toHaveText('Aucun résultat')
+})
+
+test('regressions: a loaded transcript opens at its start, appended matches are counted, a colour adds no declarations', async ({ page, renderScenario }) => {
+  const many = Array.from({ length: 30 }, (_value, index) => ({ speaker: 'ana', start: index * 2, text: `Line ${index} about the price of things.` }))
+  await renderScenario(
+    `<c2-transcript query="price" style="height: 200px" speakers='${json({ ana: { name: 'Ana', color: 'red; background-image: url(x)' } })}' segments='${json(many)}'></c2-transcript>`,
+  )
+  const scroll = transcript(page).locator('[part="scroll"]')
+  expect(await scroll.evaluate((element) => element.scrollTop)).toBe(0)
+  // A late load opens at the start too.
+  await transcript(page).evaluate(async (element) => {
+    const host = element as HTMLElement & { segments: object[]; updateComplete: Promise<boolean> }
+    host.segments = []
+    await host.updateComplete
+    host.segments = Array.from({ length: 30 }, (_value, index) => ({ speaker: 'ana', start: index * 2, text: `Line ${index} about the price of things.` }))
+    await host.updateComplete
+  })
+  expect(await scroll.evaluate((element) => element.scrollTop)).toBe(0)
+
+  const group = transcript(page).locator('[part="group"]').first()
+  expect(await group.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe('none')
+  expect(await group.evaluate((element) => (element as HTMLElement).style.getPropertyValue('--_speaker'))).toBe('')
+
+  await watch(transcript(page), 'match-change')
+  await transcript(page).evaluate((element) => {
+    const host = element as HTMLElement & { segments: object[] }
+    host.segments = [...host.segments, { speaker: 'ana', start: 70, text: 'One more price.' }]
+  })
+  await expect.poll(async () => (await events(transcript(page))).at(-1)).toEqual({ count: 31, index: 0 })
+  await expect(transcript(page).locator('[role="status"]')).toHaveText('1 of 31 matches')
 })

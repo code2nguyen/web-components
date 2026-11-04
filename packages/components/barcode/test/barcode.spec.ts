@@ -115,3 +115,15 @@ test('its text follows the language', async ({ page, renderScenario }) => {
   await expect(barcode(page, '#a')).toHaveHostAria('aria-label', 'Code-barres, UPC-A : 036000291452')
   await expect(barcode(page, '#b').locator('[part="placeholder"]')).toHaveText('Impossible de coder cette valeur')
 })
+
+test('regression: right to left, the bars and the digits under them do not mirror', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-barcode id="ltr" format="ean13" value="400638133393"></c2-barcode><div dir="rtl"><c2-barcode id="rtl" format="ean13" value="400638133393"></c2-barcode></div>`,
+  )
+  const offsets = (selector: string) =>
+    barcode(page, selector).evaluate((element) => {
+      const code = element.shadowRoot!.querySelector('[part="code"]')!.getBoundingClientRect()
+      return [...element.shadowRoot!.querySelectorAll('[part="text"]')].map((text) => Math.round(text.getBoundingClientRect().left - code.left))
+    })
+  expect(await offsets('#rtl')).toEqual(await offsets('#ltr'))
+})

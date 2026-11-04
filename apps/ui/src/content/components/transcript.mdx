@@ -47,7 +47,7 @@ import '@c2n/components/transcript'
 
 `segments` is an array of `{ speaker, start, end, text }`, times in seconds. Give a segment its `words` (`[{ text, start, end }]`, as most speech-to-text APIs return them) and the word playing is underlined while the words still to come are muted. Consecutive segments by one speaker sit under one header, with an avatar, the name and the time.
 
-`speakers` maps a speaker id to `{ name, avatar, color }`. A speaker without a colour takes the next of eight `--c2-transcript__speaker-<n>--color`, in the order they first speak, so two people in one meeting never share a colour. `layout="compact"` drops the avatars and puts the time before every segment, for a side panel.
+`speakers` maps a speaker id to `{ name, avatar, color }`. A speaker without a colour takes the next of eight `--c2-transcript__speaker-<n>--color`, in the order they first speak, so the first eight people in a meeting never share a colour. `layout="compact"` drops the avatars and puts the time before every segment, for a side panel.
 
 ### Playback
 
