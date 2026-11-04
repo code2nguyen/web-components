@@ -1,0 +1,97 @@
+---
+title: 'Radial bar chart gallery'
+description: 'Activity rings, a readiness score, a storage quota, a budget dial and team goals drawn as rings.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { RadialBarChart } from '@c2n/components/chart/radial-bar-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Activity rings
+<style>
+  .rings-activity {
+    width: 240px;
+    --c2-chart--height: 240px;
+    --c2-chart__ring--width: 22px;
+    --c2-chart__ring--gap: 4px;
+  }
+</style>
+<c2-radial-bar-chart class="rings-activity" label-field="ring" max-field="goal" color-field="color" data='[{"ring":"Move","value":420,"goal":600,"color":"#fa114f"},{"ring":"Exercise","value":24,"goal":30,"color":"#92e82a"},{"ring":"Stand","value":15,"goal":12,"color":"#1eeaef"}]'>
+  <c2-chart-series field="value" label="Today"></c2-chart-series>
+</c2-radial-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Readiness score
+<style>
+  .rings-score {
+    width: 180px;
+    --c2-chart--height: 180px;
+    --c2-chart__ring--width: 14px;
+  }
+  .rings-score strong {
+    font-size: 32px;
+    font-weight: 650;
+  }
+</style>
+<c2-radial-bar-chart class="rings-score" label-field="metric" labels="none" data='[{"metric":"Readiness","value":82,"color":"#0f766e"}]' color-field="color">
+  <c2-chart-series field="value" label="Readiness"></c2-chart-series>
+  <strong slot="center">82</strong>
+</c2-radial-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Storage quota
+<style>
+  .rings-storage {
+    width: 220px;
+    --c2-chart--height: 220px;
+    --c2-chart__ring--width: 12px;
+    --c2-chart__ring--gap: 8px;
+  }
+  .rings-storage div {
+    display: grid;
+    text-align: center;
+  }
+  .rings-storage span {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-radial-bar-chart class="rings-storage" label-field="kind" max="15" labels="none" legend="bottom" value-suffix=" GB" precision="1" data='[{"kind":"Photos","size":6.2},{"kind":"Mail","size":2.4},{"kind":"Drive","size":1.8}]'>
+  <c2-chart-series field="size" label="Used"></c2-chart-series>
+  <div slot="center"><strong>10.4 GB</strong><span>of 15 GB</span></div>
+</c2-radial-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Budget dial
+<style>
+  .rings-budget {
+    width: 280px;
+    --c2-chart--height: 260px;
+    --c2-chart__ring--width: 12px;
+    --c2-chart__ring--gap: 4px;
+  }
+</style>
+<c2-radial-bar-chart class="rings-budget" label-field="category" max-field="budget" sweep="270" labels="none" legend="bottom" data='[{"category":"Housing","spent":1000,"budget":1100},{"category":"Food","spent":480,"budget":600},{"category":"Transport","spent":210,"budget":400},{"category":"Leisure","spent":150,"budget":300}]'>
+  <c2-chart-series field="spent" label="Spent"></c2-chart-series>
+</c2-radial-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Team goals
+<style>
+  .rings-goals {
+    width: 300px;
+    --c2-chart--height: 300px;
+    --c2-chart__ring--width: 18px;
+    --c2-chart__ring--gap: 6px;
+  }
+</style>
+<c2-radial-bar-chart class="rings-goals" label-field="team" max-field="target" start-angle="-90" data='[{"team":"Sales","won":128,"target":150},{"team":"Support","won":96,"target":90},{"team":"Product","won":41,"target":60},{"team":"Design","won":18,"target":30}]'>
+  <c2-chart-series field="won" label="Done"></c2-chart-series>
+</c2-radial-bar-chart>
+```
+
+</GalleryGrid>

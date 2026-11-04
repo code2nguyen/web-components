@@ -17,6 +17,8 @@ export default defineConfig({
           'src/gauge-chart.ts',
           'src/radar-chart.ts',
           'src/pyramid-chart.ts',
+          'src/radial-bar-chart.ts',
+          'src/radial-bar-chart.ts',
           'src/butterfly-chart.ts',
           'src/scatter-chart.ts',
           'src/bubble-chart.ts',

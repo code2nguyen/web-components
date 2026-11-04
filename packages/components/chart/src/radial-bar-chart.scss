@@ -1,0 +1,41 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    ring--width: 16px,
+    ring--gap: 6px,
+    track--color: #f4f4f5,
+  )
+);
+
+// Declared so the theme generator maps them; the chart reads them from script.
+:host {
+  --_ring-width: #{css.cssVar(ring--width)};
+  --_ring-gap: #{css.cssVar(ring--gap)};
+  --_track-color: #{css.cssVar(track--color)};
+}
+
+.radial-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  place-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.radial-center ::slotted(*) {
+  pointer-events: auto;
+}
+
+// The rings as text, for assistive technology only.
+.radial-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

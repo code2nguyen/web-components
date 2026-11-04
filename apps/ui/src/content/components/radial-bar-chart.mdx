@@ -1,0 +1,89 @@
+---
+title: 'Radial bar chart'
+description: 'Concentric rings, each filling toward its own goal: activity rings, a readiness score, a budget per category.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-radial-bar-chart'
+apiTags: ['c2-radial-bar-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RadialBarChart } from '@c2n/components/chart/radial-bar-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A radial bar chart shows a few measures against their goals as concentric rings: the move, exercise and stand rings of a fitness app, a readiness score, what is spent of each budget. One row is one ring, outermost first; a ring past its goal fills its track and draws a darker second lap. It is drawn by ECharts.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/radial-bar-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .radial-plot {
+    width: 280px;
+    --c2-chart--height: 280px;
+  }
+  .radial-total {
+    display: grid;
+    gap: 2px;
+    text-align: center;
+  }
+  .radial-total strong {
+    font-size: 24px;
+    font-weight: 650;
+  }
+  .radial-total span {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+
+<div data-label="Activity rings">
+  <c2-radial-bar-chart
+    class="radial-plot"
+    label-field="ring"
+    max-field="goal"
+    color-field="color"
+    data='[{"ring":"Move","value":420,"goal":600,"color":"#fa114f"},{"ring":"Exercise","value":24,"goal":30,"color":"#92e82a"},{"ring":"Stand","value":15,"goal":12,"color":"#1eeaef"}]'
+  >
+    <c2-chart-series field="value" label="Today"></c2-chart-series>
+    <div slot="center" class="radial-total"><strong>420</strong><span>of 600 kcal</span></div>
+  </c2-radial-bar-chart>
+</div>
+
+<div data-label="Budget dial">
+  <c2-radial-bar-chart
+    class="radial-plot"
+    label-field="category"
+    max-field="budget"
+    sweep="270"
+    labels="none"
+    legend="bottom"
+    data='[{"category":"Housing","spent":1000,"budget":1100},{"category":"Food","spent":480,"budget":600},{"category":"Transport","spent":210,"budget":400},{"category":"Leisure","spent":150,"budget":300}]'
+  >
+    <c2-chart-series field="spent" label="Spent"></c2-chart-series>
+  </c2-radial-bar-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects. `label-field` names each ring, the one `c2-chart-series` reads its value, and `max-field` its goal; without it, `max` (100 by default) is every ring's goal. `color-field` gives a ring its own colour; otherwise rings take the chart palette in order.
+
+### Shape
+
+A ring starts at twelve o'clock and runs clockwise; `start-angle` turns the start. `sweep` is how much of the circle a full ring covers: `270` leaves the bottom open, the dial of a budget or a speedometer. Ring thickness and the space between rings are `--c2-chart__ring--width` and `--c2-chart__ring--gap`, and a ring narrows when the chart is too small to keep a hole. The track behind each ring is `--c2-chart__track--color`.
+
+Each ring's name is drawn at its start, in black or white for contrast, and left out when the ring is too short to hold it; `labels="none"` leaves them all out, and `legend="bottom"` lists the rings instead. The `center` slot sits in the hole for a total or an icon.
+
+### Reading it
+
+Hovering a ring shows its value against its goal and the share ("24 / 30 · 80%"); `value-suffix` and `precision` format the values. A click highlights a ring and fades the others. For assistive technology the chart carries the same figures as a list.

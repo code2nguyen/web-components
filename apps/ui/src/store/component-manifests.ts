@@ -10,6 +10,7 @@ import backdrop from '@c2n/backdrop/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
+import barcode from '@c2n/barcode/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
@@ -177,6 +178,7 @@ import toggletip from '@c2n/toggletip/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
+import transcript from '@c2n/transcript/custom-elements.json'
 import treeSelect from '@c2n/tree-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
@@ -206,6 +208,7 @@ export const componentManifests = (function () {
     badge,
     banner,
     barList,
+    barcode,
     borderBeam,
     bottomNav,
     breadcrumb,
@@ -373,6 +376,7 @@ export const componentManifests = (function () {
     tooltip,
     tour,
     traceWaterfall,
+    transcript,
     tree,
     treeSelect,
     truncate,

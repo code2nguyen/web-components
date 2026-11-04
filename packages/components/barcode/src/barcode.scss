@@ -1,0 +1,124 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-barcode,
+  $theme: (
+    module--width: 2px,
+    height: 72px,
+    quiet-zone: 10,
+    module--size: 4px,
+    matrix--quiet-zone: 2,
+    padding-block: 8px,
+    bar--color: #18181b,
+    background--color: #ffffff,
+    border-radius: 4px,
+    text--color: #18181b,
+    text--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    text--font-size: 13px,
+    placeholder--width: 220px,
+    placeholder--border: 1px dashed #bcbcc6,
+    placeholder--color: #71717a,
+    placeholder--font-size: 12px,
+  )
+);
+
+:host {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.code {
+  box-sizing: border-box;
+  max-width: 100%;
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background--color);
+}
+
+.bars,
+.guards {
+  display: block;
+  width: 100%;
+  fill: css.cssVar(bar--color);
+  shape-rendering: crispEdges;
+}
+
+.linear {
+  // The format's minimum quiet zone wins over a smaller one asked for.
+  --_left: max(#{css.cssVar(quiet-zone)}, var(--_quiet-left));
+  --_right: max(#{css.cssVar(quiet-zone)}, var(--_quiet-right));
+  width: calc((var(--_modules) + var(--_left) + var(--_right)) * #{css.cssVar(module--width)});
+  padding: css.cssVar(padding-block) calc(var(--_right) * #{css.cssVar(module--width)}) css.cssVar(padding-block)
+    calc(var(--_left) * #{css.cssVar(module--width)});
+
+  .bars {
+    height: css.cssVar(height);
+  }
+}
+
+.line {
+  position: relative;
+  height: 1.25em;
+  color: css.cssVar(text--color);
+  font-family: css.cssVar(text--font-family);
+  font-size: css.cssVar(text--font-size);
+  line-height: 1.25;
+}
+
+// EAN and UPC guards run down into the text line.
+.guards {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 55%;
+}
+
+.text {
+  position: absolute;
+  inset-block-start: 0.1em;
+  white-space: nowrap;
+
+  &.middle {
+    translate: -50%;
+  }
+
+  &.end {
+    translate: -100%;
+  }
+}
+
+.matrix {
+  width: calc((var(--_cells) + 2 * #{css.cssVar(matrix--quiet-zone)}) * #{css.cssVar(module--size)});
+  padding: calc(#{css.cssVar(matrix--quiet-zone)} * #{css.cssVar(module--size)});
+
+  .bars {
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+
+.placeholder {
+  display: flex;
+  box-sizing: border-box;
+  width: css.cssVar(placeholder--width);
+  max-width: 100%;
+  min-height: calc(#{css.cssVar(height)} + 2 * #{css.cssVar(padding-block)});
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: css.cssVar(placeholder--border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(placeholder--color);
+  font-size: css.cssVar(placeholder--font-size);
+  line-height: 1.4;
+  text-align: center;
+}

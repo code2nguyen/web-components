@@ -22,6 +22,7 @@ export type EchartsFeature =
   | 'line'
   | 'lines'
   | 'grid'
+  | 'polar'
   | 'geo'
   | 'legend'
   | 'tooltip'
@@ -41,6 +42,7 @@ const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   line: () => import('echarts/charts').then((m) => [m.LineChart]),
   lines: () => import('echarts/charts').then((m) => [m.LinesChart]),
   grid: () => import('echarts/components').then((m) => [m.GridComponent]),
+  polar: () => import('echarts/components').then((m) => [m.PolarComponent]),
   geo: () => import('echarts/components').then((m) => [m.GeoComponent]),
   legend: () => import('echarts/components').then((m) => [m.LegendComponent]),
   tooltip: () => import('echarts/components').then((m) => [m.TooltipComponent]),
