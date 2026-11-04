@@ -28,6 +28,7 @@ import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
+import type { RadialBarChart } from '@c2n/chart/radial-bar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
@@ -470,6 +471,31 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<RadarChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<RadarChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<RadarChart, 'point-click'>) => void
+      }
+    >
+    'c2-radial-bar-chart': DefineComponent<
+      C2Props<RadialBarChart> & {
+        'max-field'?: unknown
+        'color-field'?: unknown
+        'start-angle'?: unknown
+        'value-suffix'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<RadialBarChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<RadialBarChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<RadialBarChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<RadialBarChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<RadialBarChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<RadialBarChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<RadialBarChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<RadialBarChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<RadialBarChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<RadialBarChart, 'point-click'>) => void
       }
     >
     'c2-sankey-chart': DefineComponent<
