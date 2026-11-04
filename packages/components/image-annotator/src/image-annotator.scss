@@ -100,7 +100,8 @@
   height: 18px;
   border-radius: 50%;
   background-color: var(--_swatch);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  // A ring in the text colour, so a swatch as dark (or as light) as the toolbar still shows.
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent);
   content: '';
 }
 

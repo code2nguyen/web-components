@@ -689,6 +689,12 @@ export class ImageAnnotator extends LitElement {
     />`
   }
 
+  protected override firstUpdated(): void {
+    // A server-rendered page loads the image before the element hydrates, so its `load` has already fired.
+    const image = this.renderRoot.querySelector<HTMLImageElement>('img')
+    if (image?.complete && image.naturalWidth) this.natural = { width: image.naturalWidth, height: image.naturalHeight }
+  }
+
   protected override updated(): void {
     const editor = this.renderRoot.querySelector<HTMLInputElement>('.text-editor')
     if (editor && this.shadowRoot?.activeElement !== editor) editor.focus()
