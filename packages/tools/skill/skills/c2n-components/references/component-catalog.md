@@ -29,6 +29,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/pie-chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it. Children: `c2-chart-series`, `c2-map-layer`.
 - **Pyramid chart** — `c2-pyramid-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/pyramid-chart` — Ranked levels of a whole, stacked from a narrow apex to a wide base, where one row is one level. Children: `c2-chart-series`, `c2-map-layer`.
 - **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/components/chart/radar-chart` — Compare several profiles across the same set of normalized indicators. Children: `c2-chart-series`, `c2-map-layer`.
+- **Radial bar chart** — `c2-radial-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/radial-bar-chart` — Concentric rings, each filling toward its own goal: activity rings, a readiness score, a budget per category. Children: `c2-chart-series`, `c2-map-layer`.
 - **Sankey chart** — `c2-sankey-chart, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sankey-chart` — Quantities moving through stages, where one row is one flow and each band is as wide as what it carries. Children: `c2-chart-series`, `c2-map-layer`.
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/scatter-chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`, `c2-map-layer`.
 - **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sparkline` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`, `c2-map-layer`.
@@ -54,6 +55,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 - **Bar List** — `c2-bar-list` · `@c2n/components/bar-list` — A ranked list whose rows carry their own bar: top pages, referrers, countries, or the changes between two periods.
+- **Barcode** — `c2-barcode` · `@c2n/components/barcode` — A 1D or 2D barcode drawn as SVG in the browser: Code 128, EAN-13, EAN-8, UPC-A, Code 39 and Data Matrix.
 - **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
@@ -85,6 +87,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Text Effect** — `c2-text-effect` · `@c2n/components/text-effect` — Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
+- **Transcript** — `c2-transcript` · `@c2n/components/transcript` — Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
 - **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.

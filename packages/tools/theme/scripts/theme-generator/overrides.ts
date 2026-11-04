@@ -172,6 +172,13 @@ export const overrides: Record<string, Override> = {
   '--c2-qr-code__background--color': { token: 'color-surface' },
   '--c2-qr-code__center--size': { exclude: 'center mark constrained by QR scan geometry' },
   '--c2-qr-code__center--padding': { exclude: 'center mark quiet spacing' },
+  // A barcode stays dark on white in every theme: many 1D scanners cannot read light bars on a dark field.
+  '--c2-barcode__bar--color': { exclude: 'scanners need dark bars on a light field' },
+  '--c2-barcode__background--color': { exclude: 'scanners need dark bars on a light field' },
+  '--c2-barcode__text--color': { exclude: 'the printed value sits on the white code field' },
+  // A transcript match keeps dark text on its yellow highlight in every theme.
+  '--c2-transcript__mark--background-color': { exclude: 'highlight pair with the match text' },
+  '--c2-transcript__mark--color': { exclude: 'dark text on the highlight' },
   // The filter builder's dashed add button and draft chip keep their style while following the strong outline colour.
   '--c2-filter-builder__add-button--border': {
     token: 'border',

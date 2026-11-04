@@ -1,0 +1,238 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-transcript,
+  $theme: (
+    padding: 12px,
+    group--gap: 18px,
+    font-size: 14px,
+    line-height: 1.55,
+    color: #18181b,
+    avatar--size: 28px,
+    speaker--font-weight: 600,
+    time--color: #71717a,
+    time--font-size: 12px,
+    time__hover--color: rgb(2, 101, 220),
+    segment--padding: 2px 6px,
+    segment--border-radius: 6px,
+    segment__active--background-color: rgba(2, 101, 220, 0.1),
+    segment__focus--outline-color: rgb(2, 101, 220),
+    word__active--decoration-color: rgb(2, 101, 220),
+    word__upcoming--color: #71717a,
+    interim--color: #71717a,
+    mark--background-color: #fef08a,
+    mark--color: #18181b,
+    mark__current--outline-color: #ca8a04,
+    jump--background-color: #ffffff,
+    jump--color: #18181b,
+    jump--border: 1px solid #e4e4e7,
+    jump--box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
+    speaker-1--color: #1d4ed8,
+    speaker-2--color: #b45309,
+    speaker-3--color: #7e22ce,
+    speaker-4--color: #047857,
+    speaker-5--color: #be123c,
+    speaker-6--color: #0e7490,
+    speaker-7--color: #4d7c0f,
+    speaker-8--color: #a21caf,
+  )
+);
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.scroll {
+  position: relative;
+  display: grid;
+  flex: 1;
+  align-content: start;
+  min-height: 0;
+  gap: css.cssVar(group--gap);
+  padding: css.cssVar(padding);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  &.compact {
+    gap: 2px;
+  }
+}
+
+@for $index from 1 through 8 {
+  .speaker-#{$index} {
+    --_color: var(--_speaker, #{css.cssVar(speaker-#{$index}--color)});
+  }
+}
+
+.group {
+  display: grid;
+  grid-template-columns: css.cssVar(avatar--size) minmax(0, 1fr);
+  column-gap: 10px;
+
+  > .head,
+  > .segments {
+    grid-column: 2;
+  }
+}
+
+.avatar {
+  --c2-avatar--size: #{css.cssVar(avatar--size)};
+  --c2-avatar--background: var(--_color);
+  grid-row: span 2;
+}
+
+.head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.name {
+  font-weight: css.cssVar(speaker--font-weight);
+}
+
+.time {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: css.cssVar(time--color);
+  font: inherit;
+  font-size: css.cssVar(time--font-size);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+
+  &:hover {
+    color: css.cssVar(time__hover--color);
+    text-decoration: underline;
+  }
+}
+
+.segments {
+  display: grid;
+  gap: 2px;
+}
+
+.segment {
+  margin: 0 -6px;
+  padding: css.cssVar(segment--padding);
+  border-radius: css.cssVar(segment--border-radius);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(segment__focus--outline-color);
+    outline-offset: 1px;
+  }
+
+  &.active {
+    background-color: css.cssVar(segment__active--background-color);
+  }
+
+  &.interim {
+    color: css.cssVar(interim--color);
+    font-style: italic;
+  }
+}
+
+// In the segment playing, the words to come are muted once its first word is spoken.
+.segment.active:has(.word.spoken) .word:not(.spoken) {
+  color: css.cssVar(word__upcoming--color);
+}
+
+.word.now {
+  text-decoration: underline 2px css.cssVar(word__active--decoration-color);
+  text-underline-offset: 3px;
+}
+
+mark {
+  border-radius: 2px;
+  background-color: css.cssVar(mark--background-color);
+  color: css.cssVar(mark--color);
+
+  &.current {
+    outline: 2px solid css.cssVar(mark__current--outline-color);
+  }
+}
+
+.compact .row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+
+  .time {
+    justify-self: end;
+  }
+
+  .segment {
+    margin: 0;
+  }
+
+  // The speaker colours are avatar fills, too dark to read as text on a dark surface: a dot carries the colour.
+  .name::before {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background-color: var(--_color);
+    content: '';
+    vertical-align: 1px;
+  }
+}
+
+.jump {
+  position: absolute;
+  inset-block-end: 8px;
+  inset-inline-start: 50%;
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 12px;
+  border: css.cssVar(jump--border);
+  border-radius: 999px;
+  background-color: css.cssVar(jump--background-color);
+  box-shadow: css.cssVar(jump--box-shadow);
+  color: css.cssVar(jump--color);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  translate: -50%;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(segment__focus--outline-color);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+:host(:dir(rtl)) .jump {
+  translate: 50%;
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -1,0 +1,124 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Barcode } from '@c2n/components/barcode'
+
+## Presets
+
+Labels, tickets and packaging. `--c2-barcode__module--width` and `--c2-barcode--height` set the size, and the quiet zone and the text line take care of themselves.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-barcode value="C2N-2026-0042"></c2-barcode>
+```
+
+```html tag=MdxCodeBlock,label=Shipping label
+<style>
+  .ship-label {
+    display: grid;
+    gap: 10px;
+    width: 300px;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .ship-label dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 12px;
+    margin: 0;
+  }
+  .ship-label dt {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ship-label dd {
+    margin: 0;
+  }
+  .ship-label c2-barcode {
+    --c2-barcode__module--width: 1.5px;
+    --c2-barcode--height: 64px;
+  }
+</style>
+<div class="ship-label">
+  <strong>Ship to: Ana Ruiz, Lyon</strong>
+  <dl>
+    <dt>Order</dt>
+    <dd>#2026-00417</dd>
+    <dt>Weight</dt>
+    <dd>1.4 kg</dd>
+  </dl>
+  <c2-barcode value="SHIP-2026-00417"></c2-barcode>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Product back
+<style>
+  .product-back {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    padding: 16px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 12px;
+  }
+  .product-back p {
+    max-width: 140px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="product-back">
+  <p>Oat milk, 1 L. Keep refrigerated after opening.</p>
+  <c2-barcode format="ean13" value="400638133393"></c2-barcode>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Event ticket
+<style>
+  .ticket {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    width: 320px;
+    padding: 16px;
+    border: 1px dashed var(--c2-theme--color-outline, #a1a1aa);
+    border-radius: 14px;
+  }
+  .ticket strong {
+    display: block;
+    font-size: 15px;
+  }
+  .ticket span {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+  .ticket c2-barcode {
+    --c2-barcode__module--size: 3px;
+  }
+</style>
+<div class="ticket">
+  <div>
+    <strong>Design Systems Day</strong>
+    <span>Hall B · Row 12 · Seat 4</span>
+  </div>
+  <c2-barcode format="datamatrix" value="DSD26-B-12-04-7F2K9"></c2-barcode>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Compact asset tag
+<style>
+  .asset-tag {
+    --c2-barcode__module--width: 1px;
+    --c2-barcode--height: 36px;
+    --c2-barcode__text--font-size: 11px;
+    --c2-barcode--padding-block: 4px;
+  }
+</style>
+<c2-barcode class="asset-tag" format="code39" value="IT-00482"></c2-barcode>
+```
+
+</GalleryGrid>

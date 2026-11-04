@@ -1816,7 +1816,7 @@
       "tag": "c2-quantity",
       "slot": "decrement-icon",
       "decision": "assigned-content",
-      "reason": "The app's own \u2212 icon, sized by the app; the default glyph is 16px."
+      "reason": "The app's own − icon, sized by the app; the default glyph is 16px."
     },
     {
       "tag": "c2-quantity",
@@ -4316,6 +4316,61 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects the consumer's menu rows into c2-menu; style them through the c2-menu and c2-menu-item contracts."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "center",
+      "decision": "part",
+      "parts": ["center"],
+      "reason": "The center part places the slot in the chart's hole; the assigned content keeps its own styles."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     }
   ]
 }

@@ -121,6 +121,10 @@
       "types": "./dist/bar-list.d.ts",
       "default": "./dist/bar-list.js"
     },
+    "./barcode": {
+      "types": "./dist/barcode.d.ts",
+      "default": "./dist/barcode.js"
+    },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
@@ -244,6 +248,10 @@
     "./chart/radar-chart": {
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
+    },
+    "./chart/radial-bar-chart": {
+      "types": "./dist/chart/radial-bar-chart.d.ts",
+      "default": "./dist/chart/radial-bar-chart.js"
     },
     "./chart/sankey-chart": {
       "types": "./dist/chart/sankey-chart.d.ts",
@@ -993,6 +1001,10 @@
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"
     },
+    "./transcript": {
+      "types": "./dist/transcript.d.ts",
+      "default": "./dist/transcript.js"
+    },
     "./tree": {
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
@@ -1177,6 +1189,7 @@
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
+    "@c2n/barcode": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1341,6 +1354,7 @@
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
+    "@c2n/transcript": "*",
     "@c2n/tree": "*",
     "@c2n/tree-select": "*",
     "@c2n/truncate": "*",

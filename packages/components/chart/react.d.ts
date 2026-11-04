@@ -32,6 +32,7 @@ import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
+import type { RadialBarChart } from '@c2n/chart/radial-bar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
@@ -317,6 +318,21 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: RadarChart['series'] | string
         annotations?: RadarChart['annotations'] | string
+      }
+      'c2-radial-bar-chart': Omit<C2Props<RadialBarChart>, 'series' | 'annotations'> & {
+        'max-field'?: Attribute
+        'color-field'?: Attribute
+        'start-angle'?: Attribute
+        'value-suffix'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: RadialBarChart['series'] | string
+        annotations?: RadialBarChart['annotations'] | string
       }
       'c2-sankey-chart': Omit<C2Props<SankeyChart>, 'nodes' | 'series' | 'annotations'> & {
         'source-field'?: Attribute

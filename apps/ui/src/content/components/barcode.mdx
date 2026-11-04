@@ -1,0 +1,57 @@
+---
+title: 'Barcode'
+description: 'A 1D or 2D barcode drawn as SVG in the browser: Code 128, EAN-13, EAN-8, UPC-A, Code 39 and Data Matrix.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Barcode } from '@c2n/components/barcode'
+
+`c2-barcode` draws a barcode for a shipping label, a ticket, a receipt or a product page. It is encoded in the browser, so no service sees the value and nothing is loaded. It is the sibling of [`c2-qr-code`](../qr-code).
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/barcode'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/barcode
+<div data-label="Code 128">
+  <c2-barcode value="SHIP-2026-00417"></c2-barcode>
+</div>
+<div data-label="EAN-13 and UPC-A">
+  <c2-barcode format="ean13" value="400638133393"></c2-barcode>
+  <c2-barcode format="upca" value="03600029145"></c2-barcode>
+</div>
+<div data-label="Data Matrix">
+  <c2-barcode format="datamatrix" value="https://c2n.dev/t/8F3K2"></c2-barcode>
+</div>
+<div data-label="Can't encode">
+  <c2-barcode format="ean13" value="40063813339A"></c2-barcode>
+</div>
+```
+
+### Formats
+
+`format` picks the symbology:
+
+- **`code128`** (the default): any ASCII text. Digits pack two per symbol, so long numbers stay short.
+- **`ean13`**, **`ean8`** and **`upca`**: retail codes of 12, 7 and 11 digits. The check digit is added; give it and it is verified instead. The digits print in the split each standard uses, with the guard bars running into the text.
+- **`code39`**: legacy industrial labels: upper-case letters, digits, space and `- . $ / + %`. Lower case is upper-cased.
+- **`datamatrix`**: a square 2D code (ECC 200), sized to the value, up to about 1,500 characters. A value outside Latin-1 is sent as UTF-8.
+
+`hide-text` leaves out the line under a 1D code. The `encoded` getter returns the value as drawn, check digit included, and `encodeBarcode(value, format)` is the same encoder as a plain function.
+
+### Size and colour
+
+`--c2-barcode__module--width` is the width of one narrow bar, `--c2-barcode--height` the height of the bars, and `--c2-barcode__module--size` the size of one Data Matrix cell. A host narrower than the code shrinks it to fit. The quiet zone (`--c2-barcode--quiet-zone`, in modules) never goes under what the format requires.
+
+The bars stay dark on a white card in a dark theme too: that is what a scanner reads. Change `--c2-barcode__bar--color` and `--c2-barcode__background--color` only for strong contrast.
+
+### Errors
+
+A value the format cannot take (a letter in an EAN, a wrong check digit, a value too long) draws a dashed frame saying "Can't encode this value" and fires `barcode-error`, with the error and the value. The element is an image named after the format and the value ("Barcode, EAN-13: 4006381333931"); an `aria-label` on it replaces that name.
