@@ -1,0 +1,185 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-text-effect,
+  $theme: (
+    interval: 2500ms,
+    char--duration: 40ms,
+    rotate--duration: 400ms,
+    rotate--align: start,
+    shimmer--duration: 2s,
+    shimmer--color: #71717a,
+    shimmer__highlight--color: #ffffff,
+    reveal--duration: 500ms,
+    reveal--stagger: 80ms,
+    caret--color: currentColor,
+    caret--width: 2px,
+    text--color: inherit,
+    text--background: none,
+  )
+);
+
+:host {
+  display: inline;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.text {
+  color: css.cssVar(text--color);
+  background: css.cssVar(text--background);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* rotate: every word in one cell, the hidden ones reserving the widest width. */
+
+.rotate {
+  display: inline-grid;
+  justify-items: css.cssVar(rotate--align);
+  vertical-align: bottom;
+  overflow: hidden;
+  // Room for descenders inside the clipped box.
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.rotate > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  // Each word carries the fill, since a background does not clip through grid cells.
+  color: inherit;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.sizer {
+  visibility: hidden;
+}
+
+.word.in {
+  animation: c2-text-effect-in css.cssVar(rotate--duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.word.out {
+  animation: c2-text-effect-out css.cssVar(rotate--duration) cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+@keyframes c2-text-effect-in {
+  from {
+    transform: translateY(80%);
+    opacity: 0;
+  }
+}
+
+@keyframes c2-text-effect-out {
+  to {
+    transform: translateY(-80%);
+    opacity: 0;
+  }
+}
+
+/* typewriter */
+
+.caret {
+  display: inline-block;
+  width: css.cssVar(caret--width);
+  height: 0.9em;
+  margin-left: 0.06em;
+  vertical-align: -0.08em;
+  background: css.cssVar(caret--color);
+  animation: c2-text-effect-blink 1s steps(1) infinite;
+}
+
+@keyframes c2-text-effect-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* scramble */
+
+.noise {
+  opacity: 0.55;
+}
+
+/* shimmer */
+
+.shimmer {
+  color: transparent;
+  background:
+    linear-gradient(100deg, transparent 0 40%, css.cssVar(shimmer__highlight--color) 50%, transparent 60% 100%) 0 0 / 250% 100% no-repeat,
+    linear-gradient(css.cssVar(shimmer--color), css.cssVar(shimmer--color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: c2-text-effect-shimmer css.cssVar(shimmer--duration) linear infinite;
+}
+
+.shimmer.paused,
+:host(:state(paused)) .shimmer {
+  animation-play-state: paused;
+}
+
+@keyframes c2-text-effect-shimmer {
+  from {
+    background-position:
+      150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -50% 0,
+      0 0;
+  }
+}
+
+/* reveal */
+
+.piece {
+  display: inline-block;
+  color: inherit;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: c2-text-effect-rise css.cssVar(reveal--duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--_i, 0) * #{css.cssVar(reveal--stagger)});
+}
+
+@keyframes c2-text-effect-rise {
+  from {
+    transform: translateY(0.4em);
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word.in,
+  .word.out,
+  .piece,
+  .caret,
+  .shimmer {
+    animation: none;
+  }
+
+  .word.out {
+    display: none;
+  }
+
+  .shimmer {
+    color: css.cssVar(shimmer--color);
+    background: none;
+  }
+}
