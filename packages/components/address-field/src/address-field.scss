@@ -27,7 +27,10 @@
 .row {
   display: grid;
   gap: css.cssVar(row-gap) css.cssVar(gap);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(#{css.cssVar(part--min-width)}, calc((100% - (var(--_parts) - 1) * #{css.cssVar(gap)}) / var(--_parts)))), 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, max(#{css.cssVar(part--min-width)}, calc((100% - (var(--_parts) - 1) * #{css.cssVar(gap)}) / var(--_parts)))), 1fr)
+  );
 }
 
 .part {

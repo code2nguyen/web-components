@@ -606,17 +606,17 @@ export class PivotTable extends LitElement {
         html`<tr role="row">
           ${level === 0 ? html`<th class="corner" part="header" role="columnheader" rowspan=${headRows}>${corner}</th>` : nothing}
           ${nodes.map((node) =>
-          lastLevel
-            ? sortable({ path: node.path, value: 0, total: false }, node.label)
-            : html`<th part="header" role="columnheader" class="group" colspan=${pivotLeaves(node).length * valueCount || valueCount}>${node.label}</th>`,
-        )}
+            lastLevel
+              ? sortable({ path: node.path, value: 0, total: false }, node.label)
+              : html`<th part="header" role="columnheader" class="group" colspan=${pivotLeaves(node).length * valueCount || valueCount}>${node.label}</th>`,
+          )}
           ${
-          level === 0 && showColumnTotal
-            ? valueRow
-              ? html`<th part="header" role="columnheader" class="group total" colspan=${valueCount} rowspan=${columnDepth}>${this.msg.t('total')}</th>`
-              : sortable({ path: [], value: 0, total: true }, this.msg.t('total'))
-            : nothing
-        }
+            level === 0 && showColumnTotal
+              ? valueRow
+                ? html`<th part="header" role="columnheader" class="group total" colspan=${valueCount} rowspan=${columnDepth}>${this.msg.t('total')}</th>`
+                : sortable({ path: [], value: 0, total: true }, this.msg.t('total'))
+              : nothing
+          }
         </tr>`,
       )
     }

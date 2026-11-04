@@ -21,6 +21,8 @@
     <script type="module">
       import './translations.ts'
       import '../src/pivot-table.ts'
+      import { pivot } from '../src/pivot.ts'
+      window.pivotApi = { pivot }
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

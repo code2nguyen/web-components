@@ -21,8 +21,10 @@ const events = async (locator: Locator) => JSON.parse((await locator.getAttribut
 
 test('pivot() aggregates every cell, subtotal and total, groups blanks, and every aggregate works', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-pivot-table></c2-pivot-table>`)
-  const out = await page.evaluate(async (data) => {
-    const { pivot } = await import('/packages/components/pivot-table/src/pivot.ts')
+  const out = await page.evaluate((data) => {
+    type Node = { label: string; children: Node[] }
+    type Result = { cell(r: string[], c: string[], v: number): number | null; records(r: string[], c: string[]): number[]; rows: Node; columns: Node }
+    const { pivot } = (window as unknown as { pivotApi: { pivot: (data: unknown[], config: object) => Result } }).pivotApi
     const result = pivot([...data, { region: 'Europe', quarter: 'Q1', revenue: 'n/a' }, { quarter: 'Q3', revenue: 5 }], {
       rows: ['region', 'country'],
       columns: ['quarter'],

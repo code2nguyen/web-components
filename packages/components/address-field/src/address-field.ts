@@ -66,9 +66,9 @@ function normalize(value: Partial<AddressValue> | null | undefined, country = ''
  * one is wrong. With a `name`, the form receives `name[line1]`, `name[city]`, `name[postalCode]`… and `name[country]`.
  *
  * With a `provider`, the first line suggests addresses as it is typed, and picking one fills every part.
- * `googlePlacesProvider` and `mapboxSearchProvider`, exported with the element, wrap
- * Google Places and Mapbox, sending what is typed to them; without a provider nothing leaves the page. `formatAddress()` prints a saved address in the country's
- * postal order.
+ * `googlePlacesProvider` and `mapboxSearchProvider`, exported with the element, wrap Google Places and Mapbox,
+ * sending what is typed to them; without a provider nothing leaves the page. `formatAddress()` prints a saved address
+ * in the country's postal order.
  *
  * The parts are a group named by `label` (or the label of a `c2-form-field` around it), each part with its own label
  * and the browser's `autocomplete` token. Browsers do
@@ -111,6 +111,7 @@ export class AddressField extends LitElement {
   /** The address must be given; otherwise it may be left empty, but once started, the country's required parts are. */
   @property({ type: Boolean, reflect: true }) required = false
 
+  /** Turns every part off; a disabled address is not submitted. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** An address search service for the first line. */
