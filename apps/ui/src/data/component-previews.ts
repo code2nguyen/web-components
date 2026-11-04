@@ -11,6 +11,7 @@ export const componentPreviews: Record<string, string> = {
   'action-bar': `<div style="display:flex;flex-direction:column;justify-content:flex-end;width:300px;height:72px;padding-bottom:8px;box-sizing:border-box">
   <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
 </div>`,
+  'address-field': `<c2-address-field></c2-address-field>`,
   'app-shell': `<div class="preview-app-shell">
   <c2-app-shell scrolling="main" style="--c2-app-shell--height:110px;--c2-app-shell__navigation--width:76px;--c2-app-shell__navigation--background-color:var(--site-color-surface-container-3);--c2-app-shell__divider--color:var(--site-color-outline-variant)">
     <div slot="header" style="padding:8px 10px;font-size:13px;font-weight:600;border-bottom:1px solid var(--site-color-outline-variant)">Ledgerline</div>
@@ -228,6 +229,7 @@ price: .price
   </c2-icon-button>
 </div>`,
   image: `<div class="preview-row"><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600"></c2-image><c2-image style="--c2-image--width:132px;--c2-image--border-radius:8px" loading="click" src="/web-components/images/image-chart.svg" alt="Chart" width="640" height="480"></c2-image></div>`,
+  'image-annotator': `<c2-image-annotator></c2-image-annotator>`,
   'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
   'in-view': `<c2-in-view style="--c2-in-view__hidden--opacity: 0; --c2-in-view__hidden--transform: translateY(12px)"><div style="padding: 16px 24px; border-radius: 8px; background: var(--c2-theme--color-surface-container, #f4f4f5)">Revealed on scroll</div></c2-in-view>`,
   indicator: `<div class="preview-row">
@@ -365,6 +367,7 @@ price: .price
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
 </div>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+  'pivot-table': `<c2-pivot-table></c2-pivot-table>`,
   popconfirm: `<c2-popconfirm heading="Delete this task?" confirm-label="Delete"><c2-button slot="trigger">Delete task</c2-button>This cannot be undone.</c2-popconfirm>`,
   progress: `<div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;width:240px">
   <div style="display:grid;gap:12px">
