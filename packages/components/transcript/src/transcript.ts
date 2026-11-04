@@ -256,6 +256,7 @@ export class Transcript extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     this.internals.ariaLabel = this.msg.t('transcript')
+    if (!Array.isArray(this.segments)) this.segments = []
     if (changed.has('segments') || changed.has('speakers')) this.group()
     if (changed.has('segments') || changed.has('query')) {
       const before = this.matchIndex
