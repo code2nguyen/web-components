@@ -60,8 +60,8 @@ An address left empty is valid unless `required`; once started, the country's re
 Browsers do not autofill fields inside a shadow root, so for speed give the field a `provider`. The first line then suggests addresses as it is typed, and picking one fills every part:
 
 ```typescript tag=CodeBlock
-import { googlePlacesProvider } from '@c2n/components/address-field/providers/google.js'
-// or: import { mapboxSearchProvider } from '@c2n/components/address-field/providers/mapbox.js'
+import { googlePlacesProvider } from '@c2n/components/address-field'
+// or: import { mapboxSearchProvider } from '@c2n/components/address-field'
 
 document.querySelector('c2-address-field')!.provider = googlePlacesProvider({ apiKey: PLACES_KEY })
 ```

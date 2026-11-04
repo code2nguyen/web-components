@@ -66,8 +66,8 @@ function normalize(value: Partial<AddressValue> | null | undefined, country = ''
  * one is wrong. With a `name`, the form receives `name[line1]`, `name[city]`, `name[postalCode]`… and `name[country]`.
  *
  * With a `provider`, the first line suggests addresses as it is typed, and picking one fills every part.
- * `@c2n/address-field/providers/google.js` and `/providers/mapbox.js` wrap Google Places and Mapbox, sending what is
- * typed to them; without a provider nothing leaves the page. `formatAddress()` prints a saved address in the country's
+ * `googlePlacesProvider` and `mapboxSearchProvider`, exported with the element, wrap
+ * Google Places and Mapbox, sending what is typed to them; without a provider nothing leaves the page. `formatAddress()` prints a saved address in the country's
  * postal order.
  *
  * The parts are a group named by `label` (or the label of a `c2-form-field` around it), each part with its own label

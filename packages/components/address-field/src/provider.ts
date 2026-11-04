@@ -19,8 +19,7 @@ export interface AddressProviderOptions {
 
 /**
  * An address search service: `suggest` answers what was typed in the first line, and `resolve` turns the suggestion
- * picked into a full address. Write one for any service; `@c2n/address-field/providers/google.js` and
- * `/providers/mapbox.js` wrap two.
+ * picked into a full address. Write one for any service; `googlePlacesProvider` and `mapboxSearchProvider` wrap two.
  */
 export interface AddressProvider {
   suggest(query: string, options: AddressProviderOptions): Promise<AddressSuggestion[]>
