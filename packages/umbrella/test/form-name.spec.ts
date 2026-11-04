@@ -69,6 +69,7 @@ const reflectOnly: Record<string, string> = {
 
 // Form-associated elements whose entries are not under `name` itself, each covered by a test of its own below.
 const ownCase: Record<string, string> = {
+  'c2-address-field': 'submits name[line1], name[city]… and name[country], one entry per part of the country format',
   'c2-card-input': 'submits name[number], name[expiry] and name[cvc], typed in by the user only',
   'c2-choice-matrix': 'submits one name[row] entry per choice',
 }
@@ -223,4 +224,24 @@ test('c2-card-input reflects a name set as a property and submits name[number], 
     ['card[expiry]', '2040-12'],
     ['card[cvc]', '123'],
   ])
+})
+
+test('c2-address-field reflects a name set as a property and submits one name[part] entry per part, then name[country]', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  await page.evaluate(() => {
+    const element = document.createElement('c2-address-field') as HTMLElement & { name: string; value: object }
+    element.name = 'ship'
+    element.value = { line1: '8 rue de Rivoli', postalCode: '75004', city: 'Paris', country: 'FR' }
+    document.querySelector('form')!.append(element)
+  })
+  await expect(page.locator('c2-address-field')).toHaveAttribute('name', 'ship')
+  await expect
+    .poll(() => page.locator('form').evaluate((form: HTMLFormElement) => [...new FormData(form)]))
+    .toEqual([
+      ['ship[line1]', '8 rue de Rivoli'],
+      ['ship[line2]', ''],
+      ['ship[postalCode]', '75004'],
+      ['ship[city]', 'Paris'],
+      ['ship[country]', 'FR'],
+    ])
 })

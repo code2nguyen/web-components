@@ -6,7 +6,12 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/address-field.ts'],
+      // The providers are their own entries: an app that brings its own provider never loads them.
+      entry: {
+        'address-field': 'src/address-field.ts',
+        'providers/google': 'src/providers/google.ts',
+        'providers/mapbox': 'src/providers/mapbox.ts',
+      },
       formats: ['es'],
     },
     minify: false,

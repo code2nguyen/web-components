@@ -9,6 +9,14 @@
       "types": "./types/src/address-field.d.ts",
       "default": "./dist/address-field.js"
     },
+    "./providers/google.js": {
+      "types": "./types/src/providers/google.d.ts",
+      "default": "./dist/providers/google.js"
+    },
+    "./providers/mapbox.js": {
+      "types": "./types/src/providers/mapbox.d.ts",
+      "default": "./dist/providers/mapbox.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -29,7 +37,10 @@
     "vue.js"
   ],
   "keywords": [
-    "address-field",
+    "address",
+    "address autocomplete",
+    "checkout",
+    "form",
     "web component",
     "lit"
   ],
@@ -48,7 +59,12 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../form-field:build",
+        "../text-field:build",
+        "../select:build",
+        "../list-item:build",
+        "../autocomplete:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -60,7 +76,12 @@
     }
   },
   "dependencies": {
+    "@c2n/autocomplete": "*",
     "@c2n/core": "*",
+    "@c2n/form-field": "*",
+    "@c2n/list-item": "*",
+    "@c2n/select": "*",
+    "@c2n/text-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
