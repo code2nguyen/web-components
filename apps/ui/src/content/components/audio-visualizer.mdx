@@ -1,0 +1,67 @@
+---
+title: 'Audio Visualizer'
+description: 'Live audio level as bars, a waveform or an orb: the mic meter of a call, a voice message, a voice assistant.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { AudioVisualizer } from '@c2n/components/audio-visualizer'
+import { Button } from '@c2n/components/button'
+
+`c2-audio-visualizer` draws an audio level the way calls and voice apps do: the microphone meter of Meet and Discord, the waveform of a voice message, the orb of ChatGPT's voice mode. It reads a microphone or a call participant's stream, a playing `<audio>` element, or a level your call SDK already reports. With no audio at all, it shows what an agent is doing.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/audio-visualizer'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/audio-visualizer
+<div data-label="Bars from a level">
+  <c2-audio-visualizer level="0.15"></c2-audio-visualizer>
+  <c2-audio-visualizer level="0.55"></c2-audio-visualizer>
+  <c2-audio-visualizer level="0.9"></c2-audio-visualizer>
+  <c2-audio-visualizer level="0.6" muted></c2-audio-visualizer>
+</div>
+<div data-label="Your microphone">
+  <c2-button onclick="navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => document.querySelectorAll('.av-mic').forEach((meter) => (meter.stream = stream)))">Use my microphone</c2-button>
+  <c2-audio-visualizer class="av-mic" bars="9"></c2-audio-visualizer>
+  <c2-audio-visualizer class="av-mic" variant="wave"></c2-audio-visualizer>
+</div>
+<div data-label="Agent states">
+  <c2-audio-visualizer variant="orb" state="listening" label="Assistant listening"></c2-audio-visualizer>
+  <c2-audio-visualizer variant="orb" state="thinking" label="Assistant thinking"></c2-audio-visualizer>
+  <c2-audio-visualizer variant="orb" state="speaking" label="Assistant speaking"></c2-audio-visualizer>
+</div>
+```
+
+### Sources
+
+The first source set wins:
+
+- **`stream`**, a `MediaStream` (a microphone from `getUserMedia`, a participant's track from your call SDK). The visualizer analyses it through Web Audio.
+- **`media`**, an `<audio>` or `<video>` element that plays, such as a voice message. Once routed through Web Audio, the element is heard through it, as before.
+- **`level`**, a number from 0 to 1, for an SDK that reports levels (LiveKit's `audioLevel`, Daily's audio levels). This is the cheapest: no Web Audio at all.
+
+```typescript tag=CodeBlock
+const meter = document.querySelector('c2-audio-visualizer')!
+meter.stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+```
+
+Without a source, `state` animates an agent's state while its audio plays elsewhere: `idle` (flat), `listening` (a slow breath), `thinking` (a turning shimmer) and `speaking` (a looping rhythm).
+
+### Looks
+
+`variant="bars"` (the default) draws `bars` bars, loudest in the middle like a microphone meter. `wave` draws a waveform across `--c2-audio-visualizer__wave--width`, and `orb` a sphere that swells and glows with the level. `muted` draws a flat, greyed meter.
+
+### Speaking detection
+
+`speaking-change` fires with `{ speaking }` when the level crosses `speaking-threshold` (0.08 by default), held for 300 ms so the pauses between words do not flicker, and `:state(speaking)` matches meanwhile. `c2-video-tile` uses it to light a speaking participant's outline.
+
+### Motion and accessibility
+
+The visualizer draws only while it is on screen and the page is visible. Under reduced motion it is a steady meter, updated four times a second, with no breathing or turning. It is decorative by default; a `label` makes it an image of that name, for an orb that stands on its own.

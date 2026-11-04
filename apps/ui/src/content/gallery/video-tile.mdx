@@ -1,0 +1,95 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { VideoTile } from '@c2n/components/video-tile'
+
+## Presets
+
+Looks for `c2-video-tile`. The speaking outline, the name pill and the camera-off surface carry most of a call app's identity; the overlay inset moves the pill and the badges together.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .vt-default {
+    width: 100%;
+  }
+</style>
+<c2-video-tile class="vt-default" name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Green speaker
+<style>
+  .vt-green {
+    width: 100%;
+    --c2-video-tile--border-radius: 14px;
+    --c2-video-tile__speaking--color: #16a34a;
+    --c2-video-tile__speaking--width: 4px;
+  }
+</style>
+<c2-video-tile class="vt-green" name="Kenji Watanabe" speaking level="0.5"></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Light pill
+<style>
+  .vt-light {
+    width: 100%;
+    --c2-video-tile__name--background: rgba(255, 255, 255, 0.92);
+    --c2-video-tile__name--color: #18181b;
+    --c2-video-tile__name--border-radius: 999px;
+    --c2-video-tile__surface--background: light-dark(#dbeafe, #172554);
+  }
+</style>
+<c2-video-tile class="vt-light" name="Diego Fernández" muted></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Square corners
+<style>
+  .vt-square {
+    width: 100%;
+    --c2-video-tile--border-radius: 0px;
+    --c2-video-tile__name--border-radius: 0px;
+    --c2-video-tile__overlay--inset: 0px;
+    --c2-video-tile__name--background: rgba(0, 0, 0, 0.75);
+  }
+</style>
+<c2-video-tile class="vt-square" name="Lea Müller" hand-raised></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Portrait, for mobile
+<style>
+  .vt-portrait {
+    width: 180px;
+    --c2-video-tile--aspect-ratio: 3 / 4;
+    --c2-video-tile--border-radius: 14px;
+  }
+</style>
+<c2-video-tile class="vt-portrait" name="Priya Shah" pinned connection="fair"></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Large name
+<style>
+  .vt-large {
+    width: 100%;
+    --c2-video-tile__name--font-size: 14px;
+    --c2-video-tile__name--font-weight: 600;
+    --c2-video-tile__overlay--inset: 12px;
+    --c2-video-tile__avatar--size: clamp(40px, 40cqh, 120px);
+  }
+</style>
+<c2-video-tile class="vt-large" name="Olu Adeyemi" level="0.3"></c2-video-tile>
+```
+
+```html tag=MdxCodeBlock,label=Violet hand
+<style>
+  .vt-violet {
+    width: 100%;
+    --c2-video-tile__hand--background: #7c3aed;
+    --c2-video-tile__hand--color: #ffffff;
+    --c2-video-tile__speaking--color: #7c3aed;
+  }
+</style>
+<c2-video-tile class="vt-violet" name="Mia Chen" hand-raised speaking level="0.6"></c2-video-tile>
+```
+
+</GalleryGrid>

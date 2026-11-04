@@ -1,0 +1,115 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { VideoGrid } from '@c2n/components/video-grid'
+import { VideoTile } from '@c2n/components/video-tile'
+
+## Presets
+
+Looks for `c2-video-grid`. The gap, padding and background shape the stage; the strip size sets the filmstrip's height or the sidebar's width, and the tile aspect ratio reshapes every tile at once.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .vg-default {
+    width: 100%;
+  }
+</style>
+<c2-video-grid class="vg-default">
+  <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández"></c2-video-tile>
+  <c2-video-tile name="Lea Müller" muted></c2-video-tile>
+</c2-video-grid>
+```
+
+```html tag=MdxCodeBlock,label=Dark stage
+<style>
+  .vg-dark {
+    width: 100%;
+    --c2-video-grid--height: 220px;
+    --c2-video-grid--padding: 12px;
+    --c2-video-grid--gap: 6px;
+    --c2-video-grid--background: #18181b;
+    --c2-video-tile__surface--background: #27272a;
+    border-radius: 14px;
+  }
+</style>
+<c2-video-grid class="vg-dark">
+  <c2-video-tile name="Ana Ruiz" level="0.4"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández" speaking level="0.6"></c2-video-tile>
+</c2-video-grid>
+```
+
+```html tag=MdxCodeBlock,label=Spotlight, tall filmstrip
+<style>
+  .vg-spot {
+    width: 100%;
+    --c2-video-grid--height: 260px;
+    --c2-video-grid__strip--size: 72px;
+  }
+</style>
+<c2-video-grid class="vg-spot" layout="spotlight">
+  <c2-video-tile name="Ana Ruiz" pinned level="0.5"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández" muted></c2-video-tile>
+  <c2-video-tile name="Lea Müller" muted></c2-video-tile>
+</c2-video-grid>
+```
+
+```html tag=MdxCodeBlock,label=Narrow sidebar
+<style>
+  .vg-side {
+    width: 100%;
+    --c2-video-grid--height: 220px;
+    --c2-video-grid__strip--size: 88px;
+  }
+</style>
+<c2-video-grid class="vg-side" layout="sidebar">
+  <c2-video-tile name="Ana Ruiz" pinned speaking level="0.6"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández" muted></c2-video-tile>
+</c2-video-grid>
+```
+
+```html tag=MdxCodeBlock,label=Square tiles
+<style>
+  .vg-square {
+    width: 100%;
+    --c2-video-grid--height: 220px;
+    --c2-video-grid__tile--aspect-ratio: 1 / 1;
+    --c2-video-tile--border-radius: 14px;
+  }
+</style>
+<c2-video-grid class="vg-square">
+  <c2-video-tile name="Ana Ruiz" level="0.5"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández" hand-raised></c2-video-tile>
+</c2-video-grid>
+```
+
+```html tag=MdxCodeBlock,label=Crowded call
+<style>
+  .vg-crowd {
+    width: 100%;
+    --c2-video-grid--height: 220px;
+    --c2-video-grid--gap: 4px;
+    --c2-video-grid__more--background: light-dark(#ede9fe, #2e1065);
+    --c2-video-grid__more--color: light-dark(#6d28d9, #c4b5fd);
+  }
+</style>
+<c2-video-grid class="vg-crowd" max-tiles="6">
+  <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+  <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+  <c2-video-tile name="Diego Fernández" muted></c2-video-tile>
+  <c2-video-tile name="Lea Müller" muted></c2-video-tile>
+  <c2-video-tile name="Priya Shah" muted></c2-video-tile>
+  <c2-video-tile name="Olu Adeyemi" muted></c2-video-tile>
+  <c2-video-tile name="Mia Chen" muted></c2-video-tile>
+  <c2-video-tile name="Sam Lee" muted></c2-video-tile>
+</c2-video-grid>
+```
+
+</GalleryGrid>

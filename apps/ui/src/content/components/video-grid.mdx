@@ -1,0 +1,85 @@
+---
+title: 'Video Grid'
+description: 'Lays out the tiles of a call as a grid, a spotlight or a sidebar, every tile as large as the space allows.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { VideoGrid } from '@c2n/components/video-grid'
+import { VideoTile } from '@c2n/components/video-tile'
+
+`c2-video-grid` lays out the tiles of a call the way Meet does: it picks the column count that makes every tile largest for its size, or draws one featured tile large with the others in a filmstrip or a sidebar. Its children are usually `c2-video-tile` elements, but any element works.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/video-grid'
+import '@c2n/components/video-tile'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/video-grid
+<style>
+  .vg-demo {
+    width: 100%;
+    --c2-video-grid--height: 320px;
+    --c2-video-grid--padding: 0px;
+  }
+</style>
+<div data-label="Grid">
+  <c2-video-grid class="vg-demo">
+    <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+    <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+    <c2-video-tile name="Diego Fernández"></c2-video-tile>
+    <c2-video-tile name="Lea Müller" hand-raised></c2-video-tile>
+    <c2-video-tile name="Priya Shah" muted></c2-video-tile>
+  </c2-video-grid>
+</div>
+<div data-label="Spotlight">
+  <c2-video-grid class="vg-demo" layout="spotlight">
+    <c2-video-tile name="Ana Ruiz" level="0.4"></c2-video-tile>
+    <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+    <c2-video-tile name="Diego Fernández" pinned></c2-video-tile>
+    <c2-video-tile name="Lea Müller" muted></c2-video-tile>
+  </c2-video-grid>
+</div>
+<div data-label="Sidebar, 4 tiles at most">
+  <c2-video-grid class="vg-demo" layout="sidebar" max-tiles="4">
+    <c2-video-tile name="Ana Ruiz" speaking level="0.5"></c2-video-tile>
+    <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+    <c2-video-tile name="Diego Fernández" muted></c2-video-tile>
+    <c2-video-tile name="Lea Müller" muted></c2-video-tile>
+    <c2-video-tile name="Priya Shah" muted></c2-video-tile>
+    <c2-video-tile name="Olu Adeyemi" muted></c2-video-tile>
+  </c2-video-grid>
+</div>
+```
+
+### Size
+
+The grid fits its tiles to its own size. By default it takes its height from its width, at `--c2-video-grid--aspect-ratio` (16 / 9); set `--c2-video-grid--height` (`100%` fills a sized parent, such as a call screen) to fit the tiles to a given height instead. The tiles take the shape of `--c2-video-grid__tile--aspect-ratio` (16 / 9), and the grid relays the tiles out as it resizes.
+
+### Layouts
+
+- **`grid`** (the default): the column count that makes tiles largest, the last row centred. One tile fills the stage; two sit side by side, or one above the other on a portrait screen.
+- **`spotlight`**: the featured tile large, the others in a filmstrip below, `--c2-video-grid__strip--size` high.
+- **`sidebar`**: the featured tile large, the others in a column at the inline end (the left in right-to-left), `--c2-video-grid__strip--size` wide.
+
+The featured tile is the first child marked `featured`, else the first screen share (`kind="screen"`), else the first `pinned` tile, else the first child. It does not follow the active speaker by itself: a stage that jumps with every voice is hard to watch. Set `featured` on a tile to follow the speaker yourself. `featured-change` fires when it changes.
+
+### Many participants
+
+`max-tiles` caps the tiles drawn. The others fold into a "+N more" tile with their avatars, and pressing it fires `overflow-click` with the folded elements, for your participants panel:
+
+```typescript tag=CodeBlock
+grid.addEventListener('overflow-click', (event) => {
+  participantsPanel.show(event.detail.hidden)
+})
+```
+
+The featured tile, and tiles marked `pinned` or `speaking`, are never folded: they take the place of the last quiet ones.
+
+Tiles are routed by manual slot assignment, never by a `slot` attribute, so a tile that moves from the grid to the stage stays the same element and its video keeps playing.

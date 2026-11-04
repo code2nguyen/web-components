@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>video-grid scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      c2-video-grid {
+        width: 720px;
+        --c2-video-grid--height: 405px;
+        --c2-video-grid--padding: 0px;
+      }
+      c2-video-grid.portrait {
+        width: 300px;
+        --c2-video-grid--height: 520px;
+      }
+      .tile {
+        background: #3f5f8a;
+      }
+    </style>
+    <script type="module">
+      import './translations.ts'
+      import '../src/video-grid.ts'
+      import '@c2n/video-tile'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>
