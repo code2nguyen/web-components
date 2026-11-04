@@ -381,10 +381,8 @@ export class AddressField extends LitElement {
         @focusout=${() => this.touch(part)}
       ></c2-text-field>`
     }
-    // Focus given to the anchor (a browser's "show the invalid control") goes on to the part.
-    const forward = () => this.renderRoot.querySelector<HTMLElement>(`[data-part="${part}"]`)?.focus()
     return html`<c2-form-field class="part" label=${label} error-text=${message} necessity="none"
-      >${control}<span class="anchor" data-anchor=${part} tabindex="-1" @focus=${forward}></span
+      >${control}<span class="anchor" data-anchor=${part}></span
     ></c2-form-field>`
   }
 
