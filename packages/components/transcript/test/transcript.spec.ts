@@ -133,12 +133,13 @@ test('follows a real <audio> in a scroll box; scrolling away shows Jump to curre
   // The page itself did not scroll.
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
 
-  await scroll.hover()
-  await page.mouse.wheel(0, -5000)
-  // Firefox animates a wheel scroll even under reduced motion: wait until it has come to rest at the top, so the
-  // segment playing is out of view for good before the time moves on.
+  // The reader scrolls back to the top: a wheel event says it is their scroll, then the box moves. (Driven directly
+  // rather than with the mouse wheel, which headless Firefox does not apply to the box.)
+  await scroll.evaluate((element) => {
+    element.dispatchEvent(new WheelEvent('wheel', { deltaY: -5000 }))
+    element.scrollTop = 0
+  })
   await expect.poll(top).toBe(0)
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   await expect(transcript(page).locator('[part="jump"]')).toBeVisible()
   await page.evaluate(() => ((document.getElementById('audio') as HTMLAudioElement).currentTime = 50.5))
   await expect(segment(transcript(page), 25)).toHaveClass(/active/)
@@ -251,8 +252,10 @@ test('regression: a reader scroll that passes the segment playing does not resum
     const playing = host.querySelector<HTMLElement>('[data-index="20"]')!
     return playing.offsetTop - 20
   })
-  await scroll.hover()
-  await page.mouse.wheel(0, -5000)
+  await scroll.evaluate((element) => {
+    element.dispatchEvent(new WheelEvent('wheel', { deltaY: -5000 }))
+    element.scrollTop = 0
+  })
   await expect(transcript(page).locator('[part="jump"]')).toBeVisible()
   // On its way, the reader's scroll shows the segment playing for a moment, and the time moves on right then.
   const after = await scroll.evaluate(async (element, top) => {
