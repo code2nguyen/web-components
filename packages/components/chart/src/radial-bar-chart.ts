@@ -382,7 +382,8 @@ export class RadialBarChart extends EchartsChartBase {
     const plot = this.plotElement
     const width = plot?.clientWidth ?? 0
     const height = plot?.clientHeight ?? 0
-    if (this.labels !== 'start' || !rings.length || !width || !height) return nothing
+    // `plotSize` is set by the resize observer, never on the server, so a hydrated chart's first render matches it.
+    if (this.labels !== 'start' || !rings.length || !this.plotSize || !width || !height) return nothing
     const theme = this.themeController.theme
     const { inner, ring, band } = this.layout(rings.length, width, height)
     if (ring < 9) return nothing
