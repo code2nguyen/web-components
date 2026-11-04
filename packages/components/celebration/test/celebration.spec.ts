@@ -73,3 +73,19 @@ test('under reduced motion nothing is drawn, and the end still fires', async ({ 
   await expect.poll(() => events(page)).toEqual([null])
   await expect(stage(page)).toBeHidden()
 })
+
+test('regression: fire() straight after creation, before the first render, still plays and ends', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="host"></div>`)
+  const ended = await page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) => {
+        const celebration = document.createElement('c2-celebration') as HTMLElement & { fire(): void }
+        celebration.style.setProperty('--c2-celebration--duration', '400ms')
+        celebration.addEventListener('celebration-end', () => resolve(true))
+        document.getElementById('host')!.append(celebration)
+        celebration.fire()
+        setTimeout(() => resolve(false), 4000)
+      }),
+  )
+  expect(ended).toBe(true)
+})

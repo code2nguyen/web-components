@@ -74,3 +74,13 @@ test('a moving pattern pauses off screen, and stays still under reduced motion',
       .evaluate((element) => getComputedStyle(element).display),
   ).toBe('none')
 })
+
+test('regressions: a count of 0 draws no meteors, a size in rem keeps the flicker grid, content is not clipped', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-backdrop id="m" pattern="meteors" style="height: 100px; --c2-backdrop__meteor--count: 0">Content</c2-backdrop><c2-backdrop id="f" pattern="flicker" style="width: 320px; height: 160px; --c2-backdrop--size: 1rem">Content</c2-backdrop>`,
+  )
+  await expect(pattern(page, '#m').locator('.meteor')).toHaveCount(0)
+  expect(await backdrop(page, '#m').evaluate((element) => getComputedStyle(element).overflow)).toBe('visible')
+  // 1rem is 16px: 20 × 10 cells, not 320 × 160.
+  expect(await backdrop(page, '#f').evaluate((element) => (element as unknown as { columns: number; rows: number }).columns)).toBe(20)
+})

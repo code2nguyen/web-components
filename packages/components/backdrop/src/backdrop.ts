@@ -120,7 +120,8 @@ export class Backdrop extends LitElement {
   }
 
   private makeMeteors(): void {
-    const count = Math.max(0, Math.min(60, Math.round(Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-backdrop__meteor--count')) || 12)))
+    const value = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-backdrop__meteor--count'))
+    const count = Math.max(0, Math.min(60, Math.round(Number.isFinite(value) ? value : 12)))
     this.meteors = Array.from({ length: count }, () => ({
       left: Math.random() * 110,
       top: Math.random() * 60 - 20,
@@ -133,11 +134,24 @@ export class Backdrop extends LitElement {
     return this.renderRoot?.querySelector('canvas') ?? null
   }
 
-  /** Sizes the flicker canvas to the box, one cell per `--c2-backdrop--size`. */
+  /** The flicker's look, read once per layout rather than every frame. */
+  private look = { size: 16, color: 'rgba(113, 113, 122, 0.35)', lit: 'rgb(2, 101, 220)', opacity: 0.6 }
+
+  /** Sizes the flicker canvas to the box, one cell per `--c2-backdrop--size`, and reads its colours. */
   private layoutFlicker(): void {
     const canvas = this.canvas
     if (!canvas || this.pattern !== 'flicker') return
-    const size = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-backdrop--size')) || 16
+    // The probe resolves the size in any unit (`1rem`, `2em`) to pixels; cells under 4px would be thousands a row.
+    const probe = this.renderRoot.querySelector<HTMLElement>('.probe')
+    const size = Math.max(4, probe?.getBoundingClientRect().width || 16)
+    const style = getComputedStyle(canvas)
+    const opacity = Number.parseFloat(style.getPropertyValue('--_lit-opacity'))
+    this.look = {
+      size,
+      color: style.color,
+      lit: style.getPropertyValue('--_lit').trim() || 'rgb(2, 101, 220)',
+      opacity: Number.isFinite(opacity) ? opacity : 0.6,
+    }
     const ratio = window.devicePixelRatio || 1
     const width = this.clientWidth
     const height = this.clientHeight
@@ -177,38 +191,34 @@ export class Backdrop extends LitElement {
     const canvas = this.canvas
     const context = canvas?.getContext('2d')
     if (!canvas || !context) return
-    const style = getComputedStyle(canvas)
-    const size = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-backdrop--size')) || 16
+    const { size, color, lit, opacity } = this.look
     const ratio = window.devicePixelRatio || 1
     const square = Math.max(2, size / 4) * ratio
-    const lit = Number.parseFloat(style.getPropertyValue('--_lit-opacity')) || 0.6
+    const at = (index: number) => (index * size + size / 2) * ratio - square / 2
     context.clearRect(0, 0, canvas.width, canvas.height)
-    // Resting squares in the pattern colour, lit ones in the flicker colour.
+    // Resting squares in the pattern colour, then the lit ones over them in the flicker colour.
+    context.fillStyle = color
+    for (let row = 0; row < this.rows; row += 1) for (let column = 0; column < this.columns; column += 1) context.fillRect(at(column), at(row), square, square)
+    context.fillStyle = lit
     for (let row = 0; row < this.rows; row += 1) {
       for (let column = 0; column < this.columns; column += 1) {
-        const x = (column * size + size / 2) * ratio - square / 2
-        const y = (row * size + size / 2) * ratio - square / 2
-        context.fillStyle = style.color
-        context.fillRect(x, y, square, square)
         const cell = this.cells[row * this.columns + column]
-        if (cell && cell.value > 0.02) {
-          context.globalAlpha = Math.min(1, cell.value) * lit
-          context.fillStyle = style.getPropertyValue('--_lit').trim() || 'rgb(2, 101, 220)'
-          context.fillRect(x, y, square, square)
-          context.globalAlpha = 1
-        }
+        if (!cell || cell.value <= 0.02) continue
+        context.globalAlpha = Math.min(1, cell.value) * opacity
+        context.fillRect(at(column), at(row), square, square)
       }
     }
+    context.globalAlpha = 1
   }
 
   private renderPattern() {
     const classes = `pattern ${this.pattern}${this.paused ? ' paused' : ''}`
     switch (this.pattern) {
       case 'flicker':
-        return html`<div class=${classes} part="pattern" aria-hidden="true"><canvas></canvas></div>`
+        return html`<div class=${classes} part="pattern" aria-hidden="true"><canvas></canvas><span class="probe"></span></div>`
       case 'aurora':
         return html`<div class=${classes} part="pattern" aria-hidden="true">
-          <span class="blob one"></span><span class="blob two"></span><span class="blob three"></span>
+          <div class="blobs"><span class="blob one"></span><span class="blob two"></span><span class="blob three"></span></div>
         </div>`
       case 'meteors':
         return html`<div class=${classes} part="pattern" aria-hidden="true">

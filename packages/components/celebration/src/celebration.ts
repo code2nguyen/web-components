@@ -233,7 +233,13 @@ export class Celebration extends LitElement {
 
   private show(): void {
     const canvas = this.canvas
-    if (!canvas) return
+    // Fired before the first render: draw once there is a canvas.
+    if (!canvas) {
+      void this.updateComplete.then(() => {
+        if (this.canvas && this.particles.length) this.show()
+      })
+      return
+    }
     this.ratio = window.devicePixelRatio || 1
     canvas.width = Math.round(window.innerWidth * this.ratio)
     canvas.height = Math.round(window.innerHeight * this.ratio)

@@ -108,7 +108,8 @@ export class TextEffect extends LitElement {
   private observer: IntersectionObserver | null = null
   private mutations: MutationObserver | null = null
   private onScreen = true
-  private started = false
+  /** Whether the effect has started: an in-view effect waits to be seen, a hover effect rests on its text. */
+  @state() private started = false
   private deleting = false
   private reducedQuery: MediaQueryList | null = null
 
@@ -138,6 +139,8 @@ export class TextEffect extends LitElement {
     this.addEventListener('pointerenter', this.handleHover)
     this.addEventListener('focusin', this.handleHover)
     this.readText()
+    // Moved in the page: start again where a first connection would have.
+    if (this.ready && this.play === 'load') this.start()
   }
 
   override disconnectedCallback(): void {
@@ -286,6 +289,7 @@ export class TextEffect extends LitElement {
       case 'scramble': {
         const word = items[0] ?? ''
         this.shown = 0
+        // The resolved characters and the noise after them always make up the word's length.
         const scramble = () => {
           this.noise = Array.from(word.slice(this.shown), (letter) => (letter === ' ' ? ' ' : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join('')
           if (this.shown >= word.length) {
@@ -293,8 +297,10 @@ export class TextEffect extends LitElement {
             if (this.loop) this.schedule(interval, () => this.replay())
             return
           }
-          this.shown += 1
-          this.schedule(char, scramble)
+          this.schedule(char, () => {
+            this.shown += 1
+            scramble()
+          })
         }
         scramble()
         break
@@ -322,6 +328,12 @@ export class TextEffect extends LitElement {
     return html`<span class="sr"><slot></slot></span>`
   }
 
+  /** Before it starts, an in-view effect waits unseen and a hover effect rests on its final text. */
+  private get restClass(): string {
+    if (this.started) return ''
+    return this.play === 'in-view' ? 'waiting' : this.play === 'hover' ? 'resting' : ''
+  }
+
   private renderEffect() {
     const items = this.items
     const first = items[0] ?? ''
@@ -347,10 +359,10 @@ export class TextEffect extends LitElement {
       case 'scramble':
         return html`<span class="text scramble" part="text" aria-hidden="true">${first.slice(0, this.shown)}<span class="noise">${this.noise}</span></span>`
       case 'shimmer':
-        return html`<span class="text shimmer" part="text" aria-hidden="true">${first}</span>`
+        return html`<span class="text shimmer ${this.restClass}" part="text" aria-hidden="true">${first}</span>`
       default: {
         const words = first.split(' ')
-        return html`<span class="text reveal" part="text" aria-hidden="true">
+        return html`<span class="text reveal ${this.restClass}" part="text" aria-hidden="true">
           ${repeat(
             words.map((word, index) => `${this.run}:${index}:${word}`),
             (key) => key,

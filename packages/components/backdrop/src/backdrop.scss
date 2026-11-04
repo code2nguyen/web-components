@@ -26,7 +26,6 @@
   display: block;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
   background: css.cssVar(background);
 }
 
@@ -46,6 +45,7 @@
   inset: 0;
   z-index: -1;
   overflow: hidden;
+  border-radius: inherit;
   pointer-events: none;
   -webkit-mask-image: css.cssVar(mask--image);
   mask-image: css.cssVar(mask--image);
@@ -79,11 +79,25 @@
   color: var(--_color);
 }
 
+/* Resolves --c2-backdrop--size to pixels for the script. */
+.probe {
+  position: absolute;
+  width: var(--_size);
+  height: 0;
+  visibility: hidden;
+}
+
 /* aurora */
 
 .aurora {
   -webkit-mask-image: none;
   mask-image: none;
+}
+
+/* The blur is on an inner layer, so the pattern's own box still clips it. */
+.blobs {
+  position: absolute;
+  inset: 0;
   opacity: css.cssVar(aurora--opacity);
   filter: blur(css.cssVar(aurora--blur)) saturate(1.3);
 }

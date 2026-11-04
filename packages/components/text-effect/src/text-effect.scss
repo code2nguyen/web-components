@@ -165,6 +165,19 @@
   }
 }
 
+/* Not started yet: an in-view reveal waits hidden, a hover effect rests still. */
+
+.waiting .piece {
+  opacity: 0;
+  animation: none;
+}
+
+.resting .piece,
+.shimmer.resting,
+.shimmer.waiting {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .word.in,
   .word.out,

@@ -101,3 +101,40 @@ test('play="in-view" waits until it is seen; play="hover" starts again on hover;
   await props(effect(page, '#v'), { effect: 'shimmer' })
   await expect(shown(page, '#v')).toHaveClass(/shimmer/)
 })
+
+test('regressions: scramble keeps the word length, a moved element starts again, hover and in-view effects wait', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-text-effect id="s" effect="scramble" style="--c2-text-effect__char--duration: 40ms">Deployed</c2-text-effect><div id="box"></div><c2-text-effect id="h" play="hover">Rest here</c2-text-effect><div style="height: 2000px"></div><c2-text-effect id="v" play="in-view">Seen later</c2-text-effect>`,
+  )
+  const lengths = await shown(page, '#s').evaluate(
+    (element) =>
+      new Promise<number[]>((resolve) => {
+        const seen: number[] = []
+        const timer = setInterval(() => {
+          seen.push((element.textContent ?? '').length)
+          if (seen.length > 15) {
+            clearInterval(timer)
+            resolve(seen)
+          }
+        }, 20)
+      }),
+  )
+  expect(new Set(lengths.filter((length) => length > 0))).toEqual(new Set([8]))
+
+  // A rotate moved in the page keeps rotating.
+  await renderScenario(`<c2-text-effect id="r" effect="rotate" words="one;two;three" ${FAST}></c2-text-effect><div id="box"></div>`)
+  await effect(page, '#r').evaluate((element) => document.getElementById('box')!.append(element))
+  const words = new Set<string>()
+  await expect
+    .poll(async () => {
+      words.add((await shown(page, '#r').locator('.word:not(.out)').textContent()) ?? '')
+      return words.size
+    })
+    .toBeGreaterThan(1)
+
+  await renderScenario(`<c2-text-effect id="h" play="hover">Rest here</c2-text-effect><div style="height: 2000px"></div><c2-text-effect id="v" play="in-view">Seen later</c2-text-effect>`)
+  expect(await shown(page, '#h').locator('.piece').first().evaluate((element) => getComputedStyle(element).animationName)).toBe('none')
+  expect(await shown(page, '#v').locator('.piece').first().evaluate((element) => getComputedStyle(element).opacity)).toBe('0')
+  await effect(page, '#v').scrollIntoViewIfNeeded()
+  await expect.poll(() => shown(page, '#v').locator('.piece').first().evaluate((element) => getComputedStyle(element).animationName)).toBe('c2-text-effect-rise')
+})
