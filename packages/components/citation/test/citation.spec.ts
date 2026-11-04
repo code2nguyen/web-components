@@ -30,8 +30,9 @@ test('hovering the marker opens a preview of the source: site, title, snippet an
   await expect(citation(page).locator('[part="snippet"]')).toContainText('static HTML in Node')
   await expect(citation(page).locator('[part="url"]')).toHaveText('https://www.lit.dev/docs/ssr/overview/')
   await expect(citation(page).locator('[part="favicon"]')).toHaveAttribute('alt', '')
-  // The card is the width the citation sets, bridged onto the hover card.
-  expect(Math.abs((await panel(page).boundingBox())!.width - 300)).toBeLessThan(2)
+  // The card is the width the citation sets, bridged onto the hover card. Polled: the box includes the card's scale-in
+  // transition, which a loaded runner can still be in.
+  await expect.poll(async () => Math.abs((await panel(page).boundingBox())!.width - 300)).toBeLessThan(2)
   await accessible(page)
 })
 
