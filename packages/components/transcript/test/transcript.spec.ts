@@ -135,6 +135,10 @@ test('follows a real <audio> in a scroll box; scrolling away shows Jump to curre
 
   await scroll.hover()
   await page.mouse.wheel(0, -5000)
+  // Firefox animates a wheel scroll even under reduced motion: wait until it has come to rest at the top, so the
+  // segment playing is out of view for good before the time moves on.
+  await expect.poll(top).toBe(0)
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   await expect(transcript(page).locator('[part="jump"]')).toBeVisible()
   await page.evaluate(() => ((document.getElementById('audio') as HTMLAudioElement).currentTime = 50.5))
   await expect(segment(transcript(page), 25)).toHaveClass(/active/)
@@ -229,4 +233,35 @@ test('regressions: a loaded transcript opens at its start, appended matches are 
   })
   await expect.poll(async () => (await events(transcript(page))).at(-1)).toEqual({ count: 31, index: 0 })
   await expect(transcript(page).locator('[role="status"]')).toHaveText('1 of 31 matches')
+})
+
+test('regression: a reader scroll that passes the segment playing does not resume following', async ({ page, renderScenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const many = Array.from({ length: 30 }, (_value, index) => ({
+    speaker: 'ana',
+    start: index * 2,
+    end: index * 2 + 2,
+    text: `Line ${index} of the meeting, long enough to wrap now and then.`,
+  }))
+  await renderScenario(`<c2-transcript current-time="40.5" segments='${json(many)}' style="height: 220px"></c2-transcript>`)
+  const scroll = transcript(page).locator('[part="scroll"]')
+  await expect.poll(() => scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(400)
+  const passing = await scroll.evaluate((element) => {
+    const host = element.getRootNode() as ShadowRoot
+    const playing = host.querySelector<HTMLElement>('[data-index="20"]')!
+    return playing.offsetTop - 20
+  })
+  await scroll.hover()
+  await page.mouse.wheel(0, -5000)
+  await expect(transcript(page).locator('[part="jump"]')).toBeVisible()
+  // On its way, the reader's scroll shows the segment playing for a moment, and the time moves on right then.
+  const after = await scroll.evaluate(async (element, top) => {
+    // Mid-scroll: a scroll event there, and the time moves on before the scroll comes to rest.
+    element.scrollTop = top
+    element.dispatchEvent(new Event('scroll'))
+    ;(element.getRootNode() as ShadowRoot & { host: HTMLElement & { currentTime: number } }).host.currentTime = 50.5
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    return element.scrollTop
+  }, passing)
+  expect(after).toBe(passing)
 })

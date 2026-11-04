@@ -221,6 +221,7 @@ export class Transcript extends LitElement {
   private frame = 0
   private programmatic = false
   private programmaticTimer: ReturnType<typeof setTimeout> | undefined
+  private settleTimer: ReturnType<typeof setTimeout> | undefined
   private atBottom = true
   private listened: HTMLMediaElement | null = null
   private pendingMatchScroll = false
@@ -260,6 +261,7 @@ export class Transcript extends LitElement {
     super.disconnectedCallback()
     this.listen(null)
     clearTimeout(this.programmaticTimer)
+    clearTimeout(this.settleTimer)
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -499,20 +501,40 @@ export class Transcript extends LitElement {
     return rect.bottom > box.top && rect.top < box.bottom
   }
 
-  /** Pauses following when the reader has scrolled the segment playing out of view. */
+  /**
+   * The reader's own scrolling pauses following as soon as the segment playing leaves the view. Following comes back
+   * only once the scroll has come to rest with it in view: a smooth scroll that merely passes it on the way does not.
+   */
   private readonly onScroll = (): void => {
+    if (this.programmatic || !this.follow) return
+    const element = this.segmentElement(this.active)
+    if (element && !this.visible(element)) this.paused = true
+    // `scrollend` settles it; this is the fallback where the browser has none.
+    clearTimeout(this.settleTimer)
+    this.settleTimer = setTimeout(this.settle, 200)
+  }
+
+  private readonly onScrollEnd = (): void => {
+    this.endProgrammatic()
+    this.settle()
+  }
+
+  /** Once the box is at rest, follow again only if the segment playing is in view. */
+  private readonly settle = (): void => {
+    clearTimeout(this.settleTimer)
     if (this.programmatic || !this.follow) return
     const element = this.segmentElement(this.active)
     this.paused = !!element && !this.visible(element)
   }
 
-  private readonly onScrollEnd = (): void => {
-    this.endProgrammatic()
-    this.onScroll()
+  /** The reader's own wheel or touch takes over from a scroll we started, and pauses following until it settles. */
+  private readonly onUserScroll = {
+    handleEvent: () => {
+      this.endProgrammatic()
+      if (this.follow && this.active >= 0) this.paused = true
+    },
+    passive: true,
   }
-
-  /** The reader's own wheel or touch takes over from a scroll we started. */
-  private readonly onUserScroll = { handleEvent: () => this.endProgrammatic(), passive: true }
 
   private endProgrammatic(): void {
     clearTimeout(this.programmaticTimer)
