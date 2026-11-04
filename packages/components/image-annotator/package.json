@@ -29,7 +29,10 @@
     "vue.js"
   ],
   "keywords": [
-    "image-annotator",
+    "image annotation",
+    "screenshot",
+    "markup",
+    "redact",
     "web component",
     "lit"
   ],
@@ -48,7 +51,8 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../icon-button:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -61,6 +65,7 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/icon-button": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

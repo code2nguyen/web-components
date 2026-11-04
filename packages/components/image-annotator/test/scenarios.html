@@ -3,21 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Image Annotator test scenarios</title>
+    <title>image-annotator scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
       }
       main {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
         gap: 16px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import './translations.ts'
+      import '../src/image-annotator.ts'
+      // A 400 × 200 test image: white on the left, blue on the right, with a line of text to redact.
+      window.testImage = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = 400
+        canvas.height = 200
+        const context = canvas.getContext('2d')
+        context.fillStyle = '#ffffff'
+        context.fillRect(0, 0, 200, 200)
+        context.fillStyle = '#3366cc'
+        context.fillRect(200, 0, 200, 200)
+        context.fillStyle = '#000000'
+        context.font = '20px sans-serif'
+        context.fillText('secret@example.com', 10, 40)
+        return canvas.toDataURL('image/png')
+      }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Image Annotator scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>

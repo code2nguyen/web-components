@@ -1,15 +1,234 @@
-@use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-image-annotator,
-  $theme: ()
+  $theme: (
+    toolbar--background-color: #ffffff,
+    toolbar--border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    stage--background-color: #f4f4f5,
+    selection--color: rgb(2, 101, 220),
+    handle--size: 8px,
+    swatch__selected--outline-color: rgb(2, 101, 220),
+    text--font-family: (
+      system-ui,
+      sans-serif,
+    ),
+    number--color: #ffffff,
+  )
 );
 
-
 :host {
-  display: inline-flex;
+  // Read by the export, which draws text on a canvas.
+  --_text-font: #{css.cssVar(text--font-family)};
+  --_number-color: #{css.cssVar(number--color)};
+  display: block;
+  max-width: 100%;
 }
 
-.c2-image-annotator {
+.frame {
+  display: grid;
+  gap: 8px;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.toolbar {
+  --c2-icon-button__icon--width: 18px;
+  --c2-icon-button__icon--height: 18px;
+  --c2-icon-button__state-layer--size: 32px;
+  --c2-icon-button--border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+  padding: 4px;
+  border: css.cssVar(toolbar--border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(toolbar--background-color);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.separator {
+  width: 1px;
+  height: 20px;
+  margin: 0 6px;
+  background-color: currentColor;
+  opacity: 0.15;
+}
+
+.grow {
+  flex: 1;
+}
+
+.swatches,
+.widths {
   display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.swatch,
+.width {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(swatch__selected--outline-color);
+  }
+}
+
+.swatch::before {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--_swatch);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  content: '';
+}
+
+.swatch.on::before {
+  outline: 2px solid css.cssVar(swatch__selected--outline-color);
+  outline-offset: 2px;
+}
+
+.width::before {
+  width: 18px;
+  height: var(--_width);
+  border-radius: 2px;
+  background-color: currentColor;
+  content: '';
+}
+
+.width.on {
+  color: css.cssVar(selection--color);
+}
+
+.stage {
+  position: relative;
+  container-type: inline-size;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(stage--background-color);
+  line-height: 0;
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(selection--color);
+    outline-offset: 2px;
+  }
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  touch-action: none;
+}
+
+:host(:not([readonly])) .stage:not(.tool-select) .overlay {
+  cursor: crosshair;
+}
+
+.shape {
+  outline: none;
+}
+
+.tool-select .shape {
+  cursor: move;
+}
+
+.hit {
+  fill: transparent;
+  pointer-events: none;
+}
+
+.tool-select .hit {
+  pointer-events: all;
+}
+
+.label {
+  font-family: css.cssVar(text--font-family);
+  font-weight: 600;
+}
+
+.digit {
+  fill: css.cssVar(number--color);
+  font-family: css.cssVar(text--font-family);
+  font-weight: 700;
+}
+
+.draft {
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.selection {
+  pointer-events: none;
+
+  .outline {
+    fill: none;
+    stroke: css.cssVar(selection--color);
+    stroke-dasharray: 4 3;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .handle {
+    fill: #ffffff;
+    stroke: css.cssVar(selection--color);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    pointer-events: all;
+    cursor: nwse-resize;
+  }
+}
+
+.shape:focus-visible > :first-child {
+  outline: none;
+}
+
+.text-editor {
+  position: absolute;
+  min-width: 8ch;
+  padding: 0 2px;
+  border: 1px dashed css.cssVar(selection--color);
+  background: transparent;
+  font: 600 calc(var(--_size) * 100cqw) css.cssVar(text--font-family);
+  line-height: 1.2;
+  outline: none;
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
