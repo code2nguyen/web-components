@@ -12,6 +12,7 @@
         },
         "textarea": true,
         "select": true,
+        "c2-address-field": true,
         "c2-autocomplete": true,
         "c2-button-group": true,
         "c2-cascader": true,

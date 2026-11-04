@@ -3,6 +3,7 @@
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
+    "address-field": 57259,
     "app-shell": 9594,
     "app-shell/app-shell-toggle": 2471,
     "attachment": 5425,
@@ -113,6 +114,7 @@
     "hover-card": 12315,
     "icon-button": 16353,
     "image": 3680,
+    "image-annotator": 26683,
     "image-cropper": 6596,
     "in-view": 1557,
     "index": 785274,
@@ -168,6 +170,7 @@
     "password-field": 6176,
     "payment-card": 12316,
     "phone-input": 24698,
+    "pivot-table": 33042,
     "popconfirm": 14801,
     "progress": 2809,
     "promo-code-field": 17017,

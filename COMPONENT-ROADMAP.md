@@ -224,20 +224,17 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### P. Enterprise data
 
-| #   | Component            | What it does                                                                                     | Seen in                                      | Source                                                                   | Priority | Decision |
-| --- | -------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------ | -------- | -------- |
-| 182 | `c2-pivot-table`     | Drag fields to rows, columns and values; sum/count/avg, expandable subtotals                     | Syncfusion pivotview, Kendo pivotgrid, Excel | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-pivotview)    | P2       | Proposed |
-| 186 | `c2-image-annotator` | Arrows, boxes, text, blur and redact over an image; exports a PNG and the shapes                 | Syncfusion image-editor, Jam, Marker.io      | [Syncfusion](https://www.npmjs.com/package/@syncfusion/ej2-image-editor) | P2       | Proposed |
-| 188 | `c2-floating-panel`  | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom              | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel)              | P3       | Proposed |
-| 191 | `c2-network-graph`   | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz                   | —                                                                        | P3       | Proposed |
-| 192 | `c2-sunburst-chart`  | Hierarchy as rings, click to zoom into a branch (cut from round 1)                               | Disk usage tools, budget breakdowns          | —                                                                        | P3       | Proposed |
-| 193 | `c2-word-cloud`      | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail                          | —                                                                        | P3       | Proposed |
+| #   | Component           | What it does                                                                                     | Seen in                             | Source                                                      | Priority | Decision |
+| --- | ------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------- | ----------------------------------------------------------- | -------- | -------- |
+| 188 | `c2-floating-panel` | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom     | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel) | P3       | Proposed |
+| 191 | `c2-network-graph`  | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz          | —                                                           | P3       | Proposed |
+| 192 | `c2-sunburst-chart` | Hierarchy as rings, click to zoom into a branch (cut from round 1)                               | Disk usage tools, budget breakdowns | —                                                           | P3       | Proposed |
+| 193 | `c2-word-cloud`     | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail                 | —                                                           | P3       | Proposed |
 
 ### Q. Inputs with built-in data and mobile inputs
 
-| #   | Component          | What it does                                                                                | Seen in                                 | Source | Priority | Decision |
-| --- | ------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------- | ------ | -------- | -------- |
-| 195 | `c2-address-field` | Address autocomplete (pluggable provider) split into the fields each country's format needs | Stripe Address Element, Shopify, Airbnb | —      | P2       | Proposed |
+| #   | Component | What it does | Seen in | Source | Priority | Decision |
+| --- | --------- | ------------ | ------- | ------ | -------- | -------- |
 
 ### R. Commerce, content and social
 

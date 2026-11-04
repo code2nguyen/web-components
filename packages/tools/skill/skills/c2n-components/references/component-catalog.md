@@ -77,6 +77,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Order Book** — `c2-order-book` · `@c2n/components/order-book` — Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
+- **Pivot table** — `c2-pivot-table` · `@c2n/components/pivot-table` — Summarises flat rows by the fields set on rows and columns, with subtotals, totals, sorting, a heatmap and a field list.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
@@ -99,6 +100,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.
 - **Flow** — `c2-flow` · `@c2n/components/flow` — A pipeline, dependency graph or database schema on a pannable canvas: steps with a status, smooth edges, rows joined row to row, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
+- **Image annotator** — `c2-image-annotator` · `@c2n/components/image-annotator` — Arrows, boxes, text, numbered steps, blur and redaction over an image, exported as a PNG and as shapes.
 - **Image Cropper** — `c2-image-cropper` · `@c2n/components/image-cropper` — Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.
 - **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
@@ -140,6 +142,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Inputs
 
+- **Address field** — `c2-address-field` · `@c2n/components/address-field` — A postal address input with the parts, order and labels of each country, optional autocomplete from your address provider.
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.

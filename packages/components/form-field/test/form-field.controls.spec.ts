@@ -44,6 +44,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-wheel-picker', markup: '<c2-wheel-picker options="S;M;L"></c2-wheel-picker>' },
   // Both are groups named by the field; the field label names the group and each inner control keeps its own name.
   { tag: 'c2-card-input', markup: '<c2-card-input></c2-card-input>', selfLabelled: true },
+  { tag: 'c2-address-field', markup: '<c2-address-field></c2-address-field>', selfLabelled: true },
   {
     tag: 'c2-time-slot-picker',
     markup: `<c2-time-slot-picker time-zone="UTC" slots='[{"start":"2030-01-07T09:00:00Z"}]'></c2-time-slot-picker>`,
@@ -56,6 +57,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
 ]
 
 for (const { tag, markup, selfLabelled } of controls) {
+  // `main > c2-form-field`: a control may hold fields of its own (the address field's parts).
   test(`${tag} takes its name and description from the field`, async ({ page, renderScenario }) => {
     await renderScenario(`<c2-form-field label="Field label" hint="Field hint">${markup}</c2-form-field>`)
     const target = page.locator(tag).locator('[aria-describedby~="c2-field-description"]').first()
@@ -63,12 +65,12 @@ for (const { tag, markup, selfLabelled } of controls) {
     if (!selfLabelled) await expect(target).toHaveAccessibleName(/Field label/)
     await expect(target).toHaveAccessibleDescription(/Field hint/)
 
-    await page.locator('c2-form-field').evaluate((field) => field.setAttribute('error-text', 'Something is wrong'))
+    await page.locator('main > c2-form-field').evaluate((field) => field.setAttribute('error-text', 'Something is wrong'))
     await expect(target).toHaveAccessibleDescription(/Error: Something is wrong/)
-    await expect(page.locator('c2-form-field')).toHaveState('user-invalid')
+    await expect(page.locator('main > c2-form-field')).toHaveState('user-invalid')
 
     // Out of the field the control is itself again: no description from it.
-    await page.evaluate(() => document.querySelector('main')!.append(document.querySelector('c2-form-field')!.firstElementChild!))
+    await page.evaluate(() => document.querySelector('main')!.append(document.querySelector('main > c2-form-field')!.firstElementChild!))
     await expect(page.locator(tag).locator('[aria-describedby~="c2-field-description"]')).toHaveCount(0)
   })
 }

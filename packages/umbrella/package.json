@@ -77,6 +77,10 @@
       "types": "./dist/action-bar.d.ts",
       "default": "./dist/action-bar.js"
     },
+    "./address-field": {
+      "types": "./dist/address-field.d.ts",
+      "default": "./dist/address-field.js"
+    },
     "./app-shell": {
       "types": "./dist/app-shell.d.ts",
       "default": "./dist/app-shell.js"
@@ -517,6 +521,10 @@
       "types": "./dist/image.d.ts",
       "default": "./dist/image.js"
     },
+    "./image-annotator": {
+      "types": "./dist/image-annotator.d.ts",
+      "default": "./dist/image-annotator.js"
+    },
     "./image-cropper": {
       "types": "./dist/image-cropper.d.ts",
       "default": "./dist/image-cropper.js"
@@ -732,6 +740,10 @@
     "./phone-input": {
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
+    },
+    "./pivot-table": {
+      "types": "./dist/pivot-table.d.ts",
+      "default": "./dist/pivot-table.js"
     },
     "./popconfirm": {
       "types": "./dist/popconfirm.d.ts",
@@ -1180,6 +1192,7 @@
   "devDependencies": {
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
+    "@c2n/address-field": "*",
     "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
     "@c2n/audio-visualizer": "*",
@@ -1250,6 +1263,7 @@
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
     "@c2n/image": "*",
+    "@c2n/image-annotator": "*",
     "@c2n/image-cropper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
@@ -1295,6 +1309,7 @@
     "@c2n/password-field": "*",
     "@c2n/payment-card": "*",
     "@c2n/phone-input": "*",
+    "@c2n/pivot-table": "*",
     "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/promo-code-field": "*",

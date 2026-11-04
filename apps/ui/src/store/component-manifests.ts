@@ -1,6 +1,7 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
+import addressField from '@c2n/address-field/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
@@ -70,6 +71,7 @@ import header from '@c2n/header/custom-elements.json'
 import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
+import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
@@ -117,6 +119,7 @@ import passwordField from '@c2n/password-field/custom-elements.json'
 import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import pivotTable from '@c2n/pivot-table/custom-elements.json'
 import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import promoCodeField from '@c2n/promo-code-field/custom-elements.json'
@@ -199,6 +202,7 @@ export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
     actionBar,
+    addressField,
     appShell,
     attachment,
     audioVisualizer,
@@ -269,6 +273,7 @@ export const componentManifests = (function () {
     hoverCard,
     iconButton,
     image,
+    imageAnnotator,
     imageCropper,
     inView,
     indicator,
@@ -315,6 +320,7 @@ export const componentManifests = (function () {
     paymentCard,
     phoneInput,
     phosphorIcons,
+    pivotTable,
     popconfirm,
     progress,
     promoCodeField,

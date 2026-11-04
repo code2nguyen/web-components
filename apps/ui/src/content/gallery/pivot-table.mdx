@@ -1,0 +1,47 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PivotTable } from '@c2n/components/pivot-table'
+
+## Presets
+
+A sales summary, a compact cross-tab, a retention cohort and a branded report. Header and total backgrounds, the heat colour and the cell padding are variables.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-pivot-table rows="region;country" columns="quarter" values='[{"field":"revenue"}]' data='[{"region":"Europe","country":"Germany","quarter":"Q1","revenue":412000,"orders":948},{"region":"Europe","country":"Germany","quarter":"Q2","revenue":438000,"orders":1007},{"region":"Europe","country":"Germany","quarter":"Q3","revenue":455000,"orders":1046},{"region":"Europe","country":"Germany","quarter":"Q4","revenue":502000,"orders":1155},{"region":"Europe","country":"France","quarter":"Q1","revenue":356000,"orders":819},{"region":"Europe","country":"France","quarter":"Q2","revenue":371000,"orders":853},{"region":"Europe","country":"France","quarter":"Q3","revenue":360000,"orders":828},{"region":"Europe","country":"France","quarter":"Q4","revenue":398000,"orders":915},{"region":"Europe","country":"Spain","quarter":"Q1","revenue":188000,"orders":432},{"region":"Europe","country":"Spain","quarter":"Q2","revenue":201000,"orders":462},{"region":"Europe","country":"Spain","quarter":"Q4","revenue":236000,"orders":543},{"region":"Asia Pacific","country":"Japan","quarter":"Q1","revenue":298000,"orders":685},{"region":"Asia Pacific","country":"Japan","quarter":"Q2","revenue":305000,"orders":702},{"region":"Asia Pacific","country":"Japan","quarter":"Q3","revenue":320000,"orders":736},{"region":"Asia Pacific","country":"Japan","quarter":"Q4","revenue":341000,"orders":784},{"region":"Asia Pacific","country":"Australia","quarter":"Q1","revenue":144000,"orders":331},{"region":"Asia Pacific","country":"Australia","quarter":"Q2","revenue":151000,"orders":347},{"region":"Asia Pacific","country":"Australia","quarter":"Q3","revenue":149000,"orders":343},{"region":"Asia Pacific","country":"Australia","quarter":"Q4","revenue":162000,"orders":373}]'></c2-pivot-table>
+```
+
+```html tag=MdxCodeBlock,label=Compact cross-tab
+<style>
+  .pivot-compact {
+    --c2-pivot-table--font-size: 12px;
+    --c2-pivot-table__cell--padding: 3px 8px;
+  }
+</style>
+<c2-pivot-table class="pivot-compact" rows="country" columns="quarter" totals="columns" values='[{"field":"orders","label":"Orders"}]' data='[{"region":"Europe","country":"Germany","quarter":"Q1","revenue":412000,"orders":948},{"region":"Europe","country":"Germany","quarter":"Q2","revenue":438000,"orders":1007},{"region":"Europe","country":"Germany","quarter":"Q3","revenue":455000,"orders":1046},{"region":"Europe","country":"Germany","quarter":"Q4","revenue":502000,"orders":1155},{"region":"Europe","country":"France","quarter":"Q1","revenue":356000,"orders":819},{"region":"Europe","country":"France","quarter":"Q2","revenue":371000,"orders":853},{"region":"Europe","country":"France","quarter":"Q3","revenue":360000,"orders":828},{"region":"Europe","country":"France","quarter":"Q4","revenue":398000,"orders":915},{"region":"Europe","country":"Spain","quarter":"Q1","revenue":188000,"orders":432},{"region":"Europe","country":"Spain","quarter":"Q2","revenue":201000,"orders":462},{"region":"Europe","country":"Spain","quarter":"Q4","revenue":236000,"orders":543},{"region":"Asia Pacific","country":"Japan","quarter":"Q1","revenue":298000,"orders":685},{"region":"Asia Pacific","country":"Japan","quarter":"Q2","revenue":305000,"orders":702},{"region":"Asia Pacific","country":"Japan","quarter":"Q3","revenue":320000,"orders":736},{"region":"Asia Pacific","country":"Japan","quarter":"Q4","revenue":341000,"orders":784},{"region":"Asia Pacific","country":"Australia","quarter":"Q1","revenue":144000,"orders":331},{"region":"Asia Pacific","country":"Australia","quarter":"Q2","revenue":151000,"orders":347},{"region":"Asia Pacific","country":"Australia","quarter":"Q3","revenue":149000,"orders":343},{"region":"Asia Pacific","country":"Australia","quarter":"Q4","revenue":162000,"orders":373}]'></c2-pivot-table>
+```
+
+```html tag=MdxCodeBlock,label=Retention cohort
+<style>
+  .pivot-cohort {
+    --c2-pivot-table__heat--color: #0f766e;
+  }
+</style>
+<c2-pivot-table class="pivot-cohort" rows="cohort" columns="month" heatmap totals="none" values='[{"field":"retained","aggregate":"avg","label":"Retained","format":{"style":"unit","unit":"percent"}}]' data='[{"cohort":"2026-01","month":"M0","retained":100},{"cohort":"2026-01","month":"M1","retained":62},{"cohort":"2026-01","month":"M2","retained":48},{"cohort":"2026-01","month":"M3","retained":41},{"cohort":"2026-01","month":"M4","retained":37},{"cohort":"2026-01","month":"M5","retained":35},{"cohort":"2026-02","month":"M0","retained":100},{"cohort":"2026-02","month":"M1","retained":58},{"cohort":"2026-02","month":"M2","retained":44},{"cohort":"2026-02","month":"M3","retained":39},{"cohort":"2026-02","month":"M4","retained":36},{"cohort":"2026-03","month":"M0","retained":100},{"cohort":"2026-03","month":"M1","retained":65},{"cohort":"2026-03","month":"M2","retained":51},{"cohort":"2026-03","month":"M3","retained":45},{"cohort":"2026-04","month":"M0","retained":100},{"cohort":"2026-04","month":"M1","retained":61},{"cohort":"2026-04","month":"M2","retained":47},{"cohort":"2026-05","month":"M0","retained":100},{"cohort":"2026-05","month":"M1","retained":67},{"cohort":"2026-06","month":"M0","retained":100}]'></c2-pivot-table>
+```
+
+```html tag=MdxCodeBlock,label=Branded report
+<style>
+  .pivot-brand {
+    --c2-pivot-table__header--background-color: light-dark(#ede9fe, #2b1d4d);
+    --c2-pivot-table__header--color: light-dark(#5b21b6, #c4b5fd);
+    --c2-pivot-table__total--background-color: light-dark(#f5f3ff, #221840);
+    --c2-pivot-table--border-radius: 14px;
+  }
+</style>
+<c2-pivot-table class="pivot-brand" rows="region" columns="quarter" values='[{"field":"revenue","format":{"style":"currency","currency":"EUR","notation":"compact","maximumFractionDigits":2}}]' data='[{"region":"Europe","country":"Germany","quarter":"Q1","revenue":412000,"orders":948},{"region":"Europe","country":"Germany","quarter":"Q2","revenue":438000,"orders":1007},{"region":"Europe","country":"Germany","quarter":"Q3","revenue":455000,"orders":1046},{"region":"Europe","country":"Germany","quarter":"Q4","revenue":502000,"orders":1155},{"region":"Europe","country":"France","quarter":"Q1","revenue":356000,"orders":819},{"region":"Europe","country":"France","quarter":"Q2","revenue":371000,"orders":853},{"region":"Europe","country":"France","quarter":"Q3","revenue":360000,"orders":828},{"region":"Europe","country":"France","quarter":"Q4","revenue":398000,"orders":915},{"region":"Europe","country":"Spain","quarter":"Q1","revenue":188000,"orders":432},{"region":"Europe","country":"Spain","quarter":"Q2","revenue":201000,"orders":462},{"region":"Europe","country":"Spain","quarter":"Q4","revenue":236000,"orders":543},{"region":"Asia Pacific","country":"Japan","quarter":"Q1","revenue":298000,"orders":685},{"region":"Asia Pacific","country":"Japan","quarter":"Q2","revenue":305000,"orders":702},{"region":"Asia Pacific","country":"Japan","quarter":"Q3","revenue":320000,"orders":736},{"region":"Asia Pacific","country":"Japan","quarter":"Q4","revenue":341000,"orders":784},{"region":"Asia Pacific","country":"Australia","quarter":"Q1","revenue":144000,"orders":331},{"region":"Asia Pacific","country":"Australia","quarter":"Q2","revenue":151000,"orders":347},{"region":"Asia Pacific","country":"Australia","quarter":"Q3","revenue":149000,"orders":343},{"region":"Asia Pacific","country":"Australia","quarter":"Q4","revenue":162000,"orders":373}]'></c2-pivot-table>
+```
+
+</GalleryGrid>
