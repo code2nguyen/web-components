@@ -125,8 +125,11 @@ export class AddressField extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, addressFieldMessages)
   /** In a `c2-form-field`, its label names the group and its hint and error describe it. */
-  private readonly field = new FieldContextConsumer(this, { kind: 'text', selfLabelled: true })
+  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private defaultValue: AddressValue | null = null
+  /** One function for the autocomplete: a new one each render would cancel its request and reload it. */
+  private readonly suggest = (query: string, signal: AbortSignal) =>
+    this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
   private resolving: AbortController | null = null
 
   constructor() {
@@ -318,6 +321,9 @@ export class AddressField extends LitElement {
     const required = format.required.includes(part)
     const label = required ? this.labelOf(part) : this.msg.t('optional', this.labelOf(part))
     const error = this.errors().find((entry) => entry.part === part)
+    // Inside a c2-form-field that shows the message, the parts keep only the error look.
+    const message = this.field.managed ? '' : (error?.message ?? '')
+    const invalid = !!error || this.field.invalid
     const disabled = this.disabled || this.formDisabled
     const value = this.value[part]
     const stop = (event: Event) => event.stopPropagation()
@@ -346,8 +352,7 @@ export class AddressField extends LitElement {
         label-field="label"
         description-field="description"
         min-query-length="3"
-        .dataSource=${(query: string, signal: AbortSignal) =>
-          this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []}
+        .dataSource=${this.suggest}
         @input=${(event: Event) => {
           event.stopPropagation()
           this.set(part, (event.currentTarget as HTMLInputElement).value)
@@ -361,6 +366,7 @@ export class AddressField extends LitElement {
         data-part=${part}
         .value=${value}
         autocomplete=${AUTOCOMPLETE[part]}
+        ?error=${invalid}
         ?disabled=${disabled}
         @input=${(event: Event) => {
           event.stopPropagation()
@@ -373,7 +379,7 @@ export class AddressField extends LitElement {
         @focusout=${() => this.touch(part)}
       ></c2-text-field>`
     }
-    return html`<c2-form-field class="part" label=${label} error-text=${error?.message ?? ''} necessity="none">${control}</c2-form-field>`
+    return html`<c2-form-field class="part" label=${label} error-text=${message} necessity="none">${control}</c2-form-field>`
   }
 
   override render() {

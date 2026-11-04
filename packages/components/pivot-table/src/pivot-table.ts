@@ -49,6 +49,9 @@ interface Row {
   depth: number
   /** Whether the row shows values. */
   values: boolean
+  /** The row's place among its siblings, and how many there are; 0 for a subtotal or a total. */
+  position: number
+  siblings: number
 }
 
 const AGGREGATES: PivotAggregate[] = ['sum', 'count', 'avg', 'min', 'max', 'distinct']
@@ -160,6 +163,8 @@ export class PivotTable extends LitElement {
   private bodyRows: Row[] = []
   private dataColumns: Column[] = []
   private heat: { min: number; max: number }[] = []
+  /** One number format per value, for the render under way. */
+  private readonly formatters = new Map<number, Intl.NumberFormat | null>()
 
   /** The layout as configured now. */
   get config(): PivotConfig {
@@ -183,7 +188,7 @@ export class PivotTable extends LitElement {
     const quote = (text: string) => (/[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text)
     const lines: string[][] = []
     const columnDepth = this.columns.length
-    for (let level = 0; level < Math.max(1, columnDepth); level += 1) {
+    for (let level = 0; level < columnDepth; level += 1) {
       lines.push(['', ...this.dataColumns.map((column) => (column.total ? (level === 0 ? this.msg.t('total') : '') : (column.path[level] ?? '')))])
     }
     if (this.values.length > 1 || !columnDepth) lines.push(['', ...this.dataColumns.map((column) => this.valueLabel(this.values[column.value]))])
@@ -207,7 +212,10 @@ export class PivotTable extends LitElement {
       this.result = pivot(this.data, { rows: this.rows, columns: this.columns, values: this.values })
     }
     if (changed.has('rows') || changed.has('columns')) this.sort = null
-    this.layout()
+    // The cursor, a drag, an announcement or the language alone leave the rows and columns as they are.
+    const layoutKeys = ['data', 'rows', 'columns', 'values', 'toggled', 'sort', 'subtotals', 'totals', 'expandDepth', 'heatmap']
+    if (!this.hasUpdated || layoutKeys.some((key) => changed.has(key as keyof PivotTable))) this.layout()
+    this.formatters.clear()
   }
 
   // ------------------------------------------------------------------------------------------------------------ model
@@ -242,12 +250,16 @@ export class PivotTable extends LitElement {
   private formatted(row: Row, column: Column): string {
     const value = this.cellValue(row, column)
     if (value === null) return ''
-    const options = this.values[column.value]?.format ?? { maximumFractionDigits: 2 }
-    try {
-      return new Intl.NumberFormat(this.msg.locale, options).format(value)
-    } catch {
-      return String(value)
+    let format = this.formatters.get(column.value)
+    if (format === undefined) {
+      try {
+        format = new Intl.NumberFormat(this.msg.locale, this.values[column.value]?.format ?? { maximumFractionDigits: 2 })
+      } catch {
+        format = null
+      }
+      this.formatters.set(column.value, format)
     }
+    return format ? format.format(value) : String(value)
   }
 
   /** Children in the order shown: by the sorted column's values, else by label. */
@@ -281,24 +293,27 @@ export class PivotTable extends LitElement {
 
     const depth = this.rows.length
     const walk = (node: PivotNode) => {
-      for (const child of this.ordered(node)) {
+      const children = this.ordered(node)
+      const siblings = children.length
+      for (const [index, child] of children.entries()) {
+        const position = index + 1
         const level = child.path.length
         if (level < depth && child.children.length) {
           if (!this.expanded(child)) {
-            this.bodyRows.push({ kind: 'collapsed', node: child, depth: level, values: true })
+            this.bodyRows.push({ kind: 'collapsed', node: child, depth: level, values: true, position, siblings })
             continue
           }
-          this.bodyRows.push({ kind: 'group', node: child, depth: level, values: this.subtotals === 'top' })
+          this.bodyRows.push({ kind: 'group', node: child, depth: level, values: this.subtotals === 'top', position, siblings })
           walk(child)
-          if (this.subtotals === 'bottom') this.bodyRows.push({ kind: 'subtotal', node: child, depth: level + 1, values: true })
+          if (this.subtotals === 'bottom') this.bodyRows.push({ kind: 'subtotal', node: child, depth: level + 1, values: true, position: 0, siblings: 0 })
         } else {
-          this.bodyRows.push({ kind: 'leaf', node: child, depth: level, values: true })
+          this.bodyRows.push({ kind: 'leaf', node: child, depth: level, values: true, position, siblings })
         }
       }
     }
     if (depth) walk(result.rows)
-    else this.bodyRows.push({ kind: 'leaf', node: result.rows, depth: 1, values: true })
-    if (showRowTotal && depth) this.bodyRows.push({ kind: 'grand', node: result.rows, depth: 1, values: true })
+    else this.bodyRows.push({ kind: 'leaf', node: result.rows, depth: 1, values: true, position: 1, siblings: 1 })
+    if (showRowTotal && depth) this.bodyRows.push({ kind: 'grand', node: result.rows, depth: 1, values: true, position: 0, siblings: 0 })
 
     // The heatmap scale: per measure, over the leaf cells shown.
     this.heat = this.values.map(() => ({ min: Infinity, max: -Infinity }))
@@ -356,6 +371,8 @@ export class PivotTable extends LitElement {
   }
 
   private onKeydown(event: KeyboardEvent): void {
+    // Keys on the header's sort buttons are theirs.
+    if ((event.composedPath() as Element[]).some((node) => node instanceof Element && node.localName === 'thead')) return
     const { row, column } = this.cursor
     const last = { row: this.bodyRows.length - 1, column: this.dataColumns.length }
     let next = { row, column }
@@ -433,7 +450,14 @@ export class PivotTable extends LitElement {
     else this.rows = rows
     if (to === 'columns') this.columns = place(columns)
     else this.columns = columns
-    if (to === 'values' && !values.some((value) => value.field === field)) {
+    const at = values.findIndex((value) => value.field === field)
+    if (to === 'values' && at >= 0 && index !== undefined && index !== at) {
+      // A value dropped on another value: reorder.
+      const next = [...values]
+      const [moved] = next.splice(at, 1)
+      next.splice(Math.max(0, Math.min(next.length, index)), 0, moved)
+      values = next
+    } else if (to === 'values' && at < 0) {
       const numeric = this.data.some((record) => typeof (record as Record<string, unknown>)?.[field] === 'number')
       values = [...values, { field, aggregate: numeric ? 'sum' : 'count' }]
     }
@@ -441,8 +465,9 @@ export class PivotTable extends LitElement {
     this.changed()
   }
 
-  private setAggregate(field: string, aggregate: PivotAggregate): void {
-    this.values = this.values.map((value) => (value.field === field ? { ...value, aggregate, label: undefined } : value))
+  /** Changes the aggregate of the value at `index`: two values may share a field. */
+  private setAggregate(index: number, aggregate: PivotAggregate): void {
+    this.values = this.values.map((value, position) => (position === index ? { ...value, aggregate, label: undefined } : value))
     this.changed()
   }
 
@@ -474,8 +499,8 @@ export class PivotTable extends LitElement {
     this.move(dragging.field, zone, index !== undefined && index >= 0 ? index : undefined)
   }
 
-  private renderChip(field: string, zone: Zone) {
-    const value = zone === 'values' ? this.values.find((entry) => entry.field === field) : undefined
+  private renderChip(field: string, zone: Zone, index: number) {
+    const value = zone === 'values' ? this.values[index] : undefined
     const commands: [string, string][] = [
       ['rows', this.msg.t('moveToRows')],
       ['columns', this.msg.t('moveToColumns')],
@@ -501,7 +526,7 @@ export class PivotTable extends LitElement {
       <c2-menu
         @menu-select=${(event: CustomEvent<{ value: string }>) => {
           const choice = event.detail.value
-          if (AGGREGATES.includes(choice as PivotAggregate)) this.setAggregate(field, choice as PivotAggregate)
+          if (AGGREGATES.includes(choice as PivotAggregate)) this.setAggregate(index, choice as PivotAggregate)
           else if (choice === 'remove') this.move(field, 'fields')
           else this.move(field, choice as Zone)
         }}
@@ -541,7 +566,7 @@ export class PivotTable extends LitElement {
     >
       <span class="zone-label" id="zone-${zone}">${this.msg.t(zone)}</span>
       <div class="chips" role="list" aria-labelledby="zone-${zone}">
-        ${fields.map((field) => html`<span role="listitem">${this.renderChip(field, zone)}</span>`)}
+        ${fields.map((field, index) => html`<span role="listitem">${this.renderChip(field, zone, index)}</span>`)}
       </div>
     </div>`
   }
@@ -663,24 +688,13 @@ export class PivotTable extends LitElement {
   private renderRow(row: Row, index: number) {
     const group = row.kind === 'group' || row.kind === 'collapsed'
     const open = row.kind === 'group'
-    const siblings =
-      row.node && row.kind !== 'subtotal' && row.kind !== 'grand'
-        ? this.bodyRows.filter(
-            (other) =>
-              other.depth === row.depth &&
-              other.kind !== 'subtotal' &&
-              other.kind !== 'grand' &&
-              other.node?.path.slice(0, -1).join(KEY) === row.node!.path.slice(0, -1).join(KEY),
-          )
-        : []
-    const position = siblings.indexOf(row) + 1
     return html`<tr
       role="row"
       class="${row.kind}"
       aria-level=${row.depth}
       aria-expanded=${group ? String(open) : nothing}
-      aria-setsize=${siblings.length || nothing}
-      aria-posinset=${position || nothing}
+      aria-setsize=${row.siblings || nothing}
+      aria-posinset=${row.position || nothing}
     >
       <th
         part="row-header"

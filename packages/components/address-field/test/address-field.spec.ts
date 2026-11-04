@@ -49,7 +49,7 @@ test('typing fills the value; the form gets name[part]; a missing part or a bad 
   await expect.poll(() => errors(field(page))).toEqual(['ZIP code should look like 94103'])
   await page.getByRole('button', { name: 'Pay' }).click()
   await expect(page.locator('body')).not.toHaveAttribute('data-submitted', 'yes')
-  await expect.poll(() => errors(field(page))).toEqual(['Enter a state', 'ZIP code should look like 94103'])
+  await expect.poll(() => errors(field(page))).toEqual(['State is required', 'ZIP code should look like 94103'])
   await choose(field(page), 'region', 'CA')
   await input(field(page), 'postalCode').fill('94111')
   await page.keyboard.press('Tab')
@@ -79,7 +79,7 @@ test('an empty, optional address submits; a started one needs its required parts
   // A message shows once a part is left.
   await input(page.locator('#a'), 'city').focus()
   await input(page.locator('#a'), 'city').blur()
-  await expect.poll(() => errors(page.locator('#a'))).toEqual(['Enter a city'])
+  await expect.poll(() => errors(page.locator('#a'))).toEqual(['City is required'])
 })
 
 test('another country changes the parts, their order and labels, and keeps what both share', async ({ page, renderScenario }) => {
@@ -250,4 +250,14 @@ test('a reset restores the first value; its text follows the language', async ({
   await input(field(page), 'city').fill('Paris')
   await page.evaluate(() => (document.getElementById('form') as HTMLFormElement).reset())
   expect((await value(field(page))).city).toBe('Lyon')
+})
+
+test('regression: inside a c2-form-field that shows the message, the parts keep only the error look', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Delivery" error-text="Address not deliverable"><c2-address-field value='{"line1":"1 Main St"}'></c2-address-field></c2-form-field>`,
+  )
+  await expect(field(page).getByRole('group', { name: 'Delivery' })).toBeVisible()
+  await field(page).evaluate((element) => (element as HTMLElement & { reportValidity(): boolean }).reportValidity())
+  await expect.poll(() => errors(field(page))).toEqual([])
+  await expect(field(page).locator('[data-part="city"]')).toHaveAttribute('error', '')
 })

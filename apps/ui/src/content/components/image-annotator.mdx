@@ -58,7 +58,7 @@ annotator.addEventListener('annotation-change', (event) => draft.save(event.deta
 const blob = await annotator.toBlob() // PNG at the image's natural size
 ```
 
-`toBlob()`, `toDataURL()` and `toCanvas()` draw the image at full size with the shapes on it. In the export a redaction replaces the pixels and a blur is a coarse pixelation, so text under either cannot be recovered; use Redact for passwords, keys and card numbers. An image from another origin can only be exported with CORS: set `crossorigin="anonymous"` and serve it with `Access-Control-Allow-Origin`. Otherwise the export rejects and `annotator-error` says why.
+`toBlob()`, `toDataURL()` and `toCanvas()` draw the image at full size with the shapes on it. Redactions are drawn above every other shape, so a later blur never uncovers them. In the export a redaction replaces the pixels and a blur is a coarse pixelation, so text under either cannot be recovered; use Redact for passwords, keys and card numbers. An image from another origin can only be exported with CORS: set `crossorigin="anonymous"` and serve it with `Access-Control-Allow-Origin`. Otherwise the export rejects and `annotator-error` says why.
 
 ### Keyboard
 

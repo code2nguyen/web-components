@@ -205,3 +205,29 @@ test('its text follows the language', async ({ page, renderScenario }) => {
   await expect(page.locator('#empty')).toHaveHostAria('aria-label', 'Tableau croisé')
   await expect(page.locator('#empty .empty-state')).toHaveText('Aucune donnée')
 })
+
+test('regressions: Enter sorts from a header button, a value chip reorders, two measures on one field keep their own aggregate, CSV has no blank first line', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(
+    `<c2-pivot-table configurable rows="country" values='[{"field":"revenue","aggregate":"sum"},{"field":"revenue","aggregate":"avg"},{"field":"orders"}]' data='${json(SALES)}'></c2-pivot-table>`,
+  )
+  await watch(table(page), 'cell-click')
+  const header = table(page).locator('thead th').nth(1)
+  await header.locator('button').focus()
+  await page.keyboard.press('Enter')
+  await expect(header).toHaveAttribute('aria-sort', 'descending')
+  expect(await events(table(page))).toEqual([])
+  const zone = table(page).locator('.zone').nth(3)
+  // The second revenue chip keeps its own aggregate.
+  await expect(zone.locator('.chip-aggregate')).toHaveText(['Sum', 'Average', 'Sum'])
+  await zone.locator('.chip').nth(1).locator('.chip-menu').click()
+  await zone.locator('.chip').nth(1).locator('c2-menu-item', { hasText: 'Max' }).click()
+  await expect(zone.locator('.chip-aggregate')).toHaveText(['Sum', 'Max', 'Sum'])
+  // Drag orders onto the first revenue: it moves first.
+  await zone.locator('[data-field="orders"]').dragTo(zone.locator('[data-field="revenue"]').first())
+  await expect(zone.locator('.chip-label')).toHaveText(['orders', 'revenue', 'revenue'])
+  const csv = await table(page).evaluate((element) => (element as HTMLElement & { toCSV(): string }).toCSV())
+  expect(csv.split('\n')[0]).toBe(',Sum of orders,Sum of revenue,Max of revenue')
+})

@@ -128,7 +128,8 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  *
  * Shapes are plain objects in the image's own pixels (`shapes`, JSON as an attribute), so they stay in place at any
  * display size; `annotation-change` gives them after every edit. `toBlob()` and `toDataURL()` draw the image at its
- * natural size with the shapes. In the export, a redaction replaces the pixels and a blur is a coarse pixelation, so
+ * natural size with the shapes. Redactions are drawn above every other shape. In the export, a redaction replaces the
+ * pixels and a blur is a coarse pixelation, so
  * text under either cannot be recovered; use redaction for secrets. An image from another origin needs CORS
  * (`crossorigin`) to be exported: otherwise the export rejects and `annotator-error` says why.
  *
@@ -192,6 +193,8 @@ export class ImageAnnotator extends LitElement {
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, imageAnnotatorMessages)
+  /** The shapes before the text being edited was added or changed: the edit commits against them. */
+  private editOrigin: AnnotatorShape[] | null = null
   private gesture: { kind: 'draw' | 'move' | 'handle'; startX: number; startY: number; origin: AnnotatorShape; handle?: number; moved: boolean } | null = null
 
   constructor() {
@@ -236,7 +239,8 @@ export class ImageAnnotator extends LitElement {
     const context = canvas.getContext('2d')
     if (!context) throw new Error('Canvas rendering is unavailable.')
     context.drawImage(image, 0, 0)
-    for (const shape of this.shapes) this.paint(context, shape, image)
+    // Redactions last, so nothing drawn after them (a blur samples the original image) shows what they hide.
+    for (const shape of this.layered()) this.paint(context, shape, image)
     return canvas
   }
 
@@ -359,6 +363,11 @@ export class ImageAnnotator extends LitElement {
     context.restore()
   }
 
+  /** The shapes in drawing order: as drawn, with every redaction on top. */
+  private layered(): AnnotatorShape[] {
+    return [...this.shapes.filter((shape) => shape.type !== 'redact'), ...this.shapes.filter((shape) => shape.type === 'redact')]
+  }
+
   // ------------------------------------------------------------------------------------------------------- state
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -413,9 +422,21 @@ export class ImageAnnotator extends LitElement {
   }
 
   private add(shape: AnnotatorShape): void {
-    this.commit([...this.shapes, shape], this.msg.t('added', this.kind(shape)))
     this.selected = shape.id
-    if (shape.type === 'text') this.editing = shape.id
+    if (shape.type === 'text') {
+      // A text joins the history when it is finished, as one entry, and not at all if it is left empty.
+      this.editOrigin = this.shapes
+      this.shapes = [...this.shapes, shape]
+      this.editing = shape.id
+      return
+    }
+    this.commit([...this.shapes, shape], this.msg.t('added', this.kind(shape)))
+  }
+
+  /** Starts editing a text shape. */
+  private edit(id: string): void {
+    this.editOrigin = this.shapes
+    this.editing = id
   }
 
   private removeShape(id: string): void {
@@ -612,7 +633,7 @@ export class ImageAnnotator extends LitElement {
       }
       if (event.key === 'Enter' && selected.type === 'text') {
         event.preventDefault()
-        this.editing = selected.id
+        this.edit(selected.id)
         return
       }
       if (event.key === 'Escape') {
@@ -652,22 +673,36 @@ export class ImageAnnotator extends LitElement {
 
   // ------------------------------------------------------------------------------------------------------- text
 
+  /** Ends the text edit with `value` (the editor's text when left out): one history entry, or none if nothing changed. */
   private finishText(value?: string): void {
     const id = this.editing
     if (!id) return
+    const editor = this.renderRoot.querySelector<HTMLInputElement>('.text-editor')
+    // The editor is about to go: keep the keyboard on the image rather than drop it to the page.
+    if (editor && this.shadowRoot?.activeElement === editor) this.updateComplete.then(() => this.stageElement?.focus({ preventScroll: true }))
     this.editing = null
+    const origin = this.editOrigin ?? this.shapes
+    this.editOrigin = null
     const shape = this.shapes.find((candidate) => candidate.id === id)
     if (!shape) return
-    const text = (value ?? shape.text ?? '').trim()
+    const text = (value ?? editor?.value ?? shape.text ?? '').trim()
+    const before = origin.find((candidate) => candidate.id === id)
+    let next: AnnotatorShape[]
     if (!text) {
-      // An empty text box was never really added.
-      this.shapes = this.shapes.filter((candidate) => candidate.id !== id)
-      this.history = this.history.slice(0, -1)
+      next = this.shapes.filter((candidate) => candidate.id !== id)
       this.selected = null
-      this.changed()
+    } else {
+      next = this.shapes.map((candidate) =>
+        candidate.id === id ? { ...candidate, text, w: text.length * textSize(shape) * 0.6, h: textSize(shape) * 1.2 } : candidate,
+      )
+    }
+    // Back to how it was: a new text left empty, or an edit that changed nothing.
+    if ((!text && !before) || (before && before.text === text)) {
+      this.shapes = origin
       return
     }
-    if (text !== shape.text) this.patch(id, { text, w: text.length * textSize(shape) * 0.6, h: textSize(shape) * 1.2 })
+    this.shapes = origin
+    this.commit(next, !before ? this.msg.t('added', this.kind(shape)) : !text ? this.msg.t('deleted', this.kind(shape)) : undefined)
   }
 
   private renderEditor() {
@@ -894,8 +929,8 @@ export class ImageAnnotator extends LitElement {
                 <defs>
                   <filter id="blur"><feGaussianBlur stdDeviation=${Math.max(4, width / 120)}></feGaussianBlur></filter>
                 </defs>
-                ${this.shapes.map((shape, index) => this.renderShape(shape, index, count))} ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing}
-                ${this.renderSelection()}
+                ${this.layered().map((shape) => this.renderShape(shape, this.shapes.indexOf(shape), count))}
+                ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing} ${this.renderSelection()}
               </svg>`
             : nothing
         }

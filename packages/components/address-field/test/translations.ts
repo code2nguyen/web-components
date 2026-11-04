@@ -8,7 +8,7 @@ const fr: typeof addressFieldMessages.en = {
   country: 'Pays ou région',
   select: 'Choisir',
   optional: (label) => `${label} (facultatif)`,
-  required: (label) => `Saisissez ${label.toLowerCase()}`,
+  required: (label) => `${label} obligatoire`,
   postalInvalid: (label, example) => `${label} doit ressembler à ${example}`,
   filled: 'Adresse remplie',
   address: 'Adresse',

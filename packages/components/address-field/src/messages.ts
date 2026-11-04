@@ -10,7 +10,7 @@ const en = {
   /** A field's label when it may be left empty: `{0}` is the label. */
   optional: (label: string) => `${label} (optional)`,
   /** The message for an empty required field: `{0}` is its label. */
-  required: (label: string) => `Enter a ${label.toLowerCase()}`,
+  required: (label: string) => `${label} is required`,
   /** The message for a postal code that does not match the country's format: `{0}` is its label, `{1}` an example. */
   postalInvalid: (label: string, example: string) => `${label} should look like ${example}`,
   /** Announced when a suggestion fills the address. */

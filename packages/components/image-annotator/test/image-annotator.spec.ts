@@ -155,3 +155,33 @@ test('readonly shows the shapes with no toolbar or editing; its text follows the
   await props(annotator(page), { readonly: true })
   await expect(annotator(page)).toHaveHostAria('aria-label', 'Image annotée')
 })
+
+test('regressions: clicking away keeps typed text, a text is one undo step, a blur never uncovers a redaction', async ({ page, renderScenario }) => {
+  await open(page, renderScenario)
+  await tool(annotator(page), 'text').click()
+  await overlay(annotator(page)).click({ position: { x: 20, y: 150 } })
+  await page.keyboard.type('Wrong total')
+  // Finish by clicking elsewhere on the image.
+  await overlay(annotator(page)).click({ position: { x: 300, y: 50 } })
+  const texts = () => shapes(annotator(page)).then((list) => list.filter((shape) => shape.type === 'text').map((shape) => shape.text))
+  await expect.poll(texts).toContain('Wrong total')
+  // The click also placed a new text box; Escape drops it without a trace.
+  await page.keyboard.press('Escape')
+  await expect.poll(texts).toEqual(['Wrong total'])
+  await page.keyboard.press('Control+z')
+  expect(await shapes(annotator(page))).toEqual([])
+
+  // A blur drawn after a redaction, over it: the redacted pixels stay black.
+  await props(annotator(page), {
+    shapes: [
+      { id: 'r', type: 'redact', x: 0, y: 20, w: 200, h: 30, color: '#000000', stroke: 4 },
+      { id: 'b', type: 'blur', x: 0, y: 0, w: 220, h: 80, color: '#e11d48', stroke: 4 },
+    ],
+  })
+  const pixel = await annotator(page).evaluate(async (element) => {
+    const canvas = await (element as HTMLElement & { toCanvas(): Promise<HTMLCanvasElement> }).toCanvas()
+    return [...canvas.getContext('2d')!.getImageData(60, 35, 1, 1).data.slice(0, 3)]
+  })
+  expect(pixel).toEqual([0, 0, 0])
+  await expect(annotator(page).locator('g.shape').last()).toHaveAttribute('data-id', 'r')
+})
