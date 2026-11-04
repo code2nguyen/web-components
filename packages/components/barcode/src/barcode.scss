@@ -28,6 +28,8 @@
 
 :host {
   display: inline-block;
+  // A grid or flex item would otherwise be as wide as the code and overflow its track instead of shrinking it.
+  min-width: 0;
   max-width: 100%;
   vertical-align: middle;
   line-height: 0;

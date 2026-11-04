@@ -304,6 +304,7 @@ export class RadialBarChart extends EchartsChartBase {
         color: readableOn(color),
         fontSize,
         fontWeight: 600,
+        overflow: 'none',
       }
     }
     const over = (item: Ring) => Math.min(MAX_LAPS, item.share) - 1

@@ -176,6 +176,9 @@ export const overrides: Record<string, Override> = {
   '--c2-barcode__bar--color': { exclude: 'scanners need dark bars on a light field' },
   '--c2-barcode__background--color': { exclude: 'scanners need dark bars on a light field' },
   '--c2-barcode__text--color': { exclude: 'the printed value sits on the white code field' },
+  // A transcript match keeps dark text on its yellow highlight in every theme.
+  '--c2-transcript__mark--background-color': { exclude: 'highlight pair with the match text' },
+  '--c2-transcript__mark--color': { exclude: 'dark text on the highlight' },
   // The filter builder's dashed add button and draft chip keep their style while following the strong outline colour.
   '--c2-filter-builder__add-button--border': {
     token: 'border',
