@@ -1,7 +1,7 @@
 ---
-title: 'Address Field'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+title: 'Address field'
+description: 'A postal address input with the parts, order and labels of each country, optional autocomplete from your address provider.'
+category: 'Inputs'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { AddressField } from '@c2n/components/address-field'
 
-`c2-address-field` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-address-field` asks for a postal address the way each country writes it: a ZIP code and a state for the United States, a postcode and an optional county for the United Kingdom, the postal code and prefecture first for Japan. It is one form control, for checkout, shipping and billing forms.
 
 ## Import
 
@@ -21,13 +20,54 @@ import '@c2n/components/address-field'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/address-field
-<div data-label="Default">
-  <c2-address-field></c2-address-field>
+<style>
+  .address-demo {
+    max-width: 460px;
+  }
+</style>
+<div data-label="United States">
+  <c2-address-field class="address-demo" name="shipping"></c2-address-field>
+</div>
+<div data-label="Japan">
+  <c2-address-field class="address-demo" value='{"country":"JP","postalCode":"150-0002","region":"13","city":"Shibuya-ku","line1":"2-21-1 Shibuya"}'></c2-address-field>
+</div>
+<div data-label="Some countries">
+  <c2-address-field class="address-demo" countries="FR;DE;GB;IE" country="FR"></c2-address-field>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### Countries
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+About 40 countries have a format of their own: the parts they need, in their order, with their labels (State, Province, Prefecture, County, Emirate; ZIP code, Postcode, PIN code, CEP, Eircode), which are required, the postal-code pattern, and a list of regions where one is usual (the US, Canada, Australia, Brazil, Mexico, India, Japan and the United Arab Emirates). Any other country gets a general format. The picker lists the countries with a format, named in the page's language; `countries` limits or extends it, and `country` sets the starting one. Changing country keeps the parts both formats share.
+
+### Value and form
+
+`value` is `{ line1, line2, city, district, region, postalCode, country }`, every part a string; `region` is the code of a listed region (`CA`, `13`) or the typed text. With a `name`, the form receives one entry per part of the country's format, then the country:
+
+```text tag=CodeBlock
+shipping[line1]=1 Ferry Building  shipping[line2]=  shipping[city]=San Francisco
+shipping[region]=CA  shipping[postalCode]=94111  shipping[country]=US
+```
+
+`address-change` gives the value and whether it is `complete`. `formatAddress(value, { locale })` prints an address in the country's postal order, for a receipt or an address book.
+
+### Validation
+
+An address left empty is valid unless `required`; once started, the country's required parts must be filled, and the postal code must match the country's pattern. Each part shows its own message when it is left ("Enter a ZIP code", "ZIP code should look like 94103"), and every message shows when the form is submitted. The form does not submit while one is wrong.
+
+### Autocomplete
+
+Browsers do not autofill fields inside a shadow root, so for speed give the field a `provider`. The first line then suggests addresses as it is typed, and picking one fills every part:
+
+```typescript tag=CodeBlock
+import { googlePlacesProvider } from '@c2n/components/address-field/providers/google.js'
+// or: import { mapboxSearchProvider } from '@c2n/components/address-field/providers/mapbox.js'
+
+document.querySelector('c2-address-field')!.provider = googlePlacesProvider({ apiKey: PLACES_KEY })
+```
+
+The two adapters use `fetch` only and send what is typed, with the country, to Google or Mapbox, under the key you give them (restrict it to your site in their console). Any other service is an object with `suggest(query, { country, locale, signal })` and `resolve(id, { locale, signal })`. Without a provider nothing leaves the page.
+
+### Screen readers
+
+The parts are a group named by `label` ("Address" by default, or the label of a `c2-form-field` around it). Each part has its own label and the browser's `autocomplete` token, and a filled-in suggestion is announced.

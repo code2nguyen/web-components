@@ -1,7 +1,7 @@
 ---
-title: 'Pivot Table'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+title: 'Pivot table'
+description: 'Summarises flat rows by the fields set on rows and columns, with subtotals, totals, sorting, a heatmap and a field list.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { PivotTable } from '@c2n/components/pivot-table'
 
-`c2-pivot-table` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-pivot-table` does what a spreadsheet's pivot does: it groups flat rows by the fields set on `rows` and `columns`, and aggregates the `values` in every cell, with a subtotal for each group and grand totals.
 
 ## Import
 
@@ -21,13 +20,46 @@ import '@c2n/components/pivot-table'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/pivot-table
-<div data-label="Default">
-  <c2-pivot-table></c2-pivot-table>
+<div data-label="Revenue by region and quarter">
+  <c2-pivot-table
+    rows="region;country"
+    columns="quarter"
+    values='[{"field":"revenue","label":"Revenue","format":{"style":"currency","currency":"EUR","notation":"compact","maximumFractionDigits":2}}]'
+    data='[{"region":"Europe","country":"Germany","quarter":"Q1","revenue":412000,"orders":948},{"region":"Europe","country":"Germany","quarter":"Q2","revenue":438000,"orders":1007},{"region":"Europe","country":"Germany","quarter":"Q3","revenue":455000,"orders":1046},{"region":"Europe","country":"Germany","quarter":"Q4","revenue":502000,"orders":1155},{"region":"Europe","country":"France","quarter":"Q1","revenue":356000,"orders":819},{"region":"Europe","country":"France","quarter":"Q2","revenue":371000,"orders":853},{"region":"Europe","country":"France","quarter":"Q3","revenue":360000,"orders":828},{"region":"Europe","country":"France","quarter":"Q4","revenue":398000,"orders":915},{"region":"Europe","country":"Spain","quarter":"Q1","revenue":188000,"orders":432},{"region":"Europe","country":"Spain","quarter":"Q2","revenue":201000,"orders":462},{"region":"Europe","country":"Spain","quarter":"Q4","revenue":236000,"orders":543},{"region":"North America","country":"United States","quarter":"Q1","revenue":980000,"orders":2254},{"region":"North America","country":"United States","quarter":"Q2","revenue":1040000,"orders":2392},{"region":"North America","country":"United States","quarter":"Q3","revenue":1010000,"orders":2323},{"region":"North America","country":"United States","quarter":"Q4","revenue":1120000,"orders":2576},{"region":"North America","country":"Canada","quarter":"Q1","revenue":230000,"orders":529},{"region":"North America","country":"Canada","quarter":"Q2","revenue":260000,"orders":598},{"region":"North America","country":"Canada","quarter":"Q3","revenue":262000,"orders":603},{"region":"North America","country":"Canada","quarter":"Q4","revenue":264000,"orders":607},{"region":"Asia Pacific","country":"Japan","quarter":"Q1","revenue":298000,"orders":685},{"region":"Asia Pacific","country":"Japan","quarter":"Q2","revenue":305000,"orders":702},{"region":"Asia Pacific","country":"Japan","quarter":"Q3","revenue":320000,"orders":736},{"region":"Asia Pacific","country":"Japan","quarter":"Q4","revenue":341000,"orders":784},{"region":"Asia Pacific","country":"Australia","quarter":"Q1","revenue":144000,"orders":331},{"region":"Asia Pacific","country":"Australia","quarter":"Q2","revenue":151000,"orders":347},{"region":"Asia Pacific","country":"Australia","quarter":"Q3","revenue":149000,"orders":343},{"region":"Asia Pacific","country":"Australia","quarter":"Q4","revenue":162000,"orders":373}]'
+  ></c2-pivot-table>
+</div>
+<div data-label="Field list">
+  <c2-pivot-table
+    configurable
+    rows="region"
+    expand-depth="0"
+    values='[{"field":"revenue","label":"Revenue","format":{"style":"currency","currency":"EUR","notation":"compact","maximumFractionDigits":2}},{"field":"orders","aggregate":"sum","label":"Orders"}]'
+    data='[{"region":"Europe","country":"Germany","quarter":"Q1","revenue":412000,"orders":948},{"region":"Europe","country":"Germany","quarter":"Q2","revenue":438000,"orders":1007},{"region":"Europe","country":"Germany","quarter":"Q3","revenue":455000,"orders":1046},{"region":"Europe","country":"Germany","quarter":"Q4","revenue":502000,"orders":1155},{"region":"Europe","country":"France","quarter":"Q1","revenue":356000,"orders":819},{"region":"Europe","country":"France","quarter":"Q2","revenue":371000,"orders":853},{"region":"Europe","country":"France","quarter":"Q3","revenue":360000,"orders":828},{"region":"Europe","country":"France","quarter":"Q4","revenue":398000,"orders":915},{"region":"Europe","country":"Spain","quarter":"Q1","revenue":188000,"orders":432},{"region":"Europe","country":"Spain","quarter":"Q2","revenue":201000,"orders":462},{"region":"Europe","country":"Spain","quarter":"Q4","revenue":236000,"orders":543},{"region":"North America","country":"United States","quarter":"Q1","revenue":980000,"orders":2254},{"region":"North America","country":"United States","quarter":"Q2","revenue":1040000,"orders":2392},{"region":"North America","country":"United States","quarter":"Q3","revenue":1010000,"orders":2323},{"region":"North America","country":"United States","quarter":"Q4","revenue":1120000,"orders":2576},{"region":"North America","country":"Canada","quarter":"Q1","revenue":230000,"orders":529},{"region":"North America","country":"Canada","quarter":"Q2","revenue":260000,"orders":598},{"region":"North America","country":"Canada","quarter":"Q3","revenue":262000,"orders":603},{"region":"North America","country":"Canada","quarter":"Q4","revenue":264000,"orders":607},{"region":"Asia Pacific","country":"Japan","quarter":"Q1","revenue":298000,"orders":685},{"region":"Asia Pacific","country":"Japan","quarter":"Q2","revenue":305000,"orders":702},{"region":"Asia Pacific","country":"Japan","quarter":"Q3","revenue":320000,"orders":736},{"region":"Asia Pacific","country":"Japan","quarter":"Q4","revenue":341000,"orders":784},{"region":"Asia Pacific","country":"Australia","quarter":"Q1","revenue":144000,"orders":331},{"region":"Asia Pacific","country":"Australia","quarter":"Q2","revenue":151000,"orders":347},{"region":"Asia Pacific","country":"Australia","quarter":"Q3","revenue":149000,"orders":343},{"region":"Asia Pacific","country":"Australia","quarter":"Q4","revenue":162000,"orders":373}]'
+  ></c2-pivot-table>
+</div>
+<div data-label="Heatmap">
+  <c2-pivot-table rows="cohort" columns="month" heatmap totals="none" values='[{"field":"retained","aggregate":"avg","label":"Retained","format":{"style":"unit","unit":"percent"}}]' data='[{"cohort":"2026-01","month":"M0","retained":100},{"cohort":"2026-01","month":"M1","retained":62},{"cohort":"2026-01","month":"M2","retained":48},{"cohort":"2026-01","month":"M3","retained":41},{"cohort":"2026-01","month":"M4","retained":37},{"cohort":"2026-01","month":"M5","retained":35},{"cohort":"2026-02","month":"M0","retained":100},{"cohort":"2026-02","month":"M1","retained":58},{"cohort":"2026-02","month":"M2","retained":44},{"cohort":"2026-02","month":"M3","retained":39},{"cohort":"2026-02","month":"M4","retained":36},{"cohort":"2026-03","month":"M0","retained":100},{"cohort":"2026-03","month":"M1","retained":65},{"cohort":"2026-03","month":"M2","retained":51},{"cohort":"2026-03","month":"M3","retained":45},{"cohort":"2026-04","month":"M0","retained":100},{"cohort":"2026-04","month":"M1","retained":61},{"cohort":"2026-04","month":"M2","retained":47},{"cohort":"2026-05","month":"M0","retained":100},{"cohort":"2026-05","month":"M1","retained":67},{"cohort":"2026-06","month":"M0","retained":100}]'></c2-pivot-table>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### Data and values
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+`data` is an array of plain rows (a dotted field such as `customer.country` reads a nested value). `rows` and `columns` list the grouping fields, outermost first; a missing value groups under "(blank)". Each `values` entry is `{ field, aggregate, label, format }`: the aggregate is `sum` (the default), `count`, `avg`, `min`, `max` or `distinct`, and `format` takes `Intl.NumberFormat` options. Two or more values split each column. `field-labels` names the fields in headers and in the field list.
+
+`pivot(data, config)` is the same computation as a plain function, for a server, a test or an export.
+
+### Groups, totals and sorting
+
+Row groups expand and collapse from their header, by click or with Left and Right; `expand-depth` sets how deep they start open, and `expandAll()` / `collapseAll()` change it from code. An open group has its subtotal under it (`subtotals="top"` puts it on the group's own row, `none` drops it), and `totals` keeps the grand total row and column (`both`), one of them, or neither. Clicking a column header sorts the rows by it: largest first, then smallest first, then back to the labels. `heatmap` tints each cell by its value within its measure, the usual look for a cohort table.
+
+### Field list
+
+With `configurable`, a field list beside the grid holds the data's fields in four zones: unused, rows, columns and values. Drag a field between them, or use its menu, which also changes a value's aggregate. `pivot-change` gives the new `{ rows, columns, values }`, and the change is announced.
+
+### Drill-down and export
+
+`cell-click` gives the row and column paths, the value and the `records` behind a cell, to open them in a table or a sheet. `toCSV()` returns the grid as shown.
+
+### Keyboard and screen readers
+
+The grid is a `treegrid`: the arrow keys move between cells, Home and End go to the ends of a row (with Ctrl, of the grid), Left and Right close and open a group, and Enter on a value cell fires `cell-click`. Each row carries its level, position and expanded state. The grid renders every visible row: past a couple of thousand, keep groups closed.

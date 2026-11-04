@@ -5,22 +5,47 @@ import { AddressField } from '@c2n/components/address-field'
 
 ## Presets
 
-Curated looks for `c2-address-field`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+Checkout, a saved address and a compact form. The gaps and the part width at which rows wrap are variables; the parts take the text-field and select variables.
 
-<GalleryGrid>
+<GalleryGrid min="380">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-address-field></c2-address-field>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Checkout
 <style>
-  .themed {
-    /* --c2-address-field--… */
+  .checkout-address {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+  }
+  .checkout-address h3 {
+    margin: 0;
+    font-size: 15px;
   }
 </style>
-<c2-address-field class="themed"></c2-address-field>
+<div class="checkout-address">
+  <h3>Shipping address</h3>
+  <c2-address-field label="Shipping address" value='{"country":"GB","line1":"10 Downing Street","city":"London","postalCode":"SW1A 2AA"}'></c2-address-field>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Brazil
+<c2-address-field value='{"country":"BR","postalCode":"01310-100","line1":"Avenida Paulista, 1578","district":"Bela Vista","city":"São Paulo","region":"SP"}'></c2-address-field>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact-address {
+    --c2-address-field--gap: 8px;
+    --c2-address-field--row-gap: 8px;
+    --c2-address-field__part--min-width: 96px;
+  }
+</style>
+<c2-address-field class="compact-address" countries="US;CA" value='{"country":"CA","line1":"111 Wellington St","city":"Ottawa","region":"ON","postalCode":"K1A 0A9"}'></c2-address-field>
 ```
 
 </GalleryGrid>

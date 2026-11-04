@@ -1,7 +1,7 @@
 ---
-title: 'Image Annotator'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+title: 'Image annotator'
+description: 'Arrows, boxes, text, numbered steps, blur and redaction over an image, exported as a PNG and as shapes.'
+category: 'Editors & viewers'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ImageAnnotator } from '@c2n/components/image-annotator'
 
-`c2-image-annotator` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-image-annotator` is the markup step of a bug report, a support ticket or a design review: point at what is wrong with an arrow or a box, number the steps, write a note, and blur or redact what should not be shared, then export the result.
 
 ## Import
 
@@ -21,13 +20,46 @@ import '@c2n/components/image-annotator'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/image-annotator
-<div data-label="Default">
-  <c2-image-annotator></c2-image-annotator>
+<style>
+  .annotator-demo {
+    width: 100%;
+    max-width: 640px;
+  }
+</style>
+<div data-label="Annotating">
+  <c2-image-annotator
+    class="annotator-demo"
+    src="/web-components/images/image-invoice-screen.svg"
+    tool="rect"
+    shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":4},{"id":"b","type":"arrow","x":486,"y":198,"w":-110,"h":-18,"color":"#e11d48","stroke":4},{"id":"c","type":"text","x":420,"y":204,"w":150,"h":20,"text":"Total ignores VAT","color":"#e11d48","stroke":4},{"id":"d","type":"blur","x":252,"y":96,"w":150,"h":18,"color":"#e11d48","stroke":4},{"id":"e","type":"redact","x":436,"y":96,"w":70,"h":18,"color":"#000000","stroke":4},{"id":"f","type":"number","x":276,"y":246,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":4}]'
+  ></c2-image-annotator>
+</div>
+<div data-label="Read only">
+  <c2-image-annotator
+    class="annotator-demo"
+    readonly
+    src="/web-components/images/image-invoice-screen.svg"
+    shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#2563eb","stroke":4},{"id":"f","type":"number","x":200,"y":130,"w":0,"h":0,"n":1,"color":"#2563eb","stroke":4}]'
+  ></c2-image-annotator>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### Tools
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+The toolbar offers Select, Arrow, Line, Rectangle, Ellipse, Pen, Text, Number, Blur and Redact, a row of colours (`colors`), three stroke widths, and Undo and Redo (also Ctrl/⌘+Z and Shift+Ctrl/⌘+Z). Drag to draw; click to place text or a number. Shift keeps lines at 45° steps and boxes square. Select moves a shape, resizes it by its handles, and deletes it with Delete or the toolbar button.
+
+### Shapes and export
+
+Shapes are plain objects in the image's own pixels, so they stay in place at any display size. Read or set them with `shapes`; `annotation-change` gives the list after every edit, ready to save with the ticket:
+
+```typescript tag=CodeBlock
+const annotator = document.querySelector('c2-image-annotator')!
+annotator.addEventListener('annotation-change', (event) => draft.save(event.detail.shapes))
+const blob = await annotator.toBlob() // PNG at the image's natural size
+```
+
+`toBlob()`, `toDataURL()` and `toCanvas()` draw the image at full size with the shapes on it. In the export a redaction replaces the pixels and a blur is a coarse pixelation, so text under either cannot be recovered; use Redact for passwords, keys and card numbers. An image from another origin can only be exported with CORS: set `crossorigin="anonymous"` and serve it with `Access-Control-Allow-Origin`. Otherwise the export rejects and `annotator-error` says why.
+
+### Keyboard
+
+With a drawing tool chosen, Enter on the image adds a shape in the middle. With Select, Tab reaches each shape (named "Rectangle 1 of 3"), the arrow keys nudge it (Shift for 10 pixels), Enter edits a text, and Delete removes it. Additions and deletions are announced. `readonly` shows the shapes with no toolbar, for the ticket view.

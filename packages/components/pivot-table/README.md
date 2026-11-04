@@ -11,7 +11,13 @@ import '@c2n/components/pivot-table'
 ```
 
 ```html
-<c2-pivot-table></c2-pivot-table>
+<c2-pivot-table rows="region;country" columns="quarter" values='[{"field":"revenue"}]'></c2-pivot-table>
 ```
 
-// TODO: describe the component, its attributes, slots, events and CSS custom properties.
+Groups flat rows by the fields on `rows` and `columns` and aggregates `values` in every cell.
+
+- Aggregates `sum`, `count`, `avg`, `min`, `max` and `distinct`, with `Intl.NumberFormat` options per value.
+- Expandable row groups with subtotals, grand totals, sorting by column, and a `heatmap`.
+- `configurable` adds a field list to drag fields between rows, columns and values; `pivot-change` gives the layout.
+- `cell-click` gives the records behind a cell; `toCSV()` exports; `pivot()` is the computation as a function.
+- Colours and spacing are `--c2-pivot-table*` custom properties; see the API page of the docs site.

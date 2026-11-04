@@ -5,22 +5,50 @@ import { ImageAnnotator } from '@c2n/components/image-annotator'
 
 ## Presets
 
-Curated looks for `c2-image-annotator`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+A bug report, a review in the brand colours, and a compact read-only view. The colours offered come from `colors`; the toolbar, stage and selection take variables.
 
-<GalleryGrid>
+<GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-image-annotator></c2-image-annotator>
+<c2-image-annotator src="/web-components/images/image-invoice-screen.svg"></c2-image-annotator>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Bug report
+<c2-image-annotator
+  src="/web-components/images/image-invoice-screen.svg"
+  shapes='[{"id":"a","type":"ellipse","x":180,"y":160,"w":200,"h":56,"color":"#e11d48","stroke":4},{"id":"b","type":"number","x":176,"y":158,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":4},{"id":"c","type":"redact","x":436,"y":96,"w":70,"h":18,"color":"#000000","stroke":4}]'
+></c2-image-annotator>
+```
+
+```html tag=MdxCodeBlock,label=Brand review
 <style>
-  .themed {
-    /* --c2-image-annotator--… */
+  .review-annotator {
+    --c2-image-annotator__selection--color: #7c3aed;
+    --c2-image-annotator__swatch__selected--outline-color: #7c3aed;
+    --c2-image-annotator--border-radius: 14px;
   }
 </style>
-<c2-image-annotator class="themed"></c2-image-annotator>
+<c2-image-annotator
+  class="review-annotator"
+  colors="#7c3aed;#0f766e;#ea580c"
+  tool="pen"
+  src="/web-components/images/image-invoice-screen.svg"
+  shapes='[{"id":"p","type":"pen","x":190,"y":262,"w":70,"h":8,"points":[[190,266],[210,262],[230,268],[250,262],[260,266]],"color":"#7c3aed","stroke":4}]'
+></c2-image-annotator>
+```
+
+```html tag=MdxCodeBlock,label=Ticket view
+<style>
+  .ticket-annotator {
+    width: 320px;
+  }
+</style>
+<c2-image-annotator
+  class="ticket-annotator"
+  readonly
+  src="/web-components/images/image-invoice-screen.svg"
+  shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":4}]'
+></c2-image-annotator>
 ```
 
 </GalleryGrid>
