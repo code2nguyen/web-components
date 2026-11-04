@@ -34,7 +34,18 @@
 }
 
 .part {
+  position: relative;
   min-width: 0;
+}
+
+// The validation anchor of a part (see `syncForm`): an empty box at the part's start, out of the flow.
+.part > .anchor {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  outline: none;
 }
 
 .part > * {

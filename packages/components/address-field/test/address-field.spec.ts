@@ -12,27 +12,6 @@ const events = async (locator: Locator) => JSON.parse((await locator.getAttribut
 
 /** Picks an option of a part's select. */
 async function choose(locator: Locator, part: string, option: string) {
-  // TEMP diagnostic for a WebKit-only "element is not visible": the select's box and styles up the composed tree.
-  const chain = await locator.locator(`[data-part="${part}"]`).evaluate((element) => {
-    const out: string[] = []
-    for (
-      let node: Node | null = element;
-      node && node instanceof Element;
-      node = node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode
-    ) {
-      const style = getComputedStyle(node)
-      const rect = node.getBoundingClientRect()
-      out.push(
-        `${node.localName}.${node.className || ''} ${Math.round(rect.width)}x${Math.round(rect.height)}@${Math.round(rect.left)},${Math.round(rect.top)} display=${style.display} visibility=${style.visibility} cv=${style.contentVisibility} visible=${node.checkVisibility?.()} slot=${(node as HTMLElement).assignedSlot ? 'yes' : 'no'}`,
-      )
-    }
-    const inner = [...(element.shadowRoot?.children ?? [])].map((child) => {
-      const rect = child.getBoundingClientRect()
-      return `${child.localName}.${child.className} ${Math.round(rect.width)}x${Math.round(rect.height)} display=${getComputedStyle(child).display}`
-    })
-    return [...inner, ...out].join('\n')
-  })
-  console.log(`[diag ${part}]\n${chain}`)
   await locator.locator(`[data-part="${part}"]`).click()
   await locator.locator(`[data-part="${part}"] c2-list-item[value="${option}"]`).click()
 }

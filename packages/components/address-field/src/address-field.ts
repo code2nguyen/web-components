@@ -231,7 +231,9 @@ export class AddressField extends LitElement {
       this.internals.setFormValue(data, JSON.stringify(this.value))
     }
     const [error] = this.errors(true)
-    const anchor = error ? (this.renderRoot.querySelector<HTMLElement>(`[data-part="${error.part}"]`) ?? undefined) : undefined
+    // The validation anchor is a plain element of ours, never a part's host: WebKit's own validation bubble (Linux) is
+    // built in a shadow root it adds to the anchor, which on a component with a shadow root of its own blanks it.
+    const anchor = error ? (this.renderRoot.querySelector<HTMLElement>(`[data-anchor="${error.part}"]`) ?? undefined) : undefined
     if (!error) this.internals.setValidity({})
     else this.internals.setValidity(error.missing ? { valueMissing: true } : { patternMismatch: true }, error.message, anchor)
   }
@@ -379,7 +381,11 @@ export class AddressField extends LitElement {
         @focusout=${() => this.touch(part)}
       ></c2-text-field>`
     }
-    return html`<c2-form-field class="part" label=${label} error-text=${message} necessity="none">${control}</c2-form-field>`
+    // Focus given to the anchor (a browser's "show the invalid control") goes on to the part.
+    const forward = () => this.renderRoot.querySelector<HTMLElement>(`[data-part="${part}"]`)?.focus()
+    return html`<c2-form-field class="part" label=${label} error-text=${message} necessity="none"
+      >${control}<span class="anchor" data-anchor=${part} tabindex="-1" @focus=${forward}></span
+    ></c2-form-field>`
   }
 
   override render() {
