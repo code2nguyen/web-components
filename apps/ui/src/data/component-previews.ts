@@ -30,6 +30,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Margaret Hamilton" initial-count="2"></c2-avatar>
 </c2-avatar-group>`,
+  backdrop: `<c2-backdrop pattern="grid" style="width:260px;height:140px;border-radius:14px;display:grid;place-items:center;--c2-backdrop--size:10px"><strong style="font-size:18px">Ship it</strong></c2-backdrop>`,
   badge: `<div class="preview-row">
   <c2-badge tone="success">Active</c2-badge>
   <c2-badge tone="warning">Pending</c2-badge>
@@ -75,6 +76,7 @@ export const componentPreviews: Record<string, string> = {
   <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#0f766e,#16a34a);color:#fff;font-weight:600">3</div>
 </c2-carousel>`,
   cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
+  celebration: `<div class="preview-row" style="flex-direction:column;gap:8px"><c2-celebration trigger="click"><c2-button>Celebrate 🎉</c2-button></c2-celebration><span style="font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Press for confetti</span></div>`,
   'chat-input': `<c2-chat-input style="width:240px" aria-label="Message" placeholder="Ask anything…" value="Can you summarize this?"></c2-chat-input>`,
   'chat-message': `<c2-chat-message style="width:240px;--c2-chat-message__message--max-width:190px">
   <c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--background:#18181b"></c2-avatar>
@@ -521,6 +523,7 @@ price: .price
   <c2-task-icon-cook style="color:#0f766e"></c2-task-icon-cook>
   <c2-task-icon-meditate style="color:#7c3aed"></c2-task-icon-meditate>
 </div>`,
+  'text-effect': `<span style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Build <c2-text-effect effect="rotate" words="faster;safer;together" style="--c2-text-effect__text--color:var(--c2-theme--color-primary, #2563eb)"></c2-text-effect></span>`,
   'text-field': `<c2-text-field placeholder="Your email" help="We never share it." style="width:220px"></c2-text-field>`,
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
   'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,

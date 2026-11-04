@@ -1,0 +1,86 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TextEffect } from '@c2n/components/text-effect'
+
+## Presets
+
+Looks for `c2-text-effect`. The text fill and colour carry most of the style; the timings set the mood, from a calm reveal to a quick typewriter.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .te-default {
+    font-size: 24px;
+    font-weight: 600;
+  }
+</style>
+<span class="te-default"><c2-text-effect loop>Your team's second brain</c2-text-effect></span>
+```
+
+```html tag=MdxCodeBlock,label=Gradient rotate
+<style>
+  .te-gradient {
+    font-size: 28px;
+    font-weight: 700;
+    --c2-text-effect__text--background: linear-gradient(90deg, #2563eb, #9333ea 55%, #db2777);
+    --c2-text-effect__text--color: transparent;
+  }
+</style>
+<span class="te-gradient">Meet <c2-text-effect effect="rotate" words="Copilot;Atlas;Nova"></c2-text-effect></span>
+```
+
+```html tag=MdxCodeBlock,label=Prompt typewriter
+<style>
+  .te-prompt {
+    display: block;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 14px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-text-effect__caret--color: var(--c2-theme--color-primary, #2563eb);
+  }
+</style>
+<span class="te-prompt"><c2-text-effect effect="typewriter" words="Summarise this week's tickets;Draft a reply to Ana;Find unpaid invoices" loop></c2-text-effect></span>
+```
+
+```html tag=MdxCodeBlock,label=Thinking shimmer
+<style>
+  .te-thinking {
+    font-size: 15px;
+    --c2-text-effect__shimmer--duration: 1.6s;
+  }
+</style>
+<span class="te-thinking"><c2-text-effect effect="shimmer">Searching 24 sources…</c2-text-effect></span>
+```
+
+```html tag=MdxCodeBlock,label=Terminal scramble
+<style>
+  .te-terminal {
+    display: block;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #4ade80;
+    font: 600 16px ui-monospace, monospace;
+    --c2-text-effect__char--duration: 60ms;
+  }
+</style>
+<span class="te-terminal">$ <c2-text-effect effect="scramble" loop>ACCESS GRANTED</c2-text-effect></span>
+```
+
+```html tag=MdxCodeBlock,label=Slow reveal
+<style>
+  .te-slow {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    --c2-text-effect__reveal--duration: 900ms;
+    --c2-text-effect__reveal--stagger: 160ms;
+  }
+</style>
+<span class="te-slow"><c2-text-effect loop>Quiet software for calm teams</c2-text-effect></span>
+```
+
+</GalleryGrid>

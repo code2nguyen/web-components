@@ -6,6 +6,7 @@ import attachment from '@c2n/attachment/custom-elements.json'
 import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
+import backdrop from '@c2n/backdrop/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
@@ -18,6 +19,7 @@ import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
+import celebration from '@c2n/celebration/custom-elements.json'
 import chart from '@c2n/chart/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
@@ -161,6 +163,7 @@ import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
 import taskIcons from '@c2n/task-icons/custom-elements.json'
+import textEffect from '@c2n/text-effect/custom-elements.json'
 import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
@@ -199,6 +202,7 @@ export const componentManifests = (function () {
     audioVisualizer,
     autocomplete,
     avatar,
+    backdrop,
     badge,
     banner,
     barList,
@@ -211,6 +215,7 @@ export const componentManifests = (function () {
     cardInput,
     carousel,
     cascader,
+    celebration,
     chart,
     chatInput,
     chatMessage,
@@ -354,6 +359,7 @@ export const componentManifests = (function () {
     tabs,
     tagInput,
     taskIcons,
+    textEffect,
     textField,
     textarea,
     themeSelect,

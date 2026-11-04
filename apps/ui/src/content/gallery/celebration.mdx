@@ -1,0 +1,67 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Celebration } from '@c2n/components/celebration'
+import { Button } from '@c2n/components/button'
+
+## Presets
+
+Looks for `c2-celebration`. Press a card's button to see it. The colour list, count, spread and duration shape each moment.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-celebration trigger="click"><c2-button>Celebrate</c2-button></c2-celebration>
+```
+
+```html tag=MdxCodeBlock,label=Brand colours
+<style>
+  .ce-brand {
+    --c2-celebration--colors: #7c3aed, #a78bfa, #c084fc;
+  }
+</style>
+<c2-celebration class="ce-brand" trigger="click"><c2-button>Upgrade to Pro</c2-button></c2-celebration>
+```
+
+```html tag=MdxCodeBlock,label=Big launch
+<style>
+  .ce-launch {
+    --c2-celebration--count: 220;
+    --c2-celebration--spread: 110deg;
+    --c2-celebration--duration: 3500ms;
+  }
+</style>
+<c2-celebration class="ce-launch" trigger="click"><c2-button>Launch</c2-button></c2-celebration>
+```
+
+```html tag=MdxCodeBlock,label=Gold burst
+<style>
+  .ce-gold {
+    --c2-celebration--colors: #f59e0b, #fbbf24, #fde68a;
+  }
+</style>
+<c2-celebration class="ce-gold" trigger="click" kind="burst"><c2-button>Claim reward</c2-button></c2-celebration>
+```
+
+```html tag=MdxCodeBlock,label=Hearts
+<style>
+  .ce-hearts {
+    --c2-celebration__emoji--size: 36px;
+  }
+</style>
+<c2-celebration class="ce-hearts" trigger="click" kind="emoji" emoji="❤️;💖;💜"><c2-button>Like</c2-button></c2-celebration>
+```
+
+```html tag=MdxCodeBlock,label=Quiet confetti
+<style>
+  .ce-quiet {
+    --c2-celebration--count: 30;
+    --c2-celebration--spread: 35deg;
+    --c2-celebration__confetti--size: 6px;
+    --c2-celebration--colors: #94a3b8, #64748b, #cbd5e1;
+  }
+</style>
+<c2-celebration class="ce-quiet" trigger="click"><c2-button>Mark done</c2-button></c2-celebration>
+```
+
+</GalleryGrid>

@@ -82,6 +82,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed.
 - **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`.
 - **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
+- **Text Effect** — `c2-text-effect` · `@c2n/components/text-effect` — Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
@@ -105,6 +106,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Feedback
 
 - **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
+- **Celebration** — `c2-celebration` · `@c2n/components/celebration` — Confetti, a burst of sparks or rising emoji for a moment worth marking, fired from code or a click.
 - **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.
 - **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Loading Overlay** — `c2-loading-overlay` · `@c2n/components/loading-overlay` — Covers a region while it loads: the content stays in place, dimmed and blocked, with a spinner and an announced label.
@@ -197,6 +199,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
 - **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it.
 - **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.
+- **Backdrop** — `c2-backdrop` · `@c2n/components/backdrop` — A container that draws a decorative pattern behind its content: dots, a grid, stripes, flicker, aurora or meteors.
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface.
 - **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.

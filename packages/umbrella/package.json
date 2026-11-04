@@ -105,6 +105,10 @@
       "types": "./dist/avatar.d.ts",
       "default": "./dist/avatar.js"
     },
+    "./backdrop": {
+      "types": "./dist/backdrop.d.ts",
+      "default": "./dist/backdrop.js"
+    },
     "./badge": {
       "types": "./dist/badge.d.ts",
       "default": "./dist/badge.js"
@@ -156,6 +160,10 @@
     "./cascader": {
       "types": "./dist/cascader.d.ts",
       "default": "./dist/cascader.js"
+    },
+    "./celebration": {
+      "types": "./dist/celebration.d.ts",
+      "default": "./dist/celebration.js"
     },
     "./chart": {
       "types": "./dist/chart.d.ts",
@@ -917,6 +925,10 @@
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
     },
+    "./text-effect": {
+      "types": "./dist/text-effect.d.ts",
+      "default": "./dist/text-effect.js"
+    },
     "./text-field": {
       "types": "./dist/text-field.d.ts",
       "default": "./dist/text-field.js"
@@ -1161,6 +1173,7 @@
     "@c2n/audio-visualizer": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
+    "@c2n/backdrop": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
@@ -1173,6 +1186,7 @@
     "@c2n/card-input": "*",
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
+    "@c2n/celebration": "*",
     "@c2n/chart": "*",
     "@c2n/chat-input": "*",
     "@c2n/chat-message": "*",
@@ -1313,6 +1327,7 @@
     "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
+    "@c2n/text-effect": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",
     "@c2n/theme-select": "*",
