@@ -38,13 +38,14 @@ test('one ring per row toward its goal, outermost first, in the row colours; pas
   expect(laps.map((datum) => (datum.value === '-' ? '-' : Number(datum.value.toFixed(2))))).toEqual(['-', '-', 0.3])
   expect(laps[2].itemStyle?.color).toBe('rgb(21, 164, 167)')
   expect(tracks.map((datum) => datum.value)).toEqual([1, 1, 1])
-  // Each label in black or white, whichever reads on its ring; past the goal it rides the lap, which is drawn on top.
-  expect(values.map((datum) => [datum.label?.show, datum.label?.color])).toEqual([
-    [true, '#18181b'],
-    [true, '#18181b'],
-    [false, undefined],
-  ])
-  expect([laps[2].label?.show, laps[2].label?.color]).toEqual([true, '#18181b'])
+  // Each name at its ring's start, in black or white, whichever reads on the arc on top there (Stand's lap).
+  const names = chart.locator('.radial-labels text')
+  await expect(names).toHaveText(['Move', 'Exercise', 'Stand'])
+  expect(await names.evaluateAll((texts) => texts.map((text) => text.getAttribute('fill')))).toEqual(['#18181b', '#18181b', '#18181b'])
+  // Each follows its ring from twelve o'clock, the outermost highest.
+  const tops = await names.evaluateAll((texts) => texts.map((text) => text.getBoundingClientRect().top))
+  expect(tops[0]).toBeLessThan(tops[1])
+  expect(tops[1]).toBeLessThan(tops[2])
 
   const options = await chart.evaluate((element) => {
     const radial = element as RadialElement
@@ -92,6 +93,7 @@ test('a click highlights a ring and fades the others; the ring width and gap com
   expect(await chart.evaluate((element) => (element as RadialElement).highlighted)).toBe('Move')
   const [values, , tracks] = await project(page)
   expect(values.map((datum) => datum.itemStyle?.opacity)).toEqual([1, 0.25, 0.25])
+  await expect(chart.locator('.radial-labels text').nth(1)).toHaveAttribute('opacity', '0.25')
   expect(tracks.map((datum) => datum.itemStyle?.opacity)).toEqual([1, 0.25, 0.25])
 
   const sized = await chart.evaluate((element) => {
@@ -126,7 +128,7 @@ test('sweep="270" opens a dial at the bottom; the legend lists the rings and hid
   const [values] = await project(page)
   expect(values.map((datum) => datum.value)).toEqual([0.92, 0.64, 0.24, '-'])
   // labels="none".
-  expect(values.slice(0, 3).every((datum) => datum.label?.show === false)).toBe(true)
+  await expect(chart.locator('.radial-labels text')).toHaveCount(0)
 
   const legend = chart.locator('[part="legend"]')
   await expect(legend).toContainText('Housing')

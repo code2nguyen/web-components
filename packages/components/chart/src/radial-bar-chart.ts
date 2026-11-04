@@ -1,4 +1,4 @@
-import { html, unsafeCSS, type CSSResultGroup, type PropertyValues } from 'lit'
+import { html, nothing, svg, unsafeCSS, type CSSResultGroup, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -256,7 +256,14 @@ export class RadialBarChart extends EchartsChartBase {
     const rings = this.rings(this.frame, context.theme)
     const { inner, outer, ring } = this.layout(rings.length, context.width, context.height)
     const sweep = this.clampedSweep
-    const bar = { type: 'bar', coordinateSystem: 'polar', roundCap: true, barWidth: ring, animationDuration: (base.animationDuration as number) ?? 0 }
+    const bar = {
+      type: 'bar',
+      coordinateSystem: 'polar',
+      roundCap: true,
+      clip: false,
+      barWidth: ring,
+      animationDuration: (base.animationDuration as number) ?? 0,
+    }
     // ECharts lays bars that share a polar axis side by side, taking each one's width out of the band even when they
     // overlap, so the value, its overshoot lap and the track each get their own polar system, all the same size.
     const layers = [0, 1, 2]
@@ -285,49 +292,23 @@ export class RadialBarChart extends EchartsChartBase {
   protected override projectData(frame: ChartFrame, context: ChartBuildContext): unknown {
     const theme = context.theme
     const rings = this.rings(frame, theme)
-    const { inner, ring, band } = this.layout(rings.length, context.width, context.height)
-    const sweep = this.clampedSweep
     const highlighted = this.highlighted
     const dimmed = (label: string) => highlighted !== null && rings.some((item) => item.label === highlighted) && label !== highlighted
     const track = getComputedStyle(this).getPropertyValue('--_track-color').trim() || theme.gridColor
-    const fontSize = Math.min(theme.fontSize, Math.max(8, ring * 0.62))
-    // The ring's name, drawn at the start of the arc that is on top there: the overshoot lap when there is one. It
-    // shows when that arc, at the ring's radius, is longer than the text.
-    const label = (item: Ring, index: number, share: number, color: string) => {
-      const radius = inner + (rings.length - index - 0.5) * band
-      const arc = ((share * sweep) / 180) * Math.PI * radius
-      return {
-        show: this.labels === 'start' && ring >= 9 && arc > item.label.length * fontSize * 0.62 + ring,
-        position: 'insideStart',
-        rotate: 'tangential',
-        formatter: item.label,
-        color: readableOn(color),
-        fontSize,
-        fontWeight: 600,
-        overflow: 'none',
-      }
-    }
     const over = (item: Ring) => Math.min(MAX_LAPS, item.share) - 1
-    const values = rings.map((item, index) => {
+    // The ring names are drawn by the element (`renderOverlayExtras`), not by ECharts, whose polar labels get cut short.
+    const values = rings.map((item) => {
       if (this.hiddenRings.has(item.label) || item.value === null) return { name: item.label, value: '-' }
-      const share = Math.min(1, item.share)
       return {
         name: item.label,
-        value: share,
+        value: Math.min(1, item.share),
         itemStyle: { color: item.color, opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 },
-        label: over(item) > 0 ? { show: false } : label(item, index, share, item.color),
       }
     })
-    const laps = rings.map((item, index) => {
+    const laps = rings.map((item) => {
       const lap = over(item)
       if (this.hiddenRings.has(item.label) || item.value === null || lap <= 0) return { name: item.label, value: '-' }
-      const color = darken(item.color)
-      return {
-        name: item.label,
-        value: lap,
-        itemStyle: { color, opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 },
-        label: label(item, index, lap, color),
-      }
+      return { name: item.label, value: lap, itemStyle: { color: darken(item.color), opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 } }
     })
     const tracks = rings.map((item) => ({
       name: item.label,
@@ -393,10 +374,52 @@ export class RadialBarChart extends EchartsChartBase {
     this.notifyLegendChange()
   }
 
-  /** The hole's content, and the rings as text for assistive technology. */
+  /**
+   * Each ring's name at its start, on the arc drawn on top there (the overshoot lap when there is one), in black or
+   * white for contrast; left out when that arc is shorter than the text.
+   */
+  private renderRingLabels(rings: Ring[]): unknown {
+    const plot = this.plotElement
+    const width = plot?.clientWidth ?? 0
+    const height = plot?.clientHeight ?? 0
+    if (this.labels !== 'start' || !rings.length || !width || !height) return nothing
+    const theme = this.themeController.theme
+    const { inner, ring, band } = this.layout(rings.length, width, height)
+    if (ring < 9) return nothing
+    const sweep = this.clampedSweep
+    const start = sweep < 360 ? 180 + (360 - sweep) / 2 : this.startAngle || 0
+    const fontSize = Math.min(theme.fontSize, Math.max(8, ring * 0.62))
+    const highlighted = this.highlighted !== null && rings.some((item) => item.label === this.highlighted) ? this.highlighted : null
+    const labels = rings.flatMap((item, index) => {
+      if (this.hiddenRings.has(item.label) || item.value === null) return []
+      const lap = Math.min(MAX_LAPS, item.share) - 1
+      const share = lap > 0 ? lap : Math.min(1, item.share)
+      const radius = inner + (rings.length - index - 0.5) * band
+      const arc = ((share * sweep) / 180) * Math.PI * radius
+      if (arc < item.label.length * fontSize * 0.62 + ring) return []
+      // The name follows the ring's own arc, so its end stays on the ring rather than running off into the gap.
+      const from = start
+      const to = start + Math.min(share * sweep, 359)
+      const point = (angle: number) => {
+        const theta = (angle * Math.PI) / 180
+        return `${(width / 2 + radius * Math.sin(theta)).toFixed(1)} ${(height / 2 - radius * Math.cos(theta)).toFixed(1)}`
+      }
+      const path = `M ${point(from)} A ${radius.toFixed(1)} ${radius.toFixed(1)} 0 ${to - from > 180 ? 1 : 0} 1 ${point(to)}`
+      const fill = readableOn(lap > 0 ? darken(item.color) : item.color)
+      const opacity = highlighted !== null && highlighted !== item.label ? theme.dimmedOpacity : 1
+      return [
+        svg`<path id="radial-label-${index}" d=${path} fill="none"></path>
+          <text fill=${fill} opacity=${opacity} font-size=${fontSize.toFixed(1)}><textPath href="#radial-label-${index}" startOffset="2">${item.label}</textPath></text>`,
+      ]
+    })
+    return html`<svg class="radial-labels" viewBox="0 0 ${width} ${height}" aria-hidden="true">${labels}</svg>`
+  }
+
+  /** The hole's content, the ring names, and the rings as text for assistive technology. */
   protected override renderOverlayExtras(): unknown {
     const rings = this.rings()
-    return html`<div class="radial-center" part="center"><slot name="center"></slot></div>
+    return html`${this.renderRingLabels(rings)}
+      <div class="radial-center" part="center"><slot name="center"></slot></div>
       <ul class="radial-a11y">
         ${rings.map(
           (ring) =>

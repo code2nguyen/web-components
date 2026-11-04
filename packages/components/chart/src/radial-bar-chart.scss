@@ -28,6 +28,18 @@
   pointer-events: auto;
 }
 
+.radial-labels {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  font-family: inherit;
+  font-weight: 600;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
 // The rings as text, for assistive technology only.
 .radial-a11y {
   position: absolute;
