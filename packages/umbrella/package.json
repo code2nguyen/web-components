@@ -105,6 +105,10 @@
       "types": "./dist/avatar.d.ts",
       "default": "./dist/avatar.js"
     },
+    "./backdrop": {
+      "types": "./dist/backdrop.d.ts",
+      "default": "./dist/backdrop.js"
+    },
     "./badge": {
       "types": "./dist/badge.d.ts",
       "default": "./dist/badge.js"
@@ -156,6 +160,10 @@
     "./cascader": {
       "types": "./dist/cascader.d.ts",
       "default": "./dist/cascader.js"
+    },
+    "./celebration": {
+      "types": "./dist/celebration.d.ts",
+      "default": "./dist/celebration.js"
     },
     "./chart": {
       "types": "./dist/chart.d.ts",
@@ -916,6 +924,10 @@
     "./tag-input": {
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
+    },
+    "./text-effect": {
+      "types": "./dist/text-effect.d.ts",
+      "default": "./dist/text-effect.js"
     },
     "./text-field": {
       "types": "./dist/text-field.d.ts",

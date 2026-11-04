@@ -132,9 +132,28 @@ test('regressions: scramble keeps the word length, a moved element starts again,
     })
     .toBeGreaterThan(1)
 
-  await renderScenario(`<c2-text-effect id="h" play="hover">Rest here</c2-text-effect><div style="height: 2000px"></div><c2-text-effect id="v" play="in-view">Seen later</c2-text-effect>`)
-  expect(await shown(page, '#h').locator('.piece').first().evaluate((element) => getComputedStyle(element).animationName)).toBe('none')
-  expect(await shown(page, '#v').locator('.piece').first().evaluate((element) => getComputedStyle(element).opacity)).toBe('0')
+  await renderScenario(
+    `<c2-text-effect id="h" play="hover">Rest here</c2-text-effect><div style="height: 2000px"></div><c2-text-effect id="v" play="in-view">Seen later</c2-text-effect>`,
+  )
+  expect(
+    await shown(page, '#h')
+      .locator('.piece')
+      .first()
+      .evaluate((element) => getComputedStyle(element).animationName),
+  ).toBe('none')
+  expect(
+    await shown(page, '#v')
+      .locator('.piece')
+      .first()
+      .evaluate((element) => getComputedStyle(element).opacity),
+  ).toBe('0')
   await effect(page, '#v').scrollIntoViewIfNeeded()
-  await expect.poll(() => shown(page, '#v').locator('.piece').first().evaluate((element) => getComputedStyle(element).animationName)).toBe('c2-text-effect-rise')
+  await expect
+    .poll(() =>
+      shown(page, '#v')
+        .locator('.piece')
+        .first()
+        .evaluate((element) => getComputedStyle(element).animationName),
+    )
+    .toBe('c2-text-effect-rise')
 })
