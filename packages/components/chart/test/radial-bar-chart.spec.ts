@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from './fixture'
 
-type Datum = { name: string; value: number | '-'; itemStyle?: { color: string; opacity: number }; label?: { show: boolean; color: string } }
+type Datum = { name: string; value: number | '-'; itemStyle?: { color: string; opacity: number }; label?: { show: boolean; color?: string } }
 interface RadialElement extends HTMLElement {
   data: unknown
   frame: unknown
@@ -9,9 +9,9 @@ interface RadialElement extends HTMLElement {
   updateComplete: Promise<boolean>
   buildContext(): unknown
   buildOptions(context: unknown): {
-    polar: { radius: [number, number] }
-    angleAxis: { max: number; startAngle: number }
-    radiusAxis: { data: string[]; inverse: boolean }
+    polar: { radius: [number, number] }[]
+    angleAxis: { max: number; startAngle: number }[]
+    radiusAxis: { data: string[]; inverse: boolean }[]
     series: { barWidth: number; z: number }[]
   }
   projectData(frame: unknown, context: unknown): Datum[][]
@@ -38,22 +38,23 @@ test('one ring per row toward its goal, outermost first, in the row colours; pas
   expect(laps.map((datum) => (datum.value === '-' ? '-' : Number(datum.value.toFixed(2))))).toEqual(['-', '-', 0.3])
   expect(laps[2].itemStyle?.color).toBe('rgb(21, 164, 167)')
   expect(tracks.map((datum) => datum.value)).toEqual([1, 1, 1])
-  // Each label in black or white, whichever reads on its ring.
+  // Each label in black or white, whichever reads on its ring; past the goal it rides the lap, which is drawn on top.
   expect(values.map((datum) => [datum.label?.show, datum.label?.color])).toEqual([
     [true, '#18181b'],
     [true, '#18181b'],
-    [true, '#18181b'],
+    [false, undefined],
   ])
+  expect([laps[2].label?.show, laps[2].label?.color]).toEqual([true, '#18181b'])
 
   const options = await chart.evaluate((element) => {
     const radial = element as RadialElement
     return radial.buildOptions(radial.buildContext())
   })
-  expect(options.radiusAxis).toMatchObject({ data: ['Move', 'Exercise', 'Stand'], inverse: true })
-  expect(options.angleAxis).toMatchObject({ max: 1, startAngle: 90 })
+  expect(options.radiusAxis[0]).toMatchObject({ data: ['Move', 'Exercise', 'Stand'], inverse: true })
+  expect(options.angleAxis[0]).toMatchObject({ max: 1, startAngle: 90 })
   // The outer radius fills the plot; three 16px rings 6px apart leave the hole.
   const outer = await chart.locator('[part="plot"]').evaluate((element) => Math.min(element.clientWidth, element.clientHeight) / 2 - 2)
-  expect(options.polar.radius).toEqual([outer - 3 * 22, outer])
+  expect(options.polar[0].radius).toEqual([outer - 3 * 22, outer])
   expect(options.series.map((series) => series.barWidth)).toEqual([16, 16, 16])
 
   // The centre slot sits in the middle of the plot, and the rings read as text.
@@ -101,7 +102,7 @@ test('a click highlights a ring and fades the others; the ring width and gap com
     // Rings wider than the box allows narrow to keep a hole.
     radial.style.setProperty('--c2-chart__ring--width', '80px')
     const narrowed = radial.buildOptions(radial.buildContext())
-    return { width: options.series[0].barWidth, radius: options.polar.radius, narrowed: narrowed.series[0].barWidth, hole: narrowed.polar.radius[0] }
+    return { width: options.series[0].barWidth, radius: options.polar[0].radius, narrowed: narrowed.series[0].barWidth, hole: narrowed.polar[0].radius[0] }
   })
   expect(sized.width).toBe(10)
   const outer = await chart.locator('[part="plot"]').evaluate((element) => Math.min(element.clientWidth, element.clientHeight) / 2 - 2)
@@ -119,9 +120,9 @@ test('sweep="270" opens a dial at the bottom; the legend lists the rings and hid
     const radial = element as RadialElement
     return radial.buildOptions(radial.buildContext())
   })
-  expect(options.angleAxis.max).toBeCloseTo(360 / 270)
+  expect(options.angleAxis[0].max).toBeCloseTo(360 / 270)
   // Starts at the bottom left (225° clockwise from twelve), so the gap is centred at the bottom.
-  expect(options.angleAxis.startAngle).toBe(90 - 225)
+  expect(options.angleAxis[0].startAngle).toBe(90 - 225)
   const [values] = await project(page)
   expect(values.map((datum) => datum.value)).toEqual([0.92, 0.64, 0.24, '-'])
   // labels="none".
@@ -134,4 +135,26 @@ test('sweep="270" opens a dial at the bottom; the legend lists the rings and hid
   const [hidden, , tracks] = await project(page)
   expect(hidden[1].value).toBe('-')
   expect(tracks[1].value).toBe('-')
+})
+
+test('regression: new data with another ring count redraws every ring and the text list', async ({ page, scenario }) => {
+  await scenario('radial')
+  const chart = page.locator('c2-radial-bar-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate(async (element) => {
+    const radial = element as RadialElement
+    radial.data = [
+      { ring: 'Sales', value: 128, goal: 150 },
+      { ring: 'Support', value: 96, goal: 90 },
+      { ring: 'Product', value: 41, goal: 60 },
+      { ring: 'Design', value: 18, goal: 30 },
+    ]
+    await radial.updateComplete
+  })
+  await expect(chart.locator('.radial-a11y li')).toHaveCount(4)
+  const options = await chart.evaluate((element) => {
+    const radial = element as RadialElement
+    return radial.buildOptions(radial.buildContext())
+  })
+  expect(options.radiusAxis[0].data).toEqual(['Sales', 'Support', 'Product', 'Design'])
 })

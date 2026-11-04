@@ -163,8 +163,9 @@ export class Barcode extends LitElement {
           ? html`<div class="line" aria-hidden="true">
               ${longPath ? html`<svg class="guards" viewBox="0 0 ${count} 1" preserveAspectRatio="none"><path d=${longPath}></path></svg>` : nothing}
               ${code.text.map(
-              (run) => html`<span class="text ${run.anchor}" part="text" style="inset-inline-start: ${((run.x / count) * 100).toFixed(3)}%">${run.text}</span>`,
-            )}
+                (run) =>
+                  html`<span class="text ${run.anchor}" part="text" style="inset-inline-start: ${((run.x / count) * 100).toFixed(3)}%">${run.text}</span>`,
+              )}
             </div>`
           : nothing
       }

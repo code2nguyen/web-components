@@ -11,6 +11,12 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 
 <GalleryGrid min="300">
 
+```html tag=MdxCodeBlock,label=Default
+<c2-radial-bar-chart label-field="ring" max-field="goal" data='[{"ring":"Move","value":420,"goal":600},{"ring":"Exercise","value":24,"goal":30},{"ring":"Stand","value":11,"goal":12}]'>
+  <c2-chart-series field="value" label="Today"></c2-chart-series>
+</c2-radial-bar-chart>
+```
+
 ```html tag=MdxCodeBlock,label=Activity rings
 <style>
   .rings-activity {
@@ -89,7 +95,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
     --c2-chart__ring--gap: 6px;
   }
 </style>
-<c2-radial-bar-chart class="rings-goals" label-field="team" max-field="target" start-angle="-90" data='[{"team":"Sales","won":128,"target":150},{"team":"Support","won":96,"target":90},{"team":"Product","won":41,"target":60},{"team":"Design","won":18,"target":30}]'>
+<c2-radial-bar-chart class="rings-goals" label-field="team" max-field="target" data='[{"team":"Sales","won":128,"target":150},{"team":"Support","won":96,"target":90},{"team":"Product","won":41,"target":60},{"team":"Design","won":18,"target":30}]'>
   <c2-chart-series field="won" label="Done"></c2-chart-series>
 </c2-radial-bar-chart>
 ```

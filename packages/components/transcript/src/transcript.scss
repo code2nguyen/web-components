@@ -176,8 +176,16 @@ mark {
     margin: 0;
   }
 
-  .name {
-    color: var(--_color);
+  // The speaker colours are avatar fills, too dark to read as text on a dark surface: a dot carries the colour.
+  .name::before {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background-color: var(--_color);
+    content: '';
+    vertical-align: 1px;
   }
 }
 

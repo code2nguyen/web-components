@@ -77,7 +77,7 @@ function darken(color: string, amount = 0.3): string {
  *
  * @cssproperty {pixel} [--c2-chart__ring--width=16px] - The thickness of a ring. Rings narrow to fit a small chart.
  * @cssproperty {pixel} [--c2-chart__ring--gap=6px] - The space between two rings.
- * @cssproperty {color} [--c2-chart__track--color=#f4f4f5] - The full ring behind each value.
+ * @cssproperty {color} [--c2-chart__track--color=#e4e4e7] - The full ring behind each value.
  * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other rings keep while one is highlighted.
  */
 @customElement('c2-radial-bar-chart')
@@ -152,6 +152,14 @@ export class RadialBarChart extends EchartsChartBase {
   protected override normalizeContext(): NormalizeContext {
     const base = super.normalizeContext()
     return { ...base, extraFields: this.maxField ? [this.maxField] : [], signature: `${base.signature}|${this.maxField}` }
+  }
+
+  /**
+   * No data-only fast path: the rings' radii, names and labels and the text list for assistive technology all follow
+   * the rows, so new data rebuilds the options and renders.
+   */
+  protected override isDataKey(): boolean {
+    return false
   }
 
   protected override reshapesFrame(changed: PropertyValues): boolean {
@@ -248,24 +256,28 @@ export class RadialBarChart extends EchartsChartBase {
     const rings = this.rings(this.frame, context.theme)
     const { inner, outer, ring } = this.layout(rings.length, context.width, context.height)
     const sweep = this.clampedSweep
-    const bar = {
-      type: 'bar',
-      coordinateSystem: 'polar',
-      roundCap: true,
-      barWidth: ring,
-      barGap: '-100%',
-      animationDuration: (base.animationDuration as number) ?? 0,
-    }
+    const bar = { type: 'bar', coordinateSystem: 'polar', roundCap: true, barWidth: ring, animationDuration: (base.animationDuration as number) ?? 0 }
+    // ECharts lays bars that share a polar axis side by side, taking each one's width out of the band even when they
+    // overlap, so the value, its overshoot lap and the track each get their own polar system, all the same size.
+    const layers = [0, 1, 2]
     return {
       ...base,
-      polar: { radius: [inner, outer], center: ['50%', '50%'] },
+      polar: layers.map(() => ({ radius: [inner, outer], center: ['50%', '50%'] })),
       // A full lap is `360 / sweep` units, so a value of 1 covers the sweep.
-      angleAxis: { type: 'value', min: 0, max: 360 / sweep, startAngle: this.echartsStart, clockwise: true, show: false },
-      radiusAxis: { type: 'category', data: rings.map((item) => item.label), inverse: true, show: false },
+      angleAxis: layers.map((index) => ({
+        polarIndex: index,
+        type: 'value',
+        min: 0,
+        max: 360 / sweep,
+        startAngle: this.echartsStart,
+        clockwise: true,
+        show: false,
+      })),
+      radiusAxis: layers.map((index) => ({ polarIndex: index, type: 'category', data: rings.map((item) => item.label), inverse: true, show: false })),
       series: [
-        { ...bar, name: this.resolvedSeries[0]?.label ?? this.resolvedSeries[0]?.field ?? 'value', z: 3 },
-        { ...bar, name: 'lap', z: 4, silent: false },
-        { ...bar, name: 'track', z: 2 },
+        { ...bar, polarIndex: 0, name: this.resolvedSeries[0]?.label ?? this.resolvedSeries[0]?.field ?? 'value', z: 3 },
+        { ...bar, polarIndex: 1, name: 'lap', z: 4 },
+        { ...bar, polarIndex: 2, name: 'track', z: 2 },
       ],
     }
   }
@@ -279,32 +291,42 @@ export class RadialBarChart extends EchartsChartBase {
     const dimmed = (label: string) => highlighted !== null && rings.some((item) => item.label === highlighted) && label !== highlighted
     const track = getComputedStyle(this).getPropertyValue('--_track-color').trim() || theme.gridColor
     const fontSize = Math.min(theme.fontSize, Math.max(8, ring * 0.62))
+    // The ring's name, drawn at the start of the arc that is on top there: the overshoot lap when there is one. It
+    // shows when that arc, at the ring's radius, is longer than the text.
+    const label = (item: Ring, index: number, share: number, color: string) => {
+      const radius = inner + (rings.length - index - 0.5) * band
+      const arc = ((share * sweep) / 180) * Math.PI * radius
+      return {
+        show: this.labels === 'start' && ring >= 9 && arc > item.label.length * fontSize * 0.62 + ring,
+        position: 'insideStart',
+        rotate: 'tangential',
+        formatter: item.label,
+        color: readableOn(color),
+        fontSize,
+        fontWeight: 600,
+      }
+    }
+    const over = (item: Ring) => Math.min(MAX_LAPS, item.share) - 1
     const values = rings.map((item, index) => {
       if (this.hiddenRings.has(item.label) || item.value === null) return { name: item.label, value: '-' }
       const share = Math.min(1, item.share)
-      // The ring's name fits when its arc is longer than the text, at that ring's radius.
-      const radius = inner + (rings.length - index - 0.5) * band
-      const arc = ((share * sweep) / 180) * Math.PI * radius
-      const fits = this.labels === 'start' && ring >= 9 && arc > item.label.length * fontSize * 0.62 + ring
       return {
         name: item.label,
         value: share,
         itemStyle: { color: item.color, opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 },
-        label: {
-          show: fits,
-          position: 'insideStart',
-          rotate: 'tangential',
-          formatter: item.label,
-          color: readableOn(item.color),
-          fontSize,
-          fontWeight: 600,
-        },
+        label: over(item) > 0 ? { show: false } : label(item, index, share, item.color),
       }
     })
-    const laps = rings.map((item) => {
-      const over = Math.min(MAX_LAPS, item.share) - 1
-      if (this.hiddenRings.has(item.label) || item.value === null || over <= 0) return { name: item.label, value: '-' }
-      return { name: item.label, value: over, itemStyle: { color: darken(item.color), opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 } }
+    const laps = rings.map((item, index) => {
+      const lap = over(item)
+      if (this.hiddenRings.has(item.label) || item.value === null || lap <= 0) return { name: item.label, value: '-' }
+      const color = darken(item.color)
+      return {
+        name: item.label,
+        value: lap,
+        itemStyle: { color, opacity: dimmed(item.label) ? theme.dimmedOpacity : 1 },
+        label: label(item, index, lap, color),
+      }
     })
     const tracks = rings.map((item) => ({
       name: item.label,
