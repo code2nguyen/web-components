@@ -3,21 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Video Player test scenarios</title>
+    <title>video-player scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
       }
       main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+        display: block;
+        width: 640px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import '../src/video-player.ts'
+      import { parseVtt, formatTime } from '../src/vtt.ts'
+      window.vtt = { parseVtt, formatTime }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Video Player scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>

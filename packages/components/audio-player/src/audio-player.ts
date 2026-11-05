@@ -267,7 +267,7 @@ export class AudioPlayer extends LitElement {
     if (count !== this.fitted) this.fitted = count
   }
 
-  protected override updated(changed: PropertyValues<this>): void {
+  protected override updated(changed: PropertyValues): void {
     this.internals.role = 'group'
     this.internals.ariaLabel = this.label || this.msg.t('player')
     if (changed.has('slotted') || changed.has('src')) this.bindMedia()
@@ -543,8 +543,12 @@ export class AudioPlayer extends LitElement {
   private renderTime(length: number) {
     if (this.failed) return html`<span class="time error" part="time" role="status">${this.msg.t('error')}</span>`
     const started = this.playing || this.currentTime > 0
-    const text = this.variant === 'bubble' ? formatAudioTime(started ? this.currentTime : length) : started ? `${formatAudioTime(this.currentTime)} / ${formatAudioTime(length)}` : formatAudioTime(length)
-    return html`<span class="time" part="time" aria-hidden="true">${text}</span>`
+    const bubble = this.variant === 'bubble'
+    const total = formatAudioTime(length)
+    const text = bubble ? formatAudioTime(started ? this.currentTime : length) : started ? `${formatAudioTime(this.currentTime)} / ${total}` : total
+    // The sizer holds the widest text the time can show, so starting to play never narrows the waveform under the pointer.
+    const widest = bubble ? total : `${total} / ${total}`
+    return html`<span class="time" part="time" aria-hidden="true"><span class="sizer">${widest}</span><span class="text">${text}</span></span>`
   }
 
   override render() {

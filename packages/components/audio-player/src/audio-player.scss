@@ -1,15 +1,269 @@
-@use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-audio-player,
-  $theme: ()
+  $theme: (
+    width: 100%,
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 10px 12px,
+    gap: 12px,
+    color: #18181b,
+    play--size: 36px,
+    play--background-color: rgb(2, 101, 220),
+    play--color: #ffffff,
+    waveform--height: 32px,
+    bar--width: 3px,
+    bar--gap: 2px,
+    bar--color: #d4d4d8,
+    bar__played--color: rgb(2, 101, 220),
+    time--color: #71717a,
+    time--font-size: 12px,
+    speed--background-color: #f4f4f5,
+    speed--color: #18181b,
+    speed--font-size: 12px,
+    toggle--color: rgb(2, 101, 220),
+    transcript--background-color: #f4f4f5,
+    transcript--font-size: 13px,
+    error--color: #dc2626,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    bubble--background-color: #ffffff,
+    bubble--border-radius: 16px 16px 16px 4px,
+    bubble--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.08),
+    bubble--max-width: 320px,
+    disabled-opacity: variables.$disabled-content-opacity,
+  )
 );
 
-
 :host {
-  display: inline-flex;
+  display: block;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: 100%;
+  color: css.cssVar(color);
+  font-size: 14px;
 }
 
-.c2-audio-player {
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.player {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+}
+
+.player.has-avatar {
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+}
+
+.avatar {
+  display: flex;
+}
+
+button {
+  margin: 0;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+.waveform:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.play {
+  display: grid;
+  place-items: center;
+  width: css.cssVar(play--size);
+  height: css.cssVar(play--size);
+  padding: 0;
+  border-radius: 999px;
+  background-color: css.cssVar(play--background-color);
+  color: css.cssVar(play--color);
+}
+
+.play svg {
+  width: 45%;
+  height: 45%;
+  fill: currentColor;
+}
+
+.waveform {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: css.cssVar(bar--gap);
+  min-width: 0;
+  height: css.cssVar(waveform--height);
+  border-radius: 4px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.bar {
+  flex: none;
+  width: css.cssVar(bar--width);
+  min-height: 3px;
+  border-radius: 999px;
+  background-color: css.cssVar(bar--color);
+}
+
+.bar.played {
+  background-color: css.cssVar(bar__played--color);
+}
+
+.waveform.loading .bar {
+  opacity: 0.6;
+}
+
+.time {
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.time:not(.error) {
+  display: inline-grid;
+  justify-items: end;
+}
+
+.time .sizer,
+.time .text {
+  grid-area: 1 / 1;
+}
+
+.time .sizer {
+  visibility: hidden;
+}
+
+.bubble .time {
+  justify-items: start;
+}
+
+.time.error {
+  color: css.cssVar(error--color);
+}
+
+.speed {
+  min-width: 38px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background-color: css.cssVar(speed--background-color);
+  color: css.cssVar(speed--color);
+  font-size: css.cssVar(speed--font-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle {
+  grid-column: 2 / -1;
+  justify-self: start;
   display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -4px;
+  padding: 0;
+  background: none;
+  color: css.cssVar(toggle--color);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.has-avatar .toggle,
+.has-avatar .transcript {
+  grid-column: 3 / -1;
+}
+
+.toggle svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 150ms;
+}
+
+.toggle svg.open {
+  transform: rotate(180deg);
+}
+
+.transcript {
+  grid-column: 2 / -1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background-color: css.cssVar(transcript--background-color);
+  font-size: css.cssVar(transcript--font-size);
+  line-height: 1.5;
+}
+
+.transcript p {
+  margin: 0;
+}
+
+.failed .waveform,
+.failed .speed,
+.failed .play {
+  opacity: css.cssVar(disabled-opacity);
+}
+
+// The chat-message look: the play button beside the waveform, the time and speed under it.
+.bubble {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  max-width: css.cssVar(bubble--max-width);
+  padding: 8px 12px 6px 8px;
+  border: 0;
+  border-radius: css.cssVar(bubble--border-radius);
+  background-color: css.cssVar(bubble--background-color);
+  box-shadow: css.cssVar(bubble--box-shadow);
+}
+
+.bubble.has-avatar {
+  grid-template-columns: auto auto minmax(0, 1fr);
+}
+
+.bubble .body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bubble .waveform {
+  height: calc(#{css.cssVar(waveform--height)} - 6px);
+}
+
+.bubble .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.bubble .speed {
+  min-width: 32px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle svg {
+    transition: none;
+  }
 }

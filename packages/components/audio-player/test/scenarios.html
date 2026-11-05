@@ -3,21 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Audio Player test scenarios</title>
+    <title>audio-player scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
       }
       main {
-        display: flex;
-        align-items: center;
+        display: grid;
         gap: 16px;
+        width: 480px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import './translations.ts'
+      import '../src/audio-player.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Audio Player scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>
