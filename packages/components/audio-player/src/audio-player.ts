@@ -354,6 +354,9 @@ export class AudioPlayer extends LitElement {
         cancelAnimationFrame(this.frame)
         this.playing = false
         this.currentTime = 0
+        // The old file's length and a seek asked for it do not carry over to the new one.
+        this.mediaDuration = Number.NaN
+        this.pendingSeek = null
         return
     }
     // play, pause, ended and ratechange are the host's events too: a media event does not leave the shadow root.

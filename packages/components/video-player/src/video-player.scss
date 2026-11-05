@@ -256,7 +256,9 @@ svg .fill {
 .segment .buffered,
 .segment .played {
   position: absolute;
-  inset: 0 auto 0 0;
+  // From the inline start: the fills grow from the right in a right-to-left page, as the time does.
+  inset-block: 0;
+  inset-inline-start: 0;
 }
 
 .segment .buffered {

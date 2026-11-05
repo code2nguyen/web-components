@@ -228,3 +228,14 @@ test('a transcript opens behind a toggle; the bubble variant is narrower and fit
   await expect(french.locator('.speed')).toHaveAccessibleName('Vitesse de lecture 1×')
   await accessible(page)
 })
+
+test('a new source on a slotted audio drops the old length until the new one is known', async ({ page, renderScenario }) => {
+  // The second file never answers, so only what the player kept from the first one could show a length.
+  await page.route('**/voice-note.webm?stalled', () => undefined)
+  await renderScenario(`<c2-audio-player label="swap" peaks='${PEAKS}'><audio src="${NOTE}" preload="metadata"></audio></c2-audio-player>`)
+  const swap = player(page)
+  await expect(waveform(swap)).toHaveAttribute('aria-valuemax', '12')
+  await swap.evaluate((element, src) => (element.querySelector('audio') as HTMLAudioElement).setAttribute('src', src), `${NOTE}?stalled`)
+  await expect(waveform(swap)).toHaveAttribute('aria-valuemax', '0')
+  await expect(waveform(swap)).toHaveAttribute('aria-valuetext', /^0:00 of 0:00$/)
+})

@@ -34,20 +34,20 @@
   </head>
 
   <body>
-    <!-- The docs site's sample, served from the repo root by `npm run dev` in this package: copy it next to index.html or point src at it. -->
+    <!-- The docs site's sample: `npm run dev` in this package serves apps/ui/public at /, so /media/ is the docs media. -->
     <c2-audio-player
-      src="/../../../apps/ui/public/media/voice-note.webm"
+      src="/media/voice-note.webm"
       label="voice note from Ana"
       duration="12"
       transcript="Hi team, quick update on the launch. The build is green and QA signed off this morning."
     ></c2-audio-player>
     <div class="chat">
-      <c2-audio-player variant="bubble" exclusive src="/../../../apps/ui/public/media/voice-note.webm" label="voice message" duration="12">
+      <c2-audio-player variant="bubble" exclusive src="/media/voice-note.webm" label="voice message" duration="12">
         <span slot="avatar" class="avatar">AR</span>
       </c2-audio-player>
     </div>
     <c2-audio-player exclusive label="slotted audio" bars="64"
-      ><audio src="/../../../apps/ui/public/media/voice-note.webm" preload="metadata"></audio
+      ><audio src="/media/voice-note.webm" preload="metadata"></audio
     ></c2-audio-player>
   </body>
 </html>

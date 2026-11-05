@@ -246,6 +246,19 @@ export class VideoPlayer extends LitElement {
     video.removeEventListener('error', this.onSourceError, true)
     clearTimeout(this.sourceErrorTimer)
     this.video = null
+    // Nothing of that video stays on screen: the controls start over for the next one.
+    this.stopPlaying()
+    this.started = false
+    this.waiting = false
+    this.errorCode = 0
+    this.time = 0
+    this.duration = 0
+    this.bufferedEnd = 0
+    this.trackChapters = []
+    this.chapterIndex = -1
+    this.captionTracks = []
+    this.activeCaption = -1
+    this.lastCaption = -1
   }
 
   private syncFromMedia(): void {
@@ -383,6 +396,10 @@ export class VideoPlayer extends LitElement {
       if (chapters.mode === 'disabled') chapters.mode = 'hidden'
       const cues = chapters.cues ? [...chapters.cues] : []
       this.trackChapters = cues.map((cue) => ({ start: cue.startTime, title: (cue as VTTCue).text ?? '' }))
+      this.updateChapter()
+    } else if (this.trackChapters.length) {
+      // The chapters track went away: its chapters go with it.
+      this.trackChapters = []
       this.updateChapter()
     }
   }
@@ -557,8 +574,8 @@ export class VideoPlayer extends LitElement {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return
     const path = event.composedPath()
     const origin = path[0]
-    // The settings menu has its own keys.
-    if (path.some((node) => node instanceof HTMLElement && node.localName === 'c2-menu')) return
+    // The open settings menu has its own keys; its closed trigger is one of the player's controls.
+    if (this.settingsMenu?.open && path.some((node) => node instanceof HTMLElement && node.localName === 'c2-menu')) return
     const onButton = origin instanceof HTMLButtonElement
     const onVolume = origin instanceof HTMLInputElement
     const onSeek = origin === this.seekBar
@@ -643,7 +660,10 @@ export class VideoPlayer extends LitElement {
       const base = new URL(url, document.baseURI).href
       const response = await fetch(base)
       if (!response.ok) throw new Error(String(response.status))
-      const cues = parseVtt(await response.text()).map((cue) => ({ start: cue.start, end: cue.end, thumbnail: thumbnailFromCue(cue.text, base) }))
+      const cues = parseVtt(await response.text()).flatMap((cue) => {
+        const thumbnail = thumbnailFromCue(cue.text, base)
+        return thumbnail ? [{ start: cue.start, end: cue.end, thumbnail }] : []
+      })
       if (request === this.thumbnailsRequest) this.thumbnailCues = cues
     } catch {
       if (request === this.thumbnailsRequest) this.thumbnailCues = []
@@ -664,7 +684,11 @@ export class VideoPlayer extends LitElement {
     // A new `src` starts over, paused: the old video's `pause` may never come.
     if (changed.has('src') && this.hasUpdated) this.stopPlaying()
     if (changed.has('thumbnails') && typeof this.thumbnails === 'string' && this.hasUpdated) void this.loadThumbnails(this.thumbnails)
-    if (changed.has('thumbnails') && typeof this.thumbnails !== 'string') this.thumbnailCues = []
+    if (changed.has('thumbnails') && typeof this.thumbnails !== 'string') {
+      // A file still loading for the old value must not fill the previews in.
+      this.thumbnailsRequest += 1
+      this.thumbnailCues = []
+    }
   }
 
   protected override firstUpdated(): void {

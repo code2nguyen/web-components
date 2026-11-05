@@ -152,10 +152,14 @@
   transform: translateY(-50%);
 }
 
+// The handle sits on the divider, but never past the frame's edges: at 0% and 100% it stays whole, with room for its
+// focus ring, while the divider line itself goes to the edge.
 .handle {
+  --_inset: calc(#{css.cssVar(handle--size)} / 2 + #{css.cssVar(handle__focus--outline-offset)} + 2px);
+
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: clamp(var(--_inset), var(--_position), calc(100% - var(--_inset)));
   box-sizing: border-box;
   display: grid;
   place-items: center;
@@ -170,6 +174,11 @@
   pointer-events: auto;
   cursor: inherit;
   outline: none;
+}
+
+.vertical .handle {
+  top: clamp(var(--_inset), var(--_position), calc(100% - var(--_inset)));
+  left: 50%;
 }
 
 .frame.hover .handle {

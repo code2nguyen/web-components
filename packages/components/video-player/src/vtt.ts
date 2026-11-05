@@ -49,10 +49,18 @@ export function parseVtt(text: string): VttCue[] {
   return cues
 }
 
-/** A thumbnail cue's text (`sprite.jpg#xywh=0,0,160,90`) as a thumbnail, its URL resolved against the file's. */
-export function thumbnailFromCue(text: string, base: string): VideoThumbnail {
+/**
+ * A thumbnail cue's text (`sprite.jpg#xywh=0,0,160,90`) as a thumbnail, its URL resolved against the file's; `null`
+ * for a cue whose URL cannot be resolved, so one bad cue costs only its own preview.
+ */
+export function thumbnailFromCue(text: string, base: string): VideoThumbnail | null {
   const [path, hash = ''] = text.trim().split('#')
-  const url = new URL(path, base).href
+  let url: string
+  try {
+    url = new URL(path, base).href
+  } catch {
+    return null
+  }
   const match = /xywh=(\d+),(\d+),(\d+),(\d+)/.exec(hash)
   return match ? { url, x: Number(match[1]), y: Number(match[2]), w: Number(match[3]), h: Number(match[4]) } : { url }
 }

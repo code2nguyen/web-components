@@ -16,7 +16,7 @@ import '@c2n/components/audio-player'
 ```
 
 - **Source:** `src` plays with an `<audio>` of the player's own. An `<audio>` put inside the element (with its
-  `<source>`s, without `controls`) plays instead, and the player never writes on it. `media` is that element either
+  `<source>`s, without `controls`) plays instead; the player leaves its attributes untouched and only drives its playback (position, rate). `media` is that element either
   way, to hand to `c2-transcript` or `c2-audio-visualizer`.
 - **Waveform:** `peaks` (0–1, usually stored with the recording) drawn as `bars` bars at most, fewer when the waveform
   is narrow. Without `peaks`, the player fetches and decodes the file once (same-origin or CORS) to compute them; when
@@ -29,4 +29,4 @@ import '@c2n/components/audio-player'
 - **Accessibility:** a group named by `label`; the play button says "Play …" or "Pause …"; the waveform is a slider read
   as "0:12 of 0:47".
 
-Every colour, size and the bubble look are `--c2-audio-player*` CSS variables; the API page lists them.
+The main colours, sizes and the bubble look are `--c2-audio-player*` CSS variables; the API page lists them.

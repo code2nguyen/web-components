@@ -30,7 +30,12 @@ const percentFormats = new Map<string, Intl.NumberFormat>()
 function percentFormat(locale: string): Intl.NumberFormat {
   let format = percentFormats.get(locale)
   if (!format) {
-    format = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 })
+    try {
+      format = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 })
+    } catch {
+      // A `lang` that is not a language tag must not break the render: English then.
+      format = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDigits: 0 })
+    }
     percentFormats.set(locale, format)
   }
   return format
@@ -208,10 +213,39 @@ export class ImageCompare extends LitElement {
     return ''
   }
 
-  private onSlotChange(event: Event): void {
-    const slot = event.target as HTMLSlotElement
-    if (slot.name === 'before') this.beforeName = this.nameOf(slot)
-    else this.afterName = this.nameOf(slot)
+  /** Watches the layers' alternative text, which may change after they were assigned. */
+  private readonly nameObserver = typeof MutationObserver === 'undefined' ? null : new MutationObserver(() => this.readNames())
+
+  private onSlotChange(): void {
+    this.readNames()
+  }
+
+  private readNames(): void {
+    const slots = [...this.renderRoot.querySelectorAll<HTMLSlotElement>('slot[name="before"], slot[name="after"]')]
+    this.nameObserver?.disconnect()
+    for (const slot of slots) {
+      const name = this.nameOf(slot)
+      if (slot.name === 'before') this.beforeName = name
+      else this.afterName = name
+      for (const element of slot.assignedElements({ flatten: true })) {
+        this.nameObserver?.observe(element, { attributes: true, subtree: true, attributeFilter: ['alt', 'aria-label', 'aria-labelledby'] })
+      }
+    }
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    if (this.hasUpdated) this.readNames()
+  }
+
+  protected override firstUpdated(): void {
+    // `slotchange` does not fire for layers already assigned when a server-rendered shadow root hydrates.
+    this.readNames()
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.nameObserver?.disconnect()
   }
 
   private get accessibleName(): string {
@@ -252,8 +286,8 @@ export class ImageCompare extends LitElement {
           ? html`<div class="chips after-chips" aria-hidden="true"><span class="label after-label" part="label">${this.afterLabel}</span></div>`
           : nothing
       }
-      <div class="divider" part="divider">
-        <div
+      <div class="divider" part="divider"></div>
+      <div
           class="handle"
           part="handle"
           role="slider"
@@ -262,13 +296,12 @@ export class ImageCompare extends LitElement {
           aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
           aria-valuemin="0"
           aria-valuemax="100"
-          aria-valuenow=${Math.round(position)}
+          aria-valuenow=${position}
           aria-valuetext=${this.msg.t('value', before, after)}
           @keydown=${this.onKeyDown}
         >
           <slot name="handle">${this.renderGrip()}</slot>
         </div>
-      </div>
     </div>`
   }
 }
