@@ -1,0 +1,26 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { AudioPlayer } from '@c2n/components/audio-player'
+
+## Presets
+
+Curated looks for `c2-audio-player`. Open any card in the studio to start from it. Say which variables do the
+most work for this component.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-audio-player></c2-audio-player>
+```
+
+```html tag=MdxCodeBlock,label=Themed
+<style>
+  .themed {
+    /* --c2-audio-player--… */
+  }
+</style>
+<c2-audio-player class="themed"></c2-audio-player>
+```
+
+</GalleryGrid>

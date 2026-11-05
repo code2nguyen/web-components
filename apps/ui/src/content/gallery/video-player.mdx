@@ -1,0 +1,26 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { VideoPlayer } from '@c2n/components/video-player'
+
+## Presets
+
+Curated looks for `c2-video-player`. Open any card in the studio to start from it. Say which variables do the
+most work for this component.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-video-player></c2-video-player>
+```
+
+```html tag=MdxCodeBlock,label=Themed
+<style>
+  .themed {
+    /* --c2-video-player--… */
+  }
+</style>
+<c2-video-player class="themed"></c2-video-player>
+```
+
+</GalleryGrid>
