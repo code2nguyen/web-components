@@ -24,6 +24,18 @@ export interface ImageCompare {
   removeEventListener: TypedRemoveEventListener<ImageCompare, ImageCompareEventMap>
 }
 
+const percentFormats = new Map<string, Intl.NumberFormat>()
+
+/** A whole-percent formatter per locale, built once: the value text is redrawn on every pointer move. */
+function percentFormat(locale: string): Intl.NumberFormat {
+  let format = percentFormats.get(locale)
+  if (!format) {
+    format = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 })
+    percentFormats.set(locale, format)
+  }
+  return format
+}
+
 const clamp = (value: number) => (Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 50)
 const round = (value: number) => Math.round(value * 10) / 10
 
@@ -162,6 +174,8 @@ export class ImageCompare extends LitElement {
     if (!this.dragging) return
     this.dragging = false
     if (this.frame?.hasPointerCapture(event.pointerId)) this.frame.releasePointerCapture(event.pointerId)
+    // The drag settles the position: a hover move before it has nothing left to report when the pointer leaves.
+    this.hoverMoved = false
     this.dispatchEvent(new Event('change', { bubbles: true }))
   }
 
@@ -213,7 +227,7 @@ export class ImageCompare extends LitElement {
 
   override render() {
     const position = clamp(this.position)
-    const percent = new Intl.NumberFormat(this.msg.locale, { style: 'percent', maximumFractionDigits: 0 })
+    const percent = percentFormat(this.msg.locale)
     const before = percent.format(position / 100)
     const after = percent.format((100 - position) / 100)
     return html`<div

@@ -137,6 +137,16 @@ test('vertical stacks the layers top to bottom; hover follows the pointer withou
   // Leaving after moving settles it.
   await page.mouse.move(box.x + box.width / 2, box.y + box.height + 60)
   await expect.poll(() => events(hover)).toHaveLength(1)
+  // Hover, then press and drag: the release settles it once; leaving afterwards reports nothing more.
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
+  await page.mouse.move(box.x + box.width * 0.45, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2, { steps: 4 })
+  await page.mouse.up()
+  await expect.poll(() => events(hover)).toHaveLength(2)
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height + 60)
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await events(hover)).toHaveLength(2)
   await accessible(page)
 })
 
