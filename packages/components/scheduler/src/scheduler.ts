@@ -198,10 +198,12 @@ function safeColor(value: string | undefined): string | null {
  *   with `{ event, start, end, resource }`. A preview follows the pointer, and Escape cancels.
  * - `readonly` bookings stay in place. `event-click` fires on any bar.
  *
- * The grid is one Tab stop. On empty time the arrow keys move a slot cursor (Enter fires `range-select` for the
- * slot); moving onto a bar focuses it. On a bar, with `editable`, Left/Right move it by `snap-minutes`,
- * Shift+Left/Right change its end and Alt+Up/Down move it to the previous or next resource; Up/Down go to the next
- * row and Escape back to the slot cursor. Each bar is named by its title, resource and time, and moves are
+ * The grid is one Tab stop holding a slot cursor. The arrow keys move it over every slot of a row, booked or free,
+ * Up/Down to the same slot of the next row, Home/End to the first and last slot; a booked slot is read with its
+ * bookings. Enter (or Space) on a booked slot focuses its first bar; on a free slot, with `editable`, it fires
+ * `range-select` for that slot. On a bar, with `editable`, Left/Right move it by `snap-minutes`, Shift+Left/Right
+ * change its end and Alt+Up/Down move it to the previous or next resource; Up/Down go to the next row, and Escape goes
+ * back to the slot cursor where Enter left it. Each bar is named by its title, resource and time, and moves are
  * announced.
  *
  * @tag c2-scheduler

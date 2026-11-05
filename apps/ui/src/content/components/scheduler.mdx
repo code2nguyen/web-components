@@ -121,12 +121,13 @@ scheduler.addEventListener('range-select', ({ detail }) => {
 
 ## Keyboard and screen readers
 
-The grid is one Tab stop. On empty time, the arrow keys move a slot cursor across columns and rows, Home and End jump
-to the first and last column, and Enter fires `range-select` for the slot. Moving the cursor onto a booking focuses
-the bar. On a bar, with `editable`, Left and Right move it by `snap-minutes`, Shift+Left and Shift+Right change its
-end, and Alt+Up and Alt+Down move it to the previous or next resource; Up and Down go to the next row and Escape back
-to the slot cursor. Each bar is a button named by its title, resource and time ("Kick-off, Ana Ruiz, Monday
-9 November, 09:00 to 10:30"), and moves and new bookings are announced.
+The grid is one Tab stop holding a slot cursor. The arrow keys move it over every slot of a row, booked or free, Up
+and Down move it to the same slot of the next row, and Home and End jump to the first and last slot. A booked slot is
+read with its bookings. Enter on a booked slot focuses its first bar; on a free slot, with `editable`, Enter fires
+`range-select` for it. On a bar, with `editable`, Left and Right move it by `snap-minutes`, Shift+Left and Shift+Right
+change its end, and Alt+Up and Alt+Down move it to the previous or next resource; Up and Down go to the next row and
+Escape goes back to the slot cursor. Each bar is a button named by its title, resource and time ("Kick-off, Ana Ruiz,
+Monday 9 November, 09:00 to 10:30"), and moves and new bookings are announced.
 
 ## Limits
 
