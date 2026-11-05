@@ -1,0 +1,80 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { QuickTimeMenu } from '@c2n/components/quick-time-menu'
+
+## Presets
+
+Looks for `c2-quick-time-menu`. The trigger variables (`__trigger--*`, `__trigger__set--*`) change the button, the menu and item variables change the list.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-quick-time-menu></c2-quick-time-menu>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .qtm-pill {
+    --c2-quick-time-menu__trigger--border-radius: 999px;
+    --c2-quick-time-menu__trigger--border: 1px solid transparent;
+    --c2-quick-time-menu__trigger--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-quick-time-menu__trigger__hover--border: 1px solid transparent;
+    --c2-quick-time-menu__trigger__set--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-quick-time-menu__trigger__set--color: light-dark(#7e22ce, #a76cdc);
+    --c2-quick-time-menu__check--color: light-dark(#9333ea, #ab63ed);
+    --c2-quick-time-menu__menu--border-radius: 14px;
+    --c2-quick-time-menu__item--border-radius: 10px;
+  }
+</style>
+<c2-quick-time-menu class="qtm-pill" label="Snooze"></c2-quick-time-menu>
+```
+
+```html tag=MdxCodeBlock,label=Reminder card
+<style>
+  .qtm-card {
+    width: 280px;
+    padding: 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 12px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .qtm-card p {
+    margin: 0 4px 6px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .qtm-card c2-quick-time-menu {
+    --c2-quick-time-menu__menu--padding: 0;
+    --c2-quick-time-menu__menu--border: 0 solid transparent;
+  }
+</style>
+<div class="qtm-card">
+  <p>Remind me</p>
+  <c2-quick-time-menu
+    inline
+    label="Remind me"
+    presets='[{"id":"20m","label":"In 20 minutes","at":"+20m"},{"id":"1h","label":"In 1 hour","at":"+1h"},{"id":"tomorrow","label":"Tomorrow","at":"tomorrow"}]'
+  ></c2-quick-time-menu>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .qtm-compact {
+    --c2-quick-time-menu__trigger--min-height: 28px;
+    --c2-quick-time-menu__trigger--padding-inline: 8px;
+    --c2-quick-time-menu__trigger--font-size: 12px;
+    --c2-quick-time-menu__icon--size: 14px;
+    --c2-quick-time-menu__menu--width: 240px;
+    --c2-quick-time-menu__item--min-height: 28px;
+    --c2-quick-time-menu__item--font-size: 12px;
+  }
+</style>
+<c2-quick-time-menu class="qtm-compact" label="Due"></c2-quick-time-menu>
+```
+
+</GalleryGrid>

@@ -160,6 +160,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range.
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
 - **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
+- **Duration Input** — `c2-duration-input` · `@c2n/components/duration-input` — A text field for an amount of time: reads 1h 30m, 90m, 1.5h or 1:30 and stores seconds.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
 - **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
@@ -182,6 +183,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Quantity Picker** — `c2-quantity-picker, c2-quantity` · `@c2n/components/quantity-picker` — Several labelled counters behind one summary ("2 adults, 1 child"), with limits per counter and in total. Children: `c2-quantity`.
 - **Query Input** — `c2-query-input` · `@c2n/components/query-input` — A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
+- **Quick time menu** — `c2-quick-time-menu` · `@c2n/components/quick-time-menu` — A menu of quick times (Later today, Tomorrow, Next week), each showing when it falls, plus a date and time picker for anything else.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
 - **Rich Text Editor** — `c2-rich-text-editor` · `@c2n/components/rich-text-editor` — A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.
@@ -252,5 +254,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
 - **Month Planner** — `c2-month-planner` · `@c2n/components/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **Notepad** — `c2-notepad` · `@c2n/components/notepad` — A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.
+- **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.
 - **Todo List** — `c2-todo-list` · `@c2n/components/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
 - **Week Planner** — `c2-week-planner` · `@c2n/components/week-planner` — Weekly schedule with time blocks: a typical week with optional odd and even weeks, or a dated week the user edits.

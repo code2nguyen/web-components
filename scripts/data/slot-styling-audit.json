@@ -3048,6 +3048,13 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-duration-input",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-duration-input__icon--color", "--c2-duration-input__icon--size"],
+      "reason": "The field colours and sizes the slotted icon and its clock fallback through the icon variables."
+    },
+    {
       "tag": "c2-file-browser",
       "slot": "empty",
       "decision": "assigned-content",
@@ -4328,6 +4335,12 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects the consumer's menu rows into c2-menu; style them through the c2-menu and c2-menu-item contracts."
+    },
+    {
+      "tag": "c2-quick-time-menu",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects a consumer-owned button that replaces the built-in trigger; style it through its own class or public contract."
     },
     {
       "tag": "c2-radial-bar-chart",
