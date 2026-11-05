@@ -268,7 +268,12 @@ export class VideoPlayer extends LitElement {
 
   /** Every `<source>` failed: the video gave up looking (`NETWORK_NO_SOURCE`) and has no `error` of its own. */
   private noSource(video: HTMLVideoElement): boolean {
-    return !video.error && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && !!video.querySelector('source')
+    return (
+      !video.error &&
+      video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE &&
+      video.readyState === HTMLMediaElement.HAVE_NOTHING &&
+      !!video.querySelector('source')
+    )
   }
 
   private onSourceError = (event: Event): void => {
@@ -312,6 +317,10 @@ export class VideoPlayer extends LitElement {
       case 'canplay':
       case 'seeked':
         this.waiting = false
+        break
+      case 'loadedmetadata':
+        // Media that loads did not fail, whatever an early look at its state suggested.
+        if (!video.error) this.errorCode = 0
         break
       case 'waiting':
         this.waiting = true

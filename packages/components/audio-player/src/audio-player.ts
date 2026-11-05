@@ -325,6 +325,8 @@ export class AudioPlayer extends LitElement {
         return
       case 'loadedmetadata':
       case 'durationchange':
+        // Media that loads did not fail, whatever an early look at its state suggested.
+        if (event.type === 'loadedmetadata' && !media.error) this.failed = false
         this.mediaDuration = media.duration
         if (this.pendingSeek !== null && Number.isFinite(media.duration)) {
           media.currentTime = Math.min(this.pendingSeek, media.duration)
@@ -402,7 +404,9 @@ export class AudioPlayer extends LitElement {
     this.playing = !media.paused && !media.ended
     this.currentTime = media.currentTime
     this.mediaDuration = media.duration
-    this.failed = media.error !== null || gaveUp(media)
+    // Only sources that failed count: a media element just starting to pick its source reads NETWORK_NO_SOURCE too
+    // (Firefox shows it), so without `<source>` children only an `error` of its own does.
+    this.failed = media.error !== null || (media.querySelector('source') !== null && gaveUp(media))
     // A speed chosen before the media was there carries over.
     if (media.playbackRate !== this.rate) media.playbackRate = this.rate
     if (this.playing) this.tick()
