@@ -268,8 +268,12 @@ test('one malformed thumbnail cue costs only its own preview; a cleared thumbnai
   ].join('\n')
   await page.route('**/mixed-thumbs.vtt', (route) => route.fulfill({ contentType: 'text/vtt', body }))
   let release: () => void = () => undefined
+  let requested: () => void = () => undefined
+  const intercepted = new Promise<void>((resolve) => (requested = resolve))
   await page.route('**/slow-thumbs.vtt', async (route) => {
-    await new Promise<void>((resolve) => (release = resolve))
+    const held = new Promise<void>((resolve) => (release = resolve))
+    requested()
+    await held
     await route.fulfill({ contentType: 'text/vtt', body })
   })
   await renderScenario(`<c2-video-player id="mixed" label="Mixed" thumbnails="/mixed-thumbs.vtt">${VIDEO}</c2-video-player>`)
@@ -280,6 +284,7 @@ test('one malformed thumbnail cue costs only its own preview; a cleared thumbnai
   await page.mouse.move(box.x + box.width / 2, box.y - 120)
   // Cleared while its file is still on the way: the answer must not bring the previews back.
   await player(page).evaluate((element) => ((element as HTMLElement & { thumbnails: unknown }).thumbnails = '/slow-thumbs.vtt'))
+  await intercepted
   await player(page).evaluate((element) => ((element as HTMLElement & { thumbnails: unknown }).thumbnails = undefined))
   release()
   await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 300)))

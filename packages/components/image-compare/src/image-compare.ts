@@ -228,7 +228,7 @@ export class ImageCompare extends LitElement {
       if (slot.name === 'before') this.beforeName = name
       else this.afterName = name
       for (const element of slot.assignedElements({ flatten: true })) {
-        this.nameObserver?.observe(element, { attributes: true, subtree: true, attributeFilter: ['alt', 'aria-label', 'aria-labelledby'] })
+        this.nameObserver?.observe(element, { attributes: true, subtree: true, attributeFilter: ['alt', 'aria-label'] })
       }
     }
   }
