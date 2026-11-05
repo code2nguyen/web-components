@@ -2,6 +2,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-video-player,
   $theme: (
+    width: 100%,
     aspect-ratio: string.unquote('16 / 9'),
     background-color: #000000,
     color: #ffffff,
@@ -23,6 +24,9 @@
 
 :host {
   display: block;
+  // A width it keeps: as a flex item (a centring frame, a toolbar) the host would otherwise shrink to its content,
+  // which a video with no intrinsic size has none of.
+  width: css.cssVar(width);
   max-width: 100%;
   border-radius: css.cssVar(border-radius);
 }

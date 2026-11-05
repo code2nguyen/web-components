@@ -19,6 +19,17 @@ const STEP = 5
 /** The players with `exclusive` that are on the page: starting one pauses the others. */
 const exclusivePlayers = new Set<AudioPlayer>()
 
+/**
+ * Whether the media found no source it could play: after every `<source>` fails it waits in `NETWORK_NO_SOURCE` with
+ * nothing loaded, and its own `error` stays null (`currentSrc` still names the last source tried).
+ */
+function gaveUp(media: HTMLMediaElement): boolean {
+  return media.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && media.readyState === HTMLMediaElement.HAVE_NOTHING
+}
+
+/** One `Intl.NumberFormat` per locale for the speed label, rather than one per render. */
+const speedFormats = new Map<string, Intl.NumberFormat>()
+
 /** `m:ss`, or `h:mm:ss` from an hour on. */
 export function formatAudioTime(seconds: number): string {
   const total = Math.max(0, Math.floor(Number.isFinite(seconds) ? seconds : 0))
@@ -234,7 +245,12 @@ export class AudioPlayer extends LitElement {
     }
     if (changed.has('src') && changed.get('src') !== undefined) {
       this.decodedPeaks = null
+      this.decodeAbort?.abort()
+      this.decodeAbort = undefined
+      this.decoding = false
+      this.decodedFor = ''
       this.failed = false
+      this.playing = false
       this.currentTime = 0
       this.mediaDuration = Number.NaN
     }
@@ -258,11 +274,14 @@ export class AudioPlayer extends LitElement {
     const waveform = this.waveform
     const bar = waveform?.querySelector<HTMLElement>('.bar')
     if (!waveform || !bar) return
+    // Not laid out yet (hidden, detached): keep what is drawn. A laid-out player measures the waveform's own box, which
+    // the play button, the time and the speed toggle may squeeze to a few pixels in a narrow card.
+    if (this.getBoundingClientRect().width === 0) return
     const width = waveform.clientWidth
     const barWidth = parseFloat(getComputedStyle(bar).width) || 3
     const gap = parseFloat(getComputedStyle(waveform).columnGap) || 0
     const max = Math.max(1, Math.round(this.bars))
-    const fits = width > 0 ? Math.max(8, Math.floor((width + gap) / (barWidth + gap))) : max
+    const fits = Math.max(1, Math.floor((width + gap) / (barWidth + gap)))
     const count = Math.min(max, fits)
     if (count !== this.fitted) this.fitted = count
   }
@@ -299,6 +318,8 @@ export class AudioPlayer extends LitElement {
         this.currentTime = media.currentTime
         break
       case 'timeupdate':
+        if (!this.dragging) this.follow(media.currentTime)
+        return
       case 'seeked':
         if (!this.dragging) this.currentTime = media.currentTime
         return
@@ -319,10 +340,40 @@ export class AudioPlayer extends LitElement {
         return
       case 'loadstart':
         this.failed = false
+        // The author changed the slotted audio's source: its waveform is another file's.
+        if (this.decodedFor && this.mediaUrl() !== this.decodedFor) {
+          this.decodedPeaks = null
+          this.decodedFor = ''
+          this.maybeDecode()
+        }
+        return
+      case 'emptied':
+        // A new source was loaded: whatever played is gone, and the media fires no pause for it.
+        cancelAnimationFrame(this.frame)
+        this.playing = false
+        this.currentTime = 0
         return
     }
     // play, pause, ended and ratechange are the host's events too: a media event does not leave the shadow root.
     this.dispatchEvent(new Event(event.type))
+  }
+
+  private sourceCheck?: ReturnType<typeof setTimeout>
+
+  /**
+   * After the last `<source>` fails, the media element gives up (`NETWORK_NO_SOURCE`) without an error of its own, a
+   * task later than the source's `error`.
+   */
+  private readonly onSourceError = (event: Event): void => {
+    const media = event.currentTarget as HTMLAudioElement
+    if (event.target === media) return
+    clearTimeout(this.sourceCheck)
+    this.sourceCheck = setTimeout(() => {
+      if (gaveUp(media)) {
+        this.failed = true
+        this.playing = false
+      }
+    })
   }
 
   private static readonly mediaEvents = [
@@ -336,6 +387,7 @@ export class AudioPlayer extends LitElement {
     'ratechange',
     'error',
     'loadstart',
+    'emptied',
   ]
 
   private bindMedia(): void {
@@ -345,10 +397,12 @@ export class AudioPlayer extends LitElement {
     if (!media) return
     this.bound = media
     for (const type of AudioPlayer.mediaEvents) media.addEventListener(type, this.onMediaEvent)
+    // A failing `<source>` child fires `error` on itself, not on the media element, and does not bubble.
+    media.addEventListener('error', this.onSourceError, true)
     this.playing = !media.paused && !media.ended
     this.currentTime = media.currentTime
     this.mediaDuration = media.duration
-    this.failed = media.error !== null
+    this.failed = media.error !== null || gaveUp(media)
     // A speed chosen before the media was there carries over.
     if (media.playbackRate !== this.rate) media.playbackRate = this.rate
     if (this.playing) this.tick()
@@ -357,6 +411,8 @@ export class AudioPlayer extends LitElement {
   private unbindMedia(): void {
     if (!this.bound) return
     for (const type of AudioPlayer.mediaEvents) this.bound.removeEventListener(type, this.onMediaEvent)
+    this.bound.removeEventListener('error', this.onSourceError, true)
+    clearTimeout(this.sourceCheck)
     this.bound = null
   }
 
@@ -366,10 +422,23 @@ export class AudioPlayer extends LitElement {
     const step = () => {
       const media = this.media
       if (!media || media.paused || !this.isConnected) return
-      if (!this.dragging) this.currentTime = media.currentTime
+      if (!this.dragging) this.follow(media.currentTime)
       this.frame = requestAnimationFrame(step)
     }
     this.frame = requestAnimationFrame(step)
+  }
+
+  /**
+   * Moves the playhead only when what it draws changes: the time shown (whole seconds) or the last played bar. Writing
+   * it every frame re-rendered the whole player about 60 times a second.
+   */
+  private follow(time: number): void {
+    const length = this.length
+    const count = this.barCount
+    const bar = (value: number) => (length ? Math.floor(Math.min(1, value / length) * count) : 0)
+    if (Math.floor(time) !== Math.floor(this.currentTime) || bar(time) !== bar(this.currentTime) || time < this.currentTime) {
+      this.currentTime = time
+    }
   }
 
   private get length(): number {
@@ -406,13 +475,24 @@ export class AudioPlayer extends LitElement {
 
   // ---------------------------------------------------------------------------------------------------- waveform
 
+  /**
+   * The URL of the file to play, as set: the `src` of the player or of the slotted `<audio>`, else its first `<source>`.
+   * `currentSrc` comes last, because it still names the previous file until the browser has started loading the new one.
+   */
+  private mediaUrl(): string {
+    const slotted = this.slotted
+    if (slotted) return slotted.src || slotted.querySelector('source')?.src || slotted.currentSrc || ''
+    return this.src ? new URL(this.src, document.baseURI).href : ''
+  }
+
   /** Fetches and decodes the audio once to draw its waveform, when no `peaks` are given. */
   private maybeDecode(): void {
     if (this.peaks?.length) return
-    const url =
-      this.media?.currentSrc || this.media?.src || this.slotted?.querySelector('source')?.src || (this.src ? new URL(this.src, document.baseURI).href : '')
+    const url = this.mediaUrl()
     if (!url || url === this.decodedFor) return
-    if (this.preload === 'none' && !this.playing && !this.slotted) return
+    // `preload="none"` (on the player, or on a slotted `<audio>`) means nothing is fetched before the first play.
+    const preload = this.slotted ? this.slotted.getAttribute('preload') : this.preload
+    if (preload === 'none' && !this.playing) return
     this.decodedFor = url
     this.decodeAbort?.abort()
     const abort = new AbortController()
@@ -518,7 +598,10 @@ export class AudioPlayer extends LitElement {
   // ------------------------------------------------------------------------------------------------------ render
 
   private speedText(rate: number): string {
-    return `${new Intl.NumberFormat(this.msg.locale, { maximumFractionDigits: 2 }).format(rate)}×`
+    const locale = this.msg.locale
+    let format = speedFormats.get(locale)
+    if (!format) speedFormats.set(locale, (format = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 })))
+    return `${format.format(rate)}×`
   }
 
   private renderWaveform(length: number) {

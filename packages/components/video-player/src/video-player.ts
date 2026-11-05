@@ -109,6 +109,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
  *
  * @event chapter-change - Playback entered another chapter. `detail` is `{ index, chapter }`.
  *
+ * @cssproperty {length} [--c2-video-player--width=100%] - The player's width; it keeps it as a flex item too.
  * @cssproperty {string} [--c2-video-player--aspect-ratio=16 / 9] - The player's shape before the video reports its own.
  * @cssproperty {color} [--c2-video-player--background-color=#000000] - Behind the video (letterbox bars).
  * @cssproperty {color} [--c2-video-player--color=#ffffff] - Text and icons of the controls.
@@ -227,6 +228,8 @@ export class VideoPlayer extends LitElement {
     next.textTracks.addEventListener('removetrack', this.onTracksChange)
     next.textTracks.addEventListener('change', this.onTracksChange)
     next.addEventListener('load', this.onTrackLoad, true)
+    // A failed <source> fires `error` on itself, not on the video, and leaves `video.error` empty.
+    next.addEventListener('error', this.onSourceError, true)
     // The video may have loaded, or even played, before the player upgraded or hydrated.
     this.syncFromMedia()
     this.onTracksChange()
@@ -240,6 +243,8 @@ export class VideoPlayer extends LitElement {
     video.textTracks.removeEventListener('removetrack', this.onTracksChange)
     video.textTracks.removeEventListener('change', this.onTracksChange)
     video.removeEventListener('load', this.onTrackLoad, true)
+    video.removeEventListener('error', this.onSourceError, true)
+    clearTimeout(this.sourceErrorTimer)
     this.video = null
   }
 
@@ -253,10 +258,37 @@ export class VideoPlayer extends LitElement {
     this.volume = video.volume
     this.muted = video.muted
     this.rate = video.playbackRate
-    this.errorCode = video.error?.code ?? 0
+    this.errorCode = video.error?.code ?? (this.noSource(video) ? MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED : 0)
     this.pip = typeof document !== 'undefined' && document.pictureInPictureElement === video
     this.updateBuffered()
     this.updateChapter()
+  }
+
+  private sourceErrorTimer?: ReturnType<typeof setTimeout>
+
+  /** Every `<source>` failed: the video gave up looking (`NETWORK_NO_SOURCE`) and has no `error` of its own. */
+  private noSource(video: HTMLVideoElement): boolean {
+    return !video.error && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && !!video.querySelector('source')
+  }
+
+  private onSourceError = (event: Event): void => {
+    const video = this.video
+    if (!video || event.target === video) return
+    // The video moves on to the next source, or gives up, after this event: look once it has.
+    clearTimeout(this.sourceErrorTimer)
+    this.sourceErrorTimer = setTimeout(() => {
+      if (this.video !== video || !this.noSource(video)) return
+      this.errorCode = MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+      this.waiting = false
+      this.stopPlaying()
+    })
+  }
+
+  /** Playback stopped without a `pause` event (an error, a new source): the controls stop hiding. */
+  private stopPlaying(): void {
+    this.playing = false
+    this.idle = false
+    clearTimeout(this.hideTimer)
   }
 
   private onMediaEvent = (event: Event): void => {
@@ -287,9 +319,12 @@ export class VideoPlayer extends LitElement {
       case 'error':
         this.errorCode = video.error?.code ?? 4
         this.waiting = false
-        this.playing = false
+        this.stopPlaying()
         break
       case 'emptied':
+        // A new source (or `load()`) resets the media without a `pause` event.
+        this.stopPlaying()
+        this.waiting = false
         this.started = false
         this.time = 0
         this.bufferedEnd = 0
@@ -463,18 +498,25 @@ export class VideoPlayer extends LitElement {
   }
 
   private hideControls(): void {
-    const focusInControls = !!this.renderRoot.querySelector('.chrome')?.matches(':focus-within')
-    if (!this.playing || this.scrubbing || this.settingsMenu?.open || focusInControls) return
+    // Keyboard focus in the bar keeps it up; a button focused by a mouse click does not.
+    const keyboardFocus = !!this.renderRoot.querySelector('.chrome :focus-visible')
+    if (!this.playing || this.scrubbing || this.settingsMenu?.open || keyboardFocus) return
     this.idle = true
   }
 
   // ------------------------------------------------------------------------------------------------- the seek bar
 
+  /** Whether the player lays out right to left: the seek bar then fills from the right, and ← moves forward. */
+  private get rtl(): boolean {
+    if (!this.isConnected || typeof getComputedStyle !== 'function') return false
+    return getComputedStyle(this).direction === 'rtl'
+  }
+
   private timeAtPointer(event: PointerEvent): number {
     const box = this.seekBar?.getBoundingClientRect()
     if (!box || !box.width) return 0
-    const fraction = clamp((event.clientX - box.left) / box.width, 0, 1)
-    return fraction * this.duration
+    const x = (event.clientX - box.left) / box.width
+    return clamp(this.rtl ? 1 - x : x, 0, 1) * this.duration
   }
 
   private onSeekPointerDown(event: PointerEvent): void {
@@ -521,10 +563,10 @@ export class VideoPlayer extends LitElement {
         this.togglePlay()
         break
       case 'ArrowLeft':
-        this.seekTo(this.time - 5)
+        this.seekTo(this.time + (this.rtl ? 5 : -5))
         break
       case 'ArrowRight':
-        this.seekTo(this.time + 5)
+        this.seekTo(this.time + (this.rtl ? -5 : 5))
         break
       case 'j':
         this.seekTo(this.time - 10)
@@ -610,13 +652,13 @@ export class VideoPlayer extends LitElement {
   // -------------------------------------------------------------------------------------------------- lifecycle
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('label')) this.internals.ariaLabel = this.label || this.msg.t('player')
+    // A new `src` starts over, paused: the old video's `pause` may never come.
+    if (changed.has('src') && this.hasUpdated) this.stopPlaying()
     if (changed.has('thumbnails') && typeof this.thumbnails === 'string' && this.hasUpdated) void this.loadThumbnails(this.thumbnails)
     if (changed.has('thumbnails') && typeof this.thumbnails !== 'string') this.thumbnailCues = []
   }
 
   protected override firstUpdated(): void {
-    this.internals.ariaLabel = this.label || this.msg.t('player')
     this.pipSupported = typeof document !== 'undefined' && !!document.pictureInPictureEnabled && 'requestPictureInPicture' in HTMLVideoElement.prototype
     this.fullscreenSupported = typeof document !== 'undefined' && !!document.fullscreenEnabled
     if (typeof this.thumbnails === 'string') void this.loadThumbnails(this.thumbnails)
@@ -624,6 +666,8 @@ export class VideoPlayer extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>): void {
+    // Every update, once the language is resolved for it: the fallback name follows `lang` as well as `label`.
+    this.internals.ariaLabel = this.label || this.msg.t('player')
     if (changed.has('src')) this.attachMedia()
     if (changed.has('chapters')) {
       this.chapterIndex = -1
@@ -674,6 +718,7 @@ export class VideoPlayer extends LitElement {
       ? this.msg.t('timeOfInChapter', formatTime(this.time, withHours), formatTime(duration, withHours), chapterTitle)
       : this.msg.t('timeOf', formatTime(this.time, withHours), formatTime(duration, withHours))
     const percent = duration ? clamp((this.time / duration) * 100, 0, 100) : 0
+    const rtl = this.rtl
     return html`<div
       class="seek ${classMap({ scrubbing: this.scrubbing })}"
       part="seek"
@@ -702,7 +747,7 @@ export class VideoPlayer extends LitElement {
             </div>`,
         )}
       </div>
-      <div class="handle" style=${styleMap({ left: `${percent}%` })}></div>
+      <div class="handle" style=${styleMap({ left: `${rtl ? 100 - percent : percent}%` })}></div>
       ${hover !== null && duration ? this.renderPreview(hover, chapters, withHours) : nothing}
     </div>`
   }
@@ -710,7 +755,8 @@ export class VideoPlayer extends LitElement {
   private renderPreview(time: number, chapters: VideoChapter[], withHours: boolean): TemplateResult {
     const index = chapterAt(chapters, time)
     const thumbnail = this.thumbnailAt(time)
-    const left = clamp((time / this.duration) * 100, 0, 100)
+    const at = clamp((time / this.duration) * 100, 0, 100)
+    const left = this.rtl ? 100 - at : at
     const sized = thumbnail && thumbnail.w && thumbnail.h
     return html`<div class="preview" part="preview" aria-hidden="true" style=${styleMap({ '--_left': `${left}%` })}>
       ${

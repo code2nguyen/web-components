@@ -108,6 +108,80 @@ test('without peaks the waveform is computed from the file; a file that cannot l
   await expect(waveform(missing)).toHaveClass(/flat/)
 })
 
+test('a slotted audio whose every source fails says so; a new src is decoded again and stops what played', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-audio-player id="sources" label="sources"><audio><source src="/apps/ui/public/media/missing.webm" type="audio/webm" /></audio></c2-audio-player>
+    <c2-audio-player id="switch" src="${NOTE}" label="switch"></c2-audio-player>`)
+  // The error lands on the <source>, not the <audio>: the player still notices the media gave up.
+  const sources = player(page, '#sources')
+  await expect(sources.locator('.time')).toHaveText('Cannot play this recording')
+  await expect(playButton(sources)).toBeDisabled()
+  const switched = player(page, '#switch')
+  await expect(waveform(switched)).not.toHaveClass(/flat/)
+  await playButton(switched).click()
+  await expect.poll(() => mediaPaused(switched)).toBe(false)
+  await expect(playButton(switched)).toHaveAccessibleName('Pause switch')
+  const requested: string[] = []
+  page.on('request', (request) => requested.push(request.url()))
+  await switched.evaluate((element, src) => ((element as HTMLElement & { src: string }).src = src), `${NOTE}?second`)
+  // The new file is fetched and decoded for its own waveform, and the old playback is over.
+  await expect.poll(() => requested.some((url) => url.endsWith('?second'))).toBe(true)
+  await expect(playButton(switched)).toHaveAccessibleName('Play switch')
+  await expect(waveform(switched)).not.toHaveClass(/flat/)
+})
+
+test('a slotted audio with preload="none" fetches nothing before the first play', async ({ page, renderScenario }) => {
+  const requested: string[] = []
+  page.on('request', (request) => requested.push(request.url()))
+  await renderScenario(`<c2-audio-player label="lazy"><audio src="${NOTE}?lazy" preload="none"></audio></c2-audio-player>`)
+  const lazy = player(page)
+  await expect(waveform(lazy)).toHaveClass(/flat/)
+  await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 300)))
+  expect(requested.filter((url) => url.endsWith('?lazy'))).toEqual([])
+  await playButton(lazy).click()
+  await expect(waveform(lazy)).not.toHaveClass(/flat/)
+})
+
+test('while playing, the player redraws only when the time shown or the played bars change', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-audio-player src="${NOTE}" label="busy" peaks='${PEAKS}' bars="24"></c2-audio-player>`)
+  const busy = player(page)
+  await busy.evaluate((element) => {
+    const host = element as HTMLElement & { update(changed: unknown): void; renders: number }
+    const update = host.update.bind(host)
+    host.renders = 0
+    host.update = (changed) => (host.renders++, update(changed))
+  })
+  await playButton(busy).click()
+  await expect.poll(() => mediaTime(busy)).toBeGreaterThan(1.5)
+  await busy.evaluate((element) => (element as HTMLElement & { media: HTMLAudioElement }).media.pause())
+  const renders = await busy.evaluate((element) => (element as HTMLElement & { renders: number }).renders)
+  // About 1.5 s at 60 frames a second would be ~90 renders; whole seconds and 2 bars a second need far fewer.
+  expect(renders).toBeLessThan(30)
+})
+
+test('in a 200px card the waveform shrinks to the bars that fit; the time and the speed toggle stay in view', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="width: 200px"><c2-audio-player src="${NOTE}" label="narrow" peaks='${PEAKS}' duration="12"></c2-audio-player></div>`)
+  const narrow = player(page)
+  const host = (await narrow.boundingBox())!
+  const inside = async (locator: Locator) => {
+    const box = (await locator.boundingBox())!
+    return box.x >= host.x - 0.5 && box.x + box.width <= host.x + host.width + 0.5
+  }
+  await expect.poll(() => bars(narrow).count()).toBeLessThan(24)
+  expect(await inside(waveform(narrow))).toBe(true)
+  // The last bar drawn sits inside the waveform's own box.
+  const wave = (await waveform(narrow).boundingBox())!
+  const last = (await bars(narrow).last().boundingBox())!
+  expect(last.x + last.width).toBeLessThanOrEqual(wave.x + wave.width + 0.5)
+  for (const part of [narrow.locator('.time'), narrow.locator('.speed')]) {
+    await expect(part).toBeVisible()
+    expect(await inside(part)).toBe(true)
+    const box = (await part.boundingBox())!
+    // Nothing of the waveform reaches over them.
+    expect(box.x).toBeGreaterThanOrEqual(wave.x + wave.width - 0.5)
+  }
+})
+
 test('exclusive players pause each other; a slotted audio element plays and is never written on', async ({ page, renderScenario }) => {
   await renderScenario(`
     <c2-audio-player id="one" exclusive src="${NOTE}" label="one" peaks='${PEAKS}'></c2-audio-player>

@@ -109,6 +109,8 @@ button:disabled {
   justify-content: space-between;
   gap: css.cssVar(bar--gap);
   min-width: 0;
+  // Bars never draw over the time or the speed toggle, even before the count is fitted to the width.
+  overflow: hidden;
   height: css.cssVar(waveform--height);
   border-radius: 4px;
   cursor: pointer;
