@@ -626,8 +626,7 @@ export class BulletChart extends EchartsChartBase {
       const top = valued ? lineHeight + 8 : axis ? theme.axisFontSize / 2 + 2 : 2
       const bottom = named ? lineHeight * (rows.some((row) => row.description) ? 2 : 1) + 8 : axis ? theme.axisFontSize / 2 + 2 : 2
       const start = height - bottom
-      const end = Math.max(top + 1, top)
-      const length = Math.max(1, start - end)
+      const length = Math.max(1, start - top)
       const boxes = rows.map((row, index) => {
         const ticks = ticksFor(row, length, 40)
         const axisWidth = axis

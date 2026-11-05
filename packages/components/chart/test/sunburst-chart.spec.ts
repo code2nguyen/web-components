@@ -592,3 +592,20 @@ test('shows the empty state without data', async ({ page }) => {
   await expect(chart.locator('table.sunburst-a11y')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test('a real click on a segment zooms through the animated morph without errors', async ({ page }) => {
+  const errors = watchErrors(page)
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('no plot')
+  // Engineering's first-ring segment sits right of the hole.
+  await page.mouse.click(box.x + box.width / 2 + 90, box.y + box.height / 2 + 10)
+  await expect(chart.locator('.sunburst-breadcrumb li')).toHaveText(['All', 'Engineering'])
+  await page.waitForTimeout(500)
+  // The hole is now the way back.
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2 + 20)
+  await expect(chart.locator('.sunburst-breadcrumb')).toHaveCount(0)
+  expect(errors).toEqual([])
+})
