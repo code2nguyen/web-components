@@ -61,6 +61,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
 - **Distribution Bar** — `c2-distribution-bar` · `@c2n/components/distribution-bar` — One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.
+- **File browser** — `c2-file-browser` · `@c2n/components/file-browser` — Folders and files with a folder tree, breadcrumbs, search, list and grid views, selection, a context menu, renaming and drag and drop.
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
@@ -96,6 +97,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Editors & viewers
 
+- **Change Review** — `c2-change-review` · `@c2n/components/change-review` — Review proposed edits hunk by hunk: accept or reject each change, then take the resulting text.
 - **Code Editor** — `c2-code-editor` · `@c2n/components/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.
@@ -107,6 +109,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
 - **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
 - **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
+- **Terminal** — `c2-terminal` · `@c2n/components/terminal` — An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.
 
 ## Feedback
 

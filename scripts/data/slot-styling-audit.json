@@ -2946,6 +2946,12 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-change-review",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned light DOM (the app's own buttons in the summary bar); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-chip-group",
       "slot": "",
       "decision": "assigned-content",
@@ -3040,6 +3046,12 @@
       "decision": "part",
       "parts": ["tooltip"],
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-file-browser",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM (an empty-folder panel of the app's own); style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-filter-builder",
@@ -4371,6 +4383,18 @@
       "decision": "part",
       "parts": ["tooltip"],
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-terminal",
+      "slot": "banner",
+      "decision": "assigned-content",
+      "reason": "The banner slot projects consumer-owned light DOM (the first lines above every command); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-terminal",
+      "slot": "prompt",
+      "decision": "assigned-content",
+      "reason": "The prompt slot projects consumer-owned light DOM (a path or branch before the prompt mark); style the assigned node through its own class or public contract."
     }
   ]
 }

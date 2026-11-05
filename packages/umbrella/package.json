@@ -173,6 +173,10 @@
       "types": "./dist/celebration.d.ts",
       "default": "./dist/celebration.js"
     },
+    "./change-review": {
+      "types": "./dist/change-review.d.ts",
+      "default": "./dist/change-review.js"
+    },
     "./chart": {
       "types": "./dist/chart.d.ts",
       "default": "./dist/chart.js"
@@ -440,6 +444,10 @@
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
+    },
+    "./file-browser": {
+      "types": "./dist/file-browser.d.ts",
+      "default": "./dist/file-browser.js"
     },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
@@ -944,6 +952,10 @@
     "./tag-input": {
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
+    },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "default": "./dist/terminal.js"
     },
     "./text-effect": {
       "types": "./dist/text-effect.d.ts",

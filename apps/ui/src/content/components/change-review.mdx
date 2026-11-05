@@ -8,6 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ChangeReview } from '@c2n/components/change-review'
+import { Button } from '@c2n/components/button'
 
 `c2-change-review` reviews a proposed edit one change at a time, as an editor reviews an AI edit or a code review applies suggested changes. Set `original` and `modified`: the element diffs them by line and word (the diff of `c2-diff-viewer`) and groups each run of changed lines into a hunk, with `context` unchanged lines around it (3 by default). Each hunk has Accept and Reject. An accepted hunk collapses to its new text, a rejected one to its original text, and both keep an Undo. The sticky review bar shows where you are ("Hunk 2 of 5 · 3 left"), moves between hunks and decides every open hunk at once with Accept all or Reject all.
 
