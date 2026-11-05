@@ -127,8 +127,7 @@ interface Placed {
 
 /** A row as drawn: a group header or a resource with its placed bars. */
 type Row =
-  | { kind: 'group'; group: string; count: number; collapsed: boolean }
-  | { kind: 'resource'; resource: SchedulerResource; placed: Placed[]; lanes: number }
+  { kind: 'group'; group: string; count: number; collapsed: boolean } | { kind: 'resource'; resource: SchedulerResource; placed: Placed[]; lanes: number }
 
 /** A pointer gesture: a click until it moves past the threshold, then a drag. */
 interface Gesture {
@@ -366,8 +365,19 @@ export class Scheduler extends LitElement {
     }
   }
 
+  /** `2-digit` hours on a 24-hour clock (`09:00`), `numeric` on a 12-hour one (`9:00 AM`). */
+  private get hourStyle(): '2-digit' | 'numeric' {
+    try {
+      // `hourCycle` (ES2020 Intl) is missing from the library's target typings.
+      const cycle = (new Intl.DateTimeFormat(this.effectiveLocale, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle
+      return cycle === 'h11' || cycle === 'h12' ? 'numeric' : '2-digit'
+    } catch {
+      return '2-digit'
+    }
+  }
+
   private time(minutes: number): string {
-    return this.format({ hour: '2-digit', minute: '2-digit' }, minutes)
+    return this.format({ hour: this.hourStyle, minute: '2-digit' }, minutes)
   }
 
   /** A range as read aloud: "Monday 9:00 to 10:30", or with both days when it spans several. */
@@ -382,7 +392,8 @@ export class Scheduler extends LitElement {
   private shown(start: number, end: number): { full: string; short: string } {
     if (startOfDay(start) === startOfDay(end - 1)) {
       const onHour = start % 60 === 0 && end % 60 === 0
-      const short = onHour ? `${this.format({ hour: '2-digit' }, start)}–${this.format({ hour: '2-digit' }, end)}` : `${this.time(start)}–${this.time(end)}`
+      const hour = (minutes: number) => this.format({ hour: this.hourStyle }, minutes)
+      const short = onHour ? `${hour(start)}–${hour(end)}` : `${this.time(start)}–${this.time(end)}`
       return { full: `${this.time(start)}–${this.time(end)}`, short }
     }
     const day = (minutes: number) => this.format({ weekday: 'short' }, minutes)
@@ -456,7 +467,13 @@ export class Scheduler extends LitElement {
       start: dayIso(range.days[0]),
       end: dayIso(range.days[range.days.length - 1]),
     }
-    this.dispatchEvent(new CustomEvent<SchedulerRangeChangeDetail>(type, { detail, bubbles: true, composed: true }))
+    // Literal names, so the manifest records the two events rather than the parameter.
+    const options = { detail, bubbles: true, composed: true }
+    this.dispatchEvent(
+      type === 'date-change'
+        ? new CustomEvent<SchedulerRangeChangeDetail>('date-change', options)
+        : new CustomEvent<SchedulerRangeChangeDetail>('view-change', options),
+    )
   }
 
   private page(direction: 1 | -1) {
@@ -870,7 +887,11 @@ export class Scheduler extends LitElement {
       .filter(([start, end]) => end > start)
       .map(
         ([start, end]) =>
-          html`<div class="off" aria-hidden="true" style=${styleMap({ '--from': String(fractionOf(range, start)), '--to': String(fractionOf(range, end)) })}></div>`,
+          html`<div
+            class="off"
+            aria-hidden="true"
+            style=${styleMap({ '--from': String(fractionOf(range, start)), '--to': String(fractionOf(range, end)) })}
+          ></div>`,
       )
   }
 
@@ -879,7 +900,8 @@ export class Scheduler extends LitElement {
     const movable = this.editable && !event.readonly
     const dragging = this.preview?.event === event
     const time = this.shown(start, end)
-    const name = this.msg.t('event', event.title, row.resource.label, this.spoken(start, end)) + (this.editable && event.readonly ? `, ${this.msg.t('readonly')}` : '')
+    const name =
+      this.msg.t('event', event.title, row.resource.label, this.spoken(start, end)) + (this.editable && event.readonly ? `, ${this.msg.t('readonly')}` : '')
     return html`<button
       class="event ${lanes > 1 ? 'stacked' : ''} ${movable ? 'movable' : ''} ${dragging ? 'dragging' : ''} ${start < range.start ? 'clipped-start' : ''} ${end > range.end ? 'clipped-end' : ''}"
       type="button"
@@ -935,7 +957,8 @@ export class Scheduler extends LitElement {
     return html`<span class="avatar" aria-hidden="true" style=${styleMap({ '--avatar-color': color })}
         >${resource.avatar ? html`<img src=${resource.avatar} alt="" />` : initials(resource.label)}</span
       ><span class="resource-text" title=${resource.label}
-        ><span class="resource-label">${resource.label}</span>${resource.description ? html`<span class="resource-description">${resource.description}</span>` : nothing}</span
+        ><span class="resource-label">${resource.label}</span
+        >${resource.description ? html`<span class="resource-description">${resource.description}</span>` : nothing}</span
       >`
   }
 

@@ -5,22 +5,68 @@ import { Scheduler } from '@c2n/components/scheduler'
 
 ## Presets
 
-Curated looks for `c2-scheduler`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+Row height, lane height and the column width set how dense the timeline reads; the event, today and now colours
+carry the accent.
 
-<GalleryGrid>
+<GalleryGrid min={9999}>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-scheduler></c2-scheduler>
+<c2-scheduler
+  date="2026-11-09"
+  day-start="08:00"
+  day-end="15:00"
+  locale="en-GB"
+  resources='[{"id":"ana","label":"Ana Ruiz","description":"Product designer"},{"id":"kenji","label":"Kenji Ono","description":"UX research"}]'
+  events='[{"id":"1","resource":"ana","start":"2026-11-09T09:00","end":"2026-11-09T10:30","title":"Kick-off"},{"id":"2","resource":"kenji","start":"2026-11-09T09:30","end":"2026-11-09T11:30","title":"Interviews"},{"id":"3","resource":"kenji","start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Sync"}]'
+></c2-scheduler>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Compact rooms
 <style>
-  .themed {
-    /* --c2-scheduler--… */
+  .compact-rooms {
+    --c2-scheduler__row--height: 36px;
+    --c2-scheduler__lane--height: 20px;
+    --c2-scheduler__slot--width: 64px;
+    --c2-scheduler__resource--width: 140px;
+    --c2-scheduler__avatar--size: 22px;
+    --c2-scheduler__event--border-radius: 4px;
+    --c2-scheduler__event--color: #0f766e;
   }
 </style>
-<c2-scheduler class="themed"></c2-scheduler>
+<c2-scheduler
+  class="compact-rooms"
+  date="2026-11-09"
+  day-start="08:00"
+  day-end="18:00"
+  locale="en-GB"
+  resource-heading="Rooms"
+  hide-header
+  resources='[{"id":"a","label":"Aurora","group":"Floor 2"},{"id":"b","label":"Borealis","group":"Floor 2"},{"id":"c","label":"Cirrus","group":"Floor 3"},{"id":"d","label":"Dune","group":"Floor 3"}]'
+  events='[{"id":"1","resource":"a","start":"2026-11-09T09:00","end":"2026-11-09T10:00","title":"Stand-up"},{"id":"2","resource":"a","start":"2026-11-09T11:00","end":"2026-11-09T13:30","title":"Board prep"},{"id":"3","resource":"b","start":"2026-11-09T13:00","end":"2026-11-09T14:30","title":"1:1"},{"id":"4","resource":"c","start":"2026-11-09T08:30","end":"2026-11-09T12:00","title":"Workshop"},{"id":"5","resource":"d","start":"2026-11-09T14:00","end":"2026-11-09T16:00","title":"Interviews"},{"id":"6","resource":"d","start":"2026-11-09T15:00","end":"2026-11-09T16:30","title":"Debrief"}]'
+></c2-scheduler>
+```
+
+```html tag=MdxCodeBlock,label=Production week
+<style>
+  .production-week {
+    --c2-scheduler__day--width: 110px;
+    --c2-scheduler__event--color: #b45309;
+    --c2-scheduler__today--color: light-dark(#b45309, #f59e0b);
+    --c2-scheduler__now--color: #b45309;
+    --c2-scheduler__event--border-radius: 999px;
+    --c2-button-group__indicator--background-color: #b45309;
+    --c2-button-group__segmented-item__selected--color: var(--c2-theme--color-on-fill, #ffffff);
+  }
+</style>
+<c2-scheduler
+  class="production-week"
+  view="week"
+  date="2026-11-09"
+  locale="en-GB"
+  resource-heading="Machines"
+  resources='[{"id":"p1","label":"Press 1","description":"Line A"},{"id":"p2","label":"Press 2","description":"Line A"},{"id":"l1","label":"Laser cutter","description":"Line B"}]'
+  events='[{"id":"1","resource":"p1","start":"2026-11-09T08:00","end":"2026-11-10T14:00","title":"Order 1182"},{"id":"2","resource":"p1","start":"2026-11-10T16:00","end":"2026-11-13T10:00","title":"Order 1190"},{"id":"3","resource":"p2","start":"2026-11-11T07:00","end":"2026-11-13T18:00","title":"Order 1185"},{"id":"4","resource":"l1","start":"2026-11-09T06:00","end":"2026-11-12T22:00","title":"Panels batch 7"}]'
+></c2-scheduler>
 ```
 
 </GalleryGrid>
