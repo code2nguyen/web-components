@@ -181,6 +181,18 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-audio-player",
+      "slot": "avatar",
+      "decision": "assigned-content",
+      "reason": "The avatar slot projects consumer-owned light DOM (the sender's avatar in the bubble variant); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-audio-player",
+      "slot": "transcript",
+      "decision": "assigned-content",
+      "reason": "The transcript slot projects consumer-owned light DOM (a transcript of the app's own, such as a c2-transcript); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-autocomplete",
       "slot": "clear-icon",
       "decision": "assigned-content",
@@ -4306,6 +4318,24 @@
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
     },
     {
+      "tag": "c2-image-compare",
+      "slot": "before",
+      "decision": "assigned-content",
+      "reason": "The before slot projects consumer-owned light DOM (the layer shown before the divider); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-image-compare",
+      "slot": "after",
+      "decision": "assigned-content",
+      "reason": "The after slot projects consumer-owned light DOM (the layer shown after the divider, clipped by it); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-image-compare",
+      "slot": "handle",
+      "decision": "assigned-content",
+      "reason": "The handle slot projects consumer-owned light DOM (a grip of the app's own on the divider); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-image-cropper",
       "slot": "placeholder",
       "decision": "part",
@@ -4408,6 +4438,12 @@
       "slot": "prompt",
       "decision": "assigned-content",
       "reason": "The prompt slot projects consumer-owned light DOM (a path or branch before the prompt mark); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-video-player",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM (the author's own <video> with its sources and tracks); style the assigned node through its own class or public contract."
     }
   ]
 }
