@@ -735,6 +735,8 @@ export class VideoPlayer extends LitElement {
     const chapterIndex = chapterAt(chapters, this.time)
     const quiet = this.muted || this.volume === 0
     const caption = this.captionTracks[this.activeCaption >= 0 ? this.activeCaption : Math.max(0, this.lastCaption)]
+    // One text node, so a line break in the template never splits "0:00 / 0:24".
+    const timeText = `${formatTime(this.time, withHours)} / ${formatTime(this.duration, withHours)}`
     return html`<div class="controls">
       <button class="ctl play" type="button" aria-label=${this.msg.t(this.playing ? 'pause' : 'play')} @click=${this.togglePlay}>
         ${this.icon(this.playing ? 'pause' : 'play')}
@@ -755,11 +757,7 @@ export class VideoPlayer extends LitElement {
           @input=${(event: Event) => this.setVolume(Number((event.target as HTMLInputElement).value))}
         />
       </span>
-      <span class="time"
-        >${formatTime(this.time, withHours)} / ${formatTime(this.duration, withHours)}${
-          chapterIndex >= 0 ? html`<span class="chapter-name"> · ${chapters[chapterIndex].title}</span>` : nothing
-        }</span
-      >
+      <span class="time">${timeText}${chapterIndex >= 0 ? html`<span class="chapter-name"> · ${chapters[chapterIndex].title}</span>` : nothing}</span>
       <span class="spacer"></span>
       ${
         this.captionTracks.length

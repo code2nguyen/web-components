@@ -5,22 +5,52 @@ import { VideoPlayer } from '@c2n/components/video-player'
 
 ## Presets
 
-Curated looks for `c2-video-player`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+Looks for `c2-video-player`. The accent colours the played part and the handle; the controls background, the corner radius and the control size do the rest.
 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-video-player></c2-video-player>
+<c2-video-player label="Product tour" src="/web-components/media/tour.webm" poster="/web-components/media/tour-poster.jpg"></c2-video-player>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Chapters
+<c2-video-player
+  label="Onboarding"
+  src="/web-components/media/tour.webm"
+  poster="/web-components/media/tour-poster.jpg"
+  chapters='[{"start":0,"title":"Intro"},{"start":8,"title":"Dashboards"},{"start":16,"title":"Reports"}]'
+></c2-video-player>
+```
+
+```html tag=MdxCodeBlock,label=Rounded accent
 <style>
-  .themed {
-    /* --c2-video-player--… */
+  .video-rounded {
+    --c2-video-player--border-radius: 16px;
+    --c2-video-player__accent--color: #e11d48;
+    --c2-video-player__big-play--size: 56px;
+    --c2-video-player__chapter--gap: 4px;
   }
 </style>
-<c2-video-player class="themed"></c2-video-player>
+<c2-video-player
+  class="video-rounded"
+  label="Launch film"
+  src="/web-components/media/tour.webm"
+  poster="/web-components/media/tour-poster.jpg"
+  chapters='[{"start":0,"title":"Teaser"},{"start":12,"title":"Features"}]'
+></c2-video-player>
+```
+
+```html tag=MdxCodeBlock,label=Compact course clip
+<style>
+  .video-compact {
+    --c2-video-player--border-radius: 6px;
+    --c2-video-player__accent--color: #16a34a;
+    --c2-video-player__control--size: 30px;
+    --c2-video-player__big-play--size: 48px;
+    --c2-video-player__controls--background: linear-gradient(to top, rgba(5, 46, 22, 0.85), transparent);
+  }
+</style>
+<c2-video-player class="video-compact" label="Lesson 3" src="/web-components/media/tour.webm" poster="/web-components/media/tour-poster.jpg"></c2-video-player>
 ```
 
 </GalleryGrid>

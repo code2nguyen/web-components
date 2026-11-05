@@ -37,7 +37,14 @@ export function parseVtt(text: string): VttCue[] {
     const start = seconds(from)
     const end = seconds(to)
     if (!Number.isFinite(start) || !Number.isFinite(end)) continue
-    cues.push({ start, end, text: lines.slice(timing + 1).join('\n').trim() })
+    cues.push({
+      start,
+      end,
+      text: lines
+        .slice(timing + 1)
+        .join('\n')
+        .trim(),
+    })
   }
   return cues
 }

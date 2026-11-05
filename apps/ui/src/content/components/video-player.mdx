@@ -1,7 +1,7 @@
 ---
 title: 'Video Player'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'Themed controls over a real video: chapters on the seek bar, a thumbnail while scrubbing, captions, speed, picture-in-picture and full screen.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { VideoPlayer } from '@c2n/components/video-player'
 
-`c2-video-player` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-video-player` puts themed controls over a real `<video>`, the way Loom and YouTube draw them: the seek bar split into chapters, a thumbnail while you scrub, captions, speed, picture-in-picture and full screen. The video stays yours, with its sources and caption tracks, so every native feature keeps working.
 
 ## Import
 
@@ -21,13 +20,62 @@ import '@c2n/components/video-player'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/video-player
-<div data-label="Default">
-  <c2-video-player></c2-video-player>
+<style>
+  .video-demo {
+    width: 100%;
+    max-width: 560px;
+  }
+</style>
+<div data-label="Chapters, captions, thumbnails">
+  <c2-video-player class="video-demo" label="Product tour" thumbnails="/web-components/media/tour-thumbs.vtt">
+    <video src="/web-components/media/tour.webm" poster="/web-components/media/tour-poster.jpg" preload="metadata" playsinline>
+      <track kind="captions" srclang="en" label="English" src="/web-components/media/tour.en.vtt" />
+      <track kind="captions" srclang="fr" label="Français" src="/web-components/media/tour.fr.vtt" />
+      <track kind="chapters" srclang="en" src="/web-components/media/tour.chapters.vtt" />
+    </video>
+  </c2-video-player>
+</div>
+<div data-label="A single file">
+  <c2-video-player
+    class="video-demo"
+    label="Release notes"
+    src="/web-components/media/tour.webm"
+    poster="/web-components/media/tour-poster.jpg"
+    chapters='[{"start":0,"title":"What’s new"},{"start":12,"title":"Coming next"}]'
+  ></c2-video-player>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### The video
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+Put a `<video>` inside the player, with its `<source>` and `<track>` children, and leave its `controls` off. The player draws the controls and never writes an attribute on the video, so several sources, captions, `crossorigin` and an HLS or DASH library attached to the element all keep working. For a single file, `src` and `poster` render the player's own video. `media` gives the video element, for example to hand to a `c2-transcript`:
+
+```typescript tag=CodeBlock
+const player = document.querySelector('c2-video-player')!
+document.querySelector('c2-transcript')!.media = player.media
+```
+
+### Chapters and thumbnails
+
+The seek bar shows the buffered range and the played part, split into one segment per chapter. Chapters come from `chapters` (`[{ "start": 0, "title": "Intro" }, …]`) or from a `<track kind="chapters">`; `chapter-change` fires as playback enters one, and the time shows the chapter's title.
+
+Hovering or dragging over the bar shows the time and the chapter. With `thumbnails` it also shows a frame: give it the URL of a WebVTT file whose cues name an image or a region of a sprite, the format most video platforms export:
+
+```text tag=CodeBlock
+WEBVTT
+
+00:00.000 --> 00:02.000
+tour-thumbs.jpg#xywh=0,0,160,90
+```
+
+Or set it to a function of the time that returns a URL or `{ url, x, y, w, h }`.
+
+### Controls
+
+Play and pause, the time, volume with mute, the captions button (it turns the last track on and off), a settings menu with the speed and the caption track, picture-in-picture where the browser has it, and full screen, which covers the whole player so the controls stay. While the video plays, the controls hide 2.5 s after the pointer stops and come back on any movement, on focus and on pause. A big play button covers the poster until the first play, a spinner shows while the video waits for data, and an error panel says what went wrong, with a button to try again. Below 420 px the volume slider, the chapter name and picture-in-picture give way.
+
+Captions are the browser's own: the player turns the text tracks on and off and the video draws the cues.
+
+### Keyboard and accessibility
+
+While focus is in the player: Space or K plays and pauses, ← and → seek 5 s, J and L seek 10 s, ↑ and ↓ change the volume, M mutes, C toggles captions, F toggles full screen, 0–9 jump to that tenth of the video, Home and End go to the start and the end. The seek bar is a slider read as "1:23 of 4:56, Dashboards", and every control is a button named by what it does. The host is a group named by `label`, and matches `:state(playing)`, `:state(fullscreen)` and `:state(idle)` while the controls are hidden.

@@ -2,19 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
-    <script type="module" src="/src/video-player.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>c2-video-player</title>
     <style>
       body {
-        padding: 24px;
+        display: grid;
+        gap: 32px;
+        max-width: 720px;
+        margin: 32px auto;
+        font: 14px system-ui;
+      }
+      .narrow {
+        width: 360px;
+      }
+      .themed {
+        --c2-video-player--border-radius: 16px;
+        --c2-video-player__accent--color: #e11d48;
       }
     </style>
+    <script type="module" src="/src/video-player.ts"></script>
   </head>
-
   <body>
-    <c2-video-player></c2-video-player>
+    <h3>Slotted video: captions, chapters track, thumbnails</h3>
+    <c2-video-player id="tour" label="Product tour" thumbnails="/media/tour-thumbs.vtt">
+      <video src="/media/tour.webm" poster="/media/tour-poster.jpg" preload="metadata" playsinline>
+        <track kind="captions" srclang="en" label="English" src="/media/tour.en.vtt" />
+        <track kind="captions" srclang="fr" label="Français" src="/media/tour.fr.vtt" />
+        <track kind="chapters" srclang="en" src="/media/tour.chapters.vtt" />
+      </video>
+    </c2-video-player>
+    <output id="chapter">Chapter: —</output>
+
+    <h3>src shortcut, chapters property, themed</h3>
+    <c2-video-player
+      class="themed"
+      label="Release notes"
+      src="/media/tour.webm"
+      poster="/media/tour-poster.jpg"
+      chapters='[{"start":0,"title":"What’s new"},{"start":12,"title":"Coming next"}]'
+    ></c2-video-player>
+
+    <h3>Narrow (volume slider, chapter name and PiP give way)</h3>
+    <c2-video-player class="narrow" label="Narrow" src="/media/tour.webm" poster="/media/tour-poster.jpg"></c2-video-player>
+
+    <h3>Missing file</h3>
+    <c2-video-player label="Broken" src="/media/missing.webm"></c2-video-player>
+
+    <script type="module">
+      // The dev server's public directory is the docs site's, so /media/ serves the sample files.
+      document.getElementById('tour').addEventListener('chapter-change', (event) => {
+        document.getElementById('chapter').textContent = `Chapter: ${event.detail.chapter.title}`
+      })
+    </script>
   </body>
 </html>
