@@ -2,6 +2,149 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.21",
+      "date": "2026-11-04",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["address-field"],
+              "text": "Add c2-address-field with Google Places and Mapbox providers",
+              "hash": "528cdac"
+            },
+            {
+              "scopes": ["image-annotator"],
+              "text": "Add c2-image-annotator",
+              "hash": "c9cc25b"
+            },
+            {
+              "scopes": ["pivot-table"],
+              "text": "Add c2-pivot-table",
+              "hash": "3eead84"
+            },
+            {
+              "scopes": ["barcode", "transcript", "chart"],
+              "text": "Add c2-barcode, c2-transcript and c2-radial-bar-chart",
+              "hash": "9597086"
+            },
+            {
+              "scopes": ["text-effect", "backdrop", "celebration"],
+              "text": "Regenerate the bundle, catalogs and framework types",
+              "hash": "466adda"
+            },
+            {
+              "scopes": ["text-effect", "backdrop", "celebration"],
+              "text": "Add the motion components",
+              "hash": "8bdb09f"
+            },
+            {
+              "scopes": ["video-grid"],
+              "text": "Size from the width when no height is set, and regenerate the bundle and catalogs",
+              "hash": "835cbe4"
+            },
+            {
+              "scopes": ["video-grid", "video-tile", "audio-visualizer"],
+              "text": "Add call-screen media components",
+              "hash": "1d9ff0e"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["address-field"],
+              "text": "Keep the validity anchor out of focus",
+              "hash": "1c33f36"
+            },
+            {
+              "scopes": ["address-field"],
+              "text": "Anchor validity on a plain element, not a part's host",
+              "hash": "9988bef"
+            },
+            {
+              "scopes": ["pivot-table", "image-annotator", "address-field"],
+              "text": "Code review fixes",
+              "hash": "03f8c7b"
+            },
+            {
+              "scopes": ["image-annotator", "pivot-table"],
+              "text": "Read an image loaded before hydration; swatch ring; wrap the field list",
+              "hash": "19e81bf"
+            },
+            {
+              "scopes": ["address-field", "pivot-table"],
+              "text": "Describe disabled; expose pivot() to the tests through the scenario page",
+              "hash": "be7c21b"
+            },
+            {
+              "scopes": ["transcript"],
+              "text": "A reader's scroll pauses following until it comes to rest",
+              "hash": "c98d673"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Draw radial ring names only once the plot is measured, so hydration matches",
+              "hash": "6488a76"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Set radial ring names along each ring's arc",
+              "hash": "1ab997b"
+            },
+            {
+              "scopes": ["barcode", "transcript", "chart"],
+              "text": "Shrink barcodes in grid tracks, keep match text dark, never truncate ring names",
+              "hash": "754d7aa"
+            },
+            {
+              "scopes": ["chart", "barcode", "transcript"],
+              "text": "Draw radial tracks, keep barcodes dark on white, review fixes",
+              "hash": "816c48f"
+            },
+            {
+              "scopes": ["chart", "transcript"],
+              "text": "List the radial bar chart in the manifest and tolerate non-array segments",
+              "hash": "cb690a5"
+            },
+            {
+              "scopes": ["text-effect", "backdrop", "celebration"],
+              "text": "Address review findings (WIP, tests pending)",
+              "hash": "92b349e"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Count the image block's padding toward its whole rules",
+              "hash": "66d3b0a"
+            },
+            {
+              "scopes": ["audio-visualizer"],
+              "text": "Pull every analyser through a muted path to the speakers",
+              "hash": "fe8e51c"
+            },
+            {
+              "scopes": ["video-tile", "audio-visualizer"],
+              "text": "Keep the avatar clear of the name pill on small tiles, and soften the thinking orb",
+              "hash": "8a35bf3"
+            },
+            {
+              "scopes": ["video-grid"],
+              "text": "Match the server's render on hydration, and size and read tiles through a wrapper",
+              "hash": "4ed9964"
+            },
+            {
+              "scopes": ["video-grid", "video-tile", "audio-visualizer"],
+              "text": "Address review findings",
+              "hash": "f211aa5"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.20",
       "date": "2026-11-03",
       "sections": [

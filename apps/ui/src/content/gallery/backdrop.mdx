@@ -1,0 +1,93 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Backdrop } from '@c2n/components/backdrop'
+
+## Presets
+
+Looks for `c2-backdrop`. The colour, spacing and fade do most of the work; the moving patterns take their own colours.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .bd-default {
+    width: 100%;
+    height: 160px;
+    display: grid;
+    place-items: center;
+  }
+</style>
+<c2-backdrop class="bd-default"><strong>Dots</strong></c2-backdrop>
+```
+
+```html tag=MdxCodeBlock,label=Blueprint grid
+<style>
+  .bd-blueprint {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    --c2-backdrop--background: light-dark(#eff6ff, #0b1a33);
+    --c2-backdrop--color: light-dark(rgba(37, 99, 235, 0.25), rgba(96, 165, 250, 0.25));
+    --c2-backdrop--size: 12px;
+    --c2-backdrop__mask--image: none;
+  }
+</style>
+<c2-backdrop class="bd-blueprint" pattern="grid"></c2-backdrop>
+```
+
+```html tag=MdxCodeBlock,label=Fading stripes
+<style>
+  .bd-stripes {
+    width: 100%;
+    height: 160px;
+    --c2-backdrop--size: 10px;
+    --c2-backdrop__mask--image: linear-gradient(to bottom, #000, transparent);
+  }
+</style>
+<c2-backdrop class="bd-stripes" pattern="stripes"></c2-backdrop>
+```
+
+```html tag=MdxCodeBlock,label=Green flicker
+<style>
+  .bd-flicker {
+    width: 100%;
+    height: 160px;
+    --c2-backdrop__flicker--color: #10b981;
+    --c2-backdrop__flicker--opacity: 0.8;
+    --c2-backdrop--size: 12px;
+  }
+</style>
+<c2-backdrop class="bd-flicker" pattern="flicker"></c2-backdrop>
+```
+
+```html tag=MdxCodeBlock,label=Sunset aurora
+<style>
+  .bd-sunset {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    --c2-backdrop__aurora--color-1: #f97316;
+    --c2-backdrop__aurora--color-2: #ec4899;
+    --c2-backdrop__aurora--color-3: #facc15;
+    --c2-backdrop__aurora--opacity: 0.6;
+  }
+</style>
+<c2-backdrop class="bd-sunset" pattern="aurora"></c2-backdrop>
+```
+
+```html tag=MdxCodeBlock,label=Night meteors
+<style>
+  .bd-night {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    --c2-backdrop--background: #0f172a;
+    --c2-backdrop__meteor--color: #e2e8f0;
+    --c2-backdrop__meteor--count: 18;
+  }
+</style>
+<c2-backdrop class="bd-night" pattern="meteors"></c2-backdrop>
+```
+
+</GalleryGrid>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-video-tile</title>
+    <script type="module" src="/src/video-tile.ts"></script>
+    <style>
+      body {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-video-tile id="camera" name="Sam Lee" local detect-speaking></c2-video-tile>
+    <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+    <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+    <c2-video-tile name="Diego Fernández" hand-raised pinned connection="poor"><span slot="badge">REC</span></c2-video-tile>
+    <button id="start">Use camera and microphone</button>
+    <script type="module">
+      document.getElementById('start').addEventListener('click', async () => {
+        document.getElementById('camera').stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      })
+    </script>
+  </body>
+</html>

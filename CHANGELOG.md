@@ -3,6 +3,39 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.21](https://github.com/code2nguyen/web-components/releases/tag/v1.0.21) — 2026-11-04
+
+### Features
+
+- **address-field:** Add c2-address-field with Google Places and Mapbox providers ([528cdac](https://github.com/code2nguyen/web-components/commit/528cdac))
+- **image-annotator:** Add c2-image-annotator ([c9cc25b](https://github.com/code2nguyen/web-components/commit/c9cc25b))
+- **pivot-table:** Add c2-pivot-table ([3eead84](https://github.com/code2nguyen/web-components/commit/3eead84))
+- **barcode, transcript, chart:** Add c2-barcode, c2-transcript and c2-radial-bar-chart ([9597086](https://github.com/code2nguyen/web-components/commit/9597086))
+- **text-effect, backdrop, celebration:** Regenerate the bundle, catalogs and framework types ([466adda](https://github.com/code2nguyen/web-components/commit/466adda))
+- **text-effect, backdrop, celebration:** Add the motion components ([8bdb09f](https://github.com/code2nguyen/web-components/commit/8bdb09f))
+- **video-grid:** Size from the width when no height is set, and regenerate the bundle and catalogs ([835cbe4](https://github.com/code2nguyen/web-components/commit/835cbe4))
+- **video-grid, video-tile, audio-visualizer:** Add call-screen media components ([1d9ff0e](https://github.com/code2nguyen/web-components/commit/1d9ff0e))
+
+### Fixes
+
+- **address-field:** Keep the validity anchor out of focus ([1c33f36](https://github.com/code2nguyen/web-components/commit/1c33f36))
+- **address-field:** Anchor validity on a plain element, not a part's host ([9988bef](https://github.com/code2nguyen/web-components/commit/9988bef))
+- **pivot-table, image-annotator, address-field:** Code review fixes ([03f8c7b](https://github.com/code2nguyen/web-components/commit/03f8c7b))
+- **image-annotator, pivot-table:** Read an image loaded before hydration; swatch ring; wrap the field list ([19e81bf](https://github.com/code2nguyen/web-components/commit/19e81bf))
+- **address-field, pivot-table:** Describe disabled; expose pivot() to the tests through the scenario page ([be7c21b](https://github.com/code2nguyen/web-components/commit/be7c21b))
+- **transcript:** A reader's scroll pauses following until it comes to rest ([c98d673](https://github.com/code2nguyen/web-components/commit/c98d673))
+- **chart:** Draw radial ring names only once the plot is measured, so hydration matches ([6488a76](https://github.com/code2nguyen/web-components/commit/6488a76))
+- **chart:** Set radial ring names along each ring's arc ([1ab997b](https://github.com/code2nguyen/web-components/commit/1ab997b))
+- **barcode, transcript, chart:** Shrink barcodes in grid tracks, keep match text dark, never truncate ring names ([754d7aa](https://github.com/code2nguyen/web-components/commit/754d7aa))
+- **chart, barcode, transcript:** Draw radial tracks, keep barcodes dark on white, review fixes ([816c48f](https://github.com/code2nguyen/web-components/commit/816c48f))
+- **chart, transcript:** List the radial bar chart in the manifest and tolerate non-array segments ([cb690a5](https://github.com/code2nguyen/web-components/commit/cb690a5))
+- **text-effect, backdrop, celebration:** Address review findings (WIP, tests pending) ([92b349e](https://github.com/code2nguyen/web-components/commit/92b349e))
+- **notepad:** Count the image block's padding toward its whole rules ([66d3b0a](https://github.com/code2nguyen/web-components/commit/66d3b0a))
+- **audio-visualizer:** Pull every analyser through a muted path to the speakers ([fe8e51c](https://github.com/code2nguyen/web-components/commit/fe8e51c))
+- **video-tile, audio-visualizer:** Keep the avatar clear of the name pill on small tiles, and soften the thinking orb ([8a35bf3](https://github.com/code2nguyen/web-components/commit/8a35bf3))
+- **video-grid:** Match the server's render on hydration, and size and read tiles through a wrapper ([4ed9964](https://github.com/code2nguyen/web-components/commit/4ed9964))
+- **video-grid, video-tile, audio-visualizer:** Address review findings ([f211aa5](https://github.com/code2nguyen/web-components/commit/f211aa5))
+
 ## [1.0.20](https://github.com/code2nguyen/web-components/releases/tag/v1.0.20) — 2026-11-03
 
 ### Fixes

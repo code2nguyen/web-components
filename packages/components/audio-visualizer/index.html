@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-audio-visualizer</title>
+    <script type="module" src="/src/audio-visualizer.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Bars from a level</h2>
+    <div class="row">
+      <c2-audio-visualizer level="0.1"></c2-audio-visualizer>
+      <c2-audio-visualizer level="0.5"></c2-audio-visualizer>
+      <c2-audio-visualizer level="0.9"></c2-audio-visualizer>
+      <c2-audio-visualizer level="0.5" muted></c2-audio-visualizer>
+    </div>
+
+    <h2>Your microphone</h2>
+    <div class="row">
+      <button id="mic">Use microphone</button>
+      <c2-audio-visualizer id="mic-bars" bars="9"></c2-audio-visualizer>
+      <c2-audio-visualizer id="mic-wave" variant="wave"></c2-audio-visualizer>
+      <c2-audio-visualizer id="mic-orb" variant="orb"></c2-audio-visualizer>
+    </div>
+
+    <h2>Agent states</h2>
+    <div class="row">
+      <c2-audio-visualizer variant="orb" state="idle" label="Assistant idle"></c2-audio-visualizer>
+      <c2-audio-visualizer variant="orb" state="listening" label="Assistant listening"></c2-audio-visualizer>
+      <c2-audio-visualizer variant="orb" state="thinking" label="Assistant thinking"></c2-audio-visualizer>
+      <c2-audio-visualizer variant="orb" state="speaking" label="Assistant speaking"></c2-audio-visualizer>
+      <c2-audio-visualizer state="speaking"></c2-audio-visualizer>
+      <c2-audio-visualizer variant="wave" state="speaking"></c2-audio-visualizer>
+    </div>
+
+    <script type="module">
+      document.getElementById('mic').addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        for (const id of ['mic-bars', 'mic-wave', 'mic-orb']) document.getElementById(id).stream = stream
+      })
+    </script>
+  </body>
+</html>

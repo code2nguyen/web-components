@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -77,6 +77,10 @@
       "types": "./dist/action-bar.d.ts",
       "default": "./dist/action-bar.js"
     },
+    "./address-field": {
+      "types": "./dist/address-field.d.ts",
+      "default": "./dist/address-field.js"
+    },
     "./app-shell": {
       "types": "./dist/app-shell.d.ts",
       "default": "./dist/app-shell.js"
@@ -93,6 +97,10 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./audio-visualizer": {
+      "types": "./dist/audio-visualizer.d.ts",
+      "default": "./dist/audio-visualizer.js"
+    },
     "./autocomplete": {
       "types": "./dist/autocomplete.d.ts",
       "default": "./dist/autocomplete.js"
@@ -100,6 +108,10 @@
     "./avatar": {
       "types": "./dist/avatar.d.ts",
       "default": "./dist/avatar.js"
+    },
+    "./backdrop": {
+      "types": "./dist/backdrop.d.ts",
+      "default": "./dist/backdrop.js"
     },
     "./badge": {
       "types": "./dist/badge.d.ts",
@@ -112,6 +124,10 @@
     "./bar-list": {
       "types": "./dist/bar-list.d.ts",
       "default": "./dist/bar-list.js"
+    },
+    "./barcode": {
+      "types": "./dist/barcode.d.ts",
+      "default": "./dist/barcode.js"
     },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
@@ -152,6 +168,10 @@
     "./cascader": {
       "types": "./dist/cascader.d.ts",
       "default": "./dist/cascader.js"
+    },
+    "./celebration": {
+      "types": "./dist/celebration.d.ts",
+      "default": "./dist/celebration.js"
     },
     "./chart": {
       "types": "./dist/chart.d.ts",
@@ -232,6 +252,10 @@
     "./chart/radar-chart": {
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
+    },
+    "./chart/radial-bar-chart": {
+      "types": "./dist/chart/radial-bar-chart.d.ts",
+      "default": "./dist/chart/radial-bar-chart.js"
     },
     "./chart/sankey-chart": {
       "types": "./dist/chart/sankey-chart.d.ts",
@@ -497,6 +521,10 @@
       "types": "./dist/image.d.ts",
       "default": "./dist/image.js"
     },
+    "./image-annotator": {
+      "types": "./dist/image-annotator.d.ts",
+      "default": "./dist/image-annotator.js"
+    },
     "./image-cropper": {
       "types": "./dist/image-cropper.d.ts",
       "default": "./dist/image-cropper.js"
@@ -713,6 +741,10 @@
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
     },
+    "./pivot-table": {
+      "types": "./dist/pivot-table.d.ts",
+      "default": "./dist/pivot-table.js"
+    },
     "./popconfirm": {
       "types": "./dist/popconfirm.d.ts",
       "default": "./dist/popconfirm.js"
@@ -913,6 +945,10 @@
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
     },
+    "./text-effect": {
+      "types": "./dist/text-effect.d.ts",
+      "default": "./dist/text-effect.js"
+    },
     "./text-field": {
       "types": "./dist/text-field.d.ts",
       "default": "./dist/text-field.js"
@@ -977,6 +1013,10 @@
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"
     },
+    "./transcript": {
+      "types": "./dist/transcript.d.ts",
+      "default": "./dist/transcript.js"
+    },
     "./tree": {
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
@@ -996,6 +1036,14 @@
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
+    },
+    "./video-grid": {
+      "types": "./dist/video-grid.d.ts",
+      "default": "./dist/video-grid.js"
+    },
+    "./video-tile": {
+      "types": "./dist/video-tile.d.ts",
+      "default": "./dist/video-tile.js"
     },
     "./view-options": {
       "types": "./dist/view-options.d.ts",
@@ -1044,10 +1092,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.20",
-    "@c2n/phosphor-icons": "1.0.20",
-    "@c2n/task-icons": "1.0.20",
-    "@c2n/theme": "1.0.20",
+    "@c2n/core": "1.0.21",
+    "@c2n/phosphor-icons": "1.0.21",
+    "@c2n/task-icons": "1.0.21",
+    "@c2n/theme": "1.0.21",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1144,13 +1192,17 @@
   "devDependencies": {
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
+    "@c2n/address-field": "*",
     "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
+    "@c2n/audio-visualizer": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
+    "@c2n/backdrop": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
+    "@c2n/barcode": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1160,6 +1212,7 @@
     "@c2n/card-input": "*",
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
+    "@c2n/celebration": "*",
     "@c2n/chart": "*",
     "@c2n/chat-input": "*",
     "@c2n/chat-message": "*",
@@ -1210,6 +1263,7 @@
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
     "@c2n/image": "*",
+    "@c2n/image-annotator": "*",
     "@c2n/image-cropper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
@@ -1255,6 +1309,7 @@
     "@c2n/password-field": "*",
     "@c2n/payment-card": "*",
     "@c2n/phone-input": "*",
+    "@c2n/pivot-table": "*",
     "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/promo-code-field": "*",
@@ -1300,6 +1355,7 @@
     "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
+    "@c2n/text-effect": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",
     "@c2n/theme-select": "*",
@@ -1313,10 +1369,13 @@
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
+    "@c2n/transcript": "*",
     "@c2n/tree": "*",
     "@c2n/tree-select": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
+    "@c2n/video-grid": "*",
+    "@c2n/video-tile": "*",
     "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
     "@c2n/visually-hidden": "*",

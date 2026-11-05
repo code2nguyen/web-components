@@ -1,0 +1,74 @@
+---
+title: 'Text Effect'
+description: 'Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TextEffect } from '@c2n/components/text-effect'
+
+`c2-text-effect` animates a word or a line in place. Use it for a landing page's hero ("Build **faster**"), a typed prompt suggestion, or an agent's "Thinking…" status. Assistive technology reads the still text, and under reduced motion it shows the final state at once.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/text-effect'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/text-effect
+<style>
+  .te-hero {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .te-accent {
+    --c2-text-effect__text--color: var(--c2-theme--color-primary, #2563eb);
+  }
+</style>
+<div data-label="Rotate">
+  <p class="te-hero">Build <c2-text-effect class="te-accent" effect="rotate" words="faster;safer;together"></c2-text-effect></p>
+</div>
+<div data-label="Typewriter">
+  <p class="te-hero"><c2-text-effect effect="typewriter" words="Ask about invoices;Ask about payroll;Ask about refunds" loop></c2-text-effect></p>
+</div>
+<div data-label="Scramble, on hover">
+  <p class="te-hero"><c2-text-effect effect="scramble" play="hover">Deployed</c2-text-effect></p>
+</div>
+<div data-label="Shimmer">
+  <c2-text-effect effect="shimmer">Thinking about your question…</c2-text-effect>
+</div>
+<div data-label="Reveal, in view">
+  <p class="te-hero"><c2-text-effect play="in-view" loop>Your team's second brain</c2-text-effect></p>
+</div>
+```
+
+### Effects
+
+- **`rotate`** cycles through `words`, each one sliding up and out. The element is as wide as the widest word, so the line never jumps; `--c2-text-effect__rotate--align` places a narrower one.
+- **`typewriter`** types the text, or each of `words` in turn, deleting one before typing the next. Without `loop` it stops on the last.
+- **`scramble`** resolves random characters into the text, left to right.
+- **`shimmer`** sweeps a light across the text, in a loop: a status that is still working.
+- **`reveal`** (the default) fades and lifts the words into place, one after another.
+
+`words` is a `;`-separated list or a JSON array; without it, the effect animates the element's own text.
+
+### When it plays
+
+`play="load"` (the default) starts it when it appears, `in-view` the first time it scrolls into view, and `hover` each time the pointer or focus enters it (it rests on the full text in between). `loop` repeats an effect that otherwise plays once, `replay()` starts it again, and `effect-end` fires when a one-shot effect finishes. Nothing runs while it is off screen or the page is hidden.
+
+### Styling
+
+Timings are variables: `--c2-text-effect--interval` (how long a word stays), `--c2-text-effect__char--duration` (typing and scramble speed), the shimmer's duration and colours, and the reveal's duration and stagger. A gradient fill works with any effect:
+
+```css tag=CodeBlock
+.brand {
+  --c2-text-effect__text--background: linear-gradient(90deg, #2563eb, #9333ea, #db2777);
+  --c2-text-effect__text--color: transparent;
+}
+```

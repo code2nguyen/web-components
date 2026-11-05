@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>address-field scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    </style>
+    <script type="module">
+      import './translations.ts'
+      import '../src/address-field.ts'
+      import { googlePlacesProvider } from '../src/providers/google.ts'
+      import { mapboxSearchProvider } from '../src/providers/mapbox.ts'
+      import { formatAddress, regionCode } from '../src/formats.ts'
+      window.addressApi = { googlePlacesProvider, mapboxSearchProvider, formatAddress, regionCode }
+      // A provider the tests control: two suggestions, and a full address for each.
+      window.fakeProvider = {
+        queries: [],
+        suggest(query, { country }) {
+          this.queries.push([query, country])
+          return Promise.resolve([
+            { id: 'ferry', label: '1 Ferry Building', description: 'San Francisco, CA 94111' },
+            { id: 'shibuya', label: '2-21-1 Shibuya', description: 'Shibuya-ku, Tokyo' },
+          ])
+        },
+        resolve(id) {
+          return Promise.resolve(
+            id === 'ferry'
+              ? { line1: '1 Ferry Building', city: 'San Francisco', region: 'California', postalCode: '94111', country: 'US' }
+              : { line1: '2-21-1 Shibuya', city: 'Shibuya-ku', region: 'Tokyo', postalCode: '150-0002', country: 'JP' },
+          )
+        },
+      }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

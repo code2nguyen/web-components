@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-text-effect</title>
+    <script type="module" src="/src/text-effect.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Build <c2-text-effect effect="rotate" words="faster;safer;together"></c2-text-effect></h1>
+    <h2><c2-text-effect effect="typewriter" words="Ask about invoices;Ask about payroll" loop></c2-text-effect></h2>
+    <h2><c2-text-effect effect="scramble" play="hover">Hover to scramble</c2-text-effect></h2>
+    <p><c2-text-effect effect="shimmer">Thinking about it…</c2-text-effect></p>
+    <h2><c2-text-effect loop>Your team's second brain</c2-text-effect></h2>
+  </body>
+</html>

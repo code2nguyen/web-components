@@ -115,6 +115,21 @@ export async function watch(locator: Locator, name: string) {
   }, name)
 }
 
+/**
+ * Whether Web Audio runs in this browser: a fresh AudioContext that reaches `running` within a second. A browser on a
+ * machine without an audio device (Firefox in CI) keeps every context suspended, so a stream it analyses reads as
+ * silence; tests that need real audio skip there rather than fail. Call it after a click, so autoplay is no reason.
+ */
+export async function webAudioRuns(page: Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    const context = new AudioContext()
+    await Promise.race([context.resume().catch(() => undefined), new Promise((resolve) => setTimeout(resolve, 1000))])
+    const running = context.state === 'running'
+    await context.close().catch(() => undefined)
+    return running
+  })
+}
+
 export async function accessible(page: Page) {
   // Audit the settled presentation, not an intermediate opacity transition.
   // Infinite loading animations are deliberately left running.

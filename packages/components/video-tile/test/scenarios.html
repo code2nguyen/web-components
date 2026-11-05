@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>video-tile scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(2, 360px);
+        gap: 16px;
+      }
+    </style>
+    <script type="module">
+      import './translations.ts'
+      import '../src/video-tile.ts'
+      import '@c2n/icon-button'
+      // A camera and a microphone the tests can hand a tile: a canvas that keeps drawing, and a tone.
+      window.fakeStream = ({ video = true, audio = false } = {}) => {
+        const stream = new MediaStream()
+        if (video) {
+          const canvas = document.createElement('canvas')
+          canvas.width = 320
+          canvas.height = 180
+          const context = canvas.getContext('2d')
+          let hue = 0
+          setInterval(() => {
+            hue = (hue + 10) % 360
+            context.fillStyle = `hsl(${hue} 60% 50%)`
+            context.fillRect(0, 0, 320, 180)
+          }, 50)
+          for (const track of canvas.captureStream(20).getVideoTracks()) stream.addTrack(track)
+        }
+        if (audio) {
+          const context = new AudioContext()
+          const oscillator = context.createOscillator()
+          const destination = context.createMediaStreamDestination()
+          oscillator.connect(destination)
+          oscillator.start()
+          for (const track of destination.stream.getAudioTracks()) stream.addTrack(track)
+        }
+        return stream
+      }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

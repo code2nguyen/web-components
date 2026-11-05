@@ -1,13 +1,17 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
+import addressField from '@c2n/address-field/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
+import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
+import backdrop from '@c2n/backdrop/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
+import barcode from '@c2n/barcode/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
@@ -17,6 +21,7 @@ import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
+import celebration from '@c2n/celebration/custom-elements.json'
 import chart from '@c2n/chart/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
@@ -66,6 +71,7 @@ import header from '@c2n/header/custom-elements.json'
 import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
+import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
@@ -113,6 +119,7 @@ import passwordField from '@c2n/password-field/custom-elements.json'
 import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import pivotTable from '@c2n/pivot-table/custom-elements.json'
 import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import promoCodeField from '@c2n/promo-code-field/custom-elements.json'
@@ -160,6 +167,7 @@ import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
 import taskIcons from '@c2n/task-icons/custom-elements.json'
+import textEffect from '@c2n/text-effect/custom-elements.json'
 import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
@@ -173,10 +181,13 @@ import toggletip from '@c2n/toggletip/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
+import transcript from '@c2n/transcript/custom-elements.json'
 import treeSelect from '@c2n/tree-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
+import videoGrid from '@c2n/video-grid/custom-elements.json'
+import videoTile from '@c2n/video-tile/custom-elements.json'
 import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
@@ -191,13 +202,17 @@ export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
     actionBar,
+    addressField,
     appShell,
     attachment,
+    audioVisualizer,
     autocomplete,
     avatar,
+    backdrop,
     badge,
     banner,
     barList,
+    barcode,
     borderBeam,
     bottomNav,
     breadcrumb,
@@ -207,6 +222,7 @@ export const componentManifests = (function () {
     cardInput,
     carousel,
     cascader,
+    celebration,
     chart,
     chatInput,
     chatMessage,
@@ -257,6 +273,7 @@ export const componentManifests = (function () {
     hoverCard,
     iconButton,
     image,
+    imageAnnotator,
     imageCropper,
     inView,
     indicator,
@@ -303,6 +320,7 @@ export const componentManifests = (function () {
     paymentCard,
     phoneInput,
     phosphorIcons,
+    pivotTable,
     popconfirm,
     progress,
     promoCodeField,
@@ -350,6 +368,7 @@ export const componentManifests = (function () {
     tabs,
     tagInput,
     taskIcons,
+    textEffect,
     textField,
     textarea,
     themeSelect,
@@ -363,10 +382,13 @@ export const componentManifests = (function () {
     tooltip,
     tour,
     traceWaterfall,
+    transcript,
     tree,
     treeSelect,
     truncate,
     upload,
+    videoGrid,
+    videoTile,
     viewOptions,
     virtualList,
     visuallyHidden,
