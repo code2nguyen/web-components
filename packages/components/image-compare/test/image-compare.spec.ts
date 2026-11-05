@@ -162,7 +162,9 @@ test('a translation names the handle and reads its value in its language', async
 })
 
 test('at either end the handle stays whole inside the frame, focus ring included', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-image-compare position="0">${layers}</c2-image-compare><c2-image-compare id="end" position="100" orientation="vertical">${layers}</c2-image-compare>`)
+  await renderScenario(
+    `<c2-image-compare position="0">${layers}</c2-image-compare><c2-image-compare id="end" position="100" orientation="vertical">${layers}</c2-image-compare>`,
+  )
   for (const host of [compare(page, 'c2-image-compare >> nth=0'), compare(page, '#end')]) {
     const frame = (await host.boundingBox())!
     const grip = (await handle(host).boundingBox())!
@@ -191,4 +193,3 @@ test('the name follows the layers\u2019 alternative text; an invalid lang falls 
   await host.locator('img[slot="after"]').evaluate((image) => image.setAttribute('alt', 'Kitchen today'))
   await expect(page.getByRole('slider', { name: 'Compare: Kitchen before / Kitchen today' })).toBeVisible()
 })
-

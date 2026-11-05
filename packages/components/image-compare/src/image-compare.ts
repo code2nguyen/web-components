@@ -288,20 +288,20 @@ export class ImageCompare extends LitElement {
       }
       <div class="divider" part="divider"></div>
       <div
-          class="handle"
-          part="handle"
-          role="slider"
-          tabindex="0"
-          aria-label=${this.accessibleName}
-          aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow=${position}
-          aria-valuetext=${this.msg.t('value', before, after)}
-          @keydown=${this.onKeyDown}
-        >
-          <slot name="handle">${this.renderGrip()}</slot>
-        </div>
+        class="handle"
+        part="handle"
+        role="slider"
+        tabindex="0"
+        aria-label=${this.accessibleName}
+        aria-orientation=${this.vertical ? 'vertical' : 'horizontal'}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow=${position}
+        aria-valuetext=${this.msg.t('value', before, after)}
+        @keydown=${this.onKeyDown}
+      >
+        <slot name="handle">${this.renderGrip()}</slot>
+      </div>
     </div>`
   }
 }
