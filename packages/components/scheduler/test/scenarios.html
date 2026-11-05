@@ -1,21 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Scheduler test scenarios</title>
+    <title>scheduler scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
-      }
-      main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+        margin: 24px;
+        font: 14px system-ui;
+        color: #18181b;
+        background: white;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import '../src/scheduler.ts'
+      // Applies every change the scheduler reports, as an app would.
+      window.applyChanges = (scheduler) => {
+        scheduler.addEventListener('event-change', (event) => {
+          const { event: booking, start, end, resource } = event.detail
+          scheduler.events = scheduler.events.map((item) => (item === booking ? { ...item, start, end, resource } : item))
+        })
+      }
+      document.querySelector('main').dataset.ready = 'true'
+    </script>
   </head>
   <body>
     <main aria-label="Scheduler scenario"></main>

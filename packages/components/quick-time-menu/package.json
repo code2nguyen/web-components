@@ -48,7 +48,10 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../overlay:build",
+        "../button:build",
+        "../date-time-picker:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -60,7 +63,10 @@
     }
   },
   "dependencies": {
+    "@c2n/button": "*",
     "@c2n/core": "*",
+    "@c2n/date-time-picker": "*",
+    "@c2n/overlay": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

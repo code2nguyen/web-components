@@ -182,7 +182,10 @@ item: article.product
 price: .price
 "></c2-diff-viewer>`,
   'distribution-bar': `<c2-distribution-bar style="width:260px" label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>`,
-  'duration-input': `<c2-duration-input></c2-duration-input>`,
+  'duration-input': `<div class="preview-row" style="flex-direction:column;gap:10px">
+  <c2-duration-input aria-label="Estimate" value="5400" style="width:200px"></c2-duration-input>
+  <c2-duration-input aria-label="Time spent" format="long" value="9000" style="width:200px"></c2-duration-input>
+</div>`,
   'emoji-picker': `<c2-emoji-picker recents="👍;🎉;🚀;❤️;😂;👀;🔥;✨" style="--c2-emoji-picker--width:252px;--c2-emoji-picker--height:168px;--c2-emoji-picker__emoji--size:28px;--c2-emoji-picker__emoji--font-size:18px;--c2-emoji-picker__category--size:26px"></c2-emoji-picker>`,
   'facet-list': `<c2-facet-list label="Status" include="error" style="width:220px" values='[{"value":"info","count":31200},{"value":"warn","count":1840},{"value":"error","count":212}]'></c2-facet-list>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">

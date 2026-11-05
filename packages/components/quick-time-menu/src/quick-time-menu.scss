@@ -1,15 +1,285 @@
-@use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-quick-time-menu,
-  $theme: ()
+  $theme: (
+    trigger--min-height: 36px,
+    trigger--padding-inline: 12px,
+    trigger--gap: 8px,
+    trigger--border: 1px solid #bcbcc6,
+    trigger--border-radius: 6px,
+    trigger--background-color: #ffffff,
+    trigger--color: #18181b,
+    trigger--font-size: 14px,
+    trigger__hover--border: 1px solid #a1a1aa,
+    trigger__open--border: 1px solid rgb(2, 101, 220),
+    trigger__set--color: rgb(2, 101, 220),
+    trigger__set--background-color: #edf1fe,
+    trigger__error--border: 1px solid #dc2626,
+    trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    trigger__focus--outline-offset: 2px,
+    icon--color: #71717a,
+    icon--size: 16px,
+    clear--color: #71717a,
+    clear__hover--background-color: #f4f4f5,
+    menu--width: 300px,
+    menu--background-color: #ffffff,
+    menu--border: 1px solid #e4e4e7,
+    menu--border-radius: 8px,
+    menu--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    menu--padding: 4px,
+    item--min-height: 36px,
+    item--padding-inline: 10px,
+    item--border-radius: 6px,
+    item--color: #18181b,
+    item--font-size: 14px,
+    item__hover--background-color: #f4f4f5,
+    item__checked--font-weight: 500,
+    check--color: rgb(2, 101, 220),
+    time--color: #52525b,
+    time--font-size: 12px,
+    separator--color: #e4e4e7,
+    hint--color: #71717a,
+    hint--font-size: 12px,
+    disabled--opacity: 0.38,
+  )
 );
 
-
 :host {
-  display: inline-flex;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
 }
 
-.c2-quick-time-menu {
+:host([hidden]) {
+  display: none;
+}
+
+:host([inline]) {
+  display: block;
+}
+
+.anchor-row {
   display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(trigger--gap);
+  min-height: css.cssVar(trigger--min-height);
+  max-width: 100%;
+  padding: 0 css.cssVar(trigger--padding-inline);
+  box-sizing: border-box;
+  border: css.cssVar(trigger--border);
+  border-radius: css.cssVar(trigger--border-radius);
+  background-color: css.cssVar(trigger--background-color);
+  color: css.cssVar(trigger--color);
+  font: inherit;
+  font-size: css.cssVar(trigger--font-size);
+  cursor: pointer;
+}
+
+.trigger:hover:not(:disabled) {
+  border: css.cssVar(trigger__hover--border);
+}
+
+.trigger.set {
+  color: css.cssVar(trigger__set--color);
+  background-color: css.cssVar(trigger__set--background-color);
+}
+
+.trigger.set .icon {
+  color: inherit;
+}
+
+.trigger.open {
+  border: css.cssVar(trigger__open--border);
+}
+
+.trigger.invalid {
+  border: css.cssVar(trigger__error--border);
+}
+
+.trigger:focus-visible,
+.clear:focus-visible {
+  outline: css.cssVar(trigger__focus--outline);
+  outline-offset: css.cssVar(trigger__focus--outline-offset);
+}
+
+.trigger:disabled {
+  opacity: css.cssVar(disabled--opacity);
+  cursor: default;
+}
+
+.trigger .text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+svg {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon {
+  color: css.cssVar(icon--color);
+}
+
+.clear {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: css.cssVar(clear--color);
+  cursor: pointer;
+}
+
+.clear:hover {
+  background-color: css.cssVar(clear__hover--background-color);
+}
+
+c2-overlay {
+  margin: 0;
+}
+
+.menu {
+  box-sizing: border-box;
+  width: css.cssVar(menu--width);
+  max-width: calc(100vw - 16px);
+  padding: css.cssVar(menu--padding);
+  border: css.cssVar(menu--border);
+  border-radius: css.cssVar(menu--border-radius);
+  background-color: css.cssVar(menu--background-color);
+  box-shadow: css.cssVar(menu--box-shadow);
+  color: css.cssVar(item--color);
+}
+
+:host([inline]) .menu {
+  width: auto;
+  max-width: none;
+  box-shadow: none;
+}
+
+c2-overlay:not(:popover-open) .menu {
+  display: none;
+}
+
+.list {
+  display: grid;
+  outline: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: css.cssVar(icon--size) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: css.cssVar(item--min-height);
+  padding: 0 css.cssVar(item--padding-inline);
+  border-radius: css.cssVar(item--border-radius);
+  font-size: css.cssVar(item--font-size);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
+.item:hover,
+.item:focus-visible,
+.item:focus {
+  background-color: css.cssVar(item__hover--background-color);
+}
+
+.item .check {
+  visibility: hidden;
+  color: css.cssVar(check--color);
+}
+
+.item.checked .check {
+  visibility: visible;
+}
+
+.item.checked .text {
+  font-weight: css.cssVar(item__checked--font-weight);
+}
+
+.item .text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.separator {
+  height: 1px;
+  margin: 4px 6px;
+  background-color: css.cssVar(separator--color);
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+  padding: 8px 10px 10px;
+}
+
+.panel-heading {
+  font-weight: 600;
+  font-size: css.cssVar(item--font-size);
+}
+
+.panel c2-date-time-picker {
+  width: 100%;
+}
+
+.hint {
+  min-height: 16px;
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.actions .back {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: #{css.cssVar(item--color)};
+  --c2-button__container--border: #{css.cssVar(trigger--border)};
+}
+
+.anchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
