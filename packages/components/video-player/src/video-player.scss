@@ -474,6 +474,19 @@ svg .fill {
   }
 }
 
+// Very narrow (a card, a thumbnail): the bar's own Play button stands in for the big one, which would cover the seek
+// bar, and the mute button goes too (M still mutes), so the time has room.
+@container (max-width: 280px) {
+  .big-play,
+  .volume {
+    display: none;
+  }
+
+  .time {
+    margin-left: 4px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chrome,
   .segment,
