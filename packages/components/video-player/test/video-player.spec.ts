@@ -27,7 +27,14 @@ test('a slotted video gets a named group, a big play button, chapters from its t
   await expect(player(page).locator('.segment')).toHaveCount(3)
   await expect(player(page).locator('.time')).toContainText('Intro')
   // The player never writes on the author's video.
-  expect(await video(page).evaluate((element) => element.getAttributeNames().sort())).toEqual(['muted', 'playsinline', 'poster', 'preload', 'src'])
+  const attributes = (element: Element) => Object.fromEntries(element.getAttributeNames().map((name) => [name, element.getAttribute(name)]))
+  expect(await video(page).evaluate(attributes)).toEqual({
+    muted: '',
+    playsinline: '',
+    preload: 'auto',
+    src: `${MEDIA}/tour.webm`,
+    poster: `${MEDIA}/tour-poster.jpg`,
+  })
   expect(await player(page).evaluate((element) => (element as HTMLElement & { media: HTMLVideoElement }).media === element.querySelector('video'))).toBe(true)
   await accessible(page)
 })
@@ -230,6 +237,66 @@ test('right to left, the seek bar runs from the right and ← moves forward', as
   // The handle sits right of centre for an early time.
   const handle = (await player(page).locator('.handle').boundingBox())!
   expect(handle.x).toBeGreaterThan(box.x + box.width / 2)
+  // The played fill grows from the right edge of the first chapter, the rightmost one.
+  const first = (await player(page).locator('.segment').first().boundingBox())!
+  const played = (await player(page).locator('.segment').first().locator('.played').boundingBox())!
+  expect(played.width).toBeGreaterThan(0)
+  expect(played.x + played.width).toBeCloseTo(first.x + first.width, 0)
+})
+
+test('one malformed thumbnail cue costs only its own preview; a cleared thumbnails URL drops a file still loading', async ({ page, renderScenario }) => {
+  await renderScenario('')
+  const cues = await page.evaluate(() => {
+    const { thumbnailFromCue } = (window as unknown as { vtt: { thumbnailFromCue(text: string, base: string): unknown } }).vtt
+    return [thumbnailFromCue('http://[bad/sprite.jpg#xywh=0,0,160,90', 'http://example.test/'), thumbnailFromCue('sprite.jpg#xywh=160,90,160,90', 'http://example.test/media/thumbs.vtt')]
+  })
+  expect(cues).toEqual([null, { url: 'http://example.test/media/sprite.jpg', x: 160, y: 90, w: 160, h: 90 }])
+  // A file whose first cue cannot be resolved still previews every other one.
+  const sprite = `${MEDIA}/tour-thumbs.jpg`
+  const body = ['WEBVTT', '', '00:00.000 --> 00:12.000', 'http://[bad/x.jpg#xywh=0,0,160,90', '', '00:12.000 --> 00:24.000', `${sprite}#xywh=0,0,160,90`, ''].join('\n')
+  await page.route('**/mixed-thumbs.vtt', (route) => route.fulfill({ contentType: 'text/vtt', body }))
+  let release: () => void = () => undefined
+  await page.route('**/slow-thumbs.vtt', async (route) => {
+    await new Promise<void>((resolve) => (release = resolve))
+    await route.fulfill({ contentType: 'text/vtt', body })
+  })
+  await renderScenario(`<c2-video-player id="mixed" label="Mixed" thumbnails="/mixed-thumbs.vtt">${VIDEO}</c2-video-player>`)
+  await ready(page)
+  const box = (await seek(player(page)).boundingBox())!
+  await page.mouse.move(box.x + box.width * 0.75, box.y + box.height / 2)
+  await expect(player(page).locator('[part="preview"] img')).toHaveAttribute('src', /tour-thumbs\.jpg$/)
+  await page.mouse.move(box.x + box.width / 2, box.y - 120)
+  // Cleared while its file is still on the way: the answer must not bring the previews back.
+  await player(page).evaluate((element) => ((element as HTMLElement & { thumbnails: unknown }).thumbnails = '/slow-thumbs.vtt'))
+  await player(page).evaluate((element) => ((element as HTMLElement & { thumbnails: unknown }).thumbnails = undefined))
+  release()
+  await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 300)))
+  await page.mouse.move(box.x + box.width * 0.75, box.y + box.height / 2)
+  await expect(player(page).locator('[part="preview"] .label')).toBeVisible()
+  await expect(player(page).locator('[part="preview"] img')).toHaveCount(0)
+})
+
+test('a removed chapters track takes its chapters along; a detached video leaves nothing of itself on screen', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-video-player label="Product tour">${VIDEO}</c2-video-player>`)
+  await ready(page)
+  await expect(player(page).locator('.segment')).toHaveCount(3)
+  await page.locator('track[kind="chapters"]').evaluate((element) => element.remove())
+  await expect(player(page).locator('.segment')).toHaveCount(1)
+  await expect(player(page).locator('.time')).not.toContainText('Intro')
+  await page.getByRole('button', { name: 'Play Product tour' }).click()
+  await expect.poll(() => mediaTime(page)).toBeGreaterThan(0.3)
+  await video(page).evaluate((element) => element.remove())
+  await expect(player(page).locator('.time')).toHaveText(/^0:00 \/ 0:00/)
+  await expect(page.getByRole('button', { name: 'Play Product tour' })).toBeVisible()
+})
+
+test('with focus on the closed settings button the player keys still work', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-video-player label="Product tour">${VIDEO}</c2-video-player>`)
+  await ready(page)
+  await player(page).getByRole('button', { name: 'Settings' }).focus()
+  expect(await video(page).evaluate((element) => (element as HTMLVideoElement).muted)).toBe(true)
+  await page.keyboard.press('m')
+  await expect.poll(() => video(page).evaluate((element) => (element as HTMLVideoElement).muted)).toBe(false)
 })
 
 test('inside a centring flex frame the player keeps its width instead of shrinking to nothing', async ({ page, renderScenario }) => {

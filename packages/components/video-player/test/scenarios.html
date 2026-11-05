@@ -18,9 +18,9 @@
     </style>
     <script type="module">
       import '../src/video-player.ts'
-      import { parseVtt, formatTime } from '../src/vtt.ts'
+      import { parseVtt, formatTime, thumbnailFromCue } from '../src/vtt.ts'
       import { addTranslations } from '@c2n/core/localize.js'
-      window.vtt = { parseVtt, formatTime }
+      window.vtt = { parseVtt, formatTime, thumbnailFromCue }
       window.addTranslations = addTranslations
       document.documentElement.dataset.modulesReady = 'true'
     </script>

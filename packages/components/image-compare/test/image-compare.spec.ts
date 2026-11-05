@@ -17,8 +17,13 @@ async function colorAt(page: Page, locator: Locator, share: number, vertical = f
   return pixel(page, x, y)
 }
 
+/** Waits until every image on the page is decoded, so a screenshot shows the layers rather than the frame behind them. */
+const imagesReady = (page: Page) =>
+  page.evaluate(() => Promise.all([...document.querySelectorAll('img')].map((image) => image.decode().catch(() => undefined))))
+
 /** `before` (blue), `after` (red) or `chip` (the dark chip over the blue layer) at a point of the page. */
 async function pixel(page: Page, x: number, y: number): Promise<string> {
+  await imagesReady(page)
   const shot = await page.screenshot({ clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 } })
   return page.evaluate(async (data) => {
     const image = new Image()
@@ -155,3 +160,35 @@ test('a translation names the handle and reads its value in its language', async
   const slider = page.getByRole('slider', { name: 'Comparer : Kitchen before / Kitchen after' })
   await expect(slider).toHaveAttribute('aria-valuetext', /25\s?% avant, 75\s?% après/)
 })
+
+test('at either end the handle stays whole inside the frame, focus ring included', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-image-compare position="0">${layers}</c2-image-compare><c2-image-compare id="end" position="100" orientation="vertical">${layers}</c2-image-compare>`)
+  for (const host of [compare(page, 'c2-image-compare >> nth=0'), compare(page, '#end')]) {
+    const frame = (await host.boundingBox())!
+    const grip = (await handle(host).boundingBox())!
+    // 4px: the default focus ring, a 2px outline 2px away.
+    expect(grip.x - 4).toBeGreaterThanOrEqual(frame.x - 0.5)
+    expect(grip.y - 4).toBeGreaterThanOrEqual(frame.y - 0.5)
+    expect(grip.x + grip.width + 4).toBeLessThanOrEqual(frame.x + frame.width + 0.5)
+    expect(grip.y + grip.height + 4).toBeLessThanOrEqual(frame.y + frame.height + 0.5)
+  }
+  // The divider line itself still goes to the edge.
+  const host = compare(page, 'c2-image-compare >> nth=0')
+  const frame = (await host.boundingBox())!
+  const line = (await host.locator('.divider').boundingBox())!
+  expect(Math.abs(line.x + line.width / 2 - frame.x)).toBeLessThan(1.5)
+})
+
+test('the name follows the layers\u2019 alternative text; an invalid lang falls back to English; aria-valuenow is the position', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<div lang="not a locale!!"><c2-image-compare position="33.5">${layers}</c2-image-compare></div>`)
+  const host = compare(page)
+  await expect(page.getByRole('slider', { name: 'Compare: Kitchen before / Kitchen after' })).toBeVisible()
+  await expect(handle(host)).toHaveAttribute('aria-valuenow', '33.5')
+  await expect(handle(host)).toHaveAttribute('aria-valuetext', /% before, .*% after/)
+  await host.locator('img[slot="after"]').evaluate((image) => image.setAttribute('alt', 'Kitchen today'))
+  await expect(page.getByRole('slider', { name: 'Compare: Kitchen before / Kitchen today' })).toBeVisible()
+})
+
