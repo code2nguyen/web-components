@@ -340,7 +340,9 @@ export class Scheduler extends LitElement {
       // Only while focus is still with the scheduler (or was dropped with the re-rendered bar): never take it back
       // from wherever the user has gone since.
       const active = this.ownerDocument.activeElement
-      if (!active || active === this.ownerDocument.body || active === this) this.focusBar(id)
+      const inner = this.shadowRoot?.activeElement
+      const dropped = !active || active === this.ownerDocument.body
+      if (dropped || (active === this && (!inner || inner.classList.contains('event')))) this.focusBar(id)
     }
   }
 
@@ -825,13 +827,16 @@ export class Scheduler extends LitElement {
   private readonly clearRefocus = () => {
     this.refocus = ''
     this.ownerDocument.removeEventListener('pointerdown', this.clearRefocus, true)
-    this.removeEventListener('focusout', this.handleRefocusOut)
+    this.renderRoot.removeEventListener('focusout', this.handleRefocusOut as EventListener)
   }
 
-  /** Focus moved on to another element (not dropped by a re-render, which has no related target): the move is over. */
+  /**
+   * Focus moved on to another element than a bar (a re-render that drops the bar's focus has no related target):
+   * the move is over. Listened on the shadow root, which sees the real element rather than the host.
+   */
   private readonly handleRefocusOut = (event: FocusEvent) => {
-    const next = event.relatedTarget as Node | null
-    if (next && !this.contains(next) && !this.renderRoot.contains(next)) this.clearRefocus()
+    const next = event.relatedTarget
+    if (next && !(next instanceof Element && next.classList.contains('event'))) this.clearRefocus()
   }
 
   private moveFromKeyboard(placed: Placed, start: number, end: number, resource: string) {
@@ -839,7 +844,7 @@ export class Scheduler extends LitElement {
     // declines leaves `events` alone, and the next pointer press or focus elsewhere forgets it.
     if (!this.refocus) {
       this.ownerDocument.addEventListener('pointerdown', this.clearRefocus, true)
-      this.addEventListener('focusout', this.handleRefocusOut)
+      this.renderRoot.addEventListener('focusout', this.handleRefocusOut as EventListener)
     }
     this.refocus = placed.event.id
     const label = this.resourceOf(resource)?.label ?? resource

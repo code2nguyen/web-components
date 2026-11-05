@@ -159,7 +159,10 @@ test('dragging a bar moves it in time and to another row; its edge resizes it; E
   expect(await events(scheduler(page))).toHaveLength(2)
 })
 
-test('from the keyboard: a slot cursor, Enter to select, arrows onto a bar, then moves, resizes and a change of row', async ({ page, renderScenario }) => {
+test('from the keyboard: the slot cursor walks every slot past bookings, Enter selects or steps onto a bar, which moves, resizes and changes row', async ({
+  page,
+  renderScenario,
+}) => {
   await renderScenario(markup())
   await page.evaluate(() => (window as unknown as { applyChanges: (element: Element) => void }).applyChanges(document.querySelector('c2-scheduler')!))
   await watch(scheduler(page), 'range-select')
@@ -173,9 +176,32 @@ test('from the keyboard: a slot cursor, Enter to select, arrows onto a bar, then
   expect(await events(scheduler(page))).toEqual([{ resource: 'ana', start: '2026-11-09T08:00', end: '2026-11-09T09:00' }])
   await expect(scheduler(page).getByRole('status')).toHaveText('New booking for Ana Ruiz, Monday 9 November, 08:00 to 09:00')
 
-  // Moving onto a booking focuses it.
+  // The cursor walks over booked slots, which read their bookings, and on past two bookings to free time.
   await page.keyboard.press('ArrowRight')
+  expect(await activeName(page)).toBe('Ana Ruiz, Monday 9 November, 09:00 to 10:00, booked: Kick-off')
+  for (const label of ['10:00 to 11:00, booked: Kick-off', '11:00 to 12:00, booked: Design review', '12:00 to 13:00, booked: Design review']) {
+    await page.keyboard.press('ArrowRight')
+    expect(await activeName(page)).toBe(`Ana Ruiz, Monday 9 November, ${label}`)
+  }
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  expect(await activeName(page)).toBe('Ana Ruiz, Monday 9 November, 14:00 to 15:00')
+  await page.keyboard.press('Enter')
+  expect((await events(scheduler(page))).at(-1)).toEqual({ resource: 'ana', start: '2026-11-09T14:00', end: '2026-11-09T15:00' })
+
+  // Enter on a booked slot steps onto its bar; Escape comes back to that slot.
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  expect(await activeName(page)).toBe('Ana Ruiz, Monday 9 November, 10:00 to 11:00, booked: Kick-off')
+  await page.keyboard.press('Enter')
   expect(await activeName(page)).toBe('Kick-off, Ana Ruiz, Monday 9 November, 09:00 to 10:30')
+  await page.keyboard.press('Escape')
+  expect(await activeName(page)).toBe('Ana Ruiz, Monday 9 November, 10:00 to 11:00, booked: Kick-off')
+
+  // On the bar, the arrows move it, Shift resizes it and Alt changes its row.
+  await page.keyboard.press('Enter')
   await page.keyboard.press('ArrowRight')
   await expect.poll(() => activeName(page)).toBe('Kick-off, Ana Ruiz, Monday 9 November, 09:15 to 10:45')
   await expect(scheduler(page).getByRole('status')).toHaveText('Kick-off moved to Ana Ruiz, Monday 9 November, 09:15 to 10:45')
@@ -183,11 +209,26 @@ test('from the keyboard: a slot cursor, Enter to select, arrows onto a bar, then
   await expect.poll(() => activeName(page)).toBe('Kick-off, Ana Ruiz, Monday 9 November, 09:15 to 11:00')
   await page.keyboard.press('Alt+ArrowDown')
   await expect.poll(() => activeName(page)).toBe('Kick-off, Kenji Ono, Monday 9 November, 09:15 to 11:00')
-  // Escape goes back to the slot cursor; Down moves to the next row.
+  // Escape goes back to the slot cursor where the bar starts on its new row; Down moves to the next row.
   await page.keyboard.press('Escape')
-  expect(await activeName(page)).toBe('Kenji Ono, Monday 9 November, 09:00 to 10:00')
+  expect(await activeName(page)).toBe('Kenji Ono, Monday 9 November, 09:00 to 10:00, booked: Kick-off, Interviews')
   await page.keyboard.press('ArrowDown')
-  expect(await activeName(page)).toBe('Aurora, Monday 9 November, 09:00 to 10:00')
+  expect(await activeName(page)).toBe('Aurora, Monday 9 November, 09:00 to 10:00, booked: Stand-up')
+})
+
+test('a keyboard move the app declines does not pull focus back on a later update', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await watch(scheduler(page), 'event-change')
+  await bar(page, 'Stand-up').focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await events(scheduler(page))).toHaveLength(1)
+  // The app ignores the change; the user goes on to the header.
+  await scheduler(page).getByRole('button', { name: 'Today' }).focus()
+  await scheduler(page).evaluate((element) => {
+    const host = element as HTMLElement & { events: unknown[] }
+    host.events = [...host.events]
+  })
+  await expect.poll(() => scheduler(page).evaluate((element) => element.shadowRoot!.activeElement?.textContent?.trim())).toBe('Today')
 })
 
 test('a read-only booking steps aside instead of moving', async ({ page, renderScenario }) => {
