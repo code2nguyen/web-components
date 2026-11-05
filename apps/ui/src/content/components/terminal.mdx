@@ -19,7 +19,7 @@ import '@c2n/components/terminal'
 
 ## Usage
 
-Type `help` in the first example: the built-in lists `commands`. Every other command goes to your `handler`.
+Type `help` in the first example: the built-in lists `commands`. Every other command goes to your `handler`, which here plays a small CLI: try `deploy web`, `logs web` (Ctrl+C stops it) or `test`, and Tab to complete.
 
 ```html tag=UsageBlock,package=@c2n/terminal
 <style>
@@ -38,6 +38,7 @@ Type `help` in the first example: the built-in lists `commands`. Every other com
 <div data-label="Commands and help">
   <c2-terminal
     class="terminal-demo"
+    data-terminal-demo
     heading="acme-cli · production"
     commands='[{"name":"deploy","description":"Deploy, roll back or inspect a service"},{"name":"logs","description":"Stream the logs of a service (Ctrl+C to stop)"},{"name":"test","description":"Run the test suite, or only what changed"}]'
   >
