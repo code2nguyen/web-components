@@ -5,22 +5,56 @@ import { AudioPlayer } from '@c2n/components/audio-player'
 
 ## Presets
 
-Curated looks for `c2-audio-player`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+Looks for `c2-audio-player`. The play button, the bar colours (`__bar--color`, `__bar__played--color`), the bar width and gap, and the box variables do most of the work.
 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-audio-player></c2-audio-player>
+<c2-audio-player src="/web-components/media/voice-note.webm" label="voice note" duration="12" peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'></c2-audio-player>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Podcast
 <style>
-  .themed {
-    /* --c2-audio-player--… */
+  .audio-podcast {
+    --c2-audio-player--border: 0 solid transparent;
+    --c2-audio-player--border-radius: 14px;
+    --c2-audio-player--padding: 14px 16px;
+    --c2-audio-player--background-color: light-dark(#fff7ed, #2a1708);
+    --c2-audio-player__play--size: 44px;
+    --c2-audio-player__play--background-color: #ea580c;
+    --c2-audio-player__bar__played--color: #ea580c;
+    --c2-audio-player__bar--width: 2px;
+    --c2-audio-player__waveform--height: 40px;
   }
 </style>
-<c2-audio-player class="themed"></c2-audio-player>
+<c2-audio-player class="audio-podcast" src="/web-components/media/voice-note.webm" label="episode 12" duration="12" peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'></c2-audio-player>
+```
+
+```html tag=MdxCodeBlock,label=Chat bubble
+<style>
+  .audio-bubble {
+    --c2-audio-player__bubble--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-audio-player__bubble--border-radius: 16px 16px 4px 16px;
+    --c2-audio-player__play--size: 32px;
+  }
+</style>
+<c2-audio-player class="audio-bubble" variant="bubble" src="/web-components/media/voice-note.webm" label="your voice message" duration="12" peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'></c2-audio-player>
+```
+
+```html tag=MdxCodeBlock,label=Minimal
+<style>
+  .audio-minimal {
+    --c2-audio-player--border: 0 solid transparent;
+    --c2-audio-player--padding: 4px 0;
+    --c2-audio-player--background-color: transparent;
+    --c2-audio-player__play--size: 28px;
+    --c2-audio-player__play--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-audio-player__play--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-audio-player__bar__played--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-audio-player__waveform--height: 24px;
+  }
+</style>
+<c2-audio-player class="audio-minimal" src="/web-components/media/voice-note.webm" label="memo" duration="12" peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'></c2-audio-player>
 ```
 
 </GalleryGrid>

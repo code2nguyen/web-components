@@ -1,7 +1,7 @@
 ---
 title: 'Audio Player'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'Waveform playback for voice notes and recordings: the waveform is the seek bar, with the time, a speed toggle and an optional transcript.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { AudioPlayer } from '@c2n/components/audio-player'
 
-`c2-audio-player` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-audio-player` plays a voice note or a recording the way Slack clips and WhatsApp voice messages do: a play button, the waveform as the seek bar, the time and a speed toggle. It plays `src` with an `<audio>` of its own, or an `<audio>` you put inside it (with its `<source>`s), which it never writes on. `media` is that element either way, to hand to `c2-transcript` or `c2-audio-visualizer`.
 
 ## Import
 
@@ -21,13 +20,63 @@ import '@c2n/components/audio-player'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/audio-player
-<div data-label="Default">
-  <c2-audio-player></c2-audio-player>
+<style>
+  .audio-chat {
+    display: grid;
+    gap: 8px;
+    width: 300px;
+    max-width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .audio-avatar {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #7c3aed;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+  }
+</style>
+<div data-label="Voice note">
+  <c2-audio-player
+    src="/web-components/media/voice-note.webm"
+    label="voice note from Ana"
+    duration="12"
+    peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'
+    transcript="Hi team, quick update on the launch. The build is green and QA signed off this morning, so we can ship on Thursday as planned."
+  ></c2-audio-player>
+</div>
+<div data-label="Chat bubble">
+  <div class="audio-chat">
+    <c2-audio-player variant="bubble" exclusive src="/web-components/media/voice-note.webm" label="voice message from Ana" duration="12" peaks='[0.47,0.93,0.99,0.94,0.61,0.75,0.0,0.0,0.82,0.53,0.44,1.0,0.0,0.4,0.55,0.93,0.3,0.72,0.76,0.91,0.74,0.0,0.66,0.95,0.81,0.85,0.36,0.43,0.68,0.56,0.97,0.96,0.0,0.03,0.54,0.53,0.78,0.57,0.73,0.0,0.44,0.5,0.69,0.67,0.65,0.0,0.0,0.0]'>
+      <span slot="avatar" class="audio-avatar">AR</span>
+    </c2-audio-player>
+  </div>
+</div>
+<div data-label="Waveform from the file">
+  <c2-audio-player src="/web-components/media/voice-note.webm" label="recording" bars="64"></c2-audio-player>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+## Waveform
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+`peaks` is the waveform: numbers from 0 to 1, usually computed once when the recording is saved and stored with it. The player brings them to `bars` bars (48 by default), or fewer when the waveform is narrower than that many bars at the bar width and gap. Without `peaks`, the player fetches the file once and decodes it with Web Audio to compute them, which only works for a file it may read (same-origin, or served with CORS); otherwise the bars stay flat. `preload="none"` delays that, and any loading, until the first play.
+
+`duration` (in seconds) shows the length before the audio's metadata has loaded, so a conversation full of voice notes shows every length without fetching every file.
+
+## Playback
+
+The waveform is the seek bar: click or drag it, or focus it and use the arrow keys (5 seconds), Home and End; Space plays and pauses. The played bars take the accent colour. The speed button cycles 1×, 1.5× and 2×. `exclusive` pauses any other `exclusive` player on the page when this one starts, as a chat does. `play()` and `pause()` drive it from script, and the host fires `play`, `pause`, `ended` and `ratechange`.
+
+## Transcript and layouts
+
+`transcript` (text), or richer content in the `transcript` slot (a `c2-transcript` given this player's `media`), adds a toggle that opens the transcript below the player. `variant="bubble"` is the compact chat look: the time and speed under the waveform, at most `--c2-audio-player__bubble--max-width` wide, with the `avatar` slot before the play button.
+
+## Accessibility
+
+The player is a group named by `label`, and the play button says what it does ("Play voice note from Ana", "Pause voice note from Ana"). The waveform is a slider read as "0:12 of 0:47"; the speed and the transcript toggle are buttons, the toggle with its expanded state. A file that cannot play says so in place of the time, and the controls are disabled.

@@ -325,7 +325,18 @@ export class AudioPlayer extends LitElement {
     this.dispatchEvent(new Event(event.type))
   }
 
-  private static readonly mediaEvents = ['play', 'pause', 'ended', 'timeupdate', 'seeked', 'loadedmetadata', 'durationchange', 'ratechange', 'error', 'loadstart']
+  private static readonly mediaEvents = [
+    'play',
+    'pause',
+    'ended',
+    'timeupdate',
+    'seeked',
+    'loadedmetadata',
+    'durationchange',
+    'ratechange',
+    'error',
+    'loadstart',
+  ]
 
   private bindMedia(): void {
     const media = this.media
@@ -398,7 +409,8 @@ export class AudioPlayer extends LitElement {
   /** Fetches and decodes the audio once to draw its waveform, when no `peaks` are given. */
   private maybeDecode(): void {
     if (this.peaks?.length) return
-    const url = this.media?.currentSrc || this.media?.src || this.slotted?.querySelector('source')?.src || (this.src ? new URL(this.src, document.baseURI).href : '')
+    const url =
+      this.media?.currentSrc || this.media?.src || this.slotted?.querySelector('source')?.src || (this.src ? new URL(this.src, document.baseURI).href : '')
     if (!url || url === this.decodedFor) return
     if (this.preload === 'none' && !this.playing && !this.slotted) return
     this.decodedFor = url
@@ -494,9 +506,9 @@ export class AudioPlayer extends LitElement {
   }
 
   private onTranscriptSlot(event: Event): void {
-    this.hasTranscriptSlot = (event.target as HTMLSlotElement).assignedNodes({ flatten: true }).some(
-      (node) => node.nodeType === Node.ELEMENT_NODE || !!node.textContent?.trim(),
-    )
+    this.hasTranscriptSlot = (event.target as HTMLSlotElement)
+      .assignedNodes({ flatten: true })
+      .some((node) => node.nodeType === Node.ELEMENT_NODE || !!node.textContent?.trim())
   }
 
   private onAvatarSlot(event: Event): void {
@@ -558,17 +570,17 @@ export class AudioPlayer extends LitElement {
     const action = this.playing ? (label ? this.msg.t('pauseLabel', label) : this.msg.t('pause')) : label ? this.msg.t('playLabel', label) : this.msg.t('play')
     const hasTranscript = !!this.transcript || this.hasTranscriptSlot
     const speed = this.speedText(this.rate)
-    const play = html`<button
-      type="button"
-      class="play"
-      part="play"
-      aria-label=${action}
-      ?disabled=${this.failed}
-      @click=${() => this.toggle()}
-    >
+    const play = html`<button type="button" class="play" part="play" aria-label=${action} ?disabled=${this.failed} @click=${() => this.toggle()}>
       <svg viewBox="0 0 24 24" aria-hidden="true">${this.playing ? pauseIcon : playIcon}</svg>
     </button>`
-    const speedButton = html`<button type="button" class="speed" part="speed" aria-label=${this.msg.t('speed', speed)} ?disabled=${this.failed} @click=${() => this.cycleSpeed()}>
+    const speedButton = html`<button
+      type="button"
+      class="speed"
+      part="speed"
+      aria-label=${this.msg.t('speed', speed)}
+      ?disabled=${this.failed}
+      @click=${() => this.cycleSpeed()}
+    >
       ${speed}
     </button>`
     return html`
@@ -577,7 +589,10 @@ export class AudioPlayer extends LitElement {
         ${play}
         ${
           bubble
-            ? html`<div class="body">${this.renderWaveform(length)}<div class="meta">${this.renderTime(length)}${speedButton}</div></div>`
+            ? html`<div class="body">
+                ${this.renderWaveform(length)}
+                <div class="meta">${this.renderTime(length)}${speedButton}</div>
+              </div>`
             : html`${this.renderWaveform(length)}${this.renderTime(length)}${speedButton}`
         }
         ${
@@ -596,7 +611,10 @@ export class AudioPlayer extends LitElement {
             : nothing
         }
         <div id="transcript" class="transcript" part="transcript" ?hidden=${!hasTranscript || !this.transcriptOpen}>
-          ${this.transcript && !this.hasTranscriptSlot ? html`<p>${this.transcript}</p>` : nothing}<slot name="transcript" @slotchange=${this.onTranscriptSlot}></slot>
+          ${this.transcript && !this.hasTranscriptSlot ? html`<p>${this.transcript}</p>` : nothing}<slot
+            name="transcript"
+            @slotchange=${this.onTranscriptSlot}
+          ></slot>
         </div>
       </div>
       <slot @slotchange=${this.onDefaultSlot}></slot>

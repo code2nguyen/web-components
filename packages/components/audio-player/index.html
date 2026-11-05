@@ -2,19 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-audio-player</title>
     <script type="module" src="/src/audio-player.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 24px;
+        max-width: 520px;
         padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .chat {
+        width: 300px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #f4f4f5;
+      }
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: #7c3aed;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 600;
       }
     </style>
   </head>
 
   <body>
-    <c2-audio-player></c2-audio-player>
+    <!-- The docs site's sample, served from the repo root by `npm run dev` in this package: copy it next to index.html or point src at it. -->
+    <c2-audio-player
+      src="/../../../apps/ui/public/media/voice-note.webm"
+      label="voice note from Ana"
+      duration="12"
+      transcript="Hi team, quick update on the launch. The build is green and QA signed off this morning."
+    ></c2-audio-player>
+    <div class="chat">
+      <c2-audio-player variant="bubble" exclusive src="/../../../apps/ui/public/media/voice-note.webm" label="voice message" duration="12">
+        <span slot="avatar" class="avatar">AR</span>
+      </c2-audio-player>
+    </div>
+    <c2-audio-player exclusive label="slotted audio" bars="64"
+      ><audio src="/../../../apps/ui/public/media/voice-note.webm" preload="metadata"></audio
+    ></c2-audio-player>
   </body>
 </html>
