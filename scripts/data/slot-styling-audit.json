@@ -193,6 +193,12 @@
       "reason": "The transcript slot projects consumer-owned light DOM (a transcript of the app's own, such as a c2-transcript); style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-audio-player",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM (the author's own <audio> with its sources); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-autocomplete",
       "slot": "clear-icon",
       "decision": "assigned-content",
