@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sunburst test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        margin: 0;
+      }
+      /* A canvas has no intrinsic size; plain width/height keep the --c2-chart--* variables free for the tests. */
+      main > * {
+        width: 560px;
+        height: 480px;
+      }
+    </style>
+    <script type="module" src="./sunburst-scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Sunburst scenario"></main>
+  </body>
+</html>

@@ -2,7 +2,6 @@ import { html, nothing, render, unsafeCSS, type CSSResultGroup, type PropertyVal
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { getFieldValue } from '@c2n/core/data-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import treemapStyles from './treemap-chart.scss?inline'
@@ -12,30 +11,14 @@ import { readableOn } from './chart-contrast.js'
 import { mixColors } from './map-scale.js'
 import { measureText } from './chart-measure.js'
 import { treemapMessages } from './messages.js'
+import { buildHierarchy, hierarchyEngineName, preorderHierarchy, type HierarchyNode, type HierarchyOptions, type HierarchyTreeNode } from './chart-hierarchy.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
 import './chart-series.js'
 
 /** One tile or group of the treemap, as the tooltip, the events and `nodes` describe it. */
-export interface TreemapNode {
-  /** The names from the top-level group down to this node. */
-  path: string[]
-  /** The node's own name: the last entry of `path`. */
-  label: string
-  /** The tile's value, or the sum of a group's tiles. */
-  value: number
-  /** The `color-field` value of a tile, or the value-weighted mean of a group's; `null` without `color-field`. */
-  colorValue: number | null
-  /** `1` for a top-level node, `2` for its children, and so on. */
-  depth: number
-  /** `value` as a share of the whole treemap, from 0 to 1. */
-  share: number
-  /** `value` as a share of the node's group, from 0 to 1; the same as `share` at the top level. */
-  parentShare: number
-  /** Whether the node is a tile rather than a group. */
-  leaf: boolean
-}
+export type TreemapNode = HierarchyNode
 
 /** What `renderTooltip`, the `tooltip-change` event and a linked `c2-chart-tooltip` receive. */
 export interface TreemapTooltipContext extends ChartTooltipContext {
@@ -48,146 +31,24 @@ export interface TreemapChart {
 }
 
 /** How {@link buildTreemap} reads the rows. */
-export interface TreemapModelOptions {
-  labelField: string
-  valueField: string
-  /** Fields naming the groups a row belongs to, outermost first. */
-  groupFields: readonly string[]
-  /** Field holding a row's nested rows. */
-  childrenField: string
-  colorField: string
-  /** Top-level names to leave out, as the legend's toggle does. */
-  hidden?: ReadonlySet<string>
-}
+export type TreemapModelOptions = HierarchyOptions
 
 /** A node of the built tree: the public description plus its children, largest first. */
-export interface TreemapTreeNode extends TreemapNode {
-  children: TreemapTreeNode[]
-}
+export type TreemapTreeNode = HierarchyTreeNode
 
 /**
  * Builds the tree a treemap draws from rows. A row is a tile named by `labelField` and sized by `valueField`; the
  * `groupFields` it carries put it into groups, outermost first, and rows under `childrenField` nest inside it (a row
  * with children is a group, sized by them). Rows without a positive value are left out, and so are the groups left
- * empty. Siblings are ordered largest first, which is how the tiles are laid out.
+ * empty. Siblings are ordered largest first, which is how the tiles are laid out. The sunburst chart builds its rings
+ * with the same function.
  */
 export function buildTreemap(rows: readonly unknown[], options: TreemapModelOptions): TreemapTreeNode[] {
-  interface Draft {
-    label: string
-    value: number
-    weighted: number
-    colored: number
-    children: Map<string, Draft>
-    leaf: boolean
-  }
-  const draft = (label: string, leaf: boolean): Draft => ({ label, value: 0, weighted: 0, colored: 0, children: new Map(), leaf })
-  const root = draft('', false)
-
-  const numberAt = (row: Record<string, unknown>, field: string): number | null => {
-    if (!field) return null
-    const raw = getFieldValue(row, field)
-    const value = typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN
-    return Number.isFinite(value) ? value : null
-  }
-  const childAt = (parent: Draft, label: string, leaf: boolean): Draft => {
-    // A tile and a group may share a name in one group: they are different nodes, so the key tells them apart.
-    const key = `${leaf ? 'leaf' : 'group'}:${label}`
-    let node = parent.children.get(key)
-    if (!node) {
-      node = draft(label, leaf)
-      parent.children.set(key, node)
-    }
-    return node
-  }
-  const add = (parent: Draft, row: unknown, depth: number): void => {
-    if (!row || typeof row !== 'object') return
-    const record = row as Record<string, unknown>
-    const name = getFieldValue(record, options.labelField)
-    const label = name === undefined || name === null ? '' : String(name)
-    const nested = options.childrenField ? getFieldValue(record, options.childrenField) : undefined
-    let target = parent
-    if (depth === 0) {
-      for (const field of options.groupFields) {
-        const group = getFieldValue(record, field)
-        if (group === undefined || group === null || String(group) === '') continue
-        target = childAt(target, String(group), false)
-      }
-    }
-    if (Array.isArray(nested) && nested.length > 0) {
-      const group = childAt(target, label, false)
-      for (const child of nested) add(group, child, depth + 1)
-      return
-    }
-    const value = numberAt(record, options.valueField)
-    if (value === null || value <= 0) return
-    const tile = childAt(target, label, true)
-    tile.value += value
-    const color = numberAt(record, options.colorField)
-    if (color !== null) {
-      tile.weighted += color * value
-      tile.colored += value
-    }
-  }
-  for (const row of rows) add(root, row, 0)
-
-  // Sums the groups bottom-up, drops the empty ones and orders siblings largest first.
-  const settle = (node: Draft): void => {
-    for (const [key, child] of node.children) {
-      if (!child.leaf) settle(child)
-      if (child.value <= 0) node.children.delete(key)
-    }
-    if (node.leaf) return
-    node.value = 0
-    node.weighted = 0
-    node.colored = 0
-    for (const child of node.children.values()) {
-      node.value += child.value
-      node.weighted += child.weighted
-      node.colored += child.colored
-    }
-  }
-  settle(root)
-  // A share is of the whole data, so hiding a group from the legend does not change what the others are a share of.
-  const total = [...root.children.values()].reduce((sum, child) => sum + child.value, 0)
-  for (const name of options.hidden ?? []) {
-    root.children.delete(`group:${name}`)
-    root.children.delete(`leaf:${name}`)
-  }
-
-  const finish = (node: Draft, parentPath: string[], parentValue: number, depth: number): TreemapTreeNode => {
-    const path = [...parentPath, node.label]
-    const children = [...node.children.values()].sort((a, b) => b.value - a.value).map((child) => finish(child, path, node.value, depth + 1))
-    return {
-      path,
-      label: node.label,
-      value: node.value,
-      colorValue: node.colored > 0 ? node.weighted / node.colored : null,
-      depth,
-      share: total > 0 ? node.value / total : 0,
-      parentShare: parentValue > 0 ? node.value / parentValue : 0,
-      leaf: node.leaf,
-      children,
-    }
-  }
-  return [...root.children.values()].sort((a, b) => b.value - a.value).map((child) => finish(child, [], total, 1))
+  return buildHierarchy(rows, options)
 }
 
-/**
- * The name a node is handed to ECharts under: its path, and whether it is a tile, so two nodes never share one. The
- * labels are drawn from the model, so the engine never shows it.
- */
-function engineName(node: TreemapNode): string {
-  return `${node.leaf ? 'tile' : 'group'}\u001f${node.path.join('\u001f')}`
-}
-
-/** Every node in the order ECharts numbers them: depth first, a group before its children. */
-function preorder(nodes: readonly TreemapTreeNode[], out: TreemapTreeNode[] = []): TreemapTreeNode[] {
-  for (const node of nodes) {
-    out.push(node)
-    preorder(node.children, out)
-  }
-  return out
-}
+const engineName = hierarchyEngineName
+const preorder = preorderHierarchy
 
 /** Space a tile's label keeps from the tile's edges, in pixels. */
 const LABEL_INSET = 5
