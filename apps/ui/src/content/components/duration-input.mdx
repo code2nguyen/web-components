@@ -1,7 +1,7 @@
 ---
 title: 'Duration Input'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'A text field for an amount of time: reads 1h 30m, 90m, 1.5h or 1:30 and stores seconds.'
+category: 'Inputs'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { DurationInput } from '@c2n/components/duration-input'
 
-`c2-duration-input` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-duration-input` takes an amount of time the way people type it, as in Jira time tracking and Toggl: `1h 30m`, `90m`, `1.5h` (or `1,5h`), `1:30`, `2 days 4 hours`, or a bare `90` read in `unit`. Its `value` is the duration in seconds. While typing, a quiet preview after the text says how it was read; when the field is left, the text is rewritten in `format` (`short`, `long` or `clock`) and rounded to `step`. Arrow Up and Down add or remove one step.
+
+`largest-unit` and `smallest-unit` bound the units written (with `largest-unit="h"`, two days read `48h`), and `day-hours` and `week-days` set how long a day and a week are: time tracking often counts a day as 8 hours. It is a form control: the form receives the seconds under `name`, text that cannot be read sets `badInput`, and `min`, `max` and `step` are seconds too. `parseDuration()` and `formatDuration()` are exported for tables and APIs.
 
 ## Import
 
@@ -21,13 +22,31 @@ import '@c2n/components/duration-input'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/duration-input
+<style>
+  .duration-width {
+    width: 220px;
+  }
+</style>
 <div data-label="Default">
-  <c2-duration-input></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Estimate"></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Meeting length" value="5400"></c2-duration-input>
+</div>
+<div data-label="Formats">
+  <c2-duration-input class="duration-width" aria-label="Long" format="long" value="5400"></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Clock" format="clock" value="3930"></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Hours only" largest-unit="h" value="172800"></c2-duration-input>
+</div>
+<div data-label="Time tracking">
+  <c2-duration-input class="duration-width" aria-label="Time spent" day-hours="8" week-days="5" step="900" value="43200" help="A day is 8 hours; rounds to 15 minutes."></c2-duration-input>
+</div>
+<div data-label="Validation">
+  <c2-duration-input class="duration-width" aria-label="Break" max="3600" value="7200" help="Up to 1 hour."></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Estimate" error error-text="Enter a duration like 1h 30m"></c2-duration-input>
+</div>
+<div data-label="States">
+  <c2-duration-input class="duration-width" aria-label="Read-only" value="1800" readonly></c2-duration-input>
+  <c2-duration-input class="duration-width" aria-label="Disabled" value="1800" disabled></c2-duration-input>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
-
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+Inside a `c2-form-field`, the field's label names the text field and the field shows the message; the control keeps its error look and its preview. A translation lists the unit words its language reads (`hourWords: 'heure heures'`) on top of the English ones, and the `long` format follows the element's language through `Intl`.

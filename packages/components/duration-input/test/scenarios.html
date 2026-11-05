@@ -3,21 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Duration Input test scenarios</title>
+    <title>duration-input scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
       }
       main {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
         gap: 16px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import './translations.ts'
+      import '../src/duration-input.ts'
+      import { parseDuration, formatDuration } from '../src/duration.ts'
+      window.durationApi = { parseDuration, formatDuration }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Duration Input scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>
