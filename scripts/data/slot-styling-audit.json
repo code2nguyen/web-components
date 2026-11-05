@@ -4326,20 +4326,23 @@
     {
       "tag": "c2-image-compare",
       "slot": "before",
-      "decision": "assigned-content",
-      "reason": "The before slot projects consumer-owned light DOM (the layer shown before the divider); style the assigned node through its own class or public contract."
+      "decision": "variables",
+      "variables": ["--c2-image-compare--aspect-ratio", "--c2-image-compare--border-radius"],
+      "reason": "The frame lays out the before layer: block, filling the frame (object-fit: cover) and inert to the pointer so the divider drags over it. The frame's shape comes from its aspect-ratio and radius variables; anything else on the layer is the author's."
     },
     {
       "tag": "c2-image-compare",
       "slot": "after",
-      "decision": "assigned-content",
-      "reason": "The after slot projects consumer-owned light DOM (the layer shown after the divider, clipped by it); style the assigned node through its own class or public contract."
+      "decision": "variables",
+      "variables": ["--c2-image-compare--aspect-ratio", "--c2-image-compare--border-radius"],
+      "reason": "The frame lays out the after (clipped at the divider) layer: block, filling the frame (object-fit: cover) and inert to the pointer so the divider drags over it. The frame's shape comes from its aspect-ratio and radius variables; anything else on the layer is the author's."
     },
     {
       "tag": "c2-image-compare",
       "slot": "handle",
-      "decision": "assigned-content",
-      "reason": "The handle slot projects consumer-owned light DOM (a grip of the app's own on the divider); style the assigned node through its own class or public contract."
+      "decision": "variables",
+      "variables": ["--c2-image-compare__handle--size", "--c2-image-compare__handle--background", "--c2-image-compare__handle--color"],
+      "reason": "The handle sizes and centres the slotted grip within its round button through the handle variables; the grip's own look is the author's."
     },
     {
       "tag": "c2-image-cropper",
@@ -4448,8 +4451,9 @@
     {
       "tag": "c2-video-player",
       "slot": "",
-      "decision": "assigned-content",
-      "reason": "The default slot projects consumer-owned light DOM (the author's own <video> with its sources and tracks); style the assigned node through its own class or public contract."
+      "decision": "variables",
+      "variables": ["--c2-video-player--aspect-ratio", "--c2-video-player--border-radius", "--c2-video-player--width"],
+      "reason": "The player lays out the author's <video> under its controls (one grid cell, full width, contained) and shapes it through its width, aspect-ratio and radius variables; the player never writes on the element, whose sources and tracks stay the author's."
     }
   ]
 }
