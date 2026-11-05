@@ -638,10 +638,28 @@ export class Terminal extends LitElement {
     input.setSelectionRange(end, end)
   }
 
-  /** Whether text is selected on the page. Chromium reports a selection inside a shadow root only on that root. */
+  /**
+   * Whether text is selected on the page. Engines report a selection inside a shadow root differently: Chromium on
+   * the root's own `getSelection()`, WebKit and Firefox only through `getComposedRanges()` (WebKit's document
+   * selection collapses to the host), and a selection outside it on the document.
+   */
   private hasSelection(): boolean {
     const root = this.shadowRoot as (ShadowRoot & { getSelection?(): Selection | null }) | null
-    return !(root?.getSelection?.()?.isCollapsed ?? true) || !(window.getSelection()?.isCollapsed ?? true)
+    if (!(root?.getSelection?.()?.isCollapsed ?? true)) return true
+    const selection = window.getSelection() as (Selection & { getComposedRanges?(options: { shadowRoots: ShadowRoot[] }): StaticRange[] }) | null
+    if (!selection) return false
+    if (root && selection.getComposedRanges) {
+      try {
+        // Only text selected in the output counts: with the command line focused, its caret is a range too.
+        const output = root.querySelector('.output')
+        const inOutput = (node: Node) => !!output && output.contains(node)
+        const ranges = selection.getComposedRanges({ shadowRoots: [root] })
+        if (ranges.some((range) => !range.collapsed && (inOutput(range.startContainer) || inOutput(range.endContainer)))) return true
+      } catch {
+        // An engine with the older signature (`getComposedRanges(...roots)`) falls back to the document selection.
+      }
+    }
+    return !selection.isCollapsed
   }
 
   private handleScreenClick(event: MouseEvent): void {

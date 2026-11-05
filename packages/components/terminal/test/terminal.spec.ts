@@ -209,12 +209,13 @@ test('clicking the screen focuses the command line unless text was selected; the
   await page.mouse.down()
   await page.mouse.move(box.x + 80, box.y + box.height / 2, { steps: 4 })
   await page.mouse.up()
-  // Text is selected. WebKit re-scopes a selection inside a shadow root to the host, so its text reads empty there;
-  // whether it is collapsed is what every engine reports, and what the terminal checks.
+  // Text is selected. Chromium reports it on the shadow root; WebKit and Firefox only through getComposedRanges().
   expect(
     await terminal(page).evaluate((element) => {
       const root = element.shadowRoot as ShadowRoot & { getSelection?(): Selection | null }
-      return !(root.getSelection?.()?.isCollapsed ?? true) || !(window.getSelection()?.isCollapsed ?? true)
+      if (!(root.getSelection?.()?.isCollapsed ?? true)) return true
+      const selection = window.getSelection() as Selection & { getComposedRanges?(options: { shadowRoots: ShadowRoot[] }): StaticRange[] }
+      return selection.getComposedRanges?.({ shadowRoots: [root] }).some((range) => !range.collapsed) ?? !selection.isCollapsed
     }),
   ).toBe(true)
   await expect(input(terminal(page))).not.toBeFocused()
