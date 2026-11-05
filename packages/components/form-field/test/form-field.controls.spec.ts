@@ -12,6 +12,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-mask-input', markup: '<c2-mask-input mask="99999"></c2-mask-input>' },
   { tag: 'c2-money-input', markup: '<c2-money-input currency="EUR"></c2-money-input>' },
   { tag: 'c2-number-input', markup: '<c2-number-input></c2-number-input>' },
+  { tag: 'c2-duration-input', markup: '<c2-duration-input></c2-duration-input>' },
   { tag: 'c2-password-field', markup: '<c2-password-field></c2-password-field>' },
   { tag: 'c2-search-field', markup: '<c2-search-field></c2-search-field>' },
   { tag: 'c2-time-input', markup: '<c2-time-input></c2-time-input>' },
@@ -88,4 +89,13 @@ test('c2-button-group keeps its role on its internals outside a field and on the
   await page.evaluate(() => document.querySelector('#out')!.append(document.querySelector('c2-button-group')!))
   await expect(group).toHaveHostAria('role', 'toolbar')
   await expect(group.locator('.field-group')).toHaveCount(0)
+})
+
+test('a control that writes its own bounds names them in the range message: an hour, not 3600 seconds', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Break" validate-on="blur"><c2-duration-input max="3600"></c2-duration-input></c2-form-field>`)
+  await page.locator('c2-duration-input input').fill('2h')
+  await page.keyboard.press('Tab')
+  await expect
+    .poll(() => page.locator('c2-form-field').evaluate((field) => (field as HTMLElement & { errorMessage: string }).errorMessage))
+    .toBe('Enter 1h or less.')
 })

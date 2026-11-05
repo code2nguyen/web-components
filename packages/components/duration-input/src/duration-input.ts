@@ -270,6 +270,15 @@ export class DurationInput extends LitElement {
     })
   }
 
+  /**
+   * `min` or `max` written as a duration (`1h`), or an empty string when it is not set. A wrapping `c2-form-field`
+   * reads it for its range messages, which would otherwise show the raw seconds.
+   */
+  formatBound(bound: 'min' | 'max'): string {
+    const seconds = this[bound]
+    return seconds === undefined || seconds === null ? '' : this.write(seconds, 'short')
+  }
+
   /** The value rounded to `step`. */
   private rounded(seconds: number): number {
     const step = this.step
