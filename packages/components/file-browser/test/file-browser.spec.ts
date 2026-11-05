@@ -178,6 +178,8 @@ test('a header or the sort menu sorts, folders staying first; search filters the
   await expect(host.locator('c2-status-panel')).toHaveAttribute('heading', 'No results for “zzz”')
   // Remote search hands the query to the app.
   await host.locator('c2-search-field input').fill('')
+  // The field reports its query after a debounce: let the cleared one land before watching for the remote one.
+  await expect.poll(() => names(host)).toHaveLength(6)
   await props(host, { search: 'remote' })
   await watch(host, 'search')
   await host.locator('c2-search-field input').fill('road')
