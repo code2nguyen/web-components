@@ -274,6 +274,12 @@ export class FileBrowser extends LitElement {
   @state() private query = ''
   @state() private cursor = ''
   @state() private narrow = false
+  /**
+   * The folder tree is drawn from the first client update on. A server-rendered tree inside this shadow root would
+   * hydrate after the tree has already written its rows' state (level, expanded, selected), a hydration mismatch; with
+   * the pane empty on the server and on the first client render, the two agree and the tree then renders client-side.
+   */
+  @state() private treeReady = false
   @state() private loading = new Set<string>()
   @state() private loaded = new Map<string, FileBrowserItem[]>()
   /** The latest load started for each folder: an answer to an older one (made stale by `refresh()`) is dropped. */
@@ -342,6 +348,7 @@ export class FileBrowser extends LitElement {
   }
 
   protected override firstUpdated(): void {
+    this.treeReady = true
     this.measure()
     void this.ensureLoaded(this.folder)
   }
@@ -1228,17 +1235,21 @@ export class FileBrowser extends LitElement {
       @drop=${this.onDrop}
       @dragleave=${this.onDragLeave}
     >
-      <c2-tree
-        class="tree"
-        aria-label=${this.msg.t('folders')}
-        .items=${[root]}
-        .value=${[this.treeValue(this.folder)]}
-        .expandedItems=${this.expanded}
-        .loadChildren=${this.loadChildren ? this.treeLoader : undefined}
-        @selection-change=${this.onTreeSelect}
-        @expansion-change=${this.onTreeExpansion}
-      ></c2-tree>
+      ${this.treeReady ? this.renderTreeElement(root) : nothing}
     </nav>`
+  }
+
+  private renderTreeElement(root: TreeNode) {
+    return html`<c2-tree
+      class="tree"
+      aria-label=${this.msg.t('folders')}
+      .items=${[root]}
+      .value=${[this.treeValue(this.folder)]}
+      .expandedItems=${this.expanded}
+      .loadChildren=${this.loadChildren ? this.treeLoader : undefined}
+      @selection-change=${this.onTreeSelect}
+      @expansion-change=${this.onTreeExpansion}
+    ></c2-tree>`
   }
 
   override render(): TemplateResult {
