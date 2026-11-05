@@ -114,6 +114,53 @@ test('step rounds on leaving; Arrow Up and Down move along the step grid within 
   expect(await value(field(page))).toBe(3600)
 })
 
+test('rounding on leaving fires input and change, so a binding that listens to input gets the rounded value', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-duration-input id="typed" aria-label="Typed" step="900"></c2-duration-input><c2-duration-input id="given" aria-label="Given" step="900" value="5410"></c2-duration-input>`,
+  )
+  // What a v-model or ngModel binding sees: the value at each event.
+  await page.evaluate(() =>
+    document.querySelectorAll('c2-duration-input').forEach((element) => {
+      const seen: string[] = []
+      for (const name of ['input', 'change'])
+        element.addEventListener(name, () => {
+          seen.push(`${name}:${(element as HTMLElement & { value: number | null }).value}`)
+          element.setAttribute('data-seen', JSON.stringify(seen))
+        })
+    }),
+  )
+  const seen = async (selector: string) => JSON.parse((await page.locator(selector).getAttribute('data-seen')) ?? '[]') as string[]
+  await input(field(page, '#typed')).fill('1h 31m')
+  await page.keyboard.press('Tab')
+  await expect(input(field(page, '#typed'))).toHaveValue('1h 30m')
+  const typed = await seen('#typed')
+  // The last input carries the rounded value, before the change.
+  expect(typed.filter((entry) => entry.startsWith('input:')).at(-1)).toBe('input:5400')
+  expect(typed.at(-1)).toBe('change:5400')
+  // Left without an edit: the given 5410 rounds to 5400, and both events say so.
+  await input(field(page, '#given')).focus()
+  await page.keyboard.press('Tab')
+  await expect(input(field(page, '#given'))).toHaveValue('1h 30m')
+  expect(await seen('#given')).toEqual(['input:5400', 'change:5400'])
+})
+
+test('a value given as a property string or an empty string is read as seconds or as no value', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-duration-input aria-label="Estimate" required min="600" value="5400"></c2-duration-input>`)
+  const state = () =>
+    field(page).evaluate((element) => {
+      const control = element as HTMLElement & { value: unknown; min: unknown; validity: ValidityState }
+      return { value: control.value, min: control.min, valueMissing: control.validity.valueMissing, rangeUnderflow: control.validity.rangeUnderflow }
+    })
+  // Angular's writeValue(null) assigns an empty string: no value, so required reports it and no range flag is set.
+  await field(page).evaluate((element) => ((element as HTMLElement & { value: unknown }).value = ''))
+  await expect(input(field(page))).toHaveValue('')
+  expect(await state()).toEqual({ value: null, min: 600, valueMissing: true, rangeUnderflow: false })
+  // Svelte 5 or a server renderer hands over strings.
+  await field(page).evaluate((element) => Object.assign(element, { value: '5400', min: '' }))
+  await expect(input(field(page))).toHaveValue('1h 30m')
+  expect(await state()).toEqual({ value: 5400, min: undefined, valueMissing: false, rangeUnderflow: false })
+})
+
 test('Arrow keys step by one unit without a step, and never below zero', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-duration-input aria-label="Wait" unit="h"></c2-duration-input>`)
   await input(field(page)).focus()

@@ -38,6 +38,15 @@ const secondsConverter = {
   toAttribute(value: number | null): string | null {
     return value === null || value === undefined ? null : String(value)
   },
+  /**
+   * A value assigned to the property: a framework may hand over `''` or `null` for "no value" (Angular's
+   * `writeValue(null)`) or a numeric string (Svelte 5, a server renderer), which must not be stored as is.
+   */
+  fromProperty(value: unknown): number | null {
+    if (value === null || value === undefined) return null
+    if (typeof value === 'string') return secondsConverter.fromAttribute(value)
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null
+  },
 }
 
 /** Reads a seconds attribute (`min`, `max`, `step`) as a number, or `undefined`. */
@@ -46,6 +55,12 @@ const optionalSecondsConverter = {
     if (value === null || value.trim() === '') return undefined
     const number = Number(value)
     return Number.isFinite(number) && number >= 0 ? number : undefined
+  },
+  /** A string or an empty value assigned to the property, read as the attribute would be. */
+  fromProperty(value: unknown): number | undefined {
+    if (value === null || value === undefined) return undefined
+    if (typeof value === 'string') return optionalSecondsConverter.fromAttribute(value)
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined
   },
 }
 
@@ -299,18 +314,25 @@ export class DurationInput extends LitElement {
   }
 
   private handleChange(event: Event) {
-    this.commit()
+    // Rounding to `step` changes the value after the last `input`: say so, or a binding (v-model, ngModel) that only
+    // listens to `input` keeps the value from before the rounding.
+    if (this.commit()) this.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }))
     redispatchEvent(this, event)
   }
 
-  /** Rounds the value to `step` and rewrites the text in `format`, unless the text cannot be read. */
-  private commit() {
+  /**
+   * Rounds the value to `step` and rewrites the text in `format`, unless the text cannot be read. Returns whether the
+   * value changed.
+   */
+  private commit(): boolean {
     const seconds = this.read(this.text)
-    if (seconds === null) return
+    if (seconds === null) return false
+    const before = this.value
     const value = this.rounded(seconds)
     this.value = value
     this.writtenValue = value
     this.text = this.write(value, this.format)
+    return value !== before
   }
 
   private handleFocusIn(event: FocusEvent) {
@@ -321,8 +343,12 @@ export class DurationInput extends LitElement {
   private handleFocusOut(event: FocusEvent) {
     this.focused = false
     this.touched = true
-    // A field left without an edit still gets its text written in `format`.
-    this.commit()
+    // A field left without an edit still gets its text written in `format`. If that rounds the value to `step`, the
+    // browser fires no `change` (nothing was typed), so both events come from here.
+    if (this.commit()) {
+      this.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }))
+      this.dispatchEvent(new Event('change', { bubbles: true }))
+    }
     redispatchEvent(this, event)
   }
 

@@ -26,8 +26,14 @@ export interface QuickTimeSelectDetail {
 }
 
 /** Events fired by {@link QuickTimeMenu}, keyed for `addEventListener`. */
+export interface QuickTimeMenuToggleDetail {
+  /** True when the menu just opened. */
+  open: boolean
+}
+
 export interface QuickTimeMenuEventMap {
   'time-select': CustomEvent<QuickTimeSelectDetail>
+  'menu-toggle': CustomEvent<QuickTimeMenuToggleDetail>
   input: Event
   change: Event
 }
@@ -35,6 +41,16 @@ export interface QuickTimeMenuEventMap {
 export interface QuickTimeMenu {
   addEventListener: TypedAddEventListener<QuickTimeMenu, QuickTimeMenuEventMap>
   removeEventListener: TypedRemoveEventListener<QuickTimeMenu, QuickTimeMenuEventMap>
+}
+
+/**
+ * `min` or `max` as a comparable `YYYY-MM-DDTHH:mm`: a date alone means the start of that day for `min` and its last
+ * minute for `max`, so `max="2026-11-06"` still allows any time on the 6th.
+ */
+function boundOf(bound: string, kind: 'min' | 'max'): string {
+  if (!bound) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(bound)) return `${bound}T${kind === 'min' ? '00:00' : '23:59'}`
+  return bound.slice(0, 16)
 }
 
 interface Row {
@@ -65,8 +81,10 @@ const clearIcon = svg`<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"></path>`
  * click. A pick fires `input`, `change` and `time-select` (with the preset's `id`).
  *
  * The trigger shows `label` until a time is chosen, then that time; a separate clear button sits beside it
- * (`clearable="false"` removes it). Slot your own trigger into `trigger`. `inline` draws the list without a trigger or
- * popover, to sit inside another menu, a sheet or a card.
+ * (`clearable="false"` removes it). Slot your own trigger into `trigger`; the component never writes attributes on it,
+ * so give it `aria-haspopup="menu"` yourself and keep its `aria-expanded` in step from `menu-toggle` (or read
+ * `expanded`, and style through `:state(open)`). `inline` draws the list without a trigger or popover, to sit inside
+ * another menu, a sheet or a card.
  *
  * It is a form control: under a `name` the form receives the value, `required` asks for one, and it takes part in
  * `c2-form-field`. The list is a `menu` of `menuitemradio` rows (the chosen one checked) with arrow keys, Home, End
@@ -77,6 +95,7 @@ const clearIcon = svg`<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"></path>`
  * @slot trigger - Replaces the built-in trigger button: an element that opens the menu (a `c2-button`, a `c2-icon-button`, a plain `<button>`).
  *
  * @event {CustomEvent<QuickTimeSelectDetail>} time-select - A time was picked: `detail.value` and `detail.preset` (the preset's `id`, or `null` from the date and time panel).
+ * @event {CustomEvent<QuickTimeMenuToggleDetail>} menu-toggle - The menu opened or closed: `detail.open`. A slotted trigger updates its own `aria-expanded` from it.
  * @event {Event} input - The value changed (a pick or a clear).
  * @event {Event} change - The value changed (a pick or a clear).
  *
@@ -157,10 +176,10 @@ export class QuickTimeMenu extends LitElement {
   /** IANA time zone the value is read in, such as `Europe/Paris`; empty is the browser's zone. */
   @property({ attribute: 'time-zone' }) timeZone = ''
 
-  /** Earliest time a row may fall at, `YYYY-MM-DDTHH:mm`; later rows only. */
+  /** Earliest time a row may fall at, `YYYY-MM-DDTHH:mm`, or a date (`YYYY-MM-DD`) for the start of that day. */
   @property() min = ''
 
-  /** Latest time a row may fall at, `YYYY-MM-DDTHH:mm`. */
+  /** Latest time a row may fall at, `YYYY-MM-DDTHH:mm`, or a date (`YYYY-MM-DD`) for any time that day. */
   @property() max = ''
 
   /** Draws the list in place, without a trigger or popover. */
@@ -230,6 +249,11 @@ export class QuickTimeMenu extends LitElement {
     this.formDisabled = disabled
   }
 
+  /** True while the menu is open. Also the custom state `:state(open)`. */
+  get expanded(): boolean {
+    return this.open
+  }
+
   /** Opens the menu. Does nothing inline or while disabled. */
   showMenu(): void {
     if (this.inline || this.isDisabled) return
@@ -287,7 +311,9 @@ export class QuickTimeMenu extends LitElement {
 
   private inRange(value: string): boolean {
     const time = value.slice(0, 16)
-    return (!this.min || time >= this.min.slice(0, 16)) && (!this.max || time <= this.max.slice(0, 16))
+    const min = boundOf(this.min, 'min')
+    const max = boundOf(this.max, 'max')
+    return (!min || time >= min) && (!max || time <= max)
   }
 
   /** The rows that apply now, each with the time it resolves to. */
@@ -323,7 +349,6 @@ export class QuickTimeMenu extends LitElement {
 
   protected override updated(changed: PropertyValues): void {
     if (changed.has('value') || changed.has('required') || changed.has('disabled') || changed.has('formDisabled') || changed.has('name')) this.syncForm()
-    if (changed.has('slottedTrigger') || changed.has('open') || changed.has('disabled') || changed.has('formDisabled')) this.syncSlottedTrigger()
   }
 
   private syncForm(): void {
@@ -331,14 +356,6 @@ export class QuickTimeMenu extends LitElement {
     const anchor = this.renderRoot.querySelector<HTMLElement>('.anchor') ?? undefined
     if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), anchor)
     else this.internals.setValidity({})
-  }
-
-  /** `aria-haspopup` and `aria-expanded` belong on the element that is the button, so they go on a slotted trigger. */
-  private syncSlottedTrigger(): void {
-    const target = this.slottedTrigger
-    if (!target) return
-    target.setAttribute('aria-haspopup', 'menu')
-    target.setAttribute('aria-expanded', String(this.open))
   }
 
   // ------------------------------------------------------------------------------------------------------- choices
@@ -374,8 +391,18 @@ export class QuickTimeMenu extends LitElement {
   }
 
   private pickRow(row: Row): void {
-    // Resolved again at the click: a menu left open past a boundary must not pick a stale time.
-    const value = resolveQuickTime(row.preset.at, this.options) || row.value
+    // Resolved again at the click: a menu left open past a boundary must not pick a stale time. A row that no longer
+    // applies (or now falls outside min/max) is not picked: the list is redrawn without it and stays open.
+    const value = resolveQuickTime(row.preset.at, this.options)
+    if (!value || !this.inRange(value)) {
+      this.tick++
+      void this.updateComplete.then(() => {
+        const rows = this.rowElements()
+        this.active = Math.min(this.active, rows.length - 1)
+        rows[this.active]?.focus()
+      })
+      return
+    }
     this.pick(value, row.preset.id)
   }
 
@@ -388,7 +415,7 @@ export class QuickTimeMenu extends LitElement {
 
   private openPanel(): void {
     const tomorrow = resolveQuickTime('tomorrow', this.options)
-    this.draft = this.value || (this.inRange(tomorrow) ? tomorrow : this.min.slice(0, 16)) || tomorrow
+    this.draft = this.value || (this.inRange(tomorrow) ? tomorrow : boundOf(this.min, 'min')) || tomorrow
     this.panel = true
     void this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('c2-date-time-picker')?.focus())
   }
@@ -461,6 +488,9 @@ export class QuickTimeMenu extends LitElement {
 
   private handleToggle(event: ToggleEvent): void {
     this.open = event.newState === 'open'
+    if (this.open) this.internals.states.add('open')
+    else this.internals.states.delete('open')
+    this.dispatchEvent(new CustomEvent<QuickTimeMenuToggleDetail>('menu-toggle', { detail: { open: this.open } }))
     if (this.open) {
       void this.updateComplete.then(() => {
         const rows = this.rowElements()
@@ -534,8 +564,8 @@ export class QuickTimeMenu extends LitElement {
       <div class="panel-heading" id="panel-heading">${this.msg.t('customHeading')}</div>
       <c2-date-time-picker
         .value=${this.draft}
-        min=${this.min || nothing}
-        max=${this.max || nothing}
+        min=${boundOf(this.min, 'min') || nothing}
+        max=${boundOf(this.max, 'max') || nothing}
         time-zone=${this.timeZone || nothing}
         aria-label=${this.msg.t('customHeading')}
         aria-describedby="panel-hint"
