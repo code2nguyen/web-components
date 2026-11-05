@@ -6,6 +6,7 @@
     background: #f4f4f5,
     divider--width: 2px,
     divider--color: #ffffff,
+    divider--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25),
     handle--size: 40px,
     handle--background: #ffffff,
     handle--color: #18181b,
@@ -16,11 +17,10 @@
     label--background: rgba(24, 24, 27, 0.6),
     label--color: #ffffff,
     label--font-size: 12px,
-    label--font-weight: 500,
+    label--font-weight: 600,
     label--padding: 4px 10px,
     label--border-radius: 999px,
     label--offset: 12px,
-    transition-duration: 150ms,
   )
 );
 
@@ -78,6 +78,29 @@
   -webkit-user-drag: none;
 }
 
+.chips {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+// Each chip belongs to its layer: the divider cuts it as it passes over, as it cuts the layer.
+.before-chips {
+  clip-path: inset(0 calc(100% - var(--_position)) 0 0);
+}
+
+.after-chips {
+  clip-path: inset(0 0 0 var(--_position));
+}
+
+.vertical .before-chips {
+  clip-path: inset(0 0 calc(100% - var(--_position)) 0);
+}
+
+.vertical .after-chips {
+  clip-path: inset(var(--_position) 0 0 0);
+}
+
 .label {
   position: absolute;
   top: css.cssVar(label--offset);
@@ -90,7 +113,6 @@
   line-height: 1.3;
   white-space: nowrap;
   pointer-events: none;
-  transition: opacity css.cssVar(transition-duration) ease;
 }
 
 .before-label {
@@ -108,10 +130,6 @@
   left: css.cssVar(label--offset);
 }
 
-.label.covered {
-  opacity: 0;
-}
-
 .divider {
   position: absolute;
   top: 0;
@@ -120,6 +138,7 @@
   width: css.cssVar(divider--width);
   transform: translateX(-50%);
   background: css.cssVar(divider--color);
+  box-shadow: css.cssVar(divider--box-shadow);
   pointer-events: none;
 }
 
@@ -167,17 +186,11 @@
 }
 
 .grip {
-  width: 60%;
-  height: 60%;
+  width: 50%;
+  height: 50%;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .label {
-    transition: none;
-  }
 }

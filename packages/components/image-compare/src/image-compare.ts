@@ -24,9 +24,6 @@ export interface ImageCompare {
   removeEventListener: TypedRemoveEventListener<ImageCompare, ImageCompareEventMap>
 }
 
-/** A label chip fades once the divider is this close (in percent) to its edge, before the divider reaches it. */
-const LABEL_FADE = 18
-
 const clamp = (value: number) => (Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 50)
 const round = (value: number) => Math.round(value * 10) / 10
 
@@ -40,7 +37,8 @@ const round = (value: number) => Math.round(value * 10) / 10
  * before layer shown, from 0 to 100 (default 50).
  *
  * Drag the handle, or press anywhere on the images, to move the divider; with `hover`, it follows the pointer without a
- * press. `before-label` and `after-label` draw chips in the corners, each fading as the divider comes over it. `input`
+ * press. `before-label` and `after-label` draw chips in the corners; each belongs to its layer, so the divider cuts it
+ * as it passes over. `input`
  * fires while the divider moves and `change` once it settles (on release, or after a key); read `position`.
  *
  * The handle is a `slider`. Its name is `label`, else "Compare: …" built from the layers' alternative text. The arrow
@@ -65,6 +63,7 @@ const round = (value: number) => Math.round(value * 10) / 10
  * @cssproperty {color} [--c2-image-compare--background=#f4f4f5] - Behind the layers, while they load.
  * @cssproperty {pixel} [--c2-image-compare__divider--width=2px] - Thickness of the divider line.
  * @cssproperty {color} [--c2-image-compare__divider--color=#ffffff] - Colour of the divider line.
+ * @cssproperty {shadow} [--c2-image-compare__divider--box-shadow=0 0 0 1px rgba(0, 0, 0, 0.25)] - Edge of the divider line, so it reads on light images.
  * @cssproperty {pixel} [--c2-image-compare__handle--size=40px] - Diameter of the handle.
  * @cssproperty {color} [--c2-image-compare__handle--background=#ffffff] - Fill of the handle.
  * @cssproperty {color} [--c2-image-compare__handle--color=#18181b] - The grip arrows.
@@ -75,11 +74,10 @@ const round = (value: number) => Math.round(value * 10) / 10
  * @cssproperty {color} [--c2-image-compare__label--background=rgba(24, 24, 27, 0.6)] - Fill of the corner chips.
  * @cssproperty {color} [--c2-image-compare__label--color=#ffffff] - Text of the corner chips.
  * @cssproperty {length} [--c2-image-compare__label--font-size=12px] - Text size of the corner chips.
- * @cssproperty {number} [--c2-image-compare__label--font-weight=500] - Text weight of the corner chips.
+ * @cssproperty {number} [--c2-image-compare__label--font-weight=600] - Text weight of the corner chips.
  * @cssproperty {length} [--c2-image-compare__label--padding=4px 10px] - Inner spacing of the corner chips.
  * @cssproperty {length} [--c2-image-compare__label--border-radius=999px] - Corner radius of the chips.
  * @cssproperty {pixel} [--c2-image-compare__label--offset=12px] - Distance of the chips from the frame's edges.
- * @cssproperty {time} [--c2-image-compare--transition-duration=150ms] - Duration of the chips' fade.
  */
 @customElement('c2-image-compare')
 export class ImageCompare extends LitElement {
@@ -209,9 +207,7 @@ export class ImageCompare extends LitElement {
   }
 
   private renderGrip() {
-    const arrows = this.vertical
-      ? svg`<path d="M7 9.5 12 4.5 17 9.5M7 14.5 12 19.5 17 14.5" />`
-      : svg`<path d="M9.5 7 4.5 12 9.5 17M14.5 7 19.5 12 14.5 17" />`
+    const arrows = this.vertical ? svg`<path d="M7 9.5 12 4.5 17 9.5M7 14.5 12 19.5 17 14.5" />` : svg`<path d="M9.5 7 4.5 12 9.5 17M14.5 7 19.5 12 14.5 17" />`
     return html`<svg class="grip" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${arrows}</svg>`
   }
 
@@ -232,16 +228,16 @@ export class ImageCompare extends LitElement {
     >
       <div class="layer before"><slot name="before" @slotchange=${this.onSlotChange}></slot></div>
       <div class="layer after"><slot name="after" @slotchange=${this.onSlotChange}></slot></div>
-      ${this.beforeLabel
-        ? html`<span class=${classMap({ label: true, 'before-label': true, covered: position < LABEL_FADE })} part="label" aria-hidden="true"
-            >${this.beforeLabel}</span
-          >`
-        : nothing}
-      ${this.afterLabel
-        ? html`<span class=${classMap({ label: true, 'after-label': true, covered: position > 100 - LABEL_FADE })} part="label" aria-hidden="true"
-            >${this.afterLabel}</span
-          >`
-        : nothing}
+      ${
+        this.beforeLabel
+          ? html`<div class="chips before-chips" aria-hidden="true"><span class="label before-label" part="label">${this.beforeLabel}</span></div>`
+          : nothing
+      }
+      ${
+        this.afterLabel
+          ? html`<div class="chips after-chips" aria-hidden="true"><span class="label after-label" part="label">${this.afterLabel}</span></div>`
+          : nothing
+      }
       <div class="divider" part="divider">
         <div
           class="handle"

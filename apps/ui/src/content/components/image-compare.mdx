@@ -1,7 +1,7 @@
 ---
 title: 'Image Compare'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ImageCompare } from '@c2n/components/image-compare'
 
-`c2-image-compare` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-image-compare` lays two layers on top of each other and cuts the after layer at a divider the reader drags: a retouched photo, a redesign, two versions of a chart or two map layers. The layers are any elements you slot, not only images.
 
 ## Import
 
@@ -21,13 +20,42 @@ import '@c2n/components/image-compare'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/image-compare
-<div data-label="Default">
-  <c2-image-compare></c2-image-compare>
+<style>
+  .compare-demo {
+    width: 480px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Before and after">
+  <c2-image-compare class="compare-demo" before-label="Before" after-label="After">
+    <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+    <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+  </c2-image-compare>
+</div>
+<div data-label="Vertical">
+  <c2-image-compare class="compare-demo" orientation="vertical" position="40" before-label="Before" after-label="After">
+    <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+    <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+  </c2-image-compare>
+</div>
+<div data-label="Hover">
+  <c2-image-compare class="compare-demo" hover label="Makeover, before and after">
+    <img slot="before" src="/web-components/images/compare-before.svg" alt="" width="800" height="500" />
+    <img slot="after" src="/web-components/images/compare-after.svg" alt="" width="800" height="500" />
+  </c2-image-compare>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+## Layers
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+The `before` slot sets the size: give its image a `width` and `height` (or the component a `--c2-image-compare--aspect-ratio`) so the space is reserved before it loads. The `after` slot is laid over it and cut at the divider. Any element works in either slot: a `c2-image`, a `<canvas>`, a chart or a map; it is sized to fill the frame.
+
+`position` is the share of the before layer shown, from 0 to 100 (default 50). `orientation="vertical"` puts the before layer on top. `before-label` and `after-label` draw chips in the corners; each belongs to its layer, so the divider cuts it as it passes.
+
+## Moving the divider
+
+Drag the handle, or press anywhere on the images to move the divider there. With `hover` it follows the pointer without a press (a touch still drags). `input` fires while it moves and `change` once it settles: on release, after a key, or when the pointer leaves in `hover` mode. Read `position` in either.
+
+## Accessibility
+
+The handle is a `slider` whose value reads "30% before, 70% after". Its name is `label`, or "Compare: …" built from the alternative text of the two layers; set `label` when the images are decorative (`alt=""`). The arrow keys move the divider 1% in the direction pressed, Page Up and Page Down 10%, Home and End to the edges.

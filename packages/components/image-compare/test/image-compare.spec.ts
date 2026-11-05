@@ -9,11 +9,16 @@ const compare = (page: Page, selector = 'c2-image-compare') => page.locator(sele
 const handle = (locator: Locator) => locator.locator('.handle')
 const position = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement & { position: number }).position)
 const events = async (locator: Locator) => JSON.parse((await locator.getAttribute('data-events')) ?? '[]') as unknown[]
-/** The colour drawn at a share of the frame's width (or height when vertical), sampled from a screenshot. */
+/** Which layer shows at a share of the frame's width (or height when vertical), sampled from a screenshot. */
 async function colorAt(page: Page, locator: Locator, share: number, vertical = false): Promise<string> {
   const box = (await locator.boundingBox())!
   const x = vertical ? box.x + box.width / 2 : box.x + box.width * share
-  const y = vertical ? box.y + box.height * share : box.y + box.height / 4
+  const y = vertical ? box.y + box.height * share : box.y + box.height * 0.6
+  return pixel(page, x, y)
+}
+
+/** `before` (blue), `after` (red) or `chip` (the dark chip over the blue layer) at a point of the page. */
+async function pixel(page: Page, x: number, y: number): Promise<string> {
   const shot = await page.screenshot({ clip: { x: Math.round(x), y: Math.round(y), width: 1, height: 1 } })
   return page.evaluate(async (data) => {
     const image = new Image()
@@ -23,12 +28,12 @@ async function colorAt(page: Page, locator: Locator, share: number, vertical = f
     canvas.width = canvas.height = 1
     const context = canvas.getContext('2d')!
     context.drawImage(image, 0, 0)
-    const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-    return r > b ? 'after' : 'before'
+    const [r, , b] = context.getImageData(0, 0, 1, 1).data
+    return r > b ? 'after' : b > 150 ? 'before' : 'chip'
   }, shot.toString('base64'))
 }
 
-test('the after layer is cut at the divider; the handle is a named slider; labels fade as the divider covers them', async ({ page, renderScenario }) => {
+test('the after layer is cut at the divider; the handle is a named slider; each label chip is cut with its layer', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-image-compare before-label="Before" after-label="After">${layers}</c2-image-compare>`)
   const host = compare(page)
   await expect(page.getByRole('slider', { name: 'Compare: Kitchen before / Kitchen after' })).toHaveAttribute('aria-valuetext', '50% before, 50% after')
@@ -37,10 +42,13 @@ test('the after layer is cut at the divider; the handle is a named slider; label
   expect(await colorAt(page, host, 0.25)).toBe('before')
   expect(await colorAt(page, host, 0.75)).toBe('after')
   await expect(host.locator('.before-label')).toHaveText('Before')
-  await expect(host.locator('.before-label')).not.toHaveClass(/covered/)
+  const chip = (await host.locator('.before-label').boundingBox())!
+  const middle = { x: chip.x + chip.width / 2, y: chip.y + chip.height / 2 }
+  expect(await pixel(page, middle.x, middle.y)).toBe('chip')
+  // Once the divider passes over it, the before chip is cut with its layer: the after layer shows there.
   await host.evaluate((element) => ((element as HTMLElement & { position: number }).position = 5))
-  await expect(host.locator('.before-label')).toHaveClass(/covered/)
-  await expect(host.locator('.after-label')).not.toHaveClass(/covered/)
+  expect(await pixel(page, middle.x, middle.y)).toBe('after')
+  await expect(host.locator('.after-label')).toBeVisible()
   // The component wrote nothing on its host.
   expect(await host.evaluate((element) => element.getAttributeNames().sort())).toEqual(['after-label', 'before-label'])
   await accessible(page)
