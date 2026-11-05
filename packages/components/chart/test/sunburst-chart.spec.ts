@@ -609,3 +609,41 @@ test('a real click on a segment zooms through the animated morph without errors'
   await expect(chart.locator('.sunburst-breadcrumb')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+// Uneven depth (Operations stops at two levels, Platform goes to three) must not push any segment past the outer ring.
+for (const height of ['480px', '320px']) {
+  test(`draws every segment inside the outer ring, at ${height} high`, async ({ page }) => {
+    await open(page, 'budget', '&animation=none')
+    const chart = page.locator('c2-sunburst-chart')
+    await expect(chart).toHaveState('ready')
+    await chart.evaluate(async (element, value) => {
+      ;(element as HTMLElement).style.height = value
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    }, height)
+    const result = await chart.evaluate((element) => {
+      const sunburst = element as SunburstElement
+      const series = sunburst.buildOptions(sunburst.buildContext()).series[0] as { center: number[]; radius: number[] }
+      const canvas = sunburst.shadowRoot?.querySelector('.plot canvas') as HTMLCanvasElement
+      const scale = canvas.width / canvas.clientWidth
+      const pixels = (canvas.getContext('2d') as CanvasRenderingContext2D).getImageData(0, 0, canvas.width, canvas.height).data
+      // The circle the plot box allows (4px clear of its edges), worked out independently of the options.
+      const cx = canvas.clientWidth / 2
+      const cy = canvas.clientHeight / 2
+      const outer = Math.min(canvas.clientWidth, canvas.clientHeight) / 2 - 4
+      const option = series.radius[1]
+      let farthest = 0
+      for (let y = 0; y < canvas.height; y += 1) {
+        for (let x = 0; x < canvas.width; x += 1) {
+          if (pixels[(y * canvas.width + x) * 4 + 3] < 32) continue
+          farthest = Math.max(farthest, Math.hypot(x / scale - cx, y / scale - cy))
+        }
+      }
+      return { farthest, outer, option, center: series.center, expected: [cx, cy] }
+    })
+    expect(result.option).toBeCloseTo(result.outer, 0)
+    expect(result.center).toEqual(result.expected)
+    // Something is drawn on the outer ring, and nothing beyond it (a pixel of antialiasing and the gap stroke aside).
+    expect(result.farthest).toBeGreaterThan(result.outer - 2)
+    expect(result.farthest).toBeLessThanOrEqual(result.outer + 2)
+  })
+}
