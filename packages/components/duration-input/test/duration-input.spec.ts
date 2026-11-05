@@ -6,6 +6,8 @@ type Api = {
   formatDurationText(seconds: number, options?: Record<string, unknown>): string
 }
 
+// Scenarios that leave a field with Tab put a button after it: Tab from the last control sends focus out of the page,
+// and headless Firefox then fires neither change nor focusout, so the field was never left.
 const field = (page: Page, selector = 'c2-duration-input') => page.locator(selector)
 const input = (locator: Locator) => locator.locator('input')
 const preview = (locator: Locator) => locator.locator('.preview')
@@ -94,7 +96,7 @@ test('typing previews how the text was read; leaving rewrites it, fires change o
 })
 
 test('step rounds on leaving; Arrow Up and Down move along the step grid within min and max', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-duration-input aria-label="Break" step="900" max="5400"></c2-duration-input>`)
+  await renderScenario(`<c2-duration-input aria-label="Break" step="900" max="5400"></c2-duration-input><button>Next</button>`)
   await watch(field(page), 'input')
   await input(field(page)).fill('1h20')
   await page.keyboard.press('Tab')
@@ -116,7 +118,7 @@ test('step rounds on leaving; Arrow Up and Down move along the step grid within 
 
 test('rounding on leaving fires input and change, so a binding that listens to input gets the rounded value', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-duration-input id="typed" aria-label="Typed" step="900"></c2-duration-input><c2-duration-input id="given" aria-label="Given" step="900" value="5410"></c2-duration-input>`,
+    `<c2-duration-input id="typed" aria-label="Typed" step="900"></c2-duration-input><c2-duration-input id="given" aria-label="Given" step="900" value="5410"></c2-duration-input><button>Next</button>`,
   )
   // What a v-model or ngModel binding sees: the value at each event.
   await page.evaluate(() =>
@@ -182,7 +184,8 @@ test('format, largest-unit and day-hours decide how the value is written', async
     <c2-duration-input id="long" aria-label="Long" format="long" value="5400"></c2-duration-input>
     <c2-duration-input id="clock" aria-label="Clock" format="clock" value="5400"></c2-duration-input>
     <c2-duration-input id="hours" aria-label="Hours" largest-unit="h" value="172800"></c2-duration-input>
-    <c2-duration-input id="workday" aria-label="Time spent" day-hours="8"></c2-duration-input>`)
+    <c2-duration-input id="workday" aria-label="Time spent" day-hours="8"></c2-duration-input>
+    <button>Next</button>`)
   await expect(input(field(page, '#long'))).toHaveValue('1 hour, 30 minutes')
   await expect(input(field(page, '#clock'))).toHaveValue('1:30')
   await expect(input(field(page, '#hours'))).toHaveValue('48h')
@@ -258,7 +261,7 @@ test('a failed submit shows the message of a field never visited; reset restores
 })
 
 test('a translation reads its own unit words and writes the long format in its language', async ({ page, renderScenario }) => {
-  await renderScenario(`<div lang="fr"><c2-duration-input aria-label="Durée" format="long"></c2-duration-input></div>`)
+  await renderScenario(`<div lang="fr"><c2-duration-input aria-label="Durée" format="long"></c2-duration-input><button>Suivant</button></div>`)
   await expect(input(field(page))).toHaveAttribute('placeholder', 'ex. 1 h 30 min')
   await input(field(page)).fill('2 heures 15 mn')
   expect(await value(field(page))).toBe(8100)

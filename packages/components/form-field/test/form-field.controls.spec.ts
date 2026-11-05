@@ -93,7 +93,9 @@ test('c2-button-group keeps its role on its internals outside a field and on the
 })
 
 test('a control that writes its own bounds names them in the range message: an hour, not 3600 seconds', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-form-field label="Break" validate-on="blur"><c2-duration-input max="3600"></c2-duration-input></c2-form-field>`)
+  await renderScenario(
+    `<c2-form-field label="Break" validate-on="blur"><c2-duration-input max="3600"></c2-duration-input></c2-form-field><button>Next</button>`,
+  )
   await page.locator('c2-duration-input input').fill('2h')
   await page.keyboard.press('Tab')
   await expect
