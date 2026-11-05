@@ -14,7 +14,6 @@ export type EchartsFeature =
   | 'sankey'
   | 'treemap'
   | 'sunburst'
-  | 'boxplot'
   | 'pie'
   | 'gauge'
   | 'radar'
@@ -37,7 +36,6 @@ const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   sankey: () => import('echarts/charts').then((m) => [m.SankeyChart]),
   treemap: () => import('echarts/charts').then((m) => [m.TreemapChart]),
   sunburst: () => import('echarts/charts').then((m) => [m.SunburstChart]),
-  boxplot: () => import('echarts/charts').then((m) => [m.BoxplotChart]),
   pie: () => import('echarts/charts').then((m) => [m.PieChart]),
   gauge: () => import('echarts/charts').then((m) => [m.GaugeChart]),
   radar: () => import('echarts/charts').then((m) => [m.RadarChart]),

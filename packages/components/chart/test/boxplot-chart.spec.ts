@@ -157,7 +157,7 @@ test('statistics: interpolated quartiles, Tukey fences, range whiskers, summarie
   expect(model.boxes[0][1]).toMatchObject({ median: 25, count: 4 })
   expect(model.boxes[1][0]).toMatchObject({ median: 5.5, count: 4 })
   expect(model.boxes[1][1]).toMatchObject({ min: 0, median: 2, max: 4, given: true })
-  expect(model.boxes[1][1].count).toBeUndefined()
+  expect(model.boxes[1][1]?.count).toBeUndefined()
   expect(model.boxes[2]).toEqual([null, null])
   expect(model.list).toHaveLength(4)
 })

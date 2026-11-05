@@ -36,6 +36,9 @@ import '@c2n/components/chart' // all of them
 | `c2-scatter-chart`     | ECharts | Relationships, clusters and outliers            |
 | `c2-candlestick-chart` | ECharts | Open-high-low-close financial sessions          |
 | `c2-overlap-chart`     | ECharts | How two or three sets overlap (Venn diagram)    |
+| `c2-bullet-chart`      | ECharts | A measure against its target and quality bands  |
+| `c2-boxplot-chart`     | ECharts | Distributions: quartiles, whiskers, outliers    |
+| `c2-sunburst-chart`    | ECharts | A hierarchy as rings, with click to zoom        |
 | `c2-chart-series`      | —       | A series definition; renders nothing            |
 | `c2-chart-legend`      | —       | A linked legend placed anywhere in the layout   |
 | `c2-chart-tooltip`     | —       | A linked floating or inline tooltip             |

@@ -12,6 +12,9 @@ import './pie-chart.js'
 import './gauge-chart.js'
 import './radar-chart.js'
 import './radial-bar-chart.js'
+import './bullet-chart.js'
+import './boxplot-chart.js'
+import './sunburst-chart.js'
 import './pyramid-chart.js'
 import './butterfly-chart.js'
 import './scatter-chart.js'
@@ -41,6 +44,18 @@ export { PieChart } from './pie-chart.js'
 export { GaugeChart } from './gauge-chart.js'
 export { RadarChart } from './radar-chart.js'
 export { RadialBarChart } from './radial-bar-chart.js'
+export { BulletChart, type BulletBand, type BulletBetter, type BulletRow, type BulletTooltipContext } from './bullet-chart.js'
+export {
+  BoxplotChart,
+  type BoxplotBox,
+  type BoxplotModel,
+  type BoxplotOrientation,
+  type BoxplotReferenceLine,
+  type BoxplotTooltipContext,
+  type BoxplotWhiskers,
+  type BoxSummary,
+} from './boxplot-chart.js'
+export { SunburstChart, type SunburstChartEventMap, type SunburstNode, type SunburstTooltipContext, type SunburstZoomEventDetail } from './sunburst-chart.js'
 export { PyramidChart } from './pyramid-chart.js'
 export { ButterflyChart } from './butterfly-chart.js'
 export type { PyramidSizing, PyramidSort } from './pyramid-layout.js'
