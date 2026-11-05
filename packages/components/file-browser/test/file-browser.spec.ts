@@ -318,3 +318,50 @@ test('below the narrow width the tree gives way to an Up button and the rows sho
   await expect(host.locator('c2-breadcrumb .current')).toHaveText('Projects')
   await accessible(page)
 })
+
+test('a refresh while a folder is loading drops the stale answer: the newer list wins, whichever arrives first', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-file-browser locale="en-US"></c2-file-browser>')
+  const host = browser(page)
+  await page.evaluate(() => {
+    const state = window as unknown as { answers: ((items: unknown[]) => void)[] }
+    state.answers = []
+    const host = document.querySelector('c2-file-browser') as HTMLElement & { loadChildren: (folder: string) => Promise<unknown[]>; refresh(): void }
+    host.loadChildren = () => new Promise((resolve) => state.answers.push(resolve))
+    host.refresh()
+  })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { answers: unknown[] }).answers.length)).toBe(1)
+  // The app renames a file, then refreshes while the first load is still out.
+  await page.evaluate(() => (document.querySelector('c2-file-browser') as HTMLElement & { refresh(): void }).refresh())
+  await expect.poll(() => page.evaluate(() => (window as unknown as { answers: unknown[] }).answers.length)).toBe(2)
+  await page.evaluate(() => {
+    const { answers } = window as unknown as { answers: ((items: unknown[]) => void)[] }
+    answers[1]([{ id: 'a', name: 'Renamed.txt', kind: 'file' }])
+  })
+  await expect.poll(() => names(host)).toEqual(['Renamed.txt'])
+  await page.evaluate(() => {
+    const { answers } = window as unknown as { answers: ((items: unknown[]) => void)[] }
+    answers[0]([{ id: 'a', name: 'Old name.txt', kind: 'file' }])
+  })
+  // The stale answer arrives last and changes nothing.
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await names(host)).toEqual(['Renamed.txt'])
+  await expect(host.locator('.loading')).toHaveCount(0)
+})
+
+test('keys typed in the author’s empty-slot content stay there: Backspace edits the field rather than going up', async ({ page, renderScenario }) => {
+  await renderScenario(
+    markup('')
+      .replace('folder="q4"', 'folder="assets"')
+      .replace('></c2-file-browser>', '><input slot="empty" aria-label="New folder name" /></c2-file-browser>'),
+  )
+  const host = browser(page)
+  const field = page.getByRole('textbox', { name: 'New folder name' })
+  await field.fill('Drafts')
+  await field.press('Backspace')
+  await field.press('Alt+ArrowUp')
+  await expect(field).toHaveValue('Draft')
+  await expect(host.locator('c2-breadcrumb .current')).toHaveText('Assets')
+  // The items still respond to the same keys.
+  await host.locator('c2-breadcrumb').locator('text=Q4 planning').click()
+  await expect.poll(() => names(host)).toContain('Assets')
+})

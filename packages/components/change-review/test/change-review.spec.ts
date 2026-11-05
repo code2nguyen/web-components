@@ -200,3 +200,36 @@ test('the review is a group named by its label, and a long review scrolls under 
   await page.keyboard.press('Alt+ArrowDown')
   await expect(button(page, 'Accept change 3')).toBeInViewport()
 })
+
+test('keys typed in slotted content keep their meaning; a shortcut with nothing to do is left to the page', async ({ page, renderScenario }) => {
+  await render(page, renderScenario)
+  await page.evaluate(() => {
+    document.querySelector('c2-change-review')!.innerHTML = '<input slot="actions" id="message" aria-label="Commit message" />'
+    // Records which keydowns reached the document still allowed to do their default.
+    ;(window as unknown as { kept: string[] }).kept = []
+    document.addEventListener('keydown', (event) => {
+      if (!event.defaultPrevented && !['Control', 'Alt', 'Shift', 'Meta'].includes(event.key))
+        (window as unknown as { kept: string[] }).kept.push(`${event.ctrlKey ? 'Control+' : ''}${event.altKey ? 'Alt+' : ''}${event.key}`)
+    })
+  })
+  const kept = () => page.evaluate(() => (window as unknown as { kept: string[] }).kept.splice(0))
+  // Every hunk decided: the summary shows the author's input.
+  await button(page, 'Accept all').click()
+  const input = page.locator('#message')
+  await expect(input).toBeVisible()
+  await input.fill('fix total rounding')
+  await input.press('Control+Backspace')
+  await expect(input).toHaveValue('fix total ')
+  await input.press('Alt+ArrowDown')
+  await input.press('Control+Enter')
+  expect(await kept()).toEqual(['Control+Backspace', 'Alt+ArrowDown', 'Control+Enter'])
+  expect(await decisions(page)).toEqual(['accepted', 'accepted', 'accepted'])
+
+  // On the hunks the shortcuts still work, and one with nothing to do is not swallowed.
+  await review(page).evaluate((element) => (element as HTMLElement & { reset(): void }).reset())
+  await button(page, 'Accept change 1').focus()
+  await page.keyboard.press('Alt+ArrowUp')
+  await page.keyboard.press('Control+Enter')
+  expect(await decisions(page)).toEqual(['accepted', null, null])
+  expect(await kept()).toEqual(['Alt+ArrowUp'])
+})

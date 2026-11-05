@@ -65,6 +65,12 @@ const HISTORY_LIMIT = 1000
 const ANNOUNCE_LINES = 3
 const ANNOUNCE_CHARS = 300
 
+/** Settles a wait raced against Ctrl+C. */
+const STOP = Symbol('stop')
+
+/** How many screen lines a printed block holds. */
+const linesOf = (block: HTMLElement) => Number(block.dataset.lines ?? 1)
+
 function isAsyncIterable(value: unknown): value is AsyncIterable<string | Node> {
   return typeof value === 'object' && value !== null && Symbol.asyncIterator in value
 }
@@ -77,11 +83,13 @@ function isAsyncIterable(value: unknown): value is AsyncIterable<string | Node> 
  * Set `handler` to `(command, { name, args, print, signal }) => …`; it may return a string, a DOM node, a promise of
  * either, or an async iterable of lines, which streams in. Without a handler, listen to `command` and call
  * `print(text, { kind })`, where `kind` is `output`, `error`, `success` or `info`. Strings are always drawn as text,
- * never parsed as HTML; their ANSI colour and bold codes (SGR 30–37, 90–97, 1 and 0) are shown and every other escape
- * is dropped.
+ * never parsed as HTML; their ANSI colour and bold codes (SGR 30–37, 90–97, 1 and 0) are shown, extended colours
+ * (`38;5;n`, `38;2;r;g;b`) fall back to the default colour, and every other escape is dropped. A carriage return starts
+ * its line over, and a print that starts with one rewrites the last line printed, so a progress line stays one line.
  *
  * Built in: `clear` (also Ctrl+L) clears the screen, `help` lists `commands` when it is set, and Ctrl+C aborts the
- * running command's `signal` and prints `^C` (with text selected, Ctrl+C copies instead). Tab completes through
+ * running command's `signal`, prints `^C` and gives the prompt back at once, even to a handler that ignores `signal`
+ * (whatever it prints later is dropped; with text selected, Ctrl+C copies instead). Tab completes through
  * `complete(input)`, which returns whole command lines: one match fills the line, several are listed under it; with an
  * empty line Tab moves focus as usual. Up and Down walk earlier commands, which `history` reads and sets. While a
  * command runs the prompt gives way to a spinner and typing is ignored; the screen keeps the last `max-lines` lines.
@@ -172,6 +180,10 @@ export class Terminal extends LitElement {
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, terminalMessages)
   private controller: AbortController | null = null
+  /** Set by `run()` from the call until the command starts, so a second call in between is ignored. */
+  private claimed = false
+  /** The run whose state `running` and `collected` describe. */
+  private current: AbortController | null = null
   private historyIndex = -1
   private draft = ''
   private lineCount = 0
@@ -187,12 +199,15 @@ export class Terminal extends LitElement {
 
   /** True while a command runs. */
   get busy(): boolean {
-    return this.running !== ''
+    return this.running !== '' || this.claimed
   }
 
-  /** Prints text (ANSI colours kept, drawn as text) or a node, as a block of the given kind. */
+  /**
+   * Prints text (ANSI colours kept, drawn as text) or a node, as a block of the given kind. Text that starts with a
+   * carriage return rewrites the last line printed when it is of the same kind.
+   */
   print(value: string | Node, options: TerminalPrintOptions = {}): void {
-    this.addBlock(this.block(value, options.kind ?? 'output'))
+    this.addBlock(this.block(value, options.kind ?? 'output'), typeof value === 'string' && /^\r(?!\n)/.test(value))
   }
 
   /** Clears the screen. The banner stays. */
@@ -205,7 +220,12 @@ export class Terminal extends LitElement {
   /** Runs a command as if it were typed and entered. Ignored while another command runs. */
   async run(command: string): Promise<void> {
     if (this.busy) return
-    await this.updateComplete
+    this.claimed = true
+    try {
+      await this.updateComplete
+    } finally {
+      this.claimed = false
+    }
     await this.execute(command)
   }
 
@@ -222,10 +242,16 @@ export class Terminal extends LitElement {
 
   protected override firstUpdated(): void {
     if (this.pending.length) {
+      for (const block of this.pending) this.lineCount += linesOf(block)
       this.output.append(...this.pending)
       this.pending = []
       this.trim()
     }
+  }
+
+  protected override updated(changed: PropertyValues<this>): void {
+    // A lower `max-lines` applies at once, not at the next print.
+    if (changed.has('maxLines') && changed.get('maxLines') !== undefined && this.output) this.trim()
   }
 
   override render() {
@@ -305,7 +331,8 @@ export class Terminal extends LitElement {
     return block
   }
 
-  private addBlock(block: HTMLElement): void {
+  private addBlock(block: HTMLElement, rewrite = false): void {
+    if (rewrite) this.dropLastLine(block.className)
     if (this.running) this.collected.push(block)
     if (!this.output) {
       this.pending.push(block)
@@ -314,14 +341,33 @@ export class Terminal extends LitElement {
     const screen = this.screen
     const atEnd = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24
     this.output.append(block)
+    this.lineCount += linesOf(block)
     this.trim()
     if (atEnd) screen.scrollTop = screen.scrollHeight
   }
 
-  /** Drops the oldest lines until no more than `maxLines` are kept. */
+  /**
+   * A print that starts with a carriage return rewrites the last line printed, when that line is plain output of the
+   * same kind: a progress line streamed as `\rDownloading 10%`, `\rDownloading 20%`… stays one line.
+   */
+  private dropLastLine(className: string): void {
+    const last = (this.output ? this.output.lastElementChild : this.pending[this.pending.length - 1]) as HTMLElement | null | undefined
+    const line = last?.className === className ? last.querySelector<HTMLElement>(':scope > .line:last-child') : null
+    if (!last || !line) return
+    line.remove()
+    const left = linesOf(last) - 1
+    if (this.output) this.lineCount -= 1
+    if (left > 0) last.dataset.lines = String(left)
+    else {
+      last.remove()
+      this.pending = this.pending.filter((block) => block !== last)
+      this.collected = this.collected.filter((block) => block !== last)
+    }
+  }
+
+  /** Drops the oldest lines until no more than `maxLines` are kept. `lineCount` is kept as a running total. */
   private trim(): void {
     const max = Math.max(1, Math.floor(this.maxLines) || 1)
-    this.lineCount = [...this.output.children].reduce((sum, block) => sum + Number((block as HTMLElement).dataset.lines ?? 1), 0)
     while (this.lineCount > max && this.output.firstElementChild) {
       const first = this.output.firstElementChild as HTMLElement
       const lines = Number(first.dataset.lines ?? 1)
@@ -399,6 +445,7 @@ export class Terminal extends LitElement {
 
     const controller = new AbortController()
     this.controller = controller
+    this.current = controller
     this.collected = []
     const print: TerminalPrint = (value, options) => {
       if (!controller.signal.aborted) this.print(value, options)
@@ -411,12 +458,24 @@ export class Terminal extends LitElement {
     }
 
     this.running = name
+    // Ctrl+C ends the command for the terminal at once, even when the handler ignores `signal`: every wait below races
+    // the abort, and whatever the abandoned handler prints or yields later is dropped by `print`.
+    const stopped = new Promise<typeof STOP>((resolve) => controller.signal.addEventListener('abort', () => resolve(STOP), { once: true }))
     try {
-      const result = await this.handler(command, context)
+      const pending = Promise.resolve(this.handler(command, context))
+      pending.catch(() => undefined)
+      const result = await Promise.race([pending, stopped])
+      if (result === STOP) return
       if (isAsyncIterable(result)) {
-        for await (const chunk of result) {
-          if (controller.signal.aborted) break
-          print(chunk)
+        const iterator = result[Symbol.asyncIterator]()
+        for (;;) {
+          const step = await Promise.race([iterator.next(), stopped])
+          if (step === STOP) {
+            iterator.return?.()?.catch(() => undefined)
+            break
+          }
+          if (step.done) break
+          print(step.value)
         }
       } else if (result !== undefined && result !== null && !controller.signal.aborted) {
         print(result as string | Node)
@@ -425,9 +484,13 @@ export class Terminal extends LitElement {
       if (!controller.signal.aborted) print(error instanceof Error ? error.message : String(error), { kind: 'error' })
     } finally {
       if (this.controller === controller) this.controller = null
-      this.running = ''
-      if (!controller.signal.aborted) this.announceOutput()
-      this.collected = []
+      // A command started after a Ctrl+C has its own run; only this one's state is cleared.
+      if (this.current === controller) {
+        this.running = ''
+        this.current = null
+        if (!controller.signal.aborted) this.announceOutput()
+        this.collected = []
+      }
     }
     await this.updateComplete
     if (this.screen) this.screen.scrollTop = this.screen.scrollHeight
@@ -448,6 +511,8 @@ export class Terminal extends LitElement {
     if (!controller) return
     controller.abort()
     this.controller = null
+    this.current = null
+    this.running = ''
     this.collected = []
     this.print('^C')
     this.announce(this.msg.t('cancelled'))

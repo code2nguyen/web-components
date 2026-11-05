@@ -42,6 +42,16 @@ export interface ChangeReview {
   removeEventListener: TypedRemoveEventListener<ChangeReview, ChangeReviewEventMap>
 }
 
+/** A text field, a select-like control or anything content-editable, where shortcut keys belong to the element. */
+function isEditable(element: Element): boolean {
+  return (
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement ||
+    (element as HTMLElement).isContentEditable === true ||
+    ['combobox', 'listbox', 'textbox', 'spinbutton', 'slider'].includes(element.getAttribute('role') ?? '')
+  )
+}
 const isMac = () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
 
 /**
@@ -344,13 +354,20 @@ export class ChangeReview extends LitElement {
 
   private onKeyDown = (event: KeyboardEvent): void => {
     if (!this.review.hunks.length || event.defaultPrevented) return
+    // Keys typed in the author's slotted content (an `actions` input or select) or in any editable element keep their
+    // own meaning: Ctrl+Backspace deletes a word there, Alt+ArrowDown opens a select.
+    const origin = event.composedPath()[0]
+    if (origin instanceof Element && (this.contains(origin) || isEditable(origin))) return
     const mod = isMac() ? event.metaKey : event.ctrlKey
     if (event.altKey && !event.ctrlKey && !event.metaKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      const target = this.current + (event.key === 'ArrowDown' ? 1 : -1)
+      if (target < 0 || target >= this.review.hunks.length) return
       event.preventDefault()
-      this.goTo(this.current + (event.key === 'ArrowDown' ? 1 : -1))
+      this.goTo(target)
     } else if (mod && !event.altKey && (event.key === 'Enter' || event.key === 'Backspace')) {
-      event.preventDefault()
+      // Only a hunk still open is decided; otherwise the key is left to the page.
       if (this.decisions[this.current] !== null) return
+      event.preventDefault()
       if (event.key === 'Enter') this.accept()
       else this.reject()
     }

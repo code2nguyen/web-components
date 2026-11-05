@@ -133,6 +133,16 @@ export interface FileBrowser {
 const ROOT_NODE = '\u001froot'
 const DRAG_TYPE = 'application/x-c2-file-browser'
 const asFolder = (id: string | null | undefined) => id ?? ''
+const collators = new Map<string, Intl.Collator>()
+/** A name collator per locale, made once: sorting reads it for every comparison. */
+function collatorFor(locale: string): Intl.Collator {
+  let collator = collators.get(locale)
+  if (!collator) {
+    collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' })
+    collators.set(locale, collator)
+  }
+  return collator
+}
 
 /**
  * Folders and files, as in Google Drive, Dropbox or a CMS media library: a folder tree, breadcrumbs, search, sorting,
@@ -266,6 +276,8 @@ export class FileBrowser extends LitElement {
   @state() private narrow = false
   @state() private loading = new Set<string>()
   @state() private loaded = new Map<string, FileBrowserItem[]>()
+  /** The latest load started for each folder: an answer to an older one (made stale by `refresh()`) is dropped. */
+  private loadGeneration = new Map<string, number>()
   @state() private expanded: string[] = []
   @state() private renaming = ''
   @state() private dropTarget: string | null = null
@@ -305,9 +317,13 @@ export class FileBrowser extends LitElement {
   /** Forgets what `loadChildren` returned, for one folder or all, and reloads the open folder. */
   refresh(folder?: string): void {
     const next = new Map(this.loaded)
+    const stale = folder === undefined ? [...this.loading] : this.loading.has(folder) ? [folder] : []
     if (folder === undefined) next.clear()
     else next.delete(folder)
     this.loaded = next
+    // A load still running for a refreshed folder answers with what was there before: forget it so a new one starts.
+    for (const id of stale) this.loadGeneration.set(id, (this.loadGeneration.get(id) ?? 0) + 1)
+    if (stale.length) this.loading = new Set([...this.loading].filter((id) => !stale.includes(id)))
     void this.ensureLoaded(this.folder)
   }
 
@@ -364,18 +380,25 @@ export class FileBrowser extends LitElement {
   private async ensureLoaded(folder: string): Promise<void> {
     const loader = this.loadChildren
     if (!loader || this.loaded.has(folder) || this.loading.has(folder)) return
+    const generation = (this.loadGeneration.get(folder) ?? 0) + 1
+    this.loadGeneration.set(folder, generation)
+    const current = () => this.loadGeneration.get(folder) === generation
     this.loading = new Set([...this.loading, folder])
     try {
       const entries = await loader(folder)
+      if (!current()) return
       this.loaded = new Map(this.loaded).set(folder, Array.isArray(entries) ? entries : [])
       if (folder === this.folder) this.announce(this.msg.t('opened', this.folderName(folder), Array.isArray(entries) ? entries.length : 0))
     } catch (error) {
+      if (!current()) return
       this.loaded = new Map(this.loaded).set(folder, [])
       this.dispatchEvent(new CustomEvent('load-error', { detail: { folder, error }, bubbles: true, composed: true }))
     } finally {
-      const next = new Set(this.loading)
-      next.delete(folder)
-      this.loading = next
+      if (current()) {
+        const next = new Set(this.loading)
+        next.delete(folder)
+        this.loading = next
+      }
     }
   }
 
@@ -404,12 +427,40 @@ export class FileBrowser extends LitElement {
     return id || ROOT_NODE
   }
 
+  /** The open folder's items as shown: filtered and sorted once per change of what they depend on. */
   private get visible(): FileBrowserItem[] {
-    let list = [...(this.childrenOf.get(this.folder) ?? [])]
+    const children = this.childrenOf.get(this.folder)
     const locale = this.msg.locale
     const query = this.search === 'local' ? this.query.trim().toLocaleLowerCase(locale) : ''
+    const memo = this.visibleMemo
+    if (
+      memo &&
+      memo.children === children &&
+      memo.locale === locale &&
+      memo.query === query &&
+      memo.sort === this.sort &&
+      memo.direction === this.sortDirection
+    ) {
+      return memo.list
+    }
+    const list = this.sorted(children ?? [], locale, query)
+    this.visibleMemo = { children, locale, query, sort: this.sort, direction: this.sortDirection, list }
+    return list
+  }
+
+  private visibleMemo?: {
+    children: FileBrowserItem[] | undefined
+    locale: string
+    query: string
+    sort: FileBrowserSort
+    direction: FileBrowserSortDirection
+    list: FileBrowserItem[]
+  }
+
+  private sorted(children: FileBrowserItem[], locale: string, query: string): FileBrowserItem[] {
+    let list = [...children]
     if (query) list = list.filter((entry) => entry.name.toLocaleLowerCase(locale).includes(query))
-    const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' })
+    const collator = collatorFor(locale)
     const direction = this.sortDirection === 'desc' ? -1 : 1
     const time = (entry: FileBrowserItem) => (entry.modified === undefined ? 0 : new Date(entry.modified).getTime() || 0)
     list.sort((a, b) => {
@@ -581,6 +632,11 @@ export class FileBrowser extends LitElement {
     if (this.renaming || event.defaultPrevented) return
     // Keys typed in the column headers belong to their buttons.
     if (event.composedPath().some((node) => node instanceof HTMLElement && node.classList.contains('columns'))) return
+    // Keys typed in the author's own content (the `empty` slot: a "New folder" field, a link) and in any editable
+    // element belong to it, never to the browser's navigation.
+    const origin = event.composedPath()[0]
+    if (origin instanceof Node && origin !== this && this.contains(origin)) return
+    if (origin instanceof HTMLElement && (origin.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(origin.tagName))) return
     const list = this.visible
     if (event.key === 'Backspace' || (event.altKey && event.key === 'ArrowUp')) {
       event.preventDefault()

@@ -217,3 +217,71 @@ test('clicking the screen focuses the command line unless text was selected; the
   await expect(input(terminal(page))).not.toBeFocused()
   await accessible(page)
 })
+
+test('extended colours keep their parameters to themselves; a carriage return rewrites the line instead of adding one', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-terminal></c2-terminal>`)
+  await terminal(page).evaluate((element) => {
+    const term = element as HTMLElement & { print(text: string): void }
+    // 256-colour 1 must not turn on bold, 256-colour 32 must not turn green, true-colour 31;200;100 must not turn red.
+    term.print('\u001b[38;5;1mone\u001b[0m \u001b[38;5;32mtwo\u001b[0m \u001b[38;2;31;200;100mthree\u001b[0m \u001b[48;5;31mfour\u001b[0m')
+    term.print('a\rb\r\nnext')
+  })
+  const first = blocks(terminal(page)).nth(0)
+  await expect(first).toHaveText('one two three four')
+  await expect(first.locator('.bold, [class*="ansi-"]')).toHaveCount(0)
+  // `\r` starts its line over; `\r\n` is a newline.
+  await expect(blocks(terminal(page)).nth(1).locator('.line')).toHaveText(['b', 'next'])
+  // A print that starts with `\r` rewrites the last line printed: a progress line stays one line.
+  await terminal(page).evaluate((element) => {
+    const term = element as HTMLElement & { print(text: string): void }
+    term.print('Downloading 0%')
+    for (const percent of [10, 20, 30]) term.print(`\rDownloading ${percent}%`)
+  })
+  await expect(blocks(terminal(page))).toHaveCount(3)
+  await expect(blocks(terminal(page)).nth(2)).toHaveText('Downloading 30%')
+  await expect(blocks(terminal(page)).nth(1).locator('.line')).toHaveText(['b', 'next'])
+  // A rewrite never reaches into a block of another kind, such as the echoed command.
+  await terminal(page).evaluate((element) => (element as HTMLElement & { print(text: string, options: object): void }).print('\rwarn', { kind: 'error' }))
+  await expect(blocks(terminal(page))).toHaveCount(4)
+})
+
+test('a second run() while one is starting is ignored; Ctrl+C frees the prompt even when the handler ignores its signal', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-terminal></c2-terminal>`)
+  await terminal(page).evaluate((element) => {
+    const term = element as HTMLElement & { handler: unknown; run(command: string): Promise<void> }
+    const started: string[] = []
+    ;(window as unknown as { started: string[] }).started = started
+    // Never settles and never looks at `signal`.
+    term.handler = (command: string) => {
+      started.push(command)
+      return new Promise(() => undefined)
+    }
+    void term.run('deploy')
+    void term.run('logs')
+  })
+  await expect(terminal(page).locator('.busy')).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as { started: string[] }).started)).toEqual(['deploy'])
+  await input(terminal(page)).press('Control+c')
+  await expect(terminal(page).locator('.busy')).toHaveCount(0)
+  await expect(input(terminal(page))).not.toHaveAttribute('readonly', '')
+  expect(await terminal(page).evaluate((element) => (element as HTMLElement & { busy: boolean }).busy)).toBe(false)
+  // The prompt answers again.
+  await terminal(page).evaluate((element) => {
+    ;(element as HTMLElement & { handler: unknown }).handler = () => 'done'
+  })
+  await enter(terminal(page), 'status')
+  await expect(blocks(terminal(page)).last()).toHaveText('done')
+})
+
+test('lowering max-lines trims the screen at once', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-terminal></c2-terminal>`)
+  await terminal(page).evaluate((element) => {
+    const term = element as HTMLElement & { print(text: string): void }
+    for (let i = 1; i <= 8; i += 1) term.print(`line ${i}`)
+  })
+  await expect(blocks(terminal(page))).toHaveCount(8)
+  await terminal(page).evaluate((element) => ((element as HTMLElement & { maxLines: number }).maxLines = 3))
+  await expect(blocks(terminal(page))).toHaveText(['line 6', 'line 7', 'line 8'])
+  await terminal(page).evaluate((element) => (element as HTMLElement & { print(text: string): void }).print('line 9\nline 10'))
+  await expect(terminal(page).locator('.output .line')).toHaveText(['line 8', 'line 9', 'line 10'])
+})

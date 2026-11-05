@@ -13,29 +13,34 @@ const COLORS: TerminalColor[] = ['black', 'red', 'green', 'yellow', 'blue', 'mag
 // CSI sequences (`ESC [ … final`), OSC sequences (`ESC ] … BEL` or `ESC ] … ESC \`) and any other two-byte escape.
 // eslint-disable-next-line no-control-regex
 const ESCAPE = /\u001b(?:\[([0-9;?]*)([@-~])|\][^\u0007\u001b]*(?:\u0007|\u001b\\)?|[@-Z\\-_])/g
-// Control characters other than tab and newline: a carriage return, a bell, a backspace.
+// Control characters other than tab, newline and carriage return: a bell, a backspace.
 // eslint-disable-next-line no-control-regex
-const CONTROL = /[\u0000-\u0008\u000b-\u001f\u007f]/g
+const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g
 
 /**
  * Splits CLI output into lines of styled spans. Only the SGR colour and bold codes are kept (30–37, 90–97, 39, 1, 22
- * and 0); every other escape and control character is dropped. The result is plain text: it is drawn as text nodes,
- * never parsed as HTML.
+ * and 0); the extended colours (`38;5;n`, `38;2;r;g;b` and their `48`/`58` background and underline forms) fall back
+ * to the default colour, and every other escape and control character is dropped. A carriage return that does not
+ * end a line starts that line over, the way a progress line rewrites itself: the text after it replaces the line.
+ * The result is plain text: it is drawn as text nodes, never parsed as HTML.
  */
 export function parseAnsi(input: string): TerminalSpan[][] {
   const lines: TerminalSpan[][] = [[]]
   let color: TerminalColor | undefined
   let bold = false
   const push = (text: string) => {
-    const clean = text.replace(/\r\n?/g, '\n')
+    const clean = text.replace(/\r\n/g, '\n')
     clean.split('\n').forEach((part, index) => {
       if (index > 0) lines.push([])
-      const visible = part.replace(CONTROL, '')
-      if (!visible) return
-      const line = lines[lines.length - 1]
-      const last = line[line.length - 1]
-      if (last && last.color === color && !!last.bold === bold) last.text += visible
-      else line.push({ text: visible, ...(color ? { color } : {}), ...(bold ? { bold } : {}) })
+      part.split('\r').forEach((piece, rewrite) => {
+        if (rewrite > 0) lines[lines.length - 1] = []
+        const visible = piece.replace(CONTROL, '')
+        if (!visible) return
+        const line = lines[lines.length - 1]
+        const last = line[line.length - 1]
+        if (last && last.color === color && !!last.bold === bold) last.text += visible
+        else line.push({ text: visible, ...(color ? { color } : {}), ...(bold ? { bold } : {}) })
+      })
     })
   }
   let index = 0
@@ -44,8 +49,14 @@ export function parseAnsi(input: string): TerminalSpan[][] {
     index = (match.index ?? 0) + match[0].length
     if (match[2] !== 'm') continue
     const codes = (match[1] ?? '').split(';').map((code) => (code === '' ? 0 : Number(code)))
-    for (const code of codes) {
-      if (code === 0) {
+    for (let i = 0; i < codes.length; i += 1) {
+      const code = codes[i]
+      if (code === 38 || code === 48 || code === 58) {
+        // An extended colour carries its own parameters: `5;n` (256 colours) or `2;r;g;b` (true colour). They are
+        // consumed here so they are not read as codes of their own; the foreground falls back to the default colour.
+        i += codes[i + 1] === 5 ? 2 : codes[i + 1] === 2 ? 4 : 0
+        if (code === 38) color = undefined
+      } else if (code === 0) {
         color = undefined
         bold = false
       } else if (code === 1) bold = true
