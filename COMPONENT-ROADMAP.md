@@ -65,12 +65,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ### C. Charts
 
-These join `@c2n/chart`, which already ships 15 chart elements (line, area, bar, pie, scatter, bubble, radar, gauge, pyramid, candlestick, butterfly, overlap, map, heatmap, sparkline). Each needs only a new series type on the existing engine.
-
-| #   | Component          | What it adds                                       | Real-world model                  | Priority | Decision |
-| --- | ------------------ | -------------------------------------------------- | --------------------------------- | -------- | -------- |
-| 54  | `c2-boxplot-chart` | Distribution summary (median, quartiles, outliers) | Datadog and Grafana latency views | P3       | Proposed |
-| 55  | `c2-bullet-chart`  | One measure against a target and qualitative bands | KPI scorecards                    | P3       | Proposed |
+Nothing left to propose here: the box plot and bullet charts shipped in `@c2n/chart`.
 
 ### D. Navigation and layout
 
@@ -215,12 +210,11 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### P. Enterprise data
 
-| #   | Component           | What it does                                                                                     | Seen in                             | Source                                                      | Priority | Decision |
-| --- | ------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------- | ----------------------------------------------------------- | -------- | -------- |
-| 188 | `c2-floating-panel` | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom     | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel) | P3       | Proposed |
-| 191 | `c2-network-graph`  | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz          | —                                                           | P3       | Proposed |
-| 192 | `c2-sunburst-chart` | Hierarchy as rings, click to zoom into a branch (cut from round 1)                               | Disk usage tools, budget breakdowns | —                                                           | P3       | Proposed |
-| 193 | `c2-word-cloud`     | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail                 | —                                                           | P3       | Proposed |
+| #   | Component           | What it does                                                                                     | Seen in                         | Source                                                      | Priority | Decision |
+| --- | ------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------- | ----------------------------------------------------------- | -------- | -------- |
+| 188 | `c2-floating-panel` | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel) | P3       | Proposed |
+| 191 | `c2-network-graph`  | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz      | —                                                           | P3       | Proposed |
+| 193 | `c2-word-cloud`     | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail             | —                                                           | P3       | Proposed |
 
 ### Q. Inputs with built-in data and mobile inputs
 
