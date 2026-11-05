@@ -257,11 +257,10 @@ export class BoxplotChart extends EchartsChartBase {
       axisLabel: { ...axisLabel, formatter: (tick: number) => this.#formatNumber(tick) },
       splitLine: { lineStyle: { color: theme.gridColor, width: theme.gridWidth } },
       name: name || undefined,
-      nameLocation: horizontal ? 'start' : 'end',
-      nameGap: horizontal ? 8 : 12,
-      nameTextStyle: horizontal
-        ? { ...axisLabel, align: 'right', verticalAlign: 'top', padding: [8, 0, 0, 0] }
-        : { ...axisLabel, align: 'right', padding: [0, 8, 0, 0] },
+      // Horizontal: the unit sits centred under the tick labels; at the axis start it ran into the first one.
+      nameLocation: horizontal ? 'middle' : 'end',
+      nameGap: horizontal ? theme.axisFontSize + 10 : 12,
+      nameTextStyle: horizontal ? { ...axisLabel, align: 'center', verticalAlign: 'top' } : { ...axisLabel, align: 'right', padding: [0, 8, 0, 0] },
     }
     // The axis labels and the unit fit inside the plot: ECharts 6 grows the margins to contain them.
     const labelled = this.#referenceLines().some((line) => line.label)
