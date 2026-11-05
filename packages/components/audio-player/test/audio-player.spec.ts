@@ -5,6 +5,19 @@ import type { Locator, Page } from '@playwright/test'
 const NOTE = '/apps/ui/public/media/voice-note.webm'
 const PEAKS = JSON.stringify([0.2, 0.6, 1, 0.4, 0.1, 0.8, 0.5, 0.3, 0.9, 0.2, 0.7, 0.4, 0.6, 0.1, 0.3, 0.8, 0.5, 0.2, 0.9, 0.4, 0.6, 0.3, 0.7, 0.1])
 
+// Playback is muted: Firefox in CI has no audio device, and an audible `<audio>` playing into its null audio backend
+// fails with a media error (the video suite plays a muted video for the same reason). `muted` is a property, not the
+// attribute, so the "never written on" checks still hold.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const play = HTMLMediaElement.prototype.play
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+      this.muted = true
+      return play.call(this)
+    }
+  })
+})
+
 const player = (page: Page, selector = 'c2-audio-player') => page.locator(selector)
 const playButton = (locator: Locator) => locator.locator('.play')
 const waveform = (locator: Locator) => locator.locator('.waveform')
