@@ -22,6 +22,7 @@ import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
 import celebration from '@c2n/celebration/custom-elements.json'
+import changeReview from '@c2n/change-review/custom-elements.json'
 import chart from '@c2n/chart/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
@@ -58,6 +59,7 @@ import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
 import facetList from '@c2n/facet-list/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
+import fileBrowser from '@c2n/file-browser/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import floatButton from '@c2n/float-button/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
@@ -170,6 +172,7 @@ import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
 import taskIcons from '@c2n/task-icons/custom-elements.json'
+import terminal from '@c2n/terminal/custom-elements.json'
 import textEffect from '@c2n/text-effect/custom-elements.json'
 import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
@@ -226,6 +229,7 @@ export const componentManifests = (function () {
     carousel,
     cascader,
     celebration,
+    changeReview,
     chart,
     chatInput,
     chatMessage,
@@ -262,6 +266,7 @@ export const componentManifests = (function () {
     facetList,
     featherIcons,
     fieldset,
+    fileBrowser,
     filterBuilder,
     floatButton,
     flow,
@@ -374,6 +379,7 @@ export const componentManifests = (function () {
     tabs,
     tagInput,
     taskIcons,
+    terminal,
     textEffect,
     textField,
     textarea,

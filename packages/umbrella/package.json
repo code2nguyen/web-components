@@ -173,6 +173,10 @@
       "types": "./dist/celebration.d.ts",
       "default": "./dist/celebration.js"
     },
+    "./change-review": {
+      "types": "./dist/change-review.d.ts",
+      "default": "./dist/change-review.js"
+    },
     "./chart": {
       "types": "./dist/chart.d.ts",
       "default": "./dist/chart.js"
@@ -444,6 +448,10 @@
     "./fieldset": {
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
+    },
+    "./file-browser": {
+      "types": "./dist/file-browser.d.ts",
+      "default": "./dist/file-browser.js"
     },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
@@ -957,6 +965,10 @@
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
     },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "default": "./dist/terminal.js"
+    },
     "./text-effect": {
       "types": "./dist/text-effect.d.ts",
       "default": "./dist/text-effect.js"
@@ -1225,6 +1237,7 @@
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
     "@c2n/celebration": "*",
+    "@c2n/change-review": "*",
     "@c2n/chart": "*",
     "@c2n/chat-input": "*",
     "@c2n/chat-message": "*",
@@ -1261,6 +1274,7 @@
     "@c2n/emoji-picker": "*",
     "@c2n/facet-list": "*",
     "@c2n/fieldset": "*",
+    "@c2n/file-browser": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",
     "@c2n/flow": "*",
@@ -1370,6 +1384,7 @@
     "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
+    "@c2n/terminal": "*",
     "@c2n/text-effect": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",

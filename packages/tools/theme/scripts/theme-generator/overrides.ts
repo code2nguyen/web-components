@@ -28,6 +28,12 @@ export const overrides: Record<string, Override> = {
   '--c2-log-viewer--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer--border': { exclude: 'default terminal frame' },
   '--c2-log-viewer--border-radius': { exclude: 'default terminal frame' },
+  // c2-terminal stays dark in both themes: its screen, title bar and muted text are its own palette.
+  '--c2-terminal--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__titlebar--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__muted--color': { exclude: 'terminal palette on its own dark screen' },
+  '--c2-terminal__ansi-black--color': { exclude: 'terminal ANSI palette' },
+  '--c2-terminal--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer__viewport__focus--outline': { exclude: 'terminal focus contrast' },
   '--c2-log-viewer__empty--color': { exclude: 'terminal metadata contrast' },
   '--c2-log-viewer__token--color': { exclude: 'terminal log token contrast' },

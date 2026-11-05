@@ -1,0 +1,93 @@
+---
+title: 'Terminal'
+description: 'An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.'
+category: 'Editors & viewers'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Terminal } from '@c2n/components/terminal'
+
+`c2-terminal` is a command line for apps that take commands: a dev console, a CLI tutorial, chat-ops or an admin shell. Your app answers each command; the terminal keeps the history, completes with Tab, streams long output, cancels with Ctrl+C and shows the colours CLI output carries. It is not a terminal emulator — there is no PTY or cursor addressing; use xterm.js for that — and `c2-log-viewer` stays the read-only log.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/terminal'
+```
+
+## Usage
+
+Type `help` in the first example: the built-in lists `commands`. Every other command goes to your `handler`, which here plays a small CLI: try `deploy web`, `logs web` (Ctrl+C stops it) or `test`, and Tab to complete.
+
+```html tag=UsageBlock,package=@c2n/terminal
+<style>
+  .terminal-demo {
+    flex: 1 1 0;
+    min-width: 0;
+    --c2-terminal--max-height: 280px;
+  }
+  .terminal-banner b {
+    color: #fafafa;
+  }
+  .terminal-path {
+    color: #e879f9;
+  }
+</style>
+<div data-label="Commands and help">
+  <c2-terminal
+    class="terminal-demo"
+    data-terminal-demo
+    heading="acme-cli · production"
+    commands='[{"name":"deploy","description":"Deploy, roll back or inspect a service"},{"name":"logs","description":"Stream the logs of a service (Ctrl+C to stop)"},{"name":"test","description":"Run the test suite, or only what changed"}]'
+  >
+    <span slot="banner" class="terminal-banner"><b>Acme CLI 4.2.0</b>  Connected to <b>prod-eu-1</b>. Type <b>help</b> for commands.</span>
+  </c2-terminal>
+</div>
+<div data-label="Prompt slot">
+  <c2-terminal class="terminal-demo" prompt="❯">
+    <span slot="prompt"><span class="terminal-path">~/acme/web</span> (main)</span>
+  </c2-terminal>
+</div>
+```
+
+## Answering commands
+
+Set `handler` to a function that receives the command line and `{ name, args, print, signal }`. `args` are the words after the name, with quotes removed. Return what to print: a string, a DOM node, a promise of either, or an async iterable of lines, which streams in while a spinner replaces the prompt.
+
+```typescript tag=CodeBlock
+const terminal = document.querySelector('c2-terminal')!
+terminal.commands = [{ name: 'deploy', description: 'Deploy a service' }, { name: 'logs', description: 'Stream logs' }]
+terminal.complete = (input) => ['deploy web', 'deploy api', 'logs api --follow'].filter((line) => line.startsWith(input))
+terminal.handler = async function* (command, { name, args, print, signal }) {
+  if (name === 'deploy') {
+    if (!args[0]) return print('usage: deploy <service>', { kind: 'error' })
+    const result = await api.deploy(args[0], { signal })
+    return print(`\u001b[32m✓\u001b[0m deployed ${args[0]} (${result.revision})`, { kind: 'success' })
+  }
+  if (name === 'logs') {
+    for await (const line of api.logs(args[0], { signal })) yield line
+    return
+  }
+  print(`${name}: command not found`, { kind: 'error' })
+}
+```
+
+- `print(text, { kind })` prints from anywhere; `kind` is `output`, `error`, `success` or `info`.
+- Without a `handler`, listen to `command`: its `detail` has the same `{ command, name, args, print, signal }`.
+- Text is always drawn as text, never parsed as HTML. ANSI colour and bold codes (SGR 30–37, 90–97, 1 and 0) are shown, extended colours (`38;5;n`, `38;2;r;g;b`) fall back to the default colour, and any other escape is dropped. A carriage return starts its line over, and a print that starts with one rewrites the last line printed, so `\rDownloading 20%` updates a progress line in place.
+- A thrown error prints as an `error` block.
+
+## Built-ins and keys
+
+- `clear`, or Ctrl+L, clears the screen; the banner stays.
+- `help` lists `commands` and the built-ins while `commands` is set; otherwise it goes to your handler.
+- Ctrl+C aborts the running command's `signal`, prints `^C` and gives the prompt back at once, even when the handler ignores `signal`; anything it prints afterwards is dropped. With text selected it copies, as usual.
+- Tab asks `complete(input)` for whole command lines: one match fills the line, several are listed under it and their common start is filled. On an empty line Tab moves focus as usual.
+- Up and Down walk earlier commands. Read `history` to keep a session and set it to restore one.
+- The screen keeps the last `max-lines` lines (5,000 by default).
+
+## Accessibility
+
+The terminal is a region named by `heading` (or "Terminal"), and the command line a text box named by `label` (or "Command"). The screen is a log that does not announce on its own: each command's output is read once the command ends, or only its line count when it is long, so the echoed command is never read twice. Clicking the screen focuses the command line unless text was selected, so output can be copied.
