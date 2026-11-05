@@ -79,7 +79,7 @@ The value is read in `time-zone` (the browser's zone by default), and `valueAsDa
 
 ### Trigger
 
-The trigger shows `label` until a time is chosen, then that time, with a clear button beside it (`clearable="false"` removes it). Put your own button in the `trigger` slot to change it entirely, and set `inline` to draw the list without a trigger, inside a card, a sheet or another menu.
+The trigger shows `label` until a time is chosen, then that time, with a clear button beside it (`clearable="false"` removes it). Put your own button in the `trigger` slot to change it entirely: the component writes no attribute on it, so give it `aria-haspopup="menu"` and keep its `aria-expanded` in step from the `menu-toggle` event (`detail.open`; `expanded` and `:state(open)` say the same). Set `inline` to draw the list without a trigger, inside a card, a sheet or another menu.
 
 ### Accessibility
 

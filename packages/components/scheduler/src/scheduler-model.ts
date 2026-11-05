@@ -4,34 +4,32 @@
  * booking. The app's strings (`YYYY-MM-DDTHH:mm`) go in and come back out unchanged in shape.
  */
 
+import { formatWallClock, pad, parseDate, parseWallClock, wallClockAt } from '@c2n/core/zoned-time.js'
+
 export type SchedulerView = 'day' | 'week' | 'month'
 
 export const MINUTES_PER_DAY = 1440
 
-const wallClockPattern = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/
 const clockPattern = /^(\d{1,2}):(\d{2})$/
 
-/** A `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm` string as minutes, or null when it is not a real date and time. */
-export function parseWallClock(value: unknown): number | null {
+const fromClock = (clock: { year: number; month: number; day: number; hour?: number; minute?: number }) =>
+  Date.UTC(clock.year, clock.month - 1, clock.day) / 60_000 + (clock.hour ?? 0) * 60 + (clock.minute ?? 0)
+
+/** A `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm[:ss]` string as minutes (seconds dropped), or null when it is not a real date. */
+export function toMinutes(value: unknown): number | null {
   if (typeof value !== 'string') return null
-  const match = wallClockPattern.exec(value.trim())
-  if (!match) return null
-  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])]
-  const hours = match[4] === undefined ? 0 : Number(match[4])
-  const minutes = match[5] === undefined ? 0 : Number(match[5])
-  if (hours > 23 || minutes > 59) return null
-  const time = Date.UTC(year, month - 1, day)
-  const date = new Date(time)
-  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null
-  return time / 60_000 + hours * 60 + minutes
+  const text = value.trim()
+  const clock = parseWallClock(text) ?? parseDate(text)
+  return clock ? fromClock(clock) : null
 }
 
-const pad = (value: number) => String(value).padStart(2, '0')
-
 /** Minutes as `YYYY-MM-DDTHH:mm`. */
-export function formatWallClock(minutes: number): string {
+export function fromMinutes(minutes: number): string {
   const date = new Date(minutes * 60_000)
-  return `${dayIso(minutes)}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`
+  return formatWallClock(
+    { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate(), hour: date.getUTCHours(), minute: date.getUTCMinutes(), second: 0 },
+    false,
+  )
 }
 
 /** The day holding `minutes`, as `YYYY-MM-DD`. */
@@ -185,20 +183,11 @@ export function localeWeekend(locale: string): number[] {
 }
 
 /** The wall clock now in `timeZone` (the browser's zone when empty), as minutes. */
-export function nowIn(timeZone: string, now = new Date()): number {
+export function nowIn(timeZone: string, now = Date.now()): number {
   try {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: timeZone || undefined,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    }).formatToParts(now)
-    const get = (type: string) => Number(parts.find((part) => part.type === type)?.value)
-    return Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute')) / 60_000
+    return fromClock(wallClockAt(now, timeZone))
   } catch {
-    return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()) / 60_000
+    // An unknown zone reads the browser's own.
+    return fromClock(wallClockAt(now, ''))
   }
 }

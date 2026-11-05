@@ -14,16 +14,16 @@ import {
   assignLanes,
   columnAt,
   dayIso,
-  formatWallClock,
   fractionOf,
+  fromMinutes,
   localeWeekend,
   minutesAt,
   nowIn,
   parseClock,
   parseClockRange,
-  parseWallClock,
   snapMinutes,
   startOfDay,
+  toMinutes,
   viewColumns,
   viewRange,
   weekdayOf,
@@ -35,7 +35,6 @@ import { schedulerMessages } from './messages.js'
 import styles from './scheduler.scss?inline'
 
 export type { SchedulerView } from './scheduler-model.js'
-export { parseWallClock, formatWallClock } from './scheduler-model.js'
 export { schedulerMessages } from './messages.js'
 
 /** A row of the scheduler: a person, a room, a machine. */
@@ -151,6 +150,18 @@ interface Preview {
 }
 
 const DRAG_THRESHOLD = 4
+
+/** `Intl.DateTimeFormat` is costly to build and a render asks for the same few dozens of times: one per locale and options. */
+const formatters = new Map<string, Intl.DateTimeFormat>()
+function dateFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}|${JSON.stringify(options)}`
+  let format = formatters.get(key)
+  if (!format) {
+    format = new Intl.DateTimeFormat(locale, options)
+    formatters.set(key, format)
+  }
+  return format
+}
 const VIEWS: SchedulerView[] = ['day', 'week', 'month']
 
 function initials(label: string): string {
@@ -284,8 +295,10 @@ export class Scheduler extends LitElement {
   private clock?: ReturnType<typeof setInterval>
   private gesture?: Gesture
   private suppressClick = false
-  /** A bar to focus once the app has applied a keyboard move. */
+  /** A bar to focus once the app has applied a keyboard move; dropped as soon as the user does anything else. */
   private refocus = ''
+  /** The slot the cursor goes back to when Escape leaves a bar reached with Enter. */
+  private barReturn: { resource: string; column: number } | null = null
   /** The range and columns of the last render, which the pointer and keyboard handlers work in. */
   private layout: { range: SchedulerRange; columns: SchedulerColumn[]; rows: Row[] } | null = null
   private scrolledFor = ''
@@ -299,6 +312,7 @@ export class Scheduler extends LitElement {
     super.disconnectedCallback()
     clearInterval(this.clock)
     this.endGesture()
+    this.clearRefocus()
   }
 
   protected override firstUpdated() {
@@ -320,8 +334,11 @@ export class Scheduler extends LitElement {
     }
     if (changed.has('events') && this.refocus) {
       const id = this.refocus
-      this.refocus = ''
-      this.focusBar(id)
+      this.clearRefocus()
+      // Only while focus is still with the scheduler (or was dropped with the re-rendered bar): never take it back
+      // from wherever the user has gone since.
+      const active = this.ownerDocument.activeElement
+      if (!active || active === this.ownerDocument.body || active === this) this.focusBar(id)
     }
   }
 
@@ -345,7 +362,7 @@ export class Scheduler extends LitElement {
 
   /** Midnight of `date`, else of today (the server's or the client's clock until the first render). */
   private get anchorDay(): number {
-    const parsed = parseWallClock(this.date)
+    const parsed = toMinutes(this.date)
     return startOfDay(parsed ?? this.now ?? nowIn(this.timeZone))
   }
 
@@ -359,9 +376,9 @@ export class Scheduler extends LitElement {
 
   private format(options: Intl.DateTimeFormatOptions, minutes: number): string {
     try {
-      return new Intl.DateTimeFormat(this.effectiveLocale, { ...options, timeZone: 'UTC' }).format(new Date(minutes * 60_000))
+      return dateFormat(this.effectiveLocale, { ...options, timeZone: 'UTC' }).format(new Date(minutes * 60_000))
     } catch {
-      return formatWallClock(minutes)
+      return fromMinutes(minutes)
     }
   }
 
@@ -369,7 +386,7 @@ export class Scheduler extends LitElement {
   private get hourStyle(): '2-digit' | 'numeric' {
     try {
       // `hourCycle` (ES2020 Intl) is missing from the library's target typings.
-      const cycle = (new Intl.DateTimeFormat(this.effectiveLocale, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle
+      const cycle = (dateFormat(this.effectiveLocale, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle
       return cycle === 'h11' || cycle === 'h12' ? 'numeric' : '2-digit'
     } catch {
       return '2-digit'
@@ -405,7 +422,7 @@ export class Scheduler extends LitElement {
     const view = this.currentView
     if (view === 'day') return this.format({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }, range.days[0])
     if (view === 'month') return this.format({ month: 'long', year: 'numeric' }, range.days[0])
-    const format = new Intl.DateTimeFormat(this.effectiveLocale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+    const format = dateFormat(this.effectiveLocale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
     const formatRange = (format as Intl.DateTimeFormat & { formatRange?: (from: Date, to: Date) => string }).formatRange
     const [first, last] = [new Date(range.days[0] * 60_000), new Date(range.days[range.days.length - 1] * 60_000)]
     return formatRange ? formatRange.call(format, first, last) : `${format.format(first)} – ${format.format(last)}`
@@ -418,8 +435,8 @@ export class Scheduler extends LitElement {
     const byResource = new Map<string, Placed[]>()
     for (const event of Array.isArray(this.events) ? this.events : []) {
       if (!event || typeof event.resource !== 'string') continue
-      const start = parseWallClock(event.start)
-      const end = parseWallClock(event.end)
+      const start = toMinutes(event.start)
+      const end = toMinutes(event.end)
       if (start === null || end === null || end <= start || end <= range.start || start >= range.end) continue
       // In a range of separate days (hours drawn only part of the day), a booking entirely in the hidden hours is not drawn.
       if (fractionOf(range, start) === fractionOf(range, end)) continue
@@ -657,13 +674,13 @@ export class Scheduler extends LitElement {
   // ------------------------------------------------------------------------------------------------- reports
 
   private selectRange(resource: string, start: number, end: number) {
-    const detail: SchedulerRangeSelectDetail = { resource, start: formatWallClock(start), end: formatWallClock(end) }
+    const detail: SchedulerRangeSelectDetail = { resource, start: fromMinutes(start), end: fromMinutes(end) }
     this.announce(this.msg.t('selected', this.resourceOf(resource)?.label ?? resource, this.spoken(start, end)))
     this.dispatchEvent(new CustomEvent<SchedulerRangeSelectDetail>('range-select', { detail, bubbles: true, composed: true }))
   }
 
   private changeEvent(event: SchedulerEvent, start: number, end: number, resource: string) {
-    const detail: SchedulerEventChangeDetail = { event, start: formatWallClock(start), end: formatWallClock(end), resource }
+    const detail: SchedulerEventChangeDetail = { event, start: fromMinutes(start), end: fromMinutes(end), resource }
     this.dispatchEvent(new CustomEvent<SchedulerEventChangeDetail>('event-change', { detail, bubbles: true, composed: true }))
   }
 
@@ -691,6 +708,7 @@ export class Scheduler extends LitElement {
   private focusCell(resource: string, column: number) {
     const columns = this.layout?.columns ?? []
     this.focusedBar = ''
+    this.barReturn = null
     this.cursor = { resource, column: Math.min(columns.length - 1, Math.max(0, column)) }
     void this.updateComplete.then(() => this.laneOf(resource)?.focus())
   }
@@ -708,14 +726,8 @@ export class Scheduler extends LitElement {
     const column = this.cursor?.resource === row.resource.id ? this.cursor.column : 0
     const go = (next: number) => {
       event.preventDefault()
+      // The cursor walks every slot, those under bars included; Enter is what steps onto a bar.
       const target = Math.min(columns.length - 1, Math.max(0, next))
-      // Moving onto a bar focuses the bar.
-      const slot = columns[target]
-      const bar = row.placed.find((item) => item.start < slot.end && item.end > slot.start)
-      if (bar && target !== column) {
-        this.focusBar(bar.event.id)
-        return
-      }
       this.cursor = { resource: row.resource.id, column: target }
       this.announce(this.slotName(row.resource, target))
     }
@@ -740,12 +752,28 @@ export class Scheduler extends LitElement {
         return
       }
       case 'Enter':
-      case ' ':
+      case ' ': {
+        // A slot with a booking: Enter focuses its first bar. An empty one, with `editable`: a new booking.
+        const bar = this.barsIn(row, column)[0]
+        if (bar) {
+          event.preventDefault()
+          this.barReturn = { resource: row.resource.id, column }
+          this.focusBar(bar.event.id)
+          return
+        }
         if (!this.editable) return
         event.preventDefault()
         this.selectRange(row.resource.id, columns[column].start, columns[column].end)
         return
+      }
     }
+  }
+
+  /** The bars of a row over a column, earliest first. */
+  private barsIn(row: Extract<Row, { kind: 'resource' }>, column: number): Placed[] {
+    const slot = this.layout?.columns[column]
+    if (!slot) return []
+    return row.placed.filter((item) => item.start < slot.end && item.end > slot.start).sort((a, b) => a.start - b.start)
   }
 
   private handleBarKey(event: KeyboardEvent, placed: Placed) {
@@ -759,7 +787,9 @@ export class Scheduler extends LitElement {
     const movable = this.editable && !placed.event.readonly
     if (key === 'Escape') {
       event.preventDefault()
-      this.focusCell(resource, columnAt(columns, placed.start))
+      // Back to the slot Enter came from, else to the slot where the bar starts.
+      const back = this.barReturn?.resource === resource ? this.barReturn.column : columnAt(columns, placed.start)
+      this.focusCell(resource, back)
       return
     }
     if (horizontal && movable && !event.altKey && !event.ctrlKey && !event.metaKey) {
@@ -790,7 +820,25 @@ export class Scheduler extends LitElement {
     }
   }
 
+  private readonly clearRefocus = () => {
+    this.refocus = ''
+    this.ownerDocument.removeEventListener('pointerdown', this.clearRefocus, true)
+    this.removeEventListener('focusout', this.handleRefocusOut)
+  }
+
+  /** Focus moved on to another element (not dropped by a re-render, which has no related target): the move is over. */
+  private readonly handleRefocusOut = (event: FocusEvent) => {
+    const next = event.relatedTarget as Node | null
+    if (next && !this.contains(next) && !this.renderRoot.contains(next)) this.clearRefocus()
+  }
+
   private moveFromKeyboard(placed: Placed, start: number, end: number, resource: string) {
+    // The app may apply the move, re-render the bar elsewhere and drop its focus; this puts it back. An app that
+    // declines leaves `events` alone, and the next pointer press or focus elsewhere forgets it.
+    if (!this.refocus) {
+      this.ownerDocument.addEventListener('pointerdown', this.clearRefocus, true)
+      this.addEventListener('focusout', this.handleRefocusOut)
+    }
     this.refocus = placed.event.id
     const label = this.resourceOf(resource)?.label ?? resource
     this.announce(this.msg.t('moved', placed.event.title, label, this.spoken(start, end)))
@@ -799,7 +847,11 @@ export class Scheduler extends LitElement {
 
   private slotName(resource: SchedulerResource, column: number): string {
     const slot = this.layout?.columns[column]
-    return slot ? this.msg.t('slot', resource.label, this.spoken(slot.start, slot.end)) : resource.label
+    if (!slot) return resource.label
+    const name = this.msg.t('slot', resource.label, this.spoken(slot.start, slot.end))
+    const row = this.layout?.rows.find((item): item is Extract<Row, { kind: 'resource' }> => item.kind === 'resource' && item.resource.id === resource.id)
+    const titles = row ? this.barsIn(row, column).map((placed) => placed.event.title) : []
+    return titles.length ? this.msg.t('slotBookings', name, titles.join(', ')) : name
   }
 
   private toggleGroup(group: string) {
@@ -923,9 +975,6 @@ export class Scheduler extends LitElement {
       }}
       @keydown=${(keyEvent: KeyboardEvent) => this.handleBarKey(keyEvent, placed)}
       @pointerdown=${(pointer: PointerEvent) => this.startBarGesture(pointer, placed)}
-      @pointermove=${this.moveGesture}
-      @pointerup=${(pointer: PointerEvent) => this.endPointer(pointer, true)}
-      @pointercancel=${(pointer: PointerEvent) => this.endPointer(pointer, false)}
     >
       ${movable ? html`<span class="handle start" data-handle="start" aria-hidden="true"></span>` : nothing}
       <span class="event-title">${event.title}</span>

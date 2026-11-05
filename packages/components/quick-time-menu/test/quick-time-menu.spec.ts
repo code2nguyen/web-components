@@ -215,17 +215,56 @@ test('inside a c2-form-field its label names the trigger; disabled turns the tri
   await accessible(page)
 })
 
-test('a slotted trigger opens the menu and carries aria-haspopup and aria-expanded', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-quick-time-menu now="${NOW}" time-zone="${ZONE}"><button slot="trigger" id="own">Remind me</button></c2-quick-time-menu>`)
+test('a slotted trigger opens the menu; the component writes nothing on it and reports the open state instead', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-quick-time-menu now="${NOW}" time-zone="${ZONE}"><button slot="trigger" id="own" aria-haspopup="menu" aria-expanded="false">Remind me</button></c2-quick-time-menu>`,
+  )
+  // The author keeps aria-expanded in step from menu-toggle, as the docs show.
+  await page.evaluate(() =>
+    document
+      .querySelector('c2-quick-time-menu')!
+      .addEventListener('menu-toggle', (event) =>
+        document.getElementById('own')!.setAttribute('aria-expanded', String((event as CustomEvent<{ open: boolean }>).detail.open)),
+      ),
+  )
   const own = page.locator('#own')
+  const attributes = () => own.evaluate((element) => element.getAttributeNames().sort())
+  const before = await attributes()
   await expect(menu(page).locator('.trigger')).toBeHidden()
-  await expect(own).toHaveAttribute('aria-haspopup', 'menu')
-  await expect(own).toHaveAttribute('aria-expanded', 'false')
   await own.click()
   await expect(own).toHaveAttribute('aria-expanded', 'true')
   await expect(rows(page).first()).toBeFocused()
+  expect(await menu(page).evaluate((element) => [(element as HTMLElement & { expanded: boolean }).expanded, element.matches(':state(open)')])).toEqual([
+    true,
+    true,
+  ])
   // A second click on the trigger of the open menu closes it.
   await own.click()
   await expect(rows(page)).toHaveCount(0)
   await expect(own).toHaveAttribute('aria-expanded', 'false')
+  expect(await menu(page).evaluate((element) => element.matches(':state(open)'))).toBe(false)
+  // No attribute was added to the author's element.
+  expect(await attributes()).toEqual(before)
+})
+
+test('a row that stopped applying while the menu was open is not picked: the list drops it and stays open', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-quick-time-menu label="Snooze until" now="${NOW}" time-zone="${ZONE}"></c2-quick-time-menu>`)
+  await watch(menu(page), 'time-select')
+  await trigger(page).click()
+  await expect(rows(page).first()).toHaveText(/Later today\s*17:00/)
+  // 18:30 in Paris: Later today no longer applies. The click lands before the list redraws.
+  await menu(page).evaluate((element) => {
+    ;(element as HTMLElement & { now: string }).now = '2026-11-09T17:30:00Z'
+    ;(element.shadowRoot!.querySelector('[role="menuitemradio"]') as HTMLElement).click()
+  })
+  await expect(rows(page).first()).toHaveText(/Tomorrow/)
+  await expect(rows(page).first()).toBeFocused()
+  expect(await menu(page).evaluate((element) => (element as HTMLElement & { value: string }).value)).toBe('')
+  expect(await events(page)).toEqual([])
+})
+
+test('a date alone as max allows any time that day; as min, from its start', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-quick-time-menu inline label="Remind me" now="${NOW}" time-zone="${ZONE}" min="2026-11-10" max="2026-11-10"></c2-quick-time-menu>`)
+  // Only Tomorrow (10 November, 09:00) falls on that day.
+  await expect(rows(page)).toHaveText([/Tomorrow\s*Tue 09:00/, /Pick a date and time…/])
 })

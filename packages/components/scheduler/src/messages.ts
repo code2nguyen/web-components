@@ -25,8 +25,10 @@ const en = {
   event: (title: string, resource: string, time: string) => `${title}, ${resource}, ${time}`,
   /** Added to a bar's name when it cannot be moved. */
   readonly: 'read-only',
-  /** The empty slot under the keyboard cursor: `{0}` is the resource, `{1}` the time range. */
+  /** The slot under the keyboard cursor: `{0}` is the resource, `{1}` the time range. */
   slot: (resource: string, time: string) => `${resource}, ${time}`,
+  /** A slot under the keyboard cursor that holds bookings (Enter focuses the first): `{0}` is the slot, `{1}` their titles. */
+  slotBookings: (slot: string, titles: string) => `${slot}, booked: ${titles}`,
   /** Announced when a bar is moved from the keyboard: `{0}` is its title, `{1}` the resource, `{2}` the new time range. */
   moved: (title: string, resource: string, time: string) => `${title} moved to ${resource}, ${time}`,
   /** Announced when a range is picked to add a booking: `{0}` is the resource, `{1}` the time range. */
