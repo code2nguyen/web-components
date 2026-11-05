@@ -1,0 +1,61 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    box--width: 40%,
+    box--fill-opacity: 0.22,
+    box--border-width: 1.5px,
+    median--width: 2.5px,
+    outlier--radius: 3px,
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// Declared so the theme generator maps them; the chart reads them from script.
+:host {
+  --_box-width: #{css.cssVar(box--width)};
+  --_box-fill-opacity: #{css.cssVar(box--fill-opacity)};
+  --_box-border-width: #{css.cssVar(box--border-width)};
+  --_median-width: #{css.cssVar(median--width)};
+  --_outlier-radius: #{css.cssVar(outlier--radius)};
+}
+
+// The backdrop sits behind the canvas, which ECharts leaves transparent: the plot area stacks its own layers.
+.plot-area {
+  isolation: isolate;
+}
+
+.boxplot-backdrop {
+  position: absolute;
+  z-index: -1;
+  background: color-mix(in srgb, var(--c2-chart__crosshair--color, #a1a1aa) 16%, transparent);
+  pointer-events: none;
+}
+
+.boxplot-backdrop[hidden] {
+  display: none;
+}
+
+// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
+.plot:focus {
+  outline: none;
+}
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: -2px;
+}
+
+// With a single series there is nothing for the legend to tell apart, so it is left out.
+.legend:not(:has(.legend-item)) {
+  display: none;
+}
+
+// The box table and the live announcement are for assistive technology only.
+.boxplot-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
