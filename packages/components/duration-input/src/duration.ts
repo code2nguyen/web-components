@@ -80,7 +80,7 @@ const TOKEN = new RegExp(`(${NUMBER})\\s*([\\p{L}]+)?`, 'gu')
  * It reads units (`1h 30m`, `2 days 4 hours`, `1h30`, where a trailing number takes the unit after the one before it),
  * fractions with a decimal point or comma (`1.5h`, `1,5h`), a clock (`1:30`, `1:05:30`) and a bare number in `unit`.
  */
-export function parseDuration(text: string, options: ParseDurationOptions = {}): number | null {
+export function parseDurationText(text: string, options: ParseDurationOptions = {}): number | null {
   const source = text
     .trim()
     .toLowerCase()
@@ -179,7 +179,7 @@ export function durationParts(seconds: number, options: FormatDurationOptions = 
  * Writes a duration in seconds as `1h 30m` (`short`), `1 hour, 30 minutes` (`long`, in `locale`) or `1:30` (`clock`).
  * Zero reads `0m`, `0 minutes` or `0:00`.
  */
-export function formatDuration(seconds: number, options: FormatDurationOptions = {}): string {
+export function formatDurationText(seconds: number, options: FormatDurationOptions = {}): string {
   const total = Number.isFinite(seconds) ? Math.max(0, seconds) : 0
   if (options.format === 'clock') {
     const showSeconds = unitIndex(options.smallestUnit, 's') >= 4 && Math.round(total) % 60 !== 0

@@ -2,8 +2,8 @@ import { test, expect, accessible, watch } from '../../../../tests/component-fix
 import type { Locator, Page } from '@playwright/test'
 
 type Api = {
-  parseDuration(text: string, options?: Record<string, unknown>): number | null
-  formatDuration(seconds: number, options?: Record<string, unknown>): string
+  parseDurationText(text: string, options?: Record<string, unknown>): number | null
+  formatDurationText(seconds: number, options?: Record<string, unknown>): string
 }
 
 const field = (page: Page, selector = 'c2-duration-input') => page.locator(selector)
@@ -13,10 +13,10 @@ const message = (locator: Locator) => locator.locator('.supporting-text')
 const value = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement & { value: number | null }).value)
 const events = async (locator: Locator) => JSON.parse((await locator.getAttribute('data-events')) ?? '[]') as unknown[]
 
-test('parseDuration reads units, fractions, clocks and bare numbers; formatDuration writes short, long and clock', async ({ page, renderScenario }) => {
+test('parseDurationText reads units, fractions, clocks and bare numbers; formatDurationText writes short, long and clock', async ({ page, renderScenario }) => {
   await renderScenario('')
   const results = await page.evaluate(() => {
-    const { parseDuration: parse, formatDuration: format } = (window as unknown as { durationApi: Api }).durationApi
+    const { parseDurationText: parse, formatDurationText: format } = (window as unknown as { durationApi: Api }).durationApi
     return {
       parsed: [
         parse('1h 30m'),

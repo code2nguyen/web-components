@@ -30,6 +30,6 @@ import '@c2n/components/duration-input'
   `required` asks for a value. The message shows below the field once it has been left; inside a `c2-form-field`, the
   field shows it instead.
 - **Events:** `input` while typing and `change` when the text is committed.
-- **Exports:** `parseDuration(text, options)` and `formatDuration(seconds, options)`, for tables and APIs.
+- **Exports:** `parseDurationText(text, options)` and `formatDurationText(seconds, options)`, for tables and APIs.
 
 Every visible text and the words each unit accepts are translatable through `addTranslations` (`duration-input`).

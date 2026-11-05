@@ -11,7 +11,7 @@ import { DurationInput } from '@c2n/components/duration-input'
 
 `c2-duration-input` takes an amount of time the way people type it, as in Jira time tracking and Toggl: `1h 30m`, `90m`, `1.5h` (or `1,5h`), `1:30`, `2 days 4 hours`, or a bare `90` read in `unit`. Its `value` is the duration in seconds. While typing, a quiet preview after the text says how it was read; when the field is left, the text is rewritten in `format` (`short`, `long` or `clock`) and rounded to `step`. Arrow Up and Down add or remove one step.
 
-`largest-unit` and `smallest-unit` bound the units written (with `largest-unit="h"`, two days read `48h`), and `day-hours` and `week-days` set how long a day and a week are: time tracking often counts a day as 8 hours. It is a form control: the form receives the seconds under `name`, text that cannot be read sets `badInput`, and `min`, `max` and `step` are seconds too. `parseDuration()` and `formatDuration()` are exported for tables and APIs.
+`largest-unit` and `smallest-unit` bound the units written (with `largest-unit="h"`, two days read `48h`), and `day-hours` and `week-days` set how long a day and a week are: time tracking often counts a day as 8 hours. It is a form control: the form receives the seconds under `name`, text that cannot be read sets `badInput`, and `min`, `max` and `step` are seconds too. `parseDurationText()` and `formatDurationText()` are exported for tables and APIs.
 
 ## Import
 

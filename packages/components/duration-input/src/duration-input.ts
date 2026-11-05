@@ -9,11 +9,11 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { LocalizeController } from '@c2n/core/localize.js'
-import { DURATION_UNITS, formatDuration, parseDuration, unitSeconds, type DurationFormat, type DurationUnit } from './duration.js'
+import { DURATION_UNITS, formatDurationText, parseDurationText, unitSeconds, type DurationFormat, type DurationUnit } from './duration.js'
 import { durationInputMessages } from './messages.js'
 import styles from './duration-input.scss?inline'
 
-export { DURATION_UNITS, durationParts, formatDuration, parseDuration, unitSeconds } from './duration.js'
+export { DURATION_UNITS, durationParts, formatDurationText, parseDurationText, unitSeconds } from './duration.js'
 export type { DurationCalendar, DurationFormat, DurationUnit, FormatDurationOptions, ParseDurationOptions } from './duration.js'
 export { durationInputMessages } from './messages.js'
 
@@ -67,7 +67,7 @@ const isUnit = (value: unknown): value is DurationUnit => typeof value === 'stri
  * It is a form control: under a `name` the form receives the seconds, `required` asks for a value, text that cannot be
  * read sets `badInput`, and `min`/`max` set the range flags. Its own message shows below the field once it is left
  * (or after a failed submit), and inside a `c2-form-field` the field shows it instead. The words each unit accepts and
- * every message are translatable. `parseDuration()` and `formatDuration()` are exported for tables and APIs.
+ * every message are translatable. `parseDurationText()` and `formatDurationText()` are exported for tables and APIs.
  *
  * @tag c2-duration-input
  *
@@ -252,7 +252,7 @@ export class DurationInput extends LitElement {
   }
 
   private write(seconds: number, format: DurationFormat): string {
-    return formatDuration(seconds, {
+    return formatDurationText(seconds, {
       ...this.calendar,
       format,
       largestUnit: isUnit(this.largestUnit) ? this.largestUnit : 'd',
@@ -263,7 +263,7 @@ export class DurationInput extends LitElement {
 
   private read(text: string): number | null {
     const words = (key: 'weekWords' | 'dayWords' | 'hourWords' | 'minuteWords' | 'secondWords') => this.msg.t(key).split(/\s+/).filter(Boolean)
-    return parseDuration(text, {
+    return parseDurationText(text, {
       ...this.calendar,
       unit: isUnit(this.unit) ? this.unit : 'm',
       words: { w: words('weekWords'), d: words('dayWords'), h: words('hourWords'), m: words('minuteWords'), s: words('secondWords') },

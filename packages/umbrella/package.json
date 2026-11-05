@@ -429,6 +429,10 @@
       "types": "./dist/distribution-bar.d.ts",
       "default": "./dist/distribution-bar.js"
     },
+    "./duration-input": {
+      "types": "./dist/duration-input.d.ts",
+      "default": "./dist/duration-input.js"
+    },
     "./emoji-picker": {
       "types": "./dist/emoji-picker.d.ts",
       "default": "./dist/emoji-picker.js"
@@ -773,6 +777,10 @@
       "types": "./dist/questionnaire.d.ts",
       "default": "./dist/questionnaire.js"
     },
+    "./quick-time-menu": {
+      "types": "./dist/quick-time-menu.d.ts",
+      "default": "./dist/quick-time-menu.js"
+    },
     "./radio": {
       "types": "./dist/radio.d.ts",
       "default": "./dist/radio.js"
@@ -808,6 +816,10 @@
     "./save-bar": {
       "types": "./dist/save-bar.d.ts",
       "default": "./dist/save-bar.js"
+    },
+    "./scheduler": {
+      "types": "./dist/scheduler.d.ts",
+      "default": "./dist/scheduler.js"
     },
     "./scroll-area": {
       "types": "./dist/scroll-area.d.ts",
