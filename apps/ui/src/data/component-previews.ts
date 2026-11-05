@@ -50,12 +50,14 @@ export const componentPreviews: Record<string, string> = {
   <c2-bottom-nav-item value="inbox" count="4"><c2-phosphor-tray slot="icon"></c2-phosphor-tray>Inbox</c2-bottom-nav-item>
   <c2-bottom-nav-item value="profile" dot><c2-phosphor-user slot="icon"></c2-phosphor-user>Profile</c2-bottom-nav-item>
 </c2-bottom-nav>`,
+  'boxplot-chart': `<!-- boxplot-chart preview: replaced by the implementation -->`,
   breadcrumb: `<c2-breadcrumb>
   <c2-link-button href="#">Home</c2-link-button>
   <c2-link-button href="#">Library</c2-link-button>
   <c2-link-button href="#">Data</c2-link-button>
 </c2-breadcrumb>`,
   'bubble-chart': `<c2-bubble-chart style="width:280px;height:132px;--c2-chart--padding:8px;--c2-chart__bubble--max-size:34px" aria-label="Life expectancy against GDP per capita, sized by population" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" legend="none" bubble-labels="none" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>`,
+  'bullet-chart': `<!-- bullet-chart preview: replaced by the implementation -->`,
   'butterfly-chart': `<c2-butterfly-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__gutter--width:44px" aria-label="Population by age band, men against women" label-field="age" legend="none" data='[{"age":"60+","men":1960,"women":2610},{"age":"40–59","men":2480,"women":2530},{"age":"20–39","men":2950,"women":2880},{"age":"0–19","men":2410,"women":2295}]'><c2-chart-series field="men" label="Men"></c2-chart-series><c2-chart-series field="women" label="Women"></c2-chart-series></c2-butterfly-chart>`,
   button: `<div class="preview-row">
   <c2-button><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>New item</c2-button>
@@ -506,6 +508,7 @@ price: .price
   <div style="padding:6px 10px">Fourth paragraph.</div>
 </div>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
+  'sunburst-chart': `<!-- sunburst-chart preview: replaced by the implementation -->`,
   'swipe-action': `<c2-swipe-action open="end" style="width:280px;border:1px solid #e4e4e7;border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>

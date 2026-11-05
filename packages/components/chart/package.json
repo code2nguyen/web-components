@@ -41,6 +41,18 @@
       "types": "./types/src/radial-bar-chart.d.ts",
       "default": "./dist/radial-bar-chart.js"
     },
+    "./bullet-chart.js": {
+      "types": "./types/src/bullet-chart.d.ts",
+      "default": "./dist/bullet-chart.js"
+    },
+    "./boxplot-chart.js": {
+      "types": "./types/src/boxplot-chart.d.ts",
+      "default": "./dist/boxplot-chart.js"
+    },
+    "./sunburst-chart.js": {
+      "types": "./types/src/sunburst-chart.d.ts",
+      "default": "./dist/sunburst-chart.js"
+    },
     "./pyramid-chart.js": {
       "types": "./types/src/pyramid-chart.d.ts",
       "default": "./dist/pyramid-chart.js"
