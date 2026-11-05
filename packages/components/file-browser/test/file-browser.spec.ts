@@ -200,6 +200,8 @@ test('the context menu, the ⋯ button and the menu key run actions on the selec
   // Right-clicking an unselected item selects it alone.
   await option(host, 'schema.json').click({ button: 'right' })
   expect(await selected(host)).toEqual(['schema.json'])
+  // The menu opens once the button is up: let it, then close it.
+  await expect(menu.locator('c2-menu-item[value="rename"]')).toBeVisible()
   await page.keyboard.press('Escape')
   await option(host, 'Assets').locator('.more').click()
   await menu.locator('c2-menu-item[value="delete"]').click()

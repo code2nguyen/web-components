@@ -303,6 +303,8 @@ export class FileBrowser extends LitElement {
   private typeahead = ''
   private typeaheadTimer?: ReturnType<typeof setTimeout>
   private resizeObserver?: ResizeObserver
+  /** Cancels a context menu that a right-click asked for and that waits for the button to come up. */
+  private cancelPendingMenu?: () => void
   private byId = new Map<string, FileBrowserItem>()
   private childrenOf = new Map<string, FileBrowserItem[]>()
 
@@ -316,6 +318,7 @@ export class FileBrowser extends LitElement {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    this.cancelPendingMenu?.()
     this.resizeObserver?.disconnect()
     clearTimeout(this.typeaheadTimer)
   }
@@ -636,6 +639,8 @@ export class FileBrowser extends LitElement {
   }
 
   private onKeydown(event: KeyboardEvent): void {
+    // Any key after a right-click (Escape above all) means the menu still waiting for the button to come up is not wanted.
+    this.cancelPendingMenu?.()
     if (this.renaming || event.defaultPrevented) return
     // Keys typed in the column headers belong to their buttons.
     if (event.composedPath().some((node) => node instanceof HTMLElement && node.classList.contains('columns'))) return
@@ -783,6 +788,7 @@ export class FileBrowser extends LitElement {
   private onContextMenu(event: MouseEvent, entry: FileBrowserItem): void {
     if (!this.actions.length) return
     event.preventDefault()
+    this.cancelPendingMenu?.()
     this.selectForMenu(entry)
     const box = this.getBoundingClientRect()
     const point = { x: event.clientX - box.left, y: event.clientY - box.top }
@@ -792,19 +798,26 @@ export class FileBrowser extends LitElement {
       void this.openMenu(entry, point)
       return
     }
-    let opened = false
-    const open = () => {
-      if (opened) return
-      opened = true
+    let done = false
+    const cancel = () => {
+      done = true
       window.removeEventListener('pointerup', open, true)
+      clearTimeout(timer)
+      if (this.cancelPendingMenu === cancel) this.cancelPendingMenu = undefined
+    }
+    const open = () => {
+      if (done) return
+      cancel()
       requestAnimationFrame(() => void this.openMenu(entry, point))
     }
     window.addEventListener('pointerup', open, true)
-    setTimeout(open, 800)
+    const timer = setTimeout(open, 800)
+    this.cancelPendingMenu = cancel
   }
 
   private onMore(event: MouseEvent, entry: FileBrowserItem): void {
     event.stopPropagation()
+    this.cancelPendingMenu?.()
     this.selectForMenu(entry)
     void this.openMenu(entry, null, event.currentTarget as HTMLElement)
   }
