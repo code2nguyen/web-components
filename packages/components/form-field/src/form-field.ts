@@ -46,6 +46,8 @@ export interface FormFieldControl extends HTMLElement {
   minLength?: number
   min?: unknown
   max?: unknown
+  /** How the control writes its own `min` or `max` for a message, when the raw value is not what a reader expects. */
+  formatBound?(bound: 'min' | 'max'): string
   value?: unknown
   type?: string
   name?: string
@@ -439,9 +441,9 @@ export class FormField extends LitElement {
       case 'tooLong':
         return this.msg.t('tooLong', Number(control?.maxLength ?? 0))
       case 'rangeUnderflow':
-        return this.msg.t('rangeUnderflow', String(control?.min ?? ''))
+        return this.msg.t('rangeUnderflow', control?.formatBound?.('min') ?? String(control?.min ?? ''))
       case 'rangeOverflow':
-        return this.msg.t('rangeOverflow', String(control?.max ?? ''))
+        return this.msg.t('rangeOverflow', control?.formatBound?.('max') ?? String(control?.max ?? ''))
       default:
         return this.msg.t(key)
     }

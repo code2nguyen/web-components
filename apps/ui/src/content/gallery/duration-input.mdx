@@ -1,0 +1,61 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DurationInput } from '@c2n/components/duration-input'
+
+## Presets
+
+Looks for `c2-duration-input`. The box is drawn by `--c2-duration-input--border`, `--border-radius` and `--background`; the preview after the text by `__preview--color`; and the clock by `__icon--color`, or by an `icon` slot of your own.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-duration-input aria-label="Estimate"></c2-duration-input>
+```
+
+```html tag=MdxCodeBlock,label=Time log pill
+<style>
+  .duration-pill {
+    width: 160px;
+    --c2-duration-input--border: 1px solid transparent;
+    --c2-duration-input--border-radius: 999px;
+    --c2-duration-input--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-duration-input__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-duration-input__value--padding: 4px 14px 4px 12px;
+    --c2-duration-input--min-height: 32px;
+    --c2-duration-input__icon--color: #0f766e;
+  }
+</style>
+<c2-duration-input class="duration-pill" aria-label="Time spent" value="2700" day-hours="8"></c2-duration-input>
+```
+
+```html tag=MdxCodeBlock,label=Stopwatch clock
+<style>
+  .duration-clock {
+    width: 150px;
+    --c2-duration-input--font-size: 22px;
+    --c2-duration-input--line-height: 28px;
+    --c2-duration-input--min-height: 48px;
+    --c2-duration-input--border-radius: 8px;
+    --c2-duration-input__icon--size: 20px;
+    --c2-duration-input__icon--color: #b45309;
+  }
+</style>
+<c2-duration-input class="duration-clock" aria-label="Lap" format="clock" value="3930"></c2-duration-input>
+```
+
+```html tag=MdxCodeBlock,label=Estimate with hint
+<style>
+  .duration-estimate {
+    width: 240px;
+    --c2-duration-input--border-radius: 8px;
+    --c2-duration-input__focus--border: 1px solid #7c3aed;
+    --c2-duration-input__focus--outline: 3px solid rgba(124, 58, 237, 0.2);
+    --c2-duration-input__icon--color: #7c3aed;
+    --c2-duration-input__preview--color: #7c3aed;
+  }
+</style>
+<c2-duration-input class="duration-estimate" aria-label="Estimate" step="900" help="Rounded to 15 minutes. A day is 8 hours." day-hours="8"></c2-duration-input>
+```
+
+</GalleryGrid>

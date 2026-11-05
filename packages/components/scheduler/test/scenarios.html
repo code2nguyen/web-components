@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>scheduler scenarios</title>
+    <style>
+      body {
+        margin: 24px;
+        font: 14px system-ui;
+        color: #18181b;
+        background: white;
+      }
+    </style>
+    <script type="module">
+      import '../src/scheduler.ts'
+      // Applies every change the scheduler reports, as an app would.
+      window.applyChanges = (scheduler) => {
+        scheduler.addEventListener('event-change', (event) => {
+          const { event: booking, start, end, resource } = event.detail
+          scheduler.events = scheduler.events.map((item) => (item === booking ? { ...item, start, end, resource } : item))
+        })
+      }
+      document.querySelector('main').dataset.ready = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Scheduler scenario"></main>
+  </body>
+</html>

@@ -1,0 +1,135 @@
+---
+title: 'Scheduler'
+description: 'Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.'
+category: 'Planning'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Scheduler } from '@c2n/components/scheduler'
+
+`c2-scheduler` lays bookings out per resource: a row for each person, room or machine, time across the top, each
+booking a bar from its start to its end. Bookings that overlap on one resource stack in lanes and the row grows to
+fit. Resources that share a `group` sit under a group row that collapses. The header pages through the range and
+switches between the `day`, `week` and `month` views. With `editable`, users drag to create, move and resize
+bookings; the scheduler reports each request and your app updates `events`. `c2-week-planner` stays the one-person
+week, and `c2-gantt` the read-only project plan.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/scheduler'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/scheduler
+<style>
+  .scheduler-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .scheduler-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="Day view">
+  <c2-scheduler
+    date="2026-11-09"
+    day-start="07:00"
+    day-end="19:00"
+    locale="en-GB"
+    resources='[{"id":"ana","label":"Ana Ruiz","group":"Design","description":"Product designer","color":"#7c3aed"},{"id":"kenji","label":"Kenji Ono","group":"Design","description":"UX research","color":"#0891b2"},{"id":"aurora","label":"Aurora","group":"Rooms","description":"8 seats","color":"#16a34a"},{"id":"borealis","label":"Borealis","group":"Rooms","description":"4 seats","color":"#ea580c"}]'
+    events='[{"id":"1","resource":"ana","start":"2026-11-09T09:00","end":"2026-11-09T10:30","title":"Kick-off"},{"id":"2","resource":"ana","start":"2026-11-09T11:30","end":"2026-11-09T13:30","title":"Design review"},{"id":"3","resource":"kenji","start":"2026-11-09T09:30","end":"2026-11-09T11:30","title":"Interviews"},{"id":"4","resource":"kenji","start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Sync with PM"},{"id":"5","resource":"kenji","start":"2026-11-09T12:30","end":"2026-11-09T14:00","title":"Synthesis"},{"id":"6","resource":"aurora","start":"2026-11-09T09:00","end":"2026-11-09T10:00","title":"Stand-up"},{"id":"7","resource":"aurora","start":"2026-11-09T11:00","end":"2026-11-09T13:30","title":"Board prep"},{"id":"8","resource":"borealis","start":"2026-11-09T13:00","end":"2026-11-09T14:30","title":"1:1 Kenji / Lea"}]'
+  ></c2-scheduler>
+</div>
+<div data-label="Week view">
+  <c2-scheduler
+    view="week"
+    date="2026-11-09"
+    locale="en-GB"
+    resource-heading="Machines"
+    resources='[{"id":"p1","label":"Press 1","description":"Line A","color":"#2563eb"},{"id":"p2","label":"Press 2","description":"Line A","color":"#db2777"},{"id":"l1","label":"Laser cutter","description":"Line B","color":"#0d9488"}]'
+    events='[{"id":"1","resource":"p1","start":"2026-11-09T08:00","end":"2026-11-10T14:00","title":"Order 1182"},{"id":"2","resource":"p1","start":"2026-11-10T16:00","end":"2026-11-13T10:00","title":"Order 1190"},{"id":"3","resource":"p2","start":"2026-11-10T07:00","end":"2026-11-10T17:00","title":"Maintenance","readonly":true},{"id":"4","resource":"p2","start":"2026-11-11T07:00","end":"2026-11-13T18:00","title":"Order 1185"},{"id":"5","resource":"l1","start":"2026-11-09T06:00","end":"2026-11-12T22:00","title":"Panels batch 7"}]'
+  ></c2-scheduler>
+</div>
+<div data-label="Editable">
+  <div class="scheduler-demo">
+    <c2-scheduler
+      editable
+      data-planner-demo="editable"
+      date="2026-11-09"
+      day-start="08:00"
+      day-end="14:00"
+      locale="en-GB"
+      resources='[{"id":"aurora","label":"Aurora","description":"8 seats","color":"#16a34a"},{"id":"borealis","label":"Borealis","description":"4 seats","color":"#ea580c"}]'
+      events='[{"id":"1","resource":"aurora","start":"2026-11-09T09:00","end":"2026-11-09T10:00","title":"Stand-up"},{"id":"2","resource":"borealis","start":"2026-11-09T11:00","end":"2026-11-09T12:30","title":"Interview"}]'
+    ></c2-scheduler>
+    <output class="scheduler-result">Drag across empty time, drag a booking, or drag one of its edges.</output>
+  </div>
+</div>
+```
+
+## Resources and events
+
+`resources` is an array of `{ id, label, group?, description?, avatar?, color? }`. A `description` adds a second line
+under the label, `avatar` an image (the label's initials otherwise), and `color` tints the avatar and the resource's
+bars. Ungrouped resources come first, then each group in the order it first appears.
+
+`events` is an array of `{ id, resource, start, end, title, description?, color?, readonly? }`. `start` and `end` are
+wall-clock `YYYY-MM-DDTHH:mm` strings, the shape `c2-date-time-picker` uses, and every time the scheduler reports
+comes back in that shape. A bar takes its `color`, else its resource's, else `--c2-scheduler__event--color`. Both
+properties accept JSON as an attribute.
+
+## Views and range
+
+- `view`: `day` draws one column per `slot-minutes` (60 by default); `week` and `month` draw one column per day.
+- `date` (`YYYY-MM-DD`) is a day of the range shown, today by default. The week starts on the locale's first day.
+- `day-start` and `day-end` bound the hours drawn each day; `scroll-time` (`08:00`) is where the day view opens.
+- The day view shades the hours outside `working-hours` (`09:00-18:00`); every view shades the locale's weekend.
+- A line marks the current time in `time-zone`, drawn under the bars so it never crosses their text.
+
+The header's previous, Today and next buttons and its Day | Week | Month switch update `date` and `view` and fire
+`date-change` and `view-change` with `{ date, view, start, end }`, the moment to load that range's bookings.
+`hide-header` drops the header for an app that drives the range from its own toolbar.
+
+## Editing
+
+`editable` lets users arrange bookings. The scheduler never changes `events` itself: it reports what the user asked
+for, and you update `events`.
+
+- **Create.** Dragging across empty time fires `range-select` with `{ resource, start, end }`, snapped to
+  `snap-minutes` (15 by default). A click selects the column under the pointer.
+- **Move and resize.** Dragging a bar moves it in time and to another row; dragging either edge resizes it. Both fire
+  `event-change` with `{ event, start, end, resource }`. A dashed preview follows the pointer, and Escape cancels.
+- **Read-only.** Bookings with `readonly: true` stay in place. `event-click` fires on any bar.
+
+```typescript tag=CodeBlock
+scheduler.addEventListener('event-change', ({ detail }) => {
+  const { event, start, end, resource } = detail
+  scheduler.events = scheduler.events.map((item) => (item === event ? { ...item, start, end, resource } : item))
+})
+scheduler.addEventListener('range-select', ({ detail }) => {
+  scheduler.events = [...scheduler.events, { id: crypto.randomUUID(), title: 'New booking', ...detail }]
+})
+```
+
+## Keyboard and screen readers
+
+The grid is one Tab stop holding a slot cursor. The arrow keys move it over every slot of a row, booked or free, Up
+and Down move it to the same slot of the next row, and Home and End jump to the first and last slot. A booked slot is
+read with its bookings. Enter on a booked slot focuses its first bar; on a free slot, with `editable`, Enter fires
+`range-select` for it. On a bar, with `editable`, Left and Right move it by `snap-minutes`, Shift+Left and Shift+Right
+change its end, and Alt+Up and Alt+Down move it to the previous or next resource; Up and Down go to the next row and
+Escape goes back to the slot cursor. Each bar is a button named by its title, resource and time ("Kick-off, Ana Ruiz,
+Monday 9 November, 09:00 to 10:30"), and moves and new bookings are announced.
+
+## Limits
+
+Rows are not virtualised: the scheduler stays smooth up to about 200 resources and 2,000 bookings in view. Recurring
+bookings are expanded by the app before they reach `events`.

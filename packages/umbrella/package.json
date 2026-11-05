@@ -429,6 +429,10 @@
       "types": "./dist/distribution-bar.d.ts",
       "default": "./dist/distribution-bar.js"
     },
+    "./duration-input": {
+      "types": "./dist/duration-input.d.ts",
+      "default": "./dist/duration-input.js"
+    },
     "./emoji-picker": {
       "types": "./dist/emoji-picker.d.ts",
       "default": "./dist/emoji-picker.js"
@@ -773,6 +777,10 @@
       "types": "./dist/questionnaire.d.ts",
       "default": "./dist/questionnaire.js"
     },
+    "./quick-time-menu": {
+      "types": "./dist/quick-time-menu.d.ts",
+      "default": "./dist/quick-time-menu.js"
+    },
     "./radio": {
       "types": "./dist/radio.d.ts",
       "default": "./dist/radio.js"
@@ -808,6 +816,10 @@
     "./save-bar": {
       "types": "./dist/save-bar.d.ts",
       "default": "./dist/save-bar.js"
+    },
+    "./scheduler": {
+      "types": "./dist/scheduler.d.ts",
+      "default": "./dist/scheduler.js"
     },
     "./scroll-area": {
       "types": "./dist/scroll-area.d.ts",
@@ -1245,6 +1257,7 @@
     "@c2n/details": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
+    "@c2n/duration-input": "*",
     "@c2n/emoji-picker": "*",
     "@c2n/facet-list": "*",
     "@c2n/fieldset": "*",
@@ -1317,6 +1330,7 @@
     "@c2n/quantity-picker": "*",
     "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
+    "@c2n/quick-time-menu": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/reaction-bar": "*",
@@ -1324,6 +1338,7 @@
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
     "@c2n/save-bar": "*",
+    "@c2n/scheduler": "*",
     "@c2n/scroll-area": "*",
     "@c2n/scroll-progress": "*",
     "@c2n/search-field": "*",

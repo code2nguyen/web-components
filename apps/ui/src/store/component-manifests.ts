@@ -53,6 +53,7 @@ import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import distributionBar from '@c2n/distribution-bar/custom-elements.json'
+import durationInput from '@c2n/duration-input/custom-elements.json'
 import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
 import facetList from '@c2n/facet-list/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
@@ -127,6 +128,7 @@ import qrCode from '@c2n/qr-code/custom-elements.json'
 import quantityPicker from '@c2n/quantity-picker/custom-elements.json'
 import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
+import quickTimeMenu from '@c2n/quick-time-menu/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
 import reactionBar from '@c2n/reaction-bar/custom-elements.json'
@@ -134,6 +136,7 @@ import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
+import scheduler from '@c2n/scheduler/custom-elements.json'
 import scrollArea from '@c2n/scroll-area/custom-elements.json'
 import scrollProgress from '@c2n/scroll-progress/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
@@ -254,6 +257,7 @@ export const componentManifests = (function () {
     details,
     diffViewer,
     distributionBar,
+    durationInput,
     emojiPicker,
     facetList,
     featherIcons,
@@ -328,6 +332,7 @@ export const componentManifests = (function () {
     quantityPicker,
     queryInput,
     questionnaire,
+    quickTimeMenu,
     radio,
     rate,
     reactionBar,
@@ -335,6 +340,7 @@ export const componentManifests = (function () {
     reorderList,
     richTextEditor,
     saveBar,
+    scheduler,
     scrollArea,
     scrollProgress,
     searchField,
