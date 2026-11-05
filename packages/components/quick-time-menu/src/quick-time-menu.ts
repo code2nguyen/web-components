@@ -361,7 +361,10 @@ export class QuickTimeMenu extends LitElement {
     if (this.inline) {
       void this.updateComplete.then(() => {
         const rows = this.rowElements()
-        const index = Math.max(0, rows.findIndex((row) => row.getAttribute('aria-checked') === 'true'))
+        const index = Math.max(
+          0,
+          rows.findIndex((row) => row.getAttribute('aria-checked') === 'true'),
+        )
         this.active = index
         rows[index]?.focus()
       })
@@ -589,14 +592,13 @@ export class QuickTimeMenu extends LitElement {
 
   override render() {
     return html`${
-      this.inline
-        ? this.renderSurface()
-        : html`<span class="anchor-row">${this.renderTrigger()}</span>
-            <c2-overlay id="menu" .anchor=${this.slottedTrigger ?? 'trigger'} placement="bottom-start" free-width @toggle=${this.handleToggle}
-              >${this.renderSurface()}</c2-overlay
-            >`
-    }
-      <span class="anchor" aria-hidden="true"></span>${this.field.renderDescription()}
+        this.inline
+          ? this.renderSurface()
+          : html`<span class="anchor-row">${this.renderTrigger()}</span>
+              <c2-overlay id="menu" .anchor=${this.slottedTrigger ?? 'trigger'} placement="bottom-start" free-width @toggle=${this.handleToggle}
+                >${this.renderSurface()}</c2-overlay
+              >`
+      } <span class="anchor" aria-hidden="true"></span>${this.field.renderDescription()}
       <span class="announcement" aria-live="polite">${this.announcement}</span>`
   }
 }

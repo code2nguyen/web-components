@@ -157,7 +157,8 @@ export function resolveQuickTime(when: QuickTimeAt, options: QuickTimeOptions = 
 /** Whether the locale reads the clock 0–23, so hours are written with two digits (`09:00`) as its users expect. */
 function twentyFourHour(locale: string | undefined): boolean {
   try {
-    const cycle = new Intl.DateTimeFormat(locale || undefined, { hour: 'numeric' }).resolvedOptions().hourCycle
+    // `hourCycle` is ES2021, above the library's ES2020 typings; every engine the components support has it.
+    const cycle = (new Intl.DateTimeFormat(locale || undefined, { hour: 'numeric' }).resolvedOptions() as { hourCycle?: string }).hourCycle
     return cycle === 'h23' || cycle === 'h24'
   } catch {
     return false

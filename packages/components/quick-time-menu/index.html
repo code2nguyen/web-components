@@ -2,19 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-quick-time-menu</title>
     <script type="module" src="/src/quick-time-menu.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 24px;
         padding: 24px;
+        font: 14px system-ui;
+      }
+      .card {
+        width: 300px;
+        padding: 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
       }
     </style>
   </head>
 
   <body>
-    <c2-quick-time-menu></c2-quick-time-menu>
+    <c2-quick-time-menu label="Snooze until" name="snooze"></c2-quick-time-menu>
+    <c2-quick-time-menu label="Due" value="2026-12-01T17:00"></c2-quick-time-menu>
+    <c2-quick-time-menu
+      label="Remind me"
+      presets='[{"id":"20m","label":"In 20 minutes","at":"+20m"},{"id":"1h","label":"In 1 hour","at":"+1h"},{"id":"monday","label":"Next Monday","at":"next monday 09:00"}]'
+    ></c2-quick-time-menu>
+    <div class="card"><c2-quick-time-menu inline label="Follow up"></c2-quick-time-menu></div>
   </body>
 </html>

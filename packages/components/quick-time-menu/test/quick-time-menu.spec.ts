@@ -54,9 +54,10 @@ test('expressions resolve to wall-clock times in the zone, and those that do not
   // A function of the current instant.
   const viaFunction = await page.evaluate(
     ({ now, zone }) =>
-      (
-        window as unknown as { quickTime: { resolveQuickTime: (at: (now: Date) => Date, options: object) => string } }
-      ).quickTime.resolveQuickTime((current) => new Date(current.getTime() + 3_600_000), { now, timeZone: zone }),
+      (window as unknown as { quickTime: { resolveQuickTime: (at: (now: Date) => Date, options: object) => string } }).quickTime.resolveQuickTime(
+        (current) => new Date(current.getTime() + 3_600_000),
+        { now, timeZone: zone },
+      ),
     { now: NOW, zone: ZONE },
   )
   expect(viaFunction).toBe('2026-11-09T15:12')
@@ -72,7 +73,14 @@ test('the menu lists each preset with the time it resolves to; a pick sets the v
   await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false')
   await trigger(page).click()
   await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true')
-  await expect(rows(page)).toHaveText([/Later today\s*17:00/, /This evening\s*18:00/, /Tomorrow\s*Tue 09:00/, /This weekend\s*Sat 09:00/, /Next week\s*Mon 16 Nov, 09:00/, /Pick a date and time…/])
+  await expect(rows(page)).toHaveText([
+    /Later today\s*17:00/,
+    /This evening\s*18:00/,
+    /Tomorrow\s*Tue 09:00/,
+    /This weekend\s*Sat 09:00/,
+    /Next week\s*Mon 16 Nov, 09:00/,
+    /Pick a date and time…/,
+  ])
   await expect(rows(page).first()).toBeFocused()
   await expect(rows(page).nth(2)).toHaveAttribute('aria-label', /^Tomorrow, Tuesday,? 10 November 2026 at 09:00$/)
   await accessible(page)
@@ -116,6 +124,8 @@ test('the keyboard opens the menu, moves through the rows and picks; typeahead j
   await page.keyboard.press('n')
   await expect(rows(page).nth(4)).toBeFocused()
   await page.keyboard.press('t')
+  await expect(rows(page).nth(1)).toBeFocused()
+  await page.keyboard.press('t')
   await expect(rows(page).nth(2)).toBeFocused()
   await page.keyboard.press('Enter')
   expect(await menu(page).evaluate((element) => (element as HTMLElement & { value: string }).value)).toBe('2026-11-10T09:00')
@@ -148,7 +158,7 @@ test('"Pick a date and time…" swaps the list for a date and time panel; Back r
   await panel.getByRole('button', { name: 'Set' }).click()
   await expect(panel).toHaveCount(0)
   expect(await events(page)).toEqual([{ value: '2026-11-12T08:30', preset: null }])
-  await expect(trigger(page)).toHaveText('Thu 12 Nov, 08:30')
+  await expect(trigger(page)).toHaveText('Thu 08:30')
 })
 
 test('presets of its own as JSON expressions, hidden outside min and max; inline draws the list in place', async ({ page, renderScenario }) => {
@@ -200,4 +210,19 @@ test('inside a c2-form-field its label names the trigger; disabled turns the tri
   await expect(menu(page).first().locator('.trigger')).toHaveAttribute('aria-label', 'Follow up')
   await expect(page.locator('#off .trigger')).toBeDisabled()
   await accessible(page)
+})
+
+test('a slotted trigger opens the menu and carries aria-haspopup and aria-expanded', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-quick-time-menu now="${NOW}" time-zone="${ZONE}"><button slot="trigger" id="own">Remind me</button></c2-quick-time-menu>`)
+  const own = page.locator('#own')
+  await expect(menu(page).locator('.trigger')).toBeHidden()
+  await expect(own).toHaveAttribute('aria-haspopup', 'menu')
+  await expect(own).toHaveAttribute('aria-expanded', 'false')
+  await own.click()
+  await expect(own).toHaveAttribute('aria-expanded', 'true')
+  await expect(rows(page).first()).toBeFocused()
+  // A second click on the trigger of the open menu closes it.
+  await own.click()
+  await expect(rows(page)).toHaveCount(0)
+  await expect(own).toHaveAttribute('aria-expanded', 'false')
 })

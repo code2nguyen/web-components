@@ -1,7 +1,7 @@
 ---
-title: 'Quick Time Menu'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+title: 'Quick time menu'
+description: 'A menu of quick times (Later today, Tomorrow, Next week), each showing when it falls, plus a date and time picker for anything else.'
+category: 'Inputs'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { QuickTimeMenu } from '@c2n/components/quick-time-menu'
 
-`c2-quick-time-menu` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-quick-time-menu` picks a time from a short list, as a snooze, a reminder or a follow-up date does in Gmail, Slack and Linear. Each row shows the time it falls at in the reader's clock format, and "Pick a date and time…" opens a `c2-date-time-picker` in place for anything else. The value is a wall-clock `YYYY-MM-DDTHH:mm`, the same shape the date and time picker uses.
 
 ## Import
 
@@ -21,13 +20,67 @@ import '@c2n/components/quick-time-menu'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/quick-time-menu
-<div data-label="Default">
-  <c2-quick-time-menu></c2-quick-time-menu>
+<style>
+  .qtm-card {
+    width: 300px;
+    padding: 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+  .qtm-card h4 {
+    margin: 0 4px 8px;
+    font-size: 14px;
+  }
+</style>
+<div data-label="Snooze">
+  <c2-quick-time-menu label="Snooze until" name="snooze"></c2-quick-time-menu>
+</div>
+<div data-label="Presets of your own">
+  <c2-quick-time-menu
+    label="Remind me"
+    presets='[{"id":"20m","label":"In 20 minutes","at":"+20m"},{"id":"1h","label":"In 1 hour","at":"+1h"},{"id":"tomorrow","label":"Tomorrow morning","at":"tomorrow 08:00"},{"id":"monday","label":"Next Monday","at":"next monday 09:00"}]'
+  ></c2-quick-time-menu>
+</div>
+<div data-label="Inline">
+  <div class="qtm-card">
+    <h4>Follow up on this thread</h4>
+    <c2-quick-time-menu inline label="Follow up"></c2-quick-time-menu>
+  </div>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### Presets
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+Without `presets` the rows are Later today (in about 3 hours, on the hour), This evening (at `evening`, 18:00), Tomorrow, This weekend and Next week (the first day of the reader's week), the last three at `morning` (09:00). A row that no longer applies is hidden: Later today and This evening in the evening, This weekend on a weekend.
+
+`presets` replaces them. Each row is `{ id, label, at }`, where `at` is either a function of the current time (set the array as a property) or an expression, which also works in a JSON attribute:
+
+| Expression                        | Falls at                                                    |
+| --------------------------------- | ----------------------------------------------------------- |
+| `+20m`, `+3h`, `+1h30m`, `+2d`    | That long from now                                          |
+| `today 16:00`, `tomorrow`         | That day, at the time given or at `morning`                 |
+| `friday 09:00`                    | The first Friday whose time is still ahead, today included  |
+| `next monday 09:00`               | The first Monday after today                                |
+| `later today`, `this evening`, `end of day`, `this weekend`, `next week` | The default rows' rules     |
+
+Times are `HH:mm`, `9am` or `5:30pm`. `min` and `max` hide the rows that fall outside them, and bound the date and time panel. A row is resolved again when it is picked, so a menu left open still picks the right time.
+
+### Value and form
+
+The value is read in `time-zone` (the browser's zone by default), and `valueAsDate` gives the instant it names. A pick fires `input`, `change` and `time-select`, whose `detail.preset` is the row's `id` (`null` from the panel). Under a `name` the form receives the value, `required` asks for one, and inside a `c2-form-field` the field's label names the trigger.
+
+```html tag=CodeBlock
+<form>
+  <c2-form-field label="Follow up">
+    <c2-quick-time-menu name="followUp" required></c2-quick-time-menu>
+  </c2-form-field>
+</form>
+```
+
+### Trigger
+
+The trigger shows `label` until a time is chosen, then that time, with a clear button beside it (`clearable="false"` removes it). Put your own button in the `trigger` slot to change it entirely, and set `inline` to draw the list without a trigger, inside a card, a sheet or another menu.
+
+### Accessibility
+
+The list is a `menu` of `menuitemradio` rows, the chosen one checked, each named by its label and full date ("Tomorrow, Tuesday 10 November 2026 at 09:00"). Arrow Down or Up on the trigger opens it on the first or last row; inside, the arrow keys, Home, End and the first letter of a row move between rows, Enter or Space picks, and Escape closes the menu and returns focus to the trigger. A pick is announced.
