@@ -72,7 +72,8 @@ test('the waveform seeks by pointer and by keyboard: arrows move 5 s, Home and E
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   await expect.poll(() => mediaTime(host)).toBeCloseTo(6, 0)
   await expect(waveform(host)).toBeFocused()
-  await expect(waveform(host)).toHaveAttribute('aria-valuetext', '0:06 of 0:12')
+  // The middle of the waveform is 6 s; an engine may land a hair before it, which the floored time shows as 0:05.
+  await expect(waveform(host)).toHaveAttribute('aria-valuetext', /^0:0[56] of 0:12$/)
   // Dragging scrubs: the played bars follow the pointer, the audio seeks on release.
   await page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2)
   await page.mouse.down()
@@ -121,8 +122,9 @@ test('a slotted audio whose every source fails says so; a new src is decoded aga
   await playButton(switched).click()
   await expect.poll(() => mediaPaused(switched)).toBe(false)
   await expect(playButton(switched)).toHaveAccessibleName('Pause switch')
+  // Only the player's own requests count: WebKit's media stack may fetch an <audio preload="none"> anyway.
   const requested: string[] = []
-  page.on('request', (request) => requested.push(request.url()))
+  page.on('request', (request) => request.resourceType() === 'fetch' && requested.push(request.url()))
   await switched.evaluate((element, src) => ((element as HTMLElement & { src: string }).src = src), `${NOTE}?second`)
   // The new file is fetched and decoded for its own waveform, and the old playback is over.
   await expect.poll(() => requested.some((url) => url.endsWith('?second'))).toBe(true)
@@ -131,8 +133,9 @@ test('a slotted audio whose every source fails says so; a new src is decoded aga
 })
 
 test('a slotted audio with preload="none" fetches nothing before the first play', async ({ page, renderScenario }) => {
+  // Only the player's own requests count: WebKit's media stack may fetch an <audio preload="none"> anyway.
   const requested: string[] = []
-  page.on('request', (request) => requested.push(request.url()))
+  page.on('request', (request) => request.resourceType() === 'fetch' && requested.push(request.url()))
   await renderScenario(`<c2-audio-player label="lazy"><audio src="${NOTE}?lazy" preload="none"></audio></c2-audio-player>`)
   const lazy = player(page)
   await expect(waveform(lazy)).toHaveClass(/flat/)
