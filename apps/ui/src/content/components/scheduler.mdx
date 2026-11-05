@@ -25,6 +25,19 @@ import '@c2n/components/scheduler'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/scheduler
+<style>
+  .scheduler-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .scheduler-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
 <div data-label="Day view">
   <c2-scheduler
     date="2026-11-09"
@@ -44,6 +57,21 @@ import '@c2n/components/scheduler'
     resources='[{"id":"p1","label":"Press 1","description":"Line A","color":"#2563eb"},{"id":"p2","label":"Press 2","description":"Line A","color":"#db2777"},{"id":"l1","label":"Laser cutter","description":"Line B","color":"#0d9488"}]'
     events='[{"id":"1","resource":"p1","start":"2026-11-09T08:00","end":"2026-11-10T14:00","title":"Order 1182"},{"id":"2","resource":"p1","start":"2026-11-10T16:00","end":"2026-11-13T10:00","title":"Order 1190"},{"id":"3","resource":"p2","start":"2026-11-10T07:00","end":"2026-11-10T17:00","title":"Maintenance","readonly":true},{"id":"4","resource":"p2","start":"2026-11-11T07:00","end":"2026-11-13T18:00","title":"Order 1185"},{"id":"5","resource":"l1","start":"2026-11-09T06:00","end":"2026-11-12T22:00","title":"Panels batch 7"}]'
   ></c2-scheduler>
+</div>
+<div data-label="Editable">
+  <div class="scheduler-demo">
+    <c2-scheduler
+      editable
+      data-planner-demo="editable"
+      date="2026-11-09"
+      day-start="08:00"
+      day-end="14:00"
+      locale="en-GB"
+      resources='[{"id":"aurora","label":"Aurora","description":"8 seats","color":"#16a34a"},{"id":"borealis","label":"Borealis","description":"4 seats","color":"#ea580c"}]'
+      events='[{"id":"1","resource":"aurora","start":"2026-11-09T09:00","end":"2026-11-09T10:00","title":"Stand-up"},{"id":"2","resource":"borealis","start":"2026-11-09T11:00","end":"2026-11-09T12:30","title":"Interview"}]'
+    ></c2-scheduler>
+    <output class="scheduler-result">Drag across empty time, drag a booking, or drag one of its edges.</output>
+  </div>
 </div>
 ```
 

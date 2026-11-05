@@ -18,6 +18,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-time-input', markup: '<c2-time-input></c2-time-input>' },
   { tag: 'c2-date-input', markup: '<c2-date-input></c2-date-input>' },
   { tag: 'c2-date-time-picker', markup: '<c2-date-time-picker></c2-date-time-picker>' },
+  { tag: 'c2-quick-time-menu', markup: '<c2-quick-time-menu></c2-quick-time-menu>' },
   { tag: 'c2-date-selector', markup: '<c2-date-selector></c2-date-selector>' },
   { tag: 'c2-otp-input', markup: '<c2-otp-input></c2-otp-input>' },
   { tag: 'c2-phone-input', markup: '<c2-phone-input></c2-phone-input>' },
