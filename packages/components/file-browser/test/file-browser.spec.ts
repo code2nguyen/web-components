@@ -362,6 +362,9 @@ test('keys typed in the author’s empty-slot content stay there: Backspace edit
   await expect(field).toHaveValue('Draft')
   await expect(host.locator('c2-breadcrumb .current')).toHaveText('Assets')
   // The items still respond to the same keys.
-  await host.locator('c2-breadcrumb').locator('text=Q4 planning').click()
+  // A narrow breadcrumb folds its middle crumbs behind the ellipsis.
+  const crumb = host.locator('c2-breadcrumb c2-link-button', { hasText: 'Q4 planning' })
+  if (!(await crumb.isVisible())) await host.locator('c2-breadcrumb [part="ellipsis"]').click()
+  await crumb.click()
   await expect.poll(() => names(host)).toContain('Assets')
 })
