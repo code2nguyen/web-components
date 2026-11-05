@@ -97,6 +97,10 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./audio-player": {
+      "types": "./dist/audio-player.d.ts",
+      "default": "./dist/audio-player.js"
+    },
     "./audio-visualizer": {
       "types": "./dist/audio-visualizer.d.ts",
       "default": "./dist/audio-visualizer.js"
@@ -536,6 +540,10 @@
     "./image-annotator": {
       "types": "./dist/image-annotator.d.ts",
       "default": "./dist/image-annotator.js"
+    },
+    "./image-compare": {
+      "types": "./dist/image-compare.d.ts",
+      "default": "./dist/image-compare.js"
     },
     "./image-cropper": {
       "types": "./dist/image-cropper.d.ts",
@@ -1064,6 +1072,10 @@
     "./video-grid": {
       "types": "./dist/video-grid.d.ts",
       "default": "./dist/video-grid.js"
+    },
+    "./video-player": {
+      "types": "./dist/video-player.d.ts",
+      "default": "./dist/video-player.js"
     },
     "./video-tile": {
       "types": "./dist/video-tile.d.ts",

@@ -51,6 +51,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Data display
 
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
+- **Audio Player** — `c2-audio-player` · `@c2n/components/audio-player` — Waveform playback for voice notes and recordings: the waveform is the seek bar, with the time, a speed toggle and an optional transcript.
 - **Audio Visualizer** — `c2-audio-visualizer` · `@c2n/components/audio-visualizer` — Live audio level as bars, a waveform or an orb: the mic meter of a call, a voice message, a voice assistant.
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
@@ -67,6 +68,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Highlight** — `c2-highlight` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
+- **Image Compare** — `c2-image-compare` · `@c2n/components/image-compare` — A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
@@ -92,6 +94,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Transcript** — `c2-transcript` · `@c2n/components/transcript` — Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
+- **Video Player** — `c2-video-player` · `@c2n/components/video-player` — Themed controls over a real video: chapters on the seek bar, a thumbnail while scrubbing, captions, speed, picture-in-picture and full screen.
 - **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.
 - **Virtual List** — `c2-virtual-list` · `@c2n/components/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
