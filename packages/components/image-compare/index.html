@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-image-compare</title>
+    <script type="module" src="/src/image-compare.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        padding: 24px;
+        font-family: system-ui;
+      }
+      c2-image-compare {
+        width: 480px;
+        max-width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-image-compare id="main" before-label="Before" after-label="After">
+      <img slot="before" src="/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+      <img slot="after" src="/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+    </c2-image-compare>
+    <output id="out">50</output>
+
+    <c2-image-compare orientation="vertical" position="35" before-label="Before" after-label="After">
+      <img slot="before" src="/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+      <img slot="after" src="/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+    </c2-image-compare>
+
+    <c2-image-compare hover label="Makeover, before and after">
+      <img slot="before" src="/images/compare-before.svg" alt="" width="800" height="500" />
+      <img slot="after" src="/images/compare-after.svg" alt="" width="800" height="500" />
+    </c2-image-compare>
+
+    <script type="module">
+      const main = document.getElementById('main')
+      main.addEventListener('input', () => (document.getElementById('out').textContent = String(main.position)))
+    </script>
+  </body>
+</html>

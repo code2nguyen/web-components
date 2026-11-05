@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>video-player scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        display: block;
+        width: 640px;
+      }
+    </style>
+    <script type="module">
+      import '../src/video-player.ts'
+      import { parseVtt, formatTime, thumbnailFromCue } from '../src/vtt.ts'
+      import { addTranslations } from '@c2n/core/localize.js'
+      window.vtt = { parseVtt, formatTime, thumbnailFromCue }
+      window.addTranslations = addTranslations
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

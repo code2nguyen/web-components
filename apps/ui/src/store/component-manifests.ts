@@ -4,6 +4,7 @@ import actionBar from '@c2n/action-bar/custom-elements.json'
 import addressField from '@c2n/address-field/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
+import audioPlayer from '@c2n/audio-player/custom-elements.json'
 import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
@@ -75,6 +76,7 @@ import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
+import imageCompare from '@c2n/image-compare/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
@@ -193,6 +195,7 @@ import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
 import videoGrid from '@c2n/video-grid/custom-elements.json'
+import videoPlayer from '@c2n/video-player/custom-elements.json'
 import videoTile from '@c2n/video-tile/custom-elements.json'
 import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
@@ -211,6 +214,7 @@ export const componentManifests = (function () {
     addressField,
     appShell,
     attachment,
+    audioPlayer,
     audioVisualizer,
     autocomplete,
     avatar,
@@ -283,6 +287,7 @@ export const componentManifests = (function () {
     iconButton,
     image,
     imageAnnotator,
+    imageCompare,
     imageCropper,
     inView,
     indicator,
@@ -400,6 +405,7 @@ export const componentManifests = (function () {
     truncate,
     upload,
     videoGrid,
+    videoPlayer,
     videoTile,
     viewOptions,
     virtualList,

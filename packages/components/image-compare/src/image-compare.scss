@@ -1,0 +1,205 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-image-compare,
+  $theme: (
+    border-radius: 8px,
+    aspect-ratio: auto,
+    background: #f4f4f5,
+    divider--width: 2px,
+    divider--color: #ffffff,
+    divider--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25),
+    handle--size: 40px,
+    handle--background: #ffffff,
+    handle--color: #18181b,
+    handle--border: 0 solid transparent,
+    handle--box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25),
+    handle__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    handle__focus--outline-offset: 2px,
+    label--background: rgba(24, 24, 27, 0.6),
+    label--color: #ffffff,
+    label--font-size: 12px,
+    label--font-weight: 600,
+    label--padding: 4px 10px,
+    label--border-radius: 999px,
+    label--offset: 12px,
+  )
+);
+
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: css.cssVar(aspect-ratio);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  cursor: ew-resize;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.frame.vertical {
+  cursor: ns-resize;
+  touch-action: pan-x;
+}
+
+.frame.hover {
+  cursor: default;
+}
+
+.layer {
+  width: 100%;
+  height: 100%;
+}
+
+.after {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 0 var(--_position));
+}
+
+.vertical .after {
+  clip-path: inset(var(--_position) 0 0 0);
+}
+
+::slotted(*) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.chips {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+// Each chip belongs to its layer: the divider cuts it as it passes over, as it cuts the layer.
+.before-chips {
+  clip-path: inset(0 calc(100% - var(--_position)) 0 0);
+}
+
+.after-chips {
+  clip-path: inset(0 0 0 var(--_position));
+}
+
+.vertical .before-chips {
+  clip-path: inset(0 0 calc(100% - var(--_position)) 0);
+}
+
+.vertical .after-chips {
+  clip-path: inset(var(--_position) 0 0 0);
+}
+
+.label {
+  position: absolute;
+  top: css.cssVar(label--offset);
+  padding: css.cssVar(label--padding);
+  border-radius: css.cssVar(label--border-radius);
+  background: css.cssVar(label--background);
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.before-label {
+  left: css.cssVar(label--offset);
+}
+
+.after-label {
+  right: css.cssVar(label--offset);
+}
+
+.vertical .after-label {
+  top: auto;
+  right: auto;
+  bottom: css.cssVar(label--offset);
+  left: css.cssVar(label--offset);
+}
+
+.divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--_position);
+  width: css.cssVar(divider--width);
+  transform: translateX(-50%);
+  background: css.cssVar(divider--color);
+  box-shadow: css.cssVar(divider--box-shadow);
+  pointer-events: none;
+}
+
+.vertical .divider {
+  top: var(--_position);
+  right: 0;
+  bottom: auto;
+  left: 0;
+  width: auto;
+  height: css.cssVar(divider--width);
+  transform: translateY(-50%);
+}
+
+// The handle sits on the divider, but never past the frame's edges: at 0% and 100% it stays whole, with room for its
+// focus ring, while the divider line itself goes to the edge.
+.handle {
+  --_inset: calc(#{css.cssVar(handle--size)} / 2 + #{css.cssVar(handle__focus--outline-offset)} + 2px);
+
+  position: absolute;
+  top: 50%;
+  left: clamp(var(--_inset), var(--_position), calc(100% - var(--_inset)));
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: css.cssVar(handle--size);
+  height: css.cssVar(handle--size);
+  border: css.cssVar(handle--border);
+  border-radius: 50%;
+  background: css.cssVar(handle--background);
+  box-shadow: css.cssVar(handle--box-shadow);
+  color: css.cssVar(handle--color);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: inherit;
+  outline: none;
+}
+
+.vertical .handle {
+  top: clamp(var(--_inset), var(--_position), calc(100% - var(--_inset)));
+  left: 50%;
+}
+
+.frame.hover .handle {
+  cursor: ew-resize;
+}
+
+.frame.hover.vertical .handle {
+  cursor: ns-resize;
+}
+
+.handle:focus-visible {
+  outline: css.cssVar(handle__focus--outline);
+  outline-offset: css.cssVar(handle__focus--outline-offset);
+}
+
+.grip {
+  width: 50%;
+  height: 50%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
