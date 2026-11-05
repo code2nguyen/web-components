@@ -24,6 +24,7 @@ declare module 'vue' {
         onInput?: (event: EventOf<QuickTimeMenu, 'input'>) => void
         onChange?: (event: EventOf<QuickTimeMenu, 'change'>) => void
         onTimeSelect?: (event: EventOf<QuickTimeMenu, 'time-select'>) => void
+        onMenuToggle?: (event: EventOf<QuickTimeMenu, 'menu-toggle'>) => void
       }
     >
   }
