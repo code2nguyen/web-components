@@ -56,6 +56,8 @@
 
 :host([inline]) {
   display: block;
+  // The list is a size container (see the narrow layout below), so it needs its width from outside, also as a flex item.
+  width: 100%;
 }
 
 .anchor-row {
@@ -180,6 +182,7 @@ c2-overlay:not(:popover-open) .menu {
 
 .list {
   display: grid;
+  container-type: inline-size;
   outline: none;
 }
 
@@ -227,6 +230,19 @@ c2-overlay:not(:popover-open) .menu {
   font-size: css.cssVar(time--font-size);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+// Too narrow for a label and its time side by side: the time moves under the label rather than both being cut.
+@container (max-width: 240px) {
+  .item {
+    grid-template-columns: css.cssVar(icon--size) minmax(0, 1fr);
+    padding-block: 6px;
+    row-gap: 0;
+  }
+
+  .time {
+    grid-column: 2;
+  }
 }
 
 .separator {

@@ -51,7 +51,7 @@ import '@c2n/components/quick-time-menu'
 
 ### Presets
 
-Without `presets` the rows are Later today (in about 3 hours, on the hour), This evening (at `evening`, 18:00), Tomorrow, This weekend and Next week (the first day of the reader's week), the last three at `morning` (09:00). A row that no longer applies is hidden: Later today and This evening in the evening, This weekend on a weekend.
+Without `presets` the rows are Later today (in about 3 hours, on the hour), This evening (at `evening`, 18:00), Tomorrow, This weekend and Next week (the first working day of the next week), the last three at `morning` (09:00). A row that no longer applies is hidden: Later today and This evening in the evening, This weekend on a weekend.
 
 `presets` replaces them. Each row is `{ id, label, at }`, where `at` is either a function of the current time (set the array as a property) or an expression, which also works in a JSON attribute:
 

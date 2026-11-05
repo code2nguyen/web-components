@@ -223,7 +223,7 @@ function safeColor(value: string | undefined): string | null {
  * @cssproperty {length} [--c2-scheduler__day--width=120px] - Least width of a day in the week view.
  * @cssproperty {length} [--c2-scheduler__month-day--width=44px] - Least width of a day in the month view.
  * @cssproperty {color} [--c2-scheduler__group--background-color=#fafafa] - Background of group rows.
- * @cssproperty {color} [--c2-scheduler__off--color=rgba(24, 24, 27, 0.05)] - Stripes over non-working hours and the weekend.
+ * @cssproperty {color} [--c2-scheduler__off--color=color-mix(in srgb, currentColor 7%, transparent)] - Stripes over non-working hours and the weekend.
  * @cssproperty {color} [--c2-scheduler__today--color=rgb(2, 101, 220)] - Today's header label.
  * @cssproperty {color} [--c2-scheduler__now--color=#dc2626] - The current-time line.
  * @cssproperty {color} [--c2-scheduler__event--color=rgb(2, 101, 220)] - Bar colour when neither the booking nor its resource has one.

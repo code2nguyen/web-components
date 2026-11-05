@@ -20,7 +20,7 @@
     day--width: 120px,
     month-day--width: 44px,
     group--background-color: #fafafa,
-    off--color: rgba(24, 24, 27, 0.05),
+    off--color: color-mix(in srgb, currentColor 7%, transparent),
     today--color: rgb(2, 101, 220),
     now--color: #dc2626,
     event--color: rgb(2, 101, 220),
@@ -395,7 +395,8 @@
 
 .event {
   z-index: 1;
-  container-type: inline-size;
+  // Its box is set by its position, never by its text, so it can be a size container for the queries below.
+  container-type: size;
   cursor: pointer;
   transition: animation.standard(opacity);
 
@@ -457,6 +458,13 @@
 }
 
 @container (max-width: 64px) {
+  .event-time {
+    display: none;
+  }
+}
+
+// A bar too short for two lines keeps the title only.
+@container (max-height: 34px) {
   .event-time {
     display: none;
   }

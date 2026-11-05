@@ -9,7 +9,7 @@ import { formatWallClock, instantOf, parseWallClock, wallClockAt, type WallClock
  * - `today 16:00`, `tomorrow`, `tomorrow 08:30` — a day and an optional time (`morning` when omitted);
  * - `monday 09:00` — the first Monday whose time is still ahead, today included; `next monday` skips today;
  * - `later today` — in about 3 hours, on the hour; `this evening`, `end of day` — today at `evening`;
- * - `this weekend` — the next weekend day at `morning`; `next week` — the first day of next week at `morning`.
+ * - `this weekend` — the next weekend day at `morning`; `next week` — the first working day of next week (never Saturday or Sunday) at `morning`.
  *
  * Times are `HH:mm`, `9am` or `5:30pm`. A function returns the instant as a `Date`.
  */
@@ -134,7 +134,10 @@ export function resolveQuickTime(when: QuickTimeAt, options: QuickTimeOptions = 
     }
     case 'next week': {
       const first = firstDayOfWeek(options.locale || 'en-US')
-      const offset = (first - weekdayOf(now) + 7) % 7 || 7
+      let offset = (first - weekdayOf(now) + 7) % 7 || 7
+      // The first working day: a week that starts on Sunday (en-US) or Saturday starts work on Monday, the way Gmail
+      // and Linear read "next week"; Saturday and Sunday are the weekend here, as for `this weekend`.
+      while ([0, 6].includes((weekdayOf(now) + offset) % 7)) offset += 1
       return ahead(at(now, offset, morning))
     }
   }

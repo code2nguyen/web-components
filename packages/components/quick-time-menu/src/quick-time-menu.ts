@@ -53,8 +53,8 @@ const clearIcon = svg`<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"></path>`
  * reminders and Linear's "remind me" offer. Each row shows the time it falls at, in the locale's hour cycle.
  *
  * The default rows are Later today (in about 3 hours, on the hour; hidden from `evening`), This evening (at
- * `evening`, hidden from an hour before), Tomorrow, This weekend (hidden on weekends) and Next week (the locale's first
- * day of the week), the last three at `morning`. `presets` replaces them with rows of your own, each
+ * `evening`, hidden from an hour before), Tomorrow, This weekend (hidden on weekends) and Next week (the first working
+ * day of the next week), the last three at `morning`. `presets` replaces them with rows of your own, each
  * `{ id, label, at }` where `at` is a function of the current instant or an expression such as `+3h`, `+30m`,
  * `tomorrow 09:00`, `next monday 09:00`, `saturday 10:00` or `end of day`; a row that does not apply now, or falls
  * outside `min`/`max`, is hidden. The last row, "Pick a date and time…", swaps the list for a `c2-date-time-picker`

@@ -51,6 +51,9 @@ test('expressions resolve to wall-clock times in the zone, and those that do not
   expect(await resolve(page, 'later today', '2026-11-09T17:30:00Z')).toBe('')
   expect(await resolve(page, 'this evening', '2026-11-09T16:20:00Z')).toBe('')
   expect(await resolve(page, 'this weekend', '2026-11-14T09:00:00Z')).toBe('')
+  // A week that starts on Sunday (en-US) or Saturday (ar-EG) still has Next week on its first working day, Monday.
+  expect(await resolve(page, 'next week', NOW, { locale: 'en-US' })).toBe('2026-11-16T09:00')
+  expect(await resolve(page, 'next week', '2026-11-14T09:00:00Z', { locale: 'en-US' })).toBe('2026-11-16T09:00')
   // A function of the current instant.
   const viaFunction = await page.evaluate(
     ({ now, zone }) =>
