@@ -248,12 +248,24 @@ test('one malformed thumbnail cue costs only its own preview; a cleared thumbnai
   await renderScenario('')
   const cues = await page.evaluate(() => {
     const { thumbnailFromCue } = (window as unknown as { vtt: { thumbnailFromCue(text: string, base: string): unknown } }).vtt
-    return [thumbnailFromCue('http://[bad/sprite.jpg#xywh=0,0,160,90', 'http://example.test/'), thumbnailFromCue('sprite.jpg#xywh=160,90,160,90', 'http://example.test/media/thumbs.vtt')]
+    return [
+      thumbnailFromCue('http://[bad/sprite.jpg#xywh=0,0,160,90', 'http://example.test/'),
+      thumbnailFromCue('sprite.jpg#xywh=160,90,160,90', 'http://example.test/media/thumbs.vtt'),
+    ]
   })
   expect(cues).toEqual([null, { url: 'http://example.test/media/sprite.jpg', x: 160, y: 90, w: 160, h: 90 }])
   // A file whose first cue cannot be resolved still previews every other one.
   const sprite = `${MEDIA}/tour-thumbs.jpg`
-  const body = ['WEBVTT', '', '00:00.000 --> 00:12.000', 'http://[bad/x.jpg#xywh=0,0,160,90', '', '00:12.000 --> 00:24.000', `${sprite}#xywh=0,0,160,90`, ''].join('\n')
+  const body = [
+    'WEBVTT',
+    '',
+    '00:00.000 --> 00:12.000',
+    'http://[bad/x.jpg#xywh=0,0,160,90',
+    '',
+    '00:12.000 --> 00:24.000',
+    `${sprite}#xywh=0,0,160,90`,
+    '',
+  ].join('\n')
   await page.route('**/mixed-thumbs.vtt', (route) => route.fulfill({ contentType: 'text/vtt', body }))
   let release: () => void = () => undefined
   await page.route('**/slow-thumbs.vtt', async (route) => {
