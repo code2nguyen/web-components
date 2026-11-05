@@ -1,7 +1,7 @@
 ---
-title: 'File Browser'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+title: 'File browser'
+description: 'Folders and files with a folder tree, breadcrumbs, search, list and grid views, selection, a context menu, renaming and drag and drop.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { FileBrowser } from '@c2n/components/file-browser'
 
-`c2-file-browser` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-file-browser` is the folder view of Google Drive, Dropbox or a CMS media library: a folder tree, breadcrumbs, search, sorting, a list and a grid view, selection, a context menu, renaming and drag and drop. It is the interface over your storage and never reads or writes a file itself: each thing the user asks for is an event, and your app updates `items`.
 
 ## Import
 
@@ -21,13 +20,71 @@ import '@c2n/components/file-browser'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/file-browser
-<div data-label="Default">
-  <c2-file-browser></c2-file-browser>
+<style>
+  .file-browser-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .file-browser-narrow {
+    width: 360px;
+    max-width: 100%;
+    --c2-file-browser--height: 380px;
+  }
+</style>
+<div data-label="List">
+  <c2-file-browser
+    class="file-browser-demo"
+    folder="q4"
+    locale="en-US"
+    value="roadmap;budget"
+    actions='[{"id":"download","label":"Download","multiple":true},{"id":"rename","label":"Rename"},{"id":"move","label":"Move to…","multiple":true},{"id":"delete","label":"Delete","multiple":true,"destructive":true}]'
+    items='[{"id":"projects","name":"Projects","kind":"folder","modified":"2026-11-03"},{"id":"photos","name":"Photos","kind":"folder","modified":"2026-10-14"},{"id":"invoices","name":"Invoices","kind":"folder","modified":"2026-10-30"},{"id":"q3","name":"Q3 launch","parent":"projects","kind":"folder","modified":"2026-09-12"},{"id":"q4","name":"Q4 planning","parent":"projects","kind":"folder","modified":"2026-11-02"},{"id":"assets","name":"Assets","parent":"q4","kind":"folder","modified":"2026-11-03"},{"id":"research","name":"Research","parent":"q4","kind":"folder","modified":"2026-10-28"},{"id":"roadmap","name":"Q4 roadmap.pdf","parent":"q4","kind":"file","size":2400000,"modified":"2026-11-02","type":"application/pdf"},{"id":"budget","name":"Budget 2027.xlsx","parent":"q4","kind":"file","size":318000,"modified":"2026-11-01"},{"id":"notes","name":"Kick-off notes.docx","parent":"q4","kind":"file","size":46000,"modified":"2026-10-30"},{"id":"mood","name":"Moodboard.png","parent":"q4","kind":"file","size":5100000,"modified":"2026-10-29"},{"id":"exports","name":"Exports.zip","parent":"q4","kind":"file","size":88000000,"modified":"2026-10-21"},{"id":"schema","name":"schema.json","parent":"q4","kind":"file","size":12000,"modified":"2026-10-20"}]'
+  ></c2-file-browser>
+</div>
+<div data-label="Grid">
+  <c2-file-browser
+    class="file-browser-demo"
+    view="grid"
+    folder="photos"
+    locale="en-US"
+    root-label="Media library"
+    items='[{"id":"photos","name":"Photos","kind":"folder"},{"id":"docs","name":"Documents","kind":"folder"},{"id":"trips","name":"Trips","parent":"photos","kind":"folder","modified":"2026-09-01"},{"id":"m1","name":"Mountains.svg","parent":"photos","kind":"file","size":48000,"modified":"2026-10-02","thumbnail":"/web-components/images/image-mountains.svg"},{"id":"m2","name":"Workspace.svg","parent":"photos","kind":"file","size":36000,"modified":"2026-10-11","thumbnail":"/web-components/images/image-workspace.svg"},{"id":"m3","name":"Revenue chart.svg","parent":"photos","kind":"file","size":22000,"modified":"2026-10-18","thumbnail":"/web-components/images/image-chart.svg"},{"id":"m4","name":"Launch teaser.mp4","parent":"photos","kind":"file","size":64000000,"modified":"2026-10-25"},{"id":"m5","name":"Voice note.m4a","parent":"photos","kind":"file","size":1800000,"modified":"2026-10-26"}]'
+  ></c2-file-browser>
+</div>
+<div data-label="Narrow">
+  <c2-file-browser
+    class="file-browser-narrow"
+    folder="q4"
+    locale="en-US"
+    items='[{"id":"projects","name":"Projects","kind":"folder"},{"id":"q4","name":"Q4 planning","parent":"projects","kind":"folder"},{"id":"assets","name":"Assets","parent":"q4","kind":"folder","modified":"2026-11-03"},{"id":"roadmap","name":"Q4 roadmap.pdf","parent":"q4","kind":"file","size":2400000,"modified":"2026-11-02"},{"id":"budget","name":"Budget 2027.xlsx","parent":"q4","kind":"file","size":318000,"modified":"2026-11-01"},{"id":"notes","name":"Kick-off notes.docx","parent":"q4","kind":"file","size":46000,"modified":"2026-10-30"}]'
+  ></c2-file-browser>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+### Items and folders
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+`items` is a flat list of `{ id, name, parent, kind, size, modified, type, thumbnail }`. `parent` is the id of the folder holding the item, empty for the root; `kind` is `folder` or `file`; `size` is in bytes, `modified` an ISO date or a timestamp, `type` a MIME type (the extension is used without one), and `thumbnail` the URL of a preview for the grid. `folder` is the open folder and `root-label` names the root.
+
+For a tree too large to send at once, set `loadChildren` to a function that returns a folder's items. It runs the first time a folder opens, in the list or in the tree, behind a skeleton; the result is cached until `refresh()`.
+
+```typescript tag=CodeBlock
+browser.loadChildren = async (folder) => (await fetch(`/api/files?parent=${folder}`)).json()
+```
+
+### Navigation, search and sorting
+
+A double-click or Enter opens a folder (`folder-change`) or fires `item-open` for a file; the breadcrumbs, the tree and Backspace go back up. The search field filters the open folder by name; with `search="remote"` it fires `search` for your app to answer instead. A column header or the sort menu sorts by name, date, size or kind (`sort`, `sort-direction`, `sort-change`), folders always first. `view` switches between `list` and `grid` (`view-change`). Below `--c2-file-browser--narrow-width` the folder pane gives way, an Up button appears, and each row shows its size and date under the name.
+
+### Selection and actions
+
+A click selects one item, Ctrl or Cmd+click toggles one, Shift+click selects a range and Ctrl or Cmd+A selects everything; in the list the check box toggles one. `value` holds the selected ids and `selection-change` reports them (it does not bubble). `selection="single"` keeps one.
+
+`actions` fills the context menu (right-click, the menu key or Shift+F10, or a row's ⋯ button) and the bar shown while items are selected. Picking one fires `item-action` with the action and the items; an action marked `multiple` is offered for several items at once. Two ids are special: `rename` edits the name in place (also F2) and fires `item-rename`, and `delete` is bound to the Delete key.
+
+### Drag and drop
+
+Dragging items onto a folder, in the list, the grid or the tree, fires `item-move` with the items and the target folder; a folder never goes into itself. Dropping files from the desktop fires `files-drop` with the files and the folder they landed in. Pair it with `c2-upload` or your own transport.
+
+### Accessibility
+
+Both views are a multi-selectable list box with one Tab stop: the arrow keys move through the items (all four in the grid), Shift extends the selection, Ctrl or Cmd moves without selecting, Space toggles, Home and End jump to the ends, and typing jumps to a name. Each item is named by its name, kind, size and date ("Q4 roadmap.pdf, PDF, 2.4 MB, modified Nov 2, 2026"). The folder pane is a tree with its own keyboard, the breadcrumbs a navigation trail, and folder changes and moves are announced.

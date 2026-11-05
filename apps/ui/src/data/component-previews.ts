@@ -79,7 +79,11 @@ export const componentPreviews: Record<string, string> = {
 </c2-carousel>`,
   cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
   celebration: `<div class="preview-row" style="flex-direction:column;gap:8px"><c2-celebration trigger="click"><c2-button>Celebrate 🎉</c2-button></c2-celebration><span style="font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Press for confetti</span></div>`,
-  'change-review': `<c2-change-review></c2-change-review>`,
+  'change-review': `<c2-change-review style="width:300px;--c2-change-review__hunk--margin:6px 8px" file-name="greet.ts" original="const greet = (name) =>
+  'Hello, ' + name
+" modified="const greet = (name, loud) =>
+  'Hello, ' + name + (loud ? '!' : '')
+"></c2-change-review>`,
   'chat-input': `<c2-chat-input style="width:240px" aria-label="Message" placeholder="Ask anything…" value="Can you summarize this?"></c2-chat-input>`,
   'chat-message': `<c2-chat-message style="width:240px;--c2-chat-message__message--max-width:190px">
   <c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--background:#18181b"></c2-avatar>
@@ -192,7 +196,7 @@ price: .price
   <c2-feather-arrow-right></c2-feather-arrow-right>
 </div>`,
   fieldset: `<c2-fieldset legend="Notifications" description="Choose what we email you about." style="width: 240px"><c2-checkbox checked>Mentions</c2-checkbox><c2-checkbox>Weekly digest</c2-checkbox></c2-fieldset>`,
-  'file-browser': `<c2-file-browser></c2-file-browser>`,
+  'file-browser': `<c2-file-browser locale="en-US" folder="q4" selection="single" value="roadmap" style="width:340px;--c2-file-browser--height:190px;--c2-file-browser--narrow-width:9999px;--c2-file-browser__row--height:30px" items='[{"id":"projects","name":"Projects","kind":"folder"},{"id":"q4","name":"Q4 planning","parent":"projects","kind":"folder"},{"id":"assets","name":"Assets","parent":"q4","kind":"folder","modified":"2026-11-03"},{"id":"roadmap","name":"Q4 roadmap.pdf","parent":"q4","kind":"file","size":2400000,"modified":"2026-11-02"},{"id":"budget","name":"Budget 2027.xlsx","parent":"q4","kind":"file","size":318000,"modified":"2026-11-01"},{"id":"mood","name":"Moodboard.png","parent":"q4","kind":"file","size":5100000,"modified":"2026-10-29"}]'></c2-file-browser>`,
   'filter-builder': `<c2-filter-builder compact-below="0" style="width:300px" fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa","count":120},{"value":"doing","label":"In progress","color":"#0265dc","count":41},{"value":"review","label":"In review","color":"#d97706","count":9},{"value":"done","label":"Done","color":"#16a34a","count":142}]},{"id":"assignee","label":"Assignee","type":"person","summary":{"one":"person","other":"people"},"options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"due","label":"Due","type":"date"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"eq","value":"doing"},{"field":"labels","operator":"has_any","value":["bug","regression"]}]}'></c2-filter-builder>`,
   'float-button': `<div style="contain:layout;position:relative;width:200px;height:170px"><c2-float-button label="Create" open style="--c2-float-button--inset:auto 8px 8px auto"><c2-float-button-action label="Upload file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></c2-float-button-action><c2-float-button-action label="New document"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></c2-float-button-action></c2-float-button></div>`,
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
@@ -530,7 +534,8 @@ price: .price
   <c2-task-icon-cook style="color:#0f766e"></c2-task-icon-cook>
   <c2-task-icon-meditate style="color:#7c3aed"></c2-task-icon-meditate>
 </div>`,
-  terminal: `<c2-terminal></c2-terminal>`,
+  terminal: `<c2-terminal heading="acme-cli" style="width:300px;--c2-terminal--font-size:12px;--c2-terminal--line-height:18px"><span slot="banner">Acme CLI 4.2.0
+Type help for commands.</span></c2-terminal>`,
   'text-effect': `<span style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Build <c2-text-effect effect="rotate" words="faster;safer;together" style="--c2-text-effect__text--color:var(--c2-theme--color-primary, #2563eb)"></c2-text-effect></span>`,
   'text-field': `<c2-text-field placeholder="Your email" help="We never share it." style="width:220px"></c2-text-field>`,
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
