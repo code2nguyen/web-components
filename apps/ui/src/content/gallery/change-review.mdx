@@ -5,22 +5,87 @@ import { ChangeReview } from '@c2n/components/change-review'
 
 ## Presets
 
-Curated looks for `c2-change-review`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+Looks for `c2-change-review`. The line and word tints (`__line__added--background-color`, `__word__added--background-color` and their removed pairs), the review bar and the button variables do most of the work.
 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-change-review></c2-change-review>
+<c2-change-review
+  label="Suggested edit"
+  file-name="greeting.ts"
+  original="export function greet(name: string) {
+  return 'Hello, ' + name
+}
+"
+  modified="export function greet(name: string, excited = false) {
+  return 'Hello, ' + name + (excited ? '!' : '.')
+}
+"
+></c2-change-review>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Writing assistant
 <style>
-  .themed {
-    /* --c2-change-review--… */
+  .prose-review {
+    --c2-change-review--border: none;
+    --c2-change-review__bar--background-color: transparent;
+    --c2-change-review__code--font-family: Georgia, serif;
+    --c2-change-review__code--font-size: 14px;
+    --c2-change-review__code--line-height: 22px;
+    --c2-change-review__line__added--background-color: transparent;
+    --c2-change-review__line__removed--background-color: transparent;
+    --c2-change-review__word__added--background-color: light-dark(#dbeafe, #1e3a5f);
+    --c2-change-review__word__removed--background-color: light-dark(#fee2e2, #4c1d1d);
+    --c2-change-review__button__primary--background-color: #7c3aed;
+    --c2-change-review__button__primary__hover--background-color: #6d28d9;
+    --c2-change-review__hunk__current--border-color: #7c3aed;
+    --c2-change-review__link--color: light-dark(#7c3aed, #a78bfa);
   }
 </style>
-<c2-change-review class="themed"></c2-change-review>
+<c2-change-review
+  class="prose-review"
+  label="Tone: friendlier"
+  context="0"
+  original="Your request has been received.
+We will respond within 5 business days.
+"
+  modified="Thanks, we got your request!
+We'll get back to you within 5 business days.
+"
+></c2-change-review>
+```
+
+```html tag=MdxCodeBlock,label=Compact panel
+<style>
+  .compact-review {
+    --c2-change-review--max-height: 260px;
+    --c2-change-review--font-size: 12px;
+    --c2-change-review__header--padding: 6px 10px;
+    --c2-change-review__bar--padding: 6px 8px;
+    --c2-change-review__hunk--margin: 6px 8px;
+    --c2-change-review__button--height: 26px;
+    --c2-change-review__code--line-height: 18px;
+  }
+</style>
+<c2-change-review
+  class="compact-review"
+  file-name="config.yml"
+  original="name: shop
+retries: 3
+timeout: 30s
+regions:
+  - eu-west
+cache: off
+"
+  modified="name: shop
+retries: 5
+timeout: 30s
+regions:
+  - eu-west
+  - us-east
+cache: on
+"
+></c2-change-review>
 ```
 
 </GalleryGrid>

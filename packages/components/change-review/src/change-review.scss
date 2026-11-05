@@ -1,15 +1,435 @@
-@use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-change-review,
-  $theme: ()
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    max-height: none,
+    font-family: inherit,
+    font-size: 14px,
+
+    header--padding: 10px 14px,
+    header--border-bottom: 1px solid #e4e4e7,
+    header--font-weight: 600,
+    file--color: #71717a,
+    stats__added--color: #15803d,
+    stats__removed--color: #dc2626,
+
+    bar--background-color: #fafafa,
+    bar--border-bottom: 1px solid #e4e4e7,
+    bar--padding: 8px 12px,
+    meter--color: rgb(2, 101, 220),
+    meter--background-color: #e4e4e7,
+    done--background-color: rgba(22, 163, 74, 0.08),
+    done-icon--background-color: #16a34a,
+
+    hunk--border: 1px solid #e4e4e7,
+    hunk--border-radius: 6px,
+    hunk__current--border-color: rgb(2, 101, 220),
+    hunk-head--background-color: #fafafa,
+    hunk--margin: 8px 12px,
+    muted--color: #52525b,
+
+    code--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    code--font-size: 12px,
+    code--line-height: 20px,
+    line__added--background-color: rgba(22, 163, 74, 0.12),
+    line__removed--background-color: rgba(220, 38, 38, 0.12),
+    word__added--background-color: rgba(22, 163, 74, 0.3),
+    word__removed--background-color: rgba(220, 38, 38, 0.3),
+    marker__added--color: #15803d,
+    marker__removed--color: #dc2626,
+    line-number--color: #52525b,
+
+    status__accepted--background-color: rgba(22, 163, 74, 0.14),
+    status__accepted--color: #166534,
+    status__rejected--background-color: rgba(113, 113, 122, 0.14),
+    status__rejected--color: #52525b,
+
+    button--height: 30px,
+    button--border-radius: 6px,
+    button--border: 1px solid #bcbcc6,
+    button--color: #18181b,
+    button--background-color: transparent,
+    button__hover--background-color: #f4f4f5,
+    button__primary--background-color: rgb(2, 101, 220),
+    button__primary--color: #ffffff,
+    button__primary__hover--background-color: rgb(1, 84, 184),
+    link--color: rgb(2, 101, 220),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
 );
 
-
 :host {
-  display: inline-flex;
+  display: block;
+  min-width: 0;
 }
 
-.c2-change-review {
+:host([hidden]) {
+  display: none;
+}
+
+.review {
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+.label {
+  font-weight: css.cssVar(header--font-weight);
+}
+
+.file {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: css.cssVar(file--color);
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+}
+
+.stats {
+  margin-inline-start: auto;
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+}
+
+.plus {
+  color: css.cssVar(stats__added--color);
+}
+
+.minus {
+  color: css.cssVar(stats__removed--color);
+}
+
+.body {
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+  padding-bottom: 4px;
+}
+
+// Review bar --------------------------------------------------------------------------------------------------------
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: css.cssVar(bar--padding);
+  border-bottom: css.cssVar(bar--border-bottom);
+  background-color: css.cssVar(bar--background-color);
+}
+
+.bar.empty {
+  position: static;
+  color: css.cssVar(muted--color);
+}
+
+.progress {
   display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.muted {
+  color: css.cssVar(muted--color);
+}
+
+.meter {
+  width: 80px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: css.cssVar(meter--background-color);
+
+  i {
+    display: block;
+    height: 100%;
+    background-color: css.cssVar(meter--color);
+  }
+}
+
+.nav {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.bar.done {
+  background-color: css.cssVar(done--background-color);
+}
+
+.check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: css.cssVar(done-icon--background-color);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.summary {
+  display: grid;
+}
+
+::slotted(*) {
+  flex: none;
+}
+
+// Buttons -----------------------------------------------------------------------------------------------------------
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: css.cssVar(button--height);
+  padding: 0 12px;
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  background-color: css.cssVar(button--background-color);
+  color: css.cssVar(button--color);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: css.cssVar(button__hover--background-color);
+  }
+}
+
+.button.primary {
+  border-color: transparent;
+  background-color: css.cssVar(button__primary--background-color);
+  color: css.cssVar(button__primary--color);
+
+  &:hover {
+    background-color: css.cssVar(button__primary__hover--background-color);
+  }
+}
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(button--border-radius);
+  background: none;
+  color: inherit;
+
+  &:hover:not(:disabled) {
+    background-color: css.cssVar(button__hover--background-color);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.link {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(link--color);
+  font-size: 12px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Hunks -------------------------------------------------------------------------------------------------------------
+
+.hunk {
+  margin: css.cssVar(hunk--margin);
+  overflow: hidden;
+  border: css.cssVar(hunk--border);
+  border-radius: css.cssVar(hunk--border-radius);
+}
+
+.hunk.current {
+  border-color: css.cssVar(hunk__current--border-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, #{css.cssVar(hunk__current--border-color)} 18%, transparent);
+}
+
+.hunk-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 8px 6px 12px;
+  border-bottom: css.cssVar(hunk--border);
+  background-color: css.cssVar(hunk-head--background-color);
+  font-size: 12px;
+}
+
+.title {
+  color: css.cssVar(muted--color);
+}
+
+.actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.status {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.status.accepted {
+  background-color: css.cssVar(status__accepted--background-color);
+  color: css.cssVar(status__accepted--color);
+}
+
+.status.rejected {
+  background-color: css.cssVar(status__rejected--background-color);
+  color: css.cssVar(status__rejected--color);
+}
+
+// Code --------------------------------------------------------------------------------------------------------------
+
+.code {
+  overflow-x: auto;
+  padding: 2px 0;
+  font-family: css.cssVar(code--font-family);
+  font-size: css.cssVar(code--font-size);
+  line-height: css.cssVar(code--line-height);
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 4ch 4ch 2ch 1fr;
+  min-width: max-content;
+  white-space: pre;
+}
+
+.n {
+  padding-inline-end: 8px;
+  color: css.cssVar(line-number--color);
+  text-align: end;
+  user-select: none;
+}
+
+.sign {
+  text-align: center;
+  user-select: none;
+}
+
+.text {
+  padding-inline-end: 12px;
+}
+
+.line.insert {
+  background-color: css.cssVar(line__added--background-color);
+
+  .sign {
+    color: css.cssVar(marker__added--color);
+  }
+}
+
+.line.delete {
+  background-color: css.cssVar(line__removed--background-color);
+
+  .sign {
+    color: css.cssVar(marker__removed--color);
+  }
+}
+
+ins,
+del {
+  border-radius: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+ins {
+  background-color: css.cssVar(word__added--background-color);
+}
+
+del {
+  background-color: css.cssVar(word__removed--background-color);
+}
+
+.collapsed .line {
+  color: css.cssVar(muted--color);
+}
+
+.none {
+  padding: 0 12px;
+  color: css.cssVar(muted--color);
+  font-family: css.cssVar(font-family);
+  font-style: italic;
+}
+
+.gap {
+  padding: 2px 12px 2px calc(12px + 10ch);
+  color: css.cssVar(muted--color);
+  font-size: 12px;
 }

@@ -5,22 +5,63 @@ import { Terminal } from '@c2n/components/terminal'
 
 ## Presets
 
-Curated looks for `c2-terminal`. Open any card in the studio to start from it. Say which variables do the
-most work for this component.
+A terminal is dark in both themes, as one reads as a terminal. Its colours are all variables: `--c2-terminal--background-color` and `--c2-terminal--color` set the screen, `--c2-terminal__prompt--color` the prompt and caret, and the eight `--c2-terminal__ansi-*--color` variables the colours CLI output carries.
 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-terminal></c2-terminal>
+<c2-terminal heading="acme-cli"></c2-terminal>
 ```
 
-```html tag=MdxCodeBlock,label=Themed
+```html tag=MdxCodeBlock,label=Midnight
 <style>
-  .themed {
-    /* --c2-terminal--… */
+  .terminal-midnight {
+    --c2-terminal--background-color: #0b1220;
+    --c2-terminal__titlebar--background-color: #0f172a;
+    --c2-terminal--border: 1px solid #1e293b;
+    --c2-terminal__titlebar--border-bottom: 1px solid #1e293b;
+    --c2-terminal__dot--color: #334155;
+    --c2-terminal--color: #e2e8f0;
+    --c2-terminal__muted--color: #94a3b8;
+    --c2-terminal__prompt--color: #a78bfa;
+    --c2-terminal--border-radius: 12px;
   }
 </style>
-<c2-terminal class="themed"></c2-terminal>
+<c2-terminal class="terminal-midnight" heading="ops · eu-west-1" prompt="λ">
+  <span slot="banner">Connected as ana@ops. Type help.</span>
+</c2-terminal>
+```
+
+```html tag=MdxCodeBlock,label=Green phosphor
+<style>
+  .terminal-phosphor {
+    --c2-terminal--background-color: #031a0b;
+    --c2-terminal--border: 1px solid #14532d;
+    --c2-terminal--color: #4ade80;
+    --c2-terminal__muted--color: #22c55e;
+    --c2-terminal__prompt--color: #86efac;
+    --c2-terminal--font-size: 14px;
+    --c2-terminal--border-radius: 4px;
+  }
+</style>
+<c2-terminal class="terminal-phosphor" prompt=">">
+  <span slot="banner">READY.</span>
+</c2-terminal>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .terminal-compact {
+    --c2-terminal--font-size: 12px;
+    --c2-terminal--line-height: 18px;
+    --c2-terminal__screen--padding: 6px 10px 8px;
+    --c2-terminal--border-radius: 6px;
+    --c2-terminal--max-height: 160px;
+  }
+</style>
+<c2-terminal class="terminal-compact" label="Console command">
+  <span slot="banner">Console · press Tab to complete</span>
+</c2-terminal>
 ```
 
 </GalleryGrid>

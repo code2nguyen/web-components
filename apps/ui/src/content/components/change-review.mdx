@@ -1,7 +1,7 @@
 ---
 title: 'Change Review'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'Review proposed edits hunk by hunk: accept or reject each change, then take the resulting text.'
+category: 'Editors & viewers'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ChangeReview } from '@c2n/components/change-review'
 
-`c2-change-review` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-change-review` reviews a proposed edit one change at a time, as an editor reviews an AI edit or a code review applies suggested changes. Set `original` and `modified`: the element diffs them by line and word (the diff of `c2-diff-viewer`) and groups each run of changed lines into a hunk, with `context` unchanged lines around it (3 by default). Each hunk has Accept and Reject. An accepted hunk collapses to its new text, a rejected one to its original text, and both keep an Undo. The sticky review bar shows where you are ("Hunk 2 of 5 · 3 left"), moves between hunks and decides every open hunk at once with Accept all or Reject all.
+
+The element never writes anything back. `result` is the text the decisions produce, `review-change` fires after each decision and `review-complete` once the last open hunk is decided, when the bar turns into a summary with Start over and the `actions` slot for your own Apply button.
 
 ## Import
 
@@ -21,13 +22,89 @@ import '@c2n/components/change-review'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/change-review
-<div data-label="Default">
-  <c2-change-review></c2-change-review>
+<style>
+  .review-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .review-apply {
+    --c2-button__container--height: 30px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+  }
+</style>
+<div data-label="Suggested edit">
+  <c2-change-review
+    class="review-demo"
+    label="Suggested edit"
+    file-name="src/billing/invoice.ts"
+    original="import { formatMoney } from './money'
+import type { Invoice } from './types'
+
+export function total(invoice: Invoice): number {
+  let sum = 0
+  for (const item of invoice.items) sum += item.price * item.qty
+  return sum
+}
+
+export function label(invoice: Invoice): string {
+  return 'Invoice ' + invoice.id
+}
+
+export function due(invoice: Invoice): Date {
+  return invoice.dueDate
+}
+
+// Totals are cached for an hour.
+export const ttl = 3_600
+"
+    modified="import { formatMoney, roundHalfEven } from './money'
+import type { Invoice } from './types'
+
+export function total(invoice: Invoice): bigint {
+  let sum = 0n
+  for (const line of invoice.lines) sum += line.unitCents * BigInt(line.quantity)
+  return roundHalfEven(sum)
+}
+
+export function label(invoice: Invoice): string {
+  return 'Invoice ' + invoice.id
+}
+
+export function due(invoice: Invoice): Date {
+  return invoice.dueDate
+}
+
+// Totals are cached for ten minutes.
+export const ttl = 600
+"
+  >
+    <c2-button class="review-apply" slot="actions">Apply</c2-button>
+  </c2-change-review>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+## Hunks and decisions
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+A hunk is one run of changed lines: the removed lines, then the added lines, with the changed words highlighted. Two hunks never share a context line; the unchanged lines left between them show as a "⋯ 8 unchanged lines" row.
+
+- **Decisions:** `decisions` holds one `'accepted'`, `'rejected'` or `null` (still open) per hunk. Set it to restore a review; new `original` or `modified` texts start a fresh one.
+- **Result:** `result` applies the accepted hunks and keeps the rejected ones as they were. An open hunk keeps its original text, or its new text with `undecided="modified"`.
+- **Bulk:** Accept all and Reject all decide only the hunks still open, so a hunk you rejected stays rejected. `reset()` (Start over) opens every hunk again.
+- **From script:** `accept(index)`, `reject(index)`, `undo(index)`, `acceptAll()`, `rejectAll()` and `goTo(index)`. `reviewHunks(original, modified, context)` and `applyDecisions(review, decisions)` are exported for code that needs the hunks or the text without the element.
+
+```typescript tag=CodeBlock
+const review = document.querySelector('c2-change-review')!
+review.addEventListener('review-complete', ({ detail }) => {
+  editor.setValue(detail.result)
+})
+```
+
+## Keyboard and accessibility
+
+Inside the element, Alt+ArrowDown and Alt+ArrowUp move between hunks, Ctrl+Enter (⌘Enter on a Mac) accepts the current hunk and Ctrl+Backspace (⌘Backspace) rejects it. Every shortcut is also a button, and the button's tooltip names it. After a decision, focus moves to the next open hunk, and to Start over once none is left.
+
+The element is a group named by `label`. Each hunk is a group named "Change 2 of 5: 2 lines removed, 3 added", its buttons "Accept change 2" and "Reject change 2", and every decision is announced ("Change 2 accepted. 3 left."). Removed and added lines are read with their kind.
+
+It is a text diff with no syntax highlighting, like `c2-diff-viewer`. Editing inside a hunk is out of scope: reject the hunk and make your own edit.

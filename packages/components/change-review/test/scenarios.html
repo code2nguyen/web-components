@@ -3,21 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Change Review test scenarios</title>
+    <title>change-review scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
       }
       main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+        display: block;
+        max-width: 760px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      import '../src/change-review.ts'
+      import { reviewHunks, applyDecisions } from '../src/review.ts'
+      window.reviewApi = { reviewHunks, applyDecisions }
+      // Thirty lines with three changes: line 4 edited, lines 15–16 replaced by three lines, line 27 removed.
+      const base = Array.from({ length: 30 }, (_, i) => `line ${i + 1}`)
+      const changed = [...base]
+      changed[3] = 'line 4 edited'
+      changed.splice(14, 2, 'new 15', 'new 16', 'new 16b')
+      changed.splice(changed.indexOf('line 27'), 1)
+      window.sample = { original: base.join('\n') + '\n', modified: changed.join('\n') + '\n' }
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Change Review scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>

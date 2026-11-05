@@ -2,19 +2,78 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-terminal</title>
     <script type="module" src="/src/terminal.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
+        display: grid;
+        gap: 24px;
+        max-width: 760px;
         padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .banner b {
+        color: #fafafa;
+      }
+      .path {
+        color: #e879f9;
       }
     </style>
   </head>
 
   <body>
-    <c2-terminal></c2-terminal>
+    <h2>Handler, help, completion and streaming</h2>
+    <c2-terminal
+      id="cli"
+      heading="acme-cli · production"
+      commands='[{"name":"deploy","description":"Deploy, roll back or inspect a service"},{"name":"logs","description":"Stream the logs of a service (Ctrl+C to stop)"},{"name":"test","description":"Run the test suite"}]'
+    >
+      <span slot="banner" class="banner"><b>Acme CLI 4.2.0</b> Connected to <b>prod-eu-1</b>. Type <b>help</b> for commands.</span>
+    </c2-terminal>
+
+    <h2>Prompt slot, no handler (listens to command)</h2>
+    <c2-terminal id="echo" prompt="❯">
+      <span slot="prompt"><span class="path">~/acme/web</span> (main)</span>
+    </c2-terminal>
+
+    <script type="module">
+      const cli = document.getElementById('cli')
+      const wait = (ms, signal) =>
+        new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, ms)
+          signal?.addEventListener('abort', () => (clearTimeout(timer), reject(new Error('aborted'))))
+        })
+      cli.complete = (input) =>
+        ['deploy status web', 'deploy rollback api --to r-1999', 'deploy restart web', 'logs api --follow', 'test --changed'].filter((line) =>
+          line.startsWith(input),
+        )
+      cli.handler = async function* (command, { name, args, print, signal }) {
+        if (name === 'deploy' && args[0] === 'status') {
+          yield `Service \u001b[1m${args[1] ?? 'web'}\u001b[0m  revision \u001b[36mr-2041\u001b[0m\n  replicas  \u001b[32m6/6 ready\u001b[0m`
+          return
+        }
+        if (name === 'deploy' && args[0] === 'rollback') {
+          print(`error: revision ${args[3] ?? '?'} not found for service "${args[1]}"\nhint: run \`deploy history ${args[1]}\` to list revisions`, {
+            kind: 'error',
+          })
+          return
+        }
+        if (name === 'logs') {
+          for (let i = 0; ; i += 1) {
+            await wait(400, signal)
+            yield `\u001b[90m14:32:${String(i).padStart(2, '0')}\u001b[0m \u001b[34mINFO\u001b[0m  GET /v1/invoices 200 \u001b[90m${20 + i}ms\u001b[0m`
+          }
+        }
+        if (name === 'test') {
+          await wait(800, signal)
+          yield ' \u001b[1;32m✓\u001b[0m billing/invoice.spec.ts \u001b[90m(14 tests)\u001b[0m \u001b[33m312ms\u001b[0m'
+          yield ' \u001b[1;31m✗\u001b[0m billing/refund.spec.ts \u001b[90m(1 failed)\u001b[0m'
+          return
+        }
+        print(`${name}: command not found`, { kind: 'error' })
+      }
+      document.getElementById('echo').addEventListener('command', (event) => event.detail.print(`you typed: ${event.detail.command}`, { kind: 'info' }))
+    </script>
   </body>
 </html>
