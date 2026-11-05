@@ -38,6 +38,8 @@
 :host {
   display: block;
   box-sizing: border-box;
+  // The narrow layout below follows the player's own width, not the viewport's.
+  container-type: inline-size;
   width: css.cssVar(width);
   max-width: 100%;
   color: css.cssVar(color);
@@ -153,6 +155,21 @@ button:disabled {
 
 .time .sizer {
   visibility: hidden;
+}
+
+.time .short {
+  display: none;
+}
+
+// In a narrow card one time (the playhead's, else the length) leaves the waveform room.
+@container (max-width: 280px) {
+  .time .full {
+    display: none;
+  }
+
+  .time .short {
+    display: inline;
+  }
 }
 
 .bubble .time {

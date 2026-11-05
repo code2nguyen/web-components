@@ -9,7 +9,7 @@ const player = (page: Page, selector = 'c2-audio-player') => page.locator(select
 const playButton = (locator: Locator) => locator.locator('.play')
 const waveform = (locator: Locator) => locator.locator('.waveform')
 const bars = (locator: Locator) => locator.locator('.bar')
-const time = (locator: Locator) => locator.locator('.time .text')
+const time = (locator: Locator) => locator.locator('.time .text.full')
 const mediaTime = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement & { media: HTMLAudioElement }).media.currentTime)
 const mediaPaused = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement & { media: HTMLAudioElement }).media.paused)
 const events = async (locator: Locator) => JSON.parse((await locator.getAttribute('data-events')) ?? '[]') as unknown[]

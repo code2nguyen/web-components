@@ -643,7 +643,12 @@ export class AudioPlayer extends LitElement {
     const text = bubble ? formatAudioTime(started ? this.currentTime : length) : started ? `${formatAudioTime(this.currentTime)} / ${total}` : total
     // The sizer holds the widest text the time can show, so starting to play never narrows the waveform under the pointer.
     const widest = bubble ? total : `${total} / ${total}`
-    return html`<span class="time" part="time" aria-hidden="true"><span class="sizer">${widest}</span><span class="text">${text}</span></span>`
+    // A narrow player shows one time, the playhead's while playing, else the length (see the stylesheet).
+    const short = formatAudioTime(started ? this.currentTime : length)
+    return html`<span class="time" part="time" aria-hidden="true"
+      ><span class="sizer full">${widest}</span><span class="text full">${text}</span><span class="sizer short">${total}</span
+      ><span class="text short">${short}</span></span
+    >`
   }
 
   override render() {
