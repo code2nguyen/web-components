@@ -11,7 +11,9 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { BoxplotChart } from '@c2n/chart/boxplot-chart.js'
 import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import type { BulletChart } from '@c2n/chart/bullet-chart.js'
 import type { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
@@ -32,6 +34,7 @@ import type { RadialBarChart } from '@c2n/chart/radial-bar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
+import type { SunburstChart } from '@c2n/chart/sunburst-chart.js'
 import type { TreemapChart } from '@c2n/chart/treemap-chart.js'
 import type { WaterfallChart } from '@c2n/chart/waterfall-chart.js'
 
@@ -92,6 +95,29 @@ declare module 'vue' {
         onPointClick?: (event: EventOf<BarChart, 'point-click'>) => void
       }
     >
+    'c2-boxplot-chart': DefineComponent<
+      C2Props<BoxplotChart> & {
+        'reference-lines'?: unknown
+        'value-suffix'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<BoxplotChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<BoxplotChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<BoxplotChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<BoxplotChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<BoxplotChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<BoxplotChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<BoxplotChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<BoxplotChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<BoxplotChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<BoxplotChart, 'point-click'>) => void
+      }
+    >
     'c2-bubble-chart': DefineComponent<
       C2Props<BubbleChart> & {
         'y-field'?: unknown
@@ -122,6 +148,35 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<BubbleChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
+      }
+    >
+    'c2-bullet-chart': DefineComponent<
+      C2Props<BulletChart> & {
+        'description-field'?: unknown
+        'target-field'?: unknown
+        'bands-field'?: unknown
+        'band-labels'?: unknown
+        'max-field'?: unknown
+        'color-field'?: unknown
+        'value-labels'?: unknown
+        'value-suffix'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<BulletChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<BulletChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<BulletChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<BulletChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<BulletChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<BulletChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<BulletChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<BulletChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<BulletChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<BulletChart, 'point-click'>) => void
       }
     >
     'c2-butterfly-chart': DefineComponent<
@@ -572,6 +627,36 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<Sparkline, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<Sparkline, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<Sparkline, 'point-click'>) => void
+      }
+    >
+    'c2-sunburst-chart': DefineComponent<
+      C2Props<SunburstChart> & {
+        'group-field'?: unknown
+        'children-field'?: unknown
+        'color-field'?: unknown
+        'color-max'?: unknown
+        'color-label'?: unknown
+        'color-suffix'?: unknown
+        'value-prefix'?: unknown
+        'value-suffix'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onZoomChange?: (event: EventOf<SunburstChart, 'zoom-change'>) => void
+        onTooltipChange?: (event: EventOf<SunburstChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<SunburstChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<SunburstChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<SunburstChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<SunburstChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<SunburstChart, 'chart-error'>) => void
+        onRangeChange?: (event: EventOf<SunburstChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<SunburstChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<SunburstChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<SunburstChart, 'point-click'>) => void
       }
     >
     'c2-treemap-chart': DefineComponent<

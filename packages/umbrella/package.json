@@ -193,9 +193,17 @@
       "types": "./dist/chart/bar-chart.d.ts",
       "default": "./dist/chart/bar-chart.js"
     },
+    "./chart/boxplot-chart": {
+      "types": "./dist/chart/boxplot-chart.d.ts",
+      "default": "./dist/chart/boxplot-chart.js"
+    },
     "./chart/bubble-chart": {
       "types": "./dist/chart/bubble-chart.d.ts",
       "default": "./dist/chart/bubble-chart.js"
+    },
+    "./chart/bullet-chart": {
+      "types": "./dist/chart/bullet-chart.d.ts",
+      "default": "./dist/chart/bullet-chart.js"
     },
     "./chart/butterfly-chart": {
       "types": "./dist/chart/butterfly-chart.d.ts",
@@ -276,6 +284,10 @@
     "./chart/sparkline": {
       "types": "./dist/chart/sparkline.d.ts",
       "default": "./dist/chart/sparkline.js"
+    },
+    "./chart/sunburst-chart": {
+      "types": "./dist/chart/sunburst-chart.d.ts",
+      "default": "./dist/chart/sunburst-chart.js"
     },
     "./chart/treemap-chart": {
       "types": "./dist/chart/treemap-chart.d.ts",

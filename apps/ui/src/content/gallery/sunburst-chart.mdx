@@ -12,10 +12,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
-<style>
-  .sunburst-default { width: 100%; --c2-chart--height: 340px; }
-</style>
-<c2-sunburst-chart class="sunburst-default" label-field="name" value-prefix="$" value-suffix="M" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
+<c2-sunburst-chart label-field="name" value-prefix="$" value-suffix="M" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
   <c2-chart-series field="budget" label="Budget"></c2-chart-series>
 </c2-sunburst-chart>
 ```
