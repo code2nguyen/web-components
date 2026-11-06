@@ -1,6 +1,6 @@
 # Marquee
 
-`c2-marquee` scrolls its children in a continuous loop: logo walls, testimonials, ticker tapes. Each child element is one item and keeps its own DOM. It pauses on hover, on focus inside and while `paused` is set, and stops for readers who ask for reduced motion.
+`c2-marquee` scrolls its children in a continuous loop: logo walls, testimonials, ticker tapes. Each child element is one item and keeps its own DOM. It pauses on hover, on focus inside and while `paused` is set. Keyboard focus and a request for reduced motion both stop it and lay the items out as a row the reader scrolls by hand, with the focused item in view.
 
 ```bash
 npm install @c2n/components

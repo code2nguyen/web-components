@@ -15,7 +15,7 @@ test('draws a browser window with the address in its title bar', async ({ page, 
   await expect(frame.locator('[part="address"]')).toHaveText('app.example.com/inbox')
   await expect(frame.locator('.dots')).toHaveAttribute('aria-hidden', 'true')
   await expect(frame.locator('.island')).toHaveCount(0)
-  // The window fills its container and fits its content's height.
+  // The window fills its container.
   expect(Math.round((await box(frame.locator('[part="frame"]'))).width)).toBe(800)
   await expect(page.getByText('Inbox', { exact: true })).toBeVisible()
   await accessible(page)
@@ -57,14 +57,20 @@ test('keeps its size in a container that shrinks to fit its content', async ({ p
   expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(300)
   expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="base"]'))).width)).toBe(357)
 
-  // A percentage width has nothing to resolve against there: the screen stands in at 360px instead of collapsing.
+  // A percentage width has nothing to resolve against there, so the device fits its content rather than collapsing:
+  // the browser exactly, the laptop's lid at its 84% share of a deck as wide as the content.
+  const fit = async () => {
+    const screen = await box(page.locator('c2-device-frame').locator('[part="screen"]'))
+    const content = await page.locator('.app').evaluate((element) => element.scrollWidth)
+    return screen.width / content
+  }
   await scenario('centred-browser')
-  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(362)
+  expect(await fit()).toBeGreaterThan(0.99)
   await scenario('centred-default-laptop')
-  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="base"]'))).width)).toBe(384)
+  expect(await fit()).toBeGreaterThan(0.8)
 })
 
-test('shrinks below its stand-in width in a narrow flex row', async ({ page, scenario }) => {
+test('shrinks to a narrow flex row', async ({ page, scenario }) => {
   await scenario('narrow-row')
   expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(200)
 })
@@ -102,15 +108,6 @@ test('draws a laptop whose deck is wider than its lid', async ({ page, scenario 
 test('an unknown device falls back to the browser window', async ({ page, scenario }) => {
   await scenario('unknown')
   await expect(page.locator('c2-device-frame').locator('[part="address"]')).toHaveText('example.com')
-})
-
-test('the screen is a size container content can query', async ({ page, scenario }) => {
-  await scenario('phone')
-  // 276px wide inside the phone: one column.
-  await expect(page.locator('.layout')).toHaveCSS('grid-template-columns', /^\d+(\.\d+)?px$/)
-  await scenario()
-  // 798px wide in the browser window: two columns.
-  await expect(page.locator('.layout')).toHaveCSS('grid-template-columns', /^\S+px \S+px$/)
 })
 
 test('a picture covers the screen', async ({ page, scenario }) => {

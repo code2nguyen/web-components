@@ -98,7 +98,11 @@ export class Marquee extends LitElement {
     this.resizeObserver = new ResizeObserver(() => this.scheduleMeasure())
     // The first render draws no items, as the server did: a server-rendered strip that drew its children in its
     // first client render would not match the markup it hydrates.
-    if (this.hasUpdated) this.collectItems()
+    if (this.hasUpdated) {
+      this.collectItems()
+      // Back in the page with the same children: the new observer has nothing to watch until told.
+      this.observeLayout()
+    }
   }
 
   protected override firstUpdated(): void {
@@ -142,13 +146,18 @@ export class Marquee extends LitElement {
   protected override updated(changes: PropertyValues): void {
     if (changes.has('items') || changes.has('orientation')) {
       if (!this.manualSlots) this.items.forEach((item, index) => (item.slot = `item-${index}`))
-      this.resizeObserver?.disconnect()
-      const viewport = this.renderRoot.querySelector('.viewport')
-      if (viewport) this.resizeObserver?.observe(viewport)
-      this.renderRoot.querySelectorAll('.item').forEach((wrapper) => this.resizeObserver?.observe(wrapper))
-      this.scheduleMeasure()
+      this.observeLayout()
     }
     if (changes.has('reverse')) this.scheduleMeasure()
+  }
+
+  /** Watches the strip and every item wrapper for size changes, and measures them on the next frame. */
+  private observeLayout(): void {
+    this.resizeObserver?.disconnect()
+    const viewport = this.renderRoot.querySelector('.viewport')
+    if (viewport) this.resizeObserver?.observe(viewport)
+    this.renderRoot.querySelectorAll('.item').forEach((wrapper) => this.resizeObserver?.observe(wrapper))
+    this.scheduleMeasure()
   }
 
   private measure(): void {

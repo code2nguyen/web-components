@@ -117,3 +117,26 @@ test('redraw() follows an id given to another element', async ({ page, scenario 
   })
   await expect(track(page)).toHaveAttribute('d', 'M 40 100 Q 150 100 260 100')
 })
+
+test('follows from and to when they change', async ({ page, scenario }) => {
+  await scenario()
+  await page
+    .locator('.diagram')
+    .evaluate((diagram) => diagram.insertAdjacentHTML('afterbegin', '<div class="node" id="middle" style="left: 180px; top: 0">M</div>'))
+  await page.locator('c2-beam').evaluate((element: HTMLElement & { to: string }) => (element.to = 'middle'))
+  // Down and to the right, to the middle node's bottom-left corner region.
+  await expect(track(page)).not.toHaveAttribute('d', 'M 40 100 Q 200 100 360 100')
+  await page.locator('c2-beam').evaluate((element: HTMLElement & { to: string }) => (element.to = 'target'))
+  await expect(track(page)).toHaveAttribute('d', 'M 40 100 Q 200 100 360 100')
+})
+
+test('keeps following its elements after being moved out of the page and back', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-beam').evaluate((element) => {
+    const parent = element.parentElement!
+    element.remove()
+    parent.append(element)
+  })
+  await page.locator('#target').evaluate((element: HTMLElement) => (element.style.height = '80px'))
+  await expect(track(page)).toHaveAttribute('d', 'M 40 101.1 Q 200 110 360 118.9')
+})

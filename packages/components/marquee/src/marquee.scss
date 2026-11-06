@@ -119,6 +119,10 @@
     display: flex;
   }
 
+  :host([orientation='vertical']) .track.running {
+    align-items: var(--c2-marquee__item--align, stretch);
+  }
+
   .running .item {
     animation: none;
   }

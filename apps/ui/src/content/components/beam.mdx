@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Beam } from '@c2n/components/beam'
 
-`c2-beam` draws a line from one element to another and sends a light along it. Lay the elements out with ordinary CSS inside a container with `position: relative`, then add one `c2-beam` per connection with `from` and `to` set to the two elements' `id`s. The line runs from edge to edge of the two boxes, so it never crosses their content. `curvature` bends it by that many pixels (negative values bend it the other way) and `reverse` sends the light back. Colours, thickness and timing are CSS variables.
+`c2-beam` draws a line from one element to another and sends a light along it. Lay the elements out with ordinary CSS inside a container with `position: relative`, then add one `c2-beam` per connection with `from` and `to` set to the two elements' `id`s. The line runs from edge to edge of the two boxes, so it never crosses their content. `curvature` moves the curve's control point that many pixels to the side, so the line bulges about half as far (negative values bend it the other way), and `reverse` sends the light back. Colours, thickness and timing are CSS variables.
 
 The beam covers its container and lets the pointer through. It redraws when the container or either element changes size; call `redraw()` after moving an element some other way. It is decorative and hidden from assistive technology, so say in text what the diagram shows. When the reader asks for reduced motion, only the line is drawn.
 

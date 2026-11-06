@@ -118,7 +118,7 @@ test('keyboard focus stops the strip at rest with the focused item in view, and 
     .toBe(true)
 
   await tab()
-  await expect(link).not.toBeFocused()
+  await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
   await expect(host.locator('.item').first()).not.toHaveCSS('animation-name', 'none')
   await expect.poll(() => host.locator('.viewport').evaluate((viewport) => viewport.scrollLeft)).toBe(0)
 })
@@ -165,11 +165,40 @@ test('measures in its own pixels under a scaled ancestor', async ({ page, scenar
   expect(await offsets(page)).toEqual([-20, 40, 100, 160, 220, 280])
 })
 
-test('the align variable applies to a vertical strip', async ({ page, scenario }) => {
+test('the align variable applies to a vertical strip, moving or at rest', async ({ page, scenario }) => {
+  const centred = async () => {
+    const strip = (await page.locator('c2-marquee').boundingBox())!
+    const first = (await page.locator('c2-marquee > .logo').first().boundingBox())!
+    return Math.round(first.x + first.width / 2) === Math.round(strip.x + strip.width / 2)
+  }
   await scenario('vertical-centred')
+  expect(await centred()).toBe(true)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('vertical-centred')
+  expect(await centred()).toBe(true)
+})
+
+test('a vertical strip at rest stretches its items when no alignment is set', async ({ page, scenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('vertical')
   const strip = (await page.locator('c2-marquee').boundingBox())!
-  const first = (await page.locator('c2-marquee > .logo').first().boundingBox())!
-  expect(Math.round(first.x + first.width / 2)).toBe(Math.round(strip.x + strip.width / 2))
+  const wrapper = (await page.locator('c2-marquee').locator('.item').first().boundingBox())!
+  expect(Math.round(wrapper.width)).toBe(Math.round(strip.width))
+})
+
+test('measures again after being moved to another place in the page', async ({ page, scenario }) => {
+  await scenario()
+  const distance = await page.locator('c2-marquee').evaluate(async (host: HTMLElement) => {
+    const parent = host.parentElement!
+    host.remove()
+    parent.append(host)
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    // An 800px strip is wider than the 720px of items: the loop grows to the strip plus the widest item.
+    parent.style.width = '800px'
+    for (let frame = 0; frame < 10; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
+    return host.shadowRoot!.querySelector<HTMLElement>('.track')!.style.getPropertyValue('--_distance')
+  })
+  expect(Math.round(Number(distance))).toBe(920)
 })
 
 test('the paused attribute freezes the strip', async ({ page, scenario }) => {

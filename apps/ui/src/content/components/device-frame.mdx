@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { DeviceFrame } from '@c2n/components/device-frame'
 
-`c2-device-frame` draws a device around its content, for product shots on marketing pages and live previews in docs. `device` picks `browser` (the default), `phone`, `tablet` or `laptop`; `url` fills the browser's address bar, and the `address` and `actions` slots replace the address or add controls to the title bar. Whatever goes inside is the screen: an image or video covers it, and live markup lays out inside it. The screen is a size container named `c2-device-frame`, so content can adapt to the device with `@container c2-device-frame (…)` queries.
+`c2-device-frame` draws a device around its content, for product shots on marketing pages and live previews in docs. `device` picks `browser` (the default), `phone`, `tablet` or `laptop`; `url` fills the browser's address bar, and the `address` and `actions` slots replace the address or add controls to the title bar. Whatever goes inside is the screen: an image or video covers it, and live markup lays out inside it. A `<picture>` is sized to the screen, but give its inner `<img>` `width: 100%; height: 100%; object-fit: cover` yourself: the frame's styles cannot reach inside it.
 
 Each device has its own width and screen shape (`--c2-device-frame__phone--width`, `--c2-device-frame__phone--aspect-ratio`, …) and never grows past its container. The frame is decorative and adds no role: describe the content itself, for example with an image's `alt` text.
 

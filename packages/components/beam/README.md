@@ -18,4 +18,4 @@ import '@c2n/components/beam'
 </div>
 ```
 
-Attributes: `from`, `to`, `curvature` (pixels), `reverse`. Call `redraw()` after moving an element without resizing anything. Colours, thickness, the light's length and its timing are CSS variables.
+Attributes: `from`, `to`, `curvature` (pixels of control-point offset; the line bulges about half as far), `reverse`. Call `redraw()` after moving an element without resizing anything. Colours, thickness, the light's length and its timing are CSS variables.

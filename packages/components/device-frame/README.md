@@ -1,6 +1,6 @@
 # Device Frame
 
-`c2-device-frame` draws a browser window, phone, tablet or laptop around a screenshot or live content. The screen is a size container named `c2-device-frame`, so content can adapt with container queries.
+`c2-device-frame` draws a browser window, phone, tablet or laptop around a screenshot or live content. An image or a video covers the screen; live markup lays out inside it.
 
 ```bash
 npm install @c2n/components

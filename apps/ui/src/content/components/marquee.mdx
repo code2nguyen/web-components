@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Marquee } from '@c2n/components/marquee'
 
-`c2-marquee` moves its children along a loop: each child element is one item, and an item that leaves one edge comes back at the other. The items keep their own DOM, so page styles, links and listeners keep working and nothing is copied. `orientation="vertical"` scrolls up instead of sideways, `reverse` turns the direction round, and `paused` stops the strip. It pauses by itself while the pointer is over it or focus is inside it. When the reader asks for reduced motion it stops and becomes a row that scrolls by hand. Speed, spacing and the edge fade are CSS variables: `--c2-marquee--speed` is in pixels per second.
+`c2-marquee` moves its children along a loop: each child element is one item, and an item that leaves one edge comes back at the other. The items keep their own DOM, so page styles, links and listeners keep working and nothing is copied. `orientation="vertical"` scrolls up instead of sideways, `reverse` turns the direction round, and `paused` stops the strip. It pauses by itself while the pointer is over it. Keyboard focus inside it, or a request for reduced motion, stops it and lays the items out at rest for the reader to scroll by hand, with the focused item scrolled into view. Speed, spacing and the edge fade are CSS variables: `--c2-marquee--speed` is in pixels per second.
 
 When the items together are shorter than the strip, the space left over shows as a gap before the first item comes round again; add items to fill a wide strip. Give the strip an `aria-label`: it is announced as a marquee, whose changes screen readers do not read out.
 

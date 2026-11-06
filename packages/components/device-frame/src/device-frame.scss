@@ -58,10 +58,6 @@
   min-block-size: 0;
   overflow: css.cssVar(screen--overflow);
   background-color: css.cssVar(screen--background-color);
-  container: c2-device-frame / inline-size;
-  // Size containment drops the content's width; in a container that sizes to its content, a device with a
-  // percentage width would collapse to its bezel without a stand-in width.
-  contain-intrinsic-inline-size: 360px;
 }
 
 // The content fills the screen: a picture covers it, anything else lays out inside it.

@@ -9,8 +9,9 @@ const DEVICES: DeviceFrameDevice[] = ['browser', 'phone', 'tablet', 'laptop']
 
 /**
  * Draws a browser window, phone, tablet or laptop around its content, for product shots and live previews on
- * marketing pages and in docs. The content is the screen: an image, a video or live markup. The screen is a size
- * container named `c2-device-frame`, so content inside can adapt to the device with container queries.
+ * marketing pages and in docs. The content is the screen: an image or a video covers it, and live markup lays out
+ * inside it. A `<picture>` is sized to the screen, but its inner `<img>` is the page's to size (`width: 100%;
+ * height: 100%; object-fit: cover`), since the frame's styles cannot reach it.
  *
  * The frame is decorative: it adds no role, and the browser's window dots are hidden from assistive technology.
  * Describe the content itself (an image's `alt`, a `role="img"` label) when it is a picture of a product.
@@ -33,7 +34,7 @@ const DEVICES: DeviceFrameDevice[] = ['browser', 'phone', 'tablet', 'laptop']
  * @cssproperty {length} [--c2-device-frame__tablet--width=560px] - Width of a tablet; it never grows past its container.
  * @cssproperty {aspect-ratio} [--c2-device-frame__tablet--aspect-ratio=3 / 4] - Shape of a tablet's screen.
  * @cssproperty {border-radius} [--c2-device-frame__tablet--border-radius=28px] - Corner radius of a tablet.
- * @cssproperty {length} [--c2-device-frame__laptop--width=100%] - Width of a laptop's screen; the deck is wider.
+ * @cssproperty {length} [--c2-device-frame__laptop--width=100%] - Width of a laptop's screen; the deck is wider. In a container that sizes to its content, set a length.
  * @cssproperty {aspect-ratio} [--c2-device-frame__laptop--aspect-ratio=16 / 10] - Shape of a laptop's screen.
  * @cssproperty {border-radius} [--c2-device-frame__laptop--border-radius=14px] - Top corner radius of a laptop lid.
  * @cssproperty {length} [--c2-device-frame__browser--width=100%] - Width of a browser window.

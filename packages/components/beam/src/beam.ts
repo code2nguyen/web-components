@@ -47,7 +47,7 @@ interface BeamGeometry {
  * @cssproperty {number} [--c2-beam__beam--length=20] - Length of the light as a share of the line, from 0 to 100.
  * @cssproperty {time} [--c2-beam__beam--duration=3s] - Time the light takes to travel the line once.
  * @cssproperty {time} [--c2-beam__beam--delay=0s] - Delay before the light starts; a negative value starts it partway along.
- * @cssproperty {integer} [--c2-beam--z-index=auto] - Stacking level of the connector in its container.
+ * @cssproperty {integer} [--c2-beam--z-index=0] - Stacking level of the connector in its container.
  */
 @customElement('c2-beam')
 export class Beam extends LitElement {
@@ -60,8 +60,9 @@ export class Beam extends LitElement {
   @property() to = ''
 
   /**
-   * Bend of the line in pixels: how far its middle moves away from the straight line. Positive values bend it to the
-   * left of the direction of travel (up for a beam running left to right), negative values to the right.
+   * Bend of the line, in pixels: how far the curve's control point sits from the straight line's middle. The line
+   * itself bulges about half that far. Positive values bend it to the left of the direction of travel (up for a beam
+   * running left to right), negative values to the right.
    */
   @property({ type: Number }) curvature = 0
 
