@@ -168,10 +168,12 @@ export function bulletTicks(min: number, max: number, target = 5): number[] {
   const safe = (step: number) => Number.isSafeInteger(Math.ceil(Math.abs(min) / step)) && Number.isSafeInteger(Math.floor(Math.abs(max) / step))
   const count = (step: number) => Math.floor(max / step + 1e-9) - Math.ceil(min / step - 1e-9) + 1
   const step = [1, 2, 2.5, 5, 10, 20, 25, 50, 100].map((multiple) => multiple * power).find((candidate) => count(candidate) <= wanted + 1)
-  if (step === undefined || !(step > 0) || !safe(step) || min + step === min) return [min, max]
+  // Ticks are rounded to twelve significant digits: a span thinner than that, relative to its offset, has no round steps.
+  const thin = (max - min) / Math.max(Math.abs(min), Math.abs(max)) < 1e-9
+  if (step === undefined || !(step > 0) || thin || !safe(step) || min + step === min) return [min, max]
   const first = Math.ceil(min / step - 1e-9)
   const ticks: number[] = []
   // Bounded by the count, not by the index: the loop ends however the floating point rounds.
   for (let at = 0; at < Math.min(count(step), MAX_TICKS); at += 1) ticks.push(Number(((first + at) * step).toPrecision(12)))
-  return ticks
+  return [...new Set(ticks)]
 }

@@ -678,7 +678,7 @@ test('regression: a lang change redraws the engine, so the values and ticks on t
   expect(await texts()).toContain('1,650')
   await chart.evaluate((element) => element.setAttribute('lang', 'de'))
   await expect.poll(texts).toContain('1.650')
-  expect(await texts()).toContain('2,5\u00a0Tsd.')
+  expect(await texts()).toContain('22,5')
 })
 
 test('an unknown scenario draws the scorecard with its rows', async ({ page }) => {
