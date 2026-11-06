@@ -488,7 +488,8 @@ test('theming: status tints replace the ramp by position, the target and row var
   expect(row.bar!.shape!.r).toBeCloseTo(row.bar!.shape!.height! / 2, 3)
   // A taller row: the host grows by the difference, and the band thickens up to the row less its axis.
   expect((await chart.boundingBox())!.height).toBeCloseTo(before + 20, 0)
-  expect(row.bands[0].shape!.height).toBe(44)
+  // Once the resize reaches the chart (the observer reports the taller plot after the layout).
+  await expect.poll(async () => (await drawn(page))[0].bands[0].shape!.height).toBe(44)
 })
 
 test('compact: no names, values or axis, sized by --c2-chart--height alone', async ({ page }) => {

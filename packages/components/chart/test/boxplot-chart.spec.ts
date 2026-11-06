@@ -150,6 +150,19 @@ test('statistics: interpolated quartiles, Tukey fences, range whiskers, summarie
   expect(result.swapped).toMatchObject({ min: 1, max: 5 })
   expect(result.incomplete).toBeNull()
 
+  // Regression: a count is a whole, non-negative number; a mean of huge finite samples does not overflow.
+  const guarded = await page.evaluate(() => {
+    const { readSummary, summarizeSamples } = window.boxplotScenario.stats
+    const five = { min: 1, q1: 2, median: 3, q3: 4, max: 5 }
+    return {
+      negative: readSummary({ ...five, count: -3 })?.count ?? null,
+      fraction: readSummary({ ...five, count: 2.5 })?.count ?? null,
+      whole: readSummary({ ...five, count: '12' })?.count ?? null,
+      mean: summarizeSamples([Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE])?.mean,
+    }
+  })
+  expect(guarded).toEqual({ negative: null, fraction: null, whole: 12, mean: Number.MAX_VALUE })
+
   const { model } = result
   expect(model.categories).toEqual(['a', 'b', 'c'])
   // Numbers pool by label; arrays are a category's samples (pooled with the rest); a summary object is drawn as given.
@@ -237,6 +250,12 @@ test('one box per label with its quartiles, whiskers and outliers, named and tab
     '21',
   ])
   // A single series has nothing for a legend to tell apart.
+  await expect(chart.locator('[part="legend"]')).toBeHidden()
+  // Regression: a legend slotted in, even after the first render, keeps the legend's box shown.
+  await chart.evaluate((element) => element.insertAdjacentHTML('beforeend', '<span slot="legend">p50 latency, per service</span>'))
+  await expect(chart.locator('[part="legend"]')).toBeVisible()
+  await expect(page.getByText('p50 latency, per service')).toBeVisible()
+  await chart.evaluate((element) => element.querySelector('[slot="legend"]')?.remove())
   await expect(chart.locator('[part="legend"]')).toBeHidden()
 
   const results = await new AxeBuilder({ page }).include('c2-boxplot-chart').analyze()
@@ -357,6 +376,14 @@ test('several series sit side by side in their colours, with the legend; a click
   expect(await chart.evaluate((element) => (element as BoxplotElement).highlighted)).toBe('west')
   expect(parts(await drawn(page, 0, 0)).box.style?.opacity).toBe(0.25)
   expect(parts(await drawn(page, 1, 0)).box.style?.opacity).toBe(1)
+  // Regression: a key that names no series dims nothing.
+  await chart.evaluate(async (element) => {
+    const box = element as BoxplotElement
+    box.highlighted = 'nope'
+    await box.updateComplete
+  })
+  expect(parts(await drawn(page, 0, 0)).box.style?.opacity).toBe(1)
+  expect(parts(await drawn(page, 1, 0)).box.style?.opacity).toBe(1)
   const clicks = await page.evaluate(() => window.boxplotScenario.events.filter((event) => event.type === 'point-click'))
   expect(clicks.at(-1)?.detail).toMatchObject({ index: 2, seriesIndex: 1, label: 'checkout' })
   await expect(chart.locator('table.boxplot-a11y tbody tr')).toHaveCount(10)
@@ -452,6 +479,21 @@ test('whiskers="range" with mean="show": no outliers, a diamond at the mean, the
   await page.evaluate(() => window.boxplotScenario.hover({ index: 1, seriesIndex: 0, px: 100, py: 100 }))
   await expect(chart.locator('[part="tooltip"]')).toContainText(/Mean\s*69\.7/)
   await expect(chart.locator('[part="plot"]')).toHaveAttribute('aria-label', 'Box plot of Score, 2 categories')
+
+  // Regression: the series are inferred from every row, so a field missing from the first is still found.
+  const fields = await chart.evaluate(async (element) => {
+    const box = element as BoxplotElement & { resolvedSeries: { field: string; label?: string }[] }
+    box.data = [
+      { class: 'A', score: null, note: 'x' },
+      { class: 'B', score: [1, 2, 3], retake: [4, 5, 6] },
+    ]
+    await box.updateComplete
+    return box.resolvedSeries.map((series) => [series.field, series.label])
+  })
+  expect(fields).toEqual([
+    ['score', 'Score'],
+    ['retake', 'Retake'],
+  ])
 })
 
 test('outliers="none" leaves the points out but still counts them', async ({ page }) => {
@@ -516,7 +558,8 @@ test('the boxes grow from the median on first draw, and appear still under reduc
   await expect(chart).toHaveState('ready')
   expect((await options(page)).animation).toBe(true)
   const group = await drawn(page, 0, 3)
-  expect(group).toMatchObject({ type: 'group', originY: 238, enterFrom: { scaleY: 0 } })
+  // The resting scale is stated, so an update landing mid-entry settles the box at full size.
+  expect(group).toMatchObject({ type: 'group', originY: 238, scaleX: 1, scaleY: 1, enterFrom: { scaleY: 0 } })
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page)
