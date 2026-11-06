@@ -4,7 +4,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, deepActiveElement } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { floatingPanelMessages } from './messages.js'
@@ -154,13 +154,6 @@ function flatParent(node: Element): Element | null {
   if (node.parentElement) return node.parentElement
   const root = node.parentNode
   return root instanceof ShadowRoot ? root.host : null
-}
-
-/** The element that receives focus: through shadow roots to the innermost focused element. */
-function deepActiveElement(): Element | null {
-  let active = document.activeElement
-  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
-  return active
 }
 
 /**

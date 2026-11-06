@@ -48,8 +48,10 @@ interface Entry {
   parent: MindMapNode | null
   /** 0 for the central topic. */
   level: number
-  /** Position among its parent's children. */
+  /** Position among its parent's children, in data order. */
   index: number
+  /** 1-based position among its siblings in drawing order (right side, then left side, for first-level topics). */
+  posInSet: number
   setSize: number
   side: MindMapSide | 'center'
   /** 0-based index of its first-level ancestor among the central topic's children; -1 for the central topic. */
@@ -93,8 +95,20 @@ const BOARD_PADDING = 48
 /** Pointer travel before a press on a topic becomes a drag. */
 const DRAG_THRESHOLD = 4
 const BRANCH_COLOURS = 8
-/** A colour from data is written into a style property: anything that could end the declaration is refused. */
-const SAFE_COLOUR = /^[^;{}<>\\]+$/
+/**
+ * A colour from data is written into a style property and used as an SVG paint: only colour syntax is accepted (hex, a
+ * name, or a colour function such as `rgb()`, `oklch()`, `color-mix()` or `var()`), never `url()`, which would make
+ * the map fetch a third-party paint server. The browser then checks it with `CSS.supports`.
+ */
+const COLOUR_SYNTAX = /^(?:#[0-9a-f]{3,8}|[a-z]+|(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark|var)\([-a-z0-9#%.,\s/()]*\))$/i
+
+export function safeColour(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const colour = value.trim()
+  if (!colour || colour.length > 200 || /url\s*\(|image|[;{}<>\\'"]/i.test(colour) || !COLOUR_SYNTAX.test(colour)) return null
+  if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && !CSS.supports('color', colour)) return null
+  return colour
+}
 
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -362,7 +376,7 @@ export class MindMap extends LitElement {
     let doc = this.#doc
     if (entry.level === 1) {
       doc = this.#pinSides(doc)
-      node.side = entry.side as MindMapSide
+      if (this.layout === 'both') node.side = entry.side as MindMapSide
     }
     const index = entry.index + (before ? 0 : 1)
     doc = insertNodes(doc, entry.parent.id, index, [node])
@@ -375,9 +389,10 @@ export class MindMap extends LitElement {
   /** Opens the inline editor on `id` (the selected topic by default). */
   edit(id = this.#selected) {
     this.#sync()
-    const entry = this.#entries.get(id)
-    if (!entry) return
+    if (!this.#entries.has(id)) return
     this.#revealHidden(id)
+    const entry = this.#entries.get(id)!
+    this.#select(id, true)
     this.#openEditor(id, entry.node.label, 'all')
   }
 
@@ -480,9 +495,18 @@ export class MindMap extends LitElement {
     const visible: Entry[] = []
     const doc = this.#doc
     if (doc) {
+      // Topic counts below every node, in one post-order pass.
+      const counts = new Map<MindMapNode, number>()
+      const count = (node: MindMapNode): number => {
+        let total = 0
+        for (const child of childrenOf(node)) total += 1 + count(child)
+        counts.set(node, total)
+        return total
+      }
+      count(doc)
       const firsts = childrenOf(doc)
       const sides = resolveSides(
-        firsts.map((child) => ({ side: child.side, weight: 1 + countDescendants(child) })),
+        firsts.map((child) => ({ side: child.side, weight: 1 + (counts.get(child) ?? 0) })),
         this.layout,
       )
       const walk = (
@@ -490,29 +514,31 @@ export class MindMap extends LitElement {
         parent: MindMapNode | null,
         level: number,
         index: number,
+        posInSet: number,
         setSize: number,
         side: Entry['side'],
         branch: number,
         color: string | null,
         shown: boolean,
       ) => {
-        const entry: Entry = { node, parent, level, index, setSize, side, branch, color, visible: shown, descendants: countDescendants(node) }
+        const entry: Entry = { node, parent, level, index, posInSet, setSize, side, branch, color, visible: shown, descendants: counts.get(node) ?? 0 }
         entries.set(node.id, entry)
         if (shown) visible.push(entry)
         const children = childrenOf(node)
         const open = shown && (level === 0 || !node.collapsed)
         if (level === 0) {
           // Right side first, then left, each top to bottom: the order the arrows and the outline read.
+          let position = 0
           for (const want of ['right', 'left'] as const) {
             children.forEach((child, i) => {
               if (sides[i] !== want) return
-              const own = typeof child.color === 'string' && SAFE_COLOUR.test(child.color) ? child.color : null
-              walk(child, node, 1, i, children.length, want, i, own, open)
+              const own = safeColour(child.color)
+              walk(child, node, 1, i, ++position, children.length, want, i, own, open)
             })
           }
-        } else children.forEach((child, i) => walk(child, node, level + 1, i, children.length, side, branch, color, open))
+        } else children.forEach((child, i) => walk(child, node, level + 1, i, i + 1, children.length, side, branch, color, open))
       }
-      walk(doc, null, 0, 0, 1, 'center', -1, null, true)
+      walk(doc, null, 0, 0, 1, 1, 'center', -1, null, true)
     }
     this.#visible = visible
   }
@@ -590,11 +616,21 @@ export class MindMap extends LitElement {
     if (!quiet && node) this.dispatchEvent(new CustomEvent<MindMapNodeEventDetail>('selection-change', { detail: { node }, bubbles: false }))
   }
 
-  /** Unfolds the folded ancestors of `id`, so it is drawn (a change of its own, like a fold). */
+  /**
+   * Unfolds the folded ancestors of `id`, so it is drawn. Folding is part of the document, so this is one `expand`
+   * change (one undo step) about the outermost folded ancestor; the selection moves to `id`, not to that ancestor.
+   */
   #revealHidden(id: string) {
     const path = this.#doc ? pathTo(this.#doc, id) : null
-    if (!path) return
-    for (const ancestor of path.slice(1, -1)) if (ancestor.collapsed) this.fold(ancestor.id, false)
+    if (!path || !this.#doc) return
+    const folded = path.slice(1, -1).filter((ancestor) => ancestor.collapsed)
+    if (!folded.length) return
+    let doc = this.#doc
+    for (const ancestor of folded) doc = updateNode(doc, ancestor.id, (node) => ({ ...node, collapsed: false }))
+    const outer = this.#entries.get(folded[0].id)!
+    const node = pathTo(doc, outer.node.id)!.pop()!
+    const parent = outer.parent ? pathTo(doc, outer.parent.id)!.pop()! : null
+    this.#apply(doc, { type: 'expand', node, parent, index: outer.index }, this.msg.t('unfolded', outer.descendants), id)
   }
 
   #announce(text: string) {
@@ -647,7 +683,7 @@ export class MindMap extends LitElement {
     doc = moveNode(doc, entry.node.id, parentId, index)
     if (doc === this.#doc) return false
     doc = updateNode(doc, parentId, (parent) => (parent.collapsed ? { ...parent, collapsed: false } : parent))
-    if (parentId === doc.id) doc = updateNode(doc, entry.node.id, (node) => ({ ...node, side: side ?? (entry.side === 'center' ? 'right' : entry.side) }))
+    if (parentId === doc.id && this.layout === 'both') doc = updateNode(doc, entry.node.id, (node) => ({ ...node, side: side ?? (entry.side === 'center' ? 'right' : entry.side) }))
     const parent = pathTo(doc, parentId)!.pop()!
     const node = childrenOf(parent).find((child) => child.id === entry.node.id)!
     const newIndex = childrenOf(parent).indexOf(node)
@@ -659,13 +695,24 @@ export class MindMap extends LitElement {
     return this.#apply(doc, action, announcement)
   }
 
+  /** The siblings of `node` on its side of the map in `doc`, with the sides resolved as the layout will draw them. */
+  #sameSide(doc: MindMapNode, node: MindMapNode, parent: MindMapNode): MindMapNode[] {
+    const children = childrenOf(parent)
+    if (parent.id !== doc.id) return children
+    const sides = resolveSides(
+      children.map((child) => ({ side: child.side, weight: 1 + countDescendants(child) })),
+      this.layout,
+    )
+    const own = sides[children.indexOf(node)]
+    return children.filter((_, i) => sides[i] === own)
+  }
+
   #positionOnSide(doc: MindMapNode, node: MindMapNode, parent: MindMapNode): number {
-    const siblings = parent.id === doc.id ? childrenOf(parent).filter((child) => child.side === node.side) : childrenOf(parent)
-    return siblings.indexOf(node) + 1
+    return this.#sameSide(doc, node, parent).indexOf(node) + 1
   }
 
   #siblingCountOnSide(doc: MindMapNode, node: MindMapNode, parent: MindMapNode): number {
-    return parent.id === doc.id ? childrenOf(parent).filter((child) => child.side === node.side).length : childrenOf(parent).length
+    return this.#sameSide(doc, node, parent).length
   }
 
   /** Alt+↑ / Alt+↓: swaps places with the previous or next sibling on the same side. */
@@ -715,7 +762,10 @@ export class MindMap extends LitElement {
       // from the second render on.
       this.#laidOut = true
       this.requestUpdate()
-    } else if (this.#renderedLaidOut && this.#doc) this.#measure()
+    } else if (this.#renderedLaidOut && this.#doc && !this.#motionFrame) {
+      // Not while topics glide: the frames move topics without resizing them, and the last frame measures.
+      this.#measure()
+    }
 
     if (this.#focusId) {
       const id = this.#focusId
@@ -961,7 +1011,7 @@ export class MindMap extends LitElement {
       aria-roledescription=${this.msg.t('topicRoleDescription')}
       aria-level=${level + 1}
       aria-setsize=${entry.setSize}
-      aria-posinset=${entry.index + 1}
+      aria-posinset=${entry.posInSet}
       aria-expanded=${branch ? String(!collapsed) : nothing}
       aria-selected=${String(selected)}
       style=${styleMap(style)}
