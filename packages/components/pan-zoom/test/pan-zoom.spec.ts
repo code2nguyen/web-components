@@ -265,6 +265,12 @@ test('gestures="pan" pans with the wheel, "zoom" zooms with it and "none" ignore
   await page.mouse.wheel(0, -100)
   await page.keyboard.up('Control')
   await drag(page, centre, { x: -100, y: 0 })
+  // "none" turns off every pointer gesture, the Space + drag and middle-button overrides included.
+  await drag(page, centre, { x: 0, y: -60 }, { button: 'middle' })
+  await viewportOf(page).focus()
+  await page.keyboard.down(' ')
+  await drag(page, centre, { x: 60, y: 0 })
+  await page.keyboard.up(' ')
   await frames(page)
   expect(await viewOf(subject(page))).toEqual({ x: 500, y: 300, zoom: 1 })
 })
@@ -508,6 +514,57 @@ test('the minimap shows while the content overflows, frames the view and moves i
   const view = await viewOf(subject(page))
   expect(view.x + 300).toBeCloseTo(400, 0)
   expect(view.y + 200).toBeCloseTo(500, 0)
+})
+
+test('an SVG or canvas minimap is drawn again after the minimap is turned off and on, and keeps following its SVG after a reconnect', async ({
+  page,
+  renderScenario,
+}) => {
+  await render(
+    page,
+    renderScenario,
+    `<c2-pan-zoom minimap fit="none"><svg width="1600" height="1000"><rect class="room" width="800" height="500" fill="rgb(255, 0, 0)"/></svg></c2-pan-zoom>`,
+  )
+  const room = page.locator('c2-pan-zoom .art-svg svg rect.room')
+  await expect(room).toBeAttached()
+  const toggle = () =>
+    subject(page).evaluate(async (element: PanZoom) => {
+      element.minimap = false
+      await element.updateComplete
+      element.minimap = true
+      await element.updateComplete
+    })
+  await toggle()
+  await expect(room).toBeAttached()
+
+  // Reconnected: a change to the SVG still reaches the copy.
+  await subject(page).evaluate((element) => {
+    const parent = element.parentElement!
+    element.remove()
+    parent.append(element)
+  })
+  await frames(page)
+  await page.locator('c2-pan-zoom > svg rect.room').evaluate((rect) => rect.setAttribute('fill', 'rgb(0, 128, 0)'))
+  await expect(room).toHaveCSS('fill', 'rgb(0, 128, 0)')
+
+  await render(page, renderScenario, `<c2-pan-zoom minimap fit="none"><canvas width="1600" height="1000"></canvas></c2-pan-zoom>`)
+  await page.locator('c2-pan-zoom > canvas').evaluate((canvas: HTMLCanvasElement) => {
+    const context = canvas.getContext('2d')!
+    context.fillStyle = 'rgb(0, 0, 255)'
+    context.fillRect(0, 0, 1600, 1000)
+  })
+  // Drawn when the view settles.
+  await subject(page).evaluate((element: PanZoom) => element.panBy(10, 0))
+  const painted = () =>
+    subject(page).evaluate((element) => {
+      const canvas = element.shadowRoot!.querySelector<HTMLCanvasElement>('.art canvas')
+      if (!canvas) return false
+      const pixel = canvas.getContext('2d')!.getImageData(canvas.width / 2, canvas.height / 2, 1, 1).data
+      return pixel[2] === 255 && pixel[3] === 255
+    })
+  await expect.poll(painted).toBe(true)
+  await toggle()
+  await expect.poll(painted).toBe(true)
 })
 
 test('the minimap copies a single image or SVG, takes its slot, and never clones custom elements', async ({ page, renderScenario }) => {

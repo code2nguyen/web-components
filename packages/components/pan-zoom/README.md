@@ -22,21 +22,21 @@ box). The host takes its container's width and `--c2-pan-zoom--height` (400px).
 
 ## Attributes
 
-| Attribute              | Default       | Meaning                                                                                                      |
-| ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------ |
-| `zoom`                 | —             | The current zoom (1 = 100%). Setting it zooms around the centre, without an event.                           |
-| `view`                 | —             | `{"x":…,"y":…,"zoom":…}` (JSON): the content point at the top-left corner and the zoom. No event, no jump.   |
-| `min-zoom`, `max-zoom` | `0.25`, `4`   | Zoom limits. `min-zoom="fit"` stops zooming out at the fitted view.                                          |
-| `zoom-step`            | `1.2`         | Factor of one button or key press.                                                                           |
-| `fit` (`fitMode`)      | `contain`     | First view and `reset()`: `contain`, `cover`, `width` (starts at the top) or `none` (100%, centred).         |
-| `bounds`               | `content`     | `content` keeps the content in view; `none` is a free canvas.                                                |
+| Attribute              | Default       | Meaning                                                                                                                                                                                               |
+| ---------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `zoom`                 | —             | The current zoom (1 = 100%). Setting it zooms around the centre, without an event.                                                                                                                    |
+| `view`                 | —             | `{"x":…,"y":…,"zoom":…}` (JSON): the content point at the top-left corner and the zoom. No event, no jump.                                                                                            |
+| `min-zoom`, `max-zoom` | `0.25`, `4`   | Zoom limits. `min-zoom="fit"` stops zooming out at the fitted view.                                                                                                                                   |
+| `zoom-step`            | `1.2`         | Factor of one button or key press.                                                                                                                                                                    |
+| `fit` (`fitMode`)      | `contain`     | First view and `reset()`: `contain`, `cover`, `width` (starts at the top) or `none` (100%, centred).                                                                                                  |
+| `bounds`               | `content`     | `content` keeps the content in view; `none` is a free canvas.                                                                                                                                         |
 | `gestures`             | `cooperative` | `cooperative`: a plain wheel and one finger scroll the page, a hint shows. `pan`: the wheel and one finger pan. `zoom`: the wheel zooms to the pointer, one finger pans. `none`: no pointer gestures. |
-| `controls`             | off           | Toolbar: zoom out, zoom percent (resets to 100%), zoom in, fit.                                              |
-| `minimap`              | off           | Overview in the bottom-left corner while the content overflows.                                              |
-| `no-inertia`           | off           | A released drag stops at once.                                                                               |
-| `no-double-click-zoom` | off           | A double-click or double tap does not zoom.                                                                  |
-| `no-keyboard`          | off           | The viewport is not a tab stop and has no role.                                                              |
-| `label`                | —             | Accessible name of the viewport.                                                                             |
+| `controls`             | off           | Toolbar: zoom out, zoom percent (resets to 100%), zoom in, fit.                                                                                                                                       |
+| `minimap`              | off           | Overview in the bottom-left corner while the content overflows.                                                                                                                                       |
+| `no-inertia`           | off           | A released drag stops at once.                                                                                                                                                                        |
+| `no-double-click-zoom` | off           | A double-click or double tap does not zoom.                                                                                                                                                           |
+| `no-keyboard`          | off           | The viewport is not a tab stop and has no role.                                                                                                                                                       |
+| `label`                | —             | Accessible name of the viewport.                                                                                                                                                                      |
 
 A fitted view never zooms past 100%, so a small image stays sharp.
 

@@ -346,44 +346,66 @@ test.describe('minimise, maximise, restore and close', () => {
     await expect.poll(async () => (await box(panel(page, 1))).x).toBe(first.x)
   })
 
-  test('docked panels that do not fit side by side share the width, then wrap upward, all inside the boundary', async ({ page, renderScenario }) => {
-    const docked = (count: number) =>
-      Array.from({ length: count }, (_, index) => chat('boundary="parent" state="minimized"', '<p>Body</p>', `Panel number ${index + 1}`)).join('')
-    for (const [width, count] of [
-      [260, 2],
-      [400, 3],
-      [260, 3],
-    ] as const) {
+  const dockArea = async (page: Page) =>
+    page.locator('.area').evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const left = rect.x + element.clientLeft
+      const top = rect.y + element.clientTop
+      return { left, top, right: left + element.clientWidth, bottom: top + element.clientHeight }
+    })
+  const docked = (count: number, attributes = '') =>
+    Array.from({ length: count }, (_, index) => chat(`boundary="parent" state="minimized" ${attributes}`, '<p>Body</p>', `Panel number ${index + 1}`)).join('')
+
+  // Each case: boundary width, panel count, the shared width each bar gets, and how many bars fit on a line. The
+  // inset is the default 16px from the right, so a line has the boundary less 2 × 16px; the gap is 8px.
+  for (const [width, count, barWidth, perLine] of [
+    [800, 2, 240, 2], // room 768: both at full width
+    [600, 3, 184, 3], // room 568: (568 - 16) / 3 = 184, above the 120px floor
+    [400, 3, 180, 2], // room 368: 117 is below the floor, so two per line at (368 - 8) / 2
+    [260, 2, 228, 1], // room 228: 110 is below the floor and two 120px bars do not fit, so one per line
+    [260, 3, 228, 1],
+  ] as const) {
+    test(`${count} docked panels in a ${width}px boundary are ${barWidth}px wide, ${perLine} per line, all inside`, async ({ page, renderScenario }) => {
       await renderScenario(`<div class="area" style="width: ${width}px; height: 300px">${docked(count)}</div>`)
-      const area = await page.locator('.area').evaluate((element) => {
-        const rect = element.getBoundingClientRect()
-        return {
-          left: rect.x + element.clientLeft,
-          top: rect.y + element.clientTop,
-          right: rect.x + element.clientLeft + element.clientWidth,
-          bottom: rect.y + element.clientTop + element.clientHeight,
-        }
-      })
-      const boxes: Rect[] = []
+      const area = await dockArea(page)
+      await expect.poll(async () => (await box(panel(page, count - 1))).width).toBe(barWidth)
+      const first = await box(panel(page, 0))
+      expect(first.x + first.width).toBe(Math.round(area.right - 16))
+      expect(first.y + first.height).toBe(Math.round(area.bottom))
       for (let index = 0; index < count; index++) {
-        await expect
-          .poll(async () => (await box(panel(page, index))).x, `panel ${index + 1} of ${count} in ${width}px`)
-          .toBeGreaterThanOrEqual(Math.floor(area.left))
-        boxes.push(await box(panel(page, index)))
-      }
-      for (const rect of boxes) {
-        expect(rect.x + rect.width).toBeLessThanOrEqual(Math.ceil(area.right))
+        const rect = await box(panel(page, index))
+        const column = index % perLine
+        const line = Math.floor(index / perLine)
+        expect(rect, `bar ${index + 1}`).toEqual({
+          x: first.x - column * (barWidth + 8),
+          y: first.y - line * (first.height + 8),
+          width: barWidth,
+          height: first.height,
+        })
+        expect(rect.x).toBeGreaterThanOrEqual(Math.floor(area.left))
         expect(rect.y).toBeGreaterThanOrEqual(Math.floor(area.top))
-        expect(rect.y + rect.height).toBeLessThanOrEqual(Math.ceil(area.bottom))
       }
-      // No two docked bars overlap.
-      for (let a = 0; a < count; a++)
-        for (let b = a + 1; b < count; b++) {
-          const [p, q] = [boxes[a], boxes[b]]
-          const overlap = p.x < q.x + q.width && q.x < p.x + p.width && p.y < q.y + q.height && q.y < p.y + p.height
-          expect(overlap, `bars ${a + 1} and ${b + 1} of ${count} in ${width}px`).toBe(false)
-        }
-    }
+    })
+  }
+
+  test('a left-anchored dock lines up to the right and keeps every bar inside', async ({ page, renderScenario }) => {
+    await renderScenario(`<div class="area" style="width: 400px; height: 300px; --c2-floating-panel__docked--inset: auto auto 0 16px">${docked(3)}</div>`)
+    const area = await dockArea(page)
+    await expect.poll(async () => (await box(panel(page, 2))).width).toBe(180)
+    const first = await box(panel(page, 0))
+    expect(first.x).toBe(Math.round(area.left + 16))
+    expect(await box(panel(page, 1))).toEqual({ ...first, x: first.x + 188 })
+    expect(await box(panel(page, 2))).toEqual({ ...first, y: first.y - first.height - 8 })
+    for (let index = 0; index < 3; index++) expect((await box(panel(page, index))).x + 180).toBeLessThanOrEqual(Math.ceil(area.right))
+  })
+
+  test('a top-anchored dock wraps downward', async ({ page, renderScenario }) => {
+    await renderScenario(`<div class="area" style="width: 260px; height: 300px; --c2-floating-panel__docked--inset: 0 16px auto auto">${docked(2)}</div>`)
+    const area = await dockArea(page)
+    await expect.poll(async () => (await box(panel(page, 1))).width).toBe(228)
+    const first = await box(panel(page, 0))
+    expect(first.y).toBe(Math.round(area.top))
+    expect(await box(panel(page, 1))).toEqual({ ...first, y: first.y + first.height + 8 })
   })
 
   test('minimize="collapse" folds the panel to its title bar where it is', async ({ page, renderScenario }) => {
@@ -441,6 +463,14 @@ test.describe('minimise, maximise, restore and close', () => {
     await page.getByRole('button', { name: 'Minimise' }).click()
     await page.getByRole('button', { name: 'Restore' }).click()
     await expect(host(page)).toHaveJSProperty('state', 'maximized')
+  })
+
+  test('no-maximize keeps Restore on a panel that is already maximised', async ({ page, renderScenario }) => {
+    await renderScenario(chat('no-maximize state="maximized"'))
+    await page.getByRole('button', { name: 'Restore' }).click()
+    await expect(host(page)).toHaveJSProperty('state', 'normal')
+    await expect(page.getByRole('button', { name: 'Maximise' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Restore' })).toHaveCount(0)
   })
 
   test('the opt-outs hide their buttons', async ({ page, renderScenario }) => {
@@ -561,6 +591,18 @@ test.describe('storage-key', () => {
     await renderScenario(chat('storage-key="chat-place"'))
     await expect(host(page)).toHaveState('minimized')
     await expect(host(page)).toHaveJSProperty('rect', { x: 100, y: 100, width: 300, height: 220 })
+  })
+
+  test('a panel minimised from maximised still restores to maximised after a reload', async ({ page, renderScenario }) => {
+    await renderScenario('')
+    await page.evaluate(() => localStorage.removeItem('chat-place'))
+    await renderScenario(chat('storage-key="chat-place" state="maximized"'))
+    await page.getByRole('button', { name: 'Minimise' }).click()
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('chat-place')!))).toEqual({ rect: null, state: 'minimized', restore: 'maximized' })
+    await renderScenario(chat('storage-key="chat-place"'))
+    await expect(host(page)).toHaveState('minimized')
+    await page.getByRole('button', { name: 'Restore' }).click()
+    await expect(host(page)).toHaveJSProperty('state', 'maximized')
   })
 
   test('ignores a value it did not write', async ({ page, renderScenario }) => {

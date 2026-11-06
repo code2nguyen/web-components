@@ -147,7 +147,10 @@ function resizeRect(start: FloatingPanelRect, edge: Edge, dx: number, dy: number
  * leaves that side `auto` and sets the opposite one.
  */
 function insetAnchor(value: string): { fromLeft: boolean; fromTop: boolean } {
-  const parts = value.trim().split(/\s+(?![^(]*\))/).filter(Boolean)
+  const parts = value
+    .trim()
+    .split(/\s+(?![^(]*\))/)
+    .filter(Boolean)
   if (!parts.length) return { fromLeft: false, fromTop: false }
   const [top, right = top, bottom = top, left = right] = parts
   return { fromLeft: right === 'auto' && left !== 'auto', fromTop: bottom === 'auto' && top !== 'auto' }
@@ -705,12 +708,15 @@ export class FloatingPanel extends LitElement {
   private persist() {
     if (!this.storageKey || isServer) return
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({
+      localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
           rect: validRect(this.rect) ?? null,
           state: this.state,
           // What Restore returns a minimised panel to, so a panel minimised from maximised still goes back there.
           ...(this.state === 'minimized' ? { restore: this.restoreState } : {}),
-        }))
+        }),
+      )
     } catch {
       // Storage blocked (private mode, quota): the place lasts for this page only.
     }

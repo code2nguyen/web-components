@@ -440,11 +440,17 @@ export class MindMap extends LitElement {
     return this.#apply(doc, { type: collapse ? 'collapse' : 'expand', node, parent, index: entry.index }, announcement, hidesSelection ? id : undefined)
   }
 
-  /** Sets the branch colour of `id` (the selected topic by default); `null` goes back to the branch colours in turn. */
+  /**
+   * Sets the colour of the branch `id` belongs to (the selected topic by default): a colour is read on first-level
+   * topics only, so a deeper topic colours its first-level ancestor's whole branch. `null` goes back to the branch
+   * colours in turn. The central topic has no branch: it returns false.
+   */
   setColor(id = this.#selected, color: string | null = null): boolean {
     this.#sync()
-    const entry = this.#entries.get(id)
-    if (!entry || !this.#doc) return false
+    let entry = this.#entries.get(id)
+    while (entry && entry.level > 1) entry = entry.parent ? this.#entries.get(entry.parent.id) : undefined
+    if (!entry || entry.level !== 1 || !this.#doc) return false
+    id = entry.node.id
     const doc = updateNode(this.#doc, id, (node) => {
       const next = { ...node }
       if (color) next.color = color
@@ -483,9 +489,17 @@ export class MindMap extends LitElement {
     this.#future = []
     this.#editing = null
     this.#index()
-    if (!this.#entries.has(this.#selected)) this.#selected = this.#doc?.id ?? ''
+    // New data can remove the selected topic or fold one of its ancestors: the nearest drawn ancestor takes over.
+    this.#selected = this.#nearestVisible(this.#selected)
     this.#layoutDirty = true
     if (this.#hasLayout) this.#refit = true
+  }
+
+  /** `id` when it is drawn, else its nearest drawn ancestor in the current map, else the central topic. */
+  #nearestVisible(id: string): string {
+    const path = this.#doc && id ? pathTo(this.#doc, id) : null
+    for (const node of (path ?? []).reverse()) if (this.#entries.get(node.id)?.visible) return node.id
+    return this.#doc?.id ?? ''
   }
 
   #index() {
@@ -597,7 +611,7 @@ export class MindMap extends LitElement {
     this.#editing = null
     this.#commitDoc(snapshot.doc)
     const focused = this.#hasFocus()
-    const selected = this.#entries.get(snapshot.selected)?.visible ? snapshot.selected : snapshot.doc.id
+    const selected = this.#nearestVisible(snapshot.selected)
     this.#select(selected, true)
     if (focused) this.#focusId = selected
     this.#revealId = selected
@@ -686,6 +700,8 @@ export class MindMap extends LitElement {
     const parent = pathTo(doc, parentId)!.pop()!
     const node = childrenOf(parent).find((child) => child.id === entry.node.id)!
     const newIndex = childrenOf(parent).indexOf(node)
+    // Dropped where it already was (same parent, place and side): nothing to change, and no undo step.
+    if (parentId === entry.parent.id && newIndex === entry.index && (parentId !== doc.id || (node.side ?? entry.side) === entry.side)) return false
     const action: MindMapAction = { type: 'move', node, parent, index: newIndex, from: { parent: entry.parent, index: entry.index } }
     const announcement =
       parentId === entry.parent.id
@@ -785,6 +801,8 @@ export class MindMap extends LitElement {
   /** Measures the drawn topics and lays the map out again when a size or the structure changed. */
   #measure() {
     let changed = this.#layoutDirty
+    // Forget the sizes of topics that are gone, so the cache does not grow with every deleted topic.
+    for (const id of this.#sizes.keys()) if (!this.#entries.has(id)) this.#sizes.delete(id)
     this.#resizeObserver ??= typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => this.requestUpdate())
     for (const entry of this.#visible) {
       const element = this.#topicEl(entry.node.id)
