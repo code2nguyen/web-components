@@ -1,0 +1,83 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-beam,
+  $theme: (
+    track--color: #e4e4e7,
+    track--width: 2px,
+    beam--color-from: #0265dc,
+    beam--color-to: #60a5fa,
+    beam--width: 2px,
+    beam--length: 20,
+    beam--duration: 3s,
+    beam--delay: 0s,
+    z-index: auto,
+  )
+);
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: css.cssVar(z-index);
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.beam-layer {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.track {
+  fill: none;
+  stroke: css.cssVar(track--color);
+  stroke-width: css.cssVar(track--width);
+  stroke-linecap: round;
+}
+
+.stop-from {
+  stop-color: css.cssVar(beam--color-from);
+}
+
+.stop-to {
+  stop-color: css.cssVar(beam--color-to);
+}
+
+// The path is 100 units long (`pathLength`), so the dash is a share of it; the gap is long enough that only one
+// dash is ever on the line.
+.beam {
+  fill: none;
+  stroke-width: css.cssVar(beam--width);
+  stroke-linecap: butt;
+  stroke-dasharray: css.cssVar(beam--length) 200;
+  stroke-dashoffset: css.cssVar(beam--length);
+  animation: c2-beam-travel linear infinite;
+  animation-duration: css.cssVar(beam--duration);
+  animation-delay: css.cssVar(beam--delay);
+}
+
+:host([reverse]) .beam {
+  animation-direction: reverse;
+}
+
+@keyframes c2-beam-travel {
+  from {
+    stroke-dashoffset: css.cssVar(beam--length);
+  }
+
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    display: none;
+  }
+}

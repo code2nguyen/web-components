@@ -1,0 +1,195 @@
+---
+description: 'Browser windows, phones, tablets and laptops around screenshots and live previews.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DeviceFrame } from '@c2n/components/device-frame'
+
+## Presets
+
+The content is the screen; the variables shape the device around it. Each device has its own `--c2-device-frame__<device>--width` and `--…--aspect-ratio`, and the bezel, bar and window dots are coloured separately.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .frame-default {
+    width: min(100%, 360px);
+  }
+  .frame-default p {
+    margin: 0;
+    padding: 24px 16px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+</style>
+<c2-device-frame class="frame-default" url="example.com">
+  <p>Your product, in a browser window.</p>
+</c2-device-frame>
+```
+
+```html tag=MdxCodeBlock,label=Window dots
+<style>
+  .frame-mac {
+    --c2-device-frame__close-dot--color: #ff5f57;
+    --c2-device-frame__minimize-dot--color: #febc2e;
+    --c2-device-frame__zoom-dot--color: #28c840;
+    --c2-device-frame__browser--border-radius: 12px;
+    --c2-device-frame__frame--box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    width: min(100%, 360px);
+  }
+  .frame-mac-page {
+    display: grid;
+    gap: 8px;
+    padding: 20px 16px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .frame-mac-page strong {
+    font-size: 18px;
+  }
+  .frame-mac-page span {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 13px;
+  }
+</style>
+<c2-device-frame class="frame-mac" url="acme.dev">
+  <div class="frame-mac-page">
+    <strong>Ship faster</strong>
+    <span>Everything your team needs, in one place.</span>
+  </div>
+</c2-device-frame>
+```
+
+```html tag=MdxCodeBlock,label=Phone app
+<style>
+  .frame-phone {
+    --c2-device-frame__phone--width: 210px;
+  }
+  .frame-phone-screen {
+    display: grid;
+    gap: 8px;
+    padding: 48px 14px 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 13px;
+  }
+  .frame-phone-screen strong {
+    font-size: 18px;
+  }
+  .frame-phone-screen span {
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-device-frame class="frame-phone" device="phone">
+  <div class="frame-phone-screen">
+    <strong>Wallet</strong>
+    <span>Balance $2,480.15</span>
+    <span>Coffee −$4.20</span>
+    <span>Salary +$3,200.00</span>
+  </div>
+</c2-device-frame>
+```
+
+```html tag=MdxCodeBlock,label=Flat phone
+<style>
+  .frame-flat {
+    --c2-device-frame__phone--width: 190px;
+    --c2-device-frame__phone--border-radius: 28px;
+    --c2-device-frame__bezel--width: 6px;
+    --c2-device-frame__bezel--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-device-frame__island--width: 0;
+    --c2-device-frame__frame--box-shadow: none;
+  }
+  .frame-flat-screen {
+    display: grid;
+    place-content: center;
+    height: 100%;
+    gap: 6px;
+    background: var(--c2-theme--color-primary-container, #edf1fe);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    text-align: center;
+  }
+  .frame-flat-screen strong {
+    font-size: 28px;
+  }
+  .frame-flat-screen span {
+    font-size: 12px;
+  }
+</style>
+<c2-device-frame class="frame-flat" device="phone">
+  <div class="frame-flat-screen">
+    <strong>9:41</strong>
+    <span>Thursday, 6 November</span>
+  </div>
+</c2-device-frame>
+```
+
+```html tag=MdxCodeBlock,label=Laptop
+<style>
+  .frame-laptop {
+    --c2-device-frame__laptop--width: 300px;
+    width: min(100%, 360px);
+  }
+  .frame-laptop-screen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+  .frame-laptop-screen span {
+    padding: 8px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 6px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-device-frame class="frame-laptop" device="laptop">
+  <div class="frame-laptop-screen">
+    <span>Visitors 12.4k</span>
+    <span>Sign-ups 318</span>
+    <span>Revenue $48k</span>
+    <span>Churn 1.2%</span>
+  </div>
+</c2-device-frame>
+```
+
+```html tag=MdxCodeBlock,label=Tablet
+<style>
+  .frame-tablet {
+    --c2-device-frame__tablet--width: 240px;
+    --c2-device-frame__tablet--aspect-ratio: 4 / 3;
+    --c2-device-frame__bezel--width: 10px;
+  }
+  .frame-tablet-screen {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    height: 100%;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+  .frame-tablet-screen nav {
+    padding: 10px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .frame-tablet-screen p {
+    margin: 0;
+    padding: 10px;
+  }
+</style>
+<c2-device-frame class="frame-tablet" device="tablet">
+  <div class="frame-tablet-screen">
+    <nav>Notes</nav>
+    <p>Meeting notes, Thursday</p>
+  </div>
+</c2-device-frame>
+```
+
+</GalleryGrid>

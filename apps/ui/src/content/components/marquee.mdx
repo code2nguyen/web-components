@@ -1,0 +1,96 @@
+---
+title: 'Marquee'
+description: 'A strip that scrolls its items in a continuous loop, for logo walls, testimonials and ticker tapes.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Marquee } from '@c2n/components/marquee'
+
+`c2-marquee` moves its children along a loop: each child element is one item, and an item that leaves one edge comes back at the other. The items keep their own DOM, so page styles, links and listeners keep working and nothing is copied. `orientation="vertical"` scrolls up instead of sideways, `reverse` turns the direction round, and `paused` stops the strip. It pauses by itself while the pointer is over it or focus is inside it. When the reader asks for reduced motion it stops and becomes a row that scrolls by hand. Speed, spacing and the edge fade are CSS variables: `--c2-marquee--speed` is in pixels per second.
+
+When the items together are shorter than the strip, the space left over shows as a gap before the first item comes round again; add items to fill a wide strip. Give the strip an `aria-label`: it is announced as a marquee, whose changes screen readers do not read out.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/marquee'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/marquee
+<style>
+  .marquee-usage {
+    width: min(100%, 560px);
+  }
+  .marquee-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .marquee-faded {
+    --c2-marquee__viewport--fade: 64px;
+  }
+  .marquee-quotes {
+    --c2-marquee__viewport--height: 200px;
+    --c2-marquee__viewport--fade: 32px;
+    --c2-marquee__item--gap: 12px;
+    --c2-marquee--speed: 24;
+  }
+  .marquee-quote {
+    display: block;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .marquee-quote cite {
+    display: block;
+    margin-top: 4px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+    font-style: normal;
+  }
+</style>
+<div data-label="Logos">
+  <c2-marquee class="marquee-usage" aria-label="Customers">
+    <span class="marquee-logo">◆ Northwind</span>
+    <span class="marquee-logo">● Contoso</span>
+    <span class="marquee-logo">▲ Fabrikam</span>
+    <span class="marquee-logo">■ Tailspin</span>
+    <span class="marquee-logo">✦ Litware</span>
+    <span class="marquee-logo">◉ Proseware</span>
+    <span class="marquee-logo">⬢ Adatum</span>
+  </c2-marquee>
+</div>
+<div data-label="Reverse, faded edges">
+  <c2-marquee class="marquee-usage marquee-faded" reverse aria-label="Integrations">
+    <span class="marquee-logo">GitHub</span>
+    <span class="marquee-logo">Slack</span>
+    <span class="marquee-logo">Linear</span>
+    <span class="marquee-logo">Figma</span>
+    <span class="marquee-logo">Notion</span>
+    <span class="marquee-logo">Stripe</span>
+    <span class="marquee-logo">Vercel</span>
+  </c2-marquee>
+</div>
+<div data-label="Vertical">
+  <c2-marquee class="marquee-usage marquee-quotes" orientation="vertical" aria-label="What teams say">
+    <blockquote class="marquee-quote">Setup took an afternoon.<cite>Priya, platform lead</cite></blockquote>
+    <blockquote class="marquee-quote">Our dashboards finally match our brand.<cite>Marco, design systems</cite></blockquote>
+    <blockquote class="marquee-quote">The forms just work in React and Angular.<cite>Lena, frontend</cite></blockquote>
+    <blockquote class="marquee-quote">Dark mode came for free.<cite>Sam, product</cite></blockquote>
+  </c2-marquee>
+</div>
+```

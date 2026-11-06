@@ -133,6 +133,10 @@
       "types": "./dist/barcode.d.ts",
       "default": "./dist/barcode.js"
     },
+    "./beam": {
+      "types": "./dist/beam.d.ts",
+      "default": "./dist/beam.js"
+    },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
       "default": "./dist/border-beam.js"
@@ -441,6 +445,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./device-frame": {
+      "types": "./dist/device-frame.d.ts",
+      "default": "./dist/device-frame.js"
+    },
     "./diff-viewer": {
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
@@ -640,6 +648,10 @@
     "./marker": {
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
+    },
+    "./marquee": {
+      "types": "./dist/marquee.d.ts",
+      "default": "./dist/marquee.js"
     },
     "./mask-input": {
       "types": "./dist/mask-input.d.ts",
@@ -1264,6 +1276,7 @@
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
     "@c2n/barcode": "*",
+    "@c2n/beam": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1305,6 +1318,7 @@
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/device-frame": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
     "@c2n/duration-input": "*",
@@ -1347,6 +1361,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/marquee": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/master-detail": "*",

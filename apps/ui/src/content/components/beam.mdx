@@ -1,0 +1,83 @@
+---
+title: 'Beam'
+description: 'An animated line between two elements, for data-flow and integration diagrams.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Beam } from '@c2n/components/beam'
+
+`c2-beam` draws a line from one element to another and sends a light along it. Lay the elements out with ordinary CSS inside a container with `position: relative`, then add one `c2-beam` per connection with `from` and `to` set to the two elements' `id`s. The line runs from edge to edge of the two boxes, so it never crosses their content. `curvature` bends it by that many pixels (negative values bend it the other way) and `reverse` sends the light back. Colours, thickness and timing are CSS variables.
+
+The beam covers its container and lets the pointer through. It redraws when the container or either element changes size; call `redraw()` after moving an element some other way. It is decorative and hidden from assistive technology, so say in text what the diagram shows. When the reader asks for reduced motion, only the line is drawn.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/beam'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/beam
+<style>
+  .beam-usage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: min(100%, 460px);
+    height: 160px;
+  }
+  .beam-usage-hub {
+    height: 200px;
+  }
+  .beam-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .beam-node {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 999px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .beam-node-hub {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+  }
+</style>
+<div data-label="Straight">
+  <div class="beam-usage">
+    <div class="beam-node" id="usage-straight-a">App</div>
+    <div class="beam-node" id="usage-straight-b">API</div>
+    <c2-beam from="usage-straight-a" to="usage-straight-b"></c2-beam>
+  </div>
+</div>
+<div data-label="Curved, into a hub">
+  <div class="beam-usage beam-usage-hub">
+    <div class="beam-column">
+      <div class="beam-node" id="usage-hub-web">Web</div>
+      <div class="beam-node" id="usage-hub-ios">iOS</div>
+      <div class="beam-node" id="usage-hub-cli">CLI</div>
+    </div>
+    <div class="beam-node beam-node-hub" id="usage-hub">Hub</div>
+    <div class="beam-node" id="usage-hub-db">DB</div>
+    <c2-beam from="usage-hub-web" to="usage-hub" curvature="-30"></c2-beam>
+    <c2-beam from="usage-hub-ios" to="usage-hub"></c2-beam>
+    <c2-beam from="usage-hub-cli" to="usage-hub" curvature="30"></c2-beam>
+    <c2-beam from="usage-hub" to="usage-hub-db" reverse></c2-beam>
+  </div>
+</div>
+```

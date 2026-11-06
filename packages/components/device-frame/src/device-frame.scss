@@ -1,0 +1,237 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-device-frame,
+  $theme: (
+    phone--width: 300px,
+    phone--aspect-ratio: string.unquote('9 / 19.5'),
+    phone--border-radius: 44px,
+    tablet--width: 560px,
+    tablet--aspect-ratio: string.unquote('3 / 4'),
+    tablet--border-radius: 28px,
+    laptop--width: 100%,
+    laptop--aspect-ratio: string.unquote('16 / 10'),
+    laptop--border-radius: 14px,
+    browser--width: 100%,
+    browser--height: auto,
+    browser--border-radius: 8px,
+    browser--border: 1px solid #e4e4e7,
+    bezel--color: #18181b,
+    bezel--width: 12px,
+    island--color: #000000,
+    island--width: 30%,
+    base--color: #d4d4d8,
+    base--height: 14px,
+    bar--background-color: #f4f4f5,
+    bar--color: #71717a,
+    address--background-color: #ffffff,
+    address--font-size: 12px,
+    close-dot--color: #d4d4d8,
+    minimize-dot--color: #d4d4d8,
+    zoom-dot--color: #d4d4d8,
+    screen--background-color: #ffffff,
+    screen--overflow: hidden,
+    frame--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+  )
+);
+
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.frame {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: css.cssVar(frame--box-shadow);
+}
+
+.screen {
+  position: relative;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: css.cssVar(screen--overflow);
+  background-color: css.cssVar(screen--background-color);
+  container: c2-device-frame / inline-size;
+}
+
+// The content fills the screen: a picture covers it, anything else lays out inside it.
+::slotted(img),
+::slotted(video),
+::slotted(picture) {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* Browser window */
+
+.frame--browser {
+  inline-size: min(100%, #{css.cssVar(browser--width)});
+  margin-inline: auto;
+  border: css.cssVar(browser--border);
+  border-radius: css.cssVar(browser--border-radius);
+  background-color: css.cssVar(screen--background-color);
+}
+
+.frame--browser .screen {
+  block-size: css.cssVar(browser--height);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  background-color: css.cssVar(bar--background-color);
+  color: css.cssVar(bar--color);
+  font-size: css.cssVar(address--font-size);
+}
+
+.dots {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.dot {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 999px;
+}
+
+.close {
+  background-color: css.cssVar(close-dot--color);
+}
+
+.minimize {
+  background-color: css.cssVar(minimize-dot--color);
+}
+
+.zoom {
+  background-color: css.cssVar(zoom-dot--color);
+}
+
+.address {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 420px;
+  margin-inline: auto;
+  min-block-size: 1.5em;
+  padding: 4px 12px;
+  border-radius: 6px;
+  line-height: 1.5;
+  background-color: css.cssVar(address--background-color);
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Balances the dots so the address stays centred when there are no actions.
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 42px;
+  justify-content: flex-end;
+}
+
+/* Phone, tablet, laptop */
+
+.device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.frame--phone,
+.frame--tablet,
+.frame--laptop {
+  border: css.cssVar(bezel--width) solid css.cssVar(bezel--color);
+  background-color: css.cssVar(bezel--color);
+}
+
+.frame--phone {
+  inline-size: min(100%, #{css.cssVar(phone--width)});
+  aspect-ratio: css.cssVar(phone--aspect-ratio);
+  border-radius: css.cssVar(phone--border-radius);
+}
+
+.frame--phone .screen {
+  border-radius: calc(#{css.cssVar(phone--border-radius)} - #{css.cssVar(bezel--width)});
+}
+
+.island {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 10px;
+  inset-inline-start: 50%;
+  inline-size: css.cssVar(island--width);
+  block-size: 24px;
+  border-radius: 999px;
+  background-color: css.cssVar(island--color);
+  translate: -50%;
+}
+
+:host(:dir(rtl)) .island {
+  translate: 50%;
+}
+
+.frame--tablet {
+  inline-size: min(100%, #{css.cssVar(tablet--width)});
+  aspect-ratio: css.cssVar(tablet--aspect-ratio);
+  border-radius: css.cssVar(tablet--border-radius);
+}
+
+.frame--tablet .screen {
+  border-radius: calc(#{css.cssVar(tablet--border-radius)} - #{css.cssVar(bezel--width)});
+}
+
+.device--laptop {
+  inline-size: 100%;
+}
+
+.frame--laptop {
+  // The deck is 8% wider than the lid on each side, so the lid stays inside the container.
+  inline-size: min(84%, #{css.cssVar(laptop--width)});
+  aspect-ratio: css.cssVar(laptop--aspect-ratio);
+  border-block-end-width: calc(#{css.cssVar(bezel--width)} * 1.5);
+  border-radius: css.cssVar(laptop--border-radius) css.cssVar(laptop--border-radius) 0 0;
+}
+
+.base {
+  position: relative;
+  inline-size: min(100%, calc(#{css.cssVar(laptop--width)} * 1.19));
+  block-size: css.cssVar(base--height);
+  border-radius: 0 0 14px 14px;
+  background-color: css.cssVar(base--color);
+  box-shadow: css.cssVar(frame--box-shadow);
+}
+
+// The thumb notch that opens the lid.
+.base::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 16%;
+  block-size: 40%;
+  border-radius: 0 0 8px 8px;
+  background-color: color-mix(in srgb, #{css.cssVar(base--color)} 80%, #000000);
+  translate: -50%;
+}
+
+:host(:dir(rtl)) .base::before {
+  translate: 50%;
+}

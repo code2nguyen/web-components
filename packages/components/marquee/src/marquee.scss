@@ -1,0 +1,123 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-marquee,
+  $theme: (
+    speed: 40,
+    item--gap: 32px,
+    item--align: center,
+    viewport--fade: 0px,
+    viewport--height: 240px,
+  )
+);
+
+:host {
+  display: block;
+  min-inline-size: 0;
+  --_dir: 1;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host(:dir(rtl)) {
+  --_dir: -1;
+}
+
+.viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 css.cssVar(viewport--fade), #000 calc(100% - #{css.cssVar(viewport--fade)}), transparent);
+}
+
+:host([orientation='vertical']) .viewport {
+  block-size: css.cssVar(viewport--height);
+  mask-image: linear-gradient(to bottom, transparent, #000 css.cssVar(viewport--fade), #000 calc(100% - #{css.cssVar(viewport--fade)}), transparent);
+}
+
+// At rest (before the first measurement, and under reduced motion) the items sit in a row.
+.track {
+  display: flex;
+  align-items: css.cssVar(item--align);
+}
+
+:host([orientation='vertical']) .track {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.item {
+  flex: none;
+  box-sizing: border-box;
+  inline-size: max-content;
+  padding-inline-end: css.cssVar(item--gap);
+}
+
+:host([orientation='vertical']) .item {
+  inline-size: auto;
+  padding-inline-end: 0;
+  padding-block-end: css.cssVar(item--gap);
+}
+
+// Running: every item shares one grid cell and is moved along the cycle by its own animation.
+.track.running {
+  display: grid;
+  justify-items: start;
+  align-items: css.cssVar(item--align);
+}
+
+:host([orientation='vertical']) .track.running {
+  block-size: 100%;
+  justify-items: stretch;
+  align-items: start;
+}
+
+.running .item {
+  grid-area: 1 / 1;
+  animation: c2-marquee-horizontal linear infinite;
+  animation-duration: calc(var(--_distance) / #{css.cssVar(speed)} * 1s);
+  animation-delay: calc(var(--_phase) * var(--_distance) / #{css.cssVar(speed)} * -1s);
+  will-change: transform;
+}
+
+:host([orientation='vertical']) .running .item {
+  animation-name: c2-marquee-vertical;
+}
+
+:host(:hover) .running .item,
+:host(:focus-within) .running .item,
+:host([paused]) .running .item {
+  animation-play-state: paused;
+}
+
+@keyframes c2-marquee-horizontal {
+  from {
+    transform: translateX(calc(var(--_from) * var(--_dir) * 1px));
+  }
+
+  to {
+    transform: translateX(calc(var(--_to) * var(--_dir) * 1px));
+  }
+}
+
+@keyframes c2-marquee-vertical {
+  from {
+    transform: translateY(calc(var(--_from) * 1px));
+  }
+
+  to {
+    transform: translateY(calc(var(--_to) * 1px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport {
+    overflow: auto;
+  }
+
+  .track.running {
+    display: flex;
+  }
+
+  .running .item {
+    animation: none;
+  }
+}
