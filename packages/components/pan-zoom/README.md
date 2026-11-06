@@ -45,7 +45,7 @@ A fitted view never zooms past 100%, so a small image stays sharp.
 A primary-button drag pans (not when it starts on a link, button, form control, `[contenteditable]`,
 `[draggable="true"]`, `[data-pan-zoom="ignore"]`, or when a content listener called `preventDefault()` on its
 `pointerdown`); Space + drag and a middle-button drag pan from anywhere, even from those. `gestures="none"` turns every
-pointer gesture off, these included: only the toolbar, the keys and the methods move the view. Ctrl/⌘ + wheel, a trackpad pinch and two fingers zoom
+pointer gesture off, these included: only the toolbar, the minimap, the keys and the methods move the view. Ctrl/⌘ + wheel, a trackpad pinch and two fingers zoom
 to the pointer, a double-click zooms in one step (Shift + double-click zooms out) and a released drag glides. With focus
 on the viewport the arrows pan 48px (a quarter of the box with Shift), `+` / `=` and `-` zoom, `0` goes back to the
 `fit` view and `1` to 100%; keys pressed inside the content are left to it. Focus moving to content out of view pans it

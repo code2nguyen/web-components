@@ -293,17 +293,19 @@ export class FloatingPanel extends LitElement {
   /**
    * Lines the docked panels of a boundary up from the first one's place to its left. When the line runs out of room
    * they share the width, down to `DOCK_MIN_WIDTH`, and past that wrap to further lines upward, so none leaves the
-   * boundary. Until this runs (a server render), CSS lines them up at full width.
+   * boundary. Lines that would run past the boundary's far edge stack on the last line that fits instead. Until this
+   * runs (a server render), CSS lines them up at full width.
    */
   private static layoutDock(key: object) {
     const dock = (FloatingPanel.docks.get(key) ?? []).filter((panel) => panel.docked && panel.panel)
     const first = dock[0]
     if (!first) return
     const style = getComputedStyle(first.panel!)
-    const { width: boundary } = first.boundarySize()
+    const { width: boundary, height: boundaryHeight } = first.boundarySize()
     const { fromLeft, fromTop } = insetAnchor(style.getPropertyValue('--c2-floating-panel__docked--inset'))
     // The used offset on the anchored side (positioned elements resolve `left`/`right` to pixels).
     const edge = pixels(fromLeft ? style.left : style.right, boundary, 0)
+    const edgeY = pixels(fromTop ? style.top : style.bottom, boundaryHeight, 0)
     const gap = pixels(style.getPropertyValue('--c2-floating-panel__docked--gap').trim(), boundary, 8)
     const wanted = pixels(style.getPropertyValue('--c2-floating-panel__docked--width').trim(), boundary, 240)
     const height = first.panel!.offsetHeight
@@ -318,9 +320,10 @@ export class FloatingPanel extends LitElement {
       barWidth = Math.min(wanted, (room - (perLine - 1) * gap) / perLine)
     }
     barWidth = Math.max(0, Math.floor(barWidth))
+    const lines = Math.max(1, Math.floor((boundaryHeight - 2 * edgeY + gap) / (height + gap)))
     dock.forEach((panel, index) => {
       const column = (index % perLine) * (barWidth + gap)
-      const line = Math.floor(index / perLine) * (height + gap)
+      const line = Math.min(Math.floor(index / perLine), lines - 1) * (height + gap)
       const place = { x: fromLeft ? column : -column, y: fromTop ? line : -line, width: barWidth }
       const current = panel.dockPlace
       if (!current || current.x !== place.x || current.y !== place.y || current.width !== place.width) panel.dockPlace = place

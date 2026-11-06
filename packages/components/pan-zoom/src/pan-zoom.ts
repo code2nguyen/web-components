@@ -185,7 +185,7 @@ interface Animation {
  * middle-button drag pan from anywhere), Ctrl/⌘ + wheel and a pinch zoom to the pointer, a double-click zooms in one step,
  * and a released drag glides. `gestures` sets what the plain wheel and one finger do: `cooperative` (the default)
  * leaves them to the page and shows a hint, `pan` pans as in Figma, `zoom` zooms as in a map, `none` leaves only the
- * buttons, the keys and the methods. The viewport is one tab stop: the arrows pan (Shift for a quarter of the view),
+ * buttons, the minimap, the keys and the methods. The viewport is one tab stop: the arrows pan (Shift for a quarter of the view),
  * `+` / `-` zoom, `0` fits and `1` goes to 100%; `no-keyboard` hands the keys to a component that draws its own
  * content. Focus moving to content out of view pans it into view.
  *
@@ -279,7 +279,7 @@ export class PanZoom extends LitElement {
    * What the wheel and one finger do. `cooperative`: they scroll the page, and Ctrl/⌘ + wheel, a pinch, two fingers
    * or a mouse drag move the view. `pan`: the wheel pans and Ctrl/⌘ + wheel zooms. `zoom`: the wheel zooms to the
    * pointer (and one finger pans). `none`: no pointer gesture at all, not even Space + drag or a middle-button drag;
-   * only the buttons, the keys and the methods move the view.
+   * only the buttons, the minimap, the keys and the methods move the view.
    */
   @property() gestures: PanZoomGestures = 'cooperative'
 
@@ -452,6 +452,8 @@ export class PanZoom extends LitElement {
     // Drawn again for a new source, and into a new element when the minimap was turned off and on.
     if (this.art === 'svg' && this.artSvgEl && (this.artDrawn !== this.artSource || this.artHost !== this.artSvgEl)) this.drawSvgArt()
     if (this.art === 'canvas' && this.artCanvasEl && (this.artDrawn !== this.artSource || this.artHost !== this.artCanvasEl)) this.drawCanvasArt()
+    // With the minimap off, let go of the removed element and the copy drawn into it.
+    if (!this.artSvgEl && !this.artCanvasEl) this.artHost = null
   }
 
   // ---------------------------------------------------------------------------------------------------------------

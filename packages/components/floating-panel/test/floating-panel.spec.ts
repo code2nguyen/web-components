@@ -408,6 +408,19 @@ test.describe('minimise, maximise, restore and close', () => {
     expect(await box(panel(page, 1))).toEqual({ ...first, y: first.y + first.height + 8 })
   })
 
+  test('lines that would leave a short boundary stack on the last line that fits', async ({ page, renderScenario }) => {
+    await renderScenario(`<div class="area" style="width: 260px; height: 100px; --c2-floating-panel__docked--inset: 0 16px auto auto">${docked(3)}</div>`)
+    const area = await dockArea(page)
+    await expect.poll(async () => (await box(panel(page, 2))).width).toBe(228)
+    const first = await box(panel(page, 0))
+    const lines = Math.max(1, Math.floor((area.bottom - area.top + 8) / (first.height + 8)))
+    for (let index = 0; index < 3; index++) {
+      const bar = await box(panel(page, index))
+      expect(bar.y).toBe(first.y + Math.min(index, lines - 1) * (first.height + 8))
+      expect(bar.y + bar.height).toBeLessThanOrEqual(Math.ceil(area.bottom))
+    }
+  })
+
   test('minimize="collapse" folds the panel to its title bar where it is', async ({ page, renderScenario }) => {
     await renderScenario(chat(`minimize="collapse" rect='{"x":100,"y":100,"width":320,"height":240}'`))
     await page.getByRole('button', { name: 'Minimise' }).click()
