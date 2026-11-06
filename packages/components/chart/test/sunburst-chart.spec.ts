@@ -68,7 +68,9 @@ async function waitForSize(chart: Locator): Promise<void> {
         const plot = sunburst.shadowRoot?.querySelector('.plot') as HTMLElement
         const canvas = plot.querySelector('canvas') as HTMLCanvasElement
         const { width, height } = sunburst.buildContext()
-        return width === plot.clientWidth && height === plot.clientHeight && canvas.clientWidth === plot.clientWidth && canvas.clientHeight === plot.clientHeight
+        return (
+          width === plot.clientWidth && height === plot.clientHeight && canvas.clientWidth === plot.clientWidth && canvas.clientHeight === plot.clientHeight
+        )
       }),
     )
     .toBe(true)
@@ -761,4 +763,133 @@ test('builds the engine tree once per update, measuring each name once', async (
   })
   expect(result.calls).toBe(1)
   expect(result.same).toBe(true)
+})
+
+test('engine names stay unique whatever a label holds, so the pointer reaches the right node', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    const api = (window as unknown as { sunburstScenario: ScenarioApi }).sunburstScenario
+    // Joined with a separator, the leaf `a␟b` and the leaf `b` inside `a` would both be named "tile␟a␟b".
+    sunburst.data = [
+      { name: 'a', children: [{ name: 'b', budget: 1 }] },
+      { name: 'a\u001fb', budget: 2 },
+    ]
+    await sunburst.updateComplete
+    let title = ''
+    sunburst.addEventListener('tooltip-change', (event) => {
+      title = ((event as CustomEvent).detail as { formattedX: string } | null)?.formattedX ?? title
+    })
+    api.hover({ index: 0, seriesIndex: 0, px: 10, py: 10, name: api.engineName(['a', 'b'], true) })
+    const nested = title
+    api.hover({ index: 0, seriesIndex: 0, px: 10, py: 10, name: api.engineName(['a\u001fb'], true) })
+    const [data] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
+    const names = new Set<string>()
+    const walk = (nodes: EngineNode[]) => nodes.forEach((node) => (names.add(node.name), walk(node.children ?? [])))
+    walk(data)
+    return { nested, flat: title, names: names.size }
+  })
+  expect(result.nested).toBe('a › b')
+  expect(result.flat).toBe('a\u001fb')
+  expect(result.names).toBe(3)
+})
+
+test('a leaf that shares its path with a group highlights only itself', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    const api = (window as unknown as { sunburstScenario: ScenarioApi }).sunburstScenario
+    sunburst.data = [
+      {
+        name: 'A',
+        children: [
+          { name: 'B', children: [{ name: 'C', budget: 3 }] },
+          { name: 'B', budget: 2 },
+          { name: 'D', budget: 1 },
+        ],
+      },
+    ]
+    await sunburst.updateComplete
+    api.click({ index: 0, seriesIndex: 0, name: api.engineName(['A', 'B'], true) })
+    await sunburst.updateComplete
+    const [data] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
+    const opacity: Record<string, number> = {}
+    const walk = (nodes: EngineNode[]) =>
+      nodes.forEach((node) => {
+        const [kind, ...path] = JSON.parse(node.name) as string[]
+        opacity[`${kind}:${path.join('/')}`] = node.itemStyle.opacity
+        walk(node.children ?? [])
+      })
+    walk(data)
+    return { highlighted: sunburst.highlighted, opacity }
+  })
+  expect(result.highlighted).toBe('["leaf","A","B"]')
+  expect(result.opacity).toEqual({ 'group:A': 1, 'group:A/B': 0.25, 'leaf:A/B/C': 0.25, 'leaf:A/B': 1, 'leaf:A/D': 0.25 })
+})
+
+test('ArrowUp from the first ring while zoomed zooms out onto the branch just left', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const live = chart.locator('.sunburst-a11y[aria-live]')
+  await chart.evaluate((element) => (element as SunburstElement).zoomTo(['Engineering']))
+  await chart.locator('.plot').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(live).toContainText('Engineering › Platform, $2.1M')
+  await page.keyboard.press('ArrowUp')
+  await expect(chart.locator('.sunburst-breadcrumb')).toHaveCount(0)
+  await expect(live).toHaveText('Zoomed out to all, $11.7M. Engineering, $5.1M, 43.6% of total, 3 items. Enter to zoom.')
+})
+
+test('says "1 item" in the summary and the announcement', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    sunburst.data = [{ name: 'Only', children: [{ name: 'One', budget: 1 }] }]
+    await sunburst.updateComplete
+  })
+  await expect(chart.locator('.plot')).toHaveAttribute('aria-label', 'Sunburst of Budget, 1 item')
+  await chart.locator('.plot').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(chart.locator('.sunburst-a11y[aria-live]')).toHaveText('Only, $1M, 100% of total, 1 item. Enter to zoom.')
+})
+
+test('new data rebuilds the options once, and a breadcrumb change lays the labels out again', async ({ page }) => {
+  await open(page, 'budget', '&animation=none')
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement & { adapter: { setOptions(...args: unknown[]): void } }
+    const adapter = sunburst.adapter
+    const original = adapter.setOptions.bind(adapter)
+    let builds = 0
+    adapter.setOptions = (...args: unknown[]) => {
+      builds += 1
+      original(...args)
+    }
+    sunburst.data = structuredClone(sunburst.data)
+    await sunburst.updateComplete
+    await sunburst.updateComplete
+    adapter.setOptions = original
+
+    sunburst.zoomTo(['Engineering'])
+    await sunburst.updateComplete
+    const before = sunburst.projectData(sunburst.frame, sunburst.buildContext())[0]
+    const centre = (sunburst.buildOptions(sunburst.buildContext()).series[0] as { center: number[] }).center[1]
+    sunburst.breadcrumb = 'none'
+    await sunburst.updateComplete
+    const after = sunburst.projectData(sunburst.frame, sunburst.buildContext())[0]
+    const moved = (sunburst.buildOptions(sunburst.buildContext()).series[0] as { center: number[] }).center[1]
+    return { builds, fresh: before !== after, centre, moved }
+  })
+  expect(result.builds).toBe(1)
+  expect(result.fresh).toBe(true)
+  // Without the breadcrumb strip the rings move back up to the middle of the plot.
+  expect(result.moved).toBeLessThan(result.centre)
 })

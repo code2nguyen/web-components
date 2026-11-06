@@ -374,6 +374,10 @@ export class BoxplotChart extends EchartsChartBase {
           children,
           originX: horizontal ? median : centre,
           originY: horizontal ? centre : median,
+          // The resting scale is stated: an update that lands while the entry is still growing would otherwise keep
+          // the box at the scale it had reached.
+          scaleX: 1,
+          scaleY: 1,
           enterFrom: horizontal ? { scaleX: 0 } : { scaleY: 0 },
         }
       },
