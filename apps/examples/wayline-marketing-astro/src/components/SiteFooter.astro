@@ -2,10 +2,20 @@
 import Logo from './Logo.astro'
 import { product } from '../data/site'
 
+// Only the sections of this page are real destinations; the rest name pages a made-up company would have, so they
+// are listed as text rather than as links that go nowhere.
 const columns = [
-  { title: 'Product', links: ['Integrations', 'Features', 'Pricing', 'Changelog'] },
-  { title: 'Company', links: ['About', 'Customers', 'Careers', 'Contact'] },
-  { title: 'Resources', links: ['Docs', 'Guides', 'Status', 'Security'] },
+  {
+    title: 'Product',
+    items: [
+      { label: 'Integrations', href: '#integrations' },
+      { label: 'Features', href: '#features' },
+      { label: 'Pricing', href: '#pricing' },
+      { label: 'FAQ', href: '#faq' },
+    ],
+  },
+  { title: 'Company', items: [{ label: 'About' }, { label: 'Customers' }, { label: 'Careers' }, { label: 'Contact' }] },
+  { title: 'Resources', items: [{ label: 'Docs' }, { label: 'Guides' }, { label: 'Status' }, { label: 'Security' }] },
 ]
 ---
 
@@ -17,16 +27,14 @@ const columns = [
     </div>
     {
       columns.map((column) => (
-        <nav class="site-footer__column" aria-label={column.title}>
+        <div class="site-footer__column">
           <h2>{column.title}</h2>
           <ul>
-            {column.links.map((label) => (
-              <li>
-                <a href="#top">{label}</a>
-              </li>
+            {column.items.map((item) => (
+              <li>{item.href ? <a href={item.href}>{item.label}</a> : <span>{item.label}</span>}</li>
             ))}
           </ul>
-        </nav>
+        </div>
       ))
     }
   </div>

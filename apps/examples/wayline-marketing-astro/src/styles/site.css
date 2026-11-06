@@ -14,7 +14,6 @@
   --site-line: var(--c2-theme--color-outline-variant, #e4e4e7);
   --site-accent: var(--c2-theme--color-primary, #0265dc);
 
-  color-scheme: light dark;
   scroll-padding-top: 80px;
 }
 
@@ -208,15 +207,8 @@ main > .container {
   color: var(--site-accent);
 }
 
-.nav-link {
-  --c2-link-button__container--padding-left: 10px;
-  --c2-link-button__container--padding-right: 10px;
-}
-
-@media (max-width: 720px) {
-  .nav-link {
-    display: none;
-  }
+.site-nav {
+  --c2-navigation-menu__mobile-trigger--background: transparent;
 }
 
 /* Hero */
@@ -853,7 +845,8 @@ main > .container {
   list-style: none;
 }
 
-.site-footer a {
+.site-footer a,
+.site-footer span {
   color: var(--site-muted);
   text-decoration: none;
 }

@@ -16,12 +16,9 @@ const links = [
     <Logo />
     <span>{product.name}</span>
   </a>
-  {
-    links.map((link) => (
-      <c2-link-button class="nav-link" href={link.href}>
-        {link.label}
-      </c2-link-button>
-    ))
-  }
+  <!-- Below 720px the bar turns itself into one menu button that lists the same links. -->
+  <c2-navigation-menu class="site-nav" aria-label="Sections" mobile-breakpoint="720" mobile-label="Open the section menu">
+    {links.map((link) => <c2-navigation-menu-item href={link.href}>{link.label}</c2-navigation-menu-item>)}
+  </c2-navigation-menu>
   <c2-button slot="actions" class="cta" data-signup>Start free</c2-button>
 </c2-header>

@@ -41,15 +41,16 @@ test('below-the-fold components load when their section comes near', async ({ pa
 test('the billing toggle switches every price', async ({ page }) => {
   await page.goto('./#pricing')
   await expect.poll(() => defined(page, 'c2-button-group')).toBe(true)
-  const team = page.locator('.plan', { has: page.getByRole('heading', { name: 'Team', exact: true }) }).locator('.plan__amount')
-  await expect(team).toHaveText('$24')
+  const price = (plan: string) => page.locator('.plan', { has: page.getByRole('heading', { name: plan, exact: true }) }).locator('.plan__amount')
+  const prices = () => Promise.all(['Starter', 'Team', 'Business'].map((plan) => price(plan).textContent()))
+  await expect.poll(prices).toEqual(['$0', '$24', '$49'])
 
   await page.getByRole('button', { name: 'Yearly · save 20%' }).click()
-  await expect(team).toHaveText('$19')
+  await expect.poll(prices).toEqual(['$0', '$19', '$39'])
   await expect(page.locator('[data-billing-note]')).toContainText('Billed yearly')
 
   await page.getByRole('button', { name: 'Monthly' }).click()
-  await expect(team).toHaveText('$24')
+  await expect.poll(prices).toEqual(['$0', '$24', '$49'])
 })
 
 test('signing up checks the email, then confirms with a toast', async ({ page }) => {
@@ -104,4 +105,26 @@ test('has no automatically detectable accessibility problems', async ({ page }) 
   await page.locator('footer').scrollIntoViewIfNeeded()
   const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(result.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([])
+})
+
+test('on a phone the sections are one menu button away', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Open the section menu' }).click()
+  await page.getByRole('link', { name: 'Pricing' }).first().click()
+  await expect(page).toHaveURL(/#pricing$/)
+})
+
+test('the headline reads whole before its word starts rotating', async ({ page }) => {
+  await page.route('**/*.js', (route) => route.abort())
+  await page.goto('./')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/between your\s+CRM$/)
+})
+
+test('the testimonials are read once, from the first column', async ({ page }) => {
+  await page.goto('./')
+  const columns = page.locator('c2-marquee.quote-column')
+  await expect(columns.nth(0)).not.toHaveAttribute('inert')
+  await expect(columns.nth(1)).toHaveAttribute('inert', '')
+  await expect(columns.nth(2)).toHaveAttribute('inert', '')
 })

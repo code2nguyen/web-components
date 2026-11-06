@@ -51,7 +51,7 @@ import { actions, triggers } from '../data/site'
       }
     </div>
     {triggers.map((item, index) => <c2-beam from={item.id} to="hub-core" curvature={(index - 1) * -40} />)}
-    {actions.map((item, index) => <c2-beam class="beam-out" from="hub-core" to={item.id} curvature={(index - 1) * 40} />)}
+    {actions.map((item, index) => <c2-beam class="beam-out" from="hub-core" to={item.id} curvature={(index - 1) * -40} />)}
     <figcaption id="hub-caption" class="visually-hidden">
       Email, forms and the CRM send events to Wayline, which passes them on to chat, billing and the warehouse.
     </figcaption>

@@ -8,8 +8,8 @@ const tone = { Running: 'success', Paused: 'neutral', Failed: 'danger' } as cons
   <section class="container hero" id="top" aria-labelledby="hero-title">
     <c2-badge class="hero-badge" tone="primary">New · Approvals on your phone</c2-badge>
     <h1 id="hero-title">
-      Automate the busywork between your
-      <c2-text-effect class="hero-word" effect="rotate" words={heroWords.join(';')}></c2-text-effect>
+      Automate the busywork between your{' '}
+      <c2-text-effect class="hero-word" effect="rotate" words={heroWords.join(';')}>{heroWords[0]}</c2-text-effect>
     </h1>
     <p class="lead">{product.description}</p>
     <div class="hero-actions">

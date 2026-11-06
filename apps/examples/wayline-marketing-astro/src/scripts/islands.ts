@@ -12,11 +12,20 @@ export function whenNear(selector: string, load: () => Promise<unknown>, margin 
     void load()
     return
   }
+  // The observer stays until the module has loaded: a load that fails (a network blip, a chunk replaced by a deploy)
+  // is tried again the next time a section comes near.
+  let loading = false
   const observer = new IntersectionObserver(
     (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return
-      observer.disconnect()
-      void load()
+      if (loading || !entries.some((entry) => entry.isIntersecting)) return
+      loading = true
+      load().then(
+        () => observer.disconnect(),
+        (error: unknown) => {
+          loading = false
+          console.warn(`Could not load the module for ${selector}; it will be tried again.`, error)
+        },
+      )
     },
     { rootMargin: margin },
   )

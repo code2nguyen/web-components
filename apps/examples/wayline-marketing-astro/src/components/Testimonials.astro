@@ -18,6 +18,7 @@ const columns = [0, 2, 4].map((start) => [...testimonials.slice(start), ...testi
           class={`quote-column quote-column--${index}`}
           orientation="vertical"
           reverse={index === 1}
+          inert={index > 0 ? '' : undefined}
           aria-label={`What customers say, column ${index + 1}`}
         >
           {quotes.map((item) => (

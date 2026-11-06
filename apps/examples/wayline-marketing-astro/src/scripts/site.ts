@@ -1,6 +1,7 @@
 // Above the fold: registered straight away, so the header and the hero upgrade on the first frame.
 import '@c2n/components/scroll-progress'
 import '@c2n/components/header'
+import '@c2n/components/navigation-menu'
 import '@c2n/components/link-button'
 import '@c2n/components/button'
 import '@c2n/components/badge'
