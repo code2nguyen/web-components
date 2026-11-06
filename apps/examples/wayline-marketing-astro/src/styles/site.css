@@ -845,8 +845,8 @@ main > .container {
   list-style: none;
 }
 
-.site-footer a,
-.site-footer span {
+.site-footer__column a,
+.site-footer__column span {
   color: var(--site-muted);
   text-decoration: none;
 }

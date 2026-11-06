@@ -128,3 +128,10 @@ test('the testimonials are read once, from the first column', async ({ page }) =
   await expect(columns.nth(1)).toHaveAttribute('inert', '')
   await expect(columns.nth(2)).toHaveAttribute('inert', '')
 })
+
+test("the footer's section links are a navigation landmark", async ({ page }) => {
+  await page.goto('./')
+  const product = page.getByRole('navigation', { name: 'Product' })
+  await expect(product.getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '#pricing')
+  await expect(page.getByRole('navigation', { name: 'Company' })).toHaveCount(0)
+})

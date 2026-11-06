@@ -26,16 +26,20 @@ const columns = [
       <p>{product.tagline}</p>
     </div>
     {
-      columns.map((column) => (
-        <div class="site-footer__column">
-          <h2>{column.title}</h2>
-          <ul>
-            {column.items.map((item) => (
-              <li>{item.href ? <a href={item.href}>{item.label}</a> : <span>{item.label}</span>}</li>
-            ))}
-          </ul>
-        </div>
-      ))
+      columns.map((column) => {
+        // A column of links is a navigation landmark; a column of plain text is not.
+        const Column = column.items.some((item) => 'href' in item) ? 'nav' : 'div'
+        return (
+          <Column class="site-footer__column" aria-label={Column === 'nav' ? column.title : undefined}>
+            <h2>{column.title}</h2>
+            <ul>
+              {column.items.map((item) => (
+                <li>{'href' in item ? <a href={item.href}>{item.label}</a> : <span>{item.label}</span>}</li>
+              ))}
+            </ul>
+          </Column>
+        )
+      })
     }
   </div>
   <p class="container site-footer__note">
