@@ -122,6 +122,34 @@ test('refits when the content grows, until the view is moved', async ({ page, re
   expect((await viewOf(subject(page))).zoom).toBe(1)
 })
 
+test('once the view is driven by a call, growing content no longer refits it, even when the call moved nothing', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, `<c2-pan-zoom min-zoom="0.1">${PLAN}</c2-pan-zoom>`)
+  const before = await viewOf(subject(page))
+  // In view already: reveal() has nothing to pan.
+  await subject(page).evaluate((element: PanZoom) => element.reveal({ x: 700, y: 400, width: 10, height: 10 }))
+  expect(await viewOf(subject(page))).toEqual(before)
+  await page.locator('.plan').evaluate((plan: HTMLElement) => (plan.style.width = '3200px'))
+  await frames(page)
+  await frames(page)
+  expect((await viewOf(subject(page))).zoom).toBe(before.zoom)
+})
+
+test('a resize during a drag is taken up when the drag ends', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, `<c2-pan-zoom fit="none" no-inertia>${PLAN}</c2-pan-zoom>`)
+  const centre = await viewportCentre(page)
+  await page.mouse.move(centre.x, centre.y)
+  await page.mouse.down()
+  await page.mouse.move(centre.x + 10, centre.y, { steps: 2 })
+  await subject(page).evaluate((element: HTMLElement) => (element.style.width = '300px'))
+  await frames(page)
+  await page.mouse.move(centre.x, centre.y, { steps: 2 })
+  // Mid-drag the view keeps the sizes the drag started with.
+  expect((await viewOf(subject(page))).x).toBe(500)
+  await page.mouse.up()
+  // Released: the narrower viewport keeps the same content point in its centre (800, as before the resize).
+  await expect.poll(async () => (await viewOf(subject(page))).x).toBe(650)
+})
+
 // ---------------------------------------------------------------------------------------------------------------
 // Zoom
 
@@ -497,6 +525,30 @@ test('the minimap copies a single image or SVG, takes its slot, and never clones
   // The page's style sheet does not reach the copy, so its computed look is carried along.
   await expect(room).toHaveCSS('stroke', 'rgb(1, 2, 3)')
   await expect(page.locator('c2-pan-zoom .art-svg foreignObject')).toHaveCount(0)
+
+  // The copy is redrawn when the SVG changes or the colour scheme does, not each time the view settles.
+  await page.evaluate(() => {
+    const element = document.querySelector('c2-pan-zoom')!
+    ;(window as unknown as { firstCopy: Element }).firstCopy = element.shadowRoot!.querySelector('.art-svg svg')!
+  })
+  const sameCopy = () =>
+    page.evaluate(
+      () => document.querySelector('c2-pan-zoom')!.shadowRoot!.querySelector('.art-svg svg') === (window as unknown as { firstCopy: Element }).firstCopy,
+    )
+  await subject(page).evaluate((element: PanZoom) => element.panBy(40, 0))
+  await frames(page)
+  expect(await sameCopy()).toBe(true)
+  await page.locator('c2-pan-zoom > svg rect.room').evaluate((rect) => rect.setAttribute('fill', 'rgb(0, 128, 0)'))
+  await expect(room).toHaveCSS('fill', 'rgb(0, 128, 0)')
+  expect(await sameCopy()).toBe(false)
+  await page.evaluate(() => {
+    const element = document.querySelector('c2-pan-zoom')!
+    ;(window as unknown as { firstCopy: Element }).firstCopy = element.shadowRoot!.querySelector('.art-svg svg')!
+    document.documentElement.style.colorScheme = 'dark'
+  })
+  await subject(page).evaluate((element: PanZoom) => element.panBy(40, 0))
+  await expect.poll(sameCopy).toBe(false)
+  await expect(room).toBeAttached()
 
   await render(page, renderScenario, `<c2-pan-zoom minimap fit="none"><c2-pan-zoom style="width: 1600px"></c2-pan-zoom></c2-pan-zoom>`)
   await expect(page.locator('c2-pan-zoom .art-rect').first()).toBeAttached()

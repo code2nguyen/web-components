@@ -20,6 +20,7 @@ import {
   panBy as panView,
   panZoomKeyAction,
   pinchView,
+  prefersReducedMotion,
   revealRect,
   sameView,
   toContentPoint as contentPointOf,
@@ -147,8 +148,6 @@ const INTERACTIVE = [
 const minZoomConverter = {
   fromAttribute: (value: string | null): number | 'fit' => (value?.trim() === 'fit' ? 'fit' : Number(value)),
 }
-
-const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const iconMinus = svg`<path d="M4 8h8" />`
 const iconPlus = svg`<path d="M4 8h8M8 4v8" />`
@@ -310,11 +309,12 @@ export class PanZoom extends LitElement {
     if (!Number.isFinite(zoom) || zoom <= 0) return
     const old = this.current.zoom
     this.stopMotion()
+    // A zoom chosen by the page is kept: content that grows later does not refit it.
+    this.touched = true
     if (!this.measured) {
       if (this.initial !== 'view') this.initial = 'zoom'
       this.current = { ...this.current, zoom }
     } else {
-      this.touched = true
       this.current = this.constrain(zoomAround(this.current, this.clampZoom(zoom), this.centre()))
     }
     this.requestUpdate('zoom', old)
@@ -334,11 +334,11 @@ export class PanZoom extends LitElement {
     if (!value || ![value.x, value.y, value.zoom].every(Number.isFinite) || value.zoom <= 0) return
     const old = this.view
     this.stopMotion()
+    this.touched = true
     if (!this.measured) {
       this.initial = 'view'
       this.current = { x: value.x, y: value.y, zoom: value.zoom }
     } else {
-      this.touched = true
       this.current = this.constrain({ x: value.x, y: value.y, zoom: this.clampZoom(value.zoom) })
     }
     this.requestUpdate('view', old)
@@ -357,6 +357,8 @@ export class PanZoom extends LitElement {
   private initial: 'fit' | 'view' | 'zoom' = 'fit'
   /** Sizes known: false on the server and until the first measurement. */
   private measured = false
+  /** A resize came during a gesture: measure again when it ends. */
+  private remeasure = false
   /** The view was moved since the last fit, so a resize keeps it rather than fitting again. */
   private touched = false
   private viewportSize: PanZoomSize = { width: 0, height: 0 }
@@ -393,6 +395,10 @@ export class PanZoom extends LitElement {
   private artSource: Element | null = null
   private artSrc = ''
   private artDrawn: Element | null = null
+  /** The inherited colours the SVG copy was drawn with, to tell when a theme switch calls for a new copy. */
+  private artLook = ''
+  private artObserver?: MutationObserver
+  private colorScheme?: MediaQueryList
   private focusIndex = 0
 
   override connectedCallback(): void {
@@ -412,6 +418,8 @@ export class PanZoom extends LitElement {
     this.wheelTimer = 0
     this.hint = null
     this.artSource?.removeEventListener('load', this.handleArtLoad)
+    this.artObserver?.disconnect()
+    this.colorScheme?.removeEventListener('change', this.handleArtChange)
   }
 
   protected override firstUpdated(): void {
@@ -451,6 +459,7 @@ export class PanZoom extends LitElement {
   /** Zooms to `zoom` (held to `min-zoom` / `max-zoom`) around `origin`, the centre by default; animated by default. */
   zoomTo(zoom: number, options: PanZoomZoomOptions = {}): void {
     if (this.defer(() => this.zoomTo(zoom, options))) return
+    this.touched = true
     this.zoomToInternal(zoom, 'api', options)
   }
 
@@ -486,9 +495,9 @@ export class PanZoom extends LitElement {
    */
   zoomToElement(target: Element | PanZoomRect, options: PanZoomFrameOptions = {}): void {
     if (this.defer(() => this.zoomToElement(target, options))) return
+    this.touched = true
     const rect = this.rectOf(target)
     if (!rect) return
-    this.touched = true
     const maxZoom = Math.min(options.maxZoom ?? Infinity, this.resolvedMaxZoom())
     const view = fitRect(rect, this.viewportSize, { padding: options.padding ?? this.padding, maxZoom, minZoom: this.resolvedMinZoom() })
     this.moveTo(this.constrain(view), 'api', options)
@@ -500,6 +509,8 @@ export class PanZoom extends LitElement {
    */
   reveal(target: Element | PanZoomRect, options: PanZoomRevealOptions = {}): void {
     if (this.defer(() => this.reveal(target, options))) return
+    // Even when nothing has to move: the caller now owns the view, so growing content must not refit it.
+    this.touched = true
     const rect = this.rectOf(target)
     if (!rect) return
     this.revealInternal(rect, 'api', options)
@@ -523,7 +534,14 @@ export class PanZoom extends LitElement {
   private measure() {
     const viewport = { width: this.viewportEl.clientWidth, height: this.viewportEl.clientHeight }
     if (!viewport.width || !viewport.height) return
+    // A resize during a gesture is taken up once the gesture ends, from the sizes the gesture started with.
+    if (this.measured && (this.dragging || this.pinching)) {
+      this.remeasure = true
+      return
+    }
+    this.remeasure = false
     const content = { width: this.contentEl.offsetWidth, height: this.contentEl.offsetHeight }
+    const wasEmpty = !this.contentSize.width || !this.contentSize.height
     const previous = this.viewportSize
     const centre = this.measured ? contentPointOf(this.current, { x: previous.width / 2, y: previous.height / 2 }) : null
     this.viewportSize = viewport
@@ -546,8 +564,10 @@ export class PanZoom extends LitElement {
       for (const call of pending) call()
       return
     }
-    if (this.dragging || this.pinching) return
-    if (!this.touched) {
+    if (wasEmpty && this.initial === 'zoom' && content.width && content.height) {
+      // An image that had not loaded at the first measurement: centre the zoom set in markup on it now.
+      this.setView(centerView(this.current, { x: content.width / 2, y: content.height / 2 }, viewport), 'resize')
+    } else if (!this.touched) {
       this.stopMotion()
       this.setView(this.fitView(this.resolvedFit()), 'resize')
     } else if (centre) {
@@ -668,9 +688,9 @@ export class PanZoom extends LitElement {
     this.dispatchEvent(new CustomEvent<PanZoomViewDetail>('view-settle', { detail: { ...this.current, reason: this.reason } }))
     if (Math.abs(this.current.zoom - this.settledZoom) > 1e-4) this.announce(this.msg.t('zoomed', this.percent(this.current.zoom)))
     this.settledZoom = this.current.zoom
-    // A canvas redraws, and an SVG's colours may have changed with the theme.
+    // A canvas redraws; an SVG copy only when its colours may have changed with the theme.
     if (this.art === 'canvas') this.drawCanvasArt()
-    if (this.art === 'svg' && this.minimap) this.drawSvgArt()
+    if (this.art === 'svg' && this.minimap && this.artLook !== this.lookOf(this.artSource)) this.drawSvgArt()
   }
 
   private announce(text: string) {
@@ -686,7 +706,7 @@ export class PanZoom extends LitElement {
   /** Moves to `target`, eased unless `animate` is false or the user prefers reduced motion. */
   private moveTo(target: PanZoomView, reason: PanZoomReason, options: PanZoomZoomOptions = {}) {
     this.stopMotion()
-    const duration = options.animate === false || reducedMotion() ? 0 : this.duration()
+    const duration = options.animate === false || prefersReducedMotion() ? 0 : this.duration()
     if (duration <= 0 || sameView(target, this.current)) {
       this.setView(target, reason, true)
       this.maybeSettle()
@@ -733,9 +753,9 @@ export class PanZoom extends LitElement {
   }
 
   private revealInternal(rect: PanZoomRect, reason: PanZoomReason, options: PanZoomRevealOptions = {}) {
+    this.touched = true
     const next = this.constrain(revealRect(this.base(), rect, this.viewportSize, options.padding ?? this.padding))
     if (sameView(next, this.base())) return
-    this.touched = true
     this.moveTo(next, reason, options)
   }
 
@@ -894,6 +914,7 @@ export class PanZoom extends LitElement {
       this.handleTap(event)
     }
     if (!this.pointers.count) this.pinching = false
+    if (this.remeasure && !this.dragging && !this.pinching) this.measure()
     this.maybeSettle()
   }
 
@@ -909,7 +930,7 @@ export class PanZoom extends LitElement {
   }
 
   private startGlide(time: number) {
-    if (this.noInertia || reducedMotion()) return
+    if (this.noInertia || prefersReducedMotion()) return
     const velocity = this.inertia.velocity(time)
     if (Math.hypot(velocity.x, velocity.y) < GLIDE_MIN_SPEED) return
     const glide = new Glide({ x: -velocity.x, y: -velocity.y })
@@ -1158,8 +1179,18 @@ export class PanZoom extends LitElement {
     }
     if (source !== this.artSource) {
       this.artSource?.removeEventListener('load', this.handleArtLoad)
+      this.artObserver?.disconnect()
       this.artSource = source
       this.artDrawn = null
+      if (art === 'svg' && source && typeof MutationObserver !== 'undefined') {
+        // An SVG copy is redrawn when the SVG changes, and when the colour scheme does; not on every move.
+        this.artObserver ??= new MutationObserver(this.handleArtChange)
+        this.artObserver.observe(source, { subtree: true, childList: true, attributes: true, characterData: true })
+        if (!this.colorScheme && typeof matchMedia === 'function') {
+          this.colorScheme = matchMedia('(prefers-color-scheme: dark)')
+          this.colorScheme.addEventListener('change', this.handleArtChange)
+        }
+      }
       if (art === 'img') source?.addEventListener('load', this.handleArtLoad)
     }
     const src = art === 'img' ? (source as HTMLImageElement).currentSrc || (source as HTMLImageElement).src : ''
@@ -1171,6 +1202,18 @@ export class PanZoom extends LitElement {
   }
 
   private handleArtLoad = () => this.syncArt()
+
+  private handleArtChange = () => {
+    this.artDrawn = null
+    this.requestUpdate()
+  }
+
+  /** The inherited colours an SVG is painted with: a cheap sign that the theme changed. */
+  private lookOf(element: Element | null) {
+    if (!element) return ''
+    const style = getComputedStyle(element)
+    return `${style.color}|${style.colorScheme}`
+  }
 
   /** Copies the slotted SVG, without anything that could run or define elements. */
   private drawSvgArt() {
@@ -1197,6 +1240,7 @@ export class PanZoom extends LitElement {
     copy.setAttribute('focusable', 'false')
     host.replaceChildren(copy)
     this.artDrawn = source
+    this.artLook = this.lookOf(source)
   }
 
   /** Copies the slotted canvas; done again each time the view settles. */

@@ -102,7 +102,7 @@ const BRANCH_COLOURS = 8
  */
 const COLOUR_SYNTAX = /^(?:#[0-9a-f]{3,8}|[a-z]+|(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark|var)\([-a-z0-9#%.,\s/()]*\))$/i
 
-export function safeColour(value: unknown): string | null {
+function safeColour(value: unknown): string | null {
   if (typeof value !== 'string') return null
   const colour = value.trim()
   if (!colour || colour.length > 200 || /url\s*\(|image|[;{}<>\\'"]/i.test(colour) || !COLOUR_SYNTAX.test(colour)) return null
@@ -683,7 +683,8 @@ export class MindMap extends LitElement {
     doc = moveNode(doc, entry.node.id, parentId, index)
     if (doc === this.#doc) return false
     doc = updateNode(doc, parentId, (parent) => (parent.collapsed ? { ...parent, collapsed: false } : parent))
-    if (parentId === doc.id && this.layout === 'both') doc = updateNode(doc, entry.node.id, (node) => ({ ...node, side: side ?? (entry.side === 'center' ? 'right' : entry.side) }))
+    if (parentId === doc.id && this.layout === 'both')
+      doc = updateNode(doc, entry.node.id, (node) => ({ ...node, side: side ?? (entry.side === 'center' ? 'right' : entry.side) }))
     const parent = pathTo(doc, parentId)!.pop()!
     const node = childrenOf(parent).find((child) => child.id === entry.node.id)!
     const newIndex = childrenOf(parent).indexOf(node)

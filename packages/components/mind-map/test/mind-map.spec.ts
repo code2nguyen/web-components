@@ -981,3 +981,100 @@ test.describe('motion and extras', () => {
     await accessible(page)
   })
 })
+
+test.describe('review fixes', () => {
+  test('a branch colour from data must be colour syntax: url() and other values are ignored', async ({ page, renderScenario }) => {
+    const evil = 'url(https://evil.example/x.svg#p)'
+    await render(
+      page,
+      renderScenario,
+      mindMap(
+        {
+          id: 'r',
+          label: 'R',
+          children: [
+            { id: 'a', label: 'Evil', color: evil, children: [{ id: 'a1', label: 'Child' }] },
+            { id: 'b', label: 'Var', color: 'var(--nope, #7c3aed)' },
+          ],
+        },
+        'minimap',
+      ),
+    )
+    const styles = await host(page).evaluate((map) =>
+      [...map.shadowRoot!.querySelectorAll('[style]')].map((element) => element.getAttribute('style')).join(' '),
+    )
+    expect(styles).not.toContain('url(')
+    // The palette colour stands in for the refused one; a valid colour expression is kept.
+    await expect.poll(() => topic(page, 'Evil').evaluate((element) => getComputedStyle(element).borderTopColor)).toBe('rgb(2, 101, 220)')
+    await expect.poll(() => topic(page, 'Var').evaluate((element) => getComputedStyle(element).borderTopColor)).toBe('rgb(124, 58, 237)')
+  })
+
+  test('with a one-sided layout a reorder announces the real position and writes no side', async ({ page, renderScenario }) => {
+    await render(
+      page,
+      renderScenario,
+      mindMap(
+        {
+          id: 'r',
+          label: 'R',
+          children: [
+            { id: 'a', label: 'A' },
+            { id: 'b', label: 'B' },
+            { id: 'c', label: 'C' },
+          ],
+        },
+        'editable layout="right"',
+      ),
+    )
+    await focusTopic(page, 'A')
+    await page.keyboard.press('Alt+ArrowDown')
+    expect(await childLabels(page, 'r')).toEqual(['B', 'A', 'C'])
+    await expect(status(page)).toHaveText('Moved A to position 2 of 3')
+    expect((await dataOf(page))!.children!.some((child) => 'side' in child)).toBe(false)
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('Escape')
+    expect((await dataOf(page))!.children!.some((child) => 'side' in child)).toBe(false)
+  })
+
+  test('select() and edit() under a folded topic unfold it in one step and select the topic itself', async ({ page, renderScenario }) => {
+    const folded = {
+      id: 'r',
+      label: 'R',
+      children: [
+        { id: 'a', label: 'A', side: 'right', collapsed: true, children: [{ id: 'a1', label: 'A1', collapsed: true, children: [{ id: 'x', label: 'Deep' }] }] },
+      ],
+    }
+    await render(page, renderScenario, mindMap(folded as MindMapNode, 'editable'))
+    await record(page)
+    await host(page).evaluate((map: MindMap) => map.edit('x'))
+    await expect(host(page).getByRole('textbox', { name: 'Edit topic' })).toBeFocused()
+    await expect(topic(page, 'Deep')).toHaveAttribute('aria-selected', 'true')
+    await expect(topic(page, 'A')).toHaveAttribute('aria-selected', 'false')
+    await page.keyboard.press('Escape')
+    const changes = (await events(page)).filter((event) => event.type === 'change')
+    expect(changes.map((event) => event.detail.action!.type)).toEqual(['expand'])
+    expect(changes[0].detail.action!.node.id).toBe('a')
+    expect(changes[0].detail.data!.children![0].collapsed).toBe(false)
+    expect(changes[0].detail.data!.children![0].children![0].collapsed).toBe(false)
+    // One undo step folds both back.
+    expect(await host(page).evaluate((map: MindMap) => map.undo())).toBe(true)
+    await expect(topic(page, 'A1')).toHaveCount(0)
+    expect(await host(page).evaluate((map: MindMap) => map.undo())).toBe(false)
+  })
+
+  test('first-level topics number their position in drawing order', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, mindMap(plan))
+    const positions = await host(page).evaluate((map) =>
+      [...map.shadowRoot!.querySelectorAll('[role="treeitem"][aria-level="2"]')].map((item) => [
+        item.getAttribute('aria-posinset'),
+        item.getAttribute('aria-setsize'),
+      ]),
+    )
+    expect(positions).toEqual([
+      ['1', '4'],
+      ['2', '4'],
+      ['3', '4'],
+      ['4', '4'],
+    ])
+  })
+})

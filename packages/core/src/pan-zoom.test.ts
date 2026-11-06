@@ -15,6 +15,7 @@ import {
   panBy,
   panZoomKeyAction,
   pinchView,
+  prefersReducedMotion,
   revealRect,
   sameView,
   toContentPoint,
@@ -226,4 +227,8 @@ test('a pinch step keeps the content under the fingers', () => {
   close(under.x, 100)
   close(under.y, 100)
   assert.equal(pinchView(view, { ...step, factor: 10 }, 0.25, 4).zoom, 4)
+})
+
+test('without matchMedia (a server) motion is not reduced', () => {
+  assert.equal(prefersReducedMotion(), false)
 })

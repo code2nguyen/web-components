@@ -8,7 +8,7 @@
  * moved with `transform: translate(-x * zoom, -y * zoom) scale(zoom)` and `transform-origin: 0 0`. Viewport points are
  * CSS pixels from the viewport's top-left corner; content points are the content's own, unscaled pixels.
  *
- * Every function is pure and DOM-free.
+ * Every function is pure and DOM-free, except `prefersReducedMotion()`, which reads a media query.
  */
 
 /** What the viewport shows: the content point at its top-left corner, and the scale. */
@@ -152,6 +152,14 @@ export function revealRect(view: PanZoomView, rect: PanZoomRect, viewport: PanZo
 export function sameView(a: PanZoomView, b: PanZoomView): boolean {
   const near = (p: number, q: number) => Math.abs(p - q) < 0.01
   return near(a.zoom, b.zoom) && near(a.x * a.zoom, b.x * b.zoom) && near(a.y * a.zoom, b.y * b.zoom)
+}
+
+/**
+ * Whether the user asked for reduced motion: then a view jumps instead of easing and a released drag does not glide.
+ * False where there is no `matchMedia` (a server).
+ */
+export function prefersReducedMotion(): boolean {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 /** Ease-out cubic: fast at the start, settling at the end. */
