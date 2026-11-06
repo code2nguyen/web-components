@@ -137,8 +137,10 @@ function resizeRect(start: FloatingPanelRect, edge: Edge, dx: number, dy: number
   return roundRect({ x, y, width, height })
 }
 
-/** A CSS length as pixels: `px` as is, `%` of `total`, anything else (`none`, `auto`, `calc()`) is `fallback`. */
-function pixels(value: string, total: number, fallback: number) {
+/** A CSS length as pixels: `px` as is, `%` of `total`, `min()` of those, anything else (`none`, `auto`, `calc()`) is `fallback`. */
+function pixels(value: string, total: number, fallback: number): number {
+  const min = /^min\((.*)\)$/.exec(value.trim())
+  if (min) return Math.min(...min[1].split(',').map((part) => pixels(part.trim(), total, fallback)))
   if (value.endsWith('px')) return parseFloat(value)
   if (value.endsWith('%')) return (parseFloat(value) * total) / 100
   return fallback
@@ -342,6 +344,9 @@ export class FloatingPanel extends LitElement {
   /** Where a collapsed panel at its CSS place folds, so it folds where it is rather than where `inset` anchors it. */
   @reactive() private collapseAnchor: FloatingPanelRect | undefined = undefined
 
+  /** The place inside the boundary nearest to the CSS place, while the CSS place sticks out of a boundary too small for it. */
+  @reactive() private cssFit: { x: number; y: number } | undefined = undefined
+
   private gesture: Gesture | undefined
   private groupKey: object | undefined
   private stopObserving: (() => void) | undefined
@@ -532,12 +537,35 @@ export class FloatingPanel extends LitElement {
     this.dispatchEvent(new CustomEvent<FloatingPanelRectChangeDetail>('rect-change', { detail: { rect: rect && { ...rect }, reason } }))
   }
 
-  /** Pulls a placed panel back inside its boundary after the boundary, the window or `rect` changed. */
+  /**
+   * Keeps the panel inside its boundary after the boundary, the window, the panel or `rect` changed. A placed panel is
+   * fitted and reports it (`reason: "boundary"`). A panel at its CSS place keeps `rect` null: CSS caps its size at the
+   * boundary, and when its CSS place still sticks out it is drawn at the nearest place inside (`cssFit`).
+   */
   private keepInside = () => {
-    if (!this.open || this.state === 'maximized' || this.docked || this.gesture) return
+    if (!this.open || this.state === 'maximized' || this.docked || this.gesture || !this.panel) return
     const rect = validRect(this.rect)
-    if (!rect || !this.panel) return
-    this.commitRect(this.fit(rect), 'boundary')
+    if (rect) {
+      this.commitRect(this.fit(rect), 'boundary')
+      return
+    }
+    if (this.state !== 'normal') return
+    const place = this.cssPlace()
+    const bounds = this.bounds()
+    const x = Math.round(clampNumber(place.x, 0, bounds.width - place.width))
+    const y = Math.round(clampNumber(place.y, 0, bounds.height - place.height))
+    const fit = x === place.x && y === place.y ? undefined : { x, y }
+    if (fit?.x !== this.cssFit?.x || fit?.y !== this.cssFit?.y) this.cssFit = fit
+  }
+
+  /** Where CSS alone puts the panel: measured with the inline place of `cssFit` taken off for the moment. */
+  private cssPlace(): FloatingPanelRect {
+    const style = this.panel!.style
+    const saved = style.cssText
+    for (const name of ['left', 'top', 'right', 'bottom']) style.removeProperty(name)
+    const place = this.measure()
+    style.cssText = saved
+    return place
   }
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -695,16 +723,22 @@ export class FloatingPanel extends LitElement {
   }
 
   private observe(key: object) {
+    const stops: (() => void)[] = []
     if (key === document) {
       window.addEventListener('resize', this.keepInside)
-      this.stopObserving = () => window.removeEventListener('resize', this.keepInside)
-      this.keepInside()
-    } else if (typeof ResizeObserver !== 'undefined') {
-      // Observing reports the size once straight away, which also fits a `rect` the author set too large.
-      const observer = new ResizeObserver(() => this.keepInside())
-      observer.observe(key as Element)
-      this.stopObserving = () => observer.disconnect()
+      stops.push(() => window.removeEventListener('resize', this.keepInside))
     }
+    if (typeof ResizeObserver !== 'undefined') {
+      // Observing reports the sizes once straight away, which also fits a panel too large for its boundary on its
+      // first measurement. The panel itself is watched too: content that grows a panel at its CSS place can push it out.
+      const observer = new ResizeObserver(() => this.keepInside())
+      if (key !== document) observer.observe(key as Element)
+      if (this.panel) observer.observe(this.panel)
+      stops.push(() => observer.disconnect())
+    } else {
+      this.keepInside()
+    }
+    this.stopObserving = () => stops.forEach((stop) => stop())
   }
 
   // ── Focus ────────────────────────────────────────────────────────────────────
@@ -759,7 +793,7 @@ export class FloatingPanel extends LitElement {
       this.needsGroupSync = false
       this.syncGroups()
     }
-    if (changed.has('rect')) this.keepInside()
+    if (changed.has('rect') || changed.has('state')) this.keepInside()
     // The first render's `open` is the author's, not a change.
     if (changed.has('open') && changed.get('open') !== undefined) {
       if (this.open) this.dispatchEvent(new Event('open'))
@@ -892,7 +926,10 @@ export class FloatingPanel extends LitElement {
     if (this.docked) style['--_dock'] = String(this.dockIndex)
     if (this.state === 'maximized' || this.docked) return style
     const rect = validRect(this.rect) ?? (this.collapsed ? this.collapseAnchor : undefined)
-    if (!rect) return style
+    if (!rect) {
+      const fit = this.state === 'normal' ? this.cssFit : undefined
+      return fit ? { ...style, left: `${fit.x}px`, top: `${fit.y}px`, right: 'auto', bottom: 'auto' } : style
+    }
     return {
       ...style,
       left: `${rect.x}px`,

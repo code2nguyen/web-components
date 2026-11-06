@@ -481,6 +481,19 @@ test('the minimap copies a single image or SVG, takes its slot, and never clones
   )
   const room = page.locator('c2-pan-zoom .art-svg svg rect.room')
   await expect(room).toBeAttached()
+  // Looked for through a display: contents wrapper, such as an island's.
+  await render(
+    page,
+    renderScenario,
+    `<c2-pan-zoom minimap fit="none"><span style="display: contents"><svg width="1600" height="1000"><rect class="through" width="800" height="500" /></svg></span></c2-pan-zoom>`,
+  )
+  await expect(page.locator('c2-pan-zoom .art-svg svg rect.through')).toBeAttached()
+  await render(
+    page,
+    renderScenario,
+    `<style>.wall { stroke: rgb(1, 2, 3); }</style><c2-pan-zoom minimap fit="none"><svg width="1600" height="1000"><rect class="room wall" width="800" height="500" fill="pink"/><foreignObject><button>x</button></foreignObject></svg></c2-pan-zoom>`,
+  )
+  await expect(room).toBeAttached()
   // The page's style sheet does not reach the copy, so its computed look is carried along.
   await expect(room).toHaveCSS('stroke', 'rgb(1, 2, 3)')
   await expect(page.locator('c2-pan-zoom .art-svg foreignObject')).toHaveCount(0)

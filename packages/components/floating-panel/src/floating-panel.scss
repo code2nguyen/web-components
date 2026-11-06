@@ -76,8 +76,9 @@
   flex-direction: column;
   width: css.cssVar(width);
   height: css.cssVar(height);
-  min-width: css.cssVar(min-width);
-  min-height: css.cssVar(min-height);
+  // A minimum larger than the boundary gives way to it, so the panel always fits inside.
+  min-width: min(#{css.cssVar(min-width)}, 100%);
+  min-height: min(#{css.cssVar(min-height)}, 100%);
   max-width: css.cssVar(max-width);
   max-height: css.cssVar(max-height);
   background: css.cssVar(background);
