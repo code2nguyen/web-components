@@ -1140,6 +1140,8 @@ test.describe('second review fixes', () => {
     await page.mouse.move(price.cx, price.cy)
     await page.mouse.down()
     await page.mouse.move(onboarding.cx, onboarding.y + onboarding.height - 2, { steps: 10 })
+    // A real drop target: after Onboarding flow, which is where Pricing page already is.
+    await expect(host(page).locator('path.drop-line')).toHaveCount(1)
     await page.mouse.up()
     expect(await childLabels(page, 'prod')).toEqual(['Onboarding flow', 'Pricing page', 'Release notes'])
     expect((await events(page)).some((event) => event.type === 'change' || event.type === 'before-change')).toBe(false)

@@ -4645,7 +4645,7 @@
       "tag": "c2-pan-zoom",
       "slot": "",
       "decision": "assigned-content",
-      "reason": "The default slot projects the consumer's content at its natural size; the component only transforms the wrapper around it, so the assigned nodes keep their own styles."
+      "reason": "The default slot's content is laid out at its natural size inside a shadow wrapper that one transform moves and scales; the shadow CSS also resets slotted img, svg, canvas and video to display: block, max-width: none and no native drag, so page rules such as img { max-width: 100% } cannot shrink them and an image is panned rather than dragged out."
     },
     {
       "tag": "c2-pan-zoom",

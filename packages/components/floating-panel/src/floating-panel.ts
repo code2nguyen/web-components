@@ -311,17 +311,17 @@ export class FloatingPanel extends LitElement {
     const room = Math.max(0, boundary - 2 * edge)
     const count = dock.length
     let perLine = count
-    let width = Math.min(wanted, (room - (count - 1) * gap) / count)
-    if (width < DOCK_MIN_WIDTH) {
-      width = Math.min(DOCK_MIN_WIDTH, room)
-      perLine = Math.max(1, Math.floor((room + gap) / (width + gap)))
-      width = Math.min(wanted, (room - (perLine - 1) * gap) / perLine)
+    let barWidth = Math.min(wanted, (room - (count - 1) * gap) / count)
+    if (barWidth < DOCK_MIN_WIDTH) {
+      barWidth = Math.min(DOCK_MIN_WIDTH, room)
+      perLine = Math.max(1, Math.floor((room + gap) / (barWidth + gap)))
+      barWidth = Math.min(wanted, (room - (perLine - 1) * gap) / perLine)
     }
-    width = Math.max(0, Math.floor(width))
+    barWidth = Math.max(0, Math.floor(barWidth))
     dock.forEach((panel, index) => {
-      const column = (index % perLine) * (width + gap)
+      const column = (index % perLine) * (barWidth + gap)
       const line = Math.floor(index / perLine) * (height + gap)
-      const place = { x: fromLeft ? column : -column, y: fromTop ? line : -line, width }
+      const place = { x: fromLeft ? column : -column, y: fromTop ? line : -line, width: barWidth }
       const current = panel.dockPlace
       if (!current || current.x !== place.x || current.y !== place.y || current.width !== place.width) panel.dockPlace = place
     })
