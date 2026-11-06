@@ -101,7 +101,12 @@ test('outline: an indented list both ways', () => {
 })
 
 test('tree: normalize gives every node a unique id and keeps unknown fields', () => {
-  const raw = { id: 'r', label: 'R', extra: 1, children: [{ id: 'x', label: 'A' }, { id: 'x', label: 'B' }, { label: 7 }, [], [{ id: 'y' }], { id: 'topic-0-1', label: 'Taken' }] }
+  const raw = {
+    id: 'r',
+    label: 'R',
+    extra: 1,
+    children: [{ id: 'x', label: 'A' }, { id: 'x', label: 'B' }, { label: 7 }, [], [{ id: 'y' }], { id: 'topic-0-1', label: 'Taken' }],
+  }
   const doc = normalize(raw)!
   assert.equal(doc.extra, 1)
   const ids: string[] = []

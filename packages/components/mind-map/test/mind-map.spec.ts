@@ -723,7 +723,9 @@ test.describe('editing', () => {
       // stand-in defined on itself that records what the map writes.
       const written = new Map<string, string>()
       const event = new ClipboardEvent('copy', { bubbles: true, cancelable: true })
-      Object.defineProperty(event, 'clipboardData', { value: { setData: (type: string, value: string) => written.set(type, value), getData: (type: string) => written.get(type) ?? '' } })
+      Object.defineProperty(event, 'clipboardData', {
+        value: { setData: (type: string, value: string) => written.set(type, value), getData: (type: string) => written.get(type) ?? '' },
+      })
       document.dispatchEvent(event)
       return written.get('text/plain')
     })
@@ -1101,4 +1103,57 @@ test('an edit keeps the zoom: adding a subtopic does not re-fit the map', async 
   await page.keyboard.press('Enter')
   await settle(page)
   expect(await zoom()).toBeCloseTo(before, 6)
+})
+
+test.describe('second review fixes', () => {
+  test('setColor() on a deeper topic colours its branch, and the central topic has none', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, mindMap(small, 'editable'))
+    expect(await host(page).evaluate((map: MindMap) => map.setColor('a2', '#7c3aed'))).toBe(true)
+    await expect.poll(() => topic(page, 'Alpha').evaluate((element) => getComputedStyle(element).borderTopColor)).toBe('rgb(124, 58, 237)')
+    const data = (await dataOf(page))!
+    expect(data.children![0].color).toBe('#7c3aed')
+    expect(data.children![0].children![1].color).toBeUndefined()
+    expect(await host(page).evaluate((map: MindMap) => map.setColor('root', '#7c3aed'))).toBe(false)
+  })
+
+  test('new data that folds the selected topic away selects its nearest drawn ancestor', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, mindMap(small, 'editable'))
+    await focusTopic(page, 'Two')
+    await host(page).evaluate(
+      async (map: MindMap, data) => {
+        map.data = data
+        await map.updateComplete
+      },
+      { ...small, children: [{ ...small.children![0], collapsed: true }, small.children![1]] },
+    )
+    await settle(page)
+    await expect(topic(page, 'Two')).toHaveCount(0)
+    await expect(topic(page, 'Alpha')).toHaveAttribute('aria-selected', 'true')
+    await expect(topic(page, 'Alpha')).toHaveAttribute('tabindex', '0')
+  })
+
+  test('dropping a topic where it already is changes nothing and adds no undo step', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, mindMap(plan, 'editable'))
+    await record(page)
+    const price = await box(topic(page, 'Pricing page'))
+    const onboarding = await box(topic(page, 'Onboarding flow'))
+    await page.mouse.move(price.cx, price.cy)
+    await page.mouse.down()
+    await page.mouse.move(onboarding.cx, onboarding.y + onboarding.height - 2, { steps: 10 })
+    await page.mouse.up()
+    expect(await childLabels(page, 'prod')).toEqual(['Onboarding flow', 'Pricing page', 'Release notes'])
+    expect((await events(page)).some((event) => event.type === 'change' || event.type === 'before-change')).toBe(false)
+    expect(await host(page).evaluate((map: MindMap) => map.undo())).toBe(false)
+  })
+
+  test('counts take the singular in French', async ({ page, renderScenario }) => {
+    await render(page, renderScenario, `<div lang="fr">${mindMap(small, 'editable')}</div>`)
+    await focusTopic(page, 'Bravo')
+    await page.keyboard.press(' ')
+    await expect(status(page)).toHaveText('Replié, 1 sujet masqué')
+    await page.keyboard.press(' ')
+    await focusTopic(page, 'Alpha')
+    await page.keyboard.press(' ')
+    await expect(status(page)).toHaveText('Replié, 3 sujets masqués')
+  })
 })

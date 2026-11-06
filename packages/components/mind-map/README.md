@@ -45,14 +45,14 @@ replaces the map and clears the undo history.
 
 ## Attributes
 
-| Attribute  | Default | Meaning                                                                                 |
-| ---------- | ------- | --------------------------------------------------------------------------------------- |
-| `data`     | —       | The map, as JSON (or the `data` property).                                              |
-| `label`    | —       | Accessible name of the map. Default: "Mind map".                                        |
-| `layout`   | `both`  | `both` puts branches on both sides; `left` and `right` on one side, as a logic chart.   |
-| `editable` | off     | The user adds, edits, moves and deletes topics. Navigation and folding work either way. |
-| `no-drag`  | off     | No drag to reparent: a drag on a topic pans, like a drag on the canvas.                 |
-| `controls` | off     | The zoom toolbar of the canvas.                                                         |
+| Attribute  | Default | Meaning                                                                                               |
+| ---------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `data`     | —       | The map, as JSON (or the `data` property).                                                            |
+| `label`    | —       | Accessible name of the map. Default: "Mind map".                                                      |
+| `layout`   | `both`  | `both` puts branches on both sides; `left` and `right` on one side, as a logic chart.                 |
+| `editable` | off     | The user adds, edits, moves and deletes topics. Navigation and folding work either way.               |
+| `no-drag`  | off     | No drag to reparent: a drag on a topic pans, like a drag on the canvas.                               |
+| `controls` | off     | The zoom toolbar of the canvas.                                                                       |
 | `minimap`  | off     | An overview while the map overflows: one box per drawn topic (not folded ones), in its branch colour. |
 
 ## Keyboard
