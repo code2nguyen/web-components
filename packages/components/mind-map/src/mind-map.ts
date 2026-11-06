@@ -158,7 +158,8 @@ const plusIcon = svg`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" 
  * @event {CustomEvent<MindMapNodeEventDetail>} selection-change - Fired when the user selects another topic, with `{ node }`. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself.
  * @event {CustomEvent<MindMapNodeEventDetail>} node-click - Fired when a topic is clicked, or activated with Enter in a read-only map, with `{ node }`. Fired in read-only maps too, to open a topic's details.
  *
- * @cssproperty {pixel} [--c2-mind-map--height=480px] - Height of the canvas; its width is the container's.
+ * @cssproperty {length} [--c2-mind-map--width=100%] - Width of the canvas; it is kept even as a flex item, which would otherwise shrink it to nothing.
+ * @cssproperty {pixel} [--c2-mind-map--height=480px] - Height of the canvas.
  * @cssproperty {background} [--c2-mind-map--background=#fafafa] - The canvas.
  * @cssproperty {border} [--c2-mind-map--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-mind-map--border-radius=8px]

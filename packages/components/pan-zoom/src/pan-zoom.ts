@@ -211,7 +211,8 @@ interface Animation {
  * @csspart minimap-frame - The viewport rectangle in the minimap.
  * @csspart hint - The hint a plain wheel shows in cooperative mode.
  *
- * @cssproperty {pixel} [--c2-pan-zoom--height=400px] - Height of the viewport; its width is the container's.
+ * @cssproperty {length} [--c2-pan-zoom--width=100%] - Width of the viewport; it is kept even as a flex item, which would otherwise shrink it to nothing.
+ * @cssproperty {pixel} [--c2-pan-zoom--height=400px] - Height of the viewport.
  * @cssproperty {background} [--c2-pan-zoom--background=#fafafa]
  * @cssproperty {border} [--c2-pan-zoom--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-pan-zoom--border-radius=8px]
