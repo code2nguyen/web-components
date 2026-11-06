@@ -462,8 +462,11 @@ test('keyboard: horizontal swaps the arrows; a single series reads without a ser
   await expect(live).toContainText('auth: median')
   await page.keyboard.press('ArrowUp')
   await expect(live).toContainText('api-gateway: median')
-  // Leaving the plot clears the focus.
+  // Leaving the plot clears the focus. A focusable element after the chart gives Tab somewhere to go: with none,
+  // Firefox moves focus into the browser chrome and the plot is never blurred.
+  await page.evaluate(() => document.querySelector('main')?.insertAdjacentHTML('afterend', '<button id="after">After</button>'))
   await page.keyboard.press('Tab')
+  await expect(page.locator('#after')).toBeFocused()
   await expect(live).toHaveText('')
 })
 
