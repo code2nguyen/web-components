@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -43,6 +43,10 @@
     "./lit-helper.js": {
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"
+    },
+    "./pan-zoom.js": {
+      "types": "./dist/pan-zoom.d.ts",
+      "default": "./dist/pan-zoom.js"
     },
     "./shortcut-helper.js": {
       "types": "./dist/shortcut-helper.d.ts",

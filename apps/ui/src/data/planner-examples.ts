@@ -1,9 +1,10 @@
 import type { MonthPlanner, MonthPlannerEvent } from '@c2n/components/month-planner'
+import type { Scheduler } from '@c2n/components/scheduler'
 import type { WeekPlanner, WeekPlannerEvent } from '@c2n/components/week-planner'
 
 /**
- * Makes the editable planner examples live. `c2-month-planner[data-planner-demo="editable"]` and
- * `c2-week-planner[data-planner-demo="editable"]` play the application: the planners never rewrite `events`, so each
+ * Makes the editable planner examples live. `c2-month-planner`, `c2-week-planner` and `c2-scheduler` with
+ * `data-planner-demo="editable"` play the application: the planners never rewrite `events`, so each
  * add, move and resize is applied here, and what happened is written into the `output` next to the planner.
  */
 
@@ -53,11 +54,27 @@ function wireWeek(planner: WeekPlanner): void {
   planner.addEventListener('event-click', ({ detail }) => say(`event-click: ${detail.event.title}`))
 }
 
+function wireScheduler(scheduler: Scheduler): void {
+  const say = outputFor(scheduler)
+  const time = (value: string) => value.slice(11)
+  scheduler.addEventListener('range-select', ({ detail }) => {
+    scheduler.events = [...scheduler.events, { id: `new-${next++}`, resource: detail.resource, start: detail.start, end: detail.end, title: 'New booking' }]
+    say(`range-select: ${detail.resource}, ${time(detail.start)}–${time(detail.end)}`)
+  })
+  scheduler.addEventListener('event-change', ({ detail }) => {
+    const { start, end, resource } = detail
+    scheduler.events = scheduler.events.map((entry) => (entry === detail.event ? { ...entry, start, end, resource } : entry))
+    say(`event-change: ${detail.event.title}, ${resource} ${time(start)}–${time(end)}`)
+  })
+  scheduler.addEventListener('event-click', ({ detail }) => say(`event-click: ${detail.event.title}`))
+}
+
 function seedExamples(): void {
-  document.querySelectorAll<MonthPlanner | WeekPlanner>('[data-planner-demo="editable"]').forEach((planner) => {
+  document.querySelectorAll<MonthPlanner | WeekPlanner | Scheduler>('[data-planner-demo="editable"]').forEach((planner) => {
     if (seeded.has(planner)) return
     if (planner.localName === 'c2-month-planner') wireMonth(planner as MonthPlanner)
     else if (planner.localName === 'c2-week-planner') wireWeek(planner as WeekPlanner)
+    else if (planner.localName === 'c2-scheduler') wireScheduler(planner as Scheduler)
     else return
     seeded.add(planner)
   })

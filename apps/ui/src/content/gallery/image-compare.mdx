@@ -1,0 +1,67 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ImageCompare } from '@c2n/components/image-compare'
+
+## Presets
+
+Looks for `c2-image-compare`. The divider, the handle and the corner chips each have their variables; the frame's radius and aspect ratio set its shape.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-image-compare>
+  <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+  <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+</c2-image-compare>
+```
+
+```html tag=MdxCodeBlock,label=Minimal line
+<style>
+  .compare-line {
+    --c2-image-compare__divider--width: 1px;
+    --c2-image-compare__handle--size: 24px;
+    --c2-image-compare__handle--background: #18181b;
+    --c2-image-compare__handle--color: #ffffff;
+    --c2-image-compare--border-radius: 0px;
+  }
+</style>
+<c2-image-compare class="compare-line" position="35">
+  <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+  <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+</c2-image-compare>
+```
+
+```html tag=MdxCodeBlock,label=Accent handle
+<style>
+  .compare-accent {
+    --c2-image-compare__divider--color: #7c3aed;
+    --c2-image-compare__divider--width: 3px;
+    --c2-image-compare__handle--background: #7c3aed;
+    --c2-image-compare__handle--color: #ffffff;
+    --c2-image-compare__label--background: #7c3aed;
+    --c2-image-compare--border-radius: 16px;
+  }
+</style>
+<c2-image-compare class="compare-accent" before-label="Original" after-label="Retouched" position="60">
+  <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room, original" width="800" height="500" />
+  <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room, retouched" width="800" height="500" />
+</c2-image-compare>
+```
+
+```html tag=MdxCodeBlock,label=Square crop
+<style>
+  .compare-square {
+    width: 280px;
+    --c2-image-compare--aspect-ratio: 1;
+    --c2-image-compare__label--background: rgba(255, 255, 255, 0.85);
+    --c2-image-compare__label--color: #18181b;
+  }
+</style>
+<c2-image-compare class="compare-square" orientation="vertical" before-label="2024" after-label="2026">
+  <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room in 2024" />
+  <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room in 2026" />
+</c2-image-compare>
+```
+
+</GalleryGrid>

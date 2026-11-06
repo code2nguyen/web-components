@@ -351,7 +351,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart, c2-bullet-chart, c2-boxplot-chart, c2-sunburst-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -570,7 +570,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart, c2-bullet-chart, c2-boxplot-chart, c2-sunburst-chart',
     ),
   ),
 ).then(() => {

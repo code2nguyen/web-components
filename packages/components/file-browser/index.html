@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-file-browser</title>
+    <script type="module" src="/src/file-browser.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 960px;
+        padding: 24px;
+        font: 14px system-ui;
+      }
+      output {
+        color: #52525b;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Editable drive</h2>
+    <c2-file-browser id="drive" folder="q4" locale="en-US"></c2-file-browser>
+    <output id="log">Rename (F2), delete, drag onto a folder or drop files from the desktop.</output>
+
+    <h2>Lazy loading</h2>
+    <c2-file-browser id="lazy" view="grid" root-label="Bucket"></c2-file-browser>
+
+    <h2>Narrow</h2>
+    <div style="width: 360px"><c2-file-browser id="narrow" folder="q4"></c2-file-browser></div>
+
+    <script type="module">
+      let items = [
+        { id: 'projects', name: 'Projects', kind: 'folder', modified: '2026-11-03' },
+        { id: 'photos', name: 'Photos', kind: 'folder', modified: '2026-10-14' },
+        { id: 'q4', name: 'Q4 planning', parent: 'projects', kind: 'folder', modified: '2026-11-02' },
+        { id: 'assets', name: 'Assets', parent: 'q4', kind: 'folder', modified: '2026-11-03' },
+        { id: 'roadmap', name: 'Q4 roadmap.pdf', parent: 'q4', kind: 'file', size: 2400000, modified: '2026-11-02' },
+        { id: 'budget', name: 'Budget 2027.xlsx', parent: 'q4', kind: 'file', size: 318000, modified: '2026-11-01' },
+        { id: 'notes', name: 'Kick-off notes.docx', parent: 'q4', kind: 'file', size: 46000, modified: '2026-10-30' },
+        { id: 'mood', name: 'Moodboard.png', parent: 'q4', kind: 'file', size: 5100000, modified: '2026-10-29' },
+      ]
+      const drive = document.getElementById('drive')
+      const narrow = document.getElementById('narrow')
+      const log = document.getElementById('log')
+      const apply = () => {
+        drive.items = items
+        narrow.items = items
+      }
+      drive.actions = [
+        { id: 'download', label: 'Download', multiple: true },
+        { id: 'rename', label: 'Rename' },
+        { id: 'delete', label: 'Delete', multiple: true, destructive: true },
+      ]
+      apply()
+      drive.addEventListener('item-rename', ({ detail }) => {
+        items = items.map((item) => (item.id === detail.item.id ? { ...item, name: detail.name } : item))
+        apply()
+        log.textContent = `Renamed to ${detail.name}`
+      })
+      drive.addEventListener('item-move', ({ detail }) => {
+        const ids = detail.items.map((item) => item.id)
+        items = items.map((item) => (ids.includes(item.id) ? { ...item, parent: detail.target } : item))
+        apply()
+        log.textContent = `Moved ${ids.length} item(s)`
+      })
+      drive.addEventListener('item-action', ({ detail }) => {
+        if (detail.action === 'delete') {
+          const ids = detail.items.map((item) => item.id)
+          items = items.filter((item) => !ids.includes(item.id))
+          apply()
+        }
+        log.textContent = `${detail.action}: ${detail.items.map((item) => item.name).join(', ')}`
+      })
+      drive.addEventListener('files-drop', ({ detail }) => {
+        items = [
+          ...items,
+          ...detail.files.map((file) => ({
+            id: crypto.randomUUID(),
+            name: file.name,
+            parent: detail.folder,
+            kind: 'file',
+            size: file.size,
+            type: file.type,
+            modified: Date.now(),
+          })),
+        ]
+        apply()
+        log.textContent = `Added ${detail.files.length} file(s)`
+      })
+
+      const lazy = document.getElementById('lazy')
+      lazy.loadChildren = (folder) =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve(
+                Array.from({ length: 6 }, (_, index) =>
+                  index < 2
+                    ? { id: `${folder}/f${index}`, name: `Folder ${index + 1}`, kind: 'folder' }
+                    : { id: `${folder}/i${index}`, name: `Object ${index}.json`, kind: 'file', size: 1000 * index },
+                ),
+              ),
+            600,
+          ),
+        )
+    </script>
+  </body>
+</html>

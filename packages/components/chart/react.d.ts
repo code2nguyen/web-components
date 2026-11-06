@@ -15,7 +15,9 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { BoxplotChart } from '@c2n/chart/boxplot-chart.js'
 import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import type { BulletChart } from '@c2n/chart/bullet-chart.js'
 import type { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
@@ -36,6 +38,7 @@ import type { RadialBarChart } from '@c2n/chart/radial-bar-chart.js'
 import type { SankeyChart } from '@c2n/chart/sankey-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
+import type { SunburstChart } from '@c2n/chart/sunburst-chart.js'
 import type { TreemapChart } from '@c2n/chart/treemap-chart.js'
 import type { WaterfallChart } from '@c2n/chart/waterfall-chart.js'
 
@@ -77,6 +80,20 @@ declare module 'react' {
         series?: BarChart['series'] | string
         annotations?: BarChart['annotations'] | string
       }
+      'c2-boxplot-chart': Omit<C2Props<BoxplotChart>, 'referenceLines' | 'series' | 'annotations'> & {
+        'reference-lines'?: Attribute
+        'value-suffix'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        referenceLines?: BoxplotChart['referenceLines'] | string
+        series?: BoxplotChart['series'] | string
+        annotations?: BoxplotChart['annotations'] | string
+      }
       'c2-bubble-chart': Omit<C2Props<BubbleChart>, 'series' | 'annotations'> & {
         'y-field'?: Attribute
         'size-field'?: Attribute
@@ -98,6 +115,26 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: BubbleChart['series'] | string
         annotations?: BubbleChart['annotations'] | string
+      }
+      'c2-bullet-chart': Omit<C2Props<BulletChart>, 'bands' | 'series' | 'annotations'> & {
+        'description-field'?: Attribute
+        'target-field'?: Attribute
+        'bands-field'?: Attribute
+        'band-labels'?: Attribute
+        'max-field'?: Attribute
+        'color-field'?: Attribute
+        'value-labels'?: Attribute
+        'value-suffix'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        bands?: BulletChart['bands'] | string
+        series?: BulletChart['series'] | string
+        annotations?: BulletChart['annotations'] | string
       }
       'c2-butterfly-chart': Omit<C2Props<ButterflyChart>, 'series' | 'annotations'> & {
         'x-field'?: Attribute
@@ -376,6 +413,26 @@ declare module 'react' {
         'lazy-render'?: Attribute
         series?: Sparkline['series'] | string
         annotations?: Sparkline['annotations'] | string
+      }
+      'c2-sunburst-chart': Omit<C2Props<SunburstChart>, 'root' | 'series' | 'annotations'> & {
+        'group-field'?: Attribute
+        'children-field'?: Attribute
+        'color-field'?: Attribute
+        'color-max'?: Attribute
+        'color-label'?: Attribute
+        'color-suffix'?: Attribute
+        'value-prefix'?: Attribute
+        'value-suffix'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        root?: SunburstChart['root'] | string
+        series?: SunburstChart['series'] | string
+        annotations?: SunburstChart['annotations'] | string
       }
       'c2-treemap-chart': Omit<C2Props<TreemapChart>, 'series' | 'annotations'> & {
         'group-field'?: Attribute

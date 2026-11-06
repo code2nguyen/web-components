@@ -1,0 +1,122 @@
+---
+title: 'Sunburst chart'
+description: 'A hierarchy drawn as rings, the whole at the centre and each ring splitting its parent: budgets, disk usage and org spend, with click to zoom.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-sunburst-chart'
+apiTags: ['c2-sunburst-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SunburstChart } from '@c2n/components/chart/sunburst-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A sunburst draws a hierarchy as rings: the centre is the whole, the first ring splits it into its top-level branches, and
+each ring further out splits its parent, the way disk-usage tools show folders and a budget breaks down by department,
+team and line item. Where a treemap packs many parts into rectangles, a sunburst shows the levels themselves, and clicking
+a branch zooms into it. One row is one node, named by `label-field` and sized by the single series. It is drawn by
+ECharts' sunburst series.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/sunburst-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .sunburst-plot {
+    width: 100%;
+    --c2-chart--height: 400px;
+  }
+</style>
+
+<div data-label="Budget">
+  <c2-sunburst-chart
+    class="sunburst-plot"
+    label-field="name"
+    value-prefix="$"
+    value-suffix="M"
+    data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'
+  >
+    <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+  </c2-sunburst-chart>
+</div>
+
+<div data-label="Zoomed in">
+  <c2-sunburst-chart
+    class="sunburst-plot"
+    label-field="name"
+    value-prefix="$"
+    value-suffix="M"
+    root='["Engineering"]'
+    data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'
+  >
+    <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+  </c2-sunburst-chart>
+</div>
+```
+
+### Data
+
+Rows are read the [treemap's](../treemap-chart) way. A row is a node: `label-field` names it, and the one
+`c2-chart-series` sizes it. Rows without a positive value are left out, and so is a group left empty.
+
+- **Nested rows with `children-field`** (`children` by default). A row with children is a group of them and is sized
+  by them, as a folder is by its files; children may nest to any depth.
+- **Flat rows with `group-field`.** The field names the group a row belongs to; a comma-separated list nests the groups,
+  outermost first: `group-field="region, sector"`.
+
+Siblings run clockwise from twelve o'clock, largest first. The `nodes` getter returns every group and leaf in that
+order, each with its path, value, share of the whole and share of its group.
+
+### Rings and colour
+
+`levels` (3 by default) caps how many rings show from the current centre; deeper levels come into view as the reader
+zooms, and a branch with fewer levels spreads them over the whole radius. Each top-level branch takes the next colour of
+`--c2-chart__series-1…8--color`, and below it siblings step lighter toward the surface, largest darkest, so a zoomed
+branch is never one flat colour. A node keeps its colour when it is zoomed into view.
+
+With `color-field`, every segment is coloured by that field on the treemap's scale around zero instead, from
+`--c2-chart__neutral--color` toward `--c2-chart__positive--color` and `--c2-chart__negative--color`, at full strength at
+`color-max`; a group takes the value-weighted mean of its leaves.
+
+Names are drawn where they fit (`labels="auto"`): along the arc on the first ring and on wide arcs, along the radius on
+narrow, deep ones, never upside down. A segment too small for its name stays blank, and the tooltip still names it;
+`labels="none"` hides them all. The hole shows the current centre's name ("Total" at the top) and value, and the
+`center` slot replaces it. `value-prefix` and `value-suffix` frame every value, or a series' `format` formats it.
+
+`--c2-chart__segment--gap`, `--c2-chart__segment--border-radius` and `--c2-chart__hole--size` (a share of the radius)
+set the shape.
+
+### Zoom
+
+Clicking a group makes it the centre: its children form the first ring, a breadcrumb ("All › Engineering") appears top
+left, and the hole becomes a "Back to All" button that goes up one level. `zoom-change` fires first with the new
+`path` and `node`; it is cancelable, so an app can load a branch before showing it. `root` holds the zoom as a path
+of names (an attribute takes it as JSON, and a server renders the breadcrumb from it), and `zoomTo(path)` and
+`zoomOut()` drive it from code. `breadcrumb="none"` hides the breadcrumb. The arcs morph into the new layout in 400 ms,
+or at once under reduced motion or `animation="none"`.
+
+Clicking a leaf fires `point-click` and highlights it, dimming everything off its path, as on the other charts.
+
+### Interaction and accessibility
+
+Hovering a segment keeps its path to the centre and fades everything else to `--c2-chart__series__dimmed--opacity`.
+The tooltip gives the path, the value and its shares of the whole and of its group.
+
+The plot is one tab stop. The left and right arrows move around a ring between siblings, down goes to the first child
+and up to the parent; Enter zooms into a group (or clicks a leaf), and Escape or Backspace zooms out. The focused
+segment gets a ring in `--c2-chart__segment__focus--color`, and a polite announcement reads it ("Sales › Field, $1.6M,
+13.7% of total, 2 items"). The plot is named by a summary, and a visually hidden table lists every leaf with its path,
+value and shares.
+
+The labels already name the branches, so the legend is off by default; `legend="bottom"` lists the top-level branches
+for a small sunburst without labels, and with `legend-action="toggle"` an entry hides its branch
+(`setGroupVisible(name, false)` does the same from code).

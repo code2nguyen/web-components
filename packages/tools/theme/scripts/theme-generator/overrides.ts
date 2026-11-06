@@ -28,6 +28,12 @@ export const overrides: Record<string, Override> = {
   '--c2-log-viewer--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer--border': { exclude: 'default terminal frame' },
   '--c2-log-viewer--border-radius': { exclude: 'default terminal frame' },
+  // c2-terminal stays dark in both themes: its screen, title bar and muted text are its own palette.
+  '--c2-terminal--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__titlebar--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__muted--color': { exclude: 'terminal palette on its own dark screen' },
+  '--c2-terminal__ansi-black--color': { exclude: 'terminal ANSI palette' },
+  '--c2-terminal--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer__viewport__focus--outline': { exclude: 'terminal focus contrast' },
   '--c2-log-viewer__empty--color': { exclude: 'terminal metadata contrast' },
   '--c2-log-viewer__token--color': { exclude: 'terminal log token contrast' },
@@ -225,6 +231,26 @@ export const overrides: Record<string, Override> = {
   '--c2-cascader__trigger__focus--outline-offset': { exclude: 'flush focus ring offset' },
   '--c2-cascader__icon--size': { exclude: 'cascader affordance size' },
   '--c2-cascader__panel--box-shadow': { token: 'shadow-md' },
+  // A floating panel behind the active one sits lower: its shadow steps down from the large one.
+  '--c2-floating-panel__inactive--box-shadow': { token: 'shadow-md' },
+  // Pan-zoom: the cooperative hint is light text on the inverted surface; the dot grid and minimap follow the greys
+  // and the accent, so both read in dark mode.
+  '--c2-pan-zoom__hint--color': { token: 'color-on-inverse-surface' },
+  '--c2-pan-zoom__grid--color': { token: 'color-outline' },
+  '--c2-pan-zoom__minimap-content--background': { token: 'color-outline-variant' },
+  '--c2-pan-zoom__minimap-frame--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-pan-zoom__minimap-frame--background': { token: 'color-primary-glow' },
+  // Mind map: the root card is the inverse surface, and the branch colours are the chart palette so they adapt to dark mode.
+  '--c2-mind-map__root--color': { token: 'color-on-inverse-surface' },
+  '--c2-mind-map__branch-1--color': { token: 'chart-series-1' },
+  '--c2-mind-map__branch-2--color': { token: 'chart-series-2' },
+  '--c2-mind-map__branch-3--color': { token: 'chart-series-3' },
+  '--c2-mind-map__branch-4--color': { token: 'chart-series-4' },
+  '--c2-mind-map__branch-5--color': { token: 'chart-series-5' },
+  '--c2-mind-map__branch-6--color': { token: 'chart-series-6' },
+  '--c2-mind-map__branch-7--color': { token: 'chart-series-7' },
+  '--c2-mind-map__branch-8--color': { token: 'chart-series-8' },
+  '--c2-mind-map__topic__selected--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
   '--c2-cascader__panel--max-width': { exclude: 'viewport-aware panel width' },
   '--c2-cascader__column--min-width': { exclude: 'hierarchy column geometry' },
   '--c2-cascader__column--max-width': { exclude: 'hierarchy column geometry' },
@@ -272,6 +298,10 @@ export const overrides: Record<string, Override> = {
   '--c2-org-chart__card__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__toggle__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__card__selected--box-shadow': { token: 'color-primary', value: '0 0 0 1px var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  // A bullet chart's qualitative bands are a grey ramp from the resting border grey (poor) to the container surface
+  // (good), so they sit back behind the bar in both themes.
+  '--c2-chart__band-start--color': { token: 'color-outline' },
+  '--c2-chart__band-end--color': { token: 'color-surface-container' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

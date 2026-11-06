@@ -1,0 +1,96 @@
+---
+title: 'Box plot chart gallery'
+description: 'Service latency against an SLO, two regions side by side, test scores with the mean, precomputed percentiles and an A/B test drawn as box plots.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { BoxplotChart } from '@c2n/components/chart/boxplot-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-boxplot-chart label-field="service" value-suffix=" ms" data='[{"service":"api","latency":[38,52,60,66,70,74,78,82,86,92,98,104,112,124,140,166,240,270]},{"service":"search","latency":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610,655]},{"service":"checkout","latency":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905,980]},{"service":"payments","latency":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688]}]'>
+  <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=Latency SLO
+<style>
+  .boxplot-slo {
+    width: 100%;
+    --c2-chart--height: 300px;
+    --c2-chart__box--width: 16px;
+  }
+</style>
+<c2-boxplot-chart class="boxplot-slo" orientation="horizontal" label-field="service" value-suffix=" ms" reference-lines='[{"value":500,"label":"SLO 500 ms","tone":"danger"}]' data='[{"service":"api-gateway","latency":[38,52,60,66,70,74,78,82,86,92,98,104,112,124,140,166,240,270]},{"service":"search","latency":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610,655,700]},{"service":"checkout","latency":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905,980,1120,1320]},{"service":"payments","latency":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688]},{"service":"inventory","latency":[44,60,70,74,80,88,94,100,110,122,128,150,180,198]}]'>
+  <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=Two regions
+<style>
+  .boxplot-regions {
+    width: 100%;
+    --c2-chart--height: 300px;
+    --c2-chart__series-1--color: #0891b2;
+    --c2-chart__series-2--color: #7c3aed;
+  }
+</style>
+<c2-boxplot-chart class="boxplot-regions" label-field="service" value-suffix=" ms" data='[{"service":"search","east":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610],"west":[126,164,186,206,220,238,258,276,298,320,327,354,399,511,701]},{"service":"checkout","east":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905],"west":[186,214,236,253,273,287,305,320,336,352,365,392,412,433,461,488,780,1031]},{"service":"payments","east":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688],"west":[150,186,220,231,248,262,273,287,309,334,345,388,444,518,789]}]'>
+  <c2-chart-series field="east" label="us-east"></c2-chart-series>
+  <c2-chart-series field="west" label="eu-west"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=Test scores
+<style>
+  .boxplot-scores {
+    width: 100%;
+    --c2-chart--height: 280px;
+    --c2-chart__series-1--color: #0f766e;
+    --c2-chart__box--width: 32%;
+    --c2-chart__box--fill-opacity: 0.32;
+    --c2-chart__median--width: 3px;
+  }
+</style>
+<c2-boxplot-chart class="boxplot-scores" label-field="class" whiskers="range" mean="show" precision="1" data='[{"class":"Class A","score":[52,61,64,70,72,75,78,81,85,93]},{"class":"Class B","score":[40,55,58,66,68,70,74,79,88,99]},{"class":"Class C","score":[61,66,70,73,77,80,82,84,90,96]}]'>
+  <c2-chart-series field="score" label="Score"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=Precomputed percentiles
+<style>
+  .boxplot-summary {
+    width: 100%;
+    --c2-chart--height: 280px;
+    --c2-chart__series-1--color: #db2777;
+    --c2-chart__box--width: 22px;
+    --c2-chart__box--border-width: 1px;
+    --c2-chart__median--width: 2px;
+    --c2-chart__outlier--radius: 2.5px;
+  }
+</style>
+<c2-boxplot-chart class="boxplot-summary" label-field="endpoint" value-suffix=" ms" data='[{"endpoint":"GET /orders","p":{"min":12,"q1":31,"median":44,"q3":62,"max":108,"outliers":[180,240],"count":18240}},{"endpoint":"POST /orders","p":{"min":40,"q1":88,"median":120,"q3":168,"max":286,"outliers":[410],"count":3120}},{"endpoint":"GET /items","p":{"min":8,"q1":18,"median":24,"q3":33,"max":55,"count":52880}},{"endpoint":"PUT /cart","p":{"min":22,"q1":48,"median":66,"q3":91,"max":150,"outliers":[220,265,301],"count":9610}}]'>
+  <c2-chart-series field="p" label="Response time"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=A/B test
+<style>
+  .boxplot-ab {
+    width: 100%;
+    --c2-chart--height: 280px;
+    --c2-chart__series-1--color: #71717a;
+    --c2-chart__series-2--color: #16a34a;
+  }
+</style>
+<c2-boxplot-chart class="boxplot-ab" orientation="horizontal" label-field="market" value-suffix=" s" precision="1" outliers="none" mean="show" data='[{"market":"US","control":[21,28,32,35,38,41,44,48,53,61,74],"variant":[26,33,38,42,45,48,52,57,63,70,85]},{"market":"EU","control":[18,24,27,31,34,36,39,43,47,55,66],"variant":[20,27,31,35,38,41,44,48,53,60,72]}]'>
+  <c2-chart-series field="control" label="Control"></c2-chart-series>
+  <c2-chart-series field="variant" label="Variant"></c2-chart-series>
+</c2-boxplot-chart>
+```
+
+</GalleryGrid>

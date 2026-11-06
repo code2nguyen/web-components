@@ -13,6 +13,7 @@ export type EchartsFeature =
   | 'chord'
   | 'sankey'
   | 'treemap'
+  | 'sunburst'
   | 'pie'
   | 'gauge'
   | 'radar'
@@ -27,12 +28,14 @@ export type EchartsFeature =
   | 'legend'
   | 'tooltip'
   | 'dataZoom'
+  | 'markLine'
 
 const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   custom: () => import('echarts/charts').then((m) => [m.CustomChart]),
   chord: () => import('echarts/charts').then((m) => [m.ChordChart]),
   sankey: () => import('echarts/charts').then((m) => [m.SankeyChart]),
   treemap: () => import('echarts/charts').then((m) => [m.TreemapChart]),
+  sunburst: () => import('echarts/charts').then((m) => [m.SunburstChart]),
   pie: () => import('echarts/charts').then((m) => [m.PieChart]),
   gauge: () => import('echarts/charts').then((m) => [m.GaugeChart]),
   radar: () => import('echarts/charts').then((m) => [m.RadarChart]),
@@ -47,6 +50,7 @@ const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   legend: () => import('echarts/components').then((m) => [m.LegendComponent]),
   tooltip: () => import('echarts/components').then((m) => [m.TooltipComponent]),
   dataZoom: () => import('echarts/components').then((m) => [m.DataZoomComponent]),
+  markLine: () => import('echarts/components').then((m) => [m.MarkLineComponent]),
 }
 
 let corePending: Promise<typeof echarts> | undefined
