@@ -150,11 +150,12 @@ export function buildHierarchy(rows: readonly unknown[], options: HierarchyOptio
 }
 
 /**
- * The name a node is handed to ECharts under: its path, and whether it is a leaf, so two nodes never share one. The
- * labels are drawn from the model, so the engine never shows it.
+ * The name a node is handed to ECharts under: whether it is a leaf, then its path, as a JSON array. Every name is
+ * escaped, so two nodes never share one whatever characters their labels hold. The labels are drawn from the model,
+ * so the engine never shows it.
  */
 export function hierarchyEngineName(node: HierarchyNode): string {
-  return `${node.leaf ? 'tile' : 'group'}\u001f${node.path.join('\u001f')}`
+  return JSON.stringify([node.leaf ? 'leaf' : 'group', ...node.path])
 }
 
 /** Every node depth first, a group before its children. */

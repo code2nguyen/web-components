@@ -971,7 +971,10 @@ export class BulletChart extends EchartsChartBase {
   /** A tick's value: compact past a thousand, so a row's axis stays short. */
   #tick(value: number): string {
     const compact = Math.abs(value) >= 1000
-    return new Intl.NumberFormat(this.msg.locale || undefined, compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 4 }).format(value)
+    return new Intl.NumberFormat(
+      this.msg.locale || undefined,
+      compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 4 },
+    ).format(value)
   }
 
   #summary(): string {

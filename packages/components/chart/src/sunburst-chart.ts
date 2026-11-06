@@ -100,9 +100,13 @@ const LABEL_INSET = 4
 /** How long the arcs take to morph into a new zoom. */
 const ZOOM_DURATION = 400
 
-/** How a node is named in `highlighted` and in `series-highlight`: its path, so a top-level branch is its own name. */
+/**
+ * How a node is named in `highlighted` and in `series-highlight`. A top-level branch is its own name, which is the key
+ * its legend entry uses; a deeper node is its engine name, a JSON array of its kind and path (`["leaf","Sales","Field"]`),
+ * which no other node shares.
+ */
 function keyOf(node: HierarchyNode): string {
-  return node.path.join(' › ')
+  return node.depth === 1 ? node.label : hierarchyEngineName(node)
 }
 
 /** An annular sector as an SVG path; a full turn is drawn as two halves, since one arc cannot close a circle. */
@@ -219,9 +223,6 @@ export class SunburstChart extends EchartsChartBase {
   /** Top-level branches the reader has switched off from the legend, by name. */
   @state() private hiddenGroups = new Set<string>()
 
-  /** Bumped on every data change, so the options are rebuilt with the data. */
-  @state() private dataRevision = 0
-
   /** The plot's size, rounded: the rings, labels and hole are laid out in pixels. Never set on a server. */
   @state() private plotSize = 0
 
@@ -272,20 +273,21 @@ export class SunburstChart extends EchartsChartBase {
     if (visible) next.delete(name)
     else next.add(name)
     this.hiddenGroups = next
-    if (!visible && this.highlighted !== null && (this.highlighted === name || this.highlighted.startsWith(`${name} › `))) this.highlight(null)
+    if (!visible && this.#highlightedNode()?.path[0] === name) this.highlight(null)
     this.notifyLegendChange()
   }
 
   // ------------------------------------------------------ chart overrides ---
 
-  /** The base fast path sends the data alone; the colours, labels and rings ride on the options too. */
-  protected override shouldUpdate(changed: PropertyValues): boolean {
-    if (changed.has('data') || changed.has('revision')) return true
-    return super.shouldUpdate(changed)
+  /**
+   * No data-only fast path: the ring layout (the breadcrumb strip, a `root` the new rows now hold), the hole's text,
+   * the legend and the leaf table all follow the rows, so new data renders and rebuilds the options once.
+   */
+  protected override isDataKey(): boolean {
+    return false
   }
 
   protected override willUpdate(changed: PropertyValues): void {
-    if (changed.has('data') || changed.has('revision')) this.dataRevision += 1
     // An update may come with new variables (a class, a theme); a pointer move only changes the tooltip.
     if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.#styleCache = undefined
     super.willUpdate(changed)
@@ -548,7 +550,7 @@ export class SunburstChart extends EchartsChartBase {
   #summary(): string {
     const series = this.resolvedSeries[0]
     const leaves = this.#computeModel().nodes.filter((node) => node.leaf).length
-    return this.msg.t('summary', series?.label ?? series?.field ?? '', String(leaves))
+    return this.msg.t('summary', leaves, series?.label ?? series?.field ?? '')
   }
 
   #pathText(path: readonly string[]): string {
@@ -568,7 +570,7 @@ export class SunburstChart extends EchartsChartBase {
       const path = this.#pathText(focused.path)
       announcement = focused.leaf
         ? this.msg.t('leafAnnouncement', path, this.#format(focused.value), this.#percent(focused.share))
-        : this.msg.t('groupAnnouncement', path, this.#format(focused.value), this.#percent(focused.share), String(focused.children.length))
+        : this.msg.t('groupAnnouncement', focused.children.length, path, this.#format(focused.value), this.#percent(focused.share))
       if (this.#announcement) announcement = `${this.#announcement}. ${announcement}`
     }
     render(
@@ -664,6 +666,16 @@ export class SunburstChart extends EchartsChartBase {
   #viewPath(): string[] {
     if (this.#computeModel().nodes.length === 0) return [...(this.root ?? [])]
     return this.#viewRoot()?.path ?? []
+  }
+
+  /** The node `highlighted` names (see {@link keyOf}); a bare name is a top-level branch, a group before a leaf. */
+  #highlightedNode(): HierarchyTreeNode | undefined {
+    const key = this.highlighted
+    if (key === null) return undefined
+    const model = this.#computeModel()
+    const named = model.byName.get(key)
+    if (named !== undefined) return model.nodes[named]
+    return model.tree.find((node) => node.label === key && !node.leaf) ?? model.tree.find((node) => node.label === key)
   }
 
   /** The group at the centre, or `undefined` for the whole. */
@@ -812,6 +824,7 @@ export class SunburstChart extends EchartsChartBase {
       this.highlighted,
       this.labels,
       this.levels,
+      this.breadcrumb,
       this.#viewPath().join('\u001f'),
       JSON.stringify(this.#style()),
     ].join('|')
@@ -827,12 +840,18 @@ export class SunburstChart extends EchartsChartBase {
     const geometry = this.#geometry(context.width, context.height)
     const arcs = this.#arcs(geometry)
     const colors = this.#colorMap()
-    const highlighted = this.highlighted === null ? null : (this.#computeModel().nodes.find((node) => keyOf(node) === this.highlighted) ?? null)
+    const highlighted = this.#highlightedNode()
+    const parents = this.#computeModel().parents
+    // Lit: the highlighted node, its ancestors and its descendants, by identity, so a leaf and a group on the same path
+    // are told apart.
+    const related = (from: HierarchyTreeNode | undefined, to: HierarchyTreeNode) => {
+      for (let node = from; node; node = parents.get(node)) if (node === to) return true
+      return false
+    }
     const font = (weight: number) => `${weight} ${theme.fontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`
     const lit = (node: HierarchyTreeNode) => {
       if (!highlighted) return true
-      const [short, long] = node.path.length <= highlighted.path.length ? [node.path, highlighted.path] : [highlighted.path, node.path]
-      return short.every((name, index) => long[index] === name)
+      return related(highlighted, node) || related(node, highlighted)
     }
     const build = (nodes: HierarchyTreeNode[], ring: number): Record<string, unknown>[] =>
       nodes.map((node) => {
@@ -974,6 +993,12 @@ export class SunburstChart extends EchartsChartBase {
         next = current ? (current.children.find((child) => arcs.has(child)) ?? current) : top[0]
         break
       case 'ArrowUp':
+        // From the first ring while zoomed, up is the centre: zoom out, which lands on the branch just left.
+        if (current && !(parent && arcs.has(parent)) && this.#viewRoot()) {
+          event.preventDefault()
+          this.zoomOut()
+          return
+        }
         next = current ? (parent && arcs.has(parent) ? parent : current) : top[0]
         break
       case 'Home':

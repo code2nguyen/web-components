@@ -128,6 +128,12 @@ test.describe('band and scale logic', () => {
         own: own.map((row) => [row.min, row.max]),
         shared: shared.map((row) => row.max),
         fixed: fixed.map((row) => row.max),
+        // The last band reaches the scale end, past the last boundary or cut at it.
+        lastBand: [
+          own[1],
+          fixed[0],
+          buildBulletRows([{ ...inputs[0], value: 5, target: 5, bands: [10, 20, 30] }], { min: 0, max: 15, scale: 'row', better: 'higher' })[0],
+        ].map((row) => row.bands.map((band) => [band.from, band.to, band.quality])),
         bands: own[0].bands,
         band: own.map((row) => row.band),
         attainment: own.map((row) => (row.attainment === null ? null : Number(row.attainment.toFixed(3)))),
@@ -143,6 +149,22 @@ test.describe('band and scale logic', () => {
     expect(result.shared).toEqual([340, 340, 340, 340])
     // `max-field` beats `max`.
     expect(result.fixed).toEqual([500, 500, 500, 12])
+    expect(result.lastBand).toEqual([
+      [
+        [0, 150, 0],
+        [150, 225, 1],
+        [225, 340, 2],
+      ],
+      [
+        [0, 150, 0],
+        [150, 225, 1],
+        [225, 500, 2],
+      ],
+      [
+        [0, 10, 0],
+        [10, 15, 1],
+      ],
+    ])
     expect(result.bands).toEqual([
       { from: 0, to: 150, quality: 0 },
       { from: 150, to: 225, quality: 1 },
@@ -264,6 +286,8 @@ test('the tooltip gives the actual, the target with the share reached and the ba
   // The band swatch is the band's colour, the actual's the bar's.
   const swatches = await tooltip.locator('.tooltip-marker').evaluateAll((markers) => markers.map((marker) => getComputedStyle(marker).backgroundColor))
   expect(swatches).toEqual(['rgb(2, 101, 220)', 'rgb(228, 228, 230)'])
+  // The target marker is the target's own colour, `--c2-chart__target--color`.
+  await expect(tooltip.locator('.bullet-tick-marker')).toHaveCSS('background-color', 'rgb(24, 24, 27)')
   const events = await page.evaluate(() => window.bulletScenario.events.filter((event) => event.type === 'point-hover'))
   expect(events.at(-1)?.detail).toMatchObject({ index: 1, seriesIndex: 0, y: 22.5, label: 'Profit' })
   await page.evaluate(() => window.bulletScenario.hover(null))
@@ -613,4 +637,53 @@ test('regression: a measure whose series field is "target" or "band" keeps the b
     await expect(rows.nth(2).locator('.bullet-band-marker')).toHaveCount(1)
     await page.evaluate(() => window.bulletScenario.hover(null))
   }
+})
+
+test('regression: a huge offset over a tiny span gives its two ends at once rather than stepping forever', async ({ page }) => {
+  await open(page, 'empty')
+  const result = await page.evaluate(() => {
+    const { bulletTicks } = window.bulletScenario.model
+    const started = performance.now()
+    const ticks = [bulletTicks(1e12, 1e12 + 1e-3), bulletTicks(-1e15, -1e15 + 0.5), bulletTicks(0, 1e300, 1e9)]
+    return { ticks, elapsed: performance.now() - started }
+  })
+  expect(result.ticks[0]).toEqual([1e12, 1e12 + 1e-3])
+  expect(result.ticks[1]).toEqual([-1e15, -1e15 + 0.5])
+  expect(result.ticks[2].length).toBeLessThanOrEqual(12)
+  expect(result.elapsed).toBeLessThan(100)
+})
+
+test('regression: a scale end past the last boundary is covered by the last band on the plot', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bullet-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate(async (element) => {
+    const bullet = element as unknown as BulletInternals
+    element.setAttribute('max', '400')
+    bullet.data = [{ kpi: 'Revenue', actual: 270, target: 350, bands: [150, 225, 300] }]
+    await bullet.updateComplete
+  })
+  const [row] = await drawn(page)
+  const last = row.bands[2].shape!
+  // The good band runs to the end of the scale, where the 400 tick sits.
+  expect(last.x! + last.width!).toBeCloseTo(row.bands[0].shape!.x! + (row.bands[0].shape!.width! * 400) / 150, 3)
+  expect(row.bands[2].style?.fill).toBe('rgb(244, 244, 245)')
+})
+
+test('regression: a lang change redraws the engine, so the values and ticks on the canvas follow the language', async ({ page }) => {
+  await open(page, 'scorecard', '&renderer=svg')
+  const chart = page.locator('c2-bullet-chart')
+  await expect(chart).toHaveState('ready')
+  const texts = () => chart.evaluate((element) => Array.from(element.shadowRoot?.querySelectorAll('.plot svg text') ?? []).map((text) => text.textContent))
+  expect(await texts()).toContain('1,650')
+  await chart.evaluate((element) => element.setAttribute('lang', 'de'))
+  await expect.poll(texts).toContain('1.650')
+  expect(await texts()).toContain('2,5\u00a0Tsd.')
+})
+
+test('an unknown scenario draws the scorecard with its rows', async ({ page }) => {
+  await open(page, 'no-such-scenario')
+  const chart = page.locator('c2-bullet-chart')
+  await expect(chart).toHaveState('ready')
+  await expect(chart.locator('table.bullet-a11y tbody tr')).toHaveCount(4)
 })

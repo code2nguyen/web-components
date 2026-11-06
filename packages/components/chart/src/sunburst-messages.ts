@@ -15,9 +15,11 @@ const sunburstEn = {
   breadcrumb: 'Zoom level',
   back: (name: string) => `Back to ${name}`,
   roleDescription: 'sunburst chart',
-  summary: (series: string, count: string) => `Sunburst of ${series}, ${count} items`,
+  // The count comes first, so a translation can pick its plural form: `{ "one": "…, {0} élément", "other": "…, {0} éléments" }`.
+  summary: (count: number, series: string) => `Sunburst of ${series}, ${count} ${count === 1 ? 'item' : 'items'}`,
   leafAnnouncement: (path: string, value: string, share: string) => `${path}, ${value}, ${share} of total`,
-  groupAnnouncement: (path: string, value: string, share: string, count: string) => `${path}, ${value}, ${share} of total, ${count} items. Enter to zoom.`,
+  groupAnnouncement: (count: number, path: string, value: string, share: string) =>
+    `${path}, ${value}, ${share} of total, ${count} ${count === 1 ? 'item' : 'items'}. Enter to zoom.`,
   zoomAnnouncement: (path: string, value: string) => `Zoomed into ${path}, ${value}`,
   zoomOutAnnouncement: (value: string) => `Zoomed out to all, ${value}`,
 }
