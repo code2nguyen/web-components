@@ -590,17 +590,21 @@ test('reads its layout from the theming variables', async ({ page }) => {
   await expect(chart).toHaveState('ready')
   const result = await chart.evaluate(async (element) => {
     const sunburst = element as SunburstElement
-    sunburst.style.setProperty('--c2-chart__segment--gap', '4px')
-    sunburst.style.setProperty('--c2-chart__segment--border-radius', '6px')
+    // Lengths in any unit: rem resolves against the root's 16px.
+    sunburst.style.setProperty('--c2-chart__segment--gap', '0.25rem')
+    sunburst.style.setProperty('--c2-chart__segment--border-radius', '0.375rem')
     sunburst.style.setProperty('--c2-chart__hole--size', '50%')
     sunburst.style.setProperty('--c2-chart__breadcrumb--color', 'rgb(1, 2, 3)')
     sunburst.style.setProperty('--c2-chart__breadcrumb--font-size', '1.25rem')
     sunburst.style.setProperty('--c2-chart__center--background', 'rgb(4, 5, 6)')
     sunburst.zoomTo(['Sales'])
     await sunburst.updateComplete
-    const series = sunburst.buildOptions(sunburst.buildContext()).series[0] as { radius: number[]; itemStyle: { borderWidth: number; borderRadius: number } }
+    const context = sunburst.buildContext()
+    const series = sunburst.buildOptions(context).series[0] as { radius: number[]; center: number[]; itemStyle: { borderWidth: number; borderRadius: number } }
     const shadow = sunburst.shadowRoot as ShadowRoot
     return {
+      // The rings sit below a breadcrumb strip of 1.5 × 20px + 8px.
+      inset: series.center[1] * 2 - context.height,
       gap: series.itemStyle.borderWidth,
       radius: series.itemStyle.borderRadius,
       hole: series.radius[0] / series.radius[1],
@@ -610,6 +614,7 @@ test('reads its layout from the theming variables', async ({ page }) => {
   })
   expect(result.gap).toBe(4)
   expect(result.radius).toBe(6)
+  expect(result.inset).toBe(38)
   expect(result.hole).toBeCloseTo(0.5, 2)
   expect(result.crumb).toBe('rgb(1, 2, 3)')
   expect(result.center).toBe('rgb(4, 5, 6)')
@@ -700,3 +705,31 @@ for (const height of ['480px', '320px']) {
     expect(result.farthest).toBeLessThanOrEqual(result.outer + 2)
   })
 }
+
+test('builds the engine tree once per update, measuring each name once', async ({ page }) => {
+  await open(page, 'budget', '&animation=none')
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    // Every label fit measures text on a canvas; count those calls across one highlight update.
+    const original = CanvasRenderingContext2D.prototype.measureText
+    let calls = 0
+    CanvasRenderingContext2D.prototype.measureText = function (this: CanvasRenderingContext2D, text: string) {
+      if (text === 'Compute') calls += 1
+      return original.call(this, text)
+    }
+    try {
+      sunburst.highlighted = 'Sales'
+      await sunburst.updateComplete
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 50)))
+      const first = sunburst.projectData(sunburst.frame, sunburst.buildContext())
+      const second = sunburst.projectData(sunburst.frame, sunburst.buildContext())
+      return { calls, same: first[0] === second[0] }
+    } finally {
+      CanvasRenderingContext2D.prototype.measureText = original
+    }
+  })
+  expect(result.calls).toBe(1)
+  expect(result.same).toBe(true)
+})

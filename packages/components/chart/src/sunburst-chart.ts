@@ -806,7 +806,15 @@ export class SunburstChart extends EchartsChartBase {
   #engineData(context: ChartBuildContext): Record<string, unknown>[] {
     const model = this.#computeModel()
     const colors = this.#colorMap()
-    const key = [context.width, context.height, this.highlighted, this.labels, this.levels, this.#viewPath().join('\u001f'), JSON.stringify(this.#style())].join('|')
+    const key = [
+      context.width,
+      context.height,
+      this.highlighted,
+      this.labels,
+      this.levels,
+      this.#viewPath().join('\u001f'),
+      JSON.stringify(this.#style()),
+    ].join('|')
     const cached = this.#engineCache
     if (cached && cached.key === key && cached.model === model && cached.theme === context.theme && cached.colors === colors) return cached.data
     const data = this.#buildEngineData(context)
