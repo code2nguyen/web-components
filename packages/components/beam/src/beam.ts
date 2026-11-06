@@ -9,6 +9,13 @@ interface Point {
   y: number
 }
 
+interface Box {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 interface BeamGeometry {
   start: Point
   control: Point
@@ -24,8 +31,8 @@ interface BeamGeometry {
  * container and lets the pointer through. `from` and `to` name the two elements by `id`, looked up in the same
  * document or shadow root. The line runs from edge to edge of the two boxes, so it never crosses their content.
  *
- * The beam redraws when the container or either element changes size. Call `redraw()` after moving an element
- * without resizing anything. When the reader asks for reduced motion only the line is drawn.
+ * The beam redraws when the container or either element changes size, and finds an element added after it. Call
+ * `redraw()` after moving an element without resizing anything, or after moving an `id` to another element. When the reader asks for reduced motion only the line is drawn.
  *
  * @tag c2-beam
  *
@@ -71,14 +78,10 @@ export class Beam extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.resizeObserver = new ResizeObserver(() => this.redraw())
+    this.resizeObserver = new ResizeObserver(() => this.scheduleMeasure())
     this.resizeObserver.observe(this)
-    // Either element may be added after the beam: look again while one is missing.
-    this.mutationObserver = new MutationObserver(() => {
-      if (!this.fromElement?.isConnected || !this.toElement?.isConnected) this.resolve()
-    })
-    const root = this.getRootNode()
-    if (root instanceof Document || root instanceof ShadowRoot) this.mutationObserver.observe(root, { childList: true, subtree: true })
+    // Either element may be added after the beam (or removed and added back): look again while one is missing.
+    this.mutationObserver = new MutationObserver(() => this.resolve())
     this.resolve()
   }
 
@@ -92,11 +95,18 @@ export class Beam extends LitElement {
 
   protected override updated(changes: PropertyValues<this>): void {
     if (changes.has('from') || changes.has('to')) this.resolve()
-    else if (changes.has('curvature')) this.redraw()
+    else if (changes.has('curvature')) this.scheduleMeasure()
   }
 
-  /** Measures both elements again and redraws the line on the next animation frame. */
+  /**
+   * Looks both elements up by `id` again, measures them and redraws the line on the next animation frame. Call it
+   * after moving an element without resizing anything, or after giving an `id` to a different element.
+   */
   redraw(): void {
+    this.resolve()
+  }
+
+  private scheduleMeasure(): void {
     cancelAnimationFrame(this.frame)
     this.frame = requestAnimationFrame(() => this.measure())
   }
@@ -116,7 +126,14 @@ export class Beam extends LitElement {
       this.toElement = to
       for (const element of [from, to]) if (element) this.resizeObserver?.observe(element)
     }
-    this.redraw()
+    // Watching the whole root costs a lookup per mutation, so it runs only while an end is missing.
+    this.mutationObserver?.disconnect()
+    const root = this.getRootNode()
+    const missing = (this.from && !from) || (this.to && !to)
+    if (missing && this.isConnected && (root instanceof Document || root instanceof ShadowRoot)) {
+      this.mutationObserver?.observe(root, { childList: true, subtree: true })
+    }
+    this.scheduleMeasure()
   }
 
   private measure(): void {
@@ -126,9 +143,21 @@ export class Beam extends LitElement {
       this.geometry = undefined
       return
     }
+    // Boxes are measured in screen pixels and the line is drawn in the beam's own, which differ under a scaled
+    // ancestor.
     const origin = this.getBoundingClientRect()
-    const a = { x: from.x + from.width / 2 - origin.x, y: from.y + from.height / 2 - origin.y }
-    const b = { x: to.x + to.width / 2 - origin.x, y: to.y + to.height / 2 - origin.y }
+    const scaleX = this.offsetWidth > 0 && origin.width > 0 ? origin.width / this.offsetWidth : 1
+    const scaleY = this.offsetHeight > 0 && origin.height > 0 ? origin.height / this.offsetHeight : 1
+    const local = (rect: DOMRect): Box => ({
+      x: (rect.x - origin.x) / scaleX,
+      y: (rect.y - origin.y) / scaleY,
+      width: rect.width / scaleX,
+      height: rect.height / scaleY,
+    })
+    const fromBox = local(from)
+    const toBox = local(to)
+    const a = { x: fromBox.x + fromBox.width / 2, y: fromBox.y + fromBox.height / 2 }
+    const b = { x: toBox.x + toBox.width / 2, y: toBox.y + toBox.height / 2 }
     const dx = b.x - a.x
     const dy = b.y - a.y
     const length = Math.hypot(dx, dy) || 1
@@ -136,9 +165,9 @@ export class Beam extends LitElement {
     // The normal on the left of the direction of travel, in screen coordinates (y grows downward).
     const control = { x: (a.x + b.x) / 2 + (dy / length) * bend, y: (a.y + b.y) / 2 - (dx / length) * bend }
     this.geometry = {
-      start: edgePoint(a, from, control),
+      start: edgePoint(a, fromBox, control),
       control,
-      end: edgePoint(b, to, control),
+      end: edgePoint(b, toBox, control),
     }
   }
 
@@ -177,7 +206,7 @@ function round(value: number): number {
 }
 
 /** Where a ray from the centre of `box` toward `target` leaves the box. */
-function edgePoint(center: Point, box: DOMRect, target: Point): Point {
+function edgePoint(center: Point, box: Box, target: Point): Point {
   const dx = target.x - center.x
   const dy = target.y - center.y
   if (dx === 0 && dy === 0) return center

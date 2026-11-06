@@ -4,8 +4,10 @@ const scenario = new URLSearchParams(location.search).get('scenario') ?? 'defaul
 const main = document.querySelector('main')!
 
 const count = scenario === 'short' ? 2 : 6
+// The link is the one focusable item: the second, or in `far-link` the last, which starts outside the strip.
+const linkAt = scenario === 'far-link' ? count - 1 : 1
 const items = Array.from({ length: count }, (_, index) =>
-  index === 1 ? `<a class="logo" href="#item-2">Item 2</a>` : `<span class="logo">Item ${index + 1}</span>`,
+  index === linkAt ? `<a class="logo" href="#item-${index + 1}">Item ${index + 1}</a>` : `<span class="logo">Item ${index + 1}</span>`,
 ).join('')
 
 const attributes: Record<string, string> = {
@@ -14,7 +16,14 @@ const attributes: Record<string, string> = {
   vertical: 'orientation="vertical"',
 }
 if (scenario === 'rtl') main.dir = 'rtl'
-main.innerHTML = `<c2-marquee aria-label="Partners" ${attributes[scenario] ?? ''}>${items}</c2-marquee>`
+// Non-rendering children take no place in the loop.
+const extras = scenario === 'extras' ? '<template><span>Template</span></template><style>.unused {}</style>' : ''
+main.innerHTML = `<c2-marquee aria-label="Partners" ${attributes[scenario] ?? ''}>${extras}${items}</c2-marquee>`
+if (scenario === 'scaled') main.style.transform = 'scale(0.5)'
+if (scenario === 'vertical-centred') {
+  main.querySelector('c2-marquee')!.setAttribute('orientation', 'vertical')
+  main.querySelector<HTMLElement>('c2-marquee')!.style.setProperty('--c2-marquee__item--align', 'center')
+}
 
 const subject = document.querySelector('c2-marquee')!
 await subject.updateComplete

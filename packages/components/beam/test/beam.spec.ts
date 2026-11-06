@@ -83,3 +83,37 @@ test('reduced motion keeps the line and drops the light', async ({ page, scenari
   await expect(track(page)).toHaveCSS('display', 'inline')
   await expect(beam(page)).toHaveCSS('display', 'none')
 })
+
+test('measures in its own pixels under a scaled ancestor', async ({ page, scenario }) => {
+  await scenario('scaled')
+  await expect(track(page)).toHaveAttribute('d', 'M 40 100 Q 200 100 360 100')
+})
+
+test('watches the page only while an end is missing', async ({ page, scenario }) => {
+  await scenario()
+  // Both ends found: adding elements elsewhere does not make the beam look its ends up again.
+  const lookups = await page.locator('c2-beam').evaluate(async (element) => {
+    let count = 0
+    const original = document.getElementById.bind(document)
+    document.getElementById = (id: string) => (count++, original(id))
+    for (let index = 0; index < 5; index++) document.body.append(document.createElement('span'))
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    document.getElementById = original
+    return element.isConnected ? count : -1
+  })
+  expect(lookups).toBe(0)
+})
+
+test('redraw() follows an id given to another element', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-beam').evaluate((element: HTMLElement & { redraw(): void }) => {
+    const old = document.getElementById('target')!
+    old.id = 'retired'
+    const moved = old.cloneNode(true) as HTMLElement
+    moved.id = 'target'
+    moved.style.left = '260px'
+    old.after(moved)
+    element.redraw()
+  })
+  await expect(track(page)).toHaveAttribute('d', 'M 40 100 Q 150 100 260 100')
+})

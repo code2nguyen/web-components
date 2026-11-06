@@ -20,8 +20,9 @@ interface ItemTrack {
  * child that leaves one edge re-enters at the other. When the items are shorter than the strip, the gap that leaves
  * shows as empty space before the first item comes round again.
  *
- * Motion pauses while the pointer is over the strip or focus is inside it, and while `paused` is set. When the
- * reader asks for reduced motion the strip stops and becomes a row that scrolls by hand.
+ * Motion pauses while the pointer is over the strip or focus is inside it, and while `paused` is set. Keyboard focus
+ * and a request for reduced motion both stop the strip and lay it out as a row that scrolls by hand, so the focused
+ * item is always in view.
  *
  * @tag c2-marquee
  *
@@ -34,7 +35,7 @@ interface ItemTrack {
  * @cssproperty {pixel} [--c2-marquee__item--gap=32px] - Space after each item.
  * @cssproperty {pixel} [--c2-marquee__viewport--fade=0px] - Length of the fade to transparent at both ends of the strip.
  * @cssproperty {pixel} [--c2-marquee__viewport--height=240px] - Height of a vertical strip.
- * @cssproperty {alignment} [--c2-marquee__item--align=center] - Cross-axis alignment of items of different sizes: start, center or end.
+ * @cssproperty {alignment} [--c2-marquee__item--align=center] - Cross-axis alignment of items of different sizes: start, center, end or stretch. A vertical strip stretches its items until this is set.
  */
 @customElement('c2-marquee')
 export class Marquee extends LitElement {
@@ -56,6 +57,8 @@ export class Marquee extends LitElement {
   @state() private items: Element[] = []
   @state() private tracks: ItemTrack[] = []
   @state() private distance = 0
+  /** Keyboard focus is inside: the strip stops at rest so the focused item can be scrolled into view. */
+  @state() private browsing = false
 
   private readonly internals = this.attachInternals()
   private mutationObserver?: MutationObserver
@@ -65,6 +68,27 @@ export class Marquee extends LitElement {
   constructor() {
     super()
     this.internals.role = 'marquee'
+    this.addEventListener('focusin', this.onFocusIn)
+    this.addEventListener('focusout', this.onFocusOut)
+  }
+
+  // A moving item can hold focus while it is outside the clipped strip, where the focus ring cannot be seen. Keyboard
+  // focus therefore lays the strip out at rest, as reduced motion does, and scrolls the item into view. Pointer focus
+  // is left alone: moving the layout under a click would send it to another item.
+  private readonly onFocusIn = (event: FocusEvent) => {
+    const target = event.target
+    if (!(target instanceof Element) || !target.matches(':focus-visible')) return
+    this.browsing = true
+    void this.updateComplete.then(() => target.scrollIntoView({ block: 'nearest', inline: 'nearest' }))
+  }
+
+  private readonly onFocusOut = (event: FocusEvent) => {
+    const next = event.relatedTarget
+    if (next instanceof Node && this.contains(next)) return
+    if (!this.browsing) return
+    this.browsing = false
+    const viewport = this.renderRoot.querySelector('.viewport')
+    viewport?.scrollTo({ left: 0, top: 0 })
   }
 
   override connectedCallback(): void {
@@ -98,7 +122,11 @@ export class Marquee extends LitElement {
   }
 
   private collectItems(): void {
-    this.items = Array.from(this.children)
+    // Elements that never render (and framework anchors, which are not elements) do not take a place in the loop.
+    const items = Array.from(this.children).filter((child) => !NON_RENDERING.has(child.localName))
+    // Re-inserting the same children, as a framework re-render may, must not restart the strip.
+    if (items.length === this.items.length && items.every((item, index) => item === this.items[index])) return
+    this.items = items
   }
 
   private scheduleMeasure(): void {
@@ -127,9 +155,15 @@ export class Marquee extends LitElement {
     const viewport = this.renderRoot.querySelector<HTMLElement>('.viewport')
     const wrappers = Array.from(this.renderRoot.querySelectorAll<HTMLElement>('.item'))
     if (!viewport || wrappers.length === 0) return
+    // Measured boxes are in screen pixels; the transforms are in the strip's own pixels, which differ under a scaled
+    // ancestor.
+    const viewBox = viewport.getBoundingClientRect()
+    const local = this.vertical ? viewport.offsetHeight : viewport.offsetWidth
+    const screen = this.vertical ? viewBox.height : viewBox.width
+    const scale = local > 0 && screen > 0 ? screen / local : 1
     const axis = (element: HTMLElement) => {
       const box = element.getBoundingClientRect()
-      return this.vertical ? box.height : box.width
+      return (this.vertical ? box.height : box.width) / scale
     }
     const sizes = wrappers.map(axis)
     const view = axis(viewport)
@@ -153,9 +187,9 @@ export class Marquee extends LitElement {
   }
 
   override render() {
-    const running = this.tracks.length === this.items.length && this.items.length > 0
+    const running = !this.browsing && this.tracks.length === this.items.length && this.items.length > 0
     return html`
-      <div class="viewport" part="viewport">
+      <div class="viewport ${this.browsing ? 'browsing' : ''}" part="viewport">
         <div class="track ${running ? 'running' : ''}" style=${styleMap({ '--_distance': String(this.distance) })}>
           ${this.items.map((item, index) => {
             const track = running ? this.tracks[index] : undefined
@@ -169,6 +203,8 @@ export class Marquee extends LitElement {
     `
   }
 }
+
+const NON_RENDERING = new Set(['template', 'script', 'style', 'link', 'meta'])
 
 function sameTrack(a: ItemTrack, b: ItemTrack | undefined): boolean {
   return !!b && Math.abs(a.from - b.from) < 0.5 && Math.abs(a.to - b.to) < 0.5 && Math.abs(a.phase - b.phase) < 0.0005

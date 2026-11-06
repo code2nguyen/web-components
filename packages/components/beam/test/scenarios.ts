@@ -16,6 +16,8 @@ main.innerHTML = `
   </div>
 `
 
+if (scenario === 'scaled') document.querySelector<HTMLElement>('.diagram')!.style.transform = 'scale(0.5)'
+
 const subject = document.querySelector('c2-beam')!
 await subject.updateComplete
 await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))

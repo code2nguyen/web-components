@@ -25,6 +25,7 @@
 
 .viewport {
   overflow: hidden;
+  overscroll-behavior: contain;
   mask-image: linear-gradient(to right, transparent, #000 css.cssVar(viewport--fade), #000 calc(100% - #{css.cssVar(viewport--fade)}), transparent);
 }
 
@@ -33,7 +34,7 @@
   mask-image: linear-gradient(to bottom, transparent, #000 css.cssVar(viewport--fade), #000 calc(100% - #{css.cssVar(viewport--fade)}), transparent);
 }
 
-// At rest (before the first measurement, and under reduced motion) the items sit in a row.
+// At rest (before the first measurement, under keyboard focus and under reduced motion) the items sit in a row.
 .track {
   display: flex;
   align-items: css.cssVar(item--align);
@@ -41,7 +42,8 @@
 
 :host([orientation='vertical']) .track {
   flex-direction: column;
-  align-items: stretch;
+  // A vertical strip of cards reads best at full width, so it stretches unless the variable is set.
+  align-items: var(--c2-marquee__item--align, stretch);
 }
 
 .item {
@@ -66,7 +68,7 @@
 
 :host([orientation='vertical']) .track.running {
   block-size: 100%;
-  justify-items: stretch;
+  justify-items: var(--c2-marquee__item--align, stretch);
   align-items: start;
 }
 
@@ -120,4 +122,8 @@
   .running .item {
     animation: none;
   }
+}
+
+.viewport.browsing {
+  overflow: auto;
 }

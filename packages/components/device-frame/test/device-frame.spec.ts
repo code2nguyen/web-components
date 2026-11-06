@@ -56,6 +56,17 @@ test('keeps its size in a container that shrinks to fit its content', async ({ p
   await scenario('centred-laptop')
   expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(300)
   expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="base"]'))).width)).toBe(357)
+
+  // A percentage width has nothing to resolve against there: the screen stands in at 360px instead of collapsing.
+  await scenario('centred-browser')
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(362)
+  await scenario('centred-default-laptop')
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="base"]'))).width)).toBe(384)
+})
+
+test('shrinks below its stand-in width in a narrow flex row', async ({ page, scenario }) => {
+  await scenario('narrow-row')
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(200)
 })
 
 test('the size variables resize the device', async ({ page, scenario }) => {

@@ -90,7 +90,7 @@ test('items shorter than the strip leave a gap and re-enter from outside it', as
   expect(await offsets(page)).toEqual([380, -20])
 })
 
-test('pauses on hover, on focus inside and while paused is set', async ({ page, scenario, tab }) => {
+test('pauses on hover and while paused is set', async ({ page, scenario }) => {
   await scenario()
   const item = page.locator('c2-marquee').locator('.item').first()
   await expect(item).toHaveCSS('animation-play-state', 'running')
@@ -99,10 +99,77 @@ test('pauses on hover, on focus inside and while paused is set', async ({ page, 
   await expect(item).toHaveCSS('animation-play-state', 'paused')
   await page.mouse.move(0, 400)
   await expect(item).toHaveCSS('animation-play-state', 'running')
+})
+
+test('keyboard focus stops the strip at rest with the focused item in view, and leaving resumes it', async ({ page, scenario, tab }) => {
+  await scenario('far-link')
+  const host = page.locator('c2-marquee')
+  const link = page.getByRole('link', { name: 'Item 6' })
+  // At rest the last item starts at 600px, past the 400px strip.
+  await tab()
+  await expect(link).toBeFocused()
+  await expect(host.locator('.item').first()).toHaveCSS('animation-name', 'none')
+  const strip = (await host.boundingBox())!
+  await expect
+    .poll(async () => {
+      const box = (await link.boundingBox())!
+      return box.x >= strip.x - 1 && box.x + box.width <= strip.x + strip.width + 1
+    })
+    .toBe(true)
 
   await tab()
+  await expect(link).not.toBeFocused()
+  await expect(host.locator('.item').first()).not.toHaveCSS('animation-name', 'none')
+  await expect.poll(() => host.locator('.viewport').evaluate((viewport) => viewport.scrollLeft)).toBe(0)
+})
+
+test('pointer focus leaves the strip moving under the pointer', async ({ page, scenario }) => {
+  await scenario()
+  // Playwright only clicks a still target; freezing the animations keeps them running in CSS terms.
+  await seek(page, 0)
+  await page.getByRole('link', { name: 'Item 2' }).click()
   await expect(page.getByRole('link', { name: 'Item 2' })).toBeFocused()
-  await expect(item).toHaveCSS('animation-play-state', 'paused')
+  await expect(page.locator('c2-marquee').locator('.item').first()).not.toHaveCSS('animation-name', 'none')
+})
+
+test('re-inserting the same children does not restart the strip', async ({ page, scenario }) => {
+  await scenario()
+  const before = await page
+    .locator('c2-marquee')
+    .locator('.item')
+    .first()
+    .evaluate((item) => item.getAnimations()[0])
+  expect(before).toBeTruthy()
+  const restarted = await page.locator('c2-marquee').evaluate(async (host) => {
+    const item = host.shadowRoot!.querySelector('.item')!
+    const animation = item.getAnimations()[0]
+    host.append(...Array.from(host.children))
+    host.append(document.createComment('anchor'))
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return item.getAnimations()[0] !== animation
+  })
+  expect(restarted).toBe(false)
+})
+
+test('non-rendering children take no place in the loop', async ({ page, scenario }) => {
+  await scenario('extras')
+  await expect(page.locator('c2-marquee').locator('.item')).toHaveCount(6)
+  await seek(page, 0)
+  expect(await offsets(page)).toEqual([0, 120, 240, 360, 480, 600])
+})
+
+test('measures in its own pixels under a scaled ancestor', async ({ page, scenario }) => {
+  await scenario('scaled')
+  await seek(page, 1000)
+  // Half size on screen: 60px apart, and 40px per second of the strip's own pixels is 20 on screen.
+  expect(await offsets(page)).toEqual([-20, 40, 100, 160, 220, 280])
+})
+
+test('the align variable applies to a vertical strip', async ({ page, scenario }) => {
+  await scenario('vertical-centred')
+  const strip = (await page.locator('c2-marquee').boundingBox())!
+  const first = (await page.locator('c2-marquee > .logo').first().boundingBox())!
+  expect(Math.round(first.x + first.width / 2)).toBe(Math.round(strip.x + strip.width / 2))
 })
 
 test('the paused attribute freezes the strip', async ({ page, scenario }) => {
