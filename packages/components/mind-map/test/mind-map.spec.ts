@@ -22,6 +22,7 @@ interface MindMap extends HTMLElement {
     | null
   getNode(id: string): MindMapNode | undefined
   select(id: string): void
+  edit(id?: string): void
   addChild(id?: string): unknown
   addSibling(id?: string, before?: boolean): unknown
   fold(id?: string, folded?: boolean): unknown
@@ -1077,4 +1078,16 @@ test.describe('review fixes', () => {
       ['4', '4'],
     ])
   })
+})
+
+test('an edit keeps the zoom: adding a subtopic does not re-fit the map', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, mindMap(plan, 'editable'))
+  const zoom = () => host(page).evaluate((map: MindMap) => map.panZoom!.zoom)
+  const before = await zoom()
+  await focusTopic(page, 'Search')
+  await page.keyboard.press('Tab')
+  await page.keyboard.type('A topic with a rather longer label')
+  await page.keyboard.press('Enter')
+  await settle(page)
+  expect(await zoom()).toBeCloseTo(before, 6)
 })

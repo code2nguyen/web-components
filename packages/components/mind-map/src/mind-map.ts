@@ -6,7 +6,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { isApplePlatform } from '@c2n/core/shortcut-helper.js'
-import { easeOutCubic } from '@c2n/core/pan-zoom.js'
+import { easeOutCubic, prefersReducedMotion } from '@c2n/core/pan-zoom.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/pan-zoom'
 import type { PanZoom } from '@c2n/pan-zoom'
@@ -109,8 +109,6 @@ function safeColour(value: unknown): string | null {
   if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && !CSS.supports('color', colour)) return null
   return colour
 }
-
-const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const plusIcon = svg`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h8M8 4v8" /></svg>`
 
@@ -865,7 +863,7 @@ export class MindMap extends LitElement {
       const old = from.get(id)
       return !old || old.x !== box.x || old.y !== box.y
     })
-    if (!from.size || duration <= 0 || reducedMotion() || !moved) {
+    if (!from.size || duration <= 0 || prefersReducedMotion() || !moved) {
       this.#drawn = new Map(target)
       return
     }
