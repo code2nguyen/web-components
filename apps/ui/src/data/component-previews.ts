@@ -183,7 +183,7 @@ greet('world')"></c2-code-editor>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,
-  'device-frame': `<div class="preview-row" style="align-items:flex-end"><c2-device-frame url="example.com" style="width:180px"><div style="padding:14px 12px;color:var(--c2-theme--color-on-surface, #18181b);font-size:12px">Your product</div></c2-device-frame><c2-device-frame device="phone" style="--c2-device-frame__phone--width:70px;--c2-device-frame__bezel--width:5px;--c2-device-frame__phone--border-radius:16px"><div style="height:100%;background:var(--c2-theme--color-primary-container, #edf1fe)"></div></c2-device-frame></div>`,
+  'device-frame': `<div class="preview-row" style="align-items:flex-end"><c2-device-frame url="example.com" style="width:180px"><div style="padding:14px 12px;color:var(--c2-theme--color-on-surface, #18181b);font-size:12px">Your product</div></c2-device-frame><c2-device-frame device="phone" style="--c2-device-frame__phone--width:60px;--c2-device-frame__bezel--width:4px;--c2-device-frame__phone--border-radius:12px"><div style="height:100%;background:var(--c2-theme--color-primary-container, #edf1fe)"></div></c2-device-frame></div>`,
   'diff-viewer': `<c2-diff-viewer style="width:300px" original="name: shop
 item: .card
 price: .price

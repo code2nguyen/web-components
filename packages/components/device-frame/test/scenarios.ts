@@ -9,6 +9,8 @@ const markup: Record<string, string> = {
   address: `<c2-device-frame url="ignored.example.com"><a slot="address" href="#docs">example.com/docs</a><span slot="actions">⋯</span>${content}</c2-device-frame>`,
   phone: `<c2-device-frame device="phone">${content}</c2-device-frame>`,
   narrow: `<div style="width: 200px"><c2-device-frame device="phone">${content}</c2-device-frame></div>`,
+  centred: `<div style="display: flex; justify-content: center"><c2-device-frame device="phone">${content}</c2-device-frame></div>`,
+  'centred-laptop': `<div style="display: flex; justify-content: center"><c2-device-frame device="laptop" style="--c2-device-frame__laptop--width: 300px">${content}</c2-device-frame></div>`,
   tablet: `<c2-device-frame device="tablet">${content}</c2-device-frame>`,
   laptop: `<c2-device-frame device="laptop">${content}</c2-device-frame>`,
   unknown: `<c2-device-frame device="watch" url="example.com">${content}</c2-device-frame>`,

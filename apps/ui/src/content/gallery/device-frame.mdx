@@ -136,16 +136,17 @@ The content is the screen; the variables shape the device around it. Each device
   .frame-laptop-screen {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    align-content: start;
+    gap: 6px;
     height: 100%;
     box-sizing: border-box;
-    padding: 12px;
+    padding: 8px;
     background: var(--c2-theme--color-surface-container-low, #fafafa);
     color: var(--c2-theme--color-on-surface, #18181b);
     font-size: 12px;
   }
   .frame-laptop-screen span {
-    padding: 8px;
+    padding: 6px;
     border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 6px;
     background: var(--c2-theme--color-surface, #ffffff);
@@ -153,10 +154,8 @@ The content is the screen; the variables shape the device around it. Each device
 </style>
 <c2-device-frame class="frame-laptop" device="laptop">
   <div class="frame-laptop-screen">
-    <span>Visitors 12.4k</span>
-    <span>Sign-ups 318</span>
-    <span>Revenue $48k</span>
-    <span>Churn 1.2%</span>
+    <span>Visitors<br />12.4k</span>
+    <span>Revenue<br />$48k</span>
   </div>
 </c2-device-frame>
 ```

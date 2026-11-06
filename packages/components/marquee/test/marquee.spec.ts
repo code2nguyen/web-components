@@ -24,7 +24,7 @@ async function box(locator: Locator) {
 async function offsets(page: Page, axis: 'x' | 'y' = 'x') {
   const strip = await box(page.locator('c2-marquee'))
   const items = await page.locator('c2-marquee > .logo').all()
-  return Promise.all(items.map(async (item) => Math.round((await box(item))[axis] - strip[axis])))
+  return Promise.all(items.map(async (item) => Math.round((await box(item))[axis] - strip[axis]) || 0))
 }
 
 test('lays the items out end to end and moves them toward the start', async ({ page, scenario }) => {
@@ -84,9 +84,10 @@ test('items shorter than the strip leave a gap and re-enter from outside it', as
   await scenario('short')
   await seek(page, 0)
   expect(await offsets(page)).toEqual([0, 120])
-  // The cycle is the strip plus the widest item (520px): the first item wraps to 400px, just past the right edge.
-  await seek(page, 3000)
-  expect(await offsets(page)).toEqual([400, 0])
+  // The cycle is the strip plus the widest item (520px): once the first item has left (at -120px) it re-enters
+  // from 400px, just past the right edge, so 140px of travel puts it at 380px.
+  await seek(page, 3500)
+  expect(await offsets(page)).toEqual([380, -20])
 })
 
 test('pauses on hover, on focus inside and while paused is set', async ({ page, scenario, tab }) => {

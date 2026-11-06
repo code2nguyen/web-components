@@ -74,7 +74,8 @@
 /* Browser window */
 
 .frame--browser {
-  inline-size: min(100%, #{css.cssVar(browser--width)});
+  inline-size: css.cssVar(browser--width);
+  max-inline-size: 100%;
   margin-inline: auto;
   border: css.cssVar(browser--border);
   border-radius: css.cssVar(browser--border-radius);
@@ -163,7 +164,8 @@
 }
 
 .frame--phone {
-  inline-size: min(100%, #{css.cssVar(phone--width)});
+  inline-size: css.cssVar(phone--width);
+  max-inline-size: 100%;
   aspect-ratio: css.cssVar(phone--aspect-ratio);
   border-radius: css.cssVar(phone--border-radius);
 }
@@ -175,10 +177,11 @@
 .island {
   position: absolute;
   z-index: 1;
-  inset-block-start: 10px;
+  inset-block-start: 2%;
   inset-inline-start: 50%;
   inline-size: css.cssVar(island--width);
-  block-size: 24px;
+  // Scales with the phone: 24px tall on a 300px phone.
+  aspect-ratio: 3.5;
   border-radius: 999px;
   background-color: css.cssVar(island--color);
   translate: -50%;
@@ -189,7 +192,8 @@
 }
 
 .frame--tablet {
-  inline-size: min(100%, #{css.cssVar(tablet--width)});
+  inline-size: css.cssVar(tablet--width);
+  max-inline-size: 100%;
   aspect-ratio: css.cssVar(tablet--aspect-ratio);
   border-radius: css.cssVar(tablet--border-radius);
 }
@@ -198,13 +202,10 @@
   border-radius: calc(#{css.cssVar(tablet--border-radius)} - #{css.cssVar(bezel--width)});
 }
 
-.device--laptop {
-  inline-size: 100%;
-}
-
 .frame--laptop {
-  // The deck is 8% wider than the lid on each side, so the lid stays inside the container.
-  inline-size: min(84%, #{css.cssVar(laptop--width)});
+  // The deck is about 9% wider than the lid on each side, so the lid stays inside the container.
+  inline-size: css.cssVar(laptop--width);
+  max-inline-size: 84%;
   aspect-ratio: css.cssVar(laptop--aspect-ratio);
   border-block-end-width: calc(#{css.cssVar(bezel--width)} * 1.5);
   border-radius: css.cssVar(laptop--border-radius) css.cssVar(laptop--border-radius) 0 0;
@@ -212,7 +213,8 @@
 
 .base {
   position: relative;
-  inline-size: min(100%, calc(#{css.cssVar(laptop--width)} * 1.19));
+  inline-size: calc(#{css.cssVar(laptop--width)} * 1.19);
+  max-inline-size: 100%;
   block-size: css.cssVar(base--height);
   border-radius: 0 0 14px 14px;
   background-color: css.cssVar(base--color);

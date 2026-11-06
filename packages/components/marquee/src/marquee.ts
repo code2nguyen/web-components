@@ -72,6 +72,12 @@ export class Marquee extends LitElement {
     this.mutationObserver = new MutationObserver(() => this.collectItems())
     this.mutationObserver.observe(this, { childList: true })
     this.resizeObserver = new ResizeObserver(() => this.scheduleMeasure())
+    // The first render draws no items, as the server did: a server-rendered strip that drew its children in its
+    // first client render would not match the markup it hydrates.
+    if (this.hasUpdated) this.collectItems()
+  }
+
+  protected override firstUpdated(): void {
     this.collectItems()
   }
 

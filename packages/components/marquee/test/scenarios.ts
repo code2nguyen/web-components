@@ -18,7 +18,9 @@ main.innerHTML = `<c2-marquee aria-label="Partners" ${attributes[scenario] ?? ''
 
 const subject = document.querySelector('c2-marquee')!
 await subject.updateComplete
-// The first measurement runs on the next animation frame; the items move once it has.
-await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-await subject.updateComplete
+// The items move once the strip has measured them, a frame or two after the first render.
+while (!subject.shadowRoot!.querySelector('.track.running')) {
+  await new Promise((resolve) => requestAnimationFrame(resolve))
+  await subject.updateComplete
+}
 main.dataset.ready = 'true'

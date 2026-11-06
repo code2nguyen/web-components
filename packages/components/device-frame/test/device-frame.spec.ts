@@ -49,6 +49,15 @@ test('a phone narrower than its container keeps its shape', async ({ page, scena
   expect(Math.round(rect.height)).toBe(Math.round((200 * 19.5) / 9))
 })
 
+test('keeps its size in a container that shrinks to fit its content', async ({ page, scenario }) => {
+  await scenario('centred')
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(300)
+
+  await scenario('centred-laptop')
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="frame"]'))).width)).toBe(300)
+  expect(Math.round((await box(page.locator('c2-device-frame').locator('[part="base"]'))).width)).toBe(357)
+})
+
 test('the size variables resize the device', async ({ page, scenario }) => {
   await scenario('phone')
   const frame = page.locator('c2-device-frame')
