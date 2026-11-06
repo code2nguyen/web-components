@@ -14,4 +14,8 @@ test('clip', async ({ page }) => {
   })
   await page.waitForTimeout(1500)
   await page.screenshot({ path: 'test-results/boxplot-clip.png' })
+  console.log(await page.locator('c2-boxplot-chart').first().evaluate((el) => {
+    const c = el as unknown as { boxes: unknown[]; adapter: { convertToPixel(f: unknown, v: number[]): number[] } }
+    return JSON.stringify({ b: c.boxes[0], px: [0, 2650000, 3650000, 8400000, 12345678].map((v) => c.adapter.convertToPixel({ gridIndex: 0 }, [0, v])) })
+  }))
 })
