@@ -126,9 +126,11 @@ export function buildBulletRows(inputs: readonly BulletRowInput[], options: Bull
   return inputs.map((input, index) => {
     const max = options.scale === 'shared' ? shared : ends[index]
     const boundaries = visibleBoundaries(input.bands, min, max)
+    // The last band reaches the scale end: a value, target or `max` past the last boundary extends it, and a boundary
+    // past the end is cut there.
     const bands: BulletBand[] = boundaries.map((to, at) => ({
       from: at === 0 ? min : boundaries[at - 1],
-      to,
+      to: at === boundaries.length - 1 ? max : Math.min(to, max),
       quality: bandQuality(at, boundaries.length, options.better),
     }))
     const { value, target } = input
@@ -151,17 +153,25 @@ export function buildBulletRows(inputs: readonly BulletRowInput[], options: Bull
   })
 }
 
+/** Most ticks a row's axis draws, whatever it is asked for. */
+const MAX_TICKS = 12
+
 /**
  * Round tick values across `[min, max]`: the finest step of 1, 2, 2.5 or 5 times a power of ten that gives at most
- * `target + 1` ticks. The ends are ticks whenever they are on a step, so `0` and a round scale end are labelled.
+ * `target + 1` ticks. The ends are ticks whenever they are on a step, so `0` and a round scale end are labelled. A span
+ * too small for its offset to step through in safe integers (`1e12` to `1e12 + 0.001`) gets its two ends.
  */
 export function bulletTicks(min: number, max: number, target = 5): number[] {
   if (!(max > min) || !finite(min) || !finite(max)) return finite(min) ? [min] : []
-  const wanted = Math.max(1, Math.floor(target))
+  const wanted = Math.max(1, Math.min(MAX_TICKS - 1, Math.floor(target)))
   const power = 10 ** Math.floor(Math.log10((max - min) / wanted))
+  const safe = (step: number) => Number.isSafeInteger(Math.ceil(Math.abs(min) / step)) && Number.isSafeInteger(Math.floor(Math.abs(max) / step))
   const count = (step: number) => Math.floor(max / step + 1e-9) - Math.ceil(min / step - 1e-9) + 1
-  const step = [1, 2, 2.5, 5, 10, 20, 25, 50].map((multiple) => multiple * power).find((candidate) => count(candidate) <= wanted + 1) ?? 100 * power
+  const step = [1, 2, 2.5, 5, 10, 20, 25, 50, 100].map((multiple) => multiple * power).find((candidate) => count(candidate) <= wanted + 1)
+  if (step === undefined || !(step > 0) || !safe(step) || min + step === min) return [min, max]
+  const first = Math.ceil(min / step - 1e-9)
   const ticks: number[] = []
-  for (let index = Math.ceil(min / step - 1e-9); index * step <= max + step * 1e-9; index += 1) ticks.push(Number((index * step).toPrecision(12)))
+  // Bounded by the count, not by the index: the loop ends however the floating point rounds.
+  for (let at = 0; at < Math.min(count(step), MAX_TICKS); at += 1) ticks.push(Number(((first + at) * step).toPrecision(12)))
   return ticks
 }

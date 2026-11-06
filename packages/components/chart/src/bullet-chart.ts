@@ -277,6 +277,11 @@ export class BulletChart extends EchartsChartBase {
     return changed.size === 0 || super.shouldUpdate(changed)
   }
 
+  /** Such a redraw request also redraws the engine: the values and ticks on the canvas follow the language too. */
+  #redrawEngine(): void {
+    this.adapter?.setOptions(this.buildOptions(this.buildContext()), 'merge')
+  }
+
   /** A bullet reads one series; the target and scale-end fields must not be inferred as more. */
   protected override inferredSeries(): ChartSeriesConfig[] {
     return super
@@ -376,7 +381,7 @@ export class BulletChart extends EchartsChartBase {
           <div class="tooltip-row">
             ${
               entry.kind === 'target'
-                ? html`<span class="bullet-tick-marker" style="background:currentColor"></span>`
+                ? html`<span class="bullet-tick-marker" style="background:${entry.color}"></span>`
                 : html`<span class="tooltip-marker ${entry.kind === 'band' ? 'bullet-band-marker' : ''}" style="background:${entry.color}"></span>`
             }
             <span class="tooltip-label">${entry.series.label ?? entry.series.field}</span>
@@ -402,6 +407,7 @@ export class BulletChart extends EchartsChartBase {
 
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
+    if (changed.size === 0) this.#redrawEngine()
     this.#renderAccessibleSummary()
     const plot = this.plotElement
     const label = this.#summary()
@@ -930,7 +936,7 @@ export class BulletChart extends EchartsChartBase {
 
   #number(value: number): string {
     const precision = typeof this.precision === 'number' && Number.isFinite(this.precision) ? Math.max(0, Math.min(20, Math.trunc(this.precision))) : 2
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: precision }).format(value)
+    return new Intl.NumberFormat(this.msg.locale || undefined, { maximumFractionDigits: precision }).format(value)
   }
 
   #format(value: number, row: BulletRow): string {
@@ -965,7 +971,7 @@ export class BulletChart extends EchartsChartBase {
   /** A tick's value: compact past a thousand, so a row's axis stays short. */
   #tick(value: number): string {
     const compact = Math.abs(value) >= 1000
-    return new Intl.NumberFormat(this.locale, compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 4 }).format(value)
+    return new Intl.NumberFormat(this.msg.locale || undefined, compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 4 }).format(value)
   }
 
   #summary(): string {

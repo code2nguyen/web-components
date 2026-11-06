@@ -133,6 +133,9 @@
   height: 12px;
   margin: 0 3px;
   border-radius: 1px;
+  // The target colour is the text colour, as dark as the tooltip: a ring of the tooltip's text keeps it visible, as
+  // the halo does on the plot.
+  box-shadow: 0 0 0 1px currentColor;
 }
 
 .bullet-band-marker {

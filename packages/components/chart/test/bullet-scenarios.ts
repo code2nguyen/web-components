@@ -91,7 +91,8 @@ for (const type of ['point-click', 'point-hover', 'series-highlight', 'tooltip-c
   chart.addEventListener(type, (event) => events.push({ type, detail: (event as CustomEvent).detail }))
 }
 
-if (scenario === 'scorecard' || scenario === 'vertical') chart.data = KPIS
+// The default branch draws the scorecard, so an unknown scenario gets its rows too.
+if (!['lower', 'status', 'shared', 'compact', 'gaps', 'empty'].includes(scenario)) chart.data = KPIS
 if (scenario === 'lower') chart.data = COSTS
 if (scenario === 'shared') chart.data = REGIONS
 if (scenario === 'gaps')

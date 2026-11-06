@@ -102,13 +102,13 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <div class="bullet-table">
   <span class="head">Region</span><span class="head number">Q3 sales</span><span class="head">vs target</span>
   <span>North</span><span class="number">$412k</span>
-  <span><c2-bullet-chart labels="none" value-labels="none" axis="none" target="400" max="450" bands="[300, 380, 450]" data='[{"sales":412}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="400" max="450" bands="[300, 380, 450]" data='[{"region":"North","sales":412}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
   <span>South</span><span class="number">$288k</span>
-  <span><c2-bullet-chart labels="none" value-labels="none" axis="none" target="350" max="450" bands="[300, 380, 450]" data='[{"sales":288}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="350" max="450" bands="[300, 380, 450]" data='[{"region":"South","sales":288}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
   <span>East</span><span class="number">$351k</span>
-  <span><c2-bullet-chart labels="none" value-labels="none" axis="none" target="345" max="450" bands="[300, 380, 450]" data='[{"sales":351}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="345" max="450" bands="[300, 380, 450]" data='[{"region":"East","sales":351}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
   <span>West</span><span class="number">$196k</span>
-  <span><c2-bullet-chart labels="none" value-labels="none" axis="none" target="260" max="450" bands="[300, 380, 450]" data='[{"sales":196}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="260" max="450" bands="[300, 380, 450]" data='[{"region":"West","sales":196}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
 </div>
 ```
 
