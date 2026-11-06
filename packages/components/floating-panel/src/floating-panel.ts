@@ -75,6 +75,8 @@ interface Gesture {
   moved: boolean
 }
 
+/** Narrowest a docked panel gets before the dock line wraps. */
+const DOCK_MIN_WIDTH = 120
 const STEP = 10
 const BIG_STEP = 50
 /** Pixels a press on the title bar travels before it becomes a drag, so a double-click never moves the panel. */
@@ -273,7 +275,42 @@ export class FloatingPanel extends LitElement {
       panel.front = index === stack.length - 1
       panel.syncStates()
     })
-    ;(FloatingPanel.docks.get(key) ?? []).forEach((panel, index) => (panel.dockIndex = index))
+    const dock = FloatingPanel.docks.get(key) ?? []
+    dock.forEach((panel, index) => (panel.dockIndex = index))
+    if (dock.length) void Promise.all(dock.map((panel) => panel.updateComplete)).then(() => FloatingPanel.layoutDock(key))
+  }
+
+  /**
+   * Lines the docked panels of a boundary up from the first one's place to its left. When the line runs out of room
+   * they share the width, down to `DOCK_MIN_WIDTH`, and past that wrap to further lines upward, so none leaves the
+   * boundary. Until this runs (a server render), CSS lines them up at full width.
+   */
+  private static layoutDock(key: object) {
+    const dock = (FloatingPanel.docks.get(key) ?? []).filter((panel) => panel.docked && panel.panel)
+    const first = dock[0]
+    if (!first) return
+    const style = getComputedStyle(first.panel!)
+    const { width: boundary } = first.boundarySize()
+    const right = pixels(style.right, boundary, 0)
+    const gap = pixels(style.getPropertyValue('--c2-floating-panel__docked--gap').trim(), boundary, 8)
+    const wanted = pixels(style.getPropertyValue('--c2-floating-panel__docked--width').trim(), boundary, 240)
+    const height = first.panel!.offsetHeight
+    // The line keeps the same margin on its far end as the docked inset leaves on its near end.
+    const room = Math.max(0, boundary - 2 * right)
+    const count = dock.length
+    let perLine = count
+    let width = Math.min(wanted, (room - (count - 1) * gap) / count)
+    if (width < DOCK_MIN_WIDTH) {
+      width = Math.min(DOCK_MIN_WIDTH, room)
+      perLine = Math.max(1, Math.floor((room + gap) / (width + gap)))
+      width = Math.min(wanted, (room - (perLine - 1) * gap) / perLine)
+    }
+    width = Math.max(0, Math.floor(width))
+    dock.forEach((panel, index) => {
+      const place = { x: -(index % perLine) * (width + gap), y: -Math.floor(index / perLine) * (height + gap), width }
+      const current = panel.dockPlace
+      if (!current || current.x !== place.x || current.y !== place.y || current.width !== place.width) panel.dockPlace = place
+    })
   }
 
   private static remove(map: Map<object, FloatingPanel[]>, key: object, panel: FloatingPanel) {
@@ -336,6 +373,8 @@ export class FloatingPanel extends LitElement {
   @reactive() private titleText = ''
   @reactive() private stackIndex = 0
   @reactive() private dockIndex = 0
+  /** A docked panel's offset from the first one's place and its width, once the dock line is measured. */
+  @reactive() private dockPlace: { x: number; y: number; width: number } | undefined = undefined
   /** In front of the other panels of its boundary. True until the stack says otherwise, as the server renders it. */
   @reactive() private front = true
   @reactive() private interacting = false
@@ -543,6 +582,7 @@ export class FloatingPanel extends LitElement {
    * boundary, and when its CSS place still sticks out it is drawn at the nearest place inside (`cssFit`).
    */
   private keepInside = () => {
+    if (this.open && this.docked && this.groupKey) FloatingPanel.layoutDock(this.groupKey)
     if (!this.open || this.state === 'maximized' || this.docked || this.gesture || !this.panel) return
     const rect = validRect(this.rect)
     if (rect) {
@@ -923,7 +963,11 @@ export class FloatingPanel extends LitElement {
 
   private placeStyle(): Record<string, string | undefined> {
     const style: Record<string, string | undefined> = { '--_stack': String(this.stackIndex) }
-    if (this.docked) style['--_dock'] = String(this.dockIndex)
+    if (this.docked) {
+      style['--_dock'] = String(this.dockIndex)
+      const place = this.dockPlace
+      if (place) Object.assign(style, { '--_dock-x': `${place.x}px`, '--_dock-y': `${place.y}px`, width: `${place.width}px` })
+    }
     if (this.state === 'maximized' || this.docked) return style
     const rect = validRect(this.rect) ?? (this.collapsed ? this.collapseAnchor : undefined)
     if (!rect) {

@@ -125,7 +125,8 @@
     height: auto;
     min-width: 0;
     min-height: 0;
-    translate: calc(var(--_dock, 0) * -1 * (#{css.cssVar(docked--width)} + #{css.cssVar(docked--gap)})) 0;
+    // Measured offsets (`--_dock-x`, `--_dock-y`) once the component has laid the line out; before that, full widths.
+    translate: var(--_dock-x, calc(var(--_dock, 0) * -1 * (#{css.cssVar(docked--width)} + #{css.cssVar(docked--gap)}))) var(--_dock-y, 0);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }

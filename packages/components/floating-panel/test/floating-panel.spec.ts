@@ -340,6 +340,46 @@ test.describe('minimise, maximise, restore and close', () => {
     await expect.poll(async () => (await box(panel(page, 1))).x).toBe(first.x)
   })
 
+  test('docked panels that do not fit side by side share the width, then wrap upward, all inside the boundary', async ({ page, renderScenario }) => {
+    const docked = (count: number) =>
+      Array.from({ length: count }, (_, index) => chat('boundary="parent" state="minimized"', '<p>Body</p>', `Panel number ${index + 1}`)).join('')
+    for (const [width, count] of [
+      [260, 2],
+      [400, 3],
+      [260, 3],
+    ] as const) {
+      await renderScenario(`<div class="area" style="width: ${width}px; height: 300px">${docked(count)}</div>`)
+      const area = await page.locator('.area').evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+        return {
+          left: rect.x + element.clientLeft,
+          top: rect.y + element.clientTop,
+          right: rect.x + element.clientLeft + element.clientWidth,
+          bottom: rect.y + element.clientTop + element.clientHeight,
+        }
+      })
+      const boxes: Rect[] = []
+      for (let index = 0; index < count; index++) {
+        await expect
+          .poll(async () => (await box(panel(page, index))).x, `panel ${index + 1} of ${count} in ${width}px`)
+          .toBeGreaterThanOrEqual(Math.floor(area.left))
+        boxes.push(await box(panel(page, index)))
+      }
+      for (const rect of boxes) {
+        expect(rect.x + rect.width).toBeLessThanOrEqual(Math.ceil(area.right))
+        expect(rect.y).toBeGreaterThanOrEqual(Math.floor(area.top))
+        expect(rect.y + rect.height).toBeLessThanOrEqual(Math.ceil(area.bottom))
+      }
+      // No two docked bars overlap.
+      for (let a = 0; a < count; a++)
+        for (let b = a + 1; b < count; b++) {
+          const [p, q] = [boxes[a], boxes[b]]
+          const overlap = p.x < q.x + q.width && q.x < p.x + p.width && p.y < q.y + q.height && q.y < p.y + p.height
+          expect(overlap, `bars ${a + 1} and ${b + 1} of ${count} in ${width}px`).toBe(false)
+        }
+    }
+  })
+
   test('minimize="collapse" folds the panel to its title bar where it is', async ({ page, renderScenario }) => {
     await renderScenario(chat(`minimize="collapse" rect='{"x":100,"y":100,"width":320,"height":240}'`))
     await page.getByRole('button', { name: 'Minimise' }).click()
