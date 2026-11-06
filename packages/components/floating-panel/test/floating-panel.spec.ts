@@ -587,6 +587,7 @@ test.describe('storage-key', () => {
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('chat-place')!))).toEqual({
       rect: { x: 100, y: 100, width: 300, height: 220 },
       state: 'minimized',
+      restore: 'normal',
     })
     await renderScenario(chat('storage-key="chat-place"'))
     await expect(host(page)).toHaveState('minimized')

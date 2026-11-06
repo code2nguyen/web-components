@@ -29,7 +29,10 @@ kept, so an app can store its own data on a node.
 
 - `side` (`left` or `right`) is read on first-level topics. Without it, `layout="both"` balances the sides by branch
   size.
-- `collapsed` hides the subtopics. Folding is saved with the map, because it is part of the document.
+- `collapsed` hides the subtopics of any topic but the central one, which cannot fold. Folding is saved with the map,
+  because it is part of the document.
+- A missing or repeated `id` is replaced by one made from the node's path (`topic-0-2`), the same on the server and in
+  the browser.
 - `color` on a first-level topic colours its whole branch. Without it, branches take the branch colours in turn.
 - `icon` is an emoji or a short text drawn before the label. It is decorative, not part of the topic's name.
 
@@ -50,7 +53,7 @@ replaces the map and clears the undo history.
 | `editable` | off     | The user adds, edits, moves and deletes topics. Navigation and folding work either way. |
 | `no-drag`  | off     | No drag to reparent: a drag on a topic pans, like a drag on the canvas.                 |
 | `controls` | off     | The zoom toolbar of the canvas.                                                         |
-| `minimap`  | off     | An overview of the map (one box per topic, in its branch colour) while it overflows.    |
+| `minimap`  | off     | An overview while the map overflows: one box per drawn topic (not folded ones), in its branch colour. |
 
 ## Keyboard
 
@@ -92,6 +95,8 @@ pans, the wheel pans and Ctrl/⌘ + wheel zooms.
 
 `addChild(id?)`, `addSibling(id?, before?)` (both return the new id), `edit(id?)`, `removeTopic(id?)`, `select(id)`,
 `fold(id?, folded?)`, `setColor(id?, color)`, `undo()`, `redo()` and `fit()`; `id` is the selected topic by default.
+`setColor()` colours a whole branch: on a deeper topic it sets the colour of its first-level ancestor, and on the
+central topic it does nothing.
 `getNode(id)` and `selectedNode` read the map, and `panZoom` is the inner `c2-pan-zoom`, for `zoomTo()`, `centerOn()`
 or `view-change`. (`removeTopic` is not called `remove` because `Element.remove()` takes the element out of the page.)
 
@@ -113,7 +118,7 @@ browser lays the map out in its second render, so the first client render matche
 
 ## Styling
 
-Every look is a CSS custom property: the canvas (`--c2-mind-map--height` 480px, `--background`, `--border`, the dot
+The main styling is done with CSS custom properties: the canvas (`--c2-mind-map--height` 480px, `--background`, `--border`, the dot
 grid), the eight branch colours (`__branch-1--color` … `__branch-8--color`, the chart series colours), the central
 topic (`__root--*`), first-level topics (`__topic--*`, with `__topic--tint` the share of the branch colour in their
 background and `__topic--max-width` where labels wrap), deeper topics (`__subtopic--*`), the connectors

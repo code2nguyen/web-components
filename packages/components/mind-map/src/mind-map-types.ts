@@ -1,12 +1,12 @@
 /** A topic of a mind map. Unknown fields are kept, so an app can store its own data on a node. */
 export interface MindMapNode {
-  /** Unique id. A node without one gets a generated id; a repeated id is replaced, with a warning. */
+  /** Unique id. A node without one, or with a repeated one (with a warning), gets an id made from its path. */
   id: string
   /** The topic's text. Line breaks are kept. */
   label: string
   /** Subtopics, in drawing order (top to bottom). */
   children?: MindMapNode[]
-  /** The subtopics are hidden. Saved with the map, since folding is part of the document. */
+  /** The subtopics are hidden (not on the central topic, which cannot fold). Saved with the map, since folding is part of the document. */
   collapsed?: boolean
   /** Which side of the central topic a first-level topic sits on. Without it, `layout="both"` balances the sides. */
   side?: MindMapSide
