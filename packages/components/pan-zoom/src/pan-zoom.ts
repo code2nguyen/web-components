@@ -163,6 +163,8 @@ interface Drag {
   id: number
   startX: number
   startY: number
+  /** The view when the drag started: a move pans it by the pointer's whole travel since, so a repeated or reordered move event cannot add up. */
+  view: PanZoomView
   lastX: number
   lastY: number
   moved: boolean
@@ -836,7 +838,15 @@ export class PanZoom extends LitElement {
 
   private startDrag(event: PointerEvent) {
     this.stopMotion()
-    this.drag = { id: event.pointerId, startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY, moved: false }
+    this.drag = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      view: this.current,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      moved: false,
+    }
     this.inertia.reset()
     this.inertia.add(event.clientX, event.clientY, event.timeStamp)
   }
@@ -870,13 +880,11 @@ export class PanZoom extends LitElement {
       this.hideHint()
       this.requestUpdate()
     }
-    const dx = event.clientX - drag.lastX
-    const dy = event.clientY - drag.lastY
     drag.lastX = event.clientX
     drag.lastY = event.clientY
     this.inertia.add(event.clientX, event.clientY, event.timeStamp)
     this.touched = true
-    this.setView(panView(this.current, -dx, -dy), 'gesture')
+    this.setView(panView(drag.view, -(event.clientX - drag.startX), -(event.clientY - drag.startY)), 'gesture')
   }
 
   private handlePointerUp = (event: PointerEvent) => {
@@ -894,7 +902,7 @@ export class PanZoom extends LitElement {
         const [rest] = this.pointers.ids
         const at = this.pointers.center()
         if (rest !== undefined && at && gestures !== 'cooperative') {
-          this.drag = { id: rest, startX: at.x, startY: at.y, lastX: at.x, lastY: at.y, moved: true }
+          this.drag = { id: rest, startX: at.x, startY: at.y, view: this.current, lastX: at.x, lastY: at.y, moved: true }
           this.inertia.reset()
         }
       }

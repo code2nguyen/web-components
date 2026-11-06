@@ -26,10 +26,16 @@ async function drag(page: Page, from: Locator, dx: number, dy: number, options: 
   const at = options.at ?? 'center'
   const x = at === 'right' ? rect.x + rect.width - 2 : at === 'left' ? rect.x + 2 : at === 'bottom-right' ? rect.x + rect.width - 2 : rect.x + rect.width / 2
   const y = at === 'bottom-right' ? rect.y + rect.height - 2 : rect.y + rect.height / 2
+  // The pointer stays inside the window, as a real one does: Firefox reports a synthetic move outside it at (0, 0).
+  // Every edge the tests drag past is inside the window, so the clamp does not change what they check.
+  const viewport = page.viewportSize()!
+  const inside = (value: number, size: number) => Math.min(Math.max(value, 0), size - 1)
+  const endX = inside(x + dx, viewport.width)
+  const endY = inside(y + dy, viewport.height)
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x + dx / 2, y + dy / 2, { steps: 4 })
-  await page.mouse.move(x + dx, y + dy, { steps: 4 })
+  await page.mouse.move((x + endX) / 2, (y + endY) / 2, { steps: 4 })
+  await page.mouse.move(endX, endY, { steps: 4 })
   await page.mouse.up()
 }
 
