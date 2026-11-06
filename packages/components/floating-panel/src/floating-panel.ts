@@ -197,7 +197,7 @@ function deepActiveElement(): Element | null {
  * @csspart minimize-button - The Minimise button, which reads Restore while the panel is minimised.
  * @csspart maximize-button - The Maximise button, which reads Restore while the panel is maximised.
  * @csspart close-button - The Close button.
- * @csspart body - The scrolling body around the default slot.
+ * @csspart body - The scrolling body region around the default slot, which projects the panel's content inside it.
  * @csspart footer - The box around the `footer` slot.
  * @csspart grip - The resize grip in the bottom-right corner.
  *

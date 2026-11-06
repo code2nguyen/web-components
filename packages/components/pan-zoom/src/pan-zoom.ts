@@ -204,10 +204,10 @@ interface Animation {
  * @csspart viewport - The pannable area: the tab stop, with the `group` role.
  * @csspart content - The wrapper the content is laid out in, and moved by the transform.
  * @csspart grid - The dot grid behind the content.
- * @csspart controls - The toolbar.
+ * @csspart controls - The toolbar container: the zoom buttons and readout, with the `controls` slot's extra buttons placed inside it after them.
  * @csspart button - Each toolbar button.
  * @csspart readout - The zoom percent button.
- * @csspart minimap - The minimap.
+ * @csspart minimap - The minimap box: it holds the `minimap` slot when one is assigned, else a drawn copy of the content as fallback.
  * @csspart minimap-frame - The viewport rectangle in the minimap.
  * @csspart hint - The hint a plain wheel shows in cooperative mode.
  *

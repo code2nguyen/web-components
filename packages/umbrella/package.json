@@ -481,6 +481,10 @@
       "types": "./dist/float-button/float-button-action.d.ts",
       "default": "./dist/float-button/float-button-action.js"
     },
+    "./floating-panel": {
+      "types": "./dist/floating-panel.d.ts",
+      "default": "./dist/floating-panel.js"
+    },
     "./flow": {
       "types": "./dist/flow.d.ts",
       "default": "./dist/flow.js"
@@ -689,6 +693,10 @@
       "types": "./dist/meter.d.ts",
       "default": "./dist/meter.js"
     },
+    "./mind-map": {
+      "types": "./dist/mind-map.d.ts",
+      "default": "./dist/mind-map.js"
+    },
     "./modal": {
       "types": "./dist/modal.d.ts",
       "default": "./dist/modal.js"
@@ -760,6 +768,10 @@
     "./pagination": {
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
+    },
+    "./pan-zoom": {
+      "types": "./dist/pan-zoom.d.ts",
+      "default": "./dist/pan-zoom.js"
     },
     "./password-field": {
       "types": "./dist/password-field.d.ts",

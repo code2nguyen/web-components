@@ -1,6 +1,34 @@
 import type { Locator, Page } from '@playwright/test'
 import { test, expect, accessible, hostAria } from '../../../../tests/component-fixture'
-import type { MindMap, MindMapNode } from '../src/mind-map'
+import type { MindMapLayout, MindMapNode } from '../src/mind-map-types'
+
+/**
+ * The parts of `c2-mind-map` the tests touch. Declared here rather than imported from `../src/mind-map`: that module
+ * imports `@c2n/pan-zoom`, whose built declaration of `c2-pan-zoom` would clash with the pan-zoom suite's source one.
+ */
+interface MindMap extends HTMLElement {
+  data: MindMapNode
+  layout: MindMapLayout
+  editable: boolean
+  noDrag: boolean
+  updateComplete: Promise<boolean>
+  panZoom:
+    | (HTMLElement & {
+        zoom: number
+        view: { x: number; y: number; zoom: number }
+        updateComplete: Promise<boolean>
+        zoomTo(zoom: number, options?: { animate?: boolean }): unknown
+      })
+    | null
+  getNode(id: string): MindMapNode | undefined
+  select(id: string): void
+  addChild(id?: string): unknown
+  addSibling(id?: string, before?: boolean): unknown
+  fold(id?: string, folded?: boolean): unknown
+  setColor(id?: string, color?: string): unknown
+  undo(): unknown
+  redo(): unknown
+}
 
 // The scenario page sizes every map to 900 × 520 with no motion (see scenarios.html), so a layout lands at once.
 
@@ -302,7 +330,7 @@ test.describe('accessibility', () => {
   test('writes no attribute on the host', async ({ page, renderScenario }) => {
     await renderScenario('<c2-mind-map></c2-mind-map>')
     const attributes = await page.evaluate(async () => {
-      const map = document.createElement('c2-mind-map')
+      const map = document.createElement('c2-mind-map') as MindMap
       map.data = { id: 'r', label: 'Root', children: [{ id: 'a', label: 'A' }] }
       document.querySelector('main')!.append(map)
       await map.updateComplete
@@ -327,7 +355,7 @@ test.describe('server rendering', () => {
   test('the first render is the indented outline the server sends, and the map is laid out on the second', async ({ page, renderScenario }) => {
     await renderScenario('<div id="spot"></div>')
     const first = await page.evaluate(async (data) => {
-      const map = document.createElement('c2-mind-map')
+      const map = document.createElement('c2-mind-map') as MindMap
       map.data = data
       // Registered before the first update runs, so it sees the DOM of the first render, as hydration does.
       const firstRender = map.updateComplete.then(() => {

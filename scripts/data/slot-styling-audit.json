@@ -4640,6 +4640,26 @@
       "decision": "part",
       "parts": ["title"],
       "reason": "The title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's content at its natural size; the component only transforms the wrapper around it, so the assigned nodes keep their own styles."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "controls",
+      "decision": "part",
+      "parts": ["controls"],
+      "reason": "The zoom toolbar owns the controls slot's component-side presentation; extra buttons sit inside it."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "minimap",
+      "decision": "part",
+      "parts": ["minimap"],
+      "reason": "The minimap box sizes and frames the slotted overview; the assigned content keeps its own styles."
     }
   ]
 }
