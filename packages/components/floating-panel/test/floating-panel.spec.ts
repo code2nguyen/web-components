@@ -73,6 +73,62 @@ test.describe('place and size', () => {
   })
 })
 
+test.describe('a boundary smaller than the CSS place', () => {
+  const narrow = (attributes: string) =>
+    `<div class="area" style="width: 200px; height: 300px">${chat(`boundary="parent" ${attributes}`)}</div><div style="height: 2px"></div>`
+
+  async function inside(page: Page) {
+    const area = await page.locator('.area').evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return { x: rect.x + element.clientLeft, y: rect.y + element.clientTop, width: element.clientWidth, height: element.clientHeight }
+    })
+    const rect = (await panel(page).boundingBox())!
+    return {
+      x: Math.round(rect.x - area.x),
+      y: Math.round(rect.y - area.y),
+      right: Math.round(area.x + area.width - (rect.x + rect.width)),
+      bottom: Math.round(area.y + area.height - (rect.y + rect.height)),
+      width: Math.round(rect.width),
+    }
+  }
+
+  test('a 320px panel in a 200px parent stays inside it, at its CSS place, without a rect', async ({ page, renderScenario }) => {
+    await renderScenario(narrow('style="--c2-floating-panel--width: 320px"'))
+    await watch(host(page), 'rect-change')
+    await expect.poll(async () => (await inside(page)).x).toBeGreaterThanOrEqual(0)
+    const place = await inside(page)
+    expect(place.width).toBeLessThanOrEqual(200)
+    expect(place.right).toBeGreaterThanOrEqual(0)
+    expect(place.bottom).toBeGreaterThanOrEqual(0)
+    await expect(host(page)).toHaveJSProperty('rect', null)
+    expect(await events(host(page))).toEqual([])
+  })
+
+  test('an inset that puts the panel outside is pulled in, and follows the parent when it grows', async ({ page, renderScenario }) => {
+    await renderScenario(
+      narrow('style="--c2-floating-panel--inset: 20px auto auto 150px; --c2-floating-panel--width: 180px; --c2-floating-panel--min-width: 100px"'),
+    )
+    await expect.poll(() => inside(page)).toMatchObject({ x: 20, y: 20, right: 0, width: 180 })
+    await page.locator('.area').evaluate((element) => ((element as HTMLElement).style.width = '500px'))
+    await expect.poll(async () => (await inside(page)).x).toBe(150)
+    await expect(host(page)).toHaveJSProperty('rect', null)
+  })
+
+  test('a drag starts from the fitted place', async ({ page, renderScenario }) => {
+    await renderScenario(
+      narrow('style="--c2-floating-panel--inset: 20px auto auto 150px; --c2-floating-panel--width: 180px; --c2-floating-panel--min-width: 100px"'),
+    )
+    await expect.poll(async () => (await inside(page)).x).toBe(20)
+    await drag(page, handle(page), 0, 40)
+    await expect(host(page)).toHaveJSProperty('rect', {
+      x: 20,
+      y: 60,
+      width: 180,
+      height: await panel(page).evaluate((element) => Math.round(element.getBoundingClientRect().height)),
+    })
+  })
+})
+
 test.describe('drag', () => {
   test('the title bar drags the panel and reports the new rect once, at the end', async ({ page, renderScenario }) => {
     await renderScenario(chat(`rect='{"x":200,"y":150,"width":320,"height":240}'`))
