@@ -1,0 +1,36 @@
+---
+import Logo from './Logo.astro'
+import { product } from '../data/site'
+
+const columns = [
+  { title: 'Product', links: ['Integrations', 'Features', 'Pricing', 'Changelog'] },
+  { title: 'Company', links: ['About', 'Customers', 'Careers', 'Contact'] },
+  { title: 'Resources', links: ['Docs', 'Guides', 'Status', 'Security'] },
+]
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__brand">
+      <span class="brand"><Logo /> {product.name}</span>
+      <p>{product.tagline}</p>
+    </div>
+    {
+      columns.map((column) => (
+        <nav class="site-footer__column" aria-label={column.title}>
+          <h2>{column.title}</h2>
+          <ul>
+            {column.links.map((label) => (
+              <li>
+                <a href="#top">{label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+  <p class="container site-footer__note">
+    {product.name} is a made-up product. This page is an example app for the c2n web components, built with Astro.
+  </p>
+</footer>

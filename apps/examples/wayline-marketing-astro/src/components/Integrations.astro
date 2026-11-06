@@ -1,0 +1,59 @@
+---
+import Icon from './Icon.astro'
+import Logo from './Logo.astro'
+import { actions, triggers } from '../data/site'
+---
+
+<section class="container split" id="integrations" aria-labelledby="integrations-title">
+  <div class="split__text">
+    <p class="eyebrow">Integrations</p>
+    <h2 id="integrations-title">Every hand-off, in one place</h2>
+    <p>
+      Something happens in one app, Wayline does the rest in the others. Connect your email, forms and CRM on one side, and your chat, billing and warehouse on
+      the other.
+    </p>
+    <ul class="checks">
+      <li>400+ connectors, and webhooks for everything else</li>
+      <li>Each step shows the exact data it received and sent</li>
+      <li>Connections are shared across the workspace, set up once</li>
+    </ul>
+  </div>
+
+  <figure class="hub" aria-labelledby="hub-caption">
+    <div class="hub__column">
+      {
+        triggers.map((item) => (
+          <div class="hub__item">
+            <span class="hub__node" id={item.id}>
+              <Icon name={item.icon} />
+            </span>
+            <span class="hub__label">{item.label}</span>
+          </div>
+        ))
+      }
+    </div>
+    <div class="hub__center">
+      <span class="hub__node hub__node--core" id="hub-core">
+        <Logo size={30} />
+      </span>
+      <span class="hub__label">Wayline</span>
+    </div>
+    <div class="hub__column">
+      {
+        actions.map((item) => (
+          <div class="hub__item">
+            <span class="hub__node" id={item.id}>
+              <Icon name={item.icon} />
+            </span>
+            <span class="hub__label">{item.label}</span>
+          </div>
+        ))
+      }
+    </div>
+    {triggers.map((item, index) => <c2-beam from={item.id} to="hub-core" curvature={(index - 1) * -40} />)}
+    {actions.map((item, index) => <c2-beam class="beam-out" from="hub-core" to={item.id} curvature={(index - 1) * 40} />)}
+    <figcaption id="hub-caption" class="visually-hidden">
+      Email, forms and the CRM send events to Wayline, which passes them on to chat, billing and the warehouse.
+    </figcaption>
+  </figure>
+</section>

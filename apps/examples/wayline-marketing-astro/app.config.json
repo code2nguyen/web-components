@@ -1,0 +1,8 @@
+{
+  "title": "Wayline Marketing Site",
+  "description": "A static Astro landing page for a fictional integration platform: a c2-backdrop hero with a rotating c2-text-effect headline and a live dashboard in a c2-device-frame, a c2-marquee logo wall and testimonial columns, a c2-beam integration hub, segmented pricing, an FAQ and a sign-up modal. Below-the-fold components load when their section comes near, like Astro's client:visible.",
+  "framework": "astro",
+  "sourcePath": "apps/examples/wayline-marketing-astro",
+  "tags": ["marketing", "landing", "astro", "static", "motion", "marquee", "beam", "device-frame"],
+  "order": 80
+}

@@ -24,8 +24,9 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-| Component | Severity | Finding |
-| --------- | -------- | ------- |
+| Component                                    | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@c2n/theme` (`c2-badge`, `c2-button-group`) | bug      | Building `apps/examples/wayline-marketing-astro`, axe flagged a neutral `c2-badge` and an unselected segmented `c2-button-group` item at 4.39:1. Both components default their text to `#52525b` (passes on `#f4f4f5`), but the theme generator's `classify.ts` puts `#52525b` in the same set as `#71717a` and maps it to `--c2-theme--color-on-surface-variant` (`#71717a`), which fails AA on the `surface-container` background they sit on. Smallest fix: map `#52525b` text on a container surface to a darker token, or add a `color-on-surface-container` role; the app works around it by setting both variables to a mix of the text colour. |
 
 ## Fixed
 

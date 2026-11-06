@@ -1,0 +1,27 @@
+---
+import Logo from './Logo.astro'
+import { product } from '../data/site'
+
+const links = [
+  { href: '#integrations', label: 'Integrations' },
+  { href: '#features', label: 'Features' },
+  { href: '#pricing', label: 'Pricing' },
+  { href: '#faq', label: 'FAQ' },
+]
+---
+
+<c2-scroll-progress class="page-progress" label="Reading progress"></c2-scroll-progress>
+<c2-header class="site-header" sticky blurred navigation-label="Main">
+  <a slot="brand" class="brand" href="#top" aria-label={`${product.name} home`}>
+    <Logo />
+    <span>{product.name}</span>
+  </a>
+  {
+    links.map((link) => (
+      <c2-link-button class="nav-link" href={link.href}>
+        {link.label}
+      </c2-link-button>
+    ))
+  }
+  <c2-button slot="actions" class="cta" data-signup>Start free</c2-button>
+</c2-header>

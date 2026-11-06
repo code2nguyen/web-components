@@ -1,0 +1,18 @@
+---
+import { customers } from '../data/site'
+
+const marks = ['◆', '●', '▲', '■', '✦', '◉', '⬢', '✚']
+---
+
+<section class="container customers" aria-labelledby="customers-title">
+  <h2 id="customers-title" class="eyebrow">Trusted by operations teams at</h2>
+  <c2-marquee class="logo-strip" aria-label="Customers">
+    {
+      customers.map((name, index) => (
+        <span class="customer">
+          <span aria-hidden="true">{marks[index % marks.length]}</span> {name}
+        </span>
+      ))
+    }
+  </c2-marquee>
+</section>

@@ -1,0 +1,37 @@
+---
+import { testimonials } from '../data/site'
+
+// Three columns that scroll up at slightly different speeds, the middle one the other way.
+const columns = [0, 1, 2].map((column) =>
+  testimonials.filter((_, index) => index % 3 === column).concat(testimonials.filter((_, index) => index % 3 !== column).slice(0, 1)),
+)
+---
+
+<section class="container" aria-labelledby="testimonials-title">
+  <div class="section-head">
+    <p class="eyebrow">Customers</p>
+    <h2 id="testimonials-title">Teams that stopped copying and pasting</h2>
+  </div>
+  <div class="quote-columns">
+    {
+      columns.map((quotes, index) => (
+        <c2-marquee
+          class={`quote-column quote-column--${index}`}
+          orientation="vertical"
+          reverse={index === 1}
+          aria-label={`What customers say, column ${index + 1}`}
+        >
+          {quotes.map((item) => (
+            <figure class="quote">
+              <blockquote>{item.quote}</blockquote>
+              <figcaption>
+                <strong>{item.name}</strong>
+                <span>{item.role}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </c2-marquee>
+      ))
+    }
+  </div>
+</section>
