@@ -586,11 +586,11 @@ test('regression: band names are one message each per band count, so a language 
   await expect(bands.nth(1)).toHaveText(/^\s*Correct, sans plus, 20/)
   await expect(bands.nth(0)).toHaveText(/^\s*Bon, 225/)
   await chart.evaluate(async (element) => {
-    element.setAttribute('band-labels', '["Behind, badly", "Close", "Ahead"]')
+    element.setAttribute('band-labels', '["Behind", "Close, but not yet", "Ahead"]')
     await (element as unknown as BulletInternals).updateComplete
   })
-  await expect(bands.nth(1)).toHaveText(/^\s*Close, 20/)
-  await expect(bands.nth(2)).toHaveText(/^\s*Behind, badly, 0/)
+  await expect(bands.nth(1)).toHaveText(/^\s*Close, but not yet, 20/)
+  await expect(bands.nth(0)).toHaveText(/^\s*Ahead, 225/)
 })
 
 test('regression: a measure whose series field is "target" or "band" keeps the bar swatch; the markers follow what an entry is', async ({ page }) => {
