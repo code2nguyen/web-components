@@ -332,7 +332,7 @@ price: .price
   Cart --> Pay{Paid?}
   Pay -- yes --> Ship"></c2-mermaid>`,
   meter: `<div class="preview-row" style="flex-direction:column;align-items:stretch;gap:14px;width:220px"><c2-meter value="78" low="70" high="90" optimum="0">Disk</c2-meter><c2-meter max="15" value-text="10.5 of 15 GB" segments='[{"label":"Photos","value":6},{"label":"Docs","value":3},{"label":"Mail","value":1.5}]'>Storage</c2-meter></div>`,
-  'mind-map': `<c2-mind-map></c2-mind-map>`,
+  'mind-map': `<c2-mind-map label="Q3 launch plan" style="width:280px;--c2-mind-map--height:170px;--c2-mind-map__grid--gap:14px" data='{"id":"r","label":"Q3 launch","children":[{"id":"m","label":"Marketing","children":[{"id":"m1","label":"Paid ads"},{"id":"m2","label":"SEO"}]},{"id":"e","label":"Engineering","children":[{"id":"e1","label":"Public API"},{"id":"e2","label":"Performance"}]},{"id":"p","label":"Product","children":[{"id":"p1","label":"Pricing"}]},{"id":"s","label":"Support","children":[{"id":"s1","label":"Help center"}]}]}'></c2-mind-map>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>

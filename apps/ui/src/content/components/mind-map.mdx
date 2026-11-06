@@ -1,7 +1,7 @@
 ---
 title: 'Mind Map'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'An idea tree laid out around a central topic, with keyboard editing as in XMind and Miro.'
+category: 'Editors & viewers'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { MindMap } from '@c2n/components/mind-map'
 
-`c2-mind-map` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-mind-map` draws a tree of ideas around a central topic: the centre is a filled card, first-level topics are boxes tinted with their branch colour and deeper topics are text on a line, joined by curves that thin at each level. Hand it the map as `data`, one root node `{ id, label, children?, collapsed?, side?, color?, icon? }`; `layout="both"` balances the branches on either side of the centre, and `left` or `right` draws a one-sided logic chart. Topics are measured in the page, so long labels wrap at `--c2-mind-map__topic--max-width` and the layout follows. The canvas is a `c2-pan-zoom`: a drag on empty canvas or the wheel pans, Ctrl/⌘ + wheel zooms, and `controls` and `minimap` add the zoom toolbar and an overview.
+
+With `editable`, the keys work as in XMind: Tab or Insert adds a subtopic, Enter a sibling, F2 or typing edits the label, Delete removes the topic, Alt + the arrows move it, Space folds and Ctrl/⌘+Z undoes; a drag moves a topic onto another, and copy and paste use an indented list. Because Tab adds a subtopic, Escape moves focus to the canvas and Tab then leaves the map. The map edits its own copy: every edit fires a cancelable `before-change`, then `change` with the new `data`, which is where an app saves it. The arrows follow the drawing in read-only maps too, where a click or Enter fires `node-click` to open a topic's details.
 
 ## Import
 
@@ -21,13 +22,46 @@ import '@c2n/components/mind-map'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/mind-map
-<div data-label="Default">
-  <c2-mind-map></c2-mind-map>
+<style>
+  .mm-usage {
+    width: 100%;
+    --c2-mind-map--height: 360px;
+  }
+</style>
+<div data-label="Editable, with controls">
+  <c2-mind-map
+    class="mm-usage"
+    label="Q3 launch plan"
+    editable
+    controls
+    data='{"id":"root","label":"Q3 launch","children":[{"id":"mkt","label":"Marketing","children":[{"id":"ads","label":"Paid ads","children":[{"id":"search","label":"Search"},{"id":"social","label":"Social"}]},{"id":"seo","label":"SEO refresh"},{"id":"event","label":"Launch event"}]},{"id":"eng","label":"Engineering","children":[{"id":"api","label":"Public API","children":[{"id":"rate","label":"Rate limits"},{"id":"sdks","label":"SDKs"}]},{"id":"perf","label":"Performance"}]},{"id":"prod","label":"Product","children":[{"id":"onb","label":"Onboarding flow"},{"id":"price","label":"Pricing page"}]},{"id":"sup","label":"Support","collapsed":true,"children":[{"id":"help","label":"Help center"},{"id":"train","label":"Agent training"}]}]}'
+  ></c2-mind-map>
+</div>
+<div data-label="Read-only logic chart">
+  <c2-mind-map
+    class="mm-usage"
+    label="Checkout outage causes"
+    layout="right"
+    data='{"id":"r","label":"Checkout outage","children":[{"id":"p","label":"People","icon":"👥","children":[{"id":"p1","label":"On-call handover"}]},{"id":"t","label":"Technology","icon":"⚙️","children":[{"id":"t1","label":"Cache eviction"},{"id":"t2","label":"Retry storm"}]},{"id":"c","label":"Process","icon":"📋","children":[{"id":"c1","label":"No canary release"}]}]}'
+  ></c2-mind-map>
 </div>
 ```
 
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
+The first map is editable: select a topic and press Tab to add a subtopic, Enter for a sibling, Space to fold, or drag a topic onto another. The fold dot of a folded topic counts its hidden topics. The second map is read-only: the arrows still follow the drawing and Space folds.
 
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.
+## Saving the map
+
+```typescript tag=CodeBlock
+const map = document.querySelector('c2-mind-map')!
+
+map.addEventListener('before-change', (event) => {
+  // Keep the "Support" branch locked.
+  if (event.detail.action.node.id === 'sup' && event.detail.action.type === 'delete') event.preventDefault()
+})
+
+map.addEventListener('change', (event) => {
+  save(event.detail.data) // the whole map after the edit
+})
+```
+
+`toOutline(node)` and `fromOutline(text)`, exported next to the element, turn a map into an indented Markdown list and back.

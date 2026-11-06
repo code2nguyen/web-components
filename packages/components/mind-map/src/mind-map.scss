@@ -1,15 +1,432 @@
-@use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-mind-map,
-  $theme: ()
+  $theme: (
+    height: 480px,
+    background: #fafafa,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    grid--display: block,
+    grid--color: #e4e4e7,
+    grid--gap: 20px,
+    font-family: inherit,
+    transition-duration: 200ms,
+    branch-1--color: #0265dc,
+    branch-2--color: #ea580c,
+    branch-3--color: #0f766e,
+    branch-4--color: #db2777,
+    branch-5--color: #a16207,
+    branch-6--color: #7c3aed,
+    branch-7--color: #0891b2,
+    branch-8--color: #52525b,
+    root--background: #18181b,
+    root--color: #fafafa,
+    root--font-size: 16px,
+    root--font-weight: 600,
+    root--padding: 10px 18px,
+    root--border-radius: 8px,
+    topic--tint: 14%,
+    topic--background: #ffffff,
+    topic--color: #18181b,
+    topic--font-size: 14px,
+    topic--font-weight: 500,
+    topic--line-height: 20px,
+    topic--padding: 6px 12px,
+    topic--border-width: 1px,
+    topic--border-radius: 6px,
+    topic--max-width: 220px,
+    subtopic--color: #18181b,
+    subtopic--font-size: 14px,
+    subtopic--font-weight: 400,
+    subtopic--padding: 4px 2px,
+    connector--width: 2.5px,
+    connector--taper: 0.5px,
+    connector--min-width: 1px,
+    level--gap: 56px,
+    sibling--gap: 12px,
+    topic__selected--outline: 2px solid #0265dc,
+    topic__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    topic__dragging--opacity: 0.4,
+    drop-target--background: #edf1fe,
+    drop-line--color: #0265dc,
+    ghost--background: #ffffff,
+    ghost--color: #18181b,
+    ghost--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    toggle--size: 18px,
+    toggle--background: #ffffff,
+    toggle--color: #18181b,
+    toggle--font-size: 12px,
+    add--size: 20px,
+    add--background: #0265dc,
+    add--color: #ffffff,
+    editor--background: #ffffff,
+    editor--color: #18181b,
+    editor--caret-color: #0265dc,
+    board__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
 );
 
-
 :host {
-  display: inline-flex;
+  display: block;
+  position: relative;
+  min-width: 0;
+  font-family: css.cssVar(font-family);
 }
 
-.c2-mind-map {
+:host([hidden]) {
+  display: none;
+}
+
+.canvas {
+  --c2-pan-zoom--height: #{css.cssVar(height)};
+  --c2-pan-zoom--background: #{css.cssVar(background)};
+  --c2-pan-zoom--border: #{css.cssVar(border)};
+  --c2-pan-zoom--border-radius: #{css.cssVar(border-radius)};
+  --c2-pan-zoom__grid--display: #{css.cssVar(grid--display)};
+  --c2-pan-zoom__grid--color: #{css.cssVar(grid--color)};
+  --c2-pan-zoom__grid--gap: #{css.cssVar(grid--gap)};
+}
+
+// The branch colours. A first-level topic's own `color` is set inline as `--_color` and wins.
+.branch-root {
+  --_color: #{css.cssVar(root--background)};
+}
+
+@for $i from 1 through 8 {
+  .branch-#{$i} {
+    --_color: #{css.cssVar(branch-#{$i}--color)};
+  }
+}
+
+.board {
+  position: relative;
+  outline: none;
+
+  &:focus-visible {
+    outline: css.cssVar(board__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+// The outline the server sends: topics one per line, indented by level, readable without the layout.
+.board.outline {
+  padding: 16px;
+
+  .layer {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .topic {
+    position: relative;
+    margin-inline-start: calc(var(--_level, 0) * 28px);
+  }
+}
+
+.board.measuring .topic {
+  opacity: 0;
+}
+
+.connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.connector {
+  fill: none;
+  stroke: var(--_color);
+  stroke-width: max(#{css.cssVar(connector--min-width)}, calc(#{css.cssVar(connector--width)} - #{css.cssVar(connector--taper)} * var(--_depth, 0)));
+  stroke-linecap: round;
+
+  &.drag-source {
+    opacity: css.cssVar(topic__dragging--opacity);
+  }
+}
+
+.drop-line {
+  fill: none;
+  stroke: css.cssVar(drop-line--color);
+  stroke-width: 2px;
+  stroke-dasharray: 5 4;
+  stroke-linecap: round;
+}
+
+.topic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: block;
+  width: max-content;
+  max-width: css.cssVar(topic--max-width);
+  color: css.cssVar(subtopic--color);
+  font-size: css.cssVar(subtopic--font-size);
+  font-weight: css.cssVar(subtopic--font-weight);
+  line-height: css.cssVar(topic--line-height);
+  padding: css.cssVar(subtopic--padding);
+  border-radius: 4px;
+  outline: none;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow-wrap: anywhere;
+
+  // The focus ring sits round the selection outline, as two rings.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  &:focus-visible::after {
+    outline: css.cssVar(topic__focus--outline);
+  }
+
+  &.selected {
+    outline: css.cssVar(topic__selected--outline);
+    outline-offset: 2px;
+  }
+}
+
+.board:not(.outline) .topic.subtopic {
+  // The line under a deeper topic is drawn by its connector.
+  padding-bottom: calc(4px + #{css.cssVar(connector--min-width)});
+}
+
+.topic.main-topic {
+  color: css.cssVar(topic--color);
+  font-size: css.cssVar(topic--font-size);
+  font-weight: css.cssVar(topic--font-weight);
+  padding: css.cssVar(topic--padding);
+  border: css.cssVar(topic--border-width) solid var(--_color);
+  border-radius: css.cssVar(topic--border-radius);
+  background: color-mix(in srgb, var(--_color) css.cssVar(topic--tint), css.cssVar(topic--background));
+}
+
+.topic.root {
+  color: css.cssVar(root--color);
+  font-size: css.cssVar(root--font-size);
+  font-weight: css.cssVar(root--font-weight);
+  line-height: 1.4;
+  padding: css.cssVar(root--padding);
+  border-radius: css.cssVar(root--border-radius);
+  background: css.cssVar(root--background);
+  max-width: calc(#{css.cssVar(topic--max-width)} + 60px);
+}
+
+.body {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.icon {
+  flex: none;
+}
+
+.text-box {
+  position: relative;
+  min-width: 1ch;
+}
+
+.text {
+  white-space: pre-wrap;
+}
+
+.editor {
+  position: absolute;
+  inset: -2px -4px;
+  box-sizing: border-box;
+  width: calc(100% + 8px);
+  height: calc(100% + 4px);
+  margin: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: css.cssVar(editor--color);
+  background: css.cssVar(editor--background);
+  caret-color: css.cssVar(editor--caret-color);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.topic.editing .text {
+  visibility: hidden;
+}
+
+.topic.drag-source {
+  opacity: css.cssVar(topic__dragging--opacity);
+}
+
+.topic.drop-into {
+  background: css.cssVar(drop-target--background);
+  outline: 2px dashed css.cssVar(drop-line--color);
+  outline-offset: 2px;
+}
+
+.board.dragging {
+  cursor: grabbing;
+}
+
+// The fold dot and the add button sit on the outer side: right of a topic on the right side, left on the left.
+.toggle,
+.add {
+  position: absolute;
+  top: 50%;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 999px;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.subtopic > .toggle,
+.subtopic > .add {
+  top: 100%;
+}
+
+.toggle {
+  --_size: #{css.cssVar(toggle--size)};
+  min-width: var(--_size);
+  height: var(--_size);
+  padding: 0 3px;
+  border: 1.5px solid var(--_color);
+  background: css.cssVar(toggle--background);
+  color: css.cssVar(toggle--color);
+  font-size: css.cssVar(toggle--font-size);
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  // Expanded: a dash, shown on hover and on the selected topic.
+  &:empty::before {
+    content: '';
+    width: 8px;
+    height: 1.5px;
+    background: currentColor;
+  }
+}
+
+.topic:hover > .toggle,
+.topic.selected > .toggle,
+.topic.collapsed > .toggle {
+  opacity: 1;
+}
+
+.add {
+  --_size: #{css.cssVar(add--size)};
+  width: var(--_size);
+  height: var(--_size);
+  padding: 0;
+  background: css.cssVar(add--background);
+  color: css.cssVar(add--color);
+
+  svg {
+    width: 70%;
+    height: 70%;
+  }
+}
+
+.side-right > .toggle,
+.side-center > .toggle {
+  left: calc(100% + 4px);
+}
+
+.side-left > .toggle {
+  right: calc(100% + 4px);
+}
+
+.side-right > .add,
+.side-center > .add {
+  left: calc(100% + 10px);
+}
+
+.side-left > .add,
+.outer-left > .add {
+  right: calc(100% + 10px);
+  left: auto;
+}
+
+// With a fold dot as well, the add button sits beyond it.
+.side-right.has-children > .add {
+  left: calc(100% + 10px + #{css.cssVar(toggle--size)});
+}
+
+.side-left.has-children > .add {
+  right: calc(100% + 10px + #{css.cssVar(toggle--size)});
+}
+
+.ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: css.cssVar(topic--max-width);
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: css.cssVar(ghost--background);
+  color: css.cssVar(ghost--color);
+  box-shadow: css.cssVar(ghost--box-shadow);
+  font-size: css.cssVar(subtopic--font-size);
+  line-height: css.cssVar(topic--line-height);
+  pointer-events: none;
+  white-space: pre-wrap;
+}
+
+.minimap .mini {
+  fill: var(--_color);
+  opacity: 0.85;
+}
+
+.probe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: css.cssVar(level--gap);
+  height: css.cssVar(sibling--gap);
+  visibility: hidden;
+  pointer-events: none;
+  transition-property: none;
+  transition-duration: css.cssVar(transition-duration);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
 }

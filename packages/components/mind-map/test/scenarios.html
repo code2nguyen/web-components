@@ -6,18 +6,28 @@
     <title>Mind Map test scenarios</title>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
+        margin: 24px;
+        font:
+          16px system-ui,
+          sans-serif;
+        color: #18181b;
+        background: white;
       }
-      main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+      c2-mind-map {
+        width: 900px;
+        --c2-mind-map--height: 520px;
+        --c2-mind-map--transition-duration: 0ms;
+        --c2-pan-zoom--transition-duration: 0ms;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      // The app's languages: French, added as an app would.
+      import './translations.ts'
+      import '../src/mind-map.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
-    <main aria-label="Mind Map scenario"></main>
+    <main aria-label="Component scenario"></main>
   </body>
 </html>
