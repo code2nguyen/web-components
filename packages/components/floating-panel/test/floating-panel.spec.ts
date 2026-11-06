@@ -725,6 +725,23 @@ test.describe('semantics', () => {
 test('animates minimise and maximise unless reduced motion is asked for', async ({ page, renderScenario }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await renderScenario(chat())
+  // Count the animations the panel starts, rather than catch a 180ms one still running on a slow machine.
+  await panel(page).evaluate((element) => {
+    const animate = element.animate.bind(element)
+    element.dataset.animations = '0'
+    element.animate = (...args: Parameters<Element['animate']>) => {
+      element.dataset.animations = String(Number(element.dataset.animations) + 1)
+      return animate(...args)
+    }
+  })
+  await page.getByRole('button', { name: 'Maximise' }).click()
+  await expect(panel(page)).toHaveAttribute('data-animations', '1')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.getByRole('button', { name: 'Restore' }).click()
+  await expect(host(page)).toHaveJSProperty('state', 'normal')
+  await expect(panel(page)).toHaveAttribute('data-animations', '1')
+})
+  await renderScenario(chat())
   await page.getByRole('button', { name: 'Maximise' }).click()
   expect(await panel(page).evaluate((element) => element.getAnimations().length)).toBeGreaterThan(0)
   await page.emulateMedia({ reducedMotion: 'reduce' })
