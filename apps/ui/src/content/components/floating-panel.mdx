@@ -1,0 +1,33 @@
+---
+title: 'Floating Panel'
+description: 'One sentence describing what the component does.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { FloatingPanel } from '@c2n/components/floating-panel'
+
+`c2-floating-panel` does something useful. Describe the element in a short paragraph: what it is for, the attributes
+that change its behaviour, and the slots a consumer fills.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/floating-panel'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/floating-panel
+<div data-label="Default">
+  <c2-floating-panel></c2-floating-panel>
+</div>
+```
+
+Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
+`<style>` block can hold the classes those rows use.
+
+The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
+file must not contain a `# Title` heading or an `<ApiTable>`.

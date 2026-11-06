@@ -63,6 +63,7 @@ import fieldset from '@c2n/fieldset/custom-elements.json'
 import fileBrowser from '@c2n/file-browser/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import floatButton from '@c2n/float-button/custom-elements.json'
+import floatingPanel from '@c2n/floating-panel/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
@@ -104,6 +105,7 @@ import menu from '@c2n/menu/custom-elements.json'
 import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import meter from '@c2n/meter/custom-elements.json'
+import mindMap from '@c2n/mind-map/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
 import monthPicker from '@c2n/month-picker/custom-elements.json'
@@ -120,6 +122,7 @@ import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
+import panZoom from '@c2n/pan-zoom/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
@@ -273,6 +276,7 @@ export const componentManifests = (function () {
     fileBrowser,
     filterBuilder,
     floatButton,
+    floatingPanel,
     flow,
     form,
     formField,
@@ -314,6 +318,7 @@ export const componentManifests = (function () {
     menubar,
     mermaid,
     meter,
+    mindMap,
     modal,
     moneyInput,
     monthPicker,
@@ -330,6 +335,7 @@ export const componentManifests = (function () {
     pageEditor,
     pageHeader,
     pagination,
+    panZoom,
     passwordField,
     paymentCard,
     phoneInput,

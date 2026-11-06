@@ -93,9 +93,7 @@ These build on `c2-overlay` (anchored popup), `c2-modal` and `c2-sheet`, which a
 
 ### G. Business apps
 
-| #   | Component     | What it adds                                  | Real-world model     | Priority | Decision |
-| --- | ------------- | --------------------------------------------- | -------------------- | -------- | -------- |
-| 92  | `c2-mind-map` | Auto-laid-out idea tree with keyboard editing | XMind, Miro mind map | P3       | Proposed |
+Nothing left to propose here: the mind map shipped as `@c2n/mind-map`.
 
 ### H. AI interfaces
 
@@ -210,11 +208,10 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### P. Enterprise data
 
-| #   | Component           | What it does                                                                                     | Seen in                         | Source                                                      | Priority | Decision |
-| --- | ------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------- | ----------------------------------------------------------- | -------- | -------- |
-| 188 | `c2-floating-panel` | Draggable, resizable, minimisable window inside the page (cut from round 1, now in two catalogs) | Zag floating-panel, Figma, Zoom | [Zag](https://www.npmjs.com/package/@zag-js/floating-panel) | P3       | Proposed |
-| 191 | `c2-network-graph`  | Force-directed node-link graph with zoom, selection and neighbour highlight                      | Neo4j Bloom, Obsidian, Wiz      | —                                                           | P3       | Proposed |
-| 193 | `c2-word-cloud`     | Terms sized by weight, clickable to filter                                                       | Qualtrics, Dovetail             | —                                                           | P3       | Proposed |
+| #   | Component          | What it does                                                                | Seen in                    | Source | Priority | Decision |
+| --- | ------------------ | --------------------------------------------------------------------------- | -------------------------- | ------ | -------- | -------- |
+| 191 | `c2-network-graph` | Force-directed node-link graph with zoom, selection and neighbour highlight | Neo4j Bloom, Obsidian, Wiz | —      | P3       | Proposed |
+| 193 | `c2-word-cloud`    | Terms sized by weight, clickable to filter                                  | Qualtrics, Dovetail        | —      | P3       | Proposed |
 
 ### Q. Inputs with built-in data and mobile inputs
 
@@ -235,11 +232,10 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### T. Dashboards, flows and editorial (design inspiration sites)
 
-| #   | Component       | What it does                                                                                                                | Seen in                                              | Source                                         | Priority | Decision |
-| --- | --------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
-| 234 | `c2-card-stack` | Swipe deck (keep or skip) and cards that stack as the page scrolls                                                          | Tinder, Apple Wallet, Awwwards sites                 | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
-| 236 | `c2-scrolly`    | Scrollytelling: a sticky graphic and steps that fire as each enters view; horizontal pinned mode                            | The New York Times, The Pudding, Apple product pages | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
-| 238 | `c2-pan-zoom`   | Pan and zoom viewport for any content: inertia, pinch, fit and zoom controls; shared by image previews, diagrams and boards | Godly and Awwwards portfolio sites                   | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
+| #   | Component       | What it does                                                                                     | Seen in                                              | Source                                         | Priority | Decision |
+| --- | --------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | ---------------------------------------------- | -------- | -------- |
+| 234 | `c2-card-stack` | Swipe deck (keep or skip) and cards that stack as the page scrolls                               | Tinder, Apple Wallet, Awwwards sites                 | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
+| 236 | `c2-scrolly`    | Scrollytelling: a sticky graphic and steps that fire as each enters view; horizontal pinned mode | The New York Times, The Pudding, Apple product pages | [Awwwards](https://www.awwwards.com/websites/) | P3       | Proposed |
 
 ### Extend instead of adding
 
