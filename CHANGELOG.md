@@ -3,6 +3,49 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.22](https://github.com/code2nguyen/web-components/releases/tag/v1.0.22) — 2026-11-06
+
+### Features
+
+- **chart:** Add c2-bullet-chart, c2-boxplot-chart and c2-sunburst-chart ([41ab6f1](https://github.com/code2nguyen/web-components/commit/41ab6f1))
+- **video-player:** Add c2-video-player ([c83ab72](https://github.com/code2nguyen/web-components/commit/c83ab72))
+- **audio-player:** Add c2-audio-player ([bf16724](https://github.com/code2nguyen/web-components/commit/bf16724))
+- **image-compare:** Add c2-image-compare ([39cd49b](https://github.com/code2nguyen/web-components/commit/39cd49b))
+- **file-browser:** Add c2-file-browser ([96ec235](https://github.com/code2nguyen/web-components/commit/96ec235))
+- **terminal, change-review:** Add c2-terminal and c2-change-review ([803a66a](https://github.com/code2nguyen/web-components/commit/803a66a))
+- **quick-time-menu:** Add c2-quick-time-menu ([a015071](https://github.com/code2nguyen/web-components/commit/a015071))
+- **scheduler:** Add c2-scheduler ([fa20683](https://github.com/code2nguyen/web-components/commit/fa20683))
+- **form-field:** Let a control write its own bounds in the range message ([031e1c5](https://github.com/code2nguyen/web-components/commit/031e1c5))
+- **duration-input:** Add c2-duration-input ([52217cd](https://github.com/code2nguyen/web-components/commit/52217cd))
+
+### Fixes
+
+- **floating-panel:** Keep overflowing dock lines inside the boundary; release the minimap art when it is turned off ([0a98ed1](https://github.com/code2nguyen/web-components/commit/0a98ed1))
+- **pan-zoom:** Pan by the pointer's travel since the drag started; test(floating-panel,mind-map): keep drags inside the window, dispatch the copy event ([637734a](https://github.com/code2nguyen/web-components/commit/637734a))
+- **mind-map:** Colour syntax only, sides resolved on one-sided maps, unfold-then-edit selects its topic, posinset in drawing order ([1873ffd](https://github.com/code2nguyen/web-components/commit/1873ffd))
+- **floating-panel:** Docked panels share the dock line or wrap upward instead of leaving the boundary ([f9c808c](https://github.com/code2nguyen/web-components/commit/f9c808c))
+- **floating-panel:** A panel at its CSS place stays inside its boundary and shrinks to fit it ([6c904bc](https://github.com/code2nguyen/web-components/commit/6c904bc))
+- **pan-zoom:** The minimap copies content through a display: contents wrapper; the floor-plan card opens on the meeting rooms ([707ccbc](https://github.com/code2nguyen/web-components/commit/707ccbc))
+- **pan-zoom, mind-map:** Keep a width in a flex or centring parent; gallery boxes take the card width ([2fd3ce8](https://github.com/code2nguyen/web-components/commit/2fd3ce8))
+- **chart:** Bullet band names translate per band count, bands below min no longer use up the five, markers follow the entry kind ([be2908a](https://github.com/code2nguyen/web-components/commit/be2908a))
+- **chart:** Sunburst keeps the author's root, refocuses the group it left and reads lengths in any unit ([29ae202](https://github.com/code2nguyen/web-components/commit/29ae202))
+- **chart:** Boxplot reads rem lengths as pixels and keeps unlabelled rows apart ([777c26d](https://github.com/code2nguyen/web-components/commit/777c26d))
+- **chart:** Bullet bands follow the theme in dark mode; a horizontal boxplot's unit no longer covers the first tick ([7c0dd04](https://github.com/code2nguyen/web-components/commit/7c0dd04))
+- **audio-player, video-player:** A player starting to load is not a failed one ([065d515](https://github.com/code2nguyen/web-components/commit/065d515))
+- **video-player:** A very narrow player drops the big play and mute buttons ([71d7fb6](https://github.com/code2nguyen/web-components/commit/71d7fb6))
+- **audio-player:** Address the code review and the narrow gallery cards ([7c4f3de](https://github.com/code2nguyen/web-components/commit/7c4f3de))
+- **video-player:** Address the code review and the empty gallery cards ([0ca1d35](https://github.com/code2nguyen/web-components/commit/0ca1d35))
+- **image-compare:** One change per drag in hover mode; cache the percent format ([b52ee7b](https://github.com/code2nguyen/web-components/commit/b52ee7b))
+- **file-browser:** A right-click menu still waiting for the button no longer opens late ([9b64836](https://github.com/code2nguyen/web-components/commit/9b64836))
+- **terminal:** See text selected in the output in WebKit and Firefox too ([e2052d0](https://github.com/code2nguyen/web-components/commit/e2052d0))
+- **file-browser, terminal:** Fixes from the docs screenshot review ([7ff0b80](https://github.com/code2nguyen/web-components/commit/7ff0b80))
+- **terminal, file-browser, change-review:** Address the code review ([28bc133](https://github.com/code2nguyen/web-components/commit/28bc133))
+
+### Improvements
+
+- Revert "chore: remove the cubic review config" ([ad56917](https://github.com/code2nguyen/web-components/commit/ad56917))
+- Revert "ci(release): stop labelling the version PR skip-review for cubic" ([fe4ee24](https://github.com/code2nguyen/web-components/commit/fe4ee24))
+
 ## [1.0.21](https://github.com/code2nguyen/web-components/releases/tag/v1.0.21) — 2026-11-04
 
 ### Features
