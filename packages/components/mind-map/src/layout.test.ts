@@ -101,13 +101,26 @@ test('outline: an indented list both ways', () => {
 })
 
 test('tree: normalize gives every node a unique id and keeps unknown fields', () => {
-  const doc = normalize({ id: 'r', label: 'R', extra: 1, children: [{ id: 'x', label: 'A' }, { id: 'x', label: 'B' }, { label: 7 }] })!
+  const raw = { id: 'r', label: 'R', extra: 1, children: [{ id: 'x', label: 'A' }, { id: 'x', label: 'B' }, { label: 7 }, [], [{ id: 'y' }], { id: 'topic-0-1', label: 'Taken' }] }
+  const doc = normalize(raw)!
   assert.equal(doc.extra, 1)
-  const ids = doc.children!.map((child) => child.id)
-  assert.equal(ids[0], 'x')
-  assert.notEqual(ids[1], 'x')
-  assert.ok(ids[2])
+  const ids: string[] = []
+  const walk = (node: MindMapNode) => {
+    ids.push(node.id)
+    for (const child of node.children ?? []) walk(child)
+  }
+  walk(doc)
+  assert.equal(new Set(ids).size, ids.length)
+  // Nested arrays are not topics.
+  assert.deepEqual(
+    doc.children!.map((child) => child.label),
+    ['A', 'B', '7', 'Taken'],
+  )
+  assert.equal(doc.children![0].id, 'x')
   assert.equal(doc.children![2].label, '7')
+  // Generated ids come from the path, so the server and the browser agree.
+  assert.deepEqual(normalize(raw), doc)
+  assert.equal(doc.children![2].id, 'topic-0-2')
 })
 
 test('tree: edits copy only the path to the change', () => {

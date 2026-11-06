@@ -18,26 +18,32 @@ export function newId(): string {
 }
 
 /**
- * A copy of `data` the map can edit: every node gets a string `id` (generated when missing or already taken) and a
- * string `label`; unknown fields are kept.
+ * A copy of `data` the map can edit: every node gets a string `id` and a string `label`; unknown fields are kept. A
+ * missing or repeated id is replaced by one made from the node's path (`topic-0-2-1`), so the server and the browser
+ * give the same node the same id and hydration matches. Only topics added at run time get random ids.
  */
 export function normalize(data: unknown): MindMapNode | null {
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return null
+  if (!isRecord(data)) return null
   const seen = new Set<string>()
-  const walk = (raw: Record<string, unknown>): MindMapNode => {
+  const walk = (raw: Record<string, unknown>, path: string): MindMapNode => {
     let id = typeof raw.id === 'string' || typeof raw.id === 'number' ? String(raw.id) : ''
     if (!id || seen.has(id)) {
       if (id) console.warn(`c2-mind-map: the id "${id}" is used by more than one node; a new id is given to the second.`)
-      id = newId()
+      id = `topic-${path}`
+      for (let n = 2; seen.has(id); n++) id = `topic-${path}-v${n}`
     }
     seen.add(id)
     const node: MindMapNode = { ...raw, id, label: raw.label == null ? '' : String(raw.label) }
-    if (Array.isArray(raw.children)) {
-      node.children = raw.children.filter((child): child is Record<string, unknown> => !!child && typeof child === 'object').map(walk)
-    } else delete node.children
+    if (Array.isArray(raw.children)) node.children = raw.children.filter(isRecord).map((child, i) => walk(child, `${path}-${i}`))
+    else delete node.children
     return node
   }
-  return walk(data as Record<string, unknown>)
+  return walk(data, '0')
+}
+
+/** A plain object: not null, not an array. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
 /** The nodes from the root down to the node with `id`, or `null`. */

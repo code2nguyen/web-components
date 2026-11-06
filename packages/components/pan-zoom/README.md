@@ -30,7 +30,7 @@ box). The host takes its container's width and `--c2-pan-zoom--height` (400px).
 | `zoom-step`            | `1.2`         | Factor of one button or key press.                                                                           |
 | `fit` (`fitMode`)      | `contain`     | First view and `reset()`: `contain`, `cover`, `width` (starts at the top) or `none` (100%, centred).         |
 | `bounds`               | `content`     | `content` keeps the content in view; `none` is a free canvas.                                                |
-| `gestures`             | `cooperative` | What a plain wheel and one finger do: `cooperative` (the page scrolls, a hint shows), `pan`, `zoom`, `none`. |
+| `gestures`             | `cooperative` | `cooperative`: a plain wheel and one finger scroll the page, a hint shows. `pan`: the wheel and one finger pan. `zoom`: the wheel zooms to the pointer, one finger pans. `none`: no pointer gestures. |
 | `controls`             | off           | Toolbar: zoom out, zoom percent (resets to 100%), zoom in, fit.                                              |
 | `minimap`              | off           | Overview in the bottom-left corner while the content overflows.                                              |
 | `no-inertia`           | off           | A released drag stops at once.                                                                               |
@@ -44,7 +44,8 @@ A fitted view never zooms past 100%, so a small image stays sharp.
 
 A primary-button drag pans (not when it starts on a link, button, form control, `[contenteditable]`,
 `[draggable="true"]`, `[data-pan-zoom="ignore"]`, or when a content listener called `preventDefault()` on its
-`pointerdown`); Space + drag and a middle-button drag always pan. Ctrl/⌘ + wheel, a trackpad pinch and two fingers zoom
+`pointerdown`); Space + drag and a middle-button drag pan from anywhere, even from those. `gestures="none"` turns every
+pointer gesture off, these included: only the toolbar, the keys and the methods move the view. Ctrl/⌘ + wheel, a trackpad pinch and two fingers zoom
 to the pointer, a double-click zooms in one step (Shift + double-click zooms out) and a released drag glides. With focus
 on the viewport the arrows pan 48px (a quarter of the box with Shift), `+` / `=` and `-` zoom, `0` goes back to the
 `fit` view and `1` to 100%; keys pressed inside the content are left to it. Focus moving to content out of view pans it
@@ -54,9 +55,13 @@ into view. Under `prefers-reduced-motion` nothing glides or eases.
 
 - `zoomIn()`, `zoomOut()`, `zoomTo(zoom, { origin?, animate? })` — `origin` is a viewport point.
 - `fit(mode?)`, `reset()`.
-- `panBy(dx, dy)`, `centerOn({ x, y }, { zoom?, animate? })` — content points.
-- `zoomToElement(element | rect, { padding?, maxZoom? })` and `reveal(element | rect, { padding? })`, which pans the
-  least distance and keeps the zoom. A rect is in content pixels.
+- `panBy(dx, dy, { animate? })` — `dx`, `dy` are viewport CSS pixels (positive shows content further right and down).
+- `centerOn({ x, y }, { zoom?, animate? })` — `x`, `y` are a content point, in the content's own pixels.
+- `zoomToElement(element | rect, { padding?, maxZoom?, animate? })` frames the target: it fits it with `padding` round
+  it, which can change the zoom (up to `maxZoom`).
+- `reveal(element | rect, { padding?, animate? })` pans the least distance that brings the target into view and keeps
+  the zoom.
+- A rect passed to either is in content pixels.
 - `toContentPoint(clientX, clientY)` — the content point under a pointer.
 
 Calls made before the element can measure itself (hidden, not yet laid out) wait for its first measurement.

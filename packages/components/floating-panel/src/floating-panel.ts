@@ -123,7 +123,10 @@ function fitRect(rect: FloatingPanelRect, bounds: Bounds, visibleHeight?: number
 
 /** The rect after dragging `edge` by `dx`, `dy`: the opposite edges stay where they are. */
 function resizeRect(start: FloatingPanelRect, edge: Edge, dx: number, dy: number, bounds: Bounds): FloatingPanelRect {
-  let { x, y, width, height } = start
+  let x = start.x
+  let y = start.y
+  let width = start.width
+  let height = start.height
   if (edge.includes('e')) width = clampNumber(start.width + dx, bounds.minWidth, Math.min(bounds.maxWidth, bounds.width - start.x))
   if (edge.includes('w')) {
     const right = start.x + start.width
@@ -137,6 +140,17 @@ function resizeRect(start: FloatingPanelRect, edge: Edge, dx: number, dy: number
     y = bottom - height
   }
   return roundRect({ x, y, width, height })
+}
+
+/**
+ * Which sides an `inset` shorthand anchors to: a docked line grows away from them. Right and bottom unless the value
+ * leaves that side `auto` and sets the opposite one.
+ */
+function insetAnchor(value: string): { fromLeft: boolean; fromTop: boolean } {
+  const parts = value.trim().split(/\s+(?![^(]*\))/).filter(Boolean)
+  if (!parts.length) return { fromLeft: false, fromTop: false }
+  const [top, right = top, bottom = top, left = right] = parts
+  return { fromLeft: right === 'auto' && left !== 'auto', fromTop: bottom === 'auto' && top !== 'auto' }
 }
 
 /** A CSS length as pixels: `px` as is, `%` of `total`, `min()` of those, anything else (`none`, `auto`, `calc()`) is `fallback`. */
@@ -245,7 +259,7 @@ function flatParent(node: Element): Element | null {
  * @cssproperty {opacity} [--c2-floating-panel__grip--opacity=0] - Resting opacity of the corner grip; it shows on hover, focus and on devices without hover.
  * @cssproperty {opacity} [--c2-floating-panel__grip__hover--opacity=1]
  * @cssproperty {pixel} [--c2-floating-panel__handle--size=8px] - Thickness of the invisible resize handles on the edges and corners.
- * @cssproperty {inset} [--c2-floating-panel__docked--inset=auto 16px 0 auto] - Where the first docked panel sits; the next ones line up to its left.
+ * @cssproperty {inset} [--c2-floating-panel__docked--inset=auto 16px 0 auto] - Where the first docked panel sits. The next ones line up away from the side it anchors to (to its left for a right inset, to its right for a left one), sharing the width when the line runs out of room and wrapping to further lines (upward, or downward for a top inset), always inside the boundary.
  * @cssproperty {pixel} [--c2-floating-panel__docked--width=240px]
  * @cssproperty {pixel} [--c2-floating-panel__docked--gap=8px] - Space between docked panels.
  * @cssproperty {pixel} [--c2-floating-panel__maximized--inset=8px] - Space a maximised panel leaves around it in its boundary.
@@ -284,12 +298,14 @@ export class FloatingPanel extends LitElement {
     if (!first) return
     const style = getComputedStyle(first.panel!)
     const { width: boundary } = first.boundarySize()
-    const right = pixels(style.right, boundary, 0)
+    const { fromLeft, fromTop } = insetAnchor(style.getPropertyValue('--c2-floating-panel__docked--inset'))
+    // The used offset on the anchored side (positioned elements resolve `left`/`right` to pixels).
+    const edge = pixels(fromLeft ? style.left : style.right, boundary, 0)
     const gap = pixels(style.getPropertyValue('--c2-floating-panel__docked--gap').trim(), boundary, 8)
     const wanted = pixels(style.getPropertyValue('--c2-floating-panel__docked--width').trim(), boundary, 240)
     const height = first.panel!.offsetHeight
     // The line keeps the same margin on its far end as the docked inset leaves on its near end.
-    const room = Math.max(0, boundary - 2 * right)
+    const room = Math.max(0, boundary - 2 * edge)
     const count = dock.length
     let perLine = count
     let width = Math.min(wanted, (room - (count - 1) * gap) / count)
@@ -300,7 +316,9 @@ export class FloatingPanel extends LitElement {
     }
     width = Math.max(0, Math.floor(width))
     dock.forEach((panel, index) => {
-      const place = { x: -(index % perLine) * (width + gap), y: -Math.floor(index / perLine) * (height + gap), width }
+      const column = (index % perLine) * (width + gap)
+      const line = Math.floor(index / perLine) * (height + gap)
+      const place = { x: fromLeft ? column : -column, y: fromTop ? line : -line, width }
       const current = panel.dockPlace
       if (!current || current.x !== place.x || current.y !== place.y || current.width !== place.width) panel.dockPlace = place
     })
@@ -687,7 +705,12 @@ export class FloatingPanel extends LitElement {
   private persist() {
     if (!this.storageKey || isServer) return
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({ rect: validRect(this.rect) ?? null, state: this.state }))
+      localStorage.setItem(this.storageKey, JSON.stringify({
+          rect: validRect(this.rect) ?? null,
+          state: this.state,
+          // What Restore returns a minimised panel to, so a panel minimised from maximised still goes back there.
+          ...(this.state === 'minimized' ? { restore: this.restoreState } : {}),
+        }))
     } catch {
       // Storage blocked (private mode, quota): the place lasts for this page only.
     }
@@ -696,12 +719,13 @@ export class FloatingPanel extends LitElement {
   private restoreSaved() {
     if (!this.storageKey || isServer) return
     try {
-      const saved = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as { rect?: unknown; state?: unknown } | null
+      const saved = JSON.parse(localStorage.getItem(this.storageKey) ?? 'null') as { rect?: unknown; state?: unknown; restore?: unknown } | null
       if (!saved || typeof saved !== 'object') return
       const rect = validRect(saved.rect)
       if (rect) this.rect = rect
       else if (saved.rect === null) this.rect = null
       if (STATES.includes(saved.state as FloatingPanelState)) this.state = saved.state as FloatingPanelState
+      if (saved.restore === 'maximized' || saved.restore === 'normal') this.restoreState = saved.restore
     } catch {
       // Storage blocked or a value written by something else: keep the author's place.
     }
@@ -991,7 +1015,8 @@ export class FloatingPanel extends LitElement {
       pointerup: this.handlePointerUp,
     }
     const showMinimize = !this.noMinimize || minimized
-    const showMaximize = !this.noMaximize && !minimized
+    // A panel maximised by script or storage keeps its Restore button even with `no-maximize`.
+    const showMaximize = (!this.noMaximize && !minimized) || maximized
     return html`
       <section
         part="panel"

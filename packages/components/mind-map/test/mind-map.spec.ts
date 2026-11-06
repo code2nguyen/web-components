@@ -719,9 +719,13 @@ test.describe('editing', () => {
     // The copy event the browser fires for Ctrl/⌘+C, dispatched as is: the system clipboard needs a permission only
     // Chromium can grant, and the map only ever writes to the event's own clipboard data.
     const copied = await page.evaluate(() => {
-      const data = new DataTransfer()
-      document.dispatchEvent(new ClipboardEvent('copy', { clipboardData: data, bubbles: true, cancelable: true }))
-      return data.getData('text/plain')
+      // Engines differ on the constructor's `clipboardData` (some drop it, Firefox copies it), so the event carries a
+      // stand-in defined on itself that records what the map writes.
+      const written = new Map<string, string>()
+      const event = new ClipboardEvent('copy', { bubbles: true, cancelable: true })
+      Object.defineProperty(event, 'clipboardData', { value: { setData: (type: string, value: string) => written.set(type, value), getData: (type: string) => written.get(type) ?? '' } })
+      document.dispatchEvent(event)
+      return written.get('text/plain')
     })
     expect(copied).toBe('- Alpha\n  - One\n  - Two\n  - Three')
     await expect(status(page)).toHaveText('Copied 4 topics')
@@ -730,7 +734,9 @@ test.describe('editing', () => {
     await page.evaluate(() => {
       const data = new DataTransfer()
       data.setData('text/plain', '- Ideas\n  - Sun\n  - Sea\n- Budget')
-      document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+      const event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })
+      Object.defineProperty(event, 'clipboardData', { value: data })
+      document.dispatchEvent(event)
     })
     expect(await childLabels(page, 'b1')).toEqual(['Ideas', 'Budget'])
     await expect(topic(page, 'Sea')).toHaveAttribute('aria-level', '5')

@@ -182,7 +182,7 @@ interface Animation {
  * `bounds="none"` makes a free canvas.
  *
  * A drag pans (not when it starts on a link, button, form control or `[data-pan-zoom="ignore"]`; Space + drag and a
- * middle-button drag always pan), Ctrl/⌘ + wheel and a pinch zoom to the pointer, a double-click zooms in one step,
+ * middle-button drag pan from anywhere), Ctrl/⌘ + wheel and a pinch zoom to the pointer, a double-click zooms in one step,
  * and a released drag glides. `gestures` sets what the plain wheel and one finger do: `cooperative` (the default)
  * leaves them to the page and shows a hint, `pan` pans as in Figma, `zoom` zooms as in a map, `none` leaves only the
  * buttons, the keys and the methods. The viewport is one tab stop: the arrows pan (Shift for a quarter of the view),
@@ -278,7 +278,8 @@ export class PanZoom extends LitElement {
   /**
    * What the wheel and one finger do. `cooperative`: they scroll the page, and Ctrl/⌘ + wheel, a pinch, two fingers
    * or a mouse drag move the view. `pan`: the wheel pans and Ctrl/⌘ + wheel zooms. `zoom`: the wheel zooms to the
-   * pointer. `none`: only the buttons, the keys and the methods move the view.
+   * pointer (and one finger pans). `none`: no pointer gesture at all, not even Space + drag or a middle-button drag;
+   * only the buttons, the keys and the methods move the view.
    */
   @property() gestures: PanZoomGestures = 'cooperative'
 
@@ -397,6 +398,8 @@ export class PanZoom extends LitElement {
   private artSource: Element | null = null
   private artSrc = ''
   private artDrawn: Element | null = null
+  /** The minimap element the art was last drawn into. */
+  private artHost: Element | null = null
   /** The inherited colours the SVG copy was drawn with, to tell when a theme switch calls for a new copy. */
   private artLook = ''
   private artObserver?: MutationObserver
@@ -405,7 +408,11 @@ export class PanZoom extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    if (this.hasUpdated) this.observe()
+    if (!this.hasUpdated) return
+    this.observe()
+    // Disconnecting dropped the minimap's listeners: find the art again, which binds them afresh.
+    this.artSource = null
+    this.syncArt()
   }
 
   override disconnectedCallback(): void {
@@ -422,6 +429,7 @@ export class PanZoom extends LitElement {
     this.artSource?.removeEventListener('load', this.handleArtLoad)
     this.artObserver?.disconnect()
     this.colorScheme?.removeEventListener('change', this.handleArtChange)
+    this.colorScheme = undefined
   }
 
   protected override firstUpdated(): void {
@@ -441,8 +449,9 @@ export class PanZoom extends LitElement {
   }
 
   protected override updated(): void {
-    if (this.art === 'svg' && this.artSvgEl && this.artDrawn !== this.artSource) this.drawSvgArt()
-    if (this.art === 'canvas' && this.artCanvasEl && this.artDrawn !== this.artSource) this.drawCanvasArt()
+    // Drawn again for a new source, and into a new element when the minimap was turned off and on.
+    if (this.art === 'svg' && this.artSvgEl && (this.artDrawn !== this.artSource || this.artHost !== this.artSvgEl)) this.drawSvgArt()
+    if (this.art === 'canvas' && this.artCanvasEl && (this.artDrawn !== this.artSource || this.artHost !== this.artCanvasEl)) this.drawCanvasArt()
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -875,6 +884,9 @@ export class PanZoom extends LitElement {
     if (!drag.moved) {
       if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_THRESHOLD) return
       drag.moved = true
+      // The baseline is the view as the drag takes over, so a change before the threshold (a resize, a method call) is
+      // kept; the pointer's travel still counts from where it went down.
+      drag.view = this.current
       this.dragging = true
       this.capture(event.pointerId)
       this.hideHint()
@@ -1248,6 +1260,7 @@ export class PanZoom extends LitElement {
     copy.setAttribute('focusable', 'false')
     host.replaceChildren(copy)
     this.artDrawn = source
+    this.artHost = host
     this.artLook = this.lookOf(source)
   }
 
@@ -1266,6 +1279,7 @@ export class PanZoom extends LitElement {
       // A canvas tainted by another origin's image cannot be read.
     }
     this.artDrawn = source
+    this.artHost = canvas
   }
 
   private minimapSize(): PanZoomSize {

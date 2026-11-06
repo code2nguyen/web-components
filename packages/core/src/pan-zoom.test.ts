@@ -105,7 +105,7 @@ test('clamping centres small content and keeps large content from leaving the vi
 test('revealing pans the least distance and keeps the zoom', () => {
   const view = { x: 0, y: 0, zoom: 2 }
   // Already in view: unchanged.
-  assert.equal(revealRect(view, { x: 10, y: 10, width: 20, height: 20 }, viewport, 8), view)
+  assert.deepEqual(revealRect(view, { x: 10, y: 10, width: 20, height: 20 }, viewport, 8), view)
   // Off to the right: its right edge comes to 8px from the viewport's right edge.
   const right = revealRect(view, { x: 300, y: 10, width: 20, height: 20 }, viewport, 8)
   assert.equal(right.zoom, 2)
@@ -146,6 +146,9 @@ test('an animated view starts and ends exactly and zooms geometrically', () => {
 test('views compare to within a hundredth of a pixel', () => {
   assert.ok(sameView({ x: 1, y: 1, zoom: 1 }, { x: 1.001, y: 1, zoom: 1 }))
   assert.ok(!sameView({ x: 1, y: 1, zoom: 1 }, { x: 1.1, y: 1, zoom: 1 }))
+  // A small zoom change at the origin moves nothing there, but is still a change.
+  assert.ok(!sameView({ x: 0, y: 0, zoom: 1 }, { x: 0, y: 0, zoom: 1.005 }))
+  assert.ok(sameView({ x: 0, y: 0, zoom: 1 }, { x: 0, y: 0, zoom: 1 + 1e-9 }))
 })
 
 test('the wheel zooms in on a negative delta and reads lines and pages as pixels', () => {

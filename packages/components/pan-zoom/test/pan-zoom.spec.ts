@@ -272,6 +272,19 @@ test('gestures="pan" pans with the wheel, "zoom" zooms with it and "none" ignore
 // ---------------------------------------------------------------------------------------------------------------
 // Drag
 
+test('a view change between pointer-down and the drag taking over is kept, not undone by the drag', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, `<c2-pan-zoom fit="none" no-inertia>${PLAN}</c2-pan-zoom>`)
+  const centre = await viewportCentre(page)
+  await page.mouse.move(centre.x, centre.y)
+  await page.mouse.down()
+  // Moved by code while the pointer is down but before it has travelled past the drag threshold.
+  await subject(page).evaluate((element: PanZoom) => element.panBy(40, 20, { animate: false }))
+  const moved = await viewOf(subject(page))
+  await page.mouse.move(centre.x - 100, centre.y - 50, { steps: 8 })
+  await page.mouse.up()
+  expect(await viewOf(subject(page))).toEqual({ x: moved.x + 100, y: moved.y + 50, zoom: 1 })
+})
+
 test('a drag pans, and a drag from a button is left to it', async ({ page, renderScenario }) => {
   await render(page, renderScenario, `<c2-pan-zoom fit="none" no-inertia>${PLAN}</c2-pan-zoom>`)
   const centre = await viewportCentre(page)

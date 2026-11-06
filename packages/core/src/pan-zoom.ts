@@ -148,10 +148,15 @@ export function revealRect(view: PanZoomView, rect: PanZoomRect, viewport: PanZo
   return dx || dy ? panBy(view, dx, dy) : view
 }
 
-/** Whether two views draw the same thing, to within a hundredth of a pixel. */
+/**
+ * Whether two views draw the same thing: the same zoom (to within a millionth, relative) and the same offset (to within a
+ * hundredth of a pixel). The zoom is compared on its own, since a small zoom change barely moves the content near the
+ * origin and would otherwise read as no change.
+ */
 export function sameView(a: PanZoomView, b: PanZoomView): boolean {
   const near = (p: number, q: number) => Math.abs(p - q) < 0.01
-  return near(a.zoom, b.zoom) && near(a.x * a.zoom, b.x * b.zoom) && near(a.y * a.zoom, b.y * b.zoom)
+  const sameZoom = Math.abs(a.zoom - b.zoom) <= 1e-6 * Math.max(1, Math.abs(a.zoom), Math.abs(b.zoom))
+  return sameZoom && near(a.x * a.zoom, b.x * b.zoom) && near(a.y * a.zoom, b.y * b.zoom)
 }
 
 /**
