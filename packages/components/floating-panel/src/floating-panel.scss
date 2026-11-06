@@ -1,15 +1,402 @@
 @use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-floating-panel,
-  $theme: ()
+  $theme: (
+    inset: 'auto 24px 24px auto',
+    width: 360px,
+    height: auto,
+    min-width: 240px,
+    min-height: 160px,
+    max-width: 100%,
+    max-height: 100%,
+    z-index: 100,
+    transition-duration: 180ms,
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+    inactive--box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
+
+    header--height: 40px,
+    header--padding: 0 6px 0 12px,
+    header--background: #fafafa,
+    header--border-bottom: 1px solid #e4e4e7,
+    title--font-size: 14px,
+    title--font-weight: 600,
+    title--color: #18181b,
+    title__inactive--color: #71717a,
+    icon--color: #71717a,
+    icon--size: 16px,
+
+    button--size: 28px,
+    button--icon-size: 16px,
+    button--border-radius: 6px,
+    button--color: #71717a,
+    button__hover--background: #f4f4f5,
+    button__hover--color: #18181b,
+    close-button__hover--background: #f4f4f5,
+    close-button__hover--color: #dc2626,
+
+    body--padding: 16px,
+    body--font-size: 14px,
+    footer--padding: 12px 16px,
+    footer--border-top: 1px solid #e4e4e7,
+
+    grip--color: #a1a1aa,
+    grip--opacity: 0,
+    grip__hover--opacity: 1,
+    handle--size: 8px,
+
+    docked--inset: 'auto 16px 0 auto',
+    docked--width: 240px,
+    docked--gap: 8px,
+    maximized--inset: 8px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
 );
 
-
+// The host draws nothing and takes no place: the panel inside is positioned, so the component never writes on the host.
 :host {
-  display: inline-flex;
+  display: contents;
 }
 
-.c2-floating-panel {
+[hidden] {
+  display: none !important;
+}
+
+.panel {
+  --_handle: #{css.cssVar(handle--size)};
+
+  position: fixed;
+  inset: css.cssVar(inset);
+  z-index: calc(#{css.cssVar(z-index)} + var(--_stack, 0));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: css.cssVar(width);
+  height: css.cssVar(height);
+  min-width: css.cssVar(min-width);
+  min-height: css.cssVar(min-height);
+  max-width: css.cssVar(max-width);
+  max-height: css.cssVar(max-height);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  // Keyboard moves and boundary clamps slide; a drag follows the pointer with no delay (`.moving`).
+  transition-property: left, top, width, height, box-shadow;
+  transition-duration: css.cssVar(transition-duration);
+  transition-timing-function: animation.$standard-easing;
+
+  &.parent {
+    position: absolute;
+  }
+
+  &.inactive {
+    box-shadow: css.cssVar(inactive--box-shadow);
+  }
+
+  &.moving {
+    transition: none;
+  }
+
+  &.maximized {
+    inset: css.cssVar(maximized--inset);
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: none;
+  }
+
+  &.collapsed {
+    height: auto;
+    min-height: 0;
+  }
+
+  // Docked panels line up from the first one's place to its left, one docked width and gap apart.
+  &.docked {
+    inset: css.cssVar(docked--inset);
+    width: css.cssVar(docked--width);
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    translate: calc(var(--_dock, 0) * -1 * (#{css.cssVar(docked--width)} + #{css.cssVar(docked--gap)})) 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+// Clips the title bar and the footer to the rounded corners while the resize handles reach past the edge.
+.frame {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  min-height: css.cssVar(header--height);
+  padding: css.cssVar(header--padding);
+  background: css.cssVar(header--background);
+  border-bottom: css.cssVar(header--border-bottom);
+  user-select: none;
+  -webkit-user-select: none;
+
+  .docked &,
+  .collapsed & {
+    border-bottom: none;
+  }
+}
+
+.handle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  align-self: stretch;
+  gap: 8px;
+  min-width: 0;
+  border-radius: 4px;
+  outline: none;
+
+  &.draggable {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .moving &.draggable {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.icon {
   display: inline-flex;
+  flex: none;
+  color: css.cssVar(icon--color);
+
+  ::slotted(svg),
+  ::slotted(img) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: 1.4;
+  color: css.cssVar(title--color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .inactive & {
+    color: css.cssVar(title__inactive--color);
+  }
+}
+
+.actions,
+.buttons {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(button--border-radius);
+  background: transparent;
+  color: css.cssVar(button--color);
+  font: inherit;
+  cursor: pointer;
+
+  svg {
+    width: css.cssVar(button--icon-size);
+    height: css.cssVar(button--icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    background: css.cssVar(button__hover--background);
+    color: css.cssVar(button__hover--color);
+  }
+
+  &.close:hover {
+    background: css.cssVar(close-button__hover--background);
+    color: css.cssVar(close-button__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 0;
+  }
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: css.cssVar(body--padding);
+  font-size: css.cssVar(body--font-size);
+}
+
+.footer {
+  flex: none;
+  padding: css.cssVar(footer--padding);
+  border-top: css.cssVar(footer--border-top);
+}
+
+// Invisible resize handles, centred on the edges and the corners.
+.edge {
+  position: absolute;
+  z-index: 1;
+  touch-action: none;
+}
+
+.edge-n,
+.edge-s {
+  left: var(--_handle);
+  right: var(--_handle);
+  height: var(--_handle);
+  cursor: ns-resize;
+}
+
+.edge-e,
+.edge-w {
+  top: var(--_handle);
+  bottom: var(--_handle);
+  width: var(--_handle);
+  cursor: ew-resize;
+}
+
+.edge-n {
+  top: calc(var(--_handle) / -2);
+}
+.edge-s {
+  bottom: calc(var(--_handle) / -2);
+}
+.edge-e {
+  right: calc(var(--_handle) / -2);
+}
+.edge-w {
+  left: calc(var(--_handle) / -2);
+}
+
+.edge-ne,
+.edge-nw,
+.edge-se,
+.edge-sw {
+  width: calc(var(--_handle) * 1.5);
+  height: calc(var(--_handle) * 1.5);
+}
+
+.edge-ne {
+  top: calc(var(--_handle) / -2);
+  right: calc(var(--_handle) / -2);
+  cursor: nesw-resize;
+}
+.edge-nw {
+  top: calc(var(--_handle) / -2);
+  left: calc(var(--_handle) / -2);
+  cursor: nwse-resize;
+}
+.edge-se {
+  bottom: calc(var(--_handle) / -2);
+  right: calc(var(--_handle) / -2);
+  cursor: nwse-resize;
+}
+.edge-sw {
+  bottom: calc(var(--_handle) / -2);
+  left: calc(var(--_handle) / -2);
+  cursor: nesw-resize;
+}
+
+.grip {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: css.cssVar(grip--color);
+  opacity: css.cssVar(grip--opacity);
+  cursor: nwse-resize;
+  touch-action: none;
+  outline: none;
+  transition: opacity 120ms animation.$standard-easing;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+  }
+
+  .panel:hover &,
+  .moving &,
+  &:focus-visible {
+    opacity: css.cssVar(grip__hover--opacity);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+
+  @media (hover: none) {
+    opacity: css.cssVar(grip__hover--opacity);
+  }
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .grip {
+    transition: none;
+  }
 }

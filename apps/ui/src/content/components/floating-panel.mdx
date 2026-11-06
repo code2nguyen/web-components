@@ -1,6 +1,6 @@
 ---
 title: 'Floating Panel'
-description: 'One sentence describing what the component does.'
+description: 'A window inside the page that the user drags, resizes, minimises and maximises, without blocking the page.'
 category: 'Layout'
 ---
 
@@ -9,8 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { FloatingPanel } from '@c2n/components/floating-panel'
 
-`c2-floating-panel` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-floating-panel` is a window inside the page: a support chat, an inspector beside a canvas, a tool palette, a call's mini window. It is not modal, so the page around it stays usable. CSS sets where it first appears and how big it is (`--c2-floating-panel--inset`, `--width` and `--height`; the bottom-right corner of the window by default), and from there the user drags it by its title bar, resizes it from any edge or corner, minimises, maximises and closes it. `rect` holds the user's place and size, and `storage-key` keeps it, with the state, in `localStorage` for the next visit. `boundary="viewport"` (the default) keeps the panel inside the window; `boundary="parent"` keeps it inside its nearest positioned ancestor, as in the examples below. Minimised panels dock to the bottom edge and line up from the right, or with `minimize="collapse"` fold to their title bar where they are. A press or focus brings a panel to the front of the others in its boundary, and the front one matches `:state(active)`.
+
+With the keyboard, the title bar is a handle: the Arrow keys move the panel by 10px (Shift: 50px) and Home puts it back at its CSS place. The grip in the bottom-right corner resizes it the same way, and Escape restores a maximised panel without ever closing it. `show()` opens the panel and moves focus into it; `close()` asks `before-close` first, which a listener can cancel, and returns focus to where it was. Fill the `title`, `icon`, `actions` and `footer` slots; the body scrolls. The host writes nothing on itself: style its state with `:state(minimized)`, `:state(maximized)`, `:state(active)` and `:state(dragging)`.
 
 ## Import
 
@@ -21,13 +22,56 @@ import '@c2n/components/floating-panel'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/floating-panel
+<style>
+  .fp-stage {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fp-stage p {
+    margin: 0 0 8px;
+  }
+  .fp-compact {
+    --c2-floating-panel--inset: 16px auto auto 16px;
+    --c2-floating-panel--width: 260px;
+    --c2-floating-panel--min-width: 200px;
+    --c2-floating-panel--min-height: 120px;
+    --c2-floating-panel--border-radius: 14px;
+    --c2-floating-panel__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-floating-panel__body--padding: 12px 16px;
+  }
+</style>
 <div data-label="Default">
-  <c2-floating-panel></c2-floating-panel>
+  <div class="fp-stage">
+    <c2-floating-panel open boundary="parent">
+      <span slot="title">Support chat</span>
+      <p>Drag the title bar to move the panel, or an edge to resize it.</p>
+      <p>Focus the title bar and use the Arrow keys; Home puts it back.</p>
+    </c2-floating-panel>
+  </div>
+</div>
+<div data-label="Minimised">
+  <div class="fp-stage">
+    <c2-floating-panel open boundary="parent" state="minimized">
+      <span slot="title">Support chat</span>
+      <p>Restore the panel from its docked title bar.</p>
+    </c2-floating-panel>
+    <c2-floating-panel open boundary="parent" state="minimized">
+      <span slot="title">Meeting notes</span>
+      <p>Docked panels line up from the right.</p>
+    </c2-floating-panel>
+  </div>
+</div>
+<div data-label="Customised">
+  <div class="fp-stage">
+    <c2-floating-panel class="fp-compact" open boundary="parent" minimize="collapse">
+      <span slot="title">Properties</span>
+      <p>A rounder, more compact panel that folds in place when minimised.</p>
+    </c2-floating-panel>
+  </div>
 </div>
 ```
-
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
-
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.

@@ -5,16 +5,40 @@
   "type": "module",
   "main": "dist/floating-panel.js",
   "exports": {
-    ".": { "types": "./types/src/floating-panel.d.ts", "default": "./dist/floating-panel.js" },
-    "./react": { "types": "./react.d.ts", "default": "./react.js" },
-    "./vue": { "types": "./vue.d.ts", "default": "./vue.js" },
+    ".": {
+      "types": "./types/src/floating-panel.d.ts",
+      "default": "./dist/floating-panel.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
     "./custom-elements.json": "./custom-elements.json"
   },
-  "files": ["dist", "types", "custom-elements.json", "react.d.ts", "react.js", "vue.d.ts", "vue.js"],
-  "keywords": ["floating-panel", "web component", "lit"],
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "floating-panel",
+    "web component",
+    "lit"
+  ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
-  "repository": { "type": "git", "url": "https://github.com/code2nguyen/web-components.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "wireit",
@@ -22,13 +46,25 @@
     "type-check": "wireit"
   },
   "wireit": {
-    "type-check": { "dependencies": ["../../core:build"], "command": "tsc -p tsconfig.lib.json --composite false" },
-    "build": { "dependencies": ["type-check"], "command": "vite build" }
+    "type-check": {
+      "dependencies": [
+        "../../core:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
   },
   "dependencies": {
     "@c2n/core": "*",
     "lit": "3.3.3"
   },
-  "devDependencies": { "@c2n/config": "*" },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
   "customElements": "custom-elements.json"
 }
