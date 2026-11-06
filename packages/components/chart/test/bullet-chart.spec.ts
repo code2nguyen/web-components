@@ -84,7 +84,31 @@ test.describe('band and scale logic', () => {
         bandBoundaries('nonsense'),
       ]
     })
-    expect(result).toEqual([[150, 225, 300], [20, 25, 30], [1, 2, 3], [1, 2], [1, 2, 3, 4, 5], [], []])
+    // Not capped here: which five a row draws depends on its scale.
+    expect(result).toEqual([[150, 225, 300], [20, 25, 30], [1, 2, 3], [1, 2], [1, 2, 3, 4, 5, 6, 7], [], []])
+  })
+
+  test('regression: boundaries under the scale start do not use up the five bands; the band reaching the end is the last', async ({ page }) => {
+    await open(page, 'empty')
+    const result = await page.evaluate(() => {
+      const { buildBulletRows, visibleBoundaries } = window.bulletScenario.model
+      const [row] = buildBulletRows([{ label: 'A', description: '', value: 65, target: 68, bands: [10, 20, 30, 40, 60, 70], max: null }], {
+        min: 50,
+        scale: 'row',
+        better: 'higher',
+      })
+      return {
+        bands: row.bands,
+        capped: visibleBoundaries([1, 2, 3, 4, 5, 6, 7], 0, 10),
+        ended: visibleBoundaries([10, 20, 30], 0, 15),
+      }
+    })
+    expect(result.bands).toEqual([
+      { from: 50, to: 60, quality: 0 },
+      { from: 60, to: 70, quality: 1 },
+    ])
+    expect(result.capped).toEqual([1, 2, 3, 4, 5])
+    expect(result.ended).toEqual([10, 20])
   })
 
   test('scales end at the largest of the last band, the value and the target, unless overridden; shared takes the widest', async ({ page }) => {
@@ -547,4 +571,46 @@ test('a chart rendered before its engine loads already has its height and table,
   expect(result.rows).toBe(2)
   expect(result.attributes).toEqual(['bands', 'data', 'label-field', 'lazy-render', 'style', 'target'])
   expect(errors).toEqual([])
+})
+
+test('regression: band names are one message each per band count, so a language names them its own way; band-labels may be a JSON array', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bullet-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate(async (element) => {
+    window.bulletScenario.addTranslations({ fr: { 'bullet-chart': { band1Of3: 'Faible', band2Of3: 'Correct, sans plus', band3Of3: 'Bon' } } })
+    element.setAttribute('lang', 'fr')
+    await (element as unknown as BulletInternals).updateComplete
+  })
+  const bands = chart.locator('table.bullet-a11y tbody tr td:nth-of-type(4)')
+  await expect(bands.nth(1)).toHaveText(/^\s*Correct, sans plus, 20/)
+  await expect(bands.nth(0)).toHaveText(/^\s*Bon, 225/)
+  await chart.evaluate(async (element) => {
+    element.setAttribute('band-labels', '["Behind, badly", "Close", "Ahead"]')
+    await (element as unknown as BulletInternals).updateComplete
+  })
+  await expect(bands.nth(1)).toHaveText(/^\s*Close, 20/)
+  await expect(bands.nth(2)).toHaveText(/^\s*Behind, badly, 0/)
+})
+
+test('regression: a measure whose series field is "target" or "band" keeps the bar swatch; the markers follow what an entry is', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bullet-chart')
+  await expect(chart).toHaveState('ready')
+  for (const field of ['target', 'band']) {
+    await chart.evaluate(async (element, name) => {
+      const bullet = element as unknown as BulletInternals
+      element.setAttribute('target-field', 'goal')
+      element.querySelector('c2-chart-series')?.setAttribute('field', name)
+      bullet.data = [{ kpi: 'Revenue', [name]: 270, goal: 250, bands: [150, 225, 300] }]
+      await bullet.updateComplete
+    }, field)
+    await page.evaluate(() => window.bulletScenario.hover({ index: 0, seriesIndex: 0, px: 300, py: 20 }))
+    const rows = chart.locator('[part="tooltip"] .tooltip-row')
+    await expect(rows).toHaveText([/Actual\s*270/, /Target\s*250/, /Band\s*Good/])
+    await expect(rows.nth(0).locator('.tooltip-marker:not(.bullet-band-marker)')).toHaveCSS('background-color', 'rgb(2, 101, 220)')
+    await expect(rows.nth(1).locator('.bullet-tick-marker')).toHaveCount(1)
+    await expect(rows.nth(2).locator('.bullet-band-marker')).toHaveCount(1)
+    await page.evaluate(() => window.bulletScenario.hover(null))
+  }
 })

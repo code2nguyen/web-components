@@ -2,6 +2,7 @@
 import '../src/bullet-chart'
 import '../src/chart-series'
 import * as model from '../src/bullet-model'
+import { addTranslations } from '@c2n/core/localize.js'
 import type { ChartAdapter, ChartAdapterEvents } from '../src/chart-adapter'
 import type { BulletChart } from '../src/bullet-chart'
 import './bullet-scenario-api'
@@ -105,6 +106,7 @@ window.bulletScenario = {
   click: (detail) => adapterEvents?.click(detail),
   events,
   model,
+  addTranslations,
 }
 
 void new Promise<void>((resolve) => {

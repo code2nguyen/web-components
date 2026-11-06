@@ -268,6 +268,15 @@ export class BulletChart extends EchartsChartBase {
     return false
   }
 
+  /**
+   * An update with no property changed is a redraw request (a `lang` change from the localize controller, the row
+   * count changing under `updateData()`): it renders. The base class would take it for a data-only tick and skip it,
+   * leaving the table, the summary and the announcement in the old language.
+   */
+  protected override shouldUpdate(changed: PropertyValues): boolean {
+    return changed.size === 0 || super.shouldUpdate(changed)
+  }
+
   /** A bullet reads one series; the target and scale-end fields must not be inferred as more. */
   protected override inferredSeries(): ChartSeriesConfig[] {
     return super
@@ -842,7 +851,6 @@ export class BulletChart extends EchartsChartBase {
       .map((name) => name.trim())
       .filter(Boolean)
   }
-
 
   // ------------------------------------------------------------ keyboard ---
 

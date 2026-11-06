@@ -9,6 +9,8 @@ export interface BulletScenarioApi {
   events: { type: string; detail: unknown }[]
   /** The pure band and scale functions, for the unit tests. */
   model: typeof import('../src/bullet-model')
+  /** Registers translations, for the language tests. */
+  addTranslations: typeof import('@c2n/core/localize.js').addTranslations
 }
 
 declare global {
