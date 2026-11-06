@@ -2,7 +2,7 @@
 import Icon from './Icon.astro'
 import { plans } from '../data/site'
 
-const price = (amount: number) => (amount === 0 ? '$0' : `$${amount}`)
+const price = (amount: number) => `$${amount}`
 ---
 
 <section class="container" id="pricing" aria-labelledby="pricing-title">
@@ -38,7 +38,7 @@ const price = (amount: number) => (amount === 0 ? '$0' : `$${amount}`)
               </li>
             ))}
           </ul>
-          <c2-button slot="footer" class:list={['plan__cta', plan.highlighted ? 'cta' : 'outline']} data-signup data-plan={plan.name}>
+          <c2-button slot="footer" class:list={['plan__cta', plan.highlighted ? 'cta' : 'outline']} data-signup data-plan={plan.id} data-plan-name={plan.name}>
             {plan.monthly === 0 ? 'Start free' : `Try ${plan.name} free`}
           </c2-button>
         </c2-card>

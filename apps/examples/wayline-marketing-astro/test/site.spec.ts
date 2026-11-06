@@ -26,7 +26,7 @@ test('the hero upgrades straight away and the page loads without errors', async 
 
 test('below-the-fold components load when their section comes near', async ({ page }) => {
   await page.goto('./')
-  expect(await defined(page, 'c2-beam')).toBe(false)
+  // The FAQ is far below the first screen at any viewport size, so its modules have not loaded yet.
   expect(await defined(page, 'c2-accordion')).toBe(false)
 
   await page.locator('#integrations').scrollIntoViewIfNeeded()
@@ -68,6 +68,8 @@ test('signing up checks the email, then confirms with a toast', async ({ page })
   await modal.getByRole('button', { name: 'Create workspace' }).click()
   await expect(page.getByRole('dialog', { name: 'Start your free trial' })).toBeHidden()
   await expect(page.getByText('We sent a sign-in link to ana@example.com.')).toBeVisible()
+  // In the page's own region (bottom right), not a second one created at runtime.
+  await expect(page.locator('c2-toast-region')).toHaveCount(1)
 })
 
 test('a plan button opens the dialog for that plan', async ({ page }) => {

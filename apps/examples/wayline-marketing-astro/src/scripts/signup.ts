@@ -15,9 +15,16 @@ export function setUpSignup(): void {
   document.addEventListener('click', async (event) => {
     const trigger = (event.target as Element | null)?.closest<HTMLElement>('[data-signup]')
     if (!trigger) return
-    await loadDialog()
-    const chosen = trigger.dataset.plan ?? 'Starter'
-    if (plan) plan.textContent = chosen === 'Starter' ? 'Starter plan · free forever' : `${chosen} plan · free for 14 days`
+    try {
+      await loadDialog()
+    } catch (error) {
+      // The dialog's modules did not load; a later press tries again.
+      console.warn('The sign-up dialog could not load.', error)
+      return
+    }
+    const free = (trigger.dataset.plan ?? 'starter') === 'starter'
+    const name = trigger.dataset.planName ?? 'Starter'
+    if (plan) plan.textContent = free ? `${name} plan · free forever` : `${name} plan · free for 14 days`
     dialog.setAttribute('open', '')
   })
 
@@ -26,10 +33,11 @@ export function setUpSignup(): void {
     // The form fields show their own messages for whichever check failed.
     if (!form.reportValidity()) return
     const email = String(new FormData(form).get('email') ?? '')
-    const [, , , { toast }] = await loadDialog()
+    await loadDialog()
     dialog.removeAttribute('open')
     form.reset()
-    toast.show({
+    // The page's own region, so its `position` applies (the `toast` helper would create a second one).
+    document.querySelector('c2-toast-region')?.show({
       heading: 'Check your inbox',
       message: `We sent a sign-in link to ${email}.`,
       variant: 'success',

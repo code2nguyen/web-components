@@ -50,7 +50,9 @@
     "@c2n/feather-icons": "*"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@c2n/config": "*",
+    "@playwright/test": "1.63.0",
     "astro": "7.3.1"
   }
 }

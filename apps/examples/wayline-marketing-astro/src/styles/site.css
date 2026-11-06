@@ -540,7 +540,8 @@ main > .container {
   }
 }
 
-.feature {
+.feature,
+.plan {
   --c2-card--padding-top: 24px;
   --c2-card--padding-right: 24px;
   --c2-card--padding-bottom: 24px;
@@ -706,14 +707,6 @@ main > .container {
 }
 
 .plan {
-  --c2-card--padding-top: 24px;
-  --c2-card--padding-right: 24px;
-  --c2-card--padding-bottom: 24px;
-  --c2-card--padding-left: 24px;
-  --c2-card--border-top-left-radius: 14px;
-  --c2-card--border-top-right-radius: 14px;
-  --c2-card--border-bottom-left-radius: 14px;
-  --c2-card--border-bottom-right-radius: 14px;
   --c2-card__header--padding-top: 24px;
 }
 
