@@ -654,6 +654,18 @@ test('regression: a huge offset over a tiny span gives its two ends at once rath
   expect(result.elapsed).toBeLessThan(100)
 })
 
+test('regression: opposite extreme ends fall back to the two ends, and no tick lands outside the scale', async ({ page }) => {
+  await open(page, 'empty')
+  const result = await page.evaluate(() => {
+    const { bulletTicks } = window.bulletScenario.model
+    const extreme = bulletTicks(-Number.MAX_VALUE, Number.MAX_VALUE)
+    const near = bulletTicks(0.30000000001, 1)
+    return { extreme, near }
+  })
+  expect(result.extreme.every((tick) => Number.isFinite(tick))).toBe(true)
+  expect(result.near.every((tick) => tick >= 0.30000000001 && tick <= 1)).toBe(true)
+})
+
 test('regression: a scale end past the last boundary is covered by the last band on the plot', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bullet-chart')

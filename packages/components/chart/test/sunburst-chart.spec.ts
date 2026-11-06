@@ -652,6 +652,23 @@ test('reads its layout from the theming variables', async ({ page }) => {
   expect(result.center).toBe('rgb(4, 5, 6)')
 })
 
+test('regression: hiding the branch that holds the highlight clears it', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    sunburst.highlighted = '["leaf","Engineering","Platform","Compute"]'
+    await sunburst.updateComplete
+    const before = sunburst.highlighted
+    sunburst.setGroupVisible('Engineering', false)
+    await sunburst.updateComplete
+    return { before, after: sunburst.highlighted }
+  })
+  expect(result.before).not.toBeNull()
+  expect(result.after).toBeNull()
+})
+
 test('hiding a branch from the legend keeps the others’ colours and shares', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-sunburst-chart')

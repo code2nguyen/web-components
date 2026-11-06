@@ -276,8 +276,10 @@ export class SunburstChart extends EchartsChartBase {
     const next = new Set(this.hiddenGroups)
     if (visible) next.delete(name)
     else next.add(name)
+    // Resolve the highlight before the branch leaves the model, or it can no longer be found to clear.
+    const clear = !visible && this.#highlightedNode()?.path[0] === name
     this.hiddenGroups = next
-    if (!visible && this.#highlightedNode()?.path[0] === name) this.highlight(null)
+    if (clear) this.highlight(null)
     this.notifyLegendChange()
   }
 
