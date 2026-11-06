@@ -401,22 +401,74 @@ test('a cancelled zoom-change keeps the zoom', async ({ page }) => {
   expect(result).toEqual({ changed: false, kept: [], second: true, root: ['Sales'], out: true, outAgain: false })
 })
 
-test('`root` as an attribute renders zoomed, and settles a path through a leaf on its group', async ({ page }) => {
+test('`root` as an attribute renders zoomed, and a path through a leaf draws its deepest group but is kept as written', async ({ page }) => {
   await open(page, 'root')
   const chart = page.locator('c2-sunburst-chart')
   await expect(chart).toHaveState('ready')
   await expect(chart.locator('.sunburst-breadcrumb li')).toHaveText(['All', 'Engineering'])
   const result = await chart.evaluate(async (element) => {
     const sunburst = element as SunburstElement
-    const [data] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
-    const first = data.map((node) => node.name.split('\u001f').at(-1))
+    const first = () => sunburst.projectData(sunburst.frame, sunburst.buildContext())[0].map((node) => node.name.split('\u001f').at(-1))
+    const engineering = first()
     sunburst.root = ['Marketing', 'Brand', 'Nothing']
     await sunburst.updateComplete
     await sunburst.updateComplete
-    return { first, settled: sunburst.root }
+    return { engineering, marketing: first(), root: sunburst.root }
   })
-  expect(result.first).toEqual(['Platform', 'Product', 'Data'])
-  expect(result.settled).toEqual(['Marketing'])
+  expect(result.engineering).toEqual(['Platform', 'Product', 'Data'])
+  expect(result.marketing).toEqual(['Demand', 'Brand', 'Events'])
+  expect(result.root).toEqual(['Marketing', 'Brand', 'Nothing'])
+  await expect(chart.locator('.sunburst-breadcrumb li')).toHaveText(['All', 'Marketing'])
+})
+
+test('a `root` deeper than the data lands there once lazy data supplies the branch, and follows a hidden branch back', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const crumbs = chart.locator('.sunburst-breadcrumb li')
+  const full = await chart.evaluate((element) => (element as SunburstElement).data)
+  await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    // Platform is not loaded yet: Engineering stands in for it.
+    const rows = structuredClone(sunburst.data) as { name: string; children?: { name: string }[] }[]
+    rows[0].children = rows[0].children?.filter((child) => child.name !== 'Platform')
+    sunburst.data = rows
+    sunburst.root = ['Engineering', 'Platform']
+    await sunburst.updateComplete
+  })
+  await expect(crumbs).toHaveText(['All', 'Engineering'])
+  expect(await chart.evaluate((element) => (element as SunburstElement).root)).toEqual(['Engineering', 'Platform'])
+
+  await chart.evaluate(async (element, rows) => {
+    ;(element as SunburstElement).data = rows
+    await (element as SunburstElement).updateComplete
+  }, full)
+  await expect(crumbs).toHaveText(['All', 'Engineering', 'Platform'])
+
+  await chart.evaluate((element) => (element as SunburstElement).setGroupVisible('Engineering', false))
+  await expect(chart.locator('.sunburst-breadcrumb')).toHaveCount(0)
+  await chart.evaluate((element) => (element as SunburstElement).setGroupVisible('Engineering', true))
+  await expect(crumbs).toHaveText(['All', 'Engineering', 'Platform'])
+  const zoomChanges = await page.evaluate(
+    () => (window as unknown as { sunburstScenario: ScenarioApi }).sunburstScenario.events.filter((event) => event.type === 'zoom-change').length,
+  )
+  expect(zoomChanges).toBe(0)
+})
+
+test('zooming out with the keyboard lands on the group just left', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-sunburst-chart')
+  await expect(chart).toHaveState('ready')
+  const live = chart.locator('.sunburst-a11y[aria-live]')
+  await chart.evaluate((element) => (element as SunburstElement).zoomTo(['Engineering', 'Platform']))
+  await chart.locator('.plot').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(live).toContainText('Engineering › Platform › Compute')
+  await page.keyboard.press('Escape')
+  await expect(chart.locator('.sunburst-breadcrumb li')).toHaveText(['All', 'Engineering'])
+  await expect(live).toHaveText('Zoomed into Engineering, $5.1M. Engineering › Platform, $2.1M, 17.9% of total, 3 items. Enter to zoom.')
+  await page.keyboard.press('Escape')
+  await expect(live).toContainText('Zoomed out to all, $11.7M. Engineering, $5.1M')
 })
 
 test('the keyboard walks the tree, zooms with Enter and out with Escape, and announces each segment', async ({ page }) => {
@@ -542,6 +594,7 @@ test('reads its layout from the theming variables', async ({ page }) => {
     sunburst.style.setProperty('--c2-chart__segment--border-radius', '6px')
     sunburst.style.setProperty('--c2-chart__hole--size', '50%')
     sunburst.style.setProperty('--c2-chart__breadcrumb--color', 'rgb(1, 2, 3)')
+    sunburst.style.setProperty('--c2-chart__breadcrumb--font-size', '1.25rem')
     sunburst.style.setProperty('--c2-chart__center--background', 'rgb(4, 5, 6)')
     sunburst.zoomTo(['Sales'])
     await sunburst.updateComplete

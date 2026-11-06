@@ -362,7 +362,7 @@ export class BulletChart extends EchartsChartBase {
     if (!row) return super.defaultTooltip(context)
     return html`
       <div class="tooltip-title">${row.label}${row.description ? html`<span class="bullet-tooltip-description"> · ${row.description}</span>` : nothing}</div>
-      ${(context.entries as Partial<BulletTooltipEntry>[]).map(
+      ${context.entries.map(
         (entry) => html`
           <div class="tooltip-row">
             ${

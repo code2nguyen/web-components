@@ -47,9 +47,6 @@ export function buildTreemap(rows: readonly unknown[], options: TreemapModelOpti
   return buildHierarchy(rows, options)
 }
 
-const engineName = hierarchyEngineName
-const preorder = preorderHierarchy
-
 /** Space a tile's label keeps from the tile's edges, in pixels. */
 const LABEL_INSET = 5
 
@@ -407,8 +404,8 @@ export class TreemapChart extends EchartsChartBase {
     const tree = buildTreemap(rows, { ...options, hidden: this.hiddenGroups })
     // Every top-level name in its unhidden order: a group's palette slot and legend place stay put while others are hidden.
     const order = this.hiddenGroups.size === 0 ? tree.map((node) => node.label) : buildTreemap(rows, options).map((node) => node.label)
-    const nodes = preorder(tree)
-    this.#model = { key, data: this.data, tree, nodes, order, byName: new Map(nodes.map((node, index) => [engineName(node), index])) }
+    const nodes = preorderHierarchy(tree)
+    this.#model = { key, data: this.data, tree, nodes, order, byName: new Map(nodes.map((node, index) => [hierarchyEngineName(node), index])) }
     return this.#model
   }
 
@@ -421,7 +418,7 @@ export class TreemapChart extends EchartsChartBase {
     return this.#computeModel().nodes[index - 1]
   }
 
-  /** The node ECharts drew under `name`, which is unique: see {@link engineName}. */
+  /** The node ECharts drew under `name`, which is unique: see {@link hierarchyEngineName}. */
   #nodeNamed(name: string | undefined): TreemapTreeNode | undefined {
     const index = name === undefined ? undefined : this.#computeModel().byName.get(name)
     return index === undefined ? undefined : this.#computeModel().nodes[index]
@@ -446,7 +443,7 @@ export class TreemapChart extends EchartsChartBase {
       if (!node.leaf) {
         // A group is drawn as its header strip and the gaps between its tiles, in the surface colour.
         return {
-          name: engineName(node),
+          name: hierarchyEngineName(node),
           value: node.value,
           itemStyle: { color: theme.surface, borderColor: theme.surface, opacity },
           upperLabel: { opacity },
@@ -456,7 +453,7 @@ export class TreemapChart extends EchartsChartBase {
       const color = this.#tileColor(node, scale)
       // ECharts' treemap ignores an item's opacity, so a dimmed tile is drawn faded into the surface instead.
       const fill = opacity < 1 ? mixColors(theme.surface, color, opacity) : color
-      return { name: engineName(node), value: node.value, itemStyle: { color: fill }, label: { color: readableOn(color), opacity } }
+      return { name: hierarchyEngineName(node), value: node.value, itemStyle: { color: fill }, label: { color: readableOn(color), opacity } }
     })
   }
 

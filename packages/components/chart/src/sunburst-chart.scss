@@ -149,6 +149,31 @@
   stroke-linejoin: round;
 }
 
+// Sized by the layout variables, so script reads them in pixels whatever unit they are written in.
+.sunburst-probe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+
+  i {
+    position: absolute;
+    display: block;
+    height: 0;
+  }
+
+  .gap {
+    width: var(--_segment-gap);
+  }
+
+  .radius {
+    width: var(--_segment-radius);
+  }
+
+  .crumb {
+    font-size: var(--_breadcrumb-font-size);
+  }
+}
+
 // The leaf table and the live announcement are for assistive technology only.
 .sunburst-a11y {
   position: absolute;
