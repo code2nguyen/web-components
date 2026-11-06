@@ -1,0 +1,68 @@
+---
+title: 'Sunburst chart gallery'
+description: 'A department budget, disk usage with a legend, a market map coloured by change, a drill-down opened on one branch and sales by region drawn as sunbursts.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SunburstChart } from '@c2n/components/chart/sunburst-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-sunburst-chart label-field="name" value-prefix="$" value-suffix="M" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
+  <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Disk usage with a legend
+<style>
+  .sunburst-disk { width: 100%; --c2-chart--height: 260px; --c2-chart__hole--size: 42%; --c2-chart__series-1--color: #7c3aed; --c2-chart__series-2--color: #0891b2; --c2-chart__series-3--color: #d97706; --c2-chart__series-4--color: #64748b; }
+  .sunburst-disk-total { display: grid; line-height: 1.2; color: var(--c2-theme--color-on-surface-variant, #71717a); }
+  .sunburst-disk-total strong { font-size: 20px; color: var(--c2-theme--color-on-surface, #18181b); }
+</style>
+<c2-sunburst-chart class="sunburst-disk" label-field="name" value-suffix=" MB" labels="none" levels="2" legend="end" data='[{"name":"node_modules","children":[{"name":"echarts","size":52},{"name":"typescript","size":23},{"name":"@astrojs","size":13},{"name":"playwright-core","size":9}]},{"name":"packages","children":[{"name":"components","size":31},{"name":"tools","size":12},{"name":"icons","size":8}]},{"name":".git","children":[{"name":"objects","size":34},{"name":"refs","size":4}]},{"name":"apps","children":[{"name":"ui","size":14},{"name":"examples","size":11}]}]'>
+  <c2-chart-series field="size" label="Size"></c2-chart-series>
+  <span slot="center" class="sunburst-disk-total">Used <strong>211 MB</strong></span>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Market map by change
+<style>
+  .sunburst-market { width: 100%; --c2-chart--height: 340px; --c2-chart__segment--gap: 2px; --c2-chart__segment--border-radius: 0px; --c2-chart__positive--color: #16a34a; --c2-chart__negative--color: #dc2626; }
+</style>
+<c2-sunburst-chart class="sunburst-market" label-field="ticker" group-field="sector" color-field="change" color-label="Change" color-suffix="%" color-max="3" value-prefix="$" value-suffix="bn" data='[{"sector":"Technology","ticker":"AAPL","cap":3400,"change":1.2},{"sector":"Technology","ticker":"MSFT","cap":3100,"change":-0.4},{"sector":"Technology","ticker":"NVDA","cap":2900,"change":3.1},{"sector":"Communication","ticker":"GOOGL","cap":2100,"change":0.8},{"sector":"Communication","ticker":"META","cap":1400,"change":-2.3},{"sector":"Consumer","ticker":"AMZN","cap":1900,"change":1.6},{"sector":"Consumer","ticker":"TSLA","cap":800,"change":-3.4},{"sector":"Financials","ticker":"JPM","cap":600,"change":-0.6},{"sector":"Financials","ticker":"V","cap":550,"change":0.3},{"sector":"Health","ticker":"LLY","cap":700,"change":-1.8},{"sector":"Health","ticker":"UNH","cap":480,"change":0.9}]'>
+  <c2-chart-series field="cap" label="Market cap"></c2-chart-series>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Opened on one branch
+<style>
+  .sunburst-drill { width: 100%; --c2-chart--height: 340px; --c2-chart__segment--gap: 3px; --c2-chart__segment--border-radius: 6px; --c2-chart__hole--size: 34%; }
+</style>
+<c2-sunburst-chart class="sunburst-drill" label-field="name" value-prefix="$" value-suffix="M" root='["Engineering"]' data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
+  <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Revenue by region
+<style>
+  .sunburst-region { width: 100%; --c2-chart--height: 340px; --c2-chart__hole--size: 22%; --c2-chart__series-1--color: #0f766e; --c2-chart__series-2--color: #4f46e5; --c2-chart__series-3--color: #c2410c; }
+</style>
+<c2-sunburst-chart class="sunburst-region" label-field="city" group-field="region, country" value-prefix="$" value-suffix="M" data='[{"region":"Americas","country":"United States","city":"New York","revenue":4.2},{"region":"Americas","country":"United States","city":"San Francisco","revenue":3.1},{"region":"Americas","country":"United States","city":"Chicago","revenue":1.4},{"region":"Americas","country":"Brazil","city":"São Paulo","revenue":1.2},{"region":"Americas","country":"Canada","city":"Toronto","revenue":0.9},{"region":"Europe","country":"United Kingdom","city":"London","revenue":2.6},{"region":"Europe","country":"Germany","city":"Berlin","revenue":1.3},{"region":"Europe","country":"Germany","city":"Munich","revenue":0.8},{"region":"Europe","country":"France","city":"Paris","revenue":1.5},{"region":"Asia Pacific","country":"Japan","city":"Tokyo","revenue":2.2},{"region":"Asia Pacific","country":"Australia","city":"Sydney","revenue":1.1},{"region":"Asia Pacific","country":"Singapore","city":"Singapore","revenue":0.9}]'>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Compact two rings
+<style>
+  .sunburst-compact { width: 100%; --c2-chart--height: 220px; --c2-chart__segment--gap: 2px; --c2-chart__segment--border-radius: 4px; --c2-chart__hole--size: 50%; }
+</style>
+<c2-sunburst-chart class="sunburst-compact" label-field="name" value-prefix="$" value-suffix="M" levels="2" labels="none" legend="bottom" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
+  <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+</c2-sunburst-chart>
+```
+
+</GalleryGrid>

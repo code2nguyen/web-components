@@ -278,6 +278,10 @@ export const overrides: Record<string, Override> = {
   '--c2-org-chart__card__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__toggle__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__card__selected--box-shadow': { token: 'color-primary', value: '0 0 0 1px var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  // A bullet chart's qualitative bands are a grey ramp from the resting border grey (poor) to the container surface
+  // (good), so they sit back behind the bar in both themes.
+  '--c2-chart__band-start--color': { token: 'color-outline' },
+  '--c2-chart__band-end--color': { token: 'color-surface-container' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

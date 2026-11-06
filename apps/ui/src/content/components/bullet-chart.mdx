@@ -1,0 +1,130 @@
+---
+title: 'Bullet chart'
+description: 'One measure against a target and qualitative bands, a row per KPI, as Stephen Few drew it for scorecards.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-bullet-chart'
+apiTags: ['c2-bullet-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BulletChart } from '@c2n/components/chart/bullet-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A bullet chart sets one measure against its target and a few qualitative bands, in the space of a line of text. It is
+the compact gauge of a KPI scorecard: revenue against plan, profit margin, new customers, satisfaction, each on its own
+scale. One row is one bullet: grey bands from poor to good, the measure as a bar, the target as a tick across it. It is
+drawn by ECharts.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/bullet-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .bullet-usage {
+    width: 560px;
+    max-width: 100%;
+  }
+  .bullet-usage--compact {
+    width: 240px;
+    --c2-chart--height: 16px;
+    --c2-chart--padding: 0;
+    --c2-chart--border-top: 0;
+    --c2-chart--border-right: 0;
+    --c2-chart--border-bottom: 0;
+    --c2-chart--border-left: 0;
+  }
+</style>
+
+<div data-label="KPI scorecard">
+  <c2-bullet-chart
+    class="bullet-usage"
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+    data='[{"kpi":"Revenue","unit":"US$, thousands","actual":270,"target":250,"bands":[150,225,300]},{"kpi":"Profit","unit":"% of revenue","actual":22.5,"target":27,"bands":[20,25,30]},{"kpi":"New customers","unit":"count","actual":1650,"target":2100,"bands":[1400,2000,2500]},{"kpi":"Satisfaction","unit":"out of 5","actual":4.6,"target":4.2,"bands":[3.5,4.25,5]}]'
+  >
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+  </c2-bullet-chart>
+</div>
+
+<div data-label="Lower is better">
+  <c2-bullet-chart
+    class="bullet-usage"
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+    better="lower"
+    data='[{"kpi":"Cost per lead","unit":"US$","actual":46,"target":40,"bands":[35,50,70]},{"kpi":"Churn","unit":"% monthly","actual":2.1,"target":2.5,"bands":[2,3,5]}]'
+  >
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+  </c2-bullet-chart>
+</div>
+
+<div data-label="Compact">
+  <c2-bullet-chart
+    class="bullet-usage--compact"
+    labels="none"
+    value-labels="none"
+    axis="none"
+    target="250"
+    bands="[150, 225, 300]"
+    data='[{"actual":270}]'
+  >
+    <c2-chart-series field="actual" label="Revenue"></c2-chart-series>
+  </c2-bullet-chart>
+</div>
+```
+
+### Data
+
+Rows are plain objects, one per bullet. `label-field` names a row and `description-field` adds a muted second line under
+the name, for its unit. The one `c2-chart-series` reads the measure. `target-field` reads each row's target, or
+`target` sets one for every row, and `bands-field` reads each row's band boundaries as an ascending array, or `bands`
+sets them for every row: `[150, 225, 300]` draws three bands, 0–150, 150–225 and 225–300. A row takes two to five
+bands. `color-field` gives a row its own bar colour.
+
+### Scale
+
+Each row runs from `min` (0 by default) to the largest of its last band, its value and its target, so rows in
+different units sit together. `max-field` or `max` sets the end, and `scale="shared"` puts every row on one scale, for
+measures in the same unit. `better="lower"` turns the bands round for a measure where less is better (cost per lead,
+churn): the good band sits near zero, and a value meets its target at or below it.
+
+### Look
+
+The bands are a grey ramp from `--c2-chart__band-start--color` (poor) to `--c2-chart__band-end--color` (good).
+`--c2-chart__band-1--color` to `--c2-chart__band-5--color` replace one position, poorest first, for status tints
+such as red, amber and green. The bar takes the series colour and a third of the band height; the target is a tick
+70% of the band height in the text colour, `--c2-chart__target--width` wide, with a halo of the surface where it
+crosses the bar.
+
+`labels="none"`, `value-labels="none"` and `axis="none"` leave out the name column, the value after the bands and
+the small tick axis under each row; `value-suffix` and `precision` format the values, or the `format` property
+formats them per row. `orientation="vertical"` sets the rows side by side as columns, the value above and the name
+below.
+
+The chart sizes itself: unless `--c2-chart--height` is set, it is as tall as its rows, each
+`--c2-chart__row--height` (44px, or 24px without the axis) with `--c2-chart__row--gap` between them. A set height
+is shared between the rows, which is how a bullet fits a table cell: `--c2-chart--height: 16px` with no padding or
+border, and no names, values or axis.
+
+### Reading it
+
+Hovering a row gives it a faint backdrop and shows the value, the target with the share reached, and the band the
+value falls in. The plot is one tab stop: the arrow keys move between rows, Home and End go to the first and last,
+Enter highlights a row and Escape clears it, and a live region reads the focused row ("Profit: 22.5, 83% of the 27
+target, Satisfactory"). Clicking a row fires `point-click` and fades the others. The plot is named by a summary
+("Bullet chart, 4 measures, 2 on target"), and a hidden table lists every row's actual, target, share and band.
+`band-labels` names the bands, poorest first, as a comma list ("Behind, On track, Ahead") or a JSON array when a name holds a comma.

@@ -1,5 +1,5 @@
 {
-  "lazy": 372523,
+  "lazy": 374640,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -29,10 +29,12 @@
     "cascader": 17432,
     "celebration": 3529,
     "change-review": 17105,
-    "chart": 168700,
+    "chart": 213196,
     "chart/area-chart": 35642,
     "chart/bar-chart": 38052,
+    "chart/boxplot-chart": 42931,
     "chart/bubble-chart": 37387,
+    "chart/bullet-chart": 46065,
     "chart/butterfly-chart": 33441,
     "chart/candlestick-chart": 32113,
     "chart/chart-legend": 2622,
@@ -53,6 +55,7 @@
     "chart/sankey-chart": 40756,
     "chart/scatter-chart": 31521,
     "chart/sparkline": 35950,
+    "chart/sunburst-chart": 47992,
     "chart/treemap-chart": 39987,
     "chart/waterfall-chart": 35724,
     "chat-input": 3880,

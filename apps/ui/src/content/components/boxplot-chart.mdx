@@ -1,0 +1,83 @@
+---
+title: 'Box plot chart'
+description: 'The distribution of each category as its median, quartiles, whiskers and outliers: latency per service, test scores, A/B results.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-boxplot-chart'
+apiTags: ['c2-boxplot-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BoxplotChart } from '@c2n/components/chart/boxplot-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A box plot summarises a distribution per category: the box runs from the first to the third quartile with a heavier rule at the median, the whiskers reach out to the spread of the samples, and the values past them are drawn as hollow outliers. It suits latency per service, test scores per class and the two arms of an A/B test. It is drawn by ECharts.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/boxplot-chart'
+```
+
+This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency it loads on first draw: `npm install echarts`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .boxplot-plot {
+    width: 100%;
+    --c2-chart--height: 300px;
+  }
+</style>
+
+<div data-label="Latency with an SLO">
+  <c2-boxplot-chart
+    class="boxplot-plot"
+    label-field="service"
+    value-suffix=" ms"
+    reference-lines='[{"value":500,"label":"SLO 500 ms","tone":"danger"}]'
+    data='[{"service":"api-gateway","latency":[38,52,60,66,70,74,78,82,86,92,98,104,112,124,140,166,240,270]},{"service":"auth","latency":[22,30,34,38,40,42,44,46,48,52,56,62,72,86,132]},{"service":"search","latency":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610,655,700]},{"service":"checkout","latency":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905,980,1120,1320]},{"service":"payments","latency":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688]},{"service":"inventory","latency":[44,60,70,74,80,88,94,100,110,122,128,150,180,198]}]'
+  >
+    <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+  </c2-boxplot-chart>
+</div>
+
+<div data-label="Two regions">
+  <c2-boxplot-chart
+    class="boxplot-plot"
+    label-field="service"
+    value-suffix=" ms"
+    data='[{"service":"search","east":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610],"west":[126,164,186,206,220,238,258,276,298,320,327,354,399,511,701]},{"service":"checkout","east":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905],"west":[186,214,236,253,273,287,305,320,336,352,365,392,412,433,461,488,780,1031]},{"service":"payments","east":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688],"west":[150,186,220,231,248,262,273,287,309,334,345,388,444,518,789]}]'
+  >
+    <c2-chart-series field="east" label="us-east"></c2-chart-series>
+    <c2-chart-series field="west" label="eu-west"></c2-chart-series>
+  </c2-boxplot-chart>
+</div>
+```
+
+### Data
+
+`label-field` names the category, and each `c2-chart-series` field may hold one of three shapes, read row by row:
+
+- **A number** is one sample. Rows with the same label pool their samples, so long-format data (one row per request) works as it is.
+- **An array of numbers** is the samples of that category.
+- **A summary object**, `{ min, q1, median, q3, max, outliers?, mean?, count? }`, is a box already computed by a backend or a query (metrics stores return percentiles, not samples). It is drawn as given.
+
+From samples the quartiles are interpolated linearly, as R (type 7), NumPy and a spreadsheet's `PERCENTILE.INC` do. `summarizeSamples()` is exported from the module for the same figures elsewhere in an app, and the `boxes` property lists every box the chart drew.
+
+### Whiskers, outliers and the mean
+
+`whiskers="tukey"` (the default) ends each whisker at the furthest sample within 1.5 × IQR of the box; the samples past it are outliers, drawn as hollow points. `whiskers="range"` runs from the minimum to the maximum, with no outliers. `outliers="none"` leaves the points out (the tooltip still counts them), and `mean="show"` adds a diamond at the mean.
+
+### Layout
+
+Several series are groups, sitting side by side in each category in the series colours, with the legend: two regions, or control and variant. `orientation="horizontal"` lays the categories down the left, which suits long names. `reference-lines` takes a JSON array of `{ value, label, tone }` and draws a dashed rule across the plot at each value, such as an SLO, in the annotation tones (`neutral`, `info`, `success`, `warning`, `danger`). `value-suffix` and `precision` format the tooltip and the table; the suffix also names the value axis.
+
+The box width, its tint, its outline, the median rule and the outlier size are `--c2-chart__box--width` (a share of the band, or a length), `--c2-chart__box--fill-opacity`, `--c2-chart__box--border-width`, `--c2-chart__median--width` and `--c2-chart__outlier--radius`.
+
+### Reading it
+
+Hovering a box gives its category a backdrop and lists the five numbers, the outliers ("4, up to 1,320 ms") and the sample count when it is known; hovering an outlier names its value. With several series a click highlights one and fades the others. The plot is one tab stop: ← and → move between categories and ↑ and ↓ between the series of a category (the other way round when horizontal), and each box is announced with its median, quartiles, whiskers and outliers. For assistive technology the chart also carries every box as a table.
