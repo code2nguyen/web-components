@@ -99,6 +99,9 @@ A canvas has no intrinsic size, so a chart is sized by its host: `--c2-chart--he
 sparkline) plus whatever width the layout gives it. A `ResizeObserver` keeps the canvas in step, and the
 plot box is `contain: strict` so a resize cannot feed back into itself.
 
+The bullet chart is the exception: unless `--c2-chart--height` is set, it is as tall as its rows
+(`--c2-chart__row--height`, 44px each), so a scorecard grows with its measures.
+
 ## Theming
 
 Every element shares the `--c2-chart__*` namespace, so theming once themes them all. The palette is
