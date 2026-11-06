@@ -235,6 +235,20 @@ test('under reduced motion the strip takes keyboard focus, so a row with nothing
   await accessible(page)
 })
 
+test('under reduced motion a strip with nothing to scroll is no tab stop', async ({ page, scenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Two items, 240px, in a 400px strip.
+  await scenario('short')
+  await expect(page.locator('c2-marquee').locator('.viewport')).not.toHaveAttribute('tabindex', /.*/)
+})
+
+test('the focus ring is drawn inside the strip, where the edge fade cannot clip it', async ({ page, scenario, tab }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('extras')
+  await tab()
+  await expect(page.locator('c2-marquee').locator('.viewport')).toHaveCSS('outline-offset', '-2px')
+})
+
 test('a moving strip does not take focus itself', async ({ page, scenario }) => {
   await scenario()
   await expect(page.locator('c2-marquee').locator('.viewport')).not.toHaveAttribute('tabindex', /.*/)
