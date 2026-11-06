@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import styles from './stat.scss?inline'
 
 export type StatTone = 'neutral' | 'positive' | 'negative' | 'warning'
@@ -61,18 +62,24 @@ export class Stat extends LitElement {
   /** Semantic colour applied to the icon container. */
   @property({ reflect: true }) tone: StatTone = 'neutral'
 
+  // The icon box and the description line are drawn only when they have content. (`:host(:has(> [slot]))` would say
+  // the same in CSS, but browsers do not match `:has()` inside `:host()`.)
+  private readonly slotPresence = new SlotPresenceController(this, ['icon', 'description'])
+
   override render() {
     return html`
       <div class="c2-stat" part="container">
-        <span class="icon" part="icon" aria-hidden="true"><slot name="icon"></slot></span>
+        <span class="icon" part="icon" aria-hidden="true" ?hidden=${!this.slotPresence.has('icon')}
+          ><slot name="icon" @slotchange=${this.slotPresence.handleSlotChange}></slot
+        ></span>
         <div class="content">
           <div class="value-row">
             <div class="value" part="value"><slot name="value">${this.value ?? html`<span class="placeholder">--</span>`}</slot></div>
             <div class="trend" part="trend"><slot name="trend"></slot></div>
           </div>
           <div class="label" part="label"><slot name="label">${this.label}</slot></div>
-          <div class="description" part="description">
-            <slot name="description"></slot>
+          <div class="description" part="description" ?hidden=${!this.slotPresence.has('description')}>
+            <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </div>
         </div>
       </div>
