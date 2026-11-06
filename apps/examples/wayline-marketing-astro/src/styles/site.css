@@ -241,8 +241,11 @@ main > .container {
   max-width: 900px;
 }
 
+/* On its own line, so the space the widest word reserves is centred instead of opening a gap after "your". */
 .hero-word {
   --c2-text-effect__rotate--align: center;
+
+  display: block;
   --c2-text-effect__text--background: linear-gradient(90deg, var(--site-accent), #7c3aed);
   --c2-text-effect__text--color: transparent;
 }
