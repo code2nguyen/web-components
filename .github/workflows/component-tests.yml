@@ -13,12 +13,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  # Picks the suites the change reaches (scripts/run-changed-component-tests.mjs) and how many shards to spread them
+  # over: a component PR stays in one shard per browser, a full run takes four.
+  plan:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
+    outputs:
+      directories: ${{ steps.plan.outputs.directories }}
+      shards: ${{ steps.plan.outputs.shards }}
+      shard_total: ${{ steps.plan.outputs.shard_total }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -26,14 +28,34 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - id: plan
+        env:
+          COMPONENT_TEST_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          SCOPE: ${{ github.event_name == 'workflow_dispatch' && '--all' || '' }}
+        run: |
+          node scripts/run-changed-component-tests.mjs --plan $SCOPE > plan.json
+          node -e '
+            const { appendFileSync } = require("node:fs")
+            const plan = require("./plan.json")
+            appendFileSync(process.env.GITHUB_OUTPUT, `directories=${plan.directories.join(" ")}\nshards=${JSON.stringify(plan.shards)}\nshard_total=${plan.shards.length}\n`)
+            const list = plan.directories.map((directory) => `- \`${directory}\``).join("\n") || "_No suite reached._"
+            const scope = plan.everything ? "Shared test input changed: every suite runs." : "The suites this change reaches:"
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### ${plan.directories.length} suites, ${plan.shards.length} shard(s) per browser\n\n${scope}\n\n${list}\n`)
+          '
+
+  # Builds once for every browser and shard. The suites run against source, but the type-check resolves `@c2n/*`
+  # through each package's `exports` (the generated, git-ignored `dist/*.d.ts`), and the `@c2n/components` suite loads
+  # the umbrella bundle and its merged manifest.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
           cache: npm
       - run: npm ci
-      # The suites themselves run against source, but the type-check resolves a component's `@c2n/*` imports through
-      # each package's `exports`, which point at the generated `dist/*.d.ts`. Those are git-ignored, so without a
-      # build tsc cannot see them and fails on any component that depends on a sibling package.
       - run: npm run build
-      # `@c2n/components` bundles the component packages, and its suite (selected by any component change) loads the
-      # bundle and its merged custom-elements.json, both build output of packages/umbrella.
       - run: npm run build -w packages/umbrella
       - run: npm run docs:check
       - name: Verify generated component manifests are committed
@@ -41,42 +63,74 @@ jobs:
       # The initial full-library audit still has unresolved failures. Collect the complete result on every PR;
       # promote this to a required gate only after the inventory and browser/panel evidence reach zero failures.
       - name: Style-contract static diagnostic
-        if: matrix.browser == 'chromium'
         continue-on-error: true
         run: |
           mkdir -p test-results/style-contracts
           node scripts/check-style-contracts.mjs --json > test-results/style-contracts/style-contract-static-report.json
       - name: Summarize style-contract diagnostic
-        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        if: ${{ !cancelled() }}
         run: node scripts/summarize-style-contract-audit.mjs test-results/style-contracts/style-contract-static-report.json
       - name: Upload style-contract static report
-        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: style-contract-static-report
           path: test-results/style-contracts/style-contract-static-report.json
           retention-days: 7
+      - name: Pack the build output
+        run: |
+          find packages open-packages -name node_modules -prune -o -type d \( -name dist -o -name types \) -print -prune > build-output.txt
+          echo packages/umbrella/custom-elements.json >> build-output.txt
+          tar -czf build-output.tgz -T build-output.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build-output.tgz
+          retention-days: 1
+
+  test:
+    needs: [plan, build]
+    # The first shard keeps the name the job had before sharding.
+    name: ${{ format('test ({0}{1})', matrix.browser, matrix.shard != 1 && format(', {0}/{1}', matrix.shard, needs.plan.outputs.shard_total) || '') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+      - run: tar -xzf build-output.tgz && rm build-output.tgz
       - run: npx playwright install --with-deps ${{ matrix.browser }}
-      - run: npm run test:type-check
+      - if: matrix.shard == 1
+        run: npm run test:type-check
       - name: Style-contract browser diagnostic
+        if: matrix.shard == 1
         continue-on-error: true
         run: npm run test:style-contracts -- --project=${{ matrix.browser }} --output=test-results/style-contracts-${{ matrix.browser }} --reporter=list
       - name: Configuration-panel diagnostic
-        if: matrix.browser == 'chromium'
+        if: matrix.browser == 'chromium' && matrix.shard == 1
         continue-on-error: true
         run: npx playwright test --config apps/ui/playwright.config.ts apps/ui/test/style-panel.spec.ts --project=chromium --output=apps/ui/test-results/style-panel --reporter=list
-      - name: Test changed component packages
-        if: github.event_name != 'workflow_dispatch'
+      - name: Test the suites the change reaches
+        if: needs.plan.outputs.directories != ''
         env:
-          COMPONENT_TEST_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-        run: npm run test:changed -- --project=${{ matrix.browser }}
-      - name: Test all component packages
-        if: github.event_name == 'workflow_dispatch'
-        run: npm run test:all -- --project=${{ matrix.browser }}
+          DIRECTORIES: ${{ needs.plan.outputs.directories }}
+          SHARD: ${{ matrix.shard }}/${{ needs.plan.outputs.shard_total }}
+        # The directories are word-split on purpose: one argument per suite.
+        run: npx playwright test $DIRECTORIES --project=${{ matrix.browser }} --shard=$SHARD --pass-with-no-tests
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-${{ matrix.browser }}
+          name: playwright-${{ matrix.browser }}-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/
