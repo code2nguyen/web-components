@@ -1,10 +1,9 @@
 ---
 import { testimonials } from '../data/site'
 
-// Three columns that scroll up at slightly different speeds, the middle one the other way.
-const columns = [0, 1, 2].map((column) =>
-  testimonials.filter((_, index) => index % 3 === column).concat(testimonials.filter((_, index) => index % 3 !== column).slice(0, 1)),
-)
+// Three columns of every quote, each starting at a different one and scrolling at its own speed, the middle one the
+// other way. A column needs more quotes than fit in its height, or its loop shows a gap before the first comes round.
+const columns = [0, 2, 4].map((start) => [...testimonials.slice(start), ...testimonials.slice(0, start)])
 ---
 
 <section class="container" aria-labelledby="testimonials-title">
