@@ -22,8 +22,8 @@ interface ItemTrack {
  *
  * Motion pauses while the pointer is over the strip or focus is inside it, and while `paused` is set. Keyboard focus
  * and a request for reduced motion both stop the strip and lay it out as a row that scrolls by hand, so the focused
- * item is always in view. Under reduced motion the strip itself takes keyboard focus, so a row of plain items (a logo
- * wall) can still be scrolled from the keyboard.
+ * item is always in view. Under reduced motion a strip whose items are longer than it takes keyboard focus itself, so a
+ * row of plain items (a logo wall) can still be scrolled from the keyboard.
  *
  * @tag c2-marquee
  *
@@ -63,6 +63,8 @@ export class Marquee extends LitElement {
   @state() private browsing = false
   /** The reader asked for reduced motion: the strip is a row they scroll by hand, so it takes keyboard focus. */
   @state() private still = false
+  /** The items are longer than the strip, so at rest there is something to scroll to. */
+  @state() private overflowing = false
   private motionQuery?: MediaQueryList
   private readonly onMotionChange = () => (this.still = this.motionQuery?.matches ?? false)
 
@@ -190,6 +192,7 @@ export class Marquee extends LitElement {
     if (view <= 0 || sizes.every((size) => size <= 0)) return
 
     const content = sizes.reduce((sum, size) => sum + size, 0)
+    this.overflowing = content > view + 0.5
     // An item must leave the strip completely before it re-enters at the far end, or it would pop into view.
     const cycle = Math.max(content, view + Math.max(...sizes))
     let start = 0
@@ -209,7 +212,7 @@ export class Marquee extends LitElement {
   override render() {
     const running = !this.browsing && this.tracks.length === this.items.length && this.items.length > 0
     return html`
-      <div class="viewport ${this.browsing ? 'browsing' : ''}" part="viewport" tabindex=${this.still ? '0' : nothing}>
+      <div class="viewport ${this.browsing ? 'browsing' : ''}" part="viewport" tabindex=${this.still && this.overflowing ? '0' : nothing}>
         <div class="track ${running ? 'running' : ''}" style=${styleMap({ '--_distance': String(this.distance) })}>
           ${this.items.map((item, index) => {
             const track = running ? this.tracks[index] : undefined

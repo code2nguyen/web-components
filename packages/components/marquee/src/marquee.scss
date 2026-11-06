@@ -135,5 +135,6 @@
 
 .viewport:focus-visible {
   outline: css.cssVar(viewport__focus--outline);
-  outline-offset: 2px;
+  // Inside the edge: the fade mask clips anything drawn outside the strip.
+  outline-offset: -2px;
 }

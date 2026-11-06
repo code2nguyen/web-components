@@ -18,4 +18,4 @@ import '@c2n/components/marquee'
 </c2-marquee>
 ```
 
-Attributes: `orientation` (`horizontal` | `vertical`), `reverse`, `paused`. Styling: `--c2-marquee--speed` (pixels per second), `--c2-marquee__item--gap`, `--c2-marquee__item--align`, `--c2-marquee__viewport--fade`, `--c2-marquee__viewport--height` (vertical strips).
+Attributes: `orientation` (`horizontal` | `vertical`), `reverse`, `paused`. Styling: `--c2-marquee--speed` (pixels per second), `--c2-marquee__item--gap`, `--c2-marquee__item--align`, `--c2-marquee__viewport--fade`, `--c2-marquee__viewport--height` (vertical strips), `--c2-marquee__viewport__focus--outline` (the ring shown when, under reduced motion, the strip takes keyboard focus to scroll).
