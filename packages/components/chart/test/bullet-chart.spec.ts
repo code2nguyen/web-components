@@ -662,7 +662,8 @@ test('regression: opposite extreme ends fall back to the two ends, and no tick l
     const near = bulletTicks(0.30000000001, 1)
     return { extreme, near }
   })
-  expect(result.extreme.every((tick) => Number.isFinite(tick))).toBe(true)
+  expect(result.extreme).toEqual([-Number.MAX_VALUE, Number.MAX_VALUE])
+  expect(result.near.length).toBeGreaterThan(0)
   expect(result.near.every((tick) => tick >= 0.30000000001 && tick <= 1)).toBe(true)
 })
 
