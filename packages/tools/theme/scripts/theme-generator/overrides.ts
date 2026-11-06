@@ -231,6 +231,26 @@ export const overrides: Record<string, Override> = {
   '--c2-cascader__trigger__focus--outline-offset': { exclude: 'flush focus ring offset' },
   '--c2-cascader__icon--size': { exclude: 'cascader affordance size' },
   '--c2-cascader__panel--box-shadow': { token: 'shadow-md' },
+  // A floating panel behind the active one sits lower: its shadow steps down from the large one.
+  '--c2-floating-panel__inactive--box-shadow': { token: 'shadow-md' },
+  // Pan-zoom: the cooperative hint is light text on the inverted surface; the dot grid and minimap follow the greys
+  // and the accent, so both read in dark mode.
+  '--c2-pan-zoom__hint--color': { token: 'color-on-inverse-surface' },
+  '--c2-pan-zoom__grid--color': { token: 'color-outline' },
+  '--c2-pan-zoom__minimap-content--background': { token: 'color-outline-variant' },
+  '--c2-pan-zoom__minimap-frame--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-pan-zoom__minimap-frame--background': { token: 'color-primary-glow' },
+  // Mind map: the root card is the inverse surface, and the branch colours are the chart palette so they adapt to dark mode.
+  '--c2-mind-map__root--color': { token: 'color-on-inverse-surface' },
+  '--c2-mind-map__branch-1--color': { token: 'chart-series-1' },
+  '--c2-mind-map__branch-2--color': { token: 'chart-series-2' },
+  '--c2-mind-map__branch-3--color': { token: 'chart-series-3' },
+  '--c2-mind-map__branch-4--color': { token: 'chart-series-4' },
+  '--c2-mind-map__branch-5--color': { token: 'chart-series-5' },
+  '--c2-mind-map__branch-6--color': { token: 'chart-series-6' },
+  '--c2-mind-map__branch-7--color': { token: 'chart-series-7' },
+  '--c2-mind-map__branch-8--color': { token: 'chart-series-8' },
+  '--c2-mind-map__topic__selected--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
   '--c2-cascader__panel--max-width': { exclude: 'viewport-aware panel width' },
   '--c2-cascader__column--min-width': { exclude: 'hierarchy column geometry' },
   '--c2-cascader__column--max-width': { exclude: 'hierarchy column geometry' },

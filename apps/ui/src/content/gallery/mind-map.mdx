@@ -1,0 +1,134 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MindMap } from '@c2n/components/mind-map'
+
+## Presets
+
+Looks for `c2-mind-map`. The eight `__branch-N--color` variables colour the branches, `__topic--tint` sets how much of that colour a first-level topic takes, the `__root`, `__topic` and `__subtopic` variables shape the three levels, `__connector--width` and `--taper` the curves, and `__level--gap` and `__sibling--gap` the spacing. A node's own `color` wins over the palette.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-mind-map
+  label="Q3 launch plan"
+  editable
+  controls
+  data='{"id":"root","label":"Q3 launch","children":[{"id":"mkt","label":"Marketing","children":[{"id":"ads","label":"Paid ads","children":[{"id":"search","label":"Search"},{"id":"social","label":"Social"}]},{"id":"seo","label":"SEO refresh"},{"id":"event","label":"Launch event","children":[{"id":"venue","label":"Venue"},{"id":"speakers","label":"Speakers"}]}]},{"id":"eng","label":"Engineering","children":[{"id":"api","label":"Public API","children":[{"id":"rate","label":"Rate limits"},{"id":"sdks","label":"SDKs"}]},{"id":"perf","label":"Performance"},{"id":"mig","label":"Data migration"}]},{"id":"prod","label":"Product","children":[{"id":"onb","label":"Onboarding flow"},{"id":"price","label":"Pricing page"},{"id":"notes","label":"Release notes"}]},{"id":"sup","label":"Support","children":[{"id":"help","label":"Help center"},{"id":"train","label":"Agent training"}]}]}'
+></c2-mind-map>
+```
+
+```html tag=MdxCodeBlock,label=One-sided brainstorm
+<style>
+  .mm-brainstorm {
+    --c2-mind-map--height: 400px;
+    --c2-mind-map__grid--display: none;
+    --c2-mind-map__root--border-radius: 999px;
+    --c2-mind-map__root--padding: 10px 22px;
+    --c2-mind-map__topic--border-radius: 999px;
+    --c2-mind-map__topic--padding: 5px 14px;
+    --c2-mind-map__topic--tint: 22%;
+    --c2-mind-map__level--gap: 44px;
+  }
+</style>
+<c2-mind-map
+  class="mm-brainstorm"
+  label="Name ideas"
+  layout="right"
+  editable
+  data='{"id":"r","label":"Name the app","children":[{"id":"a","label":"Short and punchy","children":[{"id":"a1","label":"Tally"},{"id":"a2","label":"Hop"},{"id":"a3","label":"Nudge"}]},{"id":"b","label":"Descriptive","children":[{"id":"b1","label":"TaskFlow"},{"id":"b2","label":"PlanWell"}]},{"id":"c","label":"Playful","children":[{"id":"c1","label":"Doodle Do"},{"id":"c2","label":"Ticklist"}]}]}'
+></c2-mind-map>
+```
+
+```html tag=MdxCodeBlock,label=Coloured branches
+<style>
+  .mm-coloured {
+    --c2-mind-map--height: 400px;
+    --c2-mind-map__branch-1--color: #047857;
+    --c2-mind-map__branch-2--color: #b45309;
+    --c2-mind-map__branch-3--color: #1d4ed8;
+    --c2-mind-map__branch-4--color: #a21caf;
+    --c2-mind-map__topic--tint: 100%;
+    --c2-mind-map__topic--color: #ffffff;
+    --c2-mind-map__topic--font-weight: 600;
+    --c2-mind-map__connector--width: 4px;
+    --c2-mind-map__connector--taper: 1px;
+  }
+</style>
+<c2-mind-map
+  class="mm-coloured"
+  label="Garden plan"
+  data='{"id":"r","label":"Spring garden","children":[{"id":"veg","label":"Vegetables","children":[{"id":"v1","label":"Tomatoes"},{"id":"v2","label":"Courgettes"},{"id":"v3","label":"Beans"}]},{"id":"tools","label":"Tools","children":[{"id":"t1","label":"Hoe"},{"id":"t2","label":"Watering can"}]},{"id":"herbs","label":"Herbs","children":[{"id":"h1","label":"Basil"},{"id":"h2","label":"Thyme"}]},{"id":"flowers","label":"Flowers","children":[{"id":"f1","label":"Tulips"},{"id":"f2","label":"Dahlias"}]}]}'
+></c2-mind-map>
+```
+
+```html tag=MdxCodeBlock,label=Read-only with icons
+<style>
+  .mm-icons {
+    --c2-mind-map--height: 380px;
+    --c2-mind-map__root--background: var(--c2-theme--color-primary, #0265dc);
+    --c2-mind-map__root--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-mind-map__topic--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-mind-map__topic--tint: 0%;
+    --c2-mind-map__topic--border-width: 1.5px;
+  }
+</style>
+<c2-mind-map
+  class="mm-icons"
+  label="Team offsite"
+  data='{"id":"r","label":"Team offsite","children":[{"id":"travel","label":"Travel","icon":"✈️","children":[{"id":"t1","label":"Flights"},{"id":"t2","label":"Airport transfer"}]},{"id":"stay","label":"Stay","icon":"🏨","children":[{"id":"s1","label":"Hotel block"}]},{"id":"agenda","label":"Agenda","icon":"🗓️","children":[{"id":"g1","label":"Strategy day"},{"id":"g2","label":"Workshops"},{"id":"g3","label":"Dinner"}]},{"id":"budget","label":"Budget","icon":"💶","color":"#a16207","children":[{"id":"b1","label":"Approval"}]}]}'
+></c2-mind-map>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .mm-compact {
+    --c2-mind-map--height: 280px;
+    --c2-mind-map__root--font-size: 14px;
+    --c2-mind-map__root--padding: 6px 12px;
+    --c2-mind-map__root--border-radius: 6px;
+    --c2-mind-map__topic--font-size: 12px;
+    --c2-mind-map__topic--line-height: 16px;
+    --c2-mind-map__topic--padding: 3px 8px;
+    --c2-mind-map__topic--border-radius: 4px;
+    --c2-mind-map__subtopic--font-size: 12px;
+    --c2-mind-map__subtopic--padding: 2px 1px;
+    --c2-mind-map__connector--width: 1.5px;
+    --c2-mind-map__connector--taper: 0.25px;
+    --c2-mind-map__level--gap: 32px;
+    --c2-mind-map__sibling--gap: 4px;
+    --c2-mind-map__grid--gap: 14px;
+  }
+</style>
+<c2-mind-map
+  class="mm-compact"
+  label="Sprint 14"
+  editable
+  data='{"id":"r","label":"Sprint 14","children":[{"id":"a","label":"Must","children":[{"id":"a1","label":"Login fix"},{"id":"a2","label":"Export CSV"},{"id":"a3","label":"Audit log"}]},{"id":"b","label":"Should","children":[{"id":"b1","label":"Dark mode"},{"id":"b2","label":"Shortcuts"}]},{"id":"c","label":"Could","children":[{"id":"c1","label":"Emoji picker"}]},{"id":"d","label":"Won’t","children":[{"id":"d1","label":"Plugins"}]}]}'
+></c2-mind-map>
+```
+
+```html tag=MdxCodeBlock,label=Quiet outline
+<style>
+  .mm-quiet {
+    --c2-mind-map--height: 360px;
+    --c2-mind-map__grid--display: none;
+    --c2-mind-map__branch-1--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-mind-map__branch-2--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-mind-map__branch-3--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-mind-map__root--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-mind-map__root--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-mind-map__topic--tint: 0%;
+    --c2-mind-map__connector--width: 1.5px;
+    --c2-mind-map__connector--taper: 0px;
+  }
+</style>
+<c2-mind-map
+  class="mm-quiet"
+  label="Essay outline"
+  layout="right"
+  data='{"id":"r","label":"Essay: remote work","children":[{"id":"i","label":"Introduction","children":[{"id":"i1","label":"Hook"},{"id":"i2","label":"Thesis"}]},{"id":"b","label":"Body","children":[{"id":"b1","label":"Productivity data"},{"id":"b2","label":"Hiring reach"},{"id":"b3","label":"Counter-arguments"}]},{"id":"c","label":"Conclusion","children":[{"id":"c1","label":"Call to action"}]}]}'
+></c2-mind-map>
+```
+
+</GalleryGrid>

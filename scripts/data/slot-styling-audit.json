@@ -4605,6 +4605,61 @@
       "decision": "variables",
       "variables": ["--c2-video-player--aspect-ratio", "--c2-video-player--border-radius", "--c2-video-player--width"],
       "reason": "The player lays out the author's <video> under its controls (one grid cell, full width, contained) and shapes it through its width, aspect-ratio and radius variables; the player never writes on the element, whose sources and tracks stay the author's."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The scrolling body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The title-bar actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The title-bar icon box owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot's content is laid out at its natural size inside a shadow wrapper that one transform moves and scales; the shadow CSS also resets slotted img, svg, canvas and video to display: block, max-width: none and no native drag, so page rules such as img { max-width: 100% } cannot shrink them and an image is panned rather than dragged out."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "controls",
+      "decision": "part",
+      "parts": ["controls"],
+      "reason": "The zoom toolbar owns the controls slot's component-side presentation; extra buttons sit inside it."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "minimap",
+      "decision": "part",
+      "parts": ["minimap"],
+      "reason": "The minimap box sizes and frames the slotted overview; the assigned content keeps its own styles."
     }
   ]
 }

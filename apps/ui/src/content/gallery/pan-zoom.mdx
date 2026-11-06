@@ -1,0 +1,377 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PanZoom } from '@c2n/components/pan-zoom'
+
+## Presets
+
+Looks for `c2-pan-zoom`. `--c2-pan-zoom--height` sizes the viewport, the `__controls` and `__button` variables shape the toolbar, the `__minimap` ones the overview, and `__grid--display: block` draws a dot grid that scales with the zoom.
+
+<GalleryGrid min="360">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .fp-room {
+    fill: var(--c2-theme--color-surface, #ffffff);
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 6;
+  }
+  .fp-wall {
+    fill: none;
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 4;
+  }
+  .fp-blue {
+    fill: light-dark(#eaf2fd, #172a45);
+  }
+  .fp-orange {
+    fill: light-dark(#fdf0e7, #3b2617);
+  }
+  .fp-violet {
+    fill: light-dark(#f2edfd, #2a1f45);
+  }
+  .fp-pink {
+    fill: light-dark(#fcedf2, #3d1d29);
+  }
+  .fp-green {
+    fill: light-dark(#e8f5f1, #16332b);
+  }
+  .fp-item {
+    fill: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    stroke: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+    stroke-width: 2;
+  }
+  .fp-plant {
+    fill: #3f9a86;
+  }
+  .fp-label {
+    fill: var(--c2-theme--color-on-surface, #18181b);
+    font: 600 20px system-ui, sans-serif;
+  }
+</style>
+<c2-pan-zoom label="Office floor plan, level 3" controls>
+  <svg class="fp" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Office floor plan, level 3">
+    <defs>
+      <pattern id="fp-default-desks" x="40" y="60" width="84" height="96" patternUnits="userSpaceOnUse">
+        <rect class="fp-item" x="12" y="14" width="60" height="34" rx="5" />
+        <circle class="fp-item" cx="42" cy="66" r="11" />
+      </pattern>
+    </defs>
+    <rect class="fp-room" x="8" y="8" width="452" height="402" />
+    <rect class="fp-room fp-blue" x="460" y="8" width="320" height="232" />
+    <rect class="fp-room fp-blue" x="780" y="8" width="210" height="232" />
+    <rect class="fp-room fp-orange" x="990" y="8" width="202" height="402" />
+    <rect class="fp-room" x="460" y="240" width="530" height="170" />
+    <rect class="fp-room fp-violet" x="8" y="410" width="262" height="170" />
+    <rect class="fp-room fp-pink" x="8" y="580" width="262" height="172" />
+    <rect class="fp-room fp-green" x="270" y="410" width="440" height="342" />
+    <rect class="fp-room" x="710" y="410" width="482" height="342" />
+    <rect fill="url(#fp-default-desks)" x="40" y="60" width="420" height="288" />
+    <rect class="fp-item" x="530" y="100" width="180" height="64" rx="10" />
+    <circle class="fp-item" cx="560" cy="80" r="11" /><circle class="fp-item" cx="560" cy="184" r="11" />
+    <circle class="fp-item" cx="600" cy="80" r="11" /><circle class="fp-item" cx="600" cy="184" r="11" />
+    <circle class="fp-item" cx="640" cy="80" r="11" /><circle class="fp-item" cx="640" cy="184" r="11" />
+    <circle class="fp-item" cx="680" cy="80" r="11" /><circle class="fp-item" cx="680" cy="184" r="11" />
+    <rect class="fp-item" x="830" y="104" width="110" height="56" rx="10" />
+    <circle class="fp-item" cx="855" cy="84" r="11" /><circle class="fp-item" cx="855" cy="180" r="11" />
+    <circle class="fp-item" cx="885" cy="84" r="11" /><circle class="fp-item" cx="885" cy="180" r="11" />
+    <circle class="fp-item" cx="915" cy="84" r="11" /><circle class="fp-item" cx="915" cy="180" r="11" />
+    <rect class="fp-item" x="1012" y="56" width="160" height="34" rx="4" />
+    <rect class="fp-item" x="1032" y="220" width="120" height="60" rx="10" />
+    <circle class="fp-item" cx="1052" cy="200" r="10" /><circle class="fp-item" cx="1052" cy="300" r="10" />
+    <circle class="fp-item" cx="1092" cy="200" r="10" /><circle class="fp-item" cx="1092" cy="300" r="10" />
+    <circle class="fp-item" cx="1132" cy="200" r="10" /><circle class="fp-item" cx="1132" cy="300" r="10" />
+    <rect class="fp-item" x="40" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="78" cy="526" r="11" />
+    <rect class="fp-item" x="150" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="188" cy="526" r="11" />
+    <path class="fp-wall" d="M139 580V752" />
+    <rect class="fp-item" x="300" y="480" width="160" height="50" rx="16" />
+    <rect class="fp-item" x="300" y="580" width="50" height="130" rx="16" />
+    <circle class="fp-item" cx="540" cy="630" r="48" />
+    <circle class="fp-plant" cx="300" cy="730" r="13" /><circle class="fp-plant" cx="684" cy="436" r="13" />
+    <path class="fp-item" d="M800 600H990a30 30 0 0 1 30 30v30H800Z" />
+    <path class="fp-item" d="M1110 540V730M1126 540V730M1142 540V730M1158 540V730M1174 540V730" />
+    <circle class="fp-plant" cx="1166" cy="440" r="13" />
+    <text class="fp-label" x="28" y="46">Open office</text>
+    <text class="fp-label" x="480" y="46">Meeting A</text>
+    <text class="fp-label" x="800" y="46">Meeting B</text>
+    <text class="fp-label" x="1010" y="46">Kitchen</text>
+    <text class="fp-label" x="480" y="278">Corridor</text>
+    <text class="fp-label" x="28" y="448">Focus room</text>
+    <text class="fp-label" x="28" y="618">Phone booths</text>
+    <text class="fp-label" x="290" y="448">Lounge</text>
+    <text class="fp-label" x="730" y="448">Reception</text>
+  </svg>
+</c2-pan-zoom>
+```
+
+```html tag=MdxCodeBlock,label=Floor plan with minimap
+<style>
+  .fp-room {
+    fill: var(--c2-theme--color-surface, #ffffff);
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 6;
+  }
+  .fp-wall {
+    fill: none;
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 4;
+  }
+  .fp-blue {
+    fill: light-dark(#eaf2fd, #172a45);
+  }
+  .fp-orange {
+    fill: light-dark(#fdf0e7, #3b2617);
+  }
+  .fp-violet {
+    fill: light-dark(#f2edfd, #2a1f45);
+  }
+  .fp-pink {
+    fill: light-dark(#fcedf2, #3d1d29);
+  }
+  .fp-green {
+    fill: light-dark(#e8f5f1, #16332b);
+  }
+  .fp-item {
+    fill: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    stroke: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+    stroke-width: 2;
+  }
+  .fp-plant {
+    fill: #3f9a86;
+  }
+  .fp-label {
+    fill: var(--c2-theme--color-on-surface, #18181b);
+    font: 600 20px system-ui, sans-serif;
+  }
+  .pz-minimap {
+    --c2-pan-zoom--height: 320px;
+    --c2-pan-zoom__minimap--width: 128px;
+    --c2-pan-zoom__minimap--max-height: 96px;
+  }
+</style>
+<c2-pan-zoom class="pz-minimap" label="Office floor plan, level 3" controls minimap view='{"x": 440, "y": 0, "zoom": 1.25}' max-zoom="6">
+  <svg class="fp" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Office floor plan, level 3">
+    <defs>
+      <pattern id="fp-minimap-desks" x="40" y="60" width="84" height="96" patternUnits="userSpaceOnUse">
+        <rect class="fp-item" x="12" y="14" width="60" height="34" rx="5" />
+        <circle class="fp-item" cx="42" cy="66" r="11" />
+      </pattern>
+    </defs>
+    <rect class="fp-room" x="8" y="8" width="452" height="402" />
+    <rect class="fp-room fp-blue" x="460" y="8" width="320" height="232" />
+    <rect class="fp-room fp-blue" x="780" y="8" width="210" height="232" />
+    <rect class="fp-room fp-orange" x="990" y="8" width="202" height="402" />
+    <rect class="fp-room" x="460" y="240" width="530" height="170" />
+    <rect class="fp-room fp-violet" x="8" y="410" width="262" height="170" />
+    <rect class="fp-room fp-pink" x="8" y="580" width="262" height="172" />
+    <rect class="fp-room fp-green" x="270" y="410" width="440" height="342" />
+    <rect class="fp-room" x="710" y="410" width="482" height="342" />
+    <rect fill="url(#fp-minimap-desks)" x="40" y="60" width="420" height="288" />
+    <rect class="fp-item" x="530" y="100" width="180" height="64" rx="10" />
+    <circle class="fp-item" cx="560" cy="80" r="11" /><circle class="fp-item" cx="560" cy="184" r="11" />
+    <circle class="fp-item" cx="600" cy="80" r="11" /><circle class="fp-item" cx="600" cy="184" r="11" />
+    <circle class="fp-item" cx="640" cy="80" r="11" /><circle class="fp-item" cx="640" cy="184" r="11" />
+    <circle class="fp-item" cx="680" cy="80" r="11" /><circle class="fp-item" cx="680" cy="184" r="11" />
+    <rect class="fp-item" x="830" y="104" width="110" height="56" rx="10" />
+    <circle class="fp-item" cx="855" cy="84" r="11" /><circle class="fp-item" cx="855" cy="180" r="11" />
+    <circle class="fp-item" cx="885" cy="84" r="11" /><circle class="fp-item" cx="885" cy="180" r="11" />
+    <circle class="fp-item" cx="915" cy="84" r="11" /><circle class="fp-item" cx="915" cy="180" r="11" />
+    <rect class="fp-item" x="1012" y="56" width="160" height="34" rx="4" />
+    <rect class="fp-item" x="1032" y="220" width="120" height="60" rx="10" />
+    <circle class="fp-item" cx="1052" cy="200" r="10" /><circle class="fp-item" cx="1052" cy="300" r="10" />
+    <circle class="fp-item" cx="1092" cy="200" r="10" /><circle class="fp-item" cx="1092" cy="300" r="10" />
+    <circle class="fp-item" cx="1132" cy="200" r="10" /><circle class="fp-item" cx="1132" cy="300" r="10" />
+    <rect class="fp-item" x="40" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="78" cy="526" r="11" />
+    <rect class="fp-item" x="150" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="188" cy="526" r="11" />
+    <path class="fp-wall" d="M139 580V752" />
+    <rect class="fp-item" x="300" y="480" width="160" height="50" rx="16" />
+    <rect class="fp-item" x="300" y="580" width="50" height="130" rx="16" />
+    <circle class="fp-item" cx="540" cy="630" r="48" />
+    <circle class="fp-plant" cx="300" cy="730" r="13" /><circle class="fp-plant" cx="684" cy="436" r="13" />
+    <path class="fp-item" d="M800 600H990a30 30 0 0 1 30 30v30H800Z" />
+    <path class="fp-item" d="M1110 540V730M1126 540V730M1142 540V730M1158 540V730M1174 540V730" />
+    <circle class="fp-plant" cx="1166" cy="440" r="13" />
+    <text class="fp-label" x="28" y="46">Open office</text>
+    <text class="fp-label" x="480" y="46">Meeting A</text>
+    <text class="fp-label" x="800" y="46">Meeting B</text>
+    <text class="fp-label" x="1010" y="46">Kitchen</text>
+    <text class="fp-label" x="480" y="278">Corridor</text>
+    <text class="fp-label" x="28" y="448">Focus room</text>
+    <text class="fp-label" x="28" y="618">Phone booths</text>
+    <text class="fp-label" x="290" y="448">Lounge</text>
+    <text class="fp-label" x="730" y="448">Reception</text>
+  </svg>
+</c2-pan-zoom>
+```
+
+```html tag=MdxCodeBlock,label=Image preview
+<style>
+  .pz-preview {
+    margin: 0;
+    width: 100%;
+    max-width: 340px;
+    padding: 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 12px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .pz-photo {
+    --c2-pan-zoom--height: 220px;
+    --c2-pan-zoom--fit-padding: 0px;
+    --c2-pan-zoom--border: none;
+    --c2-pan-zoom--border-radius: 8px;
+  }
+  .pz-caption {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+  .pz-caption span {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<figure class="pz-preview">
+  <c2-pan-zoom class="pz-photo" label="mountains.svg" min-zoom="fit" fit="cover" gestures="zoom">
+    <img src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600" />
+  </c2-pan-zoom>
+  <figcaption class="pz-caption">mountains.svg <span>2.4 MB</span></figcaption>
+</figure>
+```
+
+```html tag=MdxCodeBlock,label=Board with dot grid
+<style>
+  .pz-board {
+    --c2-pan-zoom--height: 320px;
+    --c2-pan-zoom--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-pan-zoom__grid--display: block;
+    --c2-pan-zoom__grid--gap: 24px;
+  }
+  .pz-canvas {
+    position: relative;
+    width: 760px;
+    height: 460px;
+  }
+  .pz-note {
+    position: absolute;
+    box-sizing: border-box;
+    width: 168px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font: 14px/1.4 system-ui, sans-serif;
+  }
+  .pz-note strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .pz-n1 {
+    left: 24px;
+    top: 32px;
+  }
+  .pz-n2 {
+    left: 216px;
+    top: 64px;
+  }
+  .pz-n3 {
+    left: 420px;
+    top: 24px;
+  }
+  .pz-n4 {
+    left: 96px;
+    top: 240px;
+  }
+  .pz-n5 {
+    left: 560px;
+    top: 260px;
+  }
+  .pz-yellow {
+    background: light-dark(#fef3c7, #3d3113);
+  }
+  .pz-blue {
+    background: light-dark(#dbeafe, #172a45);
+  }
+  .pz-green {
+    background: light-dark(#dcfce7, #16332b);
+  }
+  .pz-pink {
+    background: light-dark(#fce7f3, #3d1d2f);
+  }
+</style>
+<c2-pan-zoom class="pz-board" label="Retro board" gestures="pan" bounds="none" controls>
+  <div class="pz-canvas">
+    <div class="pz-note pz-yellow pz-n1"><strong>Went well</strong>Release notes were ready a day early.</div>
+    <div class="pz-note pz-yellow pz-n2"><strong>Went well</strong>Pairing on the migration.</div>
+    <div class="pz-note pz-pink pz-n3"><strong>To improve</strong>Flaky end-to-end tests on Fridays.</div>
+    <div class="pz-note pz-blue pz-n4"><strong>Idea</strong>A shared fixture for seeded accounts.</div>
+    <div class="pz-note pz-green pz-n5"><strong>Action</strong>Quarantine the three slowest suites.</div>
+  </div>
+</c2-pan-zoom>
+```
+
+```html tag=MdxCodeBlock,label=Pill toolbar
+<style>
+  .pz-pill {
+    --c2-pan-zoom--height: 300px;
+    --c2-pan-zoom--border-radius: 14px;
+    --c2-pan-zoom__controls--inset: 12px 12px auto auto;
+    --c2-pan-zoom__controls--background: #18181b;
+    --c2-pan-zoom__controls--color: #fafafa;
+    --c2-pan-zoom__controls--border: 1px solid #3f3f46;
+    --c2-pan-zoom__controls--border-radius: 999px;
+    --c2-pan-zoom__button--border-radius: 999px;
+    --c2-pan-zoom__button__hover--background: #3f3f46;
+    --c2-pan-zoom__focus--outline: 2px solid #a78bfa;
+  }
+  .pz-chart-surface {
+    fill: var(--c2-theme--color-surface, #ffffff);
+  }
+  .pz-chart-grid {
+    stroke: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    stroke-width: 1;
+  }
+  .pz-chart-axis {
+    stroke: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+    stroke-width: 2;
+  }
+  .pz-chart-label {
+    fill: var(--c2-theme--color-on-surface-variant, #71717a);
+    font: 14px system-ui, sans-serif;
+    text-anchor: middle;
+  }
+  .pz-chart-bar {
+    fill: #0265dc;
+  }
+  .pz-chart-line {
+    fill: none;
+    stroke: #f97316;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
+<c2-pan-zoom class="pz-pill" label="Revenue chart" controls fit="width">
+  <svg width="640" height="400" viewBox="0 0 640 400" role="img" aria-label="Bar chart of monthly revenue, January to June">
+    <rect class="pz-chart-surface" width="640" height="400" />
+    <path class="pz-chart-grid" d="M60 60H600M60 140H600M60 220H600" />
+    <rect class="pz-chart-bar" x="90" y="230" width="44" height="70" rx="4" />
+    <rect class="pz-chart-bar" x="170" y="200" width="44" height="100" rx="4" />
+    <rect class="pz-chart-bar" x="250" y="210" width="44" height="90" rx="4" />
+    <rect class="pz-chart-bar" x="330" y="160" width="44" height="140" rx="4" />
+    <rect class="pz-chart-bar" x="410" y="130" width="44" height="170" rx="4" />
+    <rect class="pz-chart-bar" x="490" y="90" width="44" height="210" rx="4" />
+    <polyline class="pz-chart-line" points="112,220 192,190 272,196 352,150 432,118 512,78" />
+    <line class="pz-chart-axis" x1="60" y1="300" x2="600" y2="300" />
+    <text class="pz-chart-label" x="112" y="330">Jan</text>
+    <text class="pz-chart-label" x="192" y="330">Feb</text>
+    <text class="pz-chart-label" x="272" y="330">Mar</text>
+    <text class="pz-chart-label" x="352" y="330">Apr</text>
+    <text class="pz-chart-label" x="432" y="330">May</text>
+    <text class="pz-chart-label" x="512" y="330">Jun</text>
+  </svg>
+</c2-pan-zoom>
+```
+
+</GalleryGrid>

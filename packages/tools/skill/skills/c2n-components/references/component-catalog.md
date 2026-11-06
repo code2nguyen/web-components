@@ -112,7 +112,9 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Image Cropper** — `c2-image-cropper` · `@c2n/components/image-cropper` — Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.
 - **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
+- **Mind Map** — `c2-mind-map` · `@c2n/components/mind-map` — An idea tree laid out around a central topic, with keyboard editing as in XMind and Miro.
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
+- **Pan Zoom** — `c2-pan-zoom` · `@c2n/components/pan-zoom` — A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.
 - **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
 - **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
 - **Terminal** — `c2-terminal` · `@c2n/components/terminal` — An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.
@@ -223,6 +225,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chatbot** — `c2-chatbot` · `@c2n/components/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
+- **Floating Panel** — `c2-floating-panel` · `@c2n/components/floating-panel` — A window inside the page that the user drags, resizes, minimises and maximises, without blocking the page.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **In View** — `c2-in-view` · `@c2n/components/in-view` — Reacts when its content scrolls into view: reveal it, load more, or pause it when it leaves.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.

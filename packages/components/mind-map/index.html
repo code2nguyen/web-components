@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-mind-map</title>
+    <script type="module" src="/src/mind-map.ts"></script>
+    <style>
+      body {
+        margin: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      h2 {
+        font-size: 15px;
+        margin: 28px 0 8px;
+      }
+      c2-mind-map {
+        max-width: 960px;
+      }
+      #log {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: #52525b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Editable, both sides, with controls and minimap</h2>
+    <c2-mind-map
+      id="plan"
+      label="Q3 launch plan"
+      editable
+      controls
+      minimap
+      data='{"id":"root","label":"Q3 launch","children":[
+        {"id":"mkt","label":"Marketing","icon":"📣","children":[{"id":"ads","label":"Paid ads","children":[{"id":"search","label":"Search"},{"id":"social","label":"Social"}]},{"id":"seo","label":"SEO refresh"},{"id":"event","label":"Launch event","children":[{"id":"venue","label":"Venue"},{"id":"speakers","label":"Speakers"}]}]},
+        {"id":"eng","label":"Engineering","icon":"🛠️","children":[{"id":"api","label":"Public API","children":[{"id":"rate","label":"Rate limits"},{"id":"sdks","label":"SDKs"}]},{"id":"perf","label":"Performance"},{"id":"mig","label":"Data migration"}]},
+        {"id":"prod","label":"Product","children":[{"id":"onb","label":"Onboarding flow"},{"id":"price","label":"Pricing page"},{"id":"notes","label":"Release notes"}]},
+        {"id":"sup","label":"Support","collapsed":true,"children":[{"id":"help","label":"Help center"},{"id":"train","label":"Agent training"}]}]}'
+    ></c2-mind-map>
+    <p id="log"></p>
+
+    <h2>Read-only logic chart (layout="right")</h2>
+    <c2-mind-map
+      label="Incident causes"
+      layout="right"
+      style="--c2-mind-map--height: 320px"
+      data='{"id":"r","label":"Checkout outage","children":[
+        {"id":"p","label":"People","children":[{"id":"p1","label":"On-call handover"}]},
+        {"id":"t","label":"Technology","children":[{"id":"t1","label":"Cache eviction"},{"id":"t2","label":"Retry storm"}]},
+        {"id":"c","label":"Process","color":"#7c3aed","children":[{"id":"c1","label":"No canary"}]}]}'
+    ></c2-mind-map>
+
+    <script type="module">
+      const map = document.querySelector('#plan')
+      const log = document.querySelector('#log')
+      map.addEventListener('change', (event) => (log.textContent = `change: ${event.detail.action.type} ${event.detail.action.node.label ?? ''}`))
+    </script>
+  </body>
+</html>
