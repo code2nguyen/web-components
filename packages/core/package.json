@@ -44,6 +44,10 @@
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"
     },
+    "./pan-zoom.js": {
+      "types": "./dist/pan-zoom.d.ts",
+      "default": "./dist/pan-zoom.js"
+    },
     "./shortcut-helper.js": {
       "types": "./dist/shortcut-helper.d.ts",
       "default": "./dist/shortcut-helper.js"

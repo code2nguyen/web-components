@@ -7,12 +7,23 @@
     <style>
       body {
         font-family: system-ui, sans-serif;
+        margin: 0;
         padding: 24px;
       }
-      main {
-        display: flex;
-        align-items: center;
-        gap: 16px;
+      c2-pan-zoom {
+        width: 600px;
+        --c2-pan-zoom--height: 400px;
+        --c2-pan-zoom--border: none;
+        --c2-pan-zoom--transition-duration: 0ms;
+      }
+      .plan {
+        position: relative;
+        width: 1600px;
+        height: 1000px;
+        background: linear-gradient(135deg, #dbeafe, #fde68a);
+      }
+      .plan > * {
+        position: absolute;
       }
     </style>
     <script type="module" src="./scenarios.ts"></script>
