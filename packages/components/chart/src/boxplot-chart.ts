@@ -260,7 +260,8 @@ export class BoxplotChart extends EchartsChartBase {
       scale: true,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { ...axisLabel, formatter: (tick: number) => this.#formatNumber(tick) },
+      // Wide ticks along a horizontal value axis would run into each other: ECharts drops the ones that would.
+      axisLabel: { ...axisLabel, hideOverlap: true, formatter: (tick: number) => this.#formatNumber(tick) },
       splitLine: { lineStyle: { color: theme.gridColor, width: theme.gridWidth } },
       name: name || undefined,
       // Horizontal: the unit sits centred under the tick labels; at the axis start it ran into the first one.
