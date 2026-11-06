@@ -65,7 +65,7 @@ Domain patterns with no design-system home come from the products that made them
 
 ### C. Charts
 
-Nothing left to propose here: the box plot and bullet charts shipped in `@c2n/chart`.
+Nothing left to propose here: the box plot and bullet charts shipped in `@c2n/chart`, along with the sunburst chart from section P.
 
 ### D. Navigation and layout
 

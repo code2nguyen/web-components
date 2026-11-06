@@ -80,7 +80,11 @@ export function summarizeSamples(samples: readonly unknown[], options: { whisker
   const q1 = quantile(values, 0.25)
   const median = quantile(values, 0.5)
   const q3 = quantile(values, 0.75)
-  const mean = values.reduce((sum, value) => sum + value, 0) / values.length
+  // A running mean: a sum of large finite samples could overflow to Infinity.
+  let mean = 0
+  values.forEach((value, at) => {
+    mean += (value - mean) / (at + 1)
+  })
   const count = values.length
   const first = values[0]
   const last = values[values.length - 1]
@@ -126,7 +130,8 @@ export function readSummary(value: unknown): BoxSummary | null {
   const mean = finite(record.mean)
   const count = finite(record.count)
   if (mean !== undefined) summary.mean = mean
-  if (count !== undefined) summary.count = count
+  // A count is a number of samples: a whole number, never negative.
+  if (count !== undefined && Number.isInteger(count) && count >= 0) summary.count = count
   return summary
 }
 

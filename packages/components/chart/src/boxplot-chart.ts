@@ -205,16 +205,22 @@ export class BoxplotChart extends EchartsChartBase {
     return true
   }
 
-  /** A field holding numbers, sample arrays or summary objects is a series: the shapes the box plot reads. */
+  /**
+   * A field holding numbers, sample arrays or summary objects is a series: the shapes the box plot reads. Every row is
+   * looked at, so a field whose first value is missing still counts; fields keep the order they first appear in.
+   */
   protected override inferredSeries(): ChartSeriesConfig[] {
     const rows = this.data
-    if (!Array.isArray(rows) || rows.length === 0) return []
-    const first: unknown = rows[0]
-    if (!first || typeof first !== 'object' || Array.isArray(first) || ArrayBuffer.isView(first)) return []
-    const row = first as Record<string, unknown>
-    return Object.keys(row)
-      .filter((key) => key !== this.labelField && key !== this.xField && (typeof row[key] === 'number' || (row[key] !== null && typeof row[key] === 'object')))
-      .map((key) => ({ field: key, label: humanize(key) }))
+    if (!Array.isArray(rows)) return []
+    const fields = new Set<string>()
+    for (const row of rows as unknown[]) {
+      if (!row || typeof row !== 'object' || Array.isArray(row) || ArrayBuffer.isView(row)) continue
+      for (const [key, value] of Object.entries(row as Record<string, unknown>)) {
+        if (fields.has(key) || key === this.labelField || key === this.xField) continue
+        if ((typeof value === 'number' && Number.isFinite(value)) || (value !== null && typeof value === 'object')) fields.add(key)
+      }
+    }
+    return [...fields].map((key) => ({ field: key, label: humanize(key) }))
   }
 
   /** With no box to draw (no rows, or no value in any), the chart shows its empty state. */
@@ -301,7 +307,8 @@ export class BoxplotChart extends EchartsChartBase {
         const at = (value: number) => (horizontal ? api.coord([value, item.category])[0] : api.coord([item.category, value])[1])
         // A point `across` the category axis from the box's centre line, at `value`.
         const point = (across: number, value: number): [number, number] => (horizontal ? [at(value), centre + across] : [centre + across, at(value)])
-        const dimmed = this.highlighted !== null && context.series.length > 1 && this.highlighted !== context.series[index]?.field
+        // The resolved index: a key naming no series dims nothing.
+        const dimmed = context.highlighted >= 0 && context.highlighted !== index
         const opacity = dimmed ? theme.dimmedOpacity : 1
         const stroke = { stroke: color, lineWidth: style.borderWidth, opacity }
         const line = (from: [number, number], to: [number, number], lineStyle: Record<string, unknown> = stroke) => ({
@@ -484,6 +491,10 @@ export class BoxplotChart extends EchartsChartBase {
     plot.setAttribute('role', 'group')
     plot.addEventListener('keydown', this.#handleKeydown)
     plot.addEventListener('blur', this.#handleBlur)
+    // A legend slotted after the first render must bring the built-in legend's box back (see `legendItems`).
+    this.renderRoot.addEventListener('slotchange', (event) => {
+      if ((event.target as HTMLSlotElement | null)?.name === 'legend') this.requestUpdate()
+    })
   }
 
   protected override updated(changed: PropertyValues): void {
