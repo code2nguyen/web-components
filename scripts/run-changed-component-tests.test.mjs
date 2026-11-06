@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { hasGlobalTestImpact, rootManifestImpact, selectComponentTestDirectories, shardCount } from './run-changed-component-tests.mjs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import {
+  buildImportGraph,
+  findComponentTestDirectories,
+  hasGlobalTestImpact,
+  rootManifestImpact,
+  selectComponentTestDirectories,
+  shardCount,
+} from './run-changed-component-tests.mjs'
 
 const suites = ['open-packages/chatbot/test', 'packages/components/button/test', 'packages/components/select/test']
 
@@ -134,4 +144,39 @@ test('shardCount spreads a full run over four shards and keeps a small one in on
   assert.equal(shardCount(15), 1)
   assert.equal(shardCount(16), 2)
   assert.equal(shardCount(202), 4)
+})
+
+test('buildImportGraph reads package names, @c2n specifiers and core imports from the source tree', () => {
+  const root = mkdtempSync(join(tmpdir(), 'c2n-graph-'))
+  const write = (path, content) => {
+    mkdirSync(dirname(join(root, path)), { recursive: true })
+    writeFileSync(join(root, path), content)
+  }
+  try {
+    write('packages/components/select/package.json', JSON.stringify({ name: '@c2n/select' }))
+    write('packages/components/select/src/select.ts', "import { redispatchEvent } from '@c2n/core/dom-helper.js'\nimport '@c2n/list'\n")
+    write('packages/components/select/src/select.scss', "@use '@c2n/sass/css-variable' as css;\n")
+    write('packages/components/select/test/scenarios.html', '<script type="module">import \'@c2n/button\'</script>')
+    // Generated declarations and build output are not sources.
+    write('packages/components/select/vue.d.ts', "import type { EventMapOf } from '@c2n/core/event-helper.js'\n")
+    write('packages/components/select/dist/select.js', "import '@c2n/core/lit-helper.js'\n")
+    write('packages/icons/symbols/package.json', JSON.stringify({ name: '@c2n/symbols' }))
+    write('packages/icons/symbols/src/symbol.ts', "import { customElement } from '@c2n/core/element-helper.js'\n")
+    write('packages/core/src/dom-helper.ts', 'export const x = 1\n')
+    write('packages/core/src/contexts/field.ts', "import { x } from '../dom-helper.js'\nimport { y } from './pager.ts'\n")
+
+    const graph = buildImportGraph(root)
+    const select = graph.packages.find((entry) => entry.name === '@c2n/select')
+    assert.equal(select.directory, 'packages/components/select')
+    assert.deepEqual([...select.specifiers].sort(), ['@c2n/button', '@c2n/core/dom-helper.js', '@c2n/list', '@c2n/sass/css-variable'])
+    assert.deepEqual(graph.packages.find((entry) => entry.name === '@c2n/symbols').specifiers, ['@c2n/core/element-helper.js'])
+    assert.deepEqual(graph.iconPackages, { symbols: '@c2n/symbols' })
+    assert.deepEqual(graph.coreImports, { 'contexts/field': ['dom-helper', 'contexts/pager'], 'dom-helper': [] })
+
+    const suites = findComponentTestDirectories(root)
+    assert.deepEqual(suites, ['packages/components/select/test'])
+    assert.deepEqual(selectComponentTestDirectories(['packages/core/src/dom-helper.ts'], suites, { graph }), ['packages/components/select/test'])
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
 })

@@ -120,7 +120,8 @@ jobs:
         if: matrix.browser == 'chromium' && matrix.shard == 1
         continue-on-error: true
         run: npx playwright test --config apps/ui/playwright.config.ts apps/ui/test/style-panel.spec.ts --project=chromium --output=apps/ui/test-results/style-panel --reporter=list
-      - name: Test the suites the change reaches
+      # scripts/style-contract-ci.test.mjs checks this step by name.
+      - name: Test changed component packages
         if: needs.plan.outputs.directories != ''
         env:
           DIRECTORIES: ${{ needs.plan.outputs.directories }}
