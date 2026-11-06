@@ -165,7 +165,7 @@ window.sunburstScenario = {
   hover: (detail) => adapterEvents?.hover(detail),
   click: (detail) => adapterEvents?.click(detail),
   events,
-  engineName: (path, leaf) => `${leaf ? 'tile' : 'group'}\u001f${path.join('\u001f')}`,
+  engineName: (path, leaf) => JSON.stringify([leaf ? 'leaf' : 'group', ...path]),
 }
 
 void new Promise<void>((resolve) => {

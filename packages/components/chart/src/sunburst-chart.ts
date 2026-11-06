@@ -140,10 +140,14 @@ function arcPath(cx: number, cy: number, arc: SunburstArc): string {
  *
  * Clicking a group zooms into it: it becomes the centre, a breadcrumb appears top left and the centre turns into a
  * button that goes back up. `root` holds the zoom, and `zoomTo(path)` and `zoomOut()` drive it. Clicking a leaf fires
- * `point-click` and highlights it. Hovering a segment keeps its path to the centre and fades the rest.
+ * `point-click` and highlights it, dimming everything off its path. `highlighted` then holds the node's key: a
+ * top-level branch's name (the key its legend entry uses), or for a deeper node a JSON array of its kind and path,
+ * `["leaf","Sales","Field","Enterprise"]`, which no other node shares. Hovering a segment keeps its path to the centre
+ * and fades the rest.
  *
  * The plot is one tab stop: the left and right arrows move around a ring, down goes to the first child and up to
- * the parent, Enter zooms into a group, and Escape or Backspace zooms out. A hidden table lists every leaf.
+ * the parent (from the first ring while zoomed, up zooms out), Enter zooms into a group, and Escape or Backspace zooms
+ * out. A hidden table lists every leaf.
  *
  * @tag c2-sunburst-chart
  *

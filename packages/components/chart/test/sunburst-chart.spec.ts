@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { expect } from '../../../../tests/component-fixture'
 import { test } from '../../../../tests/fixture'
 
@@ -55,10 +55,30 @@ function watchErrors(page: Page): string[] {
   return errors
 }
 
+/**
+ * Waits until a resized chart has caught up: the engine's build context and canvas have the plot's new size, and the
+ * update the resize scheduled has run.
+ */
+async function waitForSize(chart: Locator): Promise<void> {
+  await expect
+    .poll(() =>
+      chart.evaluate(async (element) => {
+        const sunburst = element as SunburstElement
+        await sunburst.updateComplete
+        const plot = sunburst.shadowRoot?.querySelector('.plot') as HTMLElement
+        const canvas = plot.querySelector('canvas') as HTMLCanvasElement
+        const { width, height } = sunburst.buildContext()
+        return width === plot.clientWidth && height === plot.clientHeight && canvas.clientWidth === plot.clientWidth && canvas.clientHeight === plot.clientHeight
+      }),
+    )
+    .toBe(true)
+  await chart.evaluate((element) => (element as SunburstElement).updateComplete)
+}
+
 /** The rings the engine is handed, as `name@ring` per segment, depth first. */
 function flatten(nodes: EngineNode[], ring = 1, out: string[] = []): string[] {
   for (const node of nodes) {
-    out.push(`${node.name.split('\u001f').at(-1)}@${ring}`)
+    out.push(`${(JSON.parse(node.name) as string[]).at(-1)}@${ring}`)
     if (node.children) flatten(node.children, ring + 1, out)
   }
   return out
@@ -160,10 +180,10 @@ test('colours by color-field on the scale around zero, groups by their weighted 
   const result = await chart.evaluate((element) => {
     const sunburst = element as SunburstElement
     const [data] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
-    const tech = data.find((node) => node.name.endsWith('Tech'))
+    const tech = data.find((node) => JSON.parse(node.name).at(-1) === 'Tech')
     return {
-      sap: tech?.children?.find((node) => node.name.endsWith('SAP'))?.itemStyle.color,
-      shel: data.find((node) => node.name.endsWith('Energy'))?.children?.find((node) => node.name.endsWith('SHEL'))?.itemStyle.color,
+      sap: tech?.children?.find((node) => JSON.parse(node.name).at(-1) === 'SAP')?.itemStyle.color,
+      shel: data.find((node) => JSON.parse(node.name).at(-1) === 'Energy')?.children?.find((node) => JSON.parse(node.name).at(-1) === 'SHEL')?.itemStyle.color,
       legend: sunburst.getLegendItems().length,
     }
   })
@@ -201,7 +221,7 @@ test('labels a segment along the arc or the radius where its name fits, and none
     const sunburst = element as SunburstElement
     const label = (data: EngineNode[], name: string): EngineNode['label'] | undefined => {
       for (const node of data) {
-        if (node.name.endsWith(`\u001f${name}`)) return node.label
+        if (JSON.parse(node.name).at(-1) === name) return node.label
         const found = label(node.children ?? [], name)
         if (found) return found
       }
@@ -216,17 +236,27 @@ test('labels a segment along the arc or the radius where its name fits, and none
       return out
     }
     const auto = { engineering: label(data, 'Engineering'), compute: label(data, 'Compute'), placed: placements(data) }
-    // A narrower chart: the outer names that ran along their arcs now only fit along the radius.
+    // A narrower chart: the outer names that ran along their arcs no longer fit.
     sunburst.style.width = '360px'
     sunburst.style.height = '360px'
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    await sunburst.updateComplete
+    return { auto }
+  })
+  await waitForSize(chart)
+  const after = await chart.evaluate(async (element) => {
+    const sunburst = element as SunburstElement
+    const placements = (nodes: EngineNode[], ring = 1, out: string[] = []): string[] => {
+      for (const node of nodes) {
+        out.push(`${ring}:${node.label.show ? node.label.rotate : 'none'}`)
+        placements(node.children ?? [], ring + 1, out)
+      }
+      return out
+    }
     const [narrow] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
     sunburst.labels = 'none'
     await sunburst.updateComplete
     const [hidden] = sunburst.projectData(sunburst.frame, sunburst.buildContext())
     const shown = (nodes: EngineNode[]): number => nodes.reduce((sum, node) => sum + (node.label.show ? 1 : 0) + shown(node.children ?? []), 0)
-    return { auto, narrow: placements(narrow), none: shown(hidden) }
+    return { narrow: placements(narrow), none: shown(hidden) }
   })
   expect(result.auto.engineering).toMatchObject({ show: true, rotate: 'tangential', color: '#ffffff' })
   expect(result.auto.compute?.show).toBe(true)
@@ -234,8 +264,8 @@ test('labels a segment along the arc or the radius where its name fits, and none
   expect(result.auto.placed.filter((item) => item.startsWith('1:'))).toEqual(['1:tangential', '1:tangential', '1:tangential', '1:tangential'])
   expect(result.auto.placed).toContain('3:radial')
   expect(result.auto.placed).toContain('3:none')
-  expect(result.narrow.filter((item) => item === '3:none').length).toBeGreaterThan(result.auto.placed.filter((item) => item === '3:none').length)
-  expect(result.none).toBe(0)
+  expect(after.narrow.filter((item) => item === '3:none').length).toBeGreaterThan(result.auto.placed.filter((item) => item === '3:none').length)
+  expect(after.none).toBe(0)
 })
 
 test('hides the names a small sunburst cannot hold, and the hole text it has no room for', async ({ page }) => {
@@ -375,7 +405,7 @@ test('a leaf click fires point-click and highlights it, dimming everything off i
       engineering: data[0].itemStyle.opacity,
     }
   })
-  expect(result.highlighted).toBe('Sales › Field › Enterprise')
+  expect(result.highlighted).toBe('["leaf","Sales","Field","Enterprise"]')
   expect(result.root).toEqual([])
   expect(result.events).toContain('point-click')
   expect(result.events).not.toContain('zoom-change')
@@ -408,7 +438,7 @@ test('`root` as an attribute renders zoomed, and a path through a leaf draws its
   await expect(chart.locator('.sunburst-breadcrumb li')).toHaveText(['All', 'Engineering'])
   const result = await chart.evaluate(async (element) => {
     const sunburst = element as SunburstElement
-    const first = () => sunburst.projectData(sunburst.frame, sunburst.buildContext())[0].map((node) => node.name.split('\u001f').at(-1))
+    const first = () => sunburst.projectData(sunburst.frame, sunburst.buildContext())[0].map((node) => (JSON.parse(node.name) as string[]).at(-1))
     const engineering = first()
     sunburst.root = ['Marketing', 'Brand', 'Nothing']
     await sunburst.updateComplete
@@ -520,7 +550,7 @@ test('Enter on a leaf fires point-click instead of zooming', async ({ page }) =>
   const events = await page.evaluate(() => (window as unknown as { sunburstScenario: ScenarioApi }).sunburstScenario.events.map((event) => event.type))
   expect(events).toContain('point-click')
   expect(events).not.toContain('zoom-change')
-  expect(await chart.evaluate((element) => (element as SunburstElement).highlighted)).toBe('Operations › Finance')
+  expect(await chart.evaluate((element) => (element as SunburstElement).highlighted)).toBe('["leaf","Operations","Finance"]')
 })
 
 test('names the plot, lists every leaf in a hidden table, and passes axe zoomed in and out', async ({ page }) => {
@@ -674,10 +704,10 @@ for (const height of ['480px', '320px']) {
     await open(page, 'budget', '&animation=none')
     const chart = page.locator('c2-sunburst-chart')
     await expect(chart).toHaveState('ready')
-    await chart.evaluate(async (element, value) => {
+    await chart.evaluate((element, value) => {
       ;(element as HTMLElement).style.height = value
-      await new Promise((resolve) => setTimeout(resolve, 300))
     }, height)
+    await waitForSize(chart)
     const result = await chart.evaluate((element) => {
       const sunburst = element as SunburstElement
       const series = sunburst.buildOptions(sunburst.buildContext()).series[0] as { center: number[]; radius: number[] }
@@ -722,7 +752,6 @@ test('builds the engine tree once per update, measuring each name once', async (
     try {
       sunburst.highlighted = 'Sales'
       await sunburst.updateComplete
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 50)))
       const first = sunburst.projectData(sunburst.frame, sunburst.buildContext())
       const second = sunburst.projectData(sunburst.frame, sunburst.buildContext())
       return { calls, same: first[0] === second[0] }
