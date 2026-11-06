@@ -30,7 +30,7 @@ jobs:
           node-version: 24
       - id: plan
         env:
-          COMPONENT_TEST_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          COMPONENT_TEST_BASE: ${{ github.event.pull_request.base.sha }}
           SCOPE: ${{ github.event_name == 'workflow_dispatch' && '--all' || '' }}
         run: |
           node scripts/run-changed-component-tests.mjs --plan $SCOPE > plan.json

@@ -46,33 +46,43 @@ const graph = {
   packages: [
     { directory: 'packages/components/button', name: '@c2n/button', specifiers: ['@c2n/core/lit-helper.js', '@c2n/feather-icons/icons/x.js'] },
     { directory: 'packages/components/select', name: '@c2n/select', specifiers: ['@c2n/core/dom-helper.js', '@c2n/button'] },
-    { directory: 'open-packages/chatbot', name: '@c2n/chatbot', specifiers: ['@c2n/core/contexts/field.js'] },
+    { directory: 'open-packages/chatbot', name: '@c2n/chatbot', specifiers: ['@c2n/core/contexts/field.js', '@c2n/symbols/symbols/empty.js'] },
+    { directory: 'packages/icons/feather-icons', name: '@c2n/feather-icons', specifiers: [] },
+    { directory: 'packages/icons/symbols', name: '@c2n/symbols', specifiers: ['@c2n/core/element-helper.js'] },
   ],
-  iconPackages: { 'feather-icons': '@c2n/feather-icons' },
-  coreImports: { 'dom-helper': [], 'lit-helper': [], 'contexts/field': ['dom-helper'], 'pan-zoom': [] },
+  iconPackages: { 'feather-icons': '@c2n/feather-icons', symbols: '@c2n/symbols' },
+  coreImports: { 'dom-helper': [], 'lit-helper': [], 'element-helper': [], 'contexts/field': ['dom-helper'], 'pan-zoom': [] },
 }
 const withUmbrella = [...suites, 'packages/umbrella/test']
 const noManifestImpact = { 'package.json': false, 'package-lock.json': false, 'packages/core/package.json': false }
 
-test('with an import graph, a core module runs the suites importing it or a core module built on it', () => {
+test('with an import graph, a core module runs every package loading it, directly or through another package', () => {
+  // Select loads Button, which imports lit-helper.
   assert.deepEqual(selectComponentTestDirectories(['packages/core/src/lit-helper.ts'], withUmbrella, { graph }), [
     'packages/components/button/test',
+    'packages/components/select/test',
     'packages/umbrella/test',
   ])
+  // contexts/field imports dom-helper.
   assert.deepEqual(selectComponentTestDirectories(['packages/core/src/dom-helper.ts'], withUmbrella, { graph }), [
     'open-packages/chatbot/test',
     'packages/components/select/test',
+    'packages/umbrella/test',
+  ])
+  // Through an icon set: the chatbot loads symbols, which imports element-helper.
+  assert.deepEqual(selectComponentTestDirectories(['packages/core/src/element-helper.ts'], withUmbrella, { graph }), [
+    'open-packages/chatbot/test',
     'packages/umbrella/test',
   ])
   // A module nothing imports yet, and core's unit tests, reach no suite.
   assert.deepEqual(selectComponentTestDirectories(['packages/core/src/pan-zoom.ts', 'packages/core/src/pan-zoom.test.ts'], withUmbrella, { graph }), [])
 })
 
-test('with an import graph, an icon set runs the suites importing it; core config still runs everything', () => {
-  assert.deepEqual(selectComponentTestDirectories(['packages/icons/feather-icons/src/feather-icon.ts'], withUmbrella, { graph }), [
-    'packages/components/button/test',
-    'packages/umbrella/test',
-  ])
+test('with an import graph, an icon set runs the packages loading it; core config still runs everything', () => {
+  assert.deepEqual(
+    selectComponentTestDirectories(['packages/icons/feather-icons/src/icons/x.ts', 'packages/icons/feather-icons/src/icons/y.ts'], withUmbrella, { graph }),
+    ['packages/components/button/test', 'packages/components/select/test', 'packages/umbrella/test'],
+  )
   assert.deepEqual(selectComponentTestDirectories(['packages/core/tsconfig.json'], withUmbrella, { graph }), withUmbrella)
 })
 
@@ -92,10 +102,11 @@ test('root manifests run everything unless the change cannot reach the suites', 
   }
 })
 
-test('rootManifestImpact: the wireit list, new lockfile packages, workspace links and new core exports do not count', () => {
+test('rootManifestImpact: the wireit build list, new lockfile packages, workspace links and new core exports do not count', () => {
   const root = (extra) => JSON.stringify({ name: 'root', devDependencies: { vite: '7.0.0' }, wireit: { build: { dependencies: ['a'] } }, ...extra })
   assert.equal(rootManifestImpact('package.json', root(), root({ wireit: { build: { dependencies: ['a', 'b'] } } })), false)
   assert.equal(rootManifestImpact('package.json', root(), root({ devDependencies: { vite: '7.1.0' } })), true)
+  assert.equal(rootManifestImpact('package.json', root(), root({ wireit: { build: { dependencies: ['a'], files: ['x'] } } })), true)
   assert.equal(rootManifestImpact('package.json', undefined, root()), true)
 
   const lock = (packages) => JSON.stringify({ lockfileVersion: 3, packages: { '': { name: 'root' }, 'node_modules/lit': { version: '3.0.0' }, ...packages } })

@@ -20,7 +20,7 @@ npm run test:all                # all components, Chromium/Firefox/WebKit
 npm run test:report             # inspect the last HTML report
 ```
 
-`npm test` reads staged, unstaged and untracked files, then runs the suites belonging to changed `packages/components/*` and `open-packages/*` packages. On a local feature branch it also includes committed changes since `origin/HEAD` (currently `origin/develop`); pass `--base=<branch-or-sha>` to choose another comparison point. A change to a `@c2n/core` module or an icon set runs the suites of the packages that import it (a core module also counts for the core modules that import it). Changes to Playwright infrastructure, Sass, shared config or the selection script run every suite, and so do the root `package.json`, `package-lock.json` and core's `package.json` when the change can reach the installed packages: not when it only adds a wireit build entry, new lockfile packages or a new core export. If no changed package has a suite, the command exits successfully without starting Vite or a browser.
+`npm test` reads staged, unstaged and untracked files, then runs the suites belonging to changed `packages/components/*` and `open-packages/*` packages. On a local feature branch it also includes committed changes since `origin/HEAD` (currently `origin/develop`); pass `--base=<branch-or-sha>` to choose another comparison point. A change to a `@c2n/core` module or an icon set runs the suites of every package that loads it, directly or through another package (the test server resolves sibling packages to source); a core module also counts for the core modules that import it. Changes to Playwright infrastructure, Sass, shared config or the selection script run every suite, and so do the root `package.json`, `package-lock.json` and core's `package.json` when the change can reach the installed packages: not when it only adds a `wireit.build` dependency, new lockfile packages or a new core export. If no changed package has a suite, the command exits successfully without starting Vite or a browser.
 
 Playwright starts Vite on `127.0.0.1:4175`, waits for the health page, and stops its server when finished. For repeated local runs, optionally keep `npm run test:serve` running; Playwright reuses it outside CI. A conflicting port fails instead of silently choosing another one. Browser processes are reused across tests, with an isolated browser context/page per test. Override concurrency with `--workers=4` when useful.
 
@@ -60,7 +60,7 @@ For keyboard navigation, destructure the shared `tab` fixture and use `tab()` / 
 
 CI uses four workers (the runners have four vCPUs), retries a failure once, and fails on a focused test (`test.only`).
 
-Selection follows imports: a component change runs its own suite and the `@c2n/components` suite, not those of the components built on it; a core module or an icon set runs its importers. Shared inputs run everything rather than trying to infer every transitive consumer.
+Selection follows imports: a component change runs its own suite and the `@c2n/components` suite, not those of the components built on it; a core module or an icon set runs every package that loads it. Shared inputs run everything rather than trying to infer every transitive consumer.
 
 ## Benchmarks
 

@@ -58,7 +58,7 @@ function walk(directory, visit) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.isDirectory()) {
       if (!skippedDirectories.has(entry.name)) walk(join(directory, entry.name), visit)
-    } else if (scannedExtensions.test(entry.name)) {
+    } else if (scannedExtensions.test(entry.name) && !entry.name.endsWith('.d.ts')) {
       visit(join(directory, entry.name))
     }
   }
@@ -73,14 +73,16 @@ function packageName(directory) {
 }
 
 /**
- * What each component package imports, for selecting the suites a change reaches:
- * - `packages`: every component package with its npm name and the `@c2n/*` specifiers its sources, tests and harness use;
+ * What each package imports, for selecting the suites a change reaches:
+ * - `packages`: every component, open and icon package with its npm name and the `@c2n/*` specifiers its sources,
+ *   tests and harness use (generated `.d.ts` files left out);
  * - `iconPackages`: icon directory → npm name;
  * - `coreImports`: each `packages/core/src` file → the core files it imports.
  */
 export function buildImportGraph(root = repositoryRoot) {
   const packages = []
-  for (const packageRoot of packageRoots) {
+  const iconPackages = {}
+  for (const packageRoot of [...packageRoots, 'packages/icons']) {
     const absoluteRoot = resolve(root, packageRoot)
     if (!existsSync(absoluteRoot)) continue
     for (const entry of readdirSync(absoluteRoot, { withFileTypes: true })) {
@@ -90,14 +92,9 @@ export function buildImportGraph(root = repositoryRoot) {
       walk(directory, (file) => {
         for (const match of readFileSync(file, 'utf8').matchAll(specifierPattern)) specifiers.add(`@c2n/${match[1]}${match[2]}`)
       })
-      packages.push({ directory: `${packageRoot}/${entry.name}`, name: packageName(directory), specifiers: [...specifiers] })
-    }
-  }
-  const iconPackages = {}
-  const iconsRoot = resolve(root, 'packages/icons')
-  if (existsSync(iconsRoot)) {
-    for (const entry of readdirSync(iconsRoot, { withFileTypes: true })) {
-      if (entry.isDirectory()) iconPackages[entry.name] = packageName(join(iconsRoot, entry.name))
+      const name = packageName(directory)
+      packages.push({ directory: `${packageRoot}/${entry.name}`, name, specifiers: [...specifiers] })
+      if (packageRoot === 'packages/icons') iconPackages[entry.name] = name
     }
   }
   const coreImports = {}
@@ -135,7 +132,7 @@ function coreDependents(module, coreImports) {
 
 /**
  * Whether a change to the root `package.json`, `package-lock.json` or core's `package.json` can reach the suites.
- * The root manifest counts unless only its `wireit` build list changed; the lockfile counts when an installed package
+ * The root manifest counts unless only its `wireit.build` dependency list changed; the lockfile counts when an installed package
  * (not a workspace or its link) changed or went away, since packages only added for a new component leave the others
  * alone; core's manifest counts unless it only gained exports.
  */
@@ -149,8 +146,8 @@ export function rootManifestImpact(file, before, after) {
     return true
   }
   if (file === 'package.json') {
-    delete old.wireit
-    delete current.wireit
+    delete old.wireit?.build?.dependencies
+    delete current.wireit?.build?.dependencies
     return JSON.stringify(old) !== JSON.stringify(current)
   }
   if (file === 'packages/core/package.json') {
@@ -182,15 +179,17 @@ export function hasGlobalTestImpact(changedFiles, options = {}) {
 /**
  * The suites a change reaches. A component change runs that component's suite and the `@c2n/components` suite (not
  * the components built on it, which would turn a Button change into some forty suites). With `options.graph`, a core
- * module or an icon set runs the components that import it (a core module also counts for every core module that
- * imports it); without a graph, either runs everything.
+ * module or an icon set runs every package that loads it, directly or through another package (the test server
+ * resolves sibling packages to source); a core module also counts for the core modules that import it. Without a
+ * graph, either runs everything.
  */
 export function selectComponentTestDirectories(changedFiles, availableDirectories = findComponentTestDirectories(), options = {}) {
   if (hasGlobalTestImpact(changedFiles, options)) return [...availableDirectories]
 
   const available = new Set(availableDirectories)
   const graph = options.graph
-  const changedPackages = new Set()
+  const reached = new Set()
+  const changedIcons = new Set()
   const coreModules = new Set()
   const selected = new Set()
   for (const changedFile of changedFiles) {
@@ -198,33 +197,40 @@ export function selectComponentTestDirectories(changedFiles, availableDirectorie
     if (umbrellaImpactPattern.test(path) && available.has(umbrellaTestDirectory)) selected.add(umbrellaTestDirectory)
     const component = path.match(componentPackagePattern)
     if (component) {
-      changedPackages.add(`${component[1]}/${component[2]}`)
+      reached.add(`${component[1]}/${component[2]}`)
       continue
     }
     const icon = path.match(iconPackagePattern)
     if (icon && graph?.iconPackages[icon[1]]) {
-      changedPackages.add({ name: graph.iconPackages[icon[1]] })
+      changedIcons.add(graph.iconPackages[icon[1]])
       continue
     }
     const core = path.match(coreSourcePattern)
     if (core && graph && !/\.test$/.test(core[1])) for (const module of coreDependents(core[1], graph.coreImports)) coreModules.add(module)
   }
 
-  const reached = new Set()
-  const reach = (directory) => reached.add(directory)
-  const importers = (name) =>
-    (graph?.packages ?? []).filter((entry) => entry.specifiers.some((specifier) => specifier === name || specifier.startsWith(`${name}/`)))
-  for (const changed of changedPackages) {
-    if (typeof changed === 'string') reach(changed)
-    else for (const entry of importers(changed.name)) reach(entry.directory)
-  }
-  for (const entry of graph?.packages ?? []) {
-    if (
-      entry.specifiers.some((specifier) => specifier.startsWith('@c2n/core/') && coreModules.has(specifier.slice('@c2n/core/'.length).replace(/\.js$/, '')))
-    ) {
-      reach(entry.directory)
+  if (graph && (changedIcons.size || coreModules.size)) {
+    const loads = (entry, names) =>
+      entry.specifiers.some((specifier) => {
+        const core = specifier.match(/^@c2n\/core\/(.+?)(?:\.js)?$/)
+        if (core) return coreModules.has(core[1])
+        const name = specifier.match(/^@c2n\/[a-z0-9-]+/)[0]
+        return names.has(name)
+      })
+    // Packages that load a changed module, then the packages that load those, until nothing new is reached.
+    const names = new Set(changedIcons)
+    let grew = true
+    while (grew) {
+      grew = false
+      for (const entry of graph.packages) {
+        if (!entry.name || names.has(entry.name) || !loads(entry, names)) continue
+        names.add(entry.name)
+        reached.add(entry.directory)
+        grew = true
+      }
     }
   }
+
   for (const directory of reached) {
     if (available.has(`${directory}/test`)) selected.add(`${directory}/test`)
   }
@@ -254,9 +260,9 @@ function localDefaultBase() {
 function changedFiles(base) {
   const files = new Set()
   if (base) {
-    for (const file of gitFiles(['diff', '--name-only', '-z', '--diff-filter=ACMRD', `${base}...HEAD`])) files.add(file)
+    for (const file of gitFiles(['diff', '--name-only', '--no-renames', '-z', '--diff-filter=ACMRD', `${base}...HEAD`])) files.add(file)
   }
-  for (const file of gitFiles(['diff', '--name-only', '-z', '--diff-filter=ACMRD', 'HEAD'])) files.add(file)
+  for (const file of gitFiles(['diff', '--name-only', '--no-renames', '-z', '--diff-filter=ACMRD', 'HEAD'])) files.add(file)
   for (const file of gitFiles(['ls-files', '--others', '--exclude-standard', '-z'])) files.add(file)
   return [...files]
 }
@@ -339,7 +345,9 @@ function main() {
 
   const files = all || /^0+$/.test(base) ? ['playwright.config.ts'] : changedFiles(base)
   const allDirectories = findComponentTestDirectories()
-  const options = { graph: buildImportGraph(), manifestImpact: manifestImpacts(base, files) }
+  // Reading every package's sources only pays off when a core module or an icon set changed.
+  const needsGraph = files.some((file) => coreSourcePattern.test(normalizePath(file)) || iconPackagePattern.test(normalizePath(file)))
+  const options = { graph: needsGraph ? buildImportGraph() : { packages: [], iconPackages: {}, coreImports: {} }, manifestImpact: manifestImpacts(base, files) }
   const directories = selectComponentTestDirectories(files, allDirectories, options)
   const everything = hasGlobalTestImpact(files, options)
 
