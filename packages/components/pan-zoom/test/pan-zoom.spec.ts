@@ -44,7 +44,8 @@ async function record(locator: Locator) {
   })
 }
 
-const events = (page: Page) => page.evaluate(() => (window as unknown as { panZoomEvents: { type: string; bubbles: boolean; reason: string; zoom: number }[] }).panZoomEvents)
+const events = (page: Page) =>
+  page.evaluate(() => (window as unknown as { panZoomEvents: { type: string; bubbles: boolean; reason: string; zoom: number }[] }).panZoomEvents)
 const count = async (page: Page, type: string) => (await events(page)).filter((event) => event.type === type).length
 
 async function drag(page: Page, from: { x: number; y: number }, by: { x: number; y: number }, options: { button?: 'left' | 'middle'; steps?: number } = {}) {
@@ -52,6 +53,26 @@ async function drag(page: Page, from: { x: number; y: number }, by: { x: number;
   await page.mouse.down({ button: options.button ?? 'left' })
   await page.mouse.move(from.x + by.x, from.y + by.y, { steps: options.steps ?? 8 })
   await page.mouse.up({ button: options.button ?? 'left' })
+}
+
+/** A quick drag to the left, one move a frame, released while moving: what a flick is, independent of the machine's load. */
+async function flick(page: Page) {
+  await viewportOf(page).evaluate(async (viewport) => {
+    const rect = viewport.getBoundingClientRect()
+    const y = rect.top + rect.height / 2
+    const fire = (type: string, x: number) =>
+      viewport.dispatchEvent(
+        new PointerEvent(type, { pointerId: 7, pointerType: 'mouse', isPrimary: true, button: 0, clientX: x, clientY: y, bubbles: true, composed: true }),
+      )
+    let x = rect.left + 400
+    fire('pointerdown', x)
+    for (let step = 0; step < 5; step++) {
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+      x -= 30
+      fire('pointermove', x)
+    }
+    fire('pointerup', x)
+  })
 }
 
 async function viewportCentre(page: Page) {
@@ -154,7 +175,15 @@ test('a two-finger pinch zooms around the fingers', async ({ page, renderScenari
     const rect = viewport.getBoundingClientRect()
     const fire = (type: string, pointerId: number, x: number, y: number) =>
       viewport.dispatchEvent(
-        new PointerEvent(type, { pointerId, pointerType: 'touch', isPrimary: pointerId === 1, clientX: rect.left + x, clientY: rect.top + y, bubbles: true, composed: true }),
+        new PointerEvent(type, {
+          pointerId,
+          pointerType: 'touch',
+          isPrimary: pointerId === 1,
+          clientX: rect.left + x,
+          clientY: rect.top + y,
+          bubbles: true,
+          composed: true,
+        }),
       )
     fire('pointerdown', 1, 250, 200)
     fire('pointerdown', 2, 350, 200)
@@ -263,8 +292,7 @@ test('Space + drag and a middle-button drag pan even from a button; the click af
 test('a released drag glides and settles once; no-inertia stops at once', async ({ page, renderScenario }) => {
   await render(page, renderScenario, `<c2-pan-zoom fit="none">${PLAN}</c2-pan-zoom>`)
   await record(subject(page))
-  const centre = await viewportCentre(page)
-  await drag(page, centre, { x: -120, y: 0 }, { steps: 4 })
+  await flick(page)
   const released = (await viewOf(subject(page))).x
   await expect.poll(async () => (await viewOf(subject(page))).x).toBeGreaterThan(released + 5)
   await expect.poll(() => count(page, 'view-settle')).toBe(1)
@@ -272,7 +300,7 @@ test('a released drag glides and settles once; no-inertia stops at once', async 
   expect(await count(page, 'view-settle')).toBe(1)
 
   await render(page, renderScenario, `<c2-pan-zoom fit="none" no-inertia>${PLAN}</c2-pan-zoom>`)
-  await drag(page, await viewportCentre(page), { x: -120, y: 0 }, { steps: 4 })
+  await flick(page)
   const stopped = await viewOf(subject(page))
   await frames(page)
   expect(await viewOf(subject(page))).toEqual(stopped)
@@ -377,7 +405,8 @@ test('the toolbar zooms, reads the zoom and fits', async ({ page, renderScenario
   await toolbar.getByRole('button', { name: 'Zoom in' }).click()
   expect((await viewOf(subject(page))).zoom).toBe(1.4)
   await expect(toolbar.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
-  await toolbar.getByRole('button', { name: 'Zoom in' }).click()
+  // Still focusable at the limit, and a press does nothing.
+  await toolbar.getByRole('button', { name: 'Zoom in' }).click({ force: true })
   expect((await viewOf(subject(page))).zoom).toBe(1.4)
   await toolbar.getByRole('button', { name: /^Zoom 140%/ }).click()
   expect((await viewOf(subject(page))).zoom).toBe(1)
@@ -391,11 +420,7 @@ test('the toolbar zooms, reads the zoom and fits', async ({ page, renderScenario
 })
 
 test('the toolbar is one tab stop moved by the arrow keys, and takes extra buttons', async ({ page, renderScenario, tab }) => {
-  await render(
-    page,
-    renderScenario,
-    `<button>Before</button><c2-pan-zoom controls no-keyboard>${PLAN}<button slot="controls">Rotate</button></c2-pan-zoom>`,
-  )
+  await render(page, renderScenario, `<button>Before</button><c2-pan-zoom controls no-keyboard>${PLAN}<button slot="controls">Rotate</button></c2-pan-zoom>`)
   await page.getByRole('button', { name: 'Before' }).focus()
   // The content's buttons come first, then the toolbar.
   await tab()
@@ -437,10 +462,11 @@ test('the minimap shows while the content overflows, frames the view and moves i
   expect(box.width).toBeCloseTo(162, 0)
   expect(box.height).toBeCloseTo(102, 0)
   expect(frame.width / box.width).toBeCloseTo(600 / 1600, 1)
-  await page.mouse.click(box.x + box.width / 4, box.y + box.height / 2)
+  // A quarter across and half down the drawing (inside the 1px border): content point (400, 500) is centred.
+  await page.mouse.click(box.x + 1 + 40, box.y + 1 + 50)
   const view = await viewOf(subject(page))
-  expect(view.x + 300).toBeCloseTo(400, -1)
-  expect(view.y + 200).toBeCloseTo(500, -1)
+  expect(view.x + 300).toBeCloseTo(400, 0)
+  expect(view.y + 200).toBeCloseTo(500, 0)
 })
 
 test('the minimap copies a single image or SVG, takes its slot, and never clones custom elements', async ({ page, renderScenario }) => {
@@ -451,9 +477,12 @@ test('the minimap copies a single image or SVG, takes its slot, and never clones
   await render(
     page,
     renderScenario,
-    `<c2-pan-zoom minimap fit="none"><svg width="1600" height="1000"><rect class="room" width="800" height="500" fill="pink"/><foreignObject><button>x</button></foreignObject></svg></c2-pan-zoom>`,
+    `<style>.wall { stroke: rgb(1, 2, 3); }</style><c2-pan-zoom minimap fit="none"><svg width="1600" height="1000"><rect class="room wall" width="800" height="500" fill="pink"/><foreignObject><button>x</button></foreignObject></svg></c2-pan-zoom>`,
   )
-  await expect(page.locator('c2-pan-zoom .art-svg svg rect.room')).toBeAttached()
+  const room = page.locator('c2-pan-zoom .art-svg svg rect.room')
+  await expect(room).toBeAttached()
+  // The page's style sheet does not reach the copy, so its computed look is carried along.
+  await expect(room).toHaveCSS('stroke', 'rgb(1, 2, 3)')
   await expect(page.locator('c2-pan-zoom .art-svg foreignObject')).toHaveCount(0)
 
   await render(page, renderScenario, `<c2-pan-zoom minimap fit="none"><c2-pan-zoom style="width: 1600px"></c2-pan-zoom></c2-pan-zoom>`)
@@ -474,7 +503,15 @@ test('view-change fires at most once per frame and view-settle once, neither bub
     const rect = viewport.getBoundingClientRect()
     for (let index = 0; index < 5; index++) {
       viewport.dispatchEvent(
-        new WheelEvent('wheel', { deltaY: -20, ctrlKey: true, clientX: rect.left + 100, clientY: rect.top + 100, bubbles: true, cancelable: true, composed: true }),
+        new WheelEvent('wheel', {
+          deltaY: -20,
+          ctrlKey: true,
+          clientX: rect.left + 100,
+          clientY: rect.top + 100,
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+        }),
       )
     }
   })
@@ -497,10 +534,12 @@ test('setting view or zoom moves the view without an event; methods report the a
   await frames(page)
   expect(await events(page)).toEqual([])
   await subject(page).evaluate((element: PanZoom) => element.panBy(10, 0))
-  await expect.poll(() => events(page)).toEqual([
-    { type: 'view-change', bubbles: false, reason: 'api', zoom: 2 },
-    { type: 'view-settle', bubbles: false, reason: 'api', zoom: 2 },
-  ])
+  await expect
+    .poll(() => events(page))
+    .toEqual([
+      { type: 'view-change', bubbles: false, reason: 'api', zoom: 2 },
+      { type: 'view-settle', bubbles: false, reason: 'api', zoom: 2 },
+    ])
 })
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -519,7 +558,7 @@ test('animated moves ease, and jump under prefers-reduced-motion', async ({ page
   expect(await subject(page).evaluate((element: PanZoom) => (element.zoomIn(), element.zoom))).toBeCloseTo(1.44, 5)
   await render(page, renderScenario, `<c2-pan-zoom fit="none">${PLAN}</c2-pan-zoom>`)
   await record(subject(page))
-  await drag(page, await viewportCentre(page), { x: -120, y: 0 }, { steps: 4 })
+  await flick(page)
   const released = await viewOf(subject(page))
   await expect.poll(() => count(page, 'view-settle')).toBe(1)
   expect(await viewOf(subject(page))).toEqual(released)
@@ -536,10 +575,24 @@ test('before it can measure, the content is centred at its natural size; the fit
   await page.locator('#holder').evaluate((holder: HTMLElement) => (holder.style.display = 'block'))
   await frames(page)
   expect((await viewOf(subject(page))).zoom).toBeCloseTo(CONTAIN, 4)
-  await expect.poll(() => events(page)).toEqual([
-    { type: 'view-change', bubbles: false, reason: 'fit', zoom: CONTAIN },
-    { type: 'view-settle', bubbles: false, reason: 'fit', zoom: CONTAIN },
-  ])
+  await expect
+    .poll(() => events(page))
+    .toEqual([
+      { type: 'view-change', bubbles: false, reason: 'fit', zoom: CONTAIN },
+      { type: 'view-settle', bubbles: false, reason: 'fit', zoom: CONTAIN },
+    ])
+})
+
+test('reveal() called before the first measurement reads the element where the view will be', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="holder" style="display: none"><c2-pan-zoom fit="none" min-zoom="1">${PLAN}</c2-pan-zoom></div>`)
+  await subject(page).evaluate((element: PanZoom) => element.reveal(element.querySelector('#far')!))
+  await page.locator('#holder').evaluate((holder: HTMLElement) => (holder.style.display = 'block'))
+  await frames(page)
+  const viewport = await viewportOf(page).boundingBox()
+  const far = await page.locator('#far').boundingBox()
+  if (!viewport || !far) throw new Error('No boxes')
+  expect(far.x + far.width).toBeCloseTo(viewport.x + viewport.width - 24, 0)
+  expect(far.y + far.height).toBeCloseTo(viewport.y + viewport.height - 24, 0)
 })
 
 test('a call made before the first measurement waits for it', async ({ page, renderScenario }) => {
@@ -575,7 +628,12 @@ test('works inside another component’s shadow root: reveal, centerOn, follow f
   const inView = async (id: string) => {
     const box = await page.locator(`test-shadow-board #${id}`).boundingBox()
     if (!box) return false
-    return box.x >= viewport.x - 0.5 && box.y >= viewport.y - 0.5 && box.x + box.width <= viewport.x + viewport.width + 0.5 && box.y + box.height <= viewport.y + viewport.height + 0.5
+    return (
+      box.x >= viewport.x - 0.5 &&
+      box.y >= viewport.y - 0.5 &&
+      box.x + box.width <= viewport.x + viewport.width + 0.5 &&
+      box.y + box.height <= viewport.y + viewport.height + 0.5
+    )
   }
   await board.evaluate((element: PanZoom) => element.zoomTo(1, { animate: false }))
   expect(await inView('far')).toBe(false)

@@ -101,6 +101,23 @@ const HINT_DURATION = 1500
 /** Slowest release, in pixels per millisecond, that still glides. */
 const GLIDE_MIN_SPEED = 0.05
 
+/** The computed styles a minimap copy of a slotted SVG takes along, since the page's style sheets do not reach it. */
+const PAINT_PROPERTIES = [
+  'fill',
+  'fill-opacity',
+  'stroke',
+  'stroke-opacity',
+  'stroke-width',
+  'stroke-dasharray',
+  'opacity',
+  'display',
+  'visibility',
+  'font-family',
+  'font-size',
+  'font-weight',
+  'text-anchor',
+]
+
 /** A press on one of these is left to it: a drag that starts there does not pan. */
 const INTERACTIVE = [
   'a[href]',
@@ -335,8 +352,6 @@ export class PanZoom extends LitElement {
   private readonly msg = new LocalizeController(this, panZoomMessages)
 
   private current: PanZoomView = { x: 0, y: 0, zoom: 1 }
-  /** The view the DOM shows, as of the last render. */
-  private rendered: PanZoomView = { x: 0, y: 0, zoom: 1 }
   /** Where the first view comes from: the fit, the `view` attribute, or the `zoom` attribute (centred). */
   private initial: 'fit' | 'view' | 'zoom' = 'fit'
   /** Sizes known: false on the server and until the first measurement. */
@@ -415,7 +430,6 @@ export class PanZoom extends LitElement {
   }
 
   protected override updated(): void {
-    this.rendered = { ...this.current }
     if (this.art === 'svg' && this.artSvgEl && this.artDrawn !== this.artSource) this.drawSvgArt()
     if (this.art === 'canvas' && this.artCanvasEl && this.artDrawn !== this.artSource) this.drawCanvasArt()
   }
@@ -653,7 +667,9 @@ export class PanZoom extends LitElement {
     this.dispatchEvent(new CustomEvent<PanZoomViewDetail>('view-settle', { detail: { ...this.current, reason: this.reason } }))
     if (Math.abs(this.current.zoom - this.settledZoom) > 1e-4) this.announce(this.msg.t('zoomed', this.percent(this.current.zoom)))
     this.settledZoom = this.current.zoom
+    // A canvas redraws, and an SVG's colours may have changed with the theme.
     if (this.art === 'canvas') this.drawCanvasArt()
+    if (this.art === 'svg' && this.minimap) this.drawSvgArt()
   }
 
   private announce(text: string) {
@@ -728,13 +744,13 @@ export class PanZoom extends LitElement {
       const { x, y, width, height } = target
       return [x, y, width, height].every(Number.isFinite) ? { x, y, width, height } : null
     }
+    // Measured against the content wrapper as drawn, so it holds whatever the DOM shows: a render still pending, the
+    // centred layout before the first measurement, or a scroll the browser made to show a focused element.
     const box = target.getBoundingClientRect()
-    const viewport = this.viewportEl.getBoundingClientRect()
-    const view = this.rendered
-    // The browser may have scrolled the viewport to show a focused element: its box is shifted by that scroll.
-    const left = box.left - viewport.left + this.viewportEl.scrollLeft
-    const top = box.top - viewport.top + this.viewportEl.scrollTop
-    return { x: view.x + left / view.zoom, y: view.y + top / view.zoom, width: box.width / view.zoom, height: box.height / view.zoom }
+    const content = this.contentEl.getBoundingClientRect()
+    const scale = this.contentEl.offsetWidth ? content.width / this.contentEl.offsetWidth : this.current.zoom
+    if (!scale) return null
+    return { x: (box.left - content.left) / scale, y: (box.top - content.top) / scale, width: box.width / scale, height: box.height / scale }
   }
 
   private viewportPoint(clientX: number, clientY: number): PanZoomPoint {
@@ -750,7 +766,6 @@ export class PanZoom extends LitElement {
     viewport.scrollLeft = 0
     viewport.scrollTop = 0
     this.current = panView(this.current, scrollLeft, scrollTop)
-    this.rendered = panView(this.rendered, scrollLeft, scrollTop)
     this.requestUpdate()
   }
 
@@ -1157,7 +1172,15 @@ export class PanZoom extends LitElement {
     const host = this.artSvgEl
     if (!source || !host) return
     const copy = source.cloneNode(true) as SVGSVGElement
-    for (const element of copy.querySelectorAll('*')) {
+    // The copy lives in this shadow root, out of reach of the page's styles: carry the painted look over with it.
+    const originals = [source, ...source.querySelectorAll('*')]
+    const copies = [copy, ...copy.querySelectorAll('*')]
+    originals.forEach((original, index) => {
+      const style = getComputedStyle(original)
+      const target = copies[index] as SVGElement
+      for (const name of PAINT_PROPERTIES) target.style.setProperty(name, style.getPropertyValue(name))
+    })
+    for (const element of copies) {
       if (element.localName === 'foreignObject' || element.localName === 'script' || element.localName.includes('-')) element.remove()
     }
     copy.removeAttribute('id')
@@ -1241,7 +1264,8 @@ export class PanZoom extends LitElement {
     }
     const tx = this.measured || this.initial === 'view' ? -view.x * view.zoom : 0
     const ty = this.measured || this.initial === 'view' ? -view.y * view.zoom : 0
-    const hintText = this.hint === 'wheel' ? this.msg.t('wheelHint', isApplePlatform() ? '⌘' : this.msg.t('ctrlKey')) : this.hint === 'touch' ? this.msg.t('touchHint') : ''
+    const hintText =
+      this.hint === 'wheel' ? this.msg.t('wheelHint', isApplePlatform() ? '⌘' : this.msg.t('ctrlKey')) : this.hint === 'touch' ? this.msg.t('touchHint') : ''
     return html`
       <div class="box">
         <div

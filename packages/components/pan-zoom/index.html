@@ -1,22 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-pan-zoom</title>
     <script type="module" src="/src/pan-zoom.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            padding: 24px;
-        }
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+        max-width: 760px;
+      }
+      .board {
+        position: relative;
+        width: 1400px;
+        height: 900px;
+      }
+      .note {
+        position: absolute;
+        width: 160px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #fef3c7;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-    <c2-pan-zoom></c2-pan-zoom>
-</body>
+  <body>
+    <h2>Floor plan: toolbar, minimap, cooperative wheel</h2>
+    <c2-pan-zoom label="Data hall" controls minimap max-zoom="6">
+      <img src="../../../apps/ui/public/maps/data-hall.svg" alt="" width="640" height="400" />
+    </c2-pan-zoom>
 
+    <h2>Image preview: min-zoom="fit", the wheel zooms</h2>
+    <c2-pan-zoom label="Mountains" min-zoom="fit" gestures="zoom" style="--c2-pan-zoom--height: 260px">
+      <img src="../../../apps/ui/public/images/image-mountains.svg" alt="" width="800" height="600" />
+    </c2-pan-zoom>
+
+    <h2>Board: free canvas, the wheel pans, dot grid</h2>
+    <c2-pan-zoom label="Board" gestures="pan" bounds="none" controls style="--c2-pan-zoom__grid--display: block">
+      <div class="board">
+        <a class="note" href="#one" style="left: 40px; top: 40px">A link on the board</a>
+        <button class="note" style="left: 1200px; top: 760px">Far button: Tab to it</button>
+      </div>
+    </c2-pan-zoom>
+  </body>
 </html>

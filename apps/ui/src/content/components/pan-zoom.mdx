@@ -1,7 +1,7 @@
 ---
 title: 'Pan Zoom'
-description: 'One sentence describing what the component does.'
-category: 'Layout'
+description: 'A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.'
+category: 'Editors & viewers'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,8 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { PanZoom } from '@c2n/components/pan-zoom'
 
-`c2-pan-zoom` does something useful. Describe the element in a short paragraph: what it is for, the attributes
-that change its behaviour, and the slots a consumer fills.
+`c2-pan-zoom` lays whatever you slot in it out at its natural size and moves it with one transform: an image preview, an SVG diagram, a floor plan, a board. The first view fits the whole content (`fit="contain"`; `cover`, `width` and `none` are the others), never above 100%, and `min-zoom`, `max-zoom` and `zoom-step` bound the zoom. `bounds="content"` keeps the content in view while `bounds="none"` makes a free canvas. A mouse drag pans and glides when released, Ctrl/⌘ + wheel and a pinch zoom to the pointer, and a double-click zooms in one step; `gestures` sets what a plain wheel and one finger do — `cooperative`, the default, leaves them to the page and shows a hint, `pan` pans as in Figma, `zoom` zooms as in a map and `none` leaves only the buttons, the keys and the methods. The viewport is one tab stop: the arrows pan, `+` and `-` zoom, `0` fits and `1` goes to 100%, and focus moving to content out of view pans it into view.
+
+`controls` adds a toolbar (zoom out, the zoom percent, zoom in and fit, plus any buttons in the `controls` slot) and `minimap` an overview that shows while the content overflows: it copies a single slotted image or SVG, takes the `minimap` slot, or draws a plain rectangle. `zoomTo()`, `fit()`, `reset()`, `panBy()`, `centerOn()`, `zoomToElement()` and `reveal()` drive the view from code, `toContentPoint()` maps a pointer to the content, `view-change` reports every frame of a move and `view-settle` its end — the place to save `view`, which comes back from the attribute with no jump.
 
 ## Import
 
@@ -21,13 +22,114 @@ import '@c2n/components/pan-zoom'
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/pan-zoom
-<div data-label="Default">
-  <c2-pan-zoom></c2-pan-zoom>
+<style>
+  .fp-room {
+    fill: var(--c2-theme--color-surface, #ffffff);
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 6;
+  }
+  .fp-wall {
+    fill: none;
+    stroke: var(--c2-theme--color-on-surface, #18181b);
+    stroke-width: 4;
+  }
+  .fp-blue {
+    fill: light-dark(#eaf2fd, #172a45);
+  }
+  .fp-orange {
+    fill: light-dark(#fdf0e7, #3b2617);
+  }
+  .fp-violet {
+    fill: light-dark(#f2edfd, #2a1f45);
+  }
+  .fp-pink {
+    fill: light-dark(#fcedf2, #3d1d29);
+  }
+  .fp-green {
+    fill: light-dark(#e8f5f1, #16332b);
+  }
+  .fp-item {
+    fill: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    stroke: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+    stroke-width: 2;
+  }
+  .fp-plant {
+    fill: #3f9a86;
+  }
+  .fp-label {
+    fill: var(--c2-theme--color-on-surface, #18181b);
+    font: 600 20px system-ui, sans-serif;
+  }
+  .pz-usage {
+    width: 100%;
+    max-width: 640px;
+    --c2-pan-zoom--height: 320px;
+  }
+  .pz-photo {
+    width: 100%;
+    max-width: 360px;
+    --c2-pan-zoom--height: 240px;
+    --c2-pan-zoom--fit-padding: 0px;
+  }
+</style>
+<div data-label="Floor plan with toolbar and minimap">
+  <c2-pan-zoom class="pz-usage" label="Office floor plan, level 3" controls minimap max-zoom="6">
+    <svg class="fp" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Office floor plan, level 3">
+      <defs>
+        <pattern id="fp-usage-desks" x="40" y="60" width="84" height="96" patternUnits="userSpaceOnUse">
+          <rect class="fp-item" x="12" y="14" width="60" height="34" rx="5" />
+          <circle class="fp-item" cx="42" cy="66" r="11" />
+        </pattern>
+      </defs>
+      <rect class="fp-room" x="8" y="8" width="452" height="402" />
+      <rect class="fp-room fp-blue" x="460" y="8" width="320" height="232" />
+      <rect class="fp-room fp-blue" x="780" y="8" width="210" height="232" />
+      <rect class="fp-room fp-orange" x="990" y="8" width="202" height="402" />
+      <rect class="fp-room" x="460" y="240" width="530" height="170" />
+      <rect class="fp-room fp-violet" x="8" y="410" width="262" height="170" />
+      <rect class="fp-room fp-pink" x="8" y="580" width="262" height="172" />
+      <rect class="fp-room fp-green" x="270" y="410" width="440" height="342" />
+      <rect class="fp-room" x="710" y="410" width="482" height="342" />
+      <rect fill="url(#fp-usage-desks)" x="40" y="60" width="420" height="288" />
+      <rect class="fp-item" x="530" y="100" width="180" height="64" rx="10" />
+      <circle class="fp-item" cx="560" cy="80" r="11" /><circle class="fp-item" cx="560" cy="184" r="11" />
+      <circle class="fp-item" cx="600" cy="80" r="11" /><circle class="fp-item" cx="600" cy="184" r="11" />
+      <circle class="fp-item" cx="640" cy="80" r="11" /><circle class="fp-item" cx="640" cy="184" r="11" />
+      <circle class="fp-item" cx="680" cy="80" r="11" /><circle class="fp-item" cx="680" cy="184" r="11" />
+      <rect class="fp-item" x="830" y="104" width="110" height="56" rx="10" />
+      <circle class="fp-item" cx="855" cy="84" r="11" /><circle class="fp-item" cx="855" cy="180" r="11" />
+      <circle class="fp-item" cx="885" cy="84" r="11" /><circle class="fp-item" cx="885" cy="180" r="11" />
+      <circle class="fp-item" cx="915" cy="84" r="11" /><circle class="fp-item" cx="915" cy="180" r="11" />
+      <rect class="fp-item" x="1012" y="56" width="160" height="34" rx="4" />
+      <rect class="fp-item" x="1032" y="220" width="120" height="60" rx="10" />
+      <circle class="fp-item" cx="1052" cy="200" r="10" /><circle class="fp-item" cx="1052" cy="300" r="10" />
+      <circle class="fp-item" cx="1092" cy="200" r="10" /><circle class="fp-item" cx="1092" cy="300" r="10" />
+      <circle class="fp-item" cx="1132" cy="200" r="10" /><circle class="fp-item" cx="1132" cy="300" r="10" />
+      <rect class="fp-item" x="40" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="78" cy="526" r="11" />
+      <rect class="fp-item" x="150" y="470" width="76" height="34" rx="5" /><circle class="fp-item" cx="188" cy="526" r="11" />
+      <path class="fp-wall" d="M139 580V752" />
+      <rect class="fp-item" x="300" y="480" width="160" height="50" rx="16" />
+      <rect class="fp-item" x="300" y="580" width="50" height="130" rx="16" />
+      <circle class="fp-item" cx="540" cy="630" r="48" />
+      <circle class="fp-plant" cx="300" cy="730" r="13" /><circle class="fp-plant" cx="684" cy="436" r="13" />
+      <path class="fp-item" d="M800 600H990a30 30 0 0 1 30 30v30H800Z" />
+      <path class="fp-item" d="M1110 540V730M1126 540V730M1142 540V730M1158 540V730M1174 540V730" />
+      <circle class="fp-plant" cx="1166" cy="440" r="13" />
+      <text class="fp-label" x="28" y="46">Open office</text>
+      <text class="fp-label" x="480" y="46">Meeting A</text>
+      <text class="fp-label" x="800" y="46">Meeting B</text>
+      <text class="fp-label" x="1010" y="46">Kitchen</text>
+      <text class="fp-label" x="480" y="278">Corridor</text>
+      <text class="fp-label" x="28" y="448">Focus room</text>
+      <text class="fp-label" x="28" y="618">Phone booths</text>
+      <text class="fp-label" x="290" y="448">Lounge</text>
+      <text class="fp-label" x="730" y="448">Reception</text>
+    </svg>
+  </c2-pan-zoom>
+</div>
+<div data-label="Image preview">
+  <c2-pan-zoom class="pz-photo" label="Mountains at sunset" min-zoom="fit" gestures="zoom">
+    <img src="/web-components/images/image-mountains.svg" alt="Mountains at sunset" width="800" height="600" />
+  </c2-pan-zoom>
 </div>
 ```
-
-Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
-`<style>` block can hold the classes those rows use.
-
-The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
-file must not contain a `# Title` heading or an `<ApiTable>`.

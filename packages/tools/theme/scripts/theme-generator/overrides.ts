@@ -233,6 +233,13 @@ export const overrides: Record<string, Override> = {
   '--c2-cascader__panel--box-shadow': { token: 'shadow-md' },
   // A floating panel behind the active one sits lower: its shadow steps down from the large one.
   '--c2-floating-panel__inactive--box-shadow': { token: 'shadow-md' },
+  // Pan-zoom: the cooperative hint is light text on the inverted surface; the dot grid and minimap follow the greys
+  // and the accent, so both read in dark mode.
+  '--c2-pan-zoom__hint--color': { token: 'color-on-inverse-surface' },
+  '--c2-pan-zoom__grid--color': { token: 'color-outline' },
+  '--c2-pan-zoom__minimap-content--background': { token: 'color-outline-variant' },
+  '--c2-pan-zoom__minimap-frame--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-pan-zoom__minimap-frame--background': { token: 'color-primary-glow' },
   '--c2-cascader__panel--max-width': { exclude: 'viewport-aware panel width' },
   '--c2-cascader__column--min-width': { exclude: 'hierarchy column geometry' },
   '--c2-cascader__column--max-width': { exclude: 'hierarchy column geometry' },

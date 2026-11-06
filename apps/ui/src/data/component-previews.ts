@@ -376,7 +376,7 @@ price: .price
   <span slot="description">October · EUR</span>
 </c2-page-header>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
-  'pan-zoom': `<c2-pan-zoom></c2-pan-zoom>`,
+  'pan-zoom': `<c2-pan-zoom label="Data hall floor plan" controls style="width:280px;--c2-pan-zoom--height:170px;--c2-pan-zoom__button--size:24px;--c2-pan-zoom__controls--inset:auto 8px 8px auto"><img src="/web-components/maps/data-hall.svg" alt="Data hall floor plan" width="640" height="400" /></c2-pan-zoom>`,
   'password-field': `<c2-password-field placeholder="New password" autocomplete="new-password" meter value="Sunrise7!" style="width:220px"></c2-password-field>`,
   'payment-card': `<c2-payment-card style="--c2-payment-card--width: 240px; --c2-payment-card__face--padding: 14px; --c2-payment-card__number--font-size: 15px; --c2-payment-card__actions--display: none; --c2-payment-card__fields--display: none" label="Marketing · Virtual" holder="Ada Lovelace" last4="4242"></c2-payment-card>`,
   'phone-input': `<c2-phone-input value="+33612345678" style="width:240px"></c2-phone-input>`,
