@@ -10,18 +10,24 @@ import { EchartsChartBase } from './echarts-chart-base.js'
 import { columnValue, type NormalizeContext } from './chart-data.js'
 import { measureText } from './chart-measure.js'
 import { mixColors, parseColor } from './map-scale.js'
-import { bulletMessages } from './bullet-messages.js'
+import { bandNameKey, bulletMessages } from './bullet-messages.js'
 import { bandBoundaries, buildBulletRows, bulletTicks, type BulletBetter, type BulletRow, type BulletRowInput } from './bullet-model.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { ChartTheme } from './chart-theme.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
-import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
+import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext, ChartTooltipEntry } from './chart-types.js'
 import './chart-series.js'
 
 export type { BulletBand, BulletBetter, BulletRow } from './bullet-model.js'
 
+/** One line of the bullet tooltip. `kind` says what it is, whatever the measure's series field is called. */
+export interface BulletTooltipEntry extends ChartTooltipEntry {
+  kind: 'actual' | 'target' | 'band'
+}
+
 /** What `renderTooltip`, the `tooltip-change` event and a linked `c2-chart-tooltip` receive. */
 export interface BulletTooltipContext extends ChartTooltipContext {
+  entries: BulletTooltipEntry[]
   /** The hovered or focused bullet. */
   row?: BulletRow
 }
@@ -175,8 +181,8 @@ export class BulletChart extends EchartsChartBase {
   @property({ converter: jsonPropertyConverter }) bands?: number[]
 
   /**
-   * The names of the bands, poorest first, as a comma list, for the tooltip, the table and the announcement. The
-   * default follows the band count: "Poor, Satisfactory, Good" for three.
+   * The names of the bands, poorest first, as a comma list or a JSON array (for names holding a comma), for the
+   * tooltip, the table and the announcement. The default follows the band count: "Poor, Satisfactory, Good" for three.
    */
   @property({ type: String, attribute: 'band-labels' }) bandLabels = ''
 
@@ -317,8 +323,9 @@ export class BulletChart extends EchartsChartBase {
     if (!row) return { ...base, formattedX: '', entries: [] }
     const series = this.resolvedSeries[0] ?? { field: 'value' }
     const theme = this.themeController.theme
-    const entries = [
+    const entries: BulletTooltipEntry[] = [
       {
+        kind: 'actual',
         seriesIndex: 0,
         series: { ...series, label: series.label ?? this.msg.t('actual') },
         value: row.value,
@@ -328,6 +335,7 @@ export class BulletChart extends EchartsChartBase {
     ]
     if (row.target !== null) {
       entries.push({
+        kind: 'target',
         seriesIndex: 0,
         series: { field: 'target', label: this.msg.t('target') },
         value: row.target,
@@ -338,6 +346,7 @@ export class BulletChart extends EchartsChartBase {
     if (row.band >= 0 && row.bands.length > 1) {
       const band = row.bands[row.band]
       entries.push({
+        kind: 'band',
         seriesIndex: 0,
         series: { field: 'band', label: this.msg.t('band') },
         value: band.to,
@@ -353,13 +362,13 @@ export class BulletChart extends EchartsChartBase {
     if (!row) return super.defaultTooltip(context)
     return html`
       <div class="tooltip-title">${row.label}${row.description ? html`<span class="bullet-tooltip-description"> · ${row.description}</span>` : nothing}</div>
-      ${context.entries.map(
+      ${(context.entries as Partial<BulletTooltipEntry>[]).map(
         (entry) => html`
           <div class="tooltip-row">
             ${
-              entry.series.field === 'target'
+              entry.kind === 'target'
                 ? html`<span class="bullet-tick-marker" style="background:currentColor"></span>`
-                : html`<span class="tooltip-marker ${entry.series.field === 'band' ? 'bullet-band-marker' : ''}" style="background:${entry.color}"></span>`
+                : html`<span class="tooltip-marker ${entry.kind === 'band' ? 'bullet-band-marker' : ''}" style="background:${entry.color}"></span>`
             }
             <span class="tooltip-label">${entry.series.label ?? entry.series.field}</span>
             <span class="tooltip-value">${entry.formatted}</span>
@@ -811,12 +820,29 @@ export class BulletChart extends EchartsChartBase {
   /** The name of the band `at`, from `band-labels` or the default names for the row's band count. */
   #bandName(row: BulletRow, at: number): string {
     const quality = row.bands[at]?.quality ?? 0
-    const names = (this.bandLabels || this.msg.t('bandNames', row.bands.length))
+    const authored = this.#authoredBandNames()
+    if (authored.length > 0) return authored[quality] ?? authored[authored.length - 1]
+    return this.msg.t(bandNameKey(quality + 1, row.bands.length))
+  }
+
+  /** `band-labels`, as a JSON array (names may hold commas) or a comma list. */
+  #authoredBandNames(): string[] {
+    const text = this.bandLabels.trim()
+    if (!text) return []
+    if (text.startsWith('[')) {
+      try {
+        const list: unknown = JSON.parse(text)
+        if (Array.isArray(list)) return list.map((name) => String(name).trim()).filter(Boolean)
+      } catch {
+        // Not JSON after all: read it as a comma list.
+      }
+    }
+    return text
       .split(',')
       .map((name) => name.trim())
       .filter(Boolean)
-    return names[quality] ?? names[names.length - 1] ?? ''
   }
+
 
   // ------------------------------------------------------------ keyboard ---
 

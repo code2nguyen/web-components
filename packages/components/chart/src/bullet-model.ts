@@ -6,7 +6,7 @@
 /** Which end of the scale is good: `higher` (the default) puts the good band at the top of the scale, `lower` near zero. */
 export type BulletBetter = 'higher' | 'lower'
 
-/** Most bands a row draws; boundaries past the fifth are left out. */
+/** Most bands a row draws: past the scale start (and up to its end), boundaries after the fifth are left out. */
 export const MAX_BANDS = 5
 
 /** One qualitative band of a row, from `from` to `to` on the row's scale. */
@@ -67,7 +67,8 @@ const finite = (value: unknown): value is number => typeof value === 'number' &&
 
 /**
  * The band boundaries a row or the `bands` attribute carries: an array of numbers, a JSON array, or a comma list.
- * Anything that is not a finite number is left out; the rest are sorted ascending without repeats, at most five.
+ * Anything that is not a finite number is left out; the rest are sorted ascending without repeats. They are capped at
+ * five only once the row's scale is known ({@link visibleBoundaries}), so boundaries under the start do not use up the five.
  */
 export function bandBoundaries(raw: unknown): number[] {
   let list: unknown = raw
@@ -82,7 +83,17 @@ export function bandBoundaries(raw: unknown): number[] {
   }
   if (!Array.isArray(list)) return []
   const numbers = list.map((item) => (typeof item === 'string' && item.trim() !== '' ? Number(item) : item)).filter(finite)
-  return [...new Set(numbers)].sort((a, b) => a - b).slice(0, MAX_BANDS)
+  return [...new Set(numbers)].sort((a, b) => a - b)
+}
+
+/**
+ * The boundaries a row on `[min, max]` draws: those past the start, up to the first at or past the end (the band
+ * that reaches the end), at most five.
+ */
+export function visibleBoundaries(boundaries: readonly number[], min: number, max: number): number[] {
+  const past = boundaries.filter((boundary) => boundary > min)
+  const end = past.findIndex((boundary) => boundary >= max)
+  return (end === -1 ? past : past.slice(0, end + 1)).slice(0, MAX_BANDS)
 }
 
 /** How good band `index` of `count` is, `0` for the poorest: the order of the bands, reversed with `better="lower"`. */
@@ -114,7 +125,7 @@ export function buildBulletRows(inputs: readonly BulletRowInput[], options: Bull
   const shared = Math.max(min + 1, ...ends)
   return inputs.map((input, index) => {
     const max = options.scale === 'shared' ? shared : ends[index]
-    const boundaries = input.bands.filter((boundary) => boundary > min)
+    const boundaries = visibleBoundaries(input.bands, min, max)
     const bands: BulletBand[] = boundaries.map((to, at) => ({
       from: at === 0 ? min : boundaries[at - 1],
       to,

@@ -160,6 +160,15 @@ test('statistics: interpolated quartiles, Tukey fences, range whiskers, summarie
   expect(model.boxes[1][1]?.count).toBeUndefined()
   expect(model.boxes[2]).toEqual([null, null])
   expect(model.list).toHaveLength(4)
+
+  // Regression: an unlabelled row is numbered by its position, but never pools with a row whose real label is that number.
+  const mixed = await page.evaluate(() =>
+    window.boxplotScenario.stats.buildBoxplotModel([{ g: 'x', v: 1 }, { v: 100 }, { g: '2', v: 5 }, { g: 2, v: 7 }], { labelField: 'g', fields: ['v'] }),
+  )
+  expect(mixed.categories).toEqual(['x', '2', '2'])
+  expect(mixed.boxes.map((boxes) => boxes[0]?.count)).toEqual([1, 1, 2])
+  expect(mixed.boxes[1][0]).toMatchObject({ median: 100 })
+  expect(mixed.boxes[2][0]).toMatchObject({ median: 6 })
 })
 
 test('one box per label with its quartiles, whiskers and outliers, named and tabled for assistive technology', async ({ page }) => {
@@ -537,4 +546,19 @@ test('theming: the box width, tint, outline, median and outlier size come from t
   // A percentage is a share of the band, capped so neighbouring boxes keep a gap.
   await chart.evaluate((element) => element.style.setProperty('--c2-chart__box--width', '95%'))
   expect(parts(await drawn(page, 0, 3)).box.shape?.width).toBe(60)
+
+  // Regression: a length in rem or em is resolved to pixels, not read as a bare number.
+  await page.evaluate(() => (document.documentElement.style.fontSize = '10px'))
+  await chart.evaluate((element) => {
+    element.style.fontSize = '20px'
+    element.style.setProperty('--c2-chart__box--width', '3rem')
+    element.style.setProperty('--c2-chart__box--border-width', '0.2rem')
+    element.style.setProperty('--c2-chart__median--width', '0.25em')
+    element.style.setProperty('--c2-chart__outlier--radius', 'calc(0.5rem + 1px)')
+  })
+  const resolved = parts(await drawn(page, 0, 3))
+  expect(resolved.box.shape?.width).toBe(30)
+  expect(resolved.box.style?.lineWidth).toBe(2)
+  expect(resolved.median.style?.lineWidth).toBe(5)
+  expect(await drawn(page, 0, 12)).toMatchObject({ shape: { r: 6 } })
 })

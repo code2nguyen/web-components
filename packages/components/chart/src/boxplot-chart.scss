@@ -35,6 +35,29 @@
   display: none;
 }
 
+// Sized by the length variables, so script reads them in pixels whatever unit they are written in.
+.boxplot-probe {
+  position: absolute;
+  visibility: hidden;
+  height: 0;
+
+  &.box-width {
+    width: var(--_box-width);
+  }
+
+  &.border-width {
+    width: var(--_box-border-width);
+  }
+
+  &.median-width {
+    width: var(--_median-width);
+  }
+
+  &.outlier-radius {
+    width: var(--_outlier-radius);
+  }
+}
+
 // The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
 .plot:focus {
   outline: none;

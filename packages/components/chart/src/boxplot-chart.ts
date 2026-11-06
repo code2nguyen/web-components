@@ -509,7 +509,9 @@ export class BoxplotChart extends EchartsChartBase {
 
   /** The hovered or focused category's backdrop, behind the boxes. Placed by script from the engine's grid. */
   protected override renderOverlayExtras(): unknown {
-    return html`<div class="boxplot-backdrop" hidden></div>`
+    return html`<div class="boxplot-backdrop" hidden></div>
+      <span class="boxplot-probe box-width"></span><span class="boxplot-probe border-width"></span><span class="boxplot-probe median-width"></span
+      ><span class="boxplot-probe outlier-radius"></span>`
   }
 
   // ------------------------------------------------------------- keyboard ---
@@ -804,18 +806,23 @@ export class BoxplotChart extends EchartsChartBase {
   #readStyle(): BoxStyle {
     const style = typeof getComputedStyle === 'function' ? getComputedStyle(this) : undefined
     const raw = (name: string) => style?.getPropertyValue(name).trim() ?? ''
-    const read = (name: string, fallback: number) => {
-      const value = parseFloat(raw(name))
+    const opacity = parseFloat(raw('--_box-fill-opacity'))
+    // A length variable may be written in any unit (`2rem`, `calc()`): a probe sized by it resolves it to pixels.
+    const length = (name: string, fallback: number) => {
+      const probe = this.renderRoot?.querySelector<HTMLElement>(`.boxplot-probe.${name}`)
+      const value = probe?.isConnected ? probe.getBoundingClientRect().width : Number.NaN
       return Number.isFinite(value) && value >= 0 ? value : fallback
     }
+    // A percentage is a share of the band, which only the engine knows: it is read from the declared value.
     const width = raw('--_box-width')
-    const amount = parseFloat(width)
+    const share = width.endsWith('%') ? parseFloat(width) / 100 : Number.NaN
+    const pixels = Number.isFinite(share) ? Number.NaN : length('box-width', Number.NaN)
     return {
-      width: !Number.isFinite(amount) || amount <= 0 ? { share: 0.4 } : width.endsWith('%') ? { share: amount / 100 } : { pixels: amount },
-      fillOpacity: Math.min(1, read('--_box-fill-opacity', 0.22)),
-      borderWidth: read('--_box-border-width', 1.5),
-      medianWidth: read('--_median-width', 2.5),
-      outlierRadius: read('--_outlier-radius', 3),
+      width: Number.isFinite(share) && share > 0 ? { share } : Number.isFinite(pixels) && pixels > 0 ? { pixels } : { share: 0.4 },
+      fillOpacity: Number.isFinite(opacity) && opacity >= 0 ? Math.min(1, opacity) : 0.22,
+      borderWidth: length('border-width', 1.5),
+      medianWidth: length('median-width', 2.5),
+      outlierRadius: length('outlier-radius', 3),
     }
   }
 

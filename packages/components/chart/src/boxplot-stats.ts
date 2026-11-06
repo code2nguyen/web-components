@@ -152,11 +152,14 @@ export function buildBoxplotModel(rows: readonly unknown[], options: BoxplotMode
   rows.forEach((row, position) => {
     if (!row || typeof row !== 'object' || Array.isArray(row)) return
     const raw = options.labelField ? getFieldValue(row as Record<string, unknown>, options.labelField) : undefined
-    const label = raw === undefined || raw === null || raw === '' ? String(position + 1) : String(raw)
-    let category = index.get(label)
+    const unlabelled = raw === undefined || raw === null || raw === ''
+    const label = unlabelled ? String(position + 1) : String(raw)
+    // An unlabelled row is its own category, keyed apart from every real label, so a row labelled `"2"` never pools with it.
+    const key = unlabelled ? `\u0000${position}` : `\u0001${label}`
+    let category = index.get(key)
     if (category === undefined) {
       category = categories.length
-      index.set(label, category)
+      index.set(key, category)
       categories.push(label)
       samples.push(options.fields.map(() => []))
       summaries.push(options.fields.map(() => null))

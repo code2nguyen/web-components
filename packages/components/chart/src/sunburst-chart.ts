@@ -286,6 +286,8 @@ export class SunburstChart extends EchartsChartBase {
 
   protected override willUpdate(changed: PropertyValues): void {
     if (changed.has('data') || changed.has('revision')) this.dataRevision += 1
+    // An update may come with new variables (a class, a theme); a pointer move only changes the tooltip.
+    if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.#styleCache = undefined
     super.willUpdate(changed)
   }
 
@@ -453,12 +455,6 @@ export class SunburstChart extends EchartsChartBase {
 
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
-    // A `root` naming a leaf or a missing node settles on the deepest group along it, so the breadcrumb says what is drawn.
-    const model = this.#computeModel()
-    if (model.nodes.length > 0) {
-      const path = this.#viewRoot()?.path ?? []
-      if (path.length !== this.root.length || path.some((name, index) => name !== this.root[index])) this.root = path
-    }
     this.#renderAccessibleSummary()
     this.#renderFocus()
     const plot = this.plotElement
@@ -480,7 +476,8 @@ export class SunburstChart extends EchartsChartBase {
    * rings, so they arrive with the first measurement, after hydration.
    */
   protected override renderOverlayExtras(): unknown {
-    const root = this.root ?? []
+    // Before the first measurement (and on a server) the path is `root` as written; after it, what is drawn.
+    const root = this.plotSize > 0 ? this.#viewPath() : (this.root ?? [])
     const zoomed = root.length > 0
     const crumbs = zoomed && this.breadcrumb !== 'none'
     const parentName = root.length > 1 ? root[root.length - 2] : this.msg.t('root')
@@ -522,6 +519,7 @@ export class SunburstChart extends EchartsChartBase {
           : html`<div class="sunburst-center" part="center" style=${place}>${content}</div>`
       }
       <svg class="sunburst-focus" aria-hidden="true"></svg>
+      <span class="sunburst-probe" aria-hidden="true"><i class="gap"></i><i class="radius"></i><i class="crumb"></i></span>
     `
   }
 
@@ -658,6 +656,16 @@ export class SunburstChart extends EchartsChartBase {
     return this.#model
   }
 
+  /**
+   * The path to the group drawn at the centre: the deepest group along `root` the data holds. `root` itself is kept as
+   * the author set it, so a branch that arrives later (lazy data, a legend toggle) is zoomed into once it exists.
+   * Without data yet, `root` as written.
+   */
+  #viewPath(): string[] {
+    if (this.#computeModel().nodes.length === 0) return [...(this.root ?? [])]
+    return this.#viewRoot()?.path ?? []
+  }
+
   /** The group at the centre, or `undefined` for the whole. */
   #viewRoot(): HierarchyTreeNode | undefined {
     return this.root?.length ? findHierarchyNode(this.#computeModel().tree, this.root, true) : undefined
@@ -688,28 +696,39 @@ export class SunburstChart extends EchartsChartBase {
 
   // -------------------------------------------------------------- geometry ---
 
-  /** Reads the layout variables through the internal properties the stylesheet resolves them into. */
+  #styleCache?: { gap: number; radius: number; hole: number; crumb: number }
+
+  /**
+   * The layout variables in pixels. The lengths are read from probes sized by them, so any unit (`rem`, `em`, `calc()`)
+   * resolves; the hole is a share, read from its percentage. Read once per update.
+   */
   #style(): { gap: number; radius: number; hole: number; crumb: number } {
-    const style = getComputedStyle(this)
-    const read = (name: string, fallback: number) => {
-      const value = parseFloat(style.getPropertyValue(name))
+    if (this.#styleCache) return this.#styleCache
+    const probe = (name: string) => this.renderRoot?.querySelector<HTMLElement>(`.sunburst-probe > .${name}`)
+    const pixels = (name: string, fallback: number, read: (element: HTMLElement) => number) => {
+      const element = probe(name)
+      const value = element?.isConnected ? read(element) : Number.NaN
       return Number.isFinite(value) && value >= 0 ? value : fallback
     }
-    const holeText = style.getPropertyValue('--_hole-size').trim()
+    const width = (element: HTMLElement) => element.getBoundingClientRect().width
+    const holeText = getComputedStyle(this).getPropertyValue('--_hole-size').trim()
     const holeValue = parseFloat(holeText)
     const hole = Number.isFinite(holeValue) ? (holeText.endsWith('%') || holeValue > 1 ? holeValue / 100 : holeValue) : 0.28
-    return {
-      gap: read('--_segment-gap', 1.5),
-      radius: read('--_segment-radius', 2),
+    const style = {
+      gap: pixels('gap', 1.5, width),
+      radius: pixels('radius', 2, width),
       hole: Math.min(0.9, Math.max(0, hole)),
-      crumb: read('--_breadcrumb-font-size', 14),
+      crumb: pixels('crumb', 14, (element) => parseFloat(getComputedStyle(element).fontSize)),
     }
+    // Only cached once the probes exist, so a read before the first render does not stick.
+    if (probe('gap')?.isConnected) this.#styleCache = style
+    return style
   }
 
   #geometry(width: number, height: number): SunburstGeometry {
     const style = this.#style()
     // The breadcrumb takes a strip across the top while zoomed; the rings sit below it.
-    const inset = (this.root?.length ?? 0) > 0 && this.breadcrumb !== 'none' ? Math.ceil(style.crumb * 1.5) + 8 : 0
+    const inset = this.#viewPath().length > 0 && this.breadcrumb !== 'none' ? Math.ceil(style.crumb * 1.5) + 8 : 0
     const outer = Math.max(0, Math.min(width, height - inset) / 2 - EDGE)
     const hole = outer * style.hole
     const rings = Math.min(Math.max(1, Math.trunc(this.levels) || 1), hierarchyHeight(this.#viewNodes()))
@@ -730,7 +749,7 @@ export class SunburstChart extends EchartsChartBase {
   /** Where every drawn segment sits, as ECharts lays it out: clockwise from twelve o'clock, each child from its parent's start. */
   #arcs(geometry: SunburstGeometry): Map<HierarchyTreeNode, SunburstArc> {
     const model = this.#computeModel()
-    const key = [geometry.cx, geometry.cy, geometry.hole, geometry.outer, geometry.rings, (this.root ?? []).join('\u001f')].join('|')
+    const key = [geometry.cx, geometry.cy, geometry.hole, geometry.outer, geometry.rings, this.#viewPath().join('\u001f')].join('|')
     if (this.#arcCache && this.#arcCache.key === key && this.#arcCache.model === model) return this.#arcCache.arcs
     const arcs = new Map<HierarchyTreeNode, SunburstArc>()
     const nodes = this.#viewNodes()
@@ -778,7 +797,24 @@ export class SunburstChart extends EchartsChartBase {
 
   // ------------------------------------------------------------ engine data ---
 
+  #engineCache?: { key: string; model: unknown; theme: unknown; colors: unknown; data: Record<string, unknown>[] }
+
+  /**
+   * The tree as ECharts draws it, with every label fitted. The option build and the data push of one update ask for it
+   * with the same inputs, so it is built (and its names measured) once and handed out twice.
+   */
   #engineData(context: ChartBuildContext): Record<string, unknown>[] {
+    const model = this.#computeModel()
+    const colors = this.#colorMap()
+    const key = [context.width, context.height, this.highlighted, this.labels, this.levels, this.#viewPath().join('\u001f'), JSON.stringify(this.#style())].join('|')
+    const cached = this.#engineCache
+    if (cached && cached.key === key && cached.model === model && cached.theme === context.theme && cached.colors === colors) return cached.data
+    const data = this.#buildEngineData(context)
+    this.#engineCache = { key, model, theme: context.theme, colors, data }
+    return data
+  }
+
+  #buildEngineData(context: ChartBuildContext): Record<string, unknown>[] {
     const { theme } = context
     const geometry = this.#geometry(context.width, context.height)
     const arcs = this.#arcs(geometry)
@@ -893,10 +929,11 @@ export class SunburstChart extends EchartsChartBase {
     this.#announcement = target
       ? this.msg.t('zoomAnnouncement', this.#pathText(target.path), this.#format(target.value))
       : this.msg.t('zoomOutAnnouncement', this.#format(total))
-    // The keyboard follows the zoom: into the new centre's first child, or back onto the group it came out of.
+    // The keyboard follows the zoom: zooming out lands on the branch it came out of (now on the first ring), zooming in
+    // on the new centre's first child.
     if (this.#focused !== null || this.shadowRoot?.activeElement === this.plotElement) {
-      const previous = this.#viewRoot()
-      const focus = target ? target.children[0] : previous
+      const out = next.length < current.length && next.every((name, index) => name === current[index])
+      const focus = out ? findHierarchyNode(model.tree, current.slice(0, next.length + 1), true) : (target?.children[0] ?? model.tree[0])
       this.#focused = focus ? hierarchyEngineName(focus) : null
     }
     this.root = [...next]
