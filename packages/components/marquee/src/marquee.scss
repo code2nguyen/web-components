@@ -6,6 +6,7 @@
     item--align: center,
     viewport--fade: 0px,
     viewport--height: 240px,
+    viewport__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
 
@@ -130,4 +131,9 @@
 
 .viewport.browsing {
   overflow: auto;
+}
+
+.viewport:focus-visible {
+  outline: css.cssVar(viewport__focus--outline);
+  outline-offset: 2px;
 }

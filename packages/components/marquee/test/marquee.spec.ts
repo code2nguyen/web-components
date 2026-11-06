@@ -223,6 +223,23 @@ test('reduced motion stops the strip and lets it scroll by hand', async ({ page,
   expect(await viewport.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
 })
 
+test('under reduced motion the strip takes keyboard focus, so a row with nothing focusable still scrolls', async ({ page, scenario, tab }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('extras')
+  const viewport = page.locator('c2-marquee').locator('.viewport')
+  await expect(viewport).toHaveAttribute('tabindex', '0')
+  await tab()
+  await expect.poll(() => page.locator('c2-marquee').evaluate((host) => host.shadowRoot!.activeElement?.classList.contains('viewport'))).toBe(true)
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => viewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+  await accessible(page)
+})
+
+test('a moving strip does not take focus itself', async ({ page, scenario }) => {
+  await scenario()
+  await expect(page.locator('c2-marquee').locator('.viewport')).not.toHaveAttribute('tabindex', /.*/)
+})
+
 test('is accessible', async ({ page, scenario }) => {
   await scenario()
   await accessible(page)

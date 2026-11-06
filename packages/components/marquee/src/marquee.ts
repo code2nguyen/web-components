@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -22,7 +22,8 @@ interface ItemTrack {
  *
  * Motion pauses while the pointer is over the strip or focus is inside it, and while `paused` is set. Keyboard focus
  * and a request for reduced motion both stop the strip and lay it out as a row that scrolls by hand, so the focused
- * item is always in view.
+ * item is always in view. Under reduced motion the strip itself takes keyboard focus, so a row of plain items (a logo
+ * wall) can still be scrolled from the keyboard.
  *
  * @tag c2-marquee
  *
@@ -35,6 +36,7 @@ interface ItemTrack {
  * @cssproperty {pixel} [--c2-marquee__item--gap=32px] - Space after each item.
  * @cssproperty {pixel} [--c2-marquee__viewport--fade=0px] - Length of the fade to transparent at both ends of the strip.
  * @cssproperty {pixel} [--c2-marquee__viewport--height=240px] - Height of a vertical strip.
+ * @cssproperty {outline} [--c2-marquee__viewport__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the strip when it takes keyboard focus under reduced motion.
  * @cssproperty {alignment} [--c2-marquee__item--align=center] - Cross-axis alignment of items of different sizes: start, center, end or stretch. A vertical strip stretches its items until this is set.
  */
 @customElement('c2-marquee')
@@ -59,6 +61,10 @@ export class Marquee extends LitElement {
   @state() private distance = 0
   /** Keyboard focus is inside: the strip stops at rest so the focused item can be scrolled into view. */
   @state() private browsing = false
+  /** The reader asked for reduced motion: the strip is a row they scroll by hand, so it takes keyboard focus. */
+  @state() private still = false
+  private motionQuery?: MediaQueryList
+  private readonly onMotionChange = () => (this.still = this.motionQuery?.matches ?? false)
 
   private readonly internals = this.attachInternals()
   private mutationObserver?: MutationObserver
@@ -96,6 +102,9 @@ export class Marquee extends LitElement {
     this.mutationObserver = new MutationObserver(() => this.collectItems())
     this.mutationObserver.observe(this, { childList: true })
     this.resizeObserver = new ResizeObserver(() => this.scheduleMeasure())
+    this.motionQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : undefined
+    this.motionQuery?.addEventListener('change', this.onMotionChange)
+    if (this.hasUpdated) this.onMotionChange()
     // The first render draws no items, as the server did: a server-rendered strip that drew its children in its
     // first client render would not match the markup it hydrates.
     if (this.hasUpdated) {
@@ -107,12 +116,14 @@ export class Marquee extends LitElement {
 
   protected override firstUpdated(): void {
     this.collectItems()
+    this.onMotionChange()
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     this.mutationObserver?.disconnect()
     this.resizeObserver?.disconnect()
+    this.motionQuery?.removeEventListener('change', this.onMotionChange)
     cancelAnimationFrame(this.measureFrame)
   }
 
@@ -198,7 +209,7 @@ export class Marquee extends LitElement {
   override render() {
     const running = !this.browsing && this.tracks.length === this.items.length && this.items.length > 0
     return html`
-      <div class="viewport ${this.browsing ? 'browsing' : ''}" part="viewport">
+      <div class="viewport ${this.browsing ? 'browsing' : ''}" part="viewport" tabindex=${this.still ? '0' : nothing}>
         <div class="track ${running ? 'running' : ''}" style=${styleMap({ '--_distance': String(this.distance) })}>
           ${this.items.map((item, index) => {
             const track = running ? this.tracks[index] : undefined
