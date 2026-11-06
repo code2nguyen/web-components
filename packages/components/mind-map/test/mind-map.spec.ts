@@ -929,14 +929,15 @@ test.describe('localization', () => {
 })
 
 test.describe('motion and extras', () => {
-  async function moves(page: Page) {
+  /** Adds a sibling of One, which pushes Three down; `close` then leaves the new topic's editor. */
+  async function moves(page: Page, close = true) {
     await page.locator('c2-mind-map').evaluate((map: HTMLElement) => map.style.setProperty('--c2-mind-map--transition-duration', '1500ms'))
     await focusTopic(page, 'One')
     const before = await box(topic(page, 'Three'))
     await host(page).evaluate((map: MindMap) => map.addSibling('a1'))
     await settle(page)
     const during = await box(topic(page, 'Three'))
-    await page.keyboard.press('Escape')
+    if (close) await page.keyboard.press('Escape')
     return { before, during }
   }
 
@@ -954,7 +955,8 @@ test.describe('motion and extras', () => {
   test('under reduced motion, topics jump', async ({ page, renderScenario }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await render(page, renderScenario, mindMap(small, 'editable'))
-    const { before, during } = await moves(page)
+    // The editor stays open: closing it changes the new topic's height (by 10px in WebKit) and moves Three again.
+    const { before, during } = await moves(page, false)
     expect(during.y).toBeGreaterThan(before.y)
     await page.waitForTimeout(300)
     expect((await box(topic(page, 'Three'))).y).toBeCloseTo(during.y, 1)
