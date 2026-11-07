@@ -76,6 +76,8 @@ Complete [example apps](https://code2nguyen.github.io/web-components/examples) i
 
 ## Use with AI agents
 
+[![c2n Web Components MCP server](https://mcprush.com/badge/c2n-web-components-mcp/card.svg)](https://mcprush.com/to/c2n-web-components-mcp?ref=badge)
+
 ```bash
 claude mcp add --transport stdio c2n -- npx -y @c2n/mcp
 ```
