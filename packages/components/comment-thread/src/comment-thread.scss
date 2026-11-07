@@ -107,15 +107,17 @@
   margin-left: auto;
 }
 
-// One add button per comment reads as a column of identical buttons: with a pointer, it shows on the comment being
-// hovered or holding focus (the opened popup keeps focus inside, so it stays). Touch devices always show it.
+// One add, edit and delete button per comment reads as a column of identical buttons: with a pointer, they show on the
+// comment being hovered or holding focus (the opened popup keeps focus inside, so they stay). Opacity keeps the header
+// row's height and the buttons in the tab order. Touch devices always show them.
 // In the header, the add button is as tall as the text actions beside it.
 .header-reactions {
   --c2-reaction-bar__reaction--height: 22px;
 }
 
 @media (hover: hover) {
-  .comment:not(:hover, :focus-within) c2-reaction-bar::part(add) {
+  .comment:not(:hover, :focus-within) c2-reaction-bar::part(add),
+  .comment:not(:hover, :focus-within) :is(.edit, .delete) {
     opacity: 0;
   }
 }
@@ -164,6 +166,12 @@
     stroke-linejoin: round;
     stroke-width: 1.75;
   }
+}
+
+// Edit and delete are icon-only: square, as tall as the text actions beside them.
+.edit,
+.delete {
+  padding: 2px 4px;
 }
 
 .more {

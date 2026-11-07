@@ -79,12 +79,13 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * `comments` lists the thread oldest first: the first is the root, the rest its replies. Each has an `author`, a plain
  * text `body` (line breaks kept, `@mentions` highlighted, never read as HTML), a `time`, and optionally `reactions` for
  * a `c2-reaction-bar` under it (shown with `reactions`). `quote` shows the text the thread is about. `current-user`
- * says who is writing: their own comments can be edited and deleted, and without one the thread is read-only. When the
+ * says who is writing: their own comments can be edited and deleted through two icon buttons (pencil and trash, named
+ * "Edit Ana's comment" and "Delete Ana's comment"), and without one the thread is read-only. When the
  * thread's status lives elsewhere in the page, `no-resolve` drops the Resolve button. A thread
  * with more than `collapse-after` replies folds its middle behind "Show N earlier replies"; a `resolved` thread folds
  * down to its first comment. A comment without reactions keeps its reaction add button with its other actions, and on
- * a device with a pointer the add button shows while the comment is hovered or holds focus, so ten replies do not
- * draw ten of them.
+ * a device with a pointer the add button, like the edit and delete buttons, shows while the comment is hovered or
+ * holds focus, so ten replies do not draw ten of them.
  *
  * Every change is a cancelable event fired before it is applied: `comment-add`, `comment-edit`, `comment-delete`,
  * `resolve-change` and `reaction-change`. Cancel one to keep the thread controlled (to wait for the server) and set
@@ -105,10 +106,10 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * @csspart time - A comment's time.
  * @csspart body - A comment's text.
  * @csspart mention - An `@mention` in a comment's text.
- * @csspart action - Every small text button (Resolve, Edit, Delete, Cancel, Show earlier replies).
+ * @csspart action - Every small button (Resolve, Edit, Delete, Cancel, Show earlier replies).
  * @csspart resolve-action - The Resolve / Reopen button on the first comment.
- * @csspart edit-action - The Edit button on one's own comment.
- * @csspart delete-action - The Delete button on one's own comment.
+ * @csspart edit-action - The Edit button (a pencil icon) on one's own comment.
+ * @csspart delete-action - The Delete button (a trash icon) on one's own comment.
  * @csspart cancel-action - The Cancel button of the reply box and of a comment being edited.
  * @csspart more-action - The "Show N earlier replies" button.
  * @csspart composer - The reply box with its buttons.
@@ -393,9 +394,13 @@ export class CommentThread extends LitElement {
                       part="action edit-action"
                       type="button"
                       aria-label=${this.msg.t('editLabel', name)}
+                      title=${this.msg.t('edit')}
                       @click=${() => this.startEdit(comment)}
                     >
-                      ${this.msg.t('edit')}
+                      <svg viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M10.5 2.5a1.4 1.4 0 0 1 2 2L5 12l-2.5.5L3 10z" />
+                        <path d="m9.5 3.5 3 3" />
+                      </svg>
                     </button>
                     <c2-popconfirm
                       heading=${this.msg.t(root ? 'deleteThreadQuestion' : 'deleteQuestion')}
@@ -404,8 +409,17 @@ export class CommentThread extends LitElement {
                       placement="bottom"
                       @confirm=${() => this.deleteComment(comment, root)}
                     >
-                      <button slot="trigger" class="action delete" part="action delete-action" type="button" aria-label=${this.msg.t('deleteLabel', name)}>
-                        ${this.msg.t('delete')}
+                      <button
+                        slot="trigger"
+                        class="action delete"
+                        part="action delete-action"
+                        type="button"
+                        aria-label=${this.msg.t('deleteLabel', name)}
+                        title=${this.msg.t('delete')}
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                          <path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.6 8.5h6.8l.6-8.5M6.75 7v3.5M9.25 7v3.5" />
+                        </svg>
                       </button>
                     </c2-popconfirm>`
                 : nothing
