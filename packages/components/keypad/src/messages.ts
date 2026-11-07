@@ -11,7 +11,7 @@ const en = {
   delete: 'Delete',
   /** The decimal point key, read out. */
   decimal: 'Decimal point',
-  /** Read after each key of a PIN: `{0}` digits of `{1}`. */
+  /** Read after each key of a PIN: "`{0}` of `{1}` digits entered". */
   entered: (count: number, length: number) => `${count} of ${length} digits entered`,
   /** Validation message of a PIN that is not complete: `{0}` is its length. */
   incomplete: (length: number) => `Enter all ${length} digits.`,

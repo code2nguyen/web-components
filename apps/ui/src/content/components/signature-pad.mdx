@@ -46,7 +46,7 @@ To keep the signature as a picture, `toSVG()` returns a standalone SVG document 
 
 ### In a form
 
-Under a `name`, the form receives the signature as SVG markup. `required` makes an empty pad invalid. Inside a `c2-form-field`, the field's label names the pad and its hint describes it.
+Under a `name`, the form receives the signature as SVG markup. `required` makes an empty pad invalid. Inside a `c2-form-field`, the field's label names the pad unless `label` is set, and its hint describes it. A `readonly` pad never asks for a signature, even when `required`.
 
 ### Accessibility
 

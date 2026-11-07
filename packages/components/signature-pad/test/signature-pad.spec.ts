@@ -35,10 +35,18 @@ test('an empty pad is a named image that says it is not signed, with a hint and 
 })
 
 test('a stroke draws a smooth path, hides the hint and fires input and change once', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-signature-pad></c2-signature-pad>')
+  await renderScenario('<form><c2-signature-pad name="signature"></c2-signature-pad></form>')
+  // Both events, counted apart; each sees the new signature already in the form.
+  await pad(page).evaluate((element) => {
+    const seen: string[] = []
+    for (const type of ['input', 'change'])
+      element.addEventListener(type, () => seen.push(`${type}:${new FormData(element.closest('form')!).has('signature')}`))
+    ;(element as HTMLElement & { seen?: string[] }).seen = seen
+  })
   await watch(pad(page), 'change')
   await sign(page, scribble)
   await expect(paths(page)).toHaveCount(1)
+  expect(await pad(page).evaluate((element) => (element as HTMLElement & { seen?: string[] }).seen)).toEqual(['input:true', 'change:true'])
   await expect(paths(page)).toHaveAttribute('d', /^M[\d.]+ [\d.]+(Q[\d. ]+)+L[\d.]+ [\d.]+$/)
   await expect(pad(page).locator('[part="placeholder"]')).toHaveCount(0)
   await expect(surface(page)).toHaveAccessibleDescription('Signed')
@@ -166,4 +174,30 @@ test('takes its text from the nearest lang', async ({ page, renderScenario }) =>
   await expect(pad(page).locator('[part="placeholder"]')).toHaveText('Signez ici')
   await expect(surface(page)).toHaveAccessibleDescription('Pas encore signé')
   await expect(page.getByRole('button', { name: 'Effacer' })).toHaveCount(1)
+})
+
+test('a locked pad lets the page pan, takes focus itself when it has no buttons, and a read-only one asks for nothing', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<form><c2-signature-pad name="signature" readonly required></c2-signature-pad></form><c2-signature-pad id="drawing"></c2-signature-pad>',
+  )
+  const touchAction = (locator: ReturnType<typeof pad>) => locator.locator('[part="pad"]').evaluate((element) => getComputedStyle(element).touchAction)
+  expect(await touchAction(pad(page))).toBe('auto')
+  expect(await touchAction(page.locator('#drawing'))).toBe('none')
+  expect(await pad(page).evaluate((element) => element.checkValidity())).toBe(true)
+  await pad(page).evaluate((element) => element.focus())
+  await expect(surface(page)).toBeFocused()
+  // Hidden buttons are skipped too.
+  await page.locator('#drawing').evaluate((element) => {
+    element.style.setProperty('--c2-signature-pad__actions--display', 'none')
+    element.focus()
+  })
+  await expect(page.locator('#drawing').getByRole('img')).toBeFocused()
+})
+
+test('removing its own disabled inside a disabled fieldset keeps it disabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-signature-pad name="signature" disabled></c2-signature-pad></fieldset></form>')
+  await pad(page).evaluate((element) => element.removeAttribute('disabled'))
+  await expect(page.getByRole('button')).toHaveCount(0)
+  await sign(page, scribble)
+  await expect(paths(page)).toHaveCount(0)
 })

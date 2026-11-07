@@ -38,6 +38,8 @@
 }
 
 .keypad {
+  /* The display sizes a long amount against this width. */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: css.cssVar(display--gap);
@@ -56,8 +58,12 @@
 }
 
 .display--amount {
+  /* A block, not a flex row: a centred line that overflows clips at its end, with an ellipsis. Before that, the
+     font shrinks so the amount fits the width: about 0.62em per tabular digit. */
+  display: block;
   overflow: hidden;
-  font-size: css.cssVar(display--font-size);
+  font-size: min(#{css.cssVar(display--font-size)}, calc(100cqi / (var(--_chars, 1) * 0.62)));
+  text-align: center;
   font-weight: css.cssVar(display--font-weight);
   font-variant-numeric: tabular-nums;
   line-height: 1.25;

@@ -48,6 +48,18 @@ export function strokePath(points: SignatureStroke): string {
   return `${d}L${round(last[0])} ${round(last[1])}`
 }
 
+/** Each stroke's path, kept while the stroke array lives: a finished stroke never changes, so it is drawn once. */
+const pathCache = new WeakMap<SignatureStroke, string>()
+
+const cachedPath = (stroke: SignatureStroke): string => {
+  let d = pathCache.get(stroke)
+  if (d === undefined) {
+    d = strokePath(stroke)
+    pathCache.set(stroke, d)
+  }
+  return d
+}
+
 const isStroke = (stroke: unknown): stroke is SignatureStroke =>
   Array.isArray(stroke) && stroke.every((point) => Array.isArray(point) && point.length >= 2 && point.every((n) => typeof n === 'number' && Number.isFinite(n)))
 
@@ -181,12 +193,20 @@ export class SignaturePad extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    // The state as given: an own `disabled` attribute is combined in `effectiveDisabled`, so removing it inside a
+    // disabled fieldset keeps the pad disabled.
+    this.disabledByForm = disabled
   }
 
-  /** Focuses the pad's first button (Undo), the control a keyboard reaches it by. */
+  /** Focuses the pad's first visible button (Undo), the control a keyboard reaches it by, or else the pad itself. */
   override focus(options?: FocusOptions) {
-    this.renderRoot.querySelector<HTMLElement>('.action')?.focus(options)
+    this.focusTarget()?.focus(options)
+  }
+
+  /** The first visible button, or the pad, which takes focus from code (`tabindex="-1"`) but is no tab stop. */
+  private focusTarget(): HTMLElement | undefined {
+    const button = [...(this.renderRoot?.querySelectorAll<HTMLElement>('.action') ?? [])].find((action) => action.getClientRects().length > 0)
+    return button ?? this.pad ?? undefined
   }
 
   /** True while the pad holds no strokes. */
@@ -211,7 +231,7 @@ export class SignaturePad extends LitElement {
     const { width, height } = this.size()
     const { color, width: strokeWidth } = this.ink()
     const paths = this.validStrokes()
-      .map((stroke) => `<path d="${strokePath(stroke)}"/>`)
+      .map((stroke) => `<path d="${cachedPath(stroke)}"/>`)
       .join('')
     return (
       `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
@@ -272,8 +292,15 @@ export class SignaturePad extends LitElement {
 
   /** `strokes` with anything that is not a list of points dropped: the attribute and the property take any JSON. */
   private validStrokes(): SignatureStroke[] {
-    return Array.isArray(this.strokes) ? this.strokes.filter(isStroke).filter((stroke) => stroke.length > 0) : []
+    // Filtered once per `strokes` array: a drag redraws on every pointer move, and the finished strokes do not change.
+    if (this.validated?.source !== this.strokes) {
+      const strokes = Array.isArray(this.strokes) ? this.strokes.filter(isStroke).filter((stroke) => stroke.length > 0) : []
+      this.validated = { source: this.strokes, strokes }
+    }
+    return this.validated.strokes
   }
+
+  private validated: { source: unknown; strokes: SignatureStroke[] } | undefined
 
   private get effectiveDisabled() {
     return this.disabled || this.disabledByForm
@@ -302,10 +329,11 @@ export class SignaturePad extends LitElement {
       this.internals.setValidity({})
       return
     }
-    // The browser moves focus to the anchor to show the message: the pad itself takes no focus, its first button does.
-    const anchor = this.renderRoot?.querySelector<HTMLElement>('.action') ?? this.pad ?? undefined
+    // The browser moves focus to the anchor to show the message: the first visible button, or else the pad.
+    const anchor = this.focusTarget()
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, anchor)
-    else if (this.required && empty) this.internals.setValidity({ valueMissing: true }, this.msg.t('required'), anchor)
+    // A read-only pad cannot be signed, so it never asks for a signature.
+    else if (this.required && !this.readonly && empty) this.internals.setValidity({ valueMissing: true }, this.msg.t('required'), anchor)
     else this.internals.setValidity({})
   }
 
@@ -351,6 +379,8 @@ export class SignaturePad extends LitElement {
   }
 
   private notify() {
+    // The form holds the new signature before anyone hears of it.
+    this.syncFormState()
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
@@ -378,6 +408,7 @@ export class SignaturePad extends LitElement {
           class="pad ${this.locked ? '' : 'pad--drawing'}"
           part="pad"
           role="img"
+          tabindex="-1"
           aria-label=${name}
           aria-describedby=${this.field.describedBy('status')}
           aria-invalid=${invalid ? 'true' : nothing}
@@ -390,7 +421,7 @@ export class SignaturePad extends LitElement {
           <span class="baseline" part="baseline"></span>
           ${empty ? html`<span class="placeholder" part="placeholder" aria-hidden="true">${this.placeholder || this.msg.t('placeholder')}</span>` : nothing}
           <svg class="ink" part="ink" aria-hidden="true">
-            ${strokes.map((stroke) => svg`<path d=${strokePath(stroke)}></path>`)}
+            ${strokes.map((stroke) => svg`<path d=${cachedPath(stroke)}></path>`)}
             ${this.current ? svg`<path class="current" d=${strokePath(this.current)}></path>` : nothing}
           </svg>
           <span id="status" class="visually-hidden">${this.msg.t(strokes.length ? 'signed' : 'empty')}</span>

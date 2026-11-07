@@ -85,10 +85,16 @@ test('with for, it types into another field, which fires its own input and chang
   await renderScenario('<input id="code" aria-label="Code" /><c2-keypad display="none" for="code"></c2-keypad>')
   await expect(keypad(page).getByRole('group')).toHaveAccessibleName('Keypad')
   await expect(display(page)).toHaveCount(0)
-  await watch(page.locator('#code'), 'input')
+  // Both events, counted apart: each must reach the field once per key.
+  await page.locator('#code').evaluate((input) => {
+    const seen = { input: 0, change: 0 }
+    input.addEventListener('input', () => (seen.input += 1))
+    input.addEventListener('change', () => (seen.change += 1))
+    ;(input as HTMLElement & { seen?: typeof seen }).seen = seen
+  })
   await tap(page, '7', '3')
   await expect(page.locator('#code')).toHaveValue('73')
-  expect(await events(page, '#code')).toHaveLength(2)
+  expect(await page.locator('#code').evaluate((input) => (input as HTMLElement & { seen?: unknown }).seen)).toEqual({ input: 2, change: 2 })
   // Edited on its own, the field is where the next key continues from.
   await page.locator('#code').fill('9')
   await tap(page, '1')
@@ -131,4 +137,23 @@ test('takes its separators and its text from the nearest lang', async ({ page, r
   await expect(french.getByRole('group')).toHaveAccessibleName('Code')
   await french.getByRole('button', { name: '1', exact: true }).click()
   await expect(french.getByRole('status')).toHaveText('1 chiffre sur 4')
+})
+
+test('a disabled keypad turns off its biometric key too', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-keypad display="pin" disabled><button slot="start" type="button" onclick="this.dataset.pressed = 1">Face ID</button></c2-keypad>')
+  const faceId = page.getByRole('button', { name: 'Face ID' })
+  await faceId.click({ force: true })
+  await expect(faceId).not.toHaveAttribute('data-pressed')
+  await keypad(page).evaluate((element) => element.removeAttribute('disabled'))
+  await faceId.click()
+  await expect(faceId).toHaveAttribute('data-pressed', '1')
+})
+
+test('a long amount shrinks to fit the keypad rather than losing digits', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-keypad max-length="16" currency="USD" value="123456789012.34"></c2-keypad>')
+  const [display, size] = await keypad(page)
+    .locator('[part="display"]')
+    .evaluate((element) => [element.scrollWidth <= element.clientWidth, parseFloat(getComputedStyle(element).fontSize)])
+  expect(display).toBe(true)
+  expect(size).toBeLessThan(40)
 })

@@ -166,7 +166,9 @@ export class AngleSlider extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    // The state as given: an own `disabled` is combined in `effectiveDisabled`, so removing it inside a disabled
+    // fieldset keeps the control disabled.
+    this.disabledByForm = disabled
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

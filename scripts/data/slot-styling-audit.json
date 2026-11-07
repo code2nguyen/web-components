@@ -1683,7 +1683,7 @@
       "tag": "c2-keypad",
       "slot": "start",
       "decision": "assigned-content",
-      "reason": "The bottom left cell centres the slotted control, typically a biometric button styled through its own public contract."
+      "reason": "The slotted control, typically a biometric button, styles itself through its own public contract. The bottom left cell only centres it in the key grid; its layout is fixed and has no part or variable."
     },
     {
       "tag": "c2-marquee",

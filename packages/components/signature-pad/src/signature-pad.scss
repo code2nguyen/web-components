@@ -57,13 +57,23 @@
   border-radius: css.cssVar(border-radius);
   background: css.cssVar(background);
   color: css.cssVar(stroke--color);
-  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .pad--drawing {
   cursor: crosshair;
+  /* Only a pad that takes strokes keeps the page from panning under a finger. */
+  touch-action: none;
+}
+
+.pad:focus {
+  outline: none;
+}
+
+.pad:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
 }
 
 .pad--drawing:hover {

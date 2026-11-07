@@ -158,3 +158,23 @@ test('takes its text from the nearest lang', async ({ page, renderScenario }) =>
   await expect(handle(page)).toHaveAttribute('aria-valuetext', '30 degrés')
   await expect(page.getByRole('slider').nth(1)).toHaveAccessibleName('Valeur')
 })
+
+test('in forced colours the dial paints itself in system colours', async ({ page, renderScenario }) => {
+  await page.emulateMedia({ forcedColors: 'active' })
+  await renderScenario('<c2-angle-slider mode="arc" value="180"></c2-angle-slider>')
+  const fill = await slider(page)
+    .locator('[part="fill"]')
+    .evaluate((element) => getComputedStyle(element).backgroundImage)
+  expect(fill).toContain('conic-gradient')
+  expect(
+    await slider(page)
+      .locator('[part="dial"]')
+      .evaluate((element) => getComputedStyle(element).forcedColorAdjust),
+  ).toBe('none')
+})
+
+test('removing its own disabled inside a disabled fieldset keeps it disabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-angle-slider name="heading" disabled></c2-angle-slider></fieldset></form>')
+  await slider(page).evaluate((element) => element.removeAttribute('disabled'))
+  await expect(handle(page)).toHaveAttribute('aria-disabled', 'true')
+})

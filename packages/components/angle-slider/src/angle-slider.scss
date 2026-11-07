@@ -151,6 +151,25 @@
   pointer-events: none;
 }
 
+/* High contrast: the ring, the fill and the needle are drawn as backgrounds, which forced colours may drop or flatten.
+   The dial keeps its own paint, in system colours. */
+@media (forced-colors: active) {
+  .dial {
+    forced-color-adjust: none;
+    --c2-angle-slider__track--color: GrayText;
+    --c2-angle-slider__fill--color: Highlight;
+    --c2-angle-slider__needle--color: Highlight;
+    --c2-angle-slider__thumb--color: Canvas;
+    --c2-angle-slider__thumb--border: 2px solid Highlight;
+    --c2-angle-slider__thumb__focus--outline: 2px solid CanvasText;
+    --c2-angle-slider__value--color: CanvasText;
+  }
+
+  .dial--invalid .track {
+    --c2-angle-slider__track--color: Mark;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .thumb {
     transition: none;

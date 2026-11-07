@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -170,7 +171,9 @@ export class Keypad extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    // The state as given: an own `disabled` is combined in `effectiveDisabled`, so removing it inside a disabled
+    // fieldset keeps the control disabled.
+    this.disabledByForm = disabled
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -276,7 +279,7 @@ export class Keypad extends LitElement {
     if (!target) return
     target.value = value
     target.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-    target.dispatchEvent(new Event('change', { bubbles: true }))
+    target.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
   private syncFormState() {
@@ -342,11 +345,14 @@ export class Keypad extends LitElement {
         <span class="visually-hidden" role="status">${count ? this.msg.t('entered', count, this.pinLength) : ''}</span>
       </div>`
     }
+    const amount = this.formatAmount()
+    // The length lets the CSS shrink a long amount to the width, rather than clip the digits being typed.
     return html`<output
       class="display display--amount ${this.value ? '' : 'display--empty'} ${invalid ? 'display--invalid' : ''}"
       part="display"
       aria-live="polite"
-      >${this.formatAmount()}</output
+      style=${styleMap({ '--_chars': String(Math.max(1, amount.length)) })}
+      >${amount}</output
     >`
   }
 
@@ -357,22 +363,15 @@ export class Keypad extends LitElement {
     const separator = this.decimalSeparator()
     return html`<div class="keypad ${disabled ? 'keypad--disabled' : ''}">
         ${this.renderDisplay()}
-        <div
-          class="keys"
-          part="keys"
-          role="group"
-          aria-label=${name}
-          aria-describedby=${this.field.describedBy()}
-          aria-invalid=${this.field.invalid && !disabled ? 'true' : nothing}
-          @keydown=${this.handleKeydown}
-        >
+        <div class="keys" part="keys" role="group" aria-label=${name} aria-describedby=${this.field.describedBy()} @keydown=${this.handleKeydown}>
           ${DIGITS.map(key)}
           ${
             this.decimalPlaces
               ? html`<button class="key" part="key" type="button" aria-label=${this.msg.t('decimal')} ?disabled=${disabled} @click=${() => this.press('.')}>
                   ${separator}
                 </button>`
-              : html`<span class="start"><slot name="start"></slot></span>`
+              : // inert follows the slot to the slotted button: a disabled keypad's biometric key is off with the rest.
+                html`<span class="start" ?inert=${disabled}><slot name="start"></slot></span>`
           }
           ${key('0')}
           <button
