@@ -3,6 +3,38 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.23](https://github.com/code2nguyen/web-components/releases/tag/v1.0.23) — 2026-11-07
+
+### Features
+
+- **angle-slider, keypad, signature-pad:** Add c2-angle-slider, c2-keypad and c2-signature-pad ([5ce8d3b](https://github.com/code2nguyen/web-components/commit/5ce8d3b))
+- Add c2-marquee, c2-device-frame and c2-beam ([202defa](https://github.com/code2nguyen/web-components/commit/202defa))
+
+### Fixes
+
+- **theme:** Derive on-surface-variant-strong from the two text roles ([70aff81](https://github.com/code2nguyen/web-components/commit/70aff81))
+- **theme, comment-thread:** Resolve the two open component feedback entries ([22caad7](https://github.com/code2nguyen/web-components/commit/22caad7))
+- **keypad:** Measure a long amount to fit it, instead of estimating digit widths ([e13d656](https://github.com/code2nguyen/web-components/commit/e13d656))
+- **angle-slider, keypad, signature-pad:** Address cubic review findings ([bb12b32](https://github.com/code2nguyen/web-components/commit/bb12b32))
+- **keypad:** Fit the landing preview in its card ([b1e0961](https://github.com/code2nguyen/web-components/commit/b1e0961))
+- **angle-slider, keypad, signature-pad:** Address code review findings ([0961c96](https://github.com/code2nguyen/web-components/commit/0961c96))
+- **flow:** Read the hover card's status line in the secondary text colour ([5fdede2](https://github.com/code2nguyen/web-components/commit/5fdede2))
+- **flow:** Draw the hover card's status line in readable text ([3ef59db](https://github.com/code2nguyen/web-components/commit/3ef59db))
+- **marquee:** Make the strip a tab stop only when it has something to scroll ([9b2ee1d](https://github.com/code2nguyen/web-components/commit/9b2ee1d))
+- **stat:** Hide the icon box and description line when they are empty ([a0aac2d](https://github.com/code2nguyen/web-components/commit/a0aac2d))
+- **marquee:** Take keyboard focus under reduced motion ([685c18b](https://github.com/code2nguyen/web-components/commit/685c18b))
+- **marquee, beam, device-frame:** Fix Firefox and WebKit CI, address review comments ([2634c56](https://github.com/code2nguyen/web-components/commit/2634c56))
+- **device-frame:** Keep device sizes in shrink-to-fit containers; fix(marquee): match server markup when hydrating ([42c1bd1](https://github.com/code2nguyen/web-components/commit/42c1bd1))
+
+### Docs site & examples
+
+- **examples:** Keep the footer's link column a navigation landmark ([1de574c](https://github.com/code2nguyen/web-components/commit/1de574c))
+- **examples:** Address cubic's review of the marketing site ([f5f0952](https://github.com/code2nguyen/web-components/commit/f5f0952))
+- **examples:** Address code review findings in the marketing site ([3475196](https://github.com/code2nguyen/web-components/commit/3475196))
+- **examples:** Keep the testimonial loops full and the hand-off heading whole ([2d172a4](https://github.com/code2nguyen/web-components/commit/2d172a4))
+- **examples:** Centre the rotating hero word on its own line ([3e41591](https://github.com/code2nguyen/web-components/commit/3e41591))
+- **examples:** Add the Wayline marketing site, an Astro example app ([d9d5e77](https://github.com/code2nguyen/web-components/commit/d9d5e77))
+
 ## [1.0.22](https://github.com/code2nguyen/web-components/releases/tag/v1.0.22) — 2026-11-06
 
 ### Features
