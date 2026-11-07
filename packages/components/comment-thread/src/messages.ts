@@ -13,9 +13,11 @@ const en = {
   resolvedLine: (replies: number) => (replies === 0 ? 'Resolved' : replies === 1 ? 'Resolved · 1 reply' : `Resolved · ${replies} replies`),
   /** The button that unfolds the middle of a long thread. */
   showEarlier: (count: number) => (count === 1 ? 'Show 1 earlier reply' : `Show ${count} earlier replies`),
+  /** No longer drawn on the icon-only edit button; kept for apps that translated it. */
   edit: 'Edit',
-  /** The edit and delete buttons' accessible names. */
+  /** The edit and delete icon buttons' accessible names and tooltips. */
   editLabel: (name: string) => `Edit ${name}'s comment`,
+  /** The confirm button of the delete confirmation. */
   delete: 'Delete',
   deleteLabel: (name: string) => `Delete ${name}'s comment`,
   /** The question of the delete confirmation, for a reply and for the first comment. */

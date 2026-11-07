@@ -17,15 +17,6 @@
   scroll-padding-top: 80px;
 }
 
-/*
- * @c2n/theme maps these two text colours to the secondary text token, which reaches only 4.39:1 on the container
- * surface they sit on (logged in COMPONENT-FEEDBACK.md). A darker mix of the text colour passes in both themes.
- */
-:root {
-  --c2-badge__neutral--color: color-mix(in srgb, var(--site-text) 80%, var(--site-surface));
-  --c2-button-group__segmented-item--color: color-mix(in srgb, var(--site-text) 80%, var(--site-surface));
-}
-
 *,
 *::before,
 *::after {
