@@ -9,6 +9,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
 import GroupByTableToolbar from '../../components/GroupByTableToolbar.astro'
+import TableFeatureCards from '../../components/TableFeatureCards.astro'
 
 import { Table } from '@c2n/components/table'
 import { TableColumn } from '@c2n/components/table/table-column'
@@ -20,6 +21,7 @@ import { Button } from '@c2n/components/button'
 <ExampleModules />
 <SparklineMarketTable />
 <GroupByTableToolbar />
+<TableFeatureCards />
 
 ## Columns and data
 
@@ -434,7 +436,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     <c2-text-field
       class="search"
       placeholder="Search people"
-      oninput="const table = this.closest('c2-table'); table.allRows ??= table.rows; table.rows = table.allRows.filter((row) => Object.values(row).join(' ').toLowerCase().includes(this.value.toLowerCase())); this.nextElementSibling.textContent = table.rows.length + ' of ' + table.allRows.length"
+      oninput="const table = this.closest('c2-table'); const badge = this.nextElementSibling; table.quickFilter = this.value; table.updateComplete.then(() => (badge.textContent = table.totalRows + ' of ' + table.rows.length))"
     ></c2-text-field>
     <c2-badge tone="neutral">6 of 6</c2-badge>
   </div>
@@ -702,6 +704,124 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
   <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
   <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Groups by total
+<style>
+  .grouped-by-total {
+    height: 360px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="grouped-by-total" row-key="id" group-by='[{"field":"region","sortBy":"amount","sort":"desc"}]' collapsed-groups="region=APAC" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Avg qty" width="90px" align="end" format="number" summary="sum" group-summary="avg" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Details, editing and columns
+
+`renderDetail` adds a column of chevrons that open a row's detail under it. `editable` lets the user change cells in place — double-click, Enter, F2 or just type — and reports each change with `cell-edit`. `reorderable` lets the headers be dragged into another order (or moved with Ctrl+Shift+←/→), and `hidden-columns` with `allColumns` is what a column menu is built from; `downloadCSV()` exports what is shown.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Row details
+<style>
+  .row-details {
+    height: 320px;
+    width: 100%;
+  }
+  .row-details::part(order-detail) {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: 13px;
+  }
+  .row-details::part(order-term) {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .row-details::part(order-value) {
+    margin: 0;
+  }
+</style>
+<c2-table client:only="lit" class="row-details" data-detail-table row-key="id" expanded-rows="o1" rows='[{"id":"o1","customer":"Acme GmbH","status":"Paid","amount":12400,"address":"Hafenstraße 12, Hamburg","carrier":"DHL Express","items":["Desk lamp ×4","Monitor arm ×12"]},{"id":"o2","customer":"Nordlys AS","status":"Pending","amount":10080,"address":"Strandgata 3, Bergen","carrier":"PostNord","items":["Standing desk ×2"]},{"id":"o3","customer":"Halcyon Inc","status":"Paid","amount":14200,"address":"410 Market St, San Francisco","carrier":"UPS Ground","items":["Chair ×10","Footrest ×10"]},{"id":"o4","customer":"Sakura KK","status":"Failed","amount":7600,"address":"2-1 Marunouchi, Tokyo","carrier":"Yamato","items":["Webcam ×8"]}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Editable cells
+<style>
+  .editable-cells {
+    height: 320px;
+    width: 100%;
+    --c2-table__cell--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-table client:only="lit" class="editable-cells" editable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)" editable="false"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="130px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Reorderable columns
+<style>
+  .reorderable-columns {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="reorderable-columns" reorderable sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar: columns and export
+<style>
+  .columns-export {
+    height: 360px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .columns-export .bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="columns-export" data-column-menu row-key="id" selection="multiple" checkbox-selection hidden-columns="role" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <div class="bar" slot="toolbar">
+    <c2-menu>
+      <c2-button slot="trigger">Columns</c2-button>
+      <c2-menu-item type="checkbox" value="team" checked keep-open>Team</c2-menu-item>
+      <c2-menu-item type="checkbox" value="role" keep-open>Role</c2-menu-item>
+      <c2-menu-item type="checkbox" value="status" checked keep-open>Status</c2-menu-item>
+      <c2-menu-item type="checkbox" value="score" checked keep-open>Score</c2-menu-item>
+    </c2-menu>
+    <c2-button data-export-csv>Export CSV</c2-button>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
 </c2-table>
 ```
 

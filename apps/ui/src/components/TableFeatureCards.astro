@@ -1,0 +1,59 @@
+---
+/**
+ * Wires the table gallery cards whose behaviour needs script: the detail renderer of "Row details", and the column
+ * menu and CSV button of "Toolbar: columns and export". Each card is found by a data attribute, since the tables are
+ * `client:only` islands that may not exist when this runs.
+ */
+---
+
+<script>
+  import '@c2n/components/menu'
+  import '@c2n/components/button'
+  import '@c2n/components/table'
+  import type { Table } from '@c2n/components/table'
+
+  type Order = { customer: string; address: string; carrier: string; items: string[] }
+
+  /** The detail of an order: a short description list, built as DOM so the card needs no template library. */
+  function orderDetail({ row }: { row: Record<string, unknown> }): Node {
+    const order = row as unknown as Order
+    // The detail renders inside the table's shadow root, so the card styles it through parts.
+    const list = document.createElement('dl')
+    list.setAttribute('part', 'order-detail')
+    for (const [term, value] of [
+      ['Ship to', order.address],
+      ['Carrier', order.carrier],
+      ['Items', order.items.join(', ')],
+    ]) {
+      const dt = document.createElement('dt')
+      dt.setAttribute('part', 'order-term')
+      dt.textContent = term
+      const dd = document.createElement('dd')
+      dd.setAttribute('part', 'order-value')
+      dd.textContent = value
+      list.append(dt, dd)
+    }
+    return list
+  }
+
+  const wire = () => {
+    for (const table of document.querySelectorAll<Table>('c2-table[data-detail-table]')) {
+      if (!table.renderDetail) table.renderDetail = orderDetail
+    }
+  }
+  wire()
+  customElements.whenDefined('c2-table').then(wire)
+  new MutationObserver(wire).observe(document.body, { childList: true, subtree: true })
+
+  // A column menu item toggles its column; `checked-change` bubbles from the item.
+  document.addEventListener('checked-change', (event) => {
+    const item = event.target as HTMLElement & { value: string; checked: boolean }
+    const table = item.closest<Table>('c2-table[data-column-menu]')
+    if (table) table.setColumnHidden(item.value, !item.checked)
+  })
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-export-csv]')
+    const table = button?.closest<Table>('c2-table')
+    if (table) table.downloadCSV('people.csv', { formatted: true })
+  })
+</script>

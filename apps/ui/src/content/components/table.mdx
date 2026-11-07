@@ -232,7 +232,9 @@ table.summaryValues = { amount: totals.amount, qty: totals.qty }
 With the default `group-display="row"` a group is a row of the same grid: its label and row count in the first
 column (or the one marked `group-column`, which also indents the rows under it), and under every column with a
 `summary` that aggregate over the group's rows, formatted like the column. So one `summary="sum"` gives the subtotals
-and the total. `group-display="band"` draws a full-width band per group instead, holding its label and count.
+and the total. A column's `group-summary` gives group rows another aggregate (`group-summary="avg"` beside a
+`summary="sum"` total), or `none` to leave them empty. `group-display="band"` draws a full-width band per group
+instead, holding its label and count.
 
 ```html tag=CodeBlock
 <c2-table row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows="...">
@@ -243,28 +245,153 @@ and the total. `group-display="band"` draws a full-width band per group instead,
 ```
 
 Groups are ordered by their value: ascending, the direction the table is sorted by that field, or a level's own
-`sort`. The rows inside a group keep the table's sort. A group's label is its value formatted by the column of that
+`sort`. A level's `sortBy` orders them by an aggregate instead — the id of a column with a summary, or `count` for
+their number of rows — and `compare` by anything else, from the whole groups. The rows inside a group keep the
+table's sort. A group's label is its value formatted by the column of that
 field (hidden columns included), `empty-group-label` for rows without one, and `renderGroup` or a
 `slot="group:<key>"` child for anything else. From script a level can compute its value:
 
 ```typescript tag=CodeBlock
 table.groupBy = [{ field: 'month', getValue: (row) => String(row.placed).slice(0, 7), sort: 'desc' }, 'status']
 table.renderGroup = ({ value, summary }) => `${value} · ${summary.amount} €`
+
+// The regions by revenue, largest first; inside each, the statuses by number of orders.
+table.groupBy = [
+  { field: 'region', sortBy: 'amount', sort: 'desc' },
+  { field: 'status', compare: (a, b) => b.count - a.count },
+]
 ```
 
-A group is named by its path, `region=EMEA/status=Paid`. Every group is open until `expanded-groups` lists the open
-ones (`;`-separated in the attribute) or `groups-collapsed` starts them closed; the first click writes the whole list
-into `expandedGroups`, so it can be stored and handed back. `group-toggle` reports a click, `expandGroup(key)`,
-`collapseGroup(key)`, `expandAll()` and `collapseAll()` do it from script, and `getGroups()` lists every group with
-its rows and aggregates. A group's checkbox selects the rows under it (the selection still holds row keys only),
-and ←/→ on a group's first cell close, open and climb the tree.
+A group is named by its path, `region=EMEA/status=Paid`. Groups are open by default, and the ones the user closes
+are listed in `collapsed-groups`; with `groups-collapsed` they start closed and the ones opened are listed in
+`expanded-groups`, which, when you set it, is the whole state: the groups it names are open and every other one is
+closed. Only the exceptions to the default are recorded, so a group that appears later — new rows, another filter —
+follows the default rather than a stale list. Both lists are `;`-separated in the attribute and can be stored and
+handed back. `group-toggle` reports a click, `expandGroup(key)`, `collapseGroup(key)`, `expandAll()`,
+`collapseAll()` and `expandToLevel(n)` do it from script, and `getGroups()` lists every group with its rows, count
+and aggregates. A group's checkbox, named after the group, selects the rows under it (the selection still holds row
+keys only), and ←/→ on a group's first cell close, open and climb the tree.
 
 The groups of the rows at the top of the view stay under the header while their rows scroll. Pages count display
 lines, so a closed group takes one line, and a page that starts inside a group repeats that group's headers above
-its first line. Grouping is done on the client: with a `dataSource` the table only holds the rows it fetched, so it
-ignores `group-by` and says so in the console. Style a group with `--c2-table__group-row--*`,
+its first line. Style a group with `--c2-table__group-row--*`,
 `--c2-table__group-band--background`, `--c2-table__group--indent`, `--c2-table__group-toggle--*` and
 `--c2-table__group-count--*`, or with the `group-row`, `group-cell`, `group-label` and `group-count` parts.
+
+### Grouping on the server
+
+A `dataSource` only holds the rows it fetched, so the table cannot bucket them itself. Give the source a `getGroups`
+method and it groups on the server: the table asks for the top-level groups, for a group's sub-groups when it is
+opened, and for the rows of an open bottom-level group through `getRows` with `request.group`, one block at a time
+as they scroll into view. Each group carries its `count` and, optionally, the aggregates shown on its row. Group
+checkboxes are left out, since a group holds rows the table has not fetched. Without `getGroups`, `group-by` is
+ignored and the console says so.
+
+```typescript tag=CodeBlock
+table.groupBy = ['region', 'status']
+table.groupsCollapsed = true
+table.dataSource = {
+  // { level, groupBy: { field }, parent: [{ field, value }…], sort, filter }
+  async getGroups({ groupBy, parent, sort, filter }) {
+    const groups = await api.groups({ by: groupBy.field, where: parent, sort, filter })
+    return { groups: groups.map((group) => ({ value: group.key, count: group.rows, summary: { amount: group.total } })) }
+  },
+  // `group` is the open group's path; `start` counts from its first row.
+  async getRows({ start, count, sort, filter, group }) {
+    const page = await api.rows({ where: group, offset: start, limit: count, sort, filter })
+    return { rows: page.rows, total: page.total }
+  },
+}
+```
+
+### Filtering
+
+`quick-filter` keeps the rows where every word of the text occurs in one of the visible cells, either as the cell
+shows it or as its raw value, so `1,200` and `1200` both find an amount. A column with `filterable="false"` is left
+out. For anything else, `filter` takes a predicate (property only); the two combine. Filtering comes before sorting,
+grouping and the summary row, so totals and group counts describe what is shown, and the empty state reads "No
+matching rows". Bind a search field to it:
+
+```typescript tag=CodeBlock
+search.addEventListener('input', () => (table.quickFilter = search.value))
+table.filter = (row) => row.status !== 'archived'
+```
+
+A `dataSource` receives the text as `request.filter` and applies it on the server.
+
+### Row details
+
+`renderDetail` adds a column of chevrons. Opening one shows what the function returns in a row under that row,
+across the whole grid; Enter or Space on the chevron's cell does the same. `expanded-rows` lists the open rows by key
+and `row-detail-toggle` reports a toggle; `toggleRowDetail(row)` and `isRowExpanded(row)` work from script.
+
+```typescript tag=CodeBlock
+table.renderDetail = ({ row }) => html`<dl class="order">
+  <dt>Shipping</dt>
+  <dd>${row.address}</dd>
+  <dt>Notes</dt>
+  <dd>${row.notes}</dd>
+</dl>`
+```
+
+A detail has its own height, which the windowed body cannot place, so **the table stops virtualizing while any detail
+is open** — page large tables with `page-size`. The detail is the application's content: the arrow keys pass over it
+and its controls keep their own keys. Style it with `--c2-table__detail-row--background`,
+`--c2-table__detail-cell--padding` and `--c2-table__detail-toggle--*`, or the `detail-row` and `detail-cell` parts.
+
+### Editing cells
+
+`editable` on the table, or on a column, lets the user edit its cells: double-click, Enter, F2 or simply typing on a
+focused cell opens an editor — an input matching the column's `format` (a number input for `number`, `currency` and
+`percent`, a date input for `date`) — and Enter or leaving it commits while Escape cancels. A column with
+`editable="false"` opts out.
+
+A changed value fires `cell-edit` with the row, the column, the new `value` and the `previousValue`. Then the table
+replaces the row in `rows` by a copy holding the new value; the object the application gave is not mutated. Cancel the
+event to keep `rows` as it is and apply the value yourself, such as after the server accepted it:
+
+```typescript tag=CodeBlock
+table.addEventListener('cell-edit', async (event) => {
+  event.preventDefault()
+  const { key, field, value } = event.detail
+  const saved = await api.update(key, { [field]: value })
+  table.rows = table.rows.map((row) => (row.id === key ? saved : row))
+})
+```
+
+`renderEditor` on a column draws its own editor, a `c2-select` for instance, and ends editing with `commit(value)` or
+`cancel()`. Style the built-in input with `--c2-table__editor--*` or `::part(editor)`.
+
+### Moving and hiding columns
+
+With `reorderable`, the headers can be dragged to reorder the columns, or moved with Ctrl+Shift+←/→ (⌘⇧ on macOS) from
+a focused header. A pinned column moves among the columns pinned to its side. `column-order` holds the order as column
+ids and `column-reorder` reports each move, so it can be saved and handed back; `moveColumn(id, index)` does it from
+script.
+
+`hidden-columns` hides columns by id on top of those whose definition is `hidden`, and `setColumnHidden(id, hidden)`
+edits it. `allColumns` lists every column, hidden ones included, in display order — what a column menu is built from.
+
+### Exporting and copying
+
+`toCSV()` returns the rows as CSV: `rows: 'all' | 'selected' | 'page'`, `columns: 'visible' | 'all'`, `formatted`
+values instead of raw ones, a `separator`, and `header`. Text a spreadsheet would run as a formula (`=`, `+`, `-`, `@`)
+gets a leading `'` unless you pass `escapeFormulas: false`. `downloadCSV(filename, options)` saves the same text as a
+file.
+
+```typescript tag=CodeBlock
+exportButton.addEventListener('click', () => table.downloadCSV('orders.csv', { rows: 'selected', formatted: true }))
+```
+
+⌘C / Ctrl+C in the grid copies the selected rows as tab-separated lines that paste into a spreadsheet's cells, or the
+focused cell's text when no row is selected.
+
+### Announcements and translation
+
+Sorting, opening or closing a group, changing the quick filter and moving a column are announced through a live
+region. The built-in text — those announcements, the checkbox names and the empty states — is English and
+translatable like every component's: `addTranslations({ fr: { table: { empty: 'Aucune ligne' } } })`. The API tab
+lists every message.
 
 ### Rendering a cell
 

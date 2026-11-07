@@ -1224,7 +1224,7 @@ export class Table extends LitElement {
     const key = this.keyOf(row)
     if (columnIndex < 0 || key === undefined || !this.#isEditable(columns[columnIndex])) return false
     const line = this.#lineOfKey(key)
-    if (line < 0) return false
+    if (line < this.#pageStart || line >= this.#pageStart + this.rowCount) return false
     this.#beginEdit(line, columnIndex)
     return this.editing !== undefined
   }
@@ -2226,7 +2226,10 @@ export class Table extends LitElement {
         dragging = true
         cell.setPointerCapture(pointerId)
       }
-      this.dropTarget = this.#dropTargetAt(moveEvent.clientX, column) ?? { source, column: source, after: false }
+      const next = this.#dropTargetAt(moveEvent.clientX, column) ?? { source, column: source, after: false }
+      // Only a new landing place redraws the header; most pointer moves stay over the same half of the same header.
+      const current = this.dropTarget
+      if (!current || current.column !== next.column || current.after !== next.after) this.dropTarget = next
     }
     const finish = (endEvent: PointerEvent) => {
       cell.removeEventListener('pointermove', move)
