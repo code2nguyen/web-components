@@ -30,17 +30,21 @@ test('continuous live appends remain responsive with bounded rendering', async (
   await viewer.evaluate((element) => {
     ;(element as LogViewer).wrap = true
   })
-  const duration = await viewer.evaluate(async (element) => {
+  // Times the appends and their renders only: the pauses between them are the test's, and how long a 10 ms timer
+  // takes differs by browser.
+  const work = await viewer.evaluate(async (element) => {
     const log = element as LogViewer
-    const started = performance.now()
+    let total = 0
     for (let i = 0; i < 100; i++) {
+      const started = performance.now()
       log.appendEntries({ level: 'info', message: `stream ${i}` })
       await log.updateComplete
+      total += performance.now() - started
       await new Promise((resolve) => setTimeout(resolve, 10))
     }
-    return performance.now() - started
+    return total
   })
-  expect(duration).toBeLessThan(2500)
+  expect(work).toBeLessThan(2000)
   expect(await viewer.locator('[part="entry"]').count()).toBeLessThan(60)
   await expect(viewer.locator('[data-index="10099"]')).toContainText('stream 99')
 })

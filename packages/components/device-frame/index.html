@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-device-frame</title>
+    <script type="module" src="/src/device-frame.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 720px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 24px;
+      }
+      .app {
+        padding: 16px;
+      }
+      .mac {
+        --c2-device-frame__close-dot--color: #ff5f57;
+        --c2-device-frame__minimize-dot--color: #febc2e;
+        --c2-device-frame__zoom-dot--color: #28c840;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-device-frame url="app.example.com/inbox"><div class="app">Browser</div></c2-device-frame>
+    <c2-device-frame class="mac" url="acme.dev"><div class="app">Window dots</div></c2-device-frame>
+    <div class="row">
+      <c2-device-frame device="phone" style="--c2-device-frame__phone--width: 220px"><div class="app" style="padding-top: 48px">Phone</div></c2-device-frame>
+      <c2-device-frame device="tablet" style="--c2-device-frame__tablet--width: 300px"><div class="app">Tablet</div></c2-device-frame>
+    </div>
+    <c2-device-frame device="laptop"><div class="app">Laptop</div></c2-device-frame>
+  </body>
+</html>

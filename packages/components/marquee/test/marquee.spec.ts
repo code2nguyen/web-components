@@ -1,0 +1,260 @@
+import type { Locator, Page } from '@playwright/test'
+import { accessible, expect as componentExpect } from '../../../../tests/component-fixture'
+import { test, expect } from './fixture'
+
+/** Stops every item's animation at `ms` into the shared cycle, so positions can be read exactly. */
+async function seek(page: Page, ms: number) {
+  await page.locator('c2-marquee').evaluate((host, time) => {
+    for (const item of host.shadowRoot!.querySelectorAll('.item')) {
+      for (const animation of item.getAnimations()) {
+        animation.pause()
+        animation.currentTime = time
+      }
+    }
+  }, ms)
+}
+
+async function box(locator: Locator) {
+  const rect = await locator.boundingBox()
+  if (!rect) throw new Error('Expected a rendered element')
+  return rect
+}
+
+/** Left edge of each item relative to the strip's left edge. */
+async function offsets(page: Page, axis: 'x' | 'y' = 'x') {
+  const strip = await box(page.locator('c2-marquee'))
+  const items = await page.locator('c2-marquee > .logo').all()
+  return Promise.all(items.map(async (item) => Math.round((await box(item))[axis] - strip[axis]) || 0))
+}
+
+test('lays the items out end to end and moves them toward the start', async ({ page, scenario }) => {
+  await scenario()
+  await componentExpect(page.locator('c2-marquee')).toHaveHostAria('role', 'marquee')
+
+  await seek(page, 0)
+  expect(await offsets(page)).toEqual([0, 120, 240, 360, 480, 600])
+
+  // 40px per second by default.
+  await seek(page, 1000)
+  expect(await offsets(page)).toEqual([-40, 80, 200, 320, 440, 560])
+
+  // The first item leaves the strip whole, then joins the end of the line, keeping the spacing.
+  await seek(page, 3500)
+  expect(await offsets(page)).toEqual([580, -20, 100, 220, 340, 460])
+})
+
+test('follows the speed variable', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-marquee').evaluate((host: HTMLElement) => host.style.setProperty('--c2-marquee--speed', '80'))
+  await seek(page, 1000)
+  expect(await offsets(page)).toEqual([-80, 40, 160, 280, 400, 520])
+})
+
+test('reverse moves the items toward the end', async ({ page, scenario }) => {
+  await scenario('reverse')
+  await seek(page, 0)
+  // The last item waits off the start edge, where it enters from (the same point of the loop as 600px).
+  expect(await offsets(page)).toEqual([0, 120, 240, 360, 480, -120])
+  await seek(page, 1000)
+  expect(await offsets(page)).toEqual([40, 160, 280, 400, 520, -80])
+})
+
+test('starts from the right and moves right in a right-to-left page', async ({ page, scenario }) => {
+  await scenario('rtl')
+  const strip = await box(page.locator('c2-marquee'))
+  // The gap pads the inline end of each item, which is its left side here.
+  const first = page.locator('c2-marquee > .logo').first()
+
+  await seek(page, 0)
+  expect(Math.round((await box(first)).x + 100 - (strip.x + strip.width))).toBe(0)
+  await seek(page, 1000)
+  expect(Math.round((await box(first)).x + 100 - (strip.x + strip.width))).toBe(40)
+})
+
+test('vertical strips move up inside their own height', async ({ page, scenario }) => {
+  await scenario('vertical')
+  expect(Math.round((await box(page.locator('c2-marquee'))).height)).toBe(300)
+  await seek(page, 0)
+  expect(await offsets(page, 'y')).toEqual([0, 60, 120, 180, 240, 300])
+  await seek(page, 1000)
+  expect(await offsets(page, 'y')).toEqual([-40, 20, 80, 140, 200, 260])
+})
+
+test('items shorter than the strip leave a gap and re-enter from outside it', async ({ page, scenario }) => {
+  await scenario('short')
+  await seek(page, 0)
+  expect(await offsets(page)).toEqual([0, 120])
+  // The cycle is the strip plus the widest item (520px): once the first item has left (at -120px) it re-enters
+  // from 400px, just past the right edge, so 140px of travel puts it at 380px.
+  await seek(page, 3500)
+  expect(await offsets(page)).toEqual([380, -20])
+})
+
+test('pauses on hover and while paused is set', async ({ page, scenario }) => {
+  await scenario()
+  const item = page.locator('c2-marquee').locator('.item').first()
+  await expect(item).toHaveCSS('animation-play-state', 'running')
+
+  await page.locator('c2-marquee').hover()
+  await expect(item).toHaveCSS('animation-play-state', 'paused')
+  await page.mouse.move(0, 400)
+  await expect(item).toHaveCSS('animation-play-state', 'running')
+})
+
+test('keyboard focus stops the strip at rest with the focused item in view, and leaving resumes it', async ({ page, scenario, tab }) => {
+  await scenario('far-link')
+  const host = page.locator('c2-marquee')
+  const link = page.getByRole('link', { name: 'Item 6' })
+  // At rest the last item starts at 600px, past the 400px strip.
+  await tab()
+  await expect(link).toBeFocused()
+  await expect(host.locator('.item').first()).toHaveCSS('animation-name', 'none')
+  const strip = (await host.boundingBox())!
+  await expect
+    .poll(async () => {
+      const box = (await link.boundingBox())!
+      return box.x >= strip.x - 1 && box.x + box.width <= strip.x + strip.width + 1
+    })
+    .toBe(true)
+
+  await tab()
+  await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
+  await expect(host.locator('.item').first()).not.toHaveCSS('animation-name', 'none')
+  await expect.poll(() => host.locator('.viewport').evaluate((viewport) => viewport.scrollLeft)).toBe(0)
+})
+
+test('pointer focus leaves the strip moving under the pointer', async ({ page, scenario }) => {
+  await scenario()
+  // Playwright only clicks a still target; freezing the animations keeps them running in CSS terms.
+  await seek(page, 0)
+  await page.getByRole('link', { name: 'Item 2' }).click()
+  await expect(page.getByRole('link', { name: 'Item 2' })).toBeFocused()
+  await expect(page.locator('c2-marquee').locator('.item').first()).not.toHaveCSS('animation-name', 'none')
+})
+
+test('re-inserting the same children does not restart the strip', async ({ page, scenario }) => {
+  await scenario()
+  const before = await page
+    .locator('c2-marquee')
+    .locator('.item')
+    .first()
+    .evaluate((item) => item.getAnimations()[0])
+  expect(before).toBeTruthy()
+  const restarted = await page.locator('c2-marquee').evaluate(async (host) => {
+    const item = host.shadowRoot!.querySelector('.item')!
+    const animation = item.getAnimations()[0]
+    host.append(...Array.from(host.children))
+    host.append(document.createComment('anchor'))
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return item.getAnimations()[0] !== animation
+  })
+  expect(restarted).toBe(false)
+})
+
+test('non-rendering children take no place in the loop', async ({ page, scenario }) => {
+  await scenario('extras')
+  await expect(page.locator('c2-marquee').locator('.item')).toHaveCount(6)
+  await seek(page, 0)
+  expect(await offsets(page)).toEqual([0, 120, 240, 360, 480, 600])
+})
+
+test('measures in its own pixels under a scaled ancestor', async ({ page, scenario }) => {
+  await scenario('scaled')
+  await seek(page, 1000)
+  // Half size on screen: 60px apart, and 40px per second of the strip's own pixels is 20 on screen.
+  expect(await offsets(page)).toEqual([-20, 40, 100, 160, 220, 280])
+})
+
+test('the align variable applies to a vertical strip, moving or at rest', async ({ page, scenario }) => {
+  const centred = async () => {
+    const strip = (await page.locator('c2-marquee').boundingBox())!
+    const first = (await page.locator('c2-marquee > .logo').first().boundingBox())!
+    return Math.round(first.x + first.width / 2) === Math.round(strip.x + strip.width / 2)
+  }
+  await scenario('vertical-centred')
+  expect(await centred()).toBe(true)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('vertical-centred')
+  expect(await centred()).toBe(true)
+})
+
+test('a vertical strip at rest stretches its items when no alignment is set', async ({ page, scenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('vertical')
+  const strip = (await page.locator('c2-marquee').boundingBox())!
+  const wrapper = (await page.locator('c2-marquee').locator('.item').first().boundingBox())!
+  expect(Math.round(wrapper.width)).toBe(Math.round(strip.width))
+})
+
+test('measures again after being moved to another place in the page', async ({ page, scenario }) => {
+  await scenario()
+  const distance = await page.locator('c2-marquee').evaluate(async (host: HTMLElement) => {
+    const parent = host.parentElement!
+    host.remove()
+    parent.append(host)
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    // An 800px strip is wider than the 720px of items: the loop grows to the strip plus the widest item.
+    parent.style.width = '800px'
+    for (let frame = 0; frame < 10; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
+    return host.shadowRoot!.querySelector<HTMLElement>('.track')!.style.getPropertyValue('--_distance')
+  })
+  expect(Math.round(Number(distance))).toBe(920)
+})
+
+test('the paused attribute freezes the strip', async ({ page, scenario }) => {
+  await scenario('paused')
+  await expect(page.locator('c2-marquee').locator('.item').first()).toHaveCSS('animation-play-state', 'paused')
+})
+
+test('lays out a child added later', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-marquee').evaluate((host) => host.insertAdjacentHTML('beforeend', '<span class="logo">Item 7</span>'))
+  await expect(page.getByText('Item 7')).toBeVisible()
+  await expect.poll(async () => (await seek(page, 0), offsets(page))).toEqual([0, 120, 240, 360, 480, 600, 720])
+})
+
+test('reduced motion stops the strip and lets it scroll by hand', async ({ page, scenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario()
+  const viewport = page.locator('c2-marquee').locator('.viewport')
+  await expect(page.locator('c2-marquee').locator('.item').first()).toHaveCSS('animation-name', 'none')
+  expect(await offsets(page)).toEqual([0, 120, 240, 360, 480, 600])
+  await expect(viewport).toHaveCSS('overflow-x', 'auto')
+  expect(await viewport.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
+})
+
+test('under reduced motion the strip takes keyboard focus, so a row with nothing focusable still scrolls', async ({ page, scenario, tab }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('extras')
+  const viewport = page.locator('c2-marquee').locator('.viewport')
+  await expect(viewport).toHaveAttribute('tabindex', '0')
+  await tab()
+  await expect.poll(() => page.locator('c2-marquee').evaluate((host) => host.shadowRoot!.activeElement?.classList.contains('viewport'))).toBe(true)
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => viewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+  await accessible(page)
+})
+
+test('under reduced motion a strip with nothing to scroll is no tab stop', async ({ page, scenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Two items, 240px, in a 400px strip.
+  await scenario('short')
+  await expect(page.locator('c2-marquee').locator('.viewport')).not.toHaveAttribute('tabindex', /.*/)
+})
+
+test('the focus ring is drawn inside the strip, where the edge fade cannot clip it', async ({ page, scenario, tab }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await scenario('extras')
+  await tab()
+  await expect(page.locator('c2-marquee').locator('.viewport')).toHaveCSS('outline-offset', '-2px')
+})
+
+test('a moving strip does not take focus itself', async ({ page, scenario }) => {
+  await scenario()
+  await expect(page.locator('c2-marquee').locator('.viewport')).not.toHaveAttribute('tabindex', /.*/)
+})
+
+test('is accessible', async ({ page, scenario }) => {
+  await scenario()
+  await accessible(page)
+})

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-beam</title>
+    <script type="module" src="/src/beam.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .diagram {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 560px;
+        height: 240px;
+      }
+      .column {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+      }
+      .node {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border: 1px solid #e4e4e7;
+        border-radius: 999px;
+        background: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="diagram">
+      <div class="column">
+        <div class="node" id="a">A</div>
+        <div class="node" id="b">B</div>
+        <div class="node" id="c">C</div>
+      </div>
+      <div class="node" id="hub">Hub</div>
+      <div class="node" id="out">Out</div>
+      <c2-beam from="a" to="hub" curvature="-40"></c2-beam>
+      <c2-beam from="b" to="hub"></c2-beam>
+      <c2-beam from="c" to="hub" curvature="40"></c2-beam>
+      <c2-beam from="hub" to="out" reverse></c2-beam>
+    </div>
+  </body>
+</html>
