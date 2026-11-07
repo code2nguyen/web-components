@@ -1,0 +1,63 @@
+---
+import { heroWords, product, workflows } from '../data/site'
+
+const tone = { Running: 'success', Paused: 'neutral', Failed: 'danger' } as const
+---
+
+<c2-backdrop class="hero-backdrop" pattern="grid">
+  <section class="container hero" id="top" aria-labelledby="hero-title">
+    <c2-badge class="hero-badge" tone="primary">New · Approvals on your phone</c2-badge>
+    <h1 id="hero-title">
+      Automate the busywork between your{' '}
+      <c2-text-effect class="hero-word" effect="rotate" words={heroWords.join(';')}>{heroWords[0]}</c2-text-effect>
+    </h1>
+    <p class="lead">{product.description}</p>
+    <div class="hero-actions">
+      <c2-button class="cta cta-large" data-signup>Start free</c2-button>
+      <c2-link-button class="secondary-link" href="#integrations">See how it works</c2-link-button>
+    </div>
+    <p class="fine-print">Free for three workflows. No credit card.</p>
+
+    <c2-device-frame class="hero-frame" url="app.wayline.example/workflows">
+      <div class="app-shot">
+        <aside class="app-shot__nav" aria-hidden="true">
+          <span class="app-shot__nav-item is-active">Workflows</span>
+          <span class="app-shot__nav-item">Runs</span>
+          <span class="app-shot__nav-item">Connections</span>
+          <span class="app-shot__nav-item">Settings</span>
+        </aside>
+        <div class="app-shot__main">
+          <div class="app-shot__title">
+            <strong>Workflows</strong>
+            <span>4 active this week</span>
+          </div>
+          <table class="app-shot__table">
+            <caption class="visually-hidden">Example workflows in the Wayline dashboard</caption>
+            <thead>
+              <tr>
+                <th scope="col">Workflow</th>
+                <th scope="col" class="hide-narrow">Trigger</th>
+                <th scope="col" class="numeric">Runs</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                workflows.map((workflow) => (
+                  <tr>
+                    <td>{workflow.name}</td>
+                    <td class="hide-narrow muted">{workflow.trigger}</td>
+                    <td class="numeric">{workflow.runs}</td>
+                    <td>
+                      <c2-badge tone={tone[workflow.status]}>{workflow.status}</c2-badge>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </c2-device-frame>
+  </section>
+</c2-backdrop>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beam test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 24px;
+      }
+      .diagram {
+        position: relative;
+        width: 400px;
+        height: 200px;
+      }
+      .node {
+        position: absolute;
+        top: 80px;
+        width: 40px;
+        height: 40px;
+        box-sizing: border-box;
+        border: 1px solid #a1a1aa;
+        border-radius: 8px;
+      }
+      #source {
+        left: 0;
+      }
+      #target {
+        left: 360px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Beam scenario"></main>
+  </body>
+</html>

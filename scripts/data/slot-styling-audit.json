@@ -1239,6 +1239,26 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-device-frame",
+      "slot": "",
+      "decision": "part",
+      "parts": ["screen"],
+      "reason": "The screen region owns the default slot's component-side presentation (background, overflow, size container); the content styles itself."
+    },
+    {
+      "tag": "c2-device-frame",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot places the app's own controls at the end of the browser bar; the app sizes and styles them."
+    },
+    {
+      "tag": "c2-device-frame",
+      "slot": "address",
+      "decision": "part",
+      "parts": ["address"],
+      "reason": "The address field owns the address slot's component-side presentation; the bar colours apply to the slotted text."
+    },
+    {
       "tag": "c2-distribution-bar",
       "slot": "",
       "decision": "variables",
@@ -1646,6 +1666,13 @@
       "slot": "empty",
       "decision": "assigned-content",
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-marquee",
+      "slot": "",
+      "decision": "part",
+      "parts": ["item"],
+      "reason": "Each child is wrapped in its own item part, which owns its spacing and motion; the child styles itself."
     },
     {
       "tag": "c2-master-detail",

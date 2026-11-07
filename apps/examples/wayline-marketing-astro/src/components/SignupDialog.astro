@@ -1,0 +1,21 @@
+---
+// Loaded on first use: src/scripts/signup.ts imports the modal, form field and toast modules when a "Start free"
+// button is first pressed, then opens this dialog.
+---
+
+<c2-modal id="signup" class="signup">
+  <span slot="title">Start your free trial</span>
+  <form class="signup__form" id="signup-form" novalidate>
+    <p class="signup__plan" data-signup-plan>Starter plan · free forever</p>
+    <c2-form-field label="Work email">
+      <c2-text-field name="email" type="email" autocomplete="email" placeholder="you@company.com" required></c2-text-field>
+      <span slot="error" data-match="valueMissing">Enter your work email.</span>
+      <span slot="error" data-match="typeMismatch">Enter an email address, like you@company.com.</span>
+    </c2-form-field>
+    <c2-form-field label="Company" necessity="optional">
+      <c2-text-field name="company" autocomplete="organization"></c2-text-field>
+    </c2-form-field>
+    <c2-button class="cta signup__submit" type="submit">Create workspace</c2-button>
+  </form>
+</c2-modal>
+<c2-toast-region position="bottom-right"></c2-toast-region>

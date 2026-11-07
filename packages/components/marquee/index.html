@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-marquee</title>
+    <script type="module" src="/src/marquee.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .logo {
+        color: #71717a;
+        font-size: 20px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .faded {
+        --c2-marquee__viewport--fade: 64px;
+      }
+      .quote {
+        padding: 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-marquee aria-label="Customers">
+      <span class="logo">◆ Northwind</span><span class="logo">● Contoso</span><span class="logo">▲ Fabrikam</span> <span class="logo">■ Tailspin</span
+      ><span class="logo">✦ Litware</span><span class="logo">⬢ Adatum</span>
+    </c2-marquee>
+    <c2-marquee class="faded" reverse aria-label="Links">
+      <a class="logo" href="#one">One</a><a class="logo" href="#two">Two</a><a class="logo" href="#three">Three</a>
+    </c2-marquee>
+    <c2-marquee dir="rtl" aria-label="Right to left">
+      <span class="logo">אחת</span><span class="logo">שתיים</span><span class="logo">שלוש</span><span class="logo">ארבע</span>
+    </c2-marquee>
+    <c2-marquee orientation="vertical" aria-label="Quotes">
+      <div class="quote">Setup took an afternoon.</div>
+      <div class="quote">Dark mode came for free.</div>
+      <div class="quote">Forms just work.</div>
+    </c2-marquee>
+  </body>
+</html>

@@ -56,12 +56,11 @@ Domain patterns with no design-system home come from the products that made them
 
 ### B. Data display
 
-| #   | Component           | What it adds                                                     | Real-world model                                    | Priority | Decision                                                                                                                           |
-| --- | ------------------- | ---------------------------------------------------------------- | --------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers            | P3       | Reject: extend `c2-format-number` with an animated (rolling-digit) mode instead; `c2-stat` then uses it                            |
-| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group         | P2       | Reject: extend `c2-image`, whose `preview` already opens full screen: add zoom, pan, rotate and prev/next across a group of images |
-| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview                  | P3       | Proposed                                                                                                                           |
-| 48  | `c2-marquee`        | Continuous scrolling strip, pauses on hover                      | Chakra, Mantine and Ark marquee; stock ticker tapes | P3       | Proposed                                                                                                                           |
+| #   | Component           | What it adds                                                     | Real-world model                            | Priority | Decision                                                                                                                           |
+| --- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 37  | `c2-rolling-number` | Digits that roll when a value changes                            | Mantine RollingNumber; Robinhood tickers    | P3       | Reject: extend `c2-format-number` with an animated (rolling-digit) mode instead; `c2-stat` then uses it                            |
+| 42  | `c2-image-viewer`   | Fullscreen lightbox with zoom, pan, rotate and a thumbnail strip | PrimeVue Galleria, antd Image preview group | P2       | Reject: extend `c2-image`, whose `preview` already opens full screen: add zoom, pan, rotate and prev/next across a group of images |
+| 46  | `c2-pdf-viewer`     | Paged PDF preview with zoom and search                           | DocuSign, Gmail attachment preview          | P3       | Proposed                                                                                                                           |
 
 ### C. Charts
 
@@ -201,10 +200,7 @@ The inspiration sites could not be fetched from the research environment, only s
 
 ### O. Motion and visual effects
 
-| #   | Component         | What it does                                                                       | Seen in                                   | Source                                                                       | Priority | Decision |
-| --- | ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------- | -------- | -------- |
-| 176 | `c2-beam`         | Animated connector drawn between two elements (data-flow and integration diagrams) | Magic UI (animated-beam), Stripe          | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
-| 178 | `c2-device-frame` | Phone, browser or laptop frame around slotted content                              | Magic UI (safari, iphone-15-pro, android) | [Magic UI](https://github.com/magicuidesign/magicui/blob/main/registry.json) | P3       | Proposed |
+Nothing left to propose here: the beam and the device frame shipped as `c2-beam` and `c2-device-frame`.
 
 ### P. Enterprise data
 

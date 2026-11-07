@@ -219,15 +219,18 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it.
 - **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.
 - **Backdrop** — `c2-backdrop` · `@c2n/components/backdrop` — A container that draws a decorative pattern behind its content: dots, a grid, stripes, flicker, aurora or meteors.
+- **Beam** — `c2-beam` · `@c2n/components/beam` — An animated line between two elements, for data-flow and integration diagrams.
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface.
 - **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
 - **Chatbot** — `c2-chatbot` · `@c2n/components/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
+- **Device Frame** — `c2-device-frame` · `@c2n/components/device-frame` — A browser window, phone, tablet or laptop drawn around a screenshot or live content.
 - **Floating Panel** — `c2-floating-panel` · `@c2n/components/floating-panel` — A window inside the page that the user drags, resizes, minimises and maximises, without blocking the page.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **In View** — `c2-in-view` · `@c2n/components/in-view` — Reacts when its content scrolls into view: reveal it, load more, or pause it when it leaves.
+- **Marquee** — `c2-marquee` · `@c2n/components/marquee` — A strip that scrolls its items in a continuous loop, for logo walls, testimonials and ticker tapes.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/components/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
 - **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.

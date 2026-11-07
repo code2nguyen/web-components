@@ -1,0 +1,245 @@
+---
+description: 'Integration hubs, pipelines and flows drawn with animated connectors.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Beam } from '@c2n/components/beam'
+
+## Presets
+
+Lay the nodes out with CSS, then connect them. The light's colours, length and duration are CSS variables; `curvature` and `reverse` shape each connection.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .beam-default {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(100%, 300px);
+    height: 120px;
+  }
+  .beam-default div {
+    padding: 8px 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+</style>
+<div class="beam-default">
+  <div id="beam-default-a">Client</div>
+  <div id="beam-default-b">Server</div>
+  <c2-beam from="beam-default-a" to="beam-default-b"></c2-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Integration hub
+<style>
+  .beam-hub {
+    --c2-beam__beam--color-from: #7c3aed;
+    --c2-beam__beam--color-to: #ec4899;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    place-items: center;
+    width: min(100%, 300px);
+    height: 220px;
+  }
+  .beam-hub > div {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 999px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 18px;
+  }
+  .beam-hub .tl {
+    grid-area: 1 / 1;
+  }
+  .beam-hub .tr {
+    grid-area: 1 / 3;
+  }
+  .beam-hub .bl {
+    grid-area: 3 / 1;
+  }
+  .beam-hub .br {
+    grid-area: 3 / 3;
+  }
+  .beam-hub .center {
+    grid-area: 2 / 2;
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    font-weight: 600;
+  }
+</style>
+<div class="beam-hub">
+  <div class="tl" id="beam-hub-mail">✉</div>
+  <div class="tr" id="beam-hub-chat">💬</div>
+  <div class="bl" id="beam-hub-docs">📄</div>
+  <div class="br" id="beam-hub-cal">📅</div>
+  <div class="center" id="beam-hub-core">AI</div>
+  <c2-beam from="beam-hub-mail" to="beam-hub-core" curvature="20"></c2-beam>
+  <c2-beam from="beam-hub-chat" to="beam-hub-core" curvature="-20"></c2-beam>
+  <c2-beam from="beam-hub-docs" to="beam-hub-core" curvature="-20"></c2-beam>
+  <c2-beam from="beam-hub-cal" to="beam-hub-core" curvature="20"></c2-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pipeline
+<style>
+  .beam-pipeline {
+    --c2-beam__beam--color-from: #16a34a;
+    --c2-beam__beam--color-to: #4ade80;
+    --c2-beam__beam--duration: 2s;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(100%, 320px);
+    height: 100px;
+  }
+  .beam-pipeline div {
+    padding: 6px 10px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 6px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+  .beam-pipeline .later {
+    --c2-beam__beam--delay: -1s;
+  }
+</style>
+<div class="beam-pipeline">
+  <div id="beam-pipe-build">Build</div>
+  <div id="beam-pipe-test">Test</div>
+  <div id="beam-pipe-deploy">Deploy</div>
+  <c2-beam from="beam-pipe-build" to="beam-pipe-test"></c2-beam>
+  <c2-beam class="later" from="beam-pipe-test" to="beam-pipe-deploy"></c2-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Round trip
+<style>
+  .beam-trip {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(100%, 300px);
+    height: 140px;
+  }
+  .beam-trip div {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+  .beam-trip .back {
+    --c2-beam__beam--color-from: #ea580c;
+    --c2-beam__beam--color-to: #fb923c;
+  }
+</style>
+<div class="beam-trip">
+  <div id="beam-trip-app">App</div>
+  <div id="beam-trip-api">API</div>
+  <c2-beam from="beam-trip-app" to="beam-trip-api" curvature="30"></c2-beam>
+  <c2-beam class="back" from="beam-trip-app" to="beam-trip-api" curvature="-30" reverse></c2-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Bold glow
+<style>
+  .beam-glow {
+    --c2-beam__track--width: 4px;
+    --c2-beam__track--color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-beam__beam--width: 4px;
+    --c2-beam__beam--length: 35;
+    --c2-beam__beam--color-from: #0891b2;
+    --c2-beam__beam--color-to: #7c3aed;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: min(100%, 300px);
+    height: 140px;
+  }
+  .beam-glow div {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .beam-glow .top {
+    align-self: flex-start;
+  }
+</style>
+<div class="beam-glow">
+  <div id="beam-glow-a">Upload</div>
+  <div class="top" id="beam-glow-b">Process</div>
+  <div id="beam-glow-c">Store</div>
+  <c2-beam from="beam-glow-a" to="beam-glow-b" curvature="-24"></c2-beam>
+  <c2-beam from="beam-glow-b" to="beam-glow-c" curvature="-24"></c2-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Fan out
+<style>
+  .beam-fan {
+    --c2-beam__track--color: transparent;
+    --c2-beam__beam--length: 30;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(100%, 300px);
+    height: 180px;
+  }
+  .beam-fan-targets {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .beam-fan span {
+    display: block;
+    padding: 6px 10px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 6px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+</style>
+<div class="beam-fan">
+  <span id="beam-fan-source">Event</span>
+  <div class="beam-fan-targets">
+    <span id="beam-fan-email">Email</span>
+    <span id="beam-fan-push">Push</span>
+    <span id="beam-fan-sms">SMS</span>
+  </div>
+  <c2-beam from="beam-fan-source" to="beam-fan-email" curvature="-20"></c2-beam>
+  <c2-beam from="beam-fan-source" to="beam-fan-push"></c2-beam>
+  <c2-beam from="beam-fan-source" to="beam-fan-sms" curvature="20"></c2-beam>
+</div>
+```
+
+</GalleryGrid>

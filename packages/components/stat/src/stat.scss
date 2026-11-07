@@ -60,8 +60,8 @@
   }
 }
 
-:host(:not(:has(> [slot='icon']))) .icon,
-:host(:not(:has(> [slot='description']))) .description {
+.icon[hidden],
+.description[hidden] {
   display: none;
 }
 

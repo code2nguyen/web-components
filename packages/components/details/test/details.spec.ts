@@ -93,31 +93,46 @@ test('the border shorthand reaches every side, with and without @c2n/theme, and 
 })
 test('content rendered on toggle, after the panel began opening, still slides open without a jump', async ({ page, renderScenario }) => {
   await renderScenario('<c2-details label="Lazy" style="--c2-details--transition-duration: 400ms"></c2-details>')
-  const heights = await page.locator('c2-details').evaluate(async (host) => {
+  const heights = await page.locator('c2-details').evaluate(async (host: HTMLElement & { updateComplete: Promise<boolean> }) => {
     // As an app does: the content is rendered only once the panel says it opened.
-    host.addEventListener('toggle', () => {
-      const block = document.createElement('div')
-      block.style.height = '200px'
-      block.textContent = 'Rendered on open'
-      host.append(block)
-    })
+    const toggled = new Promise<void>((resolve) =>
+      host.addEventListener('toggle', () => {
+        const block = document.createElement('div')
+        block.style.height = '200px'
+        block.textContent = 'Rendered on open'
+        host.append(block)
+        resolve()
+      }),
+    )
     const content = host.shadowRoot!.querySelector<HTMLElement>('.c2-details-content')!
+    const frame = () => new Promise(requestAnimationFrame)
     // From the closed height, so an open that jumps straight to its end fails the steps below.
     const seen: number[] = [content.getBoundingClientRect().height]
     host.shadowRoot!.querySelector<HTMLElement>('summary')!.click()
-    const until = performance.now() + 600
-    while (performance.now() < until) {
-      await new Promise(requestAnimationFrame)
+    await host.updateComplete
+    // The slide's clock is held still, so a slow runner (a few frames in the whole duration) sees the same open as a
+    // fast one: the content arrives on `toggle` while the slide has all its time left, and the resize observer retargets it.
+    for (const animation of content.getAnimations()) animation.pause()
+    await toggled
+    await frame()
+    await frame()
+    const [slide] = content.getAnimations()
+    slide.pause()
+    const duration = Number(slide.effect!.getComputedTiming().duration)
+    for (let time = 0; time <= duration; time += duration / 20) {
+      slide.currentTime = time
       seen.push(content.getBoundingClientRect().height)
     }
+    slide.finish()
+    await frame()
+    seen.push(content.getBoundingClientRect().height)
     return seen
   })
   const steps = heights.slice(1).map((height, index) => height - heights[index])
   const end = heights.at(-1)!
   expect(end).toBeGreaterThan(200)
-  // Without following the content, the panel stops at its padding and the content then lands in one frame: no height
-  // between the two is ever drawn. Following it, the panel is seen part-way open (however long a slow machine takes
-  // between two frames), and never shrinks on the way.
+  // Without following the content, the slide stops at the panel's padding and the content then lands in one frame: no
+  // height between the two is ever drawn. Following it, the panel passes part-way open, and never shrinks on the way.
   expect(heights.some((height) => height > end * 0.25 && height < end * 0.75)).toBe(true)
   expect(Math.min(...steps)).toBeGreaterThanOrEqual(-1)
 })
