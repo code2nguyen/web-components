@@ -24,7 +24,20 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups'> & {
+      'c2-table': Omit<
+        C2Props<Table>,
+        | 'rows'
+        | 'columns'
+        | 'value'
+        | 'sortModel'
+        | 'summaryValues'
+        | 'groupBy'
+        | 'expandedGroups'
+        | 'collapsedGroups'
+        | 'expandedRows'
+        | 'columnOrder'
+        | 'hiddenColumns'
+      > & {
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -39,14 +52,19 @@ declare module 'react' {
         'virtual-threshold'?: Attribute
         'block-size'?: Attribute
         'empty-message'?: Attribute
+        'quick-filter'?: Attribute
         'page-size'?: Attribute
         'summary-values'?: Attribute
         'summary-scope'?: Attribute
         'group-by'?: Attribute
         'group-display'?: Attribute
         'expanded-groups'?: Attribute
+        'collapsed-groups'?: Attribute
         'groups-collapsed'?: Attribute
         'empty-group-label'?: Attribute
+        'expanded-rows'?: Attribute
+        'column-order'?: Attribute
+        'hidden-columns'?: Attribute
         rows?: Table['rows'] | string
         columns?: Table['columns'] | string
         value?: Table['value'] | string
@@ -54,6 +72,10 @@ declare module 'react' {
         summaryValues?: Table['summaryValues'] | string
         groupBy?: Table['groupBy'] | string
         expandedGroups?: Table['expandedGroups'] | string
+        collapsedGroups?: Table['collapsedGroups'] | string
+        expandedRows?: Table['expandedRows'] | string
+        columnOrder?: Table['columnOrder'] | string
+        hiddenColumns?: Table['hiddenColumns'] | string
       }
       'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
         'column-id'?: Attribute
@@ -64,6 +86,7 @@ declare module 'react' {
         'summary-label'?: Attribute
         'summary-align'?: Attribute
         'summary-span'?: Attribute
+        'group-summary'?: Attribute
         'group-column'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
       }

@@ -35,16 +35,23 @@ declare module 'vue' {
         'virtual-threshold'?: unknown
         'block-size'?: unknown
         'empty-message'?: unknown
+        'quick-filter'?: unknown
         'page-size'?: unknown
         'summary-values'?: unknown
         'summary-scope'?: unknown
         'group-by'?: unknown
         'group-display'?: unknown
         'expanded-groups'?: unknown
+        'collapsed-groups'?: unknown
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
+        'expanded-rows'?: unknown
+        'column-order'?: unknown
+        'hidden-columns'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
+        onRowDetailToggle?: (event: EventOf<Table, 'row-detail-toggle'>) => void
+        onColumnReorder?: (event: EventOf<Table, 'column-reorder'>) => void
         onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
@@ -52,6 +59,7 @@ declare module 'vue' {
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
         onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
         onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
+        onCellEdit?: (event: EventOf<Table, 'cell-edit'>) => void
       }
     >
     'c2-table-column': DefineComponent<
@@ -64,6 +72,7 @@ declare module 'vue' {
         'summary-label'?: unknown
         'summary-align'?: unknown
         'summary-span'?: unknown
+        'group-summary'?: unknown
         'group-column'?: unknown
       }
     >
