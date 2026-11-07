@@ -48,6 +48,9 @@ export interface TableSummaryRenderContext extends TableSummaryContext {
 export type TableSummaryFunction = (context: TableSummaryContext) => unknown
 export type TableSummaryRenderer = (context: TableSummaryRenderContext) => unknown
 
+/** Renders the detail of a row, shown under it while it is expanded. */
+export type TableRowDetailRenderer = (context: TableRowContext) => unknown
+
 export type TableRowStyle = Record<string, string | number | null | undefined>
 export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
 
@@ -144,8 +147,22 @@ export interface TableColumnConfig {
   summarySpan?: number
   /** Renders the summary cell body instead of the formatted value. */
   renderSummary?: TableSummaryRenderer
+  /**
+   * Value of the column on a group row, when it should differ from the summary row: a built-in aggregate, a function
+   * of the group's rows, or `none` to leave the group cell empty. Defaults to `summary`.
+   */
+  groupSummary?: TableSummaryAggregate | TableSummaryFunction | 'none'
   /** Client-side sort comparator for the column's values. */
   comparator?: (a: unknown, b: unknown) => number
+  /**
+   * Lets the user edit the column's cells: double-click, Enter, F2 or typing on a focused cell opens an editor, Enter
+   * or leaving it commits, Escape cancels. Defaults to the table's `editable`. Needs a `field`.
+   */
+  editable?: boolean
+  /** Renders the editor of a cell instead of the built-in input; call `commit(value)` or `cancel()` from it. */
+  renderEditor?: TableEditorRenderer
+  /** Leaves the column out of `quick-filter` matching. */
+  filterable?: boolean
   /**
    * Puts the group tree in this column while the table is grouped: the chevron, the group's label and its row count
    * on each group row, and the indentation of the rows under it. Defaults to the first column.
@@ -161,9 +178,17 @@ export interface TableGroupBy {
   getValue?: (row: TableRow) => unknown
   /**
    * Order of the groups of this level. Defaults to the direction the table is sorted by `field`, ascending when it
-   * is not. A function compares two group values.
+   * is not. A function compares two group values. With `sortBy` it is the direction of that aggregate.
    */
   sort?: SortDirection | ((a: unknown, b: unknown) => number)
+  /**
+   * Orders the groups by one of their aggregates instead of their value: the `id` of a column with a `summary` (or
+   * `group-summary`), such as `amount` for the regions by revenue, or `count` for their number of rows unless a column
+   * has that id. `sort` is the direction, ascending unless it says `desc`.
+   */
+  sortBy?: string
+  /** Orders the groups by anything else: compares two whole groups (value, rows, aggregates). Wins over `sortBy`. Property only. */
+  compare?: (a: TableGroupContext, b: TableGroupContext) => number
 }
 
 /**
@@ -181,8 +206,13 @@ export interface TableGroupContext {
   field: string
   /** The value every row of the group shares. */
   value: unknown
-  /** Every row of the group, sorted, including the rows of its sub-groups. */
+  /**
+   * Every row of the group, sorted, including the rows of its sub-groups. With a data source only the rows fetched so
+   * far; `count` is the full number.
+   */
   rows: TableRow[]
+  /** Number of rows in the group, sub-groups included. */
+  count: number
   expanded: boolean
   /** The aggregates of the group's rows, keyed by column `id`: one entry per column with a `summary`. */
   summary: Record<string, unknown>
@@ -197,13 +227,45 @@ export interface TableGroupToggleEventDetail {
   group: TableGroupContext
 }
 
+/** One step of a group's path: the level's field and the value the group's rows share. */
+export interface TableGroupPathEntry {
+  field: string
+  value: unknown
+}
+
 export interface TableRowsRequest {
-  /** Index of the first row requested. */
+  /** Index of the first row requested: within the group when `group` is set. */
   start: number
   /** Number of rows requested. */
   count: number
   /** Sort the server should apply, in priority order. */
   sort: SortModel[]
+  /** The table's `quick-filter` text, which the server applies; absent when there is none. */
+  filter?: string
+  /** While grouped, the bottom-level group whose rows are asked for, outermost level first. */
+  group?: TableGroupPathEntry[]
+}
+
+/** What the table asks a grouping data source for: the groups of one level, under `parent`. */
+export interface TableGroupsRequest {
+  /** Depth of the level, 0 for the outermost. */
+  level: number
+  /** The level as `group-by` names it: `field` and, when given, `sort` (a direction) and `sortBy`. */
+  groupBy: Pick<TableGroupBy, 'field' | 'sortBy'> & { sort?: SortDirection }
+  /** The group these are the sub-groups of, outermost level first; empty for the top level. */
+  parent: TableGroupPathEntry[]
+  /** Sort of the rows, which also orders the groups of a sorted field. */
+  sort: SortModel[]
+  /** The table's `quick-filter` text. */
+  filter?: string
+}
+
+export interface TableGroupsResult {
+  /**
+   * The groups in display order: each one's `value`, its number of rows `count` (sub-groups included), and the
+   * aggregates shown on its group row, keyed by column `id`.
+   */
+  groups: { value: unknown; count: number; summary?: Record<string, unknown> }[]
 }
 
 export interface TableRowsResult {
@@ -218,6 +280,12 @@ export interface TableRowsResult {
  */
 export interface TableDataSource {
   getRows(request: TableRowsRequest): Promise<TableRowsResult>
+  /**
+   * Lists the groups of one level, which lets the table group a dataset it does not hold: with `group-by` set, it asks
+   * for the top-level groups, for the sub-groups of a group when it is opened, and for the rows of an open bottom-level
+   * group through `getRows` with `request.group`. Without it, `group-by` is ignored for a data source.
+   */
+  getGroups?(request: TableGroupsRequest): Promise<TableGroupsResult>
 }
 
 export interface TableSelectionChangeEventDetail {
@@ -240,6 +308,57 @@ export interface TableRowEventDetail {
 export interface TableCellEventDetail extends TableRowEventDetail {
   column: TableColumnConfig
   value: unknown
+}
+
+/** Handed to `renderEditor`: the cell being edited, and the two ways out of editing it. */
+export interface TableEditorContext extends TableCellContext {
+  /** Ends editing with this value; the table fires `cell-edit` and, unless that is cancelled, writes it into the row. */
+  commit: (value: unknown) => void
+  /** Ends editing and keeps the value as it was. */
+  cancel: () => void
+}
+
+export type TableEditorRenderer = (context: TableEditorContext) => unknown
+
+export interface TableCellEditEventDetail extends TableCellEventDetail {
+  /** The column's field, which the new value is written to. */
+  field: string
+  /** The value before the edit; `value` is the new one. */
+  previousValue: unknown
+}
+
+export interface TableRowDetailToggleEventDetail extends TableRowEventDetail {
+  /** Whether the row's detail is now shown. */
+  expanded: boolean
+}
+
+export interface TableColumnReorderEventDetail {
+  /** The `id` of the column that moved. */
+  id: string
+  /** Every column's `id` in the new order: what `columnOrder` now holds. */
+  order: string[]
+}
+
+/** Options of `toCSV()` and `downloadCSV()`. */
+export interface TableCsvOptions {
+  /**
+   * The rows written: `all` rows after filter and sort (grouped rows in group order), only the `selected` ones, or
+   * the `page` on show. With a data source, only the rows fetched so far. Defaults to `all`.
+   */
+  rows?: 'all' | 'selected' | 'page'
+  /** The `visible` columns, or `all` of them including hidden ones. Defaults to `visible`. */
+  columns?: 'visible' | 'all'
+  /** Writes the header labels as the first line. Defaults to `true`. */
+  header?: boolean
+  /** Writes values as the cells show them (`$1,200.00`) rather than raw (`1200`). Defaults to `false`. */
+  formatted?: boolean
+  /** Field separator. Defaults to `,`. */
+  separator?: string
+  /**
+   * Prefixes a value that a spreadsheet would read as a formula (starting with `=`, `+`, `-`, `@`, tab or carriage
+   * return, and not a plain number) with `'`. Defaults to `true`; turn it off only for data you trust.
+   */
+  escapeFormulas?: boolean
 }
 
 export interface TableColumnResizeEventDetail {

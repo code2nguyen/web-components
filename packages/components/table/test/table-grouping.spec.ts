@@ -123,10 +123,13 @@ test('clicking a group closes it and reports it; expanded-groups is the state, i
   await expect(groupRow(page, 'region=EMEA')).toHaveAttribute('aria-expanded', 'false')
   await expect(table(page).getByRole('row', { name: /Acme GmbH/ })).toHaveCount(0)
   expect(await page.evaluate(() => (window as unknown as { log: unknown[] }).log)).toEqual([{ key: 'region=EMEA', expanded: false, rows: 5, amount: 48210 }])
-  expect(await table(page).evaluate((element) => (element as HTMLElement & { expandedGroups: string[] }).expandedGroups)).toEqual([
-    'region=Americas',
-    'region=APAC',
-  ])
+  // Groups are open by default, so only the exception is recorded: a group that appears later opens like the others.
+  expect(
+    await table(page).evaluate((element) => {
+      const { expandedGroups, collapsedGroups } = element as HTMLElement & { expandedGroups?: string[]; collapsedGroups?: string[] }
+      return { expandedGroups, collapsedGroups }
+    }),
+  ).toEqual({ expandedGroups: undefined, collapsedGroups: ['region=EMEA'] })
 
   await table(page).evaluate((element) => element.setAttribute('expanded-groups', 'region=EMEA'))
   await expect(groupRow(page, 'region=Americas')).toHaveAttribute('aria-expanded', 'false')
@@ -251,8 +254,8 @@ test('a virtualized grouped table keeps the groups of the rows at the top under 
   // Clicking the stuck copy closes the real group.
   await table(page).locator('[part~="group-row-echo"]').first().click()
   await expect
-    .poll(() => table(page).evaluate((element, key) => (element as HTMLElement & { expandedGroups: string[] }).expandedGroups.includes(key!), team))
-    .toBe(false)
+    .poll(() => table(page).evaluate((element, key) => (element as HTMLElement & { collapsedGroups?: string[] }).collapsedGroups?.includes(key!), team))
+    .toBe(true)
 })
 
 test('pages count display lines, and a page that starts inside a group repeats its headers', async ({ page, renderScenario }) => {
@@ -347,4 +350,112 @@ test('group-by is ignored with a dataSource, with one warning', async ({ page, r
   await expect(table(page).locator('[part~="group-row"]')).toHaveCount(0)
   await expect(table(page).getByRole('row', { name: /Acme GmbH/ })).toHaveCount(1)
   expect(warnings.filter((text) => text.includes('group-by is ignored'))).toHaveLength(1)
+})
+
+test('a group that appears after a toggle follows the default instead of a stale list', async ({ page, renderScenario }) => {
+  await renderScenario(orders('group-by="region"'))
+  await groupRow(page, 'region=EMEA').click()
+  await props(table(page), { rows: [...ORDERS, { id: 'o20', customer: 'Andes SRL', region: 'LATAM', status: 'Paid', amount: 3000, qty: 2 }] })
+  // The new group opens like every group that was not closed by hand; EMEA stays closed.
+  await expect(groupRow(page, 'region=LATAM')).toHaveAttribute('aria-expanded', 'true')
+  await expect(table(page).getByRole('row', { name: /Andes SRL/ })).toHaveCount(1)
+  await expect(groupRow(page, 'region=EMEA')).toHaveAttribute('aria-expanded', 'false')
+})
+
+test('with groups-collapsed an opened group is recorded in expanded-groups, and new groups stay closed', async ({ page, renderScenario }) => {
+  await renderScenario(orders('group-by="region" groups-collapsed'))
+  await groupRow(page, 'region=APAC').click()
+  await expect(groupRow(page, 'region=APAC')).toHaveAttribute('aria-expanded', 'true')
+  expect(await table(page).evaluate((element) => (element as HTMLElement & { expandedGroups?: string[] }).expandedGroups)).toEqual(['region=APAC'])
+  await props(table(page), { rows: [...ORDERS, { id: 'o20', customer: 'Andes SRL', region: 'LATAM', status: 'Paid', amount: 3000, qty: 2 }] })
+  await expect(groupRow(page, 'region=LATAM')).toHaveAttribute('aria-expanded', 'false')
+})
+
+test('expandToLevel opens the levels above it and closes the rest', async ({ page, renderScenario }) => {
+  await renderScenario(orders('group-by="region,status"'))
+  await table(page).evaluate((element) => (element as HTMLElement & { expandToLevel(level: number): void }).expandToLevel(1))
+  // Three regions, each open on its closed status groups: 3 + 7 lines, no data rows.
+  await expect.poll(async () => (await lines(page)).length).toBe(3 + 7)
+  expect((await lines(page)).every((line) => line.startsWith('group'))).toBe(true)
+})
+
+test('a level is ordered by an aggregate with sortBy, by its row count, or by a compare function', async ({ page, renderScenario }) => {
+  await renderScenario(orders())
+  const groups = async () => (await lines(page)).filter((line) => line.startsWith('group')).map((line) => line.split(' | ')[0].replace('group region=', ''))
+  await props(table(page), { groupBy: [{ field: 'region', sortBy: 'amount', sort: 'desc' }] })
+  await expect.poll(groups).toEqual(['EMEA', 'Americas', 'APAC'])
+  await props(table(page), { groupBy: [{ field: 'region', sortBy: 'count' }] })
+  await expect.poll(groups).toEqual(['APAC', 'Americas', 'EMEA'])
+  // The quantity column is hidden from the group rows, but its aggregate still orders them.
+  await table(page).evaluate((element) => {
+    const target = element as HTMLElement & { hiddenColumns: string[]; groupBy: unknown[] }
+    target.hiddenColumns = ['qty']
+    target.groupBy = [{ field: 'region', compare: (a: { summary: { qty: number } }, b: { summary: { qty: number } }) => b.summary.qty - a.summary.qty }]
+  })
+  await expect.poll(groups).toEqual(['EMEA', 'Americas', 'APAC'])
+})
+
+test('group-summary gives group rows their own aggregate, or none', async ({ page, renderScenario }) => {
+  const columns = `<c2-table-column field="customer" header="Customer" width="220px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="160px" align="end" format="currency" summary="sum" group-summary="avg"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="100px" align="end" summary="sum" group-summary="none"></c2-table-column>`
+  await renderScenario(orders('group-by="region"', columns))
+  expect((await lines(page))[0]).toBe('group region=Americas | Americas 4 | $9,225.00 | ')
+  await expect(table(page).locator('[part="summary-row"]')).toContainText('$106,450.00')
+})
+
+test('the group checkbox is named after its group, and toggles are announced', async ({ page, renderScenario }) => {
+  await renderScenario(orders('group-by="region" selection="multiple" checkbox-selection'))
+  await expect(groupRow(page, 'region=EMEA').locator('c2-checkbox')).toHaveAttribute('aria-label', 'Select rows in EMEA')
+  await groupRow(page, 'region=EMEA').click()
+  await expect(table(page).locator('[role="status"]')).toHaveText('EMEA collapsed')
+  await groupRow(page, 'region=EMEA').click()
+  await expect(table(page).locator('[role="status"]')).toHaveText('EMEA expanded, 5 rows')
+})
+
+test('a data source with getGroups groups on the server: groups per level, rows per open group', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:520px;width:640px" row-key="id" group-by="region,status" groups-collapsed>${COLUMNS}</c2-table>`)
+  await table(page).evaluate((element, source) => {
+    type Entry = { field: string; value: unknown }
+    const log: string[] = []
+    ;(window as unknown as { log: string[] }).log = log
+    const matches = (row: Record<string, unknown>, path: Entry[]) => path.every((entry) => row[entry.field] === entry.value)
+    ;(element as HTMLElement & { dataSource: unknown }).dataSource = {
+      async getGroups({ groupBy, parent }: { groupBy: { field: string }; parent: Entry[] }) {
+        log.push(`groups ${parent.map((entry) => entry.value).join('/') || '-'}`)
+        const rows = source.filter((row) => matches(row, parent))
+        const values = [...new Set(rows.map((row) => row[groupBy.field as keyof typeof row]))].sort()
+        return {
+          groups: values.map((value) => {
+            const inGroup = rows.filter((row) => row[groupBy.field as keyof typeof row] === value)
+            return { value, count: inGroup.length, summary: { amount: inGroup.reduce((sum, row) => sum + row.amount, 0) } }
+          }),
+        }
+      },
+      async getRows({ start, count, group }: { start: number; count: number; group?: Entry[] }) {
+        log.push(`rows ${group?.map((entry) => entry.value).join('/')} ${start}+${count}`)
+        const rows = source.filter((row) => matches(row, group ?? []))
+        return { rows: rows.slice(start, start + count), total: rows.length }
+      },
+    }
+  }, ORDERS)
+  const log = () => page.evaluate(() => (window as unknown as { log: string[] }).log)
+  await expect.poll(async () => (await lines(page)).length).toBe(3)
+  // The aggregates come from the source; there is no qty in its summary, so that cell stays empty.
+  expect((await lines(page))[2]).toBe('group region=EMEA | EMEA 5 | | $48,210.00 | ')
+  await groupRow(page, 'region=EMEA').click()
+  await expect(groupRow(page, 'region=EMEA/status=Paid')).toBeVisible()
+  await groupRow(page, 'region=EMEA/status=Paid').click()
+  await expect(table(page).getByRole('row', { name: /Acme GmbH/ })).toHaveCount(1)
+  expect(await log()).toEqual(['groups -', 'groups EMEA', 'rows EMEA/Paid 0+3'])
+  // Rows of a group the table never fetched cannot be selected through it.
+  await expect(table(page).locator('[part~="group-row"] c2-checkbox')).toHaveCount(0)
+})
+
+test('the grouping text is translatable', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${orders('group-by="region" selection="multiple" checkbox-selection')}</div>`)
+  await expect(groupRow(page, 'region=EMEA').locator('c2-checkbox')).toHaveAttribute('aria-label', 'Sélectionner les lignes de EMEA')
+  await expect(table(page).locator('[part~="selection-header-cell"] c2-checkbox')).toHaveAttribute('aria-label', 'Sélectionner toutes les lignes')
+  await groupRow(page, 'region=EMEA').click()
+  await expect(table(page).locator('[role="status"]')).toHaveText('EMEA replié')
 })

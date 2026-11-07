@@ -8,6 +8,7 @@ import type {
   ColumnPin,
   TableCellRenderer,
   TableColumnConfig,
+  TableEditorRenderer,
   TableHeaderRenderer,
   TableSummaryAggregate,
   TableSummaryFunction,
@@ -114,8 +115,23 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Renders the summary cell body instead of the formatted value. Property only. */
   @property({ attribute: false }) renderSummary?: TableSummaryRenderer
 
+  /**
+   * Value of the column on group rows when it should differ from the summary row: `sum`, `avg`, `min`, `max`, `count`,
+   * `none` to leave group cells empty, or a function of the group's rows (property only). Defaults to `summary`.
+   */
+  @property({ type: String, attribute: 'group-summary' }) groupSummary?: TableSummaryAggregate | TableSummaryFunction | 'none'
+
   /** Client-side sort comparator for this column's values. Property only. */
   @property({ attribute: false }) comparator?: (a: unknown, b: unknown) => number
+
+  /** Lets the user edit this column's cells. Absent inherits the table's `editable`; `editable="false"` opts out. */
+  @property({ type: Boolean }) editable?: boolean
+
+  /** Renders the editor of a cell instead of the built-in input; call `commit(value)` or `cancel()` from it. Property only. */
+  @property({ attribute: false }) renderEditor?: TableEditorRenderer
+
+  /** Matched by the table's `quick-filter`. `filterable="false"` leaves the column out. */
+  @property({ type: Boolean }) filterable?: boolean
 
   /** Puts the group tree (chevron, group label and count, indentation) in this column while the table is grouped. Defaults to the first column. */
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false

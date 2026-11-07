@@ -90,6 +90,23 @@
 
     selection-cell--width: 44px,
 
+    detail-toggle-cell--width: 40px,
+    detail-toggle--size: 16px,
+    detail-toggle--color: #71717a,
+    detail-toggle--transition-duration: 150ms,
+    detail-row--background: #fafafa,
+    detail-cell--padding: 12px 16px,
+
+    editor--background: #ffffff,
+    editor--color: #18181b,
+    editor--border: 1px solid rgb(2, 101, 220),
+    editor--border-radius: 4px,
+    editor--padding: 0 8px,
+    editor--height: 28px,
+
+    drop-indicator--color: rgb(2, 101, 220),
+    header-cell__dragging--opacity: 0.5,
+
     skeleton--background: #f4f4f5,
     skeleton--border-radius: 4px,
 
@@ -654,6 +671,103 @@
 
 @media (prefers-reduced-motion: reduce) {
   .group-toggle {
+    transition: none;
+  }
+}
+
+// Row details. The detail is a row of the grid holding one cell across it; it grows to its content, so the table
+// stops virtualizing while one is open.
+.detail-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: css.cssVar(detail-toggle--size);
+  height: css.cssVar(detail-toggle--size);
+  color: css.cssVar(detail-toggle--color);
+  transform: rotate(-90deg);
+  transition: transform css.cssVar(detail-toggle--transition-duration) ease;
+}
+
+.detail-toggle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.detail-toggle--expanded {
+  transform: none;
+}
+
+.row--detail {
+  height: auto;
+  background: css.cssVar(detail-row--background);
+}
+
+.cell--detail {
+  grid-column: 1 / -1;
+  display: block;
+  padding: 0;
+  overflow: visible;
+}
+
+// The content sticks to the start edge, so a sideways scroll of a wide grid does not carry it away.
+.detail-content {
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
+  max-width: var(--_viewport-width, 100%);
+  padding: css.cssVar(detail-cell--padding);
+}
+
+// Editing. The built-in editor fills the cell's content box.
+.cell-content--editing {
+  flex: 1 1 auto;
+  display: flex;
+  overflow: visible;
+}
+
+.editor {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: css.cssVar(editor--height);
+  padding: css.cssVar(editor--padding);
+  border: css.cssVar(editor--border);
+  border-radius: css.cssVar(editor--border-radius);
+  background: css.cssVar(editor--background);
+  color: css.cssVar(editor--color);
+  font: inherit;
+  text-align: inherit;
+  outline: none;
+}
+
+.cell--align-end .editor {
+  text-align: end;
+}
+
+// Column reordering: the dragged header fades, and a line marks where it would land.
+.cell--dragging {
+  opacity: css.cssVar(header-cell__dragging--opacity);
+}
+
+.cell--drop-before {
+  box-shadow: inset 2px 0 0 0 css.cssVar(drop-indicator--color);
+}
+
+.cell--drop-after {
+  box-shadow: inset -2px 0 0 0 css.cssVar(drop-indicator--color);
+}
+
+// Announcements of sorting, grouping, filtering and column moves, read by screen readers only.
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-toggle {
     transition: none;
   }
 }

@@ -14,7 +14,23 @@ import { defaultCompare } from '@c2n/core/data-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import { provide } from '@lit/context'
 import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
+import { tableMessages } from './messages.js'
+import {
+  buildGroupTree,
+  buildRemoteGroupTree,
+  depthOf,
+  expansionResolver,
+  flattenGroups,
+  groupAtLevel,
+  toggleExpansion,
+  type GroupNode,
+  type GroupTree,
+  type Grouping,
+  type RemoteGroup,
+} from './grouping.js'
+import { aggregate, csvField, filterTerms, matchesTerms, plainText, withFieldValue } from './table-data.js'
 import {
   getFieldValue,
   groupByConverter,
@@ -22,24 +38,32 @@ import {
   type ColumnPin,
   type SortDirection,
   type SortModel,
+  type TableCellEditEventDetail,
   type TableCellEventDetail,
   type TableColumnConfig,
+  type TableColumnReorderEventDetail,
+  type TableCsvOptions,
   type TableColumnResizeEventDetail,
   type TableDataSource,
   type TableGroupBy,
   type TableGroupContext,
+  type TableGroupPathEntry,
   type TableGroupDisplay,
   type TableGroupRenderer,
   type TableGroupToggleEventDetail,
   type TableRangeChangeEventDetail,
   type TableRenderedRow,
   type TableRow,
+  type TableRowContext,
+  type TableRowDetailRenderer,
+  type TableRowDetailToggleEventDetail,
   type TableRowEventDetail,
   type TableRowPartResolver,
   type TableRowStyler,
   type TableSelectionChangeEventDetail,
   type TableSortChangeEventDetail,
   type TableSummaryAggregate,
+  type TableSummaryFunction,
 } from './table-types.js'
 
 import '@c2n/checkbox'
@@ -55,6 +79,8 @@ export type TableVirtualMode = 'auto' | 'always' | 'never'
 
 /** Field of the synthetic checkbox column, so it can live in the same render pipeline as the real columns. */
 const SELECTION_FIELD = '__c2-selection'
+/** Field of the synthetic column holding the chevron that shows a row's detail, while `renderDetail` is set. */
+const DETAIL_FIELD = '__c2-detail'
 /** Floor of a flexible track and of a column being resized, unless the column sets `minWidth`. */
 const DEFAULT_MIN_WIDTH = 64
 /** A plain flexible track such as `1fr` or `2.5fr`. */
@@ -80,51 +106,7 @@ interface SummaryCell {
   span: number
 }
 
-/** One group of the row tree, built from the sorted rows whenever they or `groupBy` change. */
-interface GroupNode {
-  key: string
-  level: number
-  field: string
-  value: unknown
-  /** Indices of the group's rows, sub-groups included, in the array the tree was built from. */
-  rowIndices: number[]
-  children: GroupNode[]
-  parent?: GroupNode
-  /** Where the group's own row sits in the display list; -1 while a closed parent hides it. */
-  position: number
-  /** The rows, their keys and the aggregates, computed on first use: the tree is rebuilt whenever the rows change. */
-  rows?: TableRow[]
-  keys?: string[]
-  selection?: { value: string[]; count: number }
-  summary?: { inputs: unknown[]; values: Map<string, unknown> }
-}
-
-/** One line of a grouped body: a group row, or a data row pointing into the array the tree was built from. */
-type DisplayItem = { kind: 'group'; node: GroupNode } | { kind: 'row'; rowIndex: number; parent: GroupNode }
-
-interface Grouping {
-  levels: TableGroupBy[]
-  /** The rows the tree indexes into: the sorted rows, or the transition rows while an update animates. */
-  source: TableRow[]
-  roots: GroupNode[]
-  nodes: Map<string, GroupNode>
-  items: DisplayItem[]
-}
-
-/** Group keys are `field=value` pairs joined by `/`, so those characters (and `;`, the list separator) are escaped. */
-function encodeGroupPart(value: string): string {
-  return value.replace(/[%/=;]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
-}
-
-/** Groups rows by the string form of their value: `1` and `"1"` share a group, and an empty value is its own. */
-function groupBucketId(value: unknown): string {
-  if (value === null || value === undefined || value === '') return ''
-  if (value instanceof Date) return value.toISOString()
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
-
-/** Keys of the expanded groups: a `;`-separated list in the attribute, since a key holds `/` and `=`. */
+/** Keys of groups (expanded or collapsed): a `;`-separated list in the attribute, since a key holds `/` and `=`. */
 const groupKeysConverter = {
   ...arrayPropertyConverter,
   fromAttribute: (value: string | null) => (value === null ? undefined : arrayPropertyConverter.fromAttribute(value)),
@@ -148,6 +130,16 @@ function columnKey(column: TableColumnConfig): string {
   return (column instanceof TableColumn ? column.columnId : column.id) || column.field
 }
 
+/** The checkbox and detail columns the table adds itself, which have no data and no header. */
+function isSynthetic(column: TableColumnConfig): boolean {
+  return column.field === SELECTION_FIELD || column.field === DETAIL_FIELD
+}
+
+/** A cell's text on one line, for a tab-separated clipboard row. */
+function tsvField(text: string): string {
+  return text.replace(/[\t\r\n]+/g, ' ')
+}
+
 /**
  * `value` holds row keys, and a row key is always a string. `arrayPropertyConverter` only splits strings, so an array
  * of numeric ids assigned from script (`table.value = [1, 2]`) used to be stored as numbers and match no row.
@@ -158,41 +150,6 @@ const rowKeysConverter = {
     const parsed = arrayPropertyConverter.fromProperty(value)
     return Array.isArray(parsed) ? parsed.filter((key) => key !== null && key !== undefined).map(String) : parsed
   },
-}
-
-function toNumber(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value === 'string' && value.trim() !== '') return Number(value)
-  return Number.NaN
-}
-
-/** Reduces a column's values to one of the built-in aggregates; non-numeric values are skipped by all but `count`. */
-function aggregate(kind: TableSummaryAggregate, values: unknown[]): unknown {
-  if (kind === 'count') return values.filter((value) => value !== null && value !== undefined && value !== '').length
-  let sum = 0
-  let count = 0
-  let min = Number.POSITIVE_INFINITY
-  let max = Number.NEGATIVE_INFINITY
-  for (const value of values) {
-    const number = toNumber(value)
-    if (!Number.isFinite(number)) continue
-    sum += number
-    count++
-    if (number < min) min = number
-    if (number > max) max = number
-  }
-  switch (kind) {
-    case 'sum':
-      return sum
-    case 'avg':
-      return count ? sum / count : undefined
-    case 'min':
-      return count ? min : undefined
-    case 'max':
-      return count ? max : undefined
-    default:
-      return undefined
-  }
 }
 
 export interface TablePageChangeEventDetail {
@@ -211,6 +168,40 @@ export interface TablePageChangeEventDetail {
   totalRows: number
 }
 
+/** Builds the `Intl` formatter of a column once; a formatter that cannot be built shows the raw value. */
+function createFormatter(column: TableColumnConfig, format: string): (value: unknown) => string {
+  const locale = column.locale
+  const extra = column.formatOptions
+  try {
+    switch (format) {
+      case 'number': {
+        const formatter = new Intl.NumberFormat(locale, numberFormatOptions({}, extra))
+        return (value) => formatter.format(Number(value))
+      }
+      case 'percent': {
+        const formatter = new Intl.NumberFormat(locale, numberFormatOptions({ style: 'percent' }, extra))
+        return (value) => formatter.format(Number(value))
+      }
+      case 'currency': {
+        const formatter = new Intl.NumberFormat(locale, numberFormatOptions({ style: 'currency', currency: column.currency ?? 'USD' }, extra))
+        return (value) => formatter.format(Number(value))
+      }
+      case 'date':
+      case 'datetime':
+      case 'time': {
+        const base: Intl.DateTimeFormatOptions =
+          format === 'date' ? { dateStyle: 'medium' } : format === 'datetime' ? { dateStyle: 'medium', timeStyle: 'short' } : { timeStyle: 'short' }
+        const formatter = new Intl.DateTimeFormat(locale, dateFormatOptions(base, extra))
+        return (value) => formatter.format(new Date(value as string))
+      }
+      default:
+        return (value) => String(value)
+    }
+  } catch {
+    return (value) => String(value)
+  }
+}
+
 function numberFormatOptions(base: Intl.NumberFormatOptions, extra: Record<string, unknown> | undefined): Intl.NumberFormatOptions {
   return Object.assign({}, base, extra ?? {})
 }
@@ -223,6 +214,47 @@ function humanize(field: string): string {
   const last = field.split('.').pop() ?? field
   const spaced = last.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
+type EditorType = 'text' | 'number' | 'date' | 'datetime-local' | 'time'
+
+/** The built-in editor's input type for a column's format. */
+function editorType(format: TableColumnConfig['format']): EditorType {
+  switch (format) {
+    case 'number':
+    case 'percent':
+    case 'currency':
+      return 'number'
+    case 'date':
+      return 'date'
+    case 'datetime':
+      return 'datetime-local'
+    case 'time':
+      return 'time'
+    default:
+      return 'text'
+  }
+}
+
+/** The text the editor starts with: the raw value, cut to what a date or time input accepts. */
+function editorDraft(value: unknown, type: EditorType): string {
+  if (value === null || value === undefined) return ''
+  if (type === 'date' || type === 'datetime-local') {
+    const date = value instanceof Date ? value : new Date(String(value))
+    if (Number.isNaN(date.getTime())) return ''
+    // The input wants local time: shift the ISO string (always UTC) by the zone offset.
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString()
+    return type === 'date' ? (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : local.slice(0, 10)) : local.slice(0, 16)
+  }
+  return value instanceof Date ? value.toISOString() : String(value)
+}
+
+/** The value of the built-in editor: a number (or `null` when emptied) for numeric columns, its text otherwise. */
+function parseEditorValue(input: HTMLInputElement): unknown {
+  if (input.type !== 'number') return input.value
+  if (input.value.trim() === '') return null
+  const number = Number(input.value)
+  return Number.isFinite(number) ? number : input.value
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -277,6 +309,9 @@ export interface TableEventMap {
   'page-change': CustomEvent<TablePageChangeEventDetail>
   'group-toggle': CustomEvent<TableGroupToggleEventDetail>
   'range-change': CustomEvent<TableRangeChangeEventDetail>
+  'cell-edit': CustomEvent<TableCellEditEventDetail>
+  'row-detail-toggle': CustomEvent<TableRowDetailToggleEventDetail>
+  'column-reorder': CustomEvent<TableColumnReorderEventDetail>
 }
 
 export interface Table {
@@ -361,13 +396,18 @@ export interface Table {
  *
  * **Grouping.** `group-by="region,status"` gathers the rows into collapsible groups, outermost level first; the grid
  * becomes a `treegrid`. With the default `group-display="row"` each group is a row of the grid: its label and row
- * count in the first column (or the one marked `group-column`), and under every column with a `summary` that
- * aggregate over the group's rows, formatted like the column. `group-display="band"` draws one full-width band per
- * group instead. A group is named by its path, `region=EMEA/status=Paid`: `expanded-groups` lists the open ones
- * (every group is open until then, or closed with `groups-collapsed`), `group-toggle` reports a click, and a group's
- * checkbox selects its rows. The groups of the rows at the top stay under the header while their rows scroll, and
- * a page that starts inside a group repeats its headers; pages count display lines, so a closed group takes one.
- * Grouping is done on the client and does not apply to a `dataSource`.
+ * count in the first column (or the one marked `group-column`), and under every column with a `summary` (or a
+ * `group-summary`, when group rows need another aggregate) that aggregate over the group's rows, formatted like the
+ * column. `group-display="band"` draws one full-width band per group instead. A group is named by its path,
+ * `region=EMEA/status=Paid`. Groups are open by default and the ones the user closes are listed in
+ * `collapsed-groups`; with `groups-collapsed` they start closed and the opened ones are listed in `expanded-groups`,
+ * which, when set, is the whole state. Only exceptions are recorded, so a group that appears later follows the
+ * default. `group-toggle` reports a click, and a group's checkbox selects its rows. Groups are ordered by value, or by
+ * an aggregate with a level's `sortBy` (`{ field: 'region', sortBy: 'amount', sort: 'desc' }`). The groups of the
+ * rows at the top stay under the header while their rows scroll, and a page that starts inside a group repeats its
+ * headers; pages count display lines, so a closed group takes one. A `dataSource` groups too when it implements
+ * `getGroups`: the table asks for each level's groups as they open and for an open group's rows through `getRows`
+ * with `request.group`.
  *
  * ```html
  * <c2-table row-key="id" group-by="region" selection="multiple" checkbox-selection>
@@ -376,6 +416,31 @@ export interface Table {
  *   <c2-table-column field="amount" format="currency" align="end" summary="sum"></c2-table-column>
  * </c2-table>
  * ```
+ *
+ * **Filtering.** `quick-filter` keeps the rows where every word of the text occurs in a visible cell, as shown or raw,
+ * and `filter` (a predicate, property only) keeps those it accepts. Both run before sorting, grouping and the summary,
+ * so totals and group counts describe what is shown; the empty state then says "No matching rows". A `dataSource`
+ * receives the text as `request.filter`.
+ *
+ * **Row details.** `renderDetail` (property only) adds a column of chevrons; opening one shows what it returns in a row
+ * under that row, across the grid. `expanded-rows` lists the open rows by key and `row-detail-toggle` reports a toggle.
+ * Details have their own heights, so the table does not virtualize while one is open.
+ *
+ * **Editing.** On an `editable` table or column, double-click, Enter, F2 or typing on a cell opens an editor (an input
+ * matching the column's `format`, or the column's `renderEditor`); Enter or leaving it commits and Escape cancels. A
+ * changed value fires the cancelable `cell-edit`, after which the table replaces the row in `rows` by a copy holding
+ * the new value — cancel the event to apply it yourself, such as after the server accepted it.
+ *
+ * **Columns.** With `reorderable`, headers are dragged to reorder the columns (Ctrl+Shift+←/→, or ⌘⇧ on macOS, from a
+ * focused header); `column-order` holds the order and `column-reorder` reports a move. `hidden-columns` (or
+ * `setColumnHidden()`) hides columns by id, and `allColumns` lists every column for a column menu.
+ *
+ * **Export and copy.** `toCSV()` returns the rows as CSV — all, selected or the page, raw or formatted — and
+ * `downloadCSV()` saves it. ⌘C / Ctrl+C in the grid copies the selected rows as tab-separated lines, or the focused
+ * cell's text when no row is selected.
+ *
+ * Sorting, opening a group, filtering and moving a column are announced through a live region; the built-in text
+ * is English and translatable with `addTranslations({ fr: { table: {…} } })`.
  *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
@@ -405,6 +470,9 @@ export interface Table {
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
+ * @event {CustomEvent<TableCellEditEventDetail>} cell-edit - Fired when the user commits a changed value in a cell editor, before the table writes it: `detail.value` is the new value, `detail.previousValue` the old one, with the row, its key and the column. Cancel it (`preventDefault()`) to keep `rows` unchanged and apply the value yourself.
+ * @event {CustomEvent<TableRowDetailToggleEventDetail>} row-detail-toggle - Fired after the user shows or hides a row's detail, with the row, its key and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
+ * @event {CustomEvent<TableColumnReorderEventDetail>} column-reorder - Fired after the user moves a column, by drag or keyboard: `detail.id` is the column moved and `detail.order` every column id in the new order, which `columnOrder` now holds.
  * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
@@ -432,6 +500,13 @@ export interface Table {
  * @csspart group-toggle - The chevron of a group row.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
+ * @csspart detail-toggle-cell - A body cell holding the chevron that shows a row's detail.
+ * @csspart detail-header-cell - The empty header cell above the detail chevrons.
+ * @csspart detail-toggle - The chevron that shows and hides a row's detail.
+ * @csspart detail-row - The row under an expanded row that holds its detail.
+ * @csspart detail-cell - The one cell of a detail row, across the grid.
+ * @csspart editor - The built-in input of a cell being edited.
+ * @csspart cell-editing - A body cell while its editor is open; exposed in addition to `cell`.
  *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
@@ -526,6 +601,23 @@ export interface Table {
  * @cssproperty {border-radius} [--c2-table__group-count--border-radius=999px]
  *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
+ *
+ * @cssproperty {pixel} [--c2-table__detail-toggle-cell--width=40px] - Width of the column of detail chevrons.
+ * @cssproperty {pixel} [--c2-table__detail-toggle--size=16px]
+ * @cssproperty {color} [--c2-table__detail-toggle--color=#71717a]
+ * @cssproperty {time} [--c2-table__detail-toggle--transition-duration=150ms] - Chevron turn when a detail opens or closes; respects reduced motion.
+ * @cssproperty {color} [--c2-table__detail-row--background=#fafafa]
+ * @cssproperty {padding} [--c2-table__detail-cell--padding=12px 16px]
+ *
+ * @cssproperty {color} [--c2-table__editor--background=#ffffff]
+ * @cssproperty {color} [--c2-table__editor--color=#18181b]
+ * @cssproperty {border} [--c2-table__editor--border=1px solid rgb(2, 101, 220)]
+ * @cssproperty {border-radius} [--c2-table__editor--border-radius=4px]
+ * @cssproperty {padding} [--c2-table__editor--padding=0 8px]
+ * @cssproperty {pixel} [--c2-table__editor--height=28px]
+ *
+ * @cssproperty {color} [--c2-table__drop-indicator--color=rgb(2, 101, 220)] - Line marking where a dragged header lands.
+ * @cssproperty {number} [--c2-table__header-cell__dragging--opacity=0.5] - Opacity of the header being dragged.
  *
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
  * @cssproperty {border-radius} [--c2-table__skeleton--border-radius=4px]
@@ -665,8 +757,21 @@ export class Table extends LitElement {
   /** Shows the error state with this message. */
   @property({ type: String }) error = ''
 
-  /** Message shown when there are no rows. */
-  @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No rows'
+  /** Message shown when there are no rows. Defaults to the translated "No rows" (or "No matching rows" while filtered). */
+  @property({ type: String, attribute: 'empty-message' }) emptyMessage = ''
+
+  /**
+   * Keeps only the rows this returns true for, before sorting and grouping. Property only; not applied to a
+   * `dataSource`, which filters on the server.
+   */
+  @property({ attribute: false }) filter?: (row: TableRow) => boolean
+
+  /**
+   * Text search over the visible columns: a row stays when every word occurs in one of its cells, case-insensitively,
+   * as the cell shows it or as its raw value. A column with `filterable="false"` is left out. A `dataSource` receives
+   * it as `request.filter` instead.
+   */
+  @property({ type: String, attribute: 'quick-filter' }) quickFilter = ''
 
   /** The page on show, 1-based. Only meaningful while the table is `paginated`; clamped to `pageCount`. */
   @property({ type: Number, reflect: true }) page = 1
@@ -697,25 +802,72 @@ export class Table extends LitElement {
   @property({ type: String, attribute: 'group-display' }) groupDisplay: TableGroupDisplay = 'row'
 
   /**
-   * Keys of the open groups (`region=EMEA/status=Paid`). While unset, every group follows `groups-collapsed`; the
-   * first toggle writes the full list here, so it can be read, stored and handed back. `;`-separated in the attribute.
+   * Keys of the open groups (`region=EMEA/status=Paid`). When set, the groups it lists are open and every other one —
+   * including a group that appears later — is closed. With `groups-collapsed` the user's toggles are written here.
+   * `;`-separated in the attribute.
    */
   @property({ converter: groupKeysConverter, attribute: 'expanded-groups' }) expandedGroups?: string[]
 
-  /** Starts every group closed while `expandedGroups` is unset. */
+  /**
+   * Keys of the groups the user closed while groups are open by default (no `expandedGroups`, no `groups-collapsed`).
+   * Only the exceptions are kept, so a group that appears later (new rows, another filter) opens like the others.
+   * `;`-separated in the attribute.
+   */
+  @property({ converter: groupKeysConverter, attribute: 'collapsed-groups' }) collapsedGroups?: string[]
+
+  /** Starts every group closed while `expandedGroups` is unset; opened groups are then recorded in `expandedGroups`. */
   @property({ type: Boolean, attribute: 'groups-collapsed' }) groupsCollapsed = false
 
   /** Renders a group's label in place of its formatted value. The slot `group:<key>` wins over both. */
   @property({ attribute: false }) renderGroup?: TableGroupRenderer
 
-  /** Label of the group of rows whose value is empty. */
-  @property({ type: String, attribute: 'empty-group-label' }) emptyGroupLabel = 'No value'
+  /** Label of the group of rows whose value is empty. Defaults to the translated "No value". */
+  @property({ type: String, attribute: 'empty-group-label' }) emptyGroupLabel = ''
+
+  /**
+   * Renders the detail of a row, shown under it while it is expanded. Setting it adds a leading column of chevrons
+   * that show and hide each row's detail. Property only. A detail has its own height, so **while any row is expanded
+   * the table stops virtualizing** — page large tables with `page-size`.
+   */
+  @property({ attribute: false }) renderDetail?: TableRowDetailRenderer
+
+  /** Keys of the rows whose detail is shown: an array in the property, `;`-separated in the attribute. */
+  @property({ converter: rowKeysConverter, attribute: 'expanded-rows' }) expandedRows: string[] = []
+
+  /** Makes every column editable; a column's own `editable` still wins. See `cell-edit`. */
+  @property({ type: Boolean }) editable = false
+
+  /**
+   * Lets the user reorder the columns by dragging their headers, or with Ctrl+Shift+←/→ (⌘⇧ on macOS) on a focused
+   * header. A pinned column moves among the columns pinned to the same side. Fires `column-reorder`.
+   */
+  @property({ type: Boolean }) reorderable = false
+
+  /**
+   * Column ids in display order: an array in the property, `;`-separated in the `column-order` attribute. Columns it
+   * does not list follow, in their definition order. Written when the user reorders the columns.
+   */
+  @property({ converter: arrayPropertyConverter, attribute: 'column-order' }) columnOrder?: string[]
+
+  /**
+   * Ids of columns to leave out, on top of those whose definition is `hidden`: what a column menu toggles.
+   * `setColumnHidden()` edits it. An array in the property, `;`-separated in the attribute.
+   */
+  @property({ converter: arrayPropertyConverter, attribute: 'hidden-columns' }) hiddenColumns: string[] = []
 
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
   private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
   @state() private remoteTotal = -1
+  /** The last message of the live region: what a sort, a group toggle, a filter or a column move did. */
+  @state() private announcement = ''
+  /** The cell being edited: its row's key, its column's id and the text in the editor. */
+  @state() private editing?: { key: string; column: string; line: number }
+  /** Where a dragged header would land: before or after the header of `column`. */
+  @state() private dropTarget?: { source: string; column: string; after: boolean }
+
+  private readonly msg = new LocalizeController(this, tableMessages)
 
   #sortedRows: TableRow[] = []
   #blocks = new Map<number, TableRow[]>()
@@ -737,8 +889,30 @@ export class Table extends LitElement {
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
   #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
+  /** The number of rows before filtering, for the filter announcement. */
+  #unfilteredCount = 0
+  /** The quick filter the last announcement described, so only a change of it is announced. */
+  #announcedFilter = ''
+  /** Formatters by column and format: building an `Intl` formatter per cell is what made formatting slow. */
+  #formatters = new WeakMap<TableColumnConfig, { key: string; format: (value: unknown) => string }>()
+  /** Focus the editor once it renders; `select` selects its text (an edit not started by typing). */
+  #focusEditor?: { select: boolean }
+  /** The editor's text, kept out of reactive state so typing does not redraw the grid. */
+  #editDraft = ''
+  /** A header drag just ended: the click that follows must not sort. */
+  #suppressHeaderClick = false
+  /** Groups a data source listed, by the key of their parent (`''` for the top level). */
+  #remoteGroups = new Map<string, RemoteGroup[]>()
+  /** Rows fetched for the bottom-level groups of a data source, by group key and block. */
+  #remoteGroupRows = new Map<string, Map<number, TableRow[]>>()
+  /** Requests in flight for a data source's groups and their rows. */
+  #remotePending = new Set<string>()
+  /** Bumped whenever remote groups or rows arrive, so the cached grouping is rebuilt. */
+  #remoteVersion = 0
   #warnedGroupedSource = false
   #headerHeightPx = 0
+  /** The viewport's inner width, which caps a row detail so it stays in view on a sideways scroll. Measured while details are on. */
+  #viewportWidth = 0
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
   /** The window `range-change` last reported, to fire only when it moves. */
@@ -818,6 +992,8 @@ export class Table extends LitElement {
   /** Whether the rows are currently windowed. */
   get isVirtualized(): boolean {
     if (this.wrap || this.virtual === 'never') return false
+    // A row's detail has its own height, which the uniform-height window cannot place.
+    if (typeof this.renderDetail === 'function' && this.expandedRows.length > 0) return false
     if (this.virtual === 'always') return true
     return this.rowCount > this.virtualThreshold
   }
@@ -830,10 +1006,24 @@ export class Table extends LitElement {
     return Boolean(this.dataSource) && this.remoteTotal < 0 && !this.error
   }
 
-  /** The resolved, ordered, visible columns — children first, then the `columns` property, then one per key of the first row. */
-  get resolvedColumns(): TableColumnConfig[] {
+  /**
+   * Every column definition in display order (`columnOrder` applied), hidden ones included — children first, then the
+   * `columns` property, then one per key of the first row. What a column menu lists.
+   */
+  get allColumns(): TableColumnConfig[] {
     const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
-    const visible = source.filter((column) => columnKey(column) && !column.hidden)
+    const columns = source.filter((column) => columnKey(column))
+    const order = Array.isArray(this.columnOrder) ? this.columnOrder : []
+    if (!order.length) return columns
+    const rank = new Map(order.map((id, index) => [id, index]))
+    // Stable: the columns `columnOrder` does not name keep their definition order, after the ones it does.
+    return [...columns].sort((left, right) => (rank.get(columnKey(left)) ?? order.length) - (rank.get(columnKey(right)) ?? order.length))
+  }
+
+  /** The visible columns in display order, pinned ones moved to their edges: what the grid draws. */
+  get resolvedColumns(): TableColumnConfig[] {
+    const hidden = new Set(Array.isArray(this.hiddenColumns) ? this.hiddenColumns : [])
+    const visible = this.allColumns.filter((column) => !column.hidden && !hidden.has(columnKey(column)))
     return [
       ...visible.filter((column) => column.pinned === 'start'),
       ...visible.filter((column) => !column.pinned),
@@ -848,6 +1038,11 @@ export class Table extends LitElement {
   keyOf(row: TableRow): string | undefined {
     const identity = this.#identityOf(row)
     if (identity !== undefined) return identity
+    const grouping = this.dataSource && this.groupBy?.length ? this.#grouping() : undefined
+    if (grouping?.remote) {
+      const index = grouping.source.indexOf(row)
+      return index >= 0 ? String(index) : undefined
+    }
     if (this.dataSource) {
       const size = this.#effectiveBlockSize
       for (const [block, rows] of this.#blocks) {
@@ -960,15 +1155,104 @@ export class Table extends LitElement {
     this.#setGroupExpanded(key, false)
   }
 
-  /** Opens every group. */
+  /** Opens every group. Without `groups-collapsed` this returns to the default, so groups that appear later open too. */
   expandAll() {
-    const grouping = this.#grouping()
-    if (grouping) this.expandedGroups = [...grouping.nodes.keys()]
+    if (this.groupsCollapsed) {
+      const grouping = this.#grouping()
+      if (grouping) this.expandedGroups = [...grouping.nodes.keys()]
+      return
+    }
+    this.expandedGroups = undefined
+    this.collapsedGroups = undefined
   }
 
-  /** Closes every group. */
+  /** Closes every group, including groups that appear later. */
   collapseAll() {
     this.expandedGroups = []
+    this.collapsedGroups = undefined
+  }
+
+  /**
+   * Opens the groups above `level` and closes the others: `expandToLevel(1)` shows every top-level group open with
+   * its sub-groups closed, `expandToLevel(0)` is `collapseAll()`.
+   */
+  expandToLevel(level: number) {
+    const grouping = this.#grouping()
+    if (!grouping) return
+    this.collapsedGroups = undefined
+    this.expandedGroups = [...grouping.nodes.values()].filter((node) => node.level < level).map((node) => node.key)
+  }
+
+  /** Hides or shows the column with `id` through `hiddenColumns`. A column whose definition is `hidden` stays hidden. */
+  setColumnHidden(id: string, hidden: boolean) {
+    const rest = (Array.isArray(this.hiddenColumns) ? this.hiddenColumns : []).filter((entry) => entry !== id)
+    this.hiddenColumns = hidden ? [...rest, id] : rest
+  }
+
+  /**
+   * Moves the column with `id` to `index` among `allColumns` and writes the result to `columnOrder`. Pinned columns
+   * are still drawn at their edge. Does not fire `column-reorder`, which reports what the user did.
+   */
+  moveColumn(id: string, index: number) {
+    const order = this.allColumns.map(columnKey)
+    const from = order.indexOf(id)
+    if (from < 0) return
+    order.splice(from, 1)
+    order.splice(Math.min(Math.max(0, Math.floor(index) || 0), order.length), 0, id)
+    this.columnOrder = order
+  }
+
+  /** Whether the detail of `row` is shown. */
+  isRowExpanded(row: TableRow): boolean {
+    const key = this.keyOf(row)
+    return key !== undefined && this.expandedRows.includes(key)
+  }
+
+  /** Shows or hides the detail of `row` (toggles it without `expanded`). Does not fire `row-detail-toggle`. */
+  toggleRowDetail(row: TableRow, expanded?: boolean) {
+    const key = this.keyOf(row)
+    if (key !== undefined) this.#setRowExpanded(key, expanded ?? !this.expandedRows.includes(key))
+  }
+
+  /**
+   * Opens the editor of the cell of `row` in the column with `id`, when that column is editable and the row is on
+   * screen (on the current page, in an open group). Returns whether it opened.
+   */
+  editCell(row: TableRow, id: string): boolean {
+    const columns = this.#renderColumns()
+    const columnIndex = columns.findIndex((column) => columnKey(column) === id)
+    const key = this.keyOf(row)
+    if (columnIndex < 0 || key === undefined || !this.#isEditable(columns[columnIndex])) return false
+    const line = this.#lineOfKey(key)
+    if (line < 0) return false
+    this.#beginEdit(line, columnIndex)
+    return this.editing !== undefined
+  }
+
+  /**
+   * The rows as CSV text, one line per row (`\r\n`-separated) with a header line first. See {@link TableCsvOptions}
+   * for which rows and columns, raw or formatted values, and the escaping of formula-like text.
+   */
+  toCSV(options: TableCsvOptions = {}): string {
+    const { rows = 'all', columns = 'visible', header = true, formatted = false, separator = ',', escapeFormulas = true } = options
+    const fields = (columns === 'all' ? this.allColumns : this.resolvedColumns).filter((column) => column.field)
+    const data = rows === 'selected' ? this.getSelectedRows() : rows === 'page' ? this.#pageRows() : this.#allRows()
+    const lines: string[] = []
+    if (header) lines.push(fields.map((column) => csvField(this.#headerText(column), separator, escapeFormulas)).join(separator))
+    for (const row of data) lines.push(fields.map((column) => csvField(this.#cellText(column, row, formatted), separator, escapeFormulas)).join(separator))
+    return lines.join('\r\n')
+  }
+
+  /** Saves `toCSV(options)` as a file named `filename`, through the browser's download. */
+  downloadCSV(filename = 'table.csv', options: TableCsvOptions = {}) {
+    // The byte order mark is what makes Excel read the file as UTF-8 rather than the system code page.
+    const blob = new Blob(['\ufeff', this.toCSV(options)], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 0)
   }
 
   /** Drops the `dataSource` cache and reloads the visible rows. */
@@ -982,18 +1266,28 @@ export class Table extends LitElement {
     if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
     if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
     const regroup = changed.has('groupBy') || changed.has('dataSource')
-    if (!this.hasUpdated || regroup || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
+    const refilter = changed.has('filter') || changed.has('quickFilter') || changed.has('hiddenColumns')
+    if (!this.hasUpdated || regroup || refilter || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
       this.#applySort()
-    if (this.dataSource && this.#groupLevels().length && !this.#warnedGroupedSource) {
+    if (this.dataSource && typeof this.dataSource.getGroups !== 'function' && this.#groupLevels().length && !this.#warnedGroupedSource) {
       this.#warnedGroupedSource = true
       console.warn(
-        '[c2-table] group-by is ignored with a dataSource: the table only holds the rows it has fetched, so it cannot know every group. Group the rows yourself, or pass them in rows.',
+        '[c2-table] group-by is ignored with a dataSource that has no getGroups: the table only holds the rows it has fetched, so it cannot know every group. Implement getGroups, group the rows yourself, or pass them in rows.',
       )
     }
     // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
     // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
-    if (changed.has('dataSource') || changed.has('blockSize') || changed.has('pageSize') || (this.dataSource && changed.has('sortModel'))) {
+    if (
+      changed.has('dataSource') ||
+      changed.has('blockSize') ||
+      changed.has('pageSize') ||
+      (this.dataSource && (changed.has('sortModel') || changed.has('quickFilter') || changed.has('groupBy')))
+    ) {
       this.#resetRemote()
+    }
+    if (changed.has('quickFilter') && this.hasUpdated && !this.dataSource && this.quickFilter !== this.#announcedFilter) {
+      this.#announcedFilter = this.quickFilter
+      this.#announce(this.msg.t('filtered', this.#sortedRows.length, this.#unfilteredCount))
     }
     if (this.paginated) {
       // A new sort is a new dataset; start it at the top rather than on a page that may no longer exist.
@@ -1078,6 +1372,7 @@ export class Table extends LitElement {
     this.#warnPositionalKeys()
     this.#measureRowHeight()
     this.#measureHeaderHeight()
+    this.#measureViewportWidth()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
     if (this.#pendingFocus) {
@@ -1085,7 +1380,21 @@ export class Table extends LitElement {
       this.renderRoot.querySelector<HTMLElement>('.cell[tabindex="0"]')?.focus(this.#pendingFocusOptions)
       this.#pendingFocusOptions = undefined
     }
-    if (this.dataSource) this.#ensureBlocks()
+    if (this.#focusEditor && this.editing) {
+      const cell = this.renderRoot.querySelector<HTMLElement>('.cell[data-editing]')
+      const input = cell?.querySelector<HTMLInputElement>('input.editor')
+      const target = input ?? cell?.querySelector<HTMLElement>('input, select, textarea, button, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]')
+      if (target) {
+        const { select } = this.#focusEditor
+        this.#focusEditor = undefined
+        target.focus()
+        if (input && select) input.select()
+      }
+    }
+    if (this.dataSource) {
+      if (this.#remoteGrouping) this.#ensureRemoteGroups()
+      else this.#ensureBlocks()
+    }
     this.#reportRenderedRange()
   }
 
@@ -1161,8 +1470,9 @@ export class Table extends LitElement {
           aria-colcount=${columns.length}
           aria-label=${this.gridLabel || nothing}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
-          style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
+          style=${styleMap({ '--_grid-template': this.#gridTemplate(columns), '--_viewport-width': this.#viewportWidth ? `${this.#viewportWidth}px` : undefined })}
           @keydown=${this.#handleKeyDown}
+          @copy=${this.#handleCopy}
         >
           ${this.#renderHeaderRow(columns, pins)}
           ${
@@ -1184,6 +1494,7 @@ export class Table extends LitElement {
       </div>
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
       <slot name="fallback" class="definitions"></slot>
+      <div class="live" role="status">${this.announcement}</div>
     `
   }
 
@@ -1197,7 +1508,7 @@ export class Table extends LitElement {
       const isLoading = this.loading || this.#isBootstrapping
       return html`<div class="row row--state" role="row">
         <div class="cell cell--state" role="gridcell" part="state">
-          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${this.emptyMessage}</slot>`}
+          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${this.#emptyText}</slot>`}
         </div>
       </div>`
     }
@@ -1212,7 +1523,8 @@ export class Table extends LitElement {
         (line) => {
           const item = grouping.items[line]
           if (item.kind === 'group') return `group:${item.node.key}`
-          return this.#keyAt(item.rowIndex, grouping.source[item.rowIndex])
+          const row = grouping.source[item.rowIndex]
+          return row ? this.#keyAt(item.rowIndex, row) : `skeleton:${item.rowIndex}`
         },
         (line) => {
           const item = grouping.items[line]
@@ -1230,29 +1542,29 @@ export class Table extends LitElement {
     )
   }
 
+  /** The empty-state text: the author's `empty-message`, else "No matching rows" while filtered, else "No rows". */
+  get #emptyText(): string {
+    if (this.emptyMessage) return this.emptyMessage
+    const filtered = !this.dataSource && (filterTerms(this.quickFilter).length > 0 || typeof this.filter === 'function') && this.#unfilteredCount > 0
+    return this.msg.t(filtered ? 'noMatches' : 'empty')
+  }
+
   /** The column holding the group tree: the one marked `group-column`, else the first data column. */
   #groupTreeColumn(columns: TableColumnConfig[]): TableColumnConfig | undefined {
-    return columns.find((column) => column.groupColumn && column.field !== SELECTION_FIELD) ?? columns.find((column) => column.field !== SELECTION_FIELD)
+    return columns.find((column) => column.groupColumn && !isSynthetic(column)) ?? columns.find((column) => !isSynthetic(column))
   }
 
   #renderGroupLabel(node: GroupNode, grouping: Grouping, echo: boolean) {
-    const column = this.#fieldColumn(node.field)
-    const empty = node.value === null || node.value === undefined || node.value === ''
-    const label = this.renderGroup
-      ? this.renderGroup(this.#groupContext(node, grouping))
-      : empty
-        ? this.emptyGroupLabel
-        : column
-          ? this.#formatValue(column, node.value)
-          : String(node.value)
+    const label = this.renderGroup ? this.renderGroup(this.#groupContext(node, grouping)) : this.#groupText(node)
     const content = html`<span class="group-label" part="group-label">${label}</span>
-      <span class="group-count" part="group-count">${node.rowIndices.length}</span>`
+      <span class="group-count" part="group-count">${this.#formatCount(node.count)}</span>`
     // Two slots of one name would split the slotted label between the row and its stuck copy; the copy shows the fallback.
     return echo ? content : html`<slot name=${`group:${node.key}`}>${content}</slot>`
   }
 
   #renderGroupCheckbox(node: GroupNode, grouping: Grouping) {
-    if (this.selection !== 'multiple') return nothing
+    // A data source's group holds rows the table has not fetched, so they cannot be selected through it.
+    if (this.selection !== 'multiple' || grouping.remote) return nothing
     const keys = this.#groupKeys(node, grouping)
     // Counted once per selection rather than on every scroll frame: a group can hold thousands of rows.
     if (node.selection?.value !== this.value) {
@@ -1262,7 +1574,7 @@ export class Table extends LitElement {
     const count = node.selection.count
     const all = count > 0 && count === keys.length
     return html`<c2-checkbox
-      aria-label="Select group rows"
+      aria-label=${this.msg.t('selectGroup', this.#groupText(node))}
       ?checked=${all}
       ?indeterminate=${count > 0 && !all}
       @click=${(event: Event) => event.stopPropagation()}
@@ -1308,16 +1620,17 @@ export class Table extends LitElement {
       cells = columns.map((column, columnIndex) => {
         const pinClasses = this.#pinClasses(column, pins)
         const style = styleMap(this.#pinStyle(column, pins))
-        if (column.field === SELECTION_FIELD) {
+        if (isSynthetic(column)) {
+          const selection = column.field === SELECTION_FIELD
           return html`<div
             class=${classMap({ cell: true, 'cell--selection': true, ...pinClasses })}
             role="gridcell"
-            part="group-cell selection-cell"
+            part=${selection ? 'group-cell selection-cell' : 'group-cell'}
             aria-colindex=${columnIndex + 1}
             tabindex=${ifDefined(focusable(columnIndex))}
             style=${style}
           >
-            ${echo ? nothing : this.#renderGroupCheckbox(node, grouping)}
+            ${echo || !selection ? nothing : this.#renderGroupCheckbox(node, grouping)}
           </div>`
         }
         const part = columnKey(column).replace(/[^\w-]/g, '-')
@@ -1338,7 +1651,7 @@ export class Table extends LitElement {
         const content =
           value === undefined || value === null || value === ''
             ? ''
-            : column.summary === 'count'
+            : this.#groupAggregate(column) === 'count'
               ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
               : this.#formatValue(column, value)
         return html`<div
@@ -1386,6 +1699,19 @@ export class Table extends LitElement {
   }
 
   #renderHeaderCell(column: TableColumnConfig, columnIndex: number, pins: Map<string, PinPlacement>) {
+    if (column.field === DETAIL_FIELD) {
+      return html`<div
+        class=${classMap({ cell: true, 'cell--header': true, 'cell--selection': true, ...this.#pinClasses(column, pins) })}
+        role="columnheader"
+        part="header-cell detail-header-cell"
+        data-field=${column.field}
+        data-column-id=${columnKey(column)}
+        aria-colindex=${columnIndex + 1}
+        aria-label=${this.msg.t('rowDetails')}
+        tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
+        style=${styleMap(this.#pinStyle(column, pins))}
+      ></div>`
+    }
     if (column.field === SELECTION_FIELD) {
       const total = this.#rowTotal
       const selected = this.value.length
@@ -1402,7 +1728,7 @@ export class Table extends LitElement {
           style=${styleMap(this.#pinStyle(column, pins))}
         >
           <c2-checkbox
-            aria-label="Select all rows"
+            aria-label=${this.msg.t('selectAll')}
             ?checked=${allSelected}
             ?indeterminate=${selected > 0 && !allSelected}
             ?disabled=${this.selection !== 'multiple' || Boolean(this.dataSource)}
@@ -1416,7 +1742,9 @@ export class Table extends LitElement {
     const sortIndex = this.sortModel.findIndex((entry) => entry.field === column.field)
     const sort = sortIndex >= 0 ? this.sortModel[sortIndex] : undefined
     const resizable = column.resizable ?? this.resizable
-    const label = column.renderHeader ? column.renderHeader({ column }) : (column.header ?? humanize(column.field || columnKey(column)))
+    const label = column.renderHeader ? column.renderHeader({ column }) : this.#headerText(column)
+    const key = columnKey(column)
+    const drop = this.dropTarget
 
     return html`
       <div
@@ -1425,6 +1753,10 @@ export class Table extends LitElement {
           'cell--header': true,
           'cell--sortable': sortable,
           'cell--sorted': Boolean(sort),
+          'cell--reorderable': this.reorderable,
+          'cell--dragging': drop?.source === key,
+          'cell--drop-before': drop?.column === key && !drop.after && drop.source !== key,
+          'cell--drop-after': drop?.column === key && drop.after && drop.source !== key,
           [`cell--align-${column.align ?? 'start'}`]: true,
           ...this.#pinClasses(column, pins),
         })}
@@ -1436,8 +1768,13 @@ export class Table extends LitElement {
         aria-sort=${ifDefined(sortable ? (sort ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none') : undefined)}
         tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
         style=${styleMap(this.#pinStyle(column, pins))}
+        @pointerdown=${(event: PointerEvent) => this.#startReorder(event, column)}
         @click=${(event: MouseEvent) => {
           this.focusedCell = { row: HEADER_ROW, column: columnIndex }
+          if (this.#suppressHeaderClick) {
+            this.#suppressHeaderClick = false
+            return
+          }
           this.#toggleSort(column, event.shiftKey)
         }}
       >
@@ -1482,12 +1819,14 @@ export class Table extends LitElement {
     const updateState = key ? this.#rowUpdateStates.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
     const extraParts = row && updateState !== 'removed' ? this.rowPart?.({ row, rowIndex: index, key }) : undefined
+    const detailed = Boolean(row && key !== '' && typeof this.renderDetail === 'function' && this.expandedRows.includes(key))
 
     return html`
       <div
         class=${classMap({
           row: true,
           'row--body': true,
+          'row--expanded': detailed,
           'row--odd': line % 2 === 1,
           'row--selected': selected,
           'row--clickable': selectable,
@@ -1514,7 +1853,21 @@ export class Table extends LitElement {
       >
         ${columns.map((column, columnIndex) => this.#renderCell(row, line, index, column, columnIndex, pins, column === treeColumn ? depth : 0))}
       </div>
+      ${detailed ? this.#renderDetailRow(row!, index, key, line, columns.length) : nothing}
     `
+  }
+
+  /**
+   * The detail of an expanded row: one cell across the grid under it. It is not a display line — it has no
+   * `aria-rowindex`, the arrow keys pass over it and its content keeps its own keyboard behaviour.
+   */
+  #renderDetailRow(row: TableRow, rowIndex: number, key: string, line: number, span: number) {
+    const context: TableRowContext = { row, rowIndex, key }
+    return html`<div class="row row--detail" role="row" part="detail-row" id=${`detail-${line}`} data-row-key=${key}>
+      <div class="cell cell--detail" role="gridcell" part="detail-cell" aria-colspan=${span}>
+        <div class="detail-content">${this.renderDetail?.(context)}</div>
+      </div>
+    </div>`
   }
 
   /** `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys); `indent` is its group depth. */
@@ -1530,7 +1883,9 @@ export class Table extends LitElement {
     const classes = {
       cell: true,
       [`cell--align-${column.align ?? 'start'}`]: true,
-      'cell--selection': column.field === SELECTION_FIELD,
+      'cell--selection': isSynthetic(column),
+      'cell--editable': this.#isEditable(column),
+      'cell--editing': Boolean(this.editing && row && this.editing.column === columnKey(column) && this.editing.key === this.#keyAt(rowIndex, row)),
       ...this.#pinClasses(column, pins),
       ...(column.cellClass ? { [column.cellClass]: true } : {}),
     }
@@ -1538,6 +1893,29 @@ export class Table extends LitElement {
       class: classMap(classes),
       tabindex: this.#tabIndexFor(line, columnIndex),
       style: styleMap(this.#pinStyle(column, pins)),
+    }
+
+    if (column.field === DETAIL_FIELD) {
+      const key = row ? this.#keyAt(rowIndex, row) : ''
+      const expanded = key !== '' && this.expandedRows.includes(key)
+      return html`<div
+        class=${shared.class}
+        role="gridcell"
+        part="cell detail-toggle-cell"
+        aria-colindex=${columnIndex + 1}
+        aria-label=${this.msg.t('rowDetails')}
+        aria-expanded=${ifDefined(row ? String(expanded) : undefined)}
+        aria-controls=${ifDefined(expanded ? `detail-${line}` : undefined)}
+        tabindex=${shared.tabindex}
+        style=${shared.style}
+        @click=${(event: Event) => {
+          event.stopPropagation()
+          this.focusedCell = { row: line, column: columnIndex }
+          this.#toggleDetailFromUser(line)
+        }}
+      >
+        ${row ? html`<span class=${classMap({ 'detail-toggle': true, 'detail-toggle--expanded': expanded })} part="detail-toggle">${CHEVRON}</span>` : nothing}
+      </div>`
     }
 
     if (column.field === SELECTION_FIELD) {
@@ -1554,7 +1932,7 @@ export class Table extends LitElement {
           ${
             row
               ? html`<c2-checkbox
-                  aria-label="Select row"
+                  aria-label=${this.msg.t('selectRow')}
                   ?checked=${this.value.includes(key)}
                   @click=${(event: Event) => event.stopPropagation()}
                   @change=${() => this.#handleCheckboxToggle(line)}
@@ -1566,6 +1944,8 @@ export class Table extends LitElement {
     }
 
     const value = getFieldValue(row, column.field)
+    const editing = Boolean(row && this.editing && this.editing.column === columnKey(column) && this.editing.key === this.#keyAt(rowIndex, row))
+    if (editing) return this.#renderEditingCell(row!, rowIndex, column, columnIndex, value, shared)
     const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
     // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
     // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
@@ -1588,6 +1968,7 @@ export class Table extends LitElement {
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
+        @dblclick=${() => this.#beginEdit(line, columnIndex)}
         @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
         <span
@@ -1598,6 +1979,401 @@ export class Table extends LitElement {
         >
       </div>
     `
+  }
+
+  /** A cell while its editor is open: the built-in input, or what the column's `renderEditor` returns. */
+  #renderEditingCell(
+    row: TableRow,
+    rowIndex: number,
+    column: TableColumnConfig,
+    columnIndex: number,
+    value: unknown,
+    shared: { class: unknown; tabindex: number; style: unknown },
+  ) {
+    const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
+    const commit = (next: unknown) => this.#commitEdit(next)
+    const cancel = () => this.#cancelEdit()
+    const type = editorType(column.format)
+    const editor = column.renderEditor
+      ? column.renderEditor({ value, row, rowIndex, column, commit, cancel })
+      : html`<input
+          class="editor"
+          part="editor"
+          type=${type}
+          step=${ifDefined(type === 'number' ? 'any' : undefined)}
+          .value=${this.#editDraft}
+          aria-label=${this.msg.t('editCell', this.#headerText(column))}
+          @input=${(event: Event) => (this.#editDraft = (event.target as HTMLInputElement).value)}
+          @keydown=${(event: KeyboardEvent) => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              commit(parseEditorValue(event.target as HTMLInputElement))
+            } else if (event.key === 'Escape') {
+              event.preventDefault()
+              event.stopPropagation()
+              cancel()
+            }
+          }}
+          @blur=${(event: FocusEvent) => {
+            // Leaving the editor commits, unless it is already closing (Enter, Escape).
+            if (this.editing) this.#commitEdit(parseEditorValue(event.target as HTMLInputElement), false)
+          }}
+          @click=${(event: Event) => event.stopPropagation()}
+          @dblclick=${(event: Event) => event.stopPropagation()}
+        />`
+    return html`
+      <div
+        class=${shared.class}
+        role="gridcell"
+        part="cell cell-${fieldPart} cell-editing"
+        aria-colindex=${columnIndex + 1}
+        tabindex=${shared.tabindex}
+        style=${shared.style}
+        data-editing
+        @click=${(event: Event) => event.stopPropagation()}
+        @focusout=${(event: FocusEvent) => {
+          // A custom editor that loses focus to something outside its cell is left without committing: only it knows
+          // its value. Close it so the cell does not stay in edit mode forever.
+          if (!column.renderEditor || !this.editing) return
+          const next = event.relatedTarget as Node | null
+          if (!next || !(event.currentTarget as Node).contains(next)) this.#cancelEdit(false)
+        }}
+      >
+        <span class="cell-content cell-content--editing" part="cell-content cell-content-${fieldPart}">${editor}</span>
+      </div>
+    `
+  }
+
+  #isEditable(column: TableColumnConfig | undefined): boolean {
+    return Boolean(column && !isSynthetic(column) && column.field && (column.editable ?? this.editable))
+  }
+
+  /** Opens the editor of the cell on display line `line`; `initial` is the text typed to start it, replacing the value. */
+  #beginEdit(line: number, columnIndex: number, initial?: string) {
+    const column = this.#renderColumns()[columnIndex]
+    if (!this.#isEditable(column)) return
+    const index = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(index)
+    if (!row) return
+    this.#editDraft = initial ?? editorDraft(getFieldValue(row, column.field), editorType(column.format))
+    this.editing = { key: this.#keyAt(index, row), column: columnKey(column), line }
+    this.focusedCell = { row: line, column: columnIndex }
+    this.#focusEditor = { select: initial === undefined }
+    this.#pendingFocus = false
+    this.#scrollToLine(line)
+  }
+
+  /**
+   * Closes the editor with `next`. Fires `cell-edit` when the value changed and, unless a listener cancels it, writes
+   * the value into a copy of the row (`rows` is replaced, the row the app gave is not mutated).
+   */
+  #commitEdit(next: unknown, refocus = true) {
+    const editing = this.editing
+    if (!editing) return
+    this.editing = undefined
+    if (refocus) this.#pendingFocus = true
+    const column = this.#renderColumns().find((candidate) => columnKey(candidate) === editing.column)
+    const line = this.#lineOfKey(editing.key)
+    const rowIndex = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(rowIndex)
+    if (!column || !row) return
+    const previousValue = getFieldValue(row, column.field)
+    if (Object.is(previousValue, next) || (typeof previousValue === typeof next && plainText(previousValue) === plainText(next))) return
+    const event = new CustomEvent<TableCellEditEventDetail>('cell-edit', {
+      detail: { row, rowIndex, key: editing.key, column, field: column.field, value: next, previousValue },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    })
+    if (!this.dispatchEvent(event)) return
+    this.#applyEdit(row, column.field, next)
+  }
+
+  #cancelEdit(refocus = true) {
+    if (!this.editing) return
+    this.editing = undefined
+    if (refocus) this.#pendingFocus = true
+  }
+
+  /** Replaces `row` by a copy holding `value` at `field`: in `rows`, or in the blocks a data source delivered. */
+  #applyEdit(row: TableRow, field: string, value: unknown) {
+    const next = withFieldValue(row, field, value)
+    if (this.dataSource) {
+      const replace = (rows: TableRow[]) => {
+        const index = rows.indexOf(row)
+        if (index >= 0) rows[index] = next
+      }
+      this.#blocks.forEach(replace)
+      for (const blocks of this.#remoteGroupRows.values()) blocks.forEach(replace)
+      this.#remoteVersion++
+      this.requestUpdate()
+      return
+    }
+    const rows = Array.isArray(this.rows) ? this.rows : []
+    const index = rows.indexOf(row)
+    if (index < 0) return
+    const copy = [...rows]
+    copy[index] = next
+    this.rows = copy
+  }
+
+  /** The display line of the data row with `key`, or -1 when it is not on any line (filtered out, in a closed group). */
+  #lineOfKey(key: string): number {
+    for (let line = 0; line < this.#lineCount; line++) {
+      const index = this.#rowIndexAt(line)
+      const row = this.#sourceRowAt(index)
+      if (row && this.#keyAt(index, row) === key) return line
+    }
+    return -1
+  }
+
+  #setRowExpanded(key: string, expanded: boolean) {
+    const rest = this.expandedRows.filter((entry) => entry !== key)
+    this.expandedRows = expanded ? [...rest, key] : rest
+  }
+
+  /** The user showed or hid the detail of the row on `line`. */
+  #toggleDetailFromUser(line: number) {
+    const rowIndex = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(rowIndex)
+    if (!row) return
+    const key = this.#keyAt(rowIndex, row)
+    const expanded = !this.expandedRows.includes(key)
+    this.#setRowExpanded(key, expanded)
+    this.dispatchEvent(
+      new CustomEvent<TableRowDetailToggleEventDetail>('row-detail-toggle', { detail: { row, rowIndex, key, expanded }, bubbles: false, composed: true }),
+    )
+  }
+
+  /** Says `text` through the live region; the same message twice in a row is still read. */
+  #announce(text: string) {
+    this.announcement = this.announcement === text ? `${text}\u00a0` : text
+  }
+
+  #headerText(column: TableColumnConfig): string {
+    return column.header ?? humanize(column.field || columnKey(column))
+  }
+
+  /** A cell's value as text: as the cell formats it, or raw. */
+  #cellText(column: TableColumnConfig, row: TableRow, formatted: boolean): string {
+    const value = getFieldValue(row, column.field)
+    return formatted ? this.#formatValue(column, value) : plainText(value)
+  }
+
+  /** Every row after filter and sort, grouped rows in group order; for a data source, those fetched so far. */
+  #allRows(): TableRow[] {
+    const grouping = this.#grouping()
+    if (grouping) return grouping.source.filter((row): row is TableRow => row !== undefined)
+    if (this.dataSource) {
+      return [...this.#blocks.entries()].sort(([left], [right]) => left - right).flatMap(([, rows]) => rows)
+    }
+    return this.#sortedRows
+  }
+
+  /** The data rows on the page on show (every row when not paging), in display order. */
+  #pageRows(): TableRow[] {
+    const rows: TableRow[] = []
+    for (let line = this.#pageStart; line < this.#pageStart + this.rowCount; line++) {
+      const row = this.#sourceRowAt(this.#rowIndexAt(line))
+      if (row) rows.push(row)
+    }
+    return rows
+  }
+
+  /**
+   * Copy (⌘C / Ctrl+C) from the grid: the selected rows as tab-separated lines a spreadsheet pastes into cells, or
+   * the focused cell's text when nothing is selected. Text selected with the pointer, an editor and a control keep
+   * their own copy.
+   */
+  #handleCopy = (event: ClipboardEvent) => {
+    if (this.editing || !event.clipboardData) return
+    const origin = event.composedPath()[0]
+    if (origin instanceof Element && origin.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], .row--detail')) return
+    if ((document.getSelection()?.toString() ?? '') !== '') return
+    const text = this.#copyText()
+    if (text === undefined) return
+    event.clipboardData.setData('text/plain', text)
+    event.preventDefault()
+  }
+
+  #copyText(): string | undefined {
+    const selected = this.selection === 'none' ? [] : this.getSelectedRows()
+    if (selected.length) {
+      const fields = this.resolvedColumns.filter((column) => column.field)
+      return selected.map((row) => fields.map((column) => tsvField(this.#cellText(column, row, true))).join('\t')).join('\n')
+    }
+    const { row: line, column: columnIndex } = this.focusedCell
+    const column = this.#renderColumns()[columnIndex]
+    if (!column || isSynthetic(column)) return undefined
+    if (line === HEADER_ROW) return this.#headerText(column)
+    if (line < 0) return undefined
+    const row = this.#sourceRowAt(this.#rowIndexAt(line))
+    return row ? this.#cellText(column, row, true) : undefined
+  }
+
+  /** Starts dragging a header to reorder the columns, once the pointer has moved a few pixels. */
+  #startReorder(event: PointerEvent, column: TableColumnConfig) {
+    if (!this.reorderable || event.button !== 0 || isSynthetic(column)) return
+    if ((event.target as Element | null)?.closest?.('.resizer')) return
+    const cell = event.currentTarget as HTMLElement
+    const source = columnKey(column)
+    const startX = event.clientX
+    const pointerId = event.pointerId
+    let dragging = false
+    const move = (moveEvent: PointerEvent) => {
+      if (!dragging) {
+        if (Math.abs(moveEvent.clientX - startX) < 6) return
+        dragging = true
+        cell.setPointerCapture(pointerId)
+      }
+      this.dropTarget = this.#dropTargetAt(moveEvent.clientX, column) ?? { source, column: source, after: false }
+    }
+    const finish = (endEvent: PointerEvent) => {
+      cell.removeEventListener('pointermove', move)
+      cell.removeEventListener('pointerup', finish)
+      cell.removeEventListener('pointercancel', finish)
+      if (cell.hasPointerCapture(pointerId)) cell.releasePointerCapture(pointerId)
+      const target = this.dropTarget
+      this.dropTarget = undefined
+      if (!dragging) return
+      // The click that ends a drag must not sort the column.
+      this.#suppressHeaderClick = true
+      setTimeout(() => (this.#suppressHeaderClick = false), 0)
+      if (endEvent.type === 'pointerup' && target && target.column !== source) this.#reorderFromUser(source, target.column, target.after)
+    }
+    cell.addEventListener('pointermove', move)
+    cell.addEventListener('pointerup', finish)
+    cell.addEventListener('pointercancel', finish)
+  }
+
+  /** The header a drag at `x` drops before or after: among the columns pinned like `column`, clamped to their ends. */
+  #dropTargetAt(x: number, column: TableColumnConfig): { source: string; column: string; after: boolean } | undefined {
+    const source = columnKey(column)
+    const peers = new Set(
+      this.resolvedColumns.filter((candidate) => (candidate.pinned ?? '') === (column.pinned ?? '')).map((candidate) => columnKey(candidate)),
+    )
+    const cells = [...this.renderRoot.querySelectorAll<HTMLElement>('.row--header .cell--header[data-column-id]')].filter((cell) =>
+      peers.has(cell.dataset.columnId ?? ''),
+    )
+    if (!cells.length) return undefined
+    for (const cell of cells) {
+      const rect = cell.getBoundingClientRect()
+      if (x >= rect.left && x <= rect.right) return { source, column: cell.dataset.columnId!, after: x > rect.left + rect.width / 2 }
+    }
+    const first = cells[0].getBoundingClientRect()
+    return x < first.left
+      ? { source, column: cells[0].dataset.columnId!, after: false }
+      : { source, column: cells[cells.length - 1].dataset.columnId!, after: true }
+  }
+
+  /** The user moved column `source` before or after column `target`: write `columnOrder`, announce it, report it. */
+  #reorderFromUser(source: string, target: string, after: boolean): boolean {
+    const columns = this.allColumns
+    const from = columns.find((column) => columnKey(column) === source)
+    const to = columns.find((column) => columnKey(column) === target)
+    if (!from || !to || source === target || (from.pinned ?? '') !== (to.pinned ?? '')) return false
+    const before = columns.map(columnKey)
+    const order = before.filter((id) => id !== source)
+    order.splice(order.indexOf(target) + (after ? 1 : 0), 0, source)
+    if (order.every((id, index) => id === before[index])) return false
+    this.columnOrder = order
+    const visible = this.resolvedColumns
+    this.#announce(this.msg.t('columnMoved', this.#headerText(from), visible.findIndex((column) => columnKey(column) === source) + 1, visible.length))
+    this.dispatchEvent(new CustomEvent<TableColumnReorderEventDetail>('column-reorder', { detail: { id: source, order }, bubbles: true, composed: true }))
+    return true
+  }
+
+  /** The path of a group, outermost level first: what a data source filters a group's rows by. */
+  #groupPath(node: GroupNode | undefined): TableGroupPathEntry[] {
+    const path: TableGroupPathEntry[] = []
+    for (let current = node; current; current = current.parent) path.unshift({ field: current.field, value: current.value })
+    return path
+  }
+
+  /**
+   * Asks a grouping data source for what the screen needs: the top-level groups, the sub-groups of every open group on
+   * screen, and the blocks of rows of the open bottom-level groups in the rendered window.
+   */
+  #ensureRemoteGroups() {
+    if (!this.dataSource?.getGroups || this.error) return
+    if (!this.#remoteGroups.has('')) {
+      void this.#fetchGroups(undefined)
+      return
+    }
+    const grouping = this.#grouping()
+    if (!grouping) return
+    const bottom = grouping.levels.length - 1
+    for (const node of grouping.nodes.values()) {
+      if (node.position >= 0 && node.level < bottom && this.#isGroupExpanded(node.key) && !this.#remoteGroups.has(node.key)) void this.#fetchGroups(node)
+    }
+    const offset = this.#pageStart
+    const { start, end } = this.#virtualizer.range
+    for (let line = offset + start; line < Math.min(offset + end, offset + this.rowCount); line++) {
+      const item = grouping.items[line]
+      if (item?.kind !== 'row' || grouping.source[item.rowIndex] !== undefined || !item.parent.range) continue
+      void this.#fetchGroupRows(item.parent, Math.floor((item.rowIndex - item.parent.range.start) / this.blockSize))
+    }
+  }
+
+  async #fetchGroups(parent: GroupNode | undefined) {
+    const dataSource = this.dataSource
+    const key = parent?.key ?? ''
+    const pending = `groups:${key}`
+    const level = parent ? parent.level + 1 : 0
+    const spec = this.#groupLevels()[level]
+    if (!dataSource?.getGroups || !spec || this.#remotePending.has(pending)) return
+    this.#remotePending.add(pending)
+    const token = this.#requestToken
+    try {
+      const result = await dataSource.getGroups({
+        level,
+        groupBy: { field: spec.field, ...(typeof spec.sort === 'string' ? { sort: spec.sort } : {}), ...(spec.sortBy ? { sortBy: spec.sortBy } : {}) },
+        parent: this.#groupPath(parent),
+        sort: this.sortModel,
+        ...(this.quickFilter ? { filter: this.quickFilter } : {}),
+      })
+      if (token !== this.#requestToken) return
+      const groups: RemoteGroup[] = Array.isArray(result?.groups) ? result.groups : []
+      this.#remoteGroups.set(key, groups)
+      if (!parent) this.remoteTotal = groups.reduce((sum, group) => sum + Math.max(0, Math.floor(group.count) || 0), 0)
+      this.#remoteVersion++
+      this.requestUpdate()
+    } catch (error) {
+      if (token === this.#requestToken) {
+        this.error = error instanceof Error ? error.message : String(error)
+        if (this.remoteTotal < 0) this.remoteTotal = 0
+      }
+    } finally {
+      if (token === this.#requestToken) this.#remotePending.delete(pending)
+    }
+  }
+
+  async #fetchGroupRows(node: GroupNode, block: number) {
+    const dataSource = this.dataSource
+    const pending = `rows:${node.key}#${block}`
+    if (!dataSource || this.#remotePending.has(pending) || this.#remoteGroupRows.get(node.key)?.has(block)) return
+    this.#remotePending.add(pending)
+    const token = this.#requestToken
+    const size = this.blockSize
+    try {
+      const result = await dataSource.getRows({
+        start: block * size,
+        count: Math.max(0, Math.min(size, node.count - block * size)),
+        sort: this.sortModel,
+        group: this.#groupPath(node),
+        ...(this.quickFilter ? { filter: this.quickFilter } : {}),
+      })
+      if (token !== this.#requestToken) return
+      const blocks = this.#remoteGroupRows.get(node.key) ?? new Map<number, TableRow[]>()
+      blocks.set(block, result?.rows ?? [])
+      this.#remoteGroupRows.set(node.key, blocks)
+      this.#remoteVersion++
+      this.requestUpdate()
+    } catch (error) {
+      if (token === this.#requestToken) this.error = error instanceof Error ? error.message : String(error)
+    } finally {
+      if (token === this.#requestToken) this.#remotePending.delete(pending)
+    }
   }
 
   #hasSummary(columns: TableColumnConfig[]): boolean {
@@ -1705,7 +2481,7 @@ export class Table extends LitElement {
           cell: true,
           'cell--summary': true,
           [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true,
-          'cell--selection': column.field === SELECTION_FIELD,
+          'cell--selection': isSynthetic(column),
           ...this.#pinClasses(column, pins),
           ...(column.cellClass ? { [column.cellClass]: true } : {}),
         })}
@@ -1717,23 +2493,36 @@ export class Table extends LitElement {
         style=${styleMap({ ...this.#pinStyle(column, pins), ...(span > 1 ? { 'grid-column': `span ${span}` } : {}) })}
         @click=${() => (this.focusedCell = { row: SUMMARY_ROW, column: index })}
       >
-        ${column.field === SELECTION_FIELD ? nothing : html`<span class="cell-content" part="summary-content summary-content-${part}">${content}</span>`}
+        ${isSynthetic(column) ? nothing : html`<span class="cell-content" part="summary-content summary-content-${part}">${content}</span>`}
       </div>
     `
   }
 
+  /** The columns the grid draws: the checkbox and detail columns the table adds, then the resolved columns. */
   #renderColumns(): TableColumnConfig[] {
     const columns = this.resolvedColumns
-    if (!this.checkboxSelection) return columns
-    const selectionColumn: TableColumnConfig = {
-      field: SELECTION_FIELD,
-      header: '',
-      width: 'var(--c2-table__selection-cell--width, 44px)',
-      minWidth: 32,
-      align: 'center',
-      pinned: 'start',
+    const synthetic: TableColumnConfig[] = []
+    if (this.checkboxSelection) {
+      synthetic.push({
+        field: SELECTION_FIELD,
+        header: '',
+        width: 'var(--c2-table__selection-cell--width, 44px)',
+        minWidth: 32,
+        align: 'center',
+        pinned: 'start',
+      })
     }
-    return [selectionColumn, ...columns]
+    if (typeof this.renderDetail === 'function') {
+      synthetic.push({
+        field: DETAIL_FIELD,
+        header: '',
+        width: 'var(--c2-table__detail-toggle-cell--width, 40px)',
+        minWidth: 32,
+        align: 'center',
+        pinned: 'start',
+      })
+    }
+    return synthetic.length ? [...synthetic, ...columns] : columns
   }
 
   #autoColumns(): TableColumnConfig[] {
@@ -1804,34 +2593,42 @@ export class Table extends LitElement {
 
   #formatValue(column: TableColumnConfig, value: unknown): string {
     if (value === null || value === undefined || value === '') return ''
-    const locale = column.locale
-    const extra = column.formatOptions
+    const format = column.format ?? 'text'
+    if (format === 'text') return String(value)
+    const id = `${format}|${column.locale ?? ''}|${column.currency ?? ''}|${column.formatOptions ? JSON.stringify(column.formatOptions) : ''}`
+    let entry = this.#formatters.get(column)
+    if (!entry || entry.key !== id) {
+      entry = { key: id, format: createFormatter(column, format) }
+      this.#formatters.set(column, entry)
+    }
     try {
-      switch (column.format) {
-        case 'number':
-          return new Intl.NumberFormat(locale, numberFormatOptions({}, extra)).format(Number(value))
-        case 'percent':
-          return new Intl.NumberFormat(locale, numberFormatOptions({ style: 'percent' }, extra)).format(Number(value))
-        case 'currency':
-          return new Intl.NumberFormat(locale, numberFormatOptions({ style: 'currency', currency: column.currency ?? 'USD' }, extra)).format(Number(value))
-        case 'date':
-          return new Intl.DateTimeFormat(locale, dateFormatOptions({ dateStyle: 'medium' }, extra)).format(new Date(value as string))
-        case 'datetime':
-          return new Intl.DateTimeFormat(locale, dateFormatOptions({ dateStyle: 'medium', timeStyle: 'short' }, extra)).format(new Date(value as string))
-        case 'time':
-          return new Intl.DateTimeFormat(locale, dateFormatOptions({ timeStyle: 'short' }, extra)).format(new Date(value as string))
-        default:
-          return String(value)
-      }
+      return entry.format(value)
     } catch {
       return String(value)
     }
+  }
+
+  #countFormat?: { locale: string; format: Intl.NumberFormat }
+
+  /** A group's row count, grouped by thousands in the table's language. */
+  #formatCount(count: number): string {
+    const locale = this.msg.locale
+    if (this.#countFormat?.locale !== locale) {
+      try {
+        this.#countFormat = { locale, format: new Intl.NumberFormat(locale) }
+      } catch {
+        return String(count)
+      }
+    }
+    return this.#countFormat.format.format(count)
   }
 
   /** `index` is the row's position in the whole dataset, on every page. */
   #rowAt(index: number): TableRow | undefined {
     if (index < 0) return undefined
     if (this.dataSource) {
+      const grouping = this.groupBy?.length ? this.#grouping() : undefined
+      if (grouping?.remote) return grouping.source[index]
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
@@ -1873,12 +2670,33 @@ export class Table extends LitElement {
 
   #applySort() {
     const rows = Array.isArray(this.rows) ? this.rows : []
+    this.#unfilteredCount = rows.length
     this.#sortedRows = this.#sortRows(rows)
   }
 
-  /** Sorts by `sortModel`, then, while grouped, gathers the rows of each group together in the order of the groups. */
+  /**
+   * Keeps the rows `filter` accepts and `quickFilter` matches. A quick-filter word may occur in a cell's raw value or
+   * in its formatted text, so `1,200` and `1200` both find an amount. A data source filters on the server.
+   */
+  #filterRows(rows: TableRow[]): TableRow[] {
+    if (this.dataSource) return rows
+    const terms = filterTerms(this.quickFilter)
+    const predicate = this.filter
+    if (!terms.length && typeof predicate !== 'function') return rows
+    const columns = terms.length ? this.resolvedColumns.filter((column) => column.field && column.filterable !== false) : []
+    const texts = (row: TableRow) =>
+      columns.flatMap((column) => {
+        const value = getFieldValue(row, column.field)
+        const raw = plainText(value).toLocaleLowerCase()
+        const shown = this.#formatValue(column, value).toLocaleLowerCase()
+        return shown === raw ? [raw] : [raw, shown]
+      })
+    return rows.filter((row) => (typeof predicate !== 'function' || predicate(row)) && (!terms.length || matchesTerms(terms, texts(row))))
+  }
+
+  /** Filters, sorts by `sortModel`, then, while grouped, gathers the rows of each group together in the order of the groups. */
   #sortRows(rows: TableRow[]): TableRow[] {
-    const sorted = this.#sortBySortModel(rows)
+    const sorted = this.#sortBySortModel(this.#filterRows(rows))
     const levels = this.groupBy?.length ? this.#groupLevels() : []
     if (this.dataSource || !levels.length) return sorted
     const ordered: TableRow[] = []
@@ -1886,7 +2704,7 @@ export class Table extends LitElement {
       if (node.children.length) node.children.forEach(visit)
       else for (const index of node.rowIndices) ordered.push(sorted[index])
     }
-    this.#buildGroupTree(sorted, levels).roots.forEach(visit)
+    this.#buildTree(sorted, levels).roots.forEach(visit)
     return ordered
   }
 
@@ -1898,6 +2716,11 @@ export class Table extends LitElement {
       .filter((entry): entry is TableGroupBy => Boolean(entry && typeof entry.field === 'string' && entry.field))
   }
 
+  /** Whether the rows come from a data source that groups them itself (`getGroups`). */
+  get #remoteGrouping(): boolean {
+    return Boolean(this.dataSource && typeof this.dataSource.getGroups === 'function' && this.#groupLevels().length)
+  }
+
   /**
    * The group tree and the display list, or `undefined` when the rows are not grouped. Cached in two layers on their
    * inputs: the tree only depends on the rows and the levels, and opening a group should not re-bucket 10k rows.
@@ -1906,75 +2729,66 @@ export class Table extends LitElement {
     // Read per rendered row, so an ungrouped table leaves before allocating anything.
     if (!this.groupBy?.length) return undefined
     const levels = this.#groupLevels()
-    if (this.dataSource || !levels.length) return undefined
-    const source = this.#transitionRows ?? this.#sortedRows
-    const treeInputs = [source, this.groupBy, this.sortModel, this.columnElements, this.columns, this.rowKey, this.getRowKey]
-    const itemInputs = [this.expandedGroups, this.groupsCollapsed]
+    if (!levels.length) return undefined
+    const remote = Boolean(this.dataSource)
+    if (remote && typeof this.dataSource?.getGroups !== 'function') return undefined
+    const source = remote ? undefined : (this.#transitionRows ?? this.#sortedRows)
+    const treeInputs = [
+      source,
+      this.groupBy,
+      this.sortModel,
+      this.columnElements,
+      this.columns,
+      this.rowKey,
+      this.getRowKey,
+      this.dataSource,
+      this.#remoteVersion,
+    ]
+    const itemInputs = [this.expandedGroups, this.collapsedGroups, this.groupsCollapsed]
     const cached = this.#groupingCache
     const sameTree = cached && cached.treeInputs.every((input, index) => input === treeInputs[index])
     if (sameTree && cached.itemInputs.every((input, index) => input === itemInputs[index])) return cached.grouping
 
-    const tree = sameTree ? cached.grouping : this.#buildGroupTree(source, levels)
-    const expanded = this.expandedGroups ? new Set(this.expandedGroups) : undefined
-    const items: DisplayItem[] = []
-    const flatten = (node: GroupNode) => {
-      node.position = items.length
-      items.push({ kind: 'group', node })
-      if (expanded ? expanded.has(node.key) : !this.groupsCollapsed) {
-        if (node.children.length) node.children.forEach(flatten)
-        else for (const rowIndex of node.rowIndices) items.push({ kind: 'row', rowIndex, parent: node })
-      }
-    }
-    for (const node of tree.nodes.values()) node.position = -1
-    tree.roots.forEach(flatten)
-
-    const grouping: Grouping = { ...tree, items }
+    const tree: GroupTree = sameTree
+      ? cached.grouping
+      : source
+        ? this.#buildTree(source, levels)
+        : buildRemoteGroupTree(levels, this.#remoteGroups, (key) => this.#remoteGroupRows.get(key), this.blockSize)
+    const items = flattenGroups(tree, (node) => this.#isGroupExpanded(node.key))
+    const grouping: Grouping = { levels: tree.levels, source: tree.source, roots: tree.roots, nodes: tree.nodes, items, remote }
     this.#groupingCache = { treeInputs, itemInputs, grouping }
     return grouping
   }
 
-  /**
-   * Buckets `source` level by level. Rows keep their order inside a bucket; the buckets of a level are ordered by
-   * their value, following the level's `sort`, else the direction the table is sorted by that field, else ascending.
-   */
-  #buildGroupTree(source: TableRow[], levels: TableGroupBy[]): Omit<Grouping, 'items'> {
-    const nodes = new Map<string, GroupNode>()
-    const build = (indices: number[], level: number, parent: GroupNode | undefined): GroupNode[] => {
-      const spec = levels[level]
-      const comparator = this.#groupComparator(spec)
-      const buckets = new Map<string, { value: unknown; indices: number[] }>()
-      for (const index of indices) {
-        const row = source[index]
-        const value = spec.getValue ? spec.getValue(row) : getFieldValue(row, spec.field)
-        const id = groupBucketId(value)
-        const bucket = buckets.get(id)
-        if (bucket) bucket.indices.push(index)
-        else buckets.set(id, { value, indices: [index] })
-      }
-      const children = [...buckets].map(([id, bucket]) => {
-        const part = `${encodeGroupPart(spec.field)}=${encodeGroupPart(id)}`
-        const node: GroupNode = {
-          key: parent ? `${parent.key}/${part}` : part,
-          level,
-          field: spec.field,
-          value: bucket.value,
-          rowIndices: bucket.indices,
-          children: [],
-          parent,
-          position: -1,
-        }
-        nodes.set(node.key, node)
-        if (level + 1 < levels.length) node.children = build(bucket.indices, level + 1, node)
-        return node
-      })
-      return children.sort((left, right) => comparator(left.value, right.value))
-    }
-    const roots = build(
-      source.map((_, index) => index),
-      0,
-      undefined,
+  #buildTree(source: TableRow[], levels: TableGroupBy[]): GroupTree {
+    return buildGroupTree(
+      source,
+      levels,
+      (row, spec) => (spec.getValue ? spec.getValue(row) : getFieldValue(row, spec.field)),
+      (spec, nodes) => this.#orderGroups(spec, nodes, source),
     )
-    return { levels, source, roots, nodes }
+  }
+
+  /**
+   * Orders the sibling groups of one level: by `compare` on the whole groups, by the aggregate `sortBy` names, or by
+   * their value — the level's `sort`, else the direction the table is sorted by that field, else ascending.
+   */
+  #orderGroups(spec: TableGroupBy, nodes: GroupNode[], source: TableRow[]): GroupNode[] {
+    const tree = { source }
+    if (typeof spec.compare === 'function') {
+      const compare = spec.compare
+      const contexts = new Map(nodes.map((node) => [node, this.#groupContext(node, tree)]))
+      return nodes.sort((left, right) => compare(contexts.get(left)!, contexts.get(right)!))
+    }
+    if (spec.sortBy) {
+      const id = spec.sortBy
+      const byCount = id === 'count' && !this.allColumns.some((column) => columnKey(column) === 'count')
+      const value = (node: GroupNode) => (byCount ? node.count : this.#groupSummary(node, tree).get(id))
+      const direction = spec.sort === 'desc' ? -1 : 1
+      return nodes.sort((left, right) => direction * defaultCompare(value(left), value(right)))
+    }
+    const comparator = this.#groupComparator(spec)
+    return nodes.sort((left, right) => comparator(left.value, right.value))
   }
 
   #groupComparator(spec: TableGroupBy): (a: unknown, b: unknown) => number {
@@ -1991,16 +2805,33 @@ export class Table extends LitElement {
     return source.find((column) => column.field === field)
   }
 
+  #expansionCache?: { inputs: unknown[]; isOpen: (key: string) => boolean }
+
+  /** Whether the group with `key` is open; the key lists are turned into sets once per change, not searched per row. */
   #isGroupExpanded(key: string): boolean {
-    return this.expandedGroups ? this.expandedGroups.includes(key) : !this.groupsCollapsed
+    const inputs = [this.expandedGroups, this.collapsedGroups, this.groupsCollapsed]
+    const cached = this.#expansionCache
+    if (!cached || cached.inputs.some((input, index) => input !== inputs[index])) {
+      this.#expansionCache = { inputs, isOpen: expansionResolver(this.#expansion) }
+    }
+    return this.#expansionCache!.isOpen(key)
+  }
+
+  get #expansion() {
+    return {
+      expanded: Array.isArray(this.expandedGroups) ? this.expandedGroups : undefined,
+      collapsed: Array.isArray(this.collapsedGroups) ? this.collapsedGroups : undefined,
+      collapsedByDefault: this.groupsCollapsed,
+    }
   }
 
   #setGroupExpanded(key: string, expanded: boolean): boolean {
     const grouping = this.#grouping()
     if (!grouping?.nodes.has(key) || this.#isGroupExpanded(key) === expanded) return false
-    // Until a group is toggled the list is implicit; write it out whole so it reads back as the state on screen.
-    const current = this.expandedGroups ?? (this.groupsCollapsed ? [] : [...grouping.nodes.keys()])
-    this.expandedGroups = expanded ? [...current, key] : current.filter((entry) => entry !== key)
+    // Only the exception to the default is written, so a group that appears later follows the default.
+    const next = toggleExpansion(this.#expansion, key, expanded)
+    if (next.expanded !== this.expandedGroups) this.expandedGroups = next.expanded ? [...next.expanded] : undefined
+    if (next.collapsed !== this.collapsedGroups) this.collapsedGroups = next.collapsed ? [...next.collapsed] : undefined
     return true
   }
 
@@ -2009,6 +2840,8 @@ export class Table extends LitElement {
     if (!this.#setGroupExpanded(node.key, expanded)) return
     const grouping = this.#grouping()
     if (!grouping) return
+    const label = this.#groupText(node)
+    this.#announce(expanded ? this.msg.t('groupExpanded', label, node.count) : this.msg.t('groupCollapsed', label))
     this.dispatchEvent(
       new CustomEvent<TableGroupToggleEventDetail>('group-toggle', {
         detail: { key: node.key, expanded, group: this.#groupContext(node, grouping) },
@@ -2018,43 +2851,58 @@ export class Table extends LitElement {
     )
   }
 
-  #groupRows(node: GroupNode, grouping: Grouping): TableRow[] {
-    node.rows ??= node.rowIndices.map((index) => grouping.source[index])
+  /** The group's rows: all of them, or for a data source those fetched so far. */
+  #groupRows(node: GroupNode, tree: { source: (TableRow | undefined)[] }): TableRow[] {
+    node.rows ??= node.range
+      ? tree.source.slice(node.range.start, node.range.start + node.range.count).filter((row): row is TableRow => row !== undefined)
+      : node.rowIndices.map((index) => tree.source[index] as TableRow)
     return node.rows
   }
 
-  #groupKeys(node: GroupNode, grouping: Grouping): string[] {
-    node.keys ??= node.rowIndices.map((index) => this.#keyAt(index, grouping.source[index]))
+  #groupKeys(node: GroupNode, tree: { source: (TableRow | undefined)[] }): string[] {
+    node.keys ??= node.rowIndices.map((index) => this.#keyAt(index, tree.source[index] as TableRow))
     return node.keys
   }
 
-  #groupContext(node: GroupNode, grouping: Grouping): TableGroupContext {
+  #groupContext(node: GroupNode, tree: { source: (TableRow | undefined)[] }): TableGroupContext {
     return {
       key: node.key,
       level: node.level,
       field: node.field,
       value: node.value,
-      rows: this.#groupRows(node, grouping),
+      rows: this.#groupRows(node, tree),
+      count: node.count,
       expanded: this.#isGroupExpanded(node.key),
-      summary: Object.fromEntries(this.#groupSummary(node, grouping)),
+      summary: Object.fromEntries(this.#groupSummary(node, tree)),
     }
   }
 
-  /** The column aggregates of a group's rows, keyed by column id; the same `summary` the totals row uses. */
-  #groupSummary(node: GroupNode, grouping: Grouping): Map<string, unknown> {
-    const columns = this.resolvedColumns
-    const inputs = [this.columnElements, this.columns, ...columns.map((column) => column.summary)]
+  /** The aggregate a column shows on group rows: its `group-summary`, else its `summary`; `undefined` for none. */
+  #groupAggregate(column: TableColumnConfig): TableSummaryAggregate | TableSummaryFunction | undefined {
+    const kind = column.groupSummary ?? column.summary
+    return kind === 'none' ? undefined : kind
+  }
+
+  /**
+   * The column aggregates of a group's rows, keyed by column id — hidden columns included, so a level can be ordered
+   * by one. A data source's groups carry their own.
+   */
+  #groupSummary(node: GroupNode, tree: { source: (TableRow | undefined)[] }): Map<string, unknown> {
+    if (node.range) return new Map(Object.entries(node.remoteSummary ?? {}))
+    const columns = this.allColumns
+    const inputs = [this.columnElements, this.columns, ...columns.map((column) => this.#groupAggregate(column))]
     const cached = node.summary
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.values
-    const rows = this.#groupRows(node, grouping)
+    const rows = this.#groupRows(node, tree)
     const values = new Map<string, unknown>()
     for (const column of columns) {
-      if (typeof column.summary === 'function') values.set(columnKey(column), column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      const kind = this.#groupAggregate(column)
+      if (typeof kind === 'function') values.set(columnKey(column), kind({ column, rows }))
+      else if (kind && column.field)
         values.set(
           columnKey(column),
           aggregate(
-            column.summary,
+            kind,
             rows.map((row) => getFieldValue(row, column.field)),
           ),
         )
@@ -2063,17 +2911,12 @@ export class Table extends LitElement {
     return values
   }
 
-  /** The item on display line `line`: its group, or the group at `level` above it. */
-  #groupAtLevel(item: DisplayItem | undefined, level: number): GroupNode | undefined {
-    let node: GroupNode | undefined = item?.kind === 'group' ? item.node : item?.parent
-    while (node && node.level > level) node = node.parent
-    return node?.level === level ? node : undefined
-  }
-
-  /** How many group levels a line sits under: the number of groups that can be stuck above it. */
-  #depthOf(item: DisplayItem | undefined): number {
-    if (!item) return 0
-    return item.kind === 'group' ? item.node.level : item.parent.level + 1
+  /** A group's label as text: for the checkbox's name and the announcements, whatever `renderGroup` draws. */
+  #groupText(node: GroupNode): string {
+    const empty = node.value === null || node.value === undefined || node.value === ''
+    if (empty) return this.emptyGroupLabel || this.msg.t('noValue')
+    const column = this.#fieldColumn(node.field)
+    return column ? this.#formatValue(column, node.value) : plainText(node.value)
   }
 
   /**
@@ -2081,7 +2924,7 @@ export class Table extends LitElement {
    * `pageSize` lines of its own; the repeated headers come on top.
    */
   #pagePrefix(grouping: Grouping): number {
-    return this.paginated && this.#pageStart > 0 ? this.#depthOf(grouping.items[this.#pageStart]) : 0
+    return this.paginated && this.#pageStart > 0 ? depthOf(grouping.items[this.#pageStart]) : 0
   }
 
   /**
@@ -2100,7 +2943,7 @@ export class Table extends LitElement {
     const stuck: GroupNode[] = []
     for (let level = 0; level < grouping.levels.length; level++) {
       const line = Math.min(end, Math.max(start, base + level))
-      const node = this.#groupAtLevel(grouping.items[line], level)
+      const node = groupAtLevel(grouping.items[line], level)
       if (!node || node.position >= Math.max(start, base + level)) break
       stuck.push(node)
     }
@@ -2150,7 +2993,7 @@ export class Table extends LitElement {
     if (!viewport) return
     const height = this.#rowHeightPx
     const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
-    const covered = this.#depthOf(grouping.items[line]) * height
+    const covered = depthOf(grouping.items[line]) * height
     const visible = viewport.clientHeight - this.#headerHeight()
     if (top - covered < viewport.scrollTop) viewport.scrollTop = Math.max(0, top - covered)
     else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
@@ -2263,6 +3106,10 @@ export class Table extends LitElement {
     this.#requestToken++
     this.#blocks.clear()
     this.#pendingBlocks.clear()
+    this.#remoteGroups.clear()
+    this.#remoteGroupRows.clear()
+    this.#remotePending.clear()
+    this.#remoteVersion++
     this.remoteTotal = -1
   }
 
@@ -2388,12 +3235,25 @@ export class Table extends LitElement {
   }
 
   #toggleSort(column: TableColumnConfig, additive: boolean) {
-    if (column.field === SELECTION_FIELD || !column.field) return
+    if (isSynthetic(column) || !column.field) return
     if (!(column.sortable ?? this.sortable)) return
     const existing = this.sortModel.find((entry) => entry.field === column.field)
     const direction: SortDirection | undefined = !existing ? 'asc' : existing.direction === 'asc' ? 'desc' : undefined
     const rest = additive && this.multiSort ? this.sortModel.filter((entry) => entry.field !== column.field) : []
     this.sortModel = direction ? [...rest, { field: column.field, direction }] : rest
+    const header = this.#headerText(column)
+    this.#announce(
+      direction === 'asc'
+        ? this.msg.t('sortedAscending', header)
+        : direction === 'desc'
+          ? this.msg.t('sortedDescending', header)
+          : this.sortModel.length
+            ? this.msg.t(
+                this.sortModel[0].direction === 'asc' ? 'sortedAscending' : 'sortedDescending',
+                this.#headerText(this.#fieldColumn(this.sortModel[0].field) ?? { field: this.sortModel[0].field }),
+              )
+            : this.msg.t('sortCleared'),
+    )
     this.dispatchEvent(new CustomEvent<TableSortChangeEventDetail>('sort-change', { detail: { sort: this.sortModel }, bubbles: true, composed: true }))
   }
 
@@ -2552,7 +3412,46 @@ export class Table extends LitElement {
     const columns = this.#renderColumns()
     if (columns.length === 0) return
     if (this.#isFromCellControl(event)) return
+    // A row's detail is the application's content: its keys are its own.
+    if (event.composedPath().some((node) => node instanceof Element && node.classList.contains('row--detail'))) return
+    if (this.editing) return
     let { row, column } = this.focusedCell
+    const current = columns[column]
+
+    // Ctrl+Shift+←/→ (⌘⇧ on macOS) on a header moves its column.
+    if (
+      row === HEADER_ROW &&
+      this.reorderable &&
+      event.shiftKey &&
+      (event.ctrlKey || event.metaKey) &&
+      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+    ) {
+      event.preventDefault()
+      if (!current || isSynthetic(current)) return
+      const peers = this.resolvedColumns.filter((candidate) => (candidate.pinned ?? '') === (current.pinned ?? ''))
+      const at = peers.indexOf(current)
+      const neighbour = peers[at + (event.key === 'ArrowRight' ? 1 : -1)]
+      if (!neighbour || !this.#reorderFromUser(columnKey(current), columnKey(neighbour), event.key === 'ArrowRight')) return
+      this.focusedCell = { row, column: this.#renderColumns().findIndex((candidate) => columnKey(candidate) === columnKey(current)) }
+      this.#pendingFocus = true
+      return
+    }
+
+    const dataLine = row >= 0 && this.#rowIndexAt(row) >= 0
+    if (dataLine && current?.field === DETAIL_FIELD && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      this.#toggleDetailFromUser(row)
+      return
+    }
+    // F2, Enter or a typed character opens the editor of an editable cell; typing replaces the value.
+    if (dataLine && this.#isEditable(current) && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      const typed = event.key.length === 1 && event.key !== ' '
+      if (event.key === 'F2' || event.key === 'Enter' || typed) {
+        event.preventDefault()
+        this.#beginEdit(row, column, typed ? event.key : undefined)
+        return
+      }
+    }
     // Keyboard movement stays inside the page: rows are numbered across the whole dataset, so page 2 starts at
     // `first`, not at 0.
     const first = this.#pageStart
@@ -2695,6 +3594,15 @@ export class Table extends LitElement {
     const height = this.#headerHeight()
     if (height > 0 && Math.abs(height - this.#headerHeightPx) > 0.01) {
       this.#headerHeightPx = height
+      this.requestUpdate()
+    }
+  }
+
+  #measureViewportWidth() {
+    if (typeof this.renderDetail !== 'function' || !this.expandedRows.length) return
+    const width = this.viewport?.clientWidth ?? 0
+    if (width > 0 && width !== this.#viewportWidth) {
+      this.#viewportWidth = width
       this.requestUpdate()
     }
   }

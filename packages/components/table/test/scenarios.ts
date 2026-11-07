@@ -1,5 +1,6 @@
 import '../src/table'
 import '../src/table-column'
+import './translations'
 // The pager is only ever slotted into the table; the table never imports it.
 import '@c2n/pagination'
 import type { Table } from '../src/table'
