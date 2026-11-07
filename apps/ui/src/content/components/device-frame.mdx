@@ -1,0 +1,80 @@
+---
+title: 'Device Frame'
+description: 'A browser window, phone, tablet or laptop drawn around a screenshot or live content.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DeviceFrame } from '@c2n/components/device-frame'
+
+`c2-device-frame` draws a device around its content, for product shots on marketing pages and live previews in docs. `device` picks `browser` (the default), `phone`, `tablet` or `laptop`; `url` fills the browser's address bar, and the `address` and `actions` slots replace the address or add controls to the title bar. Whatever goes inside is the screen: an image or video covers it, and live markup lays out inside it. A `<picture>` is sized to the screen, but give its inner `<img>` `width: 100%; height: 100%; object-fit: cover` yourself: the frame's styles cannot reach inside it.
+
+Each device has its own width and screen shape (`--c2-device-frame__phone--width`, `--c2-device-frame__phone--aspect-ratio`, …) and never grows past its container. The frame is decorative and adds no role: describe the content itself, for example with an image's `alt` text.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/device-frame'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/device-frame
+<style>
+  .frame-usage {
+    width: min(100%, 520px);
+  }
+  .frame-small {
+    --c2-device-frame__phone--width: 200px;
+  }
+  .frame-app {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+  .frame-app strong {
+    font-size: 16px;
+  }
+  .frame-app span {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .frame-phone-app {
+    padding-top: 44px;
+  }
+</style>
+<div data-label="Browser">
+  <c2-device-frame class="frame-usage" url="app.example.com/inbox">
+    <div class="frame-app">
+      <strong>Inbox</strong>
+      <span>Quarterly report is ready</span>
+      <span>Design review moved to Thursday</span>
+      <span>New comment on the pricing page</span>
+    </div>
+  </c2-device-frame>
+</div>
+<div data-label="Phone">
+  <c2-device-frame class="frame-small" device="phone">
+    <div class="frame-app frame-phone-app">
+      <strong>Today</strong>
+      <span>Stand-up, 9:30</span>
+      <span>Lunch with Ana</span>
+      <span>Ship the release</span>
+    </div>
+  </c2-device-frame>
+</div>
+<div data-label="Laptop">
+  <c2-device-frame class="frame-usage" device="laptop">
+    <div class="frame-app">
+      <strong>Revenue</strong>
+      <span>$48,210 this month</span>
+      <span>+12% on last month</span>
+    </div>
+  </c2-device-frame>
+</div>
+```

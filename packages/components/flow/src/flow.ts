@@ -455,7 +455,7 @@ const isSide = (value: unknown): value is FlowSide => typeof value === 'string' 
  * @cssproperty {box-shadow} [--c2-flow__card--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {font-size} [--c2-flow__card--font-size=14px]
  * @cssproperty {pixel} [--c2-flow__card--offset=8px] - Distance between the node and its hover card.
- * @cssproperty {color} [--c2-flow__card__term--color=#71717a] - Labels of the card's detail rows.
+ * @cssproperty {color} [--c2-flow__card__term--color=#71717a] - The card's status line and the labels of its detail rows.
  * @cssproperty {time} [--c2-flow__card--transition-duration=150ms]
  * @cssproperty {outline} [--c2-flow__canvas__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the empty canvas of an `editable` flow, the one place that takes focus when there is no node.
  * @cssproperty {pixel} [--c2-flow__connector--size=12px] - Diameter of the connection handles an `editable` flow shows in the middle of each side of a hovered, focused or selected node.

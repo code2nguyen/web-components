@@ -34,7 +34,9 @@ if (scenario === 'remote') {
     subject.dataset.request = query
     subject.dataset.requestCount = String(Number(subject.dataset.requestCount ?? 0) + 1)
     await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(resolve, query === 'p' ? 120 : 10)
+      // "p" stands for a slow request that the next keystroke cancels: it only ends when it is aborted, so a slow
+      // test runner cannot let it finish first.
+      const timer = query === 'p' ? undefined : setTimeout(resolve, 10)
       signal.addEventListener('abort', () => {
         clearTimeout(timer)
         subject.dataset.aborted = query

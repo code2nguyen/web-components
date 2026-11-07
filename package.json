@@ -113,6 +113,7 @@
         "./packages/components/banner:build",
         "./packages/components/bar-list:build",
         "./packages/components/barcode:build",
+        "./packages/components/beam:build",
         "./packages/components/border-beam:build",
         "./packages/components/bottom-nav:build",
         "./packages/components/breadcrumb:build",
@@ -152,6 +153,7 @@
         "./packages/components/date-time-picker:build",
         "./packages/components/description-list:build",
         "./packages/components/details:build",
+        "./packages/components/device-frame:build",
         "./packages/components/diff-viewer:build",
         "./packages/components/distribution-bar:build",
         "./packages/components/duration-input:build",
@@ -195,6 +197,7 @@
         "./packages/components/log-viewer:build",
         "./packages/components/markdown:build",
         "./packages/components/marker:build",
+        "./packages/components/marquee:build",
         "./packages/components/mask-input:build",
         "./packages/components/masonry:build",
         "./packages/components/master-detail:build",
@@ -320,7 +323,8 @@
         "./apps/examples/observability-nextjs:build",
         "./apps/examples/orders-admin-angular:build",
         "./apps/examples/support-inbox-vue:build",
-        "./apps/examples/trading-dashboard-react:build"
+        "./apps/examples/trading-dashboard-react:build",
+        "./apps/examples/wayline-marketing-astro:build"
       ]
     },
     "ui:build": {

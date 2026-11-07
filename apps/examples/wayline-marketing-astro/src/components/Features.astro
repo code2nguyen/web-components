@@ -1,0 +1,29 @@
+---
+import Icon from './Icon.astro'
+import { features, stats } from '../data/site'
+---
+
+<section class="container" id="features" aria-labelledby="features-title">
+  <div class="section-head">
+    <p class="eyebrow">Features</p>
+    <h2 id="features-title">Built for the work nobody wants to do by hand</h2>
+  </div>
+
+  <div class="stats">
+    {stats.map((stat) => <c2-stat class="stat" value={stat.value} label={stat.label} />)}
+  </div>
+
+  <div class="feature-grid">
+    {
+      features.map((feature) => (
+        <c2-card class="feature">
+          <span class="feature__icon">
+            <Icon name={feature.icon} />
+          </span>
+          <h3>{feature.title}</h3>
+          <p>{feature.text}</p>
+        </c2-card>
+      ))
+    }
+  </div>
+</section>

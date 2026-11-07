@@ -14,6 +14,7 @@ import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
 import barcode from '@c2n/barcode/custom-elements.json'
+import beam from '@c2n/beam/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
@@ -54,6 +55,7 @@ import dateStrip from '@c2n/date-strip/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
+import deviceFrame from '@c2n/device-frame/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import distributionBar from '@c2n/distribution-bar/custom-elements.json'
 import durationInput from '@c2n/duration-input/custom-elements.json'
@@ -98,6 +100,7 @@ import loadingOverlay from '@c2n/loading-overlay/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
+import marquee from '@c2n/marquee/custom-elements.json'
 import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import masterDetail from '@c2n/master-detail/custom-elements.json'
@@ -230,6 +233,7 @@ export const componentManifests = (function () {
     banner,
     barList,
     barcode,
+    beam,
     borderBeam,
     bottomNav,
     breadcrumb,
@@ -270,6 +274,7 @@ export const componentManifests = (function () {
     dateTimePicker,
     descriptionList,
     details,
+    deviceFrame,
     diffViewer,
     distributionBar,
     durationInput,
@@ -314,6 +319,7 @@ export const componentManifests = (function () {
     logViewer,
     markdown,
     marker,
+    marquee,
     maskInput,
     masonry,
     masterDetail,

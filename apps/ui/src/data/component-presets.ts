@@ -3941,6 +3941,62 @@ selectors:
       },
     ],
   },
+  'c2-marquee': {
+    html: `<c2-marquee aria-label="Customers" style="width:320px"><span>Northwind</span><span>Contoso</span><span>Fabrikam</span><span>Tailspin</span><span>Litware</span><span>Proseware</span></c2-marquee>`,
+    presets: [
+      {
+        name: 'Logo wall',
+        description: 'Slower, wider spacing and soft edges, for a row of customer logos.',
+        css: { '--c2-marquee--speed': '28', '--c2-marquee__item--gap': '48px', '--c2-marquee__viewport--fade': '56px' },
+      },
+      { name: 'Ticker', description: 'A fast, tight strip for prices or headlines.', css: { '--c2-marquee--speed': '70', '--c2-marquee__item--gap': '20px' } },
+      { name: 'Reverse', description: 'Moves toward the end instead of the start.', attributes: { reverse: '' } },
+    ],
+  },
+  'c2-device-frame': {
+    html: `<c2-device-frame url="example.com" style="width:320px"><p style="margin:0;padding:20px 16px">Your product here.</p></c2-device-frame>`,
+    presets: [
+      {
+        name: 'Window dots',
+        description: 'Red, amber and green window controls with a deeper shadow.',
+        css: {
+          '--c2-device-frame__close-dot--color': '#ff5f57',
+          '--c2-device-frame__minimize-dot--color': '#febc2e',
+          '--c2-device-frame__zoom-dot--color': '#28c840',
+          '--c2-device-frame__frame--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.25)',
+        },
+      },
+      { name: 'Phone', description: 'A phone with a camera island.', attributes: { device: 'phone' }, css: { '--c2-device-frame__phone--width': '200px' } },
+      {
+        name: 'Flat phone',
+        description: 'A light, thin bezel with no island or shadow.',
+        attributes: { device: 'phone' },
+        css: {
+          '--c2-device-frame__phone--width': '200px',
+          '--c2-device-frame__bezel--width': '6px',
+          '--c2-device-frame__bezel--color': '#d4d4d8',
+          '--c2-device-frame__island--width': '0',
+          '--c2-device-frame__frame--box-shadow': 'none',
+        },
+      },
+    ],
+  },
+  'c2-beam': {
+    html: `<div style="position:relative;display:flex;justify-content:space-between;align-items:center;width:300px;height:120px"><span id="beam-preset-a" style="padding:8px 12px;border:1px solid #e4e4e7;border-radius:8px">Client</span><span id="beam-preset-b" style="padding:8px 12px;border:1px solid #e4e4e7;border-radius:8px">Server</span><c2-beam from="beam-preset-a" to="beam-preset-b"></c2-beam></div>`,
+    presets: [
+      {
+        name: 'Violet',
+        description: 'A violet-to-pink light on the default line.',
+        css: { '--c2-beam__beam--color-from': '#7c3aed', '--c2-beam__beam--color-to': '#ec4899' },
+      },
+      {
+        name: 'Bold',
+        description: 'A thick, long light on a thick, soft track.',
+        css: { '--c2-beam__track--width': '4px', '--c2-beam__beam--width': '4px', '--c2-beam__beam--length': '35' },
+      },
+      { name: 'Curved return', description: 'Bends the line and sends the light back.', attributes: { curvature: '30', reverse: '' } },
+    ],
+  },
   'c2-angle-slider': {
     html: `<c2-angle-slider label="Temperature" mode="arc" min="16" max="28" step="0.5" value="21.5"></c2-angle-slider>`,
     presets: [
