@@ -422,22 +422,24 @@ test('a status that settles gives the marker one beat, and a status drawn from t
   await expect(page.locator('c2-step:state(settling)')).toHaveCount(0)
 
   // Read in the same call as the change: a round trip is long enough for a 150 ms animation to have finished.
-  const names = await page.evaluate(async () => {
+  const settled = await page.evaluate(async () => {
     window.setStatus('install', 'success')
     // A compound selector widens to `Element`, which has no `updateComplete`; the bare tag name keeps the type.
     const element = [...document.querySelectorAll('c2-step')].find((step) => step.id === 'install')!
     await element.updateComplete
-    return element
-      .shadowRoot!.querySelector('[part="marker"]')!
-      .getAnimations()
-      .map((animation) => (animation as CSSAnimation).animationName)
+    return {
+      settling: element.matches(':state(settling)'),
+      names: element
+        .shadowRoot!.querySelector('[part="marker"]')!
+        .getAnimations()
+        .map((animation) => (animation as CSSAnimation).animationName),
+    }
   })
-  expect(names).toContain('c2-step-settle')
+  expect(settled.settling).toBe(true)
+  expect(settled.names).toContain('c2-step-settle')
 
-  const step = page.locator('c2-step#install')
-  await expect(step).toHaveState('settling')
-
-  await expect(step).not.toHaveState('settling', { timeout: 2000 })
+  // And the state comes off once the beat is over.
+  await expect(page.locator('c2-step#install')).not.toHaveState('settling', { timeout: 2000 })
 })
 
 test('--c2-step--enter-duration: 0s turns the arrival animation off', async ({ page, scenario }) => {
