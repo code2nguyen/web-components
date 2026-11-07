@@ -91,6 +91,10 @@ if (scenario === 'layout') {
 
 // Buttons the spec drives: hide and show `#two` through the layout record, and dismiss it.
 if (scenario === 'motion') {
+  // Long enough that the spec can see a card mid-animation on a slow runner; the defaults (200 / 160 ms) can end
+  // within one round trip.
+  subject.style.setProperty('--c2-dash-card__enter--animation-duration', '1s')
+  subject.style.setProperty('--c2-dash-card__leave--animation-duration', '1s')
   const controls = document.createElement('div')
   controls.innerHTML = `<button id="hide" type="button">Hide</button><button id="show" type="button">Show</button><button id="dismiss" type="button">Dismiss</button>`
   main.after(controls)
