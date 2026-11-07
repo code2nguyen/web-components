@@ -16,6 +16,7 @@ const tags = (manifest.modules ?? []).flatMap((module) => (module.declarations ?
 
 /** What `new FormData(form).getAll('field')` holds once each element is set up by `setUp` in the page below. */
 const submitted: Record<string, string[]> = {
+  'c2-angle-slider': ['90'],
   'c2-autocomplete': ['cdg'],
   'c2-button-group': ['b'],
   'c2-cascader': ['zhejiang;ningbo'],
@@ -30,6 +31,7 @@ const submitted: Record<string, string[]> = {
   'c2-duration-input': ['5400'],
   'c2-inline-edit': ['Apollo'],
   'c2-json-form': ['{"city":"Paris"}'],
+  'c2-keypad': ['42.5'],
   'c2-key-value-editor': ['API_KEY=secret'],
   'c2-map-chart': ['DEU', 'POL'],
   'c2-mask-input': ['abc'],
@@ -50,6 +52,10 @@ const submitted: Record<string, string[]> = {
   'c2-rich-text-editor': ['Hello **world**'],
   'c2-search-field': ['query'],
   'c2-select': ['eu'],
+  // The signature as SVG markup: the pad's size, the export ink and one path per stroke.
+  'c2-signature-pad': [
+    '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="200" viewBox="0 0 360 200"><g fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10L40 30"/></g></svg>',
+  ],
   'c2-slider': ['30'],
   'c2-switch': ['on'],
   'c2-tag-input': ['red', 'blue'],
@@ -123,7 +129,16 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-quick-time-menu': (e) => (e.value = '2026-11-12T09:00'),
         'c2-radio': (e) => Object.assign(e, { value: 'a', checked: true }),
         'c2-radio-group': (e) => (e.value = 'a'),
+        'c2-angle-slider': (e) => (e.value = 90),
+        'c2-keypad': (e) => (e.value = '42.5'),
         'c2-rate': (e) => (e.value = 3),
+        'c2-signature-pad': (e) =>
+          (e.strokes = [
+            [
+              [10, 10],
+              [40, 30],
+            ],
+          ]),
         'c2-rich-text-editor': (e) => (e.value = 'Hello **world**'),
         'c2-search-field': (e) => (e.value = 'query'),
         'c2-select': (e) => (e.value = ['eu']),
