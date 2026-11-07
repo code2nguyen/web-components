@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro'
+import CallToAction from '../components/CallToAction.astro'
+import Customers from '../components/Customers.astro'
+import Faq from '../components/Faq.astro'
+import Features from '../components/Features.astro'
+import Hero from '../components/Hero.astro'
+import Integrations from '../components/Integrations.astro'
+import Mobile from '../components/Mobile.astro'
+import Pricing from '../components/Pricing.astro'
+import SignupDialog from '../components/SignupDialog.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import Testimonials from '../components/Testimonials.astro'
+import { product } from '../data/site'
+---
+
+<Base title={`${product.name} · ${product.tagline}`} description={product.description}>
+  <SiteHeader />
+  <main>
+    <Hero />
+    <Customers />
+    <Integrations />
+    <Features />
+    <Mobile />
+    <Testimonials />
+    <Pricing />
+    <Faq />
+    <CallToAction />
+  </main>
+  <SiteFooter />
+  <SignupDialog />
+</Base>

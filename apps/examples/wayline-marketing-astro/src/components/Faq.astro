@@ -1,0 +1,19 @@
+---
+import { faqs } from '../data/site'
+---
+
+<section class="container narrow" id="faq" aria-labelledby="faq-title">
+  <div class="section-head">
+    <p class="eyebrow">FAQ</p>
+    <h2 id="faq-title">Questions, answered</h2>
+  </div>
+  <c2-accordion class="faq">
+    {
+      faqs.map((item) => (
+        <c2-details label={item.question}>
+          <p>{item.answer}</p>
+        </c2-details>
+      ))
+    }
+  </c2-accordion>
+</section>

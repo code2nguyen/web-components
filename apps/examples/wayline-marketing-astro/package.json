@@ -1,0 +1,58 @@
+{
+  "name": "@c2n/example-wayline-marketing-astro",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "wireit",
+    "type-check": "wireit",
+    "preview": "astro preview",
+    "test:browser": "playwright test --config playwright.config.ts"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../../packages/core:build",
+        "../../../packages/umbrella:build",
+        "../../../packages/icons/feather-icons:build"
+      ],
+      "files": [
+        "src/**/*.ts",
+        "test/**",
+        "astro.config.ts",
+        "playwright.config.ts",
+        "tsconfig.json",
+        "package.json"
+      ],
+      "output": [],
+      "command": "tsc -p tsconfig.json"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "src/**",
+        "public/**",
+        "astro.config.ts",
+        "tsconfig.json",
+        "package.json"
+      ],
+      "output": [
+        "dist/**"
+      ],
+      "command": "astro build"
+    }
+  },
+  "dependencies": {
+    "@c2n/components": "*",
+    "@c2n/feather-icons": "*"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@c2n/config": "*",
+    "@playwright/test": "1.63.0",
+    "astro": "7.3.1"
+  }
+}
