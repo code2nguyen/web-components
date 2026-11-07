@@ -26,6 +26,19 @@ test('collapsed trail expands with a named keyboard control', async ({ page, ren
   await expect(page.getByRole('link', { name: 'Category' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Products' })).toBeFocused()
 })
+// The trail was measured once: an item that grew afterwards (a link button upgrading, a web font arriving, the
+// gallery's "Slash" card) left a trail measured as fitting overflowing, its current page clipped.
+test('an item that grows after the trail was measured collapses the trail instead of clipping it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-breadcrumb style="width: 160px"><span slot="separator">/</span><span>src</span><span>lib</span><span id="current">a.ts</span></c2-breadcrumb>',
+  )
+  await expect(page.getByRole('button', { name: /Show \d+ more items/ })).toHaveCount(0)
+  await page.locator('#current').evaluate((item) => (item.textContent = 'components.ts'))
+  await expect(page.getByRole('button', { name: /Show \d+ more items/ })).toBeVisible()
+  const list = page.locator('c2-breadcrumb').locator('[part="list"]')
+  expect(await list.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await expect(page.locator('#current')).toBeVisible()
+})
 test('adding a page moves automatic current-page state to the new last item', async ({ page, renderScenario }) => {
   await renderScenario('<c2-breadcrumb><c2-link-button href="#home">Home</c2-link-button></c2-breadcrumb>')
   await expect(page.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')

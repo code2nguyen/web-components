@@ -50,6 +50,8 @@ test('a disabled watcher never hides its content; enter does not bubble to an ou
   await renderScenario(`<c2-in-view id="outer"><div style="height: 1500px"></div>
     <c2-in-view id="inner"><p style="margin: 0">Inner</p></c2-in-view></c2-in-view>
     <c2-in-view id="off" disabled style="--c2-in-view__hidden--opacity: 0; --c2-in-view--transition-duration: 0ms"><p>Off</p></c2-in-view>`)
+  // The outer watcher is in view itself: let its own enter fire before counting, which a loaded runner can deliver late.
+  await expect.poll(() => page.locator('#outer').evaluate((element: Element) => element.matches(':state(in-view)'))).toBe(true)
   await page.locator('#outer').evaluate((element: HTMLElement) => {
     element.dataset.count = '0'
     element.addEventListener('enter', () => (element.dataset.count = String(Number(element.dataset.count) + 1)))

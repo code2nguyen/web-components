@@ -1,0 +1,56 @@
+---
+title: 'Celebration'
+description: 'Confetti, a burst of sparks or rising emoji for a moment worth marking, fired from code or a click.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Celebration } from '@c2n/components/celebration'
+import { Button } from '@c2n/components/button'
+
+`c2-celebration` throws confetti, a ring of sparks or rising emoji: a goal reached, a deal won, a first project shipped, or a stream of reactions in a call. It is decorative; announce the success itself in words, with a toast or a status message.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/celebration'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/celebration
+<div data-label="Confetti on click">
+  <c2-celebration trigger="click"><c2-button>Publish</c2-button></c2-celebration>
+</div>
+<div data-label="Burst">
+  <c2-celebration trigger="click" kind="burst"><c2-button>Complete task</c2-button></c2-celebration>
+</div>
+<div data-label="Emoji reactions">
+  <c2-celebration trigger="click" kind="emoji" emoji="🎉;👏;❤️"><c2-button>React</c2-button></c2-celebration>
+</div>
+```
+
+### Firing
+
+Wrap a button with `trigger="click"` and it plays from wherever the reader clicks (from the centre for a keyboard press). Or call `fire()` from code, with an optional origin in viewport pixels:
+
+```typescript tag=CodeBlock
+const celebration = document.querySelector('c2-celebration')!
+await api.closeDeal(id)
+celebration.fire() // from the element's centre
+celebration.fire({ x: 200, y: 120, kind: 'burst' })
+```
+
+`celebration-end` fires when the last particle is gone.
+
+### Kinds
+
+- **`confetti`** (the default): ribbons, squares and dots thrown up, falling with gravity, drift and spin.
+- **`burst`**: a ring of sparks that fade quickly, for a small win.
+- **`emoji`**: the `emoji` list (`;`-separated or a JSON array) rises and fades. Each call adds more, so repeated calls stream reactions.
+
+### Drawing and motion
+
+It draws on one canvas in the top layer, shown only while particles are alive, so a dialog or an `overflow: hidden` parent never clips it, and clicks go through to the page. Under reduced motion nothing is drawn, and `celebration-end` still fires. The colours (`--c2-celebration--colors`, a comma-separated list), count, spread, duration and sizes are variables.

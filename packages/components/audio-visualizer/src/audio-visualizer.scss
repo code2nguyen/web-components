@@ -1,0 +1,126 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-audio-visualizer,
+  $theme: (
+    height: 32px,
+    wave--width: 240px,
+    bar--color: rgb(2, 101, 220),
+    bar--width: 4px,
+    bar--gap: 3px,
+    bar--min-height: 4px,
+    bar--border-radius: 999px,
+    wave--color: rgb(2, 101, 220),
+    wave--stroke-width: 2px,
+    orb--size: 96px,
+    orb--color: rgb(2, 101, 220),
+    orb--glow: 32px,
+    muted--color: #a1a1aa,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+/* Bars */
+
+.bars {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(bar--gap);
+  height: css.cssVar(height);
+}
+
+.bar {
+  --_min: #{css.cssVar(bar--min-height)};
+  flex: none;
+  width: css.cssVar(bar--width);
+  height: calc(var(--_min) + (100% - var(--_min)) * var(--_level, 0));
+  border-radius: css.cssVar(bar--border-radius);
+  background: css.cssVar(bar--color);
+}
+
+.muted .bar {
+  background: css.cssVar(muted--color);
+}
+
+/* Wave */
+
+.wave {
+  display: block;
+  width: css.cssVar(wave--width);
+  max-width: 100%;
+  height: css.cssVar(height);
+  overflow: visible;
+}
+
+.wave path {
+  fill: none;
+  stroke: css.cssVar(wave--color);
+  stroke-width: css.cssVar(wave--stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wave.muted path {
+  stroke: css.cssVar(muted--color);
+}
+
+/* Orb */
+
+.orb {
+  --_color: #{css.cssVar(orb--color)};
+  --_size: #{css.cssVar(orb--size)};
+  position: relative;
+  overflow: hidden;
+  width: var(--_size);
+  height: var(--_size);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--_color) 35%, #ffffff),
+    var(--_color) 60%,
+    color-mix(in srgb, var(--_color) 55%, #000000)
+  );
+  box-shadow: 0 0 calc(var(--_level, 0) * #{css.cssVar(orb--glow)}) color-mix(in srgb, var(--_color) 55%, transparent);
+  transform: scale(calc(0.72 + var(--_level, 0) * 0.28));
+}
+
+.orb.state-idle {
+  filter: saturate(0.2);
+  opacity: 0.6;
+}
+
+.orb.muted {
+  --_color: #{css.cssVar(muted--color)};
+  filter: none;
+  opacity: 0.6;
+}
+
+.orb.state-thinking::before {
+  content: '';
+  position: absolute;
+  border-radius: inherit;
+  background: conic-gradient(var(--_color), color-mix(in srgb, var(--_color) 30%, #ffffff), var(--_color));
+  opacity: 0.85;
+  /* Softens the point where the conic gradient meets, so the orb reads as a shimmer, not a pinwheel. */
+  filter: blur(calc(var(--_size) * 0.12));
+  inset: -15%;
+  animation: c2-audio-visualizer-turn 2.4s linear infinite;
+}
+
+@keyframes c2-audio-visualizer-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb.state-thinking::before {
+    animation: none;
+  }
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" font-family="Inter, system-ui, sans-serif">
+  <rect width="640" height="400" fill="#f8fafc"/>
+  <rect width="640" height="44" fill="#0f172a"/>
+  <text x="16" y="28" fill="#e2e8f0" font-size="14" font-weight="600">Acme Billing</text>
+  <text x="118" y="28" fill="#94a3b8" font-size="14">· Invoices</text>
+  <rect x="0" y="44" width="160" height="356" fill="#f1f5f9"/>
+  <g fill="#475569" font-size="13"><text x="16" y="74">Dashboard</text><text x="16" y="100">Invoices</text><text x="16" y="126">Customers</text><text x="16" y="152">Settings</text></g>
+  <rect x="180" y="64" width="440" height="58" rx="8" fill="#fff" stroke="#e2e8f0"/>
+  <text x="194" y="88" fill="#0f172a" font-size="14" font-weight="600">Invoice #2026-0417</text>
+  <text x="194" y="108" fill="#64748b" font-size="13">Billed to ana.ruiz@example.com · card •••• 4242</text>
+  <rect x="180" y="134" width="440" height="86" rx="8" fill="#fff" stroke="#e2e8f0"/>
+  <text x="194" y="158" fill="#0f172a" font-size="13">Total due</text>
+  <text x="194" y="186" fill="#0f172a" font-size="22" font-weight="700">€1,240.00</text>
+  <text x="194" y="208" fill="#64748b" font-size="13">Due Nov 30, 2026</text>
+  <rect x="180" y="232" width="78" height="28" rx="6" fill="#2563eb"/>
+  <text x="219" y="251" fill="#fff" font-size="13" text-anchor="middle">Pay now</text>
+</svg>

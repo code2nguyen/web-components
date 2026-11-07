@@ -1,0 +1,51 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FileBrowser } from '@c2n/components/file-browser'
+
+## Presets
+
+A project drive, a media library, a single-pane picker and a branded workspace. The pane widths, row height, tile size, accent and selection colours are variables.
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-file-browser folder="q4" locale="en-US" items='[{"id":"projects","name":"Projects","kind":"folder"},{"id":"photos","name":"Photos","kind":"folder"},{"id":"q4","name":"Q4 planning","parent":"projects","kind":"folder"},{"id":"assets","name":"Assets","parent":"q4","kind":"folder","modified":"2026-11-03"},{"id":"roadmap","name":"Q4 roadmap.pdf","parent":"q4","kind":"file","size":2400000,"modified":"2026-11-02"},{"id":"budget","name":"Budget 2027.xlsx","parent":"q4","kind":"file","size":318000,"modified":"2026-11-01"},{"id":"notes","name":"Kick-off notes.docx","parent":"q4","kind":"file","size":46000,"modified":"2026-10-30"},{"id":"schema","name":"schema.json","parent":"q4","kind":"file","size":12000,"modified":"2026-10-20"}]'></c2-file-browser>
+```
+
+```html tag=MdxCodeBlock,label=Media library
+<style>
+  .file-browser-media {
+    --c2-file-browser__tile--min-width: 150px;
+    --c2-file-browser__tree--width: 180px;
+    --c2-file-browser__tile--border-radius: 12px;
+  }
+</style>
+<c2-file-browser class="file-browser-media" view="grid" folder="photos" locale="en-US" root-label="Media" value="m1" items='[{"id":"photos","name":"Photos","kind":"folder"},{"id":"videos","name":"Videos","kind":"folder"},{"id":"m1","name":"Mountains.svg","parent":"photos","kind":"file","size":48000,"modified":"2026-10-02","thumbnail":"/web-components/images/image-mountains.svg"},{"id":"m2","name":"Workspace.svg","parent":"photos","kind":"file","size":36000,"modified":"2026-10-11","thumbnail":"/web-components/images/image-workspace.svg"},{"id":"m3","name":"Revenue chart.svg","parent":"photos","kind":"file","size":22000,"modified":"2026-10-18","thumbnail":"/web-components/images/image-chart.svg"}]'></c2-file-browser>
+```
+
+```html tag=MdxCodeBlock,label=Single-pane picker
+<style>
+  .file-browser-picker {
+    --c2-file-browser--narrow-width: 9999px;
+    --c2-file-browser--height: 360px;
+    --c2-file-browser__row--height: 44px;
+  }
+</style>
+<c2-file-browser class="file-browser-picker" selection="single" folder="invoices" locale="en-US" root-label="Documents" items='[{"id":"invoices","name":"Invoices","kind":"folder"},{"id":"2026","name":"2026","parent":"invoices","kind":"folder","modified":"2026-11-01"},{"id":"i1","name":"INV-1042.pdf","parent":"invoices","kind":"file","size":182000,"modified":"2026-10-31"},{"id":"i2","name":"INV-1041.pdf","parent":"invoices","kind":"file","size":176000,"modified":"2026-10-15"},{"id":"i3","name":"INV-1040.pdf","parent":"invoices","kind":"file","size":171000,"modified":"2026-09-30"}]'></c2-file-browser>
+```
+
+```html tag=MdxCodeBlock,label=Branded workspace
+<style>
+  .file-browser-brand {
+    --c2-file-browser__accent--color: light-dark(#7c3aed, #a072ef);
+    --c2-file-browser__row__selected--background-color: light-dark(#f3e8ff, #26153c);
+    --c2-file-browser__tree--background-color: light-dark(#faf5ff, #1c1229);
+    --c2-file-browser__icon__folder--color: light-dark(#8b5cf6, #966bf6);
+    --c2-file-browser__focus--outline: 2px solid rgba(124, 58, 237, 0.45);
+  }
+</style>
+<c2-file-browser class="file-browser-brand" folder="design" locale="en-US" root-label="Studio" value="brand" items='[{"id":"design","name":"Design","kind":"folder"},{"id":"eng","name":"Engineering","kind":"folder"},{"id":"icons","name":"Icons","parent":"design","kind":"folder","modified":"2026-10-30"},{"id":"brand","name":"Brand guide.pdf","parent":"design","kind":"file","size":8200000,"modified":"2026-11-02"},{"id":"tokens","name":"tokens.json","parent":"design","kind":"file","size":9000,"modified":"2026-11-01"},{"id":"deck","name":"Pitch deck.pptx","parent":"design","kind":"file","size":14500000,"modified":"2026-10-21"}]'></c2-file-browser>
+```
+
+</GalleryGrid>

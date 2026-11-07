@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-change-review</title>
+    <script type="module" src="/src/change-review.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 760px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      output {
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .compact {
+        --c2-change-review--max-height: 240px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-change-review
+      id="review"
+      label="Suggested edit"
+      file-name="src/billing/invoice.ts"
+      original="import { formatMoney } from './money'
+
+export function total(invoice) {
+  let sum = 0
+  for (const item of invoice.items) sum += item.price * item.qty
+  return sum
+}
+
+export function label(invoice) {
+  return 'Invoice ' + invoice.id
+}
+
+// Totals are cached for an hour.
+export const ttl = 3_600
+"
+      modified="import { formatMoney, roundHalfEven } from './money'
+
+export function total(invoice) {
+  let sum = 0n
+  for (const line of invoice.lines) sum += line.unitCents * BigInt(line.quantity)
+  return roundHalfEven(sum)
+}
+
+export function label(invoice) {
+  return 'Invoice ' + invoice.id
+}
+
+// Totals are cached for ten minutes.
+export const ttl = 600
+"
+    >
+      <button slot="actions" id="apply">Apply</button>
+    </c2-change-review>
+    <output id="result"></output>
+
+    <c2-change-review
+      class="compact"
+      file-name="config.yml"
+      undecided="modified"
+      original="retries: 3
+timeout: 30s
+cache: off
+"
+      modified="retries: 5
+timeout: 30s
+cache: on
+"
+    ></c2-change-review>
+
+    <script type="module">
+      const review = document.getElementById('review')
+      const output = document.getElementById('result')
+      review.addEventListener('review-change', ({ detail }) => (output.textContent = detail.result))
+      document.getElementById('apply').addEventListener('click', () => (output.textContent = 'Applied:\n' + review.result))
+    </script>
+  </body>
+</html>

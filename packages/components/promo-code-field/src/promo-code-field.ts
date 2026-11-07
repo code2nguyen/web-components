@@ -257,7 +257,7 @@ export class PromoCodeField extends LitElement {
             </div>`
           : nothing
       }
-      <span class="visually-hidden announce" aria-live="polite">${this.announcement}</span>
+      <span class="visually-hidden announce" aria-live="polite">${this.announcement || nothing}</span>
     </div>`
   }
 }

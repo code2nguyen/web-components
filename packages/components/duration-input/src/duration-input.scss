@@ -1,0 +1,150 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-duration-input,
+  $theme: (
+    min-height: 36px,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    value--padding: 6px 12px 6px 10px,
+    value--gap: 8px,
+    placeholder--color: #71717a,
+    icon--color: #71717a,
+    icon--size: 16px,
+    preview--color: #71717a,
+    preview--font-size: 12px,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid #0265dc,
+    focus--outline: none,
+    focus--outline-offset: 0px,
+    error--border: 1px solid #dc2626,
+    error__focus--outline: none,
+    read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(value--gap);
+  box-sizing: border-box;
+  min-height: css.cssVar(min-height);
+  padding: css.cssVar(value--padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &.focused {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &.error {
+    border: css.cssVar(error--border);
+
+    &.focused {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  color: css.cssVar(icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  // A character-based intrinsic width keeps the field from collapsing when it is not given a width.
+  width: 12ch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: inherit;
+  font-variant-numeric: tabular-nums;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+.preview {
+  flex: none;
+  color: css.cssVar(preview--color);
+  font-size: css.cssVar(preview--font-size);
+  white-space: nowrap;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}

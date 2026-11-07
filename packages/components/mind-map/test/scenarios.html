@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mind Map test scenarios</title>
+    <style>
+      body {
+        margin: 24px;
+        font:
+          16px system-ui,
+          sans-serif;
+        color: #18181b;
+        background: white;
+      }
+      c2-mind-map {
+        width: 900px;
+        --c2-mind-map--height: 520px;
+        --c2-mind-map--transition-duration: 0ms;
+        --c2-pan-zoom--transition-duration: 0ms;
+      }
+    </style>
+    <script type="module">
+      // The app's languages: French, added as an app would.
+      import './translations.ts'
+      import '../src/mind-map.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

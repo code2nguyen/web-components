@@ -6,7 +6,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // GitHub's Linux runners have four vCPUs.
+  workers: process.env.CI ? 4 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:4175',
@@ -15,7 +16,18 @@ export default defineConfig({
   projects: [
     // `CHROMIUM_PATH` points at a browser installed outside Playwright's cache (a container with a pinned Chromium).
     { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        // Lets Web Audio run in CI, as it does in Chromium and WebKit: the media suites feed an oscillator stream into an
+        // AudioContext, which Firefox keeps suspended on a machine with no audio device (the null backend stands in
+        // for one) and, without a click, under its autoplay policy.
+        launchOptions: {
+          firefoxUserPrefs: { 'media.cubeb.force_null_context': true, 'media.autoplay.default': 0, 'media.autoplay.block-webaudio': false },
+        },
+      },
+    },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     {
       name: 'reorder-touch',

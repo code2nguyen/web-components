@@ -520,7 +520,7 @@ export class CardInput extends LitElement {
         </span>
       </div>
       ${error && !this.field.managed ? html`<div class="error" part="error" id=${errorId}>${error.message}</div>` : nothing}
-      <div class="visually-hidden" role="status">${this.brandAnnouncement}</div>
+      <div class="visually-hidden" role="status">${this.brandAnnouncement || nothing}</div>
       ${this.field.renderDescription()}`
   }
 }

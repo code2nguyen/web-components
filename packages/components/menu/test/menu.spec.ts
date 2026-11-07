@@ -307,6 +307,26 @@ test('ArrowRight enters a submenu and ArrowLeft returns to its row', async ({ pa
   await expect(page.getByRole('menu', { name: 'Share' })).toBeVisible()
 })
 
+test('right to left, ArrowLeft enters a submenu that opens on the left and ArrowRight returns', async ({ page, renderScenario }) => {
+  await renderScenario(`<div dir="rtl" style="padding-inline: 320px">${submenu}</div>`)
+  await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
+  await expect(row(page, 'copy-link')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, 'invite')).toBeFocused()
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('menu', { name: 'Invite' })).not.toBeVisible()
+  await page.keyboard.press('ArrowLeft')
+  await expect(row(page, 'email')).toBeFocused()
+  const rowBox = await row(page, 'invite').boundingBox()
+  const submenuBox = await page.getByRole('menu', { name: 'Invite' }).boundingBox()
+  expect(submenuBox!.x + submenuBox!.width).toBeLessThanOrEqual(rowBox!.x + 1)
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('menu', { name: 'Invite' })).not.toBeVisible()
+  await expect(row(page, 'invite')).toBeFocused()
+})
+
 test('an element elsewhere on the page can be the anchor', async ({ page, renderScenario }) => {
   await renderScenario(`<button class="trigger" id="remote">Open</button>
     <c2-menu anchor="remote" aria-label="Remote">

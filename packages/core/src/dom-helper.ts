@@ -185,3 +185,10 @@ export function convertToUnit(str: string | number | null | undefined, unit = 'p
     return `${Number(str)}${unit}`
   }
 }
+
+/** The focused element, looked up through shadow roots: `document.activeElement` stops at the outermost host. */
+export function deepActiveElement(): Element | null {
+  let active = document.activeElement
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+  return active
+}

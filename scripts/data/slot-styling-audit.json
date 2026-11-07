@@ -181,6 +181,24 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-audio-player",
+      "slot": "avatar",
+      "decision": "assigned-content",
+      "reason": "The avatar slot projects consumer-owned light DOM (the sender's avatar in the bubble variant); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-audio-player",
+      "slot": "transcript",
+      "decision": "assigned-content",
+      "reason": "The transcript slot projects consumer-owned light DOM (a transcript of the app's own, such as a c2-transcript); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-audio-player",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM (the author's own <audio> with its sources); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-autocomplete",
       "slot": "clear-icon",
       "decision": "assigned-content",
@@ -257,6 +275,12 @@
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-backdrop",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The content drawn above the pattern; it keeps its own styles, and --c2-backdrop--padding spaces it."
     },
     {
       "tag": "c2-badge",
@@ -603,6 +627,12 @@
       "slot": "suffix-icon",
       "decision": "assigned-content",
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-celebration",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The content it wraps, usually the button that fires it; styled through its own public contract."
     },
     {
       "tag": "c2-chart-legend",
@@ -1209,6 +1239,26 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-device-frame",
+      "slot": "",
+      "decision": "part",
+      "parts": ["screen"],
+      "reason": "The screen region owns the default slot's component-side presentation (background, overflow, size container); the content styles itself."
+    },
+    {
+      "tag": "c2-device-frame",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot places the app's own controls at the end of the browser bar; the app sizes and styles them."
+    },
+    {
+      "tag": "c2-device-frame",
+      "slot": "address",
+      "decision": "part",
+      "parts": ["address"],
+      "reason": "The address field owns the address slot's component-side presentation; the bar colours apply to the slotted text."
+    },
+    {
       "tag": "c2-distribution-bar",
       "slot": "",
       "decision": "variables",
@@ -1618,6 +1668,13 @@
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-marquee",
+      "slot": "",
+      "decision": "part",
+      "parts": ["item"],
+      "reason": "Each child is wrapped in its own item part, which owns its spacing and motion; the child styles itself."
+    },
+    {
       "tag": "c2-master-detail",
       "slot": "back-icon",
       "decision": "variables",
@@ -2008,6 +2065,12 @@
       "decision": "variables",
       "variables": ["--c2-swipe-action__actions--gap", "--c2-swipe-action__actions--padding", "--c2-swipe-action__actions--align-items"],
       "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-text-effect",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The text to animate; it is read as plain text, and its look comes from the text variables and the surrounding font."
     },
     {
       "tag": "c2-tour",
@@ -2928,6 +2991,12 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-change-review",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned light DOM (the app's own buttons in the summary bar); style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-chip-group",
       "slot": "",
       "decision": "assigned-content",
@@ -3022,6 +3091,19 @@
       "decision": "part",
       "parts": ["tooltip"],
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-duration-input",
+      "slot": "icon",
+      "decision": "variables",
+      "variables": ["--c2-duration-input__icon--color", "--c2-duration-input__icon--size"],
+      "reason": "The field colours and sizes the slotted icon and its clock fallback through the icon variables."
+    },
+    {
+      "tag": "c2-file-browser",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM (an empty-folder panel of the app's own); style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-filter-builder",
@@ -3206,7 +3288,7 @@
       "tag": "c2-format-number",
       "slot": "",
       "decision": "assigned-content",
-      "reason": "The default slot only projects the consumer's fallback text (\"—\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
+      "reason": "The default slot only projects the consumer's fallback text (\"\u2014\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
     },
     {
       "tag": "c2-radio-group",
@@ -4056,6 +4138,30 @@
       "reason": "The semantic prompt region owns the prompt slot's component-side presentation."
     },
     {
+      "tag": "c2-video-grid",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The tiles, usually c2-video-tile elements; the grid sizes each one and the tile styles itself through its own public contract."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "A <video> element the call SDK attached; the tile sizes and fits it like its own video, through the object-fit variables."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "badge",
+      "decision": "assigned-content",
+      "reason": "The app's own badges (recording, host) beside the built-in ones; the app styles its content, which picks up the badge look by default."
+    },
+    {
+      "tag": "c2-video-tile",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "Buttons or a c2-menu shown on hover and focus; each is styled through its own public contract."
+    },
+    {
       "tag": "c2-view-options",
       "slot": "",
       "decision": "assigned-content",
@@ -4245,6 +4351,27 @@
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
     },
     {
+      "tag": "c2-image-compare",
+      "slot": "before",
+      "decision": "variables",
+      "variables": ["--c2-image-compare--aspect-ratio", "--c2-image-compare--border-radius"],
+      "reason": "The frame lays out the before layer: block, filling the frame (object-fit: cover) and inert to the pointer so the divider drags over it. The frame's shape comes from its aspect-ratio and radius variables; anything else on the layer is the author's."
+    },
+    {
+      "tag": "c2-image-compare",
+      "slot": "after",
+      "decision": "variables",
+      "variables": ["--c2-image-compare--aspect-ratio", "--c2-image-compare--border-radius"],
+      "reason": "The frame lays out the after (clipped at the divider) layer: block, filling the frame (object-fit: cover) and inert to the pointer so the divider drags over it. The frame's shape comes from its aspect-ratio and radius variables; anything else on the layer is the author's."
+    },
+    {
+      "tag": "c2-image-compare",
+      "slot": "handle",
+      "decision": "variables",
+      "variables": ["--c2-image-compare__handle--size", "--c2-image-compare__handle--background", "--c2-image-compare__handle--color"],
+      "reason": "The handle sizes and centres the slotted grip within its round button through the handle variables; the grip's own look is the author's."
+    },
+    {
       "tag": "c2-image-cropper",
       "slot": "placeholder",
       "decision": "part",
@@ -4274,6 +4401,292 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects the consumer's menu rows into c2-menu; style them through the c2-menu and c2-menu-item contracts."
+    },
+    {
+      "tag": "c2-quick-time-menu",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects a consumer-owned button that replaces the built-in trigger; style it through its own class or public contract."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "center",
+      "decision": "part",
+      "parts": ["center"],
+      "reason": "The center part places the slot in the chart's hole; the assigned content keeps its own styles."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radial-bar-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bullet-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-boxplot-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "center",
+      "decision": "part",
+      "parts": ["center"],
+      "reason": "The center part places the slot in the ring's hole; the assigned content keeps its own styles."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sunburst-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-terminal",
+      "slot": "banner",
+      "decision": "assigned-content",
+      "reason": "The banner slot projects consumer-owned light DOM (the first lines above every command); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-terminal",
+      "slot": "prompt",
+      "decision": "assigned-content",
+      "reason": "The prompt slot projects consumer-owned light DOM (a path or branch before the prompt mark); style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-video-player",
+      "slot": "",
+      "decision": "variables",
+      "variables": ["--c2-video-player--aspect-ratio", "--c2-video-player--border-radius", "--c2-video-player--width"],
+      "reason": "The player lays out the author's <video> under its controls (one grid cell, full width, contained) and shapes it through its width, aspect-ratio and radius variables; the player never writes on the element, whose sources and tracks stay the author's."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The scrolling body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The title-bar actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The title-bar icon box owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-floating-panel",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot's content is laid out at its natural size inside a shadow wrapper that one transform moves and scales; the shadow CSS also resets slotted img, svg, canvas and video to display: block, max-width: none and no native drag, so page rules such as img { max-width: 100% } cannot shrink them and an image is panned rather than dragged out."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "controls",
+      "decision": "part",
+      "parts": ["controls"],
+      "reason": "The zoom toolbar owns the controls slot's component-side presentation; extra buttons sit inside it."
+    },
+    {
+      "tag": "c2-pan-zoom",
+      "slot": "minimap",
+      "decision": "part",
+      "parts": ["minimap"],
+      "reason": "The minimap box sizes and frames the slotted overview; the assigned content keeps its own styles."
     }
   ]
 }

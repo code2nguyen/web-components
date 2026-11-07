@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-video-grid</title>
+    <script type="module" src="/src/video-grid.ts"></script>
+    <script type="module">
+      import '@c2n/video-tile'
+    </script>
+    <style>
+      body {
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      c2-video-grid {
+        resize: both;
+        overflow: hidden;
+        border: 1px dashed #a1a1aa;
+      }
+    </style>
+  </head>
+  <body>
+    <label
+      >Layout
+      <select id="layout">
+        <option>grid</option>
+        <option>spotlight</option>
+        <option>sidebar</option>
+      </select></label
+    >
+    <label>Max tiles <input id="max" type="number" value="0" min="0" /></label>
+    <button id="add">Add a participant</button>
+    <c2-video-grid id="grid">
+      <c2-video-tile name="Ana Ruiz" speaking level="0.6"></c2-video-tile>
+      <c2-video-tile name="Kenji Watanabe" muted></c2-video-tile>
+      <c2-video-tile name="Diego Fernández" kind="screen"></c2-video-tile>
+      <c2-video-tile name="Lea Müller" hand-raised></c2-video-tile>
+    </c2-video-grid>
+    <script type="module">
+      const grid = document.getElementById('grid')
+      document.getElementById('layout').addEventListener('change', (event) => (grid.layout = event.target.value))
+      document.getElementById('max').addEventListener('input', (event) => (grid.maxTiles = Number(event.target.value)))
+      let count = 0
+      document.getElementById('add').addEventListener('click', () => {
+        const tile = document.createElement('c2-video-tile')
+        tile.setAttribute('name', `Guest ${++count}`)
+        grid.append(tile)
+      })
+      grid.addEventListener('overflow-click', (event) => console.log('hidden', event.detail.hidden))
+    </script>
+  </body>
+</html>

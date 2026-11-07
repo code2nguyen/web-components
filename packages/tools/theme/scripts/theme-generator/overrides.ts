@@ -28,6 +28,12 @@ export const overrides: Record<string, Override> = {
   '--c2-log-viewer--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer--border': { exclude: 'default terminal frame' },
   '--c2-log-viewer--border-radius': { exclude: 'default terminal frame' },
+  // c2-terminal stays dark in both themes: its screen, title bar and muted text are its own palette.
+  '--c2-terminal--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__titlebar--background-color': { exclude: 'terminal screen stays dark in both themes' },
+  '--c2-terminal__muted--color': { exclude: 'terminal palette on its own dark screen' },
+  '--c2-terminal__ansi-black--color': { exclude: 'terminal ANSI palette' },
+  '--c2-terminal--font-family': { exclude: 'monospace text layout' },
   '--c2-log-viewer__viewport__focus--outline': { exclude: 'terminal focus contrast' },
   '--c2-log-viewer__empty--color': { exclude: 'terminal metadata contrast' },
   '--c2-log-viewer__token--color': { exclude: 'terminal log token contrast' },
@@ -140,6 +146,46 @@ export const overrides: Record<string, Override> = {
   '--c2-border-beam__beam--duration': { exclude: 'decorative animation timing' },
   '--c2-border-beam__beam--delay': { exclude: 'decorative animation timing' },
   '--c2-border-beam--z-index': { exclude: 'consumer stacking context' },
+  // Beam: like Border Beam, the light's first colour follows the accent and the second stop stays a coordinated
+  // accent; geometry and timing belong to the effect.
+  '--c2-beam__beam--color-from': { token: 'color-primary' },
+  '--c2-beam__beam--color-to': { exclude: 'coordinated decorative gradient stop' },
+  '--c2-beam__track--width': { exclude: 'decorative stroke geometry' },
+  '--c2-beam__beam--width': { exclude: 'decorative stroke geometry' },
+  '--c2-beam__beam--length': { exclude: 'decorative highlight length' },
+  '--c2-beam__beam--duration': { exclude: 'decorative animation timing' },
+  '--c2-beam__beam--delay': { exclude: 'decorative animation timing' },
+  '--c2-beam--z-index': { exclude: 'consumer stacking context' },
+  // Device Frame: a phone, tablet or laptop body is dark in both themes, like the hardware; its shape is the
+  // device's, not the theme's. The browser window, its bar and the deck follow the surface roles.
+  '--c2-device-frame__bezel--color': { token: 'color-dark-surface' },
+  '--c2-device-frame__island--color': { exclude: 'camera island stays black on the dark bezel' },
+  '--c2-device-frame__base--color': { token: 'color-outline' },
+  '--c2-device-frame__close-dot--color': { token: 'color-outline' },
+  '--c2-device-frame__minimize-dot--color': { token: 'color-outline' },
+  '--c2-device-frame__zoom-dot--color': { token: 'color-outline' },
+  '--c2-device-frame__frame--box-shadow': { token: 'shadow-md' },
+  '--c2-device-frame__phone--border-radius': { exclude: 'device shape' },
+  '--c2-device-frame__tablet--border-radius': { exclude: 'device shape' },
+  '--c2-device-frame__laptop--border-radius': { exclude: 'device shape' },
+  '--c2-device-frame__phone--width': { exclude: 'device size' },
+  '--c2-device-frame__tablet--width': { exclude: 'device size' },
+  '--c2-device-frame__laptop--width': { exclude: 'device size' },
+  '--c2-device-frame__browser--width': { exclude: 'device size' },
+  '--c2-device-frame__browser--height': { exclude: 'device size' },
+  '--c2-device-frame__phone--aspect-ratio': { exclude: 'device shape' },
+  '--c2-device-frame__tablet--aspect-ratio': { exclude: 'device shape' },
+  '--c2-device-frame__laptop--aspect-ratio': { exclude: 'device shape' },
+  '--c2-device-frame__bezel--width': { exclude: 'device geometry' },
+  '--c2-device-frame__island--width': { exclude: 'device geometry' },
+  '--c2-device-frame__base--height': { exclude: 'device geometry' },
+  '--c2-device-frame__screen--overflow': { exclude: 'scroll behaviour, not a theme value' },
+  // Marquee: motion and spacing belong to the strip's composition.
+  '--c2-marquee--speed': { exclude: 'decorative animation speed' },
+  '--c2-marquee__item--gap': { exclude: 'strip composition spacing' },
+  '--c2-marquee__item--align': { exclude: 'strip composition alignment' },
+  '--c2-marquee__viewport--fade': { exclude: 'decorative edge fade' },
+  '--c2-marquee__viewport--height': { exclude: 'strip composition size' },
   // Status-panel dimensions follow the surrounding page/card composition. Semantic outcome colours stay stable across
   // brand themes so success, warning and error do not inherit unrelated accent colours.
   '--c2-status-panel__container--width': { exclude: 'responsive status-panel width' },
@@ -172,6 +218,13 @@ export const overrides: Record<string, Override> = {
   '--c2-qr-code__background--color': { token: 'color-surface' },
   '--c2-qr-code__center--size': { exclude: 'center mark constrained by QR scan geometry' },
   '--c2-qr-code__center--padding': { exclude: 'center mark quiet spacing' },
+  // A barcode stays dark on white in every theme: many 1D scanners cannot read light bars on a dark field.
+  '--c2-barcode__bar--color': { exclude: 'scanners need dark bars on a light field' },
+  '--c2-barcode__background--color': { exclude: 'scanners need dark bars on a light field' },
+  '--c2-barcode__text--color': { exclude: 'the printed value sits on the white code field' },
+  // A transcript match keeps dark text on its yellow highlight in every theme.
+  '--c2-transcript__mark--background-color': { exclude: 'highlight pair with the match text' },
+  '--c2-transcript__mark--color': { exclude: 'dark text on the highlight' },
   // The filter builder's dashed add button and draft chip keep their style while following the strong outline colour.
   '--c2-filter-builder__add-button--border': {
     token: 'border',
@@ -218,6 +271,26 @@ export const overrides: Record<string, Override> = {
   '--c2-cascader__trigger__focus--outline-offset': { exclude: 'flush focus ring offset' },
   '--c2-cascader__icon--size': { exclude: 'cascader affordance size' },
   '--c2-cascader__panel--box-shadow': { token: 'shadow-md' },
+  // A floating panel behind the active one sits lower: its shadow steps down from the large one.
+  '--c2-floating-panel__inactive--box-shadow': { token: 'shadow-md' },
+  // Pan-zoom: the cooperative hint is light text on the inverted surface; the dot grid and minimap follow the greys
+  // and the accent, so both read in dark mode.
+  '--c2-pan-zoom__hint--color': { token: 'color-on-inverse-surface' },
+  '--c2-pan-zoom__grid--color': { token: 'color-outline' },
+  '--c2-pan-zoom__minimap-content--background': { token: 'color-outline-variant' },
+  '--c2-pan-zoom__minimap-frame--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
+  '--c2-pan-zoom__minimap-frame--background': { token: 'color-primary-glow' },
+  // Mind map: the root card is the inverse surface, and the branch colours are the chart palette so they adapt to dark mode.
+  '--c2-mind-map__root--color': { token: 'color-on-inverse-surface' },
+  '--c2-mind-map__branch-1--color': { token: 'chart-series-1' },
+  '--c2-mind-map__branch-2--color': { token: 'chart-series-2' },
+  '--c2-mind-map__branch-3--color': { token: 'chart-series-3' },
+  '--c2-mind-map__branch-4--color': { token: 'chart-series-4' },
+  '--c2-mind-map__branch-5--color': { token: 'chart-series-5' },
+  '--c2-mind-map__branch-6--color': { token: 'chart-series-6' },
+  '--c2-mind-map__branch-7--color': { token: 'chart-series-7' },
+  '--c2-mind-map__branch-8--color': { token: 'chart-series-8' },
+  '--c2-mind-map__topic__selected--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, #0265dc)' },
   '--c2-cascader__panel--max-width': { exclude: 'viewport-aware panel width' },
   '--c2-cascader__column--min-width': { exclude: 'hierarchy column geometry' },
   '--c2-cascader__column--max-width': { exclude: 'hierarchy column geometry' },
@@ -265,6 +338,10 @@ export const overrides: Record<string, Override> = {
   '--c2-org-chart__card__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__toggle__hover--border-color': { token: 'color-outline-strong' },
   '--c2-org-chart__card__selected--box-shadow': { token: 'color-primary', value: '0 0 0 1px var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  // A bullet chart's qualitative bands are a grey ramp from the resting border grey (poor) to the container surface
+  // (good), so they sit back behind the bar in both themes.
+  '--c2-chart__band-start--color': { token: 'color-outline' },
+  '--c2-chart__band-end--color': { token: 'color-surface-container' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

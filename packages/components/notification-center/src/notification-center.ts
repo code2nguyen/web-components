@@ -310,7 +310,7 @@ export class NotificationCenter extends LitElement {
             : nothing
         }
       </div>
-      <div class="visually-hidden" role="status">${this.announcement}</div>
+      <div class="visually-hidden" role="status">${this.announcement || nothing}</div>
     </div>`
   }
 

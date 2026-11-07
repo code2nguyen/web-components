@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marquee test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 24px;
+      }
+      main {
+        width: 400px;
+      }
+      c2-marquee {
+        --c2-marquee__item--gap: 20px;
+        --c2-marquee__viewport--height: 300px;
+      }
+      .logo {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 100px;
+        height: 40px;
+        padding: 10px;
+        border: 1px solid #a1a1aa;
+        border-radius: 6px;
+        color: #18181b;
+        font-size: 14px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Marquee scenario"></main>
+  </body>
+</html>

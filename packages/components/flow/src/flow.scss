@@ -834,11 +834,11 @@
   fill: var(--_cutout);
 }
 
-// The status marker of a node and the status line of its hover card (`.card-content.status--<status>`) take the
-// status colour.
+// The status marker of a node takes the status colour. The status line of its hover card does not: it is text,
+// and several status colours (pending, skipped, success, warning) are too light to read at its size; the card's
+// icon carries the colour.
 @each $status in (success, error, warning, running, current, pending, skipped) {
-  .status.status--#{$status},
-  .status--#{$status} .card-status {
+  .status.status--#{$status} {
     color: css.cssVar(#{$status}--color);
   }
 }
@@ -916,6 +916,7 @@
 }
 
 .card-status {
+  color: css.cssVar(card__term--color);
   font-size: 12px;
   font-weight: 600;
 }

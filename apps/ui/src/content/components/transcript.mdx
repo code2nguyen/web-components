@@ -1,0 +1,72 @@
+---
+title: 'Transcript'
+description: 'Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Transcript } from '@c2n/components/transcript'
+
+`c2-transcript` shows what was said in a meeting recording, a podcast or a call with a voice agent: who spoke, when, and the text, following the audio as it plays. Speech-to-text comes from your provider (Whisper, Deepgram, AssemblyAI, a meeting SDK); this element draws it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/transcript'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/transcript
+<style>
+  .transcript-demo {
+    width: 100%;
+    max-width: 520px;
+    height: 300px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+  .transcript-demo--short {
+    height: auto;
+  }
+</style>
+<div data-label="Playing">
+  <c2-transcript class="transcript-demo" current-time="67.4" speakers='{"ana":{"name":"Ana Ruiz"},"marcus":{"name":"Marcus Lee"},"priya":{"name":"Priya Shah"}}' segments='[{"speaker":"ana","start":42,"end":50,"text":"Thanks for joining. I want to walk through the Q3 launch plan and where we landed on pricing."},{"speaker":"ana","start":50,"end":58,"text":"Short version: we keep the free tier, and the team plan moves to per-seat billing."},{"speaker":"marcus","start":65,"end":72,"text":"That works for sales. Do we have a migration path for annual customers?","words":[{"text":"That","start":65.0},{"text":"works","start":65.45},{"text":"for","start":65.9},{"text":"sales.","start":66.35},{"text":"Do","start":66.8},{"text":"we","start":67.25},{"text":"have","start":67.7},{"text":"a","start":68.15},{"text":"migration","start":68.6},{"text":"path","start":69.05},{"text":"for","start":69.5},{"text":"annual","start":69.95},{"text":"customers?","start":70.4}]},{"speaker":"ana","start":78,"end":84,"text":"Yes, they keep their price until renewal. Priya has the numbers."},{"speaker":"priya","start":151,"end":160,"text":"About eleven percent of revenue is annual prepaid, and most of it renews in January."}]'></c2-transcript>
+</div>
+<div data-label="Search">
+  <c2-transcript class="transcript-demo" query="price" speakers='{"ana":{"name":"Ana Ruiz"},"marcus":{"name":"Marcus Lee"},"priya":{"name":"Priya Shah"}}' segments='[{"speaker":"ana","start":42,"end":50,"text":"Thanks for joining. I want to walk through the Q3 launch plan and where we landed on pricing."},{"speaker":"ana","start":50,"end":58,"text":"Short version: we keep the free tier, and the team plan moves to per-seat billing."},{"speaker":"marcus","start":65,"end":72,"text":"That works for sales. Do we have a migration path for annual customers?","words":[{"text":"That","start":65.0},{"text":"works","start":65.45},{"text":"for","start":65.9},{"text":"sales.","start":66.35},{"text":"Do","start":66.8},{"text":"we","start":67.25},{"text":"have","start":67.7},{"text":"a","start":68.15},{"text":"migration","start":68.6},{"text":"path","start":69.05},{"text":"for","start":69.5},{"text":"annual","start":69.95},{"text":"customers?","start":70.4}]},{"speaker":"ana","start":78,"end":84,"text":"Yes, they keep their price until renewal. Priya has the numbers."},{"speaker":"priya","start":151,"end":160,"text":"About eleven percent of revenue is annual prepaid, and most of it renews in January."}]'></c2-transcript>
+</div>
+<div data-label="Live, compact">
+  <c2-transcript class="transcript-demo transcript-demo--short" layout="compact" speakers='{"ana":{"name":"Ana Ruiz"},"marcus":{"name":"Marcus Lee"},"priya":{"name":"Priya Shah"}}' segments='[{"speaker":"ana","start":0,"text":"Can everyone hear me?"},{"speaker":"marcus","start":3,"text":"Loud and clear."},{"speaker":"priya","start":5,"text":"Yes. Starting with the numbers from","interim":true}]'></c2-transcript>
+</div>
+```
+
+### Segments and speakers
+
+`segments` is an array of `{ speaker, start, end, text }`, times in seconds. Give a segment its `words` (`[{ text, start, end }]`, as most speech-to-text APIs return them) and the word playing is underlined while the words still to come are muted. Consecutive segments by one speaker sit under one header, with an avatar, the name and the time.
+
+`speakers` maps a speaker id to `{ name, avatar, color }`. A speaker without a colour takes the next of eight `--c2-transcript__speaker-<n>--color`, in the order they first speak, so the first eight people in a meeting never share a colour. `layout="compact"` drops the avatars and puts the time before every segment, for a side panel.
+
+### Playback
+
+Hand it the player and it follows by itself; a click on a time, a segment or a word plays from there:
+
+```typescript tag=CodeBlock
+const transcript = document.querySelector('c2-transcript')!
+transcript.media = document.querySelector('audio')
+transcript.segments = await fetch('/meetings/42/transcript.json').then((response) => response.json())
+```
+
+Without a media element, set `current-time` from your own player or SDK and listen for `transcript-seek` (`{ time, segment }`). Cancel that event to keep `media` where it is.
+
+Give the element a height and it scrolls by itself, keeping the segment playing in view. When the reader scrolls away, following pauses and a "Jump to current" button appears. For live captions, append to `segments`: while the view is at the bottom it stays there, and a segment marked `interim` is drawn muted until the final text replaces it.
+
+### Search
+
+`query` marks every match, ignoring case and accents. Wire your own find bar to `nextMatch()`, `previousMatch()` and the `match-change` event (`{ count, index }`); the position is announced as "2 of 5 matches".
+
+### Keyboard and screen readers
+
+The segments are one tab stop: the arrow keys, Home and End move between them, and Enter or Space plays from the one focused. Each speaker group is an article named "Ana Ruiz, 0:42", and the segment playing carries `aria-current="time"`. The playing position is never announced, since it changes all the time.

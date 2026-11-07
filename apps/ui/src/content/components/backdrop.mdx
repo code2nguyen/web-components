@@ -1,0 +1,62 @@
+---
+title: 'Backdrop'
+description: 'A container that draws a decorative pattern behind its content: dots, a grid, stripes, flicker, aurora or meteors.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Backdrop } from '@c2n/components/backdrop'
+
+`c2-backdrop` wraps a hero, a landing section or an empty state and draws a decorative background behind it. The content stays in normal flow above the pattern; the pattern is hidden from assistive technology and never takes the pointer.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/backdrop'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/backdrop
+<style>
+  .bd-box {
+    width: 100%;
+    --c2-backdrop--padding: 48px 24px;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .bd-box h3 {
+    margin: 0;
+    font-size: 22px;
+  }
+  .bd-box p {
+    margin: 4px 0 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div data-label="Dots">
+  <c2-backdrop class="bd-box" pattern="dots"><h3>Dots</h3><p>A quiet texture</p></c2-backdrop>
+</div>
+<div data-label="Grid">
+  <c2-backdrop class="bd-box" pattern="grid"><h3>Grid</h3><p>A blueprint feel</p></c2-backdrop>
+</div>
+<div data-label="Flicker">
+  <c2-backdrop class="bd-box" pattern="flicker"><h3>Flicker</h3><p>Squares light up and fade</p></c2-backdrop>
+</div>
+<div data-label="Aurora">
+  <c2-backdrop class="bd-box" pattern="aurora"><h3>Aurora</h3><p>Slow drifting colour</p></c2-backdrop>
+</div>
+<div data-label="Meteors">
+  <c2-backdrop class="bd-box" pattern="meteors"><h3>Meteors</h3><p>Streaks cross now and then</p></c2-backdrop>
+</div>
+```
+
+### Patterns
+
+`dots`, `grid` and `stripes` are still, drawn with CSS gradients. `flicker` lights squares of a fine grid at random on a canvas, `aurora` drifts three soft blobs of colour, and `meteors` sends `--c2-backdrop__meteor--count` streaks across. A moving pattern stops while it is off screen or the page is hidden, and stays still under reduced motion.
+
+### Styling
+
+`--c2-backdrop--color` and `--c2-backdrop--size` set the dots', lines' and squares' colour and spacing; the default grey reads in both themes. `--c2-backdrop__mask--image` fades the pattern (toward the edges by default; `none` keeps it even, a linear gradient fades it one way). The aurora's three colours, opacity, blur and drift time, the flicker colour and the meteors' colour and length are variables too, and `--c2-backdrop--padding` spaces the content.

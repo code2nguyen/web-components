@@ -1,13 +1,19 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
+import addressField from '@c2n/address-field/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
+import audioPlayer from '@c2n/audio-player/custom-elements.json'
+import audioVisualizer from '@c2n/audio-visualizer/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
+import backdrop from '@c2n/backdrop/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
+import barcode from '@c2n/barcode/custom-elements.json'
+import beam from '@c2n/beam/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
 import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
@@ -17,6 +23,8 @@ import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
 import cascader from '@c2n/cascader/custom-elements.json'
+import celebration from '@c2n/celebration/custom-elements.json'
+import changeReview from '@c2n/change-review/custom-elements.json'
 import chart from '@c2n/chart/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
@@ -46,14 +54,18 @@ import dateStrip from '@c2n/date-strip/custom-elements.json'
 import dateTimePicker from '@c2n/date-time-picker/custom-elements.json'
 import descriptionList from '@c2n/description-list/custom-elements.json'
 import details from '@c2n/details/custom-elements.json'
+import deviceFrame from '@c2n/device-frame/custom-elements.json'
 import diffViewer from '@c2n/diff-viewer/custom-elements.json'
 import distributionBar from '@c2n/distribution-bar/custom-elements.json'
+import durationInput from '@c2n/duration-input/custom-elements.json'
 import emojiPicker from '@c2n/emoji-picker/custom-elements.json'
 import facetList from '@c2n/facet-list/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import fieldset from '@c2n/fieldset/custom-elements.json'
+import fileBrowser from '@c2n/file-browser/custom-elements.json'
 import filterBuilder from '@c2n/filter-builder/custom-elements.json'
 import floatButton from '@c2n/float-button/custom-elements.json'
+import floatingPanel from '@c2n/floating-panel/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import formField from '@c2n/form-field/custom-elements.json'
 import form from '@c2n/form/custom-elements.json'
@@ -66,6 +78,8 @@ import header from '@c2n/header/custom-elements.json'
 import highlight from '@c2n/highlight/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
+import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
+import imageCompare from '@c2n/image-compare/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
@@ -84,6 +98,7 @@ import loadingOverlay from '@c2n/loading-overlay/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import markdown from '@c2n/markdown/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
+import marquee from '@c2n/marquee/custom-elements.json'
 import maskInput from '@c2n/mask-input/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import masterDetail from '@c2n/master-detail/custom-elements.json'
@@ -93,6 +108,7 @@ import menu from '@c2n/menu/custom-elements.json'
 import menubar from '@c2n/menubar/custom-elements.json'
 import mermaid from '@c2n/mermaid/custom-elements.json'
 import meter from '@c2n/meter/custom-elements.json'
+import mindMap from '@c2n/mind-map/custom-elements.json'
 import modal from '@c2n/modal/custom-elements.json'
 import moneyInput from '@c2n/money-input/custom-elements.json'
 import monthPicker from '@c2n/month-picker/custom-elements.json'
@@ -109,10 +125,12 @@ import overlay from '@c2n/overlay/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import pageHeader from '@c2n/page-header/custom-elements.json'
 import pagination from '@c2n/pagination/custom-elements.json'
+import panZoom from '@c2n/pan-zoom/custom-elements.json'
 import passwordField from '@c2n/password-field/custom-elements.json'
 import paymentCard from '@c2n/payment-card/custom-elements.json'
 import phoneInput from '@c2n/phone-input/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import pivotTable from '@c2n/pivot-table/custom-elements.json'
 import popconfirm from '@c2n/popconfirm/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import promoCodeField from '@c2n/promo-code-field/custom-elements.json'
@@ -120,6 +138,7 @@ import qrCode from '@c2n/qr-code/custom-elements.json'
 import quantityPicker from '@c2n/quantity-picker/custom-elements.json'
 import queryInput from '@c2n/query-input/custom-elements.json'
 import questionnaire from '@c2n/questionnaire/custom-elements.json'
+import quickTimeMenu from '@c2n/quick-time-menu/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
 import reactionBar from '@c2n/reaction-bar/custom-elements.json'
@@ -127,6 +146,7 @@ import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
 import saveBar from '@c2n/save-bar/custom-elements.json'
+import scheduler from '@c2n/scheduler/custom-elements.json'
 import scrollArea from '@c2n/scroll-area/custom-elements.json'
 import scrollProgress from '@c2n/scroll-progress/custom-elements.json'
 import searchField from '@c2n/search-field/custom-elements.json'
@@ -160,6 +180,8 @@ import table from '@c2n/table/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import tagInput from '@c2n/tag-input/custom-elements.json'
 import taskIcons from '@c2n/task-icons/custom-elements.json'
+import terminal from '@c2n/terminal/custom-elements.json'
+import textEffect from '@c2n/text-effect/custom-elements.json'
 import textField from '@c2n/text-field/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
@@ -173,10 +195,14 @@ import toggletip from '@c2n/toggletip/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import tour from '@c2n/tour/custom-elements.json'
 import traceWaterfall from '@c2n/trace-waterfall/custom-elements.json'
+import transcript from '@c2n/transcript/custom-elements.json'
 import treeSelect from '@c2n/tree-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
 import truncate from '@c2n/truncate/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
+import videoGrid from '@c2n/video-grid/custom-elements.json'
+import videoPlayer from '@c2n/video-player/custom-elements.json'
+import videoTile from '@c2n/video-tile/custom-elements.json'
 import viewOptions from '@c2n/view-options/custom-elements.json'
 import virtualList from '@c2n/virtual-list/custom-elements.json'
 import visuallyHidden from '@c2n/visually-hidden/custom-elements.json'
@@ -191,13 +217,19 @@ export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     accordion,
     actionBar,
+    addressField,
     appShell,
     attachment,
+    audioPlayer,
+    audioVisualizer,
     autocomplete,
     avatar,
+    backdrop,
     badge,
     banner,
     barList,
+    barcode,
+    beam,
     borderBeam,
     bottomNav,
     breadcrumb,
@@ -207,6 +239,8 @@ export const componentManifests = (function () {
     cardInput,
     carousel,
     cascader,
+    celebration,
+    changeReview,
     chart,
     chatInput,
     chatMessage,
@@ -236,14 +270,18 @@ export const componentManifests = (function () {
     dateTimePicker,
     descriptionList,
     details,
+    deviceFrame,
     diffViewer,
     distributionBar,
+    durationInput,
     emojiPicker,
     facetList,
     featherIcons,
     fieldset,
+    fileBrowser,
     filterBuilder,
     floatButton,
+    floatingPanel,
     flow,
     form,
     formField,
@@ -257,6 +295,8 @@ export const componentManifests = (function () {
     hoverCard,
     iconButton,
     image,
+    imageAnnotator,
+    imageCompare,
     imageCropper,
     inView,
     indicator,
@@ -274,6 +314,7 @@ export const componentManifests = (function () {
     logViewer,
     markdown,
     marker,
+    marquee,
     maskInput,
     masonry,
     masterDetail,
@@ -283,6 +324,7 @@ export const componentManifests = (function () {
     menubar,
     mermaid,
     meter,
+    mindMap,
     modal,
     moneyInput,
     monthPicker,
@@ -299,10 +341,12 @@ export const componentManifests = (function () {
     pageEditor,
     pageHeader,
     pagination,
+    panZoom,
     passwordField,
     paymentCard,
     phoneInput,
     phosphorIcons,
+    pivotTable,
     popconfirm,
     progress,
     promoCodeField,
@@ -310,6 +354,7 @@ export const componentManifests = (function () {
     quantityPicker,
     queryInput,
     questionnaire,
+    quickTimeMenu,
     radio,
     rate,
     reactionBar,
@@ -317,6 +362,7 @@ export const componentManifests = (function () {
     reorderList,
     richTextEditor,
     saveBar,
+    scheduler,
     scrollArea,
     scrollProgress,
     searchField,
@@ -350,6 +396,8 @@ export const componentManifests = (function () {
     tabs,
     tagInput,
     taskIcons,
+    terminal,
+    textEffect,
     textField,
     textarea,
     themeSelect,
@@ -363,10 +411,14 @@ export const componentManifests = (function () {
     tooltip,
     tour,
     traceWaterfall,
+    transcript,
     tree,
     treeSelect,
     truncate,
     upload,
+    videoGrid,
+    videoPlayer,
+    videoTile,
     viewOptions,
     virtualList,
     visuallyHidden,

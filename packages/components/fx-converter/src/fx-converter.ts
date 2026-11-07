@@ -517,7 +517,7 @@ export class FxConverter extends LitElement {
         ${action}
       </div>
       ${this.renderField('to', to, toLabel, '')}
-      <span class="visually-hidden" aria-live="polite">${this.announcement}</span>
+      <span class="visually-hidden" aria-live="polite">${this.announcement || nothing}</span>
     </div>`
   }
 }

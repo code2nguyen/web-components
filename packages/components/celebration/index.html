@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-celebration</title>
+    <script type="module" src="/src/celebration.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-celebration trigger="click"><button>Confetti on click</button></c2-celebration>
+    <c2-celebration trigger="click" kind="burst"><button>Burst on click</button></c2-celebration>
+    <c2-celebration trigger="click" kind="emoji" emoji="🚀;🎉"><button>Emoji on click</button></c2-celebration>
+  </body>
+</html>

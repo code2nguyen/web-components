@@ -1,0 +1,158 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    band-start--color: #d4d4d8,
+    band-end--color: #f4f4f5,
+    target--color: #18181b,
+    target--width: 3px,
+    row--height: 44px,
+    row--gap: 12px,
+    label--font-weight: 600,
+    description--color: #71717a,
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+/*
+ * A bullet chart sizes itself: unless `--c2-chart--height` is set, the host is as tall as its rows. The frame and an
+ * invisible sizer share one grid cell, so the sizer gives the cell its height and the frame (with the engine's plot)
+ * fills it; a set height wins, and the sizer is clipped to it.
+ */
+:host {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  height: var(--c2-chart--height, auto);
+}
+
+.frame,
+.bullet-sizer {
+  grid-area: 1 / 1;
+}
+
+.bullet-sizer {
+  --_row: #{css.cssVar(row--height)};
+  align-self: start;
+  max-height: 100%;
+  height: calc(var(--_rows, 1) * var(--_row) + (var(--_rows, 1) - 1) * #{css.cssVar(row--gap)});
+  visibility: hidden;
+  pointer-events: none;
+}
+
+// Without the tick axis a row is a bare bar: its default height drops to 24px.
+.bullet-sizer--bare {
+  --_row: var(--c2-chart__row--height, 24px);
+}
+
+// Columns do not stack, so a vertical chart takes a fixed height.
+.bullet-sizer--vertical {
+  height: 260px;
+}
+
+// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
+.plot:focus {
+  outline: none;
+}
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: -2px;
+}
+
+/*
+ * Probes the chart reads its variables through: a computed colour or width resolves `var()`, `light-dark()`,
+ * `color-mix()` and any unit into what the engine can draw. An unset band colour reads as transparent.
+ */
+.bullet-probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+
+  > * {
+    display: block;
+    height: 0;
+  }
+
+  .band-start {
+    color: css.cssVar(band-start--color);
+  }
+
+  .band-end {
+    color: css.cssVar(band-end--color);
+  }
+
+  .band-1 {
+    color: var(--c2-chart__band-1--color, transparent);
+  }
+
+  .band-2 {
+    color: var(--c2-chart__band-2--color, transparent);
+  }
+
+  .band-3 {
+    color: var(--c2-chart__band-3--color, transparent);
+  }
+
+  .band-4 {
+    color: var(--c2-chart__band-4--color, transparent);
+  }
+
+  .band-5 {
+    color: var(--c2-chart__band-5--color, transparent);
+  }
+
+  .target {
+    color: css.cssVar(target--color, --c2-chart--color);
+    width: css.cssVar(target--width);
+  }
+
+  .description {
+    color: css.cssVar(description--color, muted--color);
+    font-weight: css.cssVar(label--font-weight);
+  }
+
+  .row {
+    width: css.cssVar(row--height);
+  }
+
+  .row-bare {
+    width: var(--c2-chart__row--height, 24px);
+  }
+
+  .gap {
+    width: css.cssVar(row--gap);
+  }
+}
+
+// The tooltip's target and band markers.
+.bullet-tick-marker {
+  flex: none;
+  box-sizing: border-box;
+  width: 4px;
+  height: 12px;
+  margin: 0 3px;
+  border-radius: 1px;
+  // The target colour is the text colour, as dark as the tooltip: a ring of the tooltip's text keeps it visible, as
+  // the halo does on the plot.
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.bullet-band-marker {
+  border-radius: 2px;
+}
+
+.bullet-tooltip-description {
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+// The table and the live announcement are for assistive technology only.
+.bullet-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

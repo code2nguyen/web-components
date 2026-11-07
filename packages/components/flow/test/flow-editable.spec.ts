@@ -632,6 +632,8 @@ test.describe('editable', () => {
     const dot = await center(handle)
     expect(Math.abs(dot.y - (box.y + box.height))).toBeLessThan(2)
     expect(Math.abs(dot.x - (box.x + box.width / 2))).toBeLessThan(2)
+    // The hover opens the node's card too; check it with the rest, once it is open, so the result does not depend on timing.
+    await expect(page.locator('c2-flow .card')).toHaveCSS('opacity', '1')
     await accessible(page)
   })
 })

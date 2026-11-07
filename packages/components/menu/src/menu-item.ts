@@ -47,7 +47,7 @@ export interface MenuItem {
  * @slot prefix-icon - Icon shown before the label.
  * @slot suffix-icon - Icon shown after the label; replaced by the chevron when the row has a submenu.
  * @slot shortcut - Keyboard hint, aligned to the end of the row.
- * @slot submenu - A nested `c2-menu` opened by hover, click, Enter or ArrowRight.
+ * @slot submenu - A nested `c2-menu` opened by hover, click, Enter or ArrowRight (ArrowLeft right to left).
  *
  * @event {CustomEvent<MenuSelectEventDetail>} menu-select - Fired after the row is activated by a click, Enter or Space. Cancelable; a row with a submenu never fires it.
  * @event {CustomEvent<{ checked: boolean; value: string }>} checked-change - Fired after the `checked` state of a `checkbox` / `radio` row changes.

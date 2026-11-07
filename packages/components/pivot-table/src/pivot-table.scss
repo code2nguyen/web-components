@@ -1,0 +1,284 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-pivot-table,
+  $theme: (
+    max-height: none,
+    font-size: 13px,
+    color: #18181b,
+    background-color: #ffffff,
+    border--color: #e4e4e7,
+    border-radius: 8px,
+    cell--padding: 6px 12px,
+    header--background-color: #fafafa,
+    header--color: #18181b,
+    subtotal--background-color: #fafafa,
+    total--background-color: #f4f4f5,
+    total--font-weight: 600,
+    muted--color: #71717a,
+    focus--outline-color: rgb(2, 101, 220),
+    heat--color: rgb(2, 101, 220),
+    heat--on-color: #ffffff,
+    indent--width: 20px,
+    field-list--width: 220px,
+    chip--background-color: #ffffff,
+    chip--border: 1px solid #e4e4e7,
+    zone__over--background-color: rgba(2, 101, 220, 0.06),
+  )
+);
+
+:host {
+  display: block;
+  max-width: 100%;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.scroll {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+  border: 1px solid css.cssVar(border--color);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: css.cssVar(cell--padding);
+  border-bottom: 1px solid css.cssVar(border--color);
+  white-space: nowrap;
+}
+
+tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+thead th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background-color: css.cssVar(header--background-color);
+  color: css.cssVar(header--color);
+  font-weight: 600;
+  text-align: end;
+}
+
+thead tr:nth-child(2) th {
+  top: calc(1lh + 13px);
+}
+
+thead th.group {
+  border-inline-start: 1px solid css.cssVar(border--color);
+  text-align: center;
+}
+
+thead th.corner {
+  z-index: 2;
+  inset-inline-start: 0;
+  color: css.cssVar(muted--color);
+  font-weight: 500;
+  text-align: start;
+  vertical-align: bottom;
+}
+
+.sort {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid css.cssVar(focus--outline-color);
+    outline-offset: 2px;
+  }
+}
+
+.arrow {
+  color: css.cssVar(focus--outline-color);
+}
+
+tbody th {
+  position: sticky;
+  z-index: 1;
+  inset-inline-start: 0;
+  padding-inline-start: calc(12px + var(--_depth, 0) * #{css.cssVar(indent--width)});
+  background-color: css.cssVar(background-color);
+  font-weight: 500;
+  text-align: start;
+  cursor: default;
+}
+
+.toggle {
+  display: inline-block;
+  width: 14px;
+  color: css.cssVar(muted--color);
+}
+
+.group > th,
+.collapsed > th {
+  cursor: pointer;
+}
+
+.leaf > th {
+  font-weight: 400;
+}
+
+td {
+  text-align: end;
+  cursor: pointer;
+}
+
+td.empty {
+  color: css.cssVar(muted--color);
+}
+
+.subtotal > *,
+.collapsed > *,
+.group > * {
+  background-color: css.cssVar(subtotal--background-color);
+  font-weight: css.cssVar(total--font-weight);
+}
+
+.grand > *,
+td.total,
+th.total {
+  background-color: css.cssVar(total--background-color);
+  font-weight: css.cssVar(total--font-weight);
+}
+
+td.heat {
+  background-color: color-mix(in srgb, #{css.cssVar(heat--color)} calc(var(--_heat) * 0.8), transparent);
+}
+
+td.hot {
+  color: css.cssVar(heat--on-color);
+}
+
+[data-cell]:focus-visible {
+  outline: 2px solid css.cssVar(focus--outline-color);
+  outline-offset: -2px;
+}
+
+.empty-state {
+  padding: 24px;
+  color: css.cssVar(muted--color);
+  text-align: center;
+}
+
+.field-list {
+  display: grid;
+  flex: none;
+  gap: 10px;
+  width: css.cssVar(field-list--width);
+  padding: 12px;
+  border: 1px solid css.cssVar(border--color);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+}
+
+.zone {
+  display: grid;
+  gap: 6px;
+}
+
+.zone-label {
+  color: css.cssVar(muted--color);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px;
+  border: 1px dashed css.cssVar(border--color);
+  border-radius: 6px;
+}
+
+.zone.over .chips {
+  border-color: css.cssVar(focus--outline-color);
+  background-color: css.cssVar(zone__over--background-color);
+}
+
+.chip {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 4px 2px 10px;
+  border: css.cssVar(chip--border);
+  border-radius: 999px;
+  background-color: css.cssVar(chip--background-color);
+  font-size: 12px;
+  cursor: grab;
+}
+
+.chip-aggregate {
+  color: css.cssVar(muted--color);
+}
+
+.chip-menu {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: css.cssVar(muted--color);
+  cursor: pointer;
+
+  &:hover {
+    background-color: css.cssVar(subtotal--background-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(focus--outline-color);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

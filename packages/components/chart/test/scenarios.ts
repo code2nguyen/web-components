@@ -26,6 +26,7 @@ import '../src/chord-chart'
 import '../src/sankey-chart'
 import '../src/treemap-chart'
 import '../src/waterfall-chart'
+import '../src/radial-bar-chart'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -266,6 +267,12 @@ function build(): void {
     case 'waterfall':
       main.innerHTML = `<c2-waterfall-chart id="chart" label-field="item" total-field="total" total-label="Net income"><c2-chart-series field="amount" label="Amount"></c2-chart-series></c2-waterfall-chart>`
       break
+    case 'radial':
+      main.innerHTML = `<c2-radial-bar-chart id="chart" label-field="ring" max-field="goal" color-field="color" value-suffix=" kcal" style="width: 320px; height: 320px"><c2-chart-series field="value" label="Today"></c2-chart-series><strong slot="center" id="total">420</strong></c2-radial-bar-chart>`
+      break
+    case 'radial-dial':
+      main.innerHTML = `<c2-radial-bar-chart id="chart" label-field="category" max="500" sweep="270" labels="none" legend="bottom" legend-action="toggle" style="width: 320px; height: 360px"><c2-chart-series field="spent" label="Spent"></c2-chart-series></c2-radial-bar-chart>`
+      break
     case 'treemap':
       main.innerHTML = `<c2-treemap-chart id="chart" label-field="ticker" group-field="sector"><c2-chart-series field="cap" label="Market cap"></c2-chart-series></c2-treemap-chart>`
       break
@@ -344,7 +351,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart, c2-bullet-chart, c2-boxplot-chart, c2-sunburst-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -405,6 +412,20 @@ function build(): void {
       { from: 'Revenue', to: 'Cost of revenue', amount: 20 },
       { from: 'Services', to: 'Revenue', amount: 0 },
       { from: 'Tax', amount: 3 },
+    ]
+  } else if (scenario === 'radial') {
+    chart.data = [
+      { ring: 'Move', value: 420, goal: 600, color: '#fa114f' },
+      { ring: 'Exercise', value: 24, goal: 30, color: '#92e82a' },
+      // Past the goal: a full ring and a second lap.
+      { ring: 'Stand', value: 15.6, goal: 12, color: '#1eeaef' },
+    ]
+  } else if (scenario === 'radial-dial') {
+    chart.data = [
+      { category: 'Housing', spent: 460 },
+      { category: 'Food', spent: 320 },
+      { category: 'Transport', spent: 120 },
+      { category: 'Leisure', spent: null },
     ]
   } else if (scenario === 'waterfall') {
     chart.data = [
@@ -549,7 +570,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart, c2-chord-chart, c2-sankey-chart, c2-waterfall-chart, c2-treemap-chart, c2-radial-bar-chart, c2-bullet-chart, c2-boxplot-chart, c2-sunburst-chart',
     ),
   ),
 ).then(() => {

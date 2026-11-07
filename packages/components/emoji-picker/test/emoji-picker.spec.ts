@@ -6,6 +6,9 @@ const search = (page: Page) => page.getByRole('searchbox', { name: 'Search emoji
 const events = async (page: Page) => JSON.parse((await picker(page).getAttribute('data-events')) ?? '[]')
 
 test('lists the emoji by category, each a button named after its emoji, under a named group', async ({ page, renderScenario }) => {
+  // The axe audit walks every one of the 1800+ emoji buttons: about 11 s in Chromium, and past the 30 s default in
+  // Firefox on a loaded runner.
+  test.slow()
   await renderScenario(`<c2-emoji-picker></c2-emoji-picker>`)
   await expect(picker(page)).toHaveHostAria('role', 'group')
   await expect(picker(page)).toHaveHostAria('aria-label', 'Emoji picker')

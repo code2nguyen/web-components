@@ -1,0 +1,648 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-file-browser,
+  $theme: (
+    height: 440px,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    background-color: #ffffff,
+    color: #18181b,
+    font-size: 14px,
+    narrow-width: 560px,
+    divider--border: 1px solid #e4e4e7,
+    tree--width: 220px,
+    tree--background-color: #fafafa,
+    muted--color: #52525b,
+    row--height: 36px,
+    row__hover--background-color: #f4f4f5,
+    row__selected--background-color: #edf1fe,
+    accent--color: rgb(2, 101, 220),
+    check__checked--color: #ffffff,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    tile--min-width: 128px,
+    tile--border-radius: 8px,
+    thumbnail--background-color: #f4f4f5,
+    selection-bar--background-color: #27272a,
+    selection-bar--color: #fafafa,
+    icon__folder--color: #e0a526,
+    icon__pdf--color: #dc2626,
+    icon__image--color: #0d9488,
+    icon__video--color: #db2777,
+    icon__audio--color: #9333ea,
+    icon__archive--color: #a16207,
+    icon__document--color: #2563eb,
+    icon__spreadsheet--color: #16a34a,
+    icon__presentation--color: #ea580c,
+    icon__code--color: #7c3aed,
+    icon__file--color: #71717a,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  max-width: 100%;
+  height: css.cssVar(height);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.browser {
+  display: grid;
+  grid-template-columns: css.cssVar(tree--width) minmax(0, 1fr);
+  height: 100%;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  overflow: hidden;
+  background: css.cssVar(background-color);
+}
+
+.browser.narrow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// ---------------------------------------------------------------------------------------------------- folder pane
+
+.tree-pane {
+  min-height: 0;
+  padding: 8px;
+  overflow: auto;
+  border-inline-end: css.cssVar(divider--border);
+  background: css.cssVar(tree--background-color);
+}
+
+.tree {
+  --c2-tree--border-top: 0;
+  --c2-tree--border-right: 0;
+  --c2-tree--border-bottom: 0;
+  --c2-tree--border-left: 0;
+  --c2-tree--background-color: transparent;
+}
+
+// ---------------------------------------------------------------------------------------------------- toolbar
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: css.cssVar(divider--border);
+}
+
+.trail {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.current {
+  color: css.cssVar(color);
+  font-weight: 600;
+}
+
+.search {
+  flex: 0 1 200px;
+  min-width: 140px;
+}
+
+.narrow .search {
+  flex: 1 1 100%;
+  order: 3;
+}
+
+.tools {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.sort-trigger,
+.views c2-button,
+.up {
+  --c2-button__container--height: 32px;
+  --c2-button__container--padding-left: 8px;
+  --c2-button__container--padding-right: 8px;
+  --c2-button__container--gap: 4px;
+  --c2-button__container--font-size: 13px;
+}
+
+.sort-trigger,
+.up {
+  --c2-button__container--background-color: #{css.cssVar(background-color)};
+  --c2-button__container--color: #{css.cssVar(color)};
+  --c2-button__container--border: #{css.cssVar(divider--border)};
+  --c2-button__container__hover--background-color: #{css.cssVar(row__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(row__hover--background-color)};
+}
+
+.views c2-button {
+  --c2-button__container--height: 28px;
+  --c2-button__container--padding-left: 6px;
+  --c2-button__container--padding-right: 6px;
+}
+
+svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.arrow {
+  width: 14px;
+  height: 14px;
+}
+
+// ---------------------------------------------------------------------------------------------------- content
+
+.content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  // The list drops its least useful columns as it narrows (below), so the name always keeps room.
+  container-type: inline-size;
+}
+
+.content:focus {
+  outline: none;
+}
+
+.content:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: -2px;
+}
+
+.content.drop {
+  outline: 2px dashed css.cssVar(accent--color);
+  outline-offset: -4px;
+}
+
+.columns,
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px 84px 128px 36px;
+  align-items: center;
+}
+
+.columns {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: css.cssVar(divider--border);
+  background: css.cssVar(background-color);
+}
+
+.column {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: css.cssVar(muted--color);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+}
+
+.column.size {
+  justify-content: flex-end;
+}
+
+.column.active {
+  color: css.cssVar(color);
+}
+
+.column:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: -2px;
+}
+
+.list,
+.grid {
+  outline: none;
+}
+
+.row {
+  min-height: css.cssVar(row--height);
+  border-bottom: css.cssVar(divider--border);
+  font-size: 13px;
+  cursor: default;
+  user-select: none;
+}
+
+.row:hover {
+  background: css.cssVar(row__hover--background-color);
+}
+
+.row.selected {
+  background: css.cssVar(row__selected--background-color);
+}
+
+.row:focus-visible,
+.tile:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: -2px;
+}
+
+.row.drop,
+.tile.drop {
+  outline: 2px dashed css.cssVar(accent--color);
+  outline-offset: -3px;
+}
+
+.cell {
+  min-width: 0;
+  padding: 4px 12px;
+  overflow: hidden;
+  color: css.cssVar(muted--color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell.size {
+  text-align: end;
+}
+
+.name-cell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: css.cssVar(color);
+}
+
+.name-stack {
+  display: grid;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  display: none;
+  color: css.cssVar(muted--color);
+  font-size: 11px;
+}
+
+.narrow .row {
+  grid-template-columns: minmax(0, 1fr) 36px;
+}
+
+.narrow .row .modified,
+.narrow .row .size,
+.narrow .row .kind {
+  display: none;
+}
+
+.narrow .sub {
+  display: block;
+}
+
+// A list narrower than its four columns need: Kind goes first, then Modified and Size fold under the name.
+@container (max-width: 560px) {
+  .columns,
+  .row {
+    grid-template-columns: minmax(0, 1fr) 132px 84px 36px;
+  }
+
+  .kind {
+    display: none;
+  }
+}
+
+@container (max-width: 440px) {
+  .columns,
+  .row {
+    grid-template-columns: minmax(0, 1fr) 36px;
+  }
+
+  .columns .modified,
+  .columns .size,
+  .row .modified,
+  .row .size {
+    display: none;
+  }
+
+  .sub {
+    display: block;
+  }
+}
+
+.more-cell {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.more {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: css.cssVar(muted--color);
+  cursor: pointer;
+}
+
+.more:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid css.cssVar(muted--color);
+  border-radius: 4px;
+  background: css.cssVar(background-color);
+  color: css.cssVar(check__checked--color);
+  cursor: pointer;
+}
+
+.check svg {
+  width: 12px;
+  height: 12px;
+}
+
+.selected .check {
+  border-color: css.cssVar(accent--color);
+  background: css.cssVar(accent--color);
+}
+
+.rename {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 6px;
+  border: 1px solid css.cssVar(accent--color);
+  border-radius: 4px;
+  outline: css.cssVar(focus--outline);
+  background: css.cssVar(background-color);
+  color: inherit;
+  font: inherit;
+}
+
+// ---------------------------------------------------------------------------------------------------- icons
+
+.icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.icon.large,
+.icon.large svg {
+  width: 40px;
+  height: 40px;
+}
+
+.icon-folder {
+  color: css.cssVar(icon__folder--color);
+}
+
+.icon-pdf {
+  color: css.cssVar(icon__pdf--color);
+}
+
+.icon-image {
+  color: css.cssVar(icon__image--color);
+}
+
+.icon-video {
+  color: css.cssVar(icon__video--color);
+}
+
+.icon-audio {
+  color: css.cssVar(icon__audio--color);
+}
+
+.icon-archive {
+  color: css.cssVar(icon__archive--color);
+}
+
+.icon-document {
+  color: css.cssVar(icon__document--color);
+}
+
+.icon-spreadsheet {
+  color: css.cssVar(icon__spreadsheet--color);
+}
+
+.icon-presentation {
+  color: css.cssVar(icon__presentation--color);
+}
+
+.icon-code {
+  color: css.cssVar(icon__code--color);
+}
+
+.icon-text,
+.icon-file {
+  color: css.cssVar(icon__file--color);
+}
+
+// ---------------------------------------------------------------------------------------------------- grid view
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(css.cssVar(tile--min-width), 1fr));
+  gap: 12px;
+  padding: 12px;
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  border: 1px solid transparent;
+  border-radius: css.cssVar(tile--border-radius);
+  font-size: 12px;
+  cursor: default;
+  user-select: none;
+}
+
+.tile:hover {
+  background: css.cssVar(row__hover--background-color);
+}
+
+.tile.selected {
+  border-color: css.cssVar(accent--color);
+  background: css.cssVar(row__selected--background-color);
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 6px;
+  background: css.cssVar(thumbnail--background-color);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tile .check {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  opacity: 0;
+}
+
+.tile:hover .check,
+.tile.selected .check,
+.tile:focus-visible .check {
+  opacity: 1;
+}
+
+.label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.label .icon,
+.label .icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.meta {
+  overflow: hidden;
+  color: css.cssVar(muted--color);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------------------------------- states
+
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 24px;
+}
+
+.loading {
+  display: grid;
+  gap: 4px;
+  padding: 8px 12px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+
+.skeleton-row c2-skeleton {
+  width: 100%;
+}
+
+// ---------------------------------------------------------------------------------------------------- selection bar
+
+.selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin: 8px 12px 12px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 8px;
+  background: css.cssVar(selection-bar--background-color);
+  color: css.cssVar(selection-bar--color);
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(24, 24, 27, 0.16);
+}
+
+.count {
+  flex: 1 1 auto;
+}
+
+.selection-bar button {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.selection-bar button:hover {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.selection-bar button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.bar-clear {
+  display: grid;
+  place-items: center;
+}
+
+// ---------------------------------------------------------------------------------------------------- utilities
+
+.menu-point {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.probe {
+  position: absolute;
+  width: css.cssVar(narrow-width);
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

@@ -1,0 +1,298 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-terminal,
+  $theme: (
+    height: auto,
+    max-height: 420px,
+    background-color: #18181b,
+    color: #fafafa,
+    muted--color: #a1a1aa,
+    border: 1px solid #3f3f46,
+    border-radius: 8px,
+    font-family: string.unquote('ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'),
+    font-size: 13px,
+    line-height: 20px,
+    screen--padding: 10px 14px 12px,
+    prompt--color: #7dd3fc,
+    error--color: #f87171,
+    success--color: #4ade80,
+    info--color: #93c5fd,
+    selection--background-color: rgba(96, 165, 250, 0.4),
+    titlebar--background-color: #18181b,
+    titlebar--border-bottom: 1px solid #3f3f46,
+    titlebar--font-size: 12px,
+    dot--color: #3f3f46,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    ansi-black--color: #71717a,
+    ansi-red--color: #f87171,
+    ansi-green--color: #4ade80,
+    ansi-yellow--color: #fbbf24,
+    ansi-blue--color: #60a5fa,
+    ansi-magenta--color: #e879f9,
+    ansi-cyan--color: #22d3ee,
+    ansi-white--color: #f4f4f5,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.terminal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: css.cssVar(height);
+  max-height: css.cssVar(max-height);
+  box-sizing: border-box;
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  color-scheme: dark;
+}
+
+.terminal:focus-within {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+.titlebar {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: css.cssVar(titlebar--border-bottom);
+  background-color: css.cssVar(titlebar--background-color);
+  color: css.cssVar(muted--color);
+  font-family: inherit;
+  font-size: css.cssVar(titlebar--font-size);
+  line-height: 16px;
+}
+
+.dots {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+}
+
+.dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: css.cssVar(dot--color);
+}
+
+.heading {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hints {
+  flex: none;
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
+
+.screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: css.cssVar(screen--padding);
+  overflow: auto;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+}
+
+.screen ::selection,
+::slotted(*)::selection {
+  background-color: css.cssVar(selection--background-color);
+}
+
+.banner {
+  color: css.cssVar(muted--color);
+  white-space: pre-wrap;
+}
+
+.block {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.block.command {
+  margin-top: 8px;
+}
+
+.output > .block.command:first-child {
+  margin-top: 4px;
+}
+
+.line:empty::before {
+  content: '\200b';
+}
+
+.prompt-mark {
+  color: css.cssVar(prompt--color);
+}
+
+.prompt-context,
+.muted {
+  color: css.cssVar(muted--color);
+}
+
+.block.error {
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid css.cssVar(error--color);
+  color: css.cssVar(error--color);
+}
+
+.block.success {
+  color: css.cssVar(success--color);
+}
+
+.block.info {
+  color: css.cssVar(info--color);
+}
+
+.block.help {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0 24px;
+}
+
+.help-name {
+  color: css.cssVar(info--color);
+}
+
+.block.completions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.ansi-black {
+  color: css.cssVar(ansi-black--color);
+}
+.ansi-red {
+  color: css.cssVar(ansi-red--color);
+}
+.ansi-green {
+  color: css.cssVar(ansi-green--color);
+}
+.ansi-yellow {
+  color: css.cssVar(ansi-yellow--color);
+}
+.ansi-blue {
+  color: css.cssVar(ansi-blue--color);
+}
+.ansi-magenta {
+  color: css.cssVar(ansi-magenta--color);
+}
+.ansi-cyan {
+  color: css.cssVar(ansi-cyan--color);
+}
+.ansi-white {
+  color: css.cssVar(ansi-white--color);
+}
+
+.busy {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.spinner {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid css.cssVar(prompt--color);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: c2-terminal-spin 0.8s linear infinite;
+}
+
+@keyframes c2-terminal-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.input-line {
+  display: flex;
+  align-items: baseline;
+  margin-top: 8px;
+}
+
+.output:empty + .input-line,
+.output:empty + .busy {
+  margin-top: 4px;
+}
+
+.prompt {
+  flex: none;
+  white-space: pre;
+}
+
+.prompt-slot {
+  color: css.cssVar(muted--color);
+}
+
+.prompt-slot.has-content::after {
+  content: ' ';
+}
+
+.prompt-mark::after {
+  content: ' ';
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  caret-color: css.cssVar(prompt--color);
+  font: inherit;
+  line-height: inherit;
+}
+
+// While a command runs the prompt hides, but the text box keeps focus so Ctrl+C reaches it.
+.input-line.is-busy {
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

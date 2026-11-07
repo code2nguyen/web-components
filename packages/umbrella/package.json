@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.19",
+  "version": "1.0.22",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -77,6 +77,10 @@
       "types": "./dist/action-bar.d.ts",
       "default": "./dist/action-bar.js"
     },
+    "./address-field": {
+      "types": "./dist/address-field.d.ts",
+      "default": "./dist/address-field.js"
+    },
     "./app-shell": {
       "types": "./dist/app-shell.d.ts",
       "default": "./dist/app-shell.js"
@@ -93,6 +97,14 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./audio-player": {
+      "types": "./dist/audio-player.d.ts",
+      "default": "./dist/audio-player.js"
+    },
+    "./audio-visualizer": {
+      "types": "./dist/audio-visualizer.d.ts",
+      "default": "./dist/audio-visualizer.js"
+    },
     "./autocomplete": {
       "types": "./dist/autocomplete.d.ts",
       "default": "./dist/autocomplete.js"
@@ -100,6 +112,10 @@
     "./avatar": {
       "types": "./dist/avatar.d.ts",
       "default": "./dist/avatar.js"
+    },
+    "./backdrop": {
+      "types": "./dist/backdrop.d.ts",
+      "default": "./dist/backdrop.js"
     },
     "./badge": {
       "types": "./dist/badge.d.ts",
@@ -112,6 +128,14 @@
     "./bar-list": {
       "types": "./dist/bar-list.d.ts",
       "default": "./dist/bar-list.js"
+    },
+    "./barcode": {
+      "types": "./dist/barcode.d.ts",
+      "default": "./dist/barcode.js"
+    },
+    "./beam": {
+      "types": "./dist/beam.d.ts",
+      "default": "./dist/beam.js"
     },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
@@ -153,6 +177,14 @@
       "types": "./dist/cascader.d.ts",
       "default": "./dist/cascader.js"
     },
+    "./celebration": {
+      "types": "./dist/celebration.d.ts",
+      "default": "./dist/celebration.js"
+    },
+    "./change-review": {
+      "types": "./dist/change-review.d.ts",
+      "default": "./dist/change-review.js"
+    },
     "./chart": {
       "types": "./dist/chart.d.ts",
       "default": "./dist/chart.js"
@@ -165,9 +197,17 @@
       "types": "./dist/chart/bar-chart.d.ts",
       "default": "./dist/chart/bar-chart.js"
     },
+    "./chart/boxplot-chart": {
+      "types": "./dist/chart/boxplot-chart.d.ts",
+      "default": "./dist/chart/boxplot-chart.js"
+    },
     "./chart/bubble-chart": {
       "types": "./dist/chart/bubble-chart.d.ts",
       "default": "./dist/chart/bubble-chart.js"
+    },
+    "./chart/bullet-chart": {
+      "types": "./dist/chart/bullet-chart.d.ts",
+      "default": "./dist/chart/bullet-chart.js"
     },
     "./chart/butterfly-chart": {
       "types": "./dist/chart/butterfly-chart.d.ts",
@@ -233,6 +273,10 @@
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
     },
+    "./chart/radial-bar-chart": {
+      "types": "./dist/chart/radial-bar-chart.d.ts",
+      "default": "./dist/chart/radial-bar-chart.js"
+    },
     "./chart/sankey-chart": {
       "types": "./dist/chart/sankey-chart.d.ts",
       "default": "./dist/chart/sankey-chart.js"
@@ -244,6 +288,10 @@
     "./chart/sparkline": {
       "types": "./dist/chart/sparkline.d.ts",
       "default": "./dist/chart/sparkline.js"
+    },
+    "./chart/sunburst-chart": {
+      "types": "./dist/chart/sunburst-chart.d.ts",
+      "default": "./dist/chart/sunburst-chart.js"
     },
     "./chart/treemap-chart": {
       "types": "./dist/chart/treemap-chart.d.ts",
@@ -397,6 +445,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./device-frame": {
+      "types": "./dist/device-frame.d.ts",
+      "default": "./dist/device-frame.js"
+    },
     "./diff-viewer": {
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
@@ -404,6 +456,10 @@
     "./distribution-bar": {
       "types": "./dist/distribution-bar.d.ts",
       "default": "./dist/distribution-bar.js"
+    },
+    "./duration-input": {
+      "types": "./dist/duration-input.d.ts",
+      "default": "./dist/duration-input.js"
     },
     "./emoji-picker": {
       "types": "./dist/emoji-picker.d.ts",
@@ -417,6 +473,10 @@
       "types": "./dist/fieldset.d.ts",
       "default": "./dist/fieldset.js"
     },
+    "./file-browser": {
+      "types": "./dist/file-browser.d.ts",
+      "default": "./dist/file-browser.js"
+    },
     "./filter-builder": {
       "types": "./dist/filter-builder.d.ts",
       "default": "./dist/filter-builder.js"
@@ -428,6 +488,10 @@
     "./float-button/float-button-action": {
       "types": "./dist/float-button/float-button-action.d.ts",
       "default": "./dist/float-button/float-button-action.js"
+    },
+    "./floating-panel": {
+      "types": "./dist/floating-panel.d.ts",
+      "default": "./dist/floating-panel.js"
     },
     "./flow": {
       "types": "./dist/flow.d.ts",
@@ -496,6 +560,14 @@
     "./image": {
       "types": "./dist/image.d.ts",
       "default": "./dist/image.js"
+    },
+    "./image-annotator": {
+      "types": "./dist/image-annotator.d.ts",
+      "default": "./dist/image-annotator.js"
+    },
+    "./image-compare": {
+      "types": "./dist/image-compare.d.ts",
+      "default": "./dist/image-compare.js"
     },
     "./image-cropper": {
       "types": "./dist/image-cropper.d.ts",
@@ -577,6 +649,10 @@
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
     },
+    "./marquee": {
+      "types": "./dist/marquee.d.ts",
+      "default": "./dist/marquee.js"
+    },
     "./mask-input": {
       "types": "./dist/mask-input.d.ts",
       "default": "./dist/mask-input.js"
@@ -628,6 +704,10 @@
     "./meter": {
       "types": "./dist/meter.d.ts",
       "default": "./dist/meter.js"
+    },
+    "./mind-map": {
+      "types": "./dist/mind-map.d.ts",
+      "default": "./dist/mind-map.js"
     },
     "./modal": {
       "types": "./dist/modal.d.ts",
@@ -701,6 +781,10 @@
       "types": "./dist/pagination.d.ts",
       "default": "./dist/pagination.js"
     },
+    "./pan-zoom": {
+      "types": "./dist/pan-zoom.d.ts",
+      "default": "./dist/pan-zoom.js"
+    },
     "./password-field": {
       "types": "./dist/password-field.d.ts",
       "default": "./dist/password-field.js"
@@ -712,6 +796,10 @@
     "./phone-input": {
       "types": "./dist/phone-input.d.ts",
       "default": "./dist/phone-input.js"
+    },
+    "./pivot-table": {
+      "types": "./dist/pivot-table.d.ts",
+      "default": "./dist/pivot-table.js"
     },
     "./popconfirm": {
       "types": "./dist/popconfirm.d.ts",
@@ -740,6 +828,10 @@
     "./questionnaire": {
       "types": "./dist/questionnaire.d.ts",
       "default": "./dist/questionnaire.js"
+    },
+    "./quick-time-menu": {
+      "types": "./dist/quick-time-menu.d.ts",
+      "default": "./dist/quick-time-menu.js"
     },
     "./radio": {
       "types": "./dist/radio.d.ts",
@@ -776,6 +868,10 @@
     "./save-bar": {
       "types": "./dist/save-bar.d.ts",
       "default": "./dist/save-bar.js"
+    },
+    "./scheduler": {
+      "types": "./dist/scheduler.d.ts",
+      "default": "./dist/scheduler.js"
     },
     "./scroll-area": {
       "types": "./dist/scroll-area.d.ts",
@@ -913,6 +1009,14 @@
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"
     },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "default": "./dist/terminal.js"
+    },
+    "./text-effect": {
+      "types": "./dist/text-effect.d.ts",
+      "default": "./dist/text-effect.js"
+    },
     "./text-field": {
       "types": "./dist/text-field.d.ts",
       "default": "./dist/text-field.js"
@@ -977,6 +1081,10 @@
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"
     },
+    "./transcript": {
+      "types": "./dist/transcript.d.ts",
+      "default": "./dist/transcript.js"
+    },
     "./tree": {
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
@@ -996,6 +1104,18 @@
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
+    },
+    "./video-grid": {
+      "types": "./dist/video-grid.d.ts",
+      "default": "./dist/video-grid.js"
+    },
+    "./video-player": {
+      "types": "./dist/video-player.d.ts",
+      "default": "./dist/video-player.js"
+    },
+    "./video-tile": {
+      "types": "./dist/video-tile.d.ts",
+      "default": "./dist/video-tile.js"
     },
     "./view-options": {
       "types": "./dist/view-options.d.ts",
@@ -1044,10 +1164,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.19",
-    "@c2n/phosphor-icons": "1.0.19",
-    "@c2n/task-icons": "1.0.19",
-    "@c2n/theme": "1.0.19",
+    "@c2n/core": "1.0.22",
+    "@c2n/phosphor-icons": "1.0.22",
+    "@c2n/task-icons": "1.0.22",
+    "@c2n/theme": "1.0.22",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1144,13 +1264,19 @@
   "devDependencies": {
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
+    "@c2n/address-field": "*",
     "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
+    "@c2n/audio-player": "*",
+    "@c2n/audio-visualizer": "*",
     "@c2n/autocomplete": "*",
     "@c2n/avatar": "*",
+    "@c2n/backdrop": "*",
     "@c2n/badge": "*",
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
+    "@c2n/barcode": "*",
+    "@c2n/beam": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1160,6 +1286,8 @@
     "@c2n/card-input": "*",
     "@c2n/carousel": "*",
     "@c2n/cascader": "*",
+    "@c2n/celebration": "*",
+    "@c2n/change-review": "*",
     "@c2n/chart": "*",
     "@c2n/chat-input": "*",
     "@c2n/chat-message": "*",
@@ -1190,13 +1318,17 @@
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/device-frame": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
+    "@c2n/duration-input": "*",
     "@c2n/emoji-picker": "*",
     "@c2n/facet-list": "*",
     "@c2n/fieldset": "*",
+    "@c2n/file-browser": "*",
     "@c2n/filter-builder": "*",
     "@c2n/float-button": "*",
+    "@c2n/floating-panel": "*",
     "@c2n/flow": "*",
     "@c2n/form": "*",
     "@c2n/form-field": "*",
@@ -1210,6 +1342,8 @@
     "@c2n/hover-card": "*",
     "@c2n/icon-button": "*",
     "@c2n/image": "*",
+    "@c2n/image-annotator": "*",
+    "@c2n/image-compare": "*",
     "@c2n/image-cropper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
@@ -1227,6 +1361,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/marquee": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/master-detail": "*",
@@ -1236,6 +1371,7 @@
     "@c2n/menubar": "*",
     "@c2n/mermaid": "*",
     "@c2n/meter": "*",
+    "@c2n/mind-map": "*",
     "@c2n/modal": "*",
     "@c2n/money-input": "*",
     "@c2n/month-picker": "*",
@@ -1252,9 +1388,11 @@
     "@c2n/page-editor": "*",
     "@c2n/page-header": "*",
     "@c2n/pagination": "*",
+    "@c2n/pan-zoom": "*",
     "@c2n/password-field": "*",
     "@c2n/payment-card": "*",
     "@c2n/phone-input": "*",
+    "@c2n/pivot-table": "*",
     "@c2n/popconfirm": "*",
     "@c2n/progress": "*",
     "@c2n/promo-code-field": "*",
@@ -1262,6 +1400,7 @@
     "@c2n/quantity-picker": "*",
     "@c2n/query-input": "*",
     "@c2n/questionnaire": "*",
+    "@c2n/quick-time-menu": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/reaction-bar": "*",
@@ -1269,6 +1408,7 @@
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
     "@c2n/save-bar": "*",
+    "@c2n/scheduler": "*",
     "@c2n/scroll-area": "*",
     "@c2n/scroll-progress": "*",
     "@c2n/search-field": "*",
@@ -1300,6 +1440,8 @@
     "@c2n/table-of-contents": "*",
     "@c2n/tabs": "*",
     "@c2n/tag-input": "*",
+    "@c2n/terminal": "*",
+    "@c2n/text-effect": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",
     "@c2n/theme-select": "*",
@@ -1313,10 +1455,14 @@
     "@c2n/tooltip": "*",
     "@c2n/tour": "*",
     "@c2n/trace-waterfall": "*",
+    "@c2n/transcript": "*",
     "@c2n/tree": "*",
     "@c2n/tree-select": "*",
     "@c2n/truncate": "*",
     "@c2n/upload": "*",
+    "@c2n/video-grid": "*",
+    "@c2n/video-player": "*",
+    "@c2n/video-tile": "*",
     "@c2n/view-options": "*",
     "@c2n/virtual-list": "*",
     "@c2n/visually-hidden": "*",

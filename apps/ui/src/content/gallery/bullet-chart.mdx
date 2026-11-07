@@ -1,0 +1,151 @@
+---
+title: 'Bullet chart gallery'
+description: 'A KPI scorecard, status bands, costs where lower is better, bullets in a table column, quotas on one scale and columns.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { BulletChart } from '@c2n/components/chart/bullet-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-bullet-chart
+  label-field="kpi"
+  description-field="unit"
+  target-field="target"
+  bands-field="bands"
+  data='[{"kpi":"Revenue","unit":"US$, thousands","actual":270,"target":250,"bands":[150,225,300]},{"kpi":"Profit","unit":"% of revenue","actual":22.5,"target":27,"bands":[20,25,30]},{"kpi":"New customers","unit":"count","actual":1650,"target":2100,"bands":[1400,2000,2500]},{"kpi":"Satisfaction","unit":"out of 5","actual":4.6,"target":4.2,"bands":[3.5,4.25,5]}]'
+>
+  <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+</c2-bullet-chart>
+```
+
+```html tag=MdxCodeBlock,label=Status bands
+<style>
+  .bullet-status {
+    --c2-chart__band-1--color: light-dark(#fecaca, #5c1f1f);
+    --c2-chart__band-2--color: light-dark(#fde68a, #4f3b0c);
+    --c2-chart__band-3--color: light-dark(#bbf7d0, #173f27);
+    --c2-chart__series-1--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-chart__target--width: 4px;
+  }
+</style>
+<c2-bullet-chart
+  class="bullet-status"
+  label-field="service"
+  description-field="window"
+  min="99"
+  target="99.9"
+  bands="[99.5, 99.9, 100]"
+  value-suffix="%"
+  data='[{"service":"Checkout","window":"uptime, 30 days","uptime":99.95},{"service":"Search","window":"uptime, 30 days","uptime":99.82},{"service":"Payments","window":"uptime, 30 days","uptime":99.41}]'
+>
+  <c2-chart-series field="uptime" label="Uptime"></c2-chart-series>
+</c2-bullet-chart>
+```
+
+```html tag=MdxCodeBlock,label=Lower is better
+<style>
+  .bullet-costs {
+    --c2-chart__series-1--color: #0f766e;
+  }
+</style>
+<c2-bullet-chart
+  class="bullet-costs"
+  label-field="kpi"
+  description-field="unit"
+  target-field="target"
+  bands-field="bands"
+  better="lower"
+  data='[{"kpi":"Cost per lead","unit":"US$","actual":46,"target":40,"bands":[35,50,70]},{"kpi":"Churn","unit":"% monthly","actual":2.1,"target":2.5,"bands":[2,3,5]},{"kpi":"Time to resolve","unit":"hours","actual":7.5,"target":8,"bands":[6,12,24]}]'
+>
+  <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+</c2-bullet-chart>
+```
+
+```html tag=MdxCodeBlock,label=Table column
+<style>
+  .bullet-table {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    column-gap: 20px;
+    width: 100%;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .bullet-table > span {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .bullet-table > .head {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-weight: 600;
+  }
+  .bullet-table > .number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .bullet-table c2-bullet-chart {
+    --c2-chart--height: 16px;
+    --c2-chart--padding: 0;
+    --c2-chart--border-top: 0;
+    --c2-chart--border-right: 0;
+    --c2-chart--border-bottom: 0;
+    --c2-chart--border-left: 0;
+    --c2-chart--background: transparent;
+  }
+</style>
+<div class="bullet-table">
+  <span class="head">Region</span><span class="head number">Q3 sales</span><span class="head">vs target</span>
+  <span>North</span><span class="number">$412k</span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="400" max="450" bands="[300, 380, 450]" data='[{"region":"North","sales":412}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span>South</span><span class="number">$288k</span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="350" max="450" bands="[300, 380, 450]" data='[{"region":"South","sales":288}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span>East</span><span class="number">$351k</span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="345" max="450" bands="[300, 380, 450]" data='[{"region":"East","sales":351}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+  <span>West</span><span class="number">$196k</span>
+  <span><c2-bullet-chart label-field="region" labels="none" value-labels="none" axis="none" target="260" max="450" bands="[300, 380, 450]" data='[{"region":"West","sales":196}]'><c2-chart-series field="sales" label="Sales"></c2-chart-series></c2-bullet-chart></span>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Quotas on one scale
+<style>
+  .bullet-quotas {
+    --c2-chart__row--height: 36px;
+    --c2-chart__row--gap: 8px;
+    --c2-chart__bar--border-radius: 0.5;
+    --c2-chart__series-1--color: #7c3aed;
+  }
+</style>
+<c2-bullet-chart
+  class="bullet-quotas"
+  label-field="rep"
+  target="120"
+  bands="[80, 100, 150]"
+  band-labels="Behind, On track, Ahead"
+  scale="shared"
+  value-suffix="k"
+  data='[{"rep":"Ana","booked":142},{"rep":"Ben","booked":118},{"rep":"Chloé","booked":96},{"rep":"Dev","booked":71}]'
+>
+  <c2-chart-series field="booked" label="Booked"></c2-chart-series>
+</c2-bullet-chart>
+```
+
+```html tag=MdxCodeBlock,label=Columns
+<c2-bullet-chart
+  orientation="vertical"
+  label-field="kpi"
+  description-field="unit"
+  target-field="target"
+  bands-field="bands"
+  data='[{"kpi":"Revenue","unit":"US$, thousands","actual":270,"target":250,"bands":[150,225,300]},{"kpi":"Profit","unit":"% of revenue","actual":22.5,"target":27,"bands":[20,25,30]},{"kpi":"New customers","unit":"count","actual":1650,"target":2100,"bands":[1400,2000,2500]},{"kpi":"Satisfaction","unit":"out of 5","actual":4.6,"target":4.2,"bands":[3.5,4.25,5]}]'
+>
+  <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+</c2-bullet-chart>
+```
+
+</GalleryGrid>

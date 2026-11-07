@@ -1,0 +1,336 @@
+---
+description: 'Ready-made looks for c2-floating-panel: a support chat, a layers inspector, a docked pair, a maximised editor, stacked tool panels and a call mini window.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { FloatingPanel } from '@c2n/components/floating-panel'
+
+## Presets
+
+Curated looks for `c2-floating-panel`, each in a positioned box with `boundary="parent"` so it stays inside the card. `--c2-floating-panel--inset`, `--width` and `--height` set where a panel first appears; the box variables (`--background`, `--border`, `--border-radius`, `--box-shadow`) and the `__header`, `__title` and `__button` groups set its look; `__docked` and `__maximized` place it when minimised or maximised.
+
+<GalleryGrid min="320">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .fpg-default {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-default p {
+    margin: 0;
+  }
+</style>
+<div class="fpg-default">
+  <c2-floating-panel open boundary="parent">
+    <span slot="title">Panel</span>
+    <p>Drag the title bar to move the panel, or an edge to resize it.</p>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Support chat
+<style>
+  .fpg-chat-stage {
+    position: relative;
+    width: 100%;
+    height: 340px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-chat {
+    --c2-floating-panel--inset: auto 12px 12px auto;
+    --c2-floating-panel--width: 280px;
+    --c2-floating-panel--min-width: 220px;
+    --c2-floating-panel--border-radius: 14px;
+    --c2-floating-panel__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-floating-panel__body--padding: 12px;
+    --c2-floating-panel__footer--padding: 8px 12px;
+    --c2-floating-panel__icon--color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .fpg-chat svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  .fpg-chat .from {
+    margin: 0 0 4px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .fpg-chat .bubble {
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .fpg-chat .mine {
+    margin-left: 32px;
+    background: var(--c2-theme--color-primary, #0265dc);
+    color: var(--c2-theme--color-on-primary, #ffffff);
+  }
+  .fpg-chat .compose {
+    padding: 8px 12px;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="fpg-chat-stage">
+  <c2-floating-panel class="fpg-chat" open boundary="parent">
+    <svg slot="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" /></svg>
+    <span slot="title">Support chat</span>
+    <p class="from">Maya · Support</p>
+    <p class="bubble">Hi! Which line of the March invoice looks wrong?</p>
+    <p class="bubble mine">The second seat. We removed it on the 4th.</p>
+    <div slot="footer" class="compose">Write a message…</div>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Layers inspector
+<style>
+  .fpg-editor {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: var(--c2-theme--color-surface-container-low, #fafafa);
+    background-image: radial-gradient(color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, transparent) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  .fpg-layers {
+    --c2-floating-panel--inset: 12px 12px auto auto;
+    --c2-floating-panel--width: 200px;
+    --c2-floating-panel--min-width: 160px;
+    --c2-floating-panel--min-height: 120px;
+    --c2-floating-panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08);
+    --c2-floating-panel__header--height: 32px;
+    --c2-floating-panel__header--padding: 0 4px 0 10px;
+    --c2-floating-panel__title--font-size: 12px;
+    --c2-floating-panel__button--size: 24px;
+    --c2-floating-panel__button--icon-size: 14px;
+    --c2-floating-panel__body--padding: 6px;
+    --c2-floating-panel__body--font-size: 12px;
+  }
+  .fpg-layers ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fpg-layers li {
+    padding: 6px 8px;
+    border-radius: 4px;
+  }
+  .fpg-layers li.selected {
+    background: var(--c2-theme--color-primary-container, #edf1fe);
+  }
+  .fpg-layers li::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 2px;
+    background: #a1a1aa;
+  }
+  .fpg-layers li:nth-child(1)::before {
+    background: #0265dc;
+  }
+  .fpg-layers li:nth-child(2)::before {
+    background: #ea580c;
+  }
+  .fpg-layers li:nth-child(3)::before {
+    background: #0f766e;
+  }
+</style>
+<div class="fpg-editor">
+  <c2-floating-panel class="fpg-layers" open boundary="parent" no-close>
+    <span slot="title">Layers</span>
+    <ul>
+      <li>Hero card</li>
+      <li class="selected">Call to action</li>
+      <li>Pricing</li>
+      <li>Footer</li>
+    </ul>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Docked
+<style>
+  .fpg-dock-stage {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-dock {
+    --c2-floating-panel__docked--inset: auto 12px 0 auto;
+    --c2-floating-panel__docked--width: 180px;
+    --c2-floating-panel__docked--gap: 6px;
+    --c2-floating-panel__header--height: 36px;
+  }
+</style>
+<div class="fpg-dock-stage">
+  <c2-floating-panel class="fpg-dock" open boundary="parent" state="minimized">
+    <span slot="title">Support chat</span>
+    <p>Restore the panel from its docked title bar.</p>
+  </c2-floating-panel>
+  <c2-floating-panel class="fpg-dock" open boundary="parent" state="minimized">
+    <span slot="title">Meeting notes</span>
+    <p>Docked panels line up from the right.</p>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Maximised
+<style>
+  .fpg-max-stage {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-max {
+    --c2-floating-panel__maximized--inset: 12px;
+    --c2-floating-panel--border-radius: 14px;
+    --c2-floating-panel__header--background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .fpg-max p {
+    margin: 0 0 8px;
+  }
+</style>
+<div class="fpg-max-stage">
+  <c2-floating-panel class="fpg-max" open boundary="parent" state="maximized">
+    <span slot="title">Release notes</span>
+    <p>A maximised panel fills its boundary, less its inset.</p>
+    <p>Restore it, or press Escape, to return to its last place.</p>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Stacked tools
+<style>
+  .fpg-stack-stage {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-tool {
+    --c2-floating-panel--width: 200px;
+    --c2-floating-panel--min-width: 160px;
+    --c2-floating-panel--min-height: 120px;
+    --c2-floating-panel__header--height: 34px;
+    --c2-floating-panel__body--padding: 10px 12px;
+    --c2-floating-panel__body--font-size: 12px;
+    --c2-floating-panel__title__inactive--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 45%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .fpg-tool-back {
+    --c2-floating-panel--inset: 16px auto auto 16px;
+  }
+  .fpg-tool-front {
+    --c2-floating-panel--inset: 80px auto auto 90px;
+  }
+  .fpg-tool dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    margin: 0;
+  }
+  .fpg-tool dt {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .fpg-tool dd {
+    margin: 0;
+  }
+</style>
+<div class="fpg-stack-stage">
+  <c2-floating-panel class="fpg-tool fpg-tool-back" open boundary="parent" no-maximize>
+    <span slot="title">Layers</span>
+    <dl>
+      <dt>Frame</dt>
+      <dd>Landing</dd>
+      <dt>Items</dt>
+      <dd>12</dd>
+    </dl>
+  </c2-floating-panel>
+  <c2-floating-panel class="fpg-tool fpg-tool-front" open boundary="parent" no-maximize>
+    <span slot="title">Properties</span>
+    <dl>
+      <dt>X</dt>
+      <dd>320</dd>
+      <dt>Y</dt>
+      <dd>148</dd>
+      <dt>Radius</dt>
+      <dd>16</dd>
+    </dl>
+  </c2-floating-panel>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Call mini window
+<style>
+  .fpg-call-stage {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-call {
+    --c2-floating-panel--inset: auto 12px 12px auto;
+    --c2-floating-panel--width: 240px;
+    --c2-floating-panel--min-width: 200px;
+    --c2-floating-panel--min-height: 140px;
+    --c2-floating-panel--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-floating-panel--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-floating-panel--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-floating-panel--border-radius: 14px;
+    --c2-floating-panel__header--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-floating-panel__header--border-bottom: none;
+    --c2-floating-panel__title--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-floating-panel__title__inactive--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-floating-panel__button--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-floating-panel__button__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-floating-panel__button__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-floating-panel__close-button__hover--background: #dc2626;
+    --c2-floating-panel__close-button__hover--color: #ffffff;
+    --c2-floating-panel__body--padding: 0 8px 8px;
+  }
+  .fpg-call .video {
+    display: grid;
+    place-items: center;
+    height: 120px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1e3a8a, #0f766e);
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+</style>
+<div class="fpg-call-stage">
+  <c2-floating-panel class="fpg-call" open boundary="parent" no-resize no-maximize>
+    <span slot="title">Ada Lovelace · 04:12</span>
+    <div class="video">AL</div>
+  </c2-floating-panel>
+</div>
+```
+
+</GalleryGrid>

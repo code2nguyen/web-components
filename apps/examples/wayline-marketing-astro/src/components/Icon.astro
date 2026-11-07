@@ -1,0 +1,13 @@
+---
+// A Feather icon element by name. The tag is registered by src/scripts/icons.ts, which imports exactly these icons.
+interface Props {
+  name: string
+  slot?: string
+  class?: string
+}
+
+const { name, slot, class: className } = Astro.props
+const Tag = `c2-feather-${name}`
+---
+
+<Tag slot={slot} class={className} />

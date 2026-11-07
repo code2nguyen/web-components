@@ -1,0 +1,185 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    segment--gap: 1.5px,
+    segment--border-radius: 2px,
+    segment__focus--color: #0265dc,
+    hole--size: 28%,
+    center--background: #f4f4f5,
+    breadcrumb--color: #0265dc,
+    breadcrumb--font-size: 14px,
+    neutral--color: #d4d4d8,
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// Declared so the theme generator maps them; the chart reads the layout ones from script.
+:host {
+  --_segment-gap: #{css.cssVar(segment--gap)};
+  --_segment-radius: #{css.cssVar(segment--border-radius)};
+  --_hole-size: #{css.cssVar(hole--size)};
+  --_breadcrumb-font-size: #{css.cssVar(breadcrumb--font-size)};
+}
+
+// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
+.plot:focus {
+  outline: none;
+}
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: -2px;
+}
+
+.sunburst-breadcrumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  font-size: css.cssVar(breadcrumb--font-size);
+  line-height: 1.5;
+  pointer-events: auto;
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  // The separator is drawn, not read: the list already says where one entry ends.
+  li + li::before {
+    content: '›' / '';
+    margin: 0 8px;
+    color: var(--c2-chart__muted--color, #71717a);
+  }
+
+  button {
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: none;
+    color: css.cssVar(breadcrumb--color);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  button:focus-visible {
+    outline: 2px solid css.cssVar(breadcrumb--color);
+    outline-offset: 2px;
+  }
+
+  [aria-current] {
+    font-weight: 600;
+  }
+}
+
+.sunburst-center {
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  place-items: center;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sunburst-center ::slotted(*) {
+  pointer-events: auto;
+}
+
+.sunburst-center--back {
+  background: css.cssVar(center--background);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.sunburst-center--back:focus-visible {
+  outline: 3px solid css.cssVar(segment__focus--color);
+  outline-offset: 1px;
+}
+
+.sunburst-center-text {
+  display: grid;
+  gap: 2px;
+  line-height: 1.2;
+}
+
+.sunburst-center-back,
+.sunburst-center-label {
+  color: var(--c2-chart__muted--color, #71717a);
+}
+
+.sunburst-center-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sunburst-focus {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sunburst-focus-ring {
+  fill: none;
+  stroke: css.cssVar(segment__focus--color);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+// Sized by the layout variables, so script reads them in pixels whatever unit they are written in.
+.sunburst-probe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+
+  i {
+    position: absolute;
+    display: block;
+    height: 0;
+  }
+
+  .gap {
+    width: var(--_segment-gap);
+  }
+
+  .radius {
+    width: var(--_segment-radius);
+  }
+
+  .crumb {
+    font-size: var(--_breadcrumb-font-size);
+  }
+}
+
+// The leaf table and the live announcement are for assistive technology only.
+.sunburst-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

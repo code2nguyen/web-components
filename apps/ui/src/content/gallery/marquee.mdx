@@ -1,0 +1,196 @@
+---
+description: 'Logo walls, ticker tapes, testimonial columns and tag clouds that keep moving.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Marquee } from '@c2n/components/marquee'
+
+## Presets
+
+The items bring their own look; `c2-marquee` supplies the motion. `--c2-marquee--speed` (pixels per second), `--c2-marquee__item--gap` and `--c2-marquee__viewport--fade` do most of the work.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .marquee-default {
+    width: min(100%, 360px);
+  }
+  .marquee-default span {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+</style>
+<c2-marquee class="marquee-default" aria-label="Customers">
+  <span>Northwind</span>
+  <span>Contoso</span>
+  <span>Fabrikam</span>
+  <span>Tailspin</span>
+  <span>Litware</span>
+  <span>Proseware</span>
+</c2-marquee>
+```
+
+```html tag=MdxCodeBlock,label=Logo wall
+<style>
+  .marquee-logos {
+    --c2-marquee__viewport--fade: 56px;
+    --c2-marquee__item--gap: 40px;
+    --c2-marquee--speed: 30;
+    width: min(100%, 360px);
+  }
+  .marquee-logos span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+</style>
+<c2-marquee class="marquee-logos" aria-label="Trusted by">
+  <span>◆ Northwind</span>
+  <span>● Contoso</span>
+  <span>▲ Fabrikam</span>
+  <span>■ Tailspin</span>
+  <span>✦ Litware</span>
+  <span>⬢ Adatum</span>
+</c2-marquee>
+```
+
+```html tag=MdxCodeBlock,label=Ticker tape
+<style>
+  .marquee-ticker {
+    --c2-marquee__item--gap: 28px;
+    --c2-marquee--speed: 50;
+    width: min(100%, 360px);
+    padding: 8px 0;
+    border-radius: 8px;
+    background: var(--c2-theme--color-dark-surface, #18181b);
+  }
+  .marquee-ticker span {
+    color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .marquee-ticker .up {
+    color: #4ade80;
+  }
+  .marquee-ticker .down {
+    color: #f87171;
+  }
+</style>
+<c2-marquee class="marquee-ticker" aria-label="Market prices">
+  <span>AAPL 231.40 <b class="up">▲ 1.2%</b></span>
+  <span>MSFT 418.07 <b class="up">▲ 0.4%</b></span>
+  <span>TSLA 247.10 <b class="down">▼ 2.3%</b></span>
+  <span>NVDA 121.88 <b class="up">▲ 3.1%</b></span>
+  <span>AMZN 186.52 <b class="down">▼ 0.7%</b></span>
+  <span>GOOG 165.39 <b class="up">▲ 0.9%</b></span>
+</c2-marquee>
+```
+
+```html tag=MdxCodeBlock,label=Testimonial column
+<style>
+  .marquee-column {
+    --c2-marquee__viewport--height: 220px;
+    --c2-marquee__viewport--fade: 40px;
+    --c2-marquee__item--gap: 10px;
+    --c2-marquee--speed: 20;
+    width: min(100%, 260px);
+  }
+  .marquee-column figure {
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .marquee-column figcaption {
+    margin-top: 6px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-marquee class="marquee-column" orientation="vertical" aria-label="Reviews">
+  <figure>Setup took an afternoon.<figcaption>Priya, platform lead</figcaption></figure>
+  <figure>Our dashboards finally match our brand.<figcaption>Marco, design systems</figcaption></figure>
+  <figure>Forms just work in React and Angular.<figcaption>Lena, frontend</figcaption></figure>
+  <figure>Dark mode came for free.<figcaption>Sam, product</figcaption></figure>
+</c2-marquee>
+```
+
+```html tag=MdxCodeBlock,label=Opposing rows
+<style>
+  .marquee-rows {
+    display: grid;
+    gap: 10px;
+    width: min(100%, 360px);
+  }
+  .marquee-rows c2-marquee {
+    --c2-marquee__viewport--fade: 32px;
+    --c2-marquee__item--gap: 8px;
+  }
+  .marquee-rows span {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+</style>
+<div class="marquee-rows">
+  <c2-marquee aria-label="Skills">
+    <span>TypeScript</span>
+    <span>Design tokens</span>
+    <span>Accessibility</span>
+    <span>Web components</span>
+    <span>Testing</span>
+  </c2-marquee>
+  <c2-marquee reverse aria-label="More skills">
+    <span>Theming</span>
+    <span>Animation</span>
+    <span>Server rendering</span>
+    <span>Forms</span>
+    <span>Charts</span>
+  </c2-marquee>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Announcement bar
+<style>
+  .marquee-announce {
+    --c2-marquee__item--gap: 48px;
+    --c2-marquee--speed: 36;
+    width: min(100%, 360px);
+    padding: 6px 0;
+    background: var(--c2-theme--color-primary, #0265dc);
+  }
+  .marquee-announce span {
+    color: var(--c2-theme--color-on-primary, #ffffff);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+</style>
+<c2-marquee class="marquee-announce" aria-label="Announcements">
+  <span>Free shipping over $50</span>
+  <span>New: dark mode</span>
+  <span>30-day returns</span>
+  <span>Version 2.0 is out</span>
+</c2-marquee>
+```
+
+</GalleryGrid>

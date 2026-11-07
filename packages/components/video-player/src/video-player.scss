@@ -1,0 +1,502 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-video-player,
+  $theme: (
+    width: 100%,
+    aspect-ratio: string.unquote('16 / 9'),
+    background-color: #000000,
+    color: #ffffff,
+    border-radius: 8px,
+    accent--color: rgb(2, 101, 220),
+    track--color: rgba(255, 255, 255, 0.28),
+    buffered--color: rgba(255, 255, 255, 0.5),
+    chapter--gap: 3px,
+    controls--background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.35) 60%, transparent),
+    control--size: 36px,
+    control__hover--background-color: rgba(255, 255, 255, 0.14),
+    thumbnail--width: 160px,
+    tooltip--background-color: rgba(24, 24, 27, 0.9),
+    big-play--size: 68px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    transition--duration: 200ms,
+  )
+);
+
+:host {
+  display: block;
+  // A width it keeps: as a flex item (a centring frame, a toolbar) the host would otherwise shrink to its content,
+  // which a video with no intrinsic size has none of.
+  width: css.cssVar(width);
+  max-width: 100%;
+  border-radius: css.cssVar(border-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.player {
+  position: relative;
+  overflow: hidden;
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  font-size: 13px;
+  line-height: 1.3;
+  container-type: inline-size;
+  user-select: none;
+}
+
+.player.fullscreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.player.idle {
+  cursor: none;
+}
+
+.stage {
+  display: grid;
+  aspect-ratio: css.cssVar(aspect-ratio);
+  cursor: pointer;
+}
+
+.player.fullscreen .stage {
+  aspect-ratio: auto;
+  height: 100%;
+}
+
+::slotted(video),
+video.own {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  background: transparent;
+}
+
+// A video keeps its own ratio once the stage is given one: the slot fills it.
+slot {
+  display: contents;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+svg .fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+// ----------------------------------------------------------------------------------------- overlays
+
+.big-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: css.cssVar(big-play--size);
+  height: css.cssVar(big-play--size);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(24, 24, 27, 0.72);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.big-play svg {
+  width: 40%;
+  height: 40%;
+  margin-left: 6%;
+}
+
+.big-play:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 3px;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  animation: spin 900ms linear infinite;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.error {
+  position: absolute;
+  inset: 0 0 56px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(9, 9, 11, 0.86);
+  text-align: center;
+}
+
+.error svg {
+  width: 32px;
+  height: 32px;
+  stroke: #f87171;
+}
+
+.error .message {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.error .detail {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.error .retry {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #18181b;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.error .retry:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+// ----------------------------------------------------------------------------------------- controls
+
+.chrome {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 28px 12px 8px;
+  background: css.cssVar(controls--background);
+  transition: opacity css.cssVar(transition--duration) ease;
+}
+
+.player.idle .chrome {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.seek {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 16px;
+  outline: none;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.seek:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.segments {
+  display: flex;
+  flex: 1;
+  gap: css.cssVar(chapter--gap);
+  align-items: center;
+}
+
+.segment {
+  position: relative;
+  flex-basis: 0;
+  min-width: 2px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: css.cssVar(track--color);
+  transition: height 120ms ease;
+}
+
+.segment.hovered,
+.seek.scrubbing .segment.hovered {
+  height: 7px;
+}
+
+.segment .buffered,
+.segment .played {
+  position: absolute;
+  // From the inline start: the fills grow from the right in a right-to-left page, as the time does.
+  inset-block: 0;
+  inset-inline-start: 0;
+}
+
+.segment .buffered {
+  background: css.cssVar(buffered--color);
+}
+
+.segment .played {
+  background: css.cssVar(accent--color);
+}
+
+.handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: css.cssVar(accent--color);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 120ms ease;
+  pointer-events: none;
+}
+
+.seek:hover .handle,
+.seek:focus-visible .handle,
+.seek.scrubbing .handle {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.preview {
+  position: absolute;
+  bottom: 22px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+// Keep the preview inside the player near either end.
+.preview {
+  left: clamp(calc(#{css.cssVar(thumbnail--width)} / 2), var(--_left, 50%), calc(100% - #{css.cssVar(thumbnail--width)} / 2));
+}
+
+.thumb {
+  display: block;
+  width: css.cssVar(thumbnail--width);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  border-radius: 6px;
+  background: #000;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+// A region of a sprite keeps its own size, shown from its offset.
+.thumb.region {
+  aspect-ratio: auto;
+  object-fit: none;
+}
+
+.preview .label {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: css.cssVar(tooltip--background-color);
+  font-size: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview .label b {
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.ctl {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ctl:hover {
+  background-color: css.cssVar(control__hover--background-color);
+}
+
+.ctl:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 0;
+}
+
+.ctl.cc.on {
+  box-shadow: inset 0 -2px 0 css.cssVar(accent--color);
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.volume-range {
+  width: 64px;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.volume-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, currentColor var(--_level, 100%), rgba(255, 255, 255, 0.3) var(--_level, 100%));
+}
+
+.volume-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, currentColor var(--_level, 100%), rgba(255, 255, 255, 0.3) var(--_level, 100%));
+}
+
+.volume-range::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 999px;
+  background: currentColor;
+  appearance: none;
+}
+
+.volume-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.volume-range:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+.time {
+  margin-left: 8px;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time .chapter-name {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.spacer {
+  flex: 1;
+}
+
+// The settings menu: the c2-menu look on the dark chrome.
+.settings-menu {
+  --c2-menu--background: #{css.cssVar(tooltip--background-color)};
+  --c2-menu--min-width: 200px;
+  --c2-menu--border-top: 0 solid transparent;
+  --c2-menu--border-right: 0 solid transparent;
+  --c2-menu--border-bottom: 0 solid transparent;
+  --c2-menu--border-left: 0 solid transparent;
+  --c2-menu__heading--color: rgba(255, 255, 255, 0.6);
+  --c2-menu__separator--color: rgba(255, 255, 255, 0.14);
+  --c2-menu-item--color: #ffffff;
+  --c2-menu-item--background: transparent;
+  --c2-menu-item__hover--background: rgba(255, 255, 255, 0.12);
+  --c2-menu-item__icon--color: #ffffff;
+
+  color-scheme: dark;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// Narrow: the volume slider, the chapter name and picture-in-picture give way.
+@container (max-width: 420px) {
+  .volume-range,
+  .time .chapter-name,
+  .ctl.pip {
+    display: none;
+  }
+
+  .error .detail {
+    display: none;
+  }
+
+  .big-play {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+// Very narrow (a card, a thumbnail): the bar's own Play button stands in for the big one, which would cover the seek
+// bar, and the mute button goes too (M still mutes), so the time has room.
+@container (max-width: 280px) {
+  .big-play,
+  .volume {
+    display: none;
+  }
+
+  .time {
+    margin-left: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome,
+  .segment,
+  .handle {
+    transition: none;
+  }
+
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
