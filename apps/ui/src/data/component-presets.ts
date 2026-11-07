@@ -3997,4 +3997,85 @@ selectors:
       { name: 'Curved return', description: 'Bends the line and sends the light back.', attributes: { curvature: '30', reverse: '' } },
     ],
   },
+  'c2-angle-slider': {
+    html: `<c2-angle-slider label="Temperature" mode="arc" min="16" max="28" step="0.5" value="21.5"></c2-angle-slider>`,
+    presets: [
+      {
+        name: 'Thermostat',
+        description: 'A large, thick, warm arc with a ringed handle.',
+        css: {
+          '--c2-angle-slider--size': '190px',
+          '--c2-angle-slider__arc--sweep': '260',
+          '--c2-angle-slider__track--width': '14px',
+          '--c2-angle-slider__fill--color': '#f97316',
+          '--c2-angle-slider__thumb--size': '26px',
+          '--c2-angle-slider__thumb--border': '4px solid #f97316',
+          '--c2-angle-slider__value--font-size': '40px',
+        },
+      },
+      {
+        name: 'Knob',
+        description: 'A small 300 degree knob for a toolbar or a mixer.',
+        css: {
+          '--c2-angle-slider--size': '96px',
+          '--c2-angle-slider__arc--sweep': '300',
+          '--c2-angle-slider__track--width': '6px',
+          '--c2-angle-slider__thumb--size': '14px',
+          '--c2-angle-slider__value--font-size': '16px',
+        },
+      },
+    ],
+  },
+  'c2-keypad': {
+    html: `<c2-keypad display="pin" length="6" value="123"></c2-keypad>`,
+    presets: [
+      {
+        name: 'Passcode',
+        description: 'Round keys spaced like a phone lock screen.',
+        css: {
+          '--c2-keypad--width': '200px',
+          '--c2-keypad__key--height': '60px',
+          '--c2-keypad__key--border-radius': '999px',
+          '--c2-keypad__key--font-size': '26px',
+          '--c2-keypad__key--font-weight': '400',
+          '--c2-keypad__keys--gap': '10px',
+        },
+      },
+      {
+        name: 'Bare keys',
+        description: 'Keys without a fill until they are hovered or pressed.',
+        css: {
+          '--c2-keypad__key--background': 'transparent',
+          '--c2-keypad__key__hover--background': 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff))',
+          '--c2-keypad__keys--gap': '0px',
+        },
+      },
+    ],
+  },
+  'c2-signature-pad': {
+    html: `<c2-signature-pad label="Signature"></c2-signature-pad>`,
+    presets: [
+      {
+        name: 'Line only',
+        description: 'No box, a heavy baseline to sign on, and no buttons.',
+        css: {
+          '--c2-signature-pad--border': '0',
+          '--c2-signature-pad--background': 'transparent',
+          '--c2-signature-pad__baseline--inset': '0px',
+          '--c2-signature-pad__baseline--border': '2px solid var(--c2-theme--color-on-surface, #18181b)',
+          '--c2-signature-pad__actions--display': 'none',
+        },
+      },
+      {
+        name: 'Marker',
+        description: 'A thick blue marker in a dashed, rounded box.',
+        css: {
+          '--c2-signature-pad__stroke--color': '#2563eb',
+          '--c2-signature-pad__stroke--width': '5px',
+          '--c2-signature-pad--border-radius': '14px',
+          '--c2-signature-pad__baseline--border': '0',
+        },
+      },
+    ],
+  },
 }
