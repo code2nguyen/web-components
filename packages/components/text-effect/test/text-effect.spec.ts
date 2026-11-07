@@ -61,6 +61,8 @@ test('scramble resolves into the text and ends; reveal rises word by word and en
   )
   await watch(effect(page, '#s'), 'effect-end')
   await watch(effect(page, '#r'), 'effect-end')
+  // At these timings both effects can end before the listeners above are attached, so play them again.
+  await page.evaluate(() => document.querySelectorAll('c2-text-effect').forEach((element) => element.replay()))
   await expect.poll(() => shown(page, '#s').textContent()).toBe('Deployed')
   await expect.poll(() => events(page, '#s')).toEqual([null])
   await expect(shown(page, '#r').locator('.piece')).toHaveCount(4)
