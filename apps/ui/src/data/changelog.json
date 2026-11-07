@@ -2,6 +2,190 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.22",
+      "date": "2026-11-06",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-bullet-chart, c2-boxplot-chart and c2-sunburst-chart",
+              "hash": "41ab6f1"
+            },
+            {
+              "scopes": ["video-player"],
+              "text": "Add c2-video-player",
+              "hash": "c83ab72"
+            },
+            {
+              "scopes": ["audio-player"],
+              "text": "Add c2-audio-player",
+              "hash": "bf16724"
+            },
+            {
+              "scopes": ["image-compare"],
+              "text": "Add c2-image-compare",
+              "hash": "39cd49b"
+            },
+            {
+              "scopes": ["file-browser"],
+              "text": "Add c2-file-browser",
+              "hash": "96ec235"
+            },
+            {
+              "scopes": ["terminal", "change-review"],
+              "text": "Add c2-terminal and c2-change-review",
+              "hash": "803a66a"
+            },
+            {
+              "scopes": ["quick-time-menu"],
+              "text": "Add c2-quick-time-menu",
+              "hash": "a015071"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Add c2-scheduler",
+              "hash": "fa20683"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Let a control write its own bounds in the range message",
+              "hash": "031e1c5"
+            },
+            {
+              "scopes": ["duration-input"],
+              "text": "Add c2-duration-input",
+              "hash": "52217cd"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["floating-panel"],
+              "text": "Keep overflowing dock lines inside the boundary; release the minimap art when it is turned off",
+              "hash": "0a98ed1"
+            },
+            {
+              "scopes": ["pan-zoom"],
+              "text": "Pan by the pointer's travel since the drag started; test(floating-panel,mind-map): keep drags inside the window, dispatch the copy event",
+              "hash": "637734a"
+            },
+            {
+              "scopes": ["mind-map"],
+              "text": "Colour syntax only, sides resolved on one-sided maps, unfold-then-edit selects its topic, posinset in drawing order",
+              "hash": "1873ffd"
+            },
+            {
+              "scopes": ["floating-panel"],
+              "text": "Docked panels share the dock line or wrap upward instead of leaving the boundary",
+              "hash": "f9c808c"
+            },
+            {
+              "scopes": ["floating-panel"],
+              "text": "A panel at its CSS place stays inside its boundary and shrinks to fit it",
+              "hash": "6c904bc"
+            },
+            {
+              "scopes": ["pan-zoom"],
+              "text": "The minimap copies content through a display: contents wrapper; the floor-plan card opens on the meeting rooms",
+              "hash": "707ccbc"
+            },
+            {
+              "scopes": ["pan-zoom", "mind-map"],
+              "text": "Keep a width in a flex or centring parent; gallery boxes take the card width",
+              "hash": "2fd3ce8"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Bullet band names translate per band count, bands below min no longer use up the five, markers follow the entry kind",
+              "hash": "be2908a"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Sunburst keeps the author's root, refocuses the group it left and reads lengths in any unit",
+              "hash": "29ae202"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Boxplot reads rem lengths as pixels and keeps unlabelled rows apart",
+              "hash": "777c26d"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Bullet bands follow the theme in dark mode; a horizontal boxplot's unit no longer covers the first tick",
+              "hash": "7c0dd04"
+            },
+            {
+              "scopes": ["audio-player", "video-player"],
+              "text": "A player starting to load is not a failed one",
+              "hash": "065d515"
+            },
+            {
+              "scopes": ["video-player"],
+              "text": "A very narrow player drops the big play and mute buttons",
+              "hash": "71d7fb6"
+            },
+            {
+              "scopes": ["audio-player"],
+              "text": "Address the code review and the narrow gallery cards",
+              "hash": "7c4f3de"
+            },
+            {
+              "scopes": ["video-player"],
+              "text": "Address the code review and the empty gallery cards",
+              "hash": "0ca1d35"
+            },
+            {
+              "scopes": ["image-compare"],
+              "text": "One change per drag in hover mode; cache the percent format",
+              "hash": "b52ee7b"
+            },
+            {
+              "scopes": ["file-browser"],
+              "text": "A right-click menu still waiting for the button no longer opens late",
+              "hash": "9b64836"
+            },
+            {
+              "scopes": ["terminal"],
+              "text": "See text selected in the output in WebKit and Firefox too",
+              "hash": "e2052d0"
+            },
+            {
+              "scopes": ["file-browser", "terminal"],
+              "text": "Fixes from the docs screenshot review",
+              "hash": "7ff0b80"
+            },
+            {
+              "scopes": ["terminal", "file-browser", "change-review"],
+              "text": "Address the code review",
+              "hash": "28bc133"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Revert \"chore: remove the cubic review config\"",
+              "hash": "ad56917"
+            },
+            {
+              "scopes": [],
+              "text": "Revert \"ci(release): stop labelling the version PR skip-review for cubic\"",
+              "hash": "fe4ee24"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.21",
       "date": "2026-11-04",
       "sections": [
