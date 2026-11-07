@@ -394,7 +394,7 @@ export class CommentThread extends LitElement {
                       part="action edit-action"
                       type="button"
                       aria-label=${this.msg.t('editLabel', name)}
-                      title=${this.msg.t('edit')}
+                      title=${this.msg.t('editLabel', name)}
                       @click=${() => this.startEdit(comment)}
                     >
                       <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -415,7 +415,7 @@ export class CommentThread extends LitElement {
                         part="action delete-action"
                         type="button"
                         aria-label=${this.msg.t('deleteLabel', name)}
-                        title=${this.msg.t('delete')}
+                        title=${this.msg.t('deleteLabel', name)}
                       >
                         <svg viewBox="0 0 16 16" aria-hidden="true">
                           <path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.6 8.5h6.8l.6-8.5M6.75 7v3.5M9.25 7v3.5" />

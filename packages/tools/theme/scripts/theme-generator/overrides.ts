@@ -352,6 +352,7 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__series-6--color': { token: 'chart-series-6' },
   '--c2-chart__series-7--color': { token: 'chart-series-7' },
   '--c2-chart__series-8--color': { token: 'chart-series-8' },
+  '--c2-distribution-bar__segment-8--color': { token: 'chart-series-8' },
   // A gantt task's numeric tone is a slot of the same categorical palette, so a roadmap and a chart agree.
   '--c2-gantt__series-1--color': { token: 'chart-series-1' },
   '--c2-gantt__series-2--color': { token: 'chart-series-2' },
