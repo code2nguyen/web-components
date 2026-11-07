@@ -270,7 +270,7 @@ price: .price
   <c2-kbd>Esc</c2-kbd>
 </div>`,
   'key-value-editor': `<c2-key-value-editor masked style="width: 100%; --c2-key-value-editor__header--display: none; --c2-key-value-editor__field--height: 28px; --c2-key-value-editor__button--size: 28px; --c2-key-value-editor__field--font-size: 12px" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
-  keypad: `<c2-keypad display="pin" length="4" value="12" style="--c2-keypad--width:180px;--c2-keypad__key--height:30px;--c2-keypad__key--font-size:15px;--c2-keypad__keys--gap:5px;--c2-keypad__display--gap:10px;--c2-keypad__dot--size:10px"></c2-keypad>`,
+  keypad: `<c2-keypad display="pin" length="4" value="12" style="--c2-keypad--width:168px;--c2-keypad__key--height:24px;--c2-keypad__key--font-size:13px;--c2-keypad__key--border-radius:8px;--c2-keypad__keys--gap:4px;--c2-keypad__display--gap:8px;--c2-keypad__dot--size:9px;--c2-keypad__dot--gap:10px"></c2-keypad>`,
   label: `<div class="preview-row">
   <c2-label for="preview-label-input">Email</c2-label>
   <c2-text-field id="preview-label-input" placeholder="you@example.com" style="width:170px"></c2-text-field>
