@@ -442,6 +442,8 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 16%)',
   },
+  // An exported signature goes on a white document, whatever the theme of the page it was drawn on.
+  '--c2-signature-pad__export__stroke--color': { exclude: 'exported signatures stay dark for a white document' },
   '--c2-keypad__dot--border': { token: 'color-on-surface-variant', value: '2px solid var(--c2-theme--color-on-surface-variant, #71717a)' },
   // Switch: hovered off-track uses the outline colour, the thumb is a surface.
   '--c2-switch__track__hover--color': { token: 'color-outline' },

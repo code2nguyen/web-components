@@ -187,6 +187,14 @@ export class AngleSlider extends LitElement {
     return this.mode === 'arc'
   }
 
+  /** The highest value the slider can hold: `max` on an arc; on a full turn, the last step before `max`, which is `min` again. */
+  private get lastValue(): number {
+    const { min, max } = this
+    if (this.isArc || !(max > min)) return max
+    const step = this.step > 0 ? this.step : 1
+    return Number((min + (Math.ceil((max - min) / step) - 1) * step).toFixed(10))
+  }
+
   private get effectiveDisabled() {
     return this.disabled || this.disabledByForm
   }
@@ -290,34 +298,47 @@ export class AngleSlider extends LitElement {
     if (this.effectiveDisabled) return
     const step = this.step > 0 ? this.step : 1
     const page = Math.max(step, Math.round((this.max - this.min) / 10 / step) * step)
-    let next: number
+    let delta: number
     switch (event.key) {
       case 'ArrowRight':
       case 'ArrowUp':
-        next = this.value + step
+        delta = step
         break
       case 'ArrowLeft':
       case 'ArrowDown':
-        next = this.value - step
+        delta = -step
         break
       case 'PageUp':
-        next = this.value + page
+        delta = page
         break
       case 'PageDown':
-        next = this.value - page
+        delta = -page
         break
       case 'Home':
-        next = this.min
-        break
+        event.preventDefault()
+        this.choose(this.min, true)
+        return
       case 'End':
-        // A full turn ends where it starts: End is the last step before `max`.
-        next = this.isArc ? this.max : this.max - step
-        break
+        event.preventDefault()
+        this.choose(this.lastValue, true)
+        return
       default:
         return
     }
     event.preventDefault()
-    this.choose(next, true)
+    this.choose(this.isArc ? this.value + delta : this.turn(delta / step), true)
+  }
+
+  /**
+   * The value `steps` steps round the circle from the current one. It moves along the step grid from `min`, and past
+   * the last step comes back to `min`: with a step that does not divide the turn (7 in 360), 357 is followed by 0.
+   */
+  private turn(steps: number): number {
+    const step = this.step > 0 ? this.step : 1
+    const count = Math.max(1, Math.ceil((this.max - this.min) / step))
+    const index = Math.round((this.value - this.min) / step)
+    const next = (((index + Math.round(steps)) % count) + count) % count
+    return this.min + next * step
   }
 
   private display(): string {
@@ -359,7 +380,7 @@ export class AngleSlider extends LitElement {
             tabindex=${disabled ? -1 : 0}
             aria-label=${name}
             aria-valuemin=${this.min}
-            aria-valuemax=${this.max}
+            aria-valuemax=${this.lastValue}
             aria-valuenow=${this.value}
             aria-valuetext=${this.spoken()}
             aria-disabled=${disabled ? 'true' : nothing}

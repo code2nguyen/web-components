@@ -89,6 +89,10 @@ test('with for, it types into another field, which fires its own input and chang
   await tap(page, '7', '3')
   await expect(page.locator('#code')).toHaveValue('73')
   expect(await events(page, '#code')).toHaveLength(2)
+  // Edited on its own, the field is where the next key continues from.
+  await page.locator('#code').fill('9')
+  await tap(page, '1')
+  await expect(page.locator('#code')).toHaveValue('91')
 })
 
 test('it is a form control: submits under its name, required asks for a value, resets, and a disabled one takes no keys', async ({ page, renderScenario }) => {
@@ -100,13 +104,20 @@ test('it is a form control: submits under its name, required asks for a value, r
   expect(await keypad(page).evaluate((element) => element.validationMessage)).toBe('Enter a value.')
   await page.locator('form').evaluate((form: HTMLFormElement) => form.reset())
   expect(await value(page)).toBe('12')
-  // A value set from code is kept to what the keys could type.
+  // A value set from code is kept to what the keys could type; a comma in it is a thousands separator.
   await props(keypad(page), { value: '0012.3456x' })
   expect(await value(page)).toBe('12.34')
+  await props(keypad(page), { value: '1,250.50' })
+  expect(await value(page)).toBe('1250.50')
 
   await keypad(page).evaluate((element) => element.setAttribute('disabled', ''))
   await expect(key(page, '5')).toBeDisabled()
   expect(await data()).toEqual({})
+})
+
+test('long amounts show every digit typed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-keypad max-length="20" value="12345678901234567"></c2-keypad>')
+  await expect(display(page)).toHaveText('12,345,678,901,234,567')
 })
 
 test('takes its separators and its text from the nearest lang', async ({ page, renderScenario }) => {

@@ -174,7 +174,8 @@ export class Keypad extends LitElement {
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
-    if (typeof state === 'string') this.value = state
+    // A PIN is never kept as state (see syncFormState), as browsers do not restore passwords.
+    if (typeof state === 'string' && !this.isPin) this.value = state
   }
 
   /** Empties the keypad. Fires no event. */
@@ -218,8 +219,10 @@ export class Keypad extends LitElement {
   private sanitize(raw: unknown): string {
     const text = typeof raw === 'string' ? raw : raw == null ? '' : String(raw)
     if (this.isPin) return text.replace(/\D/g, '').slice(0, this.pinLength)
+    // Commas are dropped, not read as a decimal point: a value from code is written with a point ("1250.5"), and a
+    // comma in it is a thousands separator ("1,250.50"). Only a key press reads "," as the decimal point.
     let value = ''
-    for (const char of text) value = this.apply(value, char === ',' ? '.' : char)
+    for (const char of text) if (char !== ',') value = this.apply(value, char)
     return value
   }
 
@@ -242,6 +245,12 @@ export class Keypad extends LitElement {
 
   private press(key: string) {
     if (this.effectiveDisabled) return
+    // A field the keypad types into may have been edited on its own: keep typing from what it holds now.
+    const target = this.target()
+    if (target) {
+      const current = this.sanitize(target.value)
+      if (current !== this.value) this.value = current
+    }
     const next = this.apply(this.value, key)
     if (next === this.value) return
     this.value = next
@@ -254,11 +263,17 @@ export class Keypad extends LitElement {
   }
 
   /** Writes the value into the `for` field as typing would: its value, then its own `input` and `change`. */
-  private typeIntoTarget(value: string) {
-    if (!this.for) return
+  /** The field named by `for`, when it is one that holds a `value`. */
+  private target(): (HTMLElement & { value: unknown }) | null {
+    if (!this.for) return null
     const root = this.getRootNode() as Document | ShadowRoot
     const target = root.getElementById?.(this.for) as (HTMLElement & { value?: unknown }) | null
-    if (!target || !('value' in target)) return
+    return target && 'value' in target ? (target as HTMLElement & { value: unknown }) : null
+  }
+
+  private typeIntoTarget(value: string) {
+    const target = this.target()
+    if (!target) return
     target.value = value
     target.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     target.dispatchEvent(new Event('change', { bubbles: true }))
@@ -266,7 +281,8 @@ export class Keypad extends LitElement {
 
   private syncFormState() {
     const value = this.value
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || !value ? null : value, value)
+    // The state is what the browser restores on Back or a restored session: never a PIN.
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || !value ? null : value, this.isPin ? null : value)
     if (this.effectiveDisabled) {
       this.internals.setValidity({})
       return
@@ -305,7 +321,8 @@ export class Keypad extends LitElement {
       // An unknown currency code reads as a plain number.
       format = new Intl.NumberFormat(this.msg.locale, options)
     }
-    const parts = format.formatToParts(Number(`${whole || '0'}.${fraction || '0'}`))
+    // Formatted from the digits as a string, which Intl reads exactly: a number would round past 15 or so digits.
+    const parts = format.formatToParts(`${whole || '0'}.${fraction || '0'}` as unknown as number)
     if (this.value.endsWith('.')) {
       const lastInteger = parts.map((part) => part.type).lastIndexOf('integer')
       parts.splice(lastInteger + 1, 0, { type: 'decimal', value: this.decimalSeparator() })

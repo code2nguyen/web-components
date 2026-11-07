@@ -18,6 +18,6 @@ import '@c2n/components/signature-pad'
 
 - Attributes: `strokes` (JSON, `[[[x, y], …], …]` in CSS pixels), `name`, `required`, `readonly`, `disabled`, `label`, `placeholder`.
 - Events: `input` and `change` after each stroke, Undo and Clear.
-- Styling: `--c2-signature-pad--height`, `--c2-signature-pad__stroke--color` and `--c2-signature-pad__stroke--width`, and the surface, baseline and button variables listed on the API tab.
+- Styling: `--c2-signature-pad--width`, `--c2-signature-pad--height`, `--c2-signature-pad__export__stroke--color` (the ink of exports, dark in every theme), `--c2-signature-pad__stroke--color` and `--c2-signature-pad__stroke--width`, and the surface, baseline and button variables listed on the API tab.
 
 A signature cannot be drawn from the keyboard, so a form that asks for one should accept a typed name as well.

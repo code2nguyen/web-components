@@ -80,8 +80,9 @@ test('Undo takes the last stroke away and Clear empties the pad, from the keyboa
 })
 
 test('strokes set from code show a saved signature, and it exports as SVG, a data URL and a blob', async ({ page, renderScenario }) => {
+  // The ink on screen is light, as a dark theme draws it; the export takes the export colour.
   await renderScenario(
-    '<c2-signature-pad style="--c2-signature-pad__stroke--color: rgb(10, 20, 30); --c2-signature-pad__stroke--width: 3px"></c2-signature-pad>',
+    '<c2-signature-pad style="--c2-signature-pad__stroke--color: rgb(240, 240, 240); --c2-signature-pad__export__stroke--color: rgb(10, 20, 30); --c2-signature-pad__stroke--width: 3px"></c2-signature-pad>',
   )
   await props(pad(page), {
     strokes: [
@@ -98,6 +99,11 @@ test('strokes set from code show a saved signature, and it exports as SVG, a dat
   const width = Math.round((await pad(page).locator('[part="pad"]').boundingBox())!.width)
   expect(svg).toContain(`width="${width}"`)
   expect(svg).toContain('stroke="rgb(10, 20, 30)" stroke-width="3"')
+  expect(
+    await paths(page)
+      .first()
+      .evaluate((path) => getComputedStyle(path).stroke),
+  ).toBe('rgb(240, 240, 240)')
   expect(svg.match(/<path /g)).toHaveLength(2)
   expect(await pad(page).evaluate((element) => element.toDataURL())).toMatch(/^data:image\/png;base64,/)
   expect(await pad(page).evaluate((element) => element.toDataURL('image/jpeg'))).toMatch(/^data:image\/jpeg;base64,/)
@@ -121,6 +127,9 @@ test('it is a form control: submits SVG under its name, required asks for a sign
   expect(await data()).toEqual({})
   expect(await valid()).toBe(false)
   expect(await pad(page).evaluate((element) => element.validationMessage)).toBe('Sign in the box.')
+  // Reporting it moves focus to the pad's first button, where the browser shows the message.
+  await pad(page).evaluate((element) => element.reportValidity())
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeFocused()
 
   await sign(page, scribble)
   expect(await valid()).toBe(true)

@@ -77,6 +77,16 @@ test('the keys step, page and jump, and wrap round the circle', async ({ page, r
   expect(await value(page)).toBe(270)
 })
 
+test('End goes to the last step a full turn reaches, which is also what assistive technology hears as the maximum', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-angle-slider step="7"></c2-angle-slider>')
+  await expect(handle(page)).toHaveAttribute('aria-valuemax', '357')
+  await handle(page).focus()
+  await page.keyboard.press('End')
+  expect(await value(page)).toBe(357)
+  await page.keyboard.press('ArrowRight')
+  expect(await value(page)).toBe(0)
+})
+
 test('an arc maps min to max along it, fills up to the handle, takes the nearer end in the gap and stops at its ends', async ({ page, renderScenario }) => {
   await renderScenario('<c2-angle-slider mode="arc" min="10" max="30" step="0.5" label="Temperature"></c2-angle-slider>')
   await expect(handle(page)).toHaveAccessibleName('Temperature')

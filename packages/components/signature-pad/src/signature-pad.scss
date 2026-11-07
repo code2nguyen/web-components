@@ -10,6 +10,7 @@
     border-radius: 8px,
     stroke--color: #18181b,
     stroke--width: 2.5px,
+    export__stroke--color: #18181b,
     placeholder--color: #71717a,
     placeholder--font-size: 14px,
     baseline--border: 1px solid #e4e4e7,
@@ -46,6 +47,7 @@
 
 .pad {
   --_stroke-width: #{css.cssVar(stroke--width)};
+  --_export-color: #{css.cssVar(export__stroke--color)};
 
   position: relative;
   box-sizing: border-box;

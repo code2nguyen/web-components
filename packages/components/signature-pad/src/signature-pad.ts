@@ -59,7 +59,7 @@ const isStroke = (stroke: unknown): stroke is SignatureStroke =>
  * An empty pad shows a hint (`placeholder`, "Sign here" by default) over a baseline. **Undo** takes the last stroke
  * away and **Clear** empties the pad; `undo()` and `clear()` do the same from code. `strokes` holds the drawing (an
  * array of strokes, each an array of `[x, y]` points in CSS pixels) and can be set to show a saved signature. Export it
- * with `toSVG()`, `toDataURL(type?)` or `toBlob(type?)`.
+ * with `toSVG()`, `toDataURL(type?)` or `toBlob(type?)`, in `--c2-signature-pad__export__stroke--color`.
  *
  * It is a form control: under a `name` the form receives the signature as SVG markup, `required` asks for one, and it
  * takes part in `c2-form-field`. `readonly` shows a signature without letting it change.
@@ -87,6 +87,7 @@ const isStroke = (stroke: unknown): stroke is SignatureStroke =>
  * @cssproperty {border-radius} [--c2-signature-pad--border-radius=8px]
  * @cssproperty {color} [--c2-signature-pad__stroke--color=#18181b] - Colour of the ink.
  * @cssproperty {pixel} [--c2-signature-pad__stroke--width=2.5px] - Thickness of the ink.
+ * @cssproperty {color} [--c2-signature-pad__export__stroke--color=#18181b] - Colour of the ink in `toSVG()`, `toDataURL()`, `toBlob()` and the form value. It stays dark in a dark theme: an exported signature goes on a white document.
  * @cssproperty {color} [--c2-signature-pad__placeholder--color=#71717a]
  * @cssproperty {font-size} [--c2-signature-pad__placeholder--font-size=14px]
  * @cssproperty {border} [--c2-signature-pad__baseline--border=1px solid #e4e4e7] - The line to sign on.
@@ -183,6 +184,11 @@ export class SignaturePad extends LitElement {
     this.disabledByForm = disabled && !this.hasAttribute('disabled')
   }
 
+  /** Focuses the pad's first button (Undo), the control a keyboard reaches it by. */
+  override focus(options?: FocusOptions) {
+    this.renderRoot.querySelector<HTMLElement>('.action')?.focus(options)
+  }
+
   /** True while the pad holds no strokes. */
   get isEmpty(): boolean {
     return this.validStrokes().length === 0
@@ -253,11 +259,15 @@ export class SignaturePad extends LitElement {
     return { width: Math.round(this.pad?.offsetWidth ?? 0), height: Math.round(this.pad?.offsetHeight ?? 0) }
   }
 
-  /** The ink as the pad draws it: the CSS variables resolved. */
+  /**
+   * The ink of an export: the export colour, not the one on screen, which a dark theme lightens. A signature is kept
+   * on a document, and a document is white.
+   */
   private ink(): { color: string; width: number } {
     const style = this.pad ? getComputedStyle(this.pad) : undefined
     const width = parseFloat(style?.getPropertyValue('--_stroke-width') ?? '')
-    return { color: style?.color || '#18181b', width: Number.isFinite(width) && width > 0 ? width : 2.5 }
+    const color = style?.getPropertyValue('--_export-color').trim()
+    return { color: color || '#18181b', width: Number.isFinite(width) && width > 0 ? width : 2.5 }
   }
 
   /** `strokes` with anything that is not a list of points dropped: the attribute and the property take any JSON. */
@@ -277,7 +287,10 @@ export class SignaturePad extends LitElement {
     if (changed.has('strokes') && this.defaultStrokes === undefined) this.defaultStrokes = this.validStrokes()
   }
 
-  protected override updated() {
+  // Untyped: `current` is private state, which `PropertyValues<this>` does not name.
+  protected override updated(changed: PropertyValues) {
+    // A stroke being drawn changes nothing the form sees until it ends: no export on every pointer move.
+    if (changed.size === 1 && changed.has('current')) return
     this.syncFormState()
   }
 
@@ -289,7 +302,8 @@ export class SignaturePad extends LitElement {
       this.internals.setValidity({})
       return
     }
-    const anchor = this.pad ?? undefined
+    // The browser moves focus to the anchor to show the message: the pad itself takes no focus, its first button does.
+    const anchor = this.renderRoot?.querySelector<HTMLElement>('.action') ?? this.pad ?? undefined
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, anchor)
     else if (this.required && empty) this.internals.setValidity({ valueMissing: true }, this.msg.t('required'), anchor)
     else this.internals.setValidity({})
@@ -371,6 +385,7 @@ export class SignaturePad extends LitElement {
           @pointermove=${this.handlePointerMove}
           @pointerup=${this.handlePointerUp}
           @pointercancel=${this.handlePointerUp}
+          @lostpointercapture=${this.handlePointerUp}
         >
           <span class="baseline" part="baseline"></span>
           ${empty ? html`<span class="placeholder" part="placeholder" aria-hidden="true">${this.placeholder || this.msg.t('placeholder')}</span>` : nothing}

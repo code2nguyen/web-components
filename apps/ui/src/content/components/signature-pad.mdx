@@ -42,7 +42,7 @@ After each stroke, Undo and Clear, `input` then `change` fire. `isEmpty` says wh
 
 `strokes` holds the drawing: an array of strokes, each an array of `[x, y]` points in CSS pixels from the top left corner. Store it to keep the signature editable, and set it, as a property or as a JSON attribute, to show a saved one. `readonly` shows it without letting it change.
 
-To keep the signature as a picture, `toSVG()` returns a standalone SVG document the size of the pad, in the ink's colour and thickness. `toDataURL(type?)` and `toBlob(type?)` draw it as an image at the screen's pixel density. PNG and WebP keep a transparent background; JPEG gets a white one.
+To keep the signature as a picture, `toSVG()` returns a standalone SVG document the size of the pad, in the ink's thickness. Exports and the form value draw the ink in `--c2-signature-pad__export__stroke--color` (near-black by default), not the colour on screen: in a dark theme the screen ink is light, but a signature goes on a white document. `toDataURL(type?)` and `toBlob(type?)` draw it as an image at the screen's pixel density. PNG and WebP keep a transparent background; JPEG gets a white one.
 
 ### In a form
 
