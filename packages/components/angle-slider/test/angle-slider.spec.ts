@@ -163,8 +163,10 @@ test('takes its text from the nearest lang', async ({ page, renderScenario }) =>
 test('in forced colours the dial paints itself in system colours', async ({ page, renderScenario }) => {
   await page.emulateMedia({ forcedColors: 'active' })
   await renderScenario('<c2-angle-slider mode="arc" value="180"></c2-angle-slider>')
-  // WebKit has no forced colours mode: the media query never matches there, so there is nothing to check.
-  test.skip(!(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)), 'this engine has no forced colours mode')
+  // WebKit has no forced colours mode: it matches the emulated media query but has no forced-color-adjust, and never
+  // forces colours, so the dial keeps its own paint there and there is nothing to check.
+  const forcedColours = await page.evaluate(() => matchMedia('(forced-colors: active)').matches && CSS.supports('forced-color-adjust', 'none'))
+  test.skip(!forcedColours, 'this engine has no forced colours mode')
   const fill = await slider(page)
     .locator('[part="fill"]')
     .evaluate((element) => getComputedStyle(element).backgroundImage)
