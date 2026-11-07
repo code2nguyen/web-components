@@ -1,0 +1,158 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-angle-slider,
+  $theme: (
+    size: 160px,
+    arc--sweep: 270,
+    track--width: 8px,
+    track--color: #e4e4e7,
+    fill--color: rgb(2, 101, 220),
+    track__error--color: #dc2626,
+    needle--width: 2px,
+    needle--color: rgb(2, 101, 220),
+    thumb--size: 20px,
+    thumb--color: #ffffff,
+    thumb--border: 2px solid rgb(2, 101, 220),
+    thumb--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15),
+    thumb__active--box-shadow: 0 0 0 8px rgba(2, 101, 220, 0.18),
+    thumb__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    thumb__focus--outline-offset: 2px,
+    value--display: block,
+    value--color: #18181b,
+    value--font-size: 24px,
+    value--font-weight: 600,
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.dial {
+  --_size: #{css.cssVar(size)};
+  --_track: #{css.cssVar(track--width)};
+  --_sweep: #{css.cssVar(arc--sweep)};
+  --_ring: radial-gradient(farthest-side, transparent calc(100% - var(--_track)), #000 calc(100% - var(--_track) + 0.5px));
+
+  position: relative;
+  width: var(--_size);
+  height: var(--_size);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.dial--disabled {
+  opacity: css.cssVar(disabled--opacity);
+  cursor: default;
+}
+
+/* The ring: a conic gradient cut to a band by a radial mask, so its thickness is one variable. */
+.track,
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mask: var(--_ring);
+  -webkit-mask: var(--_ring);
+  pointer-events: none;
+}
+
+.dial--angle .track {
+  background: css.cssVar(track--color);
+}
+
+.dial--arc .track {
+  background: conic-gradient(from calc(var(--_sweep) * -0.5deg), css.cssVar(track--color) 0 calc(var(--_sweep) * 1deg), transparent 0);
+}
+
+.dial--invalid .track {
+  --c2-angle-slider__track--color: #{css.cssVar(track__error--color)};
+}
+
+.fill {
+  background: conic-gradient(from calc(var(--_sweep) * -0.5deg), css.cssVar(fill--color) 0 calc(var(--_fraction) * var(--_sweep) * 1deg), transparent 0);
+}
+
+/* Turns with the value; the handle sits at its top, on the middle of the ring. */
+.arm {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dial--angle .arm {
+  transform: rotate(calc(var(--_fraction) * 360deg));
+}
+
+.dial--arc .arm {
+  transform: rotate(calc((var(--_fraction) - 0.5) * var(--_sweep) * 1deg));
+}
+
+.needle {
+  position: absolute;
+  /* From two fifths of the radius out to the ring, leaving the middle to the value. */
+  bottom: 70%;
+  left: 50%;
+  width: css.cssVar(needle--width);
+  height: calc(30% - var(--_track) / 2);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: css.cssVar(needle--color);
+}
+
+.thumb {
+  --_thumb: #{css.cssVar(thumb--size)};
+
+  position: absolute;
+  top: calc(var(--_track) / 2 - var(--_thumb) / 2);
+  left: calc(50% - var(--_thumb) / 2);
+  box-sizing: border-box;
+  width: var(--_thumb);
+  height: var(--_thumb);
+  border: css.cssVar(thumb--border);
+  border-radius: 50%;
+  background: css.cssVar(thumb--color);
+  box-shadow: css.cssVar(thumb--box-shadow);
+  pointer-events: auto;
+  outline: none;
+  transition: box-shadow 150ms ease;
+}
+
+.dial--dragging .thumb {
+  box-shadow: css.cssVar(thumb__active--box-shadow);
+}
+
+.thumb:focus-visible {
+  outline: css.cssVar(thumb__focus--outline);
+  outline-offset: css.cssVar(thumb__focus--outline-offset);
+}
+
+.value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: css.cssVar(value--display);
+  max-width: 40%;
+  transform: translate(-50%, -50%);
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb {
+    transition: none;
+  }
+}

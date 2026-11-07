@@ -12,6 +12,10 @@ export const componentPreviews: Record<string, string> = {
   <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
 </div>`,
   'address-field': `<c2-address-field style="width:280px;--c2-address-field--gap:6px;--c2-address-field--row-gap:6px;--c2-text-field--min-height:28px;--c2-form-field__label--font-size:11px" countries="US" value='{"country":"US","line1":"1 Ferry Building","city":"San Francisco","region":"CA","postalCode":"94111"}'></c2-address-field>`,
+  'angle-slider': `<div class="preview-row">
+  <c2-angle-slider label="Gradient angle" value="135" style="--c2-angle-slider--size:104px;--c2-angle-slider__value--font-size:18px"></c2-angle-slider>
+  <c2-angle-slider label="Volume" mode="arc" max="100" value="64" style="--c2-angle-slider--size:104px;--c2-angle-slider__value--font-size:18px"></c2-angle-slider>
+</div>`,
   'app-shell': `<div class="preview-app-shell">
   <c2-app-shell scrolling="main" style="--c2-app-shell--height:110px;--c2-app-shell__navigation--width:76px;--c2-app-shell__navigation--background-color:var(--site-color-surface-container-3);--c2-app-shell__divider--color:var(--site-color-outline-variant)">
     <div slot="header" style="padding:8px 10px;font-size:13px;font-weight:600;border-bottom:1px solid var(--site-color-outline-variant)">Ledgerline</div>
@@ -266,6 +270,7 @@ price: .price
   <c2-kbd>Esc</c2-kbd>
 </div>`,
   'key-value-editor': `<c2-key-value-editor masked style="width: 100%; --c2-key-value-editor__header--display: none; --c2-key-value-editor__field--height: 28px; --c2-key-value-editor__button--size: 28px; --c2-key-value-editor__field--font-size: 12px" entries='[{"key":"DATABASE_URL","value":"postgres://app@db/app"},{"key":"NODE_ENV","value":"production","masked":false}]'></c2-key-value-editor>`,
+  keypad: `<c2-keypad display="pin" length="4" value="12" style="--c2-keypad--width:180px;--c2-keypad__key--height:30px;--c2-keypad__key--font-size:15px;--c2-keypad__keys--gap:5px;--c2-keypad__display--gap:10px;--c2-keypad__dot--size:10px"></c2-keypad>`,
   label: `<div class="preview-row">
   <c2-label for="preview-label-input">Email</c2-label>
   <c2-text-field id="preview-label-input" placeholder="you@example.com" style="width:170px"></c2-text-field>
@@ -462,6 +467,7 @@ price: .price
     <div style="padding:12px;font-size:13px">Main content</div>
   </c2-side-nav>
 </div>`,
+  'signature-pad': `<c2-signature-pad label="Signature" readonly style="width:240px;--c2-signature-pad--height:120px" strokes="[[[22,84],[34,54],[44,40],[52,52],[54,76],[58,92],[66,72],[76,54],[84,64],[88,82],[98,74],[110,60],[120,66],[126,80],[138,70],[150,64],[162,74]],[[172,60],[184,82],[194,58],[206,80],[222,66]]]"></c2-signature-pad>`,
   skeleton: `<div style="display:flex;align-items:center;gap:12px;width:220px">
   <c2-skeleton variant="circle"></c2-skeleton>
   <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>

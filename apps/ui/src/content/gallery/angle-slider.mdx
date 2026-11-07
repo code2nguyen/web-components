@@ -1,0 +1,75 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { AngleSlider } from '@c2n/components/angle-slider'
+
+## Presets
+
+Looks for `c2-angle-slider`. The ring's thickness, the sweep of the arc and the handle set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-angle-slider label="Gradient angle" value="135"></c2-angle-slider>
+```
+
+```html tag=MdxCodeBlock,label=Thermostat
+<style>
+  .angle-thermostat {
+    --c2-angle-slider--size: 190px;
+    --c2-angle-slider__arc--sweep: 260;
+    --c2-angle-slider__track--width: 14px;
+    --c2-angle-slider__fill--color: #f97316;
+    --c2-angle-slider__thumb--size: 26px;
+    --c2-angle-slider__thumb--border: 4px solid #f97316;
+    --c2-angle-slider__thumb__active--box-shadow: 0 0 0 10px rgba(249, 115, 22, 0.2);
+    --c2-angle-slider__value--font-size: 40px;
+  }
+</style>
+<c2-angle-slider class="angle-thermostat" label="Temperature" mode="arc" min="16" max="28" step="0.5" value="21.5"></c2-angle-slider>
+```
+
+```html tag=MdxCodeBlock,label=Compass
+<style>
+  .angle-compass {
+    --c2-angle-slider__track--width: 2px;
+    --c2-angle-slider__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+    --c2-angle-slider__needle--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-angle-slider__needle--width: 3px;
+    --c2-angle-slider__thumb--size: 14px;
+    --c2-angle-slider__thumb--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-angle-slider__thumb--border: 0;
+    --c2-angle-slider__value--font-size: 18px;
+    --c2-angle-slider__value--font-weight: 500;
+  }
+</style>
+<c2-angle-slider class="angle-compass" label="Wind direction" value="225" step="5"></c2-angle-slider>
+```
+
+```html tag=MdxCodeBlock,label=Volume knob
+<style>
+  .angle-volume {
+    --c2-angle-slider--size: 112px;
+    --c2-angle-slider__arc--sweep: 300;
+    --c2-angle-slider__track--width: 6px;
+    --c2-angle-slider__fill--color: #7c3aed;
+    --c2-angle-slider__thumb--size: 16px;
+    --c2-angle-slider__thumb--border: 3px solid #7c3aed;
+    --c2-angle-slider__value--font-size: 18px;
+  }
+</style>
+<c2-angle-slider class="angle-volume" label="Volume" mode="arc" min="0" max="11" value="7"></c2-angle-slider>
+```
+
+```html tag=MdxCodeBlock,label=No value
+<style>
+  .angle-quiet {
+    --c2-angle-slider--size: 96px;
+    --c2-angle-slider__track--width: 10px;
+    --c2-angle-slider__value--display: none;
+  }
+</style>
+<c2-angle-slider class="angle-quiet" label="Rotation" value="60" step="15"></c2-angle-slider>
+```
+
+</GalleryGrid>

@@ -81,6 +81,10 @@
       "types": "./dist/address-field.d.ts",
       "default": "./dist/address-field.js"
     },
+    "./angle-slider": {
+      "types": "./dist/angle-slider.d.ts",
+      "default": "./dist/angle-slider.js"
+    },
     "./app-shell": {
       "types": "./dist/app-shell.d.ts",
       "default": "./dist/app-shell.js"
@@ -609,6 +613,10 @@
       "types": "./dist/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
     },
+    "./keypad": {
+      "types": "./dist/keypad.d.ts",
+      "default": "./dist/keypad.js"
+    },
     "./label": {
       "types": "./dist/label.d.ts",
       "default": "./dist/label.js"
@@ -904,6 +912,10 @@
     "./side-nav": {
       "types": "./dist/side-nav.d.ts",
       "default": "./dist/side-nav.js"
+    },
+    "./signature-pad": {
+      "types": "./dist/signature-pad.d.ts",
+      "default": "./dist/signature-pad.js"
     },
     "./skeleton": {
       "types": "./dist/skeleton.d.ts",
@@ -1253,6 +1265,7 @@
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
     "@c2n/address-field": "*",
+    "@c2n/angle-slider": "*",
     "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
     "@c2n/audio-player": "*",
@@ -1339,6 +1352,7 @@
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/key-value-editor": "*",
+    "@c2n/keypad": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",
@@ -1405,6 +1419,7 @@
     "@c2n/sheet": "*",
     "@c2n/shortcut": "*",
     "@c2n/side-nav": "*",
+    "@c2n/signature-pad": "*",
     "@c2n/skeleton": "*",
     "@c2n/skip-link": "*",
     "@c2n/slider": "*",

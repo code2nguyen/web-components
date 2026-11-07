@@ -1,0 +1,51 @@
+---
+title: 'Keypad'
+description: 'A phone-style numeric keypad that types an amount, fills PIN dots or drives another field, with a slot for a biometric key.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Keypad } from '@c2n/components/keypad'
+
+`c2-keypad` is the numeric keypad of a payments app's amount screen or a banking app's passcode screen: big keys for 0 to 9 and Delete, laid out as on a phone, driving a display above them.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/keypad'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/keypad
+<div data-label="Amount">
+  <c2-keypad label="Amount to send" currency="USD" value="42.5"></c2-keypad>
+</div>
+<div data-label="PIN">
+  <c2-keypad display="pin" length="4" value="12"></c2-keypad>
+</div>
+```
+
+### Amount
+
+With `display="amount"` (the default), what is typed shows as an amount, grouped and formatted for the page's language, in `currency` when one is set (`USD`, `EUR`). An empty keypad shows a muted zero. The bottom left key is the decimal point; `decimals` limits the digits after it (2 by default), and `decimals="0"` removes the key. `max-length` caps the characters typed. There are no leading zeros, and the decimal point alone starts at `0.`.
+
+### PIN
+
+With `display="pin"`, the display is a row of `length` dots that fill as digits are typed, and screen readers hear how many are entered. When the last one is typed, `complete` fires with the code in `detail.value`. The keypad takes no more digits after that: check the code, then call `clear()` to try again.
+
+On a passcode screen there is no decimal key, so the bottom left cell holds the `start` slot. Put a fingerprint or face ID button there.
+
+### Driving another field
+
+With `display="none"` and `for` set to the `id` of a field (an `<input>`, a `c2-text-field`), the keypad types into that field. The field receives its new `value`, then its own `input` and `change`, as if it had been typed in.
+
+### Value and events
+
+`value` is the text typed (`"1250.5"`). A value set from code is kept to what the keys could have typed. Each key that changes it fires `input` then `change`. Under a `name` the form receives it, `required` asks for a value, and a PIN must be complete. Inside a `c2-form-field`, the field's label names the keypad.
+
+### Keyboard
+
+Every key is a button in the tab order. While one has focus, a hardware keyboard types too: the digits, the decimal point (`.` or `,`) and Backspace.

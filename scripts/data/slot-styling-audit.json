@@ -30,6 +30,18 @@
       "reason": "The count line sets the type the slotted label inherits."
     },
     {
+      "tag": "c2-angle-slider",
+      "slot": "",
+      "decision": "variables",
+      "variables": [
+        "--c2-angle-slider__value--color",
+        "--c2-angle-slider__value--font-size",
+        "--c2-angle-slider__value--font-weight",
+        "--c2-angle-slider__value--display"
+      ],
+      "reason": "The middle of the dial centres the slotted content and sets the colour and type it inherits; the display variable hides it."
+    },
+    {
       "tag": "c2-app-shell",
       "slot": "",
       "decision": "part",
@@ -1646,6 +1658,12 @@
       "slot": "empty",
       "decision": "assigned-content",
       "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-keypad",
+      "slot": "start",
+      "decision": "assigned-content",
+      "reason": "The bottom left cell centres the slotted control, typically a biometric button styled through its own public contract."
     },
     {
       "tag": "c2-master-detail",

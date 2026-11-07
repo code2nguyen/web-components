@@ -429,6 +429,20 @@ export const overrides: Record<string, Override> = {
   },
   '--c2-slider__tick__filled--color': onPrimary,
   '--c2-slider__value--color': { token: 'color-on-inverse-surface' },
+  // Angle slider: the same handle as the slider, a surface disc ringed in the accent.
+  '--c2-angle-slider__thumb--color': { token: 'color-surface' },
+  '--c2-angle-slider__thumb--border': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  // Keypad: keys are surface-container tiles that darken towards the ink when hovered and pressed; an empty PIN dot
+  // is ringed in the secondary text colour, which keeps it 3:1 against the page.
+  '--c2-keypad__key__hover--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  '--c2-keypad__key__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 16%)',
+  },
+  '--c2-keypad__dot--border': { token: 'color-on-surface-variant', value: '2px solid var(--c2-theme--color-on-surface-variant, #71717a)' },
   // Switch: hovered off-track uses the outline colour, the thumb is a surface.
   '--c2-switch__track__hover--color': { token: 'color-outline' },
   '--c2-switch__thumb--color': { token: 'color-surface' },

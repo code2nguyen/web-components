@@ -154,6 +154,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Address field** — `c2-address-field` · `@c2n/components/address-field` — A postal address input with the parts, order and labels of each country, optional autocomplete from your address provider.
+- **Angle Slider** — `c2-angle-slider` · `@c2n/components/angle-slider` — A round knob to pick a direction on a full circle, or a value along an arc like a thermostat or volume dial, by drag or keys.
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
@@ -179,6 +180,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.
+- **Keypad** — `c2-keypad` · `@c2n/components/keypad` — A phone-style numeric keypad that types an amount, fills PIN dots or drives another field, with a slot for a biometric key.
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
 - **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
@@ -199,6 +201,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Secret Field** — `c2-secret-field` · `@c2n/components/secret-field` — Shows an API key or other secret masked, with buttons to reveal it, copy it and ask for a new one.
 - **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
 - **Shortcut** — `c2-shortcut` · `@c2n/components/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
+- **Signature Pad** — `c2-signature-pad` · `@c2n/components/signature-pad` — A box to sign in with a mouse, a pen or a finger, with undo and clear, that exports the signature as SVG or an image.
 - **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/components/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
 - **Tag Input** — `c2-tag-input` · `@c2n/components/tag-input` — Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation.

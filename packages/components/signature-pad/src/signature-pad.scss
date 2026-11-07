@@ -1,0 +1,150 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-signature-pad,
+  $theme: (
+    width: 360px,
+    height: 200px,
+    background: #ffffff,
+    border: 1px solid #bcbcc6,
+    hover--border: 1px solid #a1a1aa,
+    error--border: 1px solid #dc2626,
+    border-radius: 8px,
+    stroke--color: #18181b,
+    stroke--width: 2.5px,
+    placeholder--color: #71717a,
+    placeholder--font-size: 14px,
+    baseline--border: 1px solid #e4e4e7,
+    baseline--inset: 24px,
+    actions--display: flex,
+    action--color: #71717a,
+    action__hover--color: #18181b,
+    action__hover--background: #f4f4f5,
+    action--font-size: 12px,
+    action--font-weight: 500,
+    action--border-radius: 6px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.signature {
+  position: relative;
+}
+
+.signature--disabled {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+.pad {
+  --_stroke-width: #{css.cssVar(stroke--width)};
+
+  position: relative;
+  box-sizing: border-box;
+  height: css.cssVar(height);
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(stroke--color);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pad--drawing {
+  cursor: crosshair;
+}
+
+.pad--drawing:hover {
+  border: css.cssVar(hover--border);
+}
+
+.signature--invalid .pad {
+  border: css.cssVar(error--border);
+}
+
+.baseline {
+  position: absolute;
+  right: css.cssVar(baseline--inset);
+  bottom: css.cssVar(baseline--inset);
+  left: css.cssVar(baseline--inset);
+  border-top: css.cssVar(baseline--border);
+  pointer-events: none;
+}
+
+.placeholder {
+  position: absolute;
+  bottom: calc(#{css.cssVar(baseline--inset)} + 8px);
+  left: css.cssVar(baseline--inset);
+  color: css.cssVar(placeholder--color);
+  font-size: css.cssVar(placeholder--font-size);
+  pointer-events: none;
+}
+
+.ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--_stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: css.cssVar(actions--display);
+  gap: 2px;
+}
+
+.action {
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: css.cssVar(action--border-radius);
+  background: transparent;
+  color: css.cssVar(action--color);
+  font: inherit;
+  font-size: css.cssVar(action--font-size);
+  font-weight: css.cssVar(action--font-weight);
+  cursor: pointer;
+}
+
+.action:hover:not([aria-disabled='true']) {
+  background: css.cssVar(action__hover--background);
+  color: css.cssVar(action__hover--color);
+}
+
+.action[aria-disabled='true'] {
+  opacity: css.cssVar(disabled--opacity);
+  cursor: default;
+}
+
+.action:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -1,0 +1,60 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Keypad } from '@c2n/components/keypad'
+
+## Presets
+
+Looks for `c2-keypad`. The keys' shape and fill, and the size of the display, set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-keypad label="Amount to send" value="42.5"></c2-keypad>
+```
+
+```html tag=MdxCodeBlock,label=Passcode
+<style>
+  .keypad-passcode {
+    /* Three 60px columns and two 10px gaps: each key is as wide as it is tall, so the radius draws a circle. */
+    --c2-keypad--width: 200px;
+    --c2-keypad__key--height: 60px;
+    --c2-keypad__key--border-radius: 999px;
+    --c2-keypad__key--font-size: 26px;
+    --c2-keypad__key--font-weight: 400;
+    --c2-keypad__keys--gap: 10px;
+    --c2-keypad__dot--size: 12px;
+  }
+</style>
+<c2-keypad class="keypad-passcode" display="pin" length="6" value="123"></c2-keypad>
+```
+
+```html tag=MdxCodeBlock,label=Bare keys
+<style>
+  .keypad-bare {
+    --c2-keypad__key--background: transparent;
+    --c2-keypad__key__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    --c2-keypad__key__active--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-keypad__key--height: 56px;
+    --c2-keypad__display--font-size: 48px;
+    --c2-keypad__keys--gap: 0px;
+  }
+</style>
+<c2-keypad class="keypad-bare" label="Amount" currency="EUR" value="18"></c2-keypad>
+```
+
+```html tag=MdxCodeBlock,label=Accent
+<style>
+  .keypad-accent {
+    --c2-keypad__key--background: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-keypad__key__hover--background: light-dark(#dbe4fd, #24365e);
+    --c2-keypad__key__active--background: light-dark(#c7d5fb, #2e4475);
+    --c2-keypad__key--color: light-dark(#1d4ed8, #9db8f5);
+    --c2-keypad__key--border-radius: 8px;
+    --c2-keypad__display--color: light-dark(#1d4ed8, #9db8f5);
+  }
+</style>
+<c2-keypad class="keypad-accent" label="Tip" currency="USD" decimals="0" value="15"></c2-keypad>
+```
+
+</GalleryGrid>

@@ -1,0 +1,62 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SignaturePad } from '@c2n/components/signature-pad'
+
+## Presets
+
+Looks for `c2-signature-pad`. The ink, the surface and the baseline set the style.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-signature-pad label="Your signature"></c2-signature-pad>
+```
+
+```html tag=MdxCodeBlock,label=Fountain pen
+<style>
+  .signature-pen {
+    --c2-signature-pad__stroke--color: light-dark(#1e3a8a, #93c5fd);
+    --c2-signature-pad__stroke--width: 3px;
+    --c2-signature-pad--background: light-dark(#fffbeb, #2a2112);
+    --c2-signature-pad--border: 1px solid light-dark(#fde68a, #5c4a1a);
+    --c2-signature-pad__baseline--border: 1px dashed light-dark(#d97706, #f2a54a);
+    --c2-signature-pad__placeholder--color: light-dark(#92400e, #f2a54a);
+  }
+</style>
+<c2-signature-pad
+  class="signature-pen"
+  label="Signature"
+  strokes="[[[36,142],[49,107],[58,89],[65,102],[68,132],[72,148],[80,124],[89,100],[98,113],[102,136],[111,126],[122,108],[132,116],[137,132],[149,120],[162,112],[174,124]]]"
+></c2-signature-pad>
+```
+
+```html tag=MdxCodeBlock,label=Line only
+<style>
+  .signature-line {
+    --c2-signature-pad--height: 120px;
+    --c2-signature-pad--border: 0;
+    --c2-signature-pad--background: transparent;
+    --c2-signature-pad__baseline--inset: 0px;
+    --c2-signature-pad__baseline--border: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-signature-pad__actions--display: none;
+  }
+</style>
+<c2-signature-pad class="signature-line" label="Signature" placeholder="Sign above the line"></c2-signature-pad>
+```
+
+```html tag=MdxCodeBlock,label=Marker
+<style>
+  .signature-marker {
+    --c2-signature-pad--height: 160px;
+    --c2-signature-pad__stroke--color: #2563eb;
+    --c2-signature-pad__stroke--width: 5px;
+    --c2-signature-pad--border-radius: 14px;
+    --c2-signature-pad--border: 2px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+    --c2-signature-pad__baseline--border: 0;
+  }
+</style>
+<c2-signature-pad class="signature-marker" label="Initials" placeholder="Initial here"></c2-signature-pad>
+```
+
+</GalleryGrid>

@@ -2,6 +2,7 @@ import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import accordion from '@c2n/accordion/custom-elements.json'
 import actionBar from '@c2n/action-bar/custom-elements.json'
 import addressField from '@c2n/address-field/custom-elements.json'
+import angleSlider from '@c2n/angle-slider/custom-elements.json'
 import appShell from '@c2n/app-shell/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
 import audioPlayer from '@c2n/audio-player/custom-elements.json'
@@ -88,6 +89,7 @@ import jsonViewer from '@c2n/json-viewer/custom-elements.json'
 import kanban from '@c2n/kanban/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
 import keyValueEditor from '@c2n/key-value-editor/custom-elements.json'
+import keypad from '@c2n/keypad/custom-elements.json'
 import label from '@c2n/label/custom-elements.json'
 import linkButton from '@c2n/link-button/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
@@ -155,6 +157,7 @@ import shareSheet from '@c2n/share-sheet/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
+import signaturePad from '@c2n/signature-pad/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
 import skipLink from '@c2n/skip-link/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
@@ -215,6 +218,7 @@ export const componentManifests = (function () {
     accordion,
     actionBar,
     addressField,
+    angleSlider,
     appShell,
     attachment,
     audioPlayer,
@@ -301,6 +305,7 @@ export const componentManifests = (function () {
     kanban,
     kbd,
     keyValueEditor,
+    keypad,
     label,
     linkButton,
     list,
@@ -368,6 +373,7 @@ export const componentManifests = (function () {
     sheet,
     shortcut,
     sideNav,
+    signaturePad,
     skeleton,
     skipLink,
     slider,
