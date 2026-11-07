@@ -2,6 +2,135 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.23",
+      "date": "2026-11-07",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["angle-slider", "keypad", "signature-pad"],
+              "text": "Add c2-angle-slider, c2-keypad and c2-signature-pad",
+              "hash": "5ce8d3b"
+            },
+            {
+              "scopes": [],
+              "text": "Add c2-marquee, c2-device-frame and c2-beam",
+              "hash": "202defa"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Derive on-surface-variant-strong from the two text roles",
+              "hash": "70aff81"
+            },
+            {
+              "scopes": ["theme", "comment-thread"],
+              "text": "Resolve the two open component feedback entries",
+              "hash": "22caad7"
+            },
+            {
+              "scopes": ["keypad"],
+              "text": "Measure a long amount to fit it, instead of estimating digit widths",
+              "hash": "e13d656"
+            },
+            {
+              "scopes": ["angle-slider", "keypad", "signature-pad"],
+              "text": "Address cubic review findings",
+              "hash": "bb12b32"
+            },
+            {
+              "scopes": ["keypad"],
+              "text": "Fit the landing preview in its card",
+              "hash": "b1e0961"
+            },
+            {
+              "scopes": ["angle-slider", "keypad", "signature-pad"],
+              "text": "Address code review findings",
+              "hash": "0961c96"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Read the hover card's status line in the secondary text colour",
+              "hash": "5fdede2"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Draw the hover card's status line in readable text",
+              "hash": "3ef59db"
+            },
+            {
+              "scopes": ["marquee"],
+              "text": "Make the strip a tab stop only when it has something to scroll",
+              "hash": "9b2ee1d"
+            },
+            {
+              "scopes": ["stat"],
+              "text": "Hide the icon box and description line when they are empty",
+              "hash": "a0aac2d"
+            },
+            {
+              "scopes": ["marquee"],
+              "text": "Take keyboard focus under reduced motion",
+              "hash": "685c18b"
+            },
+            {
+              "scopes": ["marquee", "beam", "device-frame"],
+              "text": "Fix Firefox and WebKit CI, address review comments",
+              "hash": "2634c56"
+            },
+            {
+              "scopes": ["device-frame"],
+              "text": "Keep device sizes in shrink-to-fit containers; fix(marquee): match server markup when hydrating",
+              "hash": "42c1bd1"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["examples"],
+              "text": "Keep the footer's link column a navigation landmark",
+              "hash": "1de574c"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Address cubic's review of the marketing site",
+              "hash": "f5f0952"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Address code review findings in the marketing site",
+              "hash": "3475196"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Keep the testimonial loops full and the hand-off heading whole",
+              "hash": "2d172a4"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Centre the rotating hero word on its own line",
+              "hash": "3e41591"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add the Wayline marketing site, an Astro example app",
+              "hash": "d9d5e77"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.22",
       "date": "2026-11-06",
       "sections": [
