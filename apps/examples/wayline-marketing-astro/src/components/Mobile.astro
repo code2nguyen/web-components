@@ -1,0 +1,48 @@
+---
+import Icon from './Icon.astro'
+---
+
+<section class="container split split--reverse" aria-labelledby="mobile-title">
+  <div class="split__text">
+    <p class="eyebrow">Mobile approvals</p>
+    <h2 id="mobile-title">Say yes from anywhere</h2>
+    <p>
+      When a workflow needs a person, Wayline asks the right one on their phone. They see what is being approved and why, and the workflow carries on the moment
+      they answer.
+    </p>
+    <ul class="checks">
+      <li>Push notifications with the details inline</li>
+      <li>Delegate to a colleague while you are away</li>
+      <li>Every decision is written to the run history</li>
+    </ul>
+  </div>
+
+  <div class="phone-stage">
+    <c2-device-frame class="phone" device="phone">
+      <div class="phone-screen">
+        <p class="phone-screen__time" aria-hidden="true">9:41</p>
+        <div class="approval">
+          <span class="approval__icon"><Icon name="bell" /></span>
+          <div>
+            <strong>Refund over $500</strong>
+            <p>Order #4821 · Contoso</p>
+          </div>
+        </div>
+        <div class="approval">
+          <span class="approval__icon"><Icon name="clock" /></span>
+          <div>
+            <strong>New vendor: Litware</strong>
+            <p>Waiting for finance</p>
+          </div>
+        </div>
+        <div class="approval approval--done">
+          <span class="approval__icon"><Icon name="check" /></span>
+          <div>
+            <strong>Discount for Fabrikam</strong>
+            <p>Approved by Marco</p>
+          </div>
+        </div>
+      </div>
+    </c2-device-frame>
+  </div>
+</section>
